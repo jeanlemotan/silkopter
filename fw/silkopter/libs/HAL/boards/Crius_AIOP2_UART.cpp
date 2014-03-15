@@ -1,7 +1,7 @@
 #include <avr/interrupt.h>
 #include <qmath.h>
 
-#include <HAL/Crius_AIOP2_UART.h>
+#include <HAL/boards/Crius_AIOP2_UART.h>
 
 using namespace hal;
 

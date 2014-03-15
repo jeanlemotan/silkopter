@@ -569,7 +569,7 @@ static void
 _TrivialIterator_requirement_violation(_TrivialIterator __i) {
   typedef typename
     __value_type_type_definition_requirement_violation<_TrivialIterator>::
-    value_type __T;
+    value_type __T __attribute__((unused));
   // Refinement of Assignable
   _Assignable_concept_specification<_TrivialIterator>::
     _Assignable_requirement_violation(__i);
@@ -796,7 +796,7 @@ _Allocator_requirement_violation(_Alloc __a) {
   __const_reference__typedef_requirement_violation<_Alloc>();
   __pointer__typedef_requirement_violation<_Alloc>();
   __const_pointer__typedef_requirement_violation<_Alloc>();
-  typedef typename _Alloc::value_type _Tp;
+  typedef typename _Alloc::value_type _Tp __attribute__((unused));
   //__STL_REQUIRES_SAME_TYPE(typename _Alloc::__STL_TEMPLATE rebind<_Tp>::other,
   //                         _Alloc);
 }

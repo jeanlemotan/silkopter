@@ -36,7 +36,7 @@ int main(void)
 		channels[0], channels[1], channels[2], channels[3],
 		channels[4], channels[5], channels[6], channels[7]);
 		now = hal::clock.micros();
-		auto d2 = now - last;
+		//auto d2 = now - last;
 
 		hal::uart0.write(str.c_str());
 // 		format(str, "timing: {0}us / {1}us {2} {3}\n", d1, d2, sizeof(size_t), sizeof(uint16_t));

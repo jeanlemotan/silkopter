@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "HAL/Crius_AIOP2_Clock.h"
+#include "HAL/boards/Crius_AIOP2_Clock.h"
 
 using namespace hal;
 

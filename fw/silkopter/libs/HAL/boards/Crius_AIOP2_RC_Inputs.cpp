@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
-#include "HAL/Crius_AIOP2_RC_Inputs.h"
+#include "HAL/boards/Crius_AIOP2_RC_Inputs.h"
 
 using namespace hal;
 
