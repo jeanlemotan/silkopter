@@ -18,7 +18,7 @@ public:
 	Value get_channel(uint8_t ch) const;
 	
 	//returns the value of all channels up to min(size, get_channel_count())
-	void get_all_channels(Value* dst, uint8_t size) const;
+	void get_channels(Value* dst, uint8_t size) const;
 	
 private:
 };

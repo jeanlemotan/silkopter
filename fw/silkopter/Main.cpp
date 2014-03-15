@@ -28,9 +28,9 @@ int main(void)
         //TODO:: Please write your application code 
 		uint32_t now = hal::clock.micros();
 
-		uint16_t channels[8];
+		hal::RC_Inputs::Value channels[8];
 		last = hal::clock.micros();
-		hal::rc_inputs.get_all_channels(channels, 8);
+		hal::rc_inputs.get_channels(channels, 8);
 		now = hal::clock.micros();
 		auto d1 = now - last;
 				

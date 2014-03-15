@@ -535,6 +535,10 @@
     <Folder Include="libs\qmath" />
     <Folder Include="libs\qmath\detail" />
     <Folder Include="libs\stl" />
+    <Folder Include="src" />
+    <Folder Include="src\GS" />
+    <Folder Include="src\OSD" />
+    <Folder Include="src\States" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\stl\algorithm">

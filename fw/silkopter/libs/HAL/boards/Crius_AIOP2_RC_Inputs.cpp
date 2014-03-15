@@ -279,7 +279,7 @@ RC_Inputs::Value RC_Inputs::get_channel(uint8_t ch) const
 	return pulse * multiplier;
 }
 
-void RC_Inputs::get_all_channels(Value* dst, uint8_t size) const
+void RC_Inputs::get_channels(Value* dst, uint8_t size) const
 {
 	size = math::min(size, MAX_CHANNEL_COUNT);
     /* grab channels from isr's memory in critical section */
