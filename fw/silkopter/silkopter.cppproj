@@ -175,6 +175,12 @@
     <Compile Include="libs\HAL\boards\Crius_AIOP2_RC_Inputs.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\HAL\boards\Crius_AIOP2_RC_Outputs.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\boards\Crius_AIOP2_RC_Outputs.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\HAL\boards\Crius_AIOP2_UART.cpp">
       <SubType>compile</SubType>
     </Compile>

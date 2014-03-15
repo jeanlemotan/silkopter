@@ -165,6 +165,22 @@ void Clock::delay_micros(uint16_t us)
 	);
 }
 
+void Clock::delay_millis(uint16_t ms)
+{
+	uint32_t us = uint32_t(ms) * 1000;
+	uint16_t times = us >> 14;
+	uint16_t rest = ms & 16385; 
+	
+	for (uint16_t i = 0; i < times; i++)
+	{
+		hal::clock.delay_micros(16384);
+	}
+	if (rest)
+	{
+		hal::clock.delay_micros(rest);
+	}
+}
+
 namespace hal
 {
 	Clock clock;
