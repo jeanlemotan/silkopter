@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "HAL/boards/Crius_AIOP2_Clock.h"
+#include "HAL/boards/Crius_AIOP2/Clock.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
 
 using namespace hal;
 
@@ -186,3 +188,4 @@ namespace hal
 	Clock clock;
 }
 
+#endif

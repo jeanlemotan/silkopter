@@ -1,7 +1,9 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
-#include "HAL/boards/Crius_AIOP2_RC_Inputs.h"
+#include "HAL/boards/Crius_AIOP2/RC_Inputs.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
 
 using namespace hal;
 
@@ -28,9 +30,11 @@ namespace hal
 
 static const uint8_t MIN_CHANNEL_COUNT = 5;     // for ppm sum we allow less than 8 channels to make up a valid packet
 
-static const uint16_t MIN_PULSEWIDTH = 1800; // 900
-static const uint16_t MAX_PULSEWIDTH = 4200; // 2100
-static const uint16_t MIN_PPM_SYNCHWIDTH = 5000; //2500
+static const uint16_t MIN_PULSE_WIDTH = 1800; // 900
+static const uint16_t MAX_PULSE_WIDTH = 4200; // 2100
+static const uint16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
+static const uint16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
+static const uint16_t MAX_VALUE = 1024;
 
 /* private variables to communicate with input capture isr */
 static volatile uint16_t s_pulses[RC_Inputs::MAX_CHANNEL_COUNT] = {0};  
@@ -105,7 +109,7 @@ static void A8_ppm_isr()
 				
 			// Process channel pulse
 			// Good widths?
-			if (width > MIN_PULSEWIDTH && width < MAX_PULSEWIDTH && s_got_first_synch) 
+			if (width > MIN_PULSE_WIDTH && width < MAX_PULSE_WIDTH && s_got_first_synch) 
 			{
 				if (s_crt_channel < RC_Inputs::MAX_CHANNEL_COUNT) 
 				{
@@ -129,7 +133,7 @@ static void A8_ppm_isr()
 
 			// Process First SYNCH
 			// We skip first frame, because we can start from middle, so first frame can be invalid
-			else if (width > MIN_PPM_SYNCHWIDTH && !s_got_first_synch)
+			else if (width > MIN_PPM_SYNCH_WIDTH && !s_got_first_synch)
 			{
 				s_got_first_synch = true;
 				s_crt_channel = 0;
@@ -137,7 +141,7 @@ static void A8_ppm_isr()
 
 			// Process any other SYNCH
 			// it's SYNCH
-			else if (width > MIN_PPM_SYNCHWIDTH)
+			else if (width > MIN_PPM_SYNCH_WIDTH)
 			{
 				// Check for minimal channels and copy data to further process
 				if (s_crt_channel >= MIN_CHANNEL_COUNT)
@@ -260,7 +264,7 @@ RC_Inputs::RC_Inputs()
 	init();
 }
 
-RC_Inputs::Value RC_Inputs::get_channel(uint8_t ch) const
+int16_t RC_Inputs::get_channel(uint8_t ch) const
 {
     /* constrain ch */
     if (ch >= MAX_CHANNEL_COUNT) 
@@ -269,36 +273,30 @@ RC_Inputs::Value RC_Inputs::get_channel(uint8_t ch) const
 	}
     /* grab channel from isr's memory in critical section*/
     cli();
-    Value capt = s_pulses[ch];
+    int16_t capt = s_pulses[ch];
     sei();
 	
-	const Value range = (MAX_PULSEWIDTH - MIN_PULSEWIDTH);
-	const Value multiplier = 1024 / range;
-
-    Value pulse = math::clamp(capt, Value(0), range);
-	return pulse * multiplier;
+    int32_t pulse = math::clamp(capt, int16_t(0), int16_t(PULSE_RANGE));
+	return pulse * (int32_t)MAX_VALUE / (int32_t)PULSE_RANGE;
 }
 
-void RC_Inputs::get_all_channels(Value* dst, uint8_t size) const
+void RC_Inputs::get_channels(int16_t* dst, uint8_t size) const
 {
 	size = math::min(size, MAX_CHANNEL_COUNT);
     /* grab channels from isr's memory in critical section */
     cli();
-	Value periods[MAX_CHANNEL_COUNT];
+	int16_t periods[MAX_CHANNEL_COUNT];
     for (uint8_t i = 0; i < size; i++) 
 	{
-        periods[i] = s_pulses[i] - MIN_PULSEWIDTH;
+        periods[i] = s_pulses[i] - MIN_PULSE_WIDTH;
     }
     sei();
 
-	const Value range = (MAX_PULSEWIDTH - MIN_PULSEWIDTH);
-	const Value multiplier = 1024 / range;
-	
     for (uint8_t i = 0; i < size; i++) 
 	{
-        periods[i] = math::clamp(periods[i], Value(0), range);
-		dst[i] = periods[i] * multiplier;
+        periods[i] = math::clamp(periods[i], int16_t(0), int16_t(PULSE_RANGE));
+		dst[i] = (int32_t)periods[i] * (int32_t)MAX_VALUE / (int32_t)PULSE_RANGE;
     }
 }
 
-
+#endif

@@ -8,11 +8,13 @@
 #include <HAL/UART.h>
 #include <HAL/Clock.h>
 #include <HAL/RC_Inputs.h>
+#include <HAL/RC_Outputs.h>
 #include <Format/Format.h>
 
 int main(void)
 {
 	hal::uart0.begin(115200);
+	hal::rc_outputs.set_frequencies(50);
 	
 	sei();
 
@@ -28,11 +30,13 @@ int main(void)
         //TODO:: Please write your application code 
 		uint32_t now = hal::clock.micros();
 
-		hal::RC_Inputs::Value channels[8];
+		int16_t channels[8];
 		last = hal::clock.micros();
 		hal::rc_inputs.get_channels(channels, 8);
 		now = hal::clock.micros();
 		auto d1 = now - last;
+
+		hal::rc_outputs.set_all_channels(channels[2]);
 				
 		last = hal::clock.micros();
 		format(str, "#{0}s: {1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\n", hal::clock.millis() >> 10,
@@ -45,7 +49,7 @@ int main(void)
  		format(str, "timing: {0}us / {1}us {2} {3}\n", d1, d2, sizeof(size_t), sizeof(uint16_t));
 		hal::uart0.write(str.c_str());
 		
-		hal::clock.delay_millis(1000);
+		hal::clock.delay_millis(100);
 
 		last = now;
     }

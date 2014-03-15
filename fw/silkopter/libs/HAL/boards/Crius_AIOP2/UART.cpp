@@ -1,7 +1,9 @@
 #include <avr/interrupt.h>
 #include <qmath.h>
 
-#include <HAL/boards/Crius_AIOP2_UART.h>
+#include "HAL/boards/Crius_AIOP2/UART.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
 
 using namespace hal;
 
@@ -235,3 +237,4 @@ namespace hal
 	UART uart3(3);
 }
 
+#endif
