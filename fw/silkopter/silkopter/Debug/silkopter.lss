@@ -1,0 +1,1955 @@
+
+silkopter.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000006  00800200  0000101a  000010ae  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         0000101a  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          000001c6  00800206  00800206  000010b4  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  000010b4  2**0
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000030  00000000  00000000  000010e4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00006da4  00000000  00000000  00001114  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000626  00000000  00000000  00007eb8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000650  00000000  00000000  000084de  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  000000a4  00000000  00000000  00008b30  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    0000430f  00000000  00000000  00008bd4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000ca6  00000000  00000000  0000cee3  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000038  00000000  00000000  0000db89  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+       0:	72 c0       	rjmp	.+228    	; 0xe6 <__ctors_end>
+       2:	00 00       	nop
+       4:	9e c0       	rjmp	.+316    	; 0x142 <__bad_interrupt>
+       6:	00 00       	nop
+       8:	9c c0       	rjmp	.+312    	; 0x142 <__bad_interrupt>
+       a:	00 00       	nop
+       c:	9a c0       	rjmp	.+308    	; 0x142 <__bad_interrupt>
+       e:	00 00       	nop
+      10:	98 c0       	rjmp	.+304    	; 0x142 <__bad_interrupt>
+      12:	00 00       	nop
+      14:	96 c0       	rjmp	.+300    	; 0x142 <__bad_interrupt>
+      16:	00 00       	nop
+      18:	94 c0       	rjmp	.+296    	; 0x142 <__bad_interrupt>
+      1a:	00 00       	nop
+      1c:	92 c0       	rjmp	.+292    	; 0x142 <__bad_interrupt>
+      1e:	00 00       	nop
+      20:	90 c0       	rjmp	.+288    	; 0x142 <__bad_interrupt>
+      22:	00 00       	nop
+      24:	8e c0       	rjmp	.+284    	; 0x142 <__bad_interrupt>
+      26:	00 00       	nop
+      28:	8c c0       	rjmp	.+280    	; 0x142 <__bad_interrupt>
+      2a:	00 00       	nop
+      2c:	8a c0       	rjmp	.+276    	; 0x142 <__bad_interrupt>
+      2e:	00 00       	nop
+      30:	88 c0       	rjmp	.+272    	; 0x142 <__bad_interrupt>
+      32:	00 00       	nop
+      34:	86 c0       	rjmp	.+268    	; 0x142 <__bad_interrupt>
+      36:	00 00       	nop
+      38:	84 c0       	rjmp	.+264    	; 0x142 <__bad_interrupt>
+      3a:	00 00       	nop
+      3c:	82 c0       	rjmp	.+260    	; 0x142 <__bad_interrupt>
+      3e:	00 00       	nop
+      40:	80 c0       	rjmp	.+256    	; 0x142 <__bad_interrupt>
+      42:	00 00       	nop
+      44:	7e c0       	rjmp	.+252    	; 0x142 <__bad_interrupt>
+      46:	00 00       	nop
+      48:	7c c0       	rjmp	.+248    	; 0x142 <__bad_interrupt>
+      4a:	00 00       	nop
+      4c:	7a c0       	rjmp	.+244    	; 0x142 <__bad_interrupt>
+      4e:	00 00       	nop
+      50:	78 c0       	rjmp	.+240    	; 0x142 <__bad_interrupt>
+      52:	00 00       	nop
+      54:	76 c0       	rjmp	.+236    	; 0x142 <__bad_interrupt>
+      56:	00 00       	nop
+      58:	74 c0       	rjmp	.+232    	; 0x142 <__bad_interrupt>
+      5a:	00 00       	nop
+      5c:	72 c0       	rjmp	.+228    	; 0x142 <__bad_interrupt>
+      5e:	00 00       	nop
+      60:	70 c0       	rjmp	.+224    	; 0x142 <__bad_interrupt>
+      62:	00 00       	nop
+      64:	6e c0       	rjmp	.+220    	; 0x142 <__bad_interrupt>
+      66:	00 00       	nop
+      68:	6c c0       	rjmp	.+216    	; 0x142 <__bad_interrupt>
+      6a:	00 00       	nop
+      6c:	6a c0       	rjmp	.+212    	; 0x142 <__bad_interrupt>
+      6e:	00 00       	nop
+      70:	68 c0       	rjmp	.+208    	; 0x142 <__bad_interrupt>
+      72:	00 00       	nop
+      74:	66 c0       	rjmp	.+204    	; 0x142 <__bad_interrupt>
+      76:	00 00       	nop
+      78:	64 c0       	rjmp	.+200    	; 0x142 <__bad_interrupt>
+      7a:	00 00       	nop
+      7c:	62 c0       	rjmp	.+196    	; 0x142 <__bad_interrupt>
+      7e:	00 00       	nop
+      80:	60 c0       	rjmp	.+192    	; 0x142 <__bad_interrupt>
+      82:	00 00       	nop
+      84:	5e c0       	rjmp	.+188    	; 0x142 <__bad_interrupt>
+      86:	00 00       	nop
+      88:	5c c0       	rjmp	.+184    	; 0x142 <__bad_interrupt>
+      8a:	00 00       	nop
+      8c:	5a c0       	rjmp	.+180    	; 0x142 <__bad_interrupt>
+      8e:	00 00       	nop
+      90:	58 c0       	rjmp	.+176    	; 0x142 <__bad_interrupt>
+      92:	00 00       	nop
+      94:	56 c0       	rjmp	.+172    	; 0x142 <__bad_interrupt>
+      96:	00 00       	nop
+      98:	54 c0       	rjmp	.+168    	; 0x142 <__bad_interrupt>
+      9a:	00 00       	nop
+      9c:	52 c0       	rjmp	.+164    	; 0x142 <__bad_interrupt>
+      9e:	00 00       	nop
+      a0:	50 c0       	rjmp	.+160    	; 0x142 <__bad_interrupt>
+      a2:	00 00       	nop
+      a4:	4e c0       	rjmp	.+156    	; 0x142 <__bad_interrupt>
+      a6:	00 00       	nop
+      a8:	4c c0       	rjmp	.+152    	; 0x142 <__bad_interrupt>
+      aa:	00 00       	nop
+      ac:	4a c0       	rjmp	.+148    	; 0x142 <__bad_interrupt>
+      ae:	00 00       	nop
+      b0:	48 c0       	rjmp	.+144    	; 0x142 <__bad_interrupt>
+      b2:	00 00       	nop
+      b4:	46 c0       	rjmp	.+140    	; 0x142 <__bad_interrupt>
+      b6:	00 00       	nop
+      b8:	44 c0       	rjmp	.+136    	; 0x142 <__bad_interrupt>
+      ba:	00 00       	nop
+      bc:	42 c0       	rjmp	.+132    	; 0x142 <__bad_interrupt>
+      be:	00 00       	nop
+      c0:	40 c0       	rjmp	.+128    	; 0x142 <__bad_interrupt>
+      c2:	00 00       	nop
+      c4:	3e c0       	rjmp	.+124    	; 0x142 <__bad_interrupt>
+      c6:	00 00       	nop
+      c8:	3c c0       	rjmp	.+120    	; 0x142 <__bad_interrupt>
+      ca:	00 00       	nop
+      cc:	3a c0       	rjmp	.+116    	; 0x142 <__bad_interrupt>
+      ce:	00 00       	nop
+      d0:	38 c0       	rjmp	.+112    	; 0x142 <__bad_interrupt>
+      d2:	00 00       	nop
+      d4:	36 c0       	rjmp	.+108    	; 0x142 <__bad_interrupt>
+      d6:	00 00       	nop
+      d8:	34 c0       	rjmp	.+104    	; 0x142 <__bad_interrupt>
+      da:	00 00       	nop
+      dc:	32 c0       	rjmp	.+100    	; 0x142 <__bad_interrupt>
+      de:	00 00       	nop
+      e0:	30 c0       	rjmp	.+96     	; 0x142 <__bad_interrupt>
+	...
+
+000000e4 <__ctors_start>:
+      e4:	e5 01       	movw	r28, r10
+
+000000e6 <__ctors_end>:
+      e6:	11 24       	eor	r1, r1
+      e8:	1f be       	out	0x3f, r1	; 63
+      ea:	cf ef       	ldi	r28, 0xFF	; 255
+      ec:	d1 e2       	ldi	r29, 0x21	; 33
+      ee:	de bf       	out	0x3e, r29	; 62
+      f0:	cd bf       	out	0x3d, r28	; 61
+      f2:	00 e0       	ldi	r16, 0x00	; 0
+      f4:	0c bf       	out	0x3c, r16	; 60
+
+000000f6 <__do_clear_bss>:
+      f6:	23 e0       	ldi	r18, 0x03	; 3
+      f8:	a6 e0       	ldi	r26, 0x06	; 6
+      fa:	b2 e0       	ldi	r27, 0x02	; 2
+      fc:	01 c0       	rjmp	.+2      	; 0x100 <.do_clear_bss_start>
+
+000000fe <.do_clear_bss_loop>:
+      fe:	1d 92       	st	X+, r1
+
+00000100 <.do_clear_bss_start>:
+     100:	ac 3c       	cpi	r26, 0xCC	; 204
+     102:	b2 07       	cpc	r27, r18
+     104:	e1 f7       	brne	.-8      	; 0xfe <.do_clear_bss_loop>
+
+00000106 <__do_copy_data>:
+     106:	12 e0       	ldi	r17, 0x02	; 2
+     108:	a0 e0       	ldi	r26, 0x00	; 0
+     10a:	b2 e0       	ldi	r27, 0x02	; 2
+     10c:	ea e1       	ldi	r30, 0x1A	; 26
+     10e:	f0 e1       	ldi	r31, 0x10	; 16
+     110:	00 e0       	ldi	r16, 0x00	; 0
+     112:	0b bf       	out	0x3b, r16	; 59
+     114:	02 c0       	rjmp	.+4      	; 0x11a <__do_copy_data+0x14>
+     116:	07 90       	elpm	r0, Z+
+     118:	0d 92       	st	X+, r0
+     11a:	a6 30       	cpi	r26, 0x06	; 6
+     11c:	b1 07       	cpc	r27, r17
+     11e:	d9 f7       	brne	.-10     	; 0x116 <__do_copy_data+0x10>
+
+00000120 <__do_global_ctors>:
+     120:	10 e0       	ldi	r17, 0x00	; 0
+     122:	c6 ee       	ldi	r28, 0xE6	; 230
+     124:	d0 e0       	ldi	r29, 0x00	; 0
+     126:	00 e0       	ldi	r16, 0x00	; 0
+     128:	05 c0       	rjmp	.+10     	; 0x134 <__do_global_ctors+0x14>
+     12a:	22 97       	sbiw	r28, 0x02	; 2
+     12c:	01 09       	sbc	r16, r1
+     12e:	fe 01       	movw	r30, r28
+     130:	0b bf       	out	0x3b, r16	; 59
+     132:	14 d6       	rcall	.+3112   	; 0xd5c <__tablejump_elpm__>
+     134:	c4 3e       	cpi	r28, 0xE4	; 228
+     136:	d1 07       	cpc	r29, r17
+     138:	80 e0       	ldi	r24, 0x00	; 0
+     13a:	08 07       	cpc	r16, r24
+     13c:	b1 f7       	brne	.-20     	; 0x12a <__do_global_ctors+0xa>
+     13e:	12 d1       	rcall	.+548    	; 0x364 <main>
+     140:	6a c7       	rjmp	.+3796   	; 0x1016 <_exit>
+
+00000142 <__bad_interrupt>:
+     142:	5e cf       	rjmp	.-324    	; 0x0 <__vectors>
+
+00000144 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi>:
+    _M_end_of_storage = __new_start + __len;
+  }
+}
+
+template <class _Tp, class _Alloc>
+void vector<_Tp, _Alloc>::_M_fill_insert(iterator __position, size_type __n, 
+     144:	4f 92       	push	r4
+     146:	5f 92       	push	r5
+     148:	6f 92       	push	r6
+     14a:	7f 92       	push	r7
+     14c:	8f 92       	push	r8
+     14e:	9f 92       	push	r9
+     150:	af 92       	push	r10
+     152:	bf 92       	push	r11
+     154:	cf 92       	push	r12
+     156:	df 92       	push	r13
+     158:	ef 92       	push	r14
+     15a:	ff 92       	push	r15
+     15c:	0f 93       	push	r16
+     15e:	1f 93       	push	r17
+     160:	cf 93       	push	r28
+     162:	df 93       	push	r29
+     164:	8c 01       	movw	r16, r24
+     166:	eb 01       	movw	r28, r22
+     168:	6a 01       	movw	r12, r20
+     16a:	79 01       	movw	r14, r18
+                                         const _Tp& __x)
+{
+  if (__n != 0) {
+     16c:	41 15       	cp	r20, r1
+     16e:	51 05       	cpc	r21, r1
+     170:	09 f4       	brne	.+2      	; 0x174 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x30>
+     172:	e7 c0       	rjmp	.+462    	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+    if (size_type(_M_end_of_storage - _M_finish) >= __n) {
+     174:	dc 01       	movw	r26, r24
+     176:	12 96       	adiw	r26, 0x02	; 2
+     178:	6d 90       	ld	r6, X+
+     17a:	7c 90       	ld	r7, X
+     17c:	13 97       	sbiw	r26, 0x03	; 3
+     17e:	14 96       	adiw	r26, 0x04	; 4
+     180:	8d 91       	ld	r24, X+
+     182:	9c 91       	ld	r25, X
+     184:	15 97       	sbiw	r26, 0x05	; 5
+     186:	86 19       	sub	r24, r6
+     188:	97 09       	sbc	r25, r7
+     18a:	95 95       	asr	r25
+     18c:	87 95       	ror	r24
+     18e:	84 17       	cp	r24, r20
+     190:	95 07       	cpc	r25, r21
+     192:	08 f4       	brcc	.+2      	; 0x196 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x52>
+     194:	64 c0       	rjmp	.+200    	; 0x25e <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x11a>
+      _Tp __x_copy = __x;
+     196:	f9 01       	movw	r30, r18
+     198:	e0 80       	ld	r14, Z
+     19a:	f1 80       	ldd	r15, Z+1	; 0x01
+      const size_type __elems_after = _M_finish - __position;
+     19c:	93 01       	movw	r18, r6
+     19e:	26 1b       	sub	r18, r22
+     1a0:	37 0b       	sbc	r19, r23
+     1a2:	35 95       	asr	r19
+     1a4:	27 95       	ror	r18
+      iterator __old_finish = _M_finish;
+      if (__elems_after > __n) {
+     1a6:	42 17       	cp	r20, r18
+     1a8:	53 07       	cpc	r21, r19
+     1aa:	58 f5       	brcc	.+86     	; 0x202 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0xbe>
+        uninitialized_copy(_M_finish - __n, _M_finish, _M_finish);
+     1ac:	cc 0c       	add	r12, r12
+     1ae:	dd 1c       	adc	r13, r13
+}
+
+template <class _Tp>
+inline _Tp*
+__copy_trivial(const _Tp* __first, const _Tp* __last, _Tp* __result) {
+  memmove(__result, __first, sizeof(_Tp) * (__last - __first));
+     1b0:	53 01       	movw	r10, r6
+     1b2:	ac 18       	sub	r10, r12
+     1b4:	bd 08       	sbc	r11, r13
+     1b6:	4c 2d       	mov	r20, r12
+     1b8:	5d 2d       	mov	r21, r13
+     1ba:	b5 01       	movw	r22, r10
+     1bc:	c3 01       	movw	r24, r6
+     1be:	11 d7       	rcall	.+3618   	; 0xfe2 <memmove>
+        _M_finish += __n;
+     1c0:	d8 01       	movw	r26, r16
+     1c2:	12 96       	adiw	r26, 0x02	; 2
+     1c4:	8d 91       	ld	r24, X+
+     1c6:	9c 91       	ld	r25, X
+     1c8:	13 97       	sbiw	r26, 0x03	; 3
+     1ca:	8c 0d       	add	r24, r12
+     1cc:	9d 1d       	adc	r25, r13
+     1ce:	13 96       	adiw	r26, 0x03	; 3
+     1d0:	9c 93       	st	X, r25
+     1d2:	8e 93       	st	-X, r24
+     1d4:	12 97       	sbiw	r26, 0x02	; 2
+
+template <class _Tp>
+struct __copy_backward_dispatch<_Tp*, _Tp*, __true_type>
+{
+  static _Tp* copy(const _Tp* __first, const _Tp* __last, _Tp* __result) {
+    const ptrdiff_t _Num = __last - __first;
+     1d6:	ac 1a       	sub	r10, r28
+     1d8:	bd 0a       	sbc	r11, r29
+    memmove(__result - _Num, __first, sizeof(_Tp) * _Num);
+     1da:	e8 94       	clt
+     1dc:	a0 f8       	bld	r10, 0
+     1de:	a5 01       	movw	r20, r10
+     1e0:	be 01       	movw	r22, r28
+     1e2:	c3 01       	movw	r24, r6
+     1e4:	8a 19       	sub	r24, r10
+     1e6:	9b 09       	sbc	r25, r11
+     1e8:	fc d6       	rcall	.+3576   	; 0xfe2 <memmove>
+        copy_backward(__position, __old_finish - __n, __old_finish);
+        fill(__position, __position + __n, __x_copy);
+     1ea:	cc 0e       	add	r12, r28
+     1ec:	dd 1e       	adc	r13, r29
+
+
+template <class _ForwardIter, class _Tp>
+void fill(_ForwardIter __first, _ForwardIter __last, const _Tp& _value) {
+  __STL_REQUIRES(_ForwardIter, _Mutable_ForwardIterator);
+  for ( ; __first != __last; ++__first)
+     1ee:	cc 15       	cp	r28, r12
+     1f0:	dd 05       	cpc	r29, r13
+     1f2:	09 f4       	brne	.+2      	; 0x1f6 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0xb2>
+     1f4:	a6 c0       	rjmp	.+332    	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+    *__first = _value;
+     1f6:	e9 92       	st	Y+, r14
+     1f8:	f9 92       	st	Y+, r15
+
+
+template <class _ForwardIter, class _Tp>
+void fill(_ForwardIter __first, _ForwardIter __last, const _Tp& _value) {
+  __STL_REQUIRES(_ForwardIter, _Mutable_ForwardIterator);
+  for ( ; __first != __last; ++__first)
+     1fa:	cc 16       	cp	r12, r28
+     1fc:	dd 06       	cpc	r13, r29
+     1fe:	d9 f7       	brne	.-10     	; 0x1f6 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0xb2>
+     200:	a0 c0       	rjmp	.+320    	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+      }
+      else {
+        uninitialized_fill_n(_M_finish, __n - __elems_after, __x_copy);
+     202:	c2 1a       	sub	r12, r18
+     204:	d3 0a       	sbc	r13, r19
+}
+
+template <class _OutputIter, class _Size, class _Tp>
+_OutputIter fill_n(_OutputIter __first, _Size __n, const _Tp& _value) {
+  __STL_REQUIRES(_OutputIter, _OutputIterator);
+  for ( ; __n > 0; --__n, ++__first)
+     206:	39 f0       	breq	.+14     	; 0x216 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0xd2>
+     208:	c6 01       	movw	r24, r12
+     20a:	f3 01       	movw	r30, r6
+    *__first = _value;
+     20c:	e1 92       	st	Z+, r14
+     20e:	f1 92       	st	Z+, r15
+}
+
+template <class _OutputIter, class _Size, class _Tp>
+_OutputIter fill_n(_OutputIter __first, _Size __n, const _Tp& _value) {
+  __STL_REQUIRES(_OutputIter, _OutputIterator);
+  for ( ; __n > 0; --__n, ++__first)
+     210:	01 97       	sbiw	r24, 0x01	; 1
+     212:	00 97       	sbiw	r24, 0x00	; 0
+     214:	d9 f7       	brne	.-10     	; 0x20c <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0xc8>
+        _M_finish += __n - __elems_after;
+     216:	cc 0c       	add	r12, r12
+     218:	dd 1c       	adc	r13, r13
+     21a:	f8 01       	movw	r30, r16
+     21c:	82 81       	ldd	r24, Z+2	; 0x02
+     21e:	93 81       	ldd	r25, Z+3	; 0x03
+     220:	8c 0d       	add	r24, r12
+     222:	9d 1d       	adc	r25, r13
+     224:	93 83       	std	Z+3, r25	; 0x03
+     226:	82 83       	std	Z+2, r24	; 0x02
+}
+
+template <class _Tp>
+inline _Tp*
+__copy_trivial(const _Tp* __first, const _Tp* __last, _Tp* __result) {
+  memmove(__result, __first, sizeof(_Tp) * (__last - __first));
+     228:	59 01       	movw	r10, r18
+     22a:	aa 0c       	add	r10, r10
+     22c:	bb 1c       	adc	r11, r11
+     22e:	a5 01       	movw	r20, r10
+     230:	be 01       	movw	r22, r28
+     232:	d7 d6       	rcall	.+3502   	; 0xfe2 <memmove>
+        uninitialized_copy(__position, __old_finish, _M_finish);
+        _M_finish += __elems_after;
+     234:	d8 01       	movw	r26, r16
+     236:	12 96       	adiw	r26, 0x02	; 2
+     238:	2d 91       	ld	r18, X+
+     23a:	3c 91       	ld	r19, X
+     23c:	13 97       	sbiw	r26, 0x03	; 3
+     23e:	a2 0e       	add	r10, r18
+     240:	b3 1e       	adc	r11, r19
+     242:	13 96       	adiw	r26, 0x03	; 3
+     244:	bc 92       	st	X, r11
+     246:	ae 92       	st	-X, r10
+     248:	12 97       	sbiw	r26, 0x02	; 2
+
+
+template <class _ForwardIter, class _Tp>
+void fill(_ForwardIter __first, _ForwardIter __last, const _Tp& _value) {
+  __STL_REQUIRES(_ForwardIter, _Mutable_ForwardIterator);
+  for ( ; __first != __last; ++__first)
+     24a:	6c 16       	cp	r6, r28
+     24c:	7d 06       	cpc	r7, r29
+     24e:	09 f4       	brne	.+2      	; 0x252 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x10e>
+     250:	78 c0       	rjmp	.+240    	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+    *__first = _value;
+     252:	e9 92       	st	Y+, r14
+     254:	f9 92       	st	Y+, r15
+
+
+template <class _ForwardIter, class _Tp>
+void fill(_ForwardIter __first, _ForwardIter __last, const _Tp& _value) {
+  __STL_REQUIRES(_ForwardIter, _Mutable_ForwardIterator);
+  for ( ; __first != __last; ++__first)
+     256:	6c 16       	cp	r6, r28
+     258:	7d 06       	cpc	r7, r29
+     25a:	d9 f7       	brne	.-10     	; 0x252 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x10e>
+     25c:	72 c0       	rjmp	.+228    	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+    { return reverse_iterator(begin()); }
+  const_reverse_iterator rend() const
+    { return const_reverse_iterator(begin()); }
+
+  size_type size() const
+    { return size_type(end() - begin()); }
+     25e:	f8 01       	movw	r30, r16
+     260:	80 81       	ld	r24, Z
+     262:	91 81       	ldd	r25, Z+1	; 0x01
+     264:	68 1a       	sub	r6, r24
+     266:	79 0a       	sbc	r7, r25
+     268:	75 94       	asr	r7
+     26a:	67 94       	ror	r6
+     26c:	53 01       	movw	r10, r6
+     26e:	64 16       	cp	r6, r20
+     270:	75 06       	cpc	r7, r21
+     272:	08 f4       	brcc	.+2      	; 0x276 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x132>
+     274:	5a 01       	movw	r10, r20
+        fill(__position, __old_finish, __x_copy);
+      }
+    }
+    else {
+      const size_type __old_size = size();        
+      const size_type __len = __old_size + max(__old_size, __n);
+     276:	6a 0c       	add	r6, r10
+     278:	7b 1c       	adc	r7, r11
+template<class _Tp, class _Alloc>
+class simple_alloc {
+
+public:
+    static _Tp* allocate(size_t __n)
+      { return 0 == __n ? 0 : (_Tp*) _Alloc::allocate(__n * sizeof (_Tp)); }
+     27a:	61 14       	cp	r6, r1
+     27c:	71 04       	cpc	r7, r1
+     27e:	09 f4       	brne	.+2      	; 0x282 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x13e>
+     280:	4d c0       	rjmp	.+154    	; 0x31c <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1d8>
+     282:	43 01       	movw	r8, r6
+     284:	88 0c       	add	r8, r8
+     286:	99 1c       	adc	r9, r9
+
+public:
+
+  static void* allocate(size_t __n)
+  {
+    void* __result = avr_malloc(__n);
+     288:	c4 01       	movw	r24, r8
+     28a:	84 d5       	rcall	.+2824   	; 0xd94 <malloc>
+    if (0 == __result) __result = _S_oom_malloc(__n);
+     28c:	00 97       	sbiw	r24, 0x00	; 0
+     28e:	71 f4       	brne	.+28     	; 0x2ac <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x168>
+{
+    void (* __my_malloc_handler)();
+    void* __result;
+
+    for (;;) {
+        __my_malloc_handler = __malloc_alloc_oom_handler;
+     290:	e0 91 06 02 	lds	r30, 0x0206
+     294:	f0 91 07 02 	lds	r31, 0x0207
+        if (0 == __my_malloc_handler) { __THROW_BAD_ALLOC; }
+     298:	30 97       	sbiw	r30, 0x00	; 0
+     29a:	19 f4       	brne	.+6      	; 0x2a2 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x15e>
+     29c:	80 e0       	ldi	r24, 0x00	; 0
+     29e:	90 e0       	ldi	r25, 0x00	; 0
+     2a0:	ba d6       	rcall	.+3444   	; 0x1016 <_exit>
+        (*__my_malloc_handler)();
+     2a2:	19 95       	eicall
+        __result = malloc(__n);
+     2a4:	c4 01       	movw	r24, r8
+     2a6:	76 d5       	rcall	.+2796   	; 0xd94 <malloc>
+        if (__result) return(__result);
+     2a8:	00 97       	sbiw	r24, 0x00	; 0
+     2aa:	91 f3       	breq	.-28     	; 0x290 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x14c>
+template<class _Tp, class _Alloc>
+class simple_alloc {
+
+public:
+    static _Tp* allocate(size_t __n)
+      { return 0 == __n ? 0 : (_Tp*) _Alloc::allocate(__n * sizeof (_Tp)); }
+     2ac:	5c 01       	movw	r10, r24
+     2ae:	38 c0       	rjmp	.+112    	; 0x320 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1dc>
+
+template <class _OutputIter, class _Size, class _Tp>
+_OutputIter fill_n(_OutputIter __first, _Size __n, const _Tp& _value) {
+  __STL_REQUIRES(_OutputIter, _OutputIterator);
+  for ( ; __n > 0; --__n, ++__first)
+    *__first = _value;
+     2b0:	d7 01       	movw	r26, r14
+     2b2:	4d 91       	ld	r20, X+
+     2b4:	5c 91       	ld	r21, X
+     2b6:	41 93       	st	Z+, r20
+     2b8:	51 93       	st	Z+, r21
+}
+
+template <class _OutputIter, class _Size, class _Tp>
+_OutputIter fill_n(_OutputIter __first, _Size __n, const _Tp& _value) {
+  __STL_REQUIRES(_OutputIter, _OutputIterator);
+  for ( ; __n > 0; --__n, ++__first)
+     2ba:	21 50       	subi	r18, 0x01	; 1
+     2bc:	31 09       	sbc	r19, r1
+     2be:	21 15       	cp	r18, r1
+     2c0:	31 05       	cpc	r19, r1
+     2c2:	b1 f7       	brne	.-20     	; 0x2b0 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x16c>
+     2c4:	cc 0c       	add	r12, r12
+     2c6:	dd 1c       	adc	r13, r13
+     2c8:	8c 0c       	add	r8, r12
+     2ca:	9d 1c       	adc	r9, r13
+}
+
+template <class _Tp>
+inline _Tp*
+__copy_trivial(const _Tp* __first, const _Tp* __last, _Tp* __result) {
+  memmove(__result, __first, sizeof(_Tp) * (__last - __first));
+     2cc:	f8 01       	movw	r30, r16
+     2ce:	c2 80       	ldd	r12, Z+2	; 0x02
+     2d0:	d3 80       	ldd	r13, Z+3	; 0x03
+     2d2:	c4 18       	sub	r12, r4
+     2d4:	d5 08       	sbc	r13, r5
+     2d6:	e8 94       	clt
+     2d8:	c0 f8       	bld	r12, 0
+     2da:	a6 01       	movw	r20, r12
+     2dc:	be 01       	movw	r22, r28
+     2de:	c4 01       	movw	r24, r8
+     2e0:	80 d6       	rcall	.+3328   	; 0xfe2 <memmove>
+  return __result + (__last - __first);
+     2e2:	8c 0c       	add	r8, r12
+     2e4:	9d 1c       	adc	r9, r13
+          = uninitialized_copy(__position, _M_finish, __new_finish);
+      }
+      __STL_UNWIND((destroy(__new_start,__new_finish), 
+                    _M_deallocate(__new_start,__len)));
+      destroy(_M_start, _M_finish);
+      _M_deallocate(_M_start, _M_end_of_storage - _M_start);
+     2e6:	d8 01       	movw	r26, r16
+     2e8:	8d 91       	ld	r24, X+
+     2ea:	9c 91       	ld	r25, X
+     2ec:	11 97       	sbiw	r26, 0x01	; 1
+     2ee:	14 96       	adiw	r26, 0x04	; 4
+     2f0:	2d 91       	ld	r18, X+
+     2f2:	3c 91       	ld	r19, X
+     2f4:	15 97       	sbiw	r26, 0x05	; 5
+     2f6:	28 1b       	sub	r18, r24
+     2f8:	39 0b       	sbc	r19, r25
+     2fa:	35 95       	asr	r19
+     2fc:	27 95       	ror	r18
+    static _Tp* allocate(void)
+      { return (_Tp*) _Alloc::allocate(sizeof (_Tp)); }
+    static void deallocate(_Tp* __p, size_t __n)
+      { if (0 != __n) _Alloc::deallocate(__p, __n * sizeof (_Tp)); }
+     2fe:	23 2b       	or	r18, r19
+     300:	09 f0       	breq	.+2      	; 0x304 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1c0>
+    return __result;
+  }
+
+  static void deallocate(void* __p, size_t /* __n */)
+  {
+    avr_free(__p);
+     302:	e0 d5       	rcall	.+3008   	; 0xec4 <free>
+      _M_start = __new_start;
+     304:	f8 01       	movw	r30, r16
+     306:	b1 82       	std	Z+1, r11	; 0x01
+     308:	a0 82       	st	Z, r10
+      _M_finish = __new_finish;
+     30a:	93 82       	std	Z+3, r9	; 0x03
+     30c:	82 82       	std	Z+2, r8	; 0x02
+      _M_end_of_storage = __new_start + __len;
+     30e:	66 0c       	add	r6, r6
+     310:	77 1c       	adc	r7, r7
+     312:	a6 0c       	add	r10, r6
+     314:	b7 1c       	adc	r11, r7
+     316:	b5 82       	std	Z+5, r11	; 0x05
+     318:	a4 82       	std	Z+4, r10	; 0x04
+     31a:	13 c0       	rjmp	.+38     	; 0x342 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x1fe>
+template<class _Tp, class _Alloc>
+class simple_alloc {
+
+public:
+    static _Tp* allocate(size_t __n)
+      { return 0 == __n ? 0 : (_Tp*) _Alloc::allocate(__n * sizeof (_Tp)); }
+     31c:	a1 2c       	mov	r10, r1
+     31e:	b1 2c       	mov	r11, r1
+      const size_type __old_size = size();        
+      const size_type __len = __old_size + max(__old_size, __n);
+      iterator __new_start = _M_allocate(__len);
+      iterator __new_finish = __new_start;
+      __STL_TRY {
+        __new_finish = uninitialized_copy(_M_start, __position, __new_start);
+     320:	d8 01       	movw	r26, r16
+     322:	6d 91       	ld	r22, X+
+     324:	7c 91       	ld	r23, X
+}
+
+template <class _Tp>
+inline _Tp*
+__copy_trivial(const _Tp* __first, const _Tp* __last, _Tp* __result) {
+  memmove(__result, __first, sizeof(_Tp) * (__last - __first));
+     326:	2e 01       	movw	r4, r28
+     328:	4e 01       	movw	r8, r28
+     32a:	86 1a       	sub	r8, r22
+     32c:	97 0a       	sbc	r9, r23
+     32e:	e8 94       	clt
+     330:	80 f8       	bld	r8, 0
+     332:	a4 01       	movw	r20, r8
+     334:	c5 01       	movw	r24, r10
+     336:	55 d6       	rcall	.+3242   	; 0xfe2 <memmove>
+  return __result + (__last - __first);
+     338:	8a 0c       	add	r8, r10
+     33a:	9b 1c       	adc	r9, r11
+     33c:	96 01       	movw	r18, r12
+     33e:	f4 01       	movw	r30, r8
+     340:	b7 cf       	rjmp	.-146    	; 0x2b0 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi+0x16c>
+      _M_start = __new_start;
+      _M_finish = __new_finish;
+      _M_end_of_storage = __new_start + __len;
+    }
+  }
+}
+     342:	df 91       	pop	r29
+     344:	cf 91       	pop	r28
+     346:	1f 91       	pop	r17
+     348:	0f 91       	pop	r16
+     34a:	ff 90       	pop	r15
+     34c:	ef 90       	pop	r14
+     34e:	df 90       	pop	r13
+     350:	cf 90       	pop	r12
+     352:	bf 90       	pop	r11
+     354:	af 90       	pop	r10
+     356:	9f 90       	pop	r9
+     358:	8f 90       	pop	r8
+     35a:	7f 90       	pop	r7
+     35c:	6f 90       	pop	r6
+     35e:	5f 90       	pop	r5
+     360:	4f 90       	pop	r4
+     362:	08 95       	ret
+
+00000364 <main>:
+#include <qmath.h>
+#include <HAL/UART.h>
+
+
+int main(void)
+{
+     364:	cf 93       	push	r28
+     366:	df 93       	push	r29
+     368:	cd b7       	in	r28, 0x3d	; 61
+     36a:	de b7       	in	r29, 0x3e	; 62
+     36c:	28 97       	sbiw	r28, 0x08	; 8
+     36e:	0f b6       	in	r0, 0x3f	; 63
+     370:	f8 94       	cli
+     372:	de bf       	out	0x3e, r29	; 62
+     374:	0f be       	out	0x3f, r0	; 63
+     376:	cd bf       	out	0x3d, r28	; 61
+  typedef typename _Alloc_traits<_Tp, _Allocator>::allocator_type
+          allocator_type;
+  allocator_type get_allocator() const { return allocator_type(); }
+
+  _Vector_alloc_base(const allocator_type&)
+    : _M_start(0), _M_finish(0), _M_end_of_storage(0) 
+     378:	1c 82       	std	Y+4, r1	; 0x04
+     37a:	1b 82       	std	Y+3, r1	; 0x03
+     37c:	1e 82       	std	Y+6, r1	; 0x06
+     37e:	1d 82       	std	Y+5, r1	; 0x05
+     380:	18 86       	std	Y+8, r1	; 0x08
+     382:	1f 82       	std	Y+7, r1	; 0x07
+    if (__new_size < size()) 
+      erase(begin() + __new_size, end());
+    else
+      insert(end(), __new_size - size(), __x);
+  }
+  void resize(size_type __new_size) { resize(__new_size, _Tp()); }
+     384:	1a 82       	std	Y+2, r1	; 0x02
+     386:	19 82       	std	Y+1, r1	; 0x01
+  void insert(iterator __position,
+              const_iterator __first, const_iterator __last);
+#endif /* __STL_MEMBER_TEMPLATES */
+
+  void insert (iterator __pos, size_type __n, const _Tp& __x)
+    { _M_fill_insert(__pos, __n, __x); }
+     388:	9e 01       	movw	r18, r28
+     38a:	2f 5f       	subi	r18, 0xFF	; 255
+     38c:	3f 4f       	sbci	r19, 0xFF	; 255
+     38e:	4a e0       	ldi	r20, 0x0A	; 10
+     390:	50 e0       	ldi	r21, 0x00	; 0
+     392:	60 e0       	ldi	r22, 0x00	; 0
+     394:	70 e0       	ldi	r23, 0x00	; 0
+     396:	ce 01       	movw	r24, r28
+     398:	03 96       	adiw	r24, 0x03	; 3
+     39a:	d4 de       	rcall	.-600    	; 0x144 <_ZNSt6vectorIiSaIiEE14_M_fill_insertEPijRKi>
+protected:
+  void _M_insert_aux(iterator __position, const _Tp& __x);
+  void _M_insert_aux(iterator __position);
+
+public:
+  iterator begin() { return _M_start; }
+     39c:	8b 81       	ldd	r24, Y+3	; 0x03
+     39e:	9c 81       	ldd	r25, Y+4	; 0x04
+  const_iterator begin() const { return _M_start; }
+  iterator end() { return _M_finish; }
+     3a0:	4d 81       	ldd	r20, Y+5	; 0x05
+     3a2:	5e 81       	ldd	r21, Y+6	; 0x06
+        //TODO:: Please write your application code 
+		
+		std::vector<int> xx;
+		xx.resize(10);
+		
+		for (auto& x: xx)
+     3a4:	84 17       	cp	r24, r20
+     3a6:	95 07       	cpc	r25, r21
+     3a8:	31 f0       	breq	.+12     	; 0x3b6 <main+0x52>
+     3aa:	9c 01       	movw	r18, r24
+     3ac:	2e 5f       	subi	r18, 0xFE	; 254
+     3ae:	3f 4f       	sbci	r19, 0xFF	; 255
+     3b0:	42 17       	cp	r20, r18
+     3b2:	53 07       	cpc	r21, r19
+     3b4:	d9 f7       	brne	.-10     	; 0x3ac <main+0x48>
+    _Base::_M_start = _Base::_M_allocate(__n);
+    _Base::_M_finish = _Base::_M_start;
+    _Base::_M_end_of_storage = _Base::_M_start + __n;
+  }
+
+  ~_Vector_base() { this->_M_deallocate(_Base::_M_start, _Base::_M_end_of_storage - _Base::_M_start); }
+     3b6:	2f 81       	ldd	r18, Y+7	; 0x07
+     3b8:	38 85       	ldd	r19, Y+8	; 0x08
+     3ba:	28 1b       	sub	r18, r24
+     3bc:	39 0b       	sbc	r19, r25
+     3be:	35 95       	asr	r19
+     3c0:	27 95       	ror	r18
+    static _Tp* allocate(void)
+      { return (_Tp*) _Alloc::allocate(sizeof (_Tp)); }
+    static void deallocate(_Tp* __p, size_t __n)
+      { if (0 != __n) _Alloc::deallocate(__p, __n * sizeof (_Tp)); }
+     3c2:	23 2b       	or	r18, r19
+     3c4:	c9 f2       	breq	.-78     	; 0x378 <main+0x14>
+    return __result;
+  }
+
+  static void deallocate(void* __p, size_t /* __n */)
+  {
+    avr_free(__p);
+     3c6:	7e d5       	rcall	.+2812   	; 0xec4 <free>
+		{
+			
+		}
+		
+    }
+     3c8:	d7 cf       	rjmp	.-82     	; 0x378 <main+0x14>
+
+000003ca <_GLOBAL__sub_I_main>:
+
+template<typename T>
+mat2<T> const mat2<T>::one(1);
+
+template<typename T>
+mat2<T> const mat2<T>::identity;
+     3ca:	20 91 70 02 	lds	r18, 0x0270
+     3ce:	30 91 71 02 	lds	r19, 0x0271
+     3d2:	40 91 72 02 	lds	r20, 0x0272
+     3d6:	50 91 73 02 	lds	r21, 0x0273
+     3da:	60 91 74 02 	lds	r22, 0x0274
+     3de:	70 91 75 02 	lds	r23, 0x0275
+     3e2:	80 91 76 02 	lds	r24, 0x0276
+     3e6:	90 91 77 02 	lds	r25, 0x0277
+     3ea:	a1 e0       	ldi	r26, 0x01	; 1
+     3ec:	bb d4       	rcall	.+2422   	; 0xd64 <__adddi3_s8>
+     3ee:	20 93 70 02 	sts	0x0270, r18
+     3f2:	30 93 71 02 	sts	0x0271, r19
+     3f6:	40 93 72 02 	sts	0x0272, r20
+     3fa:	50 93 73 02 	sts	0x0273, r21
+     3fe:	60 93 74 02 	sts	0x0274, r22
+     402:	70 93 75 02 	sts	0x0275, r23
+     406:	80 93 76 02 	sts	0x0276, r24
+     40a:	90 93 77 02 	sts	0x0277, r25
+     40e:	b6 d4       	rcall	.+2412   	; 0xd7c <__cmpdi2_s8>
+     410:	21 f5       	brne	.+72     	; 0x45a <_GLOBAL__sub_I_main+0x90>
+}
+
+template <typename T>
+MATH_FORCE_INLINE mat2<T>& mat2<T>::set_identity()
+{
+	m[0] = m[3] = (T)1;
+     412:	80 e0       	ldi	r24, 0x00	; 0
+     414:	90 e0       	ldi	r25, 0x00	; 0
+     416:	a0 e8       	ldi	r26, 0x80	; 128
+     418:	bf e3       	ldi	r27, 0x3F	; 63
+     41a:	80 93 c4 03 	sts	0x03C4, r24
+     41e:	90 93 c5 03 	sts	0x03C5, r25
+     422:	a0 93 c6 03 	sts	0x03C6, r26
+     426:	b0 93 c7 03 	sts	0x03C7, r27
+     42a:	80 93 b8 03 	sts	0x03B8, r24
+     42e:	90 93 b9 03 	sts	0x03B9, r25
+     432:	a0 93 ba 03 	sts	0x03BA, r26
+     436:	b0 93 bb 03 	sts	0x03BB, r27
+	m[1] = m[2] = (T)0;
+     43a:	10 92 c0 03 	sts	0x03C0, r1
+     43e:	10 92 c1 03 	sts	0x03C1, r1
+     442:	10 92 c2 03 	sts	0x03C2, r1
+     446:	10 92 c3 03 	sts	0x03C3, r1
+     44a:	10 92 bc 03 	sts	0x03BC, r1
+     44e:	10 92 bd 03 	sts	0x03BD, r1
+     452:	10 92 be 03 	sts	0x03BE, r1
+     456:	10 92 bf 03 	sts	0x03BF, r1
+
+template<typename T>
+mat3<T> const mat3<T>::one(1);
+
+template<typename T>
+mat3<T> const mat3<T>::identity;
+     45a:	20 91 68 02 	lds	r18, 0x0268
+     45e:	30 91 69 02 	lds	r19, 0x0269
+     462:	40 91 6a 02 	lds	r20, 0x026A
+     466:	50 91 6b 02 	lds	r21, 0x026B
+     46a:	60 91 6c 02 	lds	r22, 0x026C
+     46e:	70 91 6d 02 	lds	r23, 0x026D
+     472:	80 91 6e 02 	lds	r24, 0x026E
+     476:	90 91 6f 02 	lds	r25, 0x026F
+     47a:	a1 e0       	ldi	r26, 0x01	; 1
+     47c:	73 d4       	rcall	.+2278   	; 0xd64 <__adddi3_s8>
+     47e:	20 93 68 02 	sts	0x0268, r18
+     482:	30 93 69 02 	sts	0x0269, r19
+     486:	40 93 6a 02 	sts	0x026A, r20
+     48a:	50 93 6b 02 	sts	0x026B, r21
+     48e:	60 93 6c 02 	sts	0x026C, r22
+     492:	70 93 6d 02 	sts	0x026D, r23
+     496:	80 93 6e 02 	sts	0x026E, r24
+     49a:	90 93 6f 02 	sts	0x026F, r25
+     49e:	6e d4       	rcall	.+2268   	; 0xd7c <__cmpdi2_s8>
+     4a0:	09 f0       	breq	.+2      	; 0x4a4 <_GLOBAL__sub_I_main+0xda>
+     4a2:	4c c0       	rjmp	.+152    	; 0x53c <_GLOBAL__sub_I_main+0x172>
+}
+
+template <typename T>
+MATH_FORCE_INLINE mat3<T>& mat3<T>::set_identity()
+{
+	m[0] = m[4] = (T)1;
+     4a4:	80 e0       	ldi	r24, 0x00	; 0
+     4a6:	90 e0       	ldi	r25, 0x00	; 0
+     4a8:	a0 e8       	ldi	r26, 0x80	; 128
+     4aa:	bf e3       	ldi	r27, 0x3F	; 63
+     4ac:	80 93 a4 03 	sts	0x03A4, r24
+     4b0:	90 93 a5 03 	sts	0x03A5, r25
+     4b4:	a0 93 a6 03 	sts	0x03A6, r26
+     4b8:	b0 93 a7 03 	sts	0x03A7, r27
+     4bc:	80 93 94 03 	sts	0x0394, r24
+     4c0:	90 93 95 03 	sts	0x0395, r25
+     4c4:	a0 93 96 03 	sts	0x0396, r26
+     4c8:	b0 93 97 03 	sts	0x0397, r27
+	m[1] = m[2] = m[3] = m[5] = (T)0;
+     4cc:	10 92 a8 03 	sts	0x03A8, r1
+     4d0:	10 92 a9 03 	sts	0x03A9, r1
+     4d4:	10 92 aa 03 	sts	0x03AA, r1
+     4d8:	10 92 ab 03 	sts	0x03AB, r1
+     4dc:	10 92 a0 03 	sts	0x03A0, r1
+     4e0:	10 92 a1 03 	sts	0x03A1, r1
+     4e4:	10 92 a2 03 	sts	0x03A2, r1
+     4e8:	10 92 a3 03 	sts	0x03A3, r1
+     4ec:	10 92 9c 03 	sts	0x039C, r1
+     4f0:	10 92 9d 03 	sts	0x039D, r1
+     4f4:	10 92 9e 03 	sts	0x039E, r1
+     4f8:	10 92 9f 03 	sts	0x039F, r1
+     4fc:	10 92 98 03 	sts	0x0398, r1
+     500:	10 92 99 03 	sts	0x0399, r1
+     504:	10 92 9a 03 	sts	0x039A, r1
+     508:	10 92 9b 03 	sts	0x039B, r1
+	m[8] = (T)1;
+     50c:	80 93 b4 03 	sts	0x03B4, r24
+     510:	90 93 b5 03 	sts	0x03B5, r25
+     514:	a0 93 b6 03 	sts	0x03B6, r26
+     518:	b0 93 b7 03 	sts	0x03B7, r27
+	m[6] = m[7] = (T)0;
+     51c:	10 92 b0 03 	sts	0x03B0, r1
+     520:	10 92 b1 03 	sts	0x03B1, r1
+     524:	10 92 b2 03 	sts	0x03B2, r1
+     528:	10 92 b3 03 	sts	0x03B3, r1
+     52c:	10 92 ac 03 	sts	0x03AC, r1
+     530:	10 92 ad 03 	sts	0x03AD, r1
+     534:	10 92 ae 03 	sts	0x03AE, r1
+     538:	10 92 af 03 	sts	0x03AF, r1
+
+template<typename T>
+mat4<T> const mat4<T>::one(1);
+
+template<typename T>
+mat4<T> const mat4<T>::identity;
+     53c:	20 91 60 02 	lds	r18, 0x0260
+     540:	30 91 61 02 	lds	r19, 0x0261
+     544:	40 91 62 02 	lds	r20, 0x0262
+     548:	50 91 63 02 	lds	r21, 0x0263
+     54c:	60 91 64 02 	lds	r22, 0x0264
+     550:	70 91 65 02 	lds	r23, 0x0265
+     554:	80 91 66 02 	lds	r24, 0x0266
+     558:	90 91 67 02 	lds	r25, 0x0267
+     55c:	a1 e0       	ldi	r26, 0x01	; 1
+     55e:	02 d4       	rcall	.+2052   	; 0xd64 <__adddi3_s8>
+     560:	20 93 60 02 	sts	0x0260, r18
+     564:	30 93 61 02 	sts	0x0261, r19
+     568:	40 93 62 02 	sts	0x0262, r20
+     56c:	50 93 63 02 	sts	0x0263, r21
+     570:	60 93 64 02 	sts	0x0264, r22
+     574:	70 93 65 02 	sts	0x0265, r23
+     578:	80 93 66 02 	sts	0x0266, r24
+     57c:	90 93 67 02 	sts	0x0267, r25
+     580:	fd d3       	rcall	.+2042   	; 0xd7c <__cmpdi2_s8>
+     582:	09 f0       	breq	.+2      	; 0x586 <_GLOBAL__sub_I_main+0x1bc>
+     584:	84 c0       	rjmp	.+264    	; 0x68e <_GLOBAL__sub_I_main+0x2c4>
+}
+
+template <typename T>
+MATH_FORCE_INLINE mat4<T>& mat4<T>::set_identity()
+{
+	m[ 0] = m[ 5] = m[10] = (T)1.0;
+     586:	80 e0       	ldi	r24, 0x00	; 0
+     588:	90 e0       	ldi	r25, 0x00	; 0
+     58a:	a0 e8       	ldi	r26, 0x80	; 128
+     58c:	bf e3       	ldi	r27, 0x3F	; 63
+     58e:	80 93 7c 03 	sts	0x037C, r24
+     592:	90 93 7d 03 	sts	0x037D, r25
+     596:	a0 93 7e 03 	sts	0x037E, r26
+     59a:	b0 93 7f 03 	sts	0x037F, r27
+     59e:	80 93 68 03 	sts	0x0368, r24
+     5a2:	90 93 69 03 	sts	0x0369, r25
+     5a6:	a0 93 6a 03 	sts	0x036A, r26
+     5aa:	b0 93 6b 03 	sts	0x036B, r27
+     5ae:	80 93 54 03 	sts	0x0354, r24
+     5b2:	90 93 55 03 	sts	0x0355, r25
+     5b6:	a0 93 56 03 	sts	0x0356, r26
+     5ba:	b0 93 57 03 	sts	0x0357, r27
+	m[ 1] = m[ 2] = m[ 3] = m[ 4] = m[ 6] = m[ 7] = m[ 8] = m[ 9] = m[11] = (T)0.0;
+     5be:	10 92 80 03 	sts	0x0380, r1
+     5c2:	10 92 81 03 	sts	0x0381, r1
+     5c6:	10 92 82 03 	sts	0x0382, r1
+     5ca:	10 92 83 03 	sts	0x0383, r1
+     5ce:	10 92 78 03 	sts	0x0378, r1
+     5d2:	10 92 79 03 	sts	0x0379, r1
+     5d6:	10 92 7a 03 	sts	0x037A, r1
+     5da:	10 92 7b 03 	sts	0x037B, r1
+     5de:	10 92 74 03 	sts	0x0374, r1
+     5e2:	10 92 75 03 	sts	0x0375, r1
+     5e6:	10 92 76 03 	sts	0x0376, r1
+     5ea:	10 92 77 03 	sts	0x0377, r1
+     5ee:	10 92 70 03 	sts	0x0370, r1
+     5f2:	10 92 71 03 	sts	0x0371, r1
+     5f6:	10 92 72 03 	sts	0x0372, r1
+     5fa:	10 92 73 03 	sts	0x0373, r1
+     5fe:	10 92 6c 03 	sts	0x036C, r1
+     602:	10 92 6d 03 	sts	0x036D, r1
+     606:	10 92 6e 03 	sts	0x036E, r1
+     60a:	10 92 6f 03 	sts	0x036F, r1
+     60e:	10 92 64 03 	sts	0x0364, r1
+     612:	10 92 65 03 	sts	0x0365, r1
+     616:	10 92 66 03 	sts	0x0366, r1
+     61a:	10 92 67 03 	sts	0x0367, r1
+     61e:	10 92 60 03 	sts	0x0360, r1
+     622:	10 92 61 03 	sts	0x0361, r1
+     626:	10 92 62 03 	sts	0x0362, r1
+     62a:	10 92 63 03 	sts	0x0363, r1
+     62e:	10 92 5c 03 	sts	0x035C, r1
+     632:	10 92 5d 03 	sts	0x035D, r1
+     636:	10 92 5e 03 	sts	0x035E, r1
+     63a:	10 92 5f 03 	sts	0x035F, r1
+     63e:	10 92 58 03 	sts	0x0358, r1
+     642:	10 92 59 03 	sts	0x0359, r1
+     646:	10 92 5a 03 	sts	0x035A, r1
+     64a:	10 92 5b 03 	sts	0x035B, r1
+	m[15] = (T)1.0;
+     64e:	80 93 90 03 	sts	0x0390, r24
+     652:	90 93 91 03 	sts	0x0391, r25
+     656:	a0 93 92 03 	sts	0x0392, r26
+     65a:	b0 93 93 03 	sts	0x0393, r27
+	m[12] = m[13] = m[14] = (T)0.0;
+     65e:	10 92 8c 03 	sts	0x038C, r1
+     662:	10 92 8d 03 	sts	0x038D, r1
+     666:	10 92 8e 03 	sts	0x038E, r1
+     66a:	10 92 8f 03 	sts	0x038F, r1
+     66e:	10 92 88 03 	sts	0x0388, r1
+     672:	10 92 89 03 	sts	0x0389, r1
+     676:	10 92 8a 03 	sts	0x038A, r1
+     67a:	10 92 8b 03 	sts	0x038B, r1
+     67e:	10 92 84 03 	sts	0x0384, r1
+     682:	10 92 85 03 	sts	0x0385, r1
+     686:	10 92 86 03 	sts	0x0386, r1
+     68a:	10 92 87 03 	sts	0x0387, r1
+namespace math
+{
+
+
+template<typename T> trans3d<T> const trans3d<T>::identity;
+     68e:	20 91 58 02 	lds	r18, 0x0258
+     692:	30 91 59 02 	lds	r19, 0x0259
+     696:	40 91 5a 02 	lds	r20, 0x025A
+     69a:	50 91 5b 02 	lds	r21, 0x025B
+     69e:	60 91 5c 02 	lds	r22, 0x025C
+     6a2:	70 91 5d 02 	lds	r23, 0x025D
+     6a6:	80 91 5e 02 	lds	r24, 0x025E
+     6aa:	90 91 5f 02 	lds	r25, 0x025F
+     6ae:	a1 e0       	ldi	r26, 0x01	; 1
+     6b0:	59 d3       	rcall	.+1714   	; 0xd64 <__adddi3_s8>
+     6b2:	20 93 58 02 	sts	0x0258, r18
+     6b6:	30 93 59 02 	sts	0x0259, r19
+     6ba:	40 93 5a 02 	sts	0x025A, r20
+     6be:	50 93 5b 02 	sts	0x025B, r21
+     6c2:	60 93 5c 02 	sts	0x025C, r22
+     6c6:	70 93 5d 02 	sts	0x025D, r23
+     6ca:	80 93 5e 02 	sts	0x025E, r24
+     6ce:	90 93 5f 02 	sts	0x025F, r25
+     6d2:	54 d3       	rcall	.+1704   	; 0xd7c <__cmpdi2_s8>
+     6d4:	09 f0       	breq	.+2      	; 0x6d8 <_GLOBAL__sub_I_main+0x30e>
+     6d6:	84 c0       	rjmp	.+264    	; 0x7e0 <_GLOBAL__sub_I_main+0x416>
+}
+
+template <typename T>
+MATH_FORCE_INLINE mat4<T>& mat4<T>::set_identity()
+{
+	m[ 0] = m[ 5] = m[10] = (T)1.0;
+     6d8:	80 e0       	ldi	r24, 0x00	; 0
+     6da:	90 e0       	ldi	r25, 0x00	; 0
+     6dc:	a0 e8       	ldi	r26, 0x80	; 128
+     6de:	bf e3       	ldi	r27, 0x3F	; 63
+     6e0:	80 93 3c 03 	sts	0x033C, r24
+     6e4:	90 93 3d 03 	sts	0x033D, r25
+     6e8:	a0 93 3e 03 	sts	0x033E, r26
+     6ec:	b0 93 3f 03 	sts	0x033F, r27
+     6f0:	80 93 28 03 	sts	0x0328, r24
+     6f4:	90 93 29 03 	sts	0x0329, r25
+     6f8:	a0 93 2a 03 	sts	0x032A, r26
+     6fc:	b0 93 2b 03 	sts	0x032B, r27
+     700:	80 93 14 03 	sts	0x0314, r24
+     704:	90 93 15 03 	sts	0x0315, r25
+     708:	a0 93 16 03 	sts	0x0316, r26
+     70c:	b0 93 17 03 	sts	0x0317, r27
+	m[ 1] = m[ 2] = m[ 3] = m[ 4] = m[ 6] = m[ 7] = m[ 8] = m[ 9] = m[11] = (T)0.0;
+     710:	10 92 40 03 	sts	0x0340, r1
+     714:	10 92 41 03 	sts	0x0341, r1
+     718:	10 92 42 03 	sts	0x0342, r1
+     71c:	10 92 43 03 	sts	0x0343, r1
+     720:	10 92 38 03 	sts	0x0338, r1
+     724:	10 92 39 03 	sts	0x0339, r1
+     728:	10 92 3a 03 	sts	0x033A, r1
+     72c:	10 92 3b 03 	sts	0x033B, r1
+     730:	10 92 34 03 	sts	0x0334, r1
+     734:	10 92 35 03 	sts	0x0335, r1
+     738:	10 92 36 03 	sts	0x0336, r1
+     73c:	10 92 37 03 	sts	0x0337, r1
+     740:	10 92 30 03 	sts	0x0330, r1
+     744:	10 92 31 03 	sts	0x0331, r1
+     748:	10 92 32 03 	sts	0x0332, r1
+     74c:	10 92 33 03 	sts	0x0333, r1
+     750:	10 92 2c 03 	sts	0x032C, r1
+     754:	10 92 2d 03 	sts	0x032D, r1
+     758:	10 92 2e 03 	sts	0x032E, r1
+     75c:	10 92 2f 03 	sts	0x032F, r1
+     760:	10 92 24 03 	sts	0x0324, r1
+     764:	10 92 25 03 	sts	0x0325, r1
+     768:	10 92 26 03 	sts	0x0326, r1
+     76c:	10 92 27 03 	sts	0x0327, r1
+     770:	10 92 20 03 	sts	0x0320, r1
+     774:	10 92 21 03 	sts	0x0321, r1
+     778:	10 92 22 03 	sts	0x0322, r1
+     77c:	10 92 23 03 	sts	0x0323, r1
+     780:	10 92 1c 03 	sts	0x031C, r1
+     784:	10 92 1d 03 	sts	0x031D, r1
+     788:	10 92 1e 03 	sts	0x031E, r1
+     78c:	10 92 1f 03 	sts	0x031F, r1
+     790:	10 92 18 03 	sts	0x0318, r1
+     794:	10 92 19 03 	sts	0x0319, r1
+     798:	10 92 1a 03 	sts	0x031A, r1
+     79c:	10 92 1b 03 	sts	0x031B, r1
+	m[15] = (T)1.0;
+     7a0:	80 93 50 03 	sts	0x0350, r24
+     7a4:	90 93 51 03 	sts	0x0351, r25
+     7a8:	a0 93 52 03 	sts	0x0352, r26
+     7ac:	b0 93 53 03 	sts	0x0353, r27
+	m[12] = m[13] = m[14] = (T)0.0;
+     7b0:	10 92 4c 03 	sts	0x034C, r1
+     7b4:	10 92 4d 03 	sts	0x034D, r1
+     7b8:	10 92 4e 03 	sts	0x034E, r1
+     7bc:	10 92 4f 03 	sts	0x034F, r1
+     7c0:	10 92 48 03 	sts	0x0348, r1
+     7c4:	10 92 49 03 	sts	0x0349, r1
+     7c8:	10 92 4a 03 	sts	0x034A, r1
+     7cc:	10 92 4b 03 	sts	0x034B, r1
+     7d0:	10 92 44 03 	sts	0x0344, r1
+     7d4:	10 92 45 03 	sts	0x0345, r1
+     7d8:	10 92 46 03 	sts	0x0346, r1
+     7dc:	10 92 47 03 	sts	0x0347, r1
+{
+
+
+template<typename T> trans2d<T> const trans2d<T>::zero(0);
+template<typename T> trans2d<T> const trans2d<T>::one(1);
+template<typename T> trans2d<T> const trans2d<T>::identity;
+     7e0:	20 91 50 02 	lds	r18, 0x0250
+     7e4:	30 91 51 02 	lds	r19, 0x0251
+     7e8:	40 91 52 02 	lds	r20, 0x0252
+     7ec:	50 91 53 02 	lds	r21, 0x0253
+     7f0:	60 91 54 02 	lds	r22, 0x0254
+     7f4:	70 91 55 02 	lds	r23, 0x0255
+     7f8:	80 91 56 02 	lds	r24, 0x0256
+     7fc:	90 91 57 02 	lds	r25, 0x0257
+     800:	a1 e0       	ldi	r26, 0x01	; 1
+     802:	b0 d2       	rcall	.+1376   	; 0xd64 <__adddi3_s8>
+     804:	20 93 50 02 	sts	0x0250, r18
+     808:	30 93 51 02 	sts	0x0251, r19
+     80c:	40 93 52 02 	sts	0x0252, r20
+     810:	50 93 53 02 	sts	0x0253, r21
+     814:	60 93 54 02 	sts	0x0254, r22
+     818:	70 93 55 02 	sts	0x0255, r23
+     81c:	80 93 56 02 	sts	0x0256, r24
+     820:	90 93 57 02 	sts	0x0257, r25
+     824:	ab d2       	rcall	.+1366   	; 0xd7c <__cmpdi2_s8>
+     826:	09 f0       	breq	.+2      	; 0x82a <_GLOBAL__sub_I_main+0x460>
+     828:	4c c0       	rjmp	.+152    	; 0x8c2 <_GLOBAL__sub_I_main+0x4f8>
+}
+
+template <typename T>
+MATH_FORCE_INLINE mat3<T>& mat3<T>::set_identity()
+{
+	m[0] = m[4] = (T)1;
+     82a:	80 e0       	ldi	r24, 0x00	; 0
+     82c:	90 e0       	ldi	r25, 0x00	; 0
+     82e:	a0 e8       	ldi	r26, 0x80	; 128
+     830:	bf e3       	ldi	r27, 0x3F	; 63
+     832:	80 93 00 03 	sts	0x0300, r24
+     836:	90 93 01 03 	sts	0x0301, r25
+     83a:	a0 93 02 03 	sts	0x0302, r26
+     83e:	b0 93 03 03 	sts	0x0303, r27
+     842:	80 93 f0 02 	sts	0x02F0, r24
+     846:	90 93 f1 02 	sts	0x02F1, r25
+     84a:	a0 93 f2 02 	sts	0x02F2, r26
+     84e:	b0 93 f3 02 	sts	0x02F3, r27
+	m[1] = m[2] = m[3] = m[5] = (T)0;
+     852:	10 92 04 03 	sts	0x0304, r1
+     856:	10 92 05 03 	sts	0x0305, r1
+     85a:	10 92 06 03 	sts	0x0306, r1
+     85e:	10 92 07 03 	sts	0x0307, r1
+     862:	10 92 fc 02 	sts	0x02FC, r1
+     866:	10 92 fd 02 	sts	0x02FD, r1
+     86a:	10 92 fe 02 	sts	0x02FE, r1
+     86e:	10 92 ff 02 	sts	0x02FF, r1
+     872:	10 92 f8 02 	sts	0x02F8, r1
+     876:	10 92 f9 02 	sts	0x02F9, r1
+     87a:	10 92 fa 02 	sts	0x02FA, r1
+     87e:	10 92 fb 02 	sts	0x02FB, r1
+     882:	10 92 f4 02 	sts	0x02F4, r1
+     886:	10 92 f5 02 	sts	0x02F5, r1
+     88a:	10 92 f6 02 	sts	0x02F6, r1
+     88e:	10 92 f7 02 	sts	0x02F7, r1
+	m[8] = (T)1;
+     892:	80 93 10 03 	sts	0x0310, r24
+     896:	90 93 11 03 	sts	0x0311, r25
+     89a:	a0 93 12 03 	sts	0x0312, r26
+     89e:	b0 93 13 03 	sts	0x0313, r27
+	m[6] = m[7] = (T)0;
+     8a2:	10 92 0c 03 	sts	0x030C, r1
+     8a6:	10 92 0d 03 	sts	0x030D, r1
+     8aa:	10 92 0e 03 	sts	0x030E, r1
+     8ae:	10 92 0f 03 	sts	0x030F, r1
+     8b2:	10 92 08 03 	sts	0x0308, r1
+     8b6:	10 92 09 03 	sts	0x0309, r1
+     8ba:	10 92 0a 03 	sts	0x030A, r1
+     8be:	10 92 0b 03 	sts	0x030B, r1
+
+template<typename T>
+quat<T> const quat<T>::one(1, 1, 1, 1);
+
+template<typename T>
+quat<T> const quat<T>::identity;
+     8c2:	20 91 48 02 	lds	r18, 0x0248
+     8c6:	30 91 49 02 	lds	r19, 0x0249
+     8ca:	40 91 4a 02 	lds	r20, 0x024A
+     8ce:	50 91 4b 02 	lds	r21, 0x024B
+     8d2:	60 91 4c 02 	lds	r22, 0x024C
+     8d6:	70 91 4d 02 	lds	r23, 0x024D
+     8da:	80 91 4e 02 	lds	r24, 0x024E
+     8de:	90 91 4f 02 	lds	r25, 0x024F
+     8e2:	a1 e0       	ldi	r26, 0x01	; 1
+     8e4:	3f d2       	rcall	.+1150   	; 0xd64 <__adddi3_s8>
+     8e6:	20 93 48 02 	sts	0x0248, r18
+     8ea:	30 93 49 02 	sts	0x0249, r19
+     8ee:	40 93 4a 02 	sts	0x024A, r20
+     8f2:	50 93 4b 02 	sts	0x024B, r21
+     8f6:	60 93 4c 02 	sts	0x024C, r22
+     8fa:	70 93 4d 02 	sts	0x024D, r23
+     8fe:	80 93 4e 02 	sts	0x024E, r24
+     902:	90 93 4f 02 	sts	0x024F, r25
+     906:	3a d2       	rcall	.+1140   	; 0xd7c <__cmpdi2_s8>
+     908:	21 f5       	brne	.+72     	; 0x952 <_GLOBAL__sub_I_main+0x588>
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// constructors
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <typename T> 
+MATH_FORCE_INLINE quat<T>::quat() : x(0), y(0), z(0), w(1) {}
+     90a:	10 92 e0 02 	sts	0x02E0, r1
+     90e:	10 92 e1 02 	sts	0x02E1, r1
+     912:	10 92 e2 02 	sts	0x02E2, r1
+     916:	10 92 e3 02 	sts	0x02E3, r1
+     91a:	10 92 e4 02 	sts	0x02E4, r1
+     91e:	10 92 e5 02 	sts	0x02E5, r1
+     922:	10 92 e6 02 	sts	0x02E6, r1
+     926:	10 92 e7 02 	sts	0x02E7, r1
+     92a:	10 92 e8 02 	sts	0x02E8, r1
+     92e:	10 92 e9 02 	sts	0x02E9, r1
+     932:	10 92 ea 02 	sts	0x02EA, r1
+     936:	10 92 eb 02 	sts	0x02EB, r1
+     93a:	80 e0       	ldi	r24, 0x00	; 0
+     93c:	90 e0       	ldi	r25, 0x00	; 0
+     93e:	a0 e8       	ldi	r26, 0x80	; 128
+     940:	bf e3       	ldi	r27, 0x3F	; 63
+     942:	80 93 ec 02 	sts	0x02EC, r24
+     946:	90 93 ed 02 	sts	0x02ED, r25
+     94a:	a0 93 ee 02 	sts	0x02EE, r26
+     94e:	b0 93 ef 02 	sts	0x02EF, r27
+namespace math
+{
+
+
+template<typename T>
+vec2<T> const vec2<T>::zero(0);
+     952:	20 91 40 02 	lds	r18, 0x0240
+     956:	30 91 41 02 	lds	r19, 0x0241
+     95a:	40 91 42 02 	lds	r20, 0x0242
+     95e:	50 91 43 02 	lds	r21, 0x0243
+     962:	60 91 44 02 	lds	r22, 0x0244
+     966:	70 91 45 02 	lds	r23, 0x0245
+     96a:	80 91 46 02 	lds	r24, 0x0246
+     96e:	90 91 47 02 	lds	r25, 0x0247
+     972:	a1 e0       	ldi	r26, 0x01	; 1
+     974:	f7 d1       	rcall	.+1006   	; 0xd64 <__adddi3_s8>
+     976:	20 93 40 02 	sts	0x0240, r18
+     97a:	30 93 41 02 	sts	0x0241, r19
+     97e:	40 93 42 02 	sts	0x0242, r20
+     982:	50 93 43 02 	sts	0x0243, r21
+     986:	60 93 44 02 	sts	0x0244, r22
+     98a:	70 93 45 02 	sts	0x0245, r23
+     98e:	80 93 46 02 	sts	0x0246, r24
+     992:	90 93 47 02 	sts	0x0247, r25
+     996:	f2 d1       	rcall	.+996    	; 0xd7c <__cmpdi2_s8>
+     998:	81 f4       	brne	.+32     	; 0x9ba <_GLOBAL__sub_I_main+0x5f0>
+
+template<typename T>
+MATH_FORCE_INLINE vec2<T>::vec2(T _x, T _y) : x(_x), y(_y) {}
+
+template<typename T>
+MATH_FORCE_INLINE vec2<T>::vec2(T v) : x(v), y(v) {}
+     99a:	10 92 d8 02 	sts	0x02D8, r1
+     99e:	10 92 d9 02 	sts	0x02D9, r1
+     9a2:	10 92 da 02 	sts	0x02DA, r1
+     9a6:	10 92 db 02 	sts	0x02DB, r1
+     9aa:	10 92 dc 02 	sts	0x02DC, r1
+     9ae:	10 92 dd 02 	sts	0x02DD, r1
+     9b2:	10 92 de 02 	sts	0x02DE, r1
+     9b6:	10 92 df 02 	sts	0x02DF, r1
+namespace math
+{
+
+	template<typename T> vec3<T> const vec3<T>::zero(0);
+     9ba:	20 91 38 02 	lds	r18, 0x0238
+     9be:	30 91 39 02 	lds	r19, 0x0239
+     9c2:	40 91 3a 02 	lds	r20, 0x023A
+     9c6:	50 91 3b 02 	lds	r21, 0x023B
+     9ca:	60 91 3c 02 	lds	r22, 0x023C
+     9ce:	70 91 3d 02 	lds	r23, 0x023D
+     9d2:	80 91 3e 02 	lds	r24, 0x023E
+     9d6:	90 91 3f 02 	lds	r25, 0x023F
+     9da:	a1 e0       	ldi	r26, 0x01	; 1
+     9dc:	c3 d1       	rcall	.+902    	; 0xd64 <__adddi3_s8>
+     9de:	20 93 38 02 	sts	0x0238, r18
+     9e2:	30 93 39 02 	sts	0x0239, r19
+     9e6:	40 93 3a 02 	sts	0x023A, r20
+     9ea:	50 93 3b 02 	sts	0x023B, r21
+     9ee:	60 93 3c 02 	sts	0x023C, r22
+     9f2:	70 93 3d 02 	sts	0x023D, r23
+     9f6:	80 93 3e 02 	sts	0x023E, r24
+     9fa:	90 93 3f 02 	sts	0x023F, r25
+     9fe:	be d1       	rcall	.+892    	; 0xd7c <__cmpdi2_s8>
+     a00:	c1 f4       	brne	.+48     	; 0xa32 <_GLOBAL__sub_I_main+0x668>
+	template<typename T> vec3<T> const vec3<T>::one(1);
+
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3() : x(T(0)), y(T(0)), z(T(0)) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(ZUninitialized) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(T v) : x(v), y(v), z(v) {}
+     a02:	10 92 cc 02 	sts	0x02CC, r1
+     a06:	10 92 cd 02 	sts	0x02CD, r1
+     a0a:	10 92 ce 02 	sts	0x02CE, r1
+     a0e:	10 92 cf 02 	sts	0x02CF, r1
+     a12:	10 92 d0 02 	sts	0x02D0, r1
+     a16:	10 92 d1 02 	sts	0x02D1, r1
+     a1a:	10 92 d2 02 	sts	0x02D2, r1
+     a1e:	10 92 d3 02 	sts	0x02D3, r1
+     a22:	10 92 d4 02 	sts	0x02D4, r1
+     a26:	10 92 d5 02 	sts	0x02D5, r1
+     a2a:	10 92 d6 02 	sts	0x02D6, r1
+     a2e:	10 92 d7 02 	sts	0x02D7, r1
+namespace math
+{
+
+	template<typename T> vec4<T> const vec4<T>::zero(0);
+     a32:	20 91 30 02 	lds	r18, 0x0230
+     a36:	30 91 31 02 	lds	r19, 0x0231
+     a3a:	40 91 32 02 	lds	r20, 0x0232
+     a3e:	50 91 33 02 	lds	r21, 0x0233
+     a42:	60 91 34 02 	lds	r22, 0x0234
+     a46:	70 91 35 02 	lds	r23, 0x0235
+     a4a:	80 91 36 02 	lds	r24, 0x0236
+     a4e:	90 91 37 02 	lds	r25, 0x0237
+     a52:	a1 e0       	ldi	r26, 0x01	; 1
+     a54:	87 d1       	rcall	.+782    	; 0xd64 <__adddi3_s8>
+     a56:	20 93 30 02 	sts	0x0230, r18
+     a5a:	30 93 31 02 	sts	0x0231, r19
+     a5e:	40 93 32 02 	sts	0x0232, r20
+     a62:	50 93 33 02 	sts	0x0233, r21
+     a66:	60 93 34 02 	sts	0x0234, r22
+     a6a:	70 93 35 02 	sts	0x0235, r23
+     a6e:	80 93 36 02 	sts	0x0236, r24
+     a72:	90 93 37 02 	sts	0x0237, r25
+     a76:	82 d1       	rcall	.+772    	; 0xd7c <__cmpdi2_s8>
+     a78:	01 f5       	brne	.+64     	; 0xaba <_GLOBAL__sub_I_main+0x6f0>
+	template<typename T> vec4<T> const vec4<T>::one(1);
+
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(ZUninitialized) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
+     a7a:	10 92 bc 02 	sts	0x02BC, r1
+     a7e:	10 92 bd 02 	sts	0x02BD, r1
+     a82:	10 92 be 02 	sts	0x02BE, r1
+     a86:	10 92 bf 02 	sts	0x02BF, r1
+     a8a:	10 92 c0 02 	sts	0x02C0, r1
+     a8e:	10 92 c1 02 	sts	0x02C1, r1
+     a92:	10 92 c2 02 	sts	0x02C2, r1
+     a96:	10 92 c3 02 	sts	0x02C3, r1
+     a9a:	10 92 c4 02 	sts	0x02C4, r1
+     a9e:	10 92 c5 02 	sts	0x02C5, r1
+     aa2:	10 92 c6 02 	sts	0x02C6, r1
+     aa6:	10 92 c7 02 	sts	0x02C7, r1
+     aaa:	10 92 c8 02 	sts	0x02C8, r1
+     aae:	10 92 c9 02 	sts	0x02C9, r1
+     ab2:	10 92 ca 02 	sts	0x02CA, r1
+     ab6:	10 92 cb 02 	sts	0x02CB, r1
+namespace math
+{
+
+
+template<typename T>
+quat<T> const quat<T>::zero(0, 0, 0, 1);
+     aba:	20 91 28 02 	lds	r18, 0x0228
+     abe:	30 91 29 02 	lds	r19, 0x0229
+     ac2:	40 91 2a 02 	lds	r20, 0x022A
+     ac6:	50 91 2b 02 	lds	r21, 0x022B
+     aca:	60 91 2c 02 	lds	r22, 0x022C
+     ace:	70 91 2d 02 	lds	r23, 0x022D
+     ad2:	80 91 2e 02 	lds	r24, 0x022E
+     ad6:	90 91 2f 02 	lds	r25, 0x022F
+     ada:	a1 e0       	ldi	r26, 0x01	; 1
+     adc:	43 d1       	rcall	.+646    	; 0xd64 <__adddi3_s8>
+     ade:	20 93 28 02 	sts	0x0228, r18
+     ae2:	30 93 29 02 	sts	0x0229, r19
+     ae6:	40 93 2a 02 	sts	0x022A, r20
+     aea:	50 93 2b 02 	sts	0x022B, r21
+     aee:	60 93 2c 02 	sts	0x022C, r22
+     af2:	70 93 2d 02 	sts	0x022D, r23
+     af6:	80 93 2e 02 	sts	0x022E, r24
+     afa:	90 93 2f 02 	sts	0x022F, r25
+     afe:	3e d1       	rcall	.+636    	; 0xd7c <__cmpdi2_s8>
+     b00:	21 f5       	brne	.+72     	; 0xb4a <_GLOBAL__sub_I_main+0x780>
+
+template <typename T> 
+MATH_FORCE_INLINE quat<T>::quat(ZUninitialized) {}
+
+template <typename T>
+MATH_FORCE_INLINE quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
+     b02:	10 92 ac 02 	sts	0x02AC, r1
+     b06:	10 92 ad 02 	sts	0x02AD, r1
+     b0a:	10 92 ae 02 	sts	0x02AE, r1
+     b0e:	10 92 af 02 	sts	0x02AF, r1
+     b12:	10 92 b0 02 	sts	0x02B0, r1
+     b16:	10 92 b1 02 	sts	0x02B1, r1
+     b1a:	10 92 b2 02 	sts	0x02B2, r1
+     b1e:	10 92 b3 02 	sts	0x02B3, r1
+     b22:	10 92 b4 02 	sts	0x02B4, r1
+     b26:	10 92 b5 02 	sts	0x02B5, r1
+     b2a:	10 92 b6 02 	sts	0x02B6, r1
+     b2e:	10 92 b7 02 	sts	0x02B7, r1
+     b32:	80 e0       	ldi	r24, 0x00	; 0
+     b34:	90 e0       	ldi	r25, 0x00	; 0
+     b36:	a0 e8       	ldi	r26, 0x80	; 128
+     b38:	bf e3       	ldi	r27, 0x3F	; 63
+     b3a:	80 93 b8 02 	sts	0x02B8, r24
+     b3e:	90 93 b9 02 	sts	0x02B9, r25
+     b42:	a0 93 ba 02 	sts	0x02BA, r26
+     b46:	b0 93 bb 02 	sts	0x02BB, r27
+
+template<typename T>
+vec2<T> const vec2<T>::zero(0);
+
+template<typename T>
+vec2<T> const vec2<T>::one(1);
+     b4a:	20 91 20 02 	lds	r18, 0x0220
+     b4e:	30 91 21 02 	lds	r19, 0x0221
+     b52:	40 91 22 02 	lds	r20, 0x0222
+     b56:	50 91 23 02 	lds	r21, 0x0223
+     b5a:	60 91 24 02 	lds	r22, 0x0224
+     b5e:	70 91 25 02 	lds	r23, 0x0225
+     b62:	80 91 26 02 	lds	r24, 0x0226
+     b66:	90 91 27 02 	lds	r25, 0x0227
+     b6a:	a1 e0       	ldi	r26, 0x01	; 1
+     b6c:	fb d0       	rcall	.+502    	; 0xd64 <__adddi3_s8>
+     b6e:	20 93 20 02 	sts	0x0220, r18
+     b72:	30 93 21 02 	sts	0x0221, r19
+     b76:	40 93 22 02 	sts	0x0222, r20
+     b7a:	50 93 23 02 	sts	0x0223, r21
+     b7e:	60 93 24 02 	sts	0x0224, r22
+     b82:	70 93 25 02 	sts	0x0225, r23
+     b86:	80 93 26 02 	sts	0x0226, r24
+     b8a:	90 93 27 02 	sts	0x0227, r25
+     b8e:	f6 d0       	rcall	.+492    	; 0xd7c <__cmpdi2_s8>
+     b90:	a1 f4       	brne	.+40     	; 0xbba <_GLOBAL__sub_I_main+0x7f0>
+
+template<typename T>
+MATH_FORCE_INLINE vec2<T>::vec2(T _x, T _y) : x(_x), y(_y) {}
+
+template<typename T>
+MATH_FORCE_INLINE vec2<T>::vec2(T v) : x(v), y(v) {}
+     b92:	80 e0       	ldi	r24, 0x00	; 0
+     b94:	90 e0       	ldi	r25, 0x00	; 0
+     b96:	a0 e8       	ldi	r26, 0x80	; 128
+     b98:	bf e3       	ldi	r27, 0x3F	; 63
+     b9a:	80 93 a4 02 	sts	0x02A4, r24
+     b9e:	90 93 a5 02 	sts	0x02A5, r25
+     ba2:	a0 93 a6 02 	sts	0x02A6, r26
+     ba6:	b0 93 a7 02 	sts	0x02A7, r27
+     baa:	80 93 a8 02 	sts	0x02A8, r24
+     bae:	90 93 a9 02 	sts	0x02A9, r25
+     bb2:	a0 93 aa 02 	sts	0x02AA, r26
+     bb6:	b0 93 ab 02 	sts	0x02AB, r27
+namespace math
+{
+
+	template<typename T> vec3<T> const vec3<T>::zero(0);
+	template<typename T> vec3<T> const vec3<T>::one(1);
+     bba:	20 91 18 02 	lds	r18, 0x0218
+     bbe:	30 91 19 02 	lds	r19, 0x0219
+     bc2:	40 91 1a 02 	lds	r20, 0x021A
+     bc6:	50 91 1b 02 	lds	r21, 0x021B
+     bca:	60 91 1c 02 	lds	r22, 0x021C
+     bce:	70 91 1d 02 	lds	r23, 0x021D
+     bd2:	80 91 1e 02 	lds	r24, 0x021E
+     bd6:	90 91 1f 02 	lds	r25, 0x021F
+     bda:	a1 e0       	ldi	r26, 0x01	; 1
+     bdc:	c3 d0       	rcall	.+390    	; 0xd64 <__adddi3_s8>
+     bde:	20 93 18 02 	sts	0x0218, r18
+     be2:	30 93 19 02 	sts	0x0219, r19
+     be6:	40 93 1a 02 	sts	0x021A, r20
+     bea:	50 93 1b 02 	sts	0x021B, r21
+     bee:	60 93 1c 02 	sts	0x021C, r22
+     bf2:	70 93 1d 02 	sts	0x021D, r23
+     bf6:	80 93 1e 02 	sts	0x021E, r24
+     bfa:	90 93 1f 02 	sts	0x021F, r25
+     bfe:	be d0       	rcall	.+380    	; 0xd7c <__cmpdi2_s8>
+     c00:	e1 f4       	brne	.+56     	; 0xc3a <_GLOBAL__sub_I_main+0x870>
+
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3() : x(T(0)), y(T(0)), z(T(0)) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(ZUninitialized) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(T v) : x(v), y(v), z(v) {}
+     c02:	80 e0       	ldi	r24, 0x00	; 0
+     c04:	90 e0       	ldi	r25, 0x00	; 0
+     c06:	a0 e8       	ldi	r26, 0x80	; 128
+     c08:	bf e3       	ldi	r27, 0x3F	; 63
+     c0a:	80 93 98 02 	sts	0x0298, r24
+     c0e:	90 93 99 02 	sts	0x0299, r25
+     c12:	a0 93 9a 02 	sts	0x029A, r26
+     c16:	b0 93 9b 02 	sts	0x029B, r27
+     c1a:	80 93 9c 02 	sts	0x029C, r24
+     c1e:	90 93 9d 02 	sts	0x029D, r25
+     c22:	a0 93 9e 02 	sts	0x029E, r26
+     c26:	b0 93 9f 02 	sts	0x029F, r27
+     c2a:	80 93 a0 02 	sts	0x02A0, r24
+     c2e:	90 93 a1 02 	sts	0x02A1, r25
+     c32:	a0 93 a2 02 	sts	0x02A2, r26
+     c36:	b0 93 a3 02 	sts	0x02A3, r27
+namespace math
+{
+
+	template<typename T> vec4<T> const vec4<T>::zero(0);
+	template<typename T> vec4<T> const vec4<T>::one(1);
+     c3a:	20 91 10 02 	lds	r18, 0x0210
+     c3e:	30 91 11 02 	lds	r19, 0x0211
+     c42:	40 91 12 02 	lds	r20, 0x0212
+     c46:	50 91 13 02 	lds	r21, 0x0213
+     c4a:	60 91 14 02 	lds	r22, 0x0214
+     c4e:	70 91 15 02 	lds	r23, 0x0215
+     c52:	80 91 16 02 	lds	r24, 0x0216
+     c56:	90 91 17 02 	lds	r25, 0x0217
+     c5a:	a1 e0       	ldi	r26, 0x01	; 1
+     c5c:	83 d0       	rcall	.+262    	; 0xd64 <__adddi3_s8>
+     c5e:	20 93 10 02 	sts	0x0210, r18
+     c62:	30 93 11 02 	sts	0x0211, r19
+     c66:	40 93 12 02 	sts	0x0212, r20
+     c6a:	50 93 13 02 	sts	0x0213, r21
+     c6e:	60 93 14 02 	sts	0x0214, r22
+     c72:	70 93 15 02 	sts	0x0215, r23
+     c76:	80 93 16 02 	sts	0x0216, r24
+     c7a:	90 93 17 02 	sts	0x0217, r25
+     c7e:	7e d0       	rcall	.+252    	; 0xd7c <__cmpdi2_s8>
+     c80:	21 f5       	brne	.+72     	; 0xcca <_GLOBAL__sub_I_main+0x900>
+
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(ZUninitialized) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
+	template<typename T> MATH_FORCE_INLINE vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
+     c82:	80 e0       	ldi	r24, 0x00	; 0
+     c84:	90 e0       	ldi	r25, 0x00	; 0
+     c86:	a0 e8       	ldi	r26, 0x80	; 128
+     c88:	bf e3       	ldi	r27, 0x3F	; 63
+     c8a:	80 93 88 02 	sts	0x0288, r24
+     c8e:	90 93 89 02 	sts	0x0289, r25
+     c92:	a0 93 8a 02 	sts	0x028A, r26
+     c96:	b0 93 8b 02 	sts	0x028B, r27
+     c9a:	80 93 8c 02 	sts	0x028C, r24
+     c9e:	90 93 8d 02 	sts	0x028D, r25
+     ca2:	a0 93 8e 02 	sts	0x028E, r26
+     ca6:	b0 93 8f 02 	sts	0x028F, r27
+     caa:	80 93 90 02 	sts	0x0290, r24
+     cae:	90 93 91 02 	sts	0x0291, r25
+     cb2:	a0 93 92 02 	sts	0x0292, r26
+     cb6:	b0 93 93 02 	sts	0x0293, r27
+     cba:	80 93 94 02 	sts	0x0294, r24
+     cbe:	90 93 95 02 	sts	0x0295, r25
+     cc2:	a0 93 96 02 	sts	0x0296, r26
+     cc6:	b0 93 97 02 	sts	0x0297, r27
+
+template<typename T>
+quat<T> const quat<T>::zero(0, 0, 0, 1);
+
+template<typename T>
+quat<T> const quat<T>::one(1, 1, 1, 1);
+     cca:	20 91 08 02 	lds	r18, 0x0208
+     cce:	30 91 09 02 	lds	r19, 0x0209
+     cd2:	40 91 0a 02 	lds	r20, 0x020A
+     cd6:	50 91 0b 02 	lds	r21, 0x020B
+     cda:	60 91 0c 02 	lds	r22, 0x020C
+     cde:	70 91 0d 02 	lds	r23, 0x020D
+     ce2:	80 91 0e 02 	lds	r24, 0x020E
+     ce6:	90 91 0f 02 	lds	r25, 0x020F
+     cea:	a1 e0       	ldi	r26, 0x01	; 1
+     cec:	3b d0       	rcall	.+118    	; 0xd64 <__adddi3_s8>
+     cee:	20 93 08 02 	sts	0x0208, r18
+     cf2:	30 93 09 02 	sts	0x0209, r19
+     cf6:	40 93 0a 02 	sts	0x020A, r20
+     cfa:	50 93 0b 02 	sts	0x020B, r21
+     cfe:	60 93 0c 02 	sts	0x020C, r22
+     d02:	70 93 0d 02 	sts	0x020D, r23
+     d06:	80 93 0e 02 	sts	0x020E, r24
+     d0a:	90 93 0f 02 	sts	0x020F, r25
+     d0e:	36 d0       	rcall	.+108    	; 0xd7c <__cmpdi2_s8>
+     d10:	21 f5       	brne	.+72     	; 0xd5a <_GLOBAL__sub_I_main+0x990>
+
+template <typename T> 
+MATH_FORCE_INLINE quat<T>::quat(ZUninitialized) {}
+
+template <typename T>
+MATH_FORCE_INLINE quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
+     d12:	80 e0       	ldi	r24, 0x00	; 0
+     d14:	90 e0       	ldi	r25, 0x00	; 0
+     d16:	a0 e8       	ldi	r26, 0x80	; 128
+     d18:	bf e3       	ldi	r27, 0x3F	; 63
+     d1a:	80 93 78 02 	sts	0x0278, r24
+     d1e:	90 93 79 02 	sts	0x0279, r25
+     d22:	a0 93 7a 02 	sts	0x027A, r26
+     d26:	b0 93 7b 02 	sts	0x027B, r27
+     d2a:	80 93 7c 02 	sts	0x027C, r24
+     d2e:	90 93 7d 02 	sts	0x027D, r25
+     d32:	a0 93 7e 02 	sts	0x027E, r26
+     d36:	b0 93 7f 02 	sts	0x027F, r27
+     d3a:	80 93 80 02 	sts	0x0280, r24
+     d3e:	90 93 81 02 	sts	0x0281, r25
+     d42:	a0 93 82 02 	sts	0x0282, r26
+     d46:	b0 93 83 02 	sts	0x0283, r27
+     d4a:	80 93 84 02 	sts	0x0284, r24
+     d4e:	90 93 85 02 	sts	0x0285, r25
+     d52:	a0 93 86 02 	sts	0x0286, r26
+     d56:	b0 93 87 02 	sts	0x0287, r27
+     d5a:	08 95       	ret
+
+00000d5c <__tablejump_elpm__>:
+     d5c:	07 90       	elpm	r0, Z+
+     d5e:	f6 91       	elpm	r31, Z
+     d60:	e0 2d       	mov	r30, r0
+     d62:	19 94       	eijmp
+
+00000d64 <__adddi3_s8>:
+     d64:	00 24       	eor	r0, r0
+     d66:	a7 fd       	sbrc	r26, 7
+     d68:	00 94       	com	r0
+     d6a:	2a 0f       	add	r18, r26
+     d6c:	30 1d       	adc	r19, r0
+     d6e:	40 1d       	adc	r20, r0
+     d70:	50 1d       	adc	r21, r0
+     d72:	60 1d       	adc	r22, r0
+     d74:	70 1d       	adc	r23, r0
+     d76:	80 1d       	adc	r24, r0
+     d78:	90 1d       	adc	r25, r0
+     d7a:	08 95       	ret
+
+00000d7c <__cmpdi2_s8>:
+     d7c:	00 24       	eor	r0, r0
+     d7e:	a7 fd       	sbrc	r26, 7
+     d80:	00 94       	com	r0
+     d82:	2a 17       	cp	r18, r26
+     d84:	30 05       	cpc	r19, r0
+     d86:	40 05       	cpc	r20, r0
+     d88:	50 05       	cpc	r21, r0
+     d8a:	60 05       	cpc	r22, r0
+     d8c:	70 05       	cpc	r23, r0
+     d8e:	80 05       	cpc	r24, r0
+     d90:	90 05       	cpc	r25, r0
+     d92:	08 95       	ret
+
+00000d94 <malloc>:
+     d94:	cf 93       	push	r28
+     d96:	df 93       	push	r29
+     d98:	82 30       	cpi	r24, 0x02	; 2
+     d9a:	91 05       	cpc	r25, r1
+     d9c:	10 f4       	brcc	.+4      	; 0xda2 <malloc+0xe>
+     d9e:	82 e0       	ldi	r24, 0x02	; 2
+     da0:	90 e0       	ldi	r25, 0x00	; 0
+     da2:	e0 91 ca 03 	lds	r30, 0x03CA
+     da6:	f0 91 cb 03 	lds	r31, 0x03CB
+     daa:	20 e0       	ldi	r18, 0x00	; 0
+     dac:	30 e0       	ldi	r19, 0x00	; 0
+     dae:	a0 e0       	ldi	r26, 0x00	; 0
+     db0:	b0 e0       	ldi	r27, 0x00	; 0
+     db2:	30 97       	sbiw	r30, 0x00	; 0
+     db4:	39 f1       	breq	.+78     	; 0xe04 <malloc+0x70>
+     db6:	40 81       	ld	r20, Z
+     db8:	51 81       	ldd	r21, Z+1	; 0x01
+     dba:	48 17       	cp	r20, r24
+     dbc:	59 07       	cpc	r21, r25
+     dbe:	b8 f0       	brcs	.+46     	; 0xdee <malloc+0x5a>
+     dc0:	48 17       	cp	r20, r24
+     dc2:	59 07       	cpc	r21, r25
+     dc4:	71 f4       	brne	.+28     	; 0xde2 <malloc+0x4e>
+     dc6:	82 81       	ldd	r24, Z+2	; 0x02
+     dc8:	93 81       	ldd	r25, Z+3	; 0x03
+     dca:	10 97       	sbiw	r26, 0x00	; 0
+     dcc:	29 f0       	breq	.+10     	; 0xdd8 <malloc+0x44>
+     dce:	13 96       	adiw	r26, 0x03	; 3
+     dd0:	9c 93       	st	X, r25
+     dd2:	8e 93       	st	-X, r24
+     dd4:	12 97       	sbiw	r26, 0x02	; 2
+     dd6:	2c c0       	rjmp	.+88     	; 0xe30 <malloc+0x9c>
+     dd8:	90 93 cb 03 	sts	0x03CB, r25
+     ddc:	80 93 ca 03 	sts	0x03CA, r24
+     de0:	27 c0       	rjmp	.+78     	; 0xe30 <malloc+0x9c>
+     de2:	21 15       	cp	r18, r1
+     de4:	31 05       	cpc	r19, r1
+     de6:	31 f0       	breq	.+12     	; 0xdf4 <malloc+0x60>
+     de8:	42 17       	cp	r20, r18
+     dea:	53 07       	cpc	r21, r19
+     dec:	18 f0       	brcs	.+6      	; 0xdf4 <malloc+0x60>
+     dee:	a9 01       	movw	r20, r18
+     df0:	db 01       	movw	r26, r22
+     df2:	01 c0       	rjmp	.+2      	; 0xdf6 <malloc+0x62>
+     df4:	ef 01       	movw	r28, r30
+     df6:	9a 01       	movw	r18, r20
+     df8:	bd 01       	movw	r22, r26
+     dfa:	df 01       	movw	r26, r30
+     dfc:	02 80       	ldd	r0, Z+2	; 0x02
+     dfe:	f3 81       	ldd	r31, Z+3	; 0x03
+     e00:	e0 2d       	mov	r30, r0
+     e02:	d7 cf       	rjmp	.-82     	; 0xdb2 <malloc+0x1e>
+     e04:	21 15       	cp	r18, r1
+     e06:	31 05       	cpc	r19, r1
+     e08:	f9 f0       	breq	.+62     	; 0xe48 <malloc+0xb4>
+     e0a:	28 1b       	sub	r18, r24
+     e0c:	39 0b       	sbc	r19, r25
+     e0e:	24 30       	cpi	r18, 0x04	; 4
+     e10:	31 05       	cpc	r19, r1
+     e12:	80 f4       	brcc	.+32     	; 0xe34 <malloc+0xa0>
+     e14:	8a 81       	ldd	r24, Y+2	; 0x02
+     e16:	9b 81       	ldd	r25, Y+3	; 0x03
+     e18:	61 15       	cp	r22, r1
+     e1a:	71 05       	cpc	r23, r1
+     e1c:	21 f0       	breq	.+8      	; 0xe26 <malloc+0x92>
+     e1e:	fb 01       	movw	r30, r22
+     e20:	93 83       	std	Z+3, r25	; 0x03
+     e22:	82 83       	std	Z+2, r24	; 0x02
+     e24:	04 c0       	rjmp	.+8      	; 0xe2e <malloc+0x9a>
+     e26:	90 93 cb 03 	sts	0x03CB, r25
+     e2a:	80 93 ca 03 	sts	0x03CA, r24
+     e2e:	fe 01       	movw	r30, r28
+     e30:	32 96       	adiw	r30, 0x02	; 2
+     e32:	44 c0       	rjmp	.+136    	; 0xebc <malloc+0x128>
+     e34:	fe 01       	movw	r30, r28
+     e36:	e2 0f       	add	r30, r18
+     e38:	f3 1f       	adc	r31, r19
+     e3a:	81 93       	st	Z+, r24
+     e3c:	91 93       	st	Z+, r25
+     e3e:	22 50       	subi	r18, 0x02	; 2
+     e40:	31 09       	sbc	r19, r1
+     e42:	39 83       	std	Y+1, r19	; 0x01
+     e44:	28 83       	st	Y, r18
+     e46:	3a c0       	rjmp	.+116    	; 0xebc <malloc+0x128>
+     e48:	20 91 c8 03 	lds	r18, 0x03C8
+     e4c:	30 91 c9 03 	lds	r19, 0x03C9
+     e50:	23 2b       	or	r18, r19
+     e52:	41 f4       	brne	.+16     	; 0xe64 <malloc+0xd0>
+     e54:	20 91 02 02 	lds	r18, 0x0202
+     e58:	30 91 03 02 	lds	r19, 0x0203
+     e5c:	30 93 c9 03 	sts	0x03C9, r19
+     e60:	20 93 c8 03 	sts	0x03C8, r18
+     e64:	20 91 00 02 	lds	r18, 0x0200
+     e68:	30 91 01 02 	lds	r19, 0x0201
+     e6c:	21 15       	cp	r18, r1
+     e6e:	31 05       	cpc	r19, r1
+     e70:	41 f4       	brne	.+16     	; 0xe82 <malloc+0xee>
+     e72:	2d b7       	in	r18, 0x3d	; 61
+     e74:	3e b7       	in	r19, 0x3e	; 62
+     e76:	40 91 04 02 	lds	r20, 0x0204
+     e7a:	50 91 05 02 	lds	r21, 0x0205
+     e7e:	24 1b       	sub	r18, r20
+     e80:	35 0b       	sbc	r19, r21
+     e82:	e0 91 c8 03 	lds	r30, 0x03C8
+     e86:	f0 91 c9 03 	lds	r31, 0x03C9
+     e8a:	e2 17       	cp	r30, r18
+     e8c:	f3 07       	cpc	r31, r19
+     e8e:	a0 f4       	brcc	.+40     	; 0xeb8 <malloc+0x124>
+     e90:	2e 1b       	sub	r18, r30
+     e92:	3f 0b       	sbc	r19, r31
+     e94:	28 17       	cp	r18, r24
+     e96:	39 07       	cpc	r19, r25
+     e98:	78 f0       	brcs	.+30     	; 0xeb8 <malloc+0x124>
+     e9a:	ac 01       	movw	r20, r24
+     e9c:	4e 5f       	subi	r20, 0xFE	; 254
+     e9e:	5f 4f       	sbci	r21, 0xFF	; 255
+     ea0:	24 17       	cp	r18, r20
+     ea2:	35 07       	cpc	r19, r21
+     ea4:	48 f0       	brcs	.+18     	; 0xeb8 <malloc+0x124>
+     ea6:	4e 0f       	add	r20, r30
+     ea8:	5f 1f       	adc	r21, r31
+     eaa:	50 93 c9 03 	sts	0x03C9, r21
+     eae:	40 93 c8 03 	sts	0x03C8, r20
+     eb2:	81 93       	st	Z+, r24
+     eb4:	91 93       	st	Z+, r25
+     eb6:	02 c0       	rjmp	.+4      	; 0xebc <malloc+0x128>
+     eb8:	e0 e0       	ldi	r30, 0x00	; 0
+     eba:	f0 e0       	ldi	r31, 0x00	; 0
+     ebc:	cf 01       	movw	r24, r30
+     ebe:	df 91       	pop	r29
+     ec0:	cf 91       	pop	r28
+     ec2:	08 95       	ret
+
+00000ec4 <free>:
+     ec4:	cf 93       	push	r28
+     ec6:	df 93       	push	r29
+     ec8:	00 97       	sbiw	r24, 0x00	; 0
+     eca:	09 f4       	brne	.+2      	; 0xece <free+0xa>
+     ecc:	87 c0       	rjmp	.+270    	; 0xfdc <free+0x118>
+     ece:	fc 01       	movw	r30, r24
+     ed0:	32 97       	sbiw	r30, 0x02	; 2
+     ed2:	13 82       	std	Z+3, r1	; 0x03
+     ed4:	12 82       	std	Z+2, r1	; 0x02
+     ed6:	c0 91 ca 03 	lds	r28, 0x03CA
+     eda:	d0 91 cb 03 	lds	r29, 0x03CB
+     ede:	20 97       	sbiw	r28, 0x00	; 0
+     ee0:	81 f4       	brne	.+32     	; 0xf02 <free+0x3e>
+     ee2:	20 81       	ld	r18, Z
+     ee4:	31 81       	ldd	r19, Z+1	; 0x01
+     ee6:	28 0f       	add	r18, r24
+     ee8:	39 1f       	adc	r19, r25
+     eea:	80 91 c8 03 	lds	r24, 0x03C8
+     eee:	90 91 c9 03 	lds	r25, 0x03C9
+     ef2:	82 17       	cp	r24, r18
+     ef4:	93 07       	cpc	r25, r19
+     ef6:	79 f5       	brne	.+94     	; 0xf56 <free+0x92>
+     ef8:	f0 93 c9 03 	sts	0x03C9, r31
+     efc:	e0 93 c8 03 	sts	0x03C8, r30
+     f00:	6d c0       	rjmp	.+218    	; 0xfdc <free+0x118>
+     f02:	de 01       	movw	r26, r28
+     f04:	20 e0       	ldi	r18, 0x00	; 0
+     f06:	30 e0       	ldi	r19, 0x00	; 0
+     f08:	ae 17       	cp	r26, r30
+     f0a:	bf 07       	cpc	r27, r31
+     f0c:	50 f4       	brcc	.+20     	; 0xf22 <free+0x5e>
+     f0e:	12 96       	adiw	r26, 0x02	; 2
+     f10:	4d 91       	ld	r20, X+
+     f12:	5c 91       	ld	r21, X
+     f14:	13 97       	sbiw	r26, 0x03	; 3
+     f16:	9d 01       	movw	r18, r26
+     f18:	41 15       	cp	r20, r1
+     f1a:	51 05       	cpc	r21, r1
+     f1c:	09 f1       	breq	.+66     	; 0xf60 <free+0x9c>
+     f1e:	da 01       	movw	r26, r20
+     f20:	f3 cf       	rjmp	.-26     	; 0xf08 <free+0x44>
+     f22:	b3 83       	std	Z+3, r27	; 0x03
+     f24:	a2 83       	std	Z+2, r26	; 0x02
+     f26:	40 81       	ld	r20, Z
+     f28:	51 81       	ldd	r21, Z+1	; 0x01
+     f2a:	84 0f       	add	r24, r20
+     f2c:	95 1f       	adc	r25, r21
+     f2e:	8a 17       	cp	r24, r26
+     f30:	9b 07       	cpc	r25, r27
+     f32:	71 f4       	brne	.+28     	; 0xf50 <free+0x8c>
+     f34:	8d 91       	ld	r24, X+
+     f36:	9c 91       	ld	r25, X
+     f38:	11 97       	sbiw	r26, 0x01	; 1
+     f3a:	84 0f       	add	r24, r20
+     f3c:	95 1f       	adc	r25, r21
+     f3e:	02 96       	adiw	r24, 0x02	; 2
+     f40:	91 83       	std	Z+1, r25	; 0x01
+     f42:	80 83       	st	Z, r24
+     f44:	12 96       	adiw	r26, 0x02	; 2
+     f46:	8d 91       	ld	r24, X+
+     f48:	9c 91       	ld	r25, X
+     f4a:	13 97       	sbiw	r26, 0x03	; 3
+     f4c:	93 83       	std	Z+3, r25	; 0x03
+     f4e:	82 83       	std	Z+2, r24	; 0x02
+     f50:	21 15       	cp	r18, r1
+     f52:	31 05       	cpc	r19, r1
+     f54:	29 f4       	brne	.+10     	; 0xf60 <free+0x9c>
+     f56:	f0 93 cb 03 	sts	0x03CB, r31
+     f5a:	e0 93 ca 03 	sts	0x03CA, r30
+     f5e:	3e c0       	rjmp	.+124    	; 0xfdc <free+0x118>
+     f60:	d9 01       	movw	r26, r18
+     f62:	13 96       	adiw	r26, 0x03	; 3
+     f64:	fc 93       	st	X, r31
+     f66:	ee 93       	st	-X, r30
+     f68:	12 97       	sbiw	r26, 0x02	; 2
+     f6a:	4d 91       	ld	r20, X+
+     f6c:	5d 91       	ld	r21, X+
+     f6e:	a4 0f       	add	r26, r20
+     f70:	b5 1f       	adc	r27, r21
+     f72:	ea 17       	cp	r30, r26
+     f74:	fb 07       	cpc	r31, r27
+     f76:	79 f4       	brne	.+30     	; 0xf96 <free+0xd2>
+     f78:	80 81       	ld	r24, Z
+     f7a:	91 81       	ldd	r25, Z+1	; 0x01
+     f7c:	84 0f       	add	r24, r20
+     f7e:	95 1f       	adc	r25, r21
+     f80:	02 96       	adiw	r24, 0x02	; 2
+     f82:	d9 01       	movw	r26, r18
+     f84:	11 96       	adiw	r26, 0x01	; 1
+     f86:	9c 93       	st	X, r25
+     f88:	8e 93       	st	-X, r24
+     f8a:	82 81       	ldd	r24, Z+2	; 0x02
+     f8c:	93 81       	ldd	r25, Z+3	; 0x03
+     f8e:	13 96       	adiw	r26, 0x03	; 3
+     f90:	9c 93       	st	X, r25
+     f92:	8e 93       	st	-X, r24
+     f94:	12 97       	sbiw	r26, 0x02	; 2
+     f96:	e0 e0       	ldi	r30, 0x00	; 0
+     f98:	f0 e0       	ldi	r31, 0x00	; 0
+     f9a:	8a 81       	ldd	r24, Y+2	; 0x02
+     f9c:	9b 81       	ldd	r25, Y+3	; 0x03
+     f9e:	00 97       	sbiw	r24, 0x00	; 0
+     fa0:	19 f0       	breq	.+6      	; 0xfa8 <free+0xe4>
+     fa2:	fe 01       	movw	r30, r28
+     fa4:	ec 01       	movw	r28, r24
+     fa6:	f9 cf       	rjmp	.-14     	; 0xf9a <free+0xd6>
+     fa8:	ce 01       	movw	r24, r28
+     faa:	02 96       	adiw	r24, 0x02	; 2
+     fac:	28 81       	ld	r18, Y
+     fae:	39 81       	ldd	r19, Y+1	; 0x01
+     fb0:	82 0f       	add	r24, r18
+     fb2:	93 1f       	adc	r25, r19
+     fb4:	20 91 c8 03 	lds	r18, 0x03C8
+     fb8:	30 91 c9 03 	lds	r19, 0x03C9
+     fbc:	28 17       	cp	r18, r24
+     fbe:	39 07       	cpc	r19, r25
+     fc0:	69 f4       	brne	.+26     	; 0xfdc <free+0x118>
+     fc2:	30 97       	sbiw	r30, 0x00	; 0
+     fc4:	29 f4       	brne	.+10     	; 0xfd0 <free+0x10c>
+     fc6:	10 92 cb 03 	sts	0x03CB, r1
+     fca:	10 92 ca 03 	sts	0x03CA, r1
+     fce:	02 c0       	rjmp	.+4      	; 0xfd4 <free+0x110>
+     fd0:	13 82       	std	Z+3, r1	; 0x03
+     fd2:	12 82       	std	Z+2, r1	; 0x02
+     fd4:	d0 93 c9 03 	sts	0x03C9, r29
+     fd8:	c0 93 c8 03 	sts	0x03C8, r28
+     fdc:	df 91       	pop	r29
+     fde:	cf 91       	pop	r28
+     fe0:	08 95       	ret
+
+00000fe2 <memmove>:
+     fe2:	68 17       	cp	r22, r24
+     fe4:	79 07       	cpc	r23, r25
+     fe6:	68 f4       	brcc	.+26     	; 0x1002 <memmove+0x20>
+     fe8:	fb 01       	movw	r30, r22
+     fea:	dc 01       	movw	r26, r24
+     fec:	e4 0f       	add	r30, r20
+     fee:	f5 1f       	adc	r31, r21
+     ff0:	a4 0f       	add	r26, r20
+     ff2:	b5 1f       	adc	r27, r21
+     ff4:	02 c0       	rjmp	.+4      	; 0xffa <memmove+0x18>
+     ff6:	02 90       	ld	r0, -Z
+     ff8:	0e 92       	st	-X, r0
+     ffa:	41 50       	subi	r20, 0x01	; 1
+     ffc:	50 40       	sbci	r21, 0x00	; 0
+     ffe:	d8 f7       	brcc	.-10     	; 0xff6 <memmove+0x14>
+    1000:	08 95       	ret
+    1002:	00 c0       	rjmp	.+0      	; 0x1004 <memcpy>
+
+00001004 <memcpy>:
+    1004:	fb 01       	movw	r30, r22
+    1006:	dc 01       	movw	r26, r24
+    1008:	02 c0       	rjmp	.+4      	; 0x100e <memcpy+0xa>
+    100a:	01 90       	ld	r0, Z+
+    100c:	0d 92       	st	X+, r0
+    100e:	41 50       	subi	r20, 0x01	; 1
+    1010:	50 40       	sbci	r21, 0x00	; 0
+    1012:	d8 f7       	brcc	.-10     	; 0x100a <memcpy+0x6>
+    1014:	08 95       	ret
+
+00001016 <_exit>:
+    1016:	f8 94       	cli
+
+00001018 <__stop_program>:
+    1018:	ff cf       	rjmp	.-2      	; 0x1018 <__stop_program>

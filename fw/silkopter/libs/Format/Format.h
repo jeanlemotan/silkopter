@@ -1,0 +1,888 @@
+#pragma once
+
+#include <stdint.h>
+#include <stddef.h>
+#include <algorithm>
+#include "FString.h"
+
+namespace formatting
+{
+	struct Placeholder
+	{
+		Placeholder() : alignment(0), precision(0), base_case(0), base(10), filler(' ') {}
+		uint8_t alignment;
+		uint8_t precision;
+		uint8_t base_case : 1; //lower == 0 / upper case == 1
+		uint8_t base : 7;
+		char filler;
+	};
+
+	namespace detail
+	{
+		extern const char s_digits[201];
+
+		template<class Format_String_Adapter>
+		auto parse_index(uint8_t& index, Format_String_Adapter& fmt_adapter) -> bool
+		{
+			if (fmt_adapter.is_done())
+			{
+				return false;
+			}
+			auto ch = fmt_adapter.get_and_advance();
+			if (ch < '0' || ch > '9')
+			{
+				return false;
+			}
+			index = ch - '0';
+			return true;
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+
+		auto get_base_10_digit_count(uint64_t v) -> uint8_t;
+		auto get_base_10_digit_count(uint32_t v) -> uint8_t;
+		auto get_base_10_digit_count(uint16_t v) -> uint8_t;
+		auto get_base_10_digit_count(uint8_t v) -> uint8_t;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+	//this class is an adapter that is able to iterate over an input string
+	template<class Format_String> struct Format_String_Adapter
+	{
+	public:
+		typedef typename Format_String::value_type value_type;
+		typedef typename Format_String::const_iterator iterator;
+		Format_String_Adapter(Format_String const& fmt) : m_format_string(fmt), m_it(fmt.begin()), m_end(fmt.end()) {}
+		auto is_done() const -> bool { return m_it == m_end; }
+		auto get() -> value_type { return *m_it; }
+		auto get_and_advance() -> value_type { return *m_it++; }
+	private:
+		Format_String const& m_format_string;
+		iterator m_it;
+		iterator m_end;
+	};
+	template<> struct Format_String_Adapter<char const*>
+	{
+	public:
+		typedef char value_type;
+		typedef char const* iterator;
+		Format_String_Adapter(char const* fmt) : m_format_string(fmt), m_it(fmt) {}
+		auto is_done() const -> bool { return *m_it == 0; }
+		auto get() -> value_type { return *m_it; }
+		auto get_and_advance() -> value_type { return *m_it++; }
+	private:
+		const char* m_format_string;
+		const char* m_it;
+	};
+
+	//this is needed for const char[N]
+	template<class T, size_t N> struct Format_String_Adapter<T[N]>
+	{
+	public:
+		typedef T value_type;
+		typedef T const* iterator;
+		Format_String_Adapter(T const* fmt) : m_format_string(fmt), m_it(fmt) {}
+		auto is_done() const -> bool { return *m_it == 0; }
+		auto get() ->value_type { return *m_it; }
+		auto get_and_advance() -> value_type { return *m_it++; }
+	private:
+		T const* m_format_string;
+		T const* m_it;
+	};
+
+
+	//this is to be able to specify the working string buffer for a certain string type
+	template<class Dst_String> struct Output_String_Adapter
+	{
+		Dst_String& m_dst;
+		Output_String_Adapter(Dst_String& dst) : m_dst(dst) 
+		{
+			m_dst.clear();
+			m_dst.reserve(32);
+		}
+		void reserve(size_t size)
+		{
+			m_dst.reserve(m_dst.size() + size);
+		}
+		void append(char ch)
+		{
+			m_dst.append(ch);
+		}
+		void finish()
+		{
+			//m_dst.resize(size);
+		}
+	};
+
+	template<class Dst_Adapter, class Placeholder, size_t SIZE>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, FString<SIZE> const& p)
+	{
+		dst.reserve(p.size());
+		for (auto ch: p)
+		{
+			dst.append(ch);
+		}
+	}
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, const char* p)
+	{
+		if (p)
+		{
+			do
+			{
+				dst.reserve(64);
+				for (; *p != 0; ++p)
+				{
+					dst.append(*p);
+				}
+			}
+			while (*p != 0);
+		}
+	}
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, char p)
+	{
+		dst.append(p);
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, int8_t value)
+	{
+		if (ph.base == 16)
+		{
+			char buf[8];
+			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			format_string(dst, Placeholder(), buf);
+			return;
+		}
+
+		// Take care of sign.
+		uint8_t uvalue = (value < 0) ? -value : value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1);
+
+		if (value < 0)
+		{
+			//to make space for the zero
+			alignedLength--;
+		}
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		if (value < 0)
+		{
+			dst.append('-');
+		}
+
+		char buf[8];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, uint8_t value)
+	{
+		if (ph.base == 16)
+		{
+			char buf[8];
+			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			format_string(dst, Placeholder(), buf);
+			return;
+		}
+
+		auto uvalue = value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1); //+1 because of the sign
+
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		char buf[8];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, int16_t value)
+	{
+		if (ph.base == 16)
+		{
+			char buf[32];
+			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			format_string(dst, Placeholder(), buf);
+			return;
+		}
+
+		// Take care of sign.
+		uint16_t uvalue = (value < 0) ? -value : value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1);
+
+		if (value < 0)
+		{
+			//to make space for the zero
+			alignedLength--;
+		}
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		if (value < 0)
+		{
+			dst.append('-');
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, uint16_t value)
+	{
+		if (ph.base == 16)
+		{
+			char buf[32];
+			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			format_string(dst, Placeholder(), buf);
+			return;
+		}
+
+		auto uvalue = value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1); //+1 because of the sign
+
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint8_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint8_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, int32_t value)
+	{
+		if (ph.base == 16)
+		{
+			char buf[32];
+			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			format_string(dst, Placeholder(), buf);
+			return;
+		}
+
+		// Take care of sign.
+		uint32_t uvalue = (value < 0) ? -value : value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1);
+
+		if (value < 0)
+		{
+			//to make space for the zero
+			alignedLength--;
+		}
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		if (value < 0)
+		{
+			dst.append('-');
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, uint32_t value)
+	{
+// 		if (ph.base == 16)
+// 		{
+// 			char buf[32];
+// 			sprintf(buf, ph.baseCase == 0 ? "%x" : "%X", value);
+// 			format_string(dst, Placeholder(), buf);
+// 			return;
+// 		}
+
+		auto uvalue = value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1); //+1 because of the sign
+
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, int64_t value)
+	{
+		// Take care of sign.
+		uint64_t uvalue = (value < 0) ? -value : value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1); //+1 because of the sign
+
+		if (value < 0)
+		{
+			//to make space for the zero
+			alignedLength--;
+		}
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		if (value < 0)
+		{
+			dst.append('-');
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, uint64_t value)
+	{
+		auto uvalue = value;
+		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto alignedLength = std::max(length, ph.alignment);
+		//make enough room
+		dst.reserve(alignedLength + 1); //+1 because of the sign
+
+		if (alignedLength > length)
+		{
+			auto fillers = alignedLength - length;
+			dst.reserve(fillers);
+			for (uint8_t i = 0; i < fillers; i++)
+			{
+				dst.append(ph.filler);
+			}
+		}
+
+		char buf[16];
+		auto offEnd = length - 1;
+		while(uvalue >= 100)
+		{
+			const uint32_t i = (uvalue % 100) * 2;
+			uvalue /= 100;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+			offEnd -= 2;
+		}
+
+		// Handle last 1-2 digits.
+		if (uvalue < 10)
+		{
+			buf[offEnd] = '0' + static_cast<char>(uvalue);
+		}
+		else
+		{
+			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+			buf[offEnd] = detail::s_digits[i + 1];
+			buf[offEnd - 1] = detail::s_digits[i];
+		}
+		dst.reserve(length);
+		for (uint8_t i = 0; i < length; i++)
+		{
+			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder, class P0, class P1>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, std::pair<P0, P1> const& pair)
+	{
+		dst.append('<');
+		format_string(dst, ph, pair.first);
+		dst.append(',');
+		dst.append(' ');
+		format_string(dst, ph, pair.second);
+		dst.append('>');
+	}
+
+// 	template<class Dst_Adapter, class Placeholder, class rep, class period>
+// 	void format_string(Dst_Adapter& dst, auto& off, Placeholder const& ph, std::chrono::duration<rep, period> const& duration)
+// 	{
+// 		using namespace std::chrono;
+// 
+// 		auto d = duration;
+// 		auto h = duration_cast<hours>(d);
+// 		d -= duration_cast<std::chrono::duration<rep, period>>(h);
+// 
+// 		auto m = duration_cast<minutes>(d);
+// 		d -= duration_cast<std::chrono::duration<rep, period>>(m);
+// 
+// 		auto s = duration_cast<seconds>(d);
+// 		d -= duration_cast<std::chrono::duration<rep, period>>(s);
+// 
+// 		auto ms = duration_cast<milliseconds>(d);
+// 
+// 		Placeholder ph2 = ph;
+// 		ph2.filler = '0';
+// 		ph2.alignment = 2;
+// 		format_string(dst, off, ph2, h.count());
+// 		format_string(dst, off, ph, ':');
+// 		format_string(dst, off, ph2, (int32_t)m.count());
+// 		format_string(dst, off, ph, ':');
+// 		format_string(dst, off, ph2, (int32_t)s.count());
+// 		format_string(dst, off, ph, '.');
+// 		format_string(dst, off, ph, (int32_t)ms.count());
+// 	}
+// 
+// 	template<class Dst_Adapter, class Placeholder, class clock>
+// 	void format_string(Dst_Adapter& dst, auto& off, Placeholder const& ph, std::chrono::time_point<clock> const& time_point)
+// 	{
+// 		format_string(dst, off, ph, time_point.time_since_epoch());
+// 	}
+
+	template<class Dst_Adapter, class P>
+	struct Argument_Parser
+	{
+		void execute(Dst_Adapter& dst, Placeholder const& ph, P const& p)
+		{
+			format_string(dst, ph, p);
+		}
+	};
+}
+
+#define FORMAT_BEGIN																			\
+formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);								\
+if (fmt_adapter.is_done())																		\
+{																								\
+	return;																						\
+}																								\
+																								\
+formatting::Output_String_Adapter<Dst_String> adapter(dst);										\
+do																								\
+{																								\
+	auto ch = fmt_adapter.get_and_advance();													\
+	if (ch != '{')																				\
+	{																							\
+		adapter.append(ch);																		\
+		continue;																				\
+	}																							\
+																								\
+	ch = fmt_adapter.get();																		\
+	if (ch == '{') 																				\
+	{																							\
+		adapter.reserve(2);																		\
+		adapter.append('{');																	\
+		adapter.append('{');																	\
+		fmt_adapter.get_and_advance();															\
+		continue;																				\
+	}																							\
+																								\
+	uint8_t index;																				\
+	bool ok = formatting::detail::parse_index(index, fmt_adapter);								\
+	if (!ok)																					\
+	{																							\
+		adapter.finish();																		\
+		break;																					\
+	}																							\
+	formatting::Placeholder ph;																	\
+	ch = fmt_adapter.get_and_advance();															\
+	if (ch == ':')																				\
+	{																							\
+		ch = fmt_adapter.get_and_advance();														\
+		if (ch == 'x')																			\
+		{																						\
+			ph.base = 16;																		\
+			ch = fmt_adapter.get_and_advance();													\
+		}																						\
+		else if (ch == 'X')																		\
+		{																						\
+			ph.base_case = 1;																	\
+			ph.base = 16;																		\
+			ch = fmt_adapter.get_and_advance();													\
+		}																						\
+	}																							\
+	if (ch != '}')																				\
+	{																							\
+		adapter.finish();																		\
+		break;																					\
+	}																							\
+																								\
+	switch (index)																				\
+	{
+
+#define FORMAT_PARAM(idx, T, p) case idx: formatting::Argument_Parser<typename formatting::Output_String_Adapter<Dst_String>, T>().execute(adapter, ph, p); break;
+
+#define FORMAT_END																				\
+	default:																					\
+		adapter.finish();																		\
+		break;																					\
+	}																							\
+} while (!fmt_adapter.is_done());
+
+
+template<class Dst_String>
+void format(Dst_String& dst, Dst_String const& fmt)
+{
+	dst = fmt;
+}
+
+template<class Dst_String, class Format_String>
+void format(Dst_String& dst, Format_String const& fmt)
+{
+	dst = Dst_String(fmt);
+}
+
+template<class Dst_String, class Format_String, typename P0>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_PARAM(5, P5, p5)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_PARAM(5, P5, p5)
+	FORMAT_PARAM(6, P6, p6)
+	FORMAT_END
+}
+
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_PARAM(5, P5, p5)
+	FORMAT_PARAM(6, P6, p6)
+	FORMAT_PARAM(7, P7, p7)
+	FORMAT_END
+}
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_PARAM(5, P5, p5)
+	FORMAT_PARAM(6, P6, p6)
+	FORMAT_PARAM(7, P7, p7)
+	FORMAT_PARAM(8, P8, p8)
+	FORMAT_END
+}
+template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
+void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8, P9 const& p9)
+{
+	FORMAT_BEGIN
+	FORMAT_PARAM(0, P0, p0)
+	FORMAT_PARAM(1, P1, p1)
+	FORMAT_PARAM(2, P2, p2)
+	FORMAT_PARAM(3, P3, p3)
+	FORMAT_PARAM(4, P4, p4)
+	FORMAT_PARAM(5, P5, p5)
+	FORMAT_PARAM(6, P6, p6)
+	FORMAT_PARAM(7, P7, p7)
+	FORMAT_PARAM(8, P8, p8)
+	FORMAT_PARAM(9, P9, p9)
+	FORMAT_END
+}
+
+#undef FORMAT_BEGIN
+#undef FORMAT_PARAM
+#undef FORMAT_END

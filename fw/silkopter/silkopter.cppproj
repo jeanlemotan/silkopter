@@ -1,0 +1,646 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>6.2</ProjectVersion>
+    <ToolchainName>com.Atmel.AVRGCC8.CPP</ToolchainName>
+    <ProjectGuid>{811d501f-179d-471b-89c5-8835c191df31}</ProjectGuid>
+    <avrdevice>ATmega2560</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>CPP</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>silkopter</AssemblyName>
+    <Name>silkopter</Name>
+    <RootNamespace>silkopter</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <AsfFrameworkConfig>
+      <framework-data xmlns="">
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.15.0" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <avrtool>com.atmel.avrdbg.tool.simulator</avrtool>
+    <com_atmel_avrdbg_tool_simulator>
+      <ToolOptions xmlns="">
+        <InterfaceProperties>
+          <JtagEnableExtResetOnStartSession>false</JtagEnableExtResetOnStartSession>
+        </InterfaceProperties>
+        <InterfaceName>
+        </InterfaceName>
+      </ToolOptions>
+      <ToolType xmlns="">com.atmel.avrdbg.tool.simulator</ToolType>
+      <ToolNumber xmlns="">
+      </ToolNumber>
+      <ToolName xmlns="">Simulator</ToolName>
+    </com_atmel_avrdbg_tool_simulator>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <AvrGccCpp>
+  <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
+  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>NDEBUG</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>F_CPU=16000000L</Value>
+      <Value>NDEBUG</Value>
+    </ListValues>
+  </avrgcccpp.compiler.symbols.DefSymbols>
+  <avrgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../libs/stl</Value>
+      <Value>../libs/qmath</Value>
+      <Value>../libs</Value>
+    </ListValues>
+  </avrgcccpp.compiler.directories.IncludePaths>
+  <avrgcccpp.compiler.optimization.level>Optimize most (-O3)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
+  <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.miscellaneous.OtherFlags>-fno-exceptions -std=c++11</avrgcccpp.compiler.miscellaneous.OtherFlags>
+  <avrgcccpp.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </avrgcccpp.linker.libraries.Libraries>
+</AvrGccCpp>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <AvrGccCpp>
+  <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
+  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>DEBUG</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>F_CPU=16000000L</Value>
+      <Value>DEBUG</Value>
+    </ListValues>
+  </avrgcccpp.compiler.symbols.DefSymbols>
+  <avrgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../libs/stl</Value>
+      <Value>../libs/qmath</Value>
+      <Value>../libs</Value>
+    </ListValues>
+  </avrgcccpp.compiler.directories.IncludePaths>
+  <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
+  <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcccpp.compiler.optimization.DebugLevel>Default (-g2)</avrgcccpp.compiler.optimization.DebugLevel>
+  <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.miscellaneous.OtherFlags>-fno-exceptions -std=c++11</avrgcccpp.compiler.miscellaneous.OtherFlags>
+  <avrgcccpp.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </avrgcccpp.linker.libraries.Libraries>
+  <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
+</AvrGccCpp>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="libs\Format\Format.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\Format\Format.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\Format\FString.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Clock.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_Clock.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_Clock.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_RC_Inputs.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_RC_Inputs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_UART.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\Crius_AIOP2_UART.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\HAL_Config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\RC_Inputs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\RC_Outputs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\HAL\UART.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\aabb2.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\aabb2.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\aabb3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\aabb3.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\angle.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\angle.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\cast.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\cast.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\color.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\color.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\constants.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_binary.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_binary.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_common.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_common.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_interp.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_interp.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_projection.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_projection.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_range.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_range.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_rayintersect.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_rayintersect.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_static_constructors.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_static_constructors.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_string.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_string.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_test.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_test.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_transform.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_transform.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_trig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\func_trig.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\line2.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\line2.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\line3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\line3.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat2.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat2.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat3.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat4.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\mat4.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\packet.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\packet.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\plane.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\plane.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\quat.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\quat.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\rect.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\rect.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\standard_types.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\trans2d.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\trans2d.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\trans3d.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\trans3d.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\triangle3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\triangle3.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec2.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec2.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec3.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec4.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\vec4.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\qmath.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\avr_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\char_traits.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\concept_checks.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\container_concepts.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\pnew.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\sequence_concepts.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_algo.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_algobase.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_alloc.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_bvector.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_construct.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_ctraits_fns.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_deque.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_function.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_hashtable.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_hash_fun.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_hash_map.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_hash_set.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_heap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_iterator.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_iterator_base.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_list.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_map.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_multimap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_multiset.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_numeric.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_pair.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_queue.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_range_errors.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_raw_storage_iter.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_relops.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_set.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_slist.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_stack.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_string_fwd.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_tempbuf.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_tree.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_uninitialized.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\stl_vector.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\stl\type_traits.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Main.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="libs" />
+    <Folder Include="libs\HAL" />
+    <Folder Include="libs\Format" />
+    <Folder Include="libs\qmath" />
+    <Folder Include="libs\qmath\detail" />
+    <Folder Include="libs\stl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libs\stl\algorithm">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\basic_definitions">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\bitset">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\cctype">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\cstddef">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\deque">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\functional">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\hash_map">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\hash_set">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\iomanip">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\ios">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\iosfwd">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\iostream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\istream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\istream_helpers">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\iterator">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\lcdostream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\limits">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\list">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\locale">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\map">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\memory">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\new">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\numeric">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\ostream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\ostream_helpers">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\queue">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\serstream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\set">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\slist">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\sstream">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\stack">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\streambuf">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\string">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\utility">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\valarray">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\vector">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>
