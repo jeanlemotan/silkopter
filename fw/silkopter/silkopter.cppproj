@@ -207,9 +207,6 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\UART.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Mutex.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="libs\board\boards\pins_arduino_mega.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -675,6 +672,9 @@
       <SubType>compile</SubType>
     </None>
     <None Include="libs\stl\memory">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="libs\stl\mutex">
       <SubType>compile</SubType>
     </None>
     <None Include="libs\stl\new">

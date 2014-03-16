@@ -14,10 +14,11 @@ void init(board::UART* uart)
 	{
 		return;
 	}
+	s_is_initialized = true;
+
+
 	
 	s_uart = uart;
-	
-	s_is_initialized = true;
 }
 
 

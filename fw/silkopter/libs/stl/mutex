@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 namespace std
 {
 	class mutex
@@ -28,7 +30,7 @@ namespace std
 	{
 		while (!try_lock())
 		{
-			board::clock::delay_micros(100);
+			//board::clock::delay_micros(100);
 		}
 	}
 	inline bool mutex::lock(uint32_t timeout_ms)
@@ -40,8 +42,8 @@ namespace std
 		uint32_t us = timeout_ms * 1000ULL;
 		do
 		{
-			uint32_t delay = std::min(100ULL, us);
-			board::clock::delay_micros(delay);
+			uint32_t delay = std::min(uint32_t(100), us);
+			//board::clock::delay_micros(delay);
 			us -= delay;
 			if (try_lock())
 			{

@@ -1,9 +1,10 @@
+#include "Config.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/assert.h"
 #include "board/boards/Crius_AIOP2/clock.h"
-
-#if BOARD_TYPE == CRIUS_AIOP2
 
 namespace board
 {
@@ -37,6 +38,7 @@ void init()
 	{
 		return;
 	}
+	s_is_initialized = true;
 	
 	uint8_t old_sreg = SREG;
 	cli();
@@ -65,8 +67,6 @@ void init()
 	sbi(ADCSRA, ADEN);
 
 	SREG = old_sreg;
-	
-	s_is_initialized = true;
 }
 
 SIGNAL(AVR_TIMER_OVF_VECT)

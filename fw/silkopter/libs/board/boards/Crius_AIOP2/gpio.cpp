@@ -1,10 +1,11 @@
+#include "Config.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/assert.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
-
-#if BOARD_TYPE == CRIUS_AIOP2
-
 #include "board/boards/pins_arduino_mega.h"
 
 namespace board
@@ -42,8 +43,8 @@ void init()
 	{
 		return;
 	}	
-	
 	s_is_initialized = true;
+
 }
 
 void set_pin_mode(uint8_t pin, Mode mode) 

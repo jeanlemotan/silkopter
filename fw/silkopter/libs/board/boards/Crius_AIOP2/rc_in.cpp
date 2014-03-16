@@ -1,10 +1,12 @@
+#include "Config.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "debug/assert.h"
 #include "board/boards/Crius_AIOP2/rc_in.h"
-
-#if BOARD_TYPE == CRIUS_AIOP2
 
 namespace board
 {
@@ -232,6 +234,7 @@ void init()
 	{
 		return;
 	}
+	s_is_initialized = true;
 	
 	DDRK = 0;  // Set PORTK as a digital port ([A8-A15] are consired as digital PINs and not analogical)
 //	hal.gpio->pinMode(46, GPIO_OUTPUT); // ICP5 pin (PL1) (PPM input) CRIUS v2
@@ -262,8 +265,6 @@ void init()
 // #else
 // #	error You must check SERIAL_PPM mode, something wrong
 // #endif
-
-	s_is_initialized = true;
 }
 
 int16_t get_channel(uint8_t ch)

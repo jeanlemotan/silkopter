@@ -1,11 +1,13 @@
+#include "Config.h"
+
+#if BOARD_TYPE == CRIUS_AIOP2
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "debug/assert.h"
 #include "board/boards/Crius_AIOP2/pwm_out.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
-
-#if BOARD_TYPE == CRIUS_AIOP2
 
 namespace board
 {
@@ -23,6 +25,8 @@ void init()
 	{
 		return;
 	}
+	s_is_initialized = true;
+
 	gpio::init();
 	
 	// --------------------- TIMER3: CH_0, CH_1, and CH_2 ---------------------
@@ -62,8 +66,6 @@ void init()
 	OCR1A = 0xFFFF;
 	OCR1B = 0xFFFF;
 	ICR1 = 40000; //50hz freq...Datasheet says  (system_freq/prescaler)/target frequency. So (16000000hz/8)/50hz=40000,
-	
-	s_is_initialized = true;
 }
 
 #define timer_period(hz) (2000000UL / (hz))

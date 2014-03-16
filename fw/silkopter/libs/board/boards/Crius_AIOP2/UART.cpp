@@ -1,10 +1,11 @@
-#include <avr/interrupt.h>
-#include <qmath.h>
-
-#include "debug/assert.h"
-#include "board/boards/Crius_AIOP2/UART.h"
+#include "Config.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
+
+#include <avr/interrupt.h>
+#include <qmath.h>
+#include "debug/assert.h"
+#include "board/boards/Crius_AIOP2/UART.h"
 
 using namespace board;
 
