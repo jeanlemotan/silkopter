@@ -4,6 +4,8 @@
 #define UART_BUFFER_MASK (UART_BUFFER_SIZE - 1)
 #define UART_COUNT 4
 
+#include <stdint.h>
+
 namespace hal
 {
 	
@@ -22,7 +24,7 @@ public:
 	//NOTE: non-blocking writes will skip data when the buffer is full and result ERR_TX_OVERFLOW
 	//By default the UART is blocking
 	//This can be called anytime
-	void set_blocking(Blocking blocking); 
+	void set_blocking(bool blocking); 
     void begin(uint32_t baud);
 
 	enum class Error
@@ -35,12 +37,14 @@ public:
 
 	size_t get_data_size() const;
 	bool has_data() const;
-	uint8_t get_byte();
+	uint8_t read_byte();
 	bool read(uint8_t* buf, uint8_t size);
 	
     bool write(const char* buf);
     bool write(const uint8_t* buf, size_t size);
 	bool write_byte(uint8_t b);
+	
+	void flush();
 	
 	Error get_last_error() const;
 	

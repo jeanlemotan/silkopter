@@ -11,6 +11,7 @@ public:
 
 	typedef char value_type;
 	typedef char const* const_iterator;
+	enum { MAX_SIZE = SIZE };
 
 public:
 	FString();

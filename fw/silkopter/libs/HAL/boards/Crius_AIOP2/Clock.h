@@ -2,21 +2,14 @@
 
 namespace hal
 {
-	
-class Clock
+namespace clock
 {
-public:
-	Clock();
+	extern void init();
 	
-	uint32_t millis();
-	uint32_t micros();
+	extern uint32_t millis();
+	extern uint32_t micros();
 	
-	void delay_micros(uint16_t us);
-	void delay_millis(uint16_t ms);
-	
-private:
-};
-
-extern Clock clock;
-
+	extern void delay_micros(uint16_t us);
+	extern void delay_millis(uint16_t ms);
+}
 }

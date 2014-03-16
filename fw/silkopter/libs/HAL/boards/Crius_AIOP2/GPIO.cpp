@@ -1,20 +1,20 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "Debug/Assert.h"
 #include "HAL/boards/Crius_AIOP2/GPIO.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
 #include "HAL/boards/pins_arduino_mega.h"
 
-using namespace hal;
-
 namespace hal
 {
-	GPIO gpio;
-}
+namespace gpio
+{
 
 typedef void (*ISR_Func_Ptr)();
 static volatile ISR_Func_Ptr s_isr_function = nullptr;
+static bool s_is_initialized = false;
 
 SIGNAL(INT6_vect) 
 {
@@ -36,13 +36,20 @@ SIGNAL(INT6_vect)
 #define port_input_register(P) ( (volatile uint8_t *)( pgm_read_word( p_port_to_input + (P))) )
 #define port_mode_register(P) ( (volatile uint8_t *)( pgm_read_word( p_port_to_mode + (P))) )
 
-GPIO::GPIO()
+void init()
 {
+	if (s_is_initialized)
+	{
+		return;
+	}	
 	
+	s_is_initialized = true;
 }
 
-void GPIO::set_pin_mode(uint8_t pin, Mode mode) 
+void set_pin_mode(uint8_t pin, Mode mode) 
 {
+	ASSERT(s_is_initialized);
+
     uint8_t port = digital_pin_to_port(pin);
     if (port == NOT_A_PIN) 
 	{
@@ -70,13 +77,10 @@ void GPIO::set_pin_mode(uint8_t pin, Mode mode)
     }
 }
 
-// int8_t AVRGPIO::analogPinToDigitalPin(uint8_t pin)
-// {
-// 	return analogInputToDigitalPin(pin);
-// }
-
-bool GPIO::read(uint8_t pin) 
+bool read(uint8_t pin) 
 {
+	ASSERT(s_is_initialized);
+
     uint8_t port = digital_pin_to_port(pin);
     if (port == NOT_A_PIN) 
 	{
@@ -87,8 +91,10 @@ bool GPIO::read(uint8_t pin)
     return (*port_input_register(port) & bit) ? true : false;
 }
 
-void GPIO::write(uint8_t pin, bool value) 
+void write(uint8_t pin, bool value) 
 {
+	ASSERT(s_is_initialized);
+
     uint8_t port = digital_pin_to_port(pin);
     if (port == NOT_A_PIN) 
 	{
@@ -113,8 +119,10 @@ void GPIO::write(uint8_t pin, bool value)
     SREG = oldSREG;
 }
 
-void GPIO::toggle(uint8_t pin) 
+void toggle(uint8_t pin) 
 {
+	ASSERT(s_is_initialized);
+
     uint8_t port = digital_pin_to_port(pin);
     if (port == NOT_A_PIN) 
 	{
@@ -233,4 +241,8 @@ void GPIO::toggle(uint8_t pin)
 // #endif
 // }
 
+}
+}
+
 #endif
+

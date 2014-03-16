@@ -1,28 +1,34 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
-#include "HAL/boards/Crius_AIOP2/RC_Outputs.h"
+#include "Debug/Assert.h"
+#include "HAL/boards/Crius_AIOP2/PWM_Out.h"
 #include "HAL/boards/Crius_AIOP2/GPIO.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-using namespace hal;
-
 namespace hal
 {
-	RC_Outputs rc_outputs;
-}
+namespace pwm_out
+{
 
 static const uint16_t MIN_PULSE_WIDTH = 1800; // 900
 static const uint16_t MAX_PULSE_WIDTH = 4200; // 2100
 static const uint16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
+static bool s_is_initialized = false;
 
-RC_Outputs::RC_Outputs()
+void init()
 {
+	if (s_is_initialized)
+	{
+		return;
+	}
+	gpio::init();
+	
 	// --------------------- TIMER3: CH_0, CH_1, and CH_2 ---------------------
-	hal::gpio.set_pin_mode(2, GPIO::Mode::OUTPUT); // CH_0 (PE4/OC3B)
-	hal::gpio.set_pin_mode(3, GPIO::Mode::OUTPUT); // CH_1 (PE5/OC3C)
-	hal::gpio.set_pin_mode(5, GPIO::Mode::OUTPUT); // CH_2 (PE3/OC3A)
+	gpio::set_pin_mode(2, gpio::Mode::OUTPUT); // CH_0 (PE4/OC3B)
+	gpio::set_pin_mode(3, gpio::Mode::OUTPUT); // CH_1 (PE5/OC3C)
+	gpio::set_pin_mode(5, gpio::Mode::OUTPUT); // CH_2 (PE3/OC3A)
 
 	// WGM: 1 1 1 0. Clear timer on Compare, TOP is ICR3
 	// CS31: prescale by 8 => 0.5us tick
@@ -34,9 +40,9 @@ RC_Outputs::RC_Outputs()
 	ICR3 = 40000; // 0.5us tick => 50hz freq
 
 	// --------------------- TIMER4: CH_3, CH_4, and CH_5 ---------------------
-	hal::gpio.set_pin_mode(6, GPIO::Mode::OUTPUT); // CH_3 (PE3/OC4A)
-	hal::gpio.set_pin_mode(7, GPIO::Mode::OUTPUT); // CH_4 (PE4/OC4B)
-	hal::gpio.set_pin_mode(8, GPIO::Mode::OUTPUT); // CH_5 (PE5/OC4C)
+	gpio::set_pin_mode(6, gpio::Mode::OUTPUT); // CH_3 (PE3/OC4A)
+	gpio::set_pin_mode(7, gpio::Mode::OUTPUT); // CH_4 (PE4/OC4B)
+	gpio::set_pin_mode(8, gpio::Mode::OUTPUT); // CH_5 (PE5/OC4C)
 
 	// WGM: 1 1 1 0. Clear timer on Compare, TOP is ICR3
 	// CS31: prescale by 8 => 0.5us tick
@@ -47,8 +53,8 @@ RC_Outputs::RC_Outputs()
 	OCR4C = 0xFFFF;
 	ICR4 = 40000; // 0.5us tick => 50hz freq
 	// --------------------- TIMER1: CH_6, CH_7 ---------------
-	hal::gpio.set_pin_mode(11, GPIO::Mode::OUTPUT); // CH_6 (PB5/OC1A)
-	hal::gpio.set_pin_mode(12, GPIO::Mode::OUTPUT); // CH_7 (PB6/OC1B)
+	gpio::set_pin_mode(11, gpio::Mode::OUTPUT); // CH_6 (PB5/OC1A)
+	gpio::set_pin_mode(12, gpio::Mode::OUTPUT); // CH_7 (PB6/OC1B)
 	// WGM: 1 1 1 0. Clear Timer on Compare, TOP is ICR1.
 	// CS11: prescale by 8 => 0.5us tick
 	TCCR1A = (1<<WGM11);
@@ -56,12 +62,16 @@ RC_Outputs::RC_Outputs()
 	OCR1A = 0xFFFF;
 	OCR1B = 0xFFFF;
 	ICR1 = 40000; //50hz freq...Datasheet says  (system_freq/prescaler)/target frequency. So (16000000hz/8)/50hz=40000,
+	
+	s_is_initialized = true;
 }
 
 #define timer_period(hz) (2000000UL / (hz))
 
-void RC_Outputs::set_frequency(uint8_t ch, uint16_t hz)
+void set_frequency(uint8_t ch, uint16_t hz)
 {
+	ASSERT(s_is_initialized);
+	
 	uint16_t icr = timer_period(hz);
 	if (ch == 10 || ch == 11) 
 	{
@@ -76,22 +86,28 @@ void RC_Outputs::set_frequency(uint8_t ch, uint16_t hz)
 		ICR4 = icr;
 	}
 }
-void RC_Outputs::set_frequencies(const uint16_t* hz, uint8_t size)
+void set_frequencies(const uint16_t* hz, uint8_t size)
 {
+	ASSERT(s_is_initialized);
+
 	for (uint8_t i = 0; i < size; i++)
 	{
 		set_frequency(i, hz[i]);
 	}
 }
-void RC_Outputs::set_frequencies(uint16_t hz)
+void set_frequencies(uint16_t hz)
 {
+	ASSERT(s_is_initialized);
+
 	for (uint8_t i = 0; i < MAX_CHANNEL_COUNT; i++)
 	{
 		set_frequency(i, hz);
 	}
 }
-void RC_Outputs::set_channel(uint8_t ch, int16_t val) 
+void set_channel(uint8_t ch, int16_t val) 
 {
+	ASSERT(s_is_initialized);
+
 	val = math::clamp(val, int16_t(0), int16_t(1024));
 	val = (uint32_t(val) * uint32_t(PULSE_RANGE) >> 10);
 	uint16_t pwm = val + MIN_PULSE_WIDTH;
@@ -109,8 +125,10 @@ void RC_Outputs::set_channel(uint8_t ch, int16_t val)
 	}
 } 
 
-void RC_Outputs::set_all_channels(int16_t val)
+void set_all_channels(int16_t val)
 {
+	ASSERT(s_is_initialized);
+
 	val = math::clamp(val, int16_t(0), int16_t(1024));
 	val = (uint32_t(val) * uint32_t(PULSE_RANGE) >> 10);
 	uint16_t pwm = val + MIN_PULSE_WIDTH;
@@ -125,8 +143,10 @@ void RC_Outputs::set_all_channels(int16_t val)
 	OCR1B = pwm;
 }
 
-void RC_Outputs::set_all_enabled(bool enabled)
+void set_all_enabled(bool enabled)
 {
+	ASSERT(s_is_initialized);
+
 	if (enabled)
 	{
 		TCCR3A |= (1<<COM3A1); 
@@ -136,8 +156,10 @@ void RC_Outputs::set_all_enabled(bool enabled)
 		TCCR3A &= ~(1<<COM3A1);
 		TCCR4A &= ~(1<<COM4A1);		TCCR3A &= ~(1<<COM3B1);		TCCR3A &= ~(1<<COM3C1);		TCCR4A &= ~(1<<COM4B1);		TCCR4A &= ~(1<<COM4C1);		TCCR1A &= ~(1<<COM1A1);		TCCR1A &= ~(1<<COM1B1);	}
 }
-void RC_Outputs::set_enabled(uint8_t ch, bool enabled)
+void set_enabled(uint8_t ch, bool enabled)
 {
+	ASSERT(s_is_initialized);
+
 	if (enabled)
 	{
 		switch (ch)
@@ -166,5 +188,7 @@ void RC_Outputs::set_enabled(uint8_t ch, bool enabled)
 	}
 }
 
+}
+}
 
 #endif

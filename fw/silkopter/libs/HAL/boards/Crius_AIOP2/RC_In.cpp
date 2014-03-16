@@ -1,16 +1,15 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
-#include "HAL/boards/Crius_AIOP2/RC_Inputs.h"
+#include "Debug/Assert.h"
+#include "HAL/boards/Crius_AIOP2/RC_In.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-using namespace hal;
-
 namespace hal
 {
-	RC_Inputs rc_inputs;
-}
+namespace rc_in
+{
 
 // PPM_SUM filtering
 #define FILTER FILTER_DISABLED
@@ -36,12 +35,14 @@ static const int16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
 static const int16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
 
 /* private variables to communicate with input capture isr */
-static volatile int16_t s_pulses[RC_Inputs::MAX_CHANNEL_COUNT] = {0};  
-static volatile int16_t s_raw_data[RC_Inputs::MAX_CHANNEL_COUNT]; // Default RC values
+static volatile int16_t s_pulses[rc_in::MAX_CHANNEL_COUNT] = {0};  
+static volatile int16_t s_raw_data[rc_in::MAX_CHANNEL_COUNT]; // Default RC values
 static volatile uint16_t s_edge_time[8];
 	
 typedef void (*ISR_Func_Ptr)();
 static volatile ISR_Func_Ptr s_isr_function = 0; 
+
+static bool s_is_initialized = false;
 
 ISR(PCINT2_vect) 
 {
@@ -63,7 +64,7 @@ ISR(PCINT2_vect)
 //     if (pulse_width > MIN_PPM_SYNCHWIDTH) 
 // 	{
 //         // sync pulse detected.  Pass through values if at least a minimum number of channels received
-//         if( channel_ctr >= RC_Inputs::MIN_CHANNEL_COUNT ) 
+//         if( channel_ctr >= rc_in::MIN_CHANNEL_COUNT ) 
 // 		{
 //             _valid_channels = channel_ctr;
 //         }
@@ -71,13 +72,13 @@ ISR(PCINT2_vect)
 //     } 
 // 	else 
 // 	{
-//         if (channel_ctr < RC_Inputs::MAX_CHANNEL_COUNT) 
+//         if (channel_ctr < rc_in::MAX_CHANNEL_COUNT) 
 // 		{
 //             _pulse_capt[channel_ctr] = pulse_width;
 //             channel_ctr++;
-//             if (channel_ctr == RC_Inputs::MAX_CHANNEL_COUNT) 
+//             if (channel_ctr == rc_in::MAX_CHANNEL_COUNT) 
 // 			{
-//                 _valid_channels = RC_Inputs::MAX_CHANNEL_COUNT;
+//                 _valid_channels = rc_in::MAX_CHANNEL_COUNT;
 //             }
 //         }
 //     }
@@ -110,7 +111,7 @@ static void A8_ppm_isr()
 			// Good widths?
 			if (width > MIN_PULSE_WIDTH && width < MAX_PULSE_WIDTH && s_got_first_synch) 
 			{
-				if (s_crt_channel < RC_Inputs::MAX_CHANNEL_COUNT) 
+				if (s_crt_channel < rc_in::MAX_CHANNEL_COUNT) 
 				{
 					#if FILTER == FILTER_DISABLED
 						s_raw_data[s_crt_channel] = width;
@@ -124,7 +125,7 @@ static void A8_ppm_isr()
 				// Count always even if we will get more then NUM_CHANNELS >> fault detection.
 				s_crt_channel++;
 	
-				if (s_crt_channel > RC_Inputs::MAX_CHANNEL_COUNT) 
+				if (s_crt_channel > rc_in::MAX_CHANNEL_COUNT) 
 				{
 					s_got_first_synch = false;						//reset decoder
 				}
@@ -146,7 +147,7 @@ static void A8_ppm_isr()
 				if (s_crt_channel >= MIN_CHANNEL_COUNT)
 				{
 					//store channels
-					std::copy(s_raw_data, s_raw_data + RC_Inputs::MAX_CHANNEL_COUNT, s_pulses);
+					std::copy(s_raw_data, s_raw_data + rc_in::MAX_CHANNEL_COUNT, s_pulses);
 				}
 				s_crt_channel = 0;								// always rest on synch
 			}
@@ -221,12 +222,17 @@ static void A8_ppm_isr()
 // 	
 // 	// If we got pulse on throttle pin, report success  
 // 	if (mask & 1<<pin_rc_channel[2]) {
-// 		_valid_channels = RC_Inputs::MAX_CHANNEL_COUNT;
+// 		_valid_channels = rc_in::MAX_CHANNEL_COUNT;
 // 	}
 // }
 
-static void init() 
+void init() 
 {
+	if (s_is_initialized)
+	{
+		return;
+	}
+	
 	DDRK = 0;  // Set PORTK as a digital port ([A8-A15] are consired as digital PINs and not analogical)
 //	hal.gpio->pinMode(46, GPIO_OUTPUT); // ICP5 pin (PL1) (PPM input) CRIUS v2
 //	hal.gpio->write(46,0);
@@ -256,15 +262,14 @@ static void init()
 // #else
 // #	error You must check SERIAL_PPM mode, something wrong
 // #endif
+
+	s_is_initialized = true;
 }
 
-RC_Inputs::RC_Inputs()
+int16_t get_channel(uint8_t ch)
 {
-	init();
-}
+	ASSERT(s_is_initialized);
 
-int16_t RC_Inputs::get_channel(uint8_t ch) const
-{
     /* constrain ch */
     if (ch >= MAX_CHANNEL_COUNT) 
 	{
@@ -282,8 +287,10 @@ int16_t RC_Inputs::get_channel(uint8_t ch) const
 	return pulse * 27 >> 5;
 }
 
-void RC_Inputs::get_channels(int16_t* dst, uint8_t size) const
+void get_channels(int16_t* dst, uint8_t size)
 {
+	ASSERT(s_is_initialized);
+
 	size = math::min(size, MAX_CHANNEL_COUNT);
 
     cli();
@@ -303,6 +310,9 @@ void RC_Inputs::get_channels(int16_t* dst, uint8_t size) const
 		//dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
 		dst[i] = pulse * 27 >> 5;
     }
+}
+
+}
 }
 
 #endif

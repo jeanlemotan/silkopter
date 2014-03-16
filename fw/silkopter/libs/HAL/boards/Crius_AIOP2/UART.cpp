@@ -1,6 +1,7 @@
 #include <avr/interrupt.h>
 #include <qmath.h>
 
+#include "Debug/Assert.h"
 #include "HAL/boards/Crius_AIOP2/UART.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
@@ -67,12 +68,13 @@ UART::UART(uint8_t port)
 	, m_ucsrc(*s_ucsrc[port])
 	, m_blocking(true)
 {
+	ASSERT(!s_uarts[port]);
 	s_uarts[port] = this;
 }
 
-void UART::set_blocking(Blocking blocking)
+void UART::set_blocking(bool blocking)
 {
-	m_blocking = (blocking == Blocking::YES);
+	m_blocking = blocking;
 }
 
 void UART::begin(uint32_t baud)
@@ -100,7 +102,7 @@ bool UART::has_data() const
 {
 	return (UART_BUFFER_MASK + m_rx_buffer.head - m_rx_buffer.tail) & UART_BUFFER_MASK;
 }
-uint8_t UART::get_byte()
+uint8_t UART::read_byte()
 {
     if (m_rx_buffer.head == m_rx_buffer.tail)
 	{
@@ -227,6 +229,12 @@ bool UART::write_byte(uint8_t b)
 
 	m_last_error = Error::TX_OVERFLOW;
 	return true;
+}
+
+void UART::flush()
+{
+    uint8_t tmphead = m_tx_buffer.head;
+	while (tmphead != m_tx_buffer.tail);
 }
 
 namespace hal

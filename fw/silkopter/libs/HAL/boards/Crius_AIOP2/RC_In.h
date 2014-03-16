@@ -2,23 +2,16 @@
 
 namespace hal
 {
-	
-class RC_Inputs
+namespace rc_in
 {
-public:
-	RC_Inputs();
+	extern void init();
 	
 	static const uint8_t MAX_CHANNEL_COUNT = 8;
 	
 	//returns the value of channel ch
-	int16_t get_channel(uint8_t ch) const;
+	extern int16_t get_channel(uint8_t ch);
 	
 	//returns the value of all channels up to min(size, get_channel_count())
-	void get_channels(int16_t* dst, uint8_t size) const;
-	
-private:
-};
-
-extern RC_Inputs rc_inputs;
-
+	extern void get_channels(int16_t* dst, uint8_t size);
+}
 }

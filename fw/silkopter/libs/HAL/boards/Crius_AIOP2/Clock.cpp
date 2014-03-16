@@ -1,10 +1,14 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "Debug/Assert.h"
 #include "HAL/boards/Crius_AIOP2/Clock.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-using namespace hal;
+namespace hal
+{
+namespace clock
+{
 
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
@@ -27,8 +31,13 @@ static volatile uint32_t s_micros_counter = 0;
 static volatile uint32_t s_millis_counter = 0;
 static bool s_is_initialized = false;
 
-static void init_clock() 
+void init() 
 {
+	if (s_is_initialized)
+	{
+		return;
+	}
+	
 	uint8_t old_sreg = SREG;
 	cli();
 
@@ -91,16 +100,10 @@ SIGNAL(AVR_TIMER_OVF_VECT)
 // 	);
 // }
 
-Clock::Clock()
+uint32_t micros()
 {
-	if (!s_is_initialized)
-	{
-		init_clock();
-	}
-}
+	ASSERT(s_is_initialized);
 
-uint32_t Clock::micros()
-{
 	uint8_t old_sreg = SREG;
 	cli();
 
@@ -121,8 +124,10 @@ uint32_t Clock::micros()
 	return time_micros + (tcnt >> 1);
 }
 
-uint32_t Clock::millis() 
+uint32_t millis() 
 {
+	ASSERT(s_is_initialized);
+
 	uint8_t oldSREG = SREG;
 	cli();
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
@@ -142,8 +147,10 @@ uint32_t Clock::millis()
 	return time_millis + (tcnt >> 11);
 }
 
-void Clock::delay_micros(uint16_t us)
+void delay_micros(uint16_t us)
 {
+	ASSERT(s_is_initialized);
+
 	// for the 16 MHz clock on most Arduino boards
 	// for a one-microsecond delay, simply return.  the overhead
 	// of the function call yields a delay of approximately 1 1/8 us.
@@ -168,25 +175,25 @@ void Clock::delay_micros(uint16_t us)
 	);
 }
 
-void Clock::delay_millis(uint16_t ms)
+void delay_millis(uint16_t ms)
 {
+	ASSERT(s_is_initialized);
+
 	uint32_t us = uint32_t(ms) * 1000;
 	uint16_t times = us >> 14;
 	uint16_t rest = ms & 16385; 
 	
 	for (uint16_t i = 0; i < times; i++)
 	{
-		hal::clock.delay_micros(16384);
+		hal::clock::delay_micros(16384);
 	}
 	if (rest)
 	{
-		hal::clock.delay_micros(rest);
+		hal::clock::delay_micros(rest);
 	}
 }
 
-namespace hal
-{
-	Clock clock;
-}
 
+}
+}
 #endif
