@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Format/Format.h"
+#include "util/format.h"
 
 namespace board
 {
@@ -40,8 +40,8 @@ namespace debug
 	{																				\
 		if (!(condition)) 															\
 		{																			\
-			FString<128> msg;														\
-			format(msg, fmt, ##__VA_ARGS__);										\
+			util::FString<128> msg;													\
+			util::format(msg, fmt, ##__VA_ARGS__);									\
 			debug::detail::handle_assert(#condition, __FILE__, __LINE__, msg)/*this never returns*/\
 		}																			\
 	} while(0)

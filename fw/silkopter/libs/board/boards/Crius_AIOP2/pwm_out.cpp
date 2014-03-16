@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "qmath.h"
-#include "Debug/Assert.h"
+#include "debug/assert.h"
 #include "board/boards/Crius_AIOP2/pwm_out.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 

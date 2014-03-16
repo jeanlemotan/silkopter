@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "FString.h"
 
+namespace util
+{
 namespace formatting
 {
 	struct Placeholder
@@ -159,7 +161,7 @@ namespace formatting
 
 		// Take care of sign.
 		uint8_t uvalue = (value < 0) ? -value : value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1);
@@ -225,7 +227,7 @@ namespace formatting
 		}
 
 		auto uvalue = value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1); //+1 because of the sign
@@ -282,7 +284,7 @@ namespace formatting
 
 		// Take care of sign.
 		uint16_t uvalue = (value < 0) ? -value : value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1);
@@ -348,7 +350,7 @@ namespace formatting
 		}
 
 		auto uvalue = value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1); //+1 because of the sign
@@ -405,7 +407,7 @@ namespace formatting
 
 		// Take care of sign.
 		uint32_t uvalue = (value < 0) ? -value : value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1);
@@ -471,7 +473,7 @@ namespace formatting
 // 		}
 
 		auto uvalue = value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1); //+1 because of the sign
@@ -520,7 +522,7 @@ namespace formatting
 	{
 		// Take care of sign.
 		uint64_t uvalue = (value < 0) ? -value : value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1); //+1 because of the sign
@@ -578,7 +580,7 @@ namespace formatting
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, uint64_t value)
 	{
 		auto uvalue = value;
-		auto length = formatting::detail::get_base_10_digit_count(uvalue);
+		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
 		auto alignedLength = std::max(length, ph.alignment);
 		//make enough room
 		dst.reserve(alignedLength + 1); //+1 because of the sign
@@ -679,13 +681,13 @@ namespace formatting
 }
 
 #define FORMAT_BEGIN																			\
-formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);								\
+util::formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);						\
 if (fmt_adapter.is_done())																		\
 {																								\
 	return;																						\
 }																								\
 																								\
-formatting::Output_String_Adapter<Dst_String> adapter(dst);										\
+util::formatting::Output_String_Adapter<Dst_String> adapter(dst);								\
 do																								\
 {																								\
 	auto ch = fmt_adapter.get_and_advance();													\
@@ -706,13 +708,13 @@ do																								\
 	}																							\
 																								\
 	uint8_t index;																				\
-	bool ok = formatting::detail::parse_index(index, fmt_adapter);								\
+	bool ok = util::formatting::detail::parse_index(index, fmt_adapter);						\
 	if (!ok)																					\
 	{																							\
 		adapter.finish();																		\
 		break;																					\
 	}																							\
-	formatting::Placeholder ph;																	\
+	util::formatting::Placeholder ph;															\
 	ch = fmt_adapter.get_and_advance();															\
 	if (ch == ':')																				\
 	{																							\
@@ -738,7 +740,7 @@ do																								\
 	switch (index)																				\
 	{
 
-#define FORMAT_PARAM(idx, T, p) case idx: formatting::Argument_Parser<typename formatting::Output_String_Adapter<Dst_String>, T>().execute(adapter, ph, p); break;
+#define FORMAT_PARAM(idx, T, p) case idx: util::formatting::Argument_Parser<typename util::formatting::Output_String_Adapter<Dst_String>, T>().execute(adapter, ph, p); break;
 
 #define FORMAT_END																				\
 	default:																					\
@@ -886,3 +888,6 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 #undef FORMAT_BEGIN
 #undef FORMAT_PARAM
 #undef FORMAT_END
+
+}
+	

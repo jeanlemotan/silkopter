@@ -1,6 +1,7 @@
 #include "Format.h"
 
-
+namespace util
+{
 namespace formatting
 {
 namespace detail
@@ -94,5 +95,6 @@ namespace detail
 		return 10;
 	}
 
+}
 }
 }

@@ -9,8 +9,8 @@
 #include <board/clock.h>
 #include <board/rc_in.h>
 #include <board/pwm_out.h>
-#include <Format/Format.h>
-#include <Debug/Assert.h>
+#include <util/format.h>
+#include <debug/assert.h>
 
 int main(void)
 {
@@ -27,7 +27,7 @@ int main(void)
 	math::vec3f a(1, 2, 3);
 	math::vec3f b;
 	
-	FString<64> str;
+	util::FString<64> str;
 					
     while(1)
     {

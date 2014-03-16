@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "board/UART.h"
-#include "Format/FString.h"
+#include "util/FString.h"
 
 class Console
 {
@@ -12,11 +12,11 @@ public:
 
 private:	
 	void show_help();
-	
-	bool get_command(FString<64>& command) const;
-	
-	typedef FString<64> String;
 
+	typedef util::FString<64> String;
+	
+	bool get_command(String& command) const;
+	
 	mutable String m_command;
 	board::UART& m_uart;
 };

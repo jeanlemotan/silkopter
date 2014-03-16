@@ -2,8 +2,10 @@
 
 #include <string>
 
-//fixed size string
+namespace util
+{
 
+//fixed size string
 template<size_t SIZE>
 class FString
 {
@@ -798,4 +800,4 @@ inline auto operator==(char const* cstr, FString<SIZE> const& str) -> bool
 	return str == cstr;
 }
 
-
+}

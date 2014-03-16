@@ -1,5 +1,5 @@
 #include <avr/interrupt.h>
-#include "Debug/Assert.h"
+#include "debug/assert.h"
 #include "board/UART.h"
 
 namespace debug
@@ -35,8 +35,8 @@ void handle_assert(const char* condition, const char* file, int line, const char
 		s_uart->write("\n\tFile:");
 		s_uart->write(file ? file : "N/A");
 		s_uart->write("\n\tLine:");
-		FString<32> str;
-		format(str, "{0}", line);
+		util::FString<32> str;
+		util::format(str, "{0}", line);
 		s_uart->write(str.c_str());
 		if (msg)
 		{

@@ -598,7 +598,6 @@
   <ItemGroup>
     <Folder Include="libs" />
     <Folder Include="libs\board" />
-    <Folder Include="libs\Format" />
     <Folder Include="libs\board\boards" />
     <Folder Include="libs\board\boards\Crius_AIOP2" />
     <Folder Include="libs\debug" />
