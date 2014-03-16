@@ -156,19 +156,19 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="libs\Debug\Assert.cpp">
+    <Compile Include="libs\debug\assert.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\Debug\Assert.h">
+    <Compile Include="libs\debug\assert.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\Format\Format.cpp">
+    <Compile Include="libs\util\format.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\Format\Format.h">
+    <Compile Include="libs\util\format.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\Format\FString.h">
+    <Compile Include="libs\util\FString.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\clock.cpp">
@@ -601,7 +601,8 @@
     <Folder Include="libs\Format" />
     <Folder Include="libs\board\boards" />
     <Folder Include="libs\board\boards\Crius_AIOP2" />
-    <Folder Include="libs\Debug" />
+    <Folder Include="libs\debug" />
+    <Folder Include="libs\util" />
     <Folder Include="libs\qmath" />
     <Folder Include="libs\qmath\detail" />
     <Folder Include="libs\stl" />
