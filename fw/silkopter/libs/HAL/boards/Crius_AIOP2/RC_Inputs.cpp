@@ -30,15 +30,14 @@ namespace hal
 
 static const uint8_t MIN_CHANNEL_COUNT = 5;     // for ppm sum we allow less than 8 channels to make up a valid packet
 
-static const uint16_t MIN_PULSE_WIDTH = 1800; // 900
-static const uint16_t MAX_PULSE_WIDTH = 4200; // 2100
-static const uint16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
-static const uint16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
-static const uint16_t MAX_VALUE = 1024;
+static const int16_t MIN_PULSE_WIDTH = 1800; // 900
+static const int16_t MAX_PULSE_WIDTH = 4200; // 2100
+static const int16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
+static const int16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
 
 /* private variables to communicate with input capture isr */
-static volatile uint16_t s_pulses[RC_Inputs::MAX_CHANNEL_COUNT] = {0};  
-static volatile uint16_t s_raw_data[RC_Inputs::MAX_CHANNEL_COUNT]; // Default RC values
+static volatile int16_t s_pulses[RC_Inputs::MAX_CHANNEL_COUNT] = {0};  
+static volatile int16_t s_raw_data[RC_Inputs::MAX_CHANNEL_COUNT]; // Default RC values
 static volatile uint16_t s_edge_time[8];
 	
 typedef void (*ISR_Func_Ptr)();
@@ -273,29 +272,36 @@ int16_t RC_Inputs::get_channel(uint8_t ch) const
 	}
     /* grab channel from isr's memory in critical section*/
     cli();
-    int16_t capt = s_pulses[ch];
+	//now pulses is between 0 and 1200
+    int16_t pulse = s_pulses[ch] >> 1;
     sei();
 	
-    int32_t pulse = math::clamp(capt, int16_t(0), int16_t(PULSE_RANGE));
-	return pulse * (int32_t)MAX_VALUE / (int32_t)PULSE_RANGE;
+    pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));
+	//dst = pulse * 1024 / 1200
+	//dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
+	return pulse * 27 >> 5;
 }
 
 void RC_Inputs::get_channels(int16_t* dst, uint8_t size) const
 {
 	size = math::min(size, MAX_CHANNEL_COUNT);
-    /* grab channels from isr's memory in critical section */
+
     cli();
-	int16_t periods[MAX_CHANNEL_COUNT];
+	int16_t pulses[MAX_CHANNEL_COUNT];
     for (uint8_t i = 0; i < size; i++) 
 	{
-        periods[i] = s_pulses[i] - MIN_PULSE_WIDTH;
+		//now pulses is between 0 and 1200
+        pulses[i] = (s_pulses[i] - MIN_PULSE_WIDTH) >> 1; 
     }
     sei();
 
     for (uint8_t i = 0; i < size; i++) 
 	{
-        periods[i] = math::clamp(periods[i], int16_t(0), int16_t(PULSE_RANGE));
-		dst[i] = (int32_t)periods[i] * (int32_t)MAX_VALUE / (int32_t)PULSE_RANGE;
+        auto pulse = math::clamp(pulses[i], int16_t(0), int16_t(PULSE_RANGE >> 1));
+		
+		//dst = pulse * 1024 / 1200
+		//dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
+		dst[i] = pulse * 27 >> 5;
     }
 }
 

@@ -25,6 +25,9 @@ public:
 	void set_frequencies(const uint16_t* hz, uint8_t size);
 	void set_frequencies(uint16_t hz);
 	
+	void set_all_enabled(bool enabled);
+	void set_enabled(uint8_t ch, bool enabled);
+	
 private:
 };
 

@@ -147,10 +147,11 @@ void Clock::delay_micros(uint16_t us)
 	// for the 16 MHz clock on most Arduino boards
 	// for a one-microsecond delay, simply return.  the overhead
 	// of the function call yields a delay of approximately 1 1/8 us.
-	if (--us == 0)
+	if (us <= 1)
 	{
 		return;
 	}
+	--us;
 	
 	// the following loop takes a quarter of a microsecond (4 cycles)
 	// per iteration, so execute it four times for each microsecond of
