@@ -24,14 +24,14 @@ namespace debug
 //macro used to avoid warnings about unused variables
 #define UNUSED(x) (void)sizeof(x)
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 
 #	define ASSERT(condition)															\
 	do 																					\
 	{  																					\
 		if (!(condition))																\
 		{																				\
-			debug::detail::handle_assert(#condition, __FILE__, __LINE__);/*this never returns*/	\
+			debug::detail::handle_assert(#condition, __FILE__, __LINE__, nullptr);/*this never returns*/	\
 		}																				\
 	} while(0)
 

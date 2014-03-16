@@ -14,13 +14,17 @@
 
 int main(void)
 {
+	sei();
+
 	board::uart0.begin(115200);
 	debug::init(&board::uart0);
-	
+
+	board::clock::init();
+	board::rc_in::init();
+	board::pwm_out::init();
+
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
-	
-	sei();
 
 	uint32_t last = board::clock::micros();
 	
