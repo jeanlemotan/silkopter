@@ -1,11 +1,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "Debug/Assert.h"
-#include "HAL/boards/Crius_AIOP2/Clock.h"
+#include "board/boards/Crius_AIOP2/clock.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-namespace hal
+namespace board
 {
 namespace clock
 {
@@ -185,11 +185,11 @@ void delay_millis(uint16_t ms)
 	
 	for (uint16_t i = 0; i < times; i++)
 	{
-		hal::clock::delay_micros(16384);
+		delay_micros(16384);
 	}
 	if (rest)
 	{
-		hal::clock::delay_micros(rest);
+		delay_micros(rest);
 	}
 }
 

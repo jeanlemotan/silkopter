@@ -2,7 +2,7 @@
 
 #include "Format/Format.h"
 
-namespace hal
+namespace board
 {
 	class UART;
 }
@@ -12,7 +12,7 @@ namespace debug
 {
 	//call this to setup the uart used to log asserts in debug
 	//pass null and asserts will not be logged (but will still freeze the board)
-	extern void init(hal::UART* uart);
+	extern void init(board::UART* uart);
 	
 	namespace detail
 	{

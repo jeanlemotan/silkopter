@@ -1,13 +1,13 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "Debug/Assert.h"
-#include "HAL/boards/Crius_AIOP2/GPIO.h"
+#include "board/boards/Crius_AIOP2/gpio.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-#include "HAL/boards/pins_arduino_mega.h"
+#include "board/boards/pins_arduino_mega.h"
 
-namespace hal
+namespace board
 {
 namespace gpio
 {

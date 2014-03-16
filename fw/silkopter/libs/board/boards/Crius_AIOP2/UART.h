@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-namespace hal
+namespace board
 {
 	
 class UART

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hal
+namespace board
 {
 namespace rc_in
 {

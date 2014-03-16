@@ -1,14 +1,14 @@
 #include <avr/interrupt.h>
 #include "Debug/Assert.h"
-#include "HAL/UART.h"
+#include "board/UART.h"
 
 namespace debug
 {
 	
 static bool s_is_initialized = false;	
-static hal::UART* s_uart = nullptr;
+static board::UART* s_uart = nullptr;
 	
-void init(hal::UART* uart)
+void init(board::UART* uart)
 {
 	if (s_is_initialized)
 	{

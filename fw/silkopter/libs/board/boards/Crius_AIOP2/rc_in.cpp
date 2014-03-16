@@ -2,11 +2,11 @@
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "Debug/Assert.h"
-#include "HAL/boards/Crius_AIOP2/RC_In.h"
+#include "board/boards/Crius_AIOP2/rc_in.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-namespace hal
+namespace board
 {
 namespace rc_in
 {

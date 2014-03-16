@@ -28,7 +28,7 @@ namespace std
 	{
 		while (!try_lock())
 		{
-			hal::clock.delay_micros(100);
+			board::clock::delay_micros(100);
 		}
 	}
 	inline bool mutex::lock(uint32_t timeout_ms)
@@ -41,7 +41,7 @@ namespace std
 		do
 		{
 			uint32_t delay = std::min(100ULL, us);
-			hal::clock.delay_micros(delay);
+			board::clock::delay_micros(delay);
 			us -= delay;
 			if (try_lock())
 			{

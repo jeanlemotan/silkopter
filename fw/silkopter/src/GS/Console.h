@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "HAL/UART.h"
+#include "board/UART.h"
 #include "Format/FString.h"
 
 class Console
 {
 public:
-	Console(hal::UART& uart);
+	Console(board::UART& uart);
 	void process();
 
 private:	
@@ -18,5 +18,5 @@ private:
 	typedef FString<64> String;
 
 	mutable String m_command;
-	hal::UART& m_uart;
+	board::UART& m_uart;
 };

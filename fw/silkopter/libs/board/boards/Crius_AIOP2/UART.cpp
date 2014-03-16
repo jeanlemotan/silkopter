@@ -2,11 +2,11 @@
 #include <qmath.h>
 
 #include "Debug/Assert.h"
-#include "HAL/boards/Crius_AIOP2/UART.h"
+#include "board/boards/Crius_AIOP2/UART.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-using namespace hal;
+using namespace board;
 
 #define UART_BAUD_SELECT(baud, xtalCpu) (((xtalCpu) + 8UL * (baud)) / (16UL * (baud)) -1UL)
 
@@ -237,7 +237,7 @@ void UART::flush()
 	while (tmphead != m_tx_buffer.tail);
 }
 
-namespace hal
+namespace board
 {
 	UART uart0(0);
 	UART uart1(1);

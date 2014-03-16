@@ -3,7 +3,7 @@
 #if BOARD_TYPE == CRIUS_AIOP2
 
 #include <avr/io.h>
-#include "libs/HAL/boards/pins_arduino_mega.h"
+#include "board/boards/pins_arduino_mega.h"
 
 const uint16_t PROGMEM p_port_to_mode[] = 
 {

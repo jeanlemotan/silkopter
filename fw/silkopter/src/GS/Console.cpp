@@ -1,6 +1,6 @@
 #include "src/GS/Console.h"
 
-Console::Console(hal::UART& uart)
+Console::Console(board::UART& uart)
 	: m_uart(uart)
 {
 }
