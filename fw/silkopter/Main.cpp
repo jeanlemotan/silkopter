@@ -24,7 +24,7 @@ int main(void)
 	board::clock::init();
 	board::rc_in::init();
 	board::pwm_out::init();
-	board::inertial::init(board::inertial::Sample_Rate::RATE_200_HZ);
+	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
 
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
@@ -67,7 +67,7 @@ int main(void)
 		util::format(str, "gyro: {0}, {1}, {2} ::: {3}, {4}, {5}\n", g.x, g.y, g.z, a.x, a.y, a.z);
 		board::uart0.write(str.c_str());
 		
-		board::clock::delay_millis(1);
+		board::clock::delay_millis(30);
 
 		last = now;
     }

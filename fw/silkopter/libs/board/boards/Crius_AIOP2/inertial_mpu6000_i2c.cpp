@@ -4,6 +4,7 @@
 
 #include "board/boards/Crius_AIOP2/inertial_mpu6000_i2c.h"
 #include "debug/assert.h"
+#include "util/format.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 #include "board/boards/Crius_AIOP2/i2c.h"
 #include "board/boards/Crius_AIOP2/clock.h"
@@ -176,7 +177,7 @@ static volatile uint32_t s_ins_timer = 0;
 static volatile bool s_sens_stage = 0;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
 static uint16_t s_micros_per_sample = 19000;
-
+static float s_delta_time = 0.f;
 static bool s_is_initialised = false;
 
 
@@ -239,14 +240,6 @@ static bool s_is_initialised = false;
 // 	return true;
 // }
 
-// get_delta_time returns the time period in seconds overwhich the sensor data was collected
-// float get_delta_time() const
-// {
-//     // the sensor runs at 200Hz
-// //    return 0.005 * _num_samples;
-//     return _delta_time;
-// }
-
 // float _temp_to_celsius ( uint16_t regval )
 // {
 //     return 20.0;
@@ -268,9 +261,9 @@ static bool s_is_initialised = false;
 
 /*================ HARDWARE FUNCTIONS ==================== */
 
-static math::vec3f s_accel_sum;
-static math::vec3f s_gyro_sum;
-static uint8_t s_sample_count = 0;
+static volatile math::vec3f s_accel_sum;
+static volatile math::vec3f s_gyro_sum;
+static volatile uint8_t s_sample_count = 0;
 
 static void _read_data_transaction()
 {
@@ -297,9 +290,17 @@ static void _read_data_transaction()
 		s_gyro_sum.y += int16_val(raw_mpu, 0);
 		s_gyro_sum.z -= int16_val(raw_mpu, 2);
 		s_sens_stage = 0;
-		
+	
+// 		util::FString<64> str;
+// 		util::format(str, "{0}\t{1}\t{2} ::: {3}\t{4}\t{5}\n", s_gyro_sum.x, s_gyro_sum.y, s_gyro_sum.z, 
+// 			s_accel_sum.x, s_accel_sum.y, s_accel_sum.z);	
+// 			s_gyro_sum.set(0, 0, 0);
+// 			s_accel_sum.set(0, 0, 0);
+// 		TRACE_MSG(str.c_str());
+			
 		s_sample_count++;
 	}
+	
 
 	//gpio::write(45, 0);
 }
@@ -323,6 +324,37 @@ static void _poll_data(uint32_t micros)
 			}
 		}
 	}
+}
+
+//  set the DLPF filter frequency. Assumes caller has taken semaphore
+static void _set_filter_register(uint8_t filter_hz, uint8_t default_filter)
+{
+    uint8_t filter = default_filter;
+    // choose filtering frequency
+    switch (filter_hz) 
+	{
+    case 5:
+        filter = BITS_DLPF_CFG_5HZ;
+        break;
+    case 10:
+        filter = BITS_DLPF_CFG_10HZ;
+        break;
+    case 20:
+        filter = BITS_DLPF_CFG_20HZ;
+        break;
+    case 42:
+        filter = BITS_DLPF_CFG_42HZ;
+        break;
+    case 98:
+        filter = BITS_DLPF_CFG_98HZ;
+        break;
+    }
+
+    if (filter != 0) 
+	{
+        //_last_filter_hz = filter_hz;
+        i2c::write_register(s_mpu_addr, MPUREG_CONFIG, filter);
+    }
 }
 
 static bool _init_hardware(Sample_Rate sample_rate)
@@ -362,7 +394,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
     i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_2, 0);
     clock::delay_millis(1);
     
-    uint8_t /*default_filter, */rate;
+    uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
 
     // sample rate and filtering
     // to minimise the effects of aliasing we choose a filter
@@ -374,34 +406,34 @@ static bool _init_hardware(Sample_Rate sample_rate)
         // more important than update rate. Tests on an aerobatic plane
         // show that 10Hz is fine, and makes it very noise resistant
 		s_micros_per_sample = 19000;
-//		s_delta_time = 0.02;
+		s_delta_time = 0.02f;
 		rate = MPUREG_SMPLRT_50HZ;
-		//default_filter = BITS_DLPF_CFG_10HZ;
+		default_filter = BITS_DLPF_CFG_10HZ;
         break;
     case Sample_Rate::RATE_100_HZ:
 		s_micros_per_sample = 9900;
-//		s_delta_time = 0.01;
+		s_delta_time = 0.01f;
     	rate = MPUREG_SMPLRT_100HZ;
-        //default_filter = BITS_DLPF_CFG_20HZ;
+        default_filter = BITS_DLPF_CFG_42HZ;
         break;
     case Sample_Rate::RATE_200_HZ:
 		s_micros_per_sample = 4900;
-		//		s_delta_time = 0.005;
+		s_delta_time = 0.005f;
 		rate = MPUREG_SMPLRT_200HZ;
-		//default_filter = BITS_DLPF_CFG_20HZ;
+		default_filter = BITS_DLPF_CFG_98HZ;
 		break;
     case Sample_Rate::RATE_500_HZ:
 		s_micros_per_sample = 1900;
-//		s_delta_time = 0.002;
+		s_delta_time = 0.002f;
    		rate = MPUREG_SMPLRT_500HZ;
-        //default_filter = BITS_DLPF_CFG_20HZ;
+        default_filter = BITS_DLPF_CFG_188HZ;
         break;
     default:
 		rate = 0;
 		PANIC_MSG("Unknown sample rate");
     }
 
-    //_set_filter_register(_mpu6000_filter, default_filter);
+    _set_filter_register(0, default_filter);
 
     // set sample rate to 200Hz, and use _sample_divider to give
     // the requested rate to the application
@@ -455,38 +487,6 @@ static bool _init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-/*
-  set the DLPF filter frequency. Assumes caller has taken semaphore
- */
-// static void _set_filter_register(uint8_t filter_hz, uint8_t default_filter)
-// {
-//     uint8_t filter = default_filter;
-//     // choose filtering frequency
-//     switch (filter_hz) {
-//     case 5:
-//         filter = BITS_DLPF_CFG_5HZ;
-//         break;
-//     case 10:
-//         filter = BITS_DLPF_CFG_10HZ;
-//         break;
-//     case 20:
-//         filter = BITS_DLPF_CFG_20HZ;
-//         break;
-//     case 42:
-//         filter = BITS_DLPF_CFG_42HZ;
-//         break;
-//     case 98:
-//         filter = BITS_DLPF_CFG_98HZ;
-//         break;
-//     }
-// 
-//     if (filter != 0) 
-// 	{
-//         //_last_filter_hz = filter_hz;
-//         i2c::write_register(s_mpu_addr, MPUREG_CONFIG, filter);
-//     }
-// }
-
 math::vec3f s_gyro_data;
 math::vec3f s_accel_data;
 static void _refresh_data()
@@ -496,10 +496,14 @@ static void _refresh_data()
 		return;
 	}
 
-	s_gyro_data = s_gyro_sum;
-	s_accel_data = s_accel_sum;
+	s_gyro_data.set(s_gyro_sum.x, s_gyro_sum.y, s_gyro_sum.z);
+	s_accel_data.set(s_accel_sum.x, s_accel_sum.y, s_accel_sum.z);
 	ASSERT(s_sample_count > 0);
 	float sc = 1.f / s_sample_count;
+	s_gyro_sum.set(0, 0, 0);
+	s_accel_sum.set(0, 0, 0);
+	s_sample_count = 0;
+	
 	//_gyro.rotate(_board_orientation);
 	s_gyro_data *= s_gyro_scale * sc;
 	//_gyro -= _gyro_offset;
@@ -572,18 +576,22 @@ bool has_data()
 	return s_sample_count > 0;
 }
 
-math::vec3f get_accelerometer_data()
+const math::vec3f& get_accelerometer_data()
 {
 	ASSERT(s_is_initialised);
 	_refresh_data();
 	return s_accel_data;
 }
 
-math::vec3f get_gyroscope_data()
+const math::vec3f& get_gyroscope_data()
 {
 	ASSERT(s_is_initialised);
 	_refresh_data();	
 	return s_gyro_data;
+}
+float get_delta_time()
+{
+	return s_delta_time;
 }
 
 
