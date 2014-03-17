@@ -77,6 +77,10 @@ void UART::set_blocking(bool blocking)
 {
 	m_blocking = blocking;
 }
+bool UART::is_blocking() const
+{
+	return m_blocking;
+}
 
 void UART::begin(uint32_t baud)
 {

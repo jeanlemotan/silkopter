@@ -14,17 +14,13 @@ class UART
 public:
 	UART(uint8_t port);
 	
-	enum class Blocking
-	{
-		YES,
-		NO
-	};
-
 	//Selects between blocking writes and non-blocking
 	//NOTE: non-blocking writes will skip data when the buffer is full and result ERR_TX_OVERFLOW
 	//By default the UART is blocking
 	//This can be called anytime
 	void set_blocking(bool blocking); 
+	bool is_blocking() const;
+	
     void begin(uint32_t baud);
 
 	enum class Error

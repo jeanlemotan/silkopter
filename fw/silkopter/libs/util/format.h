@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <algorithm>
+#include <math.h>
 #include "FString.h"
 
 namespace util
@@ -21,6 +22,7 @@ namespace formatting
 
 	namespace detail
 	{
+		extern const float s_pow_10[];
 		extern const char s_digits[201];
 
 		template<class Format_String_Adapter>
@@ -110,6 +112,14 @@ namespace formatting
 		void append(char ch)
 		{
 			m_dst.append(ch);
+		}
+		size_t get_offset() const
+		{
+			return m_dst.size();
+		}
+		void replace(size_t off, char ch)
+		{
+			m_dst[off] = ch;
 		}
 		void finish()
 		{
@@ -397,13 +407,13 @@ namespace formatting
 	template<class Dst_Adapter, class Placeholder>
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, int32_t value)
 	{
-		if (ph.base == 16)
-		{
-			char buf[32];
-			sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
-			format_string(dst, Placeholder(), buf);
-			return;
-		}
+		//if (ph.base == 16)
+		//{
+			//char buf[32];
+			//sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
+			//format_string(dst, Placeholder(), buf);
+			//return;
+		//}
 
 		// Take care of sign.
 		uint32_t uvalue = (value < 0) ? -value : value;
@@ -621,6 +631,149 @@ namespace formatting
 		for (uint8_t i = 0; i < length; i++)
 		{
 			dst.append(buf[i]);
+		}
+	}
+
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, float value)
+	{
+		if (!(value == value))
+		{
+			// Handle the 'width' parameter.
+			format_string(dst, ph, "nan");
+			return;
+		}
+
+		//to format the parts without alignment or precision
+		Placeholder ph2;
+		ph2.filler = '0';
+		ph2.alignment = 9;
+
+		//the float is formatted as a series of integers
+		int32_t whole_parts[16]; //each will hold 9 decimals
+		int8_t whole_parts_count = 0;
+
+		int32_t frac_parts[16];
+		uint8_t last_frac_part_alignment = 9;
+		int8_t frac_parts_count = 0;
+
+		uint8_t precision = ph.precision;
+		if (precision == 0)
+		{
+			precision = 5;
+		}
+		else if (precision > 9)
+		{
+			precision = 9;
+		}
+
+		bool is_negative = value < 0.0;
+		value = is_negative ? -value : value;
+
+		float whole = floorf(value);
+		float frac = value - whole;
+
+		//store the whole parts
+		float v = whole;
+		if (v > 0.0)
+		{
+			do
+			{
+				int32_t r = (int)fmod(v, 1000000);
+				whole_parts[whole_parts_count++] = r;
+				if (v < 1000000)
+				{
+					break;
+				}
+				v /= 1000000;
+			} while (true);
+		}
+
+		//store the fract parts
+		//we transform the frac part like this (For a precision of 5):
+		//	1.	0.0004272
+		//	2. 	0.0004272 * 100000 == 42
+		v = floor(frac * detail::s_pow_10[precision] + 0.5f);
+		if (v > 0.0f)
+		{
+			//	3.	42 + 100000 = 100042
+			v += detail::s_pow_10[precision];
+			do
+			{
+				int32_t r = (int)fmod(v, 1000000);
+				bool last = (v < 1000000);
+				if (r > 0)
+				{
+					if (last)
+					{
+						last_frac_part_alignment = 9;
+						//remove trailing zeros
+						int32_t r2 = r / 10;
+						while (r2 * 10 == r)
+						{
+							r = r2;
+							r2 /= 10;
+							last_frac_part_alignment--;
+						}
+					}
+					frac_parts[frac_parts_count++] = r;
+				}
+				if (last)
+				{
+					break;
+				}
+				v /= 1000000;
+			} while (true);
+		}
+
+		if (whole_parts_count > 0)
+		{
+			if (is_negative)
+			{
+				whole_parts[whole_parts_count - 1] *= -1;
+			}
+
+			//first part doesn't need '0' padding
+			ph2.alignment = 0;
+			format_string(dst, ph2, whole_parts[whole_parts_count - 1]);
+
+			//next parts are 9 digits each
+			ph2.alignment = 9;
+			for (int8_t i = whole_parts_count - 2; i >= 0; i--)
+			{
+				format_string(dst, ph2, whole_parts[i]);
+			}
+		}
+		else
+		{
+			format_string(dst, ph, is_negative ? "-0" : "0");
+		}
+
+		if (frac_parts_count > 0)
+		{
+			auto decimal_point_off = dst.get_offset();
+			//parseToString(dst, off, Placeholder(), '.');
+
+			//first part - no alignment needed
+			ph2.alignment = 0;
+			format_string(dst, ph2, frac_parts[frac_parts_count - 1]);
+
+			//middle part - alignment is 9
+			ph2.alignment = 9;
+			for (int8_t i = frac_parts_count - 2; i >= 1; i--)
+			{
+				format_string(dst, ph2, frac_parts[i]);
+			}
+
+			if (frac_parts_count > 1)
+			{
+				//the last part might be cut as we remove zeroes from it
+				ph2.alignment = last_frac_part_alignment;
+				format_string(dst, ph2, frac_parts[0]);
+			}
+
+			//overwrite the 1 from the frac part with the decimal point
+			dst.replace(decimal_point_off, '.');
 		}
 	}
 

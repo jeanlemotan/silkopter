@@ -8,7 +8,10 @@
 #include "board/clock.h"
 #include "debug/assert.h"
 
-using namespace board;
+namespace board
+{
+namespace i2c
+{
 
 #ifndef F_CPU
 #	define CPU_FREQ 16000000L
@@ -182,6 +185,12 @@ void init()
 	}
 	s_is_initialized = true;
 	
+	bool locked = lock();
+	if (!locked)
+	{
+		PANIC_MSG("Cannot lock i2c to initialize");
+	}
+	
     // activate internal pull-ups for twi
     // as per note from atmega128 manual pg204
     sbi(PORTD, 0);
@@ -197,15 +206,32 @@ void init()
 
     // enable twi module, acks, and twi interrupt
     TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA);
+	
+	unlock();
 }
 
 // void end() 
 // {
 //     TWCR = 0;
 // }
+
+static bool s_is_locked = false;
+bool lock()
+{
+	bool x = !s_is_locked;
+	s_is_locked = true;
+	return x;
+}
+void unlock()
+{
+	s_is_locked = false;
+}
  
 void set_high_speed(bool active) 
 {
+	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
+
     if (active) 
 	{
         TWBR = ((CPU_FREQ / 400000) - 16) / 2;
@@ -218,6 +244,10 @@ void set_high_speed(bool active)
 
 uint8_t write(uint8_t addr, const uint8_t* data, uint8_t size)
 {
+	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
+	ASSERT(data && size > 0);
+
     auto stat = _start();
     if (stat) goto error;
     stat = _send_address(SLA_W(addr));
@@ -238,6 +268,7 @@ error:
 uint8_t write_registers(uint8_t addr, uint8_t reg, const uint8_t* data, uint8_t size)
 {
 	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
 	ASSERT(data && size > 0);
 
     auto stat = _start();
@@ -270,6 +301,7 @@ uint8_t write_register(uint8_t addr, uint8_t reg, uint8_t val)
 uint8_t read(uint8_t addr, uint8_t* data, uint8_t size)
 {
 	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
 	ASSERT(data && size > 0);
     if (!data || size == 0)
 	{
@@ -305,6 +337,7 @@ error:
 uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size)
 {
 	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
 	ASSERT(data && size > 0);
 	if (!data || size == 0)
 	{
@@ -346,6 +379,9 @@ error:
 uint8_t read_register(uint8_t addr, uint8_t reg, uint8_t& data) 
 {
     return read_registers(addr, reg, &data, 1);
+}
+
+}
 }
 
 #endif

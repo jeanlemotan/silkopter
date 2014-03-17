@@ -47,6 +47,7 @@ public:
 	auto operator+=(char ch) -> FString<SIZE>&;
 
 	auto operator[](size_t idx) const -> char;
+	auto operator[](size_t idx) -> char&;
 
 	//////////////////////////////////////////////////////////////////////////
 	//equivalents of std::string
@@ -283,6 +284,12 @@ inline auto FString<SIZE>::operator+=(char ch) -> FString<SIZE>&
 
 template<size_t SIZE>
 inline auto	FString<SIZE>::operator[](size_t idx) const -> char
+{
+	return m_data[idx];
+}
+
+template<size_t SIZE>
+inline auto	FString<SIZE>::operator[](size_t idx) -> char&
 {
 	return m_data[idx];
 }

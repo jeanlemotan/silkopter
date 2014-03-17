@@ -53,5 +53,27 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	while (true);
 }
 
+void trace(const char* file, int line, const char* msg)
+{
+	if (s_uart)
+	{
+		auto blocking = s_uart->is_blocking();
+		s_uart->set_blocking(true);
+		s_uart->write("\nTrace: ");
+		if (msg)
+		{
+			s_uart->write(msg);
+		}
+		if (file)
+		{
+			util::FString<512> str;
+			util::format(str, " @ {0}:{1}", file, line);
+			s_uart->write(str.c_str());
+		}
+		s_uart->flush();
+		s_uart->set_blocking(blocking);
+	}
+}
+
 }
 }

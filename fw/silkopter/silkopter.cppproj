@@ -156,6 +156,24 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\inertial.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\scheduler.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\debug\assert.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -672,9 +690,6 @@
       <SubType>compile</SubType>
     </None>
     <None Include="libs\stl\memory">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="libs\stl\mutex">
       <SubType>compile</SubType>
     </None>
     <None Include="libs\stl\new">

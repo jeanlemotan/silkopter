@@ -1,12 +1,10 @@
 #pragma once
 
-#include <mutex>
-
 namespace board
 {
 namespace i2c
 {
-    extern void init(std::mutex* mutex);
+    extern void init();
 
 //     void begin();
 //     void end();
@@ -22,6 +20,10 @@ namespace i2c
     extern uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size);
 
     extern uint8_t get_lockup_count();
+
+	//exclusive access	
+	extern bool lock();
+	extern void unlock();
 };
 
 }
