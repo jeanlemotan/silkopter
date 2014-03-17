@@ -13,8 +13,8 @@ namespace formatting
 	struct Placeholder
 	{
 		Placeholder() : alignment(0), precision(0), base_case(0), base(10), filler(' ') {}
-		uint8_t alignment;
-		uint8_t precision;
+		int8_t alignment;
+		int8_t precision;
 		uint8_t base_case : 1; //lower == 0 / upper case == 1
 		uint8_t base : 7;
 		char filler;
@@ -41,12 +41,41 @@ namespace formatting
 			return true;
 		}
 
+		///
+
+		template<class T>
+		void decompose_digits(char* buf, int8_t length, T uvalue)
+		{
+			auto off_end = length - 1;
+			while(uvalue >= 100)
+			{
+				const uint32_t i = (uvalue % 100) * 2;
+				uvalue /= 100;
+				buf[off_end] = detail::s_digits[i + 1];
+				buf[off_end - 1] = detail::s_digits[i];
+				off_end -= 2;
+			}
+
+			// Handle last 1-2 digits.
+			if (uvalue < 10)
+			{
+				buf[off_end] = '0' + static_cast<char>(uvalue);
+			}
+			else
+			{
+				const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
+				buf[off_end] = detail::s_digits[i + 1];
+				buf[off_end - 1] = detail::s_digits[i];
+			}
+		}
+
+
 		//////////////////////////////////////////////////////////////////////////
 
-		auto get_base_10_digit_count(uint64_t v) -> uint8_t;
-		auto get_base_10_digit_count(uint32_t v) -> uint8_t;
-		auto get_base_10_digit_count(uint16_t v) -> uint8_t;
-		auto get_base_10_digit_count(uint8_t v) -> uint8_t;
+		auto get_base_10_digit_count(uint64_t v) -> int8_t;
+		auto get_base_10_digit_count(uint32_t v) -> int8_t;
+		auto get_base_10_digit_count(uint16_t v) -> int8_t;
+		auto get_base_10_digit_count(uint8_t v) -> int8_t;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -96,70 +125,31 @@ namespace formatting
 	};
 
 
-	//this is to be able to specify the working string buffer for a certain string type
-	template<class Dst_String> struct Output_String_Adapter
+	template<class Dst_String, class Placeholder, size_t SIZE>
+	void format_string(Dst_String& dst, Placeholder const& ph, FString<SIZE> const& p)
 	{
-		Dst_String& m_dst;
-		Output_String_Adapter(Dst_String& dst) : m_dst(dst) 
-		{
-			m_dst.clear();
-			m_dst.reserve(32);
-		}
-		void reserve(size_t size)
-		{
-			m_dst.reserve(m_dst.size() + size);
-		}
-		void append(char ch)
-		{
-			m_dst.append(ch);
-		}
-		size_t get_offset() const
-		{
-			return m_dst.size();
-		}
-		void replace(size_t off, char ch)
-		{
-			m_dst[off] = ch;
-		}
-		void finish()
-		{
-			//m_dst.resize(size);
-		}
-	};
-
-	template<class Dst_Adapter, class Placeholder, size_t SIZE>
-	void format_string(Dst_Adapter& dst, Placeholder const& ph, FString<SIZE> const& p)
-	{
-		dst.reserve(p.size());
-		for (auto ch: p)
-		{
-			dst.append(ch);
-		}
+		dst.append(p.begin(), p.end());
 	}
-	template<class Dst_Adapter, class Placeholder>
-	void format_string(Dst_Adapter& dst, Placeholder const& ph, const char* p)
+	template<class Dst_String, class Placeholder>
+	void format_string(Dst_String& dst, Placeholder const& ph, const char* p)
 	{
 		if (p)
 		{
-			do
+			dst.reserve(dst.size() + 64);
+			for (; *p != 0; ++p)
 			{
-				dst.reserve(64);
-				for (; *p != 0; ++p)
-				{
-					dst.append(*p);
-				}
+				dst.append(*p);
 			}
-			while (*p != 0);
 		}
 	}
-	template<class Dst_Adapter, class Placeholder>
-	void format_string(Dst_Adapter& dst, Placeholder const& ph, char p)
+	template<class Dst_String, class Placeholder>
+	void format_string(Dst_String& dst, Placeholder const& ph, char p)
 	{
 		dst.append(p);
 	}
 
-	template<class Dst_Adapter, class Placeholder>
-	void format_string(Dst_Adapter& dst, Placeholder const& ph, int8_t value)
+	template<class Dst_String, class Placeholder>
+	void format_string(Dst_String& dst, Placeholder const& ph, int8_t value)
 	{
 		if (ph.base == 16)
 		{
@@ -172,57 +162,23 @@ namespace formatting
 		// Take care of sign.
 		uint8_t uvalue = (value < 0) ? -value : value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1);
-
+		auto aligned_length = std::max(length, ph.alignment);
 		if (value < 0)
 		{
 			//to make space for the zero
-			alignedLength--;
+			aligned_length--;
 		}
-		if (alignedLength > length)
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		if (value < 0)
 		{
 			dst.append('-');
 		}
-
-		char buf[8];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		char buf[16];
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -235,50 +191,16 @@ namespace formatting
 			format_string(dst, Placeholder(), buf);
 			return;
 		}
-
 		auto uvalue = value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1); //+1 because of the sign
-
-		if (alignedLength > length)
+		auto aligned_length = std::max(length, ph.alignment);
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
-		char buf[8];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		char buf[16];
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -291,61 +213,26 @@ namespace formatting
 			format_string(dst, Placeholder(), buf);
 			return;
 		}
-
 		// Take care of sign.
 		uint16_t uvalue = (value < 0) ? -value : value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1);
-
+		auto aligned_length = std::max(length, ph.alignment);
 		if (value < 0)
 		{
 			//to make space for the zero
-			alignedLength--;
+			aligned_length--;
 		}
-		if (alignedLength > length)
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		if (value < 0)
 		{
 			dst.append('-');
 		}
-
 		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -358,50 +245,16 @@ namespace formatting
 			format_string(dst, Placeholder(), buf);
 			return;
 		}
-
 		auto uvalue = value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1); //+1 because of the sign
-
-		if (alignedLength > length)
+		auto aligned_length = std::max(length, ph.alignment);
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint8_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint8_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -418,57 +271,23 @@ namespace formatting
 		// Take care of sign.
 		uint32_t uvalue = (value < 0) ? -value : value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1);
-
+		auto aligned_length = std::max(length, ph.alignment);
 		if (value < 0)
 		{
 			//to make space for the zero
-			alignedLength--;
+			aligned_length--;
 		}
-		if (alignedLength > length)
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		if (value < 0)
 		{
 			dst.append('-');
 		}
-
 		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -484,47 +303,14 @@ namespace formatting
 
 		auto uvalue = value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1); //+1 because of the sign
-
-		if (alignedLength > length)
+		auto aligned_length = std::max(length, ph.alignment);
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -533,57 +319,23 @@ namespace formatting
 		// Take care of sign.
 		uint64_t uvalue = (value < 0) ? -value : value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1); //+1 because of the sign
-
+		auto aligned_length = std::max(length, ph.alignment);
 		if (value < 0)
 		{
 			//to make space for the zero
-			alignedLength--;
+			aligned_length--;
 		}
-		if (alignedLength > length)
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		if (value < 0)
 		{
 			dst.append('-');
 		}
-
-		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		char buf[32];
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -591,47 +343,14 @@ namespace formatting
 	{
 		auto uvalue = value;
 		auto length = util::formatting::detail::get_base_10_digit_count(uvalue);
-		auto alignedLength = std::max(length, ph.alignment);
-		//make enough room
-		dst.reserve(alignedLength + 1); //+1 because of the sign
-
-		if (alignedLength > length)
+		auto aligned_length = std::max(length, ph.alignment);
+		for (int8_t i = length; i < aligned_length; i++)
 		{
-			auto fillers = alignedLength - length;
-			dst.reserve(fillers);
-			for (uint8_t i = 0; i < fillers; i++)
-			{
-				dst.append(ph.filler);
-			}
+			dst.append(ph.filler);
 		}
-
 		char buf[16];
-		auto offEnd = length - 1;
-		while(uvalue >= 100)
-		{
-			const uint32_t i = (uvalue % 100) * 2;
-			uvalue /= 100;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-			offEnd -= 2;
-		}
-
-		// Handle last 1-2 digits.
-		if (uvalue < 10)
-		{
-			buf[offEnd] = '0' + static_cast<char>(uvalue);
-		}
-		else
-		{
-			const uint32_t i = static_cast<uint32_t>(uvalue) * 2;
-			buf[offEnd] = detail::s_digits[i + 1];
-			buf[offEnd - 1] = detail::s_digits[i];
-		}
-		dst.reserve(length);
-		for (uint8_t i = 0; i < length; i++)
-		{
-			dst.append(buf[i]);
-		}
+		detail::decompose_digits(buf, length, uvalue);
+		dst.append(buf, buf + length);
 	}
 
 	template<class Dst_Adapter, class Placeholder>
@@ -675,12 +394,11 @@ namespace formatting
 
 		//store the whole parts
 		float v = whole;
-		if (v > 0.0)
+		if (v > 0.0f)
 		{
 			do
 			{
-				int32_t r = (int)fmod(v, 1000000);
-				whole_parts[whole_parts_count++] = r;
+				whole_parts[whole_parts_count++] = (int32_t)fmod(v, 1000000);
 				if (v < 1000000)
 				{
 					break;
@@ -700,7 +418,7 @@ namespace formatting
 			v += detail::s_pow_10[precision];
 			do
 			{
-				int32_t r = (int)fmod(v, 1000000);
+				int32_t r = (int32_t)fmod(v, 1000000);
 				bool last = (v < 1000000);
 				if (r > 0)
 				{
@@ -751,7 +469,7 @@ namespace formatting
 
 		if (frac_parts_count > 0)
 		{
-			auto decimal_point_off = dst.get_offset();
+			auto decimal_point_off = dst.size();
 			//parseToString(dst, off, Placeholder(), '.');
 
 			//first part - no alignment needed
@@ -773,7 +491,7 @@ namespace formatting
 			}
 
 			//overwrite the 1 from the frac part with the decimal point
-			dst.replace(decimal_point_off, '.');
+			dst[decimal_point_off] = '.';
 		}
 	}
 
@@ -834,28 +552,27 @@ namespace formatting
 }
 
 #define FORMAT_BEGIN																			\
+dst.clear();																					\
 util::formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);						\
 if (fmt_adapter.is_done())																		\
 {																								\
 	return;																						\
 }																								\
 																								\
-util::formatting::Output_String_Adapter<Dst_String> adapter(dst);								\
 do																								\
 {																								\
 	auto ch = fmt_adapter.get_and_advance();													\
 	if (ch != '{')																				\
 	{																							\
-		adapter.append(ch);																		\
+		dst.append(ch);																			\
 		continue;																				\
 	}																							\
 																								\
 	ch = fmt_adapter.get();																		\
 	if (ch == '{') 																				\
 	{																							\
-		adapter.reserve(2);																		\
-		adapter.append('{');																	\
-		adapter.append('{');																	\
+		dst.append('{');																		\
+		dst.append('{');																		\
 		fmt_adapter.get_and_advance();															\
 		continue;																				\
 	}																							\
@@ -864,7 +581,6 @@ do																								\
 	bool ok = util::formatting::detail::parse_index(index, fmt_adapter);						\
 	if (!ok)																					\
 	{																							\
-		adapter.finish();																		\
 		break;																					\
 	}																							\
 	util::formatting::Placeholder ph;															\
@@ -886,18 +602,16 @@ do																								\
 	}																							\
 	if (ch != '}')																				\
 	{																							\
-		adapter.finish();																		\
 		break;																					\
 	}																							\
 																								\
 	switch (index)																				\
 	{
 
-#define FORMAT_PARAM(idx, T, p) case idx: util::formatting::Argument_Parser<typename util::formatting::Output_String_Adapter<Dst_String>, T>().execute(adapter, ph, p); break;
+#define FORMAT_PARAM(idx, T, p) case idx: util::formatting::Argument_Parser<Dst_String, T>().execute(dst, ph, p); break;
 
 #define FORMAT_END																				\
 	default:																					\
-		adapter.finish();																		\
 		break;																					\
 	}																							\
 } while (!fmt_adapter.is_done());

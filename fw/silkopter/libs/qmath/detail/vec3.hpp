@@ -22,6 +22,13 @@ namespace math
 		z = _z;
 		return *this;
 	}
+	template<typename T> template<typename U> MATH_FORCE_INLINE vec3<T>& vec3<T>::set(vec3<U> const& v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		return *this;
+	}
 
 	template <typename T> MATH_FORCE_INLINE void vec3<T>::set_length(T len)
 	{

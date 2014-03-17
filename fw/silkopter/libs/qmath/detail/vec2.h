@@ -52,6 +52,8 @@ struct vec2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	vec2<T>& set(T x, T y);
+	template<typename U> vec2<T>& set(vec2<U> const& v);
+
 	void set_length(T len);
 	vec2<T>& normalize();
 

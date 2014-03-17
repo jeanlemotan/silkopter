@@ -3,7 +3,7 @@
 #if BOARD_TYPE == CRIUS_AIOP2
 
 #include "board/boards/Crius_AIOP2/inertial_mpu6000_i2c.h"
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include "util/format.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 #include "board/boards/Crius_AIOP2/i2c.h"
@@ -261,44 +261,53 @@ static bool s_is_initialised = false;
 
 /*================ HARDWARE FUNCTIONS ==================== */
 
-static volatile math::vec3f s_accel_sum;
-static volatile math::vec3f s_gyro_sum;
-static volatile uint8_t s_sample_count = 0;
+struct Data
+{
+	Data() : accel_sample_count(0), gyro_sample_count(0) {}
+
+	volatile math::vec3i accel_sum;
+	volatile uint8_t accel_sample_count;
+
+	volatile math::vec3i gyro_sum;
+	volatile uint8_t gyro_sample_count;
+};
+
+static volatile Data s_buffers[2];
+static volatile uint8_t s_buffer_idx = 0;
 
 static void _read_data_transaction()
 {
 	#define int16_val(v, idx) ((int16_t)(((uint16_t)v[2*idx] << 8) | v[2*idx+1]))
 
 	//gpio::write(45, 1); 
-	uint8_t raw_mpu[6];
-	memset(raw_mpu, 0, 6);
+	uint8_t raw_mpu[6] = {0};
+	//memset(raw_mpu, 0, 6);
 	i2c::set_high_speed(true); // Set I2C fast speed
+
+	auto& buffer = s_buffers[s_buffer_idx];
 	// now read the data
 	if (s_sens_stage == 0) 
 	{
 		// Read Accel
 		i2c::read_registers(s_mpu_addr, MPUREG_ACCEL_XOUT_H, raw_mpu, 6);
-		s_accel_sum.x += int16_val(raw_mpu, 1);
-		s_accel_sum.y += int16_val(raw_mpu, 0);
-		s_accel_sum.z -= int16_val(raw_mpu, 2);
+		buffer.accel_sum.x += int16_val(raw_mpu, 1);
+		buffer.accel_sum.y += int16_val(raw_mpu, 0);
+		buffer.accel_sum.z -= int16_val(raw_mpu, 2);
+		buffer.accel_sample_count++;
+
+//		PRINT("acc data {0}\n", (math::vec3i&)buffer.accel_sum);
+
 		s_sens_stage = 1;
 	} 
 	else 
 	{
 		i2c::read_registers(s_mpu_addr, MPUREG_GYRO_XOUT_H, raw_mpu, 6);
-		s_gyro_sum.x += int16_val(raw_mpu, 1);
-		s_gyro_sum.y += int16_val(raw_mpu, 0);
-		s_gyro_sum.z -= int16_val(raw_mpu, 2);
+		buffer.gyro_sum.x += int16_val(raw_mpu, 1);
+		buffer.gyro_sum.y += int16_val(raw_mpu, 0);
+		buffer.gyro_sum.z -= int16_val(raw_mpu, 2);
+		buffer.gyro_sample_count++;
+
 		s_sens_stage = 0;
-	
-// 		util::FString<64> str;
-// 		util::format(str, "{0}\t{1}\t{2} ::: {3}\t{4}\t{5}\n", s_gyro_sum.x, s_gyro_sum.y, s_gyro_sum.z, 
-// 			s_accel_sum.x, s_accel_sum.y, s_accel_sum.z);	
-// 			s_gyro_sum.set(0, 0, 0);
-// 			s_accel_sum.set(0, 0, 0);
-// 		TRACE_MSG(str.c_str());
-			
-		s_sample_count++;
 	}
 	
 
@@ -496,20 +505,25 @@ static void _refresh_data()
 		return;
 	}
 
-	s_gyro_data.set(s_gyro_sum.x, s_gyro_sum.y, s_gyro_sum.z);
-	s_accel_data.set(s_accel_sum.x, s_accel_sum.y, s_accel_sum.z);
-	ASSERT(s_sample_count > 0);
-	float sc = 1.f / s_sample_count;
-	s_gyro_sum.set(0, 0, 0);
-	s_accel_sum.set(0, 0, 0);
-	s_sample_count = 0;
-	
+	//astore the initial buffer and swap them
+	auto buff_idx = s_buffer_idx;
+	s_buffer_idx = !s_buffer_idx;
+
+	auto& buffer = s_buffers[buff_idx];
+	ASSERT(buffer.gyro_sample_count > 0);
+	ASSERT(buffer.accel_sample_count > 0);
+	float ac = 1.f / buffer.accel_sample_count;
+	float gc = 1.f / buffer.gyro_sample_count;
+
+	s_gyro_data.set((math::vec3i&)(buffer.gyro_sum));
+	s_accel_data.set((math::vec3i&)(buffer.accel_sum));
+
 	//_gyro.rotate(_board_orientation);
-	s_gyro_data *= s_gyro_scale * sc;
+	s_gyro_data *= s_gyro_scale * gc;
 	//_gyro -= _gyro_offset;
 
 	//_accel.rotate(_board_orientation);
-	s_accel_data *= MPU6000_ACCEL_SCALE_1G * sc;
+	s_accel_data *= MPU6000_ACCEL_SCALE_1G * ac;
 
 	//     Vector3f accel_scale = _accel_scale.get();
 	//     _accel.x *= accel_scale.x;
@@ -523,6 +537,16 @@ static void _refresh_data()
 	//             _i2c_sem->give();
 	//         }
 	//     }
+	
+	//PRINT("samples {0}\n", buffer.accel_sample_count);
+
+
+	//empty the buffer
+	((math::vec3i&)buffer.gyro_sum).set(0, 0, 0);
+	buffer.gyro_sample_count = 0;
+
+	((math::vec3i&)buffer.accel_sum).set(0, 0, 0);
+	buffer.accel_sample_count = 0;
 }
 
 
@@ -573,7 +597,8 @@ void init(Sample_Rate rate)
 bool has_data()
 {
 	ASSERT(s_is_initialised);
-	return s_sample_count > 0;
+	auto& buffer = s_buffers[s_buffer_idx];
+	return buffer.accel_sample_count > 0 && buffer.gyro_sample_count > 0;
 }
 
 const math::vec3f& get_accelerometer_data()

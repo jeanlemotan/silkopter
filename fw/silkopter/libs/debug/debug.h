@@ -19,6 +19,7 @@ namespace debug
 		//this function never returns
 		void handle_assert(const char* condition, const char* file, int line, const char* msg);
 		void trace(const char* file, int line, const char* msg);
+		void print(const char* msg);
 	}
 }
 
@@ -41,9 +42,9 @@ namespace debug
 	{																				\
 		if (!(condition)) 															\
 		{																			\
-			util::FString<128> msg;													\
-			util::format(msg, fmt, ##__VA_ARGS__);									\
-			debug::detail::handle_assert(#condition, __FILE__, __LINE__, msg.c_str());/*this never returns*/\
+			util::FString<128> __msg;												\
+			util::format(__msg, fmt, ##__VA_ARGS__);								\
+			debug::detail::handle_assert(#condition, __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
 		}																			\
 	} while(0)
 
@@ -66,9 +67,9 @@ do 																				\
 #define PANIC_MSG(fmt, ...)														\
 do 																				\
 {																				\
-	util::FString<128> msg;														\
-	util::format(msg, fmt, ##__VA_ARGS__);										\
-	debug::detail::handle_assert("PANIC", __FILE__, __LINE__, msg.c_str());/*this never returns*/\
+	util::FString<128> __msg;													\
+	util::format(__msg, fmt, ##__VA_ARGS__);									\
+	debug::detail::handle_assert("PANIC", __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
 } while(0)
 
 #define ENABLE_TRACE
@@ -82,14 +83,22 @@ do 																				\
 #	define TRACE_MSG(fmt, ...)							\
 	do													\
 	{													\
-		util::FString<128> msg;							\
-		util::format(msg, fmt, ##__VA_ARGS__);			\
-		debug::detail::trace(__FILE__, __LINE__, msg.c_str());	\
+		util::FString<128> __msg;						\
+		util::format(__msg, fmt, ##__VA_ARGS__);		\
+		debug::detail::trace(__FILE__, __LINE__, __msg.c_str());	\
 	} while(0)
 #else
 #	define TRACE()
 #	define TRACE_MSG(fmt, ...);
 #endif
+
+#define PRINT(fmt, ...)							\
+do												\
+{												\
+	util::FString<128> __msg;					\
+	util::format(__msg, fmt, ##__VA_ARGS__);	\
+	debug::detail::print(__msg.c_str());		\
+} while(0)
 
 ///////////////////////////////////////////////////////////////////////////////
 

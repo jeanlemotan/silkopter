@@ -119,26 +119,28 @@ inline FString<SIZE>::FString(FString<SIZE> const& str)
 
 template<size_t SIZE>
 inline FString<SIZE>::FString(FString<SIZE> const& str, size_t offset, size_t count)
-	: m_size(0)
 {
-	m_data[0] = 0;
-	*this = FString<SIZE>(str.c_str() + offset, str.c_str() + offset + count);
+	offset = std::min(offset, str.size());
+	count = std::min(count, str.size() - offset);
+	m_size = std::min(count, SIZE);
+	memcpy(m_data, str.m_data, m_size); //ending zero as well
 }
 
 template<size_t SIZE>
 inline FString<SIZE>::FString(char const* str)
-	: m_size(0)
 {
-	m_data[0] = 0;
-	*this = str;
+	char const* ptr = str ? str : "";
+	m_size = std::min(strlen(ptr), SIZE);
+	memcpy(m_data, ptr, m_size + 1); //ending zero as well
 }
 
 template<size_t SIZE>
 inline FString<SIZE>::FString(char const* str, size_t count)
-	: m_size(0)
 {
-	m_data[0] = 0;
-	*this = FString<SIZE>(str, str + count);
+	char const* ptr = str ? str : "";
+	m_size = std::min(count, SIZE);
+	memcpy(m_data, ptr, m_size);
+	m_data[m_size] = 0;
 }
 
 template<size_t SIZE>

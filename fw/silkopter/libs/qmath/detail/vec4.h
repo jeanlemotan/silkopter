@@ -60,6 +60,8 @@ struct vec4
 	// Use only non-mutable methods here pls
 
 	vec4<T>& set(T x, T y, T z, T w);
+	template<typename U> vec4<T>& set(vec4<U> const& v);
+
 	void set_length(T len);
 	vec4<T>& normalize();
 

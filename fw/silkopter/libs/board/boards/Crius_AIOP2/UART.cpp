@@ -4,7 +4,7 @@
 
 #include <avr/interrupt.h>
 #include <qmath.h>
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include "board/boards/Crius_AIOP2/UART.h"
 
 using namespace board;

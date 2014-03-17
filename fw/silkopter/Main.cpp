@@ -12,7 +12,7 @@
 #include <board/scheduler.h>
 #include <board/inertial.h>
 #include <util/format.h>
-#include <debug/assert.h>
+#include <debug/debug.h>
 
 int main(void)
 {
@@ -20,7 +20,7 @@ int main(void)
 	debug::init(&board::uart0);
 	
 	board::scheduler::init();
-	board::scheduler::set_callback_frequency(100);
+	board::scheduler::set_callback_frequency(1000);
 	board::clock::init();
 	board::rc_in::init();
 	board::pwm_out::init();
@@ -31,11 +31,6 @@ int main(void)
 
 	auto last = board::clock::micros();
 	
-	math::vec3f a(1, 2, 3);
-	math::vec3f b;
-	
-	util::FString<64> str;
-					
     while(1)
     {
         //TODO:: Please write your application code 
@@ -64,7 +59,7 @@ int main(void)
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
 
-		util::format(str, "gyro: {0}, {1}, {2} ::: {3}, {4}, {5}\n", g.x, g.y, g.z, a.x, a.y, a.z);
+		util::format(str, "gyro: {0} ::: {1}\n", g, a);
 		board::uart0.write(str.c_str());
 		
 		board::clock::delay_millis(30);

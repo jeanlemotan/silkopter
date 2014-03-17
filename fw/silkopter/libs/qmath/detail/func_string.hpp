@@ -1,10 +1,10 @@
-#if !defined __AVR__
+
+#ifdef STD_STRING_CONVERSIONS
 
 #include <sstream>
 
 namespace math
 {
-
 
 inline std::string to_string(uint8_t v)
 {
@@ -261,61 +261,55 @@ bool from_string(quat<T>& v, std::string const& s)
 
 }
 
-namespace q
-{
+#endif //STD_STRING_CONVERSIONS
+
+
 namespace util
 {
-namespace parsing
+namespace formatting
 {
 
-	template<class String, class Placeholder, class T>
-	void format_string(String& dst, size_t& off, Placeholder const& ph, math::vec2<T> const& p)
+	template<class Dst_Adapter, class Placeholder, class T>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec2<T> const& p)
 	{
-		QASSERT(ph.alignment == 0);
-		format_string(dst, off, ph, p.x);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.y);
+		format_string(dst, ph, p.x);
+		dst.append(',');
+		format_string(dst, ph, p.y);
 	}
 
-	template<class String, class Placeholder, class T>
-	void format_string(String& dst, size_t& off, Placeholder const& ph, math::vec3<T> const& p)
+	template<class Dst_Adapter, class Placeholder, class T>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec3<T> const& p)
 	{
-		QASSERT(ph.alignment == 0);
-		format_string(dst, off, ph, p.x);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.y);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.z);
+		format_string(dst, ph, p.x);
+		dst.append(',');
+		format_string(dst, ph, p.y);
+		dst.append(',');
+		format_string(dst, ph, p.z);
 	}
 
-	template<class String, class Placeholder, class T>
-	void format_string(String& dst, size_t& off, Placeholder const& ph, math::vec4<T> const& p)
+	template<class Dst_Adapter, class Placeholder, class T>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec4<T> const& p)
 	{
-		QASSERT(ph.alignment == 0);
-		format_string(dst, off, ph, p.x);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.y);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.z);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.w);
+		format_string(dst, ph, p.x);
+		dst.append(',');
+		format_string(dst, ph, p.y);
+		dst.append(',');
+		format_string(dst, ph, p.z);
+		dst.append(',');
+		format_string(dst, ph, p.w);
 	}
 
-	template<class String, class Placeholder, class T>
-	void format_string(String& dst, size_t& off, Placeholder const& ph, math::quat<T> const& p)
+	template<class Dst_Adapter, class Placeholder, class T>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::quat<T> const& p)
 	{
-		QASSERT(ph.alignment == 0);
-		format_string(dst, off, ph, p.x);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.y);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.z);
-		format_string(dst, off, ph, ',');
-		format_string(dst, off, ph, p.w);
+		format_string(dst, ph, p.x);
+		dst.append(',');
+		format_string(dst, ph, p.y);
+		dst.append(',');
+		format_string(dst, ph, p.z);
+		dst.append(',');
+		format_string(dst, ph, p.w);
 	}
 
 }
 }
-}
-
-#endif

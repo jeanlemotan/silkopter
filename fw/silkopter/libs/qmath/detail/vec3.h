@@ -58,6 +58,8 @@ struct vec3
 	// Use only non-mutable methods here pls
 
 	vec3<T>& set(T x, T y, T z);
+	template<typename U> vec3<T>& set(vec3<U> const& v);
+	
 	void set_length(T len);
 	vec3<T>& normalize();
 

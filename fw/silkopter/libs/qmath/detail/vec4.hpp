@@ -24,6 +24,14 @@ namespace math
 		w = _w;
 		return *this;
 	}
+	template<typename T> template<typename U> MATH_FORCE_INLINE vec4<T>& vec4<T>::set(vec4<U> const& v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = v.w;
+		return *this;
+	}
 
 	template <typename T> MATH_FORCE_INLINE void vec4<T>::set_length(T len)
 	{

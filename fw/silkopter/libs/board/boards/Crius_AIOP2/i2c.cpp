@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include "board/boards/Crius_AIOP2/i2c.h"
 #include "board/clock.h"
-#include "debug/assert.h"
+#include "debug/debug.h"
 
 namespace board
 {

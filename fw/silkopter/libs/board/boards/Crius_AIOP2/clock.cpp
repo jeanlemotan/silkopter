@@ -3,7 +3,7 @@
 #if BOARD_TYPE == CRIUS_AIOP2
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include "board/boards/Crius_AIOP2/clock.h"
 
 namespace board

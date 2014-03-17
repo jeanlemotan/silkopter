@@ -37,6 +37,12 @@ MATH_FORCE_INLINE vec2<T>& vec2<T>::set(T _x, T _y)
 	y = _y;
 	return *this;
 }
+template<typename T> template<typename U> MATH_FORCE_INLINE vec2<T>& vec2<T>::set(vec2<U> const& v)
+{
+	x = v.x;
+	y = v.y;
+	return *this;
+}
 
 template <typename T>
 MATH_FORCE_INLINE void vec2<T>::set_length(T len)

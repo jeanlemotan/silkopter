@@ -4,7 +4,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 #include "board/boards/pins_arduino_mega.h"
 

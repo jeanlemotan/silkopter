@@ -1,5 +1,5 @@
 #include <avr/interrupt.h>
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include "board/UART.h"
 
 namespace debug
@@ -70,6 +70,18 @@ void trace(const char* file, int line, const char* msg)
 			util::format(str, " @ {0}:{1}", file, line);
 			s_uart->write(str.c_str());
 		}
+		s_uart->flush();
+		s_uart->set_blocking(blocking);
+	}
+}
+
+void print(const char* msg)
+{
+	if (s_uart && msg)
+	{
+		auto blocking = s_uart->is_blocking();
+		s_uart->set_blocking(true);
+		s_uart->write(msg);
 		s_uart->flush();
 		s_uart->set_blocking(blocking);
 	}

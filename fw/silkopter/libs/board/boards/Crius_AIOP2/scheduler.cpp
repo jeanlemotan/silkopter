@@ -7,7 +7,7 @@
 #include <avr/interrupt.h>
 #include "board/scheduler.h"
 #include "board/clock.h"
-#include "debug/assert.h"
+#include "debug/debug.h"
 #include <qmath.h>
 
 namespace board
