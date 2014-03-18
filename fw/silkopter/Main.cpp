@@ -17,6 +17,8 @@
 
 int main(void)
 {
+	sei();
+	
 	board::uart0.begin(115200);
 	debug::init(&board::uart0);
 	
@@ -24,9 +26,9 @@ int main(void)
 	board::scheduler::set_callback_frequency(1000);
 	board::clock::init();
 	board::rc_in::init();
-	board::pwm_out::init();
-	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
-	board::sonar::init();
+ 	board::pwm_out::init();
+ 	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
+ 	board::sonar::init();
 
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
@@ -57,18 +59,33 @@ int main(void)
 // 		now = board::clock::micros();
 // 		auto d2 = now - last;
 		
-		auto g = board::inertial::get_gyroscope_data();
-		auto a = board::inertial::get_accelerometer_data();
-		auto dist = board::sonar::get_distance();
+ 		auto g = board::inertial::get_gyroscope_data();
+ 		auto a = board::inertial::get_accelerometer_data();
+ 		auto dist = board::sonar::get_distance();
 
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
 
-		util::format(str, "sonar {0} \t gyro {1} \t accel {2}\n", dist, g, a);
-		board::uart0.write(str.c_str());
-		
-		board::clock::delay_millis(30);
+		int32_t iterations = 0;
+		now = board::clock::micros();
+		while (board::clock::micros() - now < 100000)
+		{
+			volatile int32_t x = 732715;
+			for (volatile uint32_t i = 0; i < 1000; i++)
+			{
+				x += 7;
+			}
+			iterations++;
+		}
+
+ 		PRINT("sonar {0} \t gyro {1} \t accel {2}\n", dist, g, a);
+
+		{
+			auto cpu = (22 - iterations) * 100 / 22;
+			PRINT("CPU: {0}\n", cpu); //22
+		}
+//		board::clock::delay_millis(30);
 
 		last = now;
-    }
+   }
 }

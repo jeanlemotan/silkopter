@@ -616,6 +616,7 @@ const math::vec3f& get_gyroscope_data()
 }
 float get_delta_time()
 {
+	ASSERT(s_is_initialised);
 	return s_delta_time;
 }
 

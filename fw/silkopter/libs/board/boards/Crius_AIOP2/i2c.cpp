@@ -354,7 +354,7 @@ uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size)
     if (stat) goto error;
     stat = _send_address(SLA_R(addr));
     if (stat) goto error;
-    for(uint8_t i = 0; i < size; i++) 
+    for (uint8_t i = 0; i < size; i++) 
 	{
         if (i == nackposition)
 		{
