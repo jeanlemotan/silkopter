@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "debug/debug.h"
-#include "board/boards/Crius_AIOP2/rc_in.h"
+#include "board/rc_in.h"
 
 namespace board
 {
@@ -29,6 +29,7 @@ namespace rc_in
 #	error Wrong AVARAGE_FACTOR selected. Minimum value 1
 #endif
 
+static const uint8_t MAX_CHANNEL_COUNT = 8;
 static const uint8_t MIN_CHANNEL_COUNT = 5;     // for ppm sum we allow less than 8 channels to make up a valid packet
 
 static const int16_t MIN_PULSE_WIDTH = 1800; // 900
@@ -37,8 +38,8 @@ static const int16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
 static const int16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
 
 /* private variables to communicate with input capture isr */
-static volatile int16_t s_pulses[rc_in::MAX_CHANNEL_COUNT] = {0};  
-static volatile int16_t s_raw_data[rc_in::MAX_CHANNEL_COUNT]; // Default RC values
+static volatile int16_t s_pulses[MAX_CHANNEL_COUNT] = {0};  
+static volatile int16_t s_raw_data[MAX_CHANNEL_COUNT]; // Default RC values
 static volatile uint16_t s_edge_time[8];
 	
 typedef void (*ISR_Func_Ptr)();
@@ -66,7 +67,7 @@ ISR(PCINT2_vect)
 //     if (pulse_width > MIN_PPM_SYNCHWIDTH) 
 // 	{
 //         // sync pulse detected.  Pass through values if at least a minimum number of channels received
-//         if( channel_ctr >= rc_in::MIN_CHANNEL_COUNT ) 
+//         if( channel_ctr >= MIN_CHANNEL_COUNT ) 
 // 		{
 //             _valid_channels = channel_ctr;
 //         }
@@ -74,13 +75,13 @@ ISR(PCINT2_vect)
 //     } 
 // 	else 
 // 	{
-//         if (channel_ctr < rc_in::MAX_CHANNEL_COUNT) 
+//         if (channel_ctr < MAX_CHANNEL_COUNT) 
 // 		{
 //             _pulse_capt[channel_ctr] = pulse_width;
 //             channel_ctr++;
-//             if (channel_ctr == rc_in::MAX_CHANNEL_COUNT) 
+//             if (channel_ctr == MAX_CHANNEL_COUNT) 
 // 			{
-//                 _valid_channels = rc_in::MAX_CHANNEL_COUNT;
+//                 _valid_channels = MAX_CHANNEL_COUNT;
 //             }
 //         }
 //     }
@@ -113,7 +114,7 @@ static void A8_ppm_isr()
 			// Good widths?
 			if (width > MIN_PULSE_WIDTH && width < MAX_PULSE_WIDTH && s_got_first_synch) 
 			{
-				if (s_crt_channel < rc_in::MAX_CHANNEL_COUNT) 
+				if (s_crt_channel < MAX_CHANNEL_COUNT) 
 				{
 					#if FILTER == FILTER_DISABLED
 						s_raw_data[s_crt_channel] = width;
@@ -127,7 +128,7 @@ static void A8_ppm_isr()
 				// Count always even if we will get more then NUM_CHANNELS >> fault detection.
 				s_crt_channel++;
 	
-				if (s_crt_channel > rc_in::MAX_CHANNEL_COUNT) 
+				if (s_crt_channel > MAX_CHANNEL_COUNT) 
 				{
 					s_got_first_synch = false;						//reset decoder
 				}
@@ -149,7 +150,7 @@ static void A8_ppm_isr()
 				if (s_crt_channel >= MIN_CHANNEL_COUNT)
 				{
 					//store channels
-					std::copy(s_raw_data, s_raw_data + rc_in::MAX_CHANNEL_COUNT, s_pulses);
+					std::copy(s_raw_data, s_raw_data + MAX_CHANNEL_COUNT, s_pulses);
 				}
 				s_crt_channel = 0;								// always rest on synch
 			}
@@ -224,7 +225,7 @@ static void A8_ppm_isr()
 // 	
 // 	// If we got pulse on throttle pin, report success  
 // 	if (mask & 1<<pin_rc_channel[2]) {
-// 		_valid_channels = rc_in::MAX_CHANNEL_COUNT;
+// 		_valid_channels = MAX_CHANNEL_COUNT;
 // 	}
 // }
 
@@ -312,6 +313,12 @@ void get_channels(int16_t* dst, uint8_t size)
 		dst[i] = pulse * 27 >> 5;
     }
 }
+
+uint8_t get_channel_count()
+{
+	return MAX_CHANNEL_COUNT;
+}
+
 
 }
 }

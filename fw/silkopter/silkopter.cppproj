@@ -156,22 +156,22 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.cpp">
+    <Compile Include="libs\board\boards\Crius_AIOP2\eeprom.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.h">
+    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\sonar_sr04.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\sonar_sr04.h">
+    <Compile Include="libs\board\boards\sonar_none.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\eeprom.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\inertial.h">
@@ -181,9 +181,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\sonar.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\sonar_none.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\debug\debug.cpp">
@@ -204,9 +201,6 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\clock.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\clock.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\gpio.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -222,13 +216,7 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\rc_in.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\rc_in.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\pwm_out.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\pwm_out.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\UART.cpp">
@@ -237,10 +225,10 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\UART.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\pins_arduino_mega.cpp">
+    <Compile Include="libs\board\boards\pins_2560.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\pins_arduino_mega.h">
+    <Compile Include="libs\board\boards\pins_2560.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\clock.h">

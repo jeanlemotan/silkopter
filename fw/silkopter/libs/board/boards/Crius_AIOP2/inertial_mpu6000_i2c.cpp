@@ -2,13 +2,13 @@
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-#include "board/boards/Crius_AIOP2/inertial_mpu6000_i2c.h"
+#include "board/inertial.h"
 #include "debug/debug.h"
 #include "util/format.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 #include "board/boards/Crius_AIOP2/i2c.h"
-#include "board/boards/Crius_AIOP2/clock.h"
-#include "board/boards/Crius_AIOP2/scheduler.h"
+#include "board/clock.h"
+#include "board/scheduler.h"
 
 namespace board
 {

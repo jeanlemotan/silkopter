@@ -2,8 +2,6 @@
 //boards
 #define CRIUS_AIOP_2 0
 
-
-//selected board type
 #define BOARD_TYPE CRIUS_AIOP_2
 
 
@@ -13,5 +11,12 @@
 #define SONAR_SR04			1
 
 #define SONAR_TYPE SONAR_SR04
+
+
+//////////////////////////////////////////////////////////////////////
+//CPU types
+#define ATMEGA_2560			0
+
+#define CPU_TYPE ATMEGA_2560
 
 

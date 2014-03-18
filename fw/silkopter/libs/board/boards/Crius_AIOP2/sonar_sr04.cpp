@@ -4,7 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/boards/Crius_AIOP2/sonar_sr04.h"
+#include "board/sonar.h"
 #include "board/clock.h"
 #include "board/scheduler.h"
 #include <qmath.h>

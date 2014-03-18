@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "debug/debug.h"
-#include "board/boards/Crius_AIOP2/pwm_out.h"
+#include "board/pwm_out.h"
 #include "board/boards/Crius_AIOP2/gpio.h"
 
 namespace board
@@ -14,6 +14,7 @@ namespace board
 namespace pwm_out
 {
 
+static const uint8_t MAX_CHANNEL_COUNT = 8;
 static const uint16_t MIN_PULSE_WIDTH = 1800; // 900
 static const uint16_t MAX_PULSE_WIDTH = 4200; // 2100
 static const uint16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
@@ -55,7 +56,8 @@ void init()
 	OCR4A = 0xFFFF; // Init OCR registers to nil output signal
 	OCR4B = 0xFFFF;
 	OCR4C = 0xFFFF;
-	ICR4 = 40000; // 0.5us tick => 50hz freq
+	ICR4 = 40000; // 0.5us tick => 50hz freq
+
 	// --------------------- TIMER1: CH_6, CH_7 ---------------
 	gpio::set_pin_mode(11, gpio::Mode::OUTPUT); // CH_6 (PB5/OC1A)
 	gpio::set_pin_mode(12, gpio::Mode::OUTPUT); // CH_7 (PB6/OC1B)
@@ -152,11 +154,25 @@ void set_all_enabled(bool enabled)
 	if (enabled)
 	{
 		TCCR3A |= (1<<COM3A1); 
-		TCCR4A |= (1<<COM4A1); 		TCCR3A |= (1<<COM3B1); 		TCCR3A |= (1<<COM3C1); 		TCCR4A |= (1<<COM4B1); 		TCCR4A |= (1<<COM4C1); 		TCCR1A |= (1<<COM1A1); 		TCCR1A |= (1<<COM1B1); 	}
+		TCCR4A |= (1<<COM4A1); 
+		TCCR3A |= (1<<COM3B1); 
+		TCCR3A |= (1<<COM3C1); 
+		TCCR4A |= (1<<COM4B1); 
+		TCCR4A |= (1<<COM4C1); 
+		TCCR1A |= (1<<COM1A1); 
+		TCCR1A |= (1<<COM1B1); 
+	}
 	else
 	{
 		TCCR3A &= ~(1<<COM3A1);
-		TCCR4A &= ~(1<<COM4A1);		TCCR3A &= ~(1<<COM3B1);		TCCR3A &= ~(1<<COM3C1);		TCCR4A &= ~(1<<COM4B1);		TCCR4A &= ~(1<<COM4C1);		TCCR1A &= ~(1<<COM1A1);		TCCR1A &= ~(1<<COM1B1);	}
+		TCCR4A &= ~(1<<COM4A1);
+		TCCR3A &= ~(1<<COM3B1);
+		TCCR3A &= ~(1<<COM3C1);
+		TCCR4A &= ~(1<<COM4B1);
+		TCCR4A &= ~(1<<COM4C1);
+		TCCR1A &= ~(1<<COM1A1);
+		TCCR1A &= ~(1<<COM1B1);
+	}
 }
 void set_enabled(uint8_t ch, bool enabled)
 {
@@ -173,7 +189,8 @@ void set_enabled(uint8_t ch, bool enabled)
 			case 4: TCCR4A |= (1<<COM4B1); break;
 			case 5: TCCR4A |= (1<<COM4C1); break;
 			case 6: TCCR1A |= (1<<COM1A1); break;
-			case 7: TCCR1A |= (1<<COM1B1); break;		}
+			case 7: TCCR1A |= (1<<COM1B1); break;
+		}
 	}
 	else
 	{
@@ -186,8 +203,14 @@ void set_enabled(uint8_t ch, bool enabled)
 			case 4: TCCR4A &= ~(1<<COM4B1); break;
 			case 5: TCCR4A &= ~(1<<COM4C1); break;
 			case 6: TCCR1A &= ~(1<<COM1A1); break;
-			case 7: TCCR1A &= ~(1<<COM1B1); break;		}
+			case 7: TCCR1A &= ~(1<<COM1B1); break;
+		}
 	}
+}
+
+uint8_t get_channel_count()
+{
+	return MAX_CHANNEL_COUNT;
 }
 
 }

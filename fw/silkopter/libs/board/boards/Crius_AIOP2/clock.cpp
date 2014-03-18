@@ -4,7 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/boards/Crius_AIOP2/clock.h"
+#include "board/clock.h"
 
 namespace board
 {
