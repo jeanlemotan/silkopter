@@ -13,6 +13,7 @@
 #include <board/inertial.h>
 #include <util/format.h>
 #include <debug/debug.h>
+#include <board/sonar.h>
 
 int main(void)
 {
@@ -25,11 +26,14 @@ int main(void)
 	board::rc_in::init();
 	board::pwm_out::init();
 	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
+	board::sonar::init();
 
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
 
 	auto last = board::clock::micros();
+	
+	util::FString<128> str;
 	
     while(1)
     {
@@ -55,11 +59,12 @@ int main(void)
 		
 		auto g = board::inertial::get_gyroscope_data();
 		auto a = board::inertial::get_accelerometer_data();
+		auto dist = board::sonar::get_distance();
 
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
 
-		util::format(str, "gyro: {0} ::: {1}\n", g, a);
+		util::format(str, "sonar {0} \t gyro {1} \t accel {2}\n", dist, g, a);
 		board::uart0.write(str.c_str());
 		
 		board::clock::delay_millis(30);

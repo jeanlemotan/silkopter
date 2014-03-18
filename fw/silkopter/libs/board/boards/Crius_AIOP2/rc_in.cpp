@@ -251,7 +251,7 @@ void init()
 // 		PCICR |= (1 << PCIE2); // PCINT2 Interrupt enable
 // #elif SERIAL_PPM == SERIAL_PPM_ENABLED
 		s_isr_function = A8_ppm_isr;
-		PORTK = (1<<PCINT16); //enable internal pull up on the SERIAL SUM pin A8
+		PORTK = (1 << PCINT16); //enable internal pull up on the SERIAL SUM pin A8
 		PCMSK2 |= (1 << PCINT16); // Enable int for pin A8(PCINT16)
 		PCICR |= (1 << PCIE2); // PCINT2 Interrupt enable
 // #elif SERIAL_PPM == SERIAL_PPM_ENABLED_PL1

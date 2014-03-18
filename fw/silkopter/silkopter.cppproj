@@ -168,10 +168,22 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\sonar_sr04.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\sonar_sr04.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\board\inertial.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\scheduler.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\sonar.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\sonar_none.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\debug\debug.cpp">
