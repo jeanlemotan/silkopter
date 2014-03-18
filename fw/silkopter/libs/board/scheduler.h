@@ -4,7 +4,6 @@ namespace board
 {
 namespace scheduler
 {
-	
     extern void init();
 
     extern void suspend();

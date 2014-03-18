@@ -22,7 +22,22 @@ namespace inertial
     // get_delta_time returns the time period in seconds overwhich the sensor data was collected
     extern float get_delta_time();
 
- 	extern const math::vec3f& get_gyroscope_data();
- 	extern const math::vec3f& get_accelerometer_data();
+	struct Data
+	{
+		struct 
+		{
+			bool is_valid;
+			math::vec3f value;	
+			float delta_time;
+		} gyroscope;	
+		struct
+		{
+			bool is_valid;
+			math::vec3f value;
+			float delta_time;
+		} accelerometer;
+	};
+
+ 	extern void get_data(Data& data);
 }
 }

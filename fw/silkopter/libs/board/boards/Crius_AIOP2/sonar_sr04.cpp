@@ -23,7 +23,7 @@ static const float k_max_distance = 1.8f;
 static volatile uint8_t s_state;
 static volatile uint32_t s_start_us = 0;
 static volatile uint32_t s_echo_delay_us = 0;
-static volatile float s_distance = 0.f;
+static volatile float s_altitude = 0.f;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ static void _sonar_trigger(uint32_t micros)
 	{
 		s_state = 0;
 		auto delay = s_echo_delay_us >> 1; //divide by two to account for the round trip
-		s_distance = math::min(delay, k_echo_max_delay_us) * 0.000343f;
+		s_altitude = math::min(delay, k_echo_max_delay_us) * 0.000343f;
 	}
 }
 
@@ -98,10 +98,11 @@ bool is_enabled()
 	return true;
 }
 
-float get_distance()
+void get_data(Data& data)
 {
 	ASSERT(s_is_initialized);
-	return s_distance;
+	data.is_valid = s_altitude < 3.5f;
+	data.altitude = data.is_valid ? s_altitude : 0.f;
 }
 
 

@@ -156,6 +156,12 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="libs\board\baro.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\baro.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\eeprom.cpp">
       <SubType>compile</SubType>
     </Compile>

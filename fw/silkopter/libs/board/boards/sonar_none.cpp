@@ -11,9 +11,10 @@ bool is_enabled()
 {
 	return false;
 }
-float get_distance()
+void get_data(Data& data)
 {
-	return 0;
+	data.is_valid = false;
+	data.altitude = 0;
 }
 		
 #endif

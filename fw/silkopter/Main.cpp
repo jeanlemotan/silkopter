@@ -14,6 +14,7 @@
 #include <util/format.h>
 #include <debug/debug.h>
 #include <board/sonar.h>
+#include <board/baro.h>
 
 int main(void)
 {
@@ -29,6 +30,7 @@ int main(void)
  	board::pwm_out::init();
  	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
  	board::sonar::init();
+	board::baro::init();
 
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
@@ -59,9 +61,14 @@ int main(void)
 // 		now = board::clock::micros();
 // 		auto d2 = now - last;
 		
- 		auto g = board::inertial::get_gyroscope_data();
- 		auto a = board::inertial::get_accelerometer_data();
- 		auto dist = board::sonar::get_distance();
+		board::inertial::Data i_inertial;
+ 		board::inertial::get_data(i_inertial);
+		
+		board::sonar::Data i_sonar; 
+ 		board::sonar::get_data(i_sonar);
+
+		board::baro::Data i_baro;
+		board::baro::get_data(i_baro);
 
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
@@ -78,7 +85,12 @@ int main(void)
 			iterations++;
 		}
 
- 		PRINT("sonar {0} \t gyro {1} \t accel {2}\n", dist, g, a);
+ 		PRINT("sonar {0}\tbaro {1}\ttemp {2}\tgyro {3}\taccel {4}\n", 
+			 i_sonar.altitude, 
+			 i_baro.pressure.value,
+			 i_baro.temperature.value,
+			 i_inertial.gyroscope.value, 
+			 i_inertial.accelerometer.value);
 
 		{
 			auto cpu = (22 - iterations) * 100 / 22;
