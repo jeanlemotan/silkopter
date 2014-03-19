@@ -28,6 +28,9 @@ namespace baro
 #define CMD_CONVERT_D1_OSR4096 0x48   // Maximum resolution (oversampling)
 #define CMD_CONVERT_D2_OSR4096 0x58   // Maximum resolution (oversampling)
 
+static const uint32_t			k_update_frequency = 50;
+static const uint32_t			k_delay_us = 1000000 / k_update_frequency;
+
 static bool						s_is_healthy = false;
 static volatile bool            s_has_data = false;
 static volatile uint8_t         s_d1_count;
@@ -85,7 +88,7 @@ static void _write(uint8_t reg)
 static void _update(uint32_t micros)
 {
 	// Throttle read rate to 100hz maximum.
-	if (micros - s_last_update_us < 10000)
+	if (micros - s_last_update_us < k_delay_us)
 	{
 		return;
 	}

@@ -1,29 +1,29 @@
 #include "Config.h"
 
-#if BOARD_TYPE == CRIUS_AIOP2
+#ifdef __AVR__
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/boards/avr_2560_gpio.h"
-#include "board/boards/avr_2560_pins.h"
+#include "board/boards/avr_gpio.h"
+#include "board/boards/avr_pins.h"
 
 namespace board
 {
 namespace gpio
 {
 
-typedef void (*ISR_Func_Ptr)();
-static volatile ISR_Func_Ptr s_isr_function = nullptr;
+//typedef void (*ISR_Func_Ptr)();
+//static volatile ISR_Func_Ptr s_isr_function = nullptr;
 static bool s_is_initialized = false;
 
-SIGNAL(INT6_vect) 
-{
-    if (s_isr_function) 
-	{
-        s_isr_function();
-    }
-}   
+// SIGNAL(INT6_vect) 
+// {
+//     if (s_isr_function) 
+// 	{
+//         s_isr_function();
+//     }
+// }   
 
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
@@ -246,4 +246,3 @@ void toggle(uint8_t pin)
 }
 
 #endif
-

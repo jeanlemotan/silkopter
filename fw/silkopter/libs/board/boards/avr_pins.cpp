@@ -1,9 +1,9 @@
 #include <Config.h>
 
-#if BOARD_TYPE == CRIUS_AIOP2
+#if CPU_TYPE == ATMEGA_2560
 
 #include <avr/io.h>
-#include "board/boards/avr_2560_pins.h"
+#include "board/boards/avr_pins.h"
 
 const uint16_t PROGMEM p_port_to_mode[] = 
 {

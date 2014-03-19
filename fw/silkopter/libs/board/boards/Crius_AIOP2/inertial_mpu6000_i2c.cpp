@@ -5,7 +5,7 @@
 #include "board/inertial.h"
 #include "debug/debug.h"
 #include "util/format.h"
-#include "board/boards/avr_2560_gpio.h"
+#include "board/boards/avr_gpio.h"
 #include "board/boards/avr_i2c.h"
 #include "board/clock.h"
 #include "board/scheduler.h"

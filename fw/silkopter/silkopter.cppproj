@@ -162,22 +162,22 @@
     <Compile Include="libs\board\baro.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\avr_2560_gpio.cpp">
+    <Compile Include="libs\board\boards\avr_gpio.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\avr_2560_gpio.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\avr_2560_pins.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\avr_2560_pins.h">
+    <Compile Include="libs\board\boards\avr_gpio.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\avr_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\avr_i2c.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_pins.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_pins.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\avr_UART.cpp">

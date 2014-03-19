@@ -16,6 +16,12 @@
 #include <board/sonar.h>
 #include <board/baro.h>
 
+__extension__ typedef int __guard __attribute__((mode (__DI__))); 
+
+int __cxa_guard_acquire(__guard *g) {return !*(char *)(g);};
+void __cxa_guard_release (__guard *g) {*(char *)g = 1;};
+void __cxa_guard_abort (__guard *) {};
+	
 int main(void)
 {
 	sei();
@@ -60,9 +66,27 @@ int main(void)
 // 		channels[4], channels[5], channels[6], channels[7]);
 // 		now = board::clock::micros();
 // 		auto d2 = now - last;
+
+		static math::vec3f attitude;
+
+		static math::vec3f gyro_offset;
+		static int32_t calibration_step = 100;
 		
 		board::inertial::Data i_inertial;
  		board::inertial::get_data(i_inertial);
+		
+		if (calibration_step > 0)
+		{
+			calibration_step--;
+			gyro_offset = math::max(gyro_offset, math::abs(i_inertial.gyroscope.value));
+		}
+		else
+		{
+			//auto val = math::sgn(i_inertial.gyroscope.value) * 
+			attitude += (i_inertial.gyroscope.value - gyro_offset);
+		}
+
+		PRINT("\n{0} :: {1}", attitude, gyro_offset);
 		
 		board::sonar::Data i_sonar; 
  		board::sonar::get_data(i_sonar);
@@ -72,30 +96,30 @@ int main(void)
 
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
+			 
+// 		int32_t iterations = 0;
+// 		now = board::clock::micros();
+// 		while (board::clock::micros() - now < 100000)
+// 		{
+// 			volatile int32_t x = 732715;
+// 			for (volatile uint32_t i = 0; i < 1000; i++)
+// 			{
+// 				x += 7;
+// 			}
+// 			iterations++;
+// 		}
+// 		{
+// 			auto cpu = (22 - iterations) * 100 / 22;
+// 			PRINT("CPU: {0}\n", cpu); //22
+// 		}
 
-		int32_t iterations = 0;
-		now = board::clock::micros();
-		while (board::clock::micros() - now < 100000)
-		{
-			volatile int32_t x = 732715;
-			for (volatile uint32_t i = 0; i < 1000; i++)
-			{
-				x += 7;
-			}
-			iterations++;
-		}
+//  		PRINT("sonar {0}\tbaro {1}\ttemp {2}\tgyro {3}\taccel {4}\n", 
+// 			 i_sonar.altitude, 
+// 			 i_baro.pressure.value,
+// 			 i_baro.temperature.value,
+// 			 i_inertial.gyroscope.value, 
+// 			 i_inertial.accelerometer.value);
 
- 		PRINT("sonar {0}\tbaro {1}\ttemp {2}\tgyro {3}\taccel {4}\n", 
-			 i_sonar.altitude, 
-			 i_baro.pressure.value,
-			 i_baro.temperature.value,
-			 i_inertial.gyroscope.value, 
-			 i_inertial.accelerometer.value);
-
-		{
-			auto cpu = (22 - iterations) * 100 / 22;
-			PRINT("CPU: {0}\n", cpu); //22
-		}
 //		board::clock::delay_millis(30);
 
 		last = now;
