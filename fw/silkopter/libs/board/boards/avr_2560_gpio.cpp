@@ -5,8 +5,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/boards/Crius_AIOP2/gpio.h"
-#include "board/boards/pins_2560.h"
+#include "board/boards/avr_2560_gpio.h"
+#include "board/boards/avr_2560_pins.h"
 
 namespace board
 {

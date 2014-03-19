@@ -156,7 +156,34 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\board\baro.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_2560_gpio.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_2560_gpio.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_2560_pins.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_2560_pins.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_i2c.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_i2c.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_UART.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\avr_UART.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\baro.cpp">
@@ -207,18 +234,6 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\clock.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\gpio.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\gpio.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\i2c.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\i2c.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\rc_in.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -226,15 +241,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\UART.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\UART.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\pins_2560.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\board\boards\pins_2560.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\clock.h">

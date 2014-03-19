@@ -5,8 +5,8 @@
 #include "board/inertial.h"
 #include "debug/debug.h"
 #include "util/format.h"
-#include "board/boards/Crius_AIOP2/gpio.h"
-#include "board/boards/Crius_AIOP2/i2c.h"
+#include "board/boards/avr_2560_gpio.h"
+#include "board/boards/avr_i2c.h"
 #include "board/clock.h"
 #include "board/scheduler.h"
 

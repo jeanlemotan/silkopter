@@ -7,7 +7,7 @@
 #include "qmath.h"
 #include "debug/debug.h"
 #include "board/pwm_out.h"
-#include "board/boards/Crius_AIOP2/gpio.h"
+#include "board/boards/avr_2560_gpio.h"
 
 namespace board
 {

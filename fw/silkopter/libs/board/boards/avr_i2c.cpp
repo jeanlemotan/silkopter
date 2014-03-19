@@ -4,7 +4,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "board/boards/Crius_AIOP2/i2c.h"
+#include "board/boards/avr_i2c.h"
 #include "board/clock.h"
 #include "debug/debug.h"
 

@@ -2,9 +2,9 @@
 
 #include "Config.h"
 
-#if BOARD_TYPE == CRIUS_AIOP2
-#   include "boards/Crius_AIOP2/UART.h"
+#if CPU_TYPE == ATMEGA_2560
+#   include "boards/avr_UART.h"
 #else 
-#	error Define for your board
+#	error Define for your cpu
 #endif
 

@@ -8,7 +8,7 @@
 #include "board/clock.h"
 #include "board/baro.h"
 #include "board/scheduler.h"
-#include "board/boards/Crius_AIOP2/i2c.h"
+#include "board/boards/avr_i2c.h"
 
 namespace board
 {

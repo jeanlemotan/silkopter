@@ -3,7 +3,7 @@
 #if BOARD_TYPE == CRIUS_AIOP2
 
 #include <avr/io.h>
-#include "board/boards/pins_2560.h"
+#include "board/boards/avr_2560_pins.h"
 
 const uint16_t PROGMEM p_port_to_mode[] = 
 {
