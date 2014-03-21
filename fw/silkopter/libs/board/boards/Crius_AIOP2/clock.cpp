@@ -115,7 +115,7 @@ uint32_t micros()
 	uint16_t tcnt = AVR_TIMER_TCNT;
 
 	// Check for  imminent timer overflow interrupt and pre-increment counter
-	if (AVR_TIMER_TIFR & 1 && tcnt < 0xFFFF)
+	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
 	{
 		time_micros += 0xFFFF / 2;
 	}
@@ -138,7 +138,7 @@ uint32_t millis()
 	uint16_t tcnt = AVR_TIMER_TCNT;	  
 
 	// Check for imminent timer overflow interrupt and pre-increment counter
-	if (AVR_TIMER_TIFR & 1 && tcnt < 0xFFFF)
+	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
 	{
 		time_millis += 0xFFFF >> 11;
 	}

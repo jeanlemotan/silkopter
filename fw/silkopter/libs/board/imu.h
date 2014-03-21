@@ -5,7 +5,7 @@
 
 namespace board
 {
-namespace inertial
+namespace imu
 {
 	enum class Sample_Rate
 	{

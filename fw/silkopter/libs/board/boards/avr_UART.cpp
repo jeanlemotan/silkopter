@@ -70,20 +70,53 @@ bool UART::has_data() const
 }
 uint8_t UART::read_byte()
 {
-    if (m_rx_buffer.head == m_rx_buffer.tail)
+	if (m_blocking)
+	{
+		while (m_rx_buffer.head == m_rx_buffer.tail); //wait for data
+	}
+	else if (m_rx_buffer.head == m_rx_buffer.tail)
 	{
 		m_last_error = Error::RX_UNDERFLOW;
 	    return 0;
     }
+
 	m_last_error = Error::NONE;
-    
     uint8_t tmptail = (m_rx_buffer.tail + 1) & UART_BUFFER_MASK;
     m_rx_buffer.tail = tmptail;
     return m_rx_buffer.data[tmptail];
 }
-bool UART::read(uint8_t* buf, uint8_t size)
+bool UART::read(uint8_t* buf, size_t size)
 {
-	return 0;
+	m_last_error = Error::NONE;
+
+	if (m_blocking)
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			while (m_rx_buffer.head == m_rx_buffer.tail); //wait for data
+
+		    uint8_t tmptail = (m_rx_buffer.tail + 1) & UART_BUFFER_MASK;
+		    m_rx_buffer.tail = tmptail;
+    		buf[i] = m_rx_buffer.data[tmptail];
+		}	
+	}
+	else
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			if (m_rx_buffer.head == m_rx_buffer.tail)
+			{
+				m_last_error = Error::RX_UNDERFLOW;
+			    return false;
+		    }
+
+		    uint8_t tmptail = (m_rx_buffer.tail + 1) & UART_BUFFER_MASK;
+		    m_rx_buffer.tail = tmptail;
+    		buf[i] = m_rx_buffer.data[tmptail];
+		}	
+	}
+
+	return true;
 }
 	
 bool UART::write(const uint8_t* buf, size_t size)
@@ -181,7 +214,8 @@ bool UART::write_byte(uint8_t b)
     uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
 	if (m_blocking)
 	{
-		while (tmphead == m_tx_buffer.tail);
+		m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
+		while (tmphead == m_tx_buffer.tail); //wait for enough room in the buffer
 	}
     else if (tmphead == m_tx_buffer.tail)
 	{

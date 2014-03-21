@@ -38,7 +38,7 @@ public:
 	size_t get_data_size() const;
 	bool has_data() const;
 	uint8_t read_byte();
-	bool read(uint8_t* buf, uint8_t size);
+	bool read(uint8_t* buf, size_t size);
 	
     bool write(const char* buf);
     bool write(const uint8_t* buf, size_t size);
@@ -61,7 +61,7 @@ public:
 	Buffer m_rx_buffer;
 	volatile Error m_last_error;
 	
-	static const uint32_t MAX_UARTS = 8;
+	static const uint8_t MAX_UARTS = 8;
 
 	static UART* s_uarts[MAX_UARTS];
 

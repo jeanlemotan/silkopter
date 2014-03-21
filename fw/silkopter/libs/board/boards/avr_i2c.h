@@ -18,6 +18,7 @@ namespace i2c
     extern uint8_t read(uint8_t addr, uint8_t* data, uint8_t size);
     extern uint8_t read_register(uint8_t addr, uint8_t reg, uint8_t& data);
     extern uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size);
+	extern uint8_t read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t size); //this converts to little endian
 
     extern uint8_t get_lockup_count();
 

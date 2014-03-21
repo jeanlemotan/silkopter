@@ -10,7 +10,7 @@
 #include <board/rc_in.h>
 #include <board/pwm_out.h>
 #include <board/scheduler.h>
-#include <board/inertial.h>
+#include <board/imu.h>
 #include <util/format.h>
 #include <debug/debug.h>
 #include <board/sonar.h>
@@ -34,7 +34,7 @@ int main(void)
 	board::clock::init();
 	board::rc_in::init();
  	board::pwm_out::init();
- 	board::inertial::init(board::inertial::Sample_Rate::RATE_500_HZ);
+ 	board::imu::init(board::imu::Sample_Rate::RATE_50_HZ);
  	board::sonar::init();
 	board::baro::init();
 
@@ -49,6 +49,7 @@ int main(void)
     {
         //TODO:: Please write your application code 
 		auto now = board::clock::micros();
+		auto start = now;
 
 		int16_t channels[8];
 		last = board::clock::micros();
@@ -72,21 +73,21 @@ int main(void)
 		static math::vec3f gyro_offset;
 		static int32_t calibration_step = 100;
 		
-		board::inertial::Data i_inertial;
- 		board::inertial::get_data(i_inertial);
+		board::imu::Data i_imu;
+ 		board::imu::get_data(i_imu);
 		
-		if (calibration_step > 0)
-		{
-			calibration_step--;
-			gyro_offset = math::max(gyro_offset, math::abs(i_inertial.gyroscope.value));
-		}
-		else
-		{
-			//auto val = math::sgn(i_inertial.gyroscope.value) * 
-			attitude += (i_inertial.gyroscope.value - gyro_offset);
-		}
+// 		if (calibration_step > 0)
+// 		{
+// 			calibration_step--;
+// 			gyro_offset = math::max(gyro_offset, math::abs(i_imu.gyroscope.value));
+// 		}
+// 		else
+// 		{
+// 			//auto val = math::sgn(i_imu.gyroscope.value) * 
+// 			attitude += (i_imu.gyroscope.value - gyro_offset);
+// 		}
 
-		PRINT("\n{0} :: {1}", attitude, gyro_offset);
+		//PRINT("\n{0} :: {1}", attitude, gyro_offset);
 		
 		board::sonar::Data i_sonar; 
  		board::sonar::get_data(i_sonar);
@@ -97,30 +98,37 @@ int main(void)
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
 			 
-// 		int32_t iterations = 0;
-// 		now = board::clock::micros();
-// 		while (board::clock::micros() - now < 100000)
-// 		{
-// 			volatile int32_t x = 732715;
-// 			for (volatile uint32_t i = 0; i < 1000; i++)
-// 			{
-// 				x += 7;
-// 			}
-// 			iterations++;
-// 		}
-// 		{
-// 			auto cpu = (22 - iterations) * 100 / 22;
-// 			PRINT("CPU: {0}\n", cpu); //22
-// 		}
+ 		int32_t iterations = 0;
+ 		now = board::clock::micros();
+ 		while (board::clock::micros() - now < 100000)
+ 		{
+ 			volatile int32_t x = 732715;
+ 			for (volatile uint32_t i = 0; i < 1000; i++)
+ 			{
+ 				x += 7;
+ 			}
+ 			iterations++;
+ 		}
+ 		{
+ 			auto cpu = (22 - iterations) * 100 / 22;
+ 			PRINT("CPU: {0}\n", cpu); //22
+ 		}
 
-//  		PRINT("sonar {0}\tbaro {1}\ttemp {2}\tgyro {3}\taccel {4}\n", 
-// 			 i_sonar.altitude, 
-// 			 i_baro.pressure.value,
-// 			 i_baro.temperature.value,
-// 			 i_inertial.gyroscope.value, 
-// 			 i_inertial.accelerometer.value);
+ 		PRINT(":{0}:{1}:{2}:{3}:{4}:{5}\n", 
+			 now,
+			 i_sonar.altitude, 
+			 i_baro.pressure.value,
+			 i_baro.temperature.value,
+			 i_imu.gyroscope.value, 
+			 i_imu.accelerometer.value);
 
-//		board::clock::delay_millis(30);
+		{
+			auto duration = board::clock::micros() - start;
+			if (duration < 100)
+			{
+			//	board::clock::delay_micros(100 - duration);
+			}
+		}
 
 		last = now;
    }

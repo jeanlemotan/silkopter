@@ -192,7 +192,7 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\eeprom.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\inertial_mpu6000_i2c.cpp">
+    <Compile Include="libs\board\boards\Crius_AIOP2\imu.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\scheduler.cpp">
@@ -207,7 +207,7 @@
     <Compile Include="libs\board\eeprom.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\inertial.h">
+    <Compile Include="libs\board\imu.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\scheduler.h">

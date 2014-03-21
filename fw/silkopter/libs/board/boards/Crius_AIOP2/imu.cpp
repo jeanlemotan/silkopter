@@ -2,7 +2,7 @@
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-#include "board/inertial.h"
+#include "board/imu.h"
 #include "debug/debug.h"
 #include "util/format.h"
 #include "board/boards/avr_gpio.h"
@@ -12,7 +12,7 @@
 
 namespace board
 {
-namespace inertial
+namespace imu
 {
 
 //#define DISABLE_INTERNAL_MAG
@@ -171,12 +171,11 @@ namespace inertial
  *  RM-MPU-6000A-00.pdf, page 33, section 4.25 lists LSB sensitivity of
  *  gyro as 16.4 LSB/DPS at scale factor of +/- 2000dps (FS_SEL==3)
  */
-const float s_gyro_scale = (0.0174532 / 16.4);
+const float s_gyro_scale = (0.0174532f / 16.4f);
 
-static volatile uint32_t s_ins_timer = 0;
-static volatile bool s_sens_stage = 0;
+static volatile uint32_t s_last_refresh_us = 0;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
-static uint16_t s_micros_per_sample = 19000;
+static uint16_t s_sample_us = 19000;
 static float s_delta_time = 0.f;
 static bool s_is_initialised = false;
 
@@ -262,65 +261,32 @@ static bool s_is_initialised = false;
 /*================ HARDWARE FUNCTIONS ==================== */
 
 volatile static math::vec3i s_accel_sum;
-volatile static uint8_t s_accel_sample_count = 0;
 volatile static math::vec3i s_gyro_sum;
-volatile static uint8_t s_gyro_sample_count = 0;
+volatile static uint32_t s_temp_sum;
+volatile static uint8_t s_sample_count = 0;
 
-static void _read_data_transaction()
-{
-	#define int16_val(v, idx) ((int16_t)(((uint16_t)v[2*idx] << 8) | v[2*idx+1]))
-
-	//gpio::write(45, 1); 
-	uint8_t raw_mpu[6] = {0};
-	//memset(raw_mpu, 0, 6);
-	i2c::set_high_speed(true); // Set I2C fast speed
-
-	// now read the data
-	if (s_sens_stage == 0) 
-	{
-		// Read Accel
-		i2c::read_registers(s_mpu_addr, MPUREG_ACCEL_XOUT_H, raw_mpu, 6);
-		s_accel_sum.x += int16_val(raw_mpu, 1);
-		s_accel_sum.y += int16_val(raw_mpu, 0);
-		s_accel_sum.z -= int16_val(raw_mpu, 2);
-		s_accel_sample_count++;
-
-//		PRINT("acc data {0}\n", (math::vec3i&)buffer.accel_sum);
-
-		s_sens_stage = 1;
-	} 
-	else 
-	{
-		i2c::read_registers(s_mpu_addr, MPUREG_GYRO_XOUT_H, raw_mpu, 6);
-		s_gyro_sum.x += int16_val(raw_mpu, 1);
-		s_gyro_sum.y += int16_val(raw_mpu, 0);
-		s_gyro_sum.z -= int16_val(raw_mpu, 2);
-		s_gyro_sample_count++;
-
-		s_sens_stage = 0;
-	}
-	
-
-	//gpio::write(45, 0);
-}
-
+static int16_t s_raw_mpu[14] = {0};
 
 static void _poll_data(uint32_t micros)
 {
-	bool refresh = s_sens_stage == 1 || ((micros - s_ins_timer) > s_micros_per_sample);
-	if (refresh)
+	if ((micros - s_last_refresh_us) > s_sample_us)
 	{
 		if (i2c::lock())
 		{
-			//gpio::write(46, 1);
-			_read_data_transaction();
-			//gpio::write(46,0);
+			//i2c::set_high_speed(true); // Set I2C fast speed
+
+			i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7);
+			s_accel_sum.x	+= s_raw_mpu[0];
+			s_accel_sum.y	+= s_raw_mpu[1];
+			s_accel_sum.z	-= s_raw_mpu[2];
+			s_temp_sum		+= s_raw_mpu[3];
+			s_gyro_sum.x	+= s_raw_mpu[4];
+			s_gyro_sum.y	+= s_raw_mpu[5];
+			s_gyro_sum.z	-= s_raw_mpu[6];
+			s_sample_count++;
 
 			i2c::unlock();
-			if (s_sens_stage == 0)
-			{
-				s_ins_timer = micros;
-			}
+			s_last_refresh_us = micros;
 		}
 	}
 }
@@ -410,25 +376,25 @@ static bool _init_hardware(Sample_Rate sample_rate)
         // this is used for plane and rover, where noise resistance is
         // more important than update rate. Tests on an aerobatic plane
         // show that 10Hz is fine, and makes it very noise resistant
-		s_micros_per_sample = 19000;
+		s_sample_us = 19000;
 		s_delta_time = 0.02f;
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
         break;
     case Sample_Rate::RATE_100_HZ:
-		s_micros_per_sample = 9900;
+		s_sample_us = 9900;
 		s_delta_time = 0.01f;
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
         break;
     case Sample_Rate::RATE_200_HZ:
-		s_micros_per_sample = 4900;
+		s_sample_us = 4900;
 		s_delta_time = 0.005f;
 		rate = MPUREG_SMPLRT_200HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 		break;
     case Sample_Rate::RATE_500_HZ:
-		s_micros_per_sample = 1900;
+		s_sample_us = 1900;
 		s_delta_time = 0.002f;
    		rate = MPUREG_SMPLRT_500HZ;
         default_filter = BITS_DLPF_CFG_188HZ;
@@ -485,7 +451,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
     }
     hal.console->println();*/
 
-	_read_data_transaction();
+	//t_read_data_transaction();
     
     i2c::unlock();
 	
@@ -494,6 +460,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
 
 static math::vec3f s_gyro_data;
 static math::vec3f s_accel_data;
+static float s_temp_data = 0;
 static uint32_t s_last_data_us = 0;
 
 static void _refresh_data()
@@ -507,26 +474,28 @@ static void _refresh_data()
 
 	scheduler::suspend();	
 
-	ASSERT(s_gyro_sample_count > 0);
-	ASSERT(s_accel_sample_count > 0);
-	auto asc = s_accel_sample_count;
-	auto gsc = s_gyro_sample_count;
+	ASSERT(s_sample_count > 0);
+	auto sc = s_sample_count;
 	s_gyro_data.set((math::vec3i&)(s_gyro_sum));
 	s_accel_data.set((math::vec3i&)(s_accel_sum));
+	s_temp_data = s_temp_sum;
 
 	((math::vec3i&)s_gyro_sum).set(0, 0, 0);
-	s_gyro_sample_count = 0;
 	((math::vec3i&)s_accel_sum).set(0, 0, 0);
-	s_accel_sample_count = 0;
+	s_temp_sum = 0;
+	s_sample_count = 0;
 
 	scheduler::resume();
 
+	float scinv = 1.f / sc;
 	//_gyro.rotate(_board_orientation);
-	s_gyro_data *= s_gyro_scale / gsc;
+	s_gyro_data *= s_gyro_scale * scinv;
 	//_gyro -= _gyro_offset;
 
 	//_accel.rotate(_board_orientation);
-	s_accel_data *= MPU6000_ACCEL_SCALE_1G / asc;
+	s_accel_data *= MPU6000_ACCEL_SCALE_1G * scinv;
+	
+	s_temp_data *= scinv;
 
 	//     Vector3f accel_scale = _accel_scale.get();
 	//     _accel.x *= accel_scale.x;
@@ -578,7 +547,7 @@ void init(Sample_Rate rate)
 		}
 	} while (1);
 
-	s_ins_timer = clock::micros();
+	s_last_refresh_us = clock::micros();
 
 	//gpio::set_pin_mode(46, gpio::Mode::OUTPUT); // Debug output
 	//gpio::write(46, 0);
@@ -592,7 +561,7 @@ void init(Sample_Rate rate)
 bool has_data()
 {
 	ASSERT(s_is_initialised);
-	return s_accel_sample_count > 0 && s_gyro_sample_count > 0;
+	return s_sample_count > 0;
 }
 
 void get_data(Data& data)
@@ -609,6 +578,8 @@ void get_data(Data& data)
 	data.accelerometer.value = s_accel_data;
 	data.accelerometer.delta_time = s_delta_time;
 	data.gyroscope.value = s_gyro_data;
+	s_gyro_data.set(0, 0, 0); //since gyro is a delta, reset it after reading 
+	
 	data.gyroscope.delta_time = s_delta_time;
 }
 

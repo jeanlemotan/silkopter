@@ -46,17 +46,17 @@ static float					s_pressure;
 static int32_t					s_raw_press;
 static int32_t					s_raw_temp;
 // Internal calibration registers
-static uint16_t					C1, C2, C3, C4, C5, C6;
+static float					C1f, C2f, C3f, C4f, C5f, C6f;
 static float					D1, D2;
 
 static bool						s_is_initialized = false;
 
 static uint16_t _read_uint16(uint8_t reg)
 {
-	uint8_t buf[2];
-	if (i2c::read_registers(MS5611_ADDR, reg, buf, sizeof(buf)) == 0)
+	uint16_t buf[1];
+	if (i2c::read_registers_le(MS5611_ADDR, reg, buf, 1) == 0)
 	{
-		return (((uint16_t)(buf[0]) << 8) | buf[1]);
+		return buf[0];
 	}
 	ASSERT(0);
 	return 0;
@@ -166,12 +166,18 @@ static bool _init_hardware()
 
 	// We read the factory calibration
 	// The on-chip CRC is not used
-	C1 = _read_uint16(CMD_MS5611_PROM_C1);
-	C2 = _read_uint16(CMD_MS5611_PROM_C2);
-	C3 = _read_uint16(CMD_MS5611_PROM_C3);
-	C4 = _read_uint16(CMD_MS5611_PROM_C4);
-	C5 = _read_uint16(CMD_MS5611_PROM_C5);
-	C6 = _read_uint16(CMD_MS5611_PROM_C6);
+	uint32_t C1 = _read_uint16(CMD_MS5611_PROM_C1);
+	uint32_t C2 = _read_uint16(CMD_MS5611_PROM_C2);
+	uint32_t C3 = _read_uint16(CMD_MS5611_PROM_C3);
+	uint32_t C4 = _read_uint16(CMD_MS5611_PROM_C4);
+	uint32_t C5 = _read_uint16(CMD_MS5611_PROM_C5);
+	uint32_t C6 = _read_uint16(CMD_MS5611_PROM_C6);
+	C1f = C1;
+	C2f = C2;
+	C3f = C3;
+	C4f = C4;
+	C5f = (C5 << 8);
+	C6f = C6;
 //	PRINT(":{0} {1} {2} {3} {4} {5}:", C1, C2, C3, C4, C5, C6);
 
 	//Send a command to read Temp first
@@ -216,10 +222,10 @@ static void _calculate()
 	// as this is much faster on an AVR2560, and also allows
 	// us to take advantage of the averaging of D1 and D1 over
 	// multiple samples, giving us more precision
-	float dT = D2-(((uint32_t)C5)<<8);
-	float TEMP = (dT * C6)/8388608;
-	float OFF = C2 * 65536.0f + (C4 * dT) / 128.f;
-	float SENS = C1 * 32768.0f + (C3 * dT) / 256.f;
+	float dT = D2 - C5f;
+	float TEMP = (dT * C6f)/8388608.f;
+	float OFF = C2f * 65536.0f + (C4f * dT) / 128.f;
+	float SENS = C1f * 32768.0f + (C3f * dT) / 256.f;
 	//PRINT(":{0} {1} {2} {3}:", dT, TEMP, OFF, SENS);
 
 	if (TEMP < 0)

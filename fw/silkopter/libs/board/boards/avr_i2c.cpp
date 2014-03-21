@@ -37,7 +37,8 @@ namespace i2c
 static bool s_is_initialized = false;
 
 static uint16_t s_lockup_count = 0;
-static uint16_t s_timeout_delay = 0;
+//static uint16_t s_timeout_delay_us = 1000;
+static int16_t s_delay_loop_count = 30000;
 
 
 static void _handle_lockup()
@@ -49,49 +50,31 @@ static void _handle_lockup()
 
 static uint8_t _wait_for_interrupt()
 {
-	auto start = board::clock::millis();
-	if (s_timeout_delay == 0)
+	int16_t loop_count = s_delay_loop_count + 1; //to have at least one iteration
+	// Wait while polling for timeout
+	while (!(TWCR & _BV(TWINT)) && loop_count-- >= 0);
+
+	if (loop_count <= 0)
 	{
-		/* Wait indefinitely for interrupt to go off */
-		while (!(TWCR & _BV(TWINT))) { }
+		_handle_lockup();
+		return 1;
 	}
-	else
-	{
-		/* Wait while polling for timeout */
-		while (!(TWCR & _BV(TWINT)))
-		{
-			auto current = board::clock::millis();
-			if (current - start >= s_timeout_delay)
-			{
-				_handle_lockup();
-				return 1;
-			}
-		}
-	}
+
 	return 0;
 }
 
 static uint8_t _wait_for_stop()
 {
-	auto start = board::clock::millis();
-	if (s_timeout_delay == 0)
+	int16_t loop_count = s_delay_loop_count + 1; //to have at least one iteration
+	// Wait while polling for timeout
+	while ((TWCR & _BV(TWSTO)) && loop_count-- >= 0);
+
+	if (loop_count <= 0)
 	{
-		/* Wait indefinitely for stop condition */
-		while( TWCR & _BV(TWSTO) ) { }
+		_handle_lockup();
+		return 1;
 	}
-	else
-	{
-		/* Wait while polling for timeout */
-		while( TWCR & _BV(TWSTO) )
-		{
-			auto current = board::clock::millis();
-			if (current - start >= s_timeout_delay)
-			{
-				_handle_lockup();
-				return 1;
-			}
-		}
-	}
+
 	return 0;
 }
 
@@ -133,16 +116,19 @@ static uint8_t _send_byte(uint8_t data)
 	return (TWI_STATUS == MT_DATA_ACK) ? 0 : TWI_STATUS;
 }
 
-static uint8_t _receive_byte(bool ack) 
+static uint8_t _receive_byte_ack() 
 {
-	if (ack) 
+	TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWEA);
+	auto stat = _wait_for_interrupt();
+	if (stat) 
 	{
-		TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWEA);
-	} 
-	else 
-	{
-		TWCR = _BV(TWINT) | _BV(TWEN);
+		return stat;
 	}
+	return TWI_STATUS;
+}
+static uint8_t _receive_byte() 
+{
+	TWCR = _BV(TWINT) | _BV(TWEN);
 	auto stat = _wait_for_interrupt();
 	if (stat) 
 	{
@@ -252,9 +238,9 @@ uint8_t write(uint8_t addr, const uint8_t* data, uint8_t size)
     if (stat) goto error;
     stat = _send_address(SLA_W(addr));
     if (stat) goto error;
-    for (uint8_t i = 0; i < size; i++)
+    for (int8_t i = size; i > 0; i--)
     {
-        stat = _send_byte(data[i]);
+        stat = _send_byte(*data++);
 	    if (stat) goto error;
     }
     stat = _stop();
@@ -277,9 +263,9 @@ uint8_t write_registers(uint8_t addr, uint8_t reg, const uint8_t* data, uint8_t 
     if (stat) goto error;
     stat = _send_byte(reg);
     if (stat) goto error;
-    for (uint8_t i = 0; i < size; i++)
+    for (int8_t i = size; i > 0; i--)
     {
-        stat = _send_byte(data[i]);
+        stat = _send_byte(*data++);
         if (stat) goto error;
     }
     stat = _stop();
@@ -307,25 +293,23 @@ uint8_t read(uint8_t addr, uint8_t* data, uint8_t size)
 	{
 		return 0;
 	}
-    uint8_t nackposition = size - 1;
     uint8_t stat = _start();
     if (stat) goto error;
     stat = _send_address(SLA_R(addr));
     if (stat) goto error;
-    for(uint8_t i = 0; i < size; i++) 
+    for (int8_t i = size - 1; i > 0; i--) //write size - 1 butes
 	{
-        if ( i == nackposition ) 
-		{
-            stat = _receive_byte(false);
-            if (stat != MR_DATA_NACK) goto error;
-        } 
-		else 
-		{
-            stat = _receive_byte(true);
-            if (stat != MR_DATA_ACK) goto error;
-        }
-        data[i] = TWDR;
+        stat = _receive_byte_ack();
+        if (stat != MR_DATA_ACK) goto error;
+        *data++ = TWDR;
     }
+    //last item
+	{
+        stat = _receive_byte();
+        if (stat != MR_DATA_NACK) goto error;
+        *data++ = TWDR;
+    } 
+
     stat = _stop();
     if (stat) goto error;
     return 0;
@@ -343,7 +327,6 @@ uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size)
 	{
 		return 0;
 	}
-    uint8_t nackposition = size - 1;
     uint8_t stat = _start();
     if (stat) goto error;
     stat = _send_address(SLA_W(addr));
@@ -354,26 +337,82 @@ uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size)
     if (stat) goto error;
     stat = _send_address(SLA_R(addr));
     if (stat) goto error;
-    for (uint8_t i = 0; i < size; i++) 
+    for (int8_t i = size - 1; i > 0; i--) //write size - 1 butes
 	{
-        if (i == nackposition)
-		{
-            stat = _receive_byte(false);
-            if (stat != MR_DATA_NACK) goto error;
-        } 
-		else 
-		{
-            stat = _receive_byte(true);
-            if (stat != MR_DATA_ACK) goto error;
-        }
-        data[i] = TWDR;
+        stat = _receive_byte_ack();
+        if (stat != MR_DATA_ACK) goto error;
+        *data++ = TWDR;
     }
+    //last item
+	{
+        stat = _receive_byte();
+        if (stat != MR_DATA_NACK) goto error;
+        *data++ = TWDR;
+    } 
     stat = _stop();
     if (stat) goto error;
     return 0;
 error:
     s_lockup_count++;
     return stat;
+}
+uint8_t read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t size)
+{
+	ASSERT(s_is_initialized);
+	ASSERT(s_is_locked);
+	ASSERT(data && size > 0);
+	if (!data || size == 0)
+	{
+		return 0;
+	}
+	uint8_t nack_idx = size - 1;
+	uint8_t* data_ptr8 = reinterpret_cast<uint8_t*>(data) + 1;
+
+	uint8_t stat = _start();
+	if (stat) goto error;
+	stat = _send_address(SLA_W(addr));
+	if (stat) goto error;
+	stat = _send_byte(reg);
+	if (stat) goto error;
+	stat = _start();
+	if (stat) goto error;
+	stat = _send_address(SLA_R(addr));
+	if (stat) goto error;
+	for (uint8_t i = 0; i < size; i++) //write size - 1 bytes
+	{
+		if (i == nack_idx)
+		{
+			stat = _receive_byte_ack();
+			if (stat != MR_DATA_ACK) goto error;
+			*data_ptr8 = TWDR;
+			data_ptr8 -= 1;
+
+			stat = _receive_byte(); //last byte - no ack
+			if (stat != MR_DATA_ACK) goto error;
+			*data_ptr8 = TWDR;
+			//data_ptr8 += 3;
+		}
+		else
+		{
+			stat = _receive_byte_ack();
+			if (stat != MR_DATA_ACK) goto error;
+			*data_ptr8 = TWDR;
+			data_ptr8 -= 1;
+
+			stat = _receive_byte_ack();
+			if (stat != MR_DATA_ACK) goto error;
+			*data_ptr8 = TWDR;
+			data_ptr8 += 3;
+		}
+	}
+	//0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+	//1, 0, 3, 2, 5, 4, 7, 6, 9, 8
+	stat = _stop();
+	if (stat) goto error;
+	return 0;
+error:
+	s_lockup_count++;
+	return stat;
 }
 
 uint8_t read_register(uint8_t addr, uint8_t reg, uint8_t& data) 

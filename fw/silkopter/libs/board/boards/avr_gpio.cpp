@@ -85,7 +85,7 @@ bool read(uint8_t pin)
     uint8_t port = digital_pin_to_port(pin);
     if (port == NOT_A_PIN) 
 	{
-		return 0;
+		return false;
 	}
 
     uint8_t bit = digital_pin_to_bit_mask(pin);
@@ -105,19 +105,25 @@ void write(uint8_t pin, bool value)
     uint8_t bit = digital_pin_to_bit_mask(pin);
     volatile uint8_t* out = port_output_register(port);
 
-    uint8_t oldSREG = SREG;
-    cli();
 
     if (value) 
 	{
+        uint8_t oldSREG = SREG;
+        cli();
+
         *out &= ~bit;
+        
+        SREG = oldSREG;
     } 
 	else 
 	{
-        *out |= bit;
-    }
+        uint8_t oldSREG = SREG;
+        cli();
 
-    SREG = oldSREG;
+        *out |= bit;
+
+        SREG = oldSREG;
+    }
 }
 
 void toggle(uint8_t pin) 
