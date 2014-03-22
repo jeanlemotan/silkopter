@@ -39,13 +39,13 @@ static const uint8_t MSG_BOARD_PWM_OUT = 8;
 //////////////////////////////////////////////////////////////////////////
 //UAV
 
-static const uint16_t MSG_UAV_ACCELERATION = 7;
-static const uint16_t MSG_UAV_SPEED = 8;
-static const uint16_t MSG_UAV_POSITION = 9;
-static const uint16_t MSG_UAV_ATTITUDE = 10;
-static const uint16_t MSG_UAV_PHASE = 11;
-static const uint16_t MSG_UAV_CONTROL_MODE = 12;
-static const uint16_t MSG_UAV_CONTROL_REFERENCE_FRAME = 13;
+static const uint8_t MSG_UAV_ACCELERATION = 30;
+static const uint8_t MSG_UAV_SPEED = 31;
+static const uint8_t MSG_UAV_POSITION = 32;
+static const uint8_t MSG_UAV_ATTITUDE = 33;
+static const uint8_t MSG_UAV_PHASE = 34;
+static const uint8_t MSG_UAV_CONTROL_MODE = 35;
+static const uint8_t MSG_UAV_CONTROL_REFERENCE_FRAME = 36;
 	
 //////////////////////////////////////////////////////////////////////////
 
@@ -62,7 +62,6 @@ void SFull_Protocol::hello_world(Message_String const& msg, uint16_t version)
 	m_uart->write(msg.size());
 	m_uart->write(reinterpret_cast<uint8_t const*>(msg.c_str()), msg.size());
 	m_uart->write(version);
-	m_uart->write(header, sizeof(header));
 }
 	
 void SFull_Protocol::start_frame()
@@ -75,7 +74,7 @@ void SFull_Protocol::start_frame()
 	m_buffer.clear();
 	m_buffer.write(MSG_START_FRAME);	//header: +1
 	m_buffer.write(uint8_t(4 + sizeof(m_last_frame_idx)));		//size: +1
-	m_buffer.write(m_last_frame_idx);//version: +2
+	m_buffer.write(m_last_frame_idx);//version: +4
 	
 	m_uart->write(m_buffer.get_data_ptr(), m_buffer.get_size());
 	m_uart->write(m_buffer.get_crc());//crc: +2
@@ -90,7 +89,7 @@ void SFull_Protocol::end_frame()
 	m_buffer.clear();
 	m_buffer.write(MSG_END_FRAME);	//header: +1
 	m_buffer.write(uint8_t(4 + sizeof(m_last_frame_idx)));		//size: +1
-	m_buffer.write(m_last_frame_idx);//version: +2
+	m_buffer.write(m_last_frame_idx);//version: +4
 	
 	m_uart->write(m_buffer.get_data_ptr(), m_buffer.get_size());
 	m_uart->write(m_buffer.get_crc());//crc: +2
@@ -121,7 +120,7 @@ void SFull_Protocol::send_board_gyroscope(bool is_valid, math::vec3f const& gyro
 
 	m_buffer.clear();	
 	m_buffer.write(MSG_BOARD_GYROSCOPE);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(gyro) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(gyro) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -138,7 +137,7 @@ void SFull_Protocol::send_board_accelerometer(bool is_valid, math::vec3f const& 
 
 	m_buffer.clear();
 	m_buffer.write(MSG_BOARD_ACCELEROMETER);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(accel) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(accel) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -155,7 +154,7 @@ void SFull_Protocol::send_board_temperature(bool is_valid, float temp)
 
 	m_buffer.clear();
 	m_buffer.write(MSG_BOARD_TEMPERATURE);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(temp) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(temp) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -172,7 +171,7 @@ void SFull_Protocol::send_board_baro_pressure(bool is_valid, float pressure)
 
 	m_buffer.clear();
 	m_buffer.write(MSG_BOARD_BARO_PRESSURE);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(pressure) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(pressure) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -189,7 +188,7 @@ void SFull_Protocol::send_board_sonar_altitude(bool is_valid, float altitude)
 
 	m_buffer.clear();
 	m_buffer.write(MSG_BOARD_SONAR_ALTITUDE);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(altitude) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(altitude) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -206,7 +205,7 @@ void SFull_Protocol::send_board_gps_altitude(bool is_valid, float altitude)
 
 	m_buffer.clear();
 	m_buffer.write(MSG_BOARD_GPS_ALTITUDE);
-	m_buffer.write(uint8_t(4 + sizeof(is_valid) + is_valid ? sizeof(altitude) : 0));
+	m_buffer.write(uint8_t(4 + sizeof(is_valid) + (is_valid ? sizeof(altitude) : 0)));
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{

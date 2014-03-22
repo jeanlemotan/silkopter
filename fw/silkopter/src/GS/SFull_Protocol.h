@@ -44,7 +44,7 @@ public:
 private:
 	board::UART* m_uart;
 	util::CRC_Buffer<64> m_buffer;
-	size_t m_last_frame_idx;
+	uint32_t m_last_frame_idx;
 	bool m_is_frame_started;
 };
 	

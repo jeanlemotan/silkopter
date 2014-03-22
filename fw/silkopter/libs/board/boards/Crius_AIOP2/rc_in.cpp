@@ -7,6 +7,7 @@
 #include "qmath.h"
 #include "debug/debug.h"
 #include "board/rc_in.h"
+#include "util/Scope_Sync.h"
 
 namespace board
 {
@@ -277,11 +278,13 @@ int16_t get_channel(uint8_t ch)
 	{
 		return 0;
 	}
-    /* grab channel from isr's memory in critical section*/
-    cli();
-	//now pulses is between 0 and 1200
-    int16_t pulse = (s_pulses[ch] - MIN_PULSE_WIDTH) >> 1;
-    sei();
+    // grab channel from isr's memory in critical section
+	int16_t pulse;
+	{
+		util::Scope_Sync ss;
+		//now pulses is between 0 and 1200
+		pulse = (s_pulses[ch] - MIN_PULSE_WIDTH) >> 1;
+	}
 	
     pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));
 	//dst = pulse * 1024 / 1200
@@ -295,14 +298,15 @@ void get_channels(int16_t* dst, uint8_t size)
 
 	size = math::min(size, MAX_CHANNEL_COUNT);
 
-    cli();
 	int16_t pulses[MAX_CHANNEL_COUNT];
-    for (uint8_t i = 0; i < size; i++) 
 	{
-		//now pulses is between 0 and 1200
-        pulses[i] = (s_pulses[i] - MIN_PULSE_WIDTH) >> 1; 
-    }
-    sei();
+		util::Scope_Sync ss;
+		for (uint8_t i = 0; i < size; i++)
+		{
+			//now pulses is between 0 and 1200
+			pulses[i] = (s_pulses[i] - MIN_PULSE_WIDTH) >> 1;
+		}
+	}
 
     for (uint8_t i = 0; i < size; i++) 
 	{
