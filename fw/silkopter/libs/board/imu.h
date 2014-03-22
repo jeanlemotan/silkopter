@@ -29,13 +29,11 @@ namespace imu
 		{
 			bool is_valid;
 			math::vec3f value;	
-			float delta_time;
 		} gyroscope;	
 		struct
 		{
 			bool is_valid;
 			math::vec3f value;
-			float delta_time;
 		} accelerometer;
 	};
 

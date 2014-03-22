@@ -16,6 +16,7 @@
 #include <board/sonar.h>
 #include <board/baro.h>
 #include <board/boards/avr_i2c.h>
+#include "GS/GS.h"
 
 __extension__ typedef int __guard __attribute__((mode (__DI__))); 
 
@@ -45,6 +46,9 @@ int main(void)
 	auto last = board::clock::now_us();
 	
 	util::FString<128> str;
+
+	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);
+	silk::GS gs(board::uart0);
 
 	auto last_fps = board::clock::now_ms();
 	uint32_t fps = 0;
@@ -128,16 +132,18 @@ int main(void)
 		}
 		crt_fps++;
 
-		static uint32_t counter = 0;
-		if (counter++ > 30)
-		{
-			counter = 0;
-			PRINT("{0}:{1}:{2}:{3}\n",
-			now,
-			i_imu.gyroscope.value,
-			i_imu.accelerometer.value,
-			fps);
-		}
+// 		static uint32_t counter = 0;
+// 		if (counter++ > 30)
+// 		{
+// 			counter = 0;
+// 			PRINT("{0}:{1}:{2}:{3}\n",
+// 			now,
+// 			i_imu.gyroscope.value,
+// 			i_imu.accelerometer.value,
+// 			fps);
+// 		}
+
+		gs.process(chrono::micros(1000));
 
 // 		{
 // 			auto duration = board::clock::now_us() - start;

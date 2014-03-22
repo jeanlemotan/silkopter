@@ -14,18 +14,17 @@ public:
 	SCompact_Protocol();
 	explicit SCompact_Protocol(board::UART& uart);
 
-	void hello_world(Message_String const& msg);
+	void hello_world(Message_String const& msg, uint16_t version);
 		
 	void start_frame();
 	void end_frame();
 		
-	void send_board_gyroscope(math::vec3f const& gyro);
-	void send_board_accelerometer(math::vec3f const& accel);
-	void send_board_temperature(float temp);
-		
-	void send_board_baro_altitude(float altitude);
-	void send_board_sonar_altitude(float altitude);
-	void send_board_gps_altitude(float altitude);
+	void send_board_gyroscope(bool is_valid, math::vec3f const& gyro);
+	void send_board_accelerometer(bool is_valid, math::vec3f const& accel);
+	void send_board_temperature(bool is_valid, float temp);
+	void send_board_baro_pressure(bool is_valid, float pressure);
+	void send_board_sonar_altitude(bool is_valid, float altitude);
+	void send_board_gps_altitude(bool is_valid, float altitude);
 
 	void send_uav_acceleration(math::vec3f const& accel);
 	void send_uav_speed(math::vec3f const& accel);

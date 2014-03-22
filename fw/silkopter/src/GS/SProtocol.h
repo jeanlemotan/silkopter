@@ -18,7 +18,7 @@ public:
 	//handshake
 	
 	typedef util::FString<64> Message_String;
-	virtual void hello_world(Message_String const& msg) = 0;
+	virtual void hello_world(Message_String const& msg, uint16_t version) = 0;
 	
 	virtual void start_frame() = 0;
 	virtual void end_frame() = 0;
@@ -26,13 +26,13 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	//board
 	
-	virtual void send_board_gyroscope(math::vec3f const& gyro) = 0;
-	virtual void send_board_accelerometer(math::vec3f const& accel) = 0;
-	virtual void send_board_temperature(float temp) = 0;
+	virtual void send_board_gyroscope(bool is_valid, math::vec3f const& gyro) = 0;
+	virtual void send_board_accelerometer(bool is_valid, math::vec3f const& accel) = 0;
+	virtual void send_board_temperature(bool is_valid, float temp) = 0;
 	
-	virtual void send_board_baro_altitude(float altitude) = 0;
-	virtual void send_board_sonar_altitude(float altitude) = 0;
-	virtual void send_board_gps_altitude(float altitude) = 0;
+	virtual void send_board_baro_pressure(bool is_valid, float pressure) = 0;
+	virtual void send_board_sonar_altitude(bool is_valid, float altitude) = 0;
+	virtual void send_board_gps_altitude(bool is_valid, float altitude) = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	//uav

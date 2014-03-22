@@ -24,7 +24,7 @@ SFull_Protocol::SFull_Protocol(board::UART& uart)
 static const uint16_t MSG_BOARD_GYROSCOPE = 1;
 static const uint16_t MSG_BOARD_ACCELEROMETER = 2;
 static const uint16_t MSG_BOARD_TEMPERATURE = 3;
-static const uint16_t MSG_BOARD_BARO_ALTITUDE = 4;
+static const uint16_t MSG_BOARD_BARO_PRESSURE = 4;
 static const uint16_t MSG_BOARD_SONAR_ALTITUDE = 5;
 static const uint16_t MSG_BOARD_GPS_ALTITUDE = 6;
 
@@ -43,7 +43,7 @@ static const uint16_t MSG_UAV_CONTROL_REFERENCE_FRAME = 13;
 
 static const uint8_t k_version = 1;
 	
-void SFull_Protocol::hello_world(Message_String const& msg)
+void SFull_Protocol::hello_world(Message_String const& msg, uint16_t version)
 {
 	if (!m_uart) return;
 	ASSERT(!m_is_frame_started);
@@ -53,6 +53,7 @@ void SFull_Protocol::hello_world(Message_String const& msg)
 	m_uart->write(header, sizeof(header));
 	m_uart->write(msg.size());
 	m_uart->write(reinterpret_cast<uint8_t const*>(msg.c_str()), msg.size());
+	m_uart->write(version);
 	m_uart->write(header, sizeof(header));
 }
 	
@@ -83,60 +84,84 @@ void SFull_Protocol::end_frame()
 	m_is_frame_started = false;
 }
 	
-void SFull_Protocol::send_board_gyroscope(math::vec3f const& gyro)
+void SFull_Protocol::send_board_gyroscope(bool is_valid, math::vec3f const& gyro)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 	
 	m_uart->write(MSG_BOARD_GYROSCOPE);
-	m_uart->write(gyro);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(gyro);
+	}
 }
-void SFull_Protocol::send_board_accelerometer(math::vec3f const& accel)
+void SFull_Protocol::send_board_accelerometer(bool is_valid, math::vec3f const& accel)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
 	m_uart->write(MSG_BOARD_ACCELEROMETER);
-	m_uart->write(accel);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(accel);
+	}
 }
-void SFull_Protocol::send_board_temperature(float temp)
+void SFull_Protocol::send_board_temperature(bool is_valid, float temp)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
 	m_uart->write(MSG_BOARD_TEMPERATURE);
-	m_uart->write(temp);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(temp);
+	}
 }
 
-void SFull_Protocol::send_board_baro_altitude(float altitude)
+void SFull_Protocol::send_board_baro_pressure(bool is_valid, float pressure)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	m_uart->write(MSG_BOARD_BARO_ALTITUDE);
-	m_uart->write(altitude);
+	m_uart->write(MSG_BOARD_BARO_PRESSURE);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(pressure);
+	}
 }
-void SFull_Protocol::send_board_sonar_altitude(float altitude)
+void SFull_Protocol::send_board_sonar_altitude(bool is_valid, float altitude)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
 	m_uart->write(MSG_BOARD_SONAR_ALTITUDE);
-	m_uart->write(altitude);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(altitude);
+	}
 }
-void SFull_Protocol::send_board_gps_altitude(float altitude)
+void SFull_Protocol::send_board_gps_altitude(bool is_valid, float altitude)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
 	m_uart->write(MSG_BOARD_GPS_ALTITUDE);
-	m_uart->write(altitude);
+	m_uart->write(is_valid);
+	if (is_valid)
+	{
+		m_uart->write(altitude);
+	}
 }
 
 void SFull_Protocol::send_uav_acceleration(math::vec3f const& accel)

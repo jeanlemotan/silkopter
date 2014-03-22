@@ -6,6 +6,7 @@
 #include "GS/SCompact_Protocol.h"
 #include "util/Noncopyable.h"
 #include "board/UART.h"
+#include "util/chrono.h"
 
 namespace silk
 {
@@ -16,7 +17,7 @@ namespace silk
 		explicit GS(board::UART& full_uart);
 		GS(board::UART& full_uart, board::UART& compact_uart);
 
-		void process();
+		void process(chrono::micros max_duration);
 
 	private:
 		board::UART& m_full_uart;
@@ -24,8 +25,9 @@ namespace silk
 
 		SFull_Protocol m_full_protocol;
 		SCompact_Protocol m_compact_protocol;
-
 		
+		uint32_t m_step;
+		
+		bool send_data(uint32_t step); //returns true when done
 	};
-
 }
