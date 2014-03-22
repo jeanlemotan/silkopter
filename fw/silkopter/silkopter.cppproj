@@ -225,6 +225,9 @@
     <Compile Include="libs\util\chrono.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\util\Flag_Set.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\util\format.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -579,6 +582,12 @@
     <Compile Include="libs\stl\type_traits.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\util\Noncopyable.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\util\Scope_Sync.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Main.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -592,6 +601,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\GS\GS.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Motor_Mixer.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Motor_Mixer.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\OSD\CT.cpp">
@@ -622,6 +637,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\States\State.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\UAV.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\UAV.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

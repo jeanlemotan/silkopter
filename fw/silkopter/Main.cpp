@@ -35,7 +35,7 @@ int main(void)
 	board::clock::init();
 	board::rc_in::init();
  	board::pwm_out::init();
- 	board::imu::init(board::imu::Sample_Rate::RATE_200_HZ);
+ 	board::imu::init(board::imu::Sample_Rate::RATE_500_HZ);
  	board::sonar::init();
 	board::baro::init();
 
@@ -141,9 +141,9 @@ int main(void)
 
 // 		{
 // 			auto duration = board::clock::now_us() - start;
-// 			if (duration < chrono::micros(20000))
+// 			if (duration < chrono::micros(200000))
 // 			{
-// 				board::clock::delay(chrono::micros(20000) - duration);
+// 				board::clock::delay(chrono::micros(200000) - duration);
 // 			}
 // 		}
 

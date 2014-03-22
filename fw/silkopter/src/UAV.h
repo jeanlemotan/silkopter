@@ -1,21 +1,16 @@
 #pragma once
 
-namespace uav
+#include "qmath.h"
+#include "util/Flag_Set.h"
+#include "Motor_Mixer.h"
+
+namespace silk
 {
 
-	//type of the uav. 
-	//The PLUS version has an arm pointing forward while on the X version the front is between 2 arms
-	enum class Type : uint8_t
-	{
-		TRICOPTER,
-		QUADCOPTER_X,
-		QUADCOPTER_PLUS,
-		HEXACOPTER_X,
-		HEXACOPTER_PLUS,
-		OCTOCOPTER_X,
-		OCTOCOPTER_PLUS,
-	};
-
+class UAV
+{
+public:
+		
 	//The attitude vectors
 	//At rest, gravity is towards -Z.
 	struct Attitude
@@ -87,7 +82,7 @@ namespace uav
 
 		Control_Mode control_mode; //decides how the user actions are translated into uav movement
 		Control_Reference_Frame control_reference_frame; //controls are relative to this reference frame
-		AI ai; //assist the user
+		//AI ai; //assist the user
 
 		Phase phase;
 	};
@@ -112,7 +107,7 @@ namespace uav
 			AVOID_THE_USER			= 1 << 6, 	//avoid being too low around the home position. Needs sonar and GPS. Controlled by the Params::home_radius
 			AVOID_THE_GROUND 		= 1 << 7,	//maintains a min distance from the ground. Needs sonar. Configured by Params::min_ground_distance parameter
 		};
-		util::Flag_Set<Type, uint16_t> Types;
+		typedef util::Flag_Set<Type, uint16_t> Types;
 
 		Types type;
 
@@ -143,11 +138,12 @@ namespace uav
 	struct Failsafes
 	{
 		Failsafes()
-			: radio_params.behavior(Behavior::RETURN_HOME)
-			, battery_params.behavior(Behavior::LAND)
-			, panic_params.behavior(Behavior::HOLD_POSITION)
-			, other_params.behavior(Behavior::RETURN_HOME)
-		{}
+		{
+			radio_params.behavior = Behavior::RETURN_HOME;
+			battery_params.behavior = Behavior::LAND;
+			panic_params.behavior = Behavior::HOLD_POSITION;
+			other_params.behavior = Behavior::RETURN_HOME;
+		}
 		
 		enum class Behavior : uint8_t
 		{
@@ -182,22 +178,31 @@ namespace uav
 	};
 
 
-	extern void init(Type type, float uav_radius);
+	UAV(Motor_Mixer::Type type, uint8_t motor_count, float radius);
 
-	extern void set_assists(Assists const& assists);
-	extern void set_failsafes(Failsafes const& failsafes);
+	void set_assists(Assists const& assists);
+	void set_failsafes(Failsafes const& failsafes);
 
-	extern void set_control_reference_frame(Control_Reference_Frame frame);
-	extern void set_control_mode(Control_Mode mode);
+	void set_control_reference_frame(Control_Reference_Frame frame);
+	void set_control_mode(Control_Mode mode);
 
 	//current status and parameters
-	extern const Status& get_status();
+	const Status& get_status();
 
 	//this has to be called periodically - as often as possible. Minimum is 100hz
-	extern void process();
+	void process();
+	
+private:
+	float m_radius;
+	Motor_Mixer m_motor_mixer;
+	Assists m_assists;
+	Failsafes m_failsafes;
+	Control_Reference_Frame m_control_frame_reference;
+	Control_Mode m_control_mode;
+	Status m_status;
+};
 
 };
 
 
 
-}

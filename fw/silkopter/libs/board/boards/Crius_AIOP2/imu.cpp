@@ -519,8 +519,8 @@ static void _refresh_data()
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
 	if (s_accel_data.z < -0.1f)
  	{
-		s_gyro_data.x = math::lerp(s_gyro_data.x, accel_pitch_x, 0.01f);
-		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, 0.01f);
+		s_gyro_data.x = math::lerp(s_gyro_data.x, accel_pitch_x, delta_time);
+		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, delta_time);
  	}
 	
 	s_temp_data *= scinv;
