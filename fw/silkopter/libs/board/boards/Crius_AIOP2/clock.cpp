@@ -5,6 +5,7 @@
 #include <avr/interrupt.h>
 #include "debug/debug.h"
 #include "board/clock.h"
+#include "util/Scope_Sync.h"
 
 namespace board
 {
@@ -39,9 +40,8 @@ void init()
 		return;
 	}
 	s_is_initialized = true;
-	
-	uint8_t old_sreg = SREG;
-	cli();
+
+	util::Scope_Sync ss();
 
 	// Timer cleanup before configuring
 	AVR_TIMER_TCNT = 0;
@@ -65,8 +65,6 @@ void init()
 
 	// enable a2d conversions
 	sbi(ADCSRA, ADEN);
-
-	SREG = old_sreg;
 }
 
 SIGNAL(AVR_TIMER_OVF_VECT)
@@ -100,12 +98,11 @@ SIGNAL(AVR_TIMER_OVF_VECT)
 // 	);
 // }
 
-uint32_t micros()
+chrono::time_us now_us()
 {
 	ASSERT(s_is_initialized);
 
-	uint8_t old_sreg = SREG;
-	cli();
+	util::Scope_Sync ss();
 
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
 	//uint32_t time_micros = timer_micros_counter + (AVR_TIMER_TCNT / 2);
@@ -119,17 +116,15 @@ uint32_t micros()
 	{
 		time_micros += 0xFFFF / 2;
 	}
-	SREG = old_sreg;
 
-	return time_micros + (tcnt >> 1);
+	return chrono::time_us(time_micros + (tcnt >> 1));
 }
 
-uint32_t millis() 
+chrono::time_ms now_ms() 
 {
 	ASSERT(s_is_initialized);
 
-	uint8_t oldSREG = SREG;
-	cli();
+	util::Scope_Sync ss();
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
 	//uint32_t time_millis = timer_millis_counter + (AVR_TIMER_TCNT / 2000) ;
 	//uint32_t time_millis =  timer_millis_counter + (AVR_TIMER_TCNT >> 11); // AVR_TIMER_CNT / 2048 is close enough (24us counter delay)
@@ -142,14 +137,16 @@ uint32_t millis()
 	{
 		time_millis += 0xFFFF >> 11;
 	}
-	SREG = oldSREG;
 
-	return time_millis + (tcnt >> 11);
+	return chrono::time_ms(time_millis + (tcnt >> 11));
 }
 
-void delay_micros(uint16_t us)
+void delay(chrono::micros _us)
 {
 	ASSERT(s_is_initialized);
+	ASSERT(_us.count < 65536);
+	
+	uint16_t us = _us.count;
 
 	// for the 16 MHz clock on most Arduino boards
 	// for a one-microsecond delay, simply return.  the overhead
@@ -175,21 +172,25 @@ void delay_micros(uint16_t us)
 	);
 }
 
-void delay_millis(uint16_t ms)
+void delay(chrono::millis _ms)
 {
 	ASSERT(s_is_initialized);
+	if (_ms.count <= 0)
+	{
+		return;
+	}
 
-	uint32_t us = uint32_t(ms) * 1000;
+	uint32_t us = _ms.count * 1000;
 	uint16_t times = us >> 14;
-	uint16_t rest = ms & 16385; 
+	auto rest = chrono::micros(_ms.count & 16385);
 	
 	for (uint16_t i = 0; i < times; i++)
 	{
-		delay_micros(16384);
+		delay(chrono::micros(16384));
 	}
-	if (rest)
+	if (rest.count)
 	{
-		delay_micros(rest);
+		delay(rest);
 	}
 }
 

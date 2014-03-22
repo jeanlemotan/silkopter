@@ -7,6 +7,7 @@
 #include "debug/debug.h"
 #include "board/boards/avr_gpio.h"
 #include "board/boards/avr_pins.h"
+#include "util/Scope_Sync.h"
 
 namespace board
 {
@@ -64,17 +65,13 @@ void set_pin_mode(uint8_t pin, Mode mode)
 
     if (mode == Mode::INPUT) 
 	{
-        uint8_t oldSREG = SREG;
-		cli();
+        util::Scope_Sync ss();
         *reg &= ~bit;
-        SREG = oldSREG;
     } 
 	else 
 	{
-        uint8_t oldSREG = SREG;
-		cli();
+        util::Scope_Sync ss();
         *reg |= bit;
-        SREG = oldSREG;
     }
 }
 
@@ -108,21 +105,13 @@ void write(uint8_t pin, bool value)
 
     if (value) 
 	{
-        uint8_t oldSREG = SREG;
-        cli();
-
+        util::Scope_Sync ss();
         *out &= ~bit;
-        
-        SREG = oldSREG;
     } 
 	else 
 	{
-        uint8_t oldSREG = SREG;
-        cli();
-
+        util::Scope_Sync ss();
         *out |= bit;
-
-        SREG = oldSREG;
     }
 }
 
@@ -139,12 +128,10 @@ void toggle(uint8_t pin)
     uint8_t bit = digital_pin_to_bit_mask(pin);
     volatile uint8_t* out = port_output_register(port);
 
-    uint8_t oldSREG = SREG;
-    cli();
-
-    *out ^= bit;
-
-    SREG = oldSREG;
+    {    
+        util::Scope_Sync ss();
+        *out ^= bit;
+    }
 }
 
 // /* Implement GPIO Interrupt 6, used for MPU6000 data ready on APM2. */

@@ -28,31 +28,31 @@ MATH_FORCE_INLINE T radians(T const& degrees)
 
 MATH_FORCE_INLINE float cos(float s)
 {
-	return cosf(s);
+	return ::cosf(s);
 }
 MATH_FORCE_INLINE float sin(float s)
 {
-	return sinf(s);
+	return ::sinf(s);
 }
 MATH_FORCE_INLINE float tan(float s)
 {
-	return tanf(s);
+	return ::tanf(s);
 }
 MATH_FORCE_INLINE float acos(float s)
 {
-	return acosf(s);
+	return ::acosf(s);
 }
 MATH_FORCE_INLINE float asin(float s)
 {
-	return asinf(s);
+	return ::asinf(s);
 }
 MATH_FORCE_INLINE float atan(float s)
 {
-	return atanf(s);
+	return ::atanf(s);
 }
 MATH_FORCE_INLINE float atan2(float y, float x)
 {
-	return atan2f(y, x);
+	return ::atan2f(y, x);
 }
 MATH_FORCE_INLINE void sin_cos(float angle, float& s, float& c)
 {

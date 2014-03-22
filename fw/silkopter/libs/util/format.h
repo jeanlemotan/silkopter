@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <math.h>
 #include "FString.h"
+#include "chrono.h"
 
 namespace util
 {
@@ -535,11 +536,23 @@ namespace formatting
 // 		format_string(dst, off, ph, (int32_t)ms.count());
 // 	}
 // 
-// 	template<class Dst_Adapter, class Placeholder, class clock>
-// 	void format_string(Dst_Adapter& dst, auto& off, Placeholder const& ph, std::chrono::time_point<clock> const& time_point)
-// 	{
-// 		format_string(dst, off, ph, time_point.time_since_epoch());
-// 	}
+	template<class Dst_Adapter, class Placeholder, class Rep, class Duration>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, chrono::time<Rep, Duration> const& time)
+	{
+		format_string(dst, ph, time.time_since_epoch());
+	}
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, chrono::micros us)
+	{
+		format_string(dst, ph, us.count);
+		format_string(dst, ph, "us");
+	}
+	template<class Dst_Adapter, class Placeholder>
+	void format_string(Dst_Adapter& dst, Placeholder const& ph, chrono::millis ms)
+	{
+		format_string(dst, ph, ms.count);
+		format_string(dst, ph, "ms");
+	}
 
 	template<class Dst_Adapter, class P>
 	struct Argument_Parser

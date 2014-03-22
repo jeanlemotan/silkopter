@@ -15,6 +15,7 @@
 #include <debug/debug.h>
 #include <board/sonar.h>
 #include <board/baro.h>
+#include <board/boards/avr_i2c.h>
 
 __extension__ typedef int __guard __attribute__((mode (__DI__))); 
 
@@ -34,44 +35,48 @@ int main(void)
 	board::clock::init();
 	board::rc_in::init();
  	board::pwm_out::init();
- 	board::imu::init(board::imu::Sample_Rate::RATE_50_HZ);
+ 	board::imu::init(board::imu::Sample_Rate::RATE_200_HZ);
  	board::sonar::init();
 	board::baro::init();
 
 	board::pwm_out::set_frequencies(50);
 	board::pwm_out::set_all_enabled(true);
 
-	auto last = board::clock::micros();
+	auto last = board::clock::now_us();
 	
 	util::FString<128> str;
+
+	auto last_fps = board::clock::now_ms();
+	uint32_t fps = 0;
+	uint32_t crt_fps = 0;
 	
     while(1)
     {
         //TODO:: Please write your application code 
-		auto now = board::clock::micros();
+		auto now = board::clock::now_us();
 		auto start = now;
 
-		int16_t channels[8];
-		last = board::clock::micros();
-		board::rc_in::get_channels(channels, 8);
-		now = board::clock::micros();
-		auto d1 = now - last;
+// 		int16_t channels[8];
+// 		last = board::clock::now_us();
+// 		board::rc_in::get_channels(channels, 8);
+// 		now = board::clock::now_us();
+// 		auto d1 = now - last;
 
 
-		last = board::clock::micros();
-		auto value = channels[2];
-		board::pwm_out::set_all_channels(value);
+// 		last = board::clock::now_us();
+// 		auto value = channels[2];
+// 		board::pwm_out::set_all_channels(value);
 
 // 		format(str, "#{0}s: {1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\n", board::clock.millis() >> 10,
 // 		channels[0], channels[1], channels[2], channels[3],
 // 		channels[4], channels[5], channels[6], channels[7]);
-// 		now = board::clock::micros();
+// 		now = chrono::micros();
 // 		auto d2 = now - last;
 
-		static math::vec3f attitude;
-
-		static math::vec3f gyro_offset;
-		static int32_t calibration_step = 100;
+// 		static math::vec3f attitude;
+// 
+// 		static math::vec3f gyro_offset;
+// 		static int32_t calibration_step = 100;
 		
 		board::imu::Data i_imu;
  		board::imu::get_data(i_imu);
@@ -89,46 +94,58 @@ int main(void)
 
 		//PRINT("\n{0} :: {1}", attitude, gyro_offset);
 		
-		board::sonar::Data i_sonar; 
- 		board::sonar::get_data(i_sonar);
+// 		board::sonar::Data i_sonar; 
+//  		board::sonar::get_data(i_sonar);
 
-		board::baro::Data i_baro;
-		board::baro::get_data(i_baro);
+// 		board::baro::Data i_baro;
+// 		board::baro::get_data(i_baro);
 
 //		oard::uart0.write(str.c_str());
  		//util::format(str, "timing: {0}us / {1}us\n", d1, d2);
 			 
- 		int32_t iterations = 0;
- 		now = board::clock::micros();
- 		while (board::clock::micros() - now < 100000)
- 		{
- 			volatile int32_t x = 732715;
- 			for (volatile uint32_t i = 0; i < 1000; i++)
- 			{
- 				x += 7;
- 			}
- 			iterations++;
- 		}
- 		{
- 			auto cpu = (22 - iterations) * 100 / 22;
- 			PRINT("CPU: {0}\n", cpu); //22
- 		}
+//  		int32_t iterations = 0;
+//  		now = board::clock::now_us();
+//  		while (board::clock::now_us() - now < 100000)
+//  		{
+//  			volatile int32_t x = 732715;
+//  			for (volatile uint32_t i = 0; i < 1000; i++)
+//  			{
+//  				x += 7;
+//  			}
+//  			iterations++;
+//  		}
+//  		{
+//  			auto cpu = (22 - iterations) * 100 / 22;
+//  			PRINT("CPU: {0} locks {1}\n", cpu, board::i2c::get_lockup_count()); //22
+//  		}
 
- 		PRINT(":{0}:{1}:{2}:{3}:{4}:{5}\n", 
-			 now,
-			 i_sonar.altitude, 
-			 i_baro.pressure.value,
-			 i_baro.temperature.value,
-			 i_imu.gyroscope.value, 
-			 i_imu.accelerometer.value);
-
+		auto fps_now = board::clock::now_ms();
+		if (fps_now - last_fps >= chrono::millis(1000))
 		{
-			auto duration = board::clock::micros() - start;
-			if (duration < 100)
-			{
-			//	board::clock::delay_micros(100 - duration);
-			}
+			last_fps = fps_now;
+			fps = crt_fps;
+			crt_fps = 0;
 		}
+		crt_fps++;
+
+		static uint32_t counter = 0;
+		if (counter++ > 30)
+		{
+			counter = 0;
+			PRINT("{0}:{1}:{2}:{3}\n",
+			now,
+			i_imu.gyroscope.value,
+			i_imu.accelerometer.value,
+			fps);
+		}
+
+// 		{
+// 			auto duration = board::clock::now_us() - start;
+// 			if (duration < chrono::micros(20000))
+// 			{
+// 				board::clock::delay(chrono::micros(20000) - duration);
+// 			}
+// 		}
 
 		last = now;
    }

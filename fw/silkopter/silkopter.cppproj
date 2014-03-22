@@ -222,6 +222,9 @@
     <Compile Include="libs\debug\debug.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\util\chrono.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\util\format.cpp">
       <SubType>compile</SubType>
     </Compile>

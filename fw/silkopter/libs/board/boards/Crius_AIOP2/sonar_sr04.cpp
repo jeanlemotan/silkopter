@@ -15,35 +15,35 @@ namespace sonar
 {
 
 static bool s_is_initialized = false;
-static volatile uint32_t s_last_trigger_us = 0;
-static const uint32_t k_period_us = 150000;
-static const uint32_t k_echo_max_delay_us = 20000; //20ms max
+static chrono::time_us s_last_trigger;
+static const chrono::micros k_period(150000);
+static const chrono::micros k_echo_max_delay(20000); //20ms max
 static const float k_max_distance = 1.8f; 
 
 static volatile uint8_t s_state;
-static volatile uint32_t s_start_us = 0;
-static volatile uint32_t s_echo_delay_us = 0;
+static volatile chrono::time_us s_start_time;
+static volatile chrono::micros s_echo_delay;
 static volatile float s_altitude = 0.f;
 
 //////////////////////////////////////////////////////////////////////////
 
-static void _sonar_trigger(uint32_t micros)
+static void _sonar_trigger(chrono::time_us now)
 {
-	if (micros - s_last_trigger_us >= k_period_us)
+	if (now - s_last_trigger >= k_period)
 	{
-		s_last_trigger_us = micros;
+		s_last_trigger = now;
 		s_state = 0;
-		s_echo_delay_us = 0;
+		s_echo_delay = chrono::micros();
 		
 		PORTH |= 0B01000000; // set Sonar TX pin to 1 and after ~12us set it to 0 (below) to start new measurement
-		clock::delay_micros(12);
+		clock::delay(chrono::micros(12));
 		PORTH &= 0B10111111; // set TX pin to 0, and wait for 1 on Echo pin (below)  
 	}
 	else if (s_state == 1)
 	{
 		s_state = 0;
-		auto delay = s_echo_delay_us >> 1; //divide by two to account for the round trip
-		s_altitude = math::min(delay, k_echo_max_delay_us) * 0.000343f;
+		chrono::micros delay(s_echo_delay.count >> 1); //divide by two to account for the round trip
+		s_altitude = math::min(delay, k_echo_max_delay).count * 0.000343f;
 	}
 }
 
@@ -54,11 +54,11 @@ ISR(PCINT0_vect)
 	{
 		if (PINB & 0B00010000) 
 		{
-			s_start_us = clock::micros(); // We got 1 on Echo pin, remeber current counter value
+			s_start_time = clock::now_us(); // We got 1 on Echo pin, remeber current counter value
 		} 
 		else 
 		{
-			s_echo_delay_us = clock::micros() - s_start_us; // We got 0 on Echo pin, calculate impulse length in counter ticks
+			s_echo_delay = clock::now_us() - s_start_time; // We got 0 on Echo pin, calculate impulse length in counter ticks
 			s_state = 1; // Set "Measurement finished" flag
 		}
 	}

@@ -173,10 +173,9 @@ namespace imu
  */
 const float s_gyro_scale = (0.0174532f / 16.4f);
 
-static volatile uint32_t s_last_refresh_us = 0;
+static volatile chrono::time_us s_last_refresh_time;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
-static uint16_t s_sample_us = 19000;
-static float s_delta_time = 0.f;
+static chrono::micros s_sample_duration(19000);
 static bool s_is_initialised = false;
 
 
@@ -264,29 +263,35 @@ volatile static math::vec3i s_accel_sum;
 volatile static math::vec3i s_gyro_sum;
 volatile static uint32_t s_temp_sum;
 volatile static uint8_t s_sample_count = 0;
+volatile static chrono::micros s_delta_time_sum;
 
 static int16_t s_raw_mpu[14] = {0};
 
-static void _poll_data(uint32_t micros)
+static void _poll_data()
 {
-	if ((micros - s_last_refresh_us) > s_sample_us)
+	auto now = clock::now_us();
+	auto d = now - s_last_refresh_time;
+	if (d >= s_sample_duration)
 	{
-		if (i2c::lock())
+		if (i2c::try_lock())
 		{
 			//i2c::set_high_speed(true); // Set I2C fast speed
 
-			i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7);
-			s_accel_sum.x	+= s_raw_mpu[0];
-			s_accel_sum.y	+= s_raw_mpu[1];
+			i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 3);
+			s_accel_sum.x	-= s_raw_mpu[0];
+			s_accel_sum.y	-= s_raw_mpu[1];
 			s_accel_sum.z	-= s_raw_mpu[2];
-			s_temp_sum		+= s_raw_mpu[3];
-			s_gyro_sum.x	+= s_raw_mpu[4];
-			s_gyro_sum.y	+= s_raw_mpu[5];
-			s_gyro_sum.z	-= s_raw_mpu[6];
+			//s_temp_sum		+= s_raw_mpu[3];
+			i2c::read_registers_le(s_mpu_addr, MPUREG_GYRO_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 3);
+			s_gyro_sum.x	+= s_raw_mpu[0];
+			s_gyro_sum.y	+= s_raw_mpu[1];
+			s_gyro_sum.z	+= s_raw_mpu[2];
 			s_sample_count++;
+			
+			s_delta_time_sum += d;
 
 			i2c::unlock();
-			s_last_refresh_us = micros;
+			s_last_refresh_time = now;
 		}
 	}
 }
@@ -324,13 +329,7 @@ static void _set_filter_register(uint8_t filter_hz, uint8_t default_filter)
 
 static bool _init_hardware(Sample_Rate sample_rate)
 {
-	int lock_tries = 1000;
-    while (!i2c::lock() && lock_tries >= 0)
-	{
-		lock_tries--;
-		clock::delay_micros(10);
-    }
-	if (lock_tries < 0)
+	if (!i2c::lock(chrono::micros(10000)))
 	{
 		return false;
 	}
@@ -341,13 +340,13 @@ static bool _init_hardware(Sample_Rate sample_rate)
     for (tries = 0; tries < 5; tries++) 
 	{
 		i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
-		clock::delay_millis(100);
+		clock::delay(chrono::millis(100));
 			
 		// Wake up device and select GyroZ clock. Note that the
 		// MPU6000 starts up in sleep mode, and it can take some time
 		// for it to come out of sleep
 		i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_CLK_ZGYRO);
-		clock::delay_millis(5);
+		clock::delay(chrono::millis(5));
 			
 		// check it has woken up
 		i2c::read_register(s_mpu_addr, MPUREG_PWR_MGMT_1, reg_val);
@@ -363,7 +362,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
 
     // only used for wake-up in accelerometer only low power mode
     i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_2, 0);
-    clock::delay_millis(1);
+    clock::delay(chrono::millis(1));
     
     uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
 
@@ -373,32 +372,25 @@ static bool _init_hardware(Sample_Rate sample_rate)
     switch (sample_rate)
 	{
     case Sample_Rate::RATE_50_HZ:
-        // this is used for plane and rover, where noise resistance is
-        // more important than update rate. Tests on an aerobatic plane
-        // show that 10Hz is fine, and makes it very noise resistant
-		s_sample_us = 19000;
-		s_delta_time = 0.02f;
+		s_sample_duration = chrono::micros(20000);
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
         break;
     case Sample_Rate::RATE_100_HZ:
-		s_sample_us = 9900;
-		s_delta_time = 0.01f;
+		s_sample_duration = chrono::micros(10000);
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
         break;
     case Sample_Rate::RATE_200_HZ:
-		s_sample_us = 4900;
-		s_delta_time = 0.005f;
+		s_sample_duration = chrono::micros(5000);
 		rate = MPUREG_SMPLRT_200HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 		break;
     case Sample_Rate::RATE_500_HZ:
-		s_sample_us = 1900;
-		s_delta_time = 0.002f;
-   		rate = MPUREG_SMPLRT_500HZ;
-        default_filter = BITS_DLPF_CFG_188HZ;
-        break;
+		s_sample_duration = chrono::micros(2000);
+		rate = MPUREG_SMPLRT_500HZ;
+		default_filter = BITS_DLPF_CFG_98HZ;
+	    break;
     default:
 		rate = 0;
 		PANIC_MSG("Unknown sample rate");
@@ -409,10 +401,10 @@ static bool _init_hardware(Sample_Rate sample_rate)
     // set sample rate to 200Hz, and use _sample_divider to give
     // the requested rate to the application
     i2c::write_register(s_mpu_addr, MPUREG_SMPLRT_DIV, rate);
-    clock::delay_millis(1);
+    clock::delay(chrono::millis(1));
 
     i2c::write_register(s_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_2000DPS); // Gyro scale 2000?/s
-    clock::delay_millis(1);
+    clock::delay(chrono::millis(1));
 
 		// Get chip revision
     i2c::read_register(s_mpu_addr, MPUREG_PRODUCT_ID, reg_val);
@@ -431,7 +423,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
 		i2c::write_register(s_mpu_addr, MPUREG_ACCEL_CONFIG, 2<<3);
 	}
 			
-    clock::delay_millis(1);
+    clock::delay(chrono::millis(1));
 
 #ifndef DISABLE_INTERNAL_MAG
     // Enable I2C bypass mode, to work with Magnetometer 5883L
@@ -461,7 +453,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
 static math::vec3f s_gyro_data;
 static math::vec3f s_accel_data;
 static float s_temp_data = 0;
-static uint32_t s_last_data_us = 0;
+static chrono::time_us s_last_data_time;
 
 static void _refresh_data()
 {
@@ -470,47 +462,68 @@ static void _refresh_data()
 		return;
 	}
 	
-	s_last_data_us = clock::micros();
+	s_last_data_time = clock::now_us();
 
-	scheduler::suspend();	
+	//first copy the data and resume the timer. This has to be AFAP
+	scheduler::suspend();
 
 	ASSERT(s_sample_count > 0);
 	auto sc = s_sample_count;
-	s_gyro_data.set((math::vec3i&)(s_gyro_sum));
+	math::vec3f gyro_delta((math::vec3i&)(s_gyro_sum));
 	s_accel_data.set((math::vec3i&)(s_accel_sum));
 	s_temp_data = s_temp_sum;
+	float delta_time = (float)s_delta_time_sum.count * 0.000001f;
 
 	((math::vec3i&)s_gyro_sum).set(0, 0, 0);
 	((math::vec3i&)s_accel_sum).set(0, 0, 0);
 	s_temp_sum = 0;
 	s_sample_count = 0;
+	s_delta_time_sum = chrono::micros(0);
 
 	scheduler::resume();
 
 	float scinv = 1.f / sc;
-	//_gyro.rotate(_board_orientation);
-	s_gyro_data *= s_gyro_scale * scinv;
-	//_gyro -= _gyro_offset;
 
-	//_accel.rotate(_board_orientation);
+	//compute gyro deltas and apply calibrartion offset
+	gyro_delta *= s_gyro_scale * scinv * delta_time;
+	gyro_delta -= math::vec3f(0.000140400065f, -2.01000021e-005f, 5.69999884e-006f);
+	
+	//accumulate the deltas
+	s_gyro_data += gyro_delta;
+
+	//scale the accel and apply the calibration offset
 	s_accel_data *= MPU6000_ACCEL_SCALE_1G * scinv;
+	s_accel_data.x += 2.46124005f;
+	s_accel_data.y += 0.495599985f;
+
+	//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
+	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z) + math::anglef::pi.radians;
+	if (accel_pitch_x > math::anglef::pi.radians)
+	{
+		accel_pitch_x -= math::anglef::_2pi.radians;
+	}
+	else if (accel_pitch_x < -math::anglef::pi.radians)
+	{
+		accel_pitch_x += math::anglef::_2pi.radians;
+	}
+ 	float accel_roll_y = math::atan2(s_accel_data.x, math::sqrt(s_accel_data.y*s_accel_data.y + s_accel_data.z*s_accel_data.z));
+	if (accel_roll_y > math::anglef::pi.radians)
+	{
+		accel_roll_y -= math::anglef::_2pi.radians;
+	}
+	else if (accel_roll_y < -math::anglef::pi.radians)
+	{
+		accel_roll_y += math::anglef::_2pi.radians;
+	}
+
+	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
+	if (s_accel_data.z < -0.1f)
+ 	{
+		s_gyro_data.x = math::lerp(s_gyro_data.x, accel_pitch_x, 0.01f);
+		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, 0.01f);
+ 	}
 	
 	s_temp_data *= scinv;
-
-	//     Vector3f accel_scale = _accel_scale.get();
-	//     _accel.x *= accel_scale.x;
-	//     _accel.y *= accel_scale.y;
-	//     _accel.z *= accel_scale.z;
-	//     _accel -= _accel_offset;
-
-	//     if (_last_filter_hz != _mpu6000_filter) {
-	//         if (_i2c_sem->take(10)) {
-	//             _set_filter_register(_mpu6000_filter, 0);
-	//             _i2c_sem->give();
-	//         }
-	//     }
-	
-	//PRINT("samples {0}\n", buffer.accel_sample_count);
 }
 
 
@@ -538,7 +551,7 @@ void init(Sample_Rate rate)
 		}
 		else
 		{
-			clock::delay_millis(50); // delay for 50ms
+			clock::delay(chrono::millis(50));
 		}
 		
 		if (tries++ > 5)
@@ -547,7 +560,7 @@ void init(Sample_Rate rate)
 		}
 	} while (1);
 
-	s_last_refresh_us = clock::micros();
+	s_last_refresh_time = clock::now_us();
 
 	//gpio::set_pin_mode(46, gpio::Mode::OUTPUT); // Debug output
 	//gpio::write(46, 0);
@@ -569,18 +582,17 @@ void get_data(Data& data)
 	ASSERT(s_is_initialised);
 	_refresh_data();
 	
-	auto now = clock::micros();
-	auto is_valid = now < s_last_data_us + 500;
+	auto now = clock::now_us();
+	auto is_valid = now < s_last_data_time + chrono::micros(500);
 
 	data.accelerometer.is_valid = is_valid;
 	data.gyroscope.is_valid = is_valid;
 	
 	data.accelerometer.value = s_accel_data;
-	data.accelerometer.delta_time = s_delta_time;
+	//data.accelerometer.delta_time = s_delta_time;
 	data.gyroscope.value = s_gyro_data;
-	s_gyro_data.set(0, 0, 0); //since gyro is a delta, reset it after reading 
 	
-	data.gyroscope.delta_time = s_delta_time;
+	//data.gyroscope.delta_time = s_delta_time;
 }
 
 }

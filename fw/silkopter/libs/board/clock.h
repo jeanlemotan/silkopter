@@ -1,15 +1,17 @@
 #pragma once
 
+#include "util/chrono.h"
+
 namespace board
 {
 namespace clock
 {
 	extern void init();
 	
-	extern uint32_t millis();
-	extern uint32_t micros();
+	extern chrono::time_ms now_ms();
+	extern chrono::time_us now_us();
 	
-	extern void delay_micros(uint16_t us);
-	extern void delay_millis(uint16_t ms);
+	extern void delay(chrono::micros us);
+	extern void delay(chrono::millis ms);
 }
 }

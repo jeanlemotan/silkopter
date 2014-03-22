@@ -29,7 +29,7 @@ namespace baro
 #define CMD_CONVERT_D2_OSR4096 0x58   // Maximum resolution (oversampling)
 
 static const uint32_t			k_update_frequency = 50;
-static const uint32_t			k_delay_us = 1000000 / k_update_frequency;
+static const chrono::micros		k_delay(1000000 / k_update_frequency);
 
 static bool						s_is_healthy = false;
 static volatile bool            s_has_data = false;
@@ -37,7 +37,7 @@ static volatile uint8_t         s_d1_count;
 static volatile uint8_t         s_d2_count;
 static volatile uint32_t        s_s_d1, s_s_d2;
 static uint8_t                  s_state = 0;
-static uint32_t                 s_last_update_us = 0;
+static chrono::time_us			s_last_update_time;
 /* Gates access to asynchronous state: */
 
 static float					s_temperature;
@@ -85,22 +85,23 @@ static void _write(uint8_t reg)
 // Read the sensor. This is a state machine
 // We read one time Temperature (state=1) and then 4 times Pressure (states 2-5)
 // temperature does not change so quickly...
-static void _update(uint32_t micros)
+static void _update()
 {
+	auto now = clock::now_us();
 	// Throttle read rate to 100hz maximum.
-	if (micros - s_last_update_us < k_delay_us)
+	if (now - s_last_update_time < k_delay)
 	{
 		return;
 	}
 
-	if (!i2c::lock())
+	if (!i2c::try_lock())
 	{
 		return;
 	}
 
 //	TRACE();
 			
-	s_last_update_us = micros;
+	s_last_update_time = now;
 
 	if (s_state == 0)
 	{
@@ -154,7 +155,7 @@ static bool _init_hardware()
 	while (!i2c::lock() && lock_tries >= 0)
 	{
 		lock_tries--;
-		clock::delay_micros(10);
+		clock::delay(chrono::micros(10));
 	}
 	if (lock_tries < 0)
 	{
@@ -162,7 +163,7 @@ static bool _init_hardware()
 	}
 
 	_write(CMD_MS5611_RESET);
-	clock::delay_millis(50);
+	clock::delay(chrono::millis(50));
 
 	// We read the factory calibration
 	// The on-chip CRC is not used
@@ -182,7 +183,7 @@ static bool _init_hardware()
 
 	//Send a command to read Temp first
 	_write(CMD_CONVERT_D2_OSR4096);
-	s_last_update_us = clock::micros();
+	s_last_update_time = clock::now_us();
 	s_state = 0;
 	s_temperature=0;
 	s_pressure=0;
@@ -197,11 +198,11 @@ static bool _init_hardware()
 	i2c::unlock();
 
 	// wait for at least one value to be read
-	auto start = clock::millis();
+	auto start = clock::now_ms();
 	while (!s_has_data)
 	{
-		clock::delay_millis(10);
-		if (clock::millis() - start > 1000)
+		clock::delay(chrono::millis(10));
+		if (clock::now_ms() - start > chrono::millis(1000))
 		{
 			ASSERT("PANIC: Baro took more than 1000ms to initialize");
 			s_is_healthy = false;
@@ -268,7 +269,7 @@ void init()
 		}
 		else
 		{
-			clock::delay_millis(50); // delay for 50ms
+			clock::delay(chrono::millis(50));
 		}
 				
 		if (tries++ > 5)

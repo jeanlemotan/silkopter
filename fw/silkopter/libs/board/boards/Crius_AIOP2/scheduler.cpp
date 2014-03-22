@@ -9,6 +9,7 @@
 #include "board/clock.h"
 #include "debug/debug.h"
 #include <qmath.h>
+#include "util/Scope_Sync.h"
 
 namespace board
 {
@@ -57,12 +58,11 @@ void _run_timer_procs(bool called_from_isr)
 	if (!s_is_suspended)
 	{
 		// now call the timer based drivers
-		auto micros = clock::micros();
 		for (int i = 0; i < s_callback_count; i++)
 		{
 			if (s_callbacks[i] != NULL)
 			{
-				s_callbacks[i](micros);
+				s_callbacks[i]();
 			}
 		}
 	}
@@ -117,10 +117,10 @@ void register_callback(Callback cb)
          * incremented. */
         s_callbacks[s_callback_count] = cb;
         /* _num_timer_procs is used from interrupt, and multiple bytes long. */
-        uint8_t sreg = SREG;
-        cli();
-        s_callback_count++;
-        SREG = sreg;        
+        {
+            util::Scope_Sync ss();
+            s_callback_count++;
+        }
     }
 
 }

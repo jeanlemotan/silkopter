@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 #include "board/boards/avr_i2c.h"
 #include "board/clock.h"
+#include "board/scheduler.h"
 #include "debug/debug.h"
 
 namespace board
@@ -171,8 +172,7 @@ void init()
 	}
 	s_is_initialized = true;
 	
-	bool locked = lock();
-	if (!locked)
+	if (!lock(chrono::micros(10000)))
 	{
 		PANIC_MSG("Cannot lock i2c to initialize");
 	}
@@ -202,11 +202,26 @@ void init()
 // }
 
 static bool s_is_locked = false;
-bool lock()
+bool try_lock()
 {
+	scheduler::suspend();
 	bool x = !s_is_locked;
 	s_is_locked = true;
+	scheduler::resume();
 	return x;
+}
+bool lock(chrono::micros timeout /* = micros(0) */)
+{
+	bool locked = try_lock();
+	if (!locked)
+	{
+		auto start = clock::now_us();
+		do
+		{
+			locked = try_lock();
+		} while (!locked && clock::now_us() - start <= timeout);
+	}
+	return locked;
 }
 void unlock()
 {
@@ -365,8 +380,9 @@ uint8_t read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t siz
 	{
 		return 0;
 	}
-	uint8_t nack_idx = size - 1;
 	uint8_t* data_ptr8 = reinterpret_cast<uint8_t*>(data) + 1;
+	//the data_ptr8 will advance like this
+	//1, 0, 3, 2, 5, 4, 7, 6, 9, 8
 
 	uint8_t stat = _start();
 	if (stat) goto error;
@@ -378,35 +394,34 @@ uint8_t read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t siz
 	if (stat) goto error;
 	stat = _send_address(SLA_R(addr));
 	if (stat) goto error;
-	for (uint8_t i = 0; i < size; i++) //write size - 1 bytes
+
+
+	for (int8_t i = size - 1; i > 0; i--) //write size - 1 bytes
 	{
-		if (i == nack_idx)
-		{
-			stat = _receive_byte_ack();
-			if (stat != MR_DATA_ACK) goto error;
-			*data_ptr8 = TWDR;
-			data_ptr8 -= 1;
+		stat = _receive_byte_ack();
+		if (stat != MR_DATA_ACK) goto error;
+		*data_ptr8 = TWDR;
+		data_ptr8 -= 1;
 
-			stat = _receive_byte(); //last byte - no ack
-			if (stat != MR_DATA_ACK) goto error;
-			*data_ptr8 = TWDR;
-			//data_ptr8 += 3;
-		}
-		else
-		{
-			stat = _receive_byte_ack();
-			if (stat != MR_DATA_ACK) goto error;
-			*data_ptr8 = TWDR;
-			data_ptr8 -= 1;
-
-			stat = _receive_byte_ack();
-			if (stat != MR_DATA_ACK) goto error;
-			*data_ptr8 = TWDR;
-			data_ptr8 += 3;
-		}
+		stat = _receive_byte_ack();
+		if (stat != MR_DATA_ACK) goto error;
+		*data_ptr8 = TWDR;
+		data_ptr8 += 3;
 	}
-	//0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-	//1, 0, 3, 2, 5, 4, 7, 6, 9, 8
+
+	//last bytes
+	{
+		stat = _receive_byte_ack();
+		if (stat != MR_DATA_ACK) goto error;
+		*data_ptr8 = TWDR;
+		data_ptr8 -= 1;
+
+		stat = _receive_byte(); //last byte - no ack
+		if (stat != MR_DATA_NACK) goto error;
+		*data_ptr8 = TWDR;
+		//data_ptr8 += 3;
+	}
+
 	stat = _stop();
 	if (stat) goto error;
 	return 0;
@@ -418,6 +433,11 @@ error:
 uint8_t read_register(uint8_t addr, uint8_t reg, uint8_t& data) 
 {
     return read_registers(addr, reg, &data, 1);
+}
+
+uint16_t get_lockup_count()
+{
+	return s_lockup_count;
 }
 
 }

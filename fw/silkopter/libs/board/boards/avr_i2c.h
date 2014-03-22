@@ -1,5 +1,7 @@
 #pragma once
 
+#include "board/clock.h"
+
 namespace board
 {
 namespace i2c
@@ -20,10 +22,11 @@ namespace i2c
     extern uint8_t read_registers(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t size);
 	extern uint8_t read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t size); //this converts to little endian
 
-    extern uint8_t get_lockup_count();
+    extern uint16_t get_lockup_count();
 
 	//exclusive access	
-	extern bool lock();
+	extern bool lock(chrono::micros timeout = chrono::micros(0));
+    extern bool try_lock();
 	extern void unlock();
 };
 
