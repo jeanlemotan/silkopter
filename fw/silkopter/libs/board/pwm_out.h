@@ -10,9 +10,13 @@ namespace pwm_out
 
 	//sets the value of channel ch
 	extern void set_channel(uint8_t ch, int16_t val);
-	
+	//returns the value of channel ch
+	extern int16_t get_channel(uint8_t ch);
+
 	//sets the value for all channels up to min(size, get_channel_count())
 	extern void set_channels(const int16_t* src, uint8_t size);
+	//returns the value of all channels up to min(size, get_channel_count())
+	extern void get_channels(int16_t* dst, uint8_t size);
 	
 	extern void set_all_channels(int16_t val);
 	

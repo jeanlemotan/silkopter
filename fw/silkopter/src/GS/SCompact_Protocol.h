@@ -25,6 +25,8 @@ public:
 	void send_board_baro_pressure(bool is_valid, float pressure);
 	void send_board_sonar_altitude(bool is_valid, float altitude);
 	void send_board_gps_altitude(bool is_valid, float altitude);
+	void send_board_rc_in(uint8_t count, int16_t const* values);
+	void send_board_pwm_out(uint8_t count, int16_t const* values);
 
 	void send_uav_acceleration(math::vec3f const& accel);
 	void send_uav_speed(math::vec3f const& accel);

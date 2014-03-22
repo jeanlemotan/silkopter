@@ -85,6 +85,20 @@ void SCompact_Protocol::send_board_gps_altitude(bool is_valid, float altitude)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 }
+void SCompact_Protocol::send_board_rc_in(uint8_t count, int16_t const* values)
+{
+	if (!m_uart) return;
+	ASSERT(m_is_frame_started);
+	if (!m_is_frame_started) return;
+}
+void SCompact_Protocol::send_board_pwm_out(uint8_t count, int16_t const* values)
+{
+	if (!m_uart) return;
+	ASSERT(m_is_frame_started);
+	if (!m_is_frame_started) return;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void SCompact_Protocol::send_uav_acceleration(math::vec3f const& accel)
 {

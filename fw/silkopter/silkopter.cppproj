@@ -89,7 +89,7 @@
       <Value>../src</Value>
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
-  <avrgcccpp.compiler.optimization.level>Optimize most (-O3)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.level>Optimize for size (-Os)</avrgcccpp.compiler.optimization.level>
   <avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
   <avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>False</avrgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
   <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
@@ -225,6 +225,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\util\chrono.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\util\CRC_Buffer.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\util\Flag_Set.h">

@@ -128,6 +128,29 @@ void set_channel(uint8_t ch, int16_t val)
 		case 7: OCR1B = pwm; break;// d12
 	}
 } 
+int16_t get_channel(uint8_t ch)
+{
+	ASSERT(s_is_initialized);
+
+	int16_t pwm = MIN_PULSE_WIDTH;
+	switch(ch)
+	{
+		case 0: pwm = OCR3B; break; //2
+		case 1: pwm = OCR3C; break; //3
+		case 2: pwm = OCR3A; break; //5
+		case 3: pwm = OCR4A; break; //6
+		case 4: pwm = OCR4B; break; //7
+		case 5: pwm = OCR4C; break; //8
+		case 6: pwm = OCR1A; break;// d11
+		case 7: pwm = OCR1B; break;// d12
+	}
+
+    int16_t pulse = (pwm - MIN_PULSE_WIDTH) >> 1;
+    pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));
+    //dst = pulse * 1024 / 1200
+    //dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
+    return pulse * 27 >> 5;
+}
 
 void set_all_channels(int16_t val)
 {
@@ -146,6 +169,15 @@ void set_all_channels(int16_t val)
 	OCR1A = pwm;
 	OCR1B = pwm;
 }
+
+void get_channels(int16_t* dst, uint8_t size)
+{
+	for (uint8_t i = 0; i < size; i++)
+	{
+		*dst++ = get_channel(i);
+	}	
+}
+
 
 void set_all_enabled(bool enabled)
 {

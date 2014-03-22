@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "GS/SProtocol.h"
 #include "board/UART.h"
+#include "util/CRC_Buffer.h"
 
 namespace silk
 {
@@ -19,12 +20,16 @@ public:
 	void start_frame();
 	void end_frame();
 	
+	void send_board_cpu_usage(uint8_t cpu_usage_percent);
+
 	void send_board_gyroscope(bool is_valid, math::vec3f const& gyro);
 	void send_board_accelerometer(bool is_valid, math::vec3f const& accel);
 	void send_board_temperature(bool is_valid, float temp);
 	void send_board_baro_pressure(bool is_valid, float pressure);
 	void send_board_sonar_altitude(bool is_valid, float altitude);
 	void send_board_gps_altitude(bool is_valid, float altitude);
+	void send_board_rc_in(uint8_t count, int16_t const* values);
+	void send_board_pwm_out(uint8_t count, int16_t const* values);
 
 	void send_uav_acceleration(math::vec3f const& accel);
 	void send_uav_speed(math::vec3f const& accel);
@@ -38,6 +43,7 @@ public:
 	
 private:
 	board::UART* m_uart;
+	util::CRC_Buffer<64> m_buffer;
 	size_t m_last_frame_idx;
 	bool m_is_frame_started;
 };

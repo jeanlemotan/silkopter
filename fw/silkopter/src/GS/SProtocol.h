@@ -22,6 +22,10 @@ public:
 	
 	virtual void start_frame() = 0;
 	virtual void end_frame() = 0;
+
+	//////////////////////////////////////////////////////////////////////////
+	
+	virtual void send_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//board
@@ -33,6 +37,9 @@ public:
 	virtual void send_board_baro_pressure(bool is_valid, float pressure) = 0;
 	virtual void send_board_sonar_altitude(bool is_valid, float altitude) = 0;
 	virtual void send_board_gps_altitude(bool is_valid, float altitude) = 0;
+
+	virtual void send_board_rc_in(uint8_t count, int16_t const* values) = 0;
+	virtual void send_board_pwm_out(uint8_t count, int16_t const* values) = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	//uav

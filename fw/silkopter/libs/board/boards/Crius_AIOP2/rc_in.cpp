@@ -280,7 +280,7 @@ int16_t get_channel(uint8_t ch)
     /* grab channel from isr's memory in critical section*/
     cli();
 	//now pulses is between 0 and 1200
-    int16_t pulse = s_pulses[ch] >> 1;
+    int16_t pulse = (s_pulses[ch] - MIN_PULSE_WIDTH) >> 1;
     sei();
 	
     pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));

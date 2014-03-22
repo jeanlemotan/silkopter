@@ -50,15 +50,15 @@ int main(void)
 	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);
 	silk::GS gs(board::uart0);
 
-	auto last_fps = board::clock::now_ms();
-	uint32_t fps = 0;
-	uint32_t crt_fps = 0;
+// 	auto last_fps = board::clock::now_ms();
+// 	uint32_t fps = 0;
+// 	uint32_t crt_fps = 0;
 	
     while(1)
     {
         //TODO:: Please write your application code 
 		auto now = board::clock::now_us();
-		auto start = now;
+		//auto start = now;
 
 // 		int16_t channels[8];
 // 		last = board::clock::now_us();
@@ -82,8 +82,8 @@ int main(void)
 // 		static math::vec3f gyro_offset;
 // 		static int32_t calibration_step = 100;
 		
-		board::imu::Data i_imu;
- 		board::imu::get_data(i_imu);
+// 		board::imu::Data i_imu;
+//  		board::imu::get_data(i_imu);
 		
 // 		if (calibration_step > 0)
 // 		{
@@ -123,27 +123,24 @@ int main(void)
 //  			PRINT("CPU: {0} locks {1}\n", cpu, board::i2c::get_lockup_count()); //22
 //  		}
 
-		auto fps_now = board::clock::now_ms();
-		if (fps_now - last_fps >= chrono::millis(1000))
-		{
-			last_fps = fps_now;
-			fps = crt_fps;
-			crt_fps = 0;
-		}
-		crt_fps++;
-
+// 		auto fps_now = board::clock::now_ms();
+// 		if (fps_now - last_fps >= chrono::millis(1000))
+// 		{
+// 			last_fps = fps_now;
+// 			fps = crt_fps;
+// 			crt_fps = 0;
+// 		}
+// 		crt_fps++;
+// 
 // 		static uint32_t counter = 0;
 // 		if (counter++ > 30)
 // 		{
 // 			counter = 0;
-// 			PRINT("{0}:{1}:{2}:{3}\n",
-// 			now,
-// 			i_imu.gyroscope.value,
-// 			i_imu.accelerometer.value,
+// 			PRINT("{0}\n",
 // 			fps);
 // 		}
-
-		gs.process(chrono::micros(1000));
+// 
+		gs.process(chrono::micros(500));
 
 // 		{
 // 			auto duration = board::clock::now_us() - start;

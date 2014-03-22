@@ -24,9 +24,13 @@ namespace silk
 		board::UART* m_compact_uart;
 
 		SFull_Protocol m_full_protocol;
-		SCompact_Protocol m_compact_protocol;
+		//SCompact_Protocol m_compact_protocol;
+		SFull_Protocol m_compact_protocol;
 		
 		uint32_t m_step;
+		
+		chrono::time_us m_last_time;
+		chrono::micros m_frame_duration;
 		
 		bool send_data(uint32_t step); //returns true when done
 	};
