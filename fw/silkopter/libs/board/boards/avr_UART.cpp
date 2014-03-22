@@ -164,7 +164,7 @@ bool UART::write(const uint8_t* buf, size_t size)
 	return true;
 }
 
-bool UART::write(const char* buf)
+bool UART::write_c_str(const char* buf)
 {
 	if (!buf)
 	{
@@ -206,28 +206,6 @@ bool UART::write(const char* buf)
 		}
 	}
 	m_last_error = Error::NONE;
-	return true;
-}
-
-bool UART::write_byte(uint8_t b)
-{
-    uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-	if (m_blocking)
-	{
-		m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
-		while (tmphead == m_tx_buffer.tail); //wait for enough room in the buffer
-	}
-    else if (tmphead == m_tx_buffer.tail)
-	{
-		m_last_error = Error::TX_OVERFLOW;
-		return false;
-	}
-    
-    m_tx_buffer.data[tmphead] = b;
-    m_tx_buffer.head = tmphead;
-    m_ucsrb |= _BV(UDRIE0);
-
-	m_last_error = Error::TX_OVERFLOW;
 	return true;
 }
 

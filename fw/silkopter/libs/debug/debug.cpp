@@ -30,20 +30,20 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);
-		s_uart->write("\nAssertion failed: ");
+		s_uart->write_c_str("\nAssertion failed: ");
 		if (msg)
 		{
-			s_uart->write(msg);
+			s_uart->write_c_str(msg);
 		}
-		s_uart->write("\n\tCondition: ");
-		s_uart->write(condition ? condition : "N/A");
+		s_uart->write_c_str("\n\tCondition: ");
+		s_uart->write_c_str(condition ? condition : "N/A");
 		if (file)
 		{
 			util::FString<512> str;
 			util::format(str, "\n\tLocation: {0}:{1}", file, line);
-			s_uart->write(str.c_str());
+			s_uart->write_c_str(str.c_str());
 		}
-		s_uart->write("\nThe board will now freeze...");
+		s_uart->write_c_str("\nThe board will now freeze...");
 		s_uart->flush();
 	}
 	//make sure nothing else happens
@@ -59,16 +59,16 @@ void trace(const char* file, int line, const char* msg)
 	{
 		auto blocking = s_uart->is_blocking();
 		s_uart->set_blocking(true);
-		s_uart->write("\nTrace: ");
+		s_uart->write_c_str("\nTrace: ");
 		if (msg)
 		{
-			s_uart->write(msg);
+			s_uart->write_c_str(msg);
 		}
 		if (file)
 		{
 			util::FString<512> str;
 			util::format(str, " @ {0}:{1}", file, line);
-			s_uart->write(str.c_str());
+			s_uart->write_c_str(str.c_str());
 		}
 		s_uart->flush();
 		s_uart->set_blocking(blocking);
@@ -81,7 +81,7 @@ void print(const char* msg)
 	{
 		auto blocking = s_uart->is_blocking();
 		s_uart->set_blocking(true);
-		s_uart->write(msg);
+		s_uart->write_c_str(msg);
 		s_uart->flush();
 		s_uart->set_blocking(blocking);
 	}

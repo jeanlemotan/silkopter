@@ -4,6 +4,7 @@
 #define UART_BUFFER_MASK (UART_BUFFER_SIZE - 1)
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace board
 {
@@ -40,9 +41,14 @@ public:
 	uint8_t read_byte();
 	bool read(uint8_t* buf, size_t size);
 	
-    bool write(const char* buf);
+    bool write_c_str(const char* buf);
     bool write(const uint8_t* buf, size_t size);
-	bool write_byte(uint8_t b);
+	
+	template<typename T>
+	bool write(T t)
+	{
+		return write(reinterpret_cast<uint8_t*>(&t), sizeof(t));
+	}
 	
 	void flush();
 	
