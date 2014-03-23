@@ -1,6 +1,7 @@
 #include <avr/interrupt.h>
 #include "debug/debug.h"
 #include "board/UART.h"
+#include "board/scheduler.h"
 
 namespace debug
 {
@@ -16,8 +17,6 @@ void init(board::UART* uart)
 	}
 	s_is_initialized = true;
 
-
-	
 	s_uart = uart;
 }
 
@@ -27,6 +26,7 @@ namespace detail
 	
 void handle_assert(const char* condition, const char* file, int line, const char* msg)
 {
+	board::scheduler::stop();
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);

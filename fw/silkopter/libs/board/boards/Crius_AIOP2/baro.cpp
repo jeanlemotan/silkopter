@@ -32,11 +32,6 @@ static const uint32_t			k_update_frequency = 50;
 static const chrono::micros		k_delay(1000000 / k_update_frequency);
 
 static bool						s_is_healthy = false;
-static volatile bool            s_has_data = false;
-static volatile uint8_t         s_d1_count;
-static volatile uint8_t         s_d2_count;
-static volatile uint32_t        s_s_d1, s_s_d2;
-static uint8_t                  s_state = 0;
 static chrono::time_us			s_last_update_time;
 /* Gates access to asynchronous state: */
 
@@ -50,6 +45,23 @@ static float					C1f, C2f, C3f, C4f, C5f, C6f;
 static float					D1, D2;
 
 static bool						s_is_initialized = false;
+
+//////////////////////////////////////////////////////////////////////////
+
+
+struct Buffer
+{
+	Buffer() : has_data(false), d1_count(0), d2_count(0), d1(0), d2(0) {}
+	volatile bool			has_data;
+	volatile uint8_t		d1_count;
+	volatile uint8_t		d2_count;
+	volatile uint32_t		d1, d2;
+};
+
+static volatile uint8_t s_stage = 0;
+
+static volatile Buffer s_buffers[2];
+static volatile uint8_t s_buffer_idx = 0;
 
 static uint16_t _read_uint16(uint8_t reg)
 {
@@ -99,50 +111,38 @@ static void _update()
 		return;
 	}
 
-//	TRACE();
-			
 	s_last_update_time = now;
 
-	if (s_state == 0)
+	auto& buffer = s_buffers[s_buffer_idx];
+
+	s_stage++;
+	if ((s_stage & 7) == 0)
 	{
-		s_s_d2 += _read_adc();// On state 0 we read temp
-		s_d2_count++;
-		if (s_d2_count == 32)
+		_write(CMD_CONVERT_D2_OSR4096); // Command to read temperature
+		buffer.d2 += _read_adc();// On state 0 we read temp
+		buffer.d2_count++;
+		if (buffer.d2_count == 32)
 		{
 			// we have summed 32 values. This only happens
 			// when we stop reading the barometer for a long time
 			// (more than 1.2 seconds)
-			s_s_d2 >>= 1;
-			s_d2_count = 16;
+			buffer.d2 >>= 1;
+			buffer.d2_count = 16;
 		}
-		s_state++;
-		_write(CMD_CONVERT_D1_OSR4096);      // Command to read pressure
 	}
-	else
+
+	_write(CMD_CONVERT_D1_OSR4096);      // Command to read pressure
+	buffer.d1 += _read_adc();
+	buffer.d1_count++;
+	if (buffer.d1_count == 128)
 	{
-		s_s_d1 += _read_adc();
-		s_d1_count++;
-		if (s_d1_count == 128)
-		{
-			// we have summed 128 values. This only happens
-			// when we stop reading the barometer for a long time
-			// (more than 1.2 seconds)
-			s_s_d1 >>= 1;
-			s_d1_count = 64;
-		}
-		s_state++;
-		// Now a new reading exists
-		s_has_data = true;
-		if (s_state == 5)
-		{
-			_write(CMD_CONVERT_D2_OSR4096); // Command to read temperature
-			s_state = 0;
-		}
-		else
-		{
-			_write(CMD_CONVERT_D1_OSR4096); // Command to read pressure
-		}
+		// we have summed 128 values. This only happens
+		// when we stop reading the barometer for a long time
+		// (more than 1.2 seconds)
+		buffer.d1 >>= 1;
+		buffer.d1_count = 64;
 	}
+	buffer.has_data = true;
 
 	i2c::unlock();
 }
@@ -184,14 +184,9 @@ static bool _init_hardware()
 	//Send a command to read Temp first
 	_write(CMD_CONVERT_D2_OSR4096);
 	s_last_update_time = clock::now_us();
-	s_state = 0;
-	s_temperature=0;
-	s_pressure=0;
-
-	s_s_d1 = 0;
-	s_s_d2 = 0;
-	s_d1_count = 0;
-	s_d2_count = 0;
+	s_stage = 0;
+	s_temperature = 0;
+	s_pressure = 0;
 
 	scheduler::register_callback(_update);
 			
@@ -199,7 +194,7 @@ static bool _init_hardware()
 
 	// wait for at least one value to be read
 	auto start = clock::now_ms();
-	while (!s_has_data)
+	while (!s_buffers[s_buffer_idx].has_data)
 	{
 		clock::delay(chrono::millis(10));
 		if (clock::now_ms() - start > chrono::millis(1000))
@@ -282,22 +277,21 @@ void init()
 void get_data(Data& data)
 {
 	ASSERT(s_is_initialized);
-	bool updated = s_has_data;
-	if (updated)
+	if (s_buffers[s_buffer_idx].has_data)
 	{
-		// Suspend timer procs because these variables are written to
-		// in "_update".
-		scheduler::suspend();
-		uint32_t sD1 = s_s_d1; 
-		s_s_d1 = 0;
-		uint32_t sD2 = s_s_d2; 
-		s_s_d2 = 0;
-		uint8_t d1count = s_d1_count; 
-		s_d1_count = 0;
-		uint8_t d2count = s_d2_count; 
-		s_d2_count = 0;
-		s_has_data = false;
-		scheduler::resume();
+		auto last_buffer_idx = s_buffer_idx;
+		s_buffer_idx = !s_buffer_idx; //now the interrupt will write in the other buffer.
+		auto& buffer = s_buffers[last_buffer_idx];
+
+		uint32_t sD1 = buffer.d1; 
+		buffer.d1 = 0;
+		uint32_t sD2 = buffer.d2; 
+		buffer.d2 = 0;
+		uint8_t d1count = buffer.d1_count; 
+		buffer.d1_count = 0;
+		uint8_t d2count = buffer.d2_count; 
+		buffer.d2_count = 0;
+		buffer.has_data = false;
 
 		if (d1count != 0)
 		{

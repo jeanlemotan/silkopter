@@ -16,7 +16,6 @@ public:
 	
 	CRC_Buffer() 
 		: m_size(0)
-		, m_crc(0)
 	{
 			
 	}
@@ -29,12 +28,18 @@ public:
 	void clear()
 	{
 		m_size = 0;
-		m_crc = 0;
 	}
 	
-	uint16_t get_crc() const
+	uint16_t compute_crc() const
 	{
-		return m_crc;
+		uint16_t crc = 0;
+		uint8_t const* ptr = m_data;
+		uint8_t const* end = ptr + m_size;
+		for (; ptr < end; ++ptr)
+		{
+			crc = _crc16_update(crc, *ptr);
+		}
+		return crc;
 	}
 	
 	uint8_t const* get_data_ptr() const
@@ -44,28 +49,47 @@ public:
 	
 	void write(uint8_t const* src, size_t size)
 	{
-		if (!src)
+		if (!src || !size)
 		{
 			return;
 		}
 		size = std::min(size, MAX_SIZE - m_size);
-		for (size_t i = 0; i < size; i++)
+		if (size)
 		{
-			uint8_t x = *src;
-			m_data[m_size++] = x;
-			m_crc = _crc16_update(m_crc, x);
+			memcpy(m_data + m_size, src, size);
+			m_size += size;
 		}
 	}
-	
+
 	template<typename T>
 	void write(T t)
 	{
 		return write(reinterpret_cast<uint8_t*>(&t), sizeof(t));
 	}
 
+	void write_at(size_t off, uint8_t const* src, size_t size)
+	{
+		if (!src || !size)
+		{
+			return;
+		}
+		off = std::min(off, MAX_SIZE - 1);
+		size = std::min(size, MAX_SIZE - off);
+		if (size)
+		{
+			memcpy(m_data + off, src, size);
+			m_size = std::max(m_size, off + size);
+		}
+	}
+	
+	template<typename T>
+	void write_at(size_t off, T t)
+	{
+		return write_at(off, reinterpret_cast<uint8_t*>(&t), sizeof(t));
+	}
+
 private:
 	size_t m_size;
-	uint16_t m_crc;
 	uint8_t m_data[MAX_SIZE];
 };
 	

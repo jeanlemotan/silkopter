@@ -19,56 +19,38 @@ namespace scheduler
 
 static volatile bool s_is_in_callback = false;
 static bool s_is_initialized = false;
-static volatile bool s_is_suspended = false;
-static volatile bool s_event_missed = false;
 static Callback s_callbacks[MAX_CALLBACK_COUNT] = { nullptr }; 
 static uint8_t s_callback_count = 0;
 
-/* AVRScheduler timer interrupt period is controlled by TCNT2.
- * 256-124 gives a 500Hz period
- * 256-62 gives a 1kHz period. */
+// AVRScheduler timer interrupt period is controlled by TCNT2.
+// 256-124 gives a 500Hz period
+// 256-62 gives a 1kHz period.
+// 256-31 gives a 2kHz period.
 static volatile uint8_t s_timer2_reset_value = (256 - 62);
+static uint16_t s_timer_frequency = 1000;
 
-static void _run_timer_procs(bool called_from_isr);
+static void _run_timer_procs();
 
 ISR(TIMER2_OVF_vect) 
 {
-    // we enable the interrupt again immediately and also enable
-    // interrupts. This allows other time critical interrupts to
-    // run (such as the serial receive interrupt). We catch the
-    // timer calls taking too long using _in_timer_call.
-    // This approach also gives us a nice uniform spacing between
-    // timer calls
-
     TCNT2 = s_timer2_reset_value;
     sei();
-    _run_timer_procs(true);
+    _run_timer_procs();
 }
 
-void _run_timer_procs(bool called_from_isr)
+void _run_timer_procs()
 {
-	//	hal.gpio->write(45,1);
 	if (s_is_in_callback)
 	{
-		ASSERT("timer functions took too long");
+		PANIC_MSG("timers in progress");
 		return;
 	}
 	s_is_in_callback = true;
 
-	if (!s_is_suspended)
+	// now call the timer based drivers
+	for (int i = 0; i < s_callback_count; i++)
 	{
-		// now call the timer based drivers
-		for (int i = 0; i < s_callback_count; i++)
-		{
-			if (s_callbacks[i] != NULL)
-			{
-				s_callbacks[i]();
-			}
-		}
-	}
-	else if (called_from_isr)
-	{
-		s_event_missed = true;
+		s_callbacks[i]();
 	}
 
 	//	hal.gpio->write(45,0);
@@ -102,6 +84,10 @@ void init()
 
 void register_callback(Callback cb) 
 {
+	if (!cb)
+	{
+		return;
+	}
     for (int i = 0; i < s_callback_count; i++) 
 	{
         if (s_callbacks[i] == cb) 
@@ -125,19 +111,9 @@ void register_callback(Callback cb)
 
 }
 
-void suspend() 
+void stop() 
 {
-    s_is_suspended = true;
-}
-
-void resume() 
-{
-    s_is_suspended = false;
-    if (s_event_missed == true) 
-	{
-        _run_timer_procs(false);
-        s_event_missed = false;
-    }
+	TIMSK2 = 0;
 }
 
 bool is_in_callback() 
@@ -147,8 +123,12 @@ bool is_in_callback()
 
 void set_callback_frequency(uint16_t timer_hz)
 {
-	timer_hz = math::clamp(timer_hz, uint16_t(250), uint16_t(1000));
-    s_timer2_reset_value = 256 - (62 * (1000 / timer_hz));
+	s_timer_frequency = math::clamp(timer_hz, uint16_t(250), uint16_t(2000));
+    s_timer2_reset_value = 256 - (31 * (2000 / s_timer_frequency));
+}
+uint16_t get_callback_frequency()
+{
+	return s_timer_frequency;	
 }
 
 }

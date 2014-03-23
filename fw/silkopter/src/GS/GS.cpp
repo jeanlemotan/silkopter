@@ -38,11 +38,23 @@ GS::GS(board::UART& full_uart, board::UART& compact_uart)
 void GS::process(chrono::micros max_duration)
 {
 	chrono::micros duration;
+
+	//return;
 	
 	//calculate frame time
 	auto start = board::clock::now_us();
 	m_frame_duration = start - m_last_time;
 	m_last_time = start;
+	
+	if (!m_full_protocol.is_connected())
+	{
+		if (start - m_last_hello_time > chrono::micros(100000))
+		{
+			m_last_hello_time = start;
+			m_full_protocol.hello_world(k_hello_world, k_version);
+		}
+		return;
+	}
 	
 	if (m_step == 0)
 	{
@@ -77,6 +89,12 @@ bool GS::send_data(uint32_t step)
 		uint8_t cpu_usage = m_frame_duration.count / 5000;
 		m_full_protocol.send_board_cpu_usage(cpu_usage);
 		m_compact_protocol.send_board_cpu_usage(cpu_usage);
+		return false;
+	}
+	case 6:
+	{
+		m_full_protocol.send_board_time_ms(board::clock::now_ms());
+		m_compact_protocol.send_board_time_ms(board::clock::now_ms());
 		return false;
 	}
 	case 10:

@@ -175,124 +175,57 @@ const float s_gyro_scale = (0.0174532f / 16.4f);
 
 static volatile chrono::time_us s_last_refresh_time;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
-static chrono::micros s_sample_duration(19000);
+static int8_t s_sample_freq_div = 10;
+volatile int8_t s_sample_freq_counter = 0;
 static bool s_is_initialised = false;
 
 
+//================ HARDWARE FUNCTIONS ==================== 
 
-/*================ AP_INERTIALSENSOR PUBLIC INTERFACE ==================== */
-// bool wait_for_sample(uint16_t timeout_ms)
-// {
-//     if (sample_available()) {
-//         return true;
-//     }
-//     uint32_t start = hal.scheduler->millis();
-//     while ((hal.scheduler->millis() - start) < timeout_ms) {
-//         hal.scheduler->delay_microseconds(100);
-//         if (sample_available()) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
+struct Buffer
+{
+	Buffer() : sample_count(0), temp_sum(0) {}
+		
+	volatile math::vec3i accel_sum;
+	volatile math::vec3i gyro_sum;
+	volatile uint32_t temp_sum;
+	volatile chrono::micros delta_time_sum;
+	volatile uint8_t sample_count;
+};
+volatile Buffer s_buffers[2];
+volatile uint8_t s_buffer_idx = 0;
 
-// bool update( void )
-// {
-//     // wait for at least 1 sample
-//     if (!wait_for_sample(1000)) {
-//         return false;
-//     }
-// 
-//     _previous_accel = _accel;
-// 
-//     // disable timer procs for mininum time
-//     hal.scheduler->suspend_timer_procs();
-//     _gyro  = Vector3f(_gyro_sum.x, _gyro_sum.y, _gyro_sum.z);
-//     _accel = Vector3f(_accel_sum.x, _accel_sum.y, _accel_sum.z);
-//     _num_samples = _sum_count;
-//     _accel_sum.zero();
-//     _gyro_sum.zero();
-//     _sum_count = 0;
-//     hal.scheduler->resume_timer_procs();
-// 
-//     _gyro.rotate(_board_orientation);
-//     _gyro *= s_gyro_scale / _num_samples;
-//     _gyro -= _gyro_offset;
-// 
-//     _accel.rotate(_board_orientation);
-//     _accel *= MPU6000_ACCEL_SCALE_1G / _num_samples;
-// 
-//     Vector3f accel_scale = _accel_scale.get();
-//     _accel.x *= accel_scale.x;
-//     _accel.y *= accel_scale.y;
-//     _accel.z *= accel_scale.z;
-//     _accel -= _accel_offset;
-// 
-//     if (_last_filter_hz != _mpu6000_filter) {
-//         if (_i2c_sem->take(10)) {
-//             _set_filter_register(_mpu6000_filter, 0);
-//             _i2c_sem->give();
-//         }
-//     }
-// 
-// 	return true;
-// }
-
-// float _temp_to_celsius ( uint16_t regval )
-// {
-//     return 20.0;
-// }
-
-// return the MPU6k gyro drift rate in radian/s/s
-// note that this is much better than the oilpan gyros
-// float get_gyro_drift_rate(void)
-// {
-//     // 0.5 degrees/second/minute
-//     return ToRad(0.5/60);
-// }
-
-// get number of samples read from the sensors
-// bool has_data()
-// {
-//     return s_sum_count > 0; 
-// }
-
-/*================ HARDWARE FUNCTIONS ==================== */
-
-volatile static math::vec3i s_accel_sum;
-volatile static math::vec3i s_gyro_sum;
-volatile static uint32_t s_temp_sum;
-volatile static uint8_t s_sample_count = 0;
-volatile static chrono::micros s_delta_time_sum;
-
-static int16_t s_raw_mpu[14] = {0};
+static int16_t s_raw_mpu[7] = {0};
 
 static void _poll_data()
 {
-	auto now = clock::now_us();
-	auto d = now - s_last_refresh_time;
-	if (d >= s_sample_duration)
-	{
+	if (--s_sample_freq_counter <= 0)
+	{	
+		s_sample_freq_counter = s_sample_freq_div;
+
+		auto now = clock::now_us();
 		if (i2c::try_lock())
 		{
-			//i2c::set_high_speed(true); // Set I2C fast speed
-
-			i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 3);
-			s_accel_sum.x	-= s_raw_mpu[0];
-			s_accel_sum.y	-= s_raw_mpu[1];
-			s_accel_sum.z	-= s_raw_mpu[2];
-			//s_temp_sum		+= s_raw_mpu[3];
-			i2c::read_registers_le(s_mpu_addr, MPUREG_GYRO_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 3);
-			s_gyro_sum.x	+= s_raw_mpu[0];
-			s_gyro_sum.y	+= s_raw_mpu[1];
-			s_gyro_sum.z	+= s_raw_mpu[2];
-			s_sample_count++;
+			auto d = now - s_last_refresh_time;
+			s_last_refresh_time = now;
 			
-			s_delta_time_sum += d;
+			auto& buffer = s_buffers[s_buffer_idx];
+			
+			i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7);
+			buffer.accel_sum.x	-= s_raw_mpu[0];
+			buffer.accel_sum.y	-= s_raw_mpu[1];
+			buffer.accel_sum.z	-= s_raw_mpu[2];
+			buffer.temp_sum		+= s_raw_mpu[3];
+			buffer.gyro_sum.x	+= s_raw_mpu[4];
+			buffer.gyro_sum.y	+= s_raw_mpu[5];
+			buffer.gyro_sum.z	+= s_raw_mpu[6];
+
+			buffer.sample_count++;
+			buffer.delta_time_sum += d;
 
 			i2c::unlock();
-			s_last_refresh_time = now;
 		}
+//		PRINT("\n{0}:{1}", now, clock::now_us() - now);
 	}
 }
 
@@ -366,28 +299,30 @@ static bool _init_hardware(Sample_Rate sample_rate)
     
     uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
 
+	auto scheduler_freq = scheduler::get_callback_frequency();
+	
     // sample rate and filtering
     // to minimise the effects of aliasing we choose a filter
     // that is less than half of the sample rate
     switch (sample_rate)
 	{
     case Sample_Rate::RATE_50_HZ:
-		s_sample_duration = chrono::micros(20000);
+		s_sample_freq_div = scheduler_freq / 50;
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
         break;
     case Sample_Rate::RATE_100_HZ:
-		s_sample_duration = chrono::micros(10000);
+		s_sample_freq_div = scheduler_freq / 100;
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
         break;
-    case Sample_Rate::RATE_200_HZ:
-		s_sample_duration = chrono::micros(5000);
-		rate = MPUREG_SMPLRT_200HZ;
+    case Sample_Rate::RATE_250_HZ:
+		s_sample_freq_div = scheduler_freq / 250;
+		rate = MPUREG_SMPLRT_250HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 		break;
     case Sample_Rate::RATE_500_HZ:
-		s_sample_duration = chrono::micros(2000);
+		s_sample_freq_div = scheduler_freq / 500;
 		rate = MPUREG_SMPLRT_500HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 	    break;
@@ -395,7 +330,9 @@ static bool _init_hardware(Sample_Rate sample_rate)
 		rate = 0;
 		PANIC_MSG("Unknown sample rate");
     }
-
+	
+	PRINT("\nIMU scheduler frequency divider: {0}", s_sample_freq_div);
+	
     _set_filter_register(0, default_filter);
 
     // set sample rate to 200Hz, and use _sample_divider to give
@@ -457,30 +394,35 @@ static chrono::time_us s_last_data_time;
 
 static void _refresh_data()
 {
-	if (!has_data())
+	if (!s_buffers[s_buffer_idx].sample_count)
 	{
 		return;
 	}
-	
+
 	s_last_data_time = clock::now_us();
+	
+	//////////////////////////////////////////////////////////////////////////
+	//copy the data
 
-	//first copy the data and resume the timer. This has to be AFAP
-	scheduler::suspend();
+	auto last_buffer_idx = s_buffer_idx;
+	s_buffer_idx = !s_buffer_idx; //now the interrupt will write in the other buffer.
+	auto& buffer = s_buffers[last_buffer_idx];
 
-	ASSERT(s_sample_count > 0);
-	auto sc = s_sample_count;
-	math::vec3f gyro_delta((math::vec3i&)(s_gyro_sum));
-	s_accel_data.set((math::vec3i&)(s_accel_sum));
-	s_temp_data = s_temp_sum;
-	float delta_time = (float)s_delta_time_sum.count * 0.000001f;
+	ASSERT(buffer.sample_count > 0);
+	auto sc = buffer.sample_count;
+	math::vec3f gyro_delta((math::vec3i&)(buffer.gyro_sum));
+	math::vec3f accel_data((math::vec3i&)(buffer.accel_sum));
+	s_temp_data = buffer.temp_sum;
+	float delta_time = (float)buffer.delta_time_sum.count * 0.000001f;
 
-	((math::vec3i&)s_gyro_sum).set(0, 0, 0);
-	((math::vec3i&)s_accel_sum).set(0, 0, 0);
-	s_temp_sum = 0;
-	s_sample_count = 0;
-	s_delta_time_sum = chrono::micros(0);
+	((math::vec3i&)buffer.gyro_sum).set(0, 0, 0);
+	((math::vec3i&)buffer.accel_sum).set(0, 0, 0);
+	buffer.temp_sum = 0;
+	buffer.sample_count = 0;
+	buffer.delta_time_sum = chrono::micros(0);
 
-	scheduler::resume();
+	// /Copy the data
+	//////////////////////////////////////////////////////////////////////////
 
 	float scinv = 1.f / sc;
 
@@ -492,9 +434,11 @@ static void _refresh_data()
 	s_gyro_data += gyro_delta;
 
 	//scale the accel and apply the calibration offset
-	s_accel_data *= MPU6000_ACCEL_SCALE_1G * scinv;
-	s_accel_data.x += 2.46124005f;
-	s_accel_data.y += 0.495599985f;
+	accel_data *= MPU6000_ACCEL_SCALE_1G * scinv;
+	accel_data.x += 2.46124005f;
+	accel_data.y += 0.495599985f;
+	
+	s_accel_data = accel_data;//math::lerp(s_accel_data, accel_data, 0.01f);
 
 	//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
 	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z) + math::anglef::pi.radians;
@@ -574,7 +518,7 @@ void init(Sample_Rate rate)
 bool has_data()
 {
 	ASSERT(s_is_initialised);
-	return s_sample_count > 0;
+	return s_buffers[s_buffer_idx].sample_count > 0;
 }
 
 void get_data(Data& data)
@@ -583,16 +527,13 @@ void get_data(Data& data)
 	_refresh_data();
 	
 	auto now = clock::now_us();
-	auto is_valid = now < s_last_data_time + chrono::micros(500);
+	auto is_valid = now < (s_last_data_time + chrono::micros(60000));
 
 	data.accelerometer.is_valid = is_valid;
 	data.gyroscope.is_valid = is_valid;
 	
 	data.accelerometer.value = s_accel_data;
-	//data.accelerometer.delta_time = s_delta_time;
 	data.gyroscope.value = s_gyro_data;
-	
-	//data.gyroscope.delta_time = s_delta_time;
 }
 
 }

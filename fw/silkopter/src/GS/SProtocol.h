@@ -5,6 +5,7 @@
 #include "util/Noncopyable.h"
 #include "qmath.h"
 #include "util/FString.h"
+#include "util/chrono.h"
 #include "UAV.h"
 
 namespace silk
@@ -19,6 +20,7 @@ public:
 	
 	typedef util::FString<64> Message_String;
 	virtual void hello_world(Message_String const& msg, uint16_t version) = 0;
+	virtual bool is_connected() const = 0;
 	
 	virtual void start_frame() = 0;
 	virtual void end_frame() = 0;
@@ -26,6 +28,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	
 	virtual void send_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
+	virtual void send_board_time_ms(chrono::time_ms time) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//board

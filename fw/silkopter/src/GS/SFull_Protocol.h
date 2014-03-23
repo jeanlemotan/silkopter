@@ -16,12 +16,14 @@ public:
 	explicit SFull_Protocol(board::UART& uart);
 
 	void hello_world(const Message_String& msg, uint16_t version);
+	bool is_connected() const;
 	
 	void start_frame();
 	void end_frame();
 	
 	void send_board_cpu_usage(uint8_t cpu_usage_percent);
-
+	void send_board_time_ms(chrono::time_ms time);
+	
 	void send_board_gyroscope(bool is_valid, math::vec3f const& gyro);
 	void send_board_accelerometer(bool is_valid, math::vec3f const& accel);
 	void send_board_temperature(bool is_valid, float temp);
@@ -42,10 +44,14 @@ public:
 	void send_uav_control_reference_frame(UAV::Control_Reference_Frame frame);
 	
 private:
+	void start_message(uint8_t msg);
+	void flush_message();
+
 	board::UART* m_uart;
-	util::CRC_Buffer<64> m_buffer;
+	util::CRC_Buffer<255> m_buffer;
 	uint32_t m_last_frame_idx;
 	bool m_is_frame_started;
+	bool m_is_connected;
 };
 	
 }

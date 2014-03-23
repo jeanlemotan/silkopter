@@ -79,7 +79,8 @@ private:
 	volatile uint8_t& m_ucsrc;
 	
 
-	bool m_blocking;
+	bool m_is_blocking;
+	bool m_is_open;
 	
 };
 

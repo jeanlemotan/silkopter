@@ -14,7 +14,7 @@
 #include <util/format.h>
 #include <debug/debug.h>
 #include <board/sonar.h>
-#include <board/baro.h>
+#include <board/baro.h>								   
 #include <board/boards/avr_i2c.h>
 #include "GS/GS.h"
 
@@ -32,7 +32,7 @@ int main(void)
 	debug::init(&board::uart0);
 	
 	board::scheduler::init();
-	board::scheduler::set_callback_frequency(1000);
+	board::scheduler::set_callback_frequency(500);
 	board::clock::init();
 	board::rc_in::init();
  	board::pwm_out::init();
@@ -57,7 +57,7 @@ int main(void)
     while(1)
     {
         //TODO:: Please write your application code 
-		auto now = board::clock::now_us();
+		auto start = board::clock::now_us();
 		//auto start = now;
 
 // 		int16_t channels[8];
@@ -140,16 +140,16 @@ int main(void)
 // 			fps);
 // 		}
 // 
-		gs.process(chrono::micros(500));
+		gs.process(chrono::micros(5000));
 
-// 		{
-// 			auto duration = board::clock::now_us() - start;
-// 			if (duration < chrono::micros(200000))
-// 			{
-// 				board::clock::delay(chrono::micros(200000) - duration);
-// 			}
-// 		}
-
-		last = now;
+		{
+			auto duration = board::clock::now_us() - start;
+			if (duration < chrono::micros(30000))
+			{
+				board::clock::delay(chrono::micros(30000) - duration);
+			}
+		}
+// 
+//		last = now;
    }
 }

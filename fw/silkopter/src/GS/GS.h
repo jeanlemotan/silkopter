@@ -32,6 +32,9 @@ namespace silk
 		chrono::time_us m_last_time;
 		chrono::micros m_frame_duration;
 		
+		chrono::time_us m_last_hello_time;
+
+		
 		bool send_data(uint32_t step); //returns true when done
 	};
 }

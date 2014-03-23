@@ -27,7 +27,8 @@ UART::UART(uint8_t port,
 	, m_ucsra(*ucsra)
 	, m_ucsrb(*ucsrb)
 	, m_ucsrc(*ucsrc)
-	, m_blocking(true)
+	, m_is_blocking(true)
+	, m_is_open(false)
 {
 	ASSERT(port < MAX_UARTS);
 	ASSERT(!s_uarts[port]);
@@ -36,11 +37,11 @@ UART::UART(uint8_t port,
 
 void UART::set_blocking(bool blocking)
 {
-	m_blocking = blocking;
+	m_is_blocking = blocking;
 }
 bool UART::is_blocking() const
 {
-	return m_blocking;
+	return m_is_blocking;
 }
 
 void UART::begin(uint32_t baud)
@@ -53,6 +54,8 @@ void UART::begin(uint32_t baud)
     m_ucsrb |= _BV(RXEN0) | _BV(TXEN0); //transmit and receive
 	m_ucsrb |= _BV(RXCIE0); //receiver interrupt
 	m_ucsrc |= _BV(UCSZ01) | _BV(UCSZ00); //format
+	
+	m_is_open = true;
 }
 
 UART::Error UART::get_last_error() const
@@ -62,15 +65,30 @@ UART::Error UART::get_last_error() const
 
 size_t UART::get_data_size() const
 {
-	return (UART_BUFFER_MASK + m_rx_buffer.head - m_rx_buffer.tail) & UART_BUFFER_MASK;
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return 0;
+	}
+	return ((UART_BUFFER_SIZE + m_rx_buffer.head - m_rx_buffer.tail) & UART_BUFFER_MASK);
 }
 bool UART::has_data() const
 {
-	return (UART_BUFFER_MASK + m_rx_buffer.head - m_rx_buffer.tail) & UART_BUFFER_MASK;
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return false;
+	}
+	return ((UART_BUFFER_SIZE + m_rx_buffer.head - m_rx_buffer.tail) & UART_BUFFER_MASK) > 0;
 }
 uint8_t UART::read_byte()
 {
-	if (m_blocking)
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return 0;
+	}
+	if (m_is_blocking)
 	{
 		while (m_rx_buffer.head == m_rx_buffer.tail); //wait for data
 	}
@@ -87,9 +105,15 @@ uint8_t UART::read_byte()
 }
 bool UART::read(uint8_t* buf, size_t size)
 {
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return false;
+	}
+
 	m_last_error = Error::NONE;
 
-	if (m_blocking)
+	if (m_is_blocking)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
@@ -121,13 +145,18 @@ bool UART::read(uint8_t* buf, size_t size)
 	
 bool UART::write(const uint8_t* buf, size_t size)
 {
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return false;
+	}
 	if (!buf || size == 0)
 	{
 		m_last_error = Error::NONE;
 		return true;
 	}
 
-	if (m_blocking)
+	if (m_is_blocking)
 	{
 		do
 		{
@@ -166,13 +195,18 @@ bool UART::write(const uint8_t* buf, size_t size)
 
 bool UART::write_c_str(const char* buf)
 {
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return false;
+	}
 	if (!buf)
 	{
 		m_last_error = Error::NONE;
 		return true;
 	}
 	uint8_t size = 0;
-	if (m_blocking)
+	if (m_is_blocking)
 	{
 		while (uint8_t ch = *buf++)
 		{
@@ -211,6 +245,11 @@ bool UART::write_c_str(const char* buf)
 
 void UART::flush()
 {
+	ASSERT(m_is_open);
+	if (!m_is_open)
+	{
+		return;
+	}
     uint8_t tmphead = m_tx_buffer.head;
 	while (tmphead != m_tx_buffer.tail);
 }

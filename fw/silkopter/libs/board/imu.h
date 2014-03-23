@@ -12,7 +12,7 @@ namespace imu
 	{
 		RATE_50_HZ,
 		RATE_100_HZ,
-		RATE_200_HZ,
+		RATE_250_HZ,
 		RATE_500_HZ
 	};
     extern void init(Sample_Rate rate);
