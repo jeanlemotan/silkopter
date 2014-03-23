@@ -2,7 +2,9 @@
 
 #include "qmath.h"
 #include "util/Flag_Set.h"
+#include "util/chrono.h"
 #include "Motor_Mixer.h"
+#include "board/imu.h"
 
 namespace silk
 {
@@ -75,7 +77,7 @@ public:
 		//x and y are the cartesian coords in a 2d plane with 0, 0 representing the home position
 		//z is the altitude with 0 representing the home altitude
 		math::vec3f position;
-		math::vec3f speed;
+		math::vec3f velocity;
 		math::vec3f acceleration;
 
 		Attitude attitude;
@@ -200,6 +202,16 @@ private:
 	Control_Reference_Frame m_control_frame_reference;
 	Control_Mode m_control_mode;
 	Status m_status;
+	
+	chrono::time_us m_last_time;
+	chrono::micros m_dt;
+	float m_dts;
+	
+	void read_imu_data();
+	void compute_rotation();
+	void compute_linear_motion();
+	
+	board::imu::Data m_imu_data;
 };
 
 };

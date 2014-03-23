@@ -48,7 +48,7 @@ public:
 	//uav
 		
 	virtual void send_uav_acceleration(math::vec3f const& accel) = 0;	
-	virtual void send_uav_speed(math::vec3f const& accel) = 0;
+	virtual void send_uav_velocity(math::vec3f const& accel) = 0;
 	virtual void send_uav_position(math::vec3f const& accel) = 0;
 
 	virtual void send_uav_attitude(math::vec3f const& euler) = 0;

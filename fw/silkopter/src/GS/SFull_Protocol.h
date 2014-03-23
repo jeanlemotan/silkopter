@@ -34,7 +34,7 @@ public:
 	void send_board_pwm_out(uint8_t count, int16_t const* values);
 
 	void send_uav_acceleration(math::vec3f const& accel);
-	void send_uav_speed(math::vec3f const& accel);
+	void send_uav_velocity(math::vec3f const& accel);
 	void send_uav_position(math::vec3f const& accel);
 
 	void send_uav_attitude(math::vec3f const& euler);

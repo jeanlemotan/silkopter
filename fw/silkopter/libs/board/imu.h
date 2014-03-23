@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <qmath.h>
+#include "util/chrono.h"
 
 namespace board
 {
@@ -17,11 +18,8 @@ namespace imu
 	};
     extern void init(Sample_Rate rate);
 
-    // sample_available - true when a new sample is available
-    extern bool has_data();
-
-    // get_delta_time returns the time period in seconds overwhich the sensor data was collected
-    extern float get_delta_time();
+    // calibrates the offsets for the specified duration
+    extern void calibrate(chrono::millis duration);
 
 	struct Data
 	{

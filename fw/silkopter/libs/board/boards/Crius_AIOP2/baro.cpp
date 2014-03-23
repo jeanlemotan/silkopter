@@ -66,7 +66,7 @@ static volatile uint8_t s_buffer_idx = 0;
 static uint16_t _read_uint16(uint8_t reg)
 {
 	uint16_t buf[1];
-	if (i2c::read_registers_le(MS5611_ADDR, reg, buf, 1) == 0)
+	if (i2c::read_registers_le(MS5611_ADDR, reg, buf, 1))
 	{
 		return buf[0];
 	}
@@ -77,21 +77,21 @@ static uint16_t _read_uint16(uint8_t reg)
 static uint32_t _read_adc()
 {
 	uint8_t buf[3];
-	if (i2c::read_registers(MS5611_ADDR, 0x00, buf, sizeof(buf)) == 0)
+	if (i2c::read_registers(MS5611_ADDR, 0x00, buf, sizeof(buf)))
 	{
 		return (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
 	}
-	ASSERT(0);
+	TRACE_MSG("i2c failed");
 	return 0;
 }
 
 static void _write(uint8_t reg)
 {
-	if (i2c::write(MS5611_ADDR, &reg, 1) == 0)
+	if (i2c::write(MS5611_ADDR, &reg, 1))
 	{
 		return;
 	}
-	ASSERT(0);
+	TRACE_MSG("i2c failed");
 }
 
 // Read the sensor. This is a state machine

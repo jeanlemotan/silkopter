@@ -42,7 +42,11 @@ void _run_timer_procs()
 {
 	if (s_is_in_callback)
 	{
+#ifdef NDEBUG
 		PANIC_MSG("timers in progress");
+#else
+		//PRINT("\ntimers in progress");
+#endif
 		return;
 	}
 	s_is_in_callback = true;

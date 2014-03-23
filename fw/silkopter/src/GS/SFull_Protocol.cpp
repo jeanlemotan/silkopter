@@ -44,7 +44,7 @@ static const uint8_t MSG_BOARD_PWM_OUT = 17;
 //UAV
 
 static const uint8_t MSG_UAV_ACCELERATION = 30;
-static const uint8_t MSG_UAV_SPEED = 31;
+static const uint8_t MSG_UAV_VELOCITY = 31;
 static const uint8_t MSG_UAV_POSITION = 32;
 static const uint8_t MSG_UAV_ATTITUDE = 33;
 static const uint8_t MSG_UAV_PHASE = 34;
@@ -283,14 +283,14 @@ void SFull_Protocol::send_uav_acceleration(math::vec3f const& accel)
 	m_buffer.write(accel);
 	flush_message();
 }
-void SFull_Protocol::send_uav_speed(math::vec3f const& speed)
+void SFull_Protocol::send_uav_velocity(math::vec3f const& velocity)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_SPEED);
-	m_buffer.write(speed);
+	start_message(MSG_UAV_VELOCITY);
+	m_buffer.write(velocity);
 	flush_message();
 }
 void SFull_Protocol::send_uav_position(math::vec3f const& position)

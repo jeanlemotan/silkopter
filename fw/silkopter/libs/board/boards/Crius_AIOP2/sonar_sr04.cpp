@@ -27,13 +27,14 @@ static volatile float s_altitude = 0.f;
 
 //////////////////////////////////////////////////////////////////////////
 
-static void _sonar_trigger(chrono::time_us now)
+static void _sonar_trigger()
 {
+	auto now = board::clock::now_us();
 	if (now - s_last_trigger >= k_period)
 	{
 		s_last_trigger = now;
 		s_state = 0;
-		s_echo_delay = chrono::micros();
+		s_echo_delay.count = 0;
 		
 		PORTH |= 0B01000000; // set Sonar TX pin to 1 and after ~12us set it to 0 (below) to start new measurement
 		clock::delay(chrono::micros(12));
@@ -54,11 +55,11 @@ ISR(PCINT0_vect)
 	{
 		if (PINB & 0B00010000) 
 		{
-			s_start_time = clock::now_us(); // We got 1 on Echo pin, remeber current counter value
+			(chrono::time_us&)s_start_time = clock::now_us(); // We got 1 on Echo pin, remeber current counter value
 		} 
 		else 
 		{
-			s_echo_delay = clock::now_us() - s_start_time; // We got 0 on Echo pin, calculate impulse length in counter ticks
+			(chrono::micros&)s_echo_delay = clock::now_us() - s_start_time; // We got 0 on Echo pin, calculate impulse length in counter ticks
 			s_state = 1; // Set "Measurement finished" flag
 		}
 	}

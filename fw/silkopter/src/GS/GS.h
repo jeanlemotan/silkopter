@@ -7,6 +7,7 @@
 #include "util/Noncopyable.h"
 #include "board/UART.h"
 #include "util/chrono.h"
+#include "UAV.h"
 
 namespace silk
 {
@@ -14,18 +15,19 @@ namespace silk
 	class GS : util::Noncopyable
 	{
 	public:
-		explicit GS(board::UART& full_uart);
-		GS(board::UART& full_uart, board::UART& compact_uart);
+		explicit GS(UAV& uav, board::UART& full_uart);
+		GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart);
 
 		void process(chrono::micros max_duration);
 
 	private:
+		UAV& m_uav;
 		board::UART& m_full_uart;
 		board::UART* m_compact_uart;
 
 		SFull_Protocol m_full_protocol;
 		//SCompact_Protocol m_compact_protocol;
-		SFull_Protocol m_compact_protocol;
+		//SFull_Protocol m_compact_protocol;
 		
 		uint32_t m_step;
 		
