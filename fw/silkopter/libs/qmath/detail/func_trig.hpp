@@ -7,21 +7,21 @@ namespace math
 
 MATH_FORCE_INLINE float degrees(float radians)
 {
-	return radians * (180.0f / kPI);
+	return radians * (180.0f / pi);
 }
 MATH_FORCE_INLINE float radians(float degrees)
 {
-	return degrees * kPI / 180.f;
+	return degrees * pi / 180.f;
 }
 template<typename T>
 MATH_FORCE_INLINE T degrees(T const& radians)
 {
-	return radians * 180.0f / kPI;
+	return radians * 180.0f / pi;
 }
 template<typename T>
 MATH_FORCE_INLINE T radians(T const& degrees)
 {
-	return degrees * kPI / 180.f;
+	return degrees * pi / 180.f;
 }
 
 //////////////////////////////////////////////////////////////////////////

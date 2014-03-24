@@ -76,15 +76,15 @@ struct quat
 
 	//! cast from/to mat3
 	quat<T>& set_from_mat3(mat3<T> const& mat);
-	mat3<T>  get_as_mat3() const;
+	void  get_as_mat3(mat3<T>& mat) const;
 
 	//! cast from/to mat4
 	quat<T>& set_from_mat4(mat4<T> const& mat);
-	mat4<T>  get_as_mat4() const;
+	void  get_as_mat4(mat4<T>& mat) const;
 
 	//! cast from/to trans3d
 	quat<T>& set_from_trans3d(trans3d<T> const& mat);
-	trans3d<T>  get_as_trans3d() const;
+	void	get_as_trans3d(trans3d<T>& trans) const;
 
 	//! cast from/to angle axis
 	quat<T>& set_from_angle_axis(T angle, vec3<T> const& axis);
@@ -95,19 +95,19 @@ struct quat
 	//All possible orders of multiplication are handled.
 	//NOTE - this doesn't imply any yaw/pitch/roll - the user gives that meaning.
 	quat<T>& set_from_euler_xyz(vec3<T> const& angles);
-	vec3<T>  get_as_euler_xyz() const;
+	void  get_as_euler_xyz(vec3<T>& euler) const;
 	quat<T>& set_from_euler_xzy(vec3<T> const& angles);
-	vec3<T>  get_as_euler_xzy() const;
+	void  get_as_euler_xzy(vec3<T>& euler) const;
 
 	quat<T>& set_from_euler_yxz(vec3<T> const& angles);
-	vec3<T>  get_as_euler_yxz() const;
+	void  get_as_euler_yxz(vec3<T>& euler) const;
 	quat<T>& set_from_euler_yzx(vec3<T> const& angles);
-	vec3<T>  get_as_euler_yzx() const;
+	void  get_as_euler_yzx(vec3<T>& euler) const;
 
 	quat<T>& set_from_euler_zxy(vec3<T> const& angles);
-	vec3<T>  get_as_euler_zxy() const;
+	void  get_as_euler_zxy(vec3<T>& euler) const;
 	quat<T>& set_from_euler_zyx(vec3<T> const& angles);
-	vec3<T>  get_as_euler_zyx() const;
+	void  get_as_euler_zyx(vec3<T>& euler) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // operators

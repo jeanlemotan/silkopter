@@ -184,9 +184,8 @@ inline quat<T>& quat<T>::set_from_mat3(mat3<T> const& mat)
 }
 
 template <typename T> 
-inline mat3<T> quat<T>::get_as_mat3() const
+inline void quat<T>::get_as_mat3(mat3<T>& ret) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
 	T *m = ret.data();
 
 	T const tx = x*T(2);
@@ -213,8 +212,6 @@ inline mat3<T> quat<T>::get_as_mat3() const
 	m[2] =		txz - tyw;
 	m[5] =		tyz + txw;
 	m[8] = 1 -	tyy - txx;
-
-	return ret;
 }
 
 template <typename T>
@@ -224,9 +221,11 @@ MATH_FORCE_INLINE quat<T>& quat<T>::set_from_mat4(mat4<T> const& m)
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T> quat<T>::get_as_mat4() const
+MATH_FORCE_INLINE void quat<T>::get_as_mat4(mat4<T>& ret) const
 {
-	return mat4<T>(get_as_mat3());
+	mat3<T> ret3;
+	get_as_mat3(ret3);
+	ret = ret3;
 }
 
 template <typename T>
@@ -236,11 +235,10 @@ MATH_FORCE_INLINE quat<T>& quat<T>::set_from_trans3d(trans3d<T> const& m)
 }
 
 template <typename T>
-MATH_FORCE_INLINE trans3d<T> quat<T>::get_as_trans3d() const
+MATH_FORCE_INLINE void quat<T>::get_as_trans3d(trans3d<T>& trans) const
 {
-	trans3d<T> t(trans3d<T>::uninitialized);
-	t.mat = get_as_mat3();
-	t.repair();
+	get_as_mat3(trans.mat);
+	trans.repair();
 	return t;
 }
 
@@ -318,9 +316,8 @@ MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_zyx(vec3<T> const& angles)
 }
 
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_xyz() const
+inline void quat<T>::get_as_euler_xyz(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = T(2)*(z*x + w*y);
 	if (s < T(0.9999))
 	{
@@ -332,23 +329,21 @@ inline vec3<T> quat<T>::get_as_euler_xyz() const
 		}
 		else
 		{
-			res.y = -(T)kPI2;
+			res.y = -(T)pi2;
 			res.x = -atan2(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
 			res.z = 0;
 		}
 	}
 	else
 	{
-		res.y = (T)kPI2;
+		res.y = (T)pi2;
 		res.x = atan2(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
 		res.z = 0;
 	} 
-	return res;
 }
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_xzy() const
+inline void quat<T>::get_as_euler_xzy(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = -T(2)*(x*y - w*z);
 	if (s < T(0.9999))
 	{
@@ -362,21 +357,19 @@ inline vec3<T> quat<T>::get_as_euler_xzy() const
 		{
 			res.y = -atan2(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
 			res.x = 0;
-			res.z = -(T)kPI2;
+			res.z = -(T)pi2;
 		}
 	}
 	else
 	{
 		res.y = -atan2(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
 		res.x = 0;
-		res.z = (T)kPI2;
+		res.z = (T)pi2;
 	} 
-	return res;
 }
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_yxz() const
+inline void quat<T>::get_as_euler_yxz(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = -T(2)*(z*y - w*x);
 	if (s < T(0.9999))
 	{
@@ -389,22 +382,20 @@ inline vec3<T> quat<T>::get_as_euler_yxz() const
 		else
 		{
 			res.y = 0;
-			res.x = -(T)kPI2;
+			res.x = -(T)pi2;
 			res.z = atan2(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 		}
 	}
 	else
 	{
 		res.y = 0;
-		res.x = (T)kPI2;
+		res.x = (T)pi2;
 		res.z = atan2(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 	} 
-	return res;
 }
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_yzx() const
+inline void quat<T>::get_as_euler_yzx(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = T(2)*(x*y + w*z);
 	if (s < T(0.9999))
 	{
@@ -418,22 +409,20 @@ inline vec3<T> quat<T>::get_as_euler_yzx() const
 		{
 			res.y = -atan2(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
 			res.x = 0;
-			res.z = -(T)kPI2;
+			res.z = -(T)pi2;
 		}
 	}
 	else
 	{
 		res.y = atan2(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
 		res.x = 0;
-		res.z = (T)kPI2;
+		res.z = (T)pi2;
 	} 
-	return res;
 }
 
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_zxy() const
+inline void quat<T>::get_as_euler_zxy(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = T(2)*(z*y + w*x);
 	if (s < T(0.9999))
 	{
@@ -446,23 +435,21 @@ inline vec3<T> quat<T>::get_as_euler_zxy() const
 		else
 		{
 			res.y = 0;
-			res.x = -(T)kPI2;
+			res.x = -(T)pi2;
 			res.z = -atan2(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 		}
 	}
 	else
 	{
 		res.y = 0;
-		res.x = (T)kPI2;
+		res.x = (T)pi2;
 		res.z = atan2(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 	} 
-	return res;
 }
 
 template <typename T>
-inline vec3<T> quat<T>::get_as_euler_zyx() const
+inline void quat<T>::get_as_euler_zyx(vec3<T>& res) const
 {
-	vec3<T> res;
 	T const s = -T(2)*(z*x - w*y);
 	if (s < T(0.9999))
 	{
@@ -474,18 +461,17 @@ inline vec3<T> quat<T>::get_as_euler_zyx() const
 		}
 		else
 		{
-			res.y = -(T)kPI2;
+			res.y = -(T)pi2;
 			res.x = 0;
 			res.z = atan2(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 		}
 	}
 	else
 	{
-		res.y = (T)kPI2;
+		res.y = (T)pi2;
 		res.x = 0;
 		res.z = -atan2(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 	} 
-	return res;
 }
 
 //! axis must be unit length

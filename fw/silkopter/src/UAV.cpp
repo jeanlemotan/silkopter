@@ -2,6 +2,7 @@
 #include "Motor_Mixer.h"
 #include "debug/debug.h"
 #include "board/clock.h"
+#include "physics/constants.h"
 
 
 using namespace silk;
@@ -54,6 +55,10 @@ void UAV::process()
 	m_last_time = now;
 	
 	read_imu_data();
+	read_sonar_data();
+	read_gps_data();
+	read_baro_data();
+	read_compass_data();
 	
 	compute_rotation();
 	compute_linear_motion();
@@ -62,6 +67,22 @@ void UAV::process()
 void UAV::read_imu_data()
 {
 	board::imu::get_data(m_imu_data);
+}
+void UAV::read_sonar_data()
+{
+	board::sonar::get_data(m_sonar_data);
+}
+void UAV::read_gps_data()
+{
+//	board::gps::get_data(m_gps_data);
+}
+void UAV::read_baro_data()
+{
+	board::baro::get_data(m_baro_data);
+}
+void UAV::read_compass_data()
+{
+//	board::compass::get_data(m_compass_data);
 }
 
 void UAV::compute_rotation()
@@ -74,15 +95,13 @@ void UAV::compute_rotation()
 	
 	//TODO - figure out why there's a minus in the euler!!!
 	math::quatf rot(math::quatf::eulerXYZ, -gyro);
-	m_status.attitude.front = math::rotate(rot, math::vec3f(0, 1, 0));
-	m_status.attitude.up = math::rotate(rot, math::vec3f(0, 0, 1));
-	m_status.attitude.right = math::rotate(rot, math::vec3f(1, 0, 0));
+	rot.get_as_mat3(m_status.attitude.rotation);
 	//PRINT("\nATT: {0} / {1} / {2} ::: {3}", m_status.attitude.front, m_status.attitude.right, m_status.attitude.up, gyro);
 }
 
 void UAV::compute_linear_motion()
 {
-	m_status.acceleration = m_imu_data.accelerometer.value + m_status.attitude.up*9.80665f;
+	m_status.acceleration = m_imu_data.accelerometer.value + m_status.attitude.up * physics::constants::g;
 	m_status.velocity += m_status.acceleration * m_dts;
 	m_status.position += m_status.velocity * m_dts;
 }

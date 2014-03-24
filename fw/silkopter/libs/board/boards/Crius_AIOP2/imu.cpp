@@ -9,6 +9,7 @@
 #include "board/boards/avr_i2c.h"
 #include "board/clock.h"
 #include "board/scheduler.h"
+#include "physics/constants.h"
 
 namespace board
 {
@@ -16,10 +17,6 @@ namespace imu
 {
 
 //#define DISABLE_INTERNAL_MAG
-
-// MPU6000 accelerometer scaling
-#define GRAVITY_MSS 9.80665f
-#define MPU6000_ACCEL_SCALE_1G    (GRAVITY_MSS / 4096.0f)
 
 // MPU 6000 I2C Address
 #define MPU6000_ADDR 0x68
@@ -550,7 +547,7 @@ void get_data(Data& data)
 	data.accelerometer.is_valid = is_valid;
 	data.gyroscope.is_valid = is_valid;
 	
-	data.accelerometer.value = s_accel_data * GRAVITY_MSS;
+	data.accelerometer.value = s_accel_data * physics::constants::g;
 	data.gyroscope.value = s_gyro_data;
 }
 

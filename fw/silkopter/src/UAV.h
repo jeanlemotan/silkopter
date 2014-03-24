@@ -23,10 +23,12 @@ public:
 			, yaw(0) 
 		{}
 
-		math::vec3f front; 	//at rest, points towards +Y axis
-		math::vec3f right;	//at rest, points towards +X axis
-		math::vec3f up;		//at rest, points towards +Z axis
+		math::mat3f rotation;
+		
 		//redundands for the vectors above
+		//pitch is around X
+		//roll is around Y
+		//yaw is around Z
 		float pitch, roll, yaw;
 	};
 
@@ -208,10 +210,19 @@ private:
 	float m_dts;
 	
 	void read_imu_data();
+	void read_sonar_data();
+	void read_gps_data();
+	void read_baro_data();
+	void read_compass_data();
+
 	void compute_rotation();
 	void compute_linear_motion();
 	
 	board::imu::Data m_imu_data;
+	//board::gps::Data m_gps_data;
+	board::sonar::Data m_sonar_data;
+	board::baro::Data m_baro_data;
+	board::compass::Data m_compass_data;
 };
 
 };

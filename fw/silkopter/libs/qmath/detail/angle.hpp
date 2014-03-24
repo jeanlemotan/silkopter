@@ -15,14 +15,14 @@ template<typename T> template<typename U> MATH_FORCE_INLINE angle<T>::angle(angl
 template<typename T> MATH_FORCE_INLINE angle<T>& angle<T>::normalize()
 {
 	T a = radians;
-	while (a >= k2PI)
+	while (a >= _2pi)
 	{
-		a -= k2PI;
+		a -= _2pi;
 	}
 
 	while (a < (T)0)
 	{
-		a += k2PI;
+		a += _2pi;
 	}
 
 	radians = a;
