@@ -88,21 +88,19 @@ MATH_FORCE_INLINE mat3<T>::mat3(vec3<T> const& column0, vec3<T> const& column1, 
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set(T const values[9])
+MATH_FORCE_INLINE void mat3<T>::set(T const values[9])
 {
-	assert(values);
+	ASSERT(values);
 	memcpy(m, values, sizeof(T)*elementCount);
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_identity()
+MATH_FORCE_INLINE void mat3<T>::set_identity()
 {
 	m[0] = m[4] = (T)1;
 	m[1] = m[2] = m[3] = m[5] = (T)0;
 	m[8] = (T)1;
 	m[6] = m[7] = (T)0;
-	return *this;
 }
 
 template <typename T>
@@ -149,41 +147,39 @@ MATH_FORCE_INLINE bool mat3<T>::invert()
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::transpose()
+MATH_FORCE_INLINE void mat3<T>::transpose()
 {
 	std::swap(m[1], m[3]);
 	std::swap(m[2], m[6]);
 	std::swap(m[5], m[7]);
-	return *this;
 }
 
 template <typename T>
 MATH_FORCE_INLINE vec3<T> mat3<T>::get_row(uint8_t row) const
 {
-	assert(row < rowCount);
+	ASSERT(row < rowCount);
 	return vec3<T>(m[row + 0], m[row + 3], m[row + 6]);
 }
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_row(uint8_t row, vec3<T> const& v)
+MATH_FORCE_INLINE void mat3<T>::set_row(uint8_t row, vec3<T> const& v)
 {
-	assert(row < rowCount);
+	ASSERT(row < rowCount);
 	m[row + 0] = v.x;
 	m[row + 3] = v.y;
 	m[row + 6] = v.z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec3<T> mat3<T>::get_column(uint8_t column) const
+MATH_FORCE_INLINE vec3<T> const& mat3<T>::get_column(uint8_t column) const
 {
-	assert(column < columnCount);
+	ASSERT(column < columnCount);
 	uint8_t idx = column * rowCount;
-	return vec3<T>(m[idx + 0], m[idx + 1], m[idx + 2]);
+	return reinterpret_cast<vec3<T> const&>(m[idx + 0]);
 }
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_column(uint8_t column, vec3<T> const& v)
+MATH_FORCE_INLINE void mat3<T>::set_column(uint8_t column, vec3<T> const& v)
 {
-	assert(column < columnCount);
+	ASSERT(column < columnCount);
 	uint8_t idx = column * rowCount;
 	m[idx + 0] = v.x;
 	m[idx + 1] = v.y;
@@ -191,19 +187,19 @@ MATH_FORCE_INLINE mat3<T>& mat3<T>::set_column(uint8_t column, vec3<T> const& v)
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec3<T> mat3<T>::get_axis_x() const
+MATH_FORCE_INLINE vec3<T> const& mat3<T>::get_axis_x() const
 {
 	return get_column(0);
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec3<T> mat3<T>::get_axis_y() const
+MATH_FORCE_INLINE vec3<T> const& mat3<T>::get_axis_y() const
 {
 	return get_column(1);
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec3<T> mat3<T>::get_axis_z() const
+MATH_FORCE_INLINE vec3<T> const& mat3<T>::get_axis_z() const
 {
 	return get_column(2);
 }
@@ -215,48 +211,43 @@ MATH_FORCE_INLINE vec3<T> mat3<T>::get_scale() const
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_axis_x(vec3<T> const& axis)
+MATH_FORCE_INLINE void mat3<T>::set_axis_x(vec3<T> const& axis)
 {
 	m[0] = axis.x;
 	m[1] = axis.y;
 	m[2] = axis.z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_axis_y(vec3<T> const& axis)
+MATH_FORCE_INLINE void mat3<T>::set_axis_y(vec3<T> const& axis)
 {
 	m[3] = axis.x;
 	m[4] = axis.y;
 	m[5] = axis.z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_axis_z(vec3<T> const& axis)
+MATH_FORCE_INLINE void mat3<T>::set_axis_z(vec3<T> const& axis)
 {
 	m[6] = axis.x;
 	m[7] = axis.y;
 	m[8] = axis.z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::set_scale(vec3<T> const& s)
+MATH_FORCE_INLINE void mat3<T>::set_scale(vec3<T> const& s)
 {
 	m[0] = s.x;
 	m[4] = s.y;
 	m[8] = s.z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat3<T>& mat3<T>::post_scale(vec3<T> const& s)
+MATH_FORCE_INLINE void mat3<T>::post_scale(vec3<T> const& s)
 {
 	m[0] *= s.x;
 	m[4] *= s.y;
 	m[8] *= s.z;
-	return *this;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -290,211 +281,33 @@ MATH_FORCE_INLINE T const* mat3<T>::data() const
 template <typename T>
 MATH_FORCE_INLINE T& mat3<T>::operator()(uint8_t column, uint8_t row)
 {
-	assert(column < columnCount && row < rowCount);
+	ASSERT(column < columnCount && row < rowCount);
 	return m[column*rowCount + row];
 }
 
 template <typename T>
 MATH_FORCE_INLINE T const& mat3<T>::operator()(uint8_t column, uint8_t row) const
 {
-	assert(column < columnCount && row < rowCount);
+	ASSERT(column < columnCount && row < rowCount);
 	return m[column*rowCount + row];
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// scalar operators
-///////////////////////////////////////////////////////////////////////////////
-
-// template <typename T>
-// MATH_FORCE_INLINE mat3<T> mat3<T>::operator*(T scalar) const
-// {
-// 	mat3<T> temp(uninitialized);
-// #ifdef XXXUSE_NEON_ASM
-// 	asm volatile
-// 		(		 
-// 		"vldmia %0, { q0-q3 }	\n\t"
-// 		"vdup.float q4, %1    	\n\t" // vdup splates a scalar into a vector
-// 
-// 		"vmul.float q0, q0, q4	\n\t" 	
-// 		"vmul.float q1, q1, q4	\n\t"
-// 		"vmul.float q2, q2, q4	\n\t"
-// 		"vmul.float q3, q3, q4	\n\t"
-// 
-// 		"vstmia %2, { q0-q3 }	\n\t"
-// 		: // no output
-// 	: "r" (m), "r" (scalar), "r" (temp.m)     // input
-// 		: "memory", 
-// 		"q0", "q1", "q2", "q3", "q4"
-// 		);
-// #else
-// 	temp.m[ 0] = m[ 0]*scalar;
-// 	temp.m[ 1] = m[ 1]*scalar;
-// 	temp.m[ 2] = m[ 2]*scalar;
-// 	temp.m[ 3] = m[ 3]*scalar;
-// 	temp.m[ 4] = m[ 4]*scalar;
-// 	temp.m[ 5] = m[ 5]*scalar;
-// 	temp.m[ 6] = m[ 6]*scalar;
-// 	temp.m[ 7] = m[ 7]*scalar;
-// 	temp.m[ 8] = m[ 8]*scalar;
-// #endif
-// 	return temp;
-// }
-// 
-// template <typename T>
-// MATH_FORCE_INLINE mat3<T>& mat3<T>::operator*=(T scalar)
-// {
-// #ifdef XXXUSE_NEON_ASM
-// 	asm volatile
-// 		(		 
-// 		"vldmia %0, { q0-q3 }	\n\t"
-// 		"vdup.float q4, %1    	\n\t" // vdup splates a scalar into a vector
-// 
-// 		"vmul.float q0, q0, q4	\n\t" 	
-// 		"vmul.float q1, q1, q4	\n\t"
-// 		"vmul.float q2, q2, q4	\n\t"
-// 		"vmul.float q3, q3, q4	\n\t"
-// 
-// 		"vstmia %0, { q0-q3 }	\n\t"
-// 		: // no output
-// 	: "r" (m), "r" (scalar)     // input
-// 		: "memory", 
-// 		"q0", "q1", "q2", "q3", "q4"
-// 		);
-// #else
-// 	m[ 0] *= scalar;
-// 	m[ 1] *= scalar;
-// 	m[ 2] *= scalar;
-// 	m[ 3] *= scalar;
-// 	m[ 4] *= scalar;
-// 	m[ 5] *= scalar;
-// 	m[ 6] *= scalar;
-// 	m[ 7] *= scalar;
-// 	m[ 8] *= scalar;
-// #endif
-// 	return *this;
-// }
-
-///////////////////////////////////////////////////////////////////////////////
-// arithmetic operators
-///////////////////////////////////////////////////////////////////////////////
-
-// template <typename T>
-// inline mat3<T> mat3<T>::operator*(const mat3<T>& other) const
-// {
-// 	mat3<T> ret(uninitialized);
-// //	const T *__restrict m1 = m;
-// //	const T *__restrict m2 = other.m;
-// //	T *__restrict m3 = ret.m;
-// 	const T* m1 = m;
-// 	const T* m2 = other.m;
-// 	T* m3 = ret.m;
-// 	// using this code only on release and when on the iphone
-// 	m3[0] = m1[0]*m2[0] + m1[3]*m2[1] + m1[6]*m2[2];
-// 	m3[1] = m1[1]*m2[0] + m1[4]*m2[1] + m1[7]*m2[2];
-// 	m3[2] = m1[2]*m2[0] + m1[5]*m2[1] + m1[8]*m2[2];
-// 
-// 	m3[3] = m1[0]*m2[3] + m1[3]*m2[4] + m1[6]*m2[5];
-// 	m3[4] = m1[1]*m2[3] + m1[4]*m2[4] + m1[7]*m2[5];
-// 	m3[5] = m1[2]*m2[3] + m1[5]*m2[4] + m1[8]*m2[5];
-// 
-// 	m3[6] = m1[0]*m2[6] + m1[3]*m2[7] + m1[6]*m2[8];
-// 	m3[7] = m1[1]*m2[6] + m1[4]*m2[7] + m1[7]*m2[8];
-// 	m3[8] = m1[2]*m2[6] + m1[5]*m2[7] + m1[8]*m2[8];
-// 
-// 	return ret;
-// }
-// 
-// template <typename T>
-// MATH_FORCE_INLINE mat3<T> mat3<T>::operator+(const mat3<T>& other) const
-// {
-// 	mat3<T> temp(uninitialized);
-// 	temp[ 0] = m[ 0]+other[ 0];
-// 	temp[ 1] = m[ 1]+other[ 1];
-// 	temp[ 2] = m[ 2]+other[ 2];
-// 	temp[ 3] = m[ 3]+other[ 3];
-// 	temp[ 4] = m[ 4]+other[ 4];
-// 	temp[ 5] = m[ 5]+other[ 5];
-// 	temp[ 6] = m[ 6]+other[ 6];
-// 	temp[ 7] = m[ 7]+other[ 7];
-// 	temp[ 8] = m[ 8]+other[ 8];
-// 	return temp;
-// }
-// 
-// template <typename T>
-// MATH_FORCE_INLINE mat3<T> mat3<T>::operator-(const mat3<T>& other) const
-// {
-// 	mat3<T> temp(uninitialized);
-// 	temp.m[ 0] = m[ 0]-other.m[ 0];
-// 	temp.m[ 1] = m[ 1]-other.m[ 1];
-// 	temp.m[ 2] = m[ 2]-other.m[ 2];
-// 	temp.m[ 3] = m[ 3]-other.m[ 3];
-// 	temp.m[ 4] = m[ 4]-other.m[ 4];
-// 	temp.m[ 5] = m[ 5]-other.m[ 5];
-// 	temp.m[ 6] = m[ 6]-other.m[ 6];
-// 	temp.m[ 7] = m[ 7]-other.m[ 7];
-// 	temp.m[ 8] = m[ 8]-other.m[ 8];
-// 	return temp;
-// }
-
-// template <typename T>
-// MATH_FORCE_INLINE vec2<T> mat3<T>::operator*(const vec2<T>& p) const
-// {
-// 	T px = p.x;
-// 	T py = p.y;
-// 	T x = px*m[0] + py*m[3] + m[6];
-// 	T y = px*m[1] + py*m[4] + m[7];
-// 	return vec2<T>(x, y);
-// }
-
-// template <typename T>
-// MATH_FORCE_INLINE vec3<T> mat3<T>::operator*(const vec3<T>& p) const
-// {
-// 	T px = p.x;
-// 	T py = p.y;
-// 	T pz = p.z;
-// 	T x = px*m[0] + py*m[3] + m[6];
-// 	T y = px*m[1] + py*m[4] + m[7];
-// 	T z = px*m[2] + py*m[5] + m[8];
-// 	return vec3<T>(x, y, z);
-// }
-
-// template <typename T>
-// mat3<T>& mat3<T>::operator+=(const mat3<T>& other)
-// {
-// 	for (uint8_t i = 0; i < 9; i++)
-// 	{
-// 		m[i] += other.m[i];
-// 	}
-// 	return *this;
-// }
-// 
-// template <typename T>
-// mat3<T>& mat3<T>::operator-=(const mat3<T>& other)
-// {
-// 	for (uint8_t i = 0; i < 9; i++)
-// 	{
-// 		m[i] -= other.m[i];
-// 	}
-// 	return *this;
-// }
-
 
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator*(mat3<T> const& other) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return multiply(ret, *this, other);
 }
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator+(mat3<T> const& other) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return cwise::add(ret, *this, other);
 }
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator-(mat3<T> const& other) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return cwise::substract(ret, *this, other);
 }
 template <typename T>
@@ -517,19 +330,19 @@ MATH_FORCE_INLINE mat3<T>& mat3<T>::operator-=(mat3<T> const& other)
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator*(T scalar) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return cwise::multiply(ret, *this, scalar);
 }
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator+(T scalar) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return cwise::add(ret, *this, scalar);
 }
 template <typename T>
 MATH_FORCE_INLINE mat3<T> mat3<T>::operator-(T scalar) const
 {
-	mat3<T> ret;
+	mat3<T> ret(mat3<T>::uninitialized);
 	return cwise::substract(ret, *this, scalar);
 }
 template <typename T>

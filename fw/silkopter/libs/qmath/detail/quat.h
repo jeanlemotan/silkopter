@@ -63,51 +63,51 @@ struct quat
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//! Direct assignment
-	quat<T>& set(T x, T y, T z, T w);
+	void set(T x, T y, T z, T w);
 
 	//! Normalizes the quat
-	quat<T>& normalize();
+	void normalize();
 
 	//! Inverts this quat
-	quat<T>& invert();
+	void invert();
 
 	//! Set quat to identity
-	quat<T>& set_identity();
+	void set_identity();
 
 	//! cast from/to mat3
-	quat<T>& set_from_mat3(mat3<T> const& mat);
-	void  get_as_mat3(mat3<T>& mat) const;
+	void set_from_mat3(mat3<T> const& mat);
+	void get_as_mat3(mat3<T>& mat) const;
 
 	//! cast from/to mat4
-	quat<T>& set_from_mat4(mat4<T> const& mat);
-	void  get_as_mat4(mat4<T>& mat) const;
+	void set_from_mat4(mat4<T> const& mat);
+	void get_as_mat4(mat4<T>& mat) const;
 
 	//! cast from/to trans3d
-	quat<T>& set_from_trans3d(trans3d<T> const& mat);
-	void	get_as_trans3d(trans3d<T>& trans) const;
+	void set_from_trans3d(trans3d<T> const& mat);
+	void get_as_trans3d(trans3d<T>& trans) const;
 
 	//! cast from/to angle axis
-	quat<T>& set_from_angle_axis(T angle, vec3<T> const& axis);
-	void	 get_as_angle_axis(T& angle, vec3<T>& axis) const;
+	void set_from_angle_axis(T angle, vec3<T> const& axis);
+	void get_as_angle_axis(T& angle, vec3<T>& axis) const;
 
 	//! cast from/to euler (polar rotations in a vector)
 	//these handle conversion from Euler (x, y, z) to quat
 	//All possible orders of multiplication are handled.
 	//NOTE - this doesn't imply any yaw/pitch/roll - the user gives that meaning.
-	quat<T>& set_from_euler_xyz(vec3<T> const& angles);
-	void  get_as_euler_xyz(vec3<T>& euler) const;
-	quat<T>& set_from_euler_xzy(vec3<T> const& angles);
-	void  get_as_euler_xzy(vec3<T>& euler) const;
+	void set_from_euler_xyz(vec3<T> const& angles);
+	void get_as_euler_xyz(vec3<T>& euler) const;
+	void set_from_euler_xzy(vec3<T> const& angles);
+	void get_as_euler_xzy(vec3<T>& euler) const;
 
-	quat<T>& set_from_euler_yxz(vec3<T> const& angles);
-	void  get_as_euler_yxz(vec3<T>& euler) const;
-	quat<T>& set_from_euler_yzx(vec3<T> const& angles);
-	void  get_as_euler_yzx(vec3<T>& euler) const;
+	void set_from_euler_yxz(vec3<T> const& angles);
+	void get_as_euler_yxz(vec3<T>& euler) const;
+	void set_from_euler_yzx(vec3<T> const& angles);
+	void get_as_euler_yzx(vec3<T>& euler) const;
 
-	quat<T>& set_from_euler_zxy(vec3<T> const& angles);
-	void  get_as_euler_zxy(vec3<T>& euler) const;
-	quat<T>& set_from_euler_zyx(vec3<T> const& angles);
-	void  get_as_euler_zyx(vec3<T>& euler) const;
+	void set_from_euler_zxy(vec3<T> const& angles);
+	void get_as_euler_zxy(vec3<T>& euler) const;
+	void set_from_euler_zyx(vec3<T> const& angles);
+	void get_as_euler_zyx(vec3<T>& euler) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // operators

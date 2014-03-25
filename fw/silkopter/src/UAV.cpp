@@ -94,14 +94,17 @@ void UAV::compute_rotation()
 	m_status.attitude.roll = gyro.y;
 	
 	//TODO - figure out why there's a minus in the euler!!!
-	math::quatf rot(math::quatf::eulerXYZ, -gyro);
+	math::quatf rot(math::quatf::eulerXYZ, gyro);
 	rot.get_as_mat3(m_status.attitude.rotation);
-	//PRINT("\nATT: {0} / {1} / {2} ::: {3}", m_status.attitude.front, m_status.attitude.right, m_status.attitude.up, gyro);
+// 	PRINT("\nATT: {0} / {1} / {2} ::: {3}", 
+// 		m_status.attitude.rotation.get_axis_y(), 
+// 		m_status.attitude.rotation.get_axis_x(), 
+// 		m_status.attitude.rotation.get_axis_z(), gyro);
 }
 
 void UAV::compute_linear_motion()
 {
-	m_status.acceleration = m_imu_data.accelerometer.value + m_status.attitude.up * physics::constants::g;
+	m_status.acceleration = /*m_imu_data.accelerometer.value + */m_status.attitude.rotation.get_axis_z();// * physics::constants::g;
 	m_status.velocity += m_status.acceleration * m_dts;
 	m_status.position += m_status.velocity * m_dts;
 }

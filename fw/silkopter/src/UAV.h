@@ -5,6 +5,8 @@
 #include "util/chrono.h"
 #include "Motor_Mixer.h"
 #include "board/imu.h"
+#include "board/sonar.h"
+#include "board/baro.h"
 
 namespace silk
 {
@@ -222,7 +224,7 @@ private:
 	//board::gps::Data m_gps_data;
 	board::sonar::Data m_sonar_data;
 	board::baro::Data m_baro_data;
-	board::compass::Data m_compass_data;
+	//board::compass::Data m_compass_data;
 };
 
 };

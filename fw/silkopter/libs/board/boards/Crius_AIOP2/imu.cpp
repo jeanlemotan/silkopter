@@ -209,9 +209,9 @@ static void _poll_data()
 
 			if (i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7))
 			{
-				buffer.accel_sum.x	-= s_raw_mpu[0];
-				buffer.accel_sum.y	-= s_raw_mpu[1];
-				buffer.accel_sum.z	-= s_raw_mpu[2];
+				buffer.accel_sum.x	+= s_raw_mpu[0];
+				buffer.accel_sum.y	+= s_raw_mpu[1];
+				buffer.accel_sum.z	+= s_raw_mpu[2];
 				buffer.temp_sum		+= s_raw_mpu[3];
 				buffer.gyro_sum.x	+= s_raw_mpu[4];
 				buffer.gyro_sum.y	+= s_raw_mpu[5];
@@ -456,7 +456,7 @@ static void _refresh_data()
 	s_gyro_data += s_last_gyro_sample;
 
 	//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
-	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z) + math::anglef::pi.radians;
+	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z);
 	if (accel_pitch_x > math::anglef::pi.radians)
 	{
 		accel_pitch_x -= math::anglef::_2pi.radians;
@@ -465,7 +465,7 @@ static void _refresh_data()
 	{
 		accel_pitch_x += math::anglef::_2pi.radians;
 	}
- 	float accel_roll_y = math::atan2(s_accel_data.x, math::sqrt(s_accel_data.y*s_accel_data.y + s_accel_data.z*s_accel_data.z));
+ 	float accel_roll_y = -math::atan2(s_accel_data.x, math::sqrt(s_accel_data.y*s_accel_data.y + s_accel_data.z*s_accel_data.z));
 	if (accel_roll_y > math::anglef::pi.radians)
 	{
 		accel_roll_y -= math::anglef::_2pi.radians;
@@ -476,7 +476,7 @@ static void _refresh_data()
 	}
 
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
-	if (s_accel_data.z < -0.1f)
+	if (s_accel_data.z > 0.1f)
  	{
 		s_gyro_data.x = math::lerp(s_gyro_data.x, accel_pitch_x, delta_time);
 		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, delta_time);
@@ -586,7 +586,7 @@ void calibrate(chrono::millis duration)
 		float inv_count = 1.f / count;
 		s_gyro_calibration_offset = gyro_offset * inv_count;
 		s_accel_calibration_offset = accel_offset * inv_count;
-		s_accel_calibration_offset.z += 1.f; //1g on z
+		s_accel_calibration_offset.z -= 1.f; //1g on z
 
 		PRINT("\nnew offsets gyro: {0} / accel: {1}", s_gyro_calibration_offset, s_accel_calibration_offset);
 	}

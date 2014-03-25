@@ -105,45 +105,45 @@ MATH_FORCE_INLINE quat<T>::quat(ZEulerZYX, vec3<T> const& angles)
 
 // sets new quat
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set(T _x, T _y, T _z, T _w)
+MATH_FORCE_INLINE void quat<T>::set(T _x, T _y, T _z, T _w)
 {
 	x = _x;
 	y = _y;
 	z = _z;
 	w = _w;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::normalize()
+MATH_FORCE_INLINE void quat<T>::normalize()
 {
 	T n = x*x + y*y + z*z + w*w;
-	assert(n != 0);
-	n = 1/(T)sqrt(n);
-	return (*this *= n);
+	ASSERT(n != 0);
+	n = inv_sqrt(n);
+	x *= n;
+	y *= n;
+	z *= n;
+	w *= n;
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::invert()
+MATH_FORCE_INLINE void quat<T>::invert()
 {
 	x = -x;
 	y = -y;
 	z = -z;
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_identity()
+MATH_FORCE_INLINE void quat<T>::set_identity()
 {
 	x = (T)0;
 	y = (T)0;
 	z = (T)0;
 	w = (T)1;
-	return *this;
 }
 
 template<typename T>
-inline quat<T>& quat<T>::set_from_mat3(mat3<T> const& mat)
+inline void quat<T>::set_from_mat3(mat3<T> const& mat)
 {
 	T trace = mat(0,0) + mat(1,1) + mat(2,2);
 	if (trace > 0)
@@ -179,8 +179,6 @@ inline quat<T>& quat<T>::set_from_mat3(mat3<T> const& mat)
 		*apfQuat[j] = (mat(i,j)+mat(j,i))*fRoot;
 		*apfQuat[k] = (mat(i,k)+mat(k,i))*fRoot;
 	}
-
-	return *this;
 }
 
 template <typename T> 
@@ -215,104 +213,97 @@ inline void quat<T>::get_as_mat3(mat3<T>& ret) const
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_mat4(mat4<T> const& m)
+MATH_FORCE_INLINE void quat<T>::set_from_mat4(mat4<T> const& m)
 {
-	return set_from_mat3(mat3<T>(m));
+	set_from_mat3(mat3<T>(m));
 }
 
 template <typename T>
 MATH_FORCE_INLINE void quat<T>::get_as_mat4(mat4<T>& ret) const
 {
-	mat3<T> ret3;
+	mat3<T> ret3(mat3<T>::uninitialized);
 	get_as_mat3(ret3);
 	ret = ret3;
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_trans3d(trans3d<T> const& m)
+MATH_FORCE_INLINE void quat<T>::set_from_trans3d(trans3d<T> const& m)
 {
-	return set_from_mat3(mat3<T>(m.mat));
+	set_from_mat3(mat3<T>(m.mat));
 }
 
 template <typename T>
 MATH_FORCE_INLINE void quat<T>::get_as_trans3d(trans3d<T>& trans) const
 {
-	get_as_mat3(trans.mat);
+	get_as_mat4(trans.mat);
 	trans.repair();
-	return t;
 }
 
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_xyz(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_xyz(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
-	return *this;
 }
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_xzy(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_xzy(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
-	return *this;
 }
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_yxz(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_yxz(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
-	return *this;
 }
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_yzx(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_yzx(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
-	return *this;
 }
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_zxy(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_zxy(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
-	return *this;
 }
 template <typename T>
-MATH_FORCE_INLINE quat<T>& quat<T>::set_from_euler_zyx(vec3<T> const& angles)
+MATH_FORCE_INLINE void quat<T>::set_from_euler_zyx(vec3<T> const& angles)
 {
 	vec3<T> r(angles*T(0.5));
-	vec3<T> sr, cr;
+	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
 	sin_cos(r, sr, cr);
 	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
 	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
 	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
 	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
-	return *this;
 }
 
 template <typename T>
@@ -329,14 +320,14 @@ inline void quat<T>::get_as_euler_xyz(vec3<T>& res) const
 		}
 		else
 		{
-			res.y = -(T)pi2;
+			res.y = -(T)angle<T>::pi2;
 			res.x = -atan2(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
 			res.z = 0;
 		}
 	}
 	else
 	{
-		res.y = (T)pi2;
+		res.y = (T)angle<T>::pi2;
 		res.x = atan2(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
 		res.z = 0;
 	} 
@@ -357,14 +348,14 @@ inline void quat<T>::get_as_euler_xzy(vec3<T>& res) const
 		{
 			res.y = -atan2(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
 			res.x = 0;
-			res.z = -(T)pi2;
+			res.z = -(T)angle<T>::pi2;
 		}
 	}
 	else
 	{
 		res.y = -atan2(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
 		res.x = 0;
-		res.z = (T)pi2;
+		res.z = (T)angle<T>::pi2;
 	} 
 }
 template <typename T>
@@ -382,14 +373,14 @@ inline void quat<T>::get_as_euler_yxz(vec3<T>& res) const
 		else
 		{
 			res.y = 0;
-			res.x = -(T)pi2;
+			res.x = -(T)angle<T>::pi2;
 			res.z = atan2(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 		}
 	}
 	else
 	{
 		res.y = 0;
-		res.x = (T)pi2;
+		res.x = (T)angle<T>::pi2;
 		res.z = atan2(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 	} 
 }
@@ -409,14 +400,14 @@ inline void quat<T>::get_as_euler_yzx(vec3<T>& res) const
 		{
 			res.y = -atan2(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
 			res.x = 0;
-			res.z = -(T)pi2;
+			res.z = -(T)angle<T>::pi2;
 		}
 	}
 	else
 	{
 		res.y = atan2(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
 		res.x = 0;
-		res.z = (T)pi2;
+		res.z = (T)angle<T>::pi2;
 	} 
 }
 
@@ -435,14 +426,14 @@ inline void quat<T>::get_as_euler_zxy(vec3<T>& res) const
 		else
 		{
 			res.y = 0;
-			res.x = -(T)pi2;
+			res.x = -(T)angle<T>::pi2;
 			res.z = -atan2(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 		}
 	}
 	else
 	{
 		res.y = 0;
-		res.x = (T)pi2;
+		res.x = (T)angle<T>::pi2;
 		res.z = atan2(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 	} 
 }
@@ -461,14 +452,14 @@ inline void quat<T>::get_as_euler_zyx(vec3<T>& res) const
 		}
 		else
 		{
-			res.y = -(T)pi2;
+			res.y = -(T)angle<T>::pi2;
 			res.x = 0;
 			res.z = atan2(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 		}
 	}
 	else
 	{
-		res.y = (T)pi2;
+		res.y = (T)angle<T>::pi2;
 		res.x = 0;
 		res.z = -atan2(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 	} 
@@ -477,7 +468,7 @@ inline void quat<T>::get_as_euler_zyx(vec3<T>& res) const
 //! axis must be unit length
 //! angle in radians
 template <typename T>
-inline quat<T>& quat<T>::set_from_angle_axis(T angle, vec3<T> const& axis)
+inline void quat<T>::set_from_angle_axis(T angle, vec3<T> const& axis)
 {
 	T const fHalfAngle = T(0.5)*angle;
 	T fSin;
@@ -485,7 +476,6 @@ inline quat<T>& quat<T>::set_from_angle_axis(T angle, vec3<T> const& axis)
 	x = fSin*axis.x;
 	y = fSin*axis.y;
 	z = fSin*axis.z;
-	return *this;
 }
 
 template <typename T>

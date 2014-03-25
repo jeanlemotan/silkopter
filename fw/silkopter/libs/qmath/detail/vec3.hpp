@@ -15,32 +15,29 @@ namespace math
 	template<typename T> MATH_FORCE_INLINE vec3<T>::vec3(packet3<T> const& v) : x(v.x), y(v.y), z(v.z) {}
 
 	template<typename T> template<typename U> MATH_FORCE_INLINE vec3<T>::vec3(vec3<U> const& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)) {}
-	template<typename T> MATH_FORCE_INLINE vec3<T>& vec3<T>::set(T _x, T _y, T _z)
+	template<typename T> MATH_FORCE_INLINE void vec3<T>::set(T _x, T _y, T _z)
 	{
 		x = _x;
 		y = _y;
 		z = _z;
-		return *this;
 	}
-	template<typename T> template<typename U> MATH_FORCE_INLINE vec3<T>& vec3<T>::set(vec3<U> const& v)
+	template<typename T> template<typename U> MATH_FORCE_INLINE void vec3<T>::set(vec3<U> const& v)
 	{
 		x = v.x;
 		y = v.y;
 		z = v.z;
-		return *this;
 	}
 
 	template <typename T> MATH_FORCE_INLINE void vec3<T>::set_length(T len)
 	{
 		T oldLen = length(*this);
-		assert(oldLen != 0);
+		ASSERT(oldLen != 0);
 		*this *= (len/oldLen);
 	}
 
-	template <typename T> MATH_FORCE_INLINE vec3<T>& vec3<T>::normalize()
+	template <typename T> MATH_FORCE_INLINE void vec3<T>::normalize()
 	{
 		*this = normalized(*this);
-		return *this;
 	}
 	template<typename T> MATH_FORCE_INLINE bool vec3<T>::operator==(vec3<T> const& v) const
 	{
@@ -59,13 +56,13 @@ namespace math
 
 	template<typename T> MATH_FORCE_INLINE T& vec3<T>::operator[](uint8_t i) 
 	{
-		assert(i < 3);
+		ASSERT(i < 3);
 		return ((T*)this)[i];
 	}
 
 	template<typename T> MATH_FORCE_INLINE T const& vec3<T>::operator[](uint8_t i) const
 	{
-		assert(i < 3);
+		ASSERT(i < 3);
 		return ((T*)this)[i];
 	}
 
@@ -94,13 +91,13 @@ namespace math
 
 	template<typename T> MATH_FORCE_INLINE vec3<T> vec3<T>::operator/(T s) const
 	{
-		assert(s != T(0));
+		ASSERT(s != T(0));
 		return vec3<T>(x / s, y / s, z / s);
 	}
 
 	template<> MATH_FORCE_INLINE vec3<float> vec3<float>::operator/(float s) const
 	{
-		assert(s != float(0));
+		ASSERT(s != float(0));
 		float ts = float(1) / s;
 		return vec3<float>(x * ts, y * ts, z * ts);
 	}
@@ -176,7 +173,7 @@ namespace math
 
 	template<typename T> MATH_FORCE_INLINE vec3<T>& vec3<T>::operator/=(T s)
 	{
-		assert(s != T(0));
+		ASSERT(s != T(0));
 		x /= s;
 		y /= s;
 		z /= s;
@@ -185,7 +182,7 @@ namespace math
 
 	template<> MATH_FORCE_INLINE vec3<float>& vec3<float>::operator/=(float s)
 	{
-		assert(s != float(0));
+		ASSERT(s != float(0));
 		float ts = float(1) / s;
 		x *= ts;
 		y *= ts;
@@ -195,7 +192,7 @@ namespace math
 
 	template<typename T> MATH_FORCE_INLINE vec3<T>& vec3<T>::operator/=(vec3<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0));
+		ASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0));
 		x /= v.x;
 		y /= v.y;
 		z /= v.z;
@@ -220,7 +217,7 @@ namespace math
 
 	template<typename T> MATH_FORCE_INLINE vec3<T> operator/(vec3<T> const& u, vec3<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0));
+		ASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0));
 		return vec3<T>(u.x / v.x, u.y / v.y, u.z / v.z);
 	}
 

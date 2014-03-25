@@ -55,34 +55,34 @@ struct mat3
 	// methods
 	///////////////////////////////////////////////////////////////////////////////
 
-	mat3<T>& set(T const values[9]);
+	void set(T const values[9]);
 
-	mat3<T>& set_identity();
-	bool	invert();
-	mat3<T>&transpose();
+	void set_identity();
+	bool invert();
+	void transpose();
 
 public:
 	//Rows are NOT linearly in memory. First row is m[0], m[3], m[6]
 	vec3<T> get_row(uint8_t row) const;
-	mat3<T>&set_row(uint8_t row, vec3<T> const& v);
+	void set_row(uint8_t row, vec3<T> const& v);
 
 	//Columns are linearly in memory. First row is m[0], m[1], m[2] and is the X axis of the matrix
-	vec3<T> get_column(uint8_t column) const;
-	mat3<T>&set_column(uint8_t column, vec3<T> const& v);
+	vec3<T> const& get_column(uint8_t column) const;
+	void set_column(uint8_t column, vec3<T> const& v);
 
-	vec3<T> get_axis_x() const;
-	mat3<T>&set_axis_x(vec3<T> const& axis);
+	vec3<T> const& get_axis_x() const;
+	void set_axis_x(vec3<T> const& axis);
 
-	vec3<T> get_axis_y() const;
-	mat3<T>&set_axis_y(vec3<T> const& axis);
+	vec3<T> const& get_axis_y() const;
+	void set_axis_y(vec3<T> const& axis);
 
-	vec3<T> get_axis_z() const;
-	mat3<T>&set_axis_z(vec3<T> const& axis);
+	vec3<T> const& get_axis_z() const;
+	void set_axis_z(vec3<T> const& axis);
 
 	vec3<T> get_scale() const;
-	mat3<T>&set_scale(vec3<T> const& scale);
+	void set_scale(vec3<T> const& scale);
 
-	mat3<T>&post_scale(vec3<T> const& scale);
+	void post_scale(vec3<T> const& scale);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// operators
