@@ -2,8 +2,8 @@
 
 namespace math
 {
-	template<typename T> T sqrt(T const& v);
-	template<typename T> T inv_sqrt(T const& v);
+	template<typename T, class Policy = standard> T sqrt(T const& v);
+	template<typename T, class Policy = standard> T inv_sqrt(T const& v);
 
 	template<typename T> T positive_zero(T const& v);
 
@@ -20,11 +20,11 @@ namespace math
 
 	template<typename T> T sgn(T const& v);
 	template<typename T> T sgn(angle<T> const& v);
-	template<typename T> T pow(T const& a, T const& b);
+	template<typename T, class Policy = standard> T pow(T const& a, T const& b);
 
-	template<typename T> T inverse(T const& v);
+	template<typename T, class Policy = standard> T inverse(T const& v);
 	template<typename T> T transposed(T const& v);
-	template<typename T> T normalized(T const& v);
+	template<typename T, class Policy = standard> T normalized(T const& v);
 	
 	template<typename T> typename T::value_t dot(T const& v1, T const& v2);
 	template<typename T> T cross(T const& v1, T const& v2);
@@ -36,9 +36,9 @@ namespace math
 	template<typename T> vec4<T> cross(vec4<T> const& x1, vec4<T> const& x2, vec4<T> const& x3);
 
 	template<typename T> T square(T const& v);
-	template<typename T> T distance(T const& v1, T const& v2);
+	template<typename T, class Policy = standard> T distance(T const& v1, T const& v2);
 	template<typename T> T distance_sq(T const& v1, T const& v2);
-	template<typename T> T length(T const& v);
+	template<typename T, class Policy = standard> T length(T const& v);
 	template<typename T> T length_sq(T const& v);
 
 	namespace batch

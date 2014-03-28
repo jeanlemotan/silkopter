@@ -123,48 +123,48 @@ namespace math
 
 	namespace cwise
 	{
-		template<typename T> packet2<bool> equals(vec2<T> const& v1, vec2<T> const& v2);
-		template<typename T> packet3<bool> equals(vec3<T> const& v1, vec3<T> const& v2);
-		template<typename T> packet4<bool> equals(vec4<T> const& v1, vec4<T> const& v2);
-		template<typename T> packet4<bool> equals(quat<T> const& v1, quat<T> const& v2);
+		template<typename T> vec2<bool> equals(vec2<T> const& v1, vec2<T> const& v2);
+		template<typename T> vec3<bool> equals(vec3<T> const& v1, vec3<T> const& v2);
+		template<typename T> vec4<bool> equals(vec4<T> const& v1, vec4<T> const& v2);
+		template<typename T> vec4<bool> equals(quat<T> const& v1, quat<T> const& v2);
 
-		packet2<bool> equals(vec2<float> const& v1, vec2<float> const& v2, float tolerance);
-		packet3<bool> equals(vec3<float> const& v1, vec3<float> const& v2, float tolerance);
-		packet4<bool> equals(vec4<float> const& v1, vec4<float> const& v2, float tolerance);
-		packet4<bool> equals(quat<float> const& v1, quat<float> const& v2, float tolerance);
-
-		//////////////////////////////////////////////////////////////////////////
-
-		template <typename T> packet2<bool> is_zero(vec2<T> const& v);
-		template <typename T> packet3<bool> is_zero(vec3<T> const& v);
-		template <typename T> packet4<bool> is_zero(vec4<T> const& v);
-		template <typename T> packet4<bool> is_zero(quat<T> const& v);
-
-		packet2<bool> is_zero(vec2<float> const& v, float tolerance);
-		packet3<bool> is_zero(vec3<float> const& v, float tolerance);
-		packet4<bool> is_zero(vec4<float> const& v, float tolerance);
-		packet4<bool> is_zero(quat<float> const& v, float tolerance);
+		vec2<bool> equals(vec2<float> const& v1, vec2<float> const& v2, float tolerance);
+		vec3<bool> equals(vec3<float> const& v1, vec3<float> const& v2, float tolerance);
+		vec4<bool> equals(vec4<float> const& v1, vec4<float> const& v2, float tolerance);
+		vec4<bool> equals(quat<float> const& v1, quat<float> const& v2, float tolerance);
 
 		//////////////////////////////////////////////////////////////////////////
 
-		template <typename T> packet2<bool> is_one(vec2<T> const& v);
-		template <typename T> packet3<bool> is_one(vec3<T> const& v);
-		template <typename T> packet4<bool> is_one(vec4<T> const& v);
-		template <typename T> packet4<bool> is_one(quat<T> const& v);
+		template <typename T> vec2<bool> is_zero(vec2<T> const& v);
+		template <typename T> vec3<bool> is_zero(vec3<T> const& v);
+		template <typename T> vec4<bool> is_zero(vec4<T> const& v);
+		template <typename T> vec4<bool> is_zero(quat<T> const& v);
 
-		packet2<bool> is_one(vec2<float> const& v, float tolerance);
-		packet3<bool> is_one(vec3<float> const& v, float tolerance);
-		packet4<bool> is_one(vec4<float> const& v, float tolerance);
-		packet4<bool> is_one(quat<float> const& v, float tolerance);
+		vec2<bool> is_zero(vec2<float> const& v, float tolerance);
+		vec3<bool> is_zero(vec3<float> const& v, float tolerance);
+		vec4<bool> is_zero(vec4<float> const& v, float tolerance);
+		vec4<bool> is_zero(quat<float> const& v, float tolerance);
 
 		//////////////////////////////////////////////////////////////////////////
 
-		bool all(packet2<bool> const& v);
-		bool all(packet3<bool> const& v);
-		bool all(packet4<bool> const& v);
-		bool any(packet2<bool> const& v);
-		bool any(packet3<bool> const& v);
-		bool any(packet4<bool> const& v);
+		template <typename T> vec2<bool> is_one(vec2<T> const& v);
+		template <typename T> vec3<bool> is_one(vec3<T> const& v);
+		template <typename T> vec4<bool> is_one(vec4<T> const& v);
+		template <typename T> vec4<bool> is_one(quat<T> const& v);
+
+		vec2<bool> is_one(vec2<float> const& v, float tolerance);
+		vec3<bool> is_one(vec3<float> const& v, float tolerance);
+		vec4<bool> is_one(vec4<float> const& v, float tolerance);
+		vec4<bool> is_one(quat<float> const& v, float tolerance);
+
+		//////////////////////////////////////////////////////////////////////////
+
+		bool all(vec2<bool> const& v);
+		bool all(vec3<bool> const& v);
+		bool all(vec4<bool> const& v);
+		bool any(vec2<bool> const& v);
+		bool any(vec3<bool> const& v);
+		bool any(vec4<bool> const& v);
 	}
 
 }

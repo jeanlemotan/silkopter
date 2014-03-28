@@ -11,9 +11,9 @@ template<typename T> struct mat2;
 template<typename T> struct trans2d;
 template<typename T> struct trans3d;
 
-//	.--------------- packet0 (column0) - x axis
-//	|   .----------- packet1 (column1) - y axis
-//  |	|	.------- packet2 (column2) - translation
+//	.--------------- column0 - x axis
+//	|   .----------- column1 - y axis
+//  |	|	.------- column2 - translation
 //  0   3   6
 //  1   4   7
 //  2   5   8 <--- always 0, 0, 1

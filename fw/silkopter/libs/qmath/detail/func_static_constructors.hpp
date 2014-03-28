@@ -4,11 +4,11 @@ namespace math
 
 ///! Creates a world space lookat matrix (front axis is -yaxis, up axis is zaxis)
 /// This lookAt method computes a look at matrix in jet coordinate system (3dmax biped). 
-/// This means that when you send a front of (0,-1,0) and an up of (0,0,1) the resulting matrix is identity.
+/// This means that when you send a front of (0,1,0) and an up of (0,0,1) the resulting matrix is identity.
 template<class T>
 inline mat3<T> look_at(vec3<T> const& front, vec3<T> const& up)
 {
-	vec3<T> axisY = -normalized(front);
+	vec3<T> axisY = normalized(front);
 	vec3<T> axisX = cross(axisY, normalized(up));
 	axisX.normalize(); //this normalize is mandatory because axisY and up may be unitary but they hardly are orthogonal
 	vec3<T> axisZ = cross(axisX, axisY);

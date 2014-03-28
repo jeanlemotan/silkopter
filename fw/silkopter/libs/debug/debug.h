@@ -58,6 +58,8 @@ namespace debug
 
 #endif
 
+//////////////////////////////////////////////////////////////////////////
+
 #define PANIC()																	\
 do 																				\
 {																				\
@@ -71,6 +73,18 @@ do 																				\
 	util::format(__msg, fmt, ##__VA_ARGS__);									\
 	debug::detail::handle_assert("PANIC", __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
 } while(0)
+
+//////////////////////////////////////////////////////////////////////////
+
+#define PRINT(fmt, ...)							\
+do												\
+{												\
+	util::FString<128> __msg;					\
+	util::format(__msg, fmt, ##__VA_ARGS__);	\
+	debug::detail::print(__msg.c_str());		\
+} while(0)
+
+//////////////////////////////////////////////////////////////////////////
 
 #define ENABLE_TRACE
 
@@ -92,16 +106,26 @@ do 																				\
 #	define TRACE_MSG(fmt, ...);
 #endif
 
-#define PRINT(fmt, ...)							\
-do												\
-{												\
-	util::FString<128> __msg;					\
-	util::format(__msg, fmt, ##__VA_ARGS__);	\
-	debug::detail::print(__msg.c_str());		\
-} while(0)
-
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace debug
+{
+namespace detail
+{
+	class Timed_Scope
+	{
+	public:
+		Timed_Scope(char const* file, int line);
+		~Timed_Scope();
+	private:
+		char const* m_file;
+		int m_line;
+		chrono::time_us m_start;
+	};
+}
+}
+
+#define TIMED_BLOCK() debug::detail::Timed_Scope __ts__(__FILE__, __LINE__);
 
 
 

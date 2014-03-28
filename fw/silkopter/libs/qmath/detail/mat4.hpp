@@ -16,18 +16,18 @@ mat4<T> const mat4<T>::identity;
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>::mat4()
+inline mat4<T>::mat4()
 {
 	set_identity();
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>::mat4(ZUninitialized)
+inline mat4<T>::mat4(ZUninitialized)
 {
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>::mat4(T value)
+inline mat4<T>::mat4(T value)
 {
 	m[ 0] = m[ 1] = m[ 2] = m[ 3] = value;
 	m[ 4] = m[ 5] = m[ 6] = m[ 7] = value;
@@ -36,14 +36,14 @@ MATH_FORCE_INLINE mat4<T>::mat4(T value)
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>::mat4(mat4<T> const& other)
+inline mat4<T>::mat4(mat4<T> const& other)
 {
 	*this = other;
 }
 
 template<typename T>
 template<typename U>
-MATH_FORCE_INLINE mat4<T>::mat4(mat4<U> const& other)
+inline mat4<T>::mat4(mat4<U> const& other)
 {
 	//column0
 	m[ 0] = (T)other.m[ 0];
@@ -68,7 +68,7 @@ MATH_FORCE_INLINE mat4<T>::mat4(mat4<U> const& other)
 }
 
 template<typename T>
-MATH_FORCE_INLINE mat4<T>::mat4(T const v0, T const v1, T const v2, T const v3,
+inline mat4<T>::mat4(T const v0, T const v1, T const v2, T const v3,
 			  T const v4, T const v5, T const v6, T const v7,
 			  T const v8, T const v9, T const v10, T const v11,
 			  T const v12, T const v13, T const v14, T const v15)
@@ -96,7 +96,7 @@ MATH_FORCE_INLINE mat4<T>::mat4(T const v0, T const v1, T const v2, T const v3,
 }
 
 template<typename T>
-MATH_FORCE_INLINE mat4<T>::mat4(vec4<T> const& column0, vec4<T> const& column1, vec4<T> const& column2, vec4<T> const& column3)
+inline mat4<T>::mat4(vec4<T> const& column0, vec4<T> const& column1, vec4<T> const& column2, vec4<T> const& column3)
 {
 	set_column(0, column0);
 	set_column(1, column1);
@@ -109,24 +109,23 @@ MATH_FORCE_INLINE mat4<T>::mat4(vec4<T> const& column0, vec4<T> const& column1, 
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set(T const values[16])
+inline void mat4<T>::set(T const values[16])
 {
 	assert(values);
 	memcpy(m, values, sizeof(T)*16);
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_identity()
+inline void mat4<T>::set_identity()
 {
 	m[ 0] = m[ 5] = m[10] = (T)1.0;
 	m[ 1] = m[ 2] = m[ 3] = m[ 4] = m[ 6] = m[ 7] = m[ 8] = m[ 9] = m[11] = (T)0.0;
 	m[15] = (T)1.0;
 	m[12] = m[13] = m[14] = (T)0.0;
-	return *this;
 }
 
 template <typename T>
+template <class Policy>
 inline bool mat4<T>::invert()
 {
 	T t0 = m[10] * m[15] - m[11] * m[14];
@@ -149,7 +148,7 @@ inline bool mat4<T>::invert()
 		return false;
 	}
 
-	det = 1.0 / det;
+	det = invert<Policy>(det);
 	T ft0 = (T)(t0 * det);
 	T ft1 = (T)(t1 * det);
 	T ft2 = (T)(t2 * det);
@@ -189,7 +188,7 @@ inline bool mat4<T>::invert()
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::transpose()
+inline void mat4<T>::transpose()
 {
 	std::swap(m[ 1], m[ 4]);
 	std::swap(m[ 2], m[ 8]);
@@ -197,18 +196,17 @@ MATH_FORCE_INLINE mat4<T>& mat4<T>::transpose()
 	std::swap(m[ 6], m[ 9]);
 	std::swap(m[ 7], m[13]);
 	std::swap(m[11], m[14]);
-	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> mat4<T>::_get_row(uint8_t row) const
+inline vec4<T> mat4<T>::get_row(uint8_t row) const
 {
 	assert(row < 4);
 	return vec4<T>(m[row + 0], m[row + 4], m[row + 8], m[row + 12]);
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::_set_row(uint8_t row, vec4<T> const& v)
+inline void mat4<T>::set_row(uint8_t row, vec4<T> const& v)
 {
 	assert(row < 4);
 	m[row + 0] = v.x;
@@ -219,14 +217,14 @@ MATH_FORCE_INLINE mat4<T>& mat4<T>::_set_row(uint8_t row, vec4<T> const& v)
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> const& mat4<T>::get_column(uint8_t column) const
+inline vec4<T> const& mat4<T>::get_column(uint8_t column) const
 {
 	assert(column < 4);
 	return *(((vec4<T> const*)m) + column);
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_column(uint8_t column, vec4<T> const& v)
+inline void mat4<T>::set_column(uint8_t column, vec4<T> const& v)
 {
 	assert(column < 4);
 	*(((vec4<T>*)m) + column) = v;
@@ -234,52 +232,52 @@ MATH_FORCE_INLINE mat4<T>& mat4<T>::set_column(uint8_t column, vec4<T> const& v)
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> const& mat4<T>::get_axis_x() const
+inline vec4<T> const& mat4<T>::get_axis_x() const
 {
 	return get_column(0);
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> const& mat4<T>::get_axis_y() const
+inline vec4<T> const& mat4<T>::get_axis_y() const
 {
 	return get_column(1);
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> const& mat4<T>::get_axis_z() const
+inline vec4<T> const& mat4<T>::get_axis_z() const
 {
 	return get_column(2);
 }
 
 template <typename T>
-MATH_FORCE_INLINE vec4<T> const& mat4<T>::get_axis_w() const
+inline vec4<T> const& mat4<T>::get_axis_w() const
 {
 	return get_column(3);
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_axis_x(vec4<T> const& axis)
+inline void mat4<T>::set_axis_x(vec4<T> const& axis)
 {
 	set_column(0, axis);
 	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_axis_y(vec4<T> const& axis)
+inline void mat4<T>::set_axis_y(vec4<T> const& axis)
 {
 	set_column(1, axis);
 	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_axis_z(vec4<T> const& axis)
+inline void mat4<T>::set_axis_z(vec4<T> const& axis)
 {
 	set_column(2, axis);
 	return *this;
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::set_axis_w(vec4<T> const& axis)
+inline void mat4<T>::set_axis_w(vec4<T> const& axis)
 {
 	set_column(3, axis);
 	return *this;
@@ -288,12 +286,12 @@ MATH_FORCE_INLINE mat4<T>& mat4<T>::set_axis_w(vec4<T> const& axis)
 //////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-MATH_FORCE_INLINE bool mat4<T>::operator==(mat4<T> const& m) const
+inline bool mat4<T>::operator==(mat4<T> const& m) const
 {
 	return memcmp(this->m, m.m, sizeof(T) * elementCount) == 0;
 }
 template <typename T>
-MATH_FORCE_INLINE bool mat4<T>::operator!=(mat4<T> const& m) const
+inline bool mat4<T>::operator!=(mat4<T> const& m) const
 {
 	return !operator==(m);
 }
@@ -303,95 +301,95 @@ MATH_FORCE_INLINE bool mat4<T>::operator!=(mat4<T> const& m) const
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-MATH_FORCE_INLINE T* mat4<T>::data()
+inline T* mat4<T>::data()
 {
 	return m;
 }
 template <typename T>
-MATH_FORCE_INLINE T const* mat4<T>::data() const
+inline T const* mat4<T>::data() const
 {
 	return m;
 }
 
 template <typename T>
-MATH_FORCE_INLINE T& mat4<T>::operator()(uint8_t column, uint8_t row)
+inline T& mat4<T>::operator()(uint8_t column, uint8_t row)
 {
 	assert(column < columnCount && row < rowCount);
 	return m[column*rowCount + row];
 }
 
 template <typename T>
-MATH_FORCE_INLINE T const& mat4<T>::operator()(uint8_t column, uint8_t row) const
+inline T const& mat4<T>::operator()(uint8_t column, uint8_t row) const
 {
 	assert(column < columnCount && row < rowCount);
 	return m[column*rowCount + row];
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator*(mat4<T> const& other) const
+inline mat4<T> mat4<T>::operator*(mat4<T> const& other) const
 {
 	mat4<T> ret;
 	return multiply(ret, *this, other);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator+(mat4<T> const& other) const
+inline mat4<T> mat4<T>::operator+(mat4<T> const& other) const
 {
 	mat4<T> ret;
 	return cwise::add(ret, *this, other);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator-(mat4<T> const& other) const
+inline mat4<T> mat4<T>::operator-(mat4<T> const& other) const
 {
 	mat4<T> ret;
 	return cwise::substract(ret, *this, other);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator*=(mat4<T> const& other)
+inline mat4<T>& mat4<T>::operator*=(mat4<T> const& other)
 {
 	mat4<T> a(*this);
 	return multiply(*this, a, other);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator+=(mat4<T> const& other)
+inline mat4<T>& mat4<T>::operator+=(mat4<T> const& other)
 {
 	return cwise::add(*this, *this, other);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator-=(mat4<T> const& other)
+inline mat4<T>& mat4<T>::operator-=(mat4<T> const& other)
 {
 	return cwise::substract(*this, *this, other);
 }
 
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator*(T scalar) const
+inline mat4<T> mat4<T>::operator*(T scalar) const
 {
 	mat4<T> ret;
 	return cwise::multiply(ret, *this, scalar);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator+(T scalar) const
+inline mat4<T> mat4<T>::operator+(T scalar) const
 {
 	mat4<T> ret;
 	return cwise::add(ret, *this, scalar);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T> mat4<T>::operator-(T scalar) const
+inline mat4<T> mat4<T>::operator-(T scalar) const
 {
 	mat4<T> ret;
 	return cwise::substract(ret, *this, scalar);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator*=(T scalar)
+inline mat4<T>& mat4<T>::operator*=(T scalar)
 {
 	return cwise::multiply(*this, *this, scalar);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator+=(T scalar)
+inline mat4<T>& mat4<T>::operator+=(T scalar)
 {
 	return cwise::add(*this, *this, scalar);
 }
 template <typename T>
-MATH_FORCE_INLINE mat4<T>& mat4<T>::operator-=(T scalar)
+inline mat4<T>& mat4<T>::operator-=(T scalar)
 {
 	return cwise::substract(*this, *this, scalar);
 }

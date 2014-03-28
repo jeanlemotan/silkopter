@@ -4,8 +4,7 @@ namespace math
 {
 	template<typename T> struct vec3;
 	template<typename T> struct vec4;
-	template<typename T> struct packet2;
-
+	
 template<typename T>
 struct vec2
 {
@@ -44,8 +43,6 @@ struct vec2
 	//implementation is in cast.inl
 	explicit vec2(vec3<T> const& v);
 	explicit vec2(vec4<T> const& v);
-
-	explicit vec2(packet2<T> const& v);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions

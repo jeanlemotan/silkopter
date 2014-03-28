@@ -12,9 +12,9 @@ template<typename T> struct mat3;
 
 //column-major (OpenGL) layout
 
-//	.--------------- packet0 (column0) - x axis
-//	|   .----------- packet1 (column1) - y axis
-//  |	|	.------- packet2 (column2) - translation
+//	.--------------- column0 - x axis
+//	|   .----------- column1 - y axis
+//  |	|	.------- column2 - translation
 //  0   3   6
 //  1   4   7
 //  2   5   8
@@ -58,7 +58,7 @@ struct mat3
 	void set(T const values[9]);
 
 	void set_identity();
-	bool invert();
+	template<class Policy = standard> bool invert();
 	void transpose();
 
 public:
@@ -123,7 +123,16 @@ public:
 	///////////////////////////////////////////////////////////////////////////////
 	//members
 	///////////////////////////////////////////////////////////////////////////////
-	T m[elementCount];
+	union
+	{
+		T m[elementCount];
+		struct  
+		{
+			vec3<T> column0;
+			vec3<T> column1;
+			vec3<T> column2;
+		};
+	};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

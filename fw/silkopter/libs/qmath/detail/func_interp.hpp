@@ -1,7 +1,7 @@
 namespace math
 {
 
-	MATH_FORCE_INLINE float lerp(float a, float b, float t)
+	inline float lerp(float a, float b, float t)
 	{
 		assert(t >= 0 && t <= 1);
 		float x = b - a;
@@ -35,27 +35,27 @@ namespace math
 		return slerp(a, b, t);
 	}
 
-	template<class T> MATH_FORCE_INLINE T lerp(T const& a, T const& b, float t)
+	template<class T> inline T lerp(T const& a, T const& b, float t)
 	{
 		assert(t >= 0 && t <= 1);
 		return (T)(a*(1.f - t) + b*t);
 	}
 
-	template<class T> MATH_FORCE_INLINE vec2<T> lerp(vec2<T> const& a, vec2<T> const& b, float t)
+	template<class T> inline vec2<T> lerp(vec2<T> const& a, vec2<T> const& b, float t)
 	{
 		assert(t >= 0 && t <= 1);
 		auto x = b - a;
 		return a + x*t;
 	}
 
-	template<class T> MATH_FORCE_INLINE vec3<T> lerp(vec3<T> const& a, vec3<T> const& b, float t)
+	template<class T> inline vec3<T> lerp(vec3<T> const& a, vec3<T> const& b, float t)
 	{
 		assert(t >= 0 && t <= 1);
 		auto x = b - a;
 		return a + x*t;
 	}
 
-	template<class T> MATH_FORCE_INLINE vec4<T> lerp(vec4<T> const& a, vec4<T> const& b, float t)
+	template<class T> inline vec4<T> lerp(vec4<T> const& a, vec4<T> const& b, float t)
 	{
 		assert(t >= 0 && t <= 1);
 		auto x = b - a;

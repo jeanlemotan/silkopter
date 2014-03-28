@@ -76,8 +76,6 @@ void init()
 	}
 	s_is_initialized = true;
 
-	scheduler::init();
-	
 	// Sonar INIT
 	//=======================
 	PORTH &= 0B10111111; // H6 -d9  - sonar TX

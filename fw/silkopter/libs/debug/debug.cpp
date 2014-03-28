@@ -87,5 +87,23 @@ void print(const char* msg)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+Timed_Scope::Timed_Scope(char const* file, int line)
+	: m_file(file)
+	, m_line(line)
+	, m_start(board::clock::now_us())
+{
+		
+}
+Timed_Scope::~Timed_Scope()
+{
+	auto d = board::clock::now_us() - m_start;
+	util::FString<128> msg;
+	util::format(msg, "\nScope {0}:{1} took {2}", m_file, m_line, d);
+	print(msg.c_str());
+}
+
+
 }
 }

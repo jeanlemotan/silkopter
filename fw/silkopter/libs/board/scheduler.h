@@ -6,7 +6,17 @@ namespace board
 {
 namespace scheduler
 {
-    extern void init();
+	enum class Frequency
+	{
+		_250_HZ		= 250,
+		_500_HZ		= 500,
+		_1000_HZ	= 1000,
+		_2000_HZ	= 2000,
+	};
+	extern Frequency get_frequency();
+	extern uint16_t get_frequency_hz();
+	
+    extern void init(Frequency freq);
 
     extern void stop();
 //     extern void resume();
@@ -16,8 +26,6 @@ namespace scheduler
 	typedef void(*Callback)();
     extern void register_callback(Callback cb);
 
-    extern void set_callback_frequency(uint16_t timer_hz);
-	extern uint16_t get_callback_frequency();
 }
 } 
 

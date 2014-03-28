@@ -4,8 +4,7 @@ namespace math
 {
 	template<typename T> struct vec2;
 	template<typename T> struct vec3;
-	template<typename T> struct packet4;
-
+	
 template<typename T>
 struct vec4
 {
@@ -49,8 +48,7 @@ struct vec4
 	explicit vec4(vec3<T> const& v);
 	explicit vec4(vec3<T> const& v, T w);
 
-	explicit vec4(packet4<T> const& v);
-
+	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

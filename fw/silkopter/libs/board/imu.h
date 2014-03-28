@@ -11,10 +11,10 @@ namespace imu
 {
 	enum class Sample_Rate
 	{
-		RATE_50_HZ,
-		RATE_100_HZ,
-		RATE_250_HZ,
-		RATE_500_HZ
+		_50_HZ		= 50,
+		_100_HZ		= 100,
+		_250_HZ		= 250,
+		_500_HZ		= 500
 	};
     extern void init(Sample_Rate rate);
 

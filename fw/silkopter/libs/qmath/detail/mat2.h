@@ -13,8 +13,8 @@ template<typename T> struct mat4;
 
 //column-major (OpenGL) layout
 
-//	 .----------- packet0 (column0) - x axis
-//   |   .------- packet1 (column1) - y axis
+//	 .----------- column0 - x axis
+//   |   .------- column1 - y axis
 //   0   2
 //   1   3
 
@@ -56,29 +56,29 @@ struct mat2
 	// methods
 	///////////////////////////////////////////////////////////////////////////////
 
-	mat2<T>& set(T const values[4]);
+	void set(T const values[4]);
 
-	mat2<T>& set_identity();
-	bool	invert();
-	mat2<T>&transpose();
+	void set_identity();
+	template<class Policy = standard> bool	invert();
+	void transpose();
 
 public:
 	//Rows are NOT linearly in memory. First row is m[0], m[2]
 	vec2<T> get_row(uint8_t row) const;
-	mat2<T>&set_row(uint8_t row, vec2<T> const& v);
+	void	set_row(uint8_t row, vec2<T> const& v);
 
 	//Columns are linearly in memory. First row is m[0], m[1],  and is the X axis of the matrix
 	vec2<T> const& get_column(uint8_t column) const;
-	mat2<T>&set_column(uint8_t column, vec2<T> const& v);
+	void	set_column(uint8_t column, vec2<T> const& v);
 
 	vec2<T> const& get_axis_x() const;
-	mat2<T>&set_axis_x(vec2<T> const& axis);
+	void	set_axis_x(vec2<T> const& axis);
 
 	vec2<T> const& get_axis_y() const;
-	mat2<T>&set_axis_y(vec2<T> const& axis);
+	void	set_axis_y(vec2<T> const& axis);
 
 	vec2<T> get_scale() const;
-	mat2<T>&set_scale(vec2<T> const& scale);
+	void	set_scale(vec2<T> const& scale);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// operators
@@ -120,7 +120,15 @@ public:
 	//members
 	///////////////////////////////////////////////////////////////////////////////
 
-	T m[elementCount];
+	union
+	{
+		T m[elementCount];
+		struct
+		{
+			vec2<T> column0;
+			vec2<T> column1;
+		};
+	};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

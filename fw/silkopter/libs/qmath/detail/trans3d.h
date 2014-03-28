@@ -14,10 +14,10 @@ template<typename T> struct trans3d;
 
 //column-major (OpenGL) layout
 
-//	.--------------- packet0 (column0) - x axis
-//	|   .----------- packet1 (column1) - y axis
-//	|   |   .------- packet2 (column2) - z axis
-//  |	|	|	.--- packet3 (column3) - translation
+//	.--------------- column0 - x axis
+//	|   .----------- column1 - y axis
+//	|   |   .------- column2 - z axis
+//  |	|	|	.--- column3 - translation
 //  0   4   8  12
 //  1   5   9  13
 //  2   6  10  14

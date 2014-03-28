@@ -7,11 +7,11 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE T abs(T v)
+	template<typename T> inline T abs(T v)
 	{
 		return v < 0 ? -v : v;
 	}
-	template<> MATH_FORCE_INLINE float abs(float v)
+	template<> inline float abs(float v)
 	{
 		auto* __restrict v2 = reinterpret_cast<uint32_t*>(&v);
 		uint32_t a = (*v2) & 0x7fffffff;
@@ -19,286 +19,286 @@ namespace math
 		float f = *a2;
 		return f;
 	}
-	template<> MATH_FORCE_INLINE int64_t abs(int64_t a)
+	template<> inline int64_t abs(int64_t a)
 	{
 		return a < 0 ? -a : a;
 	}
-	template<typename T> MATH_FORCE_INLINE angle<T> abs(angle<T> const& v)
+	template<typename T> inline angle<T> abs(angle<T> const& v)
 	{
 		return angle<T>(abs(v.radians));
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> abs(vec2<T> const& v)
+	template<typename T> inline vec2<T> abs(vec2<T> const& v)
 	{
 		return vec2<T>(abs(v.x), abs(v.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> sgn(vec2<T> const& v)
+	template<typename T> inline vec2<T> sgn(vec2<T> const& v)
 	{
 		return vec2<T>(sgn(v.x), sgn(v.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> abs(vec3<T> const& v)
+	template<typename T> inline vec3<T> abs(vec3<T> const& v)
 	{
 		return vec3<T>(abs(v.x), abs(v.y), abs(v.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> sgn(vec3<T> const& v)
+	template<typename T> inline vec3<T> sgn(vec3<T> const& v)
 	{
 		return vec3<T>(sgn(v.x), sgn(v.y), sgn(v.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> abs(vec4<T> const& v)
+	template<typename T> inline vec4<T> abs(vec4<T> const& v)
 	{
 		return vec4<T>(abs(v.x), abs(v.y), abs(v.z), abs(v.w));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE T sgn(T const& v)
+	template<typename T> inline T sgn(T const& v)
 	{
 		return v < T(0) ? T(-1) : v == T(0) ? T(0) : T(1);
 	}
-	template<typename T> MATH_FORCE_INLINE T sgn(angle<T> const& v)
+	template<typename T> inline T sgn(angle<T> const& v)
 	{
 		return sgn(v.radians);
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> sgn(vec4<T> const& v)
+	template<typename T> inline vec4<T> sgn(vec4<T> const& v)
 	{
 		return vec4<T>(sgn(v.x), sgn(v.y), sgn(v.z), sgn(v.w));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE T sqrt(T const& v);
-	template<> MATH_FORCE_INLINE float sqrt(float const& v)
+	template<typename T, class Policy = standard> inline T sqrt(T const& v);
+	template<class Policy = standard> inline float sqrt(float const& v)
 	{
 		return ::sqrtf(v);
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> sqrt(vec2<T> const& v)
+	template<typename T, class Policy = standard> inline vec2<T> sqrt(vec2<T> const& v)
 	{
-		return vec2<T>(sqrt(v.x), sqrt(v.y));
+		return vec2<T>(sqrt<Policy>(v.x), sqrt<Policy>(v.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> sqrt(vec3<T> const& v)
+	template<typename T, class Policy = standard> inline vec3<T> sqrt(vec3<T> const& v)
 	{
-		return vec3<T>(sqrt(v.x), sqrt(v.y), sqrt(v.z));
+		return vec3<T>(sqrt<Policy>(v.x), sqrt<Policy>(v.y), sqrt<Policy>(v.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> sqrt(vec4<T> const& v)
+	template<typename T, class Policy = standard> inline vec4<T> sqrt(vec4<T> const& v)
 	{
-		return vec4<T>(sqrt(v.x), sqrt(v.y), sqrt(v.z), sqrt(v.w));
+		return vec4<T>(sqrt<Policy>(v.x), sqrt<Policy>(v.y), sqrt<Policy>(v.z), sqrt<Policy>(v.w));
 	}
 	//////////////////////////////////////////////////////////////////////////
 
 
-	template<typename T> MATH_FORCE_INLINE T inv_sqrt(T const& v)
+	template<typename T, class Policy = standard> inline T inv_sqrt(T const& v)
 	{
 		assert(!is_zero(v));
-		return 1 / sqrt(v);
+		return 1 / sqrt<Policy>(v);
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> inv_sqrt(vec2<T> const& v)
+	template<typename T, class Policy = standard> inline vec2<T> inv_sqrt(vec2<T> const& v)
 	{
-		return vec2<T>(inv_sqrt(v.x), inv_sqrt(v.y));
+		return vec2<T>(inv_sqrt<Policy>(v.x), inv_sqrt<Policy>(v.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> inv_sqrt(vec3<T> const& v)
+	template<typename T, class Policy = standard> inline vec3<T> inv_sqrt(vec3<T> const& v)
 	{
-		return vec3<T>(inv_sqrt(v.x), inv_sqrt(v.y), inv_sqrt(v.z));
+		return vec3<T>(inv_sqrt<Policy>(v.x), inv_sqrt<Policy>(v.y), inv_sqrt<Policy>(v.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> inv_sqrt(vec4<T> const& v)
+	template<typename T, class Policy = standard> inline vec4<T> inv_sqrt(vec4<T> const& v)
 	{
-		return vec4<T>(inv_sqrt(v.x), inv_sqrt(v.y), inv_sqrt(v.z), inv_sqrt(v.w));
+		return vec4<T>(inv_sqrt<Policy>(v.x), inv_sqrt<Policy>(v.y), inv_sqrt<Policy>(v.z), inv_sqrt<Policy>(v.w));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE T pow(T const& a, T const& b);
-	template<> MATH_FORCE_INLINE float pow(float const& a, float const& b)
+	template<typename T, class Policy = standard> inline T pow(T const& a, T const& b);
+	template<class Policy = standard> inline float pow(float const& a, float const& b)
 	{
 		return powf(a, b);
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> pow(vec2<T> const& a, vec2<T> const& b)
+	template<typename T, class Policy = standard> inline vec2<T> pow(vec2<T> const& a, vec2<T> const& b)
 	{
-		return vec2<T>(pow(a.x, b.x), pow(a.y, b.y));
+		return vec2<T>(pow<Policy>(a.x, b.x), pow<Policy>(a.y, b.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> pow(vec3<T> const& a, vec3<T> const& b)
+	template<typename T, class Policy = standard> inline vec3<T> pow(vec3<T> const& a, vec3<T> const& b)
 	{
-		return vec3<T>(pow(a.x, b.x), pow(a.y, b.y), pow(a.z, b.z));
+		return vec3<T>(pow<Policy>(a.x, b.x), pow<Policy>(a.y, b.y), pow<Policy>(a.z, b.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> pow(vec4<T> const& a, vec4<T> const& b)
+	template<typename T, class Policy = standard> inline vec4<T> pow(vec4<T> const& a, vec4<T> const& b)
 	{
-		return vec4<T>(pow(a.x, b.x), pow(a.y, b.y), pow(a.z, b.z), pow(a.w, b.w));
+		return vec4<T>(pow<Policy>(a.x, b.x), pow<Policy>(a.y, b.y), pow<Policy>(a.z, b.z), pow<Policy>(a.w, b.w));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<> MATH_FORCE_INLINE float positive_zero(float const& v)
+	template<> inline float positive_zero(float const& v)
 	{
 		return v == -0.f ? 0.f : v;
 	}
-	template<typename T> MATH_FORCE_INLINE T positive_zero(T const& v)
+	template<typename T> inline T positive_zero(T const& v)
 	{
 		return v;
 	}
-	template<typename T> MATH_FORCE_INLINE angle<T> positive_zero(angle<T> const& v)
+	template<typename T> inline angle<T> positive_zero(angle<T> const& v)
 	{
 		return angle<T>(positive_zero(v.x));
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> positive_zero(vec2<T> const& v)
+	template<typename T> inline vec2<T> positive_zero(vec2<T> const& v)
 	{
 		return vec2<T>(positive_zero(v.x), positive_zero(v.y));
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> positive_zero(vec3<T> const& v)
+	template<typename T> inline vec3<T> positive_zero(vec3<T> const& v)
 	{
 		return vec3<T>(positive_zero(v.x), positive_zero(v.y), positive_zero(v.z));
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> positive_zero(vec4<T> const& v)
+	template<typename T> inline vec4<T> positive_zero(vec4<T> const& v)
 	{
 		return vec4<T>(positive_zero(v.x), positive_zero(v.y), positive_zero(v.z), positive_zero(v.w));
 	}
-	template<typename T> MATH_FORCE_INLINE quat<T> positive_zero(quat<T> const& v)
+	template<typename T> inline quat<T> positive_zero(quat<T> const& v)
 	{
 		return quat<T>(positive_zero(v.x), positive_zero(v.y), positive_zero(v.z), positive_zero(v.w));
 	}
-	template<typename T> MATH_FORCE_INLINE T inverse(T const& v)
+	template<typename T, class Policy = standard> inline T inverse(T const& v)
 	{
 		assert(v != 0);
 		return 1 / v;
 	}
-	template<typename T> MATH_FORCE_INLINE mat2<T> inverse(mat2<T> const& v)
+	template<typename T, class Policy = standard> inline mat2<T> inverse(mat2<T> const& v)
 	{
 		mat2<T> tmp(v);
-		bool res = tmp.invert();
+		bool res = tmp.template invert<Policy>();
 		assert(res);
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE mat3<T> inverse(mat3<T> const& v)
+	template<typename T, class Policy = standard> inline mat3<T> inverse(mat3<T> const& v)
 	{
 		mat3<T> tmp(v);
-		bool res = tmp.invert();
+		bool res = tmp.template invert<Policy>();
 		assert(res);
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE trans2d<T> inverse(const trans2d<T>& v)
+	template<typename T, class Policy = standard> inline trans2d<T> inverse(const trans2d<T>& v)
 	{
 		trans2d<T> tmp(v);
-		bool res = tmp.invert();
+		bool res = tmp.template invert<Policy>();
 		assert(res);
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE mat4<T> inverse(const mat4<T>& v)
+	template<typename T, class Policy = standard> inline mat4<T> inverse(const mat4<T>& v)
 	{
 		mat4<T> tmp(v);
-		bool res = tmp.invert();
+		bool res = tmp.template invert<Policy>();
 		assert(res);
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE trans3d<T> inverse(trans3d<T> const& v)
+	template<typename T, class Policy = standard> inline trans3d<T> inverse(trans3d<T> const& v)
 	{
 		trans3d<T> tmp(v);
-		bool res = tmp.invert();
+		bool res = tmp.template invert<Policy>();
 		assert(res);
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE quat<T> inverse(quat<T> const& v)
+	template<typename T, class Policy = standard> inline quat<T> inverse(quat<T> const& v)
 	{
 		quat<T> tmp(v);
-		tmp.invert();
+		tmp.template invert<Policy>();
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE mat2<T> transposed(mat2<T> const& v)
+	template<typename T> inline mat2<T> transposed(mat2<T> const& v)
 	{
 		mat2<T> tmp(v);
 		tmp.transpose();
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE mat3<T> transposed(mat3<T> const& v)
+	template<typename T> inline mat3<T> transposed(mat3<T> const& v)
 	{
 		mat3<T> tmp(v);
 		tmp.transpose();
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE mat4<T> transposed(mat4<T> const& v)
+	template<typename T> inline mat4<T> transposed(mat4<T> const& v)
 	{
 		mat4<T> tmp(v);
 		tmp.transpose();
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE angle<T> normalized(angle<T> const& v)
+	template<typename T, class Policy = standard> inline angle<T> normalized(angle<T> const& v)
 	{
 		angle<T> x(v);
-		x.normalize();
+		x.template normalize<Policy>();
 		return x;
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> normalized(vec2<T> const& v)
+	template<typename T, class Policy = standard> inline vec2<T> normalized(vec2<T> const& v)
 	{
-		T len = length(v);
+		T len = length<Policy>(v);
 		assert(len > 0);
 		return v / len;
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> normalized(vec3<T> const& v)
+	template<typename T, class Policy = standard> inline vec3<T> normalized(vec3<T> const& v)
 	{
-		T len = length(v);
+		T len = length<Policy>(v);
 		assert(len > 0);
 		return v / len;
 	}
-	template<typename T> MATH_FORCE_INLINE vec4<T> normalized(vec4<T> const& v)
+	template<typename T, class Policy = standard> inline vec4<T> normalized(vec4<T> const& v)
 	{
-		T len = length(v);
+		T len = length<Policy>(v);
 		assert(len > 0);
 		return v / len;
 	}
 
-	template<typename T> MATH_FORCE_INLINE quat<T> normalized(quat<T> const& v)
+	template<typename T, class Policy = standard> inline quat<T> normalized(quat<T> const& v)
 	{
 		quat<T> tmp(v);
-		tmp.normalize();
+		tmp.template normalize<Policy>();
 		return tmp;
 	}
-	template<typename T> MATH_FORCE_INLINE T length_sq(vec2<T> const& v)
+	template<typename T> inline T length_sq(vec2<T> const& v)
 	{
 		return dot(v, v);
 	}
-	template<typename T> MATH_FORCE_INLINE T length_sq(vec3<T> const& v)
+	template<typename T> inline T length_sq(vec3<T> const& v)
 	{
 		return dot(v, v);
 	}
-	template<typename T> MATH_FORCE_INLINE T length_sq(vec4<T> const& v)
+	template<typename T> inline T length_sq(vec4<T> const& v)
 	{
 		return dot(v, v);
 	}
-	template<typename T> MATH_FORCE_INLINE T length_sq(quat<T> const& v)
+	template<typename T> inline T length_sq(quat<T> const& v)
 	{
 		return dot(v, v);
 	}
-	template<typename T> MATH_FORCE_INLINE T length(vec2<T> const& v)
+	template<typename T, class Policy = standard> inline T length(vec2<T> const& v)
 	{
-		return sqrt(length_sq(v));
+		return sqrt<Policy>(length_sq(v));
 	}
-	template<typename T> MATH_FORCE_INLINE T length(vec3<T> const& v)
+	template<typename T, class Policy = standard> inline T length(vec3<T> const& v)
 	{
-		return sqrt(length_sq(v));
+		return sqrt<Policy>(length_sq(v));
 	}
-	template<typename T> MATH_FORCE_INLINE T length(vec4<T> const& v)
+	template<typename T, class Policy = standard> inline T length(vec4<T> const& v)
 	{
-		return sqrt(length_sq(v));
+		return sqrt<Policy>(length_sq(v));
 	}
 
-	template<typename T> MATH_FORCE_INLINE T length(quat<T> const& v)
+	template<typename T, class Policy = standard> inline T length(quat<T> const& v)
 	{
-		return sqrt(length_sq(v));
+		return sqrt<Policy>(length_sq(v));
 	}
-	template <typename T> MATH_FORCE_INLINE T dot(vec2<T> const& v1, vec2<T> const& v2)
+	template <typename T> inline T dot(vec2<T> const& v1, vec2<T> const& v2)
 	{
 		return v1.x*v2.x + v1.y*v2.y;
 	}
-	template <typename T> MATH_FORCE_INLINE T dot(vec3<T> const& v1, vec3<T> const& v2)
+	template <typename T> inline T dot(vec3<T> const& v1, vec3<T> const& v2)
 	{
 		return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 	}
-	template <typename T> MATH_FORCE_INLINE T dot(vec4<T> const& v1, vec4<T> const& v2)
+	template <typename T> inline T dot(vec4<T> const& v1, vec4<T> const& v2)
 	{
 		return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v1.w*v2.w;
 	}
 
-	template<typename T> MATH_FORCE_INLINE T cross(vec2<T> const& v1, vec2<T> const& v2)
+	template<typename T> inline T cross(vec2<T> const& v1, vec2<T> const& v2)
 	{
 		return (v1.x*v2.y - v1.y*v2.x);
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> cross(vec3<T> const& v1, vec3<T> const& v2)
+	template<typename T> inline vec3<T> cross(vec3<T> const& v1, vec3<T> const& v2)
 	{
 		return vec3<T>(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
 	}
@@ -326,11 +326,11 @@ namespace math
 #undef DOT
 #undef CROSS
 	}
-	template<typename T> MATH_FORCE_INLINE T square(T const& v)
+	template<typename T> inline T square(T const& v)
 	{
 		return v*v;
 	}
-	template<typename T> MATH_FORCE_INLINE angle<T> distance(angle<T> const& v1, angle<T> const& v2)
+	template<typename T, class Policy = standard> inline angle<T> distance(angle<T> const& v1, angle<T> const& v2)
 	{
 		auto start = v1.radians;
 		auto end = v2.radians;
@@ -351,34 +351,34 @@ namespace math
 		}
 		return angle<T>(start - end);
 	}
-	template<typename T> MATH_FORCE_INLINE T distance(vec2<T> const& v1, vec2<T> const& v2)
+	template<typename T, class Policy = standard> inline T distance(vec2<T> const& v1, vec2<T> const& v2)
 	{
-		return sqrt(distance_sq(v1, v2));
+		return sqrt<Policy>(distance_sq(v1, v2));
 	}
-	template<typename T> MATH_FORCE_INLINE T distance(vec3<T> const& v1, vec3<T> const& v2)
+	template<typename T, class Policy = standard> inline T distance(vec3<T> const& v1, vec3<T> const& v2)
 	{
-		return sqrt(distance_sq(v1, v2));
+		return sqrt<Policy>(distance_sq(v1, v2));
 	}
-	template<typename T> MATH_FORCE_INLINE T distance(vec4<T> const& v1, vec4<T> const& v2)
+	template<typename T, class Policy = standard> inline T distance(vec4<T> const& v1, vec4<T> const& v2)
 	{
-		return sqrt(distance_sq(v1, v2));
+		return sqrt<Policy>(distance_sq(v1, v2));
 	}
 
-	template<typename T> MATH_FORCE_INLINE T distance(line3<T> const& l1, line3<T> const& l2)
+	template<typename T, class Policy = standard> inline T distance(line3<T> const& l1, line3<T> const& l2)
 	{
-		return sqrt(distance_sq(l1, l2));
+		return sqrt<Policy>(distance_sq(l1, l2));
 	}
-	template<typename T> MATH_FORCE_INLINE T distance_sq(vec2<T> const& v1, vec2<T> const& v2)
-	{
-		auto v = v2 - v1;
-		return dot(v, v);
-	}
-	template<typename T> MATH_FORCE_INLINE T distance_sq(vec3<T> const& v1, vec3<T> const& v2)
+	template<typename T> inline T distance_sq(vec2<T> const& v1, vec2<T> const& v2)
 	{
 		auto v = v2 - v1;
 		return dot(v, v);
 	}
-	template<typename T> MATH_FORCE_INLINE T distance_sq(vec4<T> const& v1, vec4<T> const& v2)
+	template<typename T> inline T distance_sq(vec3<T> const& v1, vec3<T> const& v2)
+	{
+		auto v = v2 - v1;
+		return dot(v, v);
+	}
+	template<typename T> inline T distance_sq(vec4<T> const& v1, vec4<T> const& v2)
 	{
 		auto v = v2 - v1;
 		return dot(v, v);

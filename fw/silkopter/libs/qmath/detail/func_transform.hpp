@@ -1,6 +1,6 @@
 namespace math
 {
-	template<typename T> MATH_FORCE_INLINE trans3d<T>& multiply(trans3d<T>& result, trans3d<T> const& a, trans3d<T> const& b)
+	template<typename T> inline trans3d<T>& multiply(trans3d<T>& result, trans3d<T> const& a, trans3d<T> const& b)
 	{
 		T const* m1 = a.mat.data();
 		T const* m2 = b.mat.data();
@@ -32,7 +32,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE trans2d<T>& multiply(trans2d<T>& result, trans2d<T> const& a, trans2d<T> const& b)
+	template<typename T> inline trans2d<T>& multiply(trans2d<T>& result, trans2d<T> const& a, trans2d<T> const& b)
 	{
 		T const* m1 = a.mat.data();
 		T const* m2 = b.mat.data();
@@ -57,7 +57,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
+	template<typename T> inline mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
 	{
 		T const* m1 = a.data();
 		T const* m2 = b.data();
@@ -87,7 +87,7 @@ namespace math
 		return result;
 	}
 
-	template<typename T> MATH_FORCE_INLINE mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
+	template<typename T> inline mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
 	{
 		T const* m1 = a.data();
 		T const* m2 = b.data();
@@ -111,7 +111,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
+	template<typename T> inline mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
 	{
 		T const* m1 = a.data();
 		T const* m2 = b.data();
@@ -130,7 +130,7 @@ namespace math
 
 	namespace cwise
 	{
-		template<typename T> MATH_FORCE_INLINE mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
+		template<typename T> inline mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -142,7 +142,7 @@ namespace math
 			return result;
 		}
 
-		template<typename T> MATH_FORCE_INLINE mat4<T>& add(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
+		template<typename T> inline mat4<T>& add(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -153,7 +153,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat4<T>& substract(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
+		template<typename T> inline mat4<T>& substract(mat4<T>& result, mat4<T> const& a, mat4<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -164,7 +164,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, T b)
+		template<typename T> inline mat4<T>& multiply(mat4<T>& result, mat4<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -174,7 +174,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat4<T>& add(mat4<T>& result, mat4<T> const& a, T b)
+		template<typename T> inline mat4<T>& add(mat4<T>& result, mat4<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -184,7 +184,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat4<T>& substract(mat4<T>& result, mat4<T> const& a, T b)
+		template<typename T> inline mat4<T>& substract(mat4<T>& result, mat4<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -197,7 +197,7 @@ namespace math
 
 		//////////////////////////////////////////////////////////////////////////
 
-		template<typename T> MATH_FORCE_INLINE mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
+		template<typename T> inline mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -208,7 +208,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat3<T>& add(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
+		template<typename T> inline mat3<T>& add(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -219,7 +219,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat3<T>& substract(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
+		template<typename T> inline mat3<T>& substract(mat3<T>& result, mat3<T> const& a, mat3<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -230,7 +230,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, T b)
+		template<typename T> inline mat3<T>& multiply(mat3<T>& result, mat3<T> const& a, T b)
 		{
 			T  const* m1 = a.data();
 			T * m3 = result.data();
@@ -240,7 +240,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat3<T>& add(mat3<T>& result, mat3<T> const& a, T b)
+		template<typename T> inline mat3<T>& add(mat3<T>& result, mat3<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -250,7 +250,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat3<T>& substract(mat3<T>& result, mat3<T> const& a, T b)
+		template<typename T> inline mat3<T>& substract(mat3<T>& result, mat3<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -263,7 +263,7 @@ namespace math
 
 		//////////////////////////////////////////////////////////////////////////
 
-		template<typename T> MATH_FORCE_INLINE mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
+		template<typename T> inline mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -274,7 +274,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat2<T>& add(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
+		template<typename T> inline mat2<T>& add(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -285,7 +285,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat2<T>& substract(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
+		template<typename T> inline mat2<T>& substract(mat2<T>& result, mat2<T> const& a, mat2<T> const& b)
 		{
 			T const* m1 = a.data();
 			T const* m2 = b.data();
@@ -296,7 +296,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, T b)
+		template<typename T> inline mat2<T>& multiply(mat2<T>& result, mat2<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -306,7 +306,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat2<T>& add(mat2<T>& result, mat2<T> const& a, T b)
+		template<typename T> inline mat2<T>& add(mat2<T>& result, mat2<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -316,7 +316,7 @@ namespace math
 			}
 			return result;
 		}
-		template<typename T> MATH_FORCE_INLINE mat2<T>& substract(mat2<T>& result, mat2<T> const& a, T b)
+		template<typename T> inline mat2<T>& substract(mat2<T>& result, mat2<T> const& a, T b)
 		{
 			T const* m1 = a.data();
 			T * m3 = result.data();
@@ -332,7 +332,7 @@ namespace math
 	// mat2 vec2 transforms
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE vec2<T> transform(mat2<T> const& mat, vec2<T> const& v)
+	template<typename T> inline vec2<T> transform(mat2<T> const& mat, vec2<T> const& v)
 	{
 		T const* m = mat.data();
 		return vec2<T>(
@@ -345,7 +345,7 @@ namespace math
 	// mat3 vec2 transforms
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE vec2<T> transform(mat3<T> const& mat, vec2<T> const& v)
+	template<typename T> inline vec2<T> transform(mat3<T> const& mat, vec2<T> const& v)
 	{
 		T const* m = mat.data();
 		return vec2<T>(
@@ -353,7 +353,7 @@ namespace math
 			v.x*m[1] + v.y*m[4] + m[7]
 		);
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> transform(trans2d<T> const& t, vec2<T> const& v)
+	template<typename T> inline vec2<T> transform(trans2d<T> const& t, vec2<T> const& v)
 	{
 		T const* m = t.mat.data();
 		return vec2<T>(
@@ -366,7 +366,7 @@ namespace math
 	// mat4 vec4 transforms
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE vec4<T> transform(mat4<T> const& mat, vec4<T> const& vect)
+	template<typename T> inline vec4<T> transform(mat4<T> const& mat, vec4<T> const& vect)
 	{
 		T const* m = mat.data();
 		return vec4<T>(
@@ -377,7 +377,7 @@ namespace math
 		);
 	}
 
-	template<typename T> MATH_FORCE_INLINE aabb3<T> transform(mat4<T> const& m, aabb3<T> const& v)
+	template<typename T> inline aabb3<T> transform(mat4<T> const& m, aabb3<T> const& v)
 	{
 		// compute projected radius interval
 		auto hs = v.get_extent() * 0.5f;
@@ -389,16 +389,16 @@ namespace math
 		auto center = transform(m, v.get_center());
 		return aabb3<T>(center - tmp, center + tmp);
 	}
-	template<typename T> MATH_FORCE_INLINE aabb3<T> transform(trans3d<T> const& m, aabb3<T> const& v)
+	template<typename T> inline aabb3<T> transform(trans3d<T> const& m, aabb3<T> const& v)
 	{
 		return transform(m.mat, v);
 	}
-	template<typename T> MATH_FORCE_INLINE aabb2<T> transform(trans2d<T> const& m, aabb2<T> const& v)
+	template<typename T> inline aabb2<T> transform(trans2d<T> const& m, aabb2<T> const& v)
 	{
 		return transform(m.mat, v);
 	}
 
-	template<typename T> MATH_FORCE_INLINE aabb2<T> transform(mat3<T> const& m, aabb2<T> const& v)
+	template<typename T> inline aabb2<T> transform(mat3<T> const& m, aabb2<T> const& v)
 	{
 		// compute projected radius interval
 		auto hs = v.get_extent() * 0.5f;
@@ -410,7 +410,7 @@ namespace math
 		return aabb2<T>(center - tmp, center + tmp);
 	}
 
-	template<typename T> MATH_FORCE_INLINE vec4<T> project(mat4<T> const& m, vec4<T> const& v)
+	template<typename T> inline vec4<T> project(mat4<T> const& m, vec4<T> const& v)
 	{
 		vec4<T> tmp = transform(m, v);
 		if (!is_zero(tmp.w))
@@ -428,7 +428,7 @@ namespace math
 	// mat3 vec3 transforms
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE vec3<T> transform(mat3<T> const& mat, vec3<T> const& v)
+	template<typename T> inline vec3<T> transform(mat3<T> const& mat, vec3<T> const& v)
 	{
 		T const* m = mat.data();
 		return vec3<T>(
@@ -438,12 +438,12 @@ namespace math
 		);
 	}
 
-	template<typename T> MATH_FORCE_INLINE vec2<T> rotate(mat3<T> const& mat, vec2<T> const& v)
+	template<typename T> inline vec2<T> rotate(mat3<T> const& mat, vec2<T> const& v)
 	{
 		T const* m = mat.data();
 		return vec2<T>(v.x*m[0] + v.y*m[3], v.x*m[1] + v.y*m[4]);
 	}
-	template<typename T> MATH_FORCE_INLINE vec2<T> rotate(trans2d<T> const& t, vec2<T> const& v)
+	template<typename T> inline vec2<T> rotate(trans2d<T> const& t, vec2<T> const& v)
 	{
 		T const* m = t.mat.data();
 		return vec2<T>(v.x*m[0] + v.y*m[3], v.x*m[1] + v.y*m[4]);
@@ -453,7 +453,7 @@ namespace math
 	// mat4 vec3 transforms
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T> MATH_FORCE_INLINE vec3<T> transform(mat4<T> const& mat, vec3<T> const& vect)
+	template<typename T> inline vec3<T> transform(mat4<T> const& mat, vec3<T> const& vect)
 	{
 		T const* m = mat.data();
 		return vec3<T>(
@@ -462,7 +462,7 @@ namespace math
 			vect.x*m[2] + vect.y*m[6] + vect.z*m[10] + m[14]
 		);
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> rotate(mat4<T> const& mat, vec3<T> const& vect)
+	template<typename T> inline vec3<T> rotate(mat4<T> const& mat, vec3<T> const& vect)
 	{
 		T const* m = mat.data();
 		return vec3<T>(
@@ -471,15 +471,15 @@ namespace math
 			vect.x*m[2] + vect.y*m[6] + vect.z*m[10]
 		);
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> transform(trans3d<T> const& m, vec3<T> const& vect)
+	template<typename T> inline vec3<T> transform(trans3d<T> const& m, vec3<T> const& vect)
 	{
 		return transform(m.mat, vect);
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> rotate(trans3d<T> const& m, vec3<T> const& vect)
+	template<typename T> inline vec3<T> rotate(trans3d<T> const& m, vec3<T> const& vect)
 	{
 		return rotate(m.mat, vect);
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> rotate(quat<T> const& q, vec3<T> const& vect)
+	template<typename T> inline vec3<T> rotate(quat<T> const& q, vec3<T> const& vect)
 	{
 		//Eigen implementation
 		vec3<T> uv, uuv;
@@ -490,7 +490,7 @@ namespace math
 
 		return vect + q.w * uv + uuv;
 	}
-	template<typename T> MATH_FORCE_INLINE vec3<T> project(mat4<T> const& m, vec3<T> const& v)
+	template<typename T> inline vec3<T> project(mat4<T> const& m, vec3<T> const& v)
 	{
 		vec4<T> tmp = transform(m, vec4<T>(v, T(1)));
 		if (!is_zero(tmp.w))

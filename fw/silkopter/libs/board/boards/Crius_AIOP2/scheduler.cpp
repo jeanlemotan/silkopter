@@ -26,14 +26,14 @@ static uint8_t s_callback_count = 0;
 // 256-124 gives a 500Hz period
 // 256-62 gives a 1kHz period.
 // 256-31 gives a 2kHz period.
-static volatile uint8_t s_timer2_reset_value = (256 - 62);
-static uint16_t s_timer_frequency = 1000;
+static volatile uint8_t s_timer_reset_value = (256 - 62);
+static Frequency s_frequency = Frequency::_1000_HZ;
 
 static void _run_timer_procs();
 
 ISR(TIMER2_OVF_vect) 
 {
-    TCNT2 = s_timer2_reset_value;
+    TCNT2 = s_timer_reset_value;
     sei();
     _run_timer_procs();
 }
@@ -65,13 +65,17 @@ void _run_timer_procs()
 // PUBLIC API
 
 
-void init() 
+void init(Frequency freq)
 {
 	if (s_is_initialized)
 	{
 		return;
 	}
 	s_is_initialized = true;
+
+	s_frequency = freq;
+	auto freq_hz = static_cast<uint16_t>(freq);
+	s_timer_reset_value = 256 - (31 * (2000 / freq_hz));
 	
     /* TIMER2: Setup the overflow interrupt to occur at 1khz. */
     TIMSK2 = 0;                     /* Disable timer interrupt */
@@ -125,14 +129,13 @@ bool is_in_callback()
     return s_is_in_callback;
 }
 
-void set_callback_frequency(uint16_t timer_hz)
+Frequency get_frequency()
 {
-	s_timer_frequency = math::clamp(timer_hz, uint16_t(250), uint16_t(2000));
-    s_timer2_reset_value = 256 - (31 * (2000 / s_timer_frequency));
+	return s_frequency;	
 }
-uint16_t get_callback_frequency()
+uint16_t get_frequency_hz()
 {
-	return s_timer_frequency;	
+	return static_cast<uint16_t>(s_frequency);
 }
 
 }

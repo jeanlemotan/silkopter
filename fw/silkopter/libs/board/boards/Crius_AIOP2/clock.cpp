@@ -29,8 +29,8 @@ namespace clock
 #define  AVR_TIMER_WGM3           WGM53
 #define  AVR_TIMER_CS1            CS51
 
-static volatile uint32_t s_micros_counter = 0;
-static volatile uint32_t s_millis_counter = 0;
+static volatile uint64_t s_micros_counter = 0;
+//static volatile uint32_t s_millis_counter = 0;
 static bool s_is_initialized = false;
 
 void init() 
@@ -71,7 +71,7 @@ SIGNAL(AVR_TIMER_OVF_VECT)
 {
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer overflow at 40000
 	s_micros_counter += 0xFFFF / 2; // 32768us each overflow
-	s_millis_counter += 0xFFFF >> 11; // 32ms each overlflow
+//	s_millis_counter += 0xFFFF >> 11; // 32ms each overlflow
 }
 
 /* Delay for the given number of microseconds.  Assumes a 16 MHz clock. */
@@ -108,7 +108,7 @@ chrono::time_us now_us()
 	//uint32_t time_micros = timer_micros_counter + (AVR_TIMER_TCNT / 2);
 	//uint32_t time_micros = timer_micros_counter + (AVR_TIMER_TCNT >> 1);
 
-	uint32_t time_micros = s_micros_counter;
+	uint64_t time_micros = s_micros_counter;
 	uint16_t tcnt = AVR_TIMER_TCNT;
 
 	// Check for  imminent timer overflow interrupt and pre-increment counter
@@ -122,23 +122,23 @@ chrono::time_us now_us()
 
 chrono::time_ms now_ms() 
 {
-	ASSERT(s_is_initialized);
-
-	util::Scope_Sync ss();
-	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
-	//uint32_t time_millis = timer_millis_counter + (AVR_TIMER_TCNT / 2000) ;
-	//uint32_t time_millis =  timer_millis_counter + (AVR_TIMER_TCNT >> 11); // AVR_TIMER_CNT / 2048 is close enough (24us counter delay)
-
-	uint32_t time_millis =  s_millis_counter;
-	uint16_t tcnt = AVR_TIMER_TCNT;	  
-
-	// Check for imminent timer overflow interrupt and pre-increment counter
-	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
-	{
-		time_millis += 0xFFFF >> 11;
-	}
-
-	return chrono::time_ms(time_millis + (tcnt >> 11));
+//	ASSERT(s_is_initialized);
+// 	util::Scope_Sync ss();
+// 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
+// 	//uint32_t time_millis = timer_millis_counter + (AVR_TIMER_TCNT / 2000) ;
+// 	//uint32_t time_millis =  timer_millis_counter + (AVR_TIMER_TCNT >> 11); // AVR_TIMER_CNT / 2048 is close enough (24us counter delay)
+// 
+// 	uint32_t time_millis =  s_millis_counter;
+// 	uint16_t tcnt = AVR_TIMER_TCNT;	  
+// 
+// 	// Check for imminent timer overflow interrupt and pre-increment counter
+// 	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
+// 	{
+// 		time_millis += 0xFFFF >> 11;
+// 	}
+// 
+// 	return chrono::time_ms(time_millis + (tcnt >> 11));
+	return chrono::time_ms(now_us().ticks >> 10);
 }
 
 void delay(chrono::micros _us)

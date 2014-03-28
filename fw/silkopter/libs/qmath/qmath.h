@@ -14,11 +14,19 @@
 #	undef round
 #	undef radians
 #	undef degrees
-#	define assert(x)
-//#	include "detail/arch/arduino_stl_support.h"
 #endif
 
-#define MATH_FORCE_INLINE inline
+namespace math
+{
+	//standard precision
+	struct standard {};
+	//fast but less precise
+	struct fast {};
+	//standard precision but safe assumptions
+	struct safe {};
+	//fast and safe
+	struct fast_safe {};
+}
 
 #include "detail/constants.h"
 #include "detail/standard_types.h"
@@ -42,7 +50,6 @@
 #include "detail/aabb3.h"
 #include "detail/aabb2.h"
 #include "detail/color.h"
-#include "detail/packet.h"
 
 namespace math
 {
@@ -124,7 +131,6 @@ namespace math
 #include "detail/aabb2.hpp"
 #include "detail/color.hpp"
 #include "detail/cast.hpp"
-#include "detail/packet.hpp"
 
 
 #include "detail/func_common.hpp"

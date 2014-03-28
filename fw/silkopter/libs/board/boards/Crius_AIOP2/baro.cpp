@@ -252,8 +252,6 @@ void init()
 	}
 	s_is_initialized = true;
 
-	scheduler::init();
-
 	uint8_t tries = 0;
 	do
 	{

@@ -12,10 +12,10 @@ template<typename T> struct mat3;
 
 //column-major (OpenGL) layout
 
-//	.--------------- packet0 (column0) - x axis
-//	|   .----------- packet1 (column1) - y axis
-//	|   |   .------- packet2 (column2) - z axis
-//  |	|	|	.--- packet3 (column3) - w axis
+//	.--------------- column0 - x axis
+//	|   .----------- column1 - y axis
+//	|   |   .------- column2 - z axis
+//  |	|	|	.--- column3 - w axis
 //  0   4   8  12
 //  1   5   9  13
 //  2   6  10  14
@@ -77,32 +77,32 @@ struct mat4
 	// methods
 	///////////////////////////////////////////////////////////////////////////////
 
-	mat4<T>& set(T const values[16]);
+	void set(T const values[16]);
 
-	mat4<T>&set_identity();
-	bool	invert();
-	mat4<T>&transpose();
+	void	set_identity();
+	template<class Polict = standard> bool	invert();
+	void transpose();
 
 public:
 	//Rows are NOT linearly in memory. First row is m[0], m[4], m[8], m[12]
-	vec4<T> _get_row(uint8_t row) const;
-	mat4<T>&_set_row(uint8_t row, vec4<T> const& v);
+	vec4<T> get_row(uint8_t row) const;
+	void	set_row(uint8_t row, vec4<T> const& v);
 
 	//Columns are linearly in memory. First row is m[0], m[1], m[2], m[3]  and is the X axis of the matrix
 	vec4<T> const& get_column(uint8_t column) const;
-	mat4<T>&set_column(uint8_t column, vec4<T> const& v);
+	void	set_column(uint8_t column, vec4<T> const& v);
 
 	vec4<T> const& get_axis_x() const;
-	mat4<T>&set_axis_x(vec4<T> const& axis);
+	void	set_axis_x(vec4<T> const& axis);
 
 	vec4<T> const& get_axis_y() const;
-	mat4<T>&set_axis_y(vec4<T> const& axis);
+	void	set_axis_y(vec4<T> const& axis);
 
 	vec4<T> const& get_axis_z() const;
-	mat4<T>&set_axis_z(vec4<T> const& axis);
+	void	set_axis_z(vec4<T> const& axis);
 
 	vec4<T> const& get_axis_w() const;
-	mat4<T>&set_axis_w(vec4<T> const& axis);
+	void	set_axis_w(vec4<T> const& axis);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// operators
@@ -126,7 +126,17 @@ public:
 	///////////////////////////////////////////////////////////////////////////////
 	//members
 	///////////////////////////////////////////////////////////////////////////////
-	T m[16];
+	union
+	{
+		T m[elementCount];
+		struct 
+		{
+			vec4<T> column0;
+			vec4<T> column1;
+			vec4<T> column2;
+			vec4<T> column3;
+		};
+	};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

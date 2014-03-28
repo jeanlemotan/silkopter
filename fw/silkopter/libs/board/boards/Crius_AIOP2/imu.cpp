@@ -168,7 +168,8 @@ namespace imu
  *  RM-MPU-6000A-00.pdf, page 33, section 4.25 lists LSB sensitivity of
  *  gyro as 16.4 LSB/DPS at scale factor of +/- 2000dps (FS_SEL==3)
  */
-const float s_gyro_scale = (0.0174532f / 16.4f);
+//const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
+const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
 
 static volatile chrono::time_us s_last_refresh_time;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
@@ -218,7 +219,7 @@ static void _poll_data()
 				buffer.gyro_sum.z	+= s_raw_mpu[6];
 
 				buffer.sample_count++;
-				(chrono::time_us&)buffer.delta_time_sum += d;
+				(chrono::micros&)buffer.delta_time_sum += d;
 
 				(chrono::time_us&)s_last_refresh_time = now;
 			}
@@ -304,37 +305,41 @@ static bool _init_hardware(Sample_Rate sample_rate)
     
     uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
 
-	auto scheduler_freq = scheduler::get_callback_frequency();
+	auto scheduler_freq_hz = scheduler::get_frequency_hz();
 	
     // sample rate and filtering
     // to minimise the effects of aliasing we choose a filter
-    // that is less than half of the sample rate
+    // that is less than half of the sample rate  
+	uint16_t sample_rate_hz = static_cast<uint16_t>(sample_rate);
     switch (sample_rate)
 	{
-    case Sample_Rate::RATE_50_HZ:
-		s_sample_freq_div = scheduler_freq / 50;
+    case Sample_Rate::_50_HZ:
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
         break;
-    case Sample_Rate::RATE_100_HZ:
-		s_sample_freq_div = scheduler_freq / 100;
+    case Sample_Rate::_100_HZ:
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
         break;
-    case Sample_Rate::RATE_250_HZ:
-		s_sample_freq_div = scheduler_freq / 250;
+    case Sample_Rate::_250_HZ:
 		rate = MPUREG_SMPLRT_250HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 		break;
-    case Sample_Rate::RATE_500_HZ:
-		s_sample_freq_div = scheduler_freq / 500;
+    case Sample_Rate::_500_HZ:
 		rate = MPUREG_SMPLRT_500HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
 	    break;
     default:
 		rate = 0;
-		PANIC_MSG("Unknown sample rate");
+		PANIC();
     }
+
+	s_sample_freq_div = scheduler_freq_hz / sample_rate_hz;
+	//check the sample rate is compatible with the scheduler frequency
+	if (s_sample_freq_div * sample_rate_hz != scheduler_freq_hz)
+	{
+		PANIC();
+	}	
 	
 	PRINT("\nIMU scheduler frequency divider: {0}", s_sample_freq_div);
 	
@@ -345,7 +350,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
     i2c::write_register(s_mpu_addr, MPUREG_SMPLRT_DIV, rate);
     clock::delay(chrono::millis(1));
 
-    i2c::write_register(s_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_2000DPS); // Gyro scale 2000?/s
+    i2c::write_register(s_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS); // Gyro scale 2000?/s
     clock::delay(chrono::millis(1));
 
 		// Get chip revision
@@ -497,7 +502,6 @@ void init(Sample_Rate rate)
 	}
 	s_is_initialised = true;
 	
-	scheduler::init();
 	i2c::init();
 
 	uint8_t tries = 0;
