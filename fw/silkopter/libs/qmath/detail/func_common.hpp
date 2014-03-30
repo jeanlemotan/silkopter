@@ -14,10 +14,9 @@ namespace math
 	template<> inline float abs(float v)
 	{
 		auto* __restrict v2 = reinterpret_cast<uint32_t*>(&v);
-		uint32_t a = (*v2) & 0x7fffffff;
+		uint32_t a = (*v2) & 0x7FFFFFFF;
 		auto* __restrict a2 = reinterpret_cast<float*>(&a);
-		float f = *a2;
-		return f;
+		return *a2;
 	}
 	template<> inline int64_t abs(int64_t a)
 	{

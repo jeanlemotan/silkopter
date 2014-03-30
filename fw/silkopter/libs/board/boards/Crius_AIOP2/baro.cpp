@@ -70,7 +70,7 @@ static uint16_t _read_uint16(uint8_t reg)
 	{
 		return buf[0];
 	}
-	ASSERT(0);
+	TRACE_MSG("i2c failed");
 	return 0;
 }
 
@@ -203,6 +203,9 @@ static bool _init_hardware()
 			s_is_healthy = false;
 			return false;
 		}
+	#ifdef SIMULATOR
+		break;
+	#endif
 	}
 	s_is_healthy = true;
 	return true;

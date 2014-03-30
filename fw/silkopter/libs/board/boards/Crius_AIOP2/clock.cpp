@@ -1,6 +1,7 @@
 #include "Config.h"
 
 #if BOARD_TYPE == CRIUS_AIOP2
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
@@ -69,34 +70,14 @@ void init()
 
 SIGNAL(AVR_TIMER_OVF_VECT)
 {
+#ifdef SIMULATOR
+	// Hardcoded for SIM@1MHZ
+	s_micros_counter += 0x7FFF0; // 32768us * 16 each overflow
+#else
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer overflow at 40000
 	s_micros_counter += 0xFFFF / 2; // 32768us each overflow
-//	s_millis_counter += 0xFFFF >> 11; // 32ms each overlflow
+#endif
 }
-
-/* Delay for the given number of microseconds.  Assumes a 16 MHz clock. */
-// void AVRTimer::delay_microseconds(uint16_t us)
-// {
-// 	// for the 16 MHz clock on most Arduino boards
-// 	// for a one-microsecond delay, simply return.  the overhead
-// 	// of the function call yields a delay of approximately 1 1/8 us.
-// 	if (--us == 0)
-// 	return;
-// 
-// 	// the following loop takes a quarter of a microsecond (4 cycles)
-// 	// per iteration, so execute it four times for each microsecond of
-// 	// delay requested.
-// 	us <<= 2;
-// 
-// 	// account for the time taken in the preceeding commands.
-// 	us -= 2;
-// 
-// 	// busy wait
-// 	__asm__ __volatile__ (
-// 	"1: sbiw %0,1" "\n\t" // 2 cycles
-// 	"brne 1b" : "=w" (us) : "0" (us) // 2 cycles
-// 	);
-// }
 
 chrono::time_us now_us()
 {
@@ -114,7 +95,11 @@ chrono::time_us now_us()
 	// Check for  imminent timer overflow interrupt and pre-increment counter
 	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
 	{
+#ifdef SIMULATOR
+		time_micros += 0x7FFF0;
+#else
 		time_micros += 0xFFFF / 2;
+#endif
 	}
 
 	return chrono::time_us(time_micros + (tcnt >> 1));
@@ -122,27 +107,15 @@ chrono::time_us now_us()
 
 chrono::time_ms now_ms() 
 {
-//	ASSERT(s_is_initialized);
-// 	util::Scope_Sync ss();
-// 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
-// 	//uint32_t time_millis = timer_millis_counter + (AVR_TIMER_TCNT / 2000) ;
-// 	//uint32_t time_millis =  timer_millis_counter + (AVR_TIMER_TCNT >> 11); // AVR_TIMER_CNT / 2048 is close enough (24us counter delay)
-// 
-// 	uint32_t time_millis =  s_millis_counter;
-// 	uint16_t tcnt = AVR_TIMER_TCNT;	  
-// 
-// 	// Check for imminent timer overflow interrupt and pre-increment counter
-// 	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
-// 	{
-// 		time_millis += 0xFFFF >> 11;
-// 	}
-// 
-// 	return chrono::time_ms(time_millis + (tcnt >> 11));
 	return chrono::time_ms(now_us().ticks >> 10);
 }
 
 void delay(chrono::micros _us)
 {
+#ifdef SIMULATOR
+	return;
+#endif
+
 	ASSERT(s_is_initialized);
 	ASSERT(_us.count < 65536);
 	
@@ -161,7 +134,6 @@ void delay(chrono::micros _us)
 	// per iteration, so execute it four times for each microsecond of
 	// delay requested.
 	us <<= 2;
-
 	// account for the time taken in the preceeding commands.
 	us -= 3;
 
@@ -174,6 +146,10 @@ void delay(chrono::micros _us)
 
 void delay(chrono::millis _ms)
 {
+#ifdef SIMULATOR
+	return;
+#endif
+
 	ASSERT(s_is_initialized);
 	if (_ms.count <= 0)
 	{

@@ -119,6 +119,37 @@ namespace math
 	bool is_identity(quat<float> const& v1, float tolerance);
 
 	//////////////////////////////////////////////////////////////////////////
+	// positive
+
+	template <typename T> bool is_positive(T v1);
+	template <typename T> bool is_positive(angle<T> const& v1);
+	template <typename T> bool is_positive(vec2<T> const& v1);
+	template <typename T> bool is_positive(vec3<T> const& v1);
+	template <typename T> bool is_positive(vec4<T> const& v1);
+	template <typename T> bool is_positive(quat<T> const& v1);
+	template <typename T> bool is_positive(mat2<T> const& v1);
+	template <typename T> bool is_positive(mat3<T> const& v1);
+	template <typename T> bool is_positive(mat4<T> const& v1);
+	template <typename T> bool is_positive(trans3d<T> const& v1);
+	template <typename T> bool is_positive(trans2d<T> const& v1);
+
+	//////////////////////////////////////////////////////////////////////////
+	// negative
+
+	template <typename T> bool is_positive(T v1);
+	template <typename T> bool is_positive(angle<T> const& v1);
+	template <typename T> bool is_positive(vec2<T> const& v1);
+	template <typename T> bool is_positive(vec3<T> const& v1);
+	template <typename T> bool is_positive(vec4<T> const& v1);
+	template <typename T> bool is_positive(quat<T> const& v1);
+	template <typename T> bool is_positive(mat2<T> const& v1);
+	template <typename T> bool is_positive(mat3<T> const& v1);
+	template <typename T> bool is_positive(mat4<T> const& v1);
+	template <typename T> bool is_positive(trans3d<T> const& v1);
+	template <typename T> bool is_positive(trans2d<T> const& v1);
+
+
+	//////////////////////////////////////////////////////////////////////////
 	// component wise
 
 	namespace cwise
@@ -144,6 +175,20 @@ namespace math
 		vec3<bool> is_zero(vec3<float> const& v, float tolerance);
 		vec4<bool> is_zero(vec4<float> const& v, float tolerance);
 		vec4<bool> is_zero(quat<float> const& v, float tolerance);
+
+		//////////////////////////////////////////////////////////////////////////
+		
+		template <typename T> vec2<bool> is_negative(vec2<T> const& v);
+		template <typename T> vec3<bool> is_negative(vec3<T> const& v);
+		template <typename T> vec4<bool> is_negative(vec4<T> const& v);
+		template <typename T> vec4<bool> is_negative(quat<T> const& v);
+
+		//////////////////////////////////////////////////////////////////////////
+		
+		template <typename T> vec2<bool> is_positive(vec2<T> const& v);
+		template <typename T> vec3<bool> is_positive(vec3<T> const& v);
+		template <typename T> vec4<bool> is_positive(vec4<T> const& v);
+		template <typename T> vec4<bool> is_positive(quat<T> const& v);
 
 		//////////////////////////////////////////////////////////////////////////
 

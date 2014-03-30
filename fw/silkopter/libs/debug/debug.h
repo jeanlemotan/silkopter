@@ -88,6 +88,10 @@ do												\
 
 #define ENABLE_TRACE
 
+#ifdef SIMULATOR
+#	undef ENABLE_TRACE
+#endif
+
 #ifdef ENABLE_TRACE										
 #	define TRACE()										\
 	do													\

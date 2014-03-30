@@ -293,6 +293,9 @@ static bool _init_hardware(Sample_Rate sample_rate)
 		{
 			break;
 		}
+	#ifdef SIMULATOR
+		break;
+	#endif
     }
     if (tries == 5) 
 	{
@@ -558,6 +561,9 @@ void get_data(Data& data)
 
 void calibrate(chrono::millis duration)
 {
+#ifdef SIMULATOR
+	return;
+#endif
 	PRINT("\ncurrent offsets gyro: {0} / accel: {1}", s_gyro_calibration_offset, s_accel_calibration_offset);
 
 	//store a backup in case the calibration fails

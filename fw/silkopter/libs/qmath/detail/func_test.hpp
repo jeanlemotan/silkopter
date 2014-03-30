@@ -403,6 +403,131 @@ namespace math
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	// positive
+
+	template <typename T> inline bool is_positive(T v)
+	{
+		return v > T(0);
+	}
+	template <> inline bool is_positive(float v)
+	{
+		uint8_t const* __restrict lb = (reinterpret_cast<uint8_t const*>(&v) + 3); //msb in little endian
+		return (*lb & 128) == 0;
+	}
+	template <typename T> inline bool is_positive(angle<T> const& v)
+	{
+		return is_positive(v.radians);
+	}
+	template <typename T> inline bool is_positive(vec2<T> const& v)
+	{
+		return cwise::all(cwise::is_positive(v));
+	}
+	template <typename T> inline bool is_positive(vec3<T> const& v)
+	{
+		return cwise::all(cwise::is_positive(v));
+	}
+	template <typename T> inline bool is_positive(vec4<T> const& v)
+	{
+		return cwise::all(cwise::is_positive(v));
+	}
+	template <typename T> inline bool is_positive(quat<T> const& v)
+	{
+		return cwise::all(cwise::is_positive(v));
+	}
+	template <typename T> inline bool is_positive(mat2<T> const& v)
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			if (!is_positive(v.m[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	template <typename T> inline bool is_positive(mat3<T> const& v)
+	{
+		for (size_t i = 0; i < 9; i++)
+		{
+			if (!is_positive(v.m[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	template <typename T> inline bool is_positive(mat4<T> const& v)
+	{
+		return cwise::all(cwise::is_positive(v.get_column(0))) &&
+		cwise::all(cwise::is_positive(v.get_column(1))) &&
+		cwise::all(cwise::is_positive(v.get_column(2))) &&
+		cwise::all(cwise::is_positive(v.get_column(3)));
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// negative
+
+	template <typename T> inline bool is_negative(T v)
+	{
+		return v > T(0);
+	}
+	template <> inline bool is_negative(float v)
+	{
+		uint8_t const* __restrict lb = (reinterpret_cast<uint8_t const*>(&v) + 3); //msb in little endian
+		return (*lb & 128) != 0;
+	}
+	template <typename T> inline bool is_negative(angle<T> const& v)
+	{
+		return is_negative(v.radians);
+	}
+	template <typename T> inline bool is_negative(vec2<T> const& v)
+	{
+		return cwise::all(cwise::is_negative(v));
+	}
+	template <typename T> inline bool is_negative(vec3<T> const& v)
+	{
+		return cwise::all(cwise::is_negative(v));
+	}
+	template <typename T> inline bool is_negative(vec4<T> const& v)
+	{
+		return cwise::all(cwise::is_negative(v));
+	}
+	template <typename T> inline bool is_negative(quat<T> const& v)
+	{
+		return cwise::all(cwise::is_negative(v));
+	}
+	template <typename T> inline bool is_negative(mat2<T> const& v)
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			if (!is_negative(v.m[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	template <typename T> inline bool is_negative(mat3<T> const& v)
+	{
+		for (size_t i = 0; i < 9; i++)
+		{
+			if (!is_negative(v.m[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	template <typename T> inline bool is_negative(mat4<T> const& v)
+	{
+		return cwise::all(cwise::is_negative(v.get_column(0))) &&
+		cwise::all(cwise::is_negative(v.get_column(1))) &&
+		cwise::all(cwise::is_negative(v.get_column(2))) &&
+		cwise::all(cwise::is_negative(v.get_column(3)));
+	}
+	
+
+	//////////////////////////////////////////////////////////////////////////
 	// identity with tolerance
 
 	template <typename T> inline bool is_identity(mat2<T> const& v)
@@ -544,6 +669,7 @@ namespace math
 		{
 			return cwise::equals(v, quat<float>::zero, tolerance);
 		}
+
 		//////////////////////////////////////////////////////////////////////////
 
 		template <typename T> inline vec2<bool> is_one(vec2<T> const& v)
@@ -578,6 +704,44 @@ namespace math
 		inline vec4<bool> is_one(quat<float> const& v, float tolerance)
 		{
 			return cwise::equals(v, quat<float>::one, tolerance);
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+
+		template <typename T> inline vec2<bool> is_positive(vec2<T> const& v)
+		{
+			return vec2<bool>(is_positive(v.x), is_positive(v.y));
+		}
+		template <typename T> inline vec3<bool> is_positive(vec3<T> const& v)
+		{
+			return vec3<bool>(is_positive(v.x), is_positive(v.y), is_positive(v.z));
+		}
+		template <typename T> inline vec4<bool> is_positive(vec4<T> const& v)
+		{
+			return vec4<bool>(is_positive(v.x), is_positive(v.y), is_positive(v.z), is_positive(v.w));
+		}
+		template <typename T> inline vec4<bool> is_positive(quat<T> const& v)
+		{
+			return vec4<bool>(is_positive(v.x), is_positive(v.y), is_positive(v.z), is_positive(v.w));
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+
+		template <typename T> inline vec2<bool> is_negative(vec2<T> const& v)
+		{
+			return vec2<bool>(is_negative(v.x), is_negative(v.y));
+		}
+		template <typename T> inline vec3<bool> is_negative(vec3<T> const& v)
+		{
+			return vec3<bool>(is_negative(v.x), is_negative(v.y), is_negative(v.z));
+		}
+		template <typename T> inline vec4<bool> is_negative(vec4<T> const& v)
+		{
+			return vec4<bool>(is_negative(v.x), is_negative(v.y), is_negative(v.z), is_negative(v.w));
+		}
+		template <typename T> inline vec4<bool> is_negative(quat<T> const& v)
+		{
+			return vec4<bool>(is_negative(v.x), is_negative(v.y), is_negative(v.z), is_negative(v.w));
 		}
 
 		//////////////////////////////////////////////////////////////////////////

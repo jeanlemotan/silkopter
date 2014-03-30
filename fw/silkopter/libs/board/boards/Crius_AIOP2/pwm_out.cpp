@@ -77,17 +77,24 @@ void set_frequency(uint8_t ch, uint16_t hz)
 	ASSERT(s_is_initialized);
 	
 	uint16_t icr = timer_period(hz);
-	if (ch == 10 || ch == 11) 
+	switch(ch)
 	{
-		ICR1 = icr;
-	}
-	if (ch == 1 || ch == 3 || ch == 4)
-	{
-		ICR3 = icr;
-	}
-	if (ch == 2 || ch == 7 || ch == 8)
-	{
-		ICR4 = icr;
+		case 0:
+		case 1:
+		case 2:
+			ICR3 = icr;
+		break;
+
+		case 6:
+		case 7:
+			ICR1 = icr;
+		break;
+
+		case 3:
+		case 4:
+		case 5:
+			ICR4 = icr;
+		break;
 	}
 }
 void set_frequencies(const uint16_t* hz, uint8_t size)
