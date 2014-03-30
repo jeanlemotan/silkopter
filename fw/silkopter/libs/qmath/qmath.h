@@ -59,24 +59,24 @@ namespace math
 	typedef vec2<uint8_t>		vec2u8;
 	typedef vec2<int16_t>		vec2s16;
 	typedef vec2<uint16_t>		vec2u16;
-	typedef vec2<int32_t>		vec2i;
-	typedef vec2<uint32_t>		vec2u;
+	typedef vec2<int32_t>		vec2s32;
+	typedef vec2<uint32_t>		vec2u32;
 	typedef vec2<float>			vec2f;
 
 	typedef vec3<int8_t>		vec3s8;
 	typedef vec3<uint8_t>		vec3u8;
 	typedef vec3<int16_t>		vec3s16;
 	typedef vec3<uint16_t>		vec3u16;
-	typedef vec3<int32_t>		vec3i;
-	typedef vec3<uint32_t>		vec3u;
+	typedef vec3<int32_t>		vec3s32;
+	typedef vec3<uint32_t>		vec3u32;
 	typedef vec3<float>			vec3f;
 
 	typedef vec4<int8_t>		vec4s8;
 	typedef vec4<uint8_t>		vec4u8;
 	typedef vec4<int16_t>		vec4s16;
 	typedef vec4<uint16_t>		vec4u16;
-	typedef vec4<int32_t>		vec4i;
-	typedef vec4<uint32_t>		vec4u;
+	typedef vec4<int32_t>		vec4s32;
+	typedef vec4<uint32_t>		vec4u32;
 	typedef vec4<float>			vec4f;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -90,8 +90,8 @@ namespace math
 	typedef trans3d<float>		trans3df;
 	typedef line2<float>		line2f;
 	typedef line3<float>		line3f;
-	typedef rect<int32_t>		recti;
-	typedef rect<uint32_t>		rectu;
+	typedef rect<int32_t>		rects32;
+	typedef rect<uint32_t>		rectu32;
 	typedef rect<float>			rectf;
 	typedef aabb2<float>		aabb2f;
 	typedef aabb3<float>		aabb3f;

@@ -180,13 +180,17 @@ template <typename T>
 template <class Policy>
 inline void quat<T>::set_from_euler_xyz(vec3<T> const& angles)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
+	vec3<T> a(angles*T(0.5));
+	vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+	sin_cos<T, Policy>(a, s, c);
+	T cz_sx = c.z*s.x;
+	T sz_cx = s.z*c.x;
+	T cz_cx = c.z*c.x;
+	T sz_sx = s.z*s.x;
+	x = cz_sx*c.y + sz_cx*s.y;
+	y = cz_cx*s.y - sz_sx*c.y;
+	z = sz_cx*c.y + cz_sx*s.y;
+	w = cz_cx*c.y - sz_sx*s.y;
 }
 template <typename T>
 template <class Policy>

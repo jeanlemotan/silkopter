@@ -167,25 +167,28 @@ namespace detail
 	}
 	inline float fast_sin(float x)
 	{
-		if (x >= math::anglef::pi.radians)
+		while (is_positive(x) && x >= anglef::_2pi.radians) x -= anglef::_2pi.radians;
+		while (is_negative(x) && x < 0) x += anglef::_2pi.radians;
+
+		if (x >= anglef::pi.radians)
 		{
-			if (x >= math::anglef::_3pi2.radians)
+			if (x >= anglef::_3pi2.radians)
 			{
-				//64 + math::anglef::_2pi.radians
-				return 1.f - fast_sin_pi2(64.f + math::anglef::_2pi.radians - x);
+				//64 + anglef::_2pi.radians
+				return 1.f - fast_sin_pi2(64.f + anglef::_2pi.radians - x);
 			}
 			else
 			{
-				//64 + x - math::anglef::pi.radians
-				return 1.f - fast_sin_pi2(64.f - math::anglef::pi.radians + x);
+				//64 + x - anglef::pi.radians
+				return 1.f - fast_sin_pi2(64.f - anglef::pi.radians + x);
 			}
 		}
 		else
 		{
-			if (x >= math::anglef::pi2.radians)
+			if (x >= anglef::pi2.radians)
 			{
-				//64 + math::anglef::pi.radians - x
-				return fast_sin_pi2(64.f + math::anglef::pi.radians - x) - 1.f;
+				//64 + anglef::pi.radians - x
+				return fast_sin_pi2(64.f + anglef::pi.radians - x) - 1.f;
 			}
 			else
 			{
@@ -196,39 +199,40 @@ namespace detail
 
 	inline float fast_cos(float x)
 	{
-		return fast_sin(x + math::anglef::pi2.radians);
+		return fast_sin(x + anglef::pi2.radians);
 	}
 	inline void fast_sin_cos(float x, float& s, float& c)
 	{
-		while (x >= math::anglef::_2pi.radians) x -= math::anglef::_2pi.radians;
+		while (is_positive(x) && x >= anglef::_2pi.radians) x -= anglef::_2pi.radians;
+		while (is_negative(x) && x < 0) x += anglef::_2pi.radians;
 		
-		if (x >= math::anglef::pi.radians)
+		if (x >= anglef::pi.radians)
 		{
-			if (x >= math::anglef::_3pi2.radians)
+			if (x >= anglef::_3pi2.radians)
 			{
-				//64 + math::anglef::_2pi.radians
-				s = 1.f - fast_sin_pi2(64.f + math::anglef::_2pi.radians - x);
-				c = fast_sin_pi2(64.f - math::anglef::_3pi2.radians + x) - 1.f;
+				//64 + anglef::_2pi.radians
+				s = 1.f - fast_sin_pi2(64.f + anglef::_2pi.radians - x);
+				c = fast_sin_pi2(64.f - anglef::_3pi2.radians + x) - 1.f;
 			}
 			else
 			{
-				//64 + x - math::anglef::pi.radians
-				s = 1.f - fast_sin_pi2(64.f - math::anglef::pi.radians + x);
-				c = 1.f - fast_sin_pi2(64.f + math::anglef::_3pi2.radians - x);
+				//64 + x - anglef::pi.radians
+				s = 1.f - fast_sin_pi2(64.f - anglef::pi.radians + x);
+				c = 1.f - fast_sin_pi2(64.f + anglef::_3pi2.radians - x);
 			}
 		}
 		else
 		{
-			if (x >= math::anglef::pi2.radians)
+			if (x >= anglef::pi2.radians)
 			{
-				//64 + math::anglef::pi.radians - x
-				s = fast_sin_pi2(64.f + math::anglef::pi.radians - x) - 1.f;
-				c = 1.f - fast_sin_pi2(64.f - math::anglef::pi2.radians + x);
+				//64 + anglef::pi.radians - x
+				s = fast_sin_pi2(64.f + anglef::pi.radians - x) - 1.f;
+				c = 1.f - fast_sin_pi2(64.f - anglef::pi2.radians + x);
 			}
 			else
 			{
 				s = fast_sin_pi2(64.f + x) - 1.f;
-				c = fast_sin_pi2(64.f + math::anglef::pi2.radians - x) - 1.f;
+				c = fast_sin_pi2(64.f + anglef::pi2.radians - x) - 1.f;
 			}
 		}
 	}

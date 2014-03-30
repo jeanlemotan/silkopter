@@ -20,6 +20,7 @@ namespace imu
 
     // calibrates the offsets for the specified duration
     extern void calibrate(chrono::millis duration);
+	extern float get_rest_g();
 
 	struct Data
 	{

@@ -168,8 +168,8 @@ namespace imu
  *  RM-MPU-6000A-00.pdf, page 33, section 4.25 lists LSB sensitivity of
  *  gyro as 16.4 LSB/DPS at scale factor of +/- 2000dps (FS_SEL==3)
  */
-//const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
-const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
+//static const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
+static const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
 
 static volatile chrono::time_us s_last_refresh_time;
 static uint8_t s_mpu_addr = MPU6000_ADDR;
@@ -184,14 +184,18 @@ struct Buffer
 {
 	Buffer() : temp_sum(0), sample_count(0) {}
 		
-	volatile math::vec3i accel_sum;
-	volatile math::vec3i gyro_sum;
-	volatile uint32_t temp_sum;
+	volatile math::vec3s32 accel_sum;
+	volatile math::vec3s32 gyro_sum;
+	volatile uint16_t temp_sum;
 	volatile chrono::micros delta_time_sum;
 	volatile uint8_t sample_count;
 };
 volatile Buffer s_buffers[2];
 volatile uint8_t s_buffer_idx = 0;
+
+static math::vec3s16 s_gyro_calibration_offset;
+static math::vec3s16 s_accel_calibration_offset;
+static float s_rest_g = 9.80665f;
 
 static int16_t s_raw_mpu[7] = {0};
 
@@ -210,15 +214,17 @@ static void _poll_data()
 
 			if (i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7))
 			{
-				buffer.accel_sum.x	+= s_raw_mpu[0];
-				buffer.accel_sum.y	+= s_raw_mpu[1];
-				buffer.accel_sum.z	+= s_raw_mpu[2];
-				buffer.temp_sum		+= s_raw_mpu[3];
-				buffer.gyro_sum.x	+= s_raw_mpu[4];
-				buffer.gyro_sum.y	+= s_raw_mpu[5];
-				buffer.gyro_sum.z	+= s_raw_mpu[6];
-
+				buffer.accel_sum.x	+= s_raw_mpu[0] - s_accel_calibration_offset.x;
+				buffer.accel_sum.y	+= s_raw_mpu[1] - s_accel_calibration_offset.y;
+				buffer.accel_sum.z	+= s_raw_mpu[2] - s_accel_calibration_offset.z;
+				
+				//buffer.temp_sum		+= s_raw_mpu[3];
+				buffer.gyro_sum.x	+= s_raw_mpu[4] - s_gyro_calibration_offset.x;
+				buffer.gyro_sum.y	+= s_raw_mpu[5] - s_gyro_calibration_offset.y;
+				buffer.gyro_sum.z	+= s_raw_mpu[6] - s_gyro_calibration_offset.z;
+				
 				buffer.sample_count++;
+				
 				(chrono::micros&)buffer.delta_time_sum += d;
 
 				(chrono::time_us&)s_last_refresh_time = now;
@@ -400,26 +406,29 @@ static bool _init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-static math::vec3f s_gyro_calibration_offset;
-static math::vec3f s_accel_calibration_offset;
-
 static math::vec3f s_last_gyro_sample;
 static math::vec3f s_last_accel_sample;
 
 static math::vec3f s_gyro_data;
 static math::vec3f s_accel_data;
 
-static float s_temp_data = 0;
+//static float s_temp_data = 0;
 static chrono::time_us s_last_data_time;
 
 static void _refresh_data()
 {
+#ifdef SIMULATOR
+	s_buffers[s_buffer_idx].sample_count = 1;
+#else
 	if (!s_buffers[s_buffer_idx].sample_count)
 	{
 		return;
 	}
+#endif
 
-	s_last_data_time = clock::now_us();
+	auto now = clock::now_us();
+//	auto refresh_dt = now - s_last_data_time;
+	s_last_data_time = now;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//copy the data
@@ -432,17 +441,17 @@ static void _refresh_data()
 	auto sc = buffer.sample_count;
 	buffer.sample_count = 0;
 
-	s_last_gyro_sample.set((math::vec3i&)(buffer.gyro_sum));
-	((math::vec3i&)buffer.gyro_sum).set(0, 0, 0);
+	s_last_gyro_sample.set((math::vec3s32&)(buffer.gyro_sum));
+	((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
 
-	s_last_accel_sample.set((math::vec3i&)(buffer.accel_sum));
-	((math::vec3i&)buffer.accel_sum).set(0, 0, 0);
+	s_last_accel_sample.set((math::vec3s32&)(buffer.accel_sum));
+	((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
 
-	s_temp_data = buffer.temp_sum;
-	buffer.temp_sum = 0;
+	//s_temp_data = buffer.temp_sum;
+	//buffer.temp_sum = 0;
 
 	float delta_time = (float)buffer.delta_time_sum.count * 0.000001f;
-	(chrono::micros&)buffer.delta_time_sum = chrono::micros(0);
+	buffer.delta_time_sum.count = 0;
 
 	// done copying the data
 	//////////////////////////////////////////////////////////////////////////
@@ -451,37 +460,37 @@ static void _refresh_data()
 
 	//////////////////////////////////////////////////////////////////////////
 	//scale the accel and apply the calibration offset
-	s_last_accel_sample *= scinv * 0.000244140625f; // divided by 4096
-	s_last_accel_sample -= s_accel_calibration_offset;
+	s_last_accel_sample *= (scinv * 0.000244140625f); // divided by 4096
+	//s_last_accel_sample -= s_accel_calibration_offset;
 	
 	s_accel_data = s_last_accel_sample;//math::lerp(s_accel_data, accel_data, 0.01f);
 
 	//////////////////////////////////////////////////////////////////////////
 	//compute gyro deltas and apply calibrartion offset
-	s_last_gyro_sample *= s_gyro_scale * scinv * delta_time;
-	s_last_gyro_sample -= s_gyro_calibration_offset;
+	s_last_gyro_sample *= (s_gyro_scale * scinv * delta_time);
+	//s_last_gyro_sample -= s_gyro_calibration_offset;
 	//accumulate the deltas
 	s_gyro_data += s_last_gyro_sample;
 
 	//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
 	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z);
-	if (accel_pitch_x > math::anglef::pi.radians)
-	{
-		accel_pitch_x -= math::anglef::_2pi.radians;
-	}
-	else if (accel_pitch_x < -math::anglef::pi.radians)
-	{
-		accel_pitch_x += math::anglef::_2pi.radians;
-	}
+// 	if (accel_pitch_x > math::anglef::pi.radians)
+// 	{
+// 		accel_pitch_x -= math::anglef::_2pi.radians;
+// 	}
+// 	else if (accel_pitch_x < -math::anglef::pi.radians)
+// 	{
+// 		accel_pitch_x += math::anglef::_2pi.radians;
+// 	}
  	float accel_roll_y = -math::atan2(s_accel_data.x, math::sqrt(s_accel_data.y*s_accel_data.y + s_accel_data.z*s_accel_data.z));
-	if (accel_roll_y > math::anglef::pi.radians)
-	{
-		accel_roll_y -= math::anglef::_2pi.radians;
-	}
-	else if (accel_roll_y < -math::anglef::pi.radians)
-	{
-		accel_roll_y += math::anglef::_2pi.radians;
-	}
+// 	if (accel_roll_y > math::anglef::pi.radians)
+// 	{
+// 		accel_roll_y -= math::anglef::_2pi.radians;
+// 	}
+// 	else if (accel_roll_y < -math::anglef::pi.radians)
+// 	{
+// 		accel_roll_y += math::anglef::_2pi.radians;
+// 	}
 
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
 	if (s_accel_data.z > 0.1f)
@@ -490,7 +499,7 @@ static void _refresh_data()
 		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, delta_time);
  	}
 	
-	s_temp_data *= scinv;
+	//s_temp_data *= scinv;
 }
 
 
@@ -594,11 +603,16 @@ void calibrate(chrono::millis duration)
 	if (count > 0)
 	{
 		float inv_count = 1.f / count;
-		s_gyro_calibration_offset = gyro_offset * inv_count;
-		s_accel_calibration_offset = accel_offset * inv_count;
-		s_accel_calibration_offset.z -= 1.f; //1g on z
+		math::vec3f goff(gyro_offset * inv_count);
+		s_gyro_calibration_offset.set(goff * 4096.f);
+		
+		math::vec3f aoff(accel_offset * inv_count);
+		s_accel_calibration_offset.set(aoff * 4096.f);
+		//s_accel_calibration_offset.z -= 4096.f; //1g on z
+		s_rest_g = math::abs(aoff.z) * physics::constants::g;
+		s_accel_calibration_offset.z = 0;
 
-		PRINT("\nnew offsets gyro: {0} / accel: {1}", s_gyro_calibration_offset, s_accel_calibration_offset);
+		PRINT("\nnew offsets gyro: {0} / accel: {1} / rest_g: {2}", s_gyro_calibration_offset, s_accel_calibration_offset, s_rest_g);
 	}
 	else
 	{
@@ -610,6 +624,11 @@ void calibrate(chrono::millis duration)
 
 	//now reset the gyro data so we can start again with fresh calibration data
 	s_gyro_data.set(0, 0, 0);
+}
+
+float get_rest_g()
+{
+	return s_rest_g;
 }
 
 }
