@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <qmath.h>
 #include "util/chrono.h"
+#include "board/UART.h"
 
 namespace board
 {
@@ -17,22 +18,22 @@ namespace imu
 		_500_HZ		= 500
 	};
     extern void init(Sample_Rate rate);
-
-    // calibrates the offsets for the specified duration
-    extern void calibrate(chrono::millis duration);
-	extern float get_rest_g();
+	
+	extern void set_gyroscope_bias(math::vec3f const& bias);
+	extern void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
 
 	struct Data
 	{
 		struct 
 		{
 			bool is_valid;
-			math::vec3f value;	
+			chrono::secondsf dt;
+			math::vec3f value; //radians/s!!! - it's a delta
 		} gyroscope;	
 		struct
 		{
 			bool is_valid;
-			math::vec3f value;
+			math::vec3f value; //m/s/s
 		} accelerometer;
 	};
 

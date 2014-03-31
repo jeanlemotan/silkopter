@@ -5,7 +5,7 @@ namespace physics
 namespace constants
 {
 
-	extern const float g; //newton's constant
+	const float g = 9.80665f; //newton's constant
 	
 }
 }

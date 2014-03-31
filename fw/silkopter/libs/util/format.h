@@ -569,7 +569,7 @@ dst.clear();																					\
 util::formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);						\
 if (fmt_adapter.is_done())																		\
 {																								\
-	return;																						\
+	return dst;																					\
 }																								\
 																								\
 do																								\
@@ -631,46 +631,51 @@ do																								\
 
 
 template<class Dst_String>
-void format(Dst_String& dst, Dst_String const& fmt)
+Dst_String& format(Dst_String& dst, Dst_String const& fmt)
 {
 	dst = fmt;
+	return dst;
 }
 
 template<class Dst_String, class Format_String>
-void format(Dst_String& dst, Format_String const& fmt)
+Dst_String& format(Dst_String& dst, Format_String const& fmt)
 {
 	dst = Dst_String(fmt);
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
 	FORMAT_PARAM(1, P1, p1)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
 	FORMAT_PARAM(1, P1, p1)
 	FORMAT_PARAM(2, P2, p2)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -678,10 +683,11 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(2, P2, p2)
 	FORMAT_PARAM(3, P3, p3)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -690,10 +696,11 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(3, P3, p3)
 	FORMAT_PARAM(4, P4, p4)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -703,10 +710,11 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(4, P4, p4)
 	FORMAT_PARAM(5, P5, p5)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -717,10 +725,11 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(5, P5, p5)
 	FORMAT_PARAM(6, P6, p6)
 	FORMAT_END
+	return dst;
 }
 
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -732,9 +741,10 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(6, P6, p6)
 	FORMAT_PARAM(7, P7, p7)
 	FORMAT_END
+	return dst;
 }
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -747,9 +757,10 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(7, P7, p7)
 	FORMAT_PARAM(8, P8, p8)
 	FORMAT_END
+	return dst;
 }
 template<class Dst_String, class Format_String, typename P0, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8, P9 const& p9)
+Dst_String& format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p1, P2 const& p2, P3 const& p3, P4 const& p4, P5 const& p5, P6 const& p6, P7 const& p7, P8 const& p8, P9 const& p9)
 {
 	FORMAT_BEGIN
 	FORMAT_PARAM(0, P0, p0)
@@ -763,6 +774,7 @@ void format(Dst_String& dst, Format_String const& fmt, P0 const& p0, P1 const& p
 	FORMAT_PARAM(8, P8, p8)
 	FORMAT_PARAM(9, P9, p9)
 	FORMAT_END
+	return dst;
 }
 
 #undef FORMAT_BEGIN

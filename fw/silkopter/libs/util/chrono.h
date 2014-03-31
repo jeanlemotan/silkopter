@@ -4,52 +4,57 @@ namespace chrono
 {
 	struct millis;
 	struct micros;
-
-	struct millis
+	struct secondsf;
+	
+	template<class Rep, class T>
+	struct duration
 	{
-		typedef int32_t rep_t;
+		typedef Rep rep_t;
 		rep_t count;
 		
-		inline millis() : count(0) {}
-		inline millis(rep_t count) : count(count) {}
-		inline millis(millis const& other) = default;
-		inline millis(micros const& other);
-		inline millis& operator=(millis const& other) { count = other.count; return *this; }
-		inline millis operator-(millis const& other) const { millis x(count - other.count); return x; }
-		inline millis operator+(millis const& other) const { millis x(count + other.count); return x; }
-		inline millis& operator-=(millis const& other) { count -= other.count; return *this; }
-		inline millis& operator+=(millis const& other) { count += other.count; return *this; }
-		inline bool operator<(millis const& other) const { return count < other.count; }
-		inline bool operator<=(millis const& other) const { return count <= other.count; }
-		inline bool operator>(millis const& other) const { return count > other.count; }
-		inline bool operator>=(millis const& other) const { return count >= other.count; }
-		inline bool operator==(millis const& other) const { return count == other.count; }
-		inline bool operator!=(millis const& other) const { return !operator==(other); }
+		inline duration() : count(0) {}
+		inline duration(rep_t count) : count(count) {}
+		inline duration(duration<Rep, T> const& other) = default;
+		inline duration& operator=(duration<Rep, T> const& other) { count = other.count; return *this; }
+		inline T operator-(T const& other) const { T x(count - other.count); return x; }
+		inline T operator+(T const& other) const { T x(count + other.count); return x; }
+		inline duration<Rep, T>& operator-=(T const& other) { count -= other.count; return *this; }
+		inline duration<Rep, T>& operator+=(T const& other) { count += other.count; return *this; }
+		inline bool operator<(T const& other) const { return count < other.count; }
+		inline bool operator<=(T const& other) const { return count <= other.count; }
+		inline bool operator>(T const& other) const { return count > other.count; }
+		inline bool operator>=(T const& other) const { return count >= other.count; }
+		inline bool operator==(T const& other) const { return count == other.count; }
+		inline bool operator!=(T const& other) const { return !operator==(other); }
 	};
-	
-	struct micros
-	{
-		typedef int32_t rep_t;
-		rep_t count;
 
-		inline micros() : count(0) {}
-		inline micros(rep_t count) : count(count) {}
-		inline micros(micros const& other) = default;
-		inline micros(millis const& other) : count(other.count * 1000) {}
-		inline micros& operator=(micros const& other) { count = other.count; return *this; }
-		inline micros operator-(micros const& other) const { micros x(count - other.count); return x; }
-		inline micros operator+(micros const& other) const { micros x(count + other.count); return x; }
-		inline micros& operator-=(micros const& other) { count -= other.count; return *this; }
-		inline micros& operator+=(micros const& other) { count += other.count; return *this; }
-		inline bool operator<(micros const& other) const { return count < other.count; }
-		inline bool operator<=(micros const& other) const { return count <= other.count; }
-		inline bool operator>(micros const& other) const { return count > other.count; }
-		inline bool operator>=(micros const& other) const { return count >= other.count; }
-		inline bool operator==(micros const& other) const { return count == other.count; }
-		inline bool operator!=(micros const& other) const { return !operator==(other); }
+	struct millis : public duration<int32_t, millis>
+	{
+		inline millis() = default;
+		inline millis(micros const& other);
+		inline millis(secondsf const& other);
+		inline millis(rep_t count) : duration<int32_t, millis>(count) {}
 	};
 	
-	inline millis::millis(micros const& other) : count(other.count / 1000) {}
+	struct micros : public duration<int32_t, micros>
+	{
+		inline micros() = default;
+		inline micros(millis const& other) : duration<int32_t, micros>(other.count * 1000) {}
+		inline micros(secondsf const& other);
+		inline micros(rep_t count) : duration<int32_t, micros>(count) {}
+	};
+
+	struct secondsf : public duration<float, secondsf>
+	{
+		inline secondsf() = default;
+		inline secondsf(millis const& other) : duration<float, secondsf>(other.count * 0.001f) {}
+		inline secondsf(micros const& other) : duration<float, secondsf>(other.count * 0.000001f) {}
+		inline secondsf(rep_t count) : duration<float, secondsf>(count) {}
+	};
+	
+	inline millis::millis(micros const& other) : duration<int32_t, millis>(other.count / 1000) {}
+	inline millis::millis(secondsf const& other) : duration<int32_t, millis>(other.count * 1000.f) {}
+	inline micros::micros(secondsf const& other) : duration<int32_t, micros>(other.count * 1000000.f) {}
 	
 	template<class Rep, class Duration>
 	struct time

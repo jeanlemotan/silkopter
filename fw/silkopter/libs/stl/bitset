@@ -372,64 +372,6 @@ __STL_TEMPLATE_NULL struct _Base_bitset<1> {
 
 };
 
-//
-// Definitions of non-inline functions from the single-word version of
-//  _Base_bitset.
-//
-
-size_t _Base_bitset<1>::_M_do_find_first(size_t __not_found) const
-{
-  _WordT __thisword = _M_w;
-
-  if ( __thisword != static_cast<_WordT>(0) ) {
-    // find byte within word
-    for ( size_t __j = 0; __j < sizeof(_WordT); __j++ ) {
-      unsigned char __this_byte
-        = static_cast<unsigned char>(__thisword & (~(unsigned char)0));
-      if ( __this_byte )
-        return __j*CHAR_BIT + _First_one<true>::_S_first_one[__this_byte];
-
-      __thisword >>= CHAR_BIT;
-    }
-  }
-  // not found, so return a value that indicates failure.
-  return __not_found;
-}
-
-size_t _Base_bitset<1>::_M_do_find_next(size_t __prev, size_t __not_found ) const
-{
-  // make bound inclusive
-  ++__prev;
-
-  // check out of bounds
-  if ( __prev >= __BITS_PER_WORD )
-    return __not_found;
-
-    // search first (and only) word
-  _WordT __thisword = _M_w;
-
-  // mask off bits below bound
-  __thisword &= (~static_cast<_WordT>(0)) << _S_whichbit(__prev);
-
-  if ( __thisword != static_cast<_WordT>(0) ) {
-    // find byte within word
-    // get first byte into place
-    __thisword >>= _S_whichbyte(__prev) * CHAR_BIT;
-    for ( size_t __j = _S_whichbyte(__prev); __j < sizeof(_WordT); __j++ ) {
-      unsigned char __this_byte
-        = static_cast<unsigned char>(__thisword & (~(unsigned char)0));
-      if ( __this_byte )
-        return __j*CHAR_BIT + _First_one<true>::_S_first_one[__this_byte];
-
-      __thisword >>= CHAR_BIT;
-    }
-  }
-
-  // not found, so return a value that indicates failure.
-  return __not_found;
-} // end _M_do_find_next
-
-
 // ------------------------------------------------------------
 // Helper class to zero out the unused high-order bits in the highest word.
 

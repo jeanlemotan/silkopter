@@ -193,9 +193,10 @@ struct Buffer
 volatile Buffer s_buffers[2];
 volatile uint8_t s_buffer_idx = 0;
 
-static math::vec3s16 s_gyro_calibration_offset;
-static math::vec3s16 s_accel_calibration_offset;
-static float s_rest_g = 9.80665f;
+static math::vec3s16 s_gyro_calibration_bias;
+static math::vec3f s_gyro_calibration_scale(1.f);
+static math::vec3s16 s_accel_calibration_bias;
+static math::vec3f s_accel_calibration_scale(1.f);
 
 static int16_t s_raw_mpu[7] = {0};
 
@@ -214,14 +215,14 @@ static void _poll_data()
 
 			if (i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7))
 			{
-				buffer.accel_sum.x	+= s_raw_mpu[0] - s_accel_calibration_offset.x;
-				buffer.accel_sum.y	+= s_raw_mpu[1] - s_accel_calibration_offset.y;
-				buffer.accel_sum.z	+= s_raw_mpu[2] - s_accel_calibration_offset.z;
+				buffer.accel_sum.x	+= s_raw_mpu[0] - s_accel_calibration_bias.x;
+				buffer.accel_sum.y	+= s_raw_mpu[1] - s_accel_calibration_bias.y;
+				buffer.accel_sum.z	+= s_raw_mpu[2] - s_accel_calibration_bias.z;
 				
 				//buffer.temp_sum		+= s_raw_mpu[3];
-				buffer.gyro_sum.x	+= s_raw_mpu[4] - s_gyro_calibration_offset.x;
-				buffer.gyro_sum.y	+= s_raw_mpu[5] - s_gyro_calibration_offset.y;
-				buffer.gyro_sum.z	+= s_raw_mpu[6] - s_gyro_calibration_offset.z;
+				buffer.gyro_sum.x	+= s_raw_mpu[4] - s_gyro_calibration_bias.x;
+				buffer.gyro_sum.y	+= s_raw_mpu[5] - s_gyro_calibration_bias.y;
+				buffer.gyro_sum.z	+= s_raw_mpu[6] - s_gyro_calibration_bias.z;
 				
 				buffer.sample_count++;
 				
@@ -406,28 +407,27 @@ static bool _init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-static math::vec3f s_last_gyro_sample;
-static math::vec3f s_last_accel_sample;
-
-static math::vec3f s_gyro_data;
-static math::vec3f s_accel_data;
-
 //static float s_temp_data = 0;
-static chrono::time_us s_last_data_time;
+static chrono::time_ms s_last_data_time;
 
-static void _refresh_data()
+
+static void _refresh_data(Data& data)
 {
 #ifdef SIMULATOR
 	s_buffers[s_buffer_idx].sample_count = 1;
 #else
 	if (!s_buffers[s_buffer_idx].sample_count)
 	{
+		data.gyroscope.is_valid = false;
+		data.accelerometer.is_valid = false;
 		return;
 	}
 #endif
 
-	auto now = clock::now_us();
-//	auto refresh_dt = now - s_last_data_time;
+	data.gyroscope.is_valid = true;
+	data.accelerometer.is_valid = true;
+
+	auto now = clock::now_ms();
 	s_last_data_time = now;
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -441,10 +441,10 @@ static void _refresh_data()
 	auto sc = buffer.sample_count;
 	buffer.sample_count = 0;
 
-	s_last_gyro_sample.set((math::vec3s32&)(buffer.gyro_sum));
+	data.gyroscope.value.set((math::vec3s32&)(buffer.gyro_sum));
 	((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
 
-	s_last_accel_sample.set((math::vec3s32&)(buffer.accel_sum));
+	data.accelerometer.value.set((math::vec3s32&)(buffer.accel_sum));
 	((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
 
 	//s_temp_data = buffer.temp_sum;
@@ -460,48 +460,12 @@ static void _refresh_data()
 
 	//////////////////////////////////////////////////////////////////////////
 	//scale the accel and apply the calibration offset
-	s_last_accel_sample *= (scinv * 0.000244140625f); // divided by 4096
-	//s_last_accel_sample -= s_accel_calibration_offset;
-	
-	s_accel_data = s_last_accel_sample;//math::lerp(s_accel_data, accel_data, 0.01f);
+	data.accelerometer.value *= (scinv * physics::constants::g / 4096.f); // divided by 4096
+	data.accelerometer.value *= s_accel_calibration_scale;
 
-	//////////////////////////////////////////////////////////////////////////
-	//compute gyro deltas and apply calibrartion offset
-	s_last_gyro_sample *= (s_gyro_scale * scinv * delta_time);
-	//s_last_gyro_sample -= s_gyro_calibration_offset;
-	//accumulate the deltas
-	s_gyro_data += s_last_gyro_sample;
-
-	//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
-	float accel_pitch_x = math::atan2(s_accel_data.y, s_accel_data.z);
-// 	if (accel_pitch_x > math::anglef::pi.radians)
-// 	{
-// 		accel_pitch_x -= math::anglef::_2pi.radians;
-// 	}
-// 	else if (accel_pitch_x < -math::anglef::pi.radians)
-// 	{
-// 		accel_pitch_x += math::anglef::_2pi.radians;
-// 	}
- 	float accel_roll_y = -math::atan2(s_accel_data.x, math::sqrt(s_accel_data.y*s_accel_data.y + s_accel_data.z*s_accel_data.z));
-// 	if (accel_roll_y > math::anglef::pi.radians)
-// 	{
-// 		accel_roll_y -= math::anglef::_2pi.radians;
-// 	}
-// 	else if (accel_roll_y < -math::anglef::pi.radians)
-// 	{
-// 		accel_roll_y += math::anglef::_2pi.radians;
-// 	}
-
-	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
-	if (s_accel_data.z > 0.1f)
- 	{
-		s_gyro_data.x = math::lerp(s_gyro_data.x, accel_pitch_x, delta_time);
-		s_gyro_data.y = math::lerp(s_gyro_data.y, accel_roll_y, delta_time);
- 	}
-	
-	//s_temp_data *= scinv;
+	data.gyroscope.value *= (s_gyro_scale * scinv * delta_time);
+	data.gyroscope.dt.count = delta_time;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC API
@@ -555,82 +519,19 @@ bool has_data()
 void get_data(Data& data)
 {
 	ASSERT(s_is_initialised);
-	_refresh_data();
-	
-	auto now = clock::now_us();
-	auto is_valid = now < (s_last_data_time + chrono::micros(60000));
-
-	data.accelerometer.is_valid = is_valid;
-	data.gyroscope.is_valid = is_valid;
-	
-	data.accelerometer.value = s_accel_data * physics::constants::g;
-	data.gyroscope.value = s_gyro_data;
+	_refresh_data(data);
 }
 
-
-void calibrate(chrono::millis duration)
+void set_gyroscope_bias(math::vec3f const& bias)
 {
-#ifdef SIMULATOR
-	return;
-#endif
-	PRINT("\ncurrent offsets gyro: {0} / accel: {1}", s_gyro_calibration_offset, s_accel_calibration_offset);
-
-	//store a backup in case the calibration fails
-	auto old_gyro_offset = s_gyro_calibration_offset;
-	auto old_accell_offset = s_accel_calibration_offset;
-
-	//set them to zero to read back raw data	
-	s_gyro_calibration_offset.set(0, 0, 0);
-	s_accel_calibration_offset.set(0, 0, 0);
-
-	math::vec3f gyro_offset;
-	math::vec3f accel_offset;
-		
-	uint32_t count = 0;
-	auto start = board::clock::now_ms();
-	do 
-	{
-		if (has_data())
-		{
-			_refresh_data();
-			
-			gyro_offset += s_last_gyro_sample;
-			accel_offset += s_last_accel_sample;
-			count ++;
-		}
-	} while (board::clock::now_ms() - start < duration);
-
-	if (count > 0)
-	{
-		float inv_count = 1.f / count;
-		math::vec3f goff(gyro_offset * inv_count);
-		s_gyro_calibration_offset.set(goff * 4096.f);
-		
-		math::vec3f aoff(accel_offset * inv_count);
-		s_accel_calibration_offset.set(aoff * 4096.f);
-		//s_accel_calibration_offset.z -= 4096.f; //1g on z
-		s_rest_g = math::abs(aoff.z) * physics::constants::g;
-		s_accel_calibration_offset.z = 0;
-
-		PRINT("\nnew offsets gyro: {0} / accel: {1} / rest_g: {2}", s_gyro_calibration_offset, s_accel_calibration_offset, s_rest_g);
-	}
-	else
-	{
-		s_gyro_calibration_offset = old_gyro_offset;
-		s_accel_calibration_offset = old_accell_offset;
-
-		PRINT("\ncalibration failed, reverting to initial offsets: {0} / accel: {1}", s_gyro_calibration_offset, s_accel_calibration_offset);
-	}
-
-	//now reset the gyro data so we can start again with fresh calibration data
-	s_gyro_data.set(0, 0, 0);
+	s_gyro_calibration_bias.set(bias * 4096.f);
+	//s_gyro_calibration_scale.set(scale);
 }
-
-float get_rest_g()
+void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
 {
-	return s_rest_g;
+	s_accel_calibration_bias.set(bias * 4096.f / physics::constants::g);
+	s_accel_calibration_scale.set(scale);
 }
-
 }
 }
 
