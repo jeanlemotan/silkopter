@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <bitset>
 #include "GS/SProtocol.h"
 #include "board/UART.h"
 #include "util/CRC_Buffer.h"
@@ -15,11 +16,13 @@ public:
 	SFull_Protocol();
 	explicit SFull_Protocol(board::UART& uart);
 
-	void hello_world(const Message_String& msg, uint16_t version);
+	void send_hello_world(const Message_String& msg, uint16_t version);
 	bool is_connected() const;
 	
-	void start_frame();
-	void end_frame();
+	void send_start_frame();
+	void send_end_frame();
+	
+	bool is_message_enabled(Message msg) const;
 	
 	void send_board_cpu_usage(uint8_t cpu_usage_percent);
 	void send_board_time_ms(chrono::time_ms time);
@@ -44,7 +47,7 @@ public:
 	void send_uav_control_reference_frame(UAV::Control_Reference_Frame frame);
 	
 private:
-	void start_message(uint8_t msg);
+	bool start_message(Message msg);
 	void flush_message();
 
 	board::UART* m_uart;
@@ -52,6 +55,8 @@ private:
 	uint32_t m_last_frame_idx;
 	bool m_is_frame_started;
 	bool m_is_connected;
+	
+	std::bitset<256> m_enabled_messages;
 };
 	
 }

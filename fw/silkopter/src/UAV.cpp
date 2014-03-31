@@ -50,6 +50,7 @@ void UAV::process()
 	{
 		return;
 	}
+
 	m_dt = now - m_last_time;
 	m_dts = float(m_dt.count) * 0.000001f;
 	m_last_time = now;
@@ -59,8 +60,9 @@ void UAV::process()
 	read_gps_data();
 	read_baro_data();
 	read_compass_data();
+
+	m_status.attitude.process(m_imu_data);
 	
-	compute_rotation();
 	compute_linear_motion();
 }
 
@@ -85,28 +87,15 @@ void UAV::read_compass_data()
 //	board::compass::get_data(m_compass_data);
 }
 
-void UAV::compute_rotation()
-{
-	auto& gyro = m_imu_data.gyroscope.value;
-	gyro.z = 0; //TODO - use compass
-	m_status.attitude.yaw = gyro.z;
-	m_status.attitude.pitch = gyro.x;
-	m_status.attitude.roll = gyro.y;
-	
-	//TODO - figure out why there's a minus in the euler!!!
-	math::quatf rot(math::quatf::eulerXYZ, gyro);
-	rot.get_as_mat3(m_status.attitude.rotation);
-// 	PRINT("\nATT: {0} / {1} / {2} ::: {3}", 
-// 		m_status.attitude.rotation.get_axis_y(), 
-// 		m_status.attitude.rotation.get_axis_x(), 
-// 		m_status.attitude.rotation.get_axis_z(), gyro);
-}
-
 void UAV::compute_linear_motion()
 {
-	m_status.acceleration = /*m_imu_data.accelerometer.value + */m_status.attitude.rotation.get_axis_z();// * physics::constants::g;
+	math::vec3f gravity = math::transform(m_status.attitude.get_world_to_local_rotation(), math::vec3f(0, 0, 1));
+	m_status.acceleration = m_imu_data.accelerometer.value - gravity * physics::constants::g;
 	m_status.velocity += m_status.acceleration * m_dts;
+	m_status.velocity = math::lerp(m_status.velocity, math::vec3f::zero, 0.01f);
+	
 	m_status.position += m_status.velocity * m_dts;
+	m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
 }
 
 	

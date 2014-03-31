@@ -7,6 +7,7 @@
 #include "board/imu.h"
 #include "board/sonar.h"
 #include "board/baro.h"
+#include "AHRS.h"
 
 namespace silk
 {
@@ -15,25 +16,6 @@ class UAV
 {
 public:
 		
-	//The attitude vectors
-	//At rest, gravity is towards -Z.
-	struct Attitude
-	{		
-		Attitude() 
-			: pitch(0)
-			, roll(0)
-			, yaw(0) 
-		{}
-
-		math::mat3f rotation;
-		
-		//redundands for the vectors above
-		//pitch is around X
-		//roll is around Y
-		//yaw is around Z
-		float pitch, roll, yaw;
-	};
-
 	//how the user inputs control the UAV in manual modes
 	enum class Control_Mode : uint8_t
 	{
@@ -84,7 +66,7 @@ public:
 		math::vec3f velocity;
 		math::vec3f acceleration;
 
-		Attitude attitude;
+		AHRS attitude;
 
 		Control_Mode control_mode; //decides how the user actions are translated into uav movement
 		Control_Reference_Frame control_reference_frame; //controls are relative to this reference frame
@@ -217,7 +199,6 @@ private:
 	void read_baro_data();
 	void read_compass_data();
 
-	void compute_rotation();
 	void compute_linear_motion();
 	
 	board::imu::Data m_imu_data;

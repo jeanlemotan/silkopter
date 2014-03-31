@@ -8,7 +8,10 @@ SFull_Protocol::SFull_Protocol()
 	, m_is_frame_started(false)
 	, m_is_connected(false)
 {
-		
+	for (size_t i = 0; i < m_enabled_messages.count(); i++)
+	{
+		m_enabled_messages.set(i, 1);
+	}
 }
 
 SFull_Protocol::SFull_Protocol(board::UART& uart)
@@ -22,35 +25,11 @@ SFull_Protocol::SFull_Protocol(board::UART& uart)
 
 //////////////////////////////////////////////////////////////////////////
 
-static const uint8_t MSG_HELLO_WORLD = 253;
-static const uint8_t MSG_START_FRAME = 254;
-static const uint8_t MSG_END_FRAME = 255;
+bool SFull_Protocol::is_message_enabled(Message msg) const
+{
+	return m_enabled_messages.test(static_cast<uint8_t>(msg));
+}
 
-//////////////////////////////////////////////////////////////////////////
-//BOARD
-
-static const uint8_t MSG_BOARD_CPU_USAGE = 0;
-static const uint8_t MSG_BOARD_TIME_MS = 1;
-static const uint8_t MSG_BOARD_GYROSCOPE = 10;
-static const uint8_t MSG_BOARD_ACCELEROMETER = 11;
-static const uint8_t MSG_BOARD_TEMPERATURE = 12;
-static const uint8_t MSG_BOARD_BARO_PRESSURE = 13;
-static const uint8_t MSG_BOARD_SONAR_ALTITUDE = 14;
-static const uint8_t MSG_BOARD_GPS_ALTITUDE = 15;
-static const uint8_t MSG_BOARD_RC_IN = 16;
-static const uint8_t MSG_BOARD_PWM_OUT = 17;
-
-//////////////////////////////////////////////////////////////////////////
-//UAV
-
-static const uint8_t MSG_UAV_ACCELERATION = 30;
-static const uint8_t MSG_UAV_VELOCITY = 31;
-static const uint8_t MSG_UAV_POSITION = 32;
-static const uint8_t MSG_UAV_ATTITUDE = 33;
-static const uint8_t MSG_UAV_PHASE = 34;
-static const uint8_t MSG_UAV_CONTROL_MODE = 35;
-static const uint8_t MSG_UAV_CONTROL_REFERENCE_FRAME = 36;
-	
 //////////////////////////////////////////////////////////////////////////
 
 static const uint8_t k_version = 1;
@@ -61,12 +40,17 @@ static const uint8_t k_version = 1;
 //1 : 1 : size
 //2 : 2 : crc of everything excluding these 2 bytes (they are zeroed before)
 //>4 : x : data
-void SFull_Protocol::start_message(uint8_t msg)
+bool SFull_Protocol::start_message(Message msg)
 {
+	if (m_enabled_messages.test(static_cast<uint8_t>(msg)))
+	{
+		return false;
+	}
 	m_buffer.clear();
-	m_buffer.write(msg);
+	m_buffer.write(static_cast<uint8_t>(msg));
 	m_buffer.write(uint8_t(0)); //size
 	m_buffer.write(uint16_t(0)); //crc
+	return true;
 }
 void SFull_Protocol::flush_message()
 {
@@ -82,7 +66,7 @@ bool SFull_Protocol::is_connected() const
 	return m_is_connected;
 }
 	
-void SFull_Protocol::hello_world(Message_String const& msg, uint16_t version)
+void SFull_Protocol::send_hello_world(Message_String const& msg, uint16_t version)
 {
 	if (!m_uart) return;
 	ASSERT(!m_is_frame_started);
@@ -90,7 +74,7 @@ void SFull_Protocol::hello_world(Message_String const& msg, uint16_t version)
 
 	m_is_connected = false;
 
-	start_message(MSG_HELLO_WORLD);
+	start_message(Message::HELLO_WORLD);
 	m_buffer.write(k_version);
 	m_buffer.write(version);
 	m_buffer.write(uint8_t(msg.size()));
@@ -108,7 +92,7 @@ void SFull_Protocol::hello_world(Message_String const& msg, uint16_t version)
 	}
 }
 	
-void SFull_Protocol::start_frame()
+void SFull_Protocol::send_start_frame()
 {
 	if (!m_uart) return;
 	ASSERT(!m_is_frame_started);
@@ -116,19 +100,19 @@ void SFull_Protocol::start_frame()
 	if (!m_is_connected) return;
 	
 	m_last_frame_idx++;
-	start_message(MSG_START_FRAME);
+	start_message(Message::START_FRAME);
 	m_buffer.write(m_last_frame_idx);
 	flush_message();
 	m_is_frame_started = true;
 }
-void SFull_Protocol::end_frame()
+void SFull_Protocol::send_end_frame()
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 	if (!m_is_connected) return;
 	
-	start_message(MSG_END_FRAME);
+	start_message(Message::END_FRAME);
 	m_buffer.write(m_last_frame_idx);//version: +4
 	flush_message();
 	m_is_frame_started = false;
@@ -142,7 +126,10 @@ void SFull_Protocol::send_board_cpu_usage(uint8_t cpu_usage_percent)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 	
-	start_message(MSG_BOARD_CPU_USAGE);
+	if (!start_message(Message::BOARD_CPU_USAGE))
+	{
+		return;
+	}
 	m_buffer.write(cpu_usage_percent);
 	flush_message();
 }
@@ -153,7 +140,10 @@ void SFull_Protocol::send_board_time_ms(chrono::time_ms time)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 	
-	start_message(MSG_BOARD_TIME_MS);
+	if (!start_message(Message::BOARD_TIME_MS))
+	{
+		return;
+	}
 	m_buffer.write(uint32_t(time.time_since_epoch().count));
 	flush_message();
 }
@@ -164,7 +154,10 @@ void SFull_Protocol::send_board_gyroscope(bool is_valid, math::vec3f const& gyro
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_GYROSCOPE);
+	if (!start_message(Message::BOARD_GYROSCOPE))
+	{
+		return;
+	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -178,7 +171,10 @@ void SFull_Protocol::send_board_accelerometer(bool is_valid, math::vec3f const& 
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_ACCELEROMETER);
+	if (!start_message(Message::BOARD_ACCELEROMETER))
+	{
+		return;
+	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -192,7 +188,11 @@ void SFull_Protocol::send_board_temperature(bool is_valid, float temp)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_TEMPERATURE);
+	if (!start_message(Message::BOARD_TEMPERATURE))
+	{
+		return;
+	}
+
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -206,7 +206,10 @@ void SFull_Protocol::send_board_baro_pressure(bool is_valid, float pressure)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_BARO_PRESSURE);
+	if (!start_message(Message::BOARD_BARO_PRESSURE))
+	{
+		return;
+	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -220,7 +223,10 @@ void SFull_Protocol::send_board_sonar_altitude(bool is_valid, float altitude)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_SONAR_ALTITUDE);
+	if (!start_message(Message::BOARD_SONAR_ALTITUDE))
+	{
+		return;
+	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -234,7 +240,10 @@ void SFull_Protocol::send_board_gps_altitude(bool is_valid, float altitude)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_GPS_ALTITUDE);
+	if (!start_message(Message::BOARD_GPS_ALTITUDE))
+	{
+		return;
+	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
@@ -248,7 +257,10 @@ void SFull_Protocol::send_board_rc_in(uint8_t count, int16_t const* values)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_RC_IN);
+	if (!start_message(Message::BOARD_RC_IN))
+	{
+		return;
+	}
 	m_buffer.write(count);
 	if (count)
 	{
@@ -262,7 +274,10 @@ void SFull_Protocol::send_board_pwm_out(uint8_t count, int16_t const* values)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_BOARD_PWM_OUT);
+	if (!start_message(Message::BOARD_PWM_OUT))
+	{
+		return;
+	}
 	m_buffer.write(count);
 	if (count)
 	{
@@ -279,7 +294,10 @@ void SFull_Protocol::send_uav_acceleration(math::vec3f const& accel)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_ACCELERATION);
+	if (!start_message(Message::UAV_ACCELERATION))
+	{
+		return;
+	}
 	m_buffer.write(accel);
 	flush_message();
 }
@@ -289,7 +307,10 @@ void SFull_Protocol::send_uav_velocity(math::vec3f const& velocity)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_VELOCITY);
+	if (!start_message(Message::UAV_VELOCITY))
+	{
+		return;
+	}
 	m_buffer.write(velocity);
 	flush_message();
 }
@@ -299,7 +320,10 @@ void SFull_Protocol::send_uav_position(math::vec3f const& position)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_POSITION);
+	if (!start_message(Message::UAV_POSITION))
+	{
+		return;
+	}
 	m_buffer.write(position);
 	flush_message();
 }
@@ -310,7 +334,10 @@ void SFull_Protocol::send_uav_attitude(math::vec3f const& euler)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_ATTITUDE);
+	if (!start_message(Message::UAV_ATTITUDE))
+	{
+		return;
+	}
 	m_buffer.write(euler);
 	flush_message();
 }
@@ -321,7 +348,10 @@ void SFull_Protocol::send_uav_phase(UAV::Phase phase)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_PHASE);
+	if (!start_message(Message::UAV_PHASE))
+	{
+		return;
+	}
 	m_buffer.write(phase);
 	flush_message();
 }
@@ -331,7 +361,10 @@ void SFull_Protocol::send_uav_control_mode(UAV::Control_Mode mode)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_CONTROL_MODE);
+	if (!start_message(Message::UAV_CONTROL_MODE))
+	{
+		return;
+	}
 	m_buffer.write(mode);
 	flush_message();
 }
@@ -341,7 +374,10 @@ void SFull_Protocol::send_uav_control_reference_frame(UAV::Control_Reference_Fra
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	start_message(MSG_UAV_CONTROL_REFERENCE_FRAME);
+	if (!start_message(Message::UAV_CONTROL_REFERENCE_FRAME))
+	{
+		return;
+	}
 	m_buffer.write(frame);
 	flush_message();
 }

@@ -21,7 +21,7 @@ GS::GS(UAV& uav, board::UART& full_uart)
 	, m_step(0)
 {
 	full_uart.set_blocking(true);
-	m_full_protocol.hello_world(k_hello_world, k_version);
+	m_full_protocol.send_hello_world(k_hello_world, k_version);
 }
 GS::GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart)
 	: m_uav(uav)
@@ -33,7 +33,7 @@ GS::GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart)
 {
 	full_uart.set_blocking(true);
 	compact_uart.set_blocking(true);
-	m_full_protocol.hello_world(k_hello_world, k_version);
+	m_full_protocol.send_hello_world(k_hello_world, k_version);
 	//m_compact_protocol.hello_world(k_hello_world, k_version);
 }
 
@@ -57,14 +57,14 @@ void GS::process(chrono::micros max_duration)
 		if (start - m_last_hello_time > chrono::micros(100000))
 		{
 			m_last_hello_time = start;
-			m_full_protocol.hello_world(k_hello_world, k_version);
+			m_full_protocol.send_hello_world(k_hello_world, k_version);
 		}
 		return;
 	}
 	
 	if (m_step == 0)
 	{
-		m_full_protocol.start_frame();
+		m_full_protocol.send_start_frame();
 	}
 
 	//take into account the eventual start_Frame
@@ -81,7 +81,7 @@ void GS::process(chrono::micros max_duration)
 	//start over	
 	if (done)
 	{
-		m_full_protocol.end_frame();
+		m_full_protocol.send_end_frame();
 		m_step = 0;
 	}
 }

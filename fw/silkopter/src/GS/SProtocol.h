@@ -14,16 +14,52 @@ namespace silk
 class SProtocol : public util::Noncopyable
 {
 public:
+
+	//each has a corresponsing send method
+	enum class Message
+	{
+		HELLO_WORLD = 253,
+		START_FRAME = 254,
+		END_FRAME = 255,
+
+		//////////////////////////////////////////////////////////////////////////
+		//BOARD
+
+		BOARD_CPU_USAGE = 0,
+		BOARD_TIME_MS = 1,
+		BOARD_GYROSCOPE = 10,
+		BOARD_ACCELEROMETER = 11,
+		BOARD_TEMPERATURE = 12,
+		BOARD_BARO_PRESSURE = 13,
+		BOARD_SONAR_ALTITUDE = 14,
+		BOARD_GPS_ALTITUDE = 15,
+		BOARD_RC_IN = 16,
+		BOARD_PWM_OUT = 17,
+
+		//////////////////////////////////////////////////////////////////////////
+		//UAV
+
+		UAV_ACCELERATION = 30,
+		UAV_VELOCITY = 31,
+		UAV_POSITION = 32,
+		UAV_ATTITUDE = 33,
+		UAV_PHASE = 34,
+		UAV_CONTROL_MODE = 35,
+		UAV_CONTROL_REFERENCE_FRAME = 36,
+	};
+
 	
 	//////////////////////////////////////////////////////////////////////////
 	//handshake
 	
 	typedef util::FString<64> Message_String;
-	virtual void hello_world(Message_String const& msg, uint16_t version) = 0;
+	virtual void send_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	
-	virtual void start_frame() = 0;
-	virtual void end_frame() = 0;
+	virtual void send_start_frame() = 0;
+	virtual void send_end_frame() = 0;
+	
+	virtual bool is_message_enabled(Message msg) const = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	
