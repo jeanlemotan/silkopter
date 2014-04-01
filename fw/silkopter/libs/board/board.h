@@ -5,13 +5,13 @@
 
 
 #if BOARD_TYPE == CRIUS_AIOP_2
-#   include "boards/Crius_AIOP2/IMU_mpu6000_i2c.h"
-#   include "boards/Crius_AIOP2/Thermometer.h"
-#   include "boards/Crius_AIOP2/Barometer_ms5611_i2c.h"
+#   include "boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
+#   include "boards/Crius_AIOP2/Thermometer_Data.h"
+#   include "boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
 #   include "boards/Crius_AIOP2/Compass.h"
-#   include "boards/Crius_AIOP2/GPS.h"
-#   include "boards/Crius_AIOP2/Sonar.h"
-#   include "boards/avr_UART.h"
+#   include "boards/Crius_AIOP2/Sonar_SR04.h"
+#   include "boards/AVR_UART.h"
+#   include "boards/GPS.h"
 #else
 #	error Define for your board
 #endif

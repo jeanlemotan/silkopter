@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/Noncopyable.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <qmath.h>
@@ -29,7 +30,7 @@ namespace board
 		struct Accelerometer_Data
 		{
 			chrono::secondsf dt; //delta time for this data
-			math::vec3f m; //m/s/s
+			math::vec3f acceleration; //m/s/s
 		};
 
 		//returns true if data is valid.

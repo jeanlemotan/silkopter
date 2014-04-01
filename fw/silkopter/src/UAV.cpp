@@ -1,7 +1,7 @@
 #include "UAV.h"
 #include "Motor_Mixer.h"
 #include "debug/debug.h"
-#include "board/clock.h"
+#include "board/board.h"
 #include "physics/constants.h"
 
 
@@ -68,11 +68,11 @@ void UAV::process()
 
 void UAV::read_imu_data()
 {
-	board::imu::get_data(m_imu_data);
+	board::get_main_imu().get_data(m_imu_data);
 }
 void UAV::read_sonar_data()
 {
-	board::sonar::get_data(m_sonar_data);
+	//board::sonar::get_data(m_sonar_data);
 }
 void UAV::read_gps_data()
 {
@@ -80,7 +80,7 @@ void UAV::read_gps_data()
 }
 void UAV::read_baro_data()
 {
-	board::baro::get_data(m_baro_data);
+	//board::baro::get_data(m_baro_data);
 }
 void UAV::read_compass_data()
 {

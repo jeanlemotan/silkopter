@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "board/UART.h"
+#include "board/board.h"
 #include "util/FString.h"
 
 class Console

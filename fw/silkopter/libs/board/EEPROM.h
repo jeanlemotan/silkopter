@@ -11,8 +11,8 @@ public:
 	typedef uint16_t size_type;
 	typedef uint16_t offset_type;
 
-	virtual size_type get_size();
-    virtual bool is_ready();
+	virtual size_type get_size() const = 0;
+    virtual bool is_ready() const = 0;
 
 	////////////// READING /////////////////////////////
 
@@ -34,7 +34,7 @@ public:
     virtual void 	write(int32_t x, offset_type& offset) = 0;
     virtual void 	write(uint32_t x, offset_type& offset) = 0;
     virtual void 	write(float x, offset_type& offset) = 0;
-    virtual void 	write(const uint8_t* src, size_type size, offset_type& offset) = 0;
+    virtual void 	write(uint8_t const* src, size_type size, offset_type& offset) = 0;
 };
 
 }

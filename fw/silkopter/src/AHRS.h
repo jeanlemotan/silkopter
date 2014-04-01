@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/Noncopyable.h"
-#include "board/imu.h"
+#include "board/board.h"
 
 namespace silk
 {
@@ -10,7 +10,7 @@ class AHRS : util::Noncopyable
 {
 	public:
 
-	void process(board::imu::Data const& data);
+	void process(board::IMU::Data const& data);
 		
 	//returns the euler along all three axis
 	math::vec3f const& get_euler() const;

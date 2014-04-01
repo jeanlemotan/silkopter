@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "GS/SProtocol.h"
-#include "board/UART.h"
+#include "board/board.h"
 
 namespace silk
 {

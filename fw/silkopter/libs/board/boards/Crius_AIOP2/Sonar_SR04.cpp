@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-static board::Sonar_sr04* s_instance = nullptr;
+static board::Sonar_SR04* s_instance = nullptr;
 
 ISR(PCINT0_vect)
 {
@@ -39,9 +39,9 @@ static const chrono::micros k_echo_max_delay(20000); //20ms max
 static const float k_max_distance = 3.2f;
 
 
-void _sonar_trigger(void* ptr)
+void Sonar_SR04::_sonar_trigger(void* ptr)
 {
-	auto* sonar = reinterpret_cast<board::Sonar_sr04*>(ptr);
+	auto* sonar = reinterpret_cast<board::Sonar_SR04*>(ptr);
 	ASSERT(sonar);
 	
 	auto now = board::clock::now_us();
@@ -65,7 +65,7 @@ void _sonar_trigger(void* ptr)
 
 //////////////////////////////////////////////////////////////////////////
 
-Sonar_sr04::Sonar_sr04()
+Sonar_SR04::Sonar_SR04()
 	, m_state(0)
 	, m_distance(0)
 {
@@ -87,7 +87,7 @@ Sonar_sr04::Sonar_sr04()
 	scheduler::register_callback(_sonar_trigger, this);
 }
 
-bool Sonar_sr04::get_data(Data& data) const
+bool Sonar_SR04::get_data(Data& data) const
 {
 	bool is_valid = m_distance < k_max_distance;
 	data.distance = data.is_valid ? m_distance : 0.f;

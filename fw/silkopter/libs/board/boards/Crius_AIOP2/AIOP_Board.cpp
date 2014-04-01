@@ -7,7 +7,12 @@
 #include "debug/debug.h"
 #include "board/board.h"
 
-#include "board/boards/avr_UART.h"
+#include "board/boards/AVR_UART.h"
+#include "board/boards/AVR_EEPROM.h"
+#include "board/boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
+#include "board/boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
+#include "board/boards/Crius_AIOP2/Sonar_SR04.h"
+#include "board/boards/Crius_AIOP2/Compass.h"
 
 using namespace board;
 
@@ -30,7 +35,7 @@ namespace board
 	static volatile uint8_t* s_ucsrb[UART_COUNT] = { &UCSR0B, &UCSR1B, &UCSR2B, &UCSR3B };
 	static volatile uint8_t* s_ucsrc[UART_COUNT] = { &UCSR0C, &UCSR1C, &UCSR2C, &UCSR3C };
 
-	static UART s_uarts[UART_COUNT] =
+	static AVR_UART s_uarts[UART_COUNT] =
 	{
 		{0, s_ubrrh[0], s_ubrrl[0], s_ucsra[0], s_ucsrb[0], s_ucsrc[0]},
 		{1, s_ubrrh[1], s_ubrrl[1], s_ucsra[1], s_ucsrb[1], s_ucsrc[1]},
@@ -38,20 +43,13 @@ namespace board
 		{3, s_ubrrh[3], s_ubrrl[3], s_ucsra[3], s_ucsrb[3], s_ucsrc[3]},
 	};
 	
-	static UART* s_gs_full_uart = &s_uarts[0];
-	static UART* s_gs_compact_uart = nullptr;
-	static UART* s_gps_uart = nullptr;
+	static AVR_UART* s_gs_full_uart = &s_uarts[0];
+	static AVR_UART* s_gs_compact_uart = nullptr;
+	static AVR_UART* s_gps_uart = nullptr;
 	
-	static IMU s_imu;
-	
-	namespace rc_in
-	{
-		extern void init();
-	}
-	namespace pwm_out
-	{
-		extern void init();
-	}
+	static IMU_MPU6000_i2c s_imu;
+// 	static AIOP_RC_In s_rc_in;
+// 	static AIOP_PWM_Out s_pwm_out;
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -59,33 +57,33 @@ namespace board
 	{
 		s_init_params = params;
 		
-		if (params.gs_full_uart_idx >= UART_COUNT)
+		if (s_init_params.gs_full_uart_idx >= UART_COUNT)
 		{
 			PANIC_MSG("UART out of bounds");
 		}
-		s_gs_full_uart = &s_uarts[params.gs_full_uart_idx];
-		s_gs_full_uart->begin(params.gs_full_uart_baud);
+		s_gs_full_uart = &s_uarts[s_init_params.gs_full_uart_idx];
+		s_gs_full_uart->begin(s_init_params.gs_full_uart_baud);
 		
-		if (params.gs_compact_uart_idx >= 0 && params.gs_compact_uart_idx < UART_COUNT)
+		if (s_init_params.gs_compact_uart_idx >= 0 && s_init_params.gs_compact_uart_idx < UART_COUNT)
 		{
-			s_gs_compact_uart = &s_uarts[params.gs_compact_uart_idx];
-			s_gs_compact_uart->begin(params.gs_compact_uart_baud);
+			s_gs_compact_uart = &s_uarts[s_init_params.gs_compact_uart_idx];
+			s_gs_compact_uart->begin(s_init_params.gs_compact_uart_baud);
 		}
-		if (params.gps_uart_idx >= 0 && params.gps_uart_idx < UART_COUNT)
+		if (s_init_params.gps_uart_idx >= 0 && s_init_params.gps_uart_idx < UART_COUNT)
 		{
-			s_gps_uart = &s_uarts[params.gps_uart_idx];
-			s_gps_uart->begin(params.gps_uart_baud);
+			s_gps_uart = &s_uarts[s_init_params.gps_uart_idx];
+			s_gps_uart->begin(s_init_params.gps_uart_baud);
 		}
 		
-		params.main_imu_idx = 0;		
-		s_imu.init(params.main_imu_sample_rate);
+		s_init_params.main_imu_idx = 0;		
+		s_imu.init(s_init_params.main_imu_sample_rate);
 		
-		params.main_thermometer_idx = math::clamp(0, 2);
+		s_init_params.main_thermometer_idx = math::clamp<int8_t>(s_init_params.main_thermometer_idx, 0, 2);
 		
-		rc_in::init();
+		//rc_in::init();
 		
-		pwm_out::init();
-		pwm_out::set_frequencies(50);
+		//pwm_out::init();
+		//pwm_out::set_frequencies(50);
 		
 		s_imu.set_accelerometer_bias_scale(
 			math::vec3f(2.77505,-3.72759,0.48773),

@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <bitset>
 #include "GS/SProtocol.h"
-#include "board/UART.h"
+#include "board/board.h"
 #include "util/CRC_Buffer.h"
 
 namespace silk

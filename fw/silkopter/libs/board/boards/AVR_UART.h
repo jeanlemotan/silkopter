@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "board/UART.h"
 
 namespace board
 {
@@ -55,7 +56,7 @@ public:
 	
 	static const uint8_t MAX_UARTS = 8;
 
-	static UART* s_uart_ptrs[MAX_UARTS];
+	static AVR_UART* s_uart_ptrs[MAX_UARTS];
 
 private:
 	volatile uint8_t& m_ubrrh;
@@ -74,12 +75,12 @@ private:
 #define UART_ISR(id)											\
 ISR(USART##id##_RX_vect)										\
 {																\
-	auto& buffer = board::UART::s_uart_ptrs[id]->m_rx_buffer;	\
+	auto& buffer = board::AVR_UART::s_uart_ptrs[id]->m_rx_buffer;	\
 	uint8_t data = UDR##id;										\
 	uint8_t tmphead = (buffer.head + 1) & UART_BUFFER_MASK;		\
 	if (tmphead == buffer.tail)									\
 	{															\
-		board::UART::s_uart_ptrs[id]->m_last_error = UART::Error::RX_OVERFLOW;	\
+		board::AVR_UART::s_uart_ptrs[id]->m_last_error = UART::Error::RX_OVERFLOW;	\
 	}															\
 	else														\
 	{															\
@@ -89,7 +90,7 @@ ISR(USART##id##_RX_vect)										\
 }																\
 ISR(USART##id##_UDRE_vect)										\
 {																\
-	auto& buffer = board::UART::s_uart_ptrs[id]->m_tx_buffer;	\
+	auto& buffer = board::AVR_UART::s_uart_ptrs[id]->m_tx_buffer;	\
 	if (buffer.head == buffer.tail)								\
 	{															\
 		UCSR##id##B &= ~_BV(UDRIE##id);							\

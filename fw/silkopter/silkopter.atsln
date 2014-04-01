@@ -5,12 +5,18 @@ Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "silkopter", "silkopter.cppp
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Sim|AVR = Debug Sim|AVR
 		Debug|AVR = Debug|AVR
+		Release Sim|AVR = Release Sim|AVR
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{811D501F-179D-471B-89C5-8835C191DF31}.Debug Sim|AVR.ActiveCfg = Debug Sim|AVR
+		{811D501F-179D-471B-89C5-8835C191DF31}.Debug Sim|AVR.Build.0 = Debug Sim|AVR
 		{811D501F-179D-471B-89C5-8835C191DF31}.Debug|AVR.ActiveCfg = Debug|AVR
 		{811D501F-179D-471B-89C5-8835C191DF31}.Debug|AVR.Build.0 = Debug|AVR
+		{811D501F-179D-471B-89C5-8835C191DF31}.Release Sim|AVR.ActiveCfg = Release Sim|AVR
+		{811D501F-179D-471B-89C5-8835C191DF31}.Release Sim|AVR.Build.0 = Release Sim|AVR
 		{811D501F-179D-471B-89C5-8835C191DF31}.Release|AVR.ActiveCfg = Release|AVR
 		{811D501F-179D-471B-89C5-8835C191DF31}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection

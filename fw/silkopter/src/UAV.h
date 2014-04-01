@@ -4,9 +4,7 @@
 #include "util/Flag_Set.h"
 #include "util/chrono.h"
 #include "Motor_Mixer.h"
-#include "board/imu.h"
-#include "board/sonar.h"
-#include "board/baro.h"
+#include "board/board.h"
 #include "AHRS.h"
 
 namespace silk
@@ -201,10 +199,10 @@ private:
 
 	void compute_linear_motion();
 	
-	board::imu::Data m_imu_data;
+	board::IMU::Data m_imu_data;
 	//board::gps::Data m_gps_data;
-	board::sonar::Data m_sonar_data;
-	board::baro::Data m_baro_data;
+	//board::sonar::Data m_sonar_data;
+	//board::baro::Data m_baro_data;
 	//board::compass::Data m_compass_data;
 };
 

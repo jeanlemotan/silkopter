@@ -2,7 +2,7 @@
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-#include "board/boards/Crius_AIOP2/IMU.h"
+#include "board/boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
 #include "debug/debug.h"
 #include "util/format.h"
 #include "board/boards/avr_gpio.h"
@@ -168,7 +168,7 @@ namespace board
 //static const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
 static const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
 
-IMU::IMU()
+IMU_MPU6000_i2c::IMU_MPU6000_i2c()
 	: m_mpu_addr(MPU6000_ADDR)
 	, m_sample_freq_div(10)
 	, m_sample_freq_counter(0)
@@ -180,40 +180,37 @@ IMU::IMU()
 
 //================ HARDWARE FUNCTIONS ==================== 
 
-void _poll_data(void* ptr)
+void IMU_MPU6000_i2c::poll_data(void* ptr)
 {
-	reinterpret_cast<IMU*>(ptr)->poll_data();
-}
-
-void IMU::poll_data()
-{
-	if (--m_sample_freq_counter <= 0)
+	auto* imu = reinterpret_cast<IMU_MPU6000_i2c*>(ptr);
+	
+	if (--imu->m_sample_freq_counter <= 0)
 	{	
-		m_sample_freq_counter = m_sample_freq_div;
+		imu->m_sample_freq_counter = imu->m_sample_freq_div;
 
 		auto now = clock::now_us();
 		if (i2c::try_lock())
 		{
-			auto d = now - m_last_refresh_time;
+			auto d = now - imu->m_last_refresh_time;
 			
-			auto& buffer = m_buffers[m_buffer_idx];
+			auto& buffer = imu->m_buffers[imu->m_buffer_idx];
 
-			if (i2c::read_registers_le(m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(m_raw_mpu), 7))
+			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(imu->m_raw_mpu), 7))
 			{
-				buffer.accel_sum.x	+= m_raw_mpu[0] - m_accel_calibration_bias.x;
-				buffer.accel_sum.y	+= m_raw_mpu[1] - m_accel_calibration_bias.y;
-				buffer.accel_sum.z	+= m_raw_mpu[2] - m_accel_calibration_bias.z;
+				buffer.accel_sum.x	+= imu->m_raw_mpu[0] - imu->m_accel_calibration_bias.x;
+				buffer.accel_sum.y	+= imu->m_raw_mpu[1] - imu->m_accel_calibration_bias.y;
+				buffer.accel_sum.z	+= imu->m_raw_mpu[2] - imu->m_accel_calibration_bias.z;
 				
-				buffer.temp_sum		+= m_raw_mpu[3];
-				buffer.gyro_sum.x	+= m_raw_mpu[4] - m_gyro_calibration_bias.x;
-				buffer.gyro_sum.y	+= m_raw_mpu[5] - m_gyro_calibration_bias.y;
-				buffer.gyro_sum.z	+= m_raw_mpu[6] - m_gyro_calibration_bias.z;
+				buffer.temp_sum		+= imu->m_raw_mpu[3];
+				buffer.gyro_sum.x	+= imu->m_raw_mpu[4] - imu->m_gyro_calibration_bias.x;
+				buffer.gyro_sum.y	+= imu->m_raw_mpu[5] - imu->m_gyro_calibration_bias.y;
+				buffer.gyro_sum.z	+= imu->m_raw_mpu[6] - imu->m_gyro_calibration_bias.z;
 				
 				buffer.sample_count++;
 				
-				(chrono::micros&)buffer.delta_time_sum += d;
+				buffer.delta_time_sum.count += d.count;
 
-				(chrono::time_us&)m_last_refresh_time = now;
+				imu->m_last_refresh_time.ticks = now.ticks;
 			}
 			else
 			{
@@ -228,7 +225,7 @@ void IMU::poll_data()
 }
 
 //  set the DLPF filter frequency. Assumes caller has taken semaphore
-void IMU::set_filter_register(uint8_t filter_hz, uint8_t default_filter)
+void IMU_MPU6000_i2c::set_filter_register(uint8_t filter_hz, uint8_t default_filter)
 {
     uint8_t filter = default_filter;
     // choose filtering frequency
@@ -258,7 +255,7 @@ void IMU::set_filter_register(uint8_t filter_hz, uint8_t default_filter)
     }
 }
 
-bool IMU::init_hardware(Sample_Rate sample_rate)
+bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 {
 	if (!i2c::lock(chrono::micros(10000)))
 	{
@@ -392,23 +389,19 @@ bool IMU::init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-void IMU::refresh_data(Data& data) const
+bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const
 {
 #ifdef SIMULATOR
 	m_buffers[m_buffer_idx].sample_count = 1;
 #else
 	if (!m_buffers[m_buffer_idx].sample_count)
 	{
-		m_thermometer.m_data.is_valid = false;
-		data.gyroscope.is_valid = false;
-		data.accelerometer.is_valid = false;
-		return;
+		m_thermometer.m_is_valid = false;
+		return false;
 	}
 #endif
 
-	m_thermometer.m_data.is_valid = true;
-	data.gyroscope.is_valid = true;
-	data.accelerometer.is_valid = true;
+	m_thermometer.m_is_valid = true;
 
 //	auto now = clock::now_ms();
 //	s_last_refresh_time = now;
@@ -424,13 +417,13 @@ void IMU::refresh_data(Data& data) const
 	auto sc = buffer.sample_count;
 	buffer.sample_count = 0;
 
-	data.gyroscope.value.set((math::vec3s32&)(buffer.gyro_sum));
+	gdata.delta.set((math::vec3s32&)(buffer.gyro_sum));
 	((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
 
-	data.accelerometer.value.set((math::vec3s32&)(buffer.accel_sum));
+	adata.acceleration.set((math::vec3s32&)(buffer.accel_sum));
 	((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
 
-	m_thermometer.m_data.value = buffer.temp_sum * 0.000244140625f;
+	m_thermometer.m_data.degrees = buffer.temp_sum * 0.000244140625f;
 	buffer.temp_sum = 0;
 
 	float delta_time = (float)buffer.delta_time_sum.count * 0.000001f;
@@ -443,17 +436,20 @@ void IMU::refresh_data(Data& data) const
 
 	//////////////////////////////////////////////////////////////////////////
 	//scale the accel and apply the calibration offset
-	data.accelerometer.value *= (scinv * physics::constants::g / 4096.f); // divided by 4096
-	data.accelerometer.value *= m_accel_calibration_scale;
+	adata.acceleration *= (scinv * physics::constants::g / 4096.f); // divided by 4096
+	adata.acceleration *= m_accel_calibration_scale;
+	adata.dt = delta_time;
 
-	data.gyroscope.value *= (s_gyro_scale * scinv * delta_time);
-	data.gyroscope.dt.count = delta_time;
+	gdata.delta *= (s_gyro_scale * scinv * delta_time);
+	gdata.dt = delta_time;
+	
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC API
 
-void IMU::init(Sample_Rate rate)
+void IMU_MPU6000_i2c::init(Sample_Rate rate)
 {
 	if (m_is_initialised)
 	{
@@ -485,27 +481,27 @@ void IMU::init(Sample_Rate rate)
 	(chrono::time_us&)m_last_refresh_time = clock::now_us();
 
 	// start the timer process to read samples
-	board::scheduler::register_callback(&_poll_data, this);
+	board::scheduler::register_callback(&poll_data, this);
 }
 
-void IMU::get_data(Data& data) const
+bool IMU_MPU6000_i2c::get_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const
 {
 	ASSERT(m_is_initialised);
-	refresh_data(data);
+	return refresh_data(gdata, adata);
 }
 
-void IMU::set_gyroscope_bias(math::vec3f const& bias)
+void IMU_MPU6000_i2c::set_gyroscope_bias(math::vec3f const& bias)
 {
 	m_gyro_calibration_bias.set(bias * 4096.f);
 	//s_gyro_calibration_scale.set(scale);
 }
-void IMU::set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
+void IMU_MPU6000_i2c::set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
 {
 	m_accel_calibration_bias.set(bias * 4096.f / physics::constants::g);
 	m_accel_calibration_scale.set(scale);
 }
 
-Thermometer const& IMU::get_thermometer() const
+Thermometer const& IMU_MPU6000_i2c::get_thermometer() const
 {
 	return m_thermometer;	
 }

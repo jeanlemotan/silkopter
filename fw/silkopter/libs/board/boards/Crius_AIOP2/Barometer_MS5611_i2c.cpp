@@ -6,12 +6,10 @@
 #include <avr/interrupt.h>
 #include "debug/debug.h"
 #include "board/board.h"
-#include "board/baro.h"
+#include "Barometer_MS5611_i2c.h"
 #include "board/boards/avr_i2c.h"
 
 namespace board
-{
-namespace baro
 {
 
 #define MS5611_ADDR 0x77
@@ -30,37 +28,7 @@ namespace baro
 static const uint32_t			k_update_frequency = 50;
 static const chrono::micros		k_delay(1000000 / k_update_frequency);
 
-static bool						s_is_healthy = false;
-static chrono::time_us			s_last_update_time;
-/* Gates access to asynchronous state: */
-
-static float					s_temperature;
-static float					s_pressure;
-
-static int32_t					s_raw_press;
-static int32_t					s_raw_temp;
-// Internal calibration registers
-static float					C1f, C2f, C3f, C4f, C5f, C6f;
-static float					D1, D2;
-
-static bool						s_is_initialized = false;
-
 //////////////////////////////////////////////////////////////////////////
-
-
-struct Buffer
-{
-	Buffer() : has_data(false), d1_count(0), d2_count(0), d1(0), d2(0) {}
-	volatile bool			has_data;
-	volatile uint8_t		d1_count;
-	volatile uint8_t		d2_count;
-	volatile uint32_t		d1, d2;
-};
-
-static volatile uint8_t s_stage = 0;
-
-static volatile Buffer s_buffers[2];
-static volatile uint8_t s_buffer_idx = 0;
 
 static uint16_t _read_uint16(uint8_t reg)
 {
@@ -93,14 +61,54 @@ static void _write(uint8_t reg)
 	TRACE_MSG("i2c failed");
 }
 
+Barometer_MS5611_i2c::Barometer_MS5611_i2c()
+	: m_is_healthy(false)
+	, m_temperature(0)
+	, m_pressure(0)
+	, m_raw_pressure(0)
+	, m_raw_temperature(0)
+	, m_C1f(0)
+	, m_C2f(0)
+	, m_C3f(0)
+	, m_C4f(0)
+	, m_C5f(0)
+	, m_C6f(0)
+	, m_D1(0)
+	, m_D2(0)
+	, m_stage(0)
+	, m_buffer_idx(0)
+{
+	uint8_t tries = 0;
+	do
+	{
+		bool success = init_hardware();
+		if (success)
+		{
+			break;
+		}
+		else
+		{
+			clock::delay(chrono::millis(50));
+		}
+		
+		if (tries++ > 5)
+		{
+			PANIC_MSG("Failed to boot Baro 5 times");
+		}
+	} while (1);
+}
+
 // Read the sensor. This is a state machine
 // We read one time Temperature (state=1) and then 4 times Pressure (states 2-5)
 // temperature does not change so quickly...
-static void _update(void*)
+void Barometer_MS5611_i2c::poll_data(void* ptr)
 {
+	auto* baro = reinterpret_cast<Barometer_MS5611_i2c*>(ptr);
+	ASSERT(baro);
+	
 	auto now = clock::now_us();
 	// Throttle read rate to 100hz maximum.
-	if (now - s_last_update_time < k_delay)
+	if (now - baro->m_last_update_time < k_delay)
 	{
 		return;
 	}
@@ -110,12 +118,12 @@ static void _update(void*)
 		return;
 	}
 
-	s_last_update_time = now;
+	baro->m_last_update_time = now;
 
-	auto& buffer = s_buffers[s_buffer_idx];
+	auto& buffer = baro->m_buffers[baro->m_buffer_idx];
 
-	s_stage++;
-	if ((s_stage & 7) == 0)
+	baro->m_stage++;
+	if ((baro->m_stage & 7) == 0)
 	{
 		_write(CMD_CONVERT_D2_OSR4096); // Command to read temperature
 		buffer.d2 += _read_adc();// On state 0 we read temp
@@ -147,7 +155,7 @@ static void _update(void*)
 }
 
 
-static bool _init_hardware()
+bool Barometer_MS5611_i2c::init_hardware()
 {
 //	TRACE();
 	int lock_tries = 1000;
@@ -172,46 +180,46 @@ static bool _init_hardware()
 	uint32_t C4 = _read_uint16(CMD_MS5611_PROM_C4);
 	uint32_t C5 = _read_uint16(CMD_MS5611_PROM_C5);
 	uint32_t C6 = _read_uint16(CMD_MS5611_PROM_C6);
-	C1f = C1;
-	C2f = C2;
-	C3f = C3;
-	C4f = C4;
-	C5f = (C5 << 8);
-	C6f = C6;
+	m_C1f = C1;
+	m_C2f = C2;
+	m_C3f = C3;
+	m_C4f = C4;
+	m_C5f = (C5 << 8);
+	m_C6f = C6;
 //	PRINT(":{0} {1} {2} {3} {4} {5}:", C1, C2, C3, C4, C5, C6);
 
 	//Send a command to read Temp first
 	_write(CMD_CONVERT_D2_OSR4096);
-	s_last_update_time = clock::now_us();
-	s_stage = 0;
-	s_temperature = 0;
-	s_pressure = 0;
+	m_last_update_time = clock::now_us();
+	m_stage = 0;
+	m_temperature = 0;
+	m_pressure = 0;
 
-	scheduler::register_callback(_update);
+	scheduler::register_callback(poll_data, this);
 			
 	i2c::unlock();
 
 	// wait for at least one value to be read
 	auto start = clock::now_ms();
-	while (!s_buffers[s_buffer_idx].has_data)
+	while (!m_buffers[m_buffer_idx].has_data)
 	{
 		clock::delay(chrono::millis(10));
 		if (clock::now_ms() - start > chrono::millis(1000))
 		{
 			ASSERT("PANIC: Baro took more than 1000ms to initialize");
-			s_is_healthy = false;
+			m_is_healthy = false;
 			return false;
 		}
 	#ifdef SIMULATOR
 		break;
 	#endif
 	}
-	s_is_healthy = true;
+	m_is_healthy = true;
 	return true;
 }
 
 // Calculate Temperature and compensated Pressure in real units (Celsius degrees*100, mbar*100).
-static void _calculate()
+void Barometer_MS5611_i2c::calculate() const
 {
 	// Formulas from manufacturer datasheet
 	// sub -20c temperature compensation is not included
@@ -220,10 +228,10 @@ static void _calculate()
 	// as this is much faster on an AVR2560, and also allows
 	// us to take advantage of the averaging of D1 and D1 over
 	// multiple samples, giving us more precision
-	float dT = D2 - C5f;
-	float TEMP = (dT * C6f)/8388608.f;
-	float OFF = C2f * 65536.0f + (C4f * dT) / 128.f;
-	float SENS = C1f * 32768.0f + (C3f * dT) / 256.f;
+	float dT = m_D2 - m_C5f;
+	float TEMP = (dT * m_C6f)/8388608.f;
+	float OFF = m_C2f * 65536.0f + (m_C4f * dT) / 128.f;
+	float SENS = m_C1f * 32768.0f + (m_C3f * dT) / 256.f;
 	//PRINT(":{0} {1} {2} {3}:", dT, TEMP, OFF, SENS);
 
 	if (TEMP < 0)
@@ -238,50 +246,21 @@ static void _calculate()
 		SENS = SENS - SENS2;
 	}
 
-	float P = (D1*SENS/2097152.f - OFF)/32768.f;
-	s_temperature = (TEMP + 2000.f) * 0.01f;
-	s_pressure = P;
+	float P = (m_D1*SENS/2097152.f - OFF)/32768.f;
+	m_temperature = (TEMP + 2000.f) * 0.01f;
+	m_pressure = P;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC API
 
-void init()
+bool Barometer_MS5611_i2c::get_data(Data& data) const
 {
-	if (s_is_initialized)
+	if (m_buffers[m_buffer_idx].has_data)
 	{
-		return;
-	}
-	s_is_initialized = true;
-
-	uint8_t tries = 0;
-	do
-	{
-		bool success = _init_hardware();
-		if (success)
-		{
-			break;
-		}
-		else
-		{
-			clock::delay(chrono::millis(50));
-		}
-				
-		if (tries++ > 5)
-		{
-			PANIC_MSG("Failed to boot Baro 5 times");
-		}
-	} while (1);
-}
-
-void get_data(Data& data)
-{
-	ASSERT(s_is_initialized);
-	if (s_buffers[s_buffer_idx].has_data)
-	{
-		auto last_buffer_idx = s_buffer_idx;
-		s_buffer_idx = !s_buffer_idx; //now the interrupt will write in the other buffer.
-		auto& buffer = s_buffers[last_buffer_idx];
+		auto last_buffer_idx = m_buffer_idx;
+		m_buffer_idx = m_buffer_idx ^ uint8_t(1); //now the interrupt will write in the other buffer.
+		auto& buffer = m_buffers[last_buffer_idx];
 
 		uint32_t sD1 = buffer.d1; 
 		buffer.d1 = 0;
@@ -295,29 +274,29 @@ void get_data(Data& data)
 
 		if (d1count != 0)
 		{
-			D1 = ((float)sD1) / d1count;
+			m_D1 = ((float)sD1) / d1count;
+			m_raw_pressure = m_D1;
 		}
 		if (d2count != 0)
 		{
-			D2 = ((float)sD2) / d2count;
+			m_D2 = ((float)sD2) / d2count;
+			m_raw_temperature = m_D2;
 		}
 		//_pressure_samples = d1count;
-		s_raw_press = D1;
-		s_raw_temp = D2;
 	}
-	_calculate();
+	calculate();
 // 	if (updated)
 // 	{
 // 		_last_update = hal.scheduler->millis();
 // 	}
 
-	data.pressure.is_valid = s_is_healthy;
-	data.pressure.value = s_pressure;
-	data.temperature.is_valid = s_is_healthy;
-	data.temperature.value = s_temperature;
+	data.pressure = m_pressure;
+	
+	m_thermometer.m_is_valid = m_is_healthy;
+	m_thermometer.m_data.degrees = m_temperature;
+	
+	return m_is_healthy;
 }
 
-
-}
 }
 #endif

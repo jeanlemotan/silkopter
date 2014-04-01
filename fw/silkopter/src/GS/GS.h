@@ -5,7 +5,7 @@
 #include "GS/SFull_Protocol.h"
 #include "GS/SCompact_Protocol.h"
 #include "util/Noncopyable.h"
-#include "board/UART.h"
+#include "board/board.h"
 #include "util/chrono.h"
 #include "UAV.h"
 

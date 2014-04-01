@@ -1,10 +1,5 @@
 #include "GS/GS.h"
-#include "board/clock.h"
-#include "board/imu.h"
-#include "board/sonar.h"
-#include "board/baro.h"
-#include "board/rc_in.h"
-#include "board/pwm_out.h"
+#include "board/board.h"
 #include "debug/debug.h"
 
 using namespace silk;
@@ -102,29 +97,33 @@ bool GS::send_data(uint32_t step)
 		return false;
 	}
 	case 10:
+	case 11:
+	case 12:
+	case 13:
 	{
-		board::imu::Data data;
-		board::imu::get_data(data);
+		//if (step - 10 < board::s_imu_count)
+		board::IMU::Data data;
+		board::get_main_imu().get_data(data);
 		m_full_protocol.send_board_gyroscope(data.gyroscope.is_valid, data.gyroscope.value);
 		m_full_protocol.send_board_accelerometer(data.accelerometer.is_valid, data.accelerometer.value);
 		return false;
 	}
-	case 12:
+	case 18:
 	{
-		board::sonar::Data data;
-		board::sonar::get_data(data);
-		m_full_protocol.send_board_sonar_altitude(data.is_valid, data.altitude);
+// 		board::sonar::Data data;
+// 		board::sonar::get_data(data);
+// 		m_full_protocol.send_board_sonar_altitude(data.is_valid, data.altitude);
 		return false;
 	}
-	case 14:
+	case 20:
 	{
-		board::baro::Data data;
-		board::baro::get_data(data);
-		m_full_protocol.send_board_baro_pressure(data.pressure.is_valid, data.pressure.value);
-		m_full_protocol.send_board_temperature(data.temperature.is_valid, data.temperature.value);
+// 		board::baro::Data data;
+// 		board::baro::get_data(data);
+// 		m_full_protocol.send_board_baro_pressure(data.pressure.is_valid, data.pressure.value);
+// 		m_full_protocol.send_board_temperature(data.temperature.is_valid, data.temperature.value);
 		return false;
 	}
-	case 16:
+	case 22:
 	{
 		int16_t data[32];
 		auto count = math::min(board::rc_in::get_channel_count(), uint8_t(32));
@@ -132,7 +131,7 @@ bool GS::send_data(uint32_t step)
 		m_full_protocol.send_board_rc_in(count, data);
 		return false;
 	}
-	case 18:
+	case 24:
 	{
 		int16_t data[32];
 		auto count = math::min(board::pwm_out::get_channel_count(), uint8_t(32));

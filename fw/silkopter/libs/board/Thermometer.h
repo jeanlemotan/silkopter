@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Noncopyable.h"
+
 namespace board
 {
 	class Thermometer : util::Noncopyable

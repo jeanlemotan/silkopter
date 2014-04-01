@@ -2,7 +2,7 @@
 
 using namespace silk;
 
-void AHRS::process(board::imu::Data const& data)
+void AHRS::process(board::IMU::Data const& data)
 {
 	auto const& gyro = data.gyroscope.value;
 	//gyro.z = 0; //TODO - use compass

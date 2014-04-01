@@ -47,6 +47,18 @@ public:
 		UAV_CONTROL_MODE = 35,
 		UAV_CONTROL_REFERENCE_FRAME = 36,
 	};
+	
+	//each has a corresponding receive method
+	enum class Command
+	{
+		//control messages
+		SET_MESSAGE_ENABLED,
+		SET_ALL_MESSAGES_ENABLED,
+		
+		//calibration
+		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
+		SET_BOARD_GYROSCOPE_BIAS_SCALE,
+	};
 
 	
 	//////////////////////////////////////////////////////////////////////////
