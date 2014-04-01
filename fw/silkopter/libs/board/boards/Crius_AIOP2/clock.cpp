@@ -5,7 +5,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/clock.h"
+#include "board/board.h"
 #include "util/Scope_Sync.h"
 
 namespace board

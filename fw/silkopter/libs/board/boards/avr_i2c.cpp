@@ -5,8 +5,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "board/boards/avr_i2c.h"
-#include "board/clock.h"
-#include "board/scheduler.h"
 #include "debug/debug.h"
 
 namespace board

@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include "qmath.h"
 #include "debug/debug.h"
-#include "board/pwm_out.h"
+#include "board/board.h"
 #include "board/boards/avr_gpio.h"
 
 namespace board

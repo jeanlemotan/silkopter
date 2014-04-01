@@ -5,8 +5,7 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
-#include "board/scheduler.h"
-#include "board/clock.h"
+#include "board/board.h"
 #include "debug/debug.h"
 #include <qmath.h>
 #include "util/Scope_Sync.h"
@@ -19,7 +18,7 @@ namespace scheduler
 
 static volatile bool s_is_in_callback = false;
 static bool s_is_initialized = false;
-static Callback s_callbacks[MAX_CALLBACK_COUNT] = { nullptr }; 
+static std::pair<Callback, void*> s_callbacks[MAX_CALLBACK_COUNT]; 
 static uint8_t s_callback_count = 0;
 
 // AVRScheduler timer interrupt period is controlled by TCNT2.
@@ -54,7 +53,7 @@ void _run_timer_procs()
 	// now call the timer based drivers
 	for (int i = 0; i < s_callback_count; i++)
 	{
-		s_callbacks[i]();
+		s_callbacks[i].first(s_callbacks[i].second);
 	}
 
 	//	hal.gpio->write(45,0);
@@ -90,7 +89,7 @@ void init(Frequency freq)
 	clock::init();
 }
 
-void register_callback(Callback cb) 
+void register_callback(Callback cb, void* user_data)
 {
 	if (!cb)
 	{
@@ -98,7 +97,7 @@ void register_callback(Callback cb)
 	}
     for (int i = 0; i < s_callback_count; i++) 
 	{
-        if (s_callbacks[i] == cb) 
+        if (s_callbacks[i].first == cb && s_callbacks[i].second == user_data) 
 		{
             return;
         }
@@ -109,7 +108,7 @@ void register_callback(Callback cb)
         /* this write to _timer_proc can be outside the critical section
          * because that memory won't be used until _num_timer_procs is
          * incremented. */
-        s_callbacks[s_callback_count] = cb;
+        s_callbacks[s_callback_count] = std::pair<Callback, void*>(cb, user_data);
         /* _num_timer_procs is used from interrupt, and multiple bytes long. */
         {
             util::Scope_Sync ss();

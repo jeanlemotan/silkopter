@@ -1,6 +1,6 @@
 #pragma once
 
-#include "board/clock.h"
+#include "board/board.h"
 
 namespace board
 {

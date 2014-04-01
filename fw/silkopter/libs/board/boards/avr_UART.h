@@ -69,7 +69,7 @@ public:
 	
 	static const uint8_t MAX_UARTS = 8;
 
-	static UART* s_uarts[MAX_UARTS];
+	static UART* s_uart_ptrs[MAX_UARTS];
 
 private:
 	volatile uint8_t& m_ubrrh;
@@ -81,7 +81,6 @@ private:
 
 	bool m_is_blocking;
 	bool m_is_open;
-	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -89,12 +88,12 @@ private:
 #define UART_ISR(id)											\
 ISR(USART##id##_RX_vect)										\
 {																\
-	auto& buffer = board::UART::s_uarts[id]->m_rx_buffer;		\
+	auto& buffer = board::UART::s_uart_ptrs[id]->m_rx_buffer;	\
 	uint8_t data = UDR##id;										\
 	uint8_t tmphead = (buffer.head + 1) & UART_BUFFER_MASK;		\
 	if (tmphead == buffer.tail)									\
 	{															\
-		board::UART::s_uarts[id]->m_last_error = UART::Error::RX_OVERFLOW;	\
+		board::UART::s_uart_ptrs[id]->m_last_error = UART::Error::RX_OVERFLOW;	\
 	}															\
 	else														\
 	{															\
@@ -104,7 +103,7 @@ ISR(USART##id##_RX_vect)										\
 }																\
 ISR(USART##id##_UDRE_vect)										\
 {																\
-	auto& buffer = board::UART::s_uarts[id]->m_tx_buffer;		\
+	auto& buffer = board::UART::s_uart_ptrs[id]->m_tx_buffer;	\
 	if (buffer.head == buffer.tail)								\
 	{															\
 		UCSR##id##B &= ~_BV(UDRIE##id);							\
@@ -114,15 +113,6 @@ ISR(USART##id##_UDRE_vect)										\
 	buffer.tail = tmptail;										\
 	UDR##id = buffer.data[tmptail];								\
 }
-
-extern UART uart0;
-extern UART uart1;
-extern UART uart2;
-extern UART uart3;
-extern UART uart4;
-extern UART uart5;
-extern UART uart6;
-extern UART uart7;
 
 }
 

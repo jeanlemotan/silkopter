@@ -2,18 +2,15 @@
 
 #if BOARD_TYPE == CRIUS_AIOP2
 
-#include "board/imu.h"
+#include "board/boards/Crius_AIOP2/IMU.h"
 #include "debug/debug.h"
 #include "util/format.h"
 #include "board/boards/avr_gpio.h"
 #include "board/boards/avr_i2c.h"
-#include "board/clock.h"
-#include "board/scheduler.h"
+#include "board/board.h"
 #include "physics/constants.h"
 
 namespace board
-{
-namespace imu
 {
 
 //#define DISABLE_INTERNAL_MAG
@@ -171,64 +168,52 @@ namespace imu
 //static const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
 static const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
 
-static volatile chrono::time_us s_last_refresh_time;
-static uint8_t s_mpu_addr = MPU6000_ADDR;
-static int8_t s_sample_freq_div = 10;
-volatile int8_t s_sample_freq_counter = 0;
-static bool s_is_initialised = false;
-
+IMU::IMU()
+	: m_mpu_addr(MPU6000_ADDR)
+	, m_sample_freq_div(10)
+	, m_sample_freq_counter(0)
+	, m_is_initialised(false)
+	, m_buffer_idx(0)
+	, m_accel_calibration_scale(1.f)
+{
+}
 
 //================ HARDWARE FUNCTIONS ==================== 
 
-struct Buffer
+void _poll_data(void* ptr)
 {
-	Buffer() : temp_sum(0), sample_count(0) {}
-		
-	volatile math::vec3s32 accel_sum;
-	volatile math::vec3s32 gyro_sum;
-	volatile uint16_t temp_sum;
-	volatile chrono::micros delta_time_sum;
-	volatile uint8_t sample_count;
-};
-volatile Buffer s_buffers[2];
-volatile uint8_t s_buffer_idx = 0;
+	reinterpret_cast<IMU*>(ptr)->poll_data();
+}
 
-static math::vec3s16 s_gyro_calibration_bias;
-static math::vec3f s_gyro_calibration_scale(1.f);
-static math::vec3s16 s_accel_calibration_bias;
-static math::vec3f s_accel_calibration_scale(1.f);
-
-static int16_t s_raw_mpu[7] = {0};
-
-static void _poll_data()
+void IMU::poll_data()
 {
-	if (--s_sample_freq_counter <= 0)
+	if (--m_sample_freq_counter <= 0)
 	{	
-		s_sample_freq_counter = s_sample_freq_div;
+		m_sample_freq_counter = m_sample_freq_div;
 
 		auto now = clock::now_us();
 		if (i2c::try_lock())
 		{
-			auto d = now - s_last_refresh_time;
+			auto d = now - m_last_refresh_time;
 			
-			auto& buffer = s_buffers[s_buffer_idx];
+			auto& buffer = m_buffers[m_buffer_idx];
 
-			if (i2c::read_registers_le(s_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(s_raw_mpu), 7))
+			if (i2c::read_registers_le(m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(m_raw_mpu), 7))
 			{
-				buffer.accel_sum.x	+= s_raw_mpu[0] - s_accel_calibration_bias.x;
-				buffer.accel_sum.y	+= s_raw_mpu[1] - s_accel_calibration_bias.y;
-				buffer.accel_sum.z	+= s_raw_mpu[2] - s_accel_calibration_bias.z;
+				buffer.accel_sum.x	+= m_raw_mpu[0] - m_accel_calibration_bias.x;
+				buffer.accel_sum.y	+= m_raw_mpu[1] - m_accel_calibration_bias.y;
+				buffer.accel_sum.z	+= m_raw_mpu[2] - m_accel_calibration_bias.z;
 				
-				//buffer.temp_sum		+= s_raw_mpu[3];
-				buffer.gyro_sum.x	+= s_raw_mpu[4] - s_gyro_calibration_bias.x;
-				buffer.gyro_sum.y	+= s_raw_mpu[5] - s_gyro_calibration_bias.y;
-				buffer.gyro_sum.z	+= s_raw_mpu[6] - s_gyro_calibration_bias.z;
+				buffer.temp_sum		+= m_raw_mpu[3];
+				buffer.gyro_sum.x	+= m_raw_mpu[4] - m_gyro_calibration_bias.x;
+				buffer.gyro_sum.y	+= m_raw_mpu[5] - m_gyro_calibration_bias.y;
+				buffer.gyro_sum.z	+= m_raw_mpu[6] - m_gyro_calibration_bias.z;
 				
 				buffer.sample_count++;
 				
 				(chrono::micros&)buffer.delta_time_sum += d;
 
-				(chrono::time_us&)s_last_refresh_time = now;
+				(chrono::time_us&)m_last_refresh_time = now;
 			}
 			else
 			{
@@ -243,7 +228,7 @@ static void _poll_data()
 }
 
 //  set the DLPF filter frequency. Assumes caller has taken semaphore
-static void _set_filter_register(uint8_t filter_hz, uint8_t default_filter)
+void IMU::set_filter_register(uint8_t filter_hz, uint8_t default_filter)
 {
     uint8_t filter = default_filter;
     // choose filtering frequency
@@ -269,11 +254,11 @@ static void _set_filter_register(uint8_t filter_hz, uint8_t default_filter)
     if (filter != 0) 
 	{
         //_last_filter_hz = filter_hz;
-        i2c::write_register(s_mpu_addr, MPUREG_CONFIG, filter);
+        i2c::write_register(m_mpu_addr, MPUREG_CONFIG, filter);
     }
 }
 
-static bool _init_hardware(Sample_Rate sample_rate)
+bool IMU::init_hardware(Sample_Rate sample_rate)
 {
 	if (!i2c::lock(chrono::micros(10000)))
 	{
@@ -285,17 +270,17 @@ static bool _init_hardware(Sample_Rate sample_rate)
     uint8_t reg_val;
     for (tries = 0; tries < 5; tries++) 
 	{
-		i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
+		i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
 		clock::delay(chrono::millis(100));
 			
 		// Wake up device and select GyroZ clock. Note that the
 		// MPU6000 starts up in sleep mode, and it can take some time
 		// for it to come out of sleep
-		i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_CLK_ZGYRO);
+		i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_CLK_ZGYRO);
 		clock::delay(chrono::millis(5));
 			
 		// check it has woken up
-		i2c::read_register(s_mpu_addr, MPUREG_PWR_MGMT_1, reg_val);
+		i2c::read_register(m_mpu_addr, MPUREG_PWR_MGMT_1, reg_val);
 		if (reg_val == BIT_PWR_MGMT_1_CLK_ZGYRO) 
 		{
 			break;
@@ -310,7 +295,7 @@ static bool _init_hardware(Sample_Rate sample_rate)
     }
 
     // only used for wake-up in accelerometer only low power mode
-    i2c::write_register(s_mpu_addr, MPUREG_PWR_MGMT_2, 0);
+    i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_2, 0);
     clock::delay(chrono::millis(1));
     
     uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
@@ -344,27 +329,27 @@ static bool _init_hardware(Sample_Rate sample_rate)
 		PANIC();
     }
 
-	s_sample_freq_div = scheduler_freq_hz / sample_rate_hz;
+	m_sample_freq_div = scheduler_freq_hz / sample_rate_hz;
 	//check the sample rate is compatible with the scheduler frequency
-	if (s_sample_freq_div * sample_rate_hz != scheduler_freq_hz)
+	if (m_sample_freq_div * sample_rate_hz != scheduler_freq_hz)
 	{
 		PANIC();
 	}	
 	
-	PRINT("\nIMU scheduler frequency divider: {0}", s_sample_freq_div);
+	PRINT("\nIMU scheduler frequency divider: {0}", m_sample_freq_div);
 	
-    _set_filter_register(0, default_filter);
+    set_filter_register(0, default_filter);
 
     // set sample rate to 200Hz, and use _sample_divider to give
     // the requested rate to the application
-    i2c::write_register(s_mpu_addr, MPUREG_SMPLRT_DIV, rate);
+    i2c::write_register(m_mpu_addr, MPUREG_SMPLRT_DIV, rate);
     clock::delay(chrono::millis(1));
 
-    i2c::write_register(s_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS); // Gyro scale 2000?/s
+    i2c::write_register(m_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS); // Gyro scale 2000?/s
     clock::delay(chrono::millis(1));
 
 		// Get chip revision
-    i2c::read_register(s_mpu_addr, MPUREG_PRODUCT_ID, reg_val);
+    i2c::read_register(m_mpu_addr, MPUREG_PRODUCT_ID, reg_val);
 
 		// Select Accel scale
 	if ((reg_val == MPU6000_REV_A4) || (reg_val == MPU6000ES_REV_C4) || (reg_val == MPU6000ES_REV_C5) ||
@@ -372,12 +357,12 @@ static bool _init_hardware(Sample_Rate sample_rate)
 	{
 		// Accel scale 8g (4096 LSB/g)
 		// Rev C has different scaling than rev D
-		i2c::write_register(s_mpu_addr, MPUREG_ACCEL_CONFIG, 1<<3);
+		i2c::write_register(m_mpu_addr, MPUREG_ACCEL_CONFIG, 1<<3);
 	} 
 	else 
 	{
 		// Accel scale 8g (4096 LSB/g)
-		i2c::write_register(s_mpu_addr, MPUREG_ACCEL_CONFIG, 2<<3);
+		i2c::write_register(m_mpu_addr, MPUREG_ACCEL_CONFIG, 2<<3);
 	}
 			
     clock::delay(chrono::millis(1));
@@ -385,8 +370,8 @@ static bool _init_hardware(Sample_Rate sample_rate)
 #ifndef DISABLE_INTERNAL_MAG
     // Enable I2C bypass mode, to work with Magnetometer 5883L
     // Disable I2C Master mode
-    i2c::write_register(s_mpu_addr, MPUREG_USER_CTRL, 0);
-    i2c::write_register(s_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
+    i2c::write_register(m_mpu_addr, MPUREG_USER_CTRL, 0);
+    i2c::write_register(m_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
 #endif
     
 /*  Dump MPU6050 registers  
@@ -407,35 +392,33 @@ static bool _init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-//static float s_temp_data = 0;
-static chrono::time_ms s_last_data_time;
-
-
-static void _refresh_data(Data& data)
+void IMU::refresh_data(Data& data) const
 {
 #ifdef SIMULATOR
-	s_buffers[s_buffer_idx].sample_count = 1;
+	m_buffers[m_buffer_idx].sample_count = 1;
 #else
-	if (!s_buffers[s_buffer_idx].sample_count)
+	if (!m_buffers[m_buffer_idx].sample_count)
 	{
+		m_thermometer.m_data.is_valid = false;
 		data.gyroscope.is_valid = false;
 		data.accelerometer.is_valid = false;
 		return;
 	}
 #endif
 
+	m_thermometer.m_data.is_valid = true;
 	data.gyroscope.is_valid = true;
 	data.accelerometer.is_valid = true;
 
-	auto now = clock::now_ms();
-	s_last_data_time = now;
+//	auto now = clock::now_ms();
+//	s_last_refresh_time = now;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//copy the data
 
-	auto last_buffer_idx = s_buffer_idx;
-	s_buffer_idx = !s_buffer_idx; //now the interrupt will write in the other buffer.
-	auto& buffer = s_buffers[last_buffer_idx];
+	auto last_buffer_idx = m_buffer_idx;
+	m_buffer_idx = !m_buffer_idx; //now the interrupt will write in the other buffer.
+	auto& buffer = m_buffers[last_buffer_idx];
 
 	ASSERT(buffer.sample_count > 0);
 	auto sc = buffer.sample_count;
@@ -447,8 +430,8 @@ static void _refresh_data(Data& data)
 	data.accelerometer.value.set((math::vec3s32&)(buffer.accel_sum));
 	((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
 
-	//s_temp_data = buffer.temp_sum;
-	//buffer.temp_sum = 0;
+	m_thermometer.m_data.value = buffer.temp_sum * 0.000244140625f;
+	buffer.temp_sum = 0;
 
 	float delta_time = (float)buffer.delta_time_sum.count * 0.000001f;
 	buffer.delta_time_sum.count = 0;
@@ -461,7 +444,7 @@ static void _refresh_data(Data& data)
 	//////////////////////////////////////////////////////////////////////////
 	//scale the accel and apply the calibration offset
 	data.accelerometer.value *= (scinv * physics::constants::g / 4096.f); // divided by 4096
-	data.accelerometer.value *= s_accel_calibration_scale;
+	data.accelerometer.value *= m_accel_calibration_scale;
 
 	data.gyroscope.value *= (s_gyro_scale * scinv * delta_time);
 	data.gyroscope.dt.count = delta_time;
@@ -470,20 +453,20 @@ static void _refresh_data(Data& data)
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC API
 
-void init(Sample_Rate rate)
+void IMU::init(Sample_Rate rate)
 {
-	if (s_is_initialised)
+	if (m_is_initialised)
 	{
 		return;
 	}
-	s_is_initialised = true;
+	m_is_initialised = true;
 	
 	i2c::init();
 
 	uint8_t tries = 0;
 	do
 	{
-		bool success = _init_hardware(rate);
+		bool success = init_hardware(rate);
 		if (success)
 		{
 			break;
@@ -499,40 +482,34 @@ void init(Sample_Rate rate)
 		}
 	} while (1);
 
-	(chrono::time_us&)s_last_refresh_time = clock::now_us();
-
-	//gpio::set_pin_mode(46, gpio::Mode::OUTPUT); // Debug output
-	//gpio::write(46, 0);
-	//gpio::set_pin_mode(45, gpio::Mode::OUTPUT); // Debug output
-	//gpio::write(45, 0);
+	(chrono::time_us&)m_last_refresh_time = clock::now_us();
 
 	// start the timer process to read samples
-	board::scheduler::register_callback(&_poll_data);
+	board::scheduler::register_callback(&_poll_data, this);
 }
 
-bool has_data()
+void IMU::get_data(Data& data) const
 {
-	ASSERT(s_is_initialised);
-	return s_buffers[s_buffer_idx].sample_count > 0;
+	ASSERT(m_is_initialised);
+	refresh_data(data);
 }
 
-void get_data(Data& data)
+void IMU::set_gyroscope_bias(math::vec3f const& bias)
 {
-	ASSERT(s_is_initialised);
-	_refresh_data(data);
-}
-
-void set_gyroscope_bias(math::vec3f const& bias)
-{
-	s_gyro_calibration_bias.set(bias * 4096.f);
+	m_gyro_calibration_bias.set(bias * 4096.f);
 	//s_gyro_calibration_scale.set(scale);
 }
-void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
+void IMU::set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
 {
-	s_accel_calibration_bias.set(bias * 4096.f / physics::constants::g);
-	s_accel_calibration_scale.set(scale);
+	m_accel_calibration_bias.set(bias * 4096.f / physics::constants::g);
+	m_accel_calibration_scale.set(scale);
 }
+
+Thermometer const& IMU::get_thermometer() const
+{
+	return m_thermometer;	
 }
+
 }
 
 #endif

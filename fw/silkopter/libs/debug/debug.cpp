@@ -1,7 +1,6 @@
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/UART.h"
-#include "board/scheduler.h"
+#include "board/board.h"
 
 namespace debug
 {

@@ -5,9 +5,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "debug/debug.h"
-#include "board/clock.h"
+#include "board/board.h"
 #include "board/baro.h"
-#include "board/scheduler.h"
 #include "board/boards/avr_i2c.h"
 
 namespace board
@@ -97,7 +96,7 @@ static void _write(uint8_t reg)
 // Read the sensor. This is a state machine
 // We read one time Temperature (state=1) and then 4 times Pressure (states 2-5)
 // temperature does not change so quickly...
-static void _update()
+static void _update(void*)
 {
 	auto now = clock::now_us();
 	// Throttle read rate to 100hz maximum.

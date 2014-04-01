@@ -5,14 +5,14 @@
 #include <avr/interrupt.h>
 #include <qmath.h>
 #include "debug/debug.h"
-#include "board/UART.h"
+#include "board/boards/avr_UART.h"
 
 namespace board
 {
 	
 #define UART_BAUD_SELECT(baud, xtalCpu) (((xtalCpu) + 8UL * (baud)) / (16UL * (baud)) -1UL)
 
-UART* UART::s_uarts[MAX_UARTS] = {0};
+UART* UART::s_uart_ptrs[MAX_UARTS] = {0};
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -31,8 +31,8 @@ UART::UART(uint8_t port,
 	, m_is_open(false)
 {
 	ASSERT(port < MAX_UARTS);
-	ASSERT(!s_uarts[port]);
-	s_uarts[port] = this;
+	ASSERT(!s_uart_ptrs[port]);
+	s_uart_ptrs[port] = this;
 }
 
 void UART::set_blocking(bool blocking)
