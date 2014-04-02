@@ -102,10 +102,11 @@ bool GS::send_data(uint32_t step)
 	case 13:
 	{
 		//if (step - 10 < board::s_imu_count)
-		board::IMU::Data data;
-		board::get_main_imu().get_data(data);
-		m_full_protocol.send_board_gyroscope(data.gyroscope.is_valid, data.gyroscope.value);
-		m_full_protocol.send_board_accelerometer(data.accelerometer.is_valid, data.accelerometer.value);
+		board::IMU::Accelerometer_Data adata;
+		board::IMU::Gyroscope_Data gdata;
+		bool is_valid = board::get_main_imu().get_data(gdata, adata);
+		m_full_protocol.send_board_gyroscope(is_valid, gdata.delta);
+		m_full_protocol.send_board_accelerometer(is_valid, adata.acceleration);
 		return false;
 	}
 	case 18:
@@ -125,18 +126,18 @@ bool GS::send_data(uint32_t step)
 	}
 	case 22:
 	{
-		int16_t data[32];
-		auto count = math::min(board::rc_in::get_channel_count(), uint8_t(32));
-		board::rc_in::get_channels(data, count);
-		m_full_protocol.send_board_rc_in(count, data);
+//		int16_t data[32];
+//		auto count = math::min(board::get_rc_in().get_count(), uint8_t(32));
+// 		board::rc_in::get_channels(data, count);
+// 		m_full_protocol.send_board_rc_in(count, data);
 		return false;
 	}
 	case 24:
 	{
-		int16_t data[32];
-		auto count = math::min(board::pwm_out::get_channel_count(), uint8_t(32));
-		board::pwm_out::get_channels(data, count);
-		m_full_protocol.send_board_pwm_out(count, data);
+//		int16_t data[32];
+//		auto count = math::min(board::get_pwm_out().get_count(), uint8_t(32));
+// 		board::pwm_out::get_channels(data, count);
+// 		m_full_protocol.send_board_pwm_out(count, data);
 		return false;
 	}
 

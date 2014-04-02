@@ -12,7 +12,9 @@
 #include "board/boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
 #include "board/boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
 #include "board/boards/Crius_AIOP2/Sonar_SR04.h"
-#include "board/boards/Crius_AIOP2/Compass.h"
+#include "board/boards/Crius_AIOP2/Compass_HMC5843_i2c.h"
+#include "board/boards/Crius_AIOP2/AIOP_RC_In.h"
+#include "board/boards/Crius_AIOP2/AIOP_PWM_Out.h"
 
 using namespace board;
 
@@ -48,8 +50,10 @@ namespace board
 	static AVR_UART* s_gps_uart = nullptr;
 	
 	static IMU_MPU6000_i2c s_imu;
-// 	static AIOP_RC_In s_rc_in;
-// 	static AIOP_PWM_Out s_pwm_out;
+ 	static AIOP_RC_In s_rc_in;
+ 	static AIOP_PWM_Out s_pwm_out;
+	static Barometer_MS5611_i2c s_barometer;
+	static Compass_HMC5843 s_compass;
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -177,7 +181,7 @@ namespace board
 		}
 		else if (s_init_params.main_thermometer_idx == 1)
 		{
-			return &s_baro.get_thermometer();
+			return &s_barometer.get_thermometer();
 		}
 		else
 		{
@@ -226,6 +230,16 @@ namespace board
 			return nullptr;
 		}
 	}
+	
+	RC_In const& get_rc_in()
+	{
+		return s_rc_in;
+	}
+	PWM_Out& get_pwm_out()
+	{
+		return s_pwm_out;
+	}
+
 }
 
 #endif

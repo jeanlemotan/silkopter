@@ -10,7 +10,8 @@ class AHRS : util::Noncopyable
 {
 	public:
 
-	void process(board::IMU::Data const& data);
+	void process(board::IMU::Gyroscope_Data const& gdata,
+				board::IMU::Accelerometer_Data const& adata);
 		
 	//returns the euler along all three axis
 	math::vec3f const& get_euler() const;

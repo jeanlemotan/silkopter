@@ -8,26 +8,20 @@
 #include "debug/debug.h"
 #include "board/board.h"
 #include "board/boards/avr_gpio.h"
+#include "board/boards/Crius_AIOP2/AIOP_PWM_Out.h"
 
 namespace board
 {
-namespace pwm_out
-{
 
 static const uint8_t MAX_CHANNEL_COUNT = 8;
-static const uint16_t MIN_PULSE_WIDTH = 1800; // 900
-static const uint16_t MAX_PULSE_WIDTH = 4200; // 2100
-static const uint16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
-static bool s_is_initialized = false;
+static const int16_t MIN_PULSE_WIDTH = 1800; // 900
+static const int16_t MAX_PULSE_WIDTH = 4200; // 2100
+static const int16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
+static const float PULSE_RANGE_F = float(PULSE_RANGE);
+static const float PULSE_RANGE_F_INV = 1.f / PULSE_RANGE_F;
 
-void init()
+AIOP_PWM_Out::AIOP_PWM_Out()
 {
-	if (s_is_initialized)
-	{
-		return;
-	}
-	s_is_initialized = true;
-
 	gpio::init();
 	
 	// --------------------- TIMER3: CH_0, CH_1, and CH_2 ---------------------
@@ -72,10 +66,8 @@ void init()
 
 #define timer_period(hz) (2000000UL / (hz))
 
-void set_frequency(uint8_t ch, uint16_t hz)
+void AIOP_PWM_Out::set_frequency(uint8_t ch, uint16_t hz)
 {
-	ASSERT(s_is_initialized);
-	
 	uint16_t icr = timer_period(hz);
 	switch(ch)
 	{
@@ -97,99 +89,45 @@ void set_frequency(uint8_t ch, uint16_t hz)
 		break;
 	}
 }
-void set_frequencies(const uint16_t* hz, uint8_t size)
+void AIOP_PWM_Out::set_frequency_for_all(uint16_t hz)
 {
-	ASSERT(s_is_initialized);
-
-	for (uint8_t i = 0; i < size; i++)
-	{
-		set_frequency(i, hz[i]);
-	}
-}
-void set_frequencies(uint16_t hz)
-{
-	ASSERT(s_is_initialized);
-
 	for (uint8_t i = 0; i < MAX_CHANNEL_COUNT; i++)
 	{
 		set_frequency(i, hz);
 	}
 }
-void set_channel(uint8_t ch, int16_t val) 
+void AIOP_PWM_Out::set_data(uint8_t ch, Data const& data) 
 {
-	ASSERT(s_is_initialized);
-
-	val = math::clamp(val, int16_t(0), int16_t(1024));
-	val = (uint32_t(val) * uint32_t(PULSE_RANGE) >> 10);
-	uint16_t pwm = val + MIN_PULSE_WIDTH;
- 
+	int16_t pulse = static_cast<int16_t>(data.value * PULSE_RANGE_F);
+	pulse = MIN_PULSE_WIDTH + math::clamp(pulse, int16_t(0), PULSE_RANGE);
 	switch(ch)
 	{
-		case 0: OCR3B = pwm; break; //2
-		case 1: OCR3C = pwm; break; //3
-		case 2: OCR3A = pwm; break; //5
-		case 3: OCR4A = pwm; break; //6
-		case 4: OCR4B = pwm; break; //7
-		case 5: OCR4C = pwm; break; //8
-		case 6: OCR1A = pwm; break;// d11
-		case 7: OCR1B = pwm; break;// d12
+		case 0: OCR3B = pulse; break; //2
+		case 1: OCR3C = pulse; break; //3
+		case 2: OCR3A = pulse; break; //5
+		case 3: OCR4A = pulse; break; //6
+		case 4: OCR4B = pulse; break; //7
+		case 5: OCR4C = pulse; break; //8
+		case 6: OCR1A = pulse; break;// d11
+		case 7: OCR1B = pulse; break;// d12
 	}
 } 
-int16_t get_channel(uint8_t ch)
+void AIOP_PWM_Out::set_data_for_all(Data const& data)
 {
-	ASSERT(s_is_initialized);
+	int16_t pulse = static_cast<int16_t>(data.value * PULSE_RANGE_F);
+	pulse = MIN_PULSE_WIDTH + math::clamp(pulse, int16_t(0), PULSE_RANGE);
 
-	int16_t pwm = MIN_PULSE_WIDTH;
-	switch(ch)
-	{
-		case 0: pwm = OCR3B; break; //2
-		case 1: pwm = OCR3C; break; //3
-		case 2: pwm = OCR3A; break; //5
-		case 3: pwm = OCR4A; break; //6
-		case 4: pwm = OCR4B; break; //7
-		case 5: pwm = OCR4C; break; //8
-		case 6: pwm = OCR1A; break;// d11
-		case 7: pwm = OCR1B; break;// d12
-	}
-
-    int16_t pulse = (pwm - MIN_PULSE_WIDTH) >> 1;
-    pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));
-    //dst = pulse * 1024 / 1200
-    //dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
-    return pulse * 27 >> 5;
+	OCR3B = pulse; //2
+	OCR3C = pulse; //3
+	OCR3A = pulse; //5
+	OCR4A = pulse; //6
+	OCR4B = pulse; //7
+	OCR4C = pulse; //8
+	OCR1A = pulse;// d11
+	OCR1B = pulse;// d12
 }
-
-void set_all_channels(int16_t val)
+void AIOP_PWM_Out::set_enabled_for_all(bool enabled)
 {
-	ASSERT(s_is_initialized);
-
-	val = math::clamp(val, int16_t(0), int16_t(1024));
-	val = (uint32_t(val) * uint32_t(PULSE_RANGE) >> 10);
-	uint16_t pwm = val + MIN_PULSE_WIDTH;
-
-	OCR3B = pwm;
-	OCR3C = pwm;
-	OCR3A = pwm;
-	OCR4A = pwm;
-	OCR4B = pwm;
-	OCR4C = pwm;
-	OCR1A = pwm;
-	OCR1B = pwm;
-}
-
-void get_channels(int16_t* dst, uint8_t size)
-{
-	for (uint8_t i = 0; i < size; i++)
-	{
-		*dst++ = get_channel(i);
-	}	
-}
-
-
-void set_all_enabled(bool enabled)
-{
-	ASSERT(s_is_initialized);
-
 	if (enabled)
 	{
 		TCCR3A |= (1<<COM3A1); 
@@ -213,10 +151,8 @@ void set_all_enabled(bool enabled)
 		TCCR1A &= ~(1<<COM1B1);
 	}
 }
-void set_enabled(uint8_t ch, bool enabled)
+void AIOP_PWM_Out::set_enabled(uint8_t ch, bool enabled)
 {
-	ASSERT(s_is_initialized);
-
 	if (enabled)
 	{
 		switch (ch)
@@ -247,12 +183,11 @@ void set_enabled(uint8_t ch, bool enabled)
 	}
 }
 
-uint8_t get_channel_count()
+uint8_t AIOP_PWM_Out::get_count() const
 {
 	return MAX_CHANNEL_COUNT;
 }
 
-}
 }
 
 #endif

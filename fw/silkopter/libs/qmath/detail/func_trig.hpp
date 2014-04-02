@@ -163,7 +163,8 @@ namespace detail
 		uint32_t v = (uint32_t(t1) << 7) + ((uint32_t(t2 - t1) * it) >> 1);
 
 		uint32_t f = 0x3F800000 | v;
-		return *reinterpret_cast<float*>(&f); //1 .. 2
+		float* __restrict ret = reinterpret_cast<float*>(&f); //1 .. 2
+		return *ret;
 	}
 	inline float fast_sin(float x)
 	{

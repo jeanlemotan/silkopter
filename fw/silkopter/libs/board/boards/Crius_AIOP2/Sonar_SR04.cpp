@@ -4,9 +4,10 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <qmath.h>
 #include "debug/debug.h"
 #include "board/board.h"
-#include <qmath.h>
+#include "board/boards/Crius_AIOP2/Sonar_SR04.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -14,21 +15,7 @@ static board::Sonar_SR04* s_instance = nullptr;
 
 ISR(PCINT0_vect)
 {
-	ASSERT(s_instance);
-	
-	//TRACE();
-	if (s_instance->m_state == 0)
-	{
-		if (PINB & 0B00010000)
-		{
-			s_instance->m_start_time.ticks = clock::now_us().ticks; // We got 1 on Echo pin, remeber current counter value
-		}
-		else
-		{
-			s_instance->m_echo_delay.count = (clock::now_us() - m_start_time).count; // We got 0 on Echo pin, calculate impulse length in counter ticks
-			s_instance->m_state = 1; // Set "Measurement finished" flag
-		}
-	}
+	board::Sonar_SR04::trigger();
 }
 
 namespace board
@@ -39,7 +26,7 @@ static const chrono::micros k_echo_max_delay(20000); //20ms max
 static const float k_max_distance = 3.2f;
 
 
-void Sonar_SR04::_sonar_trigger(void* ptr)
+void Sonar_SR04::measure(void* ptr)
 {
 	auto* sonar = reinterpret_cast<board::Sonar_SR04*>(ptr);
 	ASSERT(sonar);
@@ -63,10 +50,27 @@ void Sonar_SR04::_sonar_trigger(void* ptr)
 	}
 }
 
+void Sonar_SR04::trigger()
+{
+	ASSERT(s_instance);
+	if (s_instance->m_state == 0)
+	{
+		if (PINB & 0B00010000)
+		{
+			s_instance->m_start_time.ticks = clock::now_us().ticks; // We got 1 on Echo pin, remeber current counter value
+		}
+		else
+		{
+			s_instance->m_echo_delay.count = (clock::now_us() - s_instance->m_start_time).count; // We got 0 on Echo pin, calculate impulse length in counter ticks
+			s_instance->m_state = 1; // Set "Measurement finished" flag
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 Sonar_SR04::Sonar_SR04()
-	, m_state(0)
+	: m_state(0)
 	, m_distance(0)
 {
 	ASSERT(!s_instance);
@@ -84,13 +88,13 @@ Sonar_SR04::Sonar_SR04()
 	PCMSK0 |= (1 << PCINT4); // Enable interrup o sonar ECHO pin: B4 - D10
 	PCICR |= (1 << PCIE0); // PCINT0 Interrupt enable for PORTB
 	
-	scheduler::register_callback(_sonar_trigger, this);
+	scheduler::register_callback(measure, this);
 }
 
 bool Sonar_SR04::get_data(Data& data) const
 {
 	bool is_valid = m_distance < k_max_distance;
-	data.distance = data.is_valid ? m_distance : 0.f;
+	data.distance = is_valid ? m_distance : 0.f;
 	return is_valid;
 }
 

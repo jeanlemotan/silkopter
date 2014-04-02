@@ -1,6 +1,7 @@
 #pragma once
 
 #include "board/Barometer.h"
+#include "board/boards/Crius_AIOP2/Thermometer_Data.h"
 
 namespace board
 {
@@ -27,8 +28,8 @@ private:
 	//mutable int32_t			m_raw_pressure;
 	//mutable int32_t			m_raw_temperature;
 	// Internal calibration registers
-	float					m_C1f, m_C2f, m_C3f, m_C4f, m_C5f, m_C6f;
-	mutable float			m_D1, m_D2;
+	float					m_c1f, m_c2f, m_c3f, m_c4f, m_c5f, m_c6f;
+	mutable float			m_d1, m_d2;
 
 	struct Buffer
 	{

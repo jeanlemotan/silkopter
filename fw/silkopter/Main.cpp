@@ -26,8 +26,6 @@ int main(void)
 	//board::s_uarts[0].begin(115200);
 	debug::init(&board::get_gs_full_uart());
 	
-	board::pwm_out::set_all_enabled(true);
-	
 	util::FString<128> str;
 
 	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);

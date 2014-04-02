@@ -199,7 +199,8 @@ private:
 
 	void compute_linear_motion();
 	
-	board::IMU::Data m_imu_data;
+	board::IMU::Accelerometer_Data m_accelerometer_data;
+	board::IMU::Gyroscope_Data m_gyroscope_data;
 	//board::gps::Data m_gps_data;
 	//board::sonar::Data m_sonar_data;
 	//board::baro::Data m_baro_data;

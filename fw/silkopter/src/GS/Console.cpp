@@ -16,7 +16,8 @@ bool Console::get_command(String& command) const
 	bool eoc = false; //end of command
 	while (m_uart.has_data())
 	{
-		auto ch = m_uart.read_byte();
+		uint8_t ch;
+		m_uart.read(ch);
 		if (ch == '\n')
 		{
 			eoc = true;

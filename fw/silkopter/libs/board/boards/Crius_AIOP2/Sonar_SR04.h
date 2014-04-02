@@ -12,8 +12,10 @@ public:
 	
 	bool get_data(Data& data) const;
 	
+	//called by the ISR
+	static void trigger();
 private:
-	static void _sonar_trigger(void* ptr);
+	static void measure(void* ptr);
 	
 	chrono::time_us m_last_trigger;
 

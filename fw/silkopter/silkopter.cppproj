@@ -314,16 +314,22 @@
     <Compile Include="libs\board\boards\Barometer_None.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\AIOP_PWM_Out.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\board\boards\Crius_AIOP2\AIOP_RC_In.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\Barometer_MS5611_i2c.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\Barometer_MS5611_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\Compass.cpp">
+    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\Compass.h">
+    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_i2c.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\AIOP_Board.cpp">

@@ -65,16 +65,16 @@ Barometer_MS5611_i2c::Barometer_MS5611_i2c()
 	: m_is_healthy(false)
 	, m_temperature(0)
 	, m_pressure(0)
-	, m_raw_pressure(0)
-	, m_raw_temperature(0)
-	, m_C1f(0)
-	, m_C2f(0)
-	, m_C3f(0)
-	, m_C4f(0)
-	, m_C5f(0)
-	, m_C6f(0)
-	, m_D1(0)
-	, m_D2(0)
+// 	, m_raw_pressure(0)
+// 	, m_raw_temperature(0)
+	, m_c1f(0)
+	, m_c2f(0)
+	, m_c3f(0)
+	, m_c4f(0)
+	, m_c5f(0)
+	, m_c6f(0)
+	, m_d1(0)
+	, m_d2(0)
 	, m_stage(0)
 	, m_buffer_idx(0)
 {
@@ -180,12 +180,12 @@ bool Barometer_MS5611_i2c::init_hardware()
 	uint32_t C4 = _read_uint16(CMD_MS5611_PROM_C4);
 	uint32_t C5 = _read_uint16(CMD_MS5611_PROM_C5);
 	uint32_t C6 = _read_uint16(CMD_MS5611_PROM_C6);
-	m_C1f = C1;
-	m_C2f = C2;
-	m_C3f = C3;
-	m_C4f = C4;
-	m_C5f = (C5 << 8);
-	m_C6f = C6;
+	m_c1f = C1;
+	m_c2f = C2;
+	m_c3f = C3;
+	m_c4f = C4;
+	m_c5f = (C5 << 8);
+	m_c6f = C6;
 //	PRINT(":{0} {1} {2} {3} {4} {5}:", C1, C2, C3, C4, C5, C6);
 
 	//Send a command to read Temp first
@@ -228,10 +228,10 @@ void Barometer_MS5611_i2c::calculate() const
 	// as this is much faster on an AVR2560, and also allows
 	// us to take advantage of the averaging of D1 and D1 over
 	// multiple samples, giving us more precision
-	float dT = m_D2 - m_C5f;
-	float TEMP = (dT * m_C6f)/8388608.f;
-	float OFF = m_C2f * 65536.0f + (m_C4f * dT) / 128.f;
-	float SENS = m_C1f * 32768.0f + (m_C3f * dT) / 256.f;
+	float dT = m_d2 - m_c5f;
+	float TEMP = (dT * m_c6f)/8388608.f;
+	float OFF = m_c2f * 65536.0f + (m_c4f * dT) / 128.f;
+	float SENS = m_c1f * 32768.0f + (m_c3f * dT) / 256.f;
 	//PRINT(":{0} {1} {2} {3}:", dT, TEMP, OFF, SENS);
 
 	if (TEMP < 0)
@@ -246,7 +246,7 @@ void Barometer_MS5611_i2c::calculate() const
 		SENS = SENS - SENS2;
 	}
 
-	float P = (m_D1*SENS/2097152.f - OFF)/32768.f;
+	float P = (m_d1*SENS/2097152.f - OFF)/32768.f;
 	m_temperature = (TEMP + 2000.f) * 0.01f;
 	m_pressure = P;
 }
@@ -262,33 +262,36 @@ bool Barometer_MS5611_i2c::get_data(Data& data) const
 		m_buffer_idx = m_buffer_idx ^ uint8_t(1); //now the interrupt will write in the other buffer.
 		auto& buffer = m_buffers[last_buffer_idx];
 
-		uint32_t sD1 = buffer.d1; 
+		uint32_t d1 = buffer.d1; 
 		buffer.d1 = 0;
-		uint32_t sD2 = buffer.d2; 
+		
+		uint32_t d2 = buffer.d2; 
 		buffer.d2 = 0;
+		
 		uint8_t d1count = buffer.d1_count; 
 		buffer.d1_count = 0;
+		
 		uint8_t d2count = buffer.d2_count; 
 		buffer.d2_count = 0;
+		
 		buffer.has_data = false;
 
+		bool calc = false;
 		if (d1count != 0)
 		{
-			m_D1 = ((float)sD1) / d1count;
-			m_raw_pressure = m_D1;
+			m_d1 = ((float)d1) / d1count;
+			calc = true;
 		}
 		if (d2count != 0)
 		{
-			m_D2 = ((float)sD2) / d2count;
-			m_raw_temperature = m_D2;
+			m_d2 = ((float)d2) / d2count;
+			calc = true;
 		}
-		//_pressure_samples = d1count;
+		if (calc)
+		{
+			calculate();
+		}
 	}
-	calculate();
-// 	if (updated)
-// 	{
-// 		_last_update = hal.scheduler->millis();
-// 	}
 
 	data.pressure = m_pressure;
 	

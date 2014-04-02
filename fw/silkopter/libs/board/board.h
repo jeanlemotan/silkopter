@@ -4,17 +4,15 @@
 #include "util/chrono.h"
 
 
-#if BOARD_TYPE == CRIUS_AIOP_2
-#   include "boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
-#   include "boards/Crius_AIOP2/Thermometer_Data.h"
-#   include "boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
-#   include "boards/Crius_AIOP2/Compass.h"
-#   include "boards/Crius_AIOP2/Sonar_SR04.h"
-#   include "boards/AVR_UART.h"
-#   include "boards/GPS.h"
-#else
-#	error Define for your board
-#endif
+#include "board/IMU.h"
+#include "board/Thermometer.h"
+#include "board/Barometer.h"
+#include "board/Compass.h"
+#include "board/Sonar.h"
+#include "board/RC_In.h"
+#include "board/PWM_Out.h"
+#include "board/UART.h"
+#include "board/GPS.h"
 
 
 namespace board
@@ -139,6 +137,10 @@ namespace board
 	extern uint8_t get_compass_count();
 	extern Compass const& get_compass(uint8_t idx);
 	extern Compass const* get_main_compass();
+	
+	//IN/OUT
+	extern RC_In const& get_rc_in();
+	extern PWM_Out& get_pwm_out();
 
 }
 

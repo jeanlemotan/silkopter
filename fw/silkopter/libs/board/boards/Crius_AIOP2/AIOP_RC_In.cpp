@@ -8,10 +8,9 @@
 #include "debug/debug.h"
 #include "board/board.h"
 #include "util/Scope_Sync.h"
+#include "board/boards/Crius_AIOP2/AIOP_RC_In.h"
 
 namespace board
-{
-namespace rc_in
 {
 
 // PPM_SUM filtering
@@ -30,23 +29,19 @@ namespace rc_in
 #	error Wrong AVARAGE_FACTOR selected. Minimum value 1
 #endif
 
-static const uint8_t MAX_CHANNEL_COUNT = 8;
 static const uint8_t MIN_CHANNEL_COUNT = 5;     // for ppm sum we allow less than 8 channels to make up a valid packet
-
 static const int16_t MIN_PULSE_WIDTH = 1800; // 900
 static const int16_t MAX_PULSE_WIDTH = 4200; // 2100
 static const int16_t MIN_PPM_SYNCH_WIDTH = 5000; //2500
 static const int16_t PULSE_RANGE = (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH);
+static const float PULSE_RANGE_INV = 1.f / PULSE_RANGE;
 
-/* private variables to communicate with input capture isr */
-static volatile int16_t s_pulses[MAX_CHANNEL_COUNT] = {0};  
-static volatile int16_t s_raw_data[MAX_CHANNEL_COUNT]; // Default RC values
-static volatile uint16_t s_edge_time[8];
-	
+volatile int16_t AIOP_RC_In::s_pulses[MAX_CHANNEL_COUNT] = {0};
+volatile int16_t AIOP_RC_In::s_raw_data[MAX_CHANNEL_COUNT] = {0};
+volatile uint16_t AIOP_RC_In::s_edge_time[MAX_CHANNEL_COUNT] = {0};
+
 typedef void (*ISR_Func_Ptr)();
 static volatile ISR_Func_Ptr s_isr_function = 0; 
-
-static bool s_is_initialized = false;
 
 ISR(PCINT2_vect) 
 {
@@ -90,7 +85,7 @@ ISR(PCINT2_vect)
 // }
 
 /* ISR for PPM SUM decoder on A8 pin */
-static void A8_ppm_isr()
+void AIOP_RC_In::A8_ppm_isr()
 { 
 	static uint8_t s_last_pin = 0;
 	static uint8_t s_crt_channel = 0;
@@ -230,14 +225,8 @@ static void A8_ppm_isr()
 // 	}
 // }
 
-void init() 
+AIOP_RC_In::AIOP_RC_In() 
 {
-	if (s_is_initialized)
-	{
-		return;
-	}
-	s_is_initialized = true;
-	
 	DDRK = 0;  // Set PORTK as a digital port ([A8-A15] are consired as digital PINs and not analogical)
 //	hal.gpio->pinMode(46, GPIO_OUTPUT); // ICP5 pin (PL1) (PPM input) CRIUS v2
 //	hal.gpio->write(46,0);
@@ -269,62 +258,32 @@ void init()
 // #endif
 }
 
-int16_t get_channel(uint8_t ch)
+bool AIOP_RC_In::get_data(uint8_t ch, Data& data) const
 {
-	ASSERT(s_is_initialized);
-
-    /* constrain ch */
     if (ch >= MAX_CHANNEL_COUNT) 
 	{
-		return 0;
+		return false;
 	}
     // grab channel from isr's memory in critical section
 	int16_t pulse;
 	{
 		util::Scope_Sync ss;
-		//now pulses is between 0 and 1200
-		pulse = (s_pulses[ch] - MIN_PULSE_WIDTH) >> 1;
+		//now pulses is between 0 and 2400
+		pulse = s_pulses[ch] - MIN_PULSE_WIDTH;
 	}
 	
-    pulse = math::clamp(pulse, int16_t(0), int16_t(PULSE_RANGE >> 1));
-	//dst = pulse * 1024 / 1200
-	//dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
-	return pulse * 27 >> 5;
+    pulse = math::clamp(pulse, int16_t(0), PULSE_RANGE);
+	data.value = float(pulse) * PULSE_RANGE_INV;
+	return true;
 }
 
-void get_channels(int16_t* dst, uint8_t size)
-{
-	ASSERT(s_is_initialized);
-
-	size = math::min(size, MAX_CHANNEL_COUNT);
-
-	int16_t pulses[MAX_CHANNEL_COUNT];
-	{
-		util::Scope_Sync ss;
-		for (uint8_t i = 0; i < size; i++)
-		{
-			//now pulses is between 0 and 1200
-			pulses[i] = (s_pulses[i] - MIN_PULSE_WIDTH) >> 1;
-		}
-	}
-
-    for (uint8_t i = 0; i < size; i++) 
-	{
-        auto pulse = math::clamp(pulses[i], int16_t(0), int16_t(PULSE_RANGE >> 1));
-		
-		//dst = pulse * 1024 / 1200
-		//dst = pulse * 27 / 32 -- like this I avoid the division and the intrmediaries fit in int16_t
-		dst[i] = pulse * 27 >> 5;
-    }
-}
-
-uint8_t get_channel_count()
+uint8_t AIOP_RC_In::get_count() const
 {
 	return MAX_CHANNEL_COUNT;
 }
 
 
-}
+
 }
 
 #endif

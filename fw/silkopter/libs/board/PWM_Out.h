@@ -17,7 +17,6 @@ namespace board
 		virtual void set_data(uint8_t channel, Data const& data) = 0;
 		virtual void set_data_for_all(Data const& data) = 0;
 		virtual void set_enabled(uint8_t channel, bool enabled) = 0;
-		virtual bool is_enabled(uint8_t channel) const = 0;
 		virtual void set_enabled_for_all(bool enabled) = 0;
 		
 		//sets the frequency of a channel in hertz

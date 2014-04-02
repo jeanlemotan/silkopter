@@ -61,14 +61,14 @@ void UAV::process()
 	read_baro_data();
 	read_compass_data();
 
-	m_status.attitude.process(m_imu_data);
+	m_status.attitude.process(m_gyroscope_data, m_accelerometer_data);
 	
 	compute_linear_motion();
 }
 
 void UAV::read_imu_data()
 {
-	board::get_main_imu().get_data(m_imu_data);
+	board::get_main_imu().get_data(m_gyroscope_data, m_accelerometer_data);
 }
 void UAV::read_sonar_data()
 {
@@ -89,13 +89,13 @@ void UAV::read_compass_data()
 
 void UAV::compute_linear_motion()
 {
-	math::vec3f gravity = math::transform(m_status.attitude.get_world_to_local_rotation(), math::vec3f(0, 0, 1));
-	m_status.acceleration = m_imu_data.accelerometer.value - gravity * physics::constants::g;
-	m_status.velocity += m_status.acceleration * m_dts;
-	m_status.velocity = math::lerp(m_status.velocity, math::vec3f::zero, 0.01f);
-	
-	m_status.position += m_status.velocity * m_dts;
-	m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
+//	math::vec3f gravity = math::transform(m_status.attitude.get_world_to_local_rotation(), math::vec3f(0, 0, 1));
+// 	m_status.acceleration = m_imu_data.accelerometer.value - gravity * physics::constants::g;
+// 	m_status.velocity += m_status.acceleration * m_dts;
+// 	m_status.velocity = math::lerp(m_status.velocity, math::vec3f::zero, 0.01f);
+// 	
+// 	m_status.position += m_status.velocity * m_dts;
+// 	m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
 }
 
 	
