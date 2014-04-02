@@ -16,6 +16,16 @@ namespace storage
 	
 	//////////////////////////////////////////////////////////////////////////
 	
+	
+	static void _set_count(size_t count)
+	{
+		s_count = count;
+		auto& eeprom = board::get_eeprom();
+		board::EEPROM::offset_type offset = 0;
+		offset += sizeof(crc_t);
+		eeprom.write(count, offset);
+	}
+	
 	static crc_t _compute_crc()
 	{
 		crc_t crc = 0;
@@ -41,7 +51,7 @@ namespace storage
 		//fast case - insert at the end
 		if (idx >= s_count)
 		{
-			s_count++;
+			_set_count(s_count + 1);
 			return;
 		}
 		
@@ -50,7 +60,7 @@ namespace storage
 		board::EEPROM::offset_type start_offset = s_start_item_offset + idx * ITEM_SIZE;
 		board::EEPROM::offset_type end_offset = s_start_item_offset + s_count * ITEM_SIZE;
 		
-		static const size_t buffer_size = 128;
+		const size_t buffer_size = 128;
 		uint8_t buffer[buffer_size];
 		
 		while (end_offset > start_offset)
@@ -60,7 +70,7 @@ namespace storage
 			eeprom.read(buffer, sz, end_offset);
 			eeprom.write(buffer, sz, end_offset + ITEM_SIZE);
 		}
-		s_count++;
+		_set_count(s_count + 1);
 	}
 	
 	static void _remove(size_t idx)
@@ -73,7 +83,7 @@ namespace storage
 		//fast case - insert at the end
 		if (idx >= s_count)
 		{
-			s_count--;
+			_set_count(s_count - 1);
 			return;
 		}
 		
@@ -92,7 +102,7 @@ namespace storage
 			eeprom.write(buffer, sz, start_offset - ITEM_SIZE);
 			start_offset += sz;
 		}
-		s_count--;
+		_set_count(s_count + 1);
 	}
 	
 	static bool _find_idx_by_id(id_t id, size_t& last_idx, id_t& last_id)
@@ -112,8 +122,8 @@ namespace storage
 		{
 			return true;
 		}
-		//only one element?
-		if (start == end)
+		//only one element or before the first?
+		if (start == end || id < last_id)
 		{
 			return false;
 		}
@@ -125,11 +135,16 @@ namespace storage
 		{
 			return true;
 		}
+		//after the end
+		if (id > last_id)
+		{
+			return false;
+		}
 			
 		//binary search the correct place
 		while (end - start >= 2)
 		{
-			last_idx = (end - start) >> 1;
+			last_idx = (end + start) >> 1;
 			last_id = read_id(last_idx);
 			if (id < last_id)
 			{
@@ -154,6 +169,31 @@ namespace storage
 		ASSERT(item_idx < s_max_count);
 		board::get_eeprom().write(id, s_start_item_offset + item_idx * ITEM_SIZE);
 	}
+	
+	static bool _check_integrity()
+	{
+		if (s_count == 0)
+		{
+			return true;
+		}
+		
+		auto& eeprom = board::get_eeprom();
+		auto offset = s_start_item_offset;
+		id_t last_id = 0;
+		eeprom.read(last_id, offset);
+		offset += ITEM_SIZE;
+		for (size_t i = 1; i < s_count; i++)
+		{
+			id_t id;
+			eeprom.read(id, offset);
+			offset += ITEM_SIZE;
+			if (id < last_id)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -166,6 +206,9 @@ namespace storage
 		
 		eeprom.read_advance(s_crc, s_start_item_offset);
 		eeprom.read_advance(s_count, s_start_item_offset);
+		PRINT("\nStorage: crc {0}, count {1} / {2}", s_crc, s_count, s_max_count);
+// 		auto x = s_count;
+// 		auto y = s_max_count;
 		if (s_count > s_max_count)
 		{
 			PRINT("\nStorage corrupted. Formatting...");
@@ -174,8 +217,12 @@ namespace storage
 		auto crc = _compute_crc();
 		if (crc != s_crc)
 		{
-			PRINT("\nStorage corrupted. Formatting...");
-			remove_all();
+			PRINT("\nCrc doesn't match. Checking integrity...");
+			if (!_check_integrity())
+			{
+				PRINT("\nStorage corrupted. Formatting...");
+				remove_all();
+			}
 		}
 	}
 
@@ -213,12 +260,6 @@ namespace storage
 	//this will recompute the crc - so it's very slow
 	void write_data(size_t item_idx, data_t data)
 	{
-		write_data_batch(item_idx, data);
-		refresh_crc();
-	}
-	
-	void write_data_batch(size_t item_idx, data_t data)
-	{
 		ASSERT(item_idx < s_max_count);
 		board::get_eeprom().write(data, s_start_item_offset + item_idx * ITEM_SIZE + sizeof(id_t));
 	}
@@ -240,20 +281,14 @@ namespace storage
 		return false;
 	}
 
-	size_t add(id_t id, data_t data)
-	{
-		auto idx = add_batch(id, data);
-		refresh_crc();
-		return idx;
-	}
-	size_t add_batch(id_t id, data_t data)
+	size_t add_data(id_t id, data_t data)
 	{
 		//fast case - empty
 		if (s_count == 0)
 		{
 			_insert(0);	
 			_write_id(0, id);
-			write_data_batch(0, data);
+			write_data(0, data);
 			return 0;
 		}
 		
@@ -263,7 +298,7 @@ namespace storage
 		
 		if (found)
 		{
-			write_data_batch(last_idx, data);
+			write_data(last_idx, data);
 			return last_idx;
 		}
 		
@@ -271,14 +306,14 @@ namespace storage
 		{
 			_insert(last_idx);
 			_write_id(last_idx, id);
-			write_data_batch(last_idx, data);
+			write_data(last_idx, data);
 			return last_idx;
 		}
 		if (id > last_id)
 		{
 			_insert(last_idx + 1);
 			_write_id(last_idx + 1, id);
-			write_data_batch(last_idx + 1, data);
+			write_data(last_idx + 1, data);
 			return last_idx + 1;
 		}
 		ASSERT(0);
@@ -287,13 +322,15 @@ namespace storage
 
 	void remove(size_t item_idx)
 	{
-		remove_batch(item_idx);
-		refresh_crc();
-	}
-
-	void remove_batch(size_t item_idx)
-	{
 		_remove(item_idx);
+	}
+	void remove_by_id(id_t id)
+	{
+		auto idx = find_idx_by_id(id);
+		if (idx != npos)
+		{
+			_remove(idx);
+		}
 	}
 
 	//clears all the items
@@ -313,6 +350,5 @@ namespace storage
 		bool found = _find_idx_by_id(id, last_idx, last_id);
 		return found ? last_idx : npos;
 	}
-
 }
 }

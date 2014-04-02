@@ -30,9 +30,9 @@ void AVR_EEPROM::write(uint8_t const* src, size_type size, offset_type offset)
 {
 	eeprom_update_block(src, (uint8_t*)offset, size);
 	
-	uint8_t buf[128];
-	eeprom_read_block(buf, (uint8_t*)offset, size);
-	buf[0] = buf[0];
+// 	uint8_t buf[128];
+// 	eeprom_read_block(buf, (uint8_t*)offset, size);
+// 	buf[0] = buf[0];
 }
 
 }
