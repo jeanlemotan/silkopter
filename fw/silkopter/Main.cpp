@@ -9,6 +9,7 @@
 #include <util/format.h>
 #include "GS/GS.h"
 #include "util/storage.h"
+#include "util/murmurhash.h"
 
 __extension__ typedef int __guard __attribute__((mode (__DI__))); 
 
@@ -26,19 +27,19 @@ int main(void)
 	
 	util::storage::init();
 	auto idx = util::storage::find_idx_by_id(12);
-	util::storage::add(12, 73);
-	idx = util::storage::find_idx_by_id(12);
-	auto data = util::storage::read_data(idx);
-	auto id = util::storage::read_id(idx);
-	util::storage::add(14, 74);
-	idx = util::storage::find_idx_by_id(14);
-	data = util::storage::read_data(idx);
-	id = util::storage::read_id(idx);
-	util::storage::add(10, 75);
-	idx = util::storage::find_idx_by_id(10);
-	data = util::storage::read_data(idx);
-	id = util::storage::read_id(idx);
-	
+
+	util::storage::add(static_murmurhash("name"), 5);
+	auto data = util::storage::read_by_id(static_murmurhash("name"), 7);
+
+	for (int i = 0; i < 300; i++)
+	{
+		util::storage::add(i, 120);
+	}
+
+	util::storage::add(static_murmurhash("name2"), 122);
+	data = util::storage::read_by_id(static_murmurhash("name2"), 123);
+
+	data = util::storage::read_by_id(static_murmurhash("name3"), 999);
 	
 	//board::s_uarts[0].begin(115200);
 	debug::init(&board::get_gs_full_uart());
