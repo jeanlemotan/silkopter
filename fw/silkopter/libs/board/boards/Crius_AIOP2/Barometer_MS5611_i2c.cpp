@@ -157,6 +157,9 @@ void Barometer_MS5611_i2c::poll_data(void* ptr)
 
 bool Barometer_MS5611_i2c::init_hardware()
 {
+#ifdef SIMULATOR
+	return true;
+#endif
 //	TRACE();
 	int lock_tries = 1000;
 	while (!i2c::lock() && lock_tries >= 0)

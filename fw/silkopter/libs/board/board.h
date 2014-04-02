@@ -13,6 +13,7 @@
 #include "board/PWM_Out.h"
 #include "board/UART.h"
 #include "board/GPS.h"
+#include "board/EEPROM.h"
 
 
 namespace board
@@ -141,6 +142,9 @@ namespace board
 	//IN/OUT
 	extern RC_In const& get_rc_in();
 	extern PWM_Out& get_pwm_out();
+	
+	//eeprom
+	extern EEPROM& get_eeprom();
 
 }
 

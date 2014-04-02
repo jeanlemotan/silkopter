@@ -54,12 +54,16 @@ namespace board
  	static AIOP_PWM_Out s_pwm_out;
 	static Barometer_MS5611_i2c s_barometer;
 	static Compass_HMC5843 s_compass;
+	static AVR_EEPROM s_eeprom;
 
 	//////////////////////////////////////////////////////////////////////////
 
 	void init(Init_Params const& params)
 	{
 		s_init_params = params;
+		
+		clock::init();
+		scheduler::init(s_init_params.scheduler_frequency);
 		
 		if (s_init_params.gs_full_uart_idx >= UART_COUNT)
 		{
@@ -238,6 +242,11 @@ namespace board
 	PWM_Out& get_pwm_out()
 	{
 		return s_pwm_out;
+	}
+
+	EEPROM& get_eeprom()
+	{
+		return s_eeprom;
 	}
 
 }
