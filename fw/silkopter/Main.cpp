@@ -15,7 +15,7 @@ extern "C" int __cxa_guard_acquire(__guard *g) {return !*(char *)(g);};
 extern "C" void __cxa_guard_release (__guard *g) {*(char *)g = 1;};
 extern "C" void __cxa_guard_abort (__guard *) {};
 extern "C" void __cxa_pure_virtual() { while (1); }
-
+	
 int main(void)
 {
 	sei();
@@ -26,7 +26,7 @@ int main(void)
 	//board::s_uarts[0].begin(115200);
 	debug::init(&board::get_gs_full_uart());
 	
-	util::FString<128> str;
+	util::String<128> str;
 
 	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);
 	silk::GS gs(uav, board::get_gs_full_uart());

@@ -7,7 +7,7 @@ namespace util
 
 //fixed size string
 template<size_t SIZE>
-class FString
+class String
 {
 public:
 
@@ -16,16 +16,16 @@ public:
 	enum { MAX_SIZE = SIZE };
 
 public:
-	FString();
-	FString(FString<SIZE> const& str);
-	FString(FString<SIZE> const& str, size_t offset, size_t count);
-	FString(char const* from, char const* to);
-	FString(char const* str);
-	FString(char const* str, size_t count);
-	explicit FString(std::string const& str);
+	String();
+	String(String<SIZE> const& str);
+	String(String<SIZE> const& str, size_t offset, size_t count);
+	String(char const* from, char const* to);
+	String(char const* str);
+	String(char const* str, size_t count);
+	explicit String(std::string const& str);
 
-	auto operator==(FString<SIZE> const& str) const -> bool;
-	auto operator!=(FString<SIZE> const& str) const -> bool;
+	auto operator==(String<SIZE> const& str) const -> bool;
+	auto operator!=(String<SIZE> const& str) const -> bool;
 
 	auto operator==(std::string const& str) const -> bool;
 	auto operator!=(std::string const& str) const -> bool;
@@ -33,18 +33,18 @@ public:
 	auto operator==(char const* str) const -> bool;
 	auto operator!=(char const* str) const -> bool;
 
-	auto operator<(FString<SIZE> const& str) const -> bool;
+	auto operator<(String<SIZE> const& str) const -> bool;
 
-	auto operator=(FString<SIZE> const& str) -> FString<SIZE>&;
-	auto operator=(char const* str) -> FString<SIZE>&;
-	auto operator=(std::string const& str) -> FString<SIZE>&;
+	auto operator=(String<SIZE> const& str) -> String<SIZE>&;
+	auto operator=(char const* str) -> String<SIZE>&;
+	auto operator=(std::string const& str) -> String<SIZE>&;
 
-	auto operator+(FString<SIZE> const& str) const -> FString<SIZE>;
-	auto operator+=(FString<SIZE> const& str) -> FString<SIZE>&;
-	auto operator+(char const* cstr) const -> FString<SIZE>;
-	auto operator+=(char const* cstr) -> FString<SIZE>&;
-	auto operator+(char ch) const -> FString<SIZE>;
-	auto operator+=(char ch) -> FString<SIZE>&;
+	auto operator+(String<SIZE> const& str) const -> String<SIZE>;
+	auto operator+=(String<SIZE> const& str) -> String<SIZE>&;
+	auto operator+(char const* cstr) const -> String<SIZE>;
+	auto operator+=(char const* cstr) -> String<SIZE>&;
+	auto operator+(char ch) const -> String<SIZE>;
+	auto operator+=(char ch) -> String<SIZE>&;
 
 	auto operator[](size_t idx) const -> char;
 	auto operator[](size_t idx) -> char&;
@@ -59,34 +59,34 @@ public:
 	void reserve(size_t size);
 	void resize(size_t size);
 
-	auto substr(size_t off = 0, size_t count = npos) const -> FString<SIZE>;
+	auto substr(size_t off = 0, size_t count = npos) const -> String<SIZE>;
 
 	void push_back(char ch);
 
 	void append(char ch);
 	void append(char const* cstr);
 	void append(char const* from, char const* to);
-	void append(FString<SIZE> const& str);
+	void append(String<SIZE> const& str);
 
 	auto find(char ch, size_t off = 0) const -> size_t;
 	auto find(char const* cstr, size_t off = 0) const -> size_t;
-	auto find(FString<SIZE> const& str, size_t off = 0) const -> size_t;
+	auto find(String<SIZE> const& str, size_t off = 0) const -> size_t;
 
 	auto find_first_of(char ch, size_t off = 0) const -> size_t;
 	auto find_first_of(char const* cstr, size_t off = 0) const -> size_t;
-	auto find_first_of(FString<SIZE> const& str, size_t off = 0) const -> size_t;
+	auto find_first_of(String<SIZE> const& str, size_t off = 0) const -> size_t;
 
 	auto find_first_not_of(char ch, size_t off = 0) const -> size_t;
 	auto find_first_not_of(char const* cstr, size_t off = 0) const -> size_t;
-	auto find_first_not_of(FString<SIZE> const& str, size_t off = 0) const -> size_t;
+	auto find_first_not_of(String<SIZE> const& str, size_t off = 0) const -> size_t;
 
 	auto find_last_of(char ch, size_t off = npos) const -> size_t;
 	auto find_last_of(char const* cstr, size_t off = npos) const -> size_t;
-	auto find_last_of(FString<SIZE> const& str, size_t off = npos) const -> size_t;
+	auto find_last_of(String<SIZE> const& str, size_t off = npos) const -> size_t;
 
 	auto find_last_not_of(char ch, size_t off = npos) const -> size_t;
 	auto find_last_not_of(char const* cstr, size_t off = npos) const -> size_t;
-	auto find_last_not_of(FString<SIZE> const& str, size_t off = npos) const -> size_t;
+	auto find_last_not_of(String<SIZE> const& str, size_t off = npos) const -> size_t;
 
 	auto begin() const -> const_iterator;
 	auto end() const -> const_iterator;
@@ -104,21 +104,21 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 
 template<size_t SIZE>
-inline FString<SIZE>::FString()
+inline String<SIZE>::String()
 	: m_size(0)
 {
 	m_data[0] = 0;
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(FString<SIZE> const& str)
+inline String<SIZE>::String(String<SIZE> const& str)
 	: m_size(str.m_size)
 {
 	memcpy(m_data, str.m_data, m_size + 1); //copy ending zero as well
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(FString<SIZE> const& str, size_t offset, size_t count)
+inline String<SIZE>::String(String<SIZE> const& str, size_t offset, size_t count)
 {
 	offset = std::min(offset, str.size());
 	count = std::min(count, str.size() - offset);
@@ -127,7 +127,7 @@ inline FString<SIZE>::FString(FString<SIZE> const& str, size_t offset, size_t co
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(char const* str)
+inline String<SIZE>::String(char const* str)
 {
 	char const* ptr = str ? str : "";
 	m_size = std::min(strlen(ptr), SIZE);
@@ -135,7 +135,7 @@ inline FString<SIZE>::FString(char const* str)
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(char const* str, size_t count)
+inline String<SIZE>::String(char const* str, size_t count)
 {
 	char const* ptr = str ? str : "";
 	m_size = std::min(count, SIZE);
@@ -144,7 +144,7 @@ inline FString<SIZE>::FString(char const* str, size_t count)
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(char const* from, char const* to)
+inline String<SIZE>::String(char const* from, char const* to)
 	: m_size(to - from)
 {
 	m_size = std::min(m_size, SIZE);
@@ -153,7 +153,7 @@ inline FString<SIZE>::FString(char const* from, char const* to)
 }
 
 template<size_t SIZE>
-inline FString<SIZE>::FString(std::string const& str)
+inline String<SIZE>::String(std::string const& str)
 	: m_size(0)
 {
 	m_data[0] = 0;
@@ -161,7 +161,7 @@ inline FString<SIZE>::FString(std::string const& str)
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator=(std::string const& str) -> FString<SIZE>&
+inline auto String<SIZE>::operator=(std::string const& str) -> String<SIZE>&
 {
 	if (str.empty())
 	{
@@ -170,12 +170,12 @@ inline auto FString<SIZE>::operator=(std::string const& str) -> FString<SIZE>&
 	}
 
 	char const* cstr = str.c_str();
-	*this = FString<SIZE>(cstr, cstr + str.length());
+	*this = String<SIZE>(cstr, cstr + str.length());
 	return *this;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator=(FString const& str) -> FString<SIZE>&
+inline auto String<SIZE>::operator=(String const& str) -> String<SIZE>&
 {
 	m_size = str.m_size;
 	memcpy(m_data, str.m_data, m_size + 1); //copy ending zero as well
@@ -183,7 +183,7 @@ inline auto FString<SIZE>::operator=(FString const& str) -> FString<SIZE>&
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator=(char const* str) -> FString<SIZE>&
+inline auto String<SIZE>::operator=(char const* str) -> String<SIZE>&
 {
 	if (!str || !*str)
 	{
@@ -198,143 +198,143 @@ inline auto FString<SIZE>::operator=(char const* str) -> FString<SIZE>&
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator<(FString<SIZE> const& str) const -> bool
+inline auto String<SIZE>::operator<(String<SIZE> const& str) const -> bool
 {
 	return strcmp(c_str(), str.c_str()) < 0;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator==(FString<SIZE> const& str) const -> bool
+inline auto String<SIZE>::operator==(String<SIZE> const& str) const -> bool
 {
 	return m_size == str.m_size && !memcmp(m_data, str.m_data, m_size);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator!=(FString<SIZE> const& str) const -> bool
+inline auto String<SIZE>::operator!=(String<SIZE> const& str) const -> bool
 {
 	return !operator==(str);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator==(std::string const& str) const -> bool
+inline auto String<SIZE>::operator==(std::string const& str) const -> bool
 {
 	return m_size == str.size() && !memcmp(m_data, str.c_str(), m_size);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator!=(std::string const& str) const -> bool
+inline auto String<SIZE>::operator!=(std::string const& str) const -> bool
 {
 	return !operator==(str);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator==(char const* str) const -> bool
+inline auto String<SIZE>::operator==(char const* str) const -> bool
 {
 	return !strcmp(c_str(), str);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator!=(char const* str) const -> bool
+inline auto String<SIZE>::operator!=(char const* str) const -> bool
 {
 	return !operator==(str);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+(FString<SIZE> const& str) const -> FString<SIZE>
+inline auto String<SIZE>::operator+(String<SIZE> const& str) const -> String<SIZE>
 {
-	FString ret(*this);
+	String ret(*this);
 	ret.append(str);
 	return ret;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+=(FString<SIZE> const& str) -> FString<SIZE>&
+inline auto String<SIZE>::operator+=(String<SIZE> const& str) -> String<SIZE>&
 {
 	append(str);
 	return *this;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+(char const* cstr) const -> FString<SIZE>
+inline auto String<SIZE>::operator+(char const* cstr) const -> String<SIZE>
 {
-	FString ret(*this);
+	String ret(*this);
 	ret.append(cstr);
 	return ret;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+=(char const* cstr) -> FString<SIZE>&
+inline auto String<SIZE>::operator+=(char const* cstr) -> String<SIZE>&
 {
 	append(cstr);
 	return *this;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+(char ch) const -> FString<SIZE>
+inline auto String<SIZE>::operator+(char ch) const -> String<SIZE>
 {
-	FString ret(*this);
+	String ret(*this);
 	ret.append(ch);
 	return ret;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::operator+=(char ch) -> FString<SIZE>&
+inline auto String<SIZE>::operator+=(char ch) -> String<SIZE>&
 {
 	append(ch);
 	return *this;
 }
 
 template<size_t SIZE>
-inline auto	FString<SIZE>::operator[](size_t idx) const -> char
+inline auto	String<SIZE>::operator[](size_t idx) const -> char
 {
 	return m_data[idx];
 }
 
 template<size_t SIZE>
-inline auto	FString<SIZE>::operator[](size_t idx) -> char&
+inline auto	String<SIZE>::operator[](size_t idx) -> char&
 {
 	return m_data[idx];
 }
 
 template<size_t SIZE>
-inline void FString<SIZE>::push_back(char ch)
+inline void String<SIZE>::push_back(char ch)
 {
 	append(ch);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::c_str() const -> char const*
+inline auto String<SIZE>::c_str() const -> char const*
 {
 	return m_data;
 }
 
 template<size_t SIZE>
-inline void FString<SIZE>::clear()
+inline void String<SIZE>::clear()
 {
 	m_size = 0;
 	m_data[0] = 0;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::length() const -> size_t
+inline auto String<SIZE>::length() const -> size_t
 {
 	return m_size;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::size() const -> size_t
+inline auto String<SIZE>::size() const -> size_t
 {
 	return m_size;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::empty() const -> bool
+inline auto String<SIZE>::empty() const -> bool
 {
 	return m_size == 0;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::substr(size_t off, size_t count) const -> FString<SIZE>
+inline auto String<SIZE>::substr(size_t off, size_t count) const -> String<SIZE>
 {
 	if (count == npos)
 	{
@@ -343,25 +343,25 @@ inline auto FString<SIZE>::substr(size_t off, size_t count) const -> FString<SIZ
 
 	if (count == 0)
 	{
-		return FString<SIZE>();
+		return String<SIZE>();
 	}
 	
 	count = std::min(count, SIZE);
 
-	FString<SIZE> ret;
+	String<SIZE> ret;
 	ret.m_size = count;
 	memcpy(ret.m_data, c_str() + off, count + 1); //ending zero as well
 	return ret;
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::find(char ch, size_t off) const -> size_t
+inline auto String<SIZE>::find(char ch, size_t off) const -> size_t
 {
 	return find_first_of(ch, off);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::find(char const* cstr, size_t off) const -> size_t
+inline auto String<SIZE>::find(char const* cstr, size_t off) const -> size_t
 {
 	if (!cstr || cstr[0] == '\0')
 	{
@@ -378,31 +378,31 @@ inline auto FString<SIZE>::find(char const* cstr, size_t off) const -> size_t
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::find(FString<SIZE> const& str, size_t off) const -> size_t
+inline auto String<SIZE>::find(String<SIZE> const& str, size_t off) const -> size_t
 {
 	return find(str.c_str(), off);
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::begin() const -> FString<SIZE>::const_iterator
+inline auto String<SIZE>::begin() const -> String<SIZE>::const_iterator
 {
 	return empty() ? 0 : c_str();
 }
 
 template<size_t SIZE>
-inline auto FString<SIZE>::end() const -> FString<SIZE>::const_iterator
+inline auto String<SIZE>::end() const -> String<SIZE>::const_iterator
 {
 	return empty() ? 0 : c_str() + size();
 }
 
 template<size_t SIZE>
-inline void FString<SIZE>::reserve(size_t)
+inline void String<SIZE>::reserve(size_t)
 {
 	; //nothing to do
 }
 
 template<size_t SIZE>
-inline void FString<SIZE>::resize(size_t s)
+inline void String<SIZE>::resize(size_t s)
 {
 	s = std::min(s, SIZE);
 	if (m_size == s)
@@ -415,7 +415,7 @@ inline void FString<SIZE>::resize(size_t s)
 }
 
 template<size_t SIZE>
-void FString<SIZE>::append(char ch)
+void String<SIZE>::append(char ch)
 {
 	auto s = std::min(m_size + 1, SIZE);
 	if (s == m_size)
@@ -428,7 +428,7 @@ void FString<SIZE>::append(char ch)
 }
 
 template<size_t SIZE>
-void FString<SIZE>::append(char const* cstr)
+void String<SIZE>::append(char const* cstr)
 {
 	if (!cstr)
 	{
@@ -445,7 +445,7 @@ void FString<SIZE>::append(char const* cstr)
 }
 
 template<size_t SIZE>
-void FString<SIZE>::append(char const* from, char const* to)
+void String<SIZE>::append(char const* from, char const* to)
 {
 	if (!from || !to)
 	{
@@ -463,13 +463,13 @@ void FString<SIZE>::append(char const* from, char const* to)
 }
 
 template<size_t SIZE>
-void FString<SIZE>::append(FString<SIZE> const& str)
+void String<SIZE>::append(String<SIZE> const& str)
 {
 	append(str.m_data, str.m_data + str.m_size);
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_of(char ch, size_t off) const -> size_t
+auto String<SIZE>::find_first_of(char ch, size_t off) const -> size_t
 {
 	if (off >= size())
 	{
@@ -489,7 +489,7 @@ auto FString<SIZE>::find_first_of(char ch, size_t off) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_of(char const* cstr, size_t off) const -> size_t
+auto String<SIZE>::find_first_of(char const* cstr, size_t off) const -> size_t
 {
 	if (!cstr || !*cstr)
 	{
@@ -515,7 +515,7 @@ auto FString<SIZE>::find_first_of(char const* cstr, size_t off) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_of(FString<SIZE> const& str, size_t off) const -> size_t
+auto String<SIZE>::find_first_of(String<SIZE> const& str, size_t off) const -> size_t
 {
 	if (str.empty())
 	{
@@ -542,7 +542,7 @@ auto FString<SIZE>::find_first_of(FString<SIZE> const& str, size_t off) const ->
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_not_of(char ch, size_t off) const -> size_t
+auto String<SIZE>::find_first_not_of(char ch, size_t off) const -> size_t
 {
 	if (off >= size())
 	{
@@ -562,7 +562,7 @@ auto FString<SIZE>::find_first_not_of(char ch, size_t off) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_not_of(char const* cstr, size_t off) const -> size_t
+auto String<SIZE>::find_first_not_of(char const* cstr, size_t off) const -> size_t
 {
 	if (!cstr || !*cstr)
 	{
@@ -588,7 +588,7 @@ auto FString<SIZE>::find_first_not_of(char const* cstr, size_t off) const -> siz
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_first_not_of(FString<SIZE> const& str, size_t off) const -> size_t
+auto String<SIZE>::find_first_not_of(String<SIZE> const& str, size_t off) const -> size_t
 {
 	if (str.empty())
 	{
@@ -617,7 +617,7 @@ auto FString<SIZE>::find_first_not_of(FString<SIZE> const& str, size_t off) cons
 //////////////////////////////////////////////////////////////////////////
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_of(char ch, size_t pos) const -> size_t
+auto String<SIZE>::find_last_of(char ch, size_t pos) const -> size_t
 {
 	if (empty())
 	{
@@ -641,7 +641,7 @@ auto FString<SIZE>::find_last_of(char ch, size_t pos) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_of(char const* cstr, size_t pos) const -> size_t
+auto String<SIZE>::find_last_of(char const* cstr, size_t pos) const -> size_t
 {
 	if (empty())
 	{
@@ -670,7 +670,7 @@ auto FString<SIZE>::find_last_of(char const* cstr, size_t pos) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_of(FString<SIZE> const& str, size_t pos) const -> size_t
+auto String<SIZE>::find_last_of(String<SIZE> const& str, size_t pos) const -> size_t
 {
 	if (empty())
 	{
@@ -700,7 +700,7 @@ auto FString<SIZE>::find_last_of(FString<SIZE> const& str, size_t pos) const -> 
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_not_of(char ch, size_t pos) const -> size_t
+auto String<SIZE>::find_last_not_of(char ch, size_t pos) const -> size_t
 {
 	if (empty())
 	{
@@ -724,7 +724,7 @@ auto FString<SIZE>::find_last_not_of(char ch, size_t pos) const -> size_t
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_not_of(char const* cstr, size_t pos) const -> size_t
+auto String<SIZE>::find_last_not_of(char const* cstr, size_t pos) const -> size_t
 {
 	if (!cstr || empty())
 	{
@@ -749,7 +749,7 @@ auto FString<SIZE>::find_last_not_of(char const* cstr, size_t pos) const -> size
 }
 
 template<size_t SIZE>
-auto FString<SIZE>::find_last_not_of(FString<SIZE> const& str, size_t pos) const -> size_t
+auto String<SIZE>::find_last_not_of(String<SIZE> const& str, size_t pos) const -> size_t
 {
 	if (empty())
 	{
@@ -778,15 +778,15 @@ auto FString<SIZE>::find_last_not_of(FString<SIZE> const& str, size_t pos) const
 	return npos;
 }
 
-//global operator+ for char const* + FString
-//used for expressions like: FString s = "my char" + name;
+//global operator+ for char const* + String
+//used for expressions like: String s = "my char" + name;
 template<size_t SIZE>
-inline auto operator+(char const* cstr, FString<SIZE> const& str) -> FString<SIZE>
+inline auto operator+(char const* cstr, String<SIZE> const& str) -> String<SIZE>
 {
 	//first some early outs
 	if (str.empty())
 	{
-		return (cstr == 0 || cstr[0] == '\0') ? FString<SIZE>() : FString<SIZE>(cstr);
+		return (cstr == 0 || cstr[0] == '\0') ? String<SIZE>() : String<SIZE>(cstr);
 	}
 	if (cstr == 0 || cstr[0] == '\0')
 	{
@@ -795,16 +795,16 @@ inline auto operator+(char const* cstr, FString<SIZE> const& str) -> FString<SIZ
 	
 	size_t cstrlen = strlen(cstr);
 	size_t strsize = std::min(str.m_size, SIZE - cstrlen);
-	FString<SIZE> ret;
+	String<SIZE> ret;
 	ret.m_size = cstrlen + strsize;
 	memcpy(ret.m_data, cstr, cstrlen);
 	memcpy(ret.m_data + cstrlen, str.c_str(), strsize + 1); //end zero
 	return ret;
 }
 
-//global operator== for char const* and FString
+//global operator== for char const* and String
 template<size_t SIZE>
-inline auto operator==(char const* cstr, FString<SIZE> const& str) -> bool
+inline auto operator==(char const* cstr, String<SIZE> const& str) -> bool
 {
 	return str == cstr;
 }

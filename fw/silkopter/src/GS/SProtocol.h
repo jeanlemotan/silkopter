@@ -64,7 +64,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	//handshake
 	
-	typedef util::FString<64> Message_String;
+	typedef util::String<64> Message_String;
 	virtual void send_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	

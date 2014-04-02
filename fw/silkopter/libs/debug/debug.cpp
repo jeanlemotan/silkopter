@@ -38,7 +38,7 @@ void handle_assert(const char* condition, const char* file, int line, const char
 		s_uart->write_c_str(condition ? condition : "N/A");
 		if (file)
 		{
-			util::FString<512> str;
+			util::String<512> str;
 			util::format(str, "\n\tLocation: {0}:{1}", file, line);
 			s_uart->write_c_str(str.c_str());
 		}
@@ -65,7 +65,7 @@ void trace(const char* file, int line, const char* msg)
 		}
 		if (file)
 		{
-			util::FString<512> str;
+			util::String<512> str;
 			util::format(str, " @ {0}:{1}", file, line);
 			s_uart->write_c_str(str.c_str());
 		}
@@ -98,7 +98,7 @@ Timed_Scope::Timed_Scope(char const* file, int line)
 Timed_Scope::~Timed_Scope()
 {
 	auto d = board::clock::now_us() - m_start;
-	util::FString<128> msg;
+	util::String<128> msg;
 	util::format(msg, "\nScope {0}:{1} took {2}", m_file, m_line, d);
 	print(msg.c_str());
 }

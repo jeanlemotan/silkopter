@@ -127,7 +127,7 @@ namespace formatting
 
 
 	template<class Dst_String, class Placeholder, size_t SIZE>
-	void format_string(Dst_String& dst, Placeholder const& ph, FString<SIZE> const& p)
+	void format_string(Dst_String& dst, Placeholder const& ph, String<SIZE> const& p)
 	{
 		dst.append(p.begin(), p.end());
 	}
