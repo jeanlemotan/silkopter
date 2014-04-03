@@ -1,12 +1,6 @@
 namespace math
 {
 
-template<typename T> angle<T> const angle<T>::zero(0);
-template<typename T> angle<T> const angle<T>::pi(T(3.1415926535897932384626433832795028841971));
-template<typename T> angle<T> const angle<T>::pi2(T(3.1415926535897932384626433832795028841971) / T(2));
-template<typename T> angle<T> const angle<T>::_2pi(T(3.1415926535897932384626433832795028841971) * T(2));
-template<typename T> angle<T> const angle<T>::_3pi2(T(3.1415926535897932384626433832795028841971) * T(3) / T(2));
-
 template<typename T> inline angle<T>::angle() : radians(T(0)) {}
 template<typename T> inline angle<T>::angle(T radians) : radians(radians) {}
 template<typename T> inline angle<T>::angle(angle<T> const& a) : radians(a.radians) {}

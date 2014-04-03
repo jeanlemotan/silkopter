@@ -24,25 +24,43 @@ int main(void)
 	
 	board::Init_Params params;
 	board::init(params);
-	
+
 	util::storage::init();
 	auto idx = util::storage::find_idx_by_id(12);
 
+{
+	TIMED_BLOCK();
+	util::storage::add(5, 7);
+	auto data = util::storage::read_by_id(static_murmurhash("name"), 7);
+	PRINT("5: {0}", data);
+}
+
+{
+	TIMED_BLOCK();
 	util::storage::add(static_murmurhash("name"), 5);
 	auto data = util::storage::read_by_id(static_murmurhash("name"), 7);
+	PRINT("name: {0}", data);
+}		   
 
+{
+	TIMED_BLOCK();
 	for (int i = 0; i < 300; i++)
 	{
-		util::storage::add(i, 120);
+		util::storage::add(i, i);
 	}
+}
 
+{
+	TIMED_BLOCK();
 	util::storage::add(static_murmurhash("name2"), 122);
-	data = util::storage::read_by_id(static_murmurhash("name2"), 123);
-
-	data = util::storage::read_by_id(static_murmurhash("name3"), 999);
-	
-	//board::s_uarts[0].begin(115200);
-	debug::init(&board::get_gs_full_uart());
+	auto data = util::storage::read_by_id(static_murmurhash("name2"), 123);
+	PRINT("name: {0}", data);
+}
+{
+	TIMED_BLOCK();
+	auto data = util::storage::read_by_id(static_murmurhash("name3"), 999);
+	PRINT("{0}", data);
+}
 	
 	util::String<128> str;
 

@@ -1,13 +1,6 @@
 namespace math
 {
 
-
-template<typename T>
-vec2<T> const vec2<T>::zero(0);
-
-template<typename T>
-vec2<T> const vec2<T>::one(1);
-
 template<typename T>
 inline vec2<T>::vec2() : x(T(0)), y(T(0)) {}
 

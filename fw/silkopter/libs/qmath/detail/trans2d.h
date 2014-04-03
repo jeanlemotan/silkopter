@@ -23,8 +23,6 @@ struct trans2d
 {
 	typedef T value_t;
 	static struct ZUninitialized {} uninitialized;
-	static trans2d<T> const zero;
-	static trans2d<T> const one;
 	static trans2d<T> const identity;
 
 

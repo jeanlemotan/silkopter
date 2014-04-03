@@ -1,9 +1,6 @@
 namespace math
 {
 
-	template<typename T> vec4<T> const vec4<T>::zero(0);
-	template<typename T> vec4<T> const vec4<T>::one(1);
-
 	template<typename T> inline vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
 	template<typename T> inline vec4<T>::vec4(ZUninitialized) {}
 	template<typename T> inline vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}

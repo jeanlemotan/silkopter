@@ -77,7 +77,7 @@
       <Value>NDEBUG</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
-  <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.level>Optimize most (-O3)</avrgcc.compiler.optimization.level>
   <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
   <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
@@ -98,7 +98,7 @@
       <Value>../src</Value>
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
-  <avrgcccpp.compiler.optimization.level>Optimize for size (-Os)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.level>Optimize most (-O3)</avrgcccpp.compiler.optimization.level>
   <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>
   <avrgcccpp.compiler.miscellaneous.OtherFlags>-fno-exceptions -std=c++11  -fpermissive -fno-rtti</avrgcccpp.compiler.miscellaneous.OtherFlags>
@@ -404,6 +404,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\physics\constants.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libs\qmath\detail\data.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\util\chrono.h">

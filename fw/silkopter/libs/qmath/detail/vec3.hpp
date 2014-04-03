@@ -1,9 +1,6 @@
 namespace math
 {
 
-	template<typename T> vec3<T> const vec3<T>::zero(0);
-	template<typename T> vec3<T> const vec3<T>::one(1);
-
 	template<typename T> inline vec3<T>::vec3() : x(T(0)), y(T(0)), z(T(0)) {}
 	template<typename T> inline vec3<T>::vec3(ZUninitialized) {}
 	template<typename T> inline vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}

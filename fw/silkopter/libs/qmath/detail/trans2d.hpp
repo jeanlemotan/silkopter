@@ -1,11 +1,6 @@
 namespace math
 {
 
-
-template<typename T> trans2d<T> const trans2d<T>::zero(0);
-template<typename T> trans2d<T> const trans2d<T>::one(1);
-template<typename T> trans2d<T> const trans2d<T>::identity;
-
 ///////////////////////////////////////////////////////////////////////////////
 //constructors
 ///////////////////////////////////////////////////////////////////////////////

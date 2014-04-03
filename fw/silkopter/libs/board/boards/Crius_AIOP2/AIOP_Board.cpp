@@ -62,8 +62,11 @@ namespace board
 	{
 		s_init_params = params;
 		
-		clock::init();
 		scheduler::init(s_init_params.scheduler_frequency);
+
+		s_uarts[0].begin(115200);
+		debug::init(&s_uarts[0]);
+		PRINT("xxx");
 		
 		if (s_init_params.gs_full_uart_idx >= UART_COUNT)
 		{
