@@ -9,6 +9,8 @@ class AIOP_PWM_Out : public PWM_Out
 {
 public:
 	AIOP_PWM_Out();
+
+	void init();
 	
 	uint8_t get_count() const;
 	void set_data(uint8_t channel, Data const& data);
@@ -20,6 +22,7 @@ public:
 	void set_frequency_for_all(uint16_t hz);
 	
 private:
+	bool m_is_initialized;
 };
 	
 }

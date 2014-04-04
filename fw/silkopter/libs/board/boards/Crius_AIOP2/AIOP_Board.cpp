@@ -7,6 +7,8 @@
 #include "debug/debug.h"
 #include "board/board.h"
 
+#include "board/boards/AVR_gpio.h"
+#include "board/boards/AVR_i2c.h"
 #include "board/boards/AVR_UART.h"
 #include "board/boards/AVR_EEPROM.h"
 #include "board/boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
@@ -63,10 +65,12 @@ namespace board
 		s_init_params = params;
 		
 		scheduler::init(s_init_params.scheduler_frequency);
+		i2c::init();
+		gpio::init();
 
+		//initialize debug first to get asserts early
 		s_uarts[0].begin(115200);
 		debug::init(&s_uarts[0]);
-		PRINT("xxx");
 		
 		if (s_init_params.gs_full_uart_idx >= UART_COUNT)
 		{
@@ -89,6 +93,11 @@ namespace board
 		s_init_params.main_imu_idx = 0;		
 		s_imu.init(s_init_params.main_imu_sample_rate);
 		
+		s_rc_in.init();
+		s_pwm_out.init();
+		s_barometer.init();
+		//s_compass.init();
+
 		s_init_params.main_thermometer_idx = math::clamp<int8_t>(s_init_params.main_thermometer_idx, 0, 2);
 		
 		//rc_in::init();

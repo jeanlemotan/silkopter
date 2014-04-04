@@ -226,7 +226,18 @@ void AIOP_RC_In::A8_ppm_isr()
 // }
 
 AIOP_RC_In::AIOP_RC_In() 
+	: m_is_initialized(false)
 {
+}
+
+void AIOP_RC_In::init()
+{
+	if (m_is_initialized)
+	{
+		return;
+	}
+	m_is_initialized = true;
+
 	DDRK = 0;  // Set PORTK as a digital port ([A8-A15] are consired as digital PINs and not analogical)
 //	hal.gpio->pinMode(46, GPIO_OUTPUT); // ICP5 pin (PL1) (PPM input) CRIUS v2
 //	hal.gpio->write(46,0);
@@ -260,6 +271,8 @@ AIOP_RC_In::AIOP_RC_In()
 
 bool AIOP_RC_In::get_data(uint8_t ch, Data& data) const
 {
+	ASSERT(m_is_initialized);
+
     if (ch >= MAX_CHANNEL_COUNT) 
 	{
 		return false;
@@ -279,6 +292,8 @@ bool AIOP_RC_In::get_data(uint8_t ch, Data& data) const
 
 uint8_t AIOP_RC_In::get_count() const
 {
+	ASSERT(m_is_initialized);
+
 	return MAX_CHANNEL_COUNT;
 }
 

@@ -8,6 +8,7 @@ namespace board
 class AVR_EEPROM : public EEPROM
 {
 public:
+
 	size_type get_capacity() const;
     bool is_ready() const;
 

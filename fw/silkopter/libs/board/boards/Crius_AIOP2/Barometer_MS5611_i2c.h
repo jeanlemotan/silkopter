@@ -10,6 +10,8 @@ class Barometer_MS5611_i2c : public Barometer
 {
 public:
 	Barometer_MS5611_i2c();
+
+	void init();
 	
 	bool get_data(Data& data) const;
 	
@@ -18,6 +20,7 @@ public:
 private:
 	mutable Thermometer_Data m_thermometer;
 	
+	bool					m_is_initialized;
 	bool					m_is_healthy;
 	chrono::time_us			m_last_update_time;
 	/* Gates access to asynchronous state: */

@@ -62,7 +62,8 @@ static void _write(uint8_t reg)
 }
 
 Barometer_MS5611_i2c::Barometer_MS5611_i2c()
-	: m_is_healthy(false)
+	: m_is_initialized(false)
+	, m_is_healthy(false)
 	, m_temperature(0)
 	, m_pressure(0)
 // 	, m_raw_pressure(0)
@@ -78,6 +79,18 @@ Barometer_MS5611_i2c::Barometer_MS5611_i2c()
 	, m_stage(0)
 	, m_buffer_idx(0)
 {
+}
+
+void Barometer_MS5611_i2c::init()
+{
+	if (m_is_initialized)
+	{
+		return;
+	}
+	m_is_initialized = true;
+
+	i2c::init();
+	
 	uint8_t tries = 0;
 	do
 	{
@@ -157,6 +170,7 @@ void Barometer_MS5611_i2c::poll_data(void* ptr)
 
 bool Barometer_MS5611_i2c::init_hardware()
 {
+	ASSERT(m_is_initialized);
 #ifdef SIMULATOR
 	return true;
 #endif
@@ -259,6 +273,8 @@ void Barometer_MS5611_i2c::calculate() const
 
 bool Barometer_MS5611_i2c::get_data(Data& data) const
 {
+	ASSERT(m_is_initialized);
+
 	if (m_buffers[m_buffer_idx].has_data)
 	{
 		auto last_buffer_idx = m_buffer_idx;

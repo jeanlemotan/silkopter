@@ -21,7 +21,18 @@ static const float PULSE_RANGE_F = float(PULSE_RANGE);
 static const float PULSE_RANGE_F_INV = 1.f / PULSE_RANGE_F;
 
 AIOP_PWM_Out::AIOP_PWM_Out()
+	: m_is_initialized(false)
 {
+}
+
+void AIOP_PWM_Out::init()
+{
+	if (m_is_initialized)
+	{
+		return;
+	}
+	m_is_initialized = true;
+
 	gpio::init();
 	
 	// --------------------- TIMER3: CH_0, CH_1, and CH_2 ---------------------
@@ -68,6 +79,8 @@ AIOP_PWM_Out::AIOP_PWM_Out()
 
 void AIOP_PWM_Out::set_frequency(uint8_t ch, uint16_t hz)
 {
+	ASSERT(m_is_initialized);
+
 	uint16_t icr = timer_period(hz);
 	switch(ch)
 	{
@@ -91,6 +104,8 @@ void AIOP_PWM_Out::set_frequency(uint8_t ch, uint16_t hz)
 }
 void AIOP_PWM_Out::set_frequency_for_all(uint16_t hz)
 {
+	ASSERT(m_is_initialized);
+
 	for (uint8_t i = 0; i < MAX_CHANNEL_COUNT; i++)
 	{
 		set_frequency(i, hz);
@@ -98,6 +113,8 @@ void AIOP_PWM_Out::set_frequency_for_all(uint16_t hz)
 }
 void AIOP_PWM_Out::set_data(uint8_t ch, Data const& data) 
 {
+	ASSERT(m_is_initialized);
+
 	int16_t pulse = static_cast<int16_t>(data.value * PULSE_RANGE_F);
 	pulse = MIN_PULSE_WIDTH + math::clamp(pulse, int16_t(0), PULSE_RANGE);
 	switch(ch)
@@ -114,6 +131,8 @@ void AIOP_PWM_Out::set_data(uint8_t ch, Data const& data)
 } 
 void AIOP_PWM_Out::set_data_for_all(Data const& data)
 {
+	ASSERT(m_is_initialized);
+
 	int16_t pulse = static_cast<int16_t>(data.value * PULSE_RANGE_F);
 	pulse = MIN_PULSE_WIDTH + math::clamp(pulse, int16_t(0), PULSE_RANGE);
 
@@ -128,6 +147,8 @@ void AIOP_PWM_Out::set_data_for_all(Data const& data)
 }
 void AIOP_PWM_Out::set_enabled_for_all(bool enabled)
 {
+	ASSERT(m_is_initialized);
+
 	if (enabled)
 	{
 		TCCR3A |= (1<<COM3A1); 
@@ -153,6 +174,8 @@ void AIOP_PWM_Out::set_enabled_for_all(bool enabled)
 }
 void AIOP_PWM_Out::set_enabled(uint8_t ch, bool enabled)
 {
+	ASSERT(m_is_initialized);
+
 	if (enabled)
 	{
 		switch (ch)
@@ -185,6 +208,8 @@ void AIOP_PWM_Out::set_enabled(uint8_t ch, bool enabled)
 
 uint8_t AIOP_PWM_Out::get_count() const
 {
+	ASSERT(m_is_initialized);
+
 	return MAX_CHANNEL_COUNT;
 }
 

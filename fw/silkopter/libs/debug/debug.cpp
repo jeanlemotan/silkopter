@@ -29,19 +29,23 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);
-		s_uart->write_c_str("\nAssertion failed: ");
+		s_uart->write_c_str("\n#");
 		if (msg)
 		{
 			s_uart->write_c_str(msg);
 		}
-		s_uart->write_c_str("\n\tCondition: ");
-		s_uart->write_c_str(condition ? condition : "N/A");
 		if (file)
 		{
 			util::String<512> str;
-			util::format(str, "\n\tLocation: {0}:{1}", file, line);
+			util::format(str, "\n@ {0}:{1}", file, line);
 			s_uart->write_c_str(str.c_str());
 		}
+		if (condition)
+		{
+			s_uart->write('\n');
+			s_uart->write_c_str(condition ? condition : "N/A");
+		}
+
 		s_uart->write_c_str("\nThe board will now freeze...");
 		s_uart->flush();
 	}

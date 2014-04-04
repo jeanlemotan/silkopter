@@ -7,83 +7,66 @@ namespace util
 {
 namespace storage
 {
-	typedef uint16_t crc_t;
-	typedef uint32_t data_t;
-	typedef uint32_t id_t;
-
-	//used to indicate item not found
-	static const size_t npos = size_t(-1);
-
-	//items is composed of an id and data
+	typedef uint16_t crc_type;
+	typedef uint8_t size_type;
+	typedef size_t offset_type;
 	
+	struct Id
+	{
+		Id() = default;
+		explicit Id(uint32_t value) : value(value) {}
+		uint32_t value;	
+	};
+
 	void init();
 
-	crc_t get_crc();
-	size_t get_count();
-	size_t get_max_count();
+	crc_type get_crc();
 
-	//searches an item by id and returns the idx or npos on failure
-	size_t find_idx_by_id(id_t id);
+	size_t get_record_count();
+	
+	void set_record(Id id, uint8_t const* data, size_type size);
 
-	id_t read_id(size_t idx);
-
-	data_t read_data(size_t idx);
-
-	template<class T> T read(size_t idx)
+	template<class T> void set_record(Id id, T data)
 	{
-		typedef int _static_assert[(sizeof(T) <= sizeof(data_t)) ? 1 : -1];
-		data_t data = read_data(idx);
-		auto* __restrict ptr = reinterpret_cast<T*>(&data);
-		return *ptr;
+		typedef int _static_assert[(sizeof(T) < 256) ? 1 : -1];
+		set_record(id, reinterpret_cast<uint8_t*>(&data), sizeof(T));
 	}
-	template<class T> T read_by_id(id_t id, T default_)
+
+	void remove_record(Id id);
+	void remove_record(offset_type offset);
+	
+	size_type get_record(offset_type offset, uint8_t* dst, size_type max_size);
+	size_type get_record(Id id, uint8_t* dst, size_type max_size);
+
+	crc_type get_record_crc(offset_type offset);
+	size_type get_record_size(offset_type offset);
+	
+	//searches an item by id and returns the idx or 0 on failure
+	offset_type find_record_offset_by_id(Id id);
+
+	template<class T> T get_record(offset_type offset, T default_)
 	{
-		typedef int _static_assert[(sizeof(T) <= sizeof(data_t)) ? 1 : -1];
-		auto idx = find_idx_by_id(id);
-		if (idx != npos)
+		typedef int _static_assert[(sizeof(T) < 256) ? 1 : -1];
+		T t;
+		auto sz = get_record(offset, reinterpret_cast<uint8_t*>(&t), sizeof(T));
+		if (sz != sizeof(T))
 		{
-			data_t data = read_data(idx);
-			auto* __restrict ptr = reinterpret_cast<T*>(&data);
-			return *ptr;
+			return default_;
 		}
-		return default_;
+		return t;
+	}
+	template<class T> T get_record(Id id, T default_)
+	{
+		typedef int _static_assert[(sizeof(T) < 256) ? 1 : -1];
+		T t;
+		auto sz = get_record(id, reinterpret_cast<uint8_t*>(&t), sizeof(T));
+		if (sz != sizeof(T))
+		{
+			return default_;
+		}
+		return t;
 	}
 	
-	//You're supposed to call refresh_crc/set_crc after calling this
-	void write_data(size_t idx, data_t data);
-
-	template<class T> void write(size_t idx, T data)
-	{
-		typedef int _static_assert[(sizeof(T) <= sizeof(data_t)) ? 1 : -1];
-		data_t _data = 0;
-		auto* __restrict ptr = reinterpret_cast<T*>(&_data);
-		*ptr = data;
-		write_data(idx, _data);
-	}
-	
-	//adds a new item to the storage. This might triger a rehash
-	//returns the index of the item or npos on failure (no space left)
-	//You're supposed to call refresh_crc/set_crc after calling this
-	size_t add_data(id_t id, data_t data);
-
-	template<class T> size_t add(id_t id, T data)
-	{
-		typedef int _static_assert[(sizeof(T) <= sizeof(data_t)) ? 1 : -1];
-		data_t _data = 0;
-		auto* __restrict ptr = reinterpret_cast<T*>(&_data);
-		*ptr = data;
-		return add_data(id, _data);
-	}
-
-	//removes an item from the system. This will trigger a rehash
-	//You're supposed to call refresh_crc/set_crc after calling this
-	void remove(size_t idx);
-	void remove_by_id(id_t id);
-
-	//recalculates the crc and returns true if it's different than the old one
-	bool refresh_crc();
-	bool set_crc(crc_t crc);
-
 	//clears all the items
 	void remove_all();
 	
