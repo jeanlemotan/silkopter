@@ -188,11 +188,8 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 	{	
 		imu->m_sample_freq_counter = imu->m_sample_freq_div;
 
-		auto now = clock::now_us();
 		if (i2c::try_lock())
 		{
-			auto d = now - imu->m_last_refresh_time;
-			
 			auto& buffer = imu->m_buffers[imu->m_buffer_idx];
 
 			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(imu->m_raw_mpu), 7))
@@ -207,10 +204,6 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 				buffer.gyro_sum.z	+= imu->m_raw_mpu[6] - imu->m_gyro_calibration_bias.z;
 				
 				buffer.sample_count++;
-				
-				buffer.delta_time_sum.count += d.count;
-
-				imu->m_last_refresh_time.ticks = now.ticks;
 			}
 			else
 			{
@@ -342,7 +335,7 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     i2c::write_register(m_mpu_addr, MPUREG_SMPLRT_DIV, rate);
     clock::delay(chrono::millis(1));
 
-    i2c::write_register(m_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS); // Gyro scale 2000?/s
+    i2c::write_register(m_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS);
     clock::delay(chrono::millis(1));
 
 		// Get chip revision
@@ -389,60 +382,69 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     return true;
 }
 
-bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const
+bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& _gdata, Accelerometer_Data& _adata) const
 {
 #ifdef SIMULATOR
 	m_buffers[m_buffer_idx].sample_count = 1;
-#else
-	if (!m_buffers[m_buffer_idx].sample_count)
-	{
-		m_thermometer.m_is_valid = false;
-		return false;
-	}
 #endif
 
+	if (m_buffers[m_buffer_idx].sample_count > 0)
+	{
+		//////////////////////////////////////////////////////////////////////////
+		//copy the data
+
+		auto last_buffer_idx = m_buffer_idx;
+		m_buffer_idx = !m_buffer_idx; //now the interrupt will write in the other buffer.
+		auto& buffer = m_buffers[last_buffer_idx];
+
+		ASSERT(buffer.sample_count > 0);
+		float sc = float(buffer.sample_count);
+		buffer.sample_count = 0;
+
+		_gdata.delta.set((math::vec3s32&)(buffer.gyro_sum));
+		((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
+
+		m_last_accel_data.set((math::vec3s32&)(buffer.accel_sum));
+		((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
+
+		float temp = float(buffer.temp_sum);
+		buffer.temp_sum = 0;
+
+		// done copying the data
+		//////////////////////////////////////////////////////////////////////////
+
+		float scinv = 1.f / sc;
+	
+		auto now = clock::now_us();
+		chrono::secondsf dt = now - m_last_refresh_time;
+		m_last_refresh_time = now;
+
+		//////////////////////////////////////////////////////////////////////////
+		//scale the accel and apply the calibration offset
+		m_last_accel_data *= (scinv * physics::constants::g / 4096.f); // divided by 4096
+		m_last_accel_data *= m_accel_calibration_scale;
+		_adata.dt = dt;
+
+		_gdata.dt = dt;
+		_gdata.delta *= s_gyro_scale * scinv;
+	
+		//From the specs: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
+		m_last_temp_data = temp * scinv * 0.002941f + 36.53f;
+
+	}
+	else
+	{
+		_adata.dt.count = 0;	
+		_gdata.dt.count = 0;	
+		_gdata.delta.set(0, 0, 0);
+	}
+
+
 	m_thermometer.m_is_valid = true;
-
-//	auto now = clock::now_ms();
-//	s_last_refresh_time = now;
+	m_thermometer.m_data.degrees = m_last_temp_data;
 	
-	//////////////////////////////////////////////////////////////////////////
-	//copy the data
+	_adata.acceleration = m_last_accel_data;
 
-	auto last_buffer_idx = m_buffer_idx;
-	m_buffer_idx = !m_buffer_idx; //now the interrupt will write in the other buffer.
-	auto& buffer = m_buffers[last_buffer_idx];
-
-	ASSERT(buffer.sample_count > 0);
-	auto sc = buffer.sample_count;
-	buffer.sample_count = 0;
-
-	gdata.delta.set((math::vec3s32&)(buffer.gyro_sum));
-	((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
-
-	adata.acceleration.set((math::vec3s32&)(buffer.accel_sum));
-	((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
-
-	m_thermometer.m_data.degrees = buffer.temp_sum * 0.000244140625f;
-	buffer.temp_sum = 0;
-
-	float delta_time = (float)buffer.delta_time_sum.count * 0.000001f;
-	buffer.delta_time_sum.count = 0;
-
-	// done copying the data
-	//////////////////////////////////////////////////////////////////////////
-
-	float scinv = 1.f / sc;
-
-	//////////////////////////////////////////////////////////////////////////
-	//scale the accel and apply the calibration offset
-	adata.acceleration *= (scinv * physics::constants::g / 4096.f); // divided by 4096
-	adata.acceleration *= m_accel_calibration_scale;
-	adata.dt = delta_time;
-
-	gdata.delta *= (s_gyro_scale * scinv * delta_time);
-	gdata.dt = delta_time;
-	
 	return true;
 }
 
@@ -478,7 +480,7 @@ void IMU_MPU6000_i2c::init(Sample_Rate rate)
 		}
 	} while (1);
 
-	(chrono::time_us&)m_last_refresh_time = clock::now_us();
+	m_last_refresh_time = clock::now_us();
 
 	// start the timer process to read samples
 	board::scheduler::register_callback(&poll_data, this);

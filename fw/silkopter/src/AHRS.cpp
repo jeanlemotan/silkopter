@@ -6,7 +6,7 @@ void AHRS::process(board::IMU::Gyroscope_Data const& gdata, board::IMU::Accelero
 {
 	auto const& gyro = gdata.delta;
 	//gyro.z = 0; //TODO - use compass
-	m_euler += math::vec3f(gyro.x, gyro.y, 0);
+	m_euler += math::vec3f(gyro.x, gyro.y, 0) * gdata.dt.count;
 	
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
 	auto const& accel = adata.acceleration;
@@ -16,8 +16,8 @@ void AHRS::process(board::IMU::Gyroscope_Data const& gdata, board::IMU::Accelero
 		float accel_pitch_x = math::atan2(accel.y, accel.z);
 		float accel_roll_y = -math::atan2(accel.x, math::sqrt(accel.y*accel.y + accel.z*accel.z));
 
-		m_euler.x = math::lerp(m_euler.x, accel_pitch_x, gdata.dt.count);
-		m_euler.y = math::lerp(m_euler.y, accel_roll_y, gdata.dt.count);
+		//m_euler.x = math::lerp(m_euler.x, accel_pitch_x, gdata.dt.count);
+		//m_euler.y = math::lerp(m_euler.y, accel_roll_y, gdata.dt.count);
  	}
 	
 	m_local_quaternion.set_from_euler_xyz<math::fast>(gyro);

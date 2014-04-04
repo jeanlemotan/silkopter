@@ -97,11 +97,7 @@ bool GS::send_data(uint32_t step)
 		return false;
 	}
 	case 10:
-	case 11:
-	case 12:
-	case 13:
 	{
-		//if (step - 10 < board::s_imu_count)
 		board::IMU::Accelerometer_Data adata;
 		board::IMU::Gyroscope_Data gdata;
 		bool is_valid = board::get_main_imu().get_data(gdata, adata);
@@ -154,6 +150,11 @@ bool GS::send_data(uint32_t step)
 	case 34:
 	{
 		m_full_protocol.send_uav_position(m_uav.get_status().position);
+		return false;
+	}
+	case 36:
+	{
+		m_full_protocol.send_uav_attitude(m_uav.get_status().attitude.get_euler());
 		return false;
 	}
 		

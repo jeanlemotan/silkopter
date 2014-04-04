@@ -26,7 +26,7 @@ public:
 	Thermometer const& get_thermometer() const;
 	 
 private:
-	 volatile chrono::time_us m_last_refresh_time;
+	 mutable chrono::time_us m_last_refresh_time;
 	 uint8_t m_mpu_addr;
 	 int8_t m_sample_freq_div;
 	 volatile int8_t m_sample_freq_counter;
@@ -52,6 +52,9 @@ private:
 	int16_t m_raw_mpu[7];
 	
 	mutable Thermometer_Data m_thermometer;
+	
+	mutable math::vec3f m_last_accel_data;
+	mutable float m_last_temp_data;
 	
 	static void poll_data(void* ptr);
 	bool refresh_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const;

@@ -23,46 +23,10 @@ int main(void)
 	sei();
 	
 	board::Init_Params params;
+	params.main_imu_sample_rate = board::IMU::Sample_Rate::_100_HZ;
 	board::init(params);
 
 	util::storage::init();
-//	auto idx = util::storage::find_record_offset_by_id(util::storage::Id(12));
-
-// {
-// 	TIMED_BLOCK();
-// 	util::storage::add_record(util::storage::Id(5), uint32_t(0));
-// 	auto data = util::storage::get_record(util::storage::Id(static_murmurhash("name")), uint32_t(1));
-// 	PRINT("\nname: {0}", data);
-// }
-
-{
-	TIMED_BLOCK();
-	auto id = util::storage::Id(static_murmurhash("caca"));
-	util::storage::set_record(id, uint32_t(10));
-	auto data = util::storage::get_record(id, uint32_t(11));
-	PRINT("\ncaca: {0}", data);
-}
-
-{
-	TIMED_BLOCK();
-	auto id = util::storage::Id(static_murmurhash("name"));
-	util::storage::set_record(id, uint32_t(10));
-	auto data = util::storage::get_record(id, uint32_t(11));
-	PRINT("\nname: {0}", data);
-}
-
-{
-	TIMED_BLOCK();
-	for (int i = 0; i < 300; i++)
-	{
-		auto x = util::storage::Id(dynamic_murmurhash_seed("xxx", i));
-		auto start = board::clock::now_us();
-		util::storage::set_record(x, i);
-		PRINT("\nadded: {0} in {1}", i, board::clock::now_us() - start);
-	}
-}
-
-
 	
 	util::String<128> str;
 
