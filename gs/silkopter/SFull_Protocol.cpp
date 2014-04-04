@@ -348,6 +348,17 @@ bool SFull_Protocol::process_message()
 				data_uav_position.received_frame_idx = m_last_frame_idx;
 			}
 			break;
+		case MSG_UAV_ATTITUDE:
+			{
+				data_uav_attitude.value = get_value<math::vec3f>(m_buffer, off);
+				data_uav_attitude.is_valid = true;
+				data_uav_attitude.received_frame_idx = m_last_frame_idx;
+			}
+			break;
+		default:
+			//__dbg_break(0);
+			int a = 0;
+			break;
 
 		}
 	}
