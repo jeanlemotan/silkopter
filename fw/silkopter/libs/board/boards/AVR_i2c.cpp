@@ -39,7 +39,7 @@ static uint16_t s_lockup_count = 0;
 #ifdef SIMULATOR
 static int32_t s_delay_loop_count = 30;
 #else
-static int32_t s_delay_loop_count = 300000;
+static int32_t s_delay_loop_count = 3000;
 #endif
 
 

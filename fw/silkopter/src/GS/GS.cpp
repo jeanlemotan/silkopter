@@ -98,11 +98,12 @@ bool GS::send_data(uint32_t step)
 	}
 	case 10:
 	{
-		board::IMU::Accelerometer_Data adata;
-		board::IMU::Gyroscope_Data gdata;
-		bool is_valid = board::get_main_imu().get_data(gdata, adata);
-		m_full_protocol.send_board_gyroscope(is_valid, gdata.delta);
-		m_full_protocol.send_board_accelerometer(is_valid, adata.acceleration);
+		board::IMU::Data data;
+		bool is_valid = board::get_main_imu().get_data(data);
+		auto delta = data.gyroscope;//(data.gyroscope - m_last_gyroscope) / chrono::secondsf(m_frame_duration).count;
+		//m_last_gyroscope = data.gyroscope;
+		m_full_protocol.send_board_gyroscope(is_valid, delta);
+		m_full_protocol.send_board_accelerometer(is_valid, data.acceleration);
 		return false;
 	}
 	case 18:
@@ -114,10 +115,12 @@ bool GS::send_data(uint32_t step)
 	}
 	case 20:
 	{
-// 		board::baro::Data data;
-// 		board::baro::get_data(data);
-// 		m_full_protocol.send_board_baro_pressure(data.pressure.is_valid, data.pressure.value);
-// 		m_full_protocol.send_board_temperature(data.temperature.is_valid, data.temperature.value);
+ 		board::Barometer::Data data;
+ 		if (board::get_main_barometer())
+		{
+			bool is_valid = board::get_main_barometer()->get_data(data);
+			m_full_protocol.send_board_baro_pressure(is_valid, data.pressure);
+		}
 		return false;
 	}
 	case 22:

@@ -31,7 +31,7 @@ public:
 		BOARD_ACCELEROMETER = 11,
 		BOARD_TEMPERATURE = 12,
 		BOARD_BARO_PRESSURE = 13,
-		BOARD_SONAR_ALTITUDE = 14,
+		BOARD_SONAR_DISTANCE = 14,
 		BOARD_GPS_ALTITUDE = 15,
 		BOARD_RC_IN = 16,
 		BOARD_PWM_OUT = 17,
@@ -86,7 +86,7 @@ public:
 	virtual void send_board_temperature(bool is_valid, float temp) = 0;
 	
 	virtual void send_board_baro_pressure(bool is_valid, float pressure) = 0;
-	virtual void send_board_sonar_altitude(bool is_valid, float altitude) = 0;
+	virtual void send_board_sonar_distance(bool is_valid, float distance) = 0;
 	virtual void send_board_gps_altitude(bool is_valid, float altitude) = 0;
 
 	virtual void send_board_rc_in(uint8_t count, int16_t const* values) = 0;

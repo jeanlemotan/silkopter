@@ -189,9 +189,8 @@ private:
 	
 	chrono::time_us m_last_time;
 	chrono::micros m_dt;
-	float m_dts;
+	chrono::secondsf m_dts;
 	
-	void read_imu_data();
 	void read_sonar_data();
 	void read_gps_data();
 	void read_baro_data();
@@ -199,8 +198,7 @@ private:
 
 	void compute_linear_motion();
 	
-	board::IMU::Accelerometer_Data m_accelerometer_data;
-	board::IMU::Gyroscope_Data m_gyroscope_data;
+	board::IMU::Data m_imu_data;
 	//board::gps::Data m_gps_data;
 	//board::sonar::Data m_sonar_data;
 	//board::baro::Data m_baro_data;

@@ -23,7 +23,7 @@ int main(void)
 	sei();
 	
 	board::Init_Params params;
-	params.main_imu_sample_rate = board::IMU::Sample_Rate::_100_HZ;
+	params.main_imu_sample_rate = board::IMU::Sample_Rate::_500_HZ;
 	board::init(params);
 
 	util::storage::init();
@@ -90,9 +90,9 @@ int main(void)
 		//for up to 3ms
 		{
 			auto duration = board::clock::now_us() - start;
-			if (duration < chrono::micros(5000))
+			if (duration < chrono::micros(1000))
 			{
-				gs.process(chrono::micros(5000) - duration);
+				gs.process(chrono::micros(1000) - duration);
 			}
 		}
    }

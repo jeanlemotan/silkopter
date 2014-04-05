@@ -21,7 +21,7 @@ public:
 	void set_gyroscope_bias(math::vec3f const& bias);
 	void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
 
- 	bool get_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const;
+ 	bool get_data(Data& data) const;
 	 
 	Thermometer const& get_thermometer() const;
 	 
@@ -49,15 +49,17 @@ private:
 	math::vec3s16 m_accel_calibration_bias;
 	math::vec3f m_accel_calibration_scale;
 
-	int16_t m_raw_mpu[7];
-	
 	mutable Thermometer_Data m_thermometer;
 	
-	mutable math::vec3f m_last_accel_data;
-	mutable float m_last_temp_data;
+	math::vec3s16 m_raw_gyro_sample;
+	
+	chrono::secondsf m_sample_time;
+	mutable math::vec3f m_gyro_data;
+	mutable math::vec3f m_accel_data;
+	mutable uint8_t m_gyro_sample_idx;
 	
 	static void poll_data(void* ptr);
-	bool refresh_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const;
+	bool refresh_data(Data& data) const;
 	//chrono::time_ms s_last_refresh_time;
 
 	void set_filter_register(uint8_t filter_hz, uint8_t default_filter);

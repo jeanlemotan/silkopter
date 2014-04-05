@@ -37,7 +37,7 @@ static uint16_t _read_uint16(uint8_t reg)
 	{
 		return buf[0];
 	}
-	TRACE_MSG("i2c failed");
+	//TRACE_MSG("i2c failed");
 	return 0;
 }
 
@@ -48,7 +48,7 @@ static uint32_t _read_adc()
 	{
 		return (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
 	}
-	TRACE_MSG("i2c failed");
+	//TRACE_MSG("i2c failed");
 	return 0;
 }
 
@@ -58,7 +58,7 @@ static void _write(uint8_t reg)
 	{
 		return;
 	}
-	TRACE_MSG("i2c failed");
+	//TRACE_MSG("i2c failed");
 }
 
 Barometer_MS5611_i2c::Barometer_MS5611_i2c()

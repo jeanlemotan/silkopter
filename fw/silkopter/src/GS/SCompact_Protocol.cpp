@@ -73,7 +73,7 @@ void SCompact_Protocol::send_board_baro_pressure(bool is_valid, float pressure)
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 }
-void SCompact_Protocol::send_board_sonar_altitude(bool is_valid, float altitude)
+void SCompact_Protocol::send_board_sonar_distance(bool is_valid, float altitude)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);

@@ -8,10 +8,7 @@ SFull_Protocol::SFull_Protocol()
 	, m_is_frame_started(false)
 	, m_is_connected(false)
 {
-	for (size_t i = 0; i < m_enabled_messages.count(); i++)
-	{
-		m_enabled_messages.set(i, 1);
-	}
+	m_enabled_messages.set();
 }
 
 SFull_Protocol::SFull_Protocol(board::UART& uart)
@@ -20,7 +17,18 @@ SFull_Protocol::SFull_Protocol(board::UART& uart)
 	, m_is_frame_started(false)
 	, m_is_connected(false)
 {
+	m_enabled_messages.set();
+	//m_enabled_messages.reset();
 		
+ 	m_enabled_messages.set(static_cast<int>(Message::HELLO_WORLD), 1);
+ 	m_enabled_messages.set(static_cast<int>(Message::START_FRAME), 1);
+ 	m_enabled_messages.set(static_cast<int>(Message::END_FRAME), 1);
+	m_enabled_messages.set(static_cast<int>(Message::BOARD_TIME_MS), 1);
+	 
+	 
+// 	m_enabled_messages.set(static_cast<int>(Message::BOARD_GYROSCOPE), 1);
+// 	m_enabled_messages.set(static_cast<int>(Message::BOARD_ACCELEROMETER), 1);
+// 	m_enabled_messages.set(static_cast<int>(Message::UAV_ATTITUDE), 1);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -42,7 +50,7 @@ static const uint8_t k_version = 1;
 //>4 : x : data
 bool SFull_Protocol::start_message(Message msg)
 {
-	if (m_enabled_messages.test(static_cast<uint8_t>(msg)))
+	if (!m_enabled_messages.test(static_cast<uint8_t>(msg)))
 	{
 		return false;
 	}
@@ -217,20 +225,20 @@ void SFull_Protocol::send_board_baro_pressure(bool is_valid, float pressure)
 	}
 	flush_message();
 }
-void SFull_Protocol::send_board_sonar_altitude(bool is_valid, float altitude)
+void SFull_Protocol::send_board_sonar_distance(bool is_valid, float distance)
 {
 	if (!m_uart) return;
 	ASSERT(m_is_frame_started);
 	if (!m_is_frame_started) return;
 
-	if (!start_message(Message::BOARD_SONAR_ALTITUDE))
+	if (!start_message(Message::BOARD_SONAR_DISTANCE))
 	{
 		return;
 	}
 	m_buffer.write(is_valid);
 	if (is_valid)
 	{
-		m_buffer.write(altitude);
+		m_buffer.write(distance);
 	}
 	flush_message();
 }

@@ -52,24 +52,23 @@ void UAV::process()
 	}
 
 	m_dt = now - m_last_time;
-	m_dts = float(m_dt.count) * 0.000001f;
+	m_dts = m_dt;
 	m_last_time = now;
 	
-	read_imu_data();
 	read_sonar_data();
 	read_gps_data();
 	read_baro_data();
 	read_compass_data();
 
-	m_status.attitude.process(m_gyroscope_data, m_accelerometer_data);
+	bool imu_valid = board::get_main_imu().get_data(m_imu_data);
+	if (imu_valid)
+	{
+		m_status.attitude.process(m_imu_data, m_dts);
+	}
 	
 	compute_linear_motion();
 }
 
-void UAV::read_imu_data()
-{
-	board::get_main_imu().get_data(m_gyroscope_data, m_accelerometer_data);
-}
 void UAV::read_sonar_data()
 {
 	//board::sonar::get_data(m_sonar_data);

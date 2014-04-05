@@ -35,6 +35,8 @@ namespace silk
 		chrono::micros m_frame_duration;
 		
 		chrono::time_us m_last_hello_time;
+		
+		math::vec3f m_last_gyroscope;
 
 		
 		bool send_data(uint32_t step); //returns true when done

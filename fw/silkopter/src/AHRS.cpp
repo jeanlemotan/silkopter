@@ -2,14 +2,19 @@
 
 using namespace silk;
 
-void AHRS::process(board::IMU::Gyroscope_Data const& gdata, board::IMU::Accelerometer_Data const& adata)
+void AHRS::process(board::IMU::Data const& data, chrono::secondsf dt)
 {
-	auto const& gyro = gdata.delta;
-	//gyro.z = 0; //TODO - use compass
-	m_euler += math::vec3f(gyro.x, gyro.y, 0) * gdata.dt.count;
+	if (data.sample_idx != m_last_sample_idx)
+	{
+		m_last_sample_idx = data.sample_idx;
+		
+		auto const& gyro = data.gyroscope;
+		//gyro.z = 0; //TODO - use compass
+		m_euler += math::vec3f(gyro.x, gyro.y, 0);
+	}
 	
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP
-	auto const& accel = adata.acceleration;
+	auto const& accel = data.acceleration;
 	if (accel.z > 0.1f)
  	{
 		//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
@@ -20,7 +25,7 @@ void AHRS::process(board::IMU::Gyroscope_Data const& gdata, board::IMU::Accelero
 		//m_euler.y = math::lerp(m_euler.y, accel_roll_y, gdata.dt.count);
  	}
 	
-	m_local_quaternion.set_from_euler_xyz<math::fast>(gyro);
+	m_local_quaternion.set_from_euler_xyz<math::fast>(m_euler);
 	m_local_quaternion.get_as_mat3<math::fast>(m_local_rotation);
 	m_world_quaternion = math::inverse<float, math::fast>(m_local_quaternion);
 	m_world_quaternion.get_as_mat3<math::fast>(m_world_rotation);

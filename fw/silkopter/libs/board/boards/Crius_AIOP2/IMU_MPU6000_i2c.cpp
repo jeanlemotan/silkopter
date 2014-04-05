@@ -13,8 +13,6 @@
 namespace board
 {
 
-//#define DISABLE_INTERNAL_MAG
-
 // MPU 6000 I2C Address
 #define MPU6000_ADDR 0x68
 
@@ -167,6 +165,9 @@ namespace board
  */
 //static const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
 static const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
+//static const float s_gyro_scale = (0.0174532f / 65.5f); //500dps
+
+static const float s_fp_g = physics::constants::g / 4096.f;
 
 IMU_MPU6000_i2c::IMU_MPU6000_i2c()
 	: m_mpu_addr(MPU6000_ADDR)
@@ -180,6 +181,17 @@ IMU_MPU6000_i2c::IMU_MPU6000_i2c()
 
 //================ HARDWARE FUNCTIONS ==================== 
 
+struct Raw_MPU_Data
+{
+	int16_t ax;
+	int16_t ay;
+	int16_t az;
+	int16_t temp;
+	int16_t gx;
+	int16_t gy;
+	int16_t gz;
+};
+
 void IMU_MPU6000_i2c::poll_data(void* ptr)
 {
 	auto* imu = reinterpret_cast<IMU_MPU6000_i2c*>(ptr);
@@ -190,25 +202,55 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 
 		if (i2c::try_lock())
 		{
+			Raw_MPU_Data raw_data;
+			
 			auto& buffer = imu->m_buffers[imu->m_buffer_idx];
 
-			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(imu->m_raw_mpu), 7))
+			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(&raw_data), 7))
 			{
-				buffer.accel_sum.x	+= imu->m_raw_mpu[0] - imu->m_accel_calibration_bias.x;
-				buffer.accel_sum.y	+= imu->m_raw_mpu[1] - imu->m_accel_calibration_bias.y;
-				buffer.accel_sum.z	+= imu->m_raw_mpu[2] - imu->m_accel_calibration_bias.z;
+				buffer.accel_sum.x	+= raw_data.ax - imu->m_accel_calibration_bias.x;
+				buffer.accel_sum.y	+= raw_data.ay - imu->m_accel_calibration_bias.y;
+				buffer.accel_sum.z	+= raw_data.az - imu->m_accel_calibration_bias.z;
 				
-				buffer.temp_sum		+= imu->m_raw_mpu[3];
-				buffer.gyro_sum.x	+= imu->m_raw_mpu[4] - imu->m_gyro_calibration_bias.x;
-				buffer.gyro_sum.y	+= imu->m_raw_mpu[5] - imu->m_gyro_calibration_bias.y;
-				buffer.gyro_sum.z	+= imu->m_raw_mpu[6] - imu->m_gyro_calibration_bias.z;
+				buffer.temp_sum		+= raw_data.temp;
+				
+				//if saturated, use the last sample
+				if (raw_data.gx < -32000 || raw_data.gx > 32000)
+				{
+					raw_data.gx = imu->m_raw_gyro_sample.x;
+				}
+				else
+				{
+					imu->m_raw_gyro_sample.x = raw_data.gx;
+				}
+				if (raw_data.gy < -32000 || raw_data.gy > 32000)
+				{
+					raw_data.gy = imu->m_raw_gyro_sample.y;
+				}
+				else
+				{
+					imu->m_raw_gyro_sample.y = raw_data.gy;
+				}
+				if (raw_data.gz < -32000 || raw_data.gz > 32000)
+				{
+					raw_data.gz = imu->m_raw_gyro_sample.z;
+				}
+				else
+				{
+					imu->m_raw_gyro_sample.z = raw_data.gz;
+				}
+				
+				buffer.gyro_sum.x	+= raw_data.gx - imu->m_gyro_calibration_bias.x;
+				buffer.gyro_sum.y	+= raw_data.gy - imu->m_gyro_calibration_bias.y;
+				buffer.gyro_sum.z	+= raw_data.gz - imu->m_gyro_calibration_bias.z;
+				
+				//PRINT("\nGYRO: {0}", (const math::vec3s32&)buffer.gyro_sum);
 				
 				buffer.sample_count++;
 			}
 			else
 			{
-				//PRINT("\ni2c failed");
-				TRACE_MSG("i2c failed");
+				//TRACE_MSG("i2c failed");
 			}
 
 			i2c::unlock();
@@ -301,18 +343,22 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     case Sample_Rate::_50_HZ:
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
+		m_sample_time = chrono::millis(20);
         break;
     case Sample_Rate::_100_HZ:
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
+		m_sample_time = chrono::millis(10);
         break;
     case Sample_Rate::_250_HZ:
 		rate = MPUREG_SMPLRT_250HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
+		m_sample_time = chrono::millis(4);
 		break;
     case Sample_Rate::_500_HZ:
 		rate = MPUREG_SMPLRT_500HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
+		m_sample_time = chrono::millis(2);
 	    break;
     default:
 		rate = 0;
@@ -357,32 +403,17 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 			
     clock::delay(chrono::millis(1));
 
-#ifndef DISABLE_INTERNAL_MAG
     // Enable I2C bypass mode, to work with Magnetometer 5883L
     // Disable I2C Master mode
     i2c::write_register(m_mpu_addr, MPUREG_USER_CTRL, 0);
     i2c::write_register(m_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
-#endif
-    
-/*  Dump MPU6050 registers  
-    hal.console->println_P(PSTR("MPU6000 registers"));
-    for (uint8_t reg=MPUREG_PRODUCT_ID; reg<=108; reg++) {
-    	  i2c::readRegister(s_mpu_addr, reg, &reg_val);
-        hal.console->printf_P(PSTR("%02x:%02x "), (unsigned)reg, (unsigned)reg_val);
-        if ((reg - (MPUREG_PRODUCT_ID-1)) % 16 == 0) {
-            hal.console->println();
-        }
-    }
-    hal.console->println();*/
-
-	//t_read_data_transaction();
     
     i2c::unlock();
 	
     return true;
 }
 
-bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& _gdata, Accelerometer_Data& _adata) const
+bool IMU_MPU6000_i2c::refresh_data(Data& data) const
 {
 #ifdef SIMULATOR
 	m_buffers[m_buffer_idx].sample_count = 1;
@@ -401,11 +432,15 @@ bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& _gdata, Accelerometer_Data& _
 		float sc = float(buffer.sample_count);
 		buffer.sample_count = 0;
 
-		_gdata.delta.set((math::vec3s32&)(buffer.gyro_sum));
-		((math::vec3s32&)buffer.gyro_sum).set(0, 0, 0);
+		m_gyro_data.set((math::vec3s32&)(buffer.gyro_sum));
+		buffer.gyro_sum.x = 0;
+		buffer.gyro_sum.y = 0;
+		buffer.gyro_sum.z = 0;
 
-		m_last_accel_data.set((math::vec3s32&)(buffer.accel_sum));
-		((math::vec3s32&)buffer.accel_sum).set(0, 0, 0);
+		m_accel_data.set((math::vec3s32&)(buffer.accel_sum));
+		buffer.accel_sum.x = 0;
+		buffer.accel_sum.y = 0;
+		buffer.accel_sum.z = 0;
 
 		float temp = float(buffer.temp_sum);
 		buffer.temp_sum = 0;
@@ -415,35 +450,27 @@ bool IMU_MPU6000_i2c::refresh_data(Gyroscope_Data& _gdata, Accelerometer_Data& _
 
 		float scinv = 1.f / sc;
 	
-		auto now = clock::now_us();
-		chrono::secondsf dt = now - m_last_refresh_time;
-		m_last_refresh_time = now;
+		//auto now = clock::now_us();
+		//chrono::secondsf dt = now - m_last_refresh_time;
+		//m_last_refresh_time = now;
 
 		//////////////////////////////////////////////////////////////////////////
 		//scale the accel and apply the calibration offset
-		m_last_accel_data *= (scinv * physics::constants::g / 4096.f); // divided by 4096
-		m_last_accel_data *= m_accel_calibration_scale;
-		_adata.dt = dt;
+		m_accel_data *= (scinv * s_fp_g); // divided by 4096
+		m_accel_data *= m_accel_calibration_scale;
 
-		_gdata.dt = dt;
-		_gdata.delta *= s_gyro_scale * scinv;
+		m_gyro_data *= s_gyro_scale * m_sample_time.count;// * scinv;
+		m_gyro_sample_idx ++;
 	
 		//From the specs: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
-		m_last_temp_data = temp * scinv * 0.002941f + 36.53f;
-
-	}
-	else
-	{
-		_adata.dt.count = 0;	
-		_gdata.dt.count = 0;	
-		_gdata.delta.set(0, 0, 0);
+		m_thermometer.m_is_valid = true;
+		m_thermometer.m_data.degrees = temp * scinv * 0.002941f + 36.53f;
 	}
 
-
-	m_thermometer.m_is_valid = true;
-	m_thermometer.m_data.degrees = m_last_temp_data;
-	
-	_adata.acceleration = m_last_accel_data;
+	data.acceleration = m_accel_data;
+	data.gyroscope = m_gyro_data;
+	data.sample_idx = m_gyro_sample_idx;
+	data.dt = m_sample_time;
 
 	return true;
 }
@@ -486,10 +513,10 @@ void IMU_MPU6000_i2c::init(Sample_Rate rate)
 	board::scheduler::register_callback(&poll_data, this);
 }
 
-bool IMU_MPU6000_i2c::get_data(Gyroscope_Data& gdata, Accelerometer_Data& adata) const
+bool IMU_MPU6000_i2c::get_data(Data& data) const
 {
 	ASSERT(m_is_initialised);
-	return refresh_data(gdata, adata);
+	return refresh_data(data);
 }
 
 void IMU_MPU6000_i2c::set_gyroscope_bias(math::vec3f const& bias)

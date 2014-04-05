@@ -8,10 +8,9 @@ namespace silk
 
 class AHRS : util::Noncopyable
 {
-	public:
+public:
 
-	void process(board::IMU::Gyroscope_Data const& gdata,
-				board::IMU::Accelerometer_Data const& adata);
+	void process(board::IMU::Data const& data, chrono::secondsf dt);
 		
 	//returns the euler along all three axis
 	math::vec3f const& get_euler() const;
@@ -25,7 +24,9 @@ class AHRS : util::Noncopyable
 	math::quatf const& get_world_to_local_quaternion() const;
 	math::mat3f const& get_world_to_local_rotation() const;
 		
-	private:
+private:
+	uint8_t m_last_sample_idx;
+	
 	math::vec3f m_euler;
 	math::mat3f m_local_rotation;
 	math::quatf m_local_quaternion;
