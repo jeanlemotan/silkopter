@@ -33,10 +33,10 @@ void SFull_Protocol::serial_callback(const boost::system::error_code& error, siz
 	{
 		std::lock_guard<std::mutex> lg(m_buffer_mutex);
 		m_buffer.insert(m_buffer.end(), m_serial_buffer.begin(), m_serial_buffer.begin() + bytes_transferred);
-		for (size_t i = 0; i < bytes_transferred; i++)
-		{
-			putchar(m_serial_buffer[i]);
-		}
+// 		for (size_t i = 0; i < bytes_transferred; i++)
+// 		{
+// 			putchar(m_serial_buffer[i]);
+// 		}
 	}
 
 	//m_serial_buffer[bytes_transferred] = 0;
@@ -47,11 +47,13 @@ void SFull_Protocol::serial_callback(const boost::system::error_code& error, siz
 
 void SFull_Protocol::read_async()
 {
-	m_port.async_read_some(boost::asio::buffer((char*)m_serial_buffer.data(), m_serial_buffer.size() - 1),
-		boost::bind(&SFull_Protocol::serial_callback, 
-		this,
-		boost::asio::placeholders::error, 
-		boost::asio::placeholders::bytes_transferred));
+// 	m_port.async_read_some(boost::asio::buffer((char*)m_serial_buffer.data(), m_serial_buffer.size() - 1),
+// 		boost::bind(&SFull_Protocol::serial_callback, 
+// 		this,
+// 		boost::asio::placeholders::error, 
+// 		boost::asio::placeholders::bytes_transferred));
+
+//	boost::asio::read(m_port, boost::asio::buffer((char*)m_serial_buffer.data(), m_serial_buffer.size() - 1));
 }
 
 void SFull_Protocol::listen_for_connection(std::string const& com_port, uint32_t baud)
@@ -80,9 +82,15 @@ void SFull_Protocol::listen_for_connection(std::string const& com_port, uint32_t
 		{
 			while (!m_stop_thread)
 			{
-				if (m_io.poll_one())
+				boost::asio::read(m_port, boost::asio::buffer((char*)m_serial_buffer.data(), m_serial_buffer.size()));
+				for (size_t i = 0; i < m_serial_buffer.size(); i++)
 				{
-					m_io.run_one();
+					putchar(m_serial_buffer[i]);
+				}
+
+				{
+					std::lock_guard<std::mutex> lg(m_buffer_mutex);
+					m_buffer.insert(m_buffer.end(), m_serial_buffer.begin(), m_serial_buffer.end());
 				}
 			}
 			m_is_listening = false;
@@ -148,7 +156,7 @@ static const uint8_t MSG_BOARD_GYROSCOPE = 10;
 static const uint8_t MSG_BOARD_ACCELEROMETER = 11;
 static const uint8_t MSG_BOARD_TEMPERATURE = 12;
 static const uint8_t MSG_BOARD_BARO_PRESSURE = 13;
-static const uint8_t MSG_BOARD_SONAR_ALTITUDE = 14;
+static const uint8_t MSG_BOARD_SONAR_DISTANCE = 14;
 static const uint8_t MSG_BOARD_GPS_ALTITUDE = 15;
 static const uint8_t MSG_BOARD_RC_IN = 16;
 static const uint8_t MSG_BOARD_PWM_OUT = 17;
@@ -315,10 +323,10 @@ bool SFull_Protocol::process_message()
 				data_board_baro_pressure.received_frame_idx = m_last_frame_idx;
 			}
 			break;
-		case MSG_BOARD_SONAR_ALTITUDE:
+		case MSG_BOARD_SONAR_DISTANCE:
 			{
-				read_optional_data(data_board_sonar_altitude, m_buffer, off);
-				data_board_sonar_altitude.received_frame_idx = m_last_frame_idx;
+				read_optional_data(data_board_sonar_distance, m_buffer, off);
+				data_board_sonar_distance.received_frame_idx = m_last_frame_idx;
 			}
 			break;
 		case MSG_BOARD_GPS_ALTITUDE:

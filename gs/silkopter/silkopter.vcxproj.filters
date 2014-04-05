@@ -62,6 +62,9 @@
     <ClCompile Include="SFull_Protocol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sensors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_Silkopter.h">
@@ -74,6 +77,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SFull_Protocol.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_Sensors.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensors.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,6 +98,9 @@
     </CustomBuild>
     <CustomBuild Include="Silkopter.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sensors.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

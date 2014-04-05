@@ -30,7 +30,7 @@ public:
 	Data<math::vec3f> data_board_accelerometer;
 	Data<float> data_board_temperature;
 	Data<float> data_board_baro_pressure;
-	Data<float> data_board_sonar_altitude;
+	Data<float> data_board_sonar_distance;
 	Data<float> data_board_gps_altitude;
 	Data<math::vec3f> data_uav_acceleration;
 	Data<math::vec3f> data_uav_velocity;
@@ -45,7 +45,7 @@ private:
 	boost::asio::serial_port m_port;
 	std::thread m_io_thread;
 	bool m_stop_thread;
-	std::array<uint8_t, 128> m_serial_buffer;
+	std::array<uint8_t, 8> m_serial_buffer;
 
 	std::mutex m_buffer_mutex;
 	std::vector<uint8_t> m_buffer;

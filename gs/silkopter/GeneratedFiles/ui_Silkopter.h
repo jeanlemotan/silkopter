@@ -18,11 +18,11 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include "Orientations.h"
-#include "qcustomplot.h"
+#include "Sensors.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -31,13 +31,11 @@ class Ui_SilkopterClass
 public:
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout;
+    QTabWidget *tab_3;
+    QWidget *info_tab;
+    QWidget *sensors_tab;
     QVBoxLayout *verticalLayout;
-    QCustomPlot *plot;
-    QCustomPlot *plot2;
-    QWidget *widget;
-    QVBoxLayout *verticalLayout_2;
-    Orientations *orientation;
-    Orientations *orientation2;
+    Sensors *sensors;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -46,55 +44,39 @@ public:
     {
         if (SilkopterClass->objectName().isEmpty())
             SilkopterClass->setObjectName(QStringLiteral("SilkopterClass"));
-        SilkopterClass->resize(600, 400);
+        SilkopterClass->resize(884, 684);
         centralWidget = new QWidget(SilkopterClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         horizontalLayout = new QHBoxLayout(centralWidget);
         horizontalLayout->setSpacing(2);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 20, 0);
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setSpacing(6);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        tab_3 = new QTabWidget(centralWidget);
+        tab_3->setObjectName(QStringLiteral("tab_3"));
+        info_tab = new QWidget();
+        info_tab->setObjectName(QStringLiteral("info_tab"));
+        tab_3->addTab(info_tab, QString());
+        sensors_tab = new QWidget();
+        sensors_tab->setObjectName(QStringLiteral("sensors_tab"));
+        verticalLayout = new QVBoxLayout(sensors_tab);
+        verticalLayout->setSpacing(0);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        plot = new QCustomPlot(centralWidget);
-        plot->setObjectName(QStringLiteral("plot"));
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        sensors = new Sensors(sensors_tab);
+        sensors->setObjectName(QStringLiteral("sensors"));
 
-        verticalLayout->addWidget(plot);
+        verticalLayout->addWidget(sensors);
 
-        plot2 = new QCustomPlot(centralWidget);
-        plot2->setObjectName(QStringLiteral("plot2"));
+        tab_3->addTab(sensors_tab, QString());
 
-        verticalLayout->addWidget(plot2);
-
-
-        horizontalLayout->addLayout(verticalLayout);
-
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setMaximumSize(QSize(160, 16777215));
-        verticalLayout_2 = new QVBoxLayout(widget);
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        orientation = new Orientations(widget);
-        orientation->setObjectName(QStringLiteral("orientation"));
-        orientation->setMaximumSize(QSize(16777215, 16777215));
-
-        verticalLayout_2->addWidget(orientation);
-
-        orientation2 = new Orientations(widget);
-        orientation2->setObjectName(QStringLiteral("orientation2"));
-
-        verticalLayout_2->addWidget(orientation2);
-
-
-        horizontalLayout->addWidget(widget);
+        horizontalLayout->addWidget(tab_3);
 
         SilkopterClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(SilkopterClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 600, 21));
+        menuBar->setGeometry(QRect(0, 0, 884, 21));
         SilkopterClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(SilkopterClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -105,12 +87,17 @@ public:
 
         retranslateUi(SilkopterClass);
 
+        tab_3->setCurrentIndex(1);
+
+
         QMetaObject::connectSlotsByName(SilkopterClass);
     } // setupUi
 
     void retranslateUi(QMainWindow *SilkopterClass)
     {
         SilkopterClass->setWindowTitle(QApplication::translate("SilkopterClass", "Silkopter", 0));
+        tab_3->setTabText(tab_3->indexOf(info_tab), QApplication::translate("SilkopterClass", "Info", 0));
+        tab_3->setTabText(tab_3->indexOf(sensors_tab), QApplication::translate("SilkopterClass", "Sensors", 0));
     } // retranslateUi
 
 };

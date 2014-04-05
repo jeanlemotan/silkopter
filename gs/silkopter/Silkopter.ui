@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>884</width>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,44 +25,46 @@
      <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>20</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QCustomPlot" name="plot" native="true"/>
-      </item>
-      <item>
-       <widget class="QCustomPlot" name="plot2" native="true"/>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QWidget" name="widget" native="true">
-      <property name="maximumSize">
-       <size>
-        <width>160</width>
-        <height>16777215</height>
-       </size>
+     <widget class="QTabWidget" name="tab_3">
+      <property name="currentIndex">
+       <number>1</number>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="Orientations" name="orientation" native="true">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="Orientations" name="orientation2" native="true"/>
-       </item>
-      </layout>
+      <widget class="QWidget" name="info_tab">
+       <attribute name="title">
+        <string>Info</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="sensors_tab">
+       <attribute name="title">
+        <string>Sensors</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="Sensors" name="sensors" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -72,7 +74,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>884</width>
      <height>21</height>
     </rect>
    </property>
@@ -90,15 +92,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Sensors</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Orientations</class>
-   <extends>QWidget</extends>
-   <header>Orientations.h</header>
+   <header>Sensors.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
