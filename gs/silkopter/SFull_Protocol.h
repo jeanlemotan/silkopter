@@ -3,6 +3,7 @@
 class SFull_Protocol : boost::noncopyable
 {
 public:
+
 	SFull_Protocol();
 	~SFull_Protocol();
 
@@ -13,17 +14,19 @@ public:
 
 	void process();
 
+	void set_board_gyroscope_bias(math::vec3f const& bias);
+	void set_board_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
+
 	template<class Payload>
 	struct Data
 	{
-		Data() : received_frame_idx(0), is_valid(false), value() {}
-		uint32_t received_frame_idx;
+		Data() : is_valid(false), value() {}
 		bool is_valid;
 		Payload value;
 	};
 
 	Data<uint8_t> data_board_cpu_usage;
-	Data<uint32_t> data_board_time_ms;
+	Data<uint32_t> data_board_time;
 	Data<std::vector<int16_t>> data_board_rc_in;
 	Data<std::vector<int16_t>> data_board_pwm_out;
 	Data<math::vec3f> data_board_gyroscope;
@@ -47,19 +50,60 @@ private:
 	bool m_stop_thread;
 	std::array<uint8_t, 8> m_serial_buffer;
 
-	std::mutex m_buffer_mutex;
-	std::vector<uint8_t> m_buffer;
+	std::mutex m_rx_buffer_mutex;
+	std::vector<uint8_t> m_rx_buffer;
 
-	void serial_callback(const boost::system::error_code& error, size_t bytes_transferred);
-	void read_async();
-	//void process_hello_world();
+	std::mutex m_tx_buffer_mutex;
+	std::vector<uint8_t> m_tx_buffer;
+
+	enum class Message
+	{
+		HELLO_WORLD = 253,
+
+		//////////////////////////////////////////////////////////////////////////
+		//BOARD
+
+		BOARD_CPU_USAGE = 0,
+		BOARD_TIME = 1,
+		BOARD_GYROSCOPE = 10,
+		BOARD_ACCELEROMETER = 11,
+		BOARD_TEMPERATURE = 12,
+		BOARD_BARO_PRESSURE = 13,
+		BOARD_SONAR_DISTANCE = 14,
+		BOARD_GPS_ALTITUDE = 15,
+		BOARD_RC_IN = 16,
+		BOARD_PWM_OUT = 17,
+
+		//////////////////////////////////////////////////////////////////////////
+		//UAV
+
+		UAV_ACCELERATION = 30,
+		UAV_VELOCITY = 31,
+		UAV_POSITION = 32,
+		UAV_ATTITUDE = 33,
+		UAV_PHASE = 34,
+		UAV_CONTROL_MODE = 35,
+		UAV_CONTROL_REFERENCE_FRAME = 36,
+	};
+
+	//each has a corresponding receive method
+	enum class Command
+	{
+		//control messages
+		SET_MESSAGE_ENABLED,
+		SET_ALL_MESSAGES_ENABLED,
+
+		//calibration
+		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
+		SET_BOARD_GYROSCOPE_BIAS,
+	};
+
+	bool start_command(Command cmd);
+	void flush_command();
+
 	bool process_message();
 	uint16_t compute_crc(uint8_t const* data, size_t size) const;
 
-	bool m_is_frame_started;
-
 	std::string m_uav_message;
 	uint16_t m_uav_version;
-
-	uint32_t m_last_frame_idx;
 };

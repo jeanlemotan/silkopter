@@ -16,7 +16,7 @@ private:
 
 	Ui::Sensors m_ui;
 
-	uint32_t m_last_time_ms;
+	uint32_t m_last_time_us;
 	std::chrono::high_resolution_clock::time_point m_last_time;
 };
 

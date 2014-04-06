@@ -43,24 +43,24 @@ void Sensors::update(SFull_Protocol& protocol)
 
 	if (protocol.is_connected())
 	{
-		uint32_t time_ms = protocol.data_board_time_ms.value;
-		if (time_ms != m_last_time_ms)
+		uint32_t time_us = protocol.data_board_time.value;
+		if (time_us != m_last_time_us)
 		{
-			m_last_time_ms = time_ms;
+			m_last_time_us = time_us;
 
 			static const float graph_length_seconds = 3.f;
 
-			double seconds = double(time_ms) / 1000.0;
+			double seconds = double(time_us) / 1000000.0;
 			//static double seconds = 0;// double(time_ms) / 1000.0;
 			//seconds += 0.01f;
 
-// 			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_board_gyroscope.value.x);
-// 			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_board_gyroscope.value.y);
-// 			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_board_gyroscope.value.z);
+			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_board_gyroscope.value.x);
+			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_board_gyroscope.value.y);
+			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_board_gyroscope.value.z);
 
-			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_uav_attitude.value.x);
-			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_uav_attitude.value.y);
-			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_uav_attitude.value.z);
+// 			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_uav_attitude.value.x);
+// 			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_uav_attitude.value.y);
+// 			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_uav_attitude.value.z);
 
 			m_ui.accel_plot->graph(0)->addData(seconds, protocol.data_board_accelerometer.value.x);
 			m_ui.accel_plot->graph(1)->addData(seconds, protocol.data_board_accelerometer.value.y);
