@@ -3,6 +3,7 @@
 
 //async_read doesn't work with std::bind
 #include "boost/bind.hpp"
+#include <thread>
 
 
 SFull_Protocol::SFull_Protocol()
@@ -137,34 +138,44 @@ void SFull_Protocol::process()
 
 	std::lock_guard<std::mutex> lg(m_rx_buffer_mutex);
 
-	while (!process_message())
+	bool needs_more_data = false;
+	do
 	{
-	}
+		auto header = decode_header(needs_more_data);
+		if (header)
+		{
+			process_rx_message(*header);
+		}
+	} while (!needs_more_data);
 //	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
+//////////////////////////////////////////////////////////////////////////
 
-bool SFull_Protocol::process_message()
+boost::optional<SFull_Protocol::Header> SFull_Protocol::decode_header(bool& needs_more_data)
 {
-//	printf("\nsize = %d", m_buffer.size());
-	if (m_rx_buffer.size() < 4)
+	needs_more_data = false;
+
+	if (m_rx_buffer.size() < sizeof(Header))
 	{
-		return true;
+		needs_more_data = true;
+		return boost::optional<Header>();
 	}
 
 	size_t off = 0;
-	auto msg = static_cast<Message>(get_value<uint8_t>(m_rx_buffer, off));
+	auto msg = static_cast<RX_Message>(get_value<uint8_t>(m_rx_buffer, off));
 	auto size = get_value<uint8_t>(m_rx_buffer, off);
 	auto crc = get_value<uint16_t>(m_rx_buffer, off);
-	if (size < 4)
+	if (size < sizeof(Header))
 	{
 		int a = 0;
 		pop_front(m_rx_buffer); //msg
-		return false;
+		return boost::optional<Header>();
 	}
 	if (m_rx_buffer.size() < size)
 	{
-		return true;
+		needs_more_data = true;
+		return boost::optional<Header>();
 	}
 	//clear crc bytes and compute crc
 	auto crc2 = m_rx_buffer[2];
@@ -181,14 +192,25 @@ bool SFull_Protocol::process_message()
 		m_rx_buffer[2] = crc2;
 		m_rx_buffer[3] = crc3;
 		pop_front(m_rx_buffer); //msg
-		return false;
+		return boost::optional<Header>();
 	}
 
-	if (m_is_connected || msg == Message::HELLO_WORLD)
+	pop_front(m_rx_buffer, 4); //msg
+	Header header;
+	header.msg = msg;
+	header.size = size;
+	header.crc = crc;
+	return boost::optional<Header>(header);
+}
+
+void SFull_Protocol::process_rx_message(Header const& header)
+{
+	size_t off = 0;
+	if (m_is_connected || header.msg == RX_Message::HELLO_WORLD)
 	{
-		switch (msg)
+		switch (header.msg)
 		{
-		case Message::HELLO_WORLD:
+		case RX_Message::HELLO_WORLD:
 			{
 				if (!m_is_connected)
 				{
@@ -218,67 +240,67 @@ bool SFull_Protocol::process_message()
 				}
 			}
 			break;
-		case Message::BOARD_CPU_USAGE:
+		case RX_Message::BOARD_CPU_USAGE:
 			{
 				data_board_cpu_usage.is_valid = true;
 				data_board_cpu_usage.value = get_value<uint8_t>(m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_TIME:
+		case RX_Message::BOARD_TIME:
 			{
 				data_board_time.is_valid = true;
 				data_board_time.value = get_value<uint32_t>(m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_GYROSCOPE:
+		case RX_Message::BOARD_GYROSCOPE:
 			{
 				read_optional_data(data_board_gyroscope, m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_ACCELEROMETER:
+		case RX_Message::BOARD_ACCELEROMETER:
 			{
 				read_optional_data(data_board_accelerometer, m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_TEMPERATURE:
+		case RX_Message::BOARD_TEMPERATURE:
 			{
 				read_optional_data(data_board_temperature, m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_BARO_PRESSURE:
+		case RX_Message::BOARD_BARO_PRESSURE:
 			{
 				read_optional_data(data_board_baro_pressure, m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_SONAR_DISTANCE:
+		case RX_Message::BOARD_SONAR_DISTANCE:
 			{
 				read_optional_data(data_board_sonar_distance, m_rx_buffer, off);
 			}
 			break;
-		case Message::BOARD_GPS_ALTITUDE:
+		case RX_Message::BOARD_GPS_ALTITUDE:
 			{
 				read_optional_data(data_board_gps_altitude, m_rx_buffer, off);
 			}
 			break;
-		case Message::UAV_ACCELERATION:
+		case RX_Message::UAV_ACCELERATION:
 			{
 				data_uav_acceleration.value = get_value<math::vec3f>(m_rx_buffer, off);
 				data_uav_acceleration.is_valid = true;
 			}
 			break;
-		case Message::UAV_VELOCITY:
+		case RX_Message::UAV_VELOCITY:
 			{
 				data_uav_velocity.value = get_value<math::vec3f>(m_rx_buffer, off);
 				data_uav_velocity.is_valid = true;
 			}
 			break;
-		case Message::UAV_POSITION:
+		case RX_Message::UAV_POSITION:
 			{
 				data_uav_position.value = get_value<math::vec3f>(m_rx_buffer, off);
 				data_uav_position.is_valid = true;
 			}
 			break;
-		case Message::UAV_ATTITUDE:
+		case RX_Message::UAV_ATTITUDE:
 			{
 				data_uav_attitude.value = get_value<math::vec3f>(m_rx_buffer, off);
 				data_uav_attitude.is_valid = true;
@@ -292,8 +314,7 @@ bool SFull_Protocol::process_message()
 		}
 	}
 
-	pop_front(m_rx_buffer, size);
-	return false;
+	pop_front(m_rx_buffer, header.size);
 }
 
 static uint16_t crc16_update(uint16_t crc, uint8_t a)
@@ -326,41 +347,73 @@ uint16_t SFull_Protocol::compute_crc(uint8_t const* data, size_t size) const
 	return crc;
 }
 
-//command structure:
+//tx_message structure:
 //offset : size : description
 //0	: 1 : msg
 //1 : 1 : size
 //2 : 2 : crc of everything excluding these 2 bytes (they are zeroed before)
 //>4 : x : data
-bool SFull_Protocol::start_command(Command cmd)
+void SFull_Protocol::start_tx_message(TX_Message msg)
 {
 	m_tx_buffer.clear();
-	add_value(m_tx_buffer, static_cast<uint8_t>(cmd));
+	add_value(m_tx_buffer, static_cast<uint8_t>(msg));
 	add_value(m_tx_buffer, uint8_t(0));
 	add_value(m_tx_buffer, uint16_t(0));
-	return true;
 }
-void SFull_Protocol::flush_command()
+uint16_t SFull_Protocol::flush_tx_message()
 {
 	set_value(m_tx_buffer, uint8_t(m_tx_buffer.size()), 1);
 	uint16_t crc = compute_crc(m_tx_buffer.data(), m_tx_buffer.size());
 	set_value(m_tx_buffer, crc, 2);
 	boost::asio::write(m_port, boost::asio::buffer(m_tx_buffer.data(), m_tx_buffer.size()));
+	return crc;
 }
 
-void SFull_Protocol::set_board_gyroscope_bias(math::vec3f const& bias)
+bool SFull_Protocol::set_board_gyroscope_bias(math::vec3f const& bias)
 {
-	start_command(Command::SET_BOARD_GYROSCOPE_BIAS);
+	start_tx_message(TX_Message::SET_BOARD_GYROSCOPE_BIAS);
 	add_value(m_tx_buffer, bias);
-	flush_command();
+	auto crc = flush_tx_message();
+
+	return wait_for_response(crc, std::chrono::seconds(1));
 }
 
-void SFull_Protocol::set_board_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
+bool SFull_Protocol::set_board_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
 {
-	start_command(Command::SET_BOARD_ACCELEROMETER_BIAS_SCALE);
+	start_tx_message(TX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE);
 	add_value(m_tx_buffer, bias);
 	add_value(m_tx_buffer, scale);
-	flush_command();
+	auto crc = flush_tx_message();
+
+	return wait_for_response(crc, std::chrono::seconds(1));
 }
+
+bool SFull_Protocol::wait_for_response(uint16_t expected_crc, std::chrono::high_resolution_clock::duration timeout)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+
+	do
+	{
+		std::lock_guard<std::mutex> lg(m_rx_buffer_mutex);
+		bool needs_more_data = false;
+		auto header = decode_header(needs_more_data);
+		if (header)
+		{
+			if (header->msg == RX_Message::ACKNOLEDGE)
+			{
+				size_t off = 0;
+				uint16_t crc = get_value<uint16_t>(m_rx_buffer, off);
+				if (expected_crc == crc)
+				{
+					return true;
+				}
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	} while (std::chrono::high_resolution_clock::now() - start < timeout);
+
+	return false;
+}
+
 
 

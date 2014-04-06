@@ -1,9 +1,10 @@
 #pragma once
 
+#include <boost/optional.hpp>
+
 class SFull_Protocol : boost::noncopyable
 {
 public:
-
 	SFull_Protocol();
 	~SFull_Protocol();
 
@@ -14,8 +15,8 @@ public:
 
 	void process();
 
-	void set_board_gyroscope_bias(math::vec3f const& bias);
-	void set_board_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
+	bool set_board_gyroscope_bias(math::vec3f const& bias);
+	bool set_board_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
 
 	template<class Payload>
 	struct Data
@@ -56,9 +57,10 @@ private:
 	std::mutex m_tx_buffer_mutex;
 	std::vector<uint8_t> m_tx_buffer;
 
-	enum class Message
+	enum class RX_Message : uint8_t
 	{
 		HELLO_WORLD = 253,
+		ACKNOLEDGE = 254,
 
 		//////////////////////////////////////////////////////////////////////////
 		//BOARD
@@ -87,21 +89,31 @@ private:
 	};
 
 	//each has a corresponding receive method
-	enum class Command
+	enum class TX_Message
 	{
 		//control messages
-		SET_MESSAGE_ENABLED,
-		SET_ALL_MESSAGES_ENABLED,
+		SET_RX_MESSAGE_ENABLED,
+		SET_ALL_RX_MESSAGES_ENABLED,
 
 		//calibration
 		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
 		SET_BOARD_GYROSCOPE_BIAS,
 	};
 
-	bool start_command(Command cmd);
-	void flush_command();
+	struct Header
+	{
+		RX_Message msg;
+		uint8_t size;
+		uint16_t crc;
+	};
 
-	bool process_message();
+	void start_tx_message(TX_Message msg);
+	uint16_t flush_tx_message();
+
+	boost::optional<Header> decode_header(bool& needs_more_data);
+	bool wait_for_response(uint16_t expected_crc, std::chrono::high_resolution_clock::duration timeout);
+
+	void process_rx_message(Header const& header);
 	uint16_t compute_crc(uint8_t const* data, size_t size) const;
 
 	std::string m_uav_message;
