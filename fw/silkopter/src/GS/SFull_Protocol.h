@@ -19,13 +19,10 @@ public:
 	void send_hello_world(const Message_String& msg, uint16_t version);
 	bool is_connected() const;
 	
-	void send_start_frame();
-	void send_end_frame();
-	
 	bool is_message_enabled(Message msg) const;
 	
 	void send_board_cpu_usage(uint8_t cpu_usage_percent);
-	void send_board_time_ms(chrono::time_ms time);
+	void send_board_time(chrono::time_us time);
 	
 	void send_board_gyroscope(bool is_valid, math::vec3f const& gyro);
 	void send_board_accelerometer(bool is_valid, math::vec3f const& accel);
@@ -52,8 +49,6 @@ private:
 
 	board::UART* m_uart;
 	util::CRC_Buffer<255> m_buffer;
-	uint32_t m_last_frame_idx;
-	bool m_is_frame_started;
 	bool m_is_connected;
 	
 	std::bitset<256> m_enabled_messages;

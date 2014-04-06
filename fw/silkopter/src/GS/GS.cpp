@@ -57,14 +57,6 @@ void GS::process(chrono::micros max_duration)
 		return;
 	}
 	
-	if (m_step == 0)
-	{
-		m_full_protocol.send_start_frame();
-	}
-
-	//take into account the eventual start_Frame
-	duration += board::clock::now_us() - start;
-	
 	bool done = false;
 	do
 	{
@@ -76,7 +68,6 @@ void GS::process(chrono::micros max_duration)
 	//start over	
 	if (done)
 	{
-		m_full_protocol.send_end_frame();
 		m_step = 0;
 	}
 }
@@ -93,7 +84,7 @@ bool GS::send_data(uint32_t step)
 	}
 	case 6:
 	{
-		m_full_protocol.send_board_time_ms(board::clock::now_ms());
+		m_full_protocol.send_board_time(board::clock::now_us());
 		return false;
 	}
 	case 10:

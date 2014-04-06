@@ -19,14 +19,12 @@ public:
 	enum class Message
 	{
 		HELLO_WORLD = 253,
-		START_FRAME = 254,
-		END_FRAME = 255,
 
 		//////////////////////////////////////////////////////////////////////////
 		//BOARD
 
 		BOARD_CPU_USAGE = 0,
-		BOARD_TIME_MS = 1,
+		BOARD_TIME = 1,
 		BOARD_GYROSCOPE = 10,
 		BOARD_ACCELEROMETER = 11,
 		BOARD_TEMPERATURE = 12,
@@ -57,7 +55,7 @@ public:
 		
 		//calibration
 		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
-		SET_BOARD_GYROSCOPE_BIAS_SCALE,
+		SET_BOARD_GYROSCOPE_BIAS,
 	};
 
 	
@@ -68,15 +66,12 @@ public:
 	virtual void send_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	
-	virtual void send_start_frame() = 0;
-	virtual void send_end_frame() = 0;
-	
 	virtual bool is_message_enabled(Message msg) const = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	
 	virtual void send_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
-	virtual void send_board_time_ms(chrono::time_ms time) = 0;
+	virtual void send_board_time(chrono::time_us time) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//board
