@@ -39,6 +39,7 @@ namespace silk
 		math::vec3f m_last_gyroscope;
 
 		
+		void receive_data(SProtocol::RX_Message message);
 		bool send_data(uint32_t step); //returns true when done
 	};
 }

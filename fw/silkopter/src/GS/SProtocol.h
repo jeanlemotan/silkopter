@@ -16,9 +16,10 @@ class SProtocol : public util::Noncopyable
 public:
 
 	//each has a corresponsing send method
-	enum class Message
+	enum class TX_Message
 	{
 		HELLO_WORLD = 253,
+		ACKNOWLEDGE = 254,
 
 		//////////////////////////////////////////////////////////////////////////
 		//BOARD
@@ -47,8 +48,10 @@ public:
 	};
 	
 	//each has a corresponding receive method
-	enum class Command
+	enum class RX_Message
 	{
+		NONE,
+		
 		//control messages
 		SET_MESSAGE_ENABLED,
 		SET_ALL_MESSAGES_ENABLED,
@@ -63,42 +66,49 @@ public:
 	//handshake
 	
 	typedef util::String<64> Message_String;
-	virtual void send_hello_world(Message_String const& msg, uint16_t version) = 0;
+	virtual void tx_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	
-	virtual bool is_message_enabled(Message msg) const = 0;
+	virtual bool is_tx_message_enabled(TX_Message msg) const = 0;
+	
+	//////////////////////////////////////////////////////////////////////////
+	//commands
+	
+	virtual RX_Message get_next_rx_message() = 0;
+	virtual void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) const = 0;
+	virtual void rx_board_gyroscope_bias(math::vec3f& bias) const = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	
-	virtual void send_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
-	virtual void send_board_time(chrono::time_us time) = 0;
+	virtual void tx_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
+	virtual void tx_board_time(chrono::time_us time) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//board
 	
-	virtual void send_board_gyroscope(bool is_valid, math::vec3f const& gyro) = 0;
-	virtual void send_board_accelerometer(bool is_valid, math::vec3f const& accel) = 0;
-	virtual void send_board_temperature(bool is_valid, float temp) = 0;
+	virtual void tx_board_gyroscope(bool is_valid, math::vec3f const& gyro) = 0;
+	virtual void tx_board_accelerometer(bool is_valid, math::vec3f const& accel) = 0;
+	virtual void tx_board_temperature(bool is_valid, float temp) = 0;
 	
-	virtual void send_board_baro_pressure(bool is_valid, float pressure) = 0;
-	virtual void send_board_sonar_distance(bool is_valid, float distance) = 0;
-	virtual void send_board_gps_altitude(bool is_valid, float altitude) = 0;
+	virtual void tx_board_baro_pressure(bool is_valid, float pressure) = 0;
+	virtual void tx_board_sonar_distance(bool is_valid, float distance) = 0;
+	virtual void tx_board_gps_altitude(bool is_valid, float altitude) = 0;
 
-	virtual void send_board_rc_in(uint8_t count, int16_t const* values) = 0;
-	virtual void send_board_pwm_out(uint8_t count, int16_t const* values) = 0;
+	virtual void tx_board_rc_in(uint8_t count, int16_t const* values) = 0;
+	virtual void tx_board_pwm_out(uint8_t count, int16_t const* values) = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	//uav
 		
-	virtual void send_uav_acceleration(math::vec3f const& accel) = 0;	
-	virtual void send_uav_velocity(math::vec3f const& accel) = 0;
-	virtual void send_uav_position(math::vec3f const& accel) = 0;
+	virtual void tx_uav_acceleration(math::vec3f const& accel) = 0;	
+	virtual void tx_uav_velocity(math::vec3f const& accel) = 0;
+	virtual void tx_uav_position(math::vec3f const& accel) = 0;
 
-	virtual void send_uav_attitude(math::vec3f const& euler) = 0;
+	virtual void tx_uav_attitude(math::vec3f const& euler) = 0;
 
-	virtual void send_uav_phase(UAV::Phase phase) = 0;
-	virtual void send_uav_control_mode(UAV::Control_Mode mode) = 0;
-	virtual void send_uav_control_reference_frame(UAV::Control_Reference_Frame frame) = 0;
+	virtual void tx_uav_phase(UAV::Phase phase) = 0;
+	virtual void tx_uav_control_mode(UAV::Control_Mode mode) = 0;
+	virtual void tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame) = 0;
 };
 	
 }
