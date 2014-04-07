@@ -407,6 +407,9 @@
     <Compile Include="libs\qmath\detail\data.cpp">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="libs\qmath\_qmath.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="libs\util\chrono.h">
       <SubType>compile</SubType>
     </Compile>
@@ -630,9 +633,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\qmath\detail\vec4.hpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="libs\qmath\qmath.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\stl\avr_config.h">

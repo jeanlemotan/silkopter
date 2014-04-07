@@ -61,6 +61,14 @@ public:
 		return write(reinterpret_cast<uint8_t*>(&t), sizeof(t));
 	}
 	
+	template<class Fmt, typename... Params>
+	size_t print(Fmt const& fmt, Params... params)
+	{
+		util::String<256> str;
+		util::format(str, fmt, params...);
+		return write(str.m_data(), str.size());
+	}
+	
 	//this blocks until the tx buffer is empty.
 	virtual void flush() = 0;
 	

@@ -97,13 +97,13 @@ void trace(const char* file, int line, const char* msg)
 	}
 }
 
-void print(const char* msg)
+void print(const char* msg, size_t size)
 {
-	if (s_uart && msg)
+	if (s_uart && msg && size > 0)
 	{
 		auto blocking = s_uart->is_blocking();
 		s_uart->set_blocking(true);
-		s_uart->write_c_str(msg);
+		s_uart->write(reinterpret_cast<uint8_t const*>(msg), size);
 		s_uart->flush();
 		s_uart->set_blocking(blocking);
 	}
@@ -123,7 +123,7 @@ Timed_Scope::~Timed_Scope()
 	auto d = board::clock::now_us() - m_start;
 	util::String<128> msg;
 	util::format(msg, "\nScope {0}:{1} took {2}", m_file, m_line, d);
-	print(msg.c_str());
+	debug::print(msg.c_str());
 }
 
 

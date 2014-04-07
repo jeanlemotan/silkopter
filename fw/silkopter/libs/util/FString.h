@@ -58,6 +58,8 @@ public:
 	void clear();
 	void reserve(size_t size);
 	void resize(size_t size);
+	auto data() const -> char const*;
+	auto data() -> char*;
 
 	auto substr(size_t off = 0, size_t count = npos) const -> String<SIZE>;
 
@@ -412,6 +414,18 @@ inline void String<SIZE>::resize(size_t s)
 
 	m_size = s;
 	m_data[m_size] = 0;
+}
+
+template<size_t SIZE>
+auto String<SIZE>::data() const -> char const*
+{
+	return m_data;
+}
+
+template<size_t SIZE>
+auto String<SIZE>::data() -> char*
+{
+	return m_data;
 }
 
 template<size_t SIZE>

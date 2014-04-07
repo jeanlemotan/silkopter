@@ -23,6 +23,8 @@ public:
 	
 	bool is_tx_message_enabled(TX_Message msg) const;
 	
+	void tx_print(char const* str, size_t size);
+	
 	RX_Message get_next_rx_message();
 	void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) const;
 	void rx_board_gyroscope_bias(math::vec3f& bias) const;

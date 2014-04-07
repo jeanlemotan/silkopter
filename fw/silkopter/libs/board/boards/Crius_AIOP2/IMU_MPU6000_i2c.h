@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <qmath.h>
+#include <_qmath.h>
 #include "util/chrono.h"
 #include "board/IMU.h"
 #include "Thermometer_Data.h"

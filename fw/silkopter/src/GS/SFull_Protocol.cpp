@@ -94,10 +94,10 @@ void SFull_Protocol::tx_hello_world(Message_String const& msg, uint16_t version)
 
 //////////////////////////////////////////////////////////////////////////
 
-void SFull_Protocol::tx_print(Print_String const& str)
+void SFull_Protocol::tx_print(char const* str, size_t size)
 {
 	start_tx_message(TX_Message::PRINT);
-	m_tx_buffer.append(reinterpret_cast<uint8_t const*>(str.c_str()), str.size());
+	m_tx_buffer.append(reinterpret_cast<uint8_t const*>(str), size);
 	flush_tx_message();
 }
 	
@@ -396,7 +396,7 @@ SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 		bool needs_more_data;
 		if (decode_rx_header(header, needs_more_data))
 		{
-			PRINT("\nreceived {0}, crc: {1}, size: {2}", static_cast<int>(header.msg), header.crc, header.size);
+			debug::print("\nreceived {0}, crc: {1}, size: {2}", static_cast<int>(header.msg), header.crc, header.size);
 			return header.msg;
 		}
 	}

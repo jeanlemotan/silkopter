@@ -19,7 +19,15 @@ namespace debug
 		//this function never returns
 		void handle_assert(const char* condition, const char* file, int line, const char* msg);
 		void trace(const char* file, int line, const char* msg);
-		void print(const char* msg);
+		void print(const char* msg, size_t size);
+	}
+	
+	template<class Fmt, typename... Params>
+	void print(Fmt const& fmt, Params... params)
+	{
+		util::String<255> str;
+		util::format(str, fmt, params...);
+		detail::print(str.data(), str.size());
 	}
 }
 
@@ -72,16 +80,6 @@ do 																				\
 	util::String<128> __msg;													\
 	util::format(__msg, fmt, ##__VA_ARGS__);									\
 	debug::detail::handle_assert("PANIC", __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
-} while(0)
-
-//////////////////////////////////////////////////////////////////////////
-
-#define PRINT(fmt, ...)							\
-do												\
-{												\
-	util::String<128> __msg;					\
-	util::format(__msg, fmt, ##__VA_ARGS__);	\
-	debug::detail::print(__msg.c_str());		\
 } while(0)
 
 //////////////////////////////////////////////////////////////////////////

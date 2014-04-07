@@ -3,7 +3,7 @@
 #if CPU_TYPE == ATMEGA_2560
 
 #include <avr/interrupt.h>
-#include <qmath.h>
+#include <_qmath.h>
 #include "debug/debug.h"
 #include "board/boards/avr_UART.h"
 

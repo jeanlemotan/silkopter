@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "util/Noncopyable.h"
-#include "qmath.h"
+#include "_qmath.h"
 #include "util/FString.h"
 #include "util/chrono.h"
 #include "UAV.h"
@@ -72,8 +72,15 @@ public:
 	
 	virtual bool is_tx_message_enabled(TX_Message msg) const = 0;
 	
-	typedef util::String<254> Print_String;
-	virtual void tx_print(Print_String const& str) = 0;
+	virtual void tx_print(char const* str, size_t size) = 0;
+	
+	template<class Fmt, typename... Params>
+	void tx_print(Fmt const& fmt, Params... params)
+	{
+		util::String<255> str;
+		util::format(str, fmt, params...);
+		tx_print(str.m_data(), str.size());
+	}
 	
 	//////////////////////////////////////////////////////////////////////////
 	//commands

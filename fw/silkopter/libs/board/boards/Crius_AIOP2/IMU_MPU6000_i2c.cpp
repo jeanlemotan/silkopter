@@ -372,7 +372,7 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 		PANIC();
 	}	
 	
-	PRINT("\nIMU scheduler frequency divider: {0}", m_sample_freq_div);
+	debug::print("\nIMU scheduler frequency divider: {0}", m_sample_freq_div);
 	
     set_filter_register(0, default_filter);
 

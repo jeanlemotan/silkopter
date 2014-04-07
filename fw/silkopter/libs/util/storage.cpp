@@ -42,7 +42,7 @@ namespace storage
 	static crc_type _compute_main_crc()
 	{
 		Header header;
-		uint8_t buffer[MAX_DATA_SIZE];
+//		uint8_t buffer[MAX_DATA_SIZE];
 		crc_type crc = 0;
 		auto& eeprom = board::get_eeprom();
 		auto offset = s_start_offset;
@@ -103,17 +103,17 @@ namespace storage
 		auto& eeprom = board::get_eeprom();
 		
 		eeprom.read_advance(s_main_header, s_start_offset);
-		PRINT("\nStorage: crc {0}, count {1}", s_main_header.crc, s_main_header.count);
+		debug::print("\nStorage: crc {0}, count {1}", s_main_header.crc, s_main_header.count);
 
 		auto crc = _compute_main_crc();
 		if (crc != s_main_header.crc)
 		{
-			PRINT("\nStorage corrupted. Formatting...");
+			debug::print("\nStorage corrupted. Formatting...");
 			remove_all();
 		}
  		else
  		{
- 			PRINT("\nCRC is ok");
+ 			debug::print("\nCRC is ok");
  		}
 	}
 

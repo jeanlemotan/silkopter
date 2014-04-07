@@ -4,7 +4,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "qmath.h"
+#include "_qmath.h"
 #include "debug/debug.h"
 #include "board/board.h"
 #include "util/Scope_Sync.h"

@@ -7,7 +7,7 @@
 #include <avr/interrupt.h>
 #include "board/board.h"
 #include "debug/debug.h"
-#include <qmath.h>
+#include <_qmath.h>
 #include "util/Scope_Sync.h"
 
 namespace board

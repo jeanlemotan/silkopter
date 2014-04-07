@@ -1,7 +1,7 @@
 #if BOARD_TYPE == CRIUS_AIOP_2
 
 #include <avr/interrupt.h>
-#include <qmath.h>
+#include <_qmath.h>
 
 #include "util/chrono.h"
 #include "debug/debug.h"
