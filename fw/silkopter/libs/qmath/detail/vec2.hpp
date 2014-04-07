@@ -38,7 +38,7 @@ template <typename T>
 inline void vec2<T>::set_length(T len)
 {
 	T oldLen = length(*this);
-	assert(oldLen != 0);
+	ASSERT(oldLen != 0);
 	*this *= (len/oldLen);
 }
 
@@ -52,10 +52,10 @@ inline vec2<T>& vec2<T>::normalize()
 template<typename T>
 inline T& vec2<T>::operator[](uint8_t i) 
 {
-	assert(i < sizeof(*this) / sizeof(T));
+	ASSERT(i < sizeof(*this) / sizeof(T));
 
-	//if you hit this assert, your compiler introduces padding. Check for #pragma packs without pop
-	assert(&((T*)this)[0] == &x && &((T*)this)[1] == &y); 
+	//if you hit this ASSERT, your compiler introduces padding. Check for #pragma packs without pop
+	ASSERT(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
 
 	return ((T*)this)[i];
 }
@@ -63,10 +63,10 @@ inline T& vec2<T>::operator[](uint8_t i)
 template<typename T>
 inline T const& vec2<T>::operator[](uint8_t i) const
 {
-	assert(i < sizeof(*this) / sizeof(T));
+	ASSERT(i < sizeof(*this) / sizeof(T));
 
-	//if you hit this assert, your compiler introduces padding. Check for #pragma packs without pop
-	assert(&((T*)this)[0] == &x && &((T*)this)[1] == &y); 
+	//if you hit this ASSERT, your compiler introduces padding. Check for #pragma packs without pop
+	ASSERT(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
 
 	return ((T*)this)[i];
 }
@@ -120,13 +120,13 @@ inline vec2<T> vec2<T>::operator*(T s) const
 template<typename T>
 inline vec2<T> vec2<T>::operator/(T s) const
 {
-	assert(s != T(0));
+	ASSERT(s != T(0));
 	return vec2<T>(x / s, y / s);
 }
 template<>
 inline vec2<float> vec2<float>::operator/(float s) const
 {
-	assert(s != 0);
+	ASSERT(s != 0);
 	float is = float(1) / s;
 	return vec2<float>(x * is, y * is);
 }
@@ -187,7 +187,7 @@ inline vec2<T>& vec2<T>::operator*=(vec2<T> const& v)
 template<typename T>
 inline vec2<T>& vec2<T>::operator/=(T s)
 {
-	assert(s != T(0));
+	ASSERT(s != T(0));
 	x /= s;
 	y /= s;
 	return *this;
@@ -195,7 +195,7 @@ inline vec2<T>& vec2<T>::operator/=(T s)
 template<>
 inline vec2<float>& vec2<float>::operator/=(float s)
 {
-	assert(s != float(0));
+	ASSERT(s != float(0));
 	float ts = float(1) / s;
 	x *= ts;
 	y *= ts;
@@ -205,7 +205,7 @@ inline vec2<float>& vec2<float>::operator/=(float s)
 template<typename T>
 inline vec2<T>& vec2<T>::operator/=(vec2<T> const& v)
 {
-	assert(v.x != T(0) && v.y != T(0));
+	ASSERT(v.x != T(0) && v.y != T(0));
 	x /= v.x;
 	y /= v.y;
 	return *this;
@@ -231,7 +231,7 @@ inline vec2<T> operator*(vec2<T> const& v0, vec2<T> const& v1)
 template<typename T>
 inline vec2<T> operator/(vec2<T> const& u, vec2<T> const& v)
 {
-	assert(v.x != T(0) && v.y != T(0));
+	ASSERT(v.x != T(0) && v.y != T(0));
 	return vec2<T>(u.x / v.x, u.y / v.y);
 }
 

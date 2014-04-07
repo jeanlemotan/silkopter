@@ -64,7 +64,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T, class Policy = standard> inline T sqrt(T const& v);
+	template<typename T, class Policy> inline T sqrt(T const& v);
 	template<class Policy = standard> inline float sqrt(float const& v)
 	{
 		return ::sqrtf(v);
@@ -84,7 +84,7 @@ namespace math
 	//////////////////////////////////////////////////////////////////////////
 
 
-	template<typename T, class Policy = standard> inline T inv_sqrt(T const& v)
+	template<typename T, class Policy> inline T inv_sqrt(T const& v)
 	{
 		assert(!is_zero(v));
 		return 1 / sqrt<Policy>(v);
@@ -104,7 +104,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template<typename T, class Policy = standard> inline T pow(T const& a, T const& b);
+	template<typename T, class Policy> inline T pow(T const& a, T const& b);
 	template<class Policy = standard> inline float pow(float const& a, float const& b)
 	{
 		return powf(a, b);
@@ -152,7 +152,7 @@ namespace math
 	{
 		return quat<T>(positive_zero(v.x), positive_zero(v.y), positive_zero(v.z), positive_zero(v.w));
 	}
-	template<typename T, class Policy = standard> inline T inverse(T const& v)
+	template<typename T, class Policy> inline T inverse(T const& v)
 	{
 		assert(v != 0);
 		return 1 / v;

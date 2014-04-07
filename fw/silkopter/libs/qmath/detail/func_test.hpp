@@ -75,7 +75,7 @@ namespace math
 
 	inline bool equals(float v1, float v2, float tolerance)
 	{
-		assert(tolerance >= 0);
+		ASSERT(tolerance >= 0);
 		// http://realtimecollisiondetection.net/pubs/Tolerances/
 		// Abs(x - y) <= Max(absTol, relTol * Max(Abs(x), Abs(y)))
 		// we assume absTol=relTol, this leaves
@@ -215,7 +215,7 @@ namespace math
 
 	inline bool is_zero(float v, float tolerance)
 	{
-		assert(tolerance >= 0);
+		ASSERT(tolerance >= 0);
 		return abs(v) <= tolerance;
 	}
 	inline bool is_zero(angle<float> const& v, float tolerance)
@@ -343,7 +343,7 @@ namespace math
 
 	inline bool is_one(float v, float tolerance)
 	{
-		assert(tolerance >= 0);
+		ASSERT(tolerance >= 0);
 		return abs(v - 1.f) <= tolerance;
 	}
 	inline bool is_one(vec2<float> const& v, float tolerance)

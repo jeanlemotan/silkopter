@@ -249,7 +249,7 @@ template<> inline void sin_cos<float, fast_safe>(float const& angle, float& s, f
 }
 	
 	
-template<typename T, class Policy = standard> inline void sin_cos(T const& angle, T& s, T& c)
+template<typename T, class Policy> inline void sin_cos(T const& angle, T& s, T& c)
 {
 	s = sin<T, Policy>(angle);
 	c = cos<T, Policy>(angle);

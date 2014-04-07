@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Config.h"
-#include "util/chrono.h"
+#ifdef __AVR__
+#	include "Config.h"
+#endif
 
+#include "util/chrono.h"
 
 #include "board/IMU.h"
 #include "board/Thermometer.h"

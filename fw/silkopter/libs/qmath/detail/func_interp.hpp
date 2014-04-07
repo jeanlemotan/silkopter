@@ -3,7 +3,7 @@ namespace math
 
 	inline float lerp(float a, float b, float t)
 	{
-		assert(t >= 0 && t <= 1);
+		ASSERT(t >= 0 && t <= 1);
 		float x = b - a;
 		return a + x*t;
 	}

@@ -1,6 +1,11 @@
-#include <avr/interrupt.h>
 #include "debug/debug.h"
+
+#ifdef __AVR__
+#	include <avr/interrupt.h>
+#endif
+
 #include "board/board.h"
+
 
 namespace debug
 {
@@ -22,7 +27,9 @@ void init(board::UART* uart)
 
 namespace detail
 {
-	
+
+#ifdef __AVR__
+
 void handle_assert(const char* condition, const char* file, int line, const char* msg)
 {
 	board::scheduler::stop();
@@ -49,12 +56,24 @@ void handle_assert(const char* condition, const char* file, int line, const char
 		s_uart->write_c_str("\nThe board will now freeze...");
 		s_uart->flush();
 	}
+
 	//make sure nothing else happens
 	cli();
-
 	//freeze
 	while (true);
 }
+
+#else
+
+	void handle_assert(const char* condition, const char* file, int line, const char* msg)
+	{
+		__asm
+		{
+			int 3
+		}
+	}
+
+#endif
 
 void trace(const char* file, int line, const char* msg)
 {

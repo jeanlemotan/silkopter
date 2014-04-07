@@ -8,7 +8,7 @@ namespace math
 template<typename T> inline trans2d<T>::trans2d()
 {
 	set_identity();
-	assert(is_valid());
+	ASSERT(is_valid());
 }
 template<typename T> inline trans2d<T>::trans2d(ZUninitialized)
 	: mat(mat3<T>::uninitialized)
@@ -17,12 +17,12 @@ template<typename T> inline trans2d<T>::trans2d(ZUninitialized)
 template<typename T> inline trans2d<T>::trans2d(trans2d<T> const& other)
 	: mat(other.mat)
 {
-	assert(is_valid());
+	ASSERT(is_valid());
 }
 template<typename T> template<typename U> inline trans2d<T>::trans2d(trans2d<U> const& other)
 	: mat(other.mat)
 {
-	assert(is_valid());
+	ASSERT(is_valid());
 }
 
 template<typename T> inline trans2d<T>::trans2d(vec2<T> const& translation, T rotation, vec2<T> const& scale)
@@ -46,7 +46,7 @@ template<typename T> inline trans2d<T>::trans2d(vec2<T> const& translation, mat2
 template<typename T> inline trans2d<T>& trans2d<T>::set_identity()
 {
 	mat.set_identity();
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::set_rotation_identity()
@@ -57,7 +57,7 @@ template<typename T> inline trans2d<T>& trans2d<T>::set_rotation_identity()
 	mat.m[3] = 0;
 	mat.m[4] = 1;
 
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline bool trans2d<T>::invert()
@@ -85,19 +85,19 @@ template<typename T> inline vec2<T> trans2d<T>::get_scale() const
 template<typename T> inline trans2d<T>& trans2d<T>::set_axis_x(vec2<T> const& axis)
 {
 	mat.set_axis_x(vec3<T>(axis, 0));
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::set_axis_y(vec2<T> const& axis)
 {
 	mat.set_axis_y(vec3<T>(axis, 0));
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::set_translation(vec2<T> const& p)
 {
 	mat.set_axis_z(vec3<T>(p, T(1)));
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::set_scale(vec2<T> const& s)
@@ -105,7 +105,7 @@ template<typename T> inline trans2d<T>& trans2d<T>::set_scale(vec2<T> const& s)
 	mat.m[0] = s.x;
 	mat.m[4] = s.y;
 	mat.m[8] = s.z;
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline mat2<T> trans2d<T>::get_rotation() const
@@ -118,7 +118,7 @@ template<typename T> inline trans2d<T>& trans2d<T>::set_rotation(mat2<T> const& 
 	mat.m[1] = rot.m[1];
 	mat.m[3] = rot.m[2];
 	mat.m[4] = rot.m[3];
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::set_rotation(T rot)
@@ -171,14 +171,14 @@ template<typename T> inline trans2d<T> trans2d<T>::operator*(trans2d<T> const& o
 {
 	trans2d<T> ret;
 	multiply(ret, *this, other);
-	assert(ret.is_valid());
+	ASSERT(ret.is_valid());
 	return ret;
 }
 template<typename T> inline trans2d<T>& trans2d<T>::operator*=(const trans2d<T>& other)
 {
 	trans2d<T> a(*this);
 	multiply(*this, a, other);
-	assert(is_valid());
+	ASSERT(is_valid());
 	return *this;
 }
 

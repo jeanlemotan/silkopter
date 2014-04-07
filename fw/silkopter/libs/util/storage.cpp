@@ -1,7 +1,7 @@
 #include "util/storage.h"
 #include "board/board.h"
 
-#include <util/crc16.h>
+#include <util/crc.h>
 
 namespace util
 {

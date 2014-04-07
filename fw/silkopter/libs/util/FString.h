@@ -384,13 +384,13 @@ inline auto String<SIZE>::find(String<SIZE> const& str, size_t off) const -> siz
 }
 
 template<size_t SIZE>
-inline auto String<SIZE>::begin() const -> String<SIZE>::const_iterator
+inline auto String<SIZE>::begin() const -> const_iterator
 {
 	return empty() ? 0 : c_str();
 }
 
 template<size_t SIZE>
-inline auto String<SIZE>::end() const -> String<SIZE>::const_iterator
+inline auto String<SIZE>::end() const -> const_iterator
 {
 	return empty() ? 0 : c_str() + size();
 }
