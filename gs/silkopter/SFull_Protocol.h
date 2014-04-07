@@ -117,7 +117,6 @@ private:
 	bool wait_for_response(uint16_t expected_crc, std::chrono::high_resolution_clock::duration timeout);
 
 	void process_rx_message(Header const& header);
-	uint16_t compute_crc(uint8_t const* data, size_t size) const;
 
 	std::string m_uav_message;
 	uint16_t m_uav_version;

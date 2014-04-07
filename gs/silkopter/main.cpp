@@ -228,8 +228,12 @@ namespace polynomial
 	}
 }
 
+#include "util/format.h"
+
 int main(int argc, char *argv[])
 {
+	util::String<128> str;
+	util::format(str, "bubu {} mimi {} {} {x}", 7, 5, 6, 7);
 
 	{
 		// 		size_t range = 805;

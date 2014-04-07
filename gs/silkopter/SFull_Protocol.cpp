@@ -4,6 +4,7 @@
 //async_read doesn't work with std::bind
 #include "boost/bind.hpp"
 #include <thread>
+#include "util/crc.h"
 
 
 SFull_Protocol::SFull_Protocol()
@@ -202,7 +203,7 @@ boost::optional<SFull_Protocol::Header> SFull_Protocol::decode_header(bool& need
 	m_rx_buffer[2] = 0;
 	m_rx_buffer[3] = 0;
 
-	auto computed_crc = compute_crc(m_rx_buffer.data(), size);
+	auto computed_crc = util::compute_crc(m_rx_buffer.data(), size);
 	if (crc != computed_crc)
 	{
 		m_rx_buffer[2] = crc2;
@@ -265,7 +266,8 @@ void SFull_Protocol::process_rx_message(Header const& header)
 			{
 				if (header.size > 0)
 				{
-					std::string msg(header.size);
+					std::string msg;
+					msg.resize(header.size);
 					std::copy(m_rx_buffer.begin() + off, m_rx_buffer.begin() + off + header.size, msg.begin());
 					printf("\n%s", msg.c_str());
 				}
@@ -348,36 +350,6 @@ void SFull_Protocol::process_rx_message(Header const& header)
 	pop_front(m_rx_buffer, header.size);
 }
 
-static uint16_t crc16_update(uint16_t crc, uint8_t a)
-{
-	crc ^= a;
-	for (int i = 0; i < 8; ++i)
-	{
-		if (crc & 1)
-		{
-			crc = (crc >> 1) ^ 0xA001;
-		}
-		else
-		{
-			crc = (crc >> 1);
-		}
-	}
-	return crc;
-}
-
-uint16_t SFull_Protocol::compute_crc(uint8_t const* data, size_t size) const
-{
-	uint16_t crc = 0;
-	if (data)
-	{
-		for (size_t i = 0; i < size; i++)
-		{
-			crc = crc16_update(crc, *data++);
-		}
-	}
-	return crc;
-}
-
 //tx_message structure:
 //offset : size : description
 //0	: 1 : msg
@@ -394,7 +366,7 @@ void SFull_Protocol::start_tx_message(TX_Message msg)
 uint16_t SFull_Protocol::flush_tx_message()
 {
 	set_value(m_tx_buffer, uint8_t(m_tx_buffer.size()), 1);
-	uint16_t crc = compute_crc(m_tx_buffer.data(), m_tx_buffer.size());
+	uint16_t crc = util::compute_crc(m_tx_buffer.data(), m_tx_buffer.size());
 	set_value(m_tx_buffer, crc, 2);
 	boost::asio::write(m_port, boost::asio::buffer(m_tx_buffer.data(), m_tx_buffer.size()));
 	return crc;
