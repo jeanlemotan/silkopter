@@ -20,6 +20,7 @@ public:
 	{
 		HELLO_WORLD = 253,
 		ACKNOWLEDGE = 254,
+		PRINT = 255,
 
 		//////////////////////////////////////////////////////////////////////////
 		//BOARD
@@ -70,6 +71,9 @@ public:
 	virtual bool is_connected() const = 0;
 	
 	virtual bool is_tx_message_enabled(TX_Message msg) const = 0;
+	
+	typedef util::String<254> Print_String;
+	virtual void tx_print(Print_String const& str) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//commands

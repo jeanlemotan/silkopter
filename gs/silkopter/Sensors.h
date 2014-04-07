@@ -9,15 +9,20 @@ public:
 	Sensors(QWidget *parent = 0);
 	~Sensors();
 
+	void init(SFull_Protocol* protocol);
+
 public:
-	void update(SFull_Protocol& protocol);
+	void update();
 
 private:
+
+	void calibrate_accelerometer();
 
 	Ui::Sensors m_ui;
 
 	uint32_t m_last_time_us;
 	std::chrono::high_resolution_clock::time_point m_last_time;
+	SFull_Protocol* m_protocol;
 };
 
 

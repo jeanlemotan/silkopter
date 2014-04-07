@@ -15,7 +15,7 @@ namespace silk
 	class GS : util::Noncopyable
 	{
 	public:
-		explicit GS(UAV& uav, board::UART& full_uart);
+		GS(UAV& uav, board::UART& full_uart);
 		GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart);
 
 		void process(chrono::micros max_duration);

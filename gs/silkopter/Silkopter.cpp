@@ -16,6 +16,8 @@ Silkopter::Silkopter(QWidget *parent)
 	timer->setSingleShot(false);
 	timer->start(16);
 	connect(timer, &QTimer::timeout, this, &Silkopter::update);
+
+	m_ui.sensors->init(&m_protocol);
 }
 
 Silkopter::~Silkopter()
@@ -36,6 +38,6 @@ void Silkopter::update()
 	auto d = now - m_last_time;
 	m_last_time = now;
 
-	m_ui.sensors->update(m_protocol);
+	m_ui.sensors->update();
 }
 

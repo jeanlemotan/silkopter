@@ -36,8 +36,6 @@ void GS::process(chrono::micros max_duration)
 {
 	chrono::micros duration;
 
-	//return;
-	
 	//calculate frame time
 	auto start = board::clock::now_us();
 	if (start - m_last_time < chrono::micros(10000))
@@ -58,13 +56,16 @@ void GS::process(chrono::micros max_duration)
 	}
 	
 	receive_data(m_full_protocol.get_next_rx_message());
+
+	start = board::clock::now_us();	
 	
 	bool done = false;
 	do
 	{
-		start = board::clock::now_us();
 		done = send_data(m_step++);
-		duration += board::clock::now_us() - start;
+		auto now = board::clock::now_us();
+		duration += now - start;
+		start = now;
 	} while (!done && duration <= max_duration);
 
 	//start over	

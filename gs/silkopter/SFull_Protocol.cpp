@@ -28,6 +28,27 @@ SFull_Protocol::~SFull_Protocol()
 	m_io.stop();
 }
 
+void SFull_Protocol::handle_read(const boost::system::error_code& e, size_t bytes_transferred)
+{
+	//THIS CAUSES SERIAL BUFFER OVERFLOWS!!!
+	for (size_t i = 0; i < bytes_transferred; i++)
+	{
+		putchar(m_serial_buffer[i]);
+	}
+
+	{
+		std::lock_guard<std::mutex> lg(m_rx_buffer_mutex);
+		m_rx_buffer.insert(m_rx_buffer.end(), m_serial_buffer.begin(), m_serial_buffer.begin() + bytes_transferred);
+	}
+
+	m_port.async_read_some(boost::asio::buffer(m_serial_buffer.data(), m_serial_buffer.size()),
+		boost::bind(
+		&SFull_Protocol::handle_read, this,
+		boost::asio::placeholders::error,
+		boost::asio::placeholders::bytes_transferred
+		));
+}
+
 void SFull_Protocol::listen_for_connection(std::string const& com_port, uint32_t baud)
 {
 	stop();
@@ -46,22 +67,20 @@ void SFull_Protocol::listen_for_connection(std::string const& com_port, uint32_t
 		m_port.set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
 		m_port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
 
+		m_port.async_read_some(boost::asio::buffer(m_serial_buffer.data(), m_serial_buffer.size()), 
+			boost::bind(
+			&SFull_Protocol::handle_read, this,
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::bytes_transferred
+			));
+
 		m_is_listening = true;
 
 		m_io_thread = std::thread([&]()
 		{
 			while (!m_stop_thread)
 			{
-				boost::asio::read(m_port, boost::asio::buffer((char*)m_serial_buffer.data(), m_serial_buffer.size()));
-				for (size_t i = 0; i < m_serial_buffer.size(); i++)
-				{
-					putchar(m_serial_buffer[i]);
-				}
-
-				{
-					std::lock_guard<std::mutex> lg(m_rx_buffer_mutex);
-					m_rx_buffer.insert(m_rx_buffer.end(), m_serial_buffer.begin(), m_serial_buffer.end());
-				}
+				m_io.run();
 			}
 			m_is_listening = false;
 		});
@@ -166,7 +185,7 @@ boost::optional<SFull_Protocol::Header> SFull_Protocol::decode_header(bool& need
 	auto msg = static_cast<RX_Message>(get_value<uint8_t>(m_rx_buffer, off));
 	auto size = get_value<uint8_t>(m_rx_buffer, off);
 	auto crc = get_value<uint16_t>(m_rx_buffer, off);
-	if (size < sizeof(Header))
+	if (size <= sizeof(Header))
 	{
 		int a = 0;
 		pop_front(m_rx_buffer); //msg
@@ -186,11 +205,13 @@ boost::optional<SFull_Protocol::Header> SFull_Protocol::decode_header(bool& need
 	auto computed_crc = compute_crc(m_rx_buffer.data(), size);
 	if (crc != computed_crc)
 	{
+		m_rx_buffer[2] = crc2;
+		m_rx_buffer[3] = crc3;
+
+		printf("\n crc failed for msg: %d, size: %d", (int)msg, (int)size);
 		//std::string str(m_buffer.begin(), m_buffer.end());
 		int a = 0;
 		//put back the crcs (as they were not actually crcs apparently)
-		m_rx_buffer[2] = crc2;
-		m_rx_buffer[3] = crc3;
 		pop_front(m_rx_buffer); //msg
 		return boost::optional<Header>();
 	}
@@ -198,7 +219,7 @@ boost::optional<SFull_Protocol::Header> SFull_Protocol::decode_header(bool& need
 	pop_front(m_rx_buffer, 4); //msg
 	Header header;
 	header.msg = msg;
-	header.size = size;
+	header.size = size - sizeof(Header);
 	header.crc = crc;
 	return boost::optional<Header>(header);
 }
@@ -237,6 +258,16 @@ void SFull_Protocol::process_rx_message(Header const& header)
 				{
 					uint8_t response[] = { 'H', 'O', 'L', 'A' };
 					boost::asio::write(m_port, boost::asio::buffer(response, sizeof(response)));
+				}
+			}
+			break;
+		case RX_Message::PRINT:
+			{
+				if (header.size > 0)
+				{
+					std::string msg(header.size);
+					std::copy(m_rx_buffer.begin() + off, m_rx_buffer.begin() + off + header.size, msg.begin());
+					printf("\n%s", msg.c_str());
 				}
 			}
 			break;

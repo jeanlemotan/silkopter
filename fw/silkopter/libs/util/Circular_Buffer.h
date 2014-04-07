@@ -21,6 +21,10 @@ namespace util
 		{
 			return (m_start < m_end) ? (m_end - m_start) : ((SIZE - m_start) + m_end);
 		}
+		bool empty() const
+		{
+			return m_start == m_end;
+		}
 		
 		T const& operator[](size_t idx) const
 		{

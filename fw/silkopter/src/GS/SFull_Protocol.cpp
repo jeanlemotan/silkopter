@@ -56,8 +56,10 @@ bool SFull_Protocol::start_tx_message(TX_Message msg)
 }
 void SFull_Protocol::flush_tx_message()
 {
-	m_tx_buffer.write_at(1, uint8_t(m_tx_buffer.size()));
-	m_tx_buffer.write_at(2, util::compute_crc(m_tx_buffer));
+	m_tx_buffer[1] = uint8_t(m_tx_buffer.size());
+	auto crc = util::compute_crc(m_tx_buffer.data(), m_tx_buffer.size());
+	//PRINT("\n msg: {0}, size {1}, crc {2}", m_tx_buffer[0], m_tx_buffer[1], crc);
+	m_tx_buffer.write_at(2, crc);
 	m_uart->write(m_tx_buffer.data(), m_tx_buffer.size());
 }
 
@@ -88,6 +90,15 @@ void SFull_Protocol::tx_hello_world(Message_String const& msg, uint16_t version)
 			m_is_connected = !memcmp(response, expected_response, sizeof(response));
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void SFull_Protocol::tx_print(Print_String const& str)
+{
+	start_tx_message(TX_Message::PRINT);
+	m_tx_buffer.append(reinterpret_cast<uint8_t const*>(str.c_str()), str.size());
+	flush_tx_message();
 }
 	
 //////////////////////////////////////////////////////////////////////////
@@ -324,15 +335,23 @@ bool SFull_Protocol::decode_rx_header(Header& header, bool& needs_more_data)
 	auto msg = static_cast<RX_Message>(get_value<RX_Buffer, uint8_t>(m_rx_buffer, off));
 	auto size = get_value<RX_Buffer, uint8_t>(m_rx_buffer, off);
 	auto crc = get_value<RX_Buffer, uint16_t>(m_rx_buffer, off);
-	if (size < sizeof(Header))
+	if (size <= sizeof(Header))
 	{
 		m_rx_buffer.pop_front(); //msg
 		return false;
 	}
 	if (m_rx_buffer.size() < size)
 	{
-		needs_more_data = true;
-		return false;
+		if (board::clock::now_ms() - m_last_rx_time < chrono::millis(500))
+		{
+			needs_more_data = true;
+			return false;
+		}
+		else
+		{
+			m_rx_buffer.pop_front(); //msg
+			return false;
+		}
 	}
 	//clear crc bytes and compute crc
 	auto crc2 = m_rx_buffer[2];
@@ -352,13 +371,35 @@ bool SFull_Protocol::decode_rx_header(Header& header, bool& needs_more_data)
 
 	m_rx_buffer.pop_front(sizeof(Header)); //whole header
 	header.msg = msg;
-	header.size = size;
+	header.size = size - sizeof(Header);
 	header.crc = crc;
 	return true;
 }
 
 SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 {
+	auto available = m_uart->get_data_size();
+	if (available > 0)
+	{
+		m_last_rx_time = board::clock::now_ms();
+		for (size_t i = 0; i < available; i++)
+		{
+			uint8_t ch;
+			m_uart->read(ch);
+			m_rx_buffer.push_back(ch);
+		}
+	}
+	
+	if (!m_rx_buffer.empty())
+	{
+		Header header;
+		bool needs_more_data;
+		if (decode_rx_header(header, needs_more_data))
+		{
+			PRINT("\nreceived {0}, crc: {1}, size: {2}", static_cast<int>(header.msg), header.crc, header.size);
+			return header.msg;
+		}
+	}
 	return RX_Message::NONE;
 }
 

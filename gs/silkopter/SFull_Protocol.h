@@ -49,7 +49,7 @@ private:
 	boost::asio::serial_port m_port;
 	std::thread m_io_thread;
 	bool m_stop_thread;
-	std::array<uint8_t, 8> m_serial_buffer;
+	std::array<uint8_t, 25600> m_serial_buffer;
 
 	std::mutex m_rx_buffer_mutex;
 	std::vector<uint8_t> m_rx_buffer;
@@ -61,6 +61,7 @@ private:
 	{
 		HELLO_WORLD = 253,
 		ACKNOLEDGE = 254,
+		PRINT = 255,
 
 		//////////////////////////////////////////////////////////////////////////
 		//BOARD
@@ -106,6 +107,8 @@ private:
 		uint8_t size;
 		uint16_t crc;
 	};
+
+	void handle_read(const boost::system::error_code& e, size_t bytes_transferred);
 
 	void start_tx_message(TX_Message msg);
 	uint16_t flush_tx_message();

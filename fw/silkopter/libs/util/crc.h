@@ -65,16 +65,6 @@ namespace util
 		return crc;
 	}
 	template<class Container>
-	crc_t compute_crc(Container const& container)
-	{
-		crc_t crc = 0;
-		for (size_t i = 0; i < container.size(); i++)
-		{
-			update_crc(crc, container[i]);
-		}
-		return crc;
-	}
-	template<class Container>
 	crc_t compute_crc(Container const& container, size_t size)
 	{
 		crc_t crc = 0;

@@ -71,6 +71,8 @@ private:
 	RX_Buffer m_rx_buffer;
 	bool m_is_connected;
 	
+	chrono::time_ms m_last_rx_time; 
+	
 	std::bitset<256> m_enabled_tx_messages;
 };
 	

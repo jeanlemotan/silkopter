@@ -58,15 +58,15 @@ public:
 		size = std::min(size, MAX_SIZE - m_size);
 		if (size)
 		{
-			memcpy(m_data + m_size, src, size * sizeof(T));
+			std::copy(src, src + size, m_data + m_size);
 			m_size += size;
 		}
 	}
-
-	template<typename U>
-	void append(U u)
+	template <class U>
+	void append(U const& u)
 	{
-		return append(reinterpret_cast<T const*>(&u), sizeof(U));
+		ASSERT(sizeof(U) % sizeof(T) == 0);
+		append(reinterpret_cast<T const*>(&u), sizeof(U) / sizeof(T));
 	}
 
 	void write_at(size_t off, T const* src, size_t size)
@@ -79,15 +79,16 @@ public:
 		size = std::min(size, MAX_SIZE - off);
 		if (size)
 		{
-			memcpy(m_data + off, src, size * sizeof(T));
+			std::copy(src, src + size, m_data + off);
 			m_size = std::max(m_size, off + size);
 		}
 	}
-	
-	template<typename U>
-	void write_at(size_t off, U u)
+
+	template <class U>
+	void write_at(size_t off, U const& u)
 	{
-		return write_at(off, reinterpret_cast<T const*>(&u), sizeof(U));
+		ASSERT(sizeof(U) % sizeof(T) == 0);
+		write_at(off, reinterpret_cast<T const*>(&u), sizeof(U) / sizeof(T));
 	}
 	
 private:

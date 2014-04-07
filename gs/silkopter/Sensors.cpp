@@ -4,6 +4,7 @@
 
 Sensors::Sensors(QWidget *parent /* = 0 */)
 	: QWidget(parent)
+	, m_protocol(nullptr)
 {
 	m_ui.setupUi(this);
 
@@ -27,6 +28,8 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
 	m_ui.sonar_plot->addGraph();
 	m_ui.sonar_plot->graph(0)->setPen(QPen(Qt::red));
 
+	connect(m_ui.accel_calibrate, &QPushButton::released, this, &Sensors::calibrate_accelerometer);
+
 	m_last_time = std::chrono::high_resolution_clock::now();
 }
 
@@ -34,16 +37,23 @@ Sensors::~Sensors()
 {
 }
 
+void Sensors::init(SFull_Protocol* protocol)
+{
+	m_protocol = protocol;
+}
 
-void Sensors::update(SFull_Protocol& protocol)
+
+void Sensors::update()
 {
 	auto now = std::chrono::high_resolution_clock::now();
 	auto d = now - m_last_time;
 	m_last_time = now;
 
-	if (protocol.is_connected())
+	assert(m_protocol);
+
+	if (m_protocol->is_connected())
 	{
-		uint32_t time_us = protocol.data_board_time.value;
+		uint32_t time_us = m_protocol->data_board_time.value;
 		if (time_us != m_last_time_us)
 		{
 			m_last_time_us = time_us;
@@ -54,22 +64,22 @@ void Sensors::update(SFull_Protocol& protocol)
 			//static double seconds = 0;// double(time_ms) / 1000.0;
 			//seconds += 0.01f;
 
-			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_board_gyroscope.value.x);
-			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_board_gyroscope.value.y);
-			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_board_gyroscope.value.z);
+			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_gyroscope.value.x);
+			m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_board_gyroscope.value.y);
+			m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_board_gyroscope.value.z);
 
-// 			m_ui.gyro_plot->graph(0)->addData(seconds, protocol.data_uav_attitude.value.x);
-// 			m_ui.gyro_plot->graph(1)->addData(seconds, protocol.data_uav_attitude.value.y);
-// 			m_ui.gyro_plot->graph(2)->addData(seconds, protocol.data_uav_attitude.value.z);
+// 			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_uav_attitude.value.x);
+// 			m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_uav_attitude.value.y);
+// 			m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_uav_attitude.value.z);
 
-			m_ui.accel_plot->graph(0)->addData(seconds, protocol.data_board_accelerometer.value.x);
-			m_ui.accel_plot->graph(1)->addData(seconds, protocol.data_board_accelerometer.value.y);
-			m_ui.accel_plot->graph(2)->addData(seconds, protocol.data_board_accelerometer.value.z);
+			m_ui.accel_plot->graph(0)->addData(seconds, m_protocol->data_board_accelerometer.value.x);
+			m_ui.accel_plot->graph(1)->addData(seconds, m_protocol->data_board_accelerometer.value.y);
+			m_ui.accel_plot->graph(2)->addData(seconds, m_protocol->data_board_accelerometer.value.z);
 
-			m_ui.sonar_plot->graph(0)->addData(seconds, protocol.data_board_sonar_distance.value);
-			m_ui.baro_plot->graph(0)->addData(seconds, protocol.data_board_baro_pressure.value);
+			m_ui.sonar_plot->graph(0)->addData(seconds, m_protocol->data_board_sonar_distance.value);
+			m_ui.baro_plot->graph(0)->addData(seconds, m_protocol->data_board_baro_pressure.value);
 
-			//printf("\n%f, %f, %f", protocol.data_board_accelerometer.value.x, protocol.data_board_accelerometer.value.y, protocol.data_board_accelerometer.value.z);
+			//printf("\n%f, %f, %f", m_protocol->data_board_accelerometer.value.x, m_protocol->data_board_accelerometer.value.y, m_protocol->data_board_accelerometer.value.z);
 
 			//////////////////////////////////////////////////////////////////////////
 
@@ -101,3 +111,7 @@ void Sensors::update(SFull_Protocol& protocol)
 	}
 }
 
+void Sensors::calibrate_accelerometer()
+{
+	m_protocol->set_board_gyroscope_bias(math::vec3f(1, 2, 3));
+}
