@@ -29,6 +29,18 @@ namespace silk
 		//SCompact_Protocol m_compact_protocol;
 		//SFull_Protocol m_compact_protocol;
 		
+		enum class Send_Option : uint8_t
+		{
+			DISABLED,
+			STREAM,
+			ONCE
+		};
+		
+		Send_Option m_message_send_option[256];
+		
+		//note - this also changes ONCE messages to DISABLED
+		Send_Option get_send_option(SProtocol::TX_Message msg);
+		
 		uint32_t m_step;
 		
 		chrono::time_us m_last_time;

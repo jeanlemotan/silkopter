@@ -21,15 +21,8 @@ public:
 	void tx_hello_world(const Message_String& msg, uint16_t version);
 	bool is_connected() const;
 	
-	bool is_tx_message_enabled(TX_Message msg) const;
-	
 	void tx_print(char const* str, size_t size);
 	void tx_acknowledge(util::crc_t crc);
-	
-	RX_Message get_next_rx_message();
-	void rx_discard_message();
-	void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale);
-	void rx_board_gyroscope_bias(math::vec3f& bias);
 	
 	void tx_board_cpu_usage(uint8_t cpu_usage_percent);
 	void tx_board_time(chrono::time_us time);
@@ -52,9 +45,21 @@ public:
 	void tx_uav_phase(UAV::Phase phase);
 	void tx_uav_control_mode(UAV::Control_Mode mode);
 	void tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame);
+
+	//////////////////////////////////////////////////////////////////////////
+	//rx
+	
+	RX_Message get_next_rx_message();
+	void discard_rx_message();
+	void decode_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale);
+	void decode_board_gyroscope_bias(math::vec3f& bias);
+	void decode_stream_all_messages(bool& enabled);
+	void decode_stream_message(TX_Message& msg, bool& enabled);
+	void decode_send_all_messages_once();
+	void decode_send_message_once(TX_Message& msg);
 	
 private:
-	bool start_tx_message(TX_Message msg);
+	void start_tx_message(TX_Message msg);
 	void flush_tx_message();
 	
 	struct Header
@@ -77,8 +82,6 @@ private:
 	chrono::time_ms m_last_rx_time;
 	
 	bool m_is_connected;
-	
-	std::bitset<256> m_enabled_tx_messages;
 };
 	
 }

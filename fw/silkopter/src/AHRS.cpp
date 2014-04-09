@@ -8,9 +8,9 @@ void AHRS::process(board::IMU::Data const& data, chrono::secondsf dt)
 	{
 		m_last_sample_idx = data.sample_idx;
 		
-		auto const& gyro = data.gyroscope;
+		auto const& gyro = data.angular_velocity;
 		//gyro.z = 0; //TODO - use compass
-		m_euler += math::vec3f(gyro.x, gyro.y, 0);
+		m_euler += math::vec3f(gyro.x, gyro.y, 0) * data.dt.count;
 	}
 	
 	//only apply the complimentary filter when the accel pitch/roll are valid - that is when the Z is pointing UP

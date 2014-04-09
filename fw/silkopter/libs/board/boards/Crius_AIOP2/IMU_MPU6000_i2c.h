@@ -54,9 +54,8 @@ private:
 	math::vec3s16 m_raw_gyro_sample;
 	
 	chrono::secondsf m_sample_time;
-	mutable math::vec3f m_gyro_data;
-	mutable math::vec3f m_accel_data;
-	mutable uint8_t m_gyro_sample_idx;
+
+	mutable Data m_out_data;
 	
 	static void poll_data(void* ptr);
 	bool refresh_data(Data& data) const;

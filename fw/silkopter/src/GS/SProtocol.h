@@ -55,8 +55,10 @@ public:
 		NONE,
 		
 		//control messages
-		SET_MESSAGE_ENABLED,
-		SET_ALL_MESSAGES_ENABLED,
+		STREAM_MESSAGE, //the message will be streamed continuously
+		STREAM_ALL_MESSAGES, //all messages will be streamed continuously
+		SEND_MESSAGE_ONCE, //the message will be sent once
+		SEND_ALL_MESSAGES_ONCE, //all message will be sent once
 		
 		//calibration
 		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
@@ -71,8 +73,6 @@ public:
 	virtual void tx_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	
-	virtual bool is_tx_message_enabled(TX_Message msg) const = 0;
-	
 	virtual void tx_print(char const* str, size_t size) = 0;
 	
 	template<class Fmt, typename... Params>
@@ -85,14 +85,6 @@ public:
 	
 	virtual void tx_acknowledge(util::crc_t crc) = 0;
 	
-	//////////////////////////////////////////////////////////////////////////
-	//commands
-	
-	virtual RX_Message get_next_rx_message() = 0;
-	virtual void rx_discard_message() = 0;
-	virtual void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) = 0;
-	virtual void rx_board_gyroscope_bias(math::vec3f& bias) = 0;
-
 	//////////////////////////////////////////////////////////////////////////
 	
 	virtual void tx_board_cpu_usage(uint8_t cpu_usage_percent) = 0;
@@ -124,6 +116,19 @@ public:
 	virtual void tx_uav_phase(UAV::Phase phase) = 0;
 	virtual void tx_uav_control_mode(UAV::Control_Mode mode) = 0;
 	virtual void tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame) = 0;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//commands
+	
+	virtual RX_Message get_next_rx_message() = 0;
+	virtual void discard_rx_message() = 0;
+	virtual void decode_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) = 0;
+	virtual void decode_board_gyroscope_bias(math::vec3f& bias) = 0;
+	virtual void decode_stream_all_messages(bool& enabled) = 0;
+	virtual void decode_stream_message(TX_Message& msg, bool& enabled) = 0;
+	virtual void decode_send_all_messages_once() = 0;
+	virtual void decode_send_message_once(TX_Message& msg) = 0;
 };
 	
 }

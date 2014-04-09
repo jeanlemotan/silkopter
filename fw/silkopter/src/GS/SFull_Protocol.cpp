@@ -6,30 +6,12 @@ using namespace silk;
 SFull_Protocol::SFull_Protocol()
 	: m_is_connected(false)
 {
-	m_enabled_tx_messages.set();
 }
 
 SFull_Protocol::SFull_Protocol(board::UART& uart)
 	: m_uart(&uart)
 	, m_is_connected(false)
 {
-	m_enabled_tx_messages.set();
-	//m_enabled_messages.reset();
-		
- 	m_enabled_tx_messages.set(static_cast<int>(TX_Message::HELLO_WORLD), 1);
-	m_enabled_tx_messages.set(static_cast<int>(TX_Message::BOARD_TIME), 1);
-	 
-	 
-// 	m_enabled_messages.set(static_cast<int>(Message::BOARD_GYROSCOPE), 1);
-// 	m_enabled_messages.set(static_cast<int>(Message::BOARD_ACCELEROMETER), 1);
-// 	m_enabled_messages.set(static_cast<int>(Message::UAV_ATTITUDE), 1);
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-bool SFull_Protocol::is_tx_message_enabled(TX_Message msg) const
-{
-	return m_enabled_tx_messages.test(static_cast<uint8_t>(msg));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -42,17 +24,12 @@ static const uint8_t k_version = 1;
 //1 : 1 : size
 //2 : 2 : crc of everything excluding these 2 bytes (they are zeroed before)
 //>4 : x : data
-bool SFull_Protocol::start_tx_message(TX_Message msg)
+void SFull_Protocol::start_tx_message(TX_Message msg)
 {
-	if (!m_enabled_tx_messages.test(static_cast<uint8_t>(msg)))
-	{
-		return false;
-	}
 	m_tx_buffer.clear();
 	m_tx_buffer.append(static_cast<uint8_t>(msg));
 	m_tx_buffer.append(uint8_t(0)); //size
 	m_tx_buffer.append(uint16_t(0)); //crc
-	return true;
 }
 void SFull_Protocol::flush_tx_message()
 {
@@ -114,30 +91,21 @@ void SFull_Protocol::tx_acknowledge(util::crc_t crc)
 	
 void SFull_Protocol::tx_board_cpu_usage(uint8_t cpu_usage_percent)
 {
-	if (!start_tx_message(TX_Message::BOARD_CPU_USAGE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_CPU_USAGE);
 	m_tx_buffer.append(cpu_usage_percent);
 	flush_tx_message();
 }
 
 void SFull_Protocol::tx_board_time(chrono::time_us time)
 {
-	if (!start_tx_message(TX_Message::BOARD_TIME))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_TIME);
 	m_tx_buffer.append(uint32_t(time.time_since_epoch().count));
 	flush_tx_message();
 }
 	
 void SFull_Protocol::tx_board_gyroscope(bool is_valid, math::vec3f const& gyro)
 {
-	if (!start_tx_message(TX_Message::BOARD_GYROSCOPE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_GYROSCOPE);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -147,10 +115,7 @@ void SFull_Protocol::tx_board_gyroscope(bool is_valid, math::vec3f const& gyro)
 }
 void SFull_Protocol::tx_board_accelerometer(bool is_valid, math::vec3f const& accel)
 {
-	if (!start_tx_message(TX_Message::BOARD_ACCELEROMETER))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_ACCELEROMETER);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -160,11 +125,7 @@ void SFull_Protocol::tx_board_accelerometer(bool is_valid, math::vec3f const& ac
 }
 void SFull_Protocol::tx_board_temperature(bool is_valid, float temp)
 {
-	if (!start_tx_message(TX_Message::BOARD_TEMPERATURE))
-	{
-		return;
-	}
-
+	start_tx_message(TX_Message::BOARD_TEMPERATURE);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -174,10 +135,7 @@ void SFull_Protocol::tx_board_temperature(bool is_valid, float temp)
 }
 void SFull_Protocol::tx_board_baro_pressure(bool is_valid, float pressure)
 {
-	if (!start_tx_message(TX_Message::BOARD_BARO_PRESSURE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_BARO_PRESSURE);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -187,10 +145,7 @@ void SFull_Protocol::tx_board_baro_pressure(bool is_valid, float pressure)
 }
 void SFull_Protocol::tx_board_sonar_distance(bool is_valid, float distance)
 {
-	if (!start_tx_message(TX_Message::BOARD_SONAR_DISTANCE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_SONAR_DISTANCE);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -200,10 +155,7 @@ void SFull_Protocol::tx_board_sonar_distance(bool is_valid, float distance)
 }
 void SFull_Protocol::tx_board_gps_altitude(bool is_valid, float altitude)
 {
-	if (!start_tx_message(TX_Message::BOARD_GPS_ALTITUDE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_GPS_ALTITUDE);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -213,10 +165,7 @@ void SFull_Protocol::tx_board_gps_altitude(bool is_valid, float altitude)
 }
 void SFull_Protocol::tx_board_rc_in(uint8_t count, int16_t const* values)
 {
-	if (!start_tx_message(TX_Message::BOARD_RC_IN))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_RC_IN);
 	m_tx_buffer.append(count);
 	if (count)
 	{
@@ -226,10 +175,7 @@ void SFull_Protocol::tx_board_rc_in(uint8_t count, int16_t const* values)
 }
 void SFull_Protocol::tx_board_pwm_out(uint8_t count, int16_t const* values)
 {
-	if (!start_tx_message(TX_Message::BOARD_PWM_OUT))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::BOARD_PWM_OUT);
 	m_tx_buffer.append(count);
 	if (count)
 	{
@@ -242,66 +188,45 @@ void SFull_Protocol::tx_board_pwm_out(uint8_t count, int16_t const* values)
 
 void SFull_Protocol::tx_uav_acceleration(math::vec3f const& accel)
 {
-	if (!start_tx_message(TX_Message::UAV_ACCELERATION))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_ACCELERATION);
 	m_tx_buffer.append(accel);
 	flush_tx_message();
 }
 void SFull_Protocol::tx_uav_velocity(math::vec3f const& velocity)
 {
-	if (!start_tx_message(TX_Message::UAV_VELOCITY))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_VELOCITY);
 	m_tx_buffer.append(velocity);
 	flush_tx_message();
 }
 void SFull_Protocol::tx_uav_position(math::vec3f const& position)
 {
-	if (!start_tx_message(TX_Message::UAV_POSITION))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_POSITION);
 	m_tx_buffer.append(position);
 	flush_tx_message();
 }
 
 void SFull_Protocol::tx_uav_attitude(math::vec3f const& euler)
 {
-	if (!start_tx_message(TX_Message::UAV_ATTITUDE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_ATTITUDE);
 	m_tx_buffer.append(euler);
 	flush_tx_message();
 }
 
 void SFull_Protocol::tx_uav_phase(UAV::Phase phase)
 {
-	if (!start_tx_message(TX_Message::UAV_PHASE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_PHASE);
 	m_tx_buffer.append(phase);
 	flush_tx_message();
 }
 void SFull_Protocol::tx_uav_control_mode(UAV::Control_Mode mode)
 {
-	if (!start_tx_message(TX_Message::UAV_CONTROL_MODE))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_CONTROL_MODE);
 	m_tx_buffer.append(mode);
 	flush_tx_message();
 }
 void SFull_Protocol::tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame)
 {
-	if (!start_tx_message(TX_Message::UAV_CONTROL_REFERENCE_FRAME))
-	{
-		return;
-	}
+	start_tx_message(TX_Message::UAV_CONTROL_REFERENCE_FRAME);
 	m_tx_buffer.append(frame);
 	flush_tx_message();
 }
@@ -413,33 +338,66 @@ SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 		bool needs_more_data;
 		if (decode_rx_header(needs_more_data))
 		{
-			tx_printf("** rx_message {}, crc: {}, size: {}", static_cast<int>(m_rx_header.msg), m_rx_header.crc, m_rx_header.size);
 			return m_rx_header.msg;
 		}
 	}
 	return RX_Message::NONE;
 }
 
-void SFull_Protocol::rx_discard_message()
+void SFull_Protocol::discard_rx_message()
 {
 	m_rx_buffer.pop_front(m_rx_header.size);
 }
-void SFull_Protocol::rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale)
+void SFull_Protocol::decode_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale)
 {
 	ASSERT(m_rx_header.msg == RX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE);
 	size_t off = 0;
 	bias = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
 	scale = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
+
 	m_rx_buffer.pop_front(m_rx_header.size);
-	
 	tx_acknowledge(m_rx_header.crc);
 }
-void SFull_Protocol::rx_board_gyroscope_bias(math::vec3f& bias)
+void SFull_Protocol::decode_board_gyroscope_bias(math::vec3f& bias)
 {
 	ASSERT(m_rx_header.msg == RX_Message::SET_BOARD_GYROSCOPE_BIAS);
 	size_t off = 0;
 	bias = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
+
 	m_rx_buffer.pop_front(m_rx_header.size);
-	
+	tx_acknowledge(m_rx_header.crc);
+}
+void SFull_Protocol::decode_stream_all_messages(bool& enabled)
+{
+	ASSERT(m_rx_header.msg == RX_Message::STREAM_ALL_MESSAGES);
+	size_t off = 0;
+	enabled = get_value<RX_Buffer, bool>(m_rx_buffer, off);
+
+	m_rx_buffer.pop_front(m_rx_header.size);
+	tx_acknowledge(m_rx_header.crc);
+}
+void SFull_Protocol::decode_stream_message(TX_Message& msg, bool& enabled)
+{
+	ASSERT(m_rx_header.msg == RX_Message::STREAM_MESSAGE);
+	size_t off = 0;
+	msg = get_value<RX_Buffer, TX_Message>(m_rx_buffer, off);
+	enabled = get_value<RX_Buffer, bool>(m_rx_buffer, off);
+
+	m_rx_buffer.pop_front(m_rx_header.size);
+	tx_acknowledge(m_rx_header.crc);
+}
+void SFull_Protocol::decode_send_all_messages_once()
+{
+	ASSERT(m_rx_header.msg == RX_Message::SEND_ALL_MESSAGES_ONCE);
+	m_rx_buffer.pop_front(m_rx_header.size);
+	tx_acknowledge(m_rx_header.crc);
+}
+void SFull_Protocol::decode_send_message_once(TX_Message& msg)
+{
+	ASSERT(m_rx_header.msg == RX_Message::SEND_MESSAGE_ONCE);
+	size_t off = 0;
+	msg = get_value<RX_Buffer, TX_Message>(m_rx_buffer, off);
+
+	m_rx_buffer.pop_front(m_rx_header.size);
 	tx_acknowledge(m_rx_header.crc);
 }

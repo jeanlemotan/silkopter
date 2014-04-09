@@ -38,10 +38,10 @@ void GS::process(chrono::micros max_duration)
 
 	//calculate frame time
 	auto start = board::clock::now_us();
-	if (start - m_last_time < chrono::micros(10000))
-	{
-		return;
-	}
+// 	if (start - m_last_time < chrono::micros(10000))
+// 	{
+// 		return;
+// 	}
 	m_frame_duration = start - m_last_time;
 	m_last_time = start;
 	
@@ -82,10 +82,44 @@ void GS::receive_data(SProtocol::RX_Message message)
 		case SProtocol::RX_Message::NONE:
 			return;
 		break;
+		case SProtocol::RX_Message::STREAM_ALL_MESSAGES:
+		{
+			bool enabled;
+			m_full_protocol.decode_stream_all_messages(enabled);
+			m_full_protocol.tx_printf("Stream all messages {}", enabled ? "enabled" : "disabled");
+			std::fill(m_message_send_option, m_message_send_option + 256, enabled ? Send_Option::STREAM : Send_Option::DISABLED);
+		}
+		break;
+		case SProtocol::RX_Message::STREAM_MESSAGE:
+		{
+			bool enabled;
+			SProtocol::TX_Message msg;
+			m_full_protocol.decode_stream_message(msg, enabled);
+			uint8_t msg_idx = static_cast<uint8_t>(msg);
+			m_full_protocol.tx_printf("Stream message {} {}", msg_idx, enabled ? "enabled" : "disabled");
+			m_message_send_option[msg_idx] = enabled ? Send_Option::STREAM : Send_Option::DISABLED;
+		}
+		break;
+		case SProtocol::RX_Message::SEND_ALL_MESSAGES_ONCE:
+		{
+			m_full_protocol.decode_send_all_messages_once();
+			m_full_protocol.tx_printf("Send all messages once");
+			std::fill(m_message_send_option, m_message_send_option + 256, Send_Option::ONCE);
+		}
+		break;
+		case SProtocol::RX_Message::SEND_MESSAGE_ONCE:
+		{
+			SProtocol::TX_Message msg;
+			m_full_protocol.decode_send_message_once(msg);
+			uint8_t msg_idx = static_cast<uint8_t>(msg);
+			m_full_protocol.tx_printf("Send message {} once", msg_idx);
+			m_message_send_option[msg_idx] = Send_Option::ONCE;
+		}
+		break;
 		case SProtocol::RX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE:
 		{
 			math::vec3f bias, scale;
-			m_full_protocol.rx_board_accelerometer_bias_scale(bias, scale);
+			m_full_protocol.decode_board_accelerometer_bias_scale(bias, scale);
 			board::get_main_imu().set_accelerometer_bias_scale(bias, scale);
 			m_full_protocol.tx_printf("Received accelerometer bias {.9} / scale {.9}", bias, scale);
 		}
@@ -93,17 +127,26 @@ void GS::receive_data(SProtocol::RX_Message message)
 		case SProtocol::RX_Message::SET_BOARD_GYROSCOPE_BIAS:
 		{
 			math::vec3f bias;
-			m_full_protocol.rx_board_gyroscope_bias(bias);
+			m_full_protocol.decode_board_gyroscope_bias(bias);
 			board::get_main_imu().set_gyroscope_bias(bias);
 			m_full_protocol.tx_printf("Received gyroscope bias {.9}", bias);
 		}
 		break;
 		default:
-			m_full_protocol.rx_discard_message();
+			m_full_protocol.discard_rx_message();
 		break;
 	}
-	
-	
+}
+
+auto GS::get_send_option(SProtocol::TX_Message msg) -> Send_Option
+{
+	auto& so = m_message_send_option[static_cast<uint8_t>(msg)];
+	if (so == Send_Option::ONCE)
+	{
+		so = Send_Option::DISABLED;
+		return Send_Option::ONCE;
+	}
+	return so;
 }
 
 bool GS::send_data(uint32_t step)
@@ -112,77 +155,117 @@ bool GS::send_data(uint32_t step)
 	{
 	case 5:
 	{
-		uint8_t cpu_usage = m_frame_duration.count / 5000;
-		m_full_protocol.tx_board_cpu_usage(cpu_usage);
+		if (get_send_option(SProtocol::TX_Message::BOARD_CPU_USAGE) != Send_Option::DISABLED)
+		{
+			uint8_t cpu_usage = m_frame_duration.count * 100 / 5000;
+			m_full_protocol.tx_board_cpu_usage(cpu_usage);
+		}
 		return false;
 	}
 	case 6:
 	{
-		m_full_protocol.tx_board_time(board::clock::now_us());
+		if (get_send_option(SProtocol::TX_Message::BOARD_TIME) != Send_Option::DISABLED)
+		{
+			m_full_protocol.tx_board_time(board::clock::now_us());
+		}
 		return false;
 	}
 	case 10:
 	{
-		board::IMU::Data data;
-		bool is_valid = board::get_main_imu().get_data(data);
-		auto delta = data.gyroscope;//(data.gyroscope - m_last_gyroscope) / chrono::secondsf(m_frame_duration).count;
-		//m_last_gyroscope = data.gyroscope;
-		m_full_protocol.tx_board_gyroscope(is_valid, delta);
-		m_full_protocol.tx_board_accelerometer(is_valid, data.acceleration);
+		if (get_send_option(SProtocol::TX_Message::BOARD_ACCELEROMETER) != Send_Option::DISABLED)
+		{
+			board::IMU::Data data;
+			bool is_valid = board::get_main_imu().get_data(data);
+			m_full_protocol.tx_board_accelerometer(is_valid, data.acceleration);
+		}
+		return false;
+	}
+	case 13:
+	{
+		if (get_send_option(SProtocol::TX_Message::BOARD_GYROSCOPE) != Send_Option::DISABLED)
+		{
+			board::IMU::Data data;
+			bool is_valid = board::get_main_imu().get_data(data);
+			m_full_protocol.tx_board_gyroscope(is_valid, data.angular_velocity);
+		}
 		return false;
 	}
 	case 18:
 	{
-// 		board::sonar::Data data;
-// 		board::sonar::get_data(data);
-// 		m_full_protocol.tx_board_sonar_altitude(data.is_valid, data.altitude);
+		if (get_send_option(SProtocol::TX_Message::BOARD_SONAR_DISTANCE) != Send_Option::DISABLED)
+		{
+			// 		board::sonar::Data data;
+			// 		board::sonar::get_data(data);
+			// 		m_full_protocol.tx_board_sonar_altitude(data.is_valid, data.altitude);
+		}
 		return false;
 	}
 	case 20:
 	{
- 		board::Barometer::Data data;
- 		if (board::get_main_barometer())
+		if (get_send_option(SProtocol::TX_Message::BOARD_BARO_PRESSURE) != Send_Option::DISABLED)
 		{
-			bool is_valid = board::get_main_barometer()->get_data(data);
-			m_full_protocol.tx_board_baro_pressure(is_valid, data.pressure);
+			board::Barometer::Data data;
+			if (board::get_main_barometer())
+			{
+				bool is_valid = board::get_main_barometer()->get_data(data);
+				m_full_protocol.tx_board_baro_pressure(is_valid, data.pressure);
+			}
 		}
 		return false;
 	}
 	case 22:
 	{
-//		int16_t data[32];
-//		auto count = math::min(board::get_rc_in().get_count(), uint8_t(32));
-// 		board::rc_in::get_channels(data, count);
-// 		m_full_protocol.tx_board_rc_in(count, data);
+		if (get_send_option(SProtocol::TX_Message::BOARD_RC_IN) != Send_Option::DISABLED)
+		{
+			//		int16_t data[32];
+			//		auto count = math::min(board::get_rc_in().get_count(), uint8_t(32));
+			// 		board::rc_in::get_channels(data, count);
+			// 		m_full_protocol.tx_board_rc_in(count, data);
+		}
 		return false;
 	}
 	case 24:
 	{
-//		int16_t data[32];
-//		auto count = math::min(board::get_pwm_out().get_count(), uint8_t(32));
-// 		board::pwm_out::get_channels(data, count);
-// 		m_full_protocol.tx_board_pwm_out(count, data);
+		if (get_send_option(SProtocol::TX_Message::BOARD_PWM_OUT) != Send_Option::DISABLED)
+		{
+			//		int16_t data[32];
+			//		auto count = math::min(board::get_pwm_out().get_count(), uint8_t(32));
+			// 		board::pwm_out::get_channels(data, count);
+			// 		m_full_protocol.tx_board_pwm_out(count, data);
+		}
 		return false;
 	}
 
 	case 30:
 	{
-		m_full_protocol.tx_uav_acceleration(m_uav.get_status().acceleration);
+		if (get_send_option(SProtocol::TX_Message::UAV_ACCELERATION) != Send_Option::DISABLED)
+		{
+			m_full_protocol.tx_uav_acceleration(m_uav.get_status().acceleration);
+		}
 		return false;
 	}
 	case 32:
 	{
-		m_full_protocol.tx_uav_velocity(m_uav.get_status().velocity);
+		if (get_send_option(SProtocol::TX_Message::UAV_VELOCITY) != Send_Option::DISABLED)
+		{
+			m_full_protocol.tx_uav_velocity(m_uav.get_status().velocity);
+		}
 		return false;
 	}
 	case 34:
 	{
-		m_full_protocol.tx_uav_position(m_uav.get_status().position);
+		if (get_send_option(SProtocol::TX_Message::UAV_POSITION) != Send_Option::DISABLED)
+		{
+			m_full_protocol.tx_uav_position(m_uav.get_status().position);
+		}
 		return false;
 	}
 	case 36:
 	{
-		m_full_protocol.tx_uav_attitude(m_uav.get_status().attitude.get_euler());
+		if (get_send_option(SProtocol::TX_Message::UAV_ATTITUDE) != Send_Option::DISABLED)
+		{
+			m_full_protocol.tx_uav_attitude(m_uav.get_status().attitude.get_euler());
+		}
 		return false;
 	}
 		

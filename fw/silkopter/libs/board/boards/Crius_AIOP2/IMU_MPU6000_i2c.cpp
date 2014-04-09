@@ -432,12 +432,12 @@ bool IMU_MPU6000_i2c::refresh_data(Data& data) const
 		float sc = float(buffer.sample_count);
 		buffer.sample_count = 0;
 
-		m_gyro_data.set((math::vec3s32&)(buffer.gyro_sum));
+		m_out_data.angular_velocity.set((math::vec3s32&)(buffer.gyro_sum));
 		buffer.gyro_sum.x = 0;
 		buffer.gyro_sum.y = 0;
 		buffer.gyro_sum.z = 0;
 
-		m_accel_data.set((math::vec3s32&)(buffer.accel_sum));
+		m_out_data.acceleration.set((math::vec3s32&)(buffer.accel_sum));
 		buffer.accel_sum.x = 0;
 		buffer.accel_sum.y = 0;
 		buffer.accel_sum.z = 0;
@@ -456,20 +456,18 @@ bool IMU_MPU6000_i2c::refresh_data(Data& data) const
 
 		//////////////////////////////////////////////////////////////////////////
 		//scale the accel and apply the calibration offset
-		m_accel_data = ((m_accel_data * (scinv * s_fp_g)) - m_accel_calibration_bias) * m_accel_calibration_scale;
+		m_out_data.acceleration = ((m_out_data.acceleration * (scinv * s_fp_g)) - m_accel_calibration_bias) * m_accel_calibration_scale;
 
-		m_gyro_data = (m_gyro_data * (s_gyro_scale_inv * m_sample_time.count)) - m_gyro_calibration_bias;
-		m_gyro_sample_idx ++;
+		m_out_data.angular_velocity = m_out_data.angular_velocity * (scinv * s_gyro_scale_inv) - m_gyro_calibration_bias;
+		m_out_data.sample_idx ++;
+		m_out_data.dt.count = m_sample_time.count * sc;
 	
 		//From the specs: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
 		m_thermometer.m_is_valid = true;
 		m_thermometer.m_data.degrees = temp * scinv * 0.002941f + 36.53f;
 	}
 
-	data.acceleration = m_accel_data;
-	data.gyroscope = m_gyro_data;
-	data.sample_idx = m_gyro_sample_idx;
-	data.dt = m_sample_time;
+	data = m_out_data;
 
 	return true;
 }

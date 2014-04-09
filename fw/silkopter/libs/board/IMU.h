@@ -24,15 +24,13 @@ namespace board
 
 		struct Data
 		{
-			Data() : sample_idx(0) {}
-			uint8_t sample_idx; //this is incremented every time there is a new sample
+			uint8_t sample_idx = 0; //this is incremented every time there is a new sample
 				
 			chrono::secondsf dt; //for how long is this measurement
 			
 			math::vec3f acceleration; //m/s/s
 			
-			//accumulated euler/s value. This is a delta that has to be applied once per increment of sample_idx
-			math::vec3f gyroscope; 
+			math::vec3f angular_velocity;
 		};
 
 		//returns true if data is valid.
