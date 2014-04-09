@@ -13,12 +13,6 @@ class Buffer : util::Noncopyable
 public:
 	static const size_t MAX_SIZE = SIZE;
 	
-	Buffer() 
-		: m_size(0)
-	{
-			
-	}
-
 	size_t size() const
 	{
 		return m_size;
@@ -92,7 +86,7 @@ public:
 	}
 	
 private:
-	size_t m_size;
+	size_t m_size = 0;
 	T m_data[MAX_SIZE];
 };
 	

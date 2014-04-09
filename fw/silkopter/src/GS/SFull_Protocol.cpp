@@ -58,7 +58,6 @@ void SFull_Protocol::flush_tx_message()
 {
 	m_tx_buffer[1] = uint8_t(m_tx_buffer.size());
 	auto crc = util::compute_crc(m_tx_buffer.data(), m_tx_buffer.size());
-	//PRINT("\n msg: {0}, size {1}, crc {2}", m_tx_buffer[0], m_tx_buffer[1], crc);
 	m_tx_buffer.write_at(2, crc);
 	m_uart->write(m_tx_buffer.data(), m_tx_buffer.size());
 }
@@ -88,6 +87,10 @@ void SFull_Protocol::tx_hello_world(Message_String const& msg, uint16_t version)
 		if (m_uart->read(response, sizeof(response)))
 		{
 			m_is_connected = !memcmp(response, expected_response, sizeof(response));
+			if (m_is_connected)
+			{
+				tx_printf("Connected.");
+			}
 		}
 	}
 }
@@ -100,7 +103,13 @@ void SFull_Protocol::tx_print(char const* str, size_t size)
 	m_tx_buffer.append(reinterpret_cast<uint8_t const*>(str), size);
 	flush_tx_message();
 }
-	
+
+void SFull_Protocol::tx_acknowledge(util::crc_t crc)
+{
+	start_tx_message(TX_Message::ACKNOWLEDGE);
+	m_tx_buffer.append(crc);
+	flush_tx_message();
+}
 //////////////////////////////////////////////////////////////////////////
 	
 void SFull_Protocol::tx_board_cpu_usage(uint8_t cpu_usage_percent)
@@ -321,14 +330,22 @@ static void set_value(Container const& t, T const& val, size_t off)
 	}
 }
 
-bool SFull_Protocol::decode_rx_header(Header& header, bool& needs_more_data)
+bool SFull_Protocol::decode_rx_header(bool& needs_more_data)
 {
 	needs_more_data = false;
 
 	if (m_rx_buffer.size() < sizeof(Header))
 	{
-		needs_more_data = true;
-		return false;
+		if (board::clock::now_ms() - m_last_rx_time < chrono::millis(500))
+		{
+			needs_more_data = true;
+			return false;
+		}
+		else
+		{
+			m_rx_buffer.pop_front(); //msg
+			return false;
+		}
 	}
 
 	size_t off = 0;
@@ -370,9 +387,9 @@ bool SFull_Protocol::decode_rx_header(Header& header, bool& needs_more_data)
 	}
 
 	m_rx_buffer.pop_front(sizeof(Header)); //whole header
-	header.msg = msg;
-	header.size = size - sizeof(Header);
-	header.crc = crc;
+	m_rx_header.msg = msg;
+	m_rx_header.size = size - sizeof(Header);
+	m_rx_header.crc = crc;
 	return true;
 }
 
@@ -381,6 +398,7 @@ SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 	auto available = m_uart->get_data_size();
 	if (available > 0)
 	{
+		//tx_printf("received {} bytes / {} ({})", available, m_rx_buffer.size(), m_uart->get_rx_data_counter());
 		m_last_rx_time = board::clock::now_ms();
 		for (size_t i = 0; i < available; i++)
 		{
@@ -392,22 +410,36 @@ SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 	
 	if (!m_rx_buffer.empty())
 	{
-		Header header;
 		bool needs_more_data;
-		if (decode_rx_header(header, needs_more_data))
+		if (decode_rx_header(needs_more_data))
 		{
-			debug::print("\nreceived {0}, crc: {1}, size: {2}", static_cast<int>(header.msg), header.crc, header.size);
-			return header.msg;
+			tx_printf("** rx_message {}, crc: {}, size: {}", static_cast<int>(m_rx_header.msg), m_rx_header.crc, m_rx_header.size);
+			return m_rx_header.msg;
 		}
 	}
 	return RX_Message::NONE;
 }
 
-void SFull_Protocol::rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) const
+void SFull_Protocol::rx_discard_message()
 {
-	
+	m_rx_buffer.pop_front(m_rx_header.size);
 }
-void SFull_Protocol::rx_board_gyroscope_bias(math::vec3f& bias) const
+void SFull_Protocol::rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale)
 {
+	ASSERT(m_rx_header.msg == RX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE);
+	size_t off = 0;
+	bias = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
+	scale = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
+	m_rx_buffer.pop_front(m_rx_header.size);
 	
+	tx_acknowledge(m_rx_header.crc);
+}
+void SFull_Protocol::rx_board_gyroscope_bias(math::vec3f& bias)
+{
+	ASSERT(m_rx_header.msg == RX_Message::SET_BOARD_GYROSCOPE_BIAS);
+	size_t off = 0;
+	bias = get_value<RX_Buffer, math::vec3f>(m_rx_buffer, off);
+	m_rx_buffer.pop_front(m_rx_header.size);
+	
+	tx_acknowledge(m_rx_header.crc);
 }

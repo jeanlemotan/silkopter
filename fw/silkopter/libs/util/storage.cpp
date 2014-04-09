@@ -103,17 +103,17 @@ namespace storage
 		auto& eeprom = board::get_eeprom();
 		
 		eeprom.read_advance(s_main_header, s_start_offset);
-		debug::print("\nStorage: crc {0}, count {1}", s_main_header.crc, s_main_header.count);
+		debug::printf("\nStorage: crc {}, count {}", s_main_header.crc, s_main_header.count);
 
 		auto crc = _compute_main_crc();
 		if (crc != s_main_header.crc)
 		{
-			debug::print("\nStorage corrupted. Formatting...");
+			debug::printf("\nStorage corrupted. Formatting...");
 			remove_all();
 		}
  		else
  		{
- 			debug::print("\nCRC is ok");
+ 			debug::printf("\nCRC is ok");
  		}
 	}
 

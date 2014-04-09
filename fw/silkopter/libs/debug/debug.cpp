@@ -43,8 +43,8 @@ void handle_assert(const char* condition, const char* file, int line, const char
 		}
 		if (file)
 		{
-			util::String<512> str;
-			util::format(str, "\n@ {0}:{1}", file, line);
+			util::FString<512> str;
+			util::format(str, "\n@ {}:{}", file, line);
 			s_uart->write_c_str(str.c_str());
 		}
 		if (condition)
@@ -53,7 +53,6 @@ void handle_assert(const char* condition, const char* file, int line, const char
 			s_uart->write_c_str(condition ? condition : "N/A");
 		}
 
-		s_uart->write_c_str("\nThe board will now freeze...");
 		s_uart->flush();
 	}
 
@@ -88,8 +87,8 @@ void trace(const char* file, int line, const char* msg)
 		}
 		if (file)
 		{
-			util::String<512> str;
-			util::format(str, " @ {0}:{1}", file, line);
+			util::FString<512> str;
+			util::format(str, " @ {}:{}", file, line);
 			s_uart->write_c_str(str.c_str());
 		}
 		s_uart->flush();
@@ -121,9 +120,7 @@ Timed_Scope::Timed_Scope(char const* file, int line)
 Timed_Scope::~Timed_Scope()
 {
 	auto d = board::clock::now_us() - m_start;
-	util::String<128> msg;
-	util::format(msg, "\nScope {0}:{1} took {2}", m_file, m_line, d);
-	debug::print(msg.c_str());
+	debug::printf("\nScope {}:{} > {}", m_file, m_line, d);
 }
 
 

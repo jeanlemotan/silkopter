@@ -99,11 +99,11 @@ namespace board
 	{
 		return 1;
 	}
-	IMU const& get_imu(uint8_t idx)
+	IMU& get_imu(uint8_t idx)
 	{
 		return s_imu;
 	}
-	IMU const& get_main_imu()
+	IMU& get_main_imu()
 	{
 		return s_imu;
 	}

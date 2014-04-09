@@ -24,10 +24,12 @@ public:
 	bool is_tx_message_enabled(TX_Message msg) const;
 	
 	void tx_print(char const* str, size_t size);
+	void tx_acknowledge(util::crc_t crc);
 	
 	RX_Message get_next_rx_message();
-	void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) const;
-	void rx_board_gyroscope_bias(math::vec3f& bias) const;
+	void rx_discard_message();
+	void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale);
+	void rx_board_gyroscope_bias(math::vec3f& bias);
 	
 	void tx_board_cpu_usage(uint8_t cpu_usage_percent);
 	void tx_board_time(chrono::time_us time);
@@ -62,7 +64,7 @@ private:
 		util::crc_t crc;
 	};
 	
-	bool decode_rx_header(Header& header, bool& needs_more_data);
+	bool decode_rx_header(bool& needs_more_data);
 
 	board::UART* m_uart;
 	
@@ -71,9 +73,10 @@ private:
 	
 	typedef util::Circular_Buffer<uint8_t, 128> RX_Buffer;
 	RX_Buffer m_rx_buffer;
-	bool m_is_connected;
+	Header m_rx_header;
+	chrono::time_ms m_last_rx_time;
 	
-	chrono::time_ms m_last_rx_time; 
+	bool m_is_connected;
 	
 	std::bitset<256> m_enabled_tx_messages;
 };

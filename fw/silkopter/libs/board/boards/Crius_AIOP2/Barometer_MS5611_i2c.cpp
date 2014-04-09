@@ -203,7 +203,7 @@ bool Barometer_MS5611_i2c::init_hardware()
 	m_c4f = C4;
 	m_c5f = (C5 << 8);
 	m_c6f = C6;
-//	PRINT(":{0} {1} {2} {3} {4} {5}:", C1, C2, C3, C4, C5, C6);
+//	PRINT(":{} {} {} {} {} {}:", C1, C2, C3, C4, C5, C6);
 
 	//Send a command to read Temp first
 	_write(CMD_CONVERT_D2_OSR4096);
@@ -249,7 +249,7 @@ void Barometer_MS5611_i2c::calculate() const
 	float TEMP = (dT * m_c6f)/8388608.f;
 	float OFF = m_c2f * 65536.0f + (m_c4f * dT) / 128.f;
 	float SENS = m_c1f * 32768.0f + (m_c3f * dT) / 256.f;
-	//PRINT(":{0} {1} {2} {3}:", dT, TEMP, OFF, SENS);
+	//PRINT(":{} {} {} {}:", dT, TEMP, OFF, SENS);
 
 	if (TEMP < 0)
 	{

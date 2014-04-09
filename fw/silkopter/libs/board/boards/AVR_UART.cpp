@@ -27,8 +27,6 @@ AVR_UART::AVR_UART(uint8_t port,
 	, m_ucsra(*ucsra)
 	, m_ucsrb(*ucsrb)
 	, m_ucsrc(*ucsrc)
-	, m_is_blocking(true)
-	, m_is_open(false)
 {
 	ASSERT(port < MAX_UARTS);
 	ASSERT(!s_uart_ptrs[port]);
@@ -46,16 +44,63 @@ bool AVR_UART::is_blocking() const
 
 void AVR_UART::begin(uint32_t baud)
 {
-	uint32_t xbaud = UART_BAUD_SELECT(baud, F_CPU);
+	if (m_is_open)
+	{
+		end();
+	}
 	
-    m_ubrrh = (uint8_t)(xbaud>>8);
-    m_ubrrl = (uint8_t) xbaud;
+	m_rx_buffer.data = reinterpret_cast<uint8_t*>(malloc(UART_BUFFER_SIZE));
+	m_tx_buffer.data = reinterpret_cast<uint8_t*>(malloc(UART_BUFFER_SIZE));
+
+	m_rx_buffer.head = m_rx_buffer.tail = 0;
+	m_tx_buffer.head = m_tx_buffer.tail = 0;
+	
+	uint32_t xbaud = 0;
+	bool use_u2x = true;
+
+		// If the user has supplied a new baud rate, compute the new UBRR value.
+#if F_CPU == 16000000UL
+	// hardcoded exception for compatibility with the bootloader shipped
+	// with the Duemilanove and previous boards and the firmware on the 8U2
+	// on the Uno and Mega 2560.
+	if (baud == 57600)
+	{
+		use_u2x = false;
+	}
+#endif
+
+	if (use_u2x) 
+	{
+		m_ucsra = 1 << U2X0;
+		xbaud = (F_CPU / 4 / baud - 1) / 2;
+	} 
+	else 
+	{
+		m_ucsra = 0;
+		xbaud = (F_CPU / 8 / baud - 1) / 2;
+	}
+
+	m_ubrrh = (uint8_t)(xbaud>>8);
+	m_ubrrl = (uint8_t) xbaud;
+
 	m_ucsrb &= ~_BV(UDRIE0);
     m_ucsrb |= _BV(RXEN0) | _BV(TXEN0); //transmit and receive
 	m_ucsrb |= _BV(RXCIE0); //receiver interrupt
 	m_ucsrc |= _BV(UCSZ01) | _BV(UCSZ00); //format
 	
 	m_is_open = true;
+}
+
+void AVR_UART::end()
+{
+	m_ucsrb &= ~(_BV(UDRIE0) | _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0));
+
+	free((void*)(m_rx_buffer.data));
+	m_rx_buffer.data = nullptr;
+	free((void*)(m_tx_buffer.data));
+	m_tx_buffer.data = nullptr;
+	
+	m_is_open = false;
 }
 
 UART::Error AVR_UART::get_last_error() const
@@ -226,6 +271,11 @@ void AVR_UART::flush()
 	}
     uint8_t tmphead = m_tx_buffer.head;
 	while (tmphead != m_tx_buffer.tail);
+}
+
+size_t AVR_UART::get_rx_data_counter() const
+{
+	return m_rx_data_counter;
 }
 
 }

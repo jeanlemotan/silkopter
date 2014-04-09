@@ -11,15 +11,9 @@ namespace util
 	public:
 		static const size_t MAX_SIZE = SIZE;
 		
-		Circular_Buffer()
-			: m_start(0)
-			, m_end(0)
-		{
-				
-		}
 		size_t size() const
 		{
-			return (m_start < m_end) ? (m_end - m_start) : ((SIZE - m_start) + m_end);
+			return (m_start <= m_end) ? (m_end - m_start) : ((SIZE - m_start) + m_end);
 		}
 		bool empty() const
 		{
@@ -97,8 +91,8 @@ namespace util
 		}
 		
 	private:
-		size_t m_start;
-		size_t m_end;
+		size_t m_start = 0;
+		size_t m_end = 0;
 		T m_data[SIZE];
 	};
 	

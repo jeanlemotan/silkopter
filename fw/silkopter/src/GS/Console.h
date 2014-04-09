@@ -13,7 +13,7 @@ public:
 private:	
 	void show_help();
 
-	typedef util::String<64> String;
+	typedef util::FString<64> String;
 	
 	bool get_command(String& command) const;
 	

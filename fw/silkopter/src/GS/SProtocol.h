@@ -6,6 +6,7 @@
 #include "_qmath.h"
 #include "util/FString.h"
 #include "util/chrono.h"
+#include "util/crc.h"
 #include "UAV.h"
 
 namespace silk
@@ -16,7 +17,7 @@ class SProtocol : public util::Noncopyable
 public:
 
 	//each has a corresponsing send method
-	enum class TX_Message
+	enum class TX_Message : uint8_t
 	{
 		HELLO_WORLD = 253,
 		ACKNOWLEDGE = 254,
@@ -49,7 +50,7 @@ public:
 	};
 	
 	//each has a corresponding receive method
-	enum class RX_Message
+	enum class RX_Message : uint8_t
 	{
 		NONE,
 		
@@ -66,7 +67,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	//handshake
 	
-	typedef util::String<64> Message_String;
+	typedef util::FString<64> Message_String;
 	virtual void tx_hello_world(Message_String const& msg, uint16_t version) = 0;
 	virtual bool is_connected() const = 0;
 	
@@ -75,19 +76,22 @@ public:
 	virtual void tx_print(char const* str, size_t size) = 0;
 	
 	template<class Fmt, typename... Params>
-	void tx_print(Fmt const& fmt, Params... params)
+	void tx_printf(Fmt const& fmt, Params... params)
 	{
-		util::String<255> str;
+		util::FString<255> str;
 		util::format(str, fmt, params...);
-		tx_print(str.m_data(), str.size());
+		tx_print(str.data(), str.size());
 	}
+	
+	virtual void tx_acknowledge(util::crc_t crc) = 0;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//commands
 	
 	virtual RX_Message get_next_rx_message() = 0;
-	virtual void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) const = 0;
-	virtual void rx_board_gyroscope_bias(math::vec3f& bias) const = 0;
+	virtual void rx_discard_message() = 0;
+	virtual void rx_board_accelerometer_bias_scale(math::vec3f& bias, math::vec3f& scale) = 0;
+	virtual void rx_board_gyroscope_bias(math::vec3f& bias) = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	

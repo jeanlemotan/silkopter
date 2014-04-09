@@ -105,10 +105,10 @@ namespace board
 		//pwm_out::init();
 		//pwm_out::set_frequencies(50);
 		
-		s_imu.set_accelerometer_bias_scale(
-			math::vec3f(2.77505,-3.72759,0.48773),
-			math::vec3f(7.12171,1.69732,0.96036));
-		s_imu.set_gyroscope_bias(math::vec3f(0.00081f, -0.00008f, 0.00002f));
+		//s_imu.set_accelerometer_bias_scale(
+		//	math::vec3f(2.77505,-3.72759,0.48773),
+		//	math::vec3f(7.12171,1.69732,0.96036));
+		//s_imu.set_gyroscope_bias(math::vec3f(0.00081f, -0.00008f, 0.00002f));
 	}
 	Init_Params const& get_init_params()
 	{
@@ -120,11 +120,11 @@ namespace board
 	{
 		return 1;
 	}
-	IMU const& get_imu(uint8_t idx)
+	IMU& get_imu(uint8_t idx)
 	{
 		return s_imu;
 	}
-	IMU const& get_main_imu()
+	IMU& get_main_imu()
 	{
 		return s_imu;
 	}

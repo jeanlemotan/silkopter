@@ -14,12 +14,11 @@ namespace board
 		friend class Barometer_MS5611_i2c;
 		friend class IMU_MPU6000_i2c;
 	public:
-		Thermometer_Data() : m_is_valid(false) {}
 		bool get_data(Data& data) const { data = m_data; return m_is_valid; }
 		
 	protected:
 		Data m_data;
-		bool m_is_valid;
+		bool m_is_valid = false;
 	};
 	
 }

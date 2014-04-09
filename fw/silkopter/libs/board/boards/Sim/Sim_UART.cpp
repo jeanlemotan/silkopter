@@ -29,7 +29,10 @@ void Sim_UART::begin(uint32_t baud)
 {
 	m_is_open = true;
 }
-
+void Sim_UART::end()
+{
+	m_is_open = false;
+}
 UART::Error Sim_UART::get_last_error() const
 {
 	return UART::Error::NONE;

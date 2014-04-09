@@ -19,6 +19,7 @@ public:
 	
 	//starts communication at the specified speed
     virtual void begin(uint32_t baud) = 0;
+	virtual void end() = 0;
 
 	enum class Error
 	{
@@ -62,9 +63,9 @@ public:
 	}
 	
 	template<class Fmt, typename... Params>
-	size_t print(Fmt const& fmt, Params... params)
+	size_t printf(Fmt const& fmt, Params... params)
 	{
-		util::String<256> str;
+		util::FString<256> str;
 		util::format(str, fmt, params...);
 		return write(str.m_data(), str.size());
 	}
@@ -74,6 +75,9 @@ public:
 	
 	//returns the last error.
 	virtual Error get_last_error() const = 0;
+	
+	//returns the number of bytes received ever
+	virtual size_t get_rx_data_counter() const = 0;
 };
 
 }

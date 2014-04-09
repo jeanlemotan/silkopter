@@ -42,7 +42,7 @@ class Flag_Set
         }
 
 		template<size_t SIZE>
-        void to_string(String<SIZE>& dst) const
+        void to_string(FString<SIZE>& dst) const
         {
 			dst.resize(size());
             for (size_t x = 0; x < size(); ++x)

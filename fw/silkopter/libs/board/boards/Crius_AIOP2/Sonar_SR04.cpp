@@ -70,8 +70,6 @@ void Sonar_SR04::trigger()
 //////////////////////////////////////////////////////////////////////////
 
 Sonar_SR04::Sonar_SR04()
-	: m_state(0)
-	, m_distance(0)
 {
 	ASSERT(!s_instance);
 	s_instance = this;

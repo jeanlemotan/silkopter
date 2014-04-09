@@ -30,7 +30,7 @@ namespace clock
 #define  AVR_TIMER_WGM3           WGM53
 #define  AVR_TIMER_CS1            CS51
 
-static volatile uint64_t s_micros_counter = 0;
+static volatile uint32_t s_micros_counter = 0;
 //static volatile uint32_t s_millis_counter = 0;
 static bool s_is_initialized = false;
 
@@ -70,44 +70,53 @@ void init()
 
 SIGNAL(AVR_TIMER_OVF_VECT)
 {
-#ifdef SIMULATOR
-	// Hardcoded for SIM@1MHZ
-	s_micros_counter += 0x7FFF0; // 32768us * 16 each overflow
-#else
 	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer overflow at 40000
-	s_micros_counter += 0xFFFF / 2; // 32768us each overflow
-#endif
+	//s_micros_counter += 0xFFFF / 2; // 32768us each overflow
+	s_micros_counter++; //we multiply later with 32768
 }
 
 chrono::time_us now_us()
 {
 	ASSERT(s_is_initialized);
 
-	util::Scope_Sync ss();
+	uint32_t time_micros;
+	uint16_t tcnt;
 
-	// Hardcoded for AVR@16MHZ and 8x pre-scale 16-bit timer
-	//uint32_t time_micros = timer_micros_counter + (AVR_TIMER_TCNT / 2);
-	//uint32_t time_micros = timer_micros_counter + (AVR_TIMER_TCNT >> 1);
-
-	uint64_t time_micros = s_micros_counter;
-	uint16_t tcnt = AVR_TIMER_TCNT;
-
-	// Check for  imminent timer overflow interrupt and pre-increment counter
-	if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
 	{
-#ifdef SIMULATOR
-		time_micros += 0x7FFF0;
-#else
-		time_micros += 0xFFFF / 2;
-#endif
+		util::Scope_Sync ss();
+		time_micros = s_micros_counter;
+		tcnt = AVR_TIMER_TCNT;
+
+		// Check for  imminent timer overflow interrupt and pre-increment counter
+		if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
+		{
+			time_micros++;
+		}
 	}
 
-	return chrono::time_us(time_micros + (tcnt >> 1));
+	return chrono::time_us(uint64_t(time_micros)*32768 + (tcnt >> 1));
 }
 
 chrono::time_ms now_ms() 
 {
-	return chrono::time_ms(now_us().ticks >> 10);
+	ASSERT(s_is_initialized);
+
+	uint32_t time_micros;
+	uint16_t tcnt;
+
+	{
+		util::Scope_Sync ss();
+		time_micros = s_micros_counter;
+		tcnt = AVR_TIMER_TCNT;
+
+		// Check for  imminent timer overflow interrupt and pre-increment counter
+		if ((AVR_TIMER_TIFR & 1) && tcnt < 0xFFFF)
+		{
+			time_micros++;
+		}
+	}
+
+	return chrono::time_ms(uint32_t(time_micros)*32 + (tcnt >> 11));
 }
 
 void delay(chrono::micros _us)

@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <algorithm>
 #include <math.h>
-#include "FString.h"
+#include "util/FString.h"
 #include "chrono.h"
 
 namespace util
@@ -23,7 +23,7 @@ namespace util
 
 		namespace detail
 		{
-			extern const float s_pow_10[];
+			extern const double s_pow_10[];
 			extern const char s_digits[201];
 
 			template<class T>
@@ -109,7 +109,7 @@ namespace util
 
 
 		template<class Dst_String, class Placeholder, size_t SIZE>
-		void format_string(Dst_String& dst, Placeholder const& ph, String<SIZE> const& p)
+		void format_string(Dst_String& dst, Placeholder const& ph, FString<SIZE> const& p)
 		{
 			dst.append(p.begin(), p.end());
 		}
@@ -121,14 +121,14 @@ namespace util
 				dst.reserve(dst.size() + 64);
 				for (; *p != 0; ++p)
 				{
-					dst.append(*p);
+					dst.push_back(*p);
 				}
 			}
 		}
 		template<class Dst_String, class Placeholder>
 		void format_string(Dst_String& dst, Placeholder const& ph, char p)
 		{
-			dst.append(p);
+			dst.push_back(p);
 		}
 
 		template<class Dst_String, class Placeholder>
@@ -153,11 +153,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.append('-');
+				dst.push_back('-');
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -179,7 +179,7 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -207,11 +207,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.append('-');
+				dst.push_back('-');
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -233,7 +233,7 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -262,11 +262,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.append('-');
+				dst.push_back('-');
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -289,7 +289,7 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -310,11 +310,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.append('-');
+				dst.push_back('-');
 			}
 			char buf[32];
 			detail::decompose_digits(buf, length, uvalue);
@@ -329,7 +329,7 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.append(ph.filler);
+				dst.push_back(ph.filler);
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -337,7 +337,7 @@ namespace util
 		}
 
 		template<class Dst_Adapter, class Placeholder>
-		void format_string(Dst_Adapter& dst, Placeholder const& ph, float value)
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, double value)
 		{
 			if (!(value == value))
 			{
@@ -349,14 +349,14 @@ namespace util
 			//to format the parts without alignment or precision
 			Placeholder ph2;
 			ph2.filler = '0';
-			ph2.alignment = 9;
+			ph2.alignment = 6;
 
-			//the float is formatted as a series of integers
+			//the double is formatted as a series of integers
 			int32_t whole_parts[16]; //each will hold 9 decimals
 			int8_t whole_parts_count = 0;
 
 			int32_t frac_parts[16];
-			uint8_t last_frac_part_alignment = 9;
+			uint8_t last_frac_part_alignment = 6;
 			int8_t frac_parts_count = 0;
 
 			uint8_t precision = ph.precision;
@@ -372,11 +372,11 @@ namespace util
 			bool is_negative = value < 0.0;
 			value = is_negative ? -value : value;
 
-			float whole = floorf(value);
-			float frac = value - whole;
+			double whole = floorf(value);
+			double frac = value - whole;
 
 			//store the whole parts
-			float v = whole;
+			double v = whole;
 			if (v > 0.0f)
 			{
 				do
@@ -402,12 +402,11 @@ namespace util
 				do
 				{
 					int32_t r = (int32_t)fmod(v, 1000000);
-					bool last = (v < 1000000);
 					if (r > 0)
 					{
-						if (last)
+						if (frac_parts_count == 0)
 						{
-							last_frac_part_alignment = 9;
+							last_frac_part_alignment = 6;
 							//remove trailing zeros
 							int32_t r2 = r / 10;
 							while (r2 * 10 == r)
@@ -419,7 +418,7 @@ namespace util
 						}
 						frac_parts[frac_parts_count++] = r;
 					}
-					if (last)
+					if (v < 1000000)
 					{
 						break;
 					}
@@ -481,12 +480,12 @@ namespace util
 		template<class Dst_Adapter, class Placeholder, class P0, class P1>
 		void format_string(Dst_Adapter& dst, Placeholder const& ph, std::pair<P0, P1> const& pair)
 		{
-			dst.append('<');
+			dst.push_back('<');
 			format_string(dst, ph, pair.first);
-			dst.append(',');
-			dst.append(' ');
+			dst.push_back(',');
+			dst.push_back(' ');
 			format_string(dst, ph, pair.second);
-			dst.append('>');
+			dst.push_back('>');
 		}
 
 		// 	template<class Dst_Adapter, class Placeholder, class rep, class period>
@@ -553,15 +552,15 @@ namespace util
 				auto ch = fmt_adapter.get_and_advance();
 				if (ch != '{')
 				{
-					dst.append(ch);
+					dst.push_back(ch);
 					continue;
 				}
 
 				ch = fmt_adapter.get();
 				if (ch == '{')
 				{
-					dst.append('{');
-					dst.append('{');
+					dst.push_back('{');
+					dst.push_back('{');
 					fmt_adapter.get_and_advance();
 					continue;
 				}
@@ -583,6 +582,16 @@ namespace util
 			{
 				ph.base_case = 1;
 				ph.base = 16;
+				ch = fmt_adapter.get_and_advance();
+			}
+			else if (ch == '.')
+			{
+				ch = fmt_adapter.get_and_advance();
+				if (ch < '0' || ch > '9')
+				{
+					return false;
+				}
+				ph.precision = ch - '0';
 				ch = fmt_adapter.get_and_advance();
 			}
 			return (ch == '}');

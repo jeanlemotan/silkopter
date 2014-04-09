@@ -164,7 +164,7 @@ namespace board
  *  gyro as 16.4 LSB/DPS at scale factor of +/- 2000dps (FS_SEL==3)
  */
 //static const float s_gyro_scale = (0.0174532f / 16.4f); //2000dps
-static const float s_gyro_scale = (0.0174532f / 32.8f); //1000dps
+static const float s_gyro_scale_inv = (0.0174532f / 32.8f); //1000dps
 //static const float s_gyro_scale = (0.0174532f / 65.5f); //500dps
 
 static const float s_fp_g = physics::constants::g / 4096.f;
@@ -208,9 +208,9 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 
 			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(&raw_data), 7))
 			{
-				buffer.accel_sum.x	+= raw_data.ax - imu->m_accel_calibration_bias.x;
-				buffer.accel_sum.y	+= raw_data.ay - imu->m_accel_calibration_bias.y;
-				buffer.accel_sum.z	+= raw_data.az - imu->m_accel_calibration_bias.z;
+				buffer.accel_sum.x	+= raw_data.ax/* - imu->m_accel_calibration_bias.x*/;
+				buffer.accel_sum.y	+= raw_data.ay/* - imu->m_accel_calibration_bias.y*/;
+				buffer.accel_sum.z	+= raw_data.az/* - imu->m_accel_calibration_bias.z*/;
 				
 				buffer.temp_sum		+= raw_data.temp;
 				
@@ -240,11 +240,11 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 					imu->m_raw_gyro_sample.z = raw_data.gz;
 				}
 				
-				buffer.gyro_sum.x	+= raw_data.gx - imu->m_gyro_calibration_bias.x;
-				buffer.gyro_sum.y	+= raw_data.gy - imu->m_gyro_calibration_bias.y;
-				buffer.gyro_sum.z	+= raw_data.gz - imu->m_gyro_calibration_bias.z;
+				buffer.gyro_sum.x	+= raw_data.gx/* - imu->m_gyro_calibration_bias.x*/;
+				buffer.gyro_sum.y	+= raw_data.gy/* - imu->m_gyro_calibration_bias.y*/;
+				buffer.gyro_sum.z	+= raw_data.gz/* - imu->m_gyro_calibration_bias.z*/;
 				
-				//PRINT("\nGYRO: {0}", (const math::vec3s32&)buffer.gyro_sum);
+				//PRINT("\nGYRO: {}", (const math::vec3s32&)buffer.gyro_sum);
 				
 				buffer.sample_count++;
 			}
@@ -255,7 +255,7 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 
 			i2c::unlock();
 		}
-//		PRINT("\n{0}:{1}", now, clock::now_us() - now);
+//		PRINT("\n{}:{}", now, clock::now_us() - now);
 	}
 }
 
@@ -372,7 +372,7 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 		PANIC();
 	}	
 	
-	debug::print("\nIMU scheduler frequency divider: {0}", m_sample_freq_div);
+	//debug::printf("\nIMU scheduler frequency divider: {}", m_sample_freq_div);
 	
     set_filter_register(0, default_filter);
 
@@ -456,10 +456,9 @@ bool IMU_MPU6000_i2c::refresh_data(Data& data) const
 
 		//////////////////////////////////////////////////////////////////////////
 		//scale the accel and apply the calibration offset
-		m_accel_data *= (scinv * s_fp_g); // divided by 4096
-		m_accel_data *= m_accel_calibration_scale;
+		m_accel_data = ((m_accel_data * (scinv * s_fp_g)) - m_accel_calibration_bias) * m_accel_calibration_scale;
 
-		m_gyro_data *= s_gyro_scale * m_sample_time.count;// * scinv;
+		m_gyro_data = (m_gyro_data * (s_gyro_scale_inv * m_sample_time.count)) - m_gyro_calibration_bias;
 		m_gyro_sample_idx ++;
 	
 		//From the specs: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
@@ -521,12 +520,12 @@ bool IMU_MPU6000_i2c::get_data(Data& data) const
 
 void IMU_MPU6000_i2c::set_gyroscope_bias(math::vec3f const& bias)
 {
-	m_gyro_calibration_bias.set(bias * 4096.f);
+	m_gyro_calibration_bias = bias;//.set(bias / (s_gyro_scale_inv * m_sample_time.count) + math::vec3f(0.5f));
 	//s_gyro_calibration_scale.set(scale);
 }
 void IMU_MPU6000_i2c::set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
 {
-	m_accel_calibration_bias.set(bias * 4096.f / physics::constants::g);
+	m_accel_calibration_bias.set(bias);//bias * 4096.f / physics::constants::g + math::vec3f(0.5f));
 	m_accel_calibration_scale.set(scale);
 }
 

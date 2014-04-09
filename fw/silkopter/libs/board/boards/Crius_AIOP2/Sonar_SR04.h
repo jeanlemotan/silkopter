@@ -19,11 +19,11 @@ private:
 	
 	chrono::time_us m_last_trigger;
 
-	volatile uint8_t m_state;
+	volatile uint8_t m_state = 0;
 	chrono::time_us m_start_time;
 
 	volatile chrono::micros m_echo_delay;
-	volatile float m_distance;
+	volatile float m_distance = 0;
 };
 
 }

@@ -77,7 +77,33 @@ void GS::process(chrono::micros max_duration)
 
 void GS::receive_data(SProtocol::RX_Message message)
 {
-			
+	switch (message)
+	{
+		case SProtocol::RX_Message::NONE:
+			return;
+		break;
+		case SProtocol::RX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE:
+		{
+			math::vec3f bias, scale;
+			m_full_protocol.rx_board_accelerometer_bias_scale(bias, scale);
+			board::get_main_imu().set_accelerometer_bias_scale(bias, scale);
+			m_full_protocol.tx_printf("Received accelerometer bias {.9} / scale {.9}", bias, scale);
+		}
+		break;
+		case SProtocol::RX_Message::SET_BOARD_GYROSCOPE_BIAS:
+		{
+			math::vec3f bias;
+			m_full_protocol.rx_board_gyroscope_bias(bias);
+			board::get_main_imu().set_gyroscope_bias(bias);
+			m_full_protocol.tx_printf("Received gyroscope bias {.9}", bias);
+		}
+		break;
+		default:
+			m_full_protocol.rx_discard_message();
+		break;
+	}
+	
+	
 }
 
 bool GS::send_data(uint32_t step)

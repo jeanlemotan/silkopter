@@ -106,8 +106,8 @@ namespace board
 
 	//IMU	
 	extern uint8_t get_imu_count();
-	extern IMU const& get_imu(uint8_t idx);
-	extern IMU const& get_main_imu();
+	extern IMU& get_imu(uint8_t idx);
+	extern IMU& get_main_imu();
 
 	//UART
 	extern uint8_t get_uart_count();

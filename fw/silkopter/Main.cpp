@@ -28,7 +28,7 @@ int main(void)
 
 	util::storage::init();
 	
-	util::String<128> str;
+	util::FString<128> str;
 
 	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);
 	silk::GS gs(uav, board::get_gs_full_uart());
@@ -64,7 +64,7 @@ int main(void)
 // //				avg_error += serror;
 // 			}
 // 			avg_error /= float(range);
-// 			PRINT("\nmax_error = {0}, avg_error = {1}", max_error, avg_error);
+// 			PRINT("\nmax_error = {}, avg_error = {}", max_error, avg_error);
 // 			float t = 0, t1 = 0;
 // 			{
 // 				TIMED_BLOCK();
@@ -82,7 +82,7 @@ int main(void)
 // 					t1 += math::sin<float, math::fast>(angle);
 // 				}
 // 			}
-// 			PRINT("\n{0} == {1}", t, t1);
+// 			PRINT("\n{} == {}", t, t1);
 // 		}
 // 
 		

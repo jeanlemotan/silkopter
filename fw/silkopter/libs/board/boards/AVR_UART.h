@@ -1,6 +1,6 @@
 #pragma once
 
-#define UART_BUFFER_SIZE 32 //has to be power of two
+#define UART_BUFFER_SIZE 128 //has to be power of two
 #define UART_BUFFER_MASK (UART_BUFFER_SIZE - 1)
 
 #include <stdint.h>
@@ -28,6 +28,7 @@ public:
 	bool is_blocking() const;
 	
     void begin(uint32_t baud);
+	void end();
 
 	size_t get_data_size() const;
 	bool has_data() const;
@@ -41,18 +42,21 @@ public:
 	
 	Error get_last_error() const;
 	
+	size_t get_rx_data_counter() const;
+		
 public:
 	struct Buffer
 	{
-		Buffer() : head(0), tail(0) {}
-		volatile uint8_t data[UART_BUFFER_SIZE];
-		volatile uint8_t head;
-		volatile uint8_t tail;
+		volatile uint8_t* data = nullptr;
+		volatile uint8_t head = 0;
+		volatile uint8_t tail = 0;
 	};
 
 	Buffer m_tx_buffer;
 	Buffer m_rx_buffer;
-	volatile Error m_last_error;
+	volatile Error m_last_error = Error::NONE;
+	
+	volatile size_t m_rx_data_counter = 0;
 	
 	static const uint8_t MAX_UARTS = 8;
 
@@ -66,8 +70,8 @@ private:
 	volatile uint8_t& m_ucsrc;
 	
 
-	bool m_is_blocking;
-	bool m_is_open;
+	bool m_is_blocking = true;
+	bool m_is_open = false;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,8 +79,8 @@ private:
 #define UART_ISR(id)											\
 ISR(USART##id##_RX_vect)										\
 {																\
-	auto& buffer = board::AVR_UART::s_uart_ptrs[id]->m_rx_buffer;	\
 	uint8_t data = UDR##id;										\
+	auto& buffer = board::AVR_UART::s_uart_ptrs[id]->m_rx_buffer;	\
 	uint8_t tmphead = (buffer.head + 1) & UART_BUFFER_MASK;		\
 	if (tmphead == buffer.tail)									\
 	{															\
@@ -86,6 +90,7 @@ ISR(USART##id##_RX_vect)										\
 	{															\
 		buffer.head = tmphead;									\
 		buffer.data[tmphead] = data;							\
+		board::AVR_UART::s_uart_ptrs[id]->m_rx_data_counter++;	\
 	}															\
 }																\
 ISR(USART##id##_UDRE_vect)										\

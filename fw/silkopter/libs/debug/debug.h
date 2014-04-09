@@ -23,9 +23,9 @@ namespace debug
 	}
 	
 	template<class Fmt, typename... Params>
-	void print(Fmt const& fmt, Params... params)
+	void printf(Fmt const& fmt, Params... params)
 	{
-		util::String<255> str;
+		util::FString<255> str;
 		util::format(str, fmt, params...);
 		detail::print(str.data(), str.size());
 	}
@@ -50,7 +50,7 @@ namespace debug
 	{																				\
 		if (!(condition)) 															\
 		{																			\
-			util::String<128> __msg;												\
+			util::FString<128> __msg;												\
 			util::format(__msg, fmt, ##__VA_ARGS__);								\
 			debug::detail::handle_assert(#condition, __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
 		}																			\
@@ -77,7 +77,7 @@ do 																				\
 #define PANIC_MSG(fmt, ...)														\
 do 																				\
 {																				\
-	util::String<128> __msg;													\
+	util::FString<128> __msg;													\
 	util::format(__msg, fmt, ##__VA_ARGS__);									\
 	debug::detail::handle_assert("PANIC", __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
 } while(0)
@@ -99,7 +99,7 @@ do 																				\
 #	define TRACE_MSG(fmt, ...)							\
 	do													\
 	{													\
-		util::String<128> __msg;						\
+		util::FString<128> __msg;						\
 		util::format(__msg, fmt, ##__VA_ARGS__);		\
 		debug::detail::trace(__FILE__, __LINE__, __msg.c_str());	\
 	} while(0)

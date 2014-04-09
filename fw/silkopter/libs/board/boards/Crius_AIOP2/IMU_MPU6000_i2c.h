@@ -45,8 +45,8 @@ private:
 	mutable volatile Buffer m_buffers[2];
 	mutable volatile uint8_t m_buffer_idx;
 
-	math::vec3s16 m_gyro_calibration_bias;
-	math::vec3s16 m_accel_calibration_bias;
+	math::vec3f m_gyro_calibration_bias;
+	math::vec3f m_accel_calibration_bias;
 	math::vec3f m_accel_calibration_scale;
 
 	mutable Thermometer_Data m_thermometer;
