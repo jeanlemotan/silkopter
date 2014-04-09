@@ -232,8 +232,16 @@ namespace polynomial
 
 int main(int argc, char *argv[])
 {
-	util::String<128> str;
-	util::format(str, "bubu {} mimi {} {} {x}", 7, 5, 6, 7);
+	std::string str;
+	util::format(str, "{}", 0.12345678f);
+	util::format(str, "{.6}", 0.12345678f);
+	util::format(str, "{.8}", 0.12345678f);
+
+	util::format(str, "{}", 0.000012345678f);
+	util::format(str, "{.1}", 0.000012345678f);
+	util::format(str, "{.2}", 0.000012345678f);
+	util::format(str, "{.6}", 0.000012345678f);
+
 
 	{
 		// 		size_t range = 805;

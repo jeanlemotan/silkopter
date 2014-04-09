@@ -92,20 +92,22 @@ private:
 	//each has a corresponding receive method
 	enum class TX_Message
 	{
+		NONE,
+
 		//control messages
-		SET_RX_MESSAGE_ENABLED,
-		SET_ALL_RX_MESSAGES_ENABLED,
+		SET_MESSAGE_ENABLED,
+		SET_ALL_MESSAGES_ENABLED,
 
 		//calibration
 		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
 		SET_BOARD_GYROSCOPE_BIAS,
 	};
 
-	struct Header
+	struct Message
 	{
 		RX_Message msg;
-		uint8_t size;
 		uint16_t crc;
+		std::vector<uint8_t> payload;
 	};
 
 	void handle_read(const boost::system::error_code& e, size_t bytes_transferred);
@@ -113,10 +115,10 @@ private:
 	void start_tx_message(TX_Message msg);
 	uint16_t flush_tx_message();
 
-	boost::optional<Header> decode_header(bool& needs_more_data);
+	boost::optional<Message> decode_message(bool& needs_more_data);
 	bool wait_for_response(uint16_t expected_crc, std::chrono::high_resolution_clock::duration timeout);
 
-	void process_rx_message(Header const& header);
+	void process_rx_message(Message const& message);
 
 	std::string m_uav_message;
 	uint16_t m_uav_version;

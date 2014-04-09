@@ -16,7 +16,8 @@ public:
 
 private:
 
-	void calibrate_accelerometer();
+	void start_accelerometer_calibration();
+	void start_gyroscope_calibration();
 
 	Ui::Sensors m_ui;
 
