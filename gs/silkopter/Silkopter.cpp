@@ -39,5 +39,11 @@ void Silkopter::update()
 	m_last_time = now;
 
 	m_ui.sensors->update();
+
+	{
+		std::string  msg;
+		util::format(msg, "CPU: {}%", m_protocol.data_board_cpu_usage.value);
+		m_ui.statusBar->showMessage(msg.c_str());
+	}
 }
 

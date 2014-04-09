@@ -34,8 +34,7 @@ void SFull_Protocol::handle_read(const boost::system::error_code& e, size_t byte
 	//THIS CAUSES SERIAL BUFFER OVERFLOWS!!!
 // 	for (size_t i = 0; i < bytes_transferred; i++)
 // 	{
-// 		putchar(m_serial_buffer[i]);
-// 	}
+// 		putchar(m_serial_buffer[i]);// 	}
 
 	{
 		std::lock_guard<std::mutex> lg(m_rx_buffer_mutex);
@@ -267,7 +266,8 @@ void SFull_Protocol::process_rx_message(Message const& message)
 			{
 				if (!message.payload.empty())
 				{
-					std::string str(message.payload.begin(), message.payload.end());
+					std::string str(">");
+					str.append(message.payload.begin(), message.payload.end());
 					puts(str.c_str());
 				}
 			}
@@ -374,7 +374,6 @@ bool SFull_Protocol::set_board_gyroscope_bias(math::vec3f const& bias)
 	start_tx_message(TX_Message::SET_BOARD_GYROSCOPE_BIAS);
 	add_value(m_tx_buffer, bias);
 	auto crc = flush_tx_message();
-
 	return wait_for_response(crc, std::chrono::seconds(1));
 }
 
@@ -384,9 +383,39 @@ bool SFull_Protocol::set_board_accelerometer_bias_scale(math::vec3f const& bias,
 	add_value(m_tx_buffer, bias);
 	add_value(m_tx_buffer, scale);
 	auto crc = flush_tx_message();
-
 	return wait_for_response(crc, std::chrono::seconds(1));
 }
+
+bool SFull_Protocol::set_stream_all_messages(bool enabled)
+{
+	start_tx_message(TX_Message::STREAM_ALL_MESSAGES);
+	add_value(m_tx_buffer, enabled);
+	auto crc = flush_tx_message();
+	return wait_for_response(crc, std::chrono::seconds(1));
+}
+bool SFull_Protocol::set_stream_message(RX_Message message, bool enabled)
+{
+	start_tx_message(TX_Message::STREAM_MESSAGE);
+	add_value(m_tx_buffer, message);
+	add_value(m_tx_buffer, enabled);
+	auto crc = flush_tx_message();
+	return wait_for_response(crc, std::chrono::seconds(1));
+}
+bool SFull_Protocol::set_send_all_message_once()
+{
+	start_tx_message(TX_Message::SEND_ALL_MESSAGES_ONCE);
+	auto crc = flush_tx_message();
+	return wait_for_response(crc, std::chrono::seconds(1));
+}
+bool SFull_Protocol::set_send_message_once(RX_Message message)
+{
+	start_tx_message(TX_Message::SEND_MESSAGE_ONCE);
+	add_value(m_tx_buffer, message);
+	auto crc = flush_tx_message();
+	return wait_for_response(crc, std::chrono::seconds(1));
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 bool SFull_Protocol::wait_for_response(uint16_t expected_crc, std::chrono::high_resolution_clock::duration timeout)
 {
