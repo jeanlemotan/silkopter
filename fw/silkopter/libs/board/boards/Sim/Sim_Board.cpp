@@ -5,6 +5,8 @@
 #include "util/chrono.h"
 #include "debug/debug.h"
 #include "board/board.h"
+#include "util/storage.h"
+#include "util/murmurhash.h"
 
 #include "board/boards/Sim/Sim_UART.h"
 #include "board/boards/Sim/Sim_EEPROM.h"
@@ -37,7 +39,7 @@ namespace board
  	static Sim_PWM_Out s_pwm_out;
 	static Sim_Barometer s_barometer;
 	static Sim_Compass s_compass;
-	static Sim_EEPROM s_eeprom("eeprom");
+	static Sim_EEPROM s_eeprom("eeprom", 4096);
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -79,15 +81,13 @@ namespace board
 
 		s_init_params.main_thermometer_idx = math::clamp<int8_t>(s_init_params.main_thermometer_idx, 0, 2);
 		
-		//rc_in::init();
-		
-		//pwm_out::init();
-		//pwm_out::set_frequencies(50);
-		
-		s_imu.set_accelerometer_bias_scale(
-			math::vec3f(2.77505,-3.72759,0.48773),
-			math::vec3f(7.12171,1.69732,0.96036));
-		s_imu.set_gyroscope_bias(math::vec3f(0.00081f, -0.00008f, 0.00002f));
+		util::storage::init();
+
+
+
+
+		IMU::Calibration_Data data = util::storage::get_record(util::storage::Id(static_murmurhash("imu_calibration_data")), s_imu.get_calibration_data());
+		s_imu.set_calibration_data(data);
 	}
 	Init_Params const& get_init_params()
 	{

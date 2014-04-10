@@ -25,10 +25,10 @@ void AHRS::process(board::IMU::Data const& data, chrono::secondsf dt)
 		//m_euler.y = math::lerp(m_euler.y, accel_roll_y, gdata.dt.count);
  	}
 	
-	m_local_quaternion.set_from_euler_xyz<math::fast>(m_euler);
-	m_local_quaternion.get_as_mat3<math::fast>(m_local_rotation);
-	m_world_quaternion = math::inverse<float, math::fast>(m_local_quaternion);
-	m_world_quaternion.get_as_mat3<math::fast>(m_world_rotation);
+	m_local_quaternion.set_from_euler_xyz<math::standard>(m_euler);
+	m_local_quaternion.get_as_mat3<math::standard>(m_local_rotation);
+	m_world_quaternion = math::inverse<float, math::standard>(m_local_quaternion);
+	m_world_quaternion.get_as_mat3<math::standard>(m_world_rotation);
 }
 
 math::vec3f const& AHRS::get_euler() const

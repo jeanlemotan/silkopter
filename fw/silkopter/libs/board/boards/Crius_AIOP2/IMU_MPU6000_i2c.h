@@ -18,8 +18,8 @@ public:
     void init(Sample_Rate rate);
 	
 	//sets calibration data
-	void set_gyroscope_bias(math::vec3f const& bias);
-	void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
+	void set_calibration_data(Calibration_Data const& data);
+	Calibration_Data const& get_calibration_data() const;
 
  	bool get_data(Data& data) const;
 	 
@@ -45,9 +45,7 @@ private:
 	mutable volatile Buffer m_buffers[2];
 	mutable volatile uint8_t m_buffer_idx;
 
-	math::vec3f m_gyro_calibration_bias;
-	math::vec3f m_accel_calibration_bias;
-	math::vec3f m_accel_calibration_scale;
+	Calibration_Data m_calibration_data;
 
 	mutable Thermometer_Data m_thermometer;
 	

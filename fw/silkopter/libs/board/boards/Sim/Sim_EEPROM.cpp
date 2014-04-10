@@ -8,30 +8,44 @@
 namespace board
 {
 
-Sim_EEPROM::Sim_EEPROM(std::string const& filename)
+Sim_EEPROM::Sim_EEPROM(std::string const& filename, size_t size)
 	: m_filename(filename)
+	, m_size(size)
 {
-	m_file.open(filename, std::ios::in | std::ios::out | std::ios::binary);
+	m_buffer.resize(m_size);
+
+	std::fstream file(filename, std::ios::in | std::ios::binary);
+	file.read(reinterpret_cast<char*>(m_buffer.data()), m_size);
+	file.close();
+}
+
+Sim_EEPROM::~Sim_EEPROM()
+{
+	std::fstream file(m_filename, std::ios::out | std::ios::binary | std::ios::trunc);
+	file.write(reinterpret_cast<char*>(m_buffer.data()), m_size);
+	file.close();
 }
 
 bool Sim_EEPROM::is_ready() const
 {
-	return m_file.is_open();
+	return true;
 }
 
 EEPROM::size_type Sim_EEPROM::get_capacity() const
 {
-	return 4096;
+	return m_size;
 }
 
 void Sim_EEPROM::read(uint8_t* dst, size_type size, offset_type offset) const
 {
-	ASSERT(0);
+	ASSERT(offset + size < m_size);
+	memcpy(dst, m_buffer.data() + offset, size);
 }
 
 void Sim_EEPROM::write(uint8_t const* src, size_type size, offset_type offset)
 {
-	ASSERT(0);
+	ASSERT(offset + size < m_size);
+	memcpy(m_buffer.data() + offset, src, size);
 }
 
 }

@@ -17,13 +17,14 @@ public:
     void init(Sample_Rate rate);
 	
 	//sets calibration data
-	void set_gyroscope_bias(math::vec3f const& bias);
-	void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale);
+	void set_calibration_data(Calibration_Data const& data) { m_calibration_data = data; }
+	Calibration_Data const& get_calibration_data() const { return m_calibration_data;  }
 
  	bool get_data(Data& data) const;
 	 
 private:
 	 bool m_is_initialised = false;
+	 Calibration_Data m_calibration_data;
 };
 
 }

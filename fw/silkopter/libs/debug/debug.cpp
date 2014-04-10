@@ -36,7 +36,7 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);
-		s_uart->write_c_str("\n#");
+		s_uart->write_c_str(util::FString<6>(F_STR("\n#")).c_str());
 		if (msg)
 		{
 			s_uart->write_c_str(msg);
@@ -44,13 +44,13 @@ void handle_assert(const char* condition, const char* file, int line, const char
 		if (file)
 		{
 			util::FString<512> str;
-			util::format(str, "\n@ {}:{}", file, line);
+			util::format(str, F_STR("\n@ {}:{}"), file, line);
 			s_uart->write_c_str(str.c_str());
 		}
 		if (condition)
 		{
 			s_uart->write('\n');
-			s_uart->write_c_str(condition ? condition : "N/A");
+			s_uart->write_c_str(condition ? condition : util::FString<6>(F_STR("N/A")).c_str());
 		}
 
 		s_uart->flush();
@@ -80,7 +80,7 @@ void trace(const char* file, int line, const char* msg)
 	{
 		auto blocking = s_uart->is_blocking();
 		s_uart->set_blocking(true);
-		s_uart->write_c_str("\nTrace: ");
+		s_uart->write_c_str(util::FString<16>(F_STR("\nTrace: ")).c_str());
 		if (msg)
 		{
 			s_uart->write_c_str(msg);
@@ -88,7 +88,7 @@ void trace(const char* file, int line, const char* msg)
 		if (file)
 		{
 			util::FString<512> str;
-			util::format(str, " @ {}:{}", file, line);
+			util::format(str, F_STR(" @ {}:{}"), file, line);
 			s_uart->write_c_str(str.c_str());
 		}
 		s_uart->flush();
@@ -120,7 +120,7 @@ Timed_Scope::Timed_Scope(char const* file, int line)
 Timed_Scope::~Timed_Scope()
 {
 	auto d = board::clock::now_us() - m_start;
-	debug::printf("\nScope {}:{} > {}", m_file, m_line, d);
+	debug::printf(F_STR("\nScope {}:{} > {}"), m_file, m_line, d);
 }
 
 

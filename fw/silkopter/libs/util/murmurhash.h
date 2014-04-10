@@ -4,7 +4,7 @@ namespace util
 {
 
 template <size_t LEN>
-uint32_t MURMURLEN(uint32_t hash, const char* str, size_t idx)
+inline uint32_t MURMURLEN(uint32_t hash, const char* str, size_t idx)
 {
     return MURMURLEN<LEN-4>(
                 MURMURLEN<4>(hash, str, idx),
@@ -15,7 +15,7 @@ uint32_t MURMURLEN(uint32_t hash, const char* str, size_t idx)
 #define _m  0x5bd1e995
 #define _r  24
 
-uint32_t MURMURLEN4(uint32_t hash, char c1, char c2, char c3, char c4)
+inline uint32_t MURMURLEN4(uint32_t hash, char c1, char c2, char c3, char c4)
 {
     #define _k  (uint32_t(c1) | (uint32_t(c2)<<8) | (uint32_t(c3) << 16) | (uint32_t(c4) << 24))
 
@@ -27,30 +27,30 @@ uint32_t MURMURLEN4(uint32_t hash, char c1, char c2, char c3, char c4)
 }
 
 template <>
-uint32_t MURMURLEN<4>(uint32_t hash, const char* str, size_t idx)
+inline uint32_t MURMURLEN<4>(uint32_t hash, const char* str, size_t idx)
 {
     return MURMURLEN4(hash, str[idx+0],str[idx+1],str[idx+2],str[idx+3]);
 }
 
 template <>
-uint32_t MURMURLEN<3>(uint32_t hash, const char* str, size_t idx)
+inline uint32_t MURMURLEN<3>(uint32_t hash, const char* str, size_t idx)
 {
     return (hash ^ (uint32_t(str[idx+2]) << 16) ^ (uint32_t(str[idx+1]) << 8) ^ (uint32_t(str[idx+0]))) * _m;
 }
 
 template <>
-uint32_t MURMURLEN<2>(uint32_t hash, const char* str, size_t idx)
+inline uint32_t MURMURLEN<2>(uint32_t hash, const char* str, size_t idx)
 {
     return (hash ^ (str[idx+1] << 8) ^ (str[idx+0])) * _m;
 }
 
 template <>
-uint32_t MURMURLEN<1>(uint32_t hash, const char* str, size_t idx)
+inline uint32_t MURMURLEN<1>(uint32_t hash, const char* str, size_t idx)
 {
     return (hash ^ (str[idx+0])) * _m;
 }
 template <size_t LEN>
-uint32_t MURMUR(uint32_t seed, const char* str)
+inline uint32_t MURMUR(uint32_t seed, const char* str)
 {
     uint32_t h = MURMURLEN<LEN>(seed ^ LEN, str, 0);
 	h ^= h >> 13;
@@ -59,7 +59,7 @@ uint32_t MURMUR(uint32_t seed, const char* str)
     return h;
 }
 
-uint32_t MurmurHash2 (const void * key, size_t len, uint32_t seed)
+inline uint32_t MurmurHash2 (const void * key, size_t len, uint32_t seed)
 {
 	// 'm' and 'r' are mixing constants generated offline.
 	// They're not really 'magic', they just happen to work well.
@@ -110,6 +110,8 @@ uint32_t MurmurHash2 (const void * key, size_t len, uint32_t seed)
 	return h;
 } 
 
+#undef _m
+#undef _r
 
 #define dynamic_murmurhash_seed(str, seed) util::MurmurHash2(str, strlen(str), seed)
 #define static_murmurhash_seed(str, seed) util::MURMUR<sizeof(str)-1>(seed, str)

@@ -69,12 +69,11 @@ namespace util
 		public:
 			typedef typename Format_String::value_type value_type;
 			typedef typename Format_String::const_iterator iterator;
-			Format_String_Adapter(Format_String const& fmt) : m_format_string(fmt), m_it(fmt.begin()), m_end(fmt.end()) {}
+			Format_String_Adapter(Format_String const& fmt) : m_it(fmt.begin()), m_end(fmt.end()) {}
 			auto is_done() const -> bool { return m_it == m_end; }
 			auto get() -> value_type { return *m_it; }
 			auto get_and_advance() -> value_type { return *m_it++; }
 		private:
-			Format_String const& m_format_string;
 			iterator m_it;
 			iterator m_end;
 		};
@@ -83,12 +82,11 @@ namespace util
 		public:
 			typedef char value_type;
 			typedef char const* iterator;
-			Format_String_Adapter(char const* fmt) : m_format_string(fmt), m_it(fmt) {}
+			Format_String_Adapter(char const* fmt) : m_it(fmt) {}
 			auto is_done() const -> bool { return *m_it == 0; }
 			auto get() -> value_type { return *m_it; }
 			auto get_and_advance() -> value_type { return *m_it++; }
 		private:
-			const char* m_format_string;
 			const char* m_it;
 		};
 
@@ -98,14 +96,27 @@ namespace util
 		public:
 			typedef T value_type;
 			typedef T const* iterator;
-			Format_String_Adapter(T const* fmt) : m_format_string(fmt), m_it(fmt) {}
+			Format_String_Adapter(T const* fmt) : m_it(fmt) {}
 			auto is_done() const -> bool { return *m_it == 0; }
 			auto get() -> value_type { return *m_it; }
 			auto get_and_advance() -> value_type { return *m_it++; }
 		private:
-			T const* m_format_string;
 			T const* m_it;
 		};
+		
+		template<> struct Format_String_Adapter<Flash_String>
+		{
+		public:
+			typedef Flash_String::value_type value_type;
+			typedef Flash_String::const_iterator iterator;
+			Format_String_Adapter(Flash_String const& fmt) : m_it(fmt.begin()) {}
+			auto is_done() const -> bool { return pgm_read_byte_near(m_it) == 0; }
+			auto get() -> value_type { return pgm_read_byte_near(m_it); }
+			auto get_and_advance() -> value_type { auto c = pgm_read_byte_near(m_it); m_it++; return c; }
+		private:
+			Flash_String::const_iterator m_it;
+		};
+
 
 
 		template<class Dst_String, class Placeholder, size_t SIZE>

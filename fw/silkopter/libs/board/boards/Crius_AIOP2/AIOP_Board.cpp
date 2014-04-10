@@ -4,6 +4,8 @@
 #include <_qmath.h>
 
 #include "util/chrono.h"
+#include "util/storage.h"
+#include "util/murmurhash.h"
 #include "debug/debug.h"
 #include "board/board.h"
 
@@ -104,6 +106,11 @@ namespace board
 		
 		//pwm_out::init();
 		//pwm_out::set_frequencies(50);
+		
+		util::storage::init();
+		
+		IMU::Calibration_Data data = util::storage::get_record(util::storage::Id(static_murmurhash("imu_calibration_data")), s_imu.get_calibration_data());
+		s_imu.set_calibration_data(data);
 		
 		//s_imu.set_accelerometer_bias_scale(
 		//	math::vec3f(2.77505,-3.72759,0.48773),

@@ -9,13 +9,19 @@ namespace storage
 {
 	typedef uint16_t crc_type;
 	typedef uint8_t size_type;
-	typedef size_t offset_type;
 	
 	struct Id
 	{
 		Id() = default;
 		explicit Id(uint32_t value) : value(value) {}
 		uint32_t value;	
+	};
+
+	struct Offset
+	{
+		Offset() = default;
+		explicit Offset(size_t value) : value(value) {}
+		size_t value;
 	};
 
 	void init();
@@ -33,18 +39,18 @@ namespace storage
 	}
 
 	void remove_record(Id id);
-	void remove_record(offset_type offset);
+	void remove_record(Offset offset);
 	
-	size_type get_record(offset_type offset, uint8_t* dst, size_type max_size);
+	size_type get_record(Offset offset, uint8_t* dst, size_type max_size);
 	size_type get_record(Id id, uint8_t* dst, size_type max_size);
 
-	crc_type get_record_crc(offset_type offset);
-	size_type get_record_size(offset_type offset);
+	crc_type get_record_crc(Offset offset);
+	size_type get_record_size(Offset offset);
 	
 	//searches an item by id and returns the idx or 0 on failure
-	offset_type find_record_offset_by_id(Id id);
+	Offset find_record_offset_by_id(Id id);
 
-	template<class T> T get_record(offset_type offset, T default_)
+	template<class T> T get_record(Offset offset, T default_)
 	{
 		typedef int _static_assert[(sizeof(T) < 256) ? 1 : -1];
 		T t;

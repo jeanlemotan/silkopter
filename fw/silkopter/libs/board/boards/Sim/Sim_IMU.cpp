@@ -32,15 +32,6 @@ bool Sim_IMU::get_data(Data& data) const
 	return true;
 }
 
-void Sim_IMU::set_gyroscope_bias(math::vec3f const& bias)
-{
-	ASSERT(0);
-}
-void Sim_IMU::set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale)
-{
-	ASSERT(0);
-}
-
 }
 
 #endif

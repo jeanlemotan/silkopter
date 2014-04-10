@@ -1,9 +1,32 @@
 #pragma once
 
 #include <string>
+#include <avr/pgmspace.h>
 
 namespace util
 {
+	
+#define F_STR(x) util::Flash_String(PSTR(x))
+
+class Flash_String
+{
+public:
+	explicit Flash_String(PGM_P src) : m_str(src) {}
+
+	typedef char value_type;
+	typedef PGM_P const_iterator;
+	
+	auto size() const -> size_t { return strlen_P(m_str); }
+	auto data() const -> PGM_P { return m_str; }
+	auto begin() const -> const_iterator { return m_str; }
+	auto end() const -> const_iterator { return m_str + size(); }
+		
+private:
+	PGM_P m_str;
+};
+	
+	
+	
 
 //fixed size string
 template<size_t SIZE>
@@ -18,10 +41,11 @@ public:
 public:
 	FString();
 	FString(FString<SIZE> const& str);
-	FString(FString<SIZE> const& str, size_t offset, size_t count);
-	FString(char const* from, char const* to);
-	FString(char const* str);
-	FString(char const* str, size_t count);
+	explicit FString(Flash_String const& str);
+	explicit FString(FString<SIZE> const& str, size_t offset, size_t count);
+	explicit FString(char const* from, char const* to);
+	explicit FString(char const* str);
+	explicit FString(char const* str, size_t count);
 	explicit FString(std::string const& str);
 
 	auto operator==(FString<SIZE> const& str) const -> bool;
@@ -36,6 +60,7 @@ public:
 	auto operator<(FString<SIZE> const& str) const -> bool;
 
 	auto operator=(FString<SIZE> const& str) -> FString<SIZE>&;
+	auto operator=(Flash_String const& str) -> FString<SIZE>&;
 	auto operator=(char const* str) -> FString<SIZE>&;
 	auto operator=(std::string const& str) -> FString<SIZE>&;
 
@@ -119,6 +144,13 @@ inline FString<SIZE>::FString(FString<SIZE> const& str)
 }
 
 template<size_t SIZE>
+inline FString<SIZE>::FString(Flash_String const& str)
+	: m_size(str.size())
+{
+	memcpy_P(m_data, str.data(), m_size + 1); //copy ending zero as well
+}
+
+template<size_t SIZE>
 inline FString<SIZE>::FString(FString<SIZE> const& str, size_t offset, size_t count)
 {
 	offset = std::min(offset, str.size());
@@ -179,6 +211,14 @@ inline auto FString<SIZE>::operator=(FString const& str) -> FString<SIZE>&
 {
 	m_size = str.m_size;
 	memcpy(m_data, str.m_data, m_size + 1); //copy ending zero as well
+	return *this;
+}
+
+template<size_t SIZE>
+inline auto FString<SIZE>::operator=(Flash_String const& str) -> FString<SIZE>&
+{
+	m_size = str.size();
+	memcpy(m_data, str.data(), m_size + 1); //copy ending zero as well
 	return *this;
 }
 

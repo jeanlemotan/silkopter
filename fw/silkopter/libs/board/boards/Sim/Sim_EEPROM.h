@@ -2,6 +2,7 @@
 
 #include "board/EEPROM.h"
 #include <fstream>
+#include <vector>
 
 namespace board
 {
@@ -10,7 +11,8 @@ class Sim_EEPROM : public EEPROM
 {
 public:
 
-	Sim_EEPROM(std::string const& filename);
+	Sim_EEPROM(std::string const& filename, size_t size);
+	~Sim_EEPROM();
 
 	size_type get_capacity() const;
     bool is_ready() const;
@@ -20,7 +22,8 @@ public:
 
 private:
 	std::string m_filename;
-	std::fstream m_file;
+	size_t m_size;
+	std::vector<uint8_t> m_buffer;
 };
 
 }

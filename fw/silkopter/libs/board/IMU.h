@@ -18,9 +18,14 @@ namespace board
 			_500_HZ		= 500
 		};
 		
-		//sets calibration data
-		virtual void set_gyroscope_bias(math::vec3f const& bias) = 0;
-		virtual void set_accelerometer_bias_scale(math::vec3f const& bias, math::vec3f const& scale) = 0;
+		struct Calibration_Data
+		{
+			math::vec3f gyroscope_bias;
+			math::vec3f accelerometer_bias;
+			math::vec3f accelerometer_scale = math::vec3f(1.f);
+		};
+		virtual void set_calibration_data(Calibration_Data const& data) = 0;
+		virtual Calibration_Data const& get_calibration_data() const = 0;
 
 		struct Data
 		{

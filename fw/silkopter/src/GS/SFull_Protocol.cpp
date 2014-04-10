@@ -66,7 +66,7 @@ void SFull_Protocol::tx_hello_world(Message_String const& msg, uint16_t version)
 			m_is_connected = !memcmp(response, expected_response, sizeof(response));
 			if (m_is_connected)
 			{
-				tx_printf("Connected.");
+				tx_printf(F_STR("Connected."));
 			}
 		}
 	}

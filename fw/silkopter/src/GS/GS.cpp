@@ -1,6 +1,8 @@
 #include "GS/GS.h"
 #include "board/board.h"
 #include "debug/debug.h"
+#include "util/murmurhash.h"
+#include "util/storage.h"
 
 using namespace silk;
 
@@ -15,7 +17,7 @@ GS::GS(UAV& uav, board::UART& full_uart)
 	, m_full_protocol(full_uart)
 	, m_step(0)
 {
-	full_uart.set_blocking(true);
+	full_uart.set_blocking(false);
 	m_full_protocol.tx_hello_world(k_hello_world, k_version);
 }
 GS::GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart)
@@ -26,8 +28,8 @@ GS::GS(UAV& uav, board::UART& full_uart, board::UART& compact_uart)
 	//, m_compact_protocol(compact_uart)
 	, m_step(0)
 {
-	full_uart.set_blocking(true);
-	compact_uart.set_blocking(true);
+	full_uart.set_blocking(false);
+	compact_uart.set_blocking(false);
 	m_full_protocol.tx_hello_world(k_hello_world, k_version);
 	//m_compact_protocol.hello_world(k_hello_world, k_version);
 }
@@ -86,7 +88,7 @@ void GS::receive_data(SProtocol::RX_Message message)
 		{
 			bool enabled;
 			m_full_protocol.decode_stream_all_messages(enabled);
-			m_full_protocol.tx_printf("Stream all messages {}", enabled ? "enabled" : "disabled");
+			m_full_protocol.tx_printf(F_STR("Stream all messages {}"), enabled ? "enabled" : "disabled");
 			std::fill(m_message_send_option, m_message_send_option + 256, enabled ? Send_Option::STREAM : Send_Option::DISABLED);
 		}
 		break;
@@ -96,14 +98,14 @@ void GS::receive_data(SProtocol::RX_Message message)
 			SProtocol::TX_Message msg;
 			m_full_protocol.decode_stream_message(msg, enabled);
 			uint8_t msg_idx = static_cast<uint8_t>(msg);
-			m_full_protocol.tx_printf("Stream message {} {}", msg_idx, enabled ? "enabled" : "disabled");
+			m_full_protocol.tx_printf(F_STR("Stream message {} {}"), msg_idx, enabled ? "enabled" : "disabled");
 			m_message_send_option[msg_idx] = enabled ? Send_Option::STREAM : Send_Option::DISABLED;
 		}
 		break;
 		case SProtocol::RX_Message::SEND_ALL_MESSAGES_ONCE:
 		{
 			m_full_protocol.decode_send_all_messages_once();
-			m_full_protocol.tx_printf("Send all messages once");
+			m_full_protocol.tx_printf(F_STR("Send all messages once"));
 			std::fill(m_message_send_option, m_message_send_option + 256, Send_Option::ONCE);
 		}
 		break;
@@ -112,24 +114,28 @@ void GS::receive_data(SProtocol::RX_Message message)
 			SProtocol::TX_Message msg;
 			m_full_protocol.decode_send_message_once(msg);
 			uint8_t msg_idx = static_cast<uint8_t>(msg);
-			m_full_protocol.tx_printf("Send message {} once", msg_idx);
+			m_full_protocol.tx_printf(F_STR("Send message {} once"), msg_idx);
 			m_message_send_option[msg_idx] = Send_Option::ONCE;
 		}
 		break;
 		case SProtocol::RX_Message::SET_BOARD_ACCELEROMETER_BIAS_SCALE:
 		{
-			math::vec3f bias, scale;
-			m_full_protocol.decode_board_accelerometer_bias_scale(bias, scale);
-			board::get_main_imu().set_accelerometer_bias_scale(bias, scale);
-			m_full_protocol.tx_printf("Received accelerometer bias {.9} / scale {.9}", bias, scale);
+			auto data = board::get_main_imu().get_calibration_data();
+			m_full_protocol.decode_board_accelerometer_bias_scale(data.accelerometer_bias, data.accelerometer_scale);
+			board::get_main_imu().set_calibration_data(data);
+			m_full_protocol.tx_printf(F_STR("Received accelerometer bias {.9} / scale {.9}"), data.accelerometer_bias, data.accelerometer_scale);
+
+			util::storage::set_record(util::storage::Id(static_murmurhash("imu_calibration_data")), data);
 		}
 		break;
 		case SProtocol::RX_Message::SET_BOARD_GYROSCOPE_BIAS:
 		{
-			math::vec3f bias;
-			m_full_protocol.decode_board_gyroscope_bias(bias);
-			board::get_main_imu().set_gyroscope_bias(bias);
-			m_full_protocol.tx_printf("Received gyroscope bias {.9}", bias);
+			auto data = board::get_main_imu().get_calibration_data();
+			m_full_protocol.decode_board_gyroscope_bias(data.gyroscope_bias);
+			board::get_main_imu().set_calibration_data(data);
+			m_full_protocol.tx_printf(F_STR("Received gyroscope bias {.9}"), data.gyroscope_bias);
+
+			util::storage::set_record(util::storage::Id(static_murmurhash("imu_calibration_data")), data);
 		}
 		break;
 		default:
@@ -151,16 +157,16 @@ auto GS::get_send_option(SProtocol::TX_Message msg) -> Send_Option
 
 bool GS::send_data(uint32_t step)
 {
-	switch (step)
-	{
-	case 5:
-	{
 		if (get_send_option(SProtocol::TX_Message::BOARD_CPU_USAGE) != Send_Option::DISABLED)
 		{
 			uint8_t cpu_usage = m_frame_duration.count * 100 / 5000;
 			m_full_protocol.tx_board_cpu_usage(cpu_usage);
 		}
-		return false;
+
+	switch (step)
+	{
+	case 5:
+	{
 	}
 	case 6:
 	{
