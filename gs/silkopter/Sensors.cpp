@@ -43,6 +43,18 @@ void Sensors::init(SFull_Protocol* protocol)
 	m_protocol = protocol;
 }
 
+void Sensors::set_stream_messages()
+{
+	m_protocol->set_stream_all_messages(false);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::PRINT, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_CPU_USAGE, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_TIME, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_ACCELEROMETER, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_GYROSCOPE, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_BARO_PRESSURE, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_SONAR_DISTANCE, true);
+}
+
 
 void Sensors::update()
 {
@@ -57,6 +69,12 @@ void Sensors::update()
 
 	if (m_protocol->is_connected())
 	{
+		if (!m_stream_messages_set)
+		{
+			m_stream_messages_set = true;
+			set_stream_messages();
+		}
+
 		uint32_t time_us = m_protocol->data_board_time.value;
 		if (time_us != m_last_time_us)
 		{
@@ -68,9 +86,10 @@ void Sensors::update()
 			//static double seconds = 0;// double(time_ms) / 1000.0;
 			//seconds += 0.01f;
 
-			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_gyroscope.value.x);
-			m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_board_gyroscope.value.y);
-			m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_board_gyroscope.value.z);
+			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_cpu_usage.value);
+			//m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_gyroscope.value.x);
+			//m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_board_gyroscope.value.y);
+			//m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_board_gyroscope.value.z);
 
 //  			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_uav_attitude.value.x);
 //  			m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_uav_attitude.value.y);
@@ -116,6 +135,7 @@ void Sensors::update()
 	else
 	{
 		m_last_time_us = 0;
+		m_stream_messages_set = false;
 	}
 }
 
@@ -128,7 +148,7 @@ struct Scope_Exit
 
 void Sensors::start_accelerometer_calibration()
 {
-	Scope_Exit _helper([&]() { m_protocol->set_stream_all_messages(true); });
+	Scope_Exit _helper([&]() { set_stream_messages(); });
 
 	//disable all messages except the ones we need to speed up data acquizition
 	{
@@ -175,7 +195,7 @@ void Sensors::start_accelerometer_calibration()
 		"on its BACK",
 	};
 
-	math::vec3f avg[6];
+	math::vec3<double> avg[6];
 
 	for (size_t step = 0; step < 6; step++)
 	{
@@ -224,11 +244,11 @@ void Sensors::start_accelerometer_calibration()
 		//remove 10 samples to avoid any garbage from the beginning
 		samples.erase(samples.begin(), samples.begin() + 10);
 
-		avg[step] = std::accumulate(samples.begin(), samples.end(), math::vec3f());
-		avg[step] /= static_cast<float>(samples.size());
+		avg[step].set(std::accumulate(samples.begin(), samples.end(), math::vec3f()));
+		avg[step] /= static_cast<double>(samples.size());
 	}
 
-	math::vec3f bias, scale;
+	math::vec3<double> bias, scale;
 	calibrate_accelerometer(avg, bias, scale);
 
 	util::format(msg, "New accelerometer data:\nBias: {.9} \nScale: {.9}.", bias, scale);
@@ -242,7 +262,7 @@ void Sensors::start_accelerometer_calibration()
 		do
 		{
 			count--;
-		} while (!m_protocol->set_board_accelerometer_bias_scale(bias, scale) && count > 0);
+		} while (!m_protocol->set_board_accelerometer_bias_scale(math::vec3f(bias), math::vec3f(scale)) && count > 0);
 		if (count <= 0)
 		{
 			QMessageBox::critical(this, "Error", "Cannot set the new calibration data.\nFailed to reset the sensors.");
@@ -253,7 +273,7 @@ void Sensors::start_accelerometer_calibration()
 
 void Sensors::start_gyroscope_calibration()
 {
-	Scope_Exit _helper([&]() { m_protocol->set_stream_all_messages(true); });
+	Scope_Exit _helper([&]() { set_stream_messages(); });
 
 	std::chrono::seconds duration(10);
 
@@ -379,30 +399,31 @@ void Sensors::collect_vec3f_sample(std::vector<math::vec3f>& samples, SFull_Prot
 	}
 }
 
-bool Sensors::calibrate_accelerometer(math::vec3f samples[6], math::vec3f& bias, math::vec3f& scale)
+bool Sensors::calibrate_accelerometer(math::vec3<double> samples[6], math::vec3<double>& bias, math::vec3<double>& scale)
 {
-	int16_t i;
-	int16_t num_iterations = 0;
-	float eps = 0.000000001;
-	float change = 100.0;
-	float data[3];
-	float beta[6];
-	float delta[6];
-	float ds[6];
-	float JS[6][6];
+	//code copied from arducopter
+	int iteration_count = 0;
+	static const double s_eps = 0.000000001;
+	static const int s_iterations = 2000;
+	double change = 100.0;
+	double data[3];
+	double beta[6];
+	double delta[6];
+	double ds[6];
+	double JS[6][6];
 	bool success = true;
 
 	// reset
 	beta[0] = beta[1] = beta[2] = 0;
 	beta[3] = beta[4] = beta[5] = 1.0f / physics::constants::g;
 
-	while (num_iterations < 20 && change > eps) 
+	while (iteration_count < s_iterations && change > s_eps)
 	{
-		num_iterations++;
+		iteration_count++;
 
 		calibrate_reset_matrices(ds, JS);
 
-		for (i = 0; i < 6; i++) 
+		for (int i = 0; i < 6; i++)
 		{
 			data[0] = samples[i].x;
 			data[1] = samples[i].y;
@@ -420,7 +441,7 @@ bool Sensors::calibrate_accelerometer(math::vec3f samples[6], math::vec3f& bias,
 			delta[4] * delta[4] / (beta[4] * beta[4]) +
 			delta[5] * delta[5] / (beta[5] * beta[5]);
 
-		for (i = 0; i < 6; i++) 
+		for (int i = 0; i < 6; i++)
 		{
 			beta[i] -= delta[i];
 		}
@@ -449,24 +470,26 @@ bool Sensors::calibrate_accelerometer(math::vec3f samples[6], math::vec3f& bias,
 	return success;
 }
 
-void Sensors::calibrate_update_matrices(float dS[6], float JS[6][6], float beta[6], float data[3])
+void Sensors::calibrate_update_matrices(double dS[6], double JS[6][6], double beta[6], double data[3])
 {
-	int16_t j, k;
-	float dx, b;
-	float residual = 1.0;
-	float jacobian[6];
+	//code copied from arducopter
+	double residual = 1.0;
+	double jacobian[6];
 
-	for (j = 0; j < 3; j++) {
-		b = beta[3 + j];
-		dx = (float)data[j] - beta[j];
+	for (int j = 0; j < 3; j++)
+	{
+		double b = beta[3 + j];
+		double dx = data[j] - beta[j];
 		residual -= b*b*dx*dx;
 		jacobian[j] = 2.0f*b*b*dx;
 		jacobian[3 + j] = -2.0f*b*dx*dx;
 	}
 
-	for (j = 0; j < 6; j++) {
+	for (int j = 0; j < 6; j++)
+	{
 		dS[j] += jacobian[j] * residual;
-		for (k = 0; k < 6; k++) {
+		for (int k = 0; k < 6; k++)
+		{
 			JS[j][k] += jacobian[j] * jacobian[k];
 		}
 	}
@@ -474,32 +497,37 @@ void Sensors::calibrate_update_matrices(float dS[6], float JS[6][6], float beta[
 
 
 // _calibrate_reset_matrices - clears matrices
-void Sensors::calibrate_reset_matrices(float dS[6], float JS[6][6])
+void Sensors::calibrate_reset_matrices(double dS[6], double JS[6][6])
 {
-	int16_t j, k;
-	for (j = 0; j < 6; j++) {
+	//code copied from arducopter
+	for (int j = 0; j < 6; j++)
+	{
 		dS[j] = 0.0f;
-		for (k = 0; k < 6; k++) {
+		for (int k = 0; k < 6; k++)
+		{
 			JS[j][k] = 0.0f;
 		}
 	}
 }
 
-void Sensors::calibrate_find_delta(float dS[6], float JS[6][6], float delta[6])
+void Sensors::calibrate_find_delta(double dS[6], double JS[6][6], double delta[6])
 {
+	//code copied from arducopter
 	//Solve 6-d matrix equation JS*x = dS
 	//first put in upper triangular form
-	int16_t i, j, k;
-	float mu;
 
 	//make upper triangular
-	for (i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++)
+	{
 		//eliminate all nonzero entries below JS[i][i]
-		for (j = i + 1; j < 6; j++) {
-			mu = JS[i][j] / JS[i][i];
-			if (mu != 0.0f) {
+		for (int j = i + 1; j < 6; j++)
+		{
+			double mu = JS[i][j] / JS[i][i];
+			if (mu != 0.0) 
+			{
 				dS[j] -= mu*dS[i];
-				for (k = j; k < 6; k++) {
+				for (int k = j; k < 6; k++)
+				{
 					JS[k][j] -= mu*JS[k][i];
 				}
 			}
@@ -507,18 +535,21 @@ void Sensors::calibrate_find_delta(float dS[6], float JS[6][6], float delta[6])
 	}
 
 	//back-substitute
-	for (i = 5; i >= 0; i--) {
+	for (int i = 5; i >= 0; i--)
+	{
 		dS[i] /= JS[i][i];
-		JS[i][i] = 1.0f;
+		JS[i][i] = 1.0;
 
-		for (j = 0; j < i; j++) {
-			mu = JS[i][j];
+		for (int j = 0; j < i; j++)
+		{
+			double mu = JS[i][j];
 			dS[j] -= mu*dS[i];
-			JS[i][j] = 0.0f;
+			JS[i][j] = 0.0;
 		}
 	}
 
-	for (i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++)
+	{
 		delta[i] = dS[i];
 	}
 }

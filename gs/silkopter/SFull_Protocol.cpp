@@ -80,7 +80,7 @@ void SFull_Protocol::listen_for_connection(std::string const& com_port, uint32_t
 		{
 			while (!m_stop_thread)
 			{
-				m_io.run();
+				m_io.run_one();
 			}
 			m_is_listening = false;
 		});

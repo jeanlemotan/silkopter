@@ -229,6 +229,8 @@ namespace polynomial
 }
 
 #include "util/format.h"
+#include "util/storage.h"
+#include "board/board.h"
 
 int main(int argc, char *argv[])
 {
@@ -242,6 +244,11 @@ int main(int argc, char *argv[])
 	util::format(str, "{.2}", 0.000012345678f);
 	util::format(str, "{.6}", 0.000012345678f);
 
+
+	board::Init_Params params;
+	board::init(params);
+
+	//board::get_main_imu().get_calibration_data();
 
 	{
 		// 		size_t range = 805;
