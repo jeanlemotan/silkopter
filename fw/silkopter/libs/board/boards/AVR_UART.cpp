@@ -21,12 +21,14 @@ AVR_UART::AVR_UART(uint8_t port,
 		   volatile uint8_t* ubrrl,
 		   volatile uint8_t* ucsra,
 		   volatile uint8_t* ucsrb,
-		   volatile uint8_t* ucsrc)
+		   volatile uint8_t* ucsrc,
+		   volatile uint8_t* udr)
 	: m_ubrrh(*ubrrh)
 	, m_ubrrl(*ubrrl)
 	, m_ucsra(*ucsra)
 	, m_ucsrb(*ucsrb)
 	, m_ucsrc(*ucsrc)
+	, m_udr(*udr)
 {
 	ASSERT(port < MAX_UARTS);
 	ASSERT(!s_uart_ptrs[port]);
@@ -40,6 +42,19 @@ void AVR_UART::set_blocking(bool blocking)
 bool AVR_UART::is_blocking() const
 {
 	return m_is_blocking;
+}
+void AVR_UART::set_buffered(bool buffered)
+{
+	if (!buffered)
+	{
+		flush();
+		m_ucsrb &= ~(_BV(UDRIE0));
+	}
+	m_is_buffered = buffered;
+}
+bool AVR_UART::is_buffered() const
+{
+	return m_is_buffered;
 }
 
 void AVR_UART::begin(uint32_t baud)
@@ -178,36 +193,39 @@ size_t AVR_UART::write(const uint8_t* buf, size_t size)
 	{
 		return 0;
 	}
-
-	if (m_is_blocking)
+	
+	if (m_is_blocking && !m_is_buffered)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-			if (tmphead == m_tx_buffer.tail)
-			{
-				m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
-				while (tmphead == m_tx_buffer.tail); //wait for enough room in the buffer
-			}
-			m_tx_buffer.data[tmphead] = *buf++;
-			m_tx_buffer.head = tmphead;
+			while (!(m_ucsra & _BV(UDRE0)));
+			m_udr = *buf++;
 		}
-		m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
 	}
 	else
 	{
-		for (size_t i = 0; i < size; i++)
+		size_t left = size;
+		while (left > 0)
 		{
-			uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-			if (tmphead == m_tx_buffer.tail)
+			size_t start = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
+			size_t end = start > m_tx_buffer.tail ? UART_BUFFER_SIZE : m_tx_buffer.tail;
+			size_t fit = std::min(end - start, left);
+			if (fit > 0)
 			{
-				m_last_error = Error::TX_OVERFLOW;
-				return i;
+				memcpy((uint8_t*)m_tx_buffer.data + start, buf, fit);
+				m_tx_buffer.head = (m_tx_buffer.head + fit) & UART_BUFFER_MASK;
+				left -= fit;
+				buf += fit;
+				m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
 			}
-			
-			m_tx_buffer.data[tmphead] = *buf++;
-			m_tx_buffer.head = tmphead;
-			m_ucsrb |= _BV(UDRIE0);
+			else
+			{
+				if (!m_is_blocking)
+				{
+					m_last_error = Error::TX_OVERFLOW;
+					return size - left;
+				}
+			}
 		}
 	}
 	return size;
@@ -215,56 +233,12 @@ size_t AVR_UART::write(const uint8_t* buf, size_t size)
 
 size_t AVR_UART::write(util::Flash_String const& str)
 {
-	for (auto it = str.begin(); *it != 0; ++it)
+	size_t size = 0;
+	for (auto it = str.begin(); *it != 0; ++it, ++size)
 	{
-		write(*it);
-	}
-}
-
-size_t AVR_UART::write_c_str(const char* buf)
-{
-	ASSERT(m_is_open);
-	if (!m_is_open)
-	{
-		return 0;
-	}
-	m_last_error = Error::NONE;
-	if (!buf)
-	{
-		return 0;
-	}
-	uint8_t size = 0;
-	if (m_is_blocking)
-	{
-		while (uint8_t ch = *buf++)
+		if (write(*it) == 0)
 		{
-			uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-			if (tmphead == m_tx_buffer.tail)
-			{
-				m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
-				while (tmphead == m_tx_buffer.tail); //wait for enough room in the buffer
-			}
-			m_tx_buffer.data[tmphead] = ch;
-			m_tx_buffer.head = tmphead;
-			size++;
-		}
-		m_ucsrb |= _BV(UDRIE0); //trigger the interrupt
-	}
-	else
-	{
-		while (uint8_t ch = *buf++)
-		{
-			uint8_t tmphead = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-			if (tmphead == m_tx_buffer.tail)
-			{
-				m_last_error = Error::TX_OVERFLOW;
-				return size;
-			}
-		
-			m_tx_buffer.data[tmphead] = ch;
-			m_tx_buffer.head = tmphead;
-			m_ucsrb |= _BV(UDRIE0);
-			size++;
+			return size;
 		}
 	}
 	return size;
@@ -273,11 +247,11 @@ size_t AVR_UART::write_c_str(const char* buf)
 void AVR_UART::flush()
 {
 	ASSERT(m_is_open);
-	if (!m_is_open)
+	if (!m_is_open || !m_is_buffered)
 	{
 		return;
 	}
-    uint8_t tmphead = m_tx_buffer.head;
+	uint8_t tmphead = m_tx_buffer.head;
 	while (tmphead != m_tx_buffer.tail);
 }
 

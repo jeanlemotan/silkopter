@@ -40,27 +40,24 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);
+		s_uart->set_buffered(false);
+		cli();
 		s_uart->write(F_STR("\n#"));
 		if (msg)
 		{
-			s_uart->write_c_str(msg);
+			s_uart->write(reinterpret_cast<uint8_t const*>(msg), strlen(msg));
 		}
 		if (file)
 		{
-			board::UART_Format_Adapter adapter(*s_uart);
-			util::format(adapter, F_STR("\n@ {}:{}"), file, line);
+			s_uart->printf(F_STR("\n@ {}:{}"), file, line);
 		}
 		if (condition)
 		{
-			s_uart->write('\n');
-			s_uart->write(condition ? condition : "N/A");
+			s_uart->printf(F_STR("\n{}"), condition);
 		}
-
-		s_uart->flush();
 	}
 
 	//make sure nothing else happens
-	cli();
 	//freeze
 	while (true);
 }
@@ -81,20 +78,16 @@ void trace(const char* file, int line, const char* msg)
 {
 	if (s_uart)
 	{
-		auto blocking = s_uart->is_blocking();
-		s_uart->set_blocking(true);
 		s_uart->write(F_STR("\nTrace: "));
 		if (msg)
 		{
-			s_uart->write_c_str(msg);
+			s_uart->write(reinterpret_cast<uint8_t const*>(msg), strlen(msg));
 		}
 		if (file)
 		{
-			board::UART_Format_Adapter adapter(*s_uart);
-			util::format(adapter, F_STR(" @ {}:{}"), file, line);
+			util::format(*s_uart, F_STR(" @ {}:{}"), file, line);
 		}
 		s_uart->flush();
-		s_uart->set_blocking(blocking);
 	}
 }
 

@@ -40,13 +40,14 @@ namespace board
 	static volatile uint8_t* s_ucsra[UART_COUNT] = { &UCSR0A, &UCSR1A, &UCSR2A, &UCSR3A };
 	static volatile uint8_t* s_ucsrb[UART_COUNT] = { &UCSR0B, &UCSR1B, &UCSR2B, &UCSR3B };
 	static volatile uint8_t* s_ucsrc[UART_COUNT] = { &UCSR0C, &UCSR1C, &UCSR2C, &UCSR3C };
+	static volatile uint8_t* s_udr[UART_COUNT]	 = { &UDR0, &UDR1, &UDR2, &UDR3 };
 
 	static AVR_UART s_uarts[UART_COUNT] =
 	{
-		{0, s_ubrrh[0], s_ubrrl[0], s_ucsra[0], s_ucsrb[0], s_ucsrc[0]},
-		{1, s_ubrrh[1], s_ubrrl[1], s_ucsra[1], s_ucsrb[1], s_ucsrc[1]},
-		{2, s_ubrrh[2], s_ubrrl[2], s_ucsra[2], s_ucsrb[2], s_ucsrc[2]},
-		{3, s_ubrrh[3], s_ubrrl[3], s_ucsra[3], s_ucsrb[3], s_ucsrc[3]},
+		{0, s_ubrrh[0], s_ubrrl[0], s_ucsra[0], s_ucsrb[0], s_ucsrc[0], s_udr[0]},
+		{1, s_ubrrh[1], s_ubrrl[1], s_ucsra[1], s_ucsrb[1], s_ucsrc[1], s_udr[1]},
+		{2, s_ubrrh[2], s_ubrrl[2], s_ucsra[2], s_ucsrb[2], s_ucsrc[2], s_udr[2]},
+		{3, s_ubrrh[3], s_ubrrl[3], s_ucsra[3], s_ucsrb[3], s_ucsrc[3], s_udr[3]},
 	};
 	
 	static AVR_UART* s_gs_full_uart = &s_uarts[0];

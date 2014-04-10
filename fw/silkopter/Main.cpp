@@ -88,9 +88,9 @@ int main(void)
 		//for up to 3ms
 		{
 			auto duration = board::clock::now_us() - start;
-			if (duration < chrono::micros(1000))
+			if (duration < chrono::micros(3000))
 			{
-				gs.process(chrono::micros(1000) - duration);
+				gs.process(chrono::micros(3000) - duration);
 			}
 		}
    }

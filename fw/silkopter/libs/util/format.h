@@ -117,44 +117,53 @@ namespace util
 			Flash_String::const_iterator m_it;
 		};
 
+		template<class T> struct Dst_Adapter
+		{
+		public:
+			Dst_Adapter(T& dst) : m_dst(dst) {}
+			void append(char ch) { m_dst.push_back(ch); }
+			void append(char const* start, char const* end) { m_dst.append(start, end); }
+			void clear() { m_dst.clear(); }
+		private:
+			T& m_dst;
+		};
 
-
-		template<class Dst_String, class Placeholder, size_t SIZE>
-		void format_string(Dst_String& dst, Placeholder const& ph, FString<SIZE> const& p)
+		template<class Dst_Adapter, class Placeholder, size_t SIZE>
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, FString<SIZE> const& p)
 		{
 			dst.append(p.begin(), p.end());
 		}
-		template<class Dst_String, class Placeholder>
-		void format_string(Dst_String& dst, Placeholder const& ph, Flash_String const& p)
+		template<class Dst_Adapter, class Placeholder>
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, Flash_String const& p)
 		{
 			for (auto it = p.begin(); *it != 0; ++it)
 			{
-				dst.push_back(*it);
+				dst.append(*it);
 			}
 		}
-		template<class Dst_String, class Placeholder>
-		void format_string(Dst_String& dst, Placeholder const& ph, const char* p)
+		template<class Dst_Adapter, class Placeholder>
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, const char* p)
 		{
 			if (p)
 			{
 				for (; *p != 0; ++p)
 				{
-					dst.push_back(*p);
+					dst.append(*p);
 				}
 			}
 		}
-		template<class Dst_String, class Placeholder>
-		void format_string(Dst_String& dst, Placeholder const& ph, char p)
+		template<class Dst_Adapter, class Placeholder>
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, char p)
 		{
-			dst.push_back(p);
+			dst.append(p);
 		}
 
-		template<class Dst_String, class Placeholder>
-		void format_string(Dst_String& dst, Placeholder const& ph, int8_t value)
+		template<class Dst_Adapter, class Placeholder>
+		void format_string(Dst_Adapter& dst, Placeholder const& ph, int8_t value)
 		{
+			char buf[8];
 			if (ph.base == 16)
 			{
-				char buf[8];
 				sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
 				format_string(dst, Placeholder(), buf);
 				return;
@@ -171,13 +180,12 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.push_back('-');
+				dst.append('-');
 			}
-			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
 			dst.append(buf, buf + length);
 		}
@@ -185,9 +193,9 @@ namespace util
 		template<class Dst_Adapter, class Placeholder>
 		void format_string(Dst_Adapter& dst, Placeholder const& ph, uint8_t value)
 		{
+			char buf[8];
 			if (ph.base == 16)
 			{
-				char buf[8];
 				sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
 				format_string(dst, Placeholder(), buf);
 				return;
@@ -197,9 +205,8 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
-			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
 			dst.append(buf, buf + length);
 		}
@@ -207,9 +214,9 @@ namespace util
 		template<class Dst_Adapter, class Placeholder>
 		void format_string(Dst_Adapter& dst, Placeholder const& ph, int16_t value)
 		{
+			char buf[8];
 			if (ph.base == 16)
 			{
-				char buf[32];
 				sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
 				format_string(dst, Placeholder(), buf);
 				return;
@@ -225,13 +232,12 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.push_back('-');
+				dst.append('-');
 			}
-			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
 			dst.append(buf, buf + length);
 		}
@@ -239,9 +245,9 @@ namespace util
 		template<class Dst_Adapter, class Placeholder>
 		void format_string(Dst_Adapter& dst, Placeholder const& ph, uint16_t value)
 		{
+			char buf[8];
 			if (ph.base == 16)
 			{
-				char buf[32];
 				sprintf(buf, ph.base_case == 0 ? "%x" : "%X", value);
 				format_string(dst, Placeholder(), buf);
 				return;
@@ -251,9 +257,8 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
-			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
 			dst.append(buf, buf + length);
 		}
@@ -280,11 +285,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.push_back('-');
+				dst.append('-');
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -307,7 +312,7 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
 			char buf[16];
 			detail::decompose_digits(buf, length, uvalue);
@@ -328,11 +333,11 @@ namespace util
 			}
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
 			if (value < 0)
 			{
-				dst.push_back('-');
+				dst.append('-');
 			}
 			char buf[32];
 			detail::decompose_digits(buf, length, uvalue);
@@ -347,9 +352,9 @@ namespace util
 			auto aligned_length = std::max(length, ph.alignment);
 			for (int8_t i = length; i < aligned_length; i++)
 			{
-				dst.push_back(ph.filler);
+				dst.append(ph.filler);
 			}
-			char buf[16];
+			char buf[32];
 			detail::decompose_digits(buf, length, uvalue);
 			dst.append(buf, buf + length);
 		}
@@ -469,41 +474,44 @@ namespace util
 
 			if (frac_parts_count > 0)
 			{
-				auto decimal_point_off = dst.size();
+				FString<16> buf;
+				//auto decimal_point_off = dst.size();
 				//parseToString(dst, off, Placeholder(), '.');
 
 				//first part - no alignment needed
 				ph2.alignment = 0;
-				format_string(dst, ph2, frac_parts[frac_parts_count - 1]);
+				format_string(buf, ph2, frac_parts[frac_parts_count - 1]);
 
 				//middle part - alignment is 9
 				ph2.alignment = 9;
 				for (int8_t i = frac_parts_count - 2; i >= 1; i--)
 				{
-					format_string(dst, ph2, frac_parts[i]);
+					format_string(buf, ph2, frac_parts[i]);
 				}
 
 				if (frac_parts_count > 1)
 				{
 					//the last part might be cut as we remove zeroes from it
 					ph2.alignment = last_frac_part_alignment;
-					format_string(dst, ph2, frac_parts[0]);
+					format_string(buf, ph2, frac_parts[0]);
 				}
 
 				//overwrite the 1 from the frac part with the decimal point
-				dst[decimal_point_off] = '.';
+				buf[0] = '.';
+				
+				dst.append(buf.data(), buf.data() + buf.size());
 			}
 		}
 
 		template<class Dst_Adapter, class Placeholder, class P0, class P1>
 		void format_string(Dst_Adapter& dst, Placeholder const& ph, std::pair<P0, P1> const& pair)
 		{
-			dst.push_back('<');
+			dst.append('<');
 			format_string(dst, ph, pair.first);
-			dst.push_back(',');
-			dst.push_back(' ');
+			dst.append(',');
+			dst.append(' ');
 			format_string(dst, ph, pair.second);
-			dst.push_back('>');
+			dst.append('>');
 		}
 
 		// 	template<class Dst_Adapter, class Placeholder, class rep, class period>
@@ -562,29 +570,30 @@ namespace util
 			}
 		};
 		
-		template<class Dst_String, class Format_String_Adapter>
-		void _copy_until_placeholder(Dst_String& dst, Format_String_Adapter& fmt_adapter) // base function
+		template<class Dst_Adapter, class Format_String_Adapter>
+		bool _copy_until_placeholder(Dst_Adapter& dst, Format_String_Adapter& fmt_adapter) // base function
 		{
-			do
+			while (!fmt_adapter.is_done())
 			{
 				auto ch = fmt_adapter.get_and_advance();
 				if (ch != '{')
 				{
-					dst.push_back(ch);
+					dst.append(ch);
 					continue;
 				}
 
 				ch = fmt_adapter.get();
 				if (ch == '{')
 				{
-					dst.push_back('{');
-					dst.push_back('{');
+					dst.append('{');
+					dst.append('{');
 					fmt_adapter.get_and_advance();
 					continue;
 				}
 
-				break;
-			} while (!fmt_adapter.is_done());
+				return true;
+			} 
+			return false;
 		}
 		
 		template<class Format_String_Adapter>
@@ -615,52 +624,57 @@ namespace util
 			return (ch == '}');
 		}
 
-		template<class Dst_String, class Format_String_Adapter>
-		Dst_String& _format(Dst_String& dst, Format_String_Adapter& fmt_adapter) // base function
+		template<class Dst_Adapter, class Format_String_Adapter>
+		void _format(Dst_Adapter& dst, Format_String_Adapter& fmt_adapter) // base function
 		{
-			_copy_until_placeholder(dst, fmt_adapter);
-			if (!fmt_adapter.is_done())
+			bool found_placeholder = _copy_until_placeholder(dst, fmt_adapter);
+			if (found_placeholder)
 			{
 				//assert(0);
 			}
-			return dst;
 		}
 
-		template<class Dst_String, class Format_String_Adapter, typename P, typename... Params>
-		Dst_String& _format(Dst_String& dst, Format_String_Adapter& fmt_adapter, P const& p, Params... params) // recursive variadic function
+		template<class Dst_Adapter, class Format_String_Adapter, typename P, typename... Params>
+		void _format(Dst_Adapter& dst, Format_String_Adapter& fmt_adapter, P const& p, Params... params) // recursive variadic function
 		{
-			do
+			while (!fmt_adapter.is_done())
 			{
-				_copy_until_placeholder(dst, fmt_adapter);
+				bool found_placeholder = _copy_until_placeholder(dst, fmt_adapter);
+				if (!found_placeholder)
+				{
+					return;
+				}
 				util::formatting::Placeholder ph;
-				if (!_read_placeholder(ph, fmt_adapter))
+				bool ok = _read_placeholder(ph, fmt_adapter);
+				if (!ok)
 				{
 					//assert(0);
-					break;
+					return;
 				}
 
-				util::formatting::Argument_Parser<Dst_String, P>().execute(dst, ph, p);
-				return _format(dst, fmt_adapter, params...);
-			} while (!fmt_adapter.is_done());
-
-			return dst;
+				util::formatting::Argument_Parser<Dst_Adapter, P>().execute(dst, ph, p);
+				_format(dst, fmt_adapter, params...);
+			}
 		}
 	}
 
 
 
 
-	template<class Dst_String, class Format_String, typename... Params>
-	Dst_String& format(Dst_String& dst, Format_String const& fmt, Params... params) // recursive variadic function
+	template<class Dst, class Format_String, typename... Params>
+	Dst& format(Dst& dst, Format_String const& fmt, Params... params) // recursive variadic function
 	{
-		dst.clear();
+		util::formatting::Dst_Adapter<Dst> dst_adapter(dst);
+		dst_adapter.clear();
+		
 		util::formatting::Format_String_Adapter<Format_String> fmt_adapter(fmt);
 		if (fmt_adapter.is_done())
 		{
 			return dst;
 		}
 
-		return formatting::_format(dst, fmt_adapter, params...);
+		formatting::_format(dst_adapter, fmt_adapter, params...);
+		return dst;
 	}
 
 }

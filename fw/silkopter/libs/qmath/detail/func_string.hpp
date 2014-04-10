@@ -273,7 +273,7 @@ namespace formatting
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec2<T> const& p)
 	{
 		format_string(dst, ph, p.x);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.y);
 	}
 
@@ -281,9 +281,9 @@ namespace formatting
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec3<T> const& p)
 	{
 		format_string(dst, ph, p.x);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.y);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.z);
 	}
 
@@ -291,11 +291,11 @@ namespace formatting
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::vec4<T> const& p)
 	{
 		format_string(dst, ph, p.x);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.y);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.z);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.w);
 	}
 
@@ -303,11 +303,11 @@ namespace formatting
 	void format_string(Dst_Adapter& dst, Placeholder const& ph, math::quat<T> const& p)
 	{
 		format_string(dst, ph, p.x);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.y);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.z);
-		dst.push_back(',');
+		dst.append(',');
 		format_string(dst, ph, p.w);
 	}
 

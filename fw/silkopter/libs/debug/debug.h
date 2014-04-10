@@ -24,11 +24,7 @@ namespace debug
 		auto* uart = get_uart();
 		if (uart)
 		{
-			auto blocking = uart->is_blocking();
-			uart->set_blocking(true);
 			uart->printf(fmt, params...);
-			uart->flush();
-			uart->set_blocking(blocking);
 		}
 	}
 }
