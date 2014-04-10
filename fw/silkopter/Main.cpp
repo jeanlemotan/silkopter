@@ -87,10 +87,10 @@ int main(void)
 		//the extra time - run the ground station connection
 		//for up to 3ms
 		{
-			auto duration = board::clock::now_us() - start;
-			if (duration < chrono::micros(3000))
+			//auto duration = board::clock::now_us() - start;
+			//if (duration < chrono::micros(3000))
 			{
-				gs.process(chrono::micros(3000) - duration);
+				gs.process(chrono::micros(500));
 			}
 		}
    }

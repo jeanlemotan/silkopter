@@ -207,9 +207,10 @@ size_t AVR_UART::write(const uint8_t* buf, size_t size)
 		size_t left = size;
 		while (left > 0)
 		{
-			size_t start = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
-			size_t end = start > m_tx_buffer.tail ? UART_BUFFER_SIZE : m_tx_buffer.tail;
-			size_t fit = std::min(end - start, left);
+			uint8_t tail = m_tx_buffer.tail;
+			uint8_t start = (m_tx_buffer.head + 1) & UART_BUFFER_MASK;
+			uint8_t end = start > tail ? UART_BUFFER_SIZE : tail;
+			size_t fit = std::min<size_t>(end - start, left);
 			if (fit > 0)
 			{
 				memcpy((uint8_t*)m_tx_buffer.data + start, buf, fit);

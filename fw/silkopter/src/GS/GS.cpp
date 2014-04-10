@@ -157,16 +157,16 @@ auto GS::get_send_option(SProtocol::TX_Message msg) -> Send_Option
 
 bool GS::send_data(uint32_t step)
 {
-		if (get_send_option(SProtocol::TX_Message::BOARD_CPU_USAGE) != Send_Option::DISABLED)
-		{
-			uint8_t cpu_usage = m_frame_duration.count * 100 / 5000;
-			m_full_protocol.tx_board_cpu_usage(cpu_usage);
-		}
 
 	switch (step)
 	{
 	case 5:
 	{
+		if (get_send_option(SProtocol::TX_Message::BOARD_CPU_USAGE) != Send_Option::DISABLED)
+		{
+			uint8_t cpu_usage = m_frame_duration.count / 1000;// * 100 / 5000;
+			m_full_protocol.tx_board_cpu_usage(cpu_usage);
+		}
 	}
 	case 6:
 	{

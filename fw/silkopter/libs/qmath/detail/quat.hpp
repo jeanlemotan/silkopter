@@ -107,7 +107,7 @@ template <typename T>
 template <class Policy>
 inline void quat<T>::get_as_mat3(mat3<T>& ret) const
 {
-	T *m = ret.data();
+	T *r = ret.data();
 
 	T const tx = x*T(2);
 	T const ty = y*T(2);
@@ -122,48 +122,63 @@ inline void quat<T>::get_as_mat3(mat3<T>& ret) const
 	T const tyw = ty*w;
 	T const tzw = tz*w;
 
-	m[0] = 1 -	tyy - tzz;
-	m[3] =		txy - tzw;
-	m[6] =		txz + tyw;
+	r[0] = 1 -	tyy - tzz;
+	r[3] =		txy - tzw;
+	r[6] =		txz + tyw;
 
-	m[1] =		txy + tzw;
-	m[4] = 1 -	txx - tzz;
-	m[7] =		tyz - txw;
+	r[1] =		txy + tzw;
+	r[4] = 1 -	txx - tzz;
+	r[7] =		tyz - txw;
 
-	m[2] =		txz - tyw;
-	m[5] =		tyz + txw;
-	m[8] = 1 -	tyy - txx;
+	r[2] =		txz - tyw;
+	r[5] =		tyz + txw;
+	r[8] = 1 -	tyy - txx;
 }
 
 template <typename T>
 template <class Policy>
-inline void quat<T>::set_from_mat4(mat4<T> const& m)
+inline void quat<T>::get_as_mat3_and_inv(mat3<T>& ret, mat3<T>& inv) const
 {
-	set_from_mat3<Policy>(mat3<T>(m));
-}
+	T *r = ret.data();
+	T *i = inv.data();
 
-template <typename T>
-template <class Policy>
-inline void quat<T>::get_as_mat4(mat4<T>& ret) const
-{
-	mat3<T> ret3(mat3<T>::uninitialized);
-	get_as_mat3<Policy>(ret3);
-	ret = ret3;
-}
+	T const tx = x*T(2);
+	T const ty = y*T(2);
+	T const tz = z*T(2);
+	T const txx = tx*x;
+	T const tyy = ty*y;
+	T const tzz = tz*z;
+	T const txy = tx*y;
+	T const txz = tx*z;
+	T const txw = tx*w;
+	T const tyz = ty*z;
+	T const tyw = ty*w;
+	T const tzw = tz*w;
 
-template <typename T>
-template <class Policy>
-inline void quat<T>::set_from_trans3d(trans3d<T> const& m)
-{
-	set_from_mat3<Policy>(mat3<T>(m.mat));
-}
+	r[0] = 1 -	tyy - tzz;
+	r[3] =		txy - tzw;
+	r[6] =		txz + tyw;
 
-template <typename T>
-template <class Policy>
-inline void quat<T>::get_as_trans3d(trans3d<T>& trans) const
-{
-	get_as_mat4<Policy>(trans.mat);
-	trans.repair();
+	r[1] =		txy + tzw;
+	r[4] = 1 -	txx - tzz;
+	r[7] =		tyz - txw;
+
+	r[2] =		txz - tyw;
+	r[5] =		tyz + txw;
+	r[8] = 1 -	tyy - txx;
+
+
+	i[0] = r[0];
+	i[3] =		txy + tzw;
+	i[6] =		txz - tyw;
+
+	i[1] =		txy - tzw;
+	i[4] = r[4];
+	i[7] =		tyz + txw;
+
+	i[2] =		txz + tyw;
+	i[5] =		tyz - txw;
+	i[8] = r[8];
 }
 
 template <typename T>

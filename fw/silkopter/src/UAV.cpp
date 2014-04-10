@@ -46,10 +46,10 @@ const UAV::Status& UAV::get_status()
 void UAV::process()
 {
 	auto now = board::clock::now_us();
-	if (now - m_last_time < chrono::micros(2000))
-	{
-		return;
-	}
+// 	if (now - m_last_time < chrono::micros(2000))
+// 	{
+// 		return;
+// 	}
 
 	m_dt = now - m_last_time;
 	m_dts = m_dt;

@@ -1,12 +1,22 @@
 #pragma once
 
 #include <string>
-#include <avr/pgmspace.h>
+
+#ifdef __AVR__
+#	include <avr/pgmspace.h>
+#endif
 
 namespace util
 {
 	
-#define F_STR(x) util::Flash_String(PSTR(x))
+#ifdef __AVR__
+#	define F_STR(x) util::Flash_String(PSTR(x))
+#else
+#	define F_STR(x) (x)
+#	define PGM_P char const*
+#	define pgm_read_byte_near(x) (*(x))
+#	define strlen_P strlen
+#endif
 
 class Flash_String
 {

@@ -14,7 +14,10 @@ public:
 		 
 	void set_blocking(bool blocking); 
 	bool is_blocking() const;
-	
+
+	void set_buffered(bool buffered);
+	bool is_buffered() const;
+
     void begin(uint32_t baud);
 	void end();
 
@@ -23,8 +26,8 @@ public:
 	uint8_t read_byte();
 	size_t read(uint8_t* buf, size_t size);
 
-    size_t write_c_str(const char* buf);
-    size_t write(uint8_t const* buf, size_t size);
+	size_t write(util::Flash_String const& str);
+	size_t write(uint8_t const* buf, size_t size);
 	
 	void flush();
 	

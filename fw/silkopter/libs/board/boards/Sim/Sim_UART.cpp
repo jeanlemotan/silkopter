@@ -25,6 +25,16 @@ bool Sim_UART::is_blocking() const
 	return m_is_blocking;
 }
 
+void Sim_UART::set_buffered(bool buffered)
+{
+
+}
+bool Sim_UART::is_buffered() const
+{
+	return true;
+}
+
+
 void Sim_UART::begin(uint32_t baud)
 {
 	m_is_open = true;
@@ -66,7 +76,12 @@ size_t Sim_UART::read(uint8_t* buf, size_t size)
 
 	return 0;
 }
-	
+
+size_t Sim_UART::write(util::Flash_String const& str)
+{
+	return 0;
+}
+
 size_t Sim_UART::write(const uint8_t* buf, size_t size)
 {
 	ASSERT(m_is_open);
@@ -79,20 +94,6 @@ size_t Sim_UART::write(const uint8_t* buf, size_t size)
 		return 0;
 	}
 
-	return 0;
-}
-
-size_t Sim_UART::write_c_str(const char* buf)
-{
-	ASSERT(m_is_open);
-	if (!m_is_open)
-	{
-		return 0;
-	}
-	if (!buf)
-	{
-		return 0;
-	}
 	return 0;
 }
 

@@ -49,14 +49,7 @@ struct quat
 	//! cast from/to mat3
 	template<class Policy = standard> void set_from_mat3(mat3<T> const& mat);
 	template<class Policy = standard> void get_as_mat3(mat3<T>& mat) const;
-
-	//! cast from/to mat4
-	template<class Policy = standard> void set_from_mat4(mat4<T> const& mat);
-	template<class Policy = standard> void get_as_mat4(mat4<T>& mat) const;
-
-	//! cast from/to trans3d
-	template<class Policy = standard> void set_from_trans3d(trans3d<T> const& mat);
-	template<class Policy = standard> void get_as_trans3d(trans3d<T>& trans) const;
+	template<class Policy = standard> void get_as_mat3_and_inv(mat3<T>& mat, mat3<T>& inv) const;
 
 	//! cast from/to angle axis
 	template<class Policy = standard> void set_from_angle_axis(T angle, vec3<T> const& axis);
