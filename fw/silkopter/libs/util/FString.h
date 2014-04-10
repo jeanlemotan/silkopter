@@ -11,15 +11,25 @@ namespace util
 class Flash_String
 {
 public:
+	struct Iterator
+	{
+		explicit Iterator(PGM_P ptr) : m_ptr(ptr) {}
+		char operator*() const { return pgm_read_byte_near(m_ptr); }
+		Iterator& operator++() { m_ptr += 1; return *this; }
+		const Iterator operator++(int) { Iterator temp(*this); ++m_ptr; return temp; }
+	private:
+		PGM_P m_ptr;
+	};
+
 	explicit Flash_String(PGM_P src) : m_str(src) {}
 
 	typedef char value_type;
-	typedef PGM_P const_iterator;
+	typedef Iterator const_iterator;
 	
 	auto size() const -> size_t { return strlen_P(m_str); }
 	auto data() const -> PGM_P { return m_str; }
-	auto begin() const -> const_iterator { return m_str; }
-	auto end() const -> const_iterator { return m_str + size(); }
+	auto begin() const -> const_iterator { return Iterator(m_str); }
+	auto end() const -> const_iterator { return Iterator(m_str + size()); }
 		
 private:
 	PGM_P m_str;

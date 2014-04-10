@@ -26,7 +26,7 @@ int main(void)
 	params.main_imu_sample_rate = board::IMU::Sample_Rate::_500_HZ;
 	board::init(params);
 
-	util::FString<128> str;
+	//util::FString<128> str;
 
 	silk::UAV uav(silk::Motor_Mixer::Type::X, 4, 0.3f);
 	silk::GS gs(uav, board::get_gs_full_uart());

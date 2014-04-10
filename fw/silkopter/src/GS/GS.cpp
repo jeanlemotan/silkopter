@@ -88,7 +88,7 @@ void GS::receive_data(SProtocol::RX_Message message)
 		{
 			bool enabled;
 			m_full_protocol.decode_stream_all_messages(enabled);
-			m_full_protocol.tx_printf(F_STR("Stream all messages {}"), enabled ? "enabled" : "disabled");
+			m_full_protocol.tx_printf(F_STR("Stream all messages {}"), enabled ? F_STR("enabled") : F_STR("disabled"));
 			std::fill(m_message_send_option, m_message_send_option + 256, enabled ? Send_Option::STREAM : Send_Option::DISABLED);
 		}
 		break;
@@ -98,7 +98,7 @@ void GS::receive_data(SProtocol::RX_Message message)
 			SProtocol::TX_Message msg;
 			m_full_protocol.decode_stream_message(msg, enabled);
 			uint8_t msg_idx = static_cast<uint8_t>(msg);
-			m_full_protocol.tx_printf(F_STR("Stream message {} {}"), msg_idx, enabled ? "enabled" : "disabled");
+			m_full_protocol.tx_printf(F_STR("Stream message {} {}"), msg_idx, enabled ? F_STR("enabled") : F_STR("disabled"));
 			m_message_send_option[msg_idx] = enabled ? Send_Option::STREAM : Send_Option::DISABLED;
 		}
 		break;

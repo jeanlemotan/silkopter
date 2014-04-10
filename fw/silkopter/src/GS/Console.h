@@ -17,6 +17,6 @@ private:
 	
 	bool get_command(String& command) const;
 	
-	mutable String m_command;
-	board::UART& m_uart;
+	//mutable String m_command;
+	//board::UART& m_uart;
 };

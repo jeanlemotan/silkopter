@@ -213,6 +213,14 @@ size_t AVR_UART::write(const uint8_t* buf, size_t size)
 	return size;
 }
 
+size_t AVR_UART::write(util::Flash_String const& str)
+{
+	for (auto it = str.begin(); *it != 0; ++it)
+	{
+		write(*it);
+	}
+}
+
 size_t AVR_UART::write_c_str(const char* buf)
 {
 	ASSERT(m_is_open);

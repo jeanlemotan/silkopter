@@ -183,7 +183,7 @@ namespace storage
 
 		auto& eeprom = board::get_eeprom();
 		
-		static const size_t BUFFER_SIZE = 256;
+		static const size_t BUFFER_SIZE = 16;
 		uint8_t buffer[BUFFER_SIZE];
 		auto dst_offset = offset.value;
 		auto src_offset = offset.value + sizeof(Header) + get_record_size(offset);

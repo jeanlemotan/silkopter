@@ -78,7 +78,7 @@ public:
 	template<class Fmt, typename... Params>
 	void tx_printf(Fmt const& fmt, Params... params)
 	{
-		util::FString<255> str;
+		util::FString<128> str;
 		util::format(str, fmt, params...);
 		tx_print(str.data(), str.size());
 	}

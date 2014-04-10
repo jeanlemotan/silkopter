@@ -3,10 +3,27 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "util/Noncopyable.h"
+#include "util/FString.h"
 
 namespace board
 {
 
+class UART;
+
+//////////////////////////////////////////////////////////////////////////
+//utility class to be able to format directly in the uart
+struct UART_Format_Adapter
+{
+	UART_Format_Adapter(UART& uart) : m_uart(uart) {}
+	void push_back(char ch);
+	void append(char const* start, char const* end);
+	void clear();
+		
+	UART& m_uart;
+};
+
+
+//////////////////////////////////////////////////////////////////////////
 class UART : util::Noncopyable
 {
 public:
@@ -54,6 +71,7 @@ public:
 	//In non-blocking mode it will flag an TX_OVERFLOW error if there is not enough room for all the data
 	//It returns the number of byte successfully written
     virtual size_t write_c_str(const char* buf) = 0;
+	virtual size_t write(util::Flash_String const& str) = 0;
     virtual size_t write(const uint8_t* buf, size_t size) = 0;
 	
 	template<typename T>
@@ -63,11 +81,10 @@ public:
 	}
 	
 	template<class Fmt, typename... Params>
-	size_t printf(Fmt const& fmt, Params... params)
+	void printf(Fmt const& fmt, Params... params)
 	{
-		util::FString<256> str;
-		util::format(str, fmt, params...);
-		return write(str.m_data(), str.size());
+		UART_Format_Adapter adapter(*this);
+		util::format(adapter, fmt, params...);
 	}
 	
 	//this blocks until the tx buffer is empty.
@@ -79,6 +96,10 @@ public:
 	//returns the number of bytes received ever
 	virtual size_t get_rx_data_counter() const = 0;
 };
+
+inline void UART_Format_Adapter::push_back(char ch) { m_uart.write(ch); }
+inline void UART_Format_Adapter::append(char const* start, char const* end) { m_uart.write(reinterpret_cast<uint8_t const*>(start), end - start); }
+inline void UART_Format_Adapter::clear() {}
 
 }
 

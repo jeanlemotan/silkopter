@@ -1,18 +1,14 @@
 #pragma once
 
 #include "util/format.h"
-
-namespace board
-{
-	class UART;
-}
-
+#include "board/UART.h"
 
 namespace debug
 {
 	//call this to setup the uart used to log asserts in debug
 	//pass null and asserts will not be logged (but will still freeze the board)
 	extern void init(board::UART* uart);
+	extern board::UART* get_uart();
 	
 	namespace detail
 	{
@@ -25,9 +21,15 @@ namespace debug
 	template<class Fmt, typename... Params>
 	void printf(Fmt const& fmt, Params... params)
 	{
-		util::FString<255> str;
-		util::format(str, fmt, params...);
-		detail::print(str.data(), str.size());
+		auto* uart = get_uart();
+		if (uart)
+		{
+			auto blocking = uart->is_blocking();
+			uart->set_blocking(true);
+			uart->printf(fmt, params...);
+			uart->flush();
+			uart->set_blocking(blocking);
+		}
 	}
 }
 

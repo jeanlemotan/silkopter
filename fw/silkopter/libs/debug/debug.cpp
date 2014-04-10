@@ -24,6 +24,10 @@ void init(board::UART* uart)
 	s_uart = uart;
 }
 
+board::UART* get_uart()
+{
+	return s_uart;
+}
 
 namespace detail
 {
@@ -36,21 +40,20 @@ void handle_assert(const char* condition, const char* file, int line, const char
 	if (s_uart)
 	{
 		s_uart->set_blocking(true);
-		s_uart->write_c_str(util::FString<6>(F_STR("\n#")).c_str());
+		s_uart->write(F_STR("\n#"));
 		if (msg)
 		{
 			s_uart->write_c_str(msg);
 		}
 		if (file)
 		{
-			util::FString<512> str;
-			util::format(str, F_STR("\n@ {}:{}"), file, line);
-			s_uart->write_c_str(str.c_str());
+			board::UART_Format_Adapter adapter(*s_uart);
+			util::format(adapter, F_STR("\n@ {}:{}"), file, line);
 		}
 		if (condition)
 		{
 			s_uart->write('\n');
-			s_uart->write_c_str(condition ? condition : util::FString<6>(F_STR("N/A")).c_str());
+			s_uart->write(condition ? condition : "N/A");
 		}
 
 		s_uart->flush();
@@ -80,29 +83,16 @@ void trace(const char* file, int line, const char* msg)
 	{
 		auto blocking = s_uart->is_blocking();
 		s_uart->set_blocking(true);
-		s_uart->write_c_str(util::FString<16>(F_STR("\nTrace: ")).c_str());
+		s_uart->write(F_STR("\nTrace: "));
 		if (msg)
 		{
 			s_uart->write_c_str(msg);
 		}
 		if (file)
 		{
-			util::FString<512> str;
-			util::format(str, F_STR(" @ {}:{}"), file, line);
-			s_uart->write_c_str(str.c_str());
+			board::UART_Format_Adapter adapter(*s_uart);
+			util::format(adapter, F_STR(" @ {}:{}"), file, line);
 		}
-		s_uart->flush();
-		s_uart->set_blocking(blocking);
-	}
-}
-
-void print(const char* msg, size_t size)
-{
-	if (s_uart && msg && size > 0)
-	{
-		auto blocking = s_uart->is_blocking();
-		s_uart->set_blocking(true);
-		s_uart->write(reinterpret_cast<uint8_t const*>(msg), size);
 		s_uart->flush();
 		s_uart->set_blocking(blocking);
 	}

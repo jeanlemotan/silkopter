@@ -110,9 +110,9 @@ namespace util
 			typedef Flash_String::value_type value_type;
 			typedef Flash_String::const_iterator iterator;
 			Format_String_Adapter(Flash_String const& fmt) : m_it(fmt.begin()) {}
-			auto is_done() const -> bool { return pgm_read_byte_near(m_it) == 0; }
-			auto get() -> value_type { return pgm_read_byte_near(m_it); }
-			auto get_and_advance() -> value_type { auto c = pgm_read_byte_near(m_it); m_it++; return c; }
+			auto is_done() const -> bool { return *m_it == 0; }
+			auto get() -> value_type { return *m_it; }
+			auto get_and_advance() -> value_type { auto c = *m_it; m_it++; return c; }
 		private:
 			Flash_String::const_iterator m_it;
 		};
@@ -125,11 +125,18 @@ namespace util
 			dst.append(p.begin(), p.end());
 		}
 		template<class Dst_String, class Placeholder>
+		void format_string(Dst_String& dst, Placeholder const& ph, Flash_String const& p)
+		{
+			for (auto it = p.begin(); *it != 0; ++it)
+			{
+				dst.push_back(*it);
+			}
+		}
+		template<class Dst_String, class Placeholder>
 		void format_string(Dst_String& dst, Placeholder const& ph, const char* p)
 		{
 			if (p)
 			{
-				dst.reserve(dst.size() + 64);
 				for (; *p != 0; ++p)
 				{
 					dst.push_back(*p);

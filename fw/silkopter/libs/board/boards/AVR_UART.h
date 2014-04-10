@@ -36,7 +36,9 @@ public:
 	size_t read(uint8_t* buf, size_t size);
 
     size_t write_c_str(const char* buf);
+	size_t write(util::Flash_String const& str);
     size_t write(uint8_t const* buf, size_t size);
+	using UART::write;
 	
 	void flush();
 	
