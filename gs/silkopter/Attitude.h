@@ -1,10 +1,10 @@
 #pragma once
 
 
-class Orientations : public QWidget
+class Attitude : public QWidget
 {
 public:
-	Orientations(QWidget* parent = 0);
+	Attitude(QWidget* parent = 0);
 
 	void paintEvent(QPaintEvent*);
 

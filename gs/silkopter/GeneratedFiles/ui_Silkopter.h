@@ -23,6 +23,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "Sensors.h"
+#include "UAV_Inertial.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -36,6 +37,9 @@ public:
     QWidget *sensors_tab;
     QVBoxLayout *verticalLayout;
     Sensors *sensors;
+    QWidget *uav_inertial_tab;
+    QVBoxLayout *verticalLayout_2;
+    UAV_Inertial *uav_inertial;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -70,6 +74,19 @@ public:
         verticalLayout->addWidget(sensors);
 
         tab_3->addTab(sensors_tab, QString());
+        uav_inertial_tab = new QWidget();
+        uav_inertial_tab->setObjectName(QStringLiteral("uav_inertial_tab"));
+        verticalLayout_2 = new QVBoxLayout(uav_inertial_tab);
+        verticalLayout_2->setSpacing(0);
+        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
+        uav_inertial = new UAV_Inertial(uav_inertial_tab);
+        uav_inertial->setObjectName(QStringLiteral("uav_inertial"));
+
+        verticalLayout_2->addWidget(uav_inertial);
+
+        tab_3->addTab(uav_inertial_tab, QString());
 
         horizontalLayout->addWidget(tab_3);
 
@@ -87,7 +104,7 @@ public:
 
         retranslateUi(SilkopterClass);
 
-        tab_3->setCurrentIndex(1);
+        tab_3->setCurrentIndex(2);
 
 
         QMetaObject::connectSlotsByName(SilkopterClass);
@@ -98,6 +115,7 @@ public:
         SilkopterClass->setWindowTitle(QApplication::translate("SilkopterClass", "Silkopter", 0));
         tab_3->setTabText(tab_3->indexOf(info_tab), QApplication::translate("SilkopterClass", "Info", 0));
         tab_3->setTabText(tab_3->indexOf(sensors_tab), QApplication::translate("SilkopterClass", "Sensors", 0));
+        tab_3->setTabText(tab_3->indexOf(uav_inertial_tab), QApplication::translate("SilkopterClass", "AHRS", 0));
     } // retranslateUi
 
 };

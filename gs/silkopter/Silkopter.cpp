@@ -18,6 +18,7 @@ Silkopter::Silkopter(QWidget *parent)
 	connect(timer, &QTimer::timeout, this, &Silkopter::update);
 
 	m_ui.sensors->init(&m_protocol);
+	m_ui.uav_inertial->init(&m_protocol);
 }
 
 Silkopter::~Silkopter()
@@ -39,6 +40,7 @@ void Silkopter::update()
 	m_last_time = now;
 
 	m_ui.sensors->update();
+	m_ui.uav_inertial->update();
 
 	{
 		std::string  msg;

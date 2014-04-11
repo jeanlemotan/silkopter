@@ -150,6 +150,7 @@
     <ClCompile Include="..\..\fw\silkopter\libs\util\storage.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="UAV_Inertial.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_qcustomplot.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -163,7 +164,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Orientations.cpp" />
+    <ClCompile Include="Attitude.cpp" />
     <ClCompile Include="qcustomplot.cpp" />
     <ClCompile Include="Sensors.cpp" />
     <ClCompile Include="SFull_Protocol.cpp" />
@@ -282,6 +283,7 @@
     <ClInclude Include="..\..\fw\silkopter\libs\util\Noncopyable.h" />
     <ClInclude Include="..\..\fw\silkopter\libs\util\Scope_Sync.h" />
     <ClInclude Include="..\..\fw\silkopter\libs\util\storage.h" />
+    <ClInclude Include="UAV_Inertial.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="GeneratedFiles\ui_Sensors.h" />
     <ClInclude Include="GeneratedFiles\ui_Silkopter.h" />
@@ -309,7 +311,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB  "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-I.\..\..\..\..\..\boost" "-I.\..\..\..\..\..\cv_all\qmath\include" "-fstdafx.h" "-f../../qcustomplot.h"</Command>
     </CustomBuild>
-    <ClInclude Include="Orientations.h" />
+    <ClInclude Include="Attitude.h" />
+    <ClInclude Include="GeneratedFiles\ui_UAV_Inertial.h" />
     <ClInclude Include="Sensors.h" />
     <ClInclude Include="SFull_Protocol.h" />
     <ClInclude Include="stdafx.h" />
@@ -343,6 +346,18 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Sensors.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="UAV_Inertial.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>

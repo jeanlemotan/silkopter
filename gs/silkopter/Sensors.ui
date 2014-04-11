@@ -48,7 +48,7 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QCustomPlot" name="gyro_plot" native="true">
+             <widget class="QCustomPlot" name="gyroscope_plot" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -63,7 +63,7 @@
                <number>1</number>
               </property>
               <item>
-               <widget class="QPushButton" name="gyro_calibrate">
+               <widget class="QPushButton" name="gyroscope_calibrate">
                 <property name="minimumSize">
                  <size>
                   <width>140</width>
@@ -72,16 +72,6 @@
                 </property>
                 <property name="text">
                  <string>Calibrate</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="gyro_bias">
-                <property name="text">
-                 <string>Bias: 0, 0, 0</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                 </property>
                </widget>
               </item>
@@ -111,7 +101,7 @@
            <number>2</number>
           </property>
           <item>
-           <widget class="QCustomPlot" name="accel_plot" native="true">
+           <widget class="QCustomPlot" name="accelerometer_plot" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -126,7 +116,7 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QPushButton" name="accel_calibrate">
+             <widget class="QPushButton" name="accelerometer_calibrate">
               <property name="minimumSize">
                <size>
                 <width>140</width>
@@ -135,38 +125,6 @@
               </property>
               <property name="text">
                <string>Calibrate</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="accel_bias">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Bias: 0, 0, 0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="accel_scale">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Scale: 1, 1, 1</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
               </property>
              </widget>
             </item>
@@ -179,7 +137,7 @@
         <widget class="QCustomPlot" name="sonar_plot" native="true"/>
        </item>
        <item>
-        <widget class="QCustomPlot" name="baro_plot" native="true"/>
+        <widget class="QCustomPlot" name="barometer_plot" native="true"/>
        </item>
       </layout>
      </item>

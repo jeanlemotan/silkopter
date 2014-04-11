@@ -80,9 +80,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qcustomplot.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Orientations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SFull_Protocol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -155,15 +152,18 @@
     <ClCompile Include="..\..\fw\silkopter\libs\board\boards\Sim\Sim_UART.cpp">
       <Filter>libs\board\boards\Sim</Filter>
     </ClCompile>
+    <ClCompile Include="Attitude.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UAV_Inertial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_Silkopter.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Orientations.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SFull_Protocol.h">
@@ -502,6 +502,15 @@
     <ClInclude Include="..\..\fw\silkopter\libs\board\boards\Sim\Sim_Thermometer.h">
       <Filter>libs\board\boards\Sim</Filter>
     </ClInclude>
+    <ClInclude Include="Attitude.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UAV_Inertial.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UAV_Inertial.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Silkopter.ui">
@@ -517,6 +526,9 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Sensors.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UAV_Inertial.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>

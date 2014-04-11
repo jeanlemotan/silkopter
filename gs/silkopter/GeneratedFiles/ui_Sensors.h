@@ -15,7 +15,6 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -32,19 +31,16 @@ public:
     QWidget *gyroscope;
     QHBoxLayout *horizontalLayout_3;
     QHBoxLayout *horizontalLayout_2;
-    QCustomPlot *gyro_plot;
+    QCustomPlot *gyroscope_plot;
     QVBoxLayout *verticalLayout_2;
-    QPushButton *gyro_calibrate;
-    QLabel *gyro_bias;
+    QPushButton *gyroscope_calibrate;
     QWidget *accelerometer;
     QHBoxLayout *horizontalLayout_4;
-    QCustomPlot *accel_plot;
+    QCustomPlot *accelerometer_plot;
     QVBoxLayout *verticalLayout_4;
-    QPushButton *accel_calibrate;
-    QLabel *accel_bias;
-    QLabel *accel_scale;
+    QPushButton *accelerometer_calibrate;
     QCustomPlot *sonar_plot;
-    QCustomPlot *baro_plot;
+    QCustomPlot *barometer_plot;
 
     void setupUi(QWidget *Sensors)
     {
@@ -68,30 +64,24 @@ public:
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(1);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        gyro_plot = new QCustomPlot(gyroscope);
-        gyro_plot->setObjectName(QStringLiteral("gyro_plot"));
+        gyroscope_plot = new QCustomPlot(gyroscope);
+        gyroscope_plot->setObjectName(QStringLiteral("gyroscope_plot"));
         QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(gyro_plot->sizePolicy().hasHeightForWidth());
-        gyro_plot->setSizePolicy(sizePolicy);
+        sizePolicy.setHeightForWidth(gyroscope_plot->sizePolicy().hasHeightForWidth());
+        gyroscope_plot->setSizePolicy(sizePolicy);
 
-        horizontalLayout_2->addWidget(gyro_plot);
+        horizontalLayout_2->addWidget(gyroscope_plot);
 
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setSpacing(1);
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        gyro_calibrate = new QPushButton(gyroscope);
-        gyro_calibrate->setObjectName(QStringLiteral("gyro_calibrate"));
-        gyro_calibrate->setMinimumSize(QSize(140, 0));
+        gyroscope_calibrate = new QPushButton(gyroscope);
+        gyroscope_calibrate->setObjectName(QStringLiteral("gyroscope_calibrate"));
+        gyroscope_calibrate->setMinimumSize(QSize(140, 0));
 
-        verticalLayout_2->addWidget(gyro_calibrate);
-
-        gyro_bias = new QLabel(gyroscope);
-        gyro_bias->setObjectName(QStringLiteral("gyro_bias"));
-        gyro_bias->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
-
-        verticalLayout_2->addWidget(gyro_bias);
+        verticalLayout_2->addWidget(gyroscope_calibrate);
 
 
         horizontalLayout_2->addLayout(verticalLayout_2);
@@ -108,43 +98,21 @@ public:
         horizontalLayout_4->setSpacing(1);
         horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
         horizontalLayout_4->setContentsMargins(2, 2, 2, 2);
-        accel_plot = new QCustomPlot(accelerometer);
-        accel_plot->setObjectName(QStringLiteral("accel_plot"));
-        sizePolicy.setHeightForWidth(accel_plot->sizePolicy().hasHeightForWidth());
-        accel_plot->setSizePolicy(sizePolicy);
+        accelerometer_plot = new QCustomPlot(accelerometer);
+        accelerometer_plot->setObjectName(QStringLiteral("accelerometer_plot"));
+        sizePolicy.setHeightForWidth(accelerometer_plot->sizePolicy().hasHeightForWidth());
+        accelerometer_plot->setSizePolicy(sizePolicy);
 
-        horizontalLayout_4->addWidget(accel_plot);
+        horizontalLayout_4->addWidget(accelerometer_plot);
 
         verticalLayout_4 = new QVBoxLayout();
         verticalLayout_4->setSpacing(1);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
-        accel_calibrate = new QPushButton(accelerometer);
-        accel_calibrate->setObjectName(QStringLiteral("accel_calibrate"));
-        accel_calibrate->setMinimumSize(QSize(140, 0));
+        accelerometer_calibrate = new QPushButton(accelerometer);
+        accelerometer_calibrate->setObjectName(QStringLiteral("accelerometer_calibrate"));
+        accelerometer_calibrate->setMinimumSize(QSize(140, 0));
 
-        verticalLayout_4->addWidget(accel_calibrate);
-
-        accel_bias = new QLabel(accelerometer);
-        accel_bias->setObjectName(QStringLiteral("accel_bias"));
-        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(accel_bias->sizePolicy().hasHeightForWidth());
-        accel_bias->setSizePolicy(sizePolicy1);
-        accel_bias->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
-
-        verticalLayout_4->addWidget(accel_bias);
-
-        accel_scale = new QLabel(accelerometer);
-        accel_scale->setObjectName(QStringLiteral("accel_scale"));
-        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(accel_scale->sizePolicy().hasHeightForWidth());
-        accel_scale->setSizePolicy(sizePolicy2);
-        accel_scale->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
-
-        verticalLayout_4->addWidget(accel_scale);
+        verticalLayout_4->addWidget(accelerometer_calibrate);
 
 
         horizontalLayout_4->addLayout(verticalLayout_4);
@@ -157,10 +125,10 @@ public:
 
         verticalLayout_3->addWidget(sonar_plot);
 
-        baro_plot = new QCustomPlot(Sensors);
-        baro_plot->setObjectName(QStringLiteral("baro_plot"));
+        barometer_plot = new QCustomPlot(Sensors);
+        barometer_plot->setObjectName(QStringLiteral("barometer_plot"));
 
-        verticalLayout_3->addWidget(baro_plot);
+        verticalLayout_3->addWidget(barometer_plot);
 
 
         horizontalLayout->addLayout(verticalLayout_3);
@@ -177,11 +145,8 @@ public:
     void retranslateUi(QWidget *Sensors)
     {
         Sensors->setWindowTitle(QApplication::translate("Sensors", "Form", 0));
-        gyro_calibrate->setText(QApplication::translate("Sensors", "Calibrate", 0));
-        gyro_bias->setText(QApplication::translate("Sensors", "Bias: 0, 0, 0", 0));
-        accel_calibrate->setText(QApplication::translate("Sensors", "Calibrate", 0));
-        accel_bias->setText(QApplication::translate("Sensors", "Bias: 0, 0, 0", 0));
-        accel_scale->setText(QApplication::translate("Sensors", "Scale: 1, 1, 1", 0));
+        gyroscope_calibrate->setText(QApplication::translate("Sensors", "Calibrate", 0));
+        accelerometer_calibrate->setText(QApplication::translate("Sensors", "Calibrate", 0));
     } // retranslateUi
 
 };

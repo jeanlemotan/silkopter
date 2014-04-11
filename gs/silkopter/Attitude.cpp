@@ -1,13 +1,13 @@
 #include "stdafx.h"
-#include "Orientations.h"
+#include "Attitude.h"
 
-Orientations::Orientations(QWidget* parent /* = 0 */)
+Attitude::Attitude(QWidget* parent /* = 0 */)
 	: QWidget(parent)
 {
 
 }
 
-void Orientations::paintEvent(QPaintEvent* ev)
+void Attitude::paintEvent(QPaintEvent* ev)
 {
 	QPainter painter(this);
 

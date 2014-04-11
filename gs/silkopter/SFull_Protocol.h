@@ -11,7 +11,7 @@ public:
 	enum class RX_Message : uint8_t
 	{
 		HELLO_WORLD = 253,
-		ACKNOLEDGE = 254,
+		ACKNOWLEDGE = 254,
 		PRINT = 255,
 
 		//////////////////////////////////////////////////////////////////////////

@@ -428,7 +428,7 @@ bool SFull_Protocol::wait_for_response(uint16_t expected_crc, std::chrono::high_
 		if (message)
 		{
 			process_rx_message(*message);
-			if (message->msg == RX_Message::ACKNOLEDGE)
+			if (message->msg == RX_Message::ACKNOWLEDGE)
 			{
 				size_t off = 0;
 				uint16_t crc = get_value<uint16_t>(message->payload, off);

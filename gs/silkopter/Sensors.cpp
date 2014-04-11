@@ -8,28 +8,28 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
 {
 	m_ui.setupUi(this);
 
-	m_ui.accel_plot->addGraph();
-	m_ui.accel_plot->graph(0)->setPen(QPen(Qt::red));
-	m_ui.accel_plot->addGraph();
-	m_ui.accel_plot->graph(1)->setPen(QPen(Qt::green));
-	m_ui.accel_plot->addGraph();
-	m_ui.accel_plot->graph(2)->setPen(QPen(Qt::blue));
+	m_ui.accelerometer_plot->addGraph();
+	m_ui.accelerometer_plot->graph(0)->setPen(QPen(Qt::red));
+	m_ui.accelerometer_plot->addGraph();
+	m_ui.accelerometer_plot->graph(1)->setPen(QPen(Qt::green));
+	m_ui.accelerometer_plot->addGraph();
+	m_ui.accelerometer_plot->graph(2)->setPen(QPen(Qt::blue));
 
-	m_ui.gyro_plot->addGraph();
-	m_ui.gyro_plot->graph(0)->setPen(QPen(Qt::red));
-	m_ui.gyro_plot->addGraph();
-	m_ui.gyro_plot->graph(1)->setPen(QPen(Qt::green));
-	m_ui.gyro_plot->addGraph();
-	m_ui.gyro_plot->graph(2)->setPen(QPen(Qt::blue));
+	m_ui.gyroscope_plot->addGraph();
+	m_ui.gyroscope_plot->graph(0)->setPen(QPen(Qt::red));
+	m_ui.gyroscope_plot->addGraph();
+	m_ui.gyroscope_plot->graph(1)->setPen(QPen(Qt::green));
+	m_ui.gyroscope_plot->addGraph();
+	m_ui.gyroscope_plot->graph(2)->setPen(QPen(Qt::blue));
 
-	m_ui.baro_plot->addGraph();
-	m_ui.baro_plot->graph(0)->setPen(QPen(Qt::red));
+	m_ui.barometer_plot->addGraph();
+	m_ui.barometer_plot->graph(0)->setPen(QPen(Qt::red));
 
 	m_ui.sonar_plot->addGraph();
 	m_ui.sonar_plot->graph(0)->setPen(QPen(Qt::red));
 
-	connect(m_ui.accel_calibrate, &QPushButton::released, this, &Sensors::start_accelerometer_calibration);
-	connect(m_ui.gyro_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
+	connect(m_ui.accelerometer_calibrate, &QPushButton::released, this, &Sensors::start_accelerometer_calibration);
+	connect(m_ui.gyroscope_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
 
 	m_last_time = std::chrono::high_resolution_clock::now();
 }
@@ -64,10 +64,10 @@ void Sensors::update()
 
 	assert(m_protocol);
 
-	m_ui.accel_calibrate->setEnabled(m_protocol->is_connected());
-	m_ui.gyro_calibrate->setEnabled(m_protocol->is_connected());
+	m_ui.accelerometer_calibrate->setEnabled(m_protocol->is_connected());
+	m_ui.gyroscope_calibrate->setEnabled(m_protocol->is_connected());
 
-	if (m_protocol->is_connected())
+	if (isVisible() && m_protocol->is_connected())
 	{
 		if (!m_stream_messages_set)
 		{
@@ -86,21 +86,23 @@ void Sensors::update()
 			//static double seconds = 0;// double(time_ms) / 1000.0;
 			//seconds += 0.01f;
 
-			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_cpu_usage.value);
-			//m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_board_gyroscope.value.x);
-			//m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_board_gyroscope.value.y);
-			//m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_board_gyroscope.value.z);
+// 			static float s_cpu = 0;
+// 			s_cpu = math::lerp(s_cpu, m_protocol->data_board_cpu_usage.value, 0.01f);
+// 			m_ui.gyroscope_plot->graph(0)->addData(seconds, s_cpu);
+			m_ui.gyroscope_plot->graph(0)->addData(seconds, m_protocol->data_board_gyroscope.value.x);
+			m_ui.gyroscope_plot->graph(1)->addData(seconds, m_protocol->data_board_gyroscope.value.y);
+			m_ui.gyroscope_plot->graph(2)->addData(seconds, m_protocol->data_board_gyroscope.value.z);
 
-//  			m_ui.gyro_plot->graph(0)->addData(seconds, m_protocol->data_uav_attitude.value.x);
-//  			m_ui.gyro_plot->graph(1)->addData(seconds, m_protocol->data_uav_attitude.value.y);
-//  			m_ui.gyro_plot->graph(2)->addData(seconds, m_protocol->data_uav_attitude.value.z);
+//  			m_ui.gyroscope_plot->graph(0)->addData(seconds, m_protocol->data_uav_attitude.value.x);
+//  			m_ui.gyroscope_plot->graph(1)->addData(seconds, m_protocol->data_uav_attitude.value.y);
+//  			m_ui.gyroscope_plot->graph(2)->addData(seconds, m_protocol->data_uav_attitude.value.z);
 
-			m_ui.accel_plot->graph(0)->addData(seconds, m_protocol->data_board_accelerometer.value.x);
-			m_ui.accel_plot->graph(1)->addData(seconds, m_protocol->data_board_accelerometer.value.y);
-			m_ui.accel_plot->graph(2)->addData(seconds, m_protocol->data_board_accelerometer.value.z);
+			m_ui.accelerometer_plot->graph(0)->addData(seconds, m_protocol->data_board_accelerometer.value.x);
+			m_ui.accelerometer_plot->graph(1)->addData(seconds, m_protocol->data_board_accelerometer.value.y);
+			m_ui.accelerometer_plot->graph(2)->addData(seconds, m_protocol->data_board_accelerometer.value.z);
 
 			m_ui.sonar_plot->graph(0)->addData(seconds, m_protocol->data_board_sonar_distance.value);
-			m_ui.baro_plot->graph(0)->addData(seconds, m_protocol->data_board_baro_pressure.value);
+			m_ui.barometer_plot->graph(0)->addData(seconds, m_protocol->data_board_baro_pressure.value);
 
 			//printf("\n%f, %f, %f", m_protocol->data_board_accelerometer.value.x, m_protocol->data_board_accelerometer.value.y, m_protocol->data_board_accelerometer.value.z);
 
@@ -108,27 +110,27 @@ void Sensors::update()
 
 			if (seconds > graph_length_seconds)
 			{
-				m_ui.gyro_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.gyro_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.gyro_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.accel_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.accel_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.accel_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
-				m_ui.baro_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.gyroscope_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.gyroscope_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.gyroscope_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.accelerometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.accelerometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.accelerometer_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.barometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
 				m_ui.sonar_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
 			}
 
 
-			m_ui.gyro_plot->rescaleAxes();
-			m_ui.gyro_plot->replot();
+			m_ui.gyroscope_plot->rescaleAxes(true);
+			m_ui.gyroscope_plot->replot();
 
-			m_ui.accel_plot->rescaleAxes();
-			m_ui.accel_plot->replot();
+			m_ui.accelerometer_plot->rescaleAxes(true);
+			m_ui.accelerometer_plot->replot();
 
-			m_ui.baro_plot->rescaleAxes();
-			m_ui.baro_plot->replot();
+			m_ui.barometer_plot->rescaleAxes(true);
+			m_ui.barometer_plot->replot();
 
-			m_ui.sonar_plot->rescaleAxes();
+			m_ui.sonar_plot->rescaleAxes(true);
 			m_ui.sonar_plot->replot();
 		}
 	}

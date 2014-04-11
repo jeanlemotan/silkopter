@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tab_3">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="info_tab">
        <attribute name="title">
@@ -62,6 +62,31 @@
         </property>
         <item>
          <widget class="Sensors" name="sensors" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="uav_inertial_tab">
+       <attribute name="title">
+        <string>AHRS</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="UAV_Inertial" name="uav_inertial" native="true"/>
         </item>
        </layout>
       </widget>
@@ -95,6 +120,12 @@
    <class>Sensors</class>
    <extends>QWidget</extends>
    <header>Sensors.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>UAV_Inertial</class>
+   <extends>QWidget</extends>
+   <header>UAV_Inertial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
