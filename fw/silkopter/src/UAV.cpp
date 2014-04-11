@@ -108,4 +108,13 @@ void UAV::compute_linear_motion()
 	//m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
 }
 
+void UAV::reset_inertial_frame()
+{
+	m_old_acceleration.set(0, 0, 0);
+	m_old_velocity.set(0, 0, 0);
+	m_status.position.set(0, 0, 0);
+	m_status.velocity.set(0, 0, 0);
+	m_status.acceleration.set(0, 0, 0);
+}
+
 	

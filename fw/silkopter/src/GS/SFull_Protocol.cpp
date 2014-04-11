@@ -278,7 +278,7 @@ bool SFull_Protocol::decode_rx_header(bool& needs_more_data)
 	auto msg = static_cast<RX_Message>(get_value<RX_Buffer, uint8_t>(m_rx_buffer, off));
 	auto size = get_value<RX_Buffer, uint8_t>(m_rx_buffer, off);
 	auto crc = get_value<RX_Buffer, uint16_t>(m_rx_buffer, off);
-	if (size <= sizeof(Header))
+	if (size < sizeof(Header))
 	{
 		m_rx_buffer.pop_front(); //msg
 		return false;
@@ -324,7 +324,7 @@ SProtocol::RX_Message SFull_Protocol::get_next_rx_message()
 	auto available = m_uart->get_data_size();
 	if (available > 0)
 	{
-		//tx_printf("received {} bytes / {} ({})", available, m_rx_buffer.size(), m_uart->get_rx_data_counter());
+		tx_printf("received {} bytes / {} ({})", available, m_rx_buffer.size(), m_uart->get_rx_data_counter());
 		m_last_rx_time = board::clock::now_ms();
 		for (size_t i = 0; i < available; i++)
 		{
@@ -402,3 +402,10 @@ void SFull_Protocol::decode_send_message_once(TX_Message& msg)
 	m_rx_buffer.pop_front(m_rx_header.size);
 	tx_acknowledge(m_rx_header.crc);
 }
+void SFull_Protocol::decode_reset_uav_inertial_frame()
+{
+	ASSERT(m_rx_header.msg == RX_Message::RESET_UAV_INERTIAL_FRAME);
+	m_rx_buffer.pop_front(m_rx_header.size);
+	tx_acknowledge(m_rx_header.crc);
+}
+

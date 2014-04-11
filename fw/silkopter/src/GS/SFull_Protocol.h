@@ -55,6 +55,7 @@ public:
 	void decode_stream_message(TX_Message& msg, bool& enabled);
 	void decode_send_all_messages_once();
 	void decode_send_message_once(TX_Message& msg);
+	void decode_reset_uav_inertial_frame();
 	
 private:
 	void start_tx_message(TX_Message msg);

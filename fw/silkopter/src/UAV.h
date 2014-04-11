@@ -171,6 +171,9 @@ public:
 
 	void set_control_reference_frame(Control_Reference_Frame frame);
 	void set_control_mode(Control_Mode mode);
+	
+	//sets the velocity/position to zero.
+	void reset_inertial_frame();
 
 	//current status and parameters
 	const Status& get_status();

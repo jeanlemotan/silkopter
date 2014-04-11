@@ -52,17 +52,20 @@ public:
 	//each has a corresponding receive method
 	enum class RX_Message : uint8_t
 	{
-		NONE,
-		
+		NONE = 0,
+
 		//control messages
-		STREAM_MESSAGE, //the message will be streamed continuously
-		STREAM_ALL_MESSAGES, //all messages will be streamed continuously
-		SEND_MESSAGE_ONCE, //the message will be sent once
-		SEND_ALL_MESSAGES_ONCE, //all message will be sent once
-		
+		STREAM_MESSAGE = 10, //the message will be streamed continuously
+		STREAM_ALL_MESSAGES = 11, //all messages will be streamed continuously
+		SEND_MESSAGE_ONCE = 12, //the message will be sent once
+		SEND_ALL_MESSAGES_ONCE = 13, //all message will be sent once
+
 		//calibration
-		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
-		SET_BOARD_GYROSCOPE_BIAS,
+		SET_BOARD_ACCELEROMETER_BIAS_SCALE = 20,
+		SET_BOARD_GYROSCOPE_BIAS = 21,
+
+		//UAV
+		RESET_UAV_INERTIAL_FRAME = 30,
 	};
 
 	
@@ -126,6 +129,7 @@ public:
 	virtual void decode_stream_message(TX_Message& msg, bool& enabled) = 0;
 	virtual void decode_send_all_messages_once() = 0;
 	virtual void decode_send_message_once(TX_Message& msg) = 0;
+	virtual void decode_reset_uav_inertial_frame() = 0;
 };
 	
 }

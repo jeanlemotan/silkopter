@@ -138,6 +138,13 @@ void GS::receive_data(SProtocol::RX_Message message)
 			util::storage::set_record(util::storage::Id(static_murmurhash("imu_calibration_data")), data);
 		}
 		break;
+		case SProtocol::RX_Message::RESET_UAV_INERTIAL_FRAME:
+		{
+			m_full_protocol.decode_reset_uav_inertial_frame();
+			m_uav.reset_inertial_frame();
+			m_full_protocol.tx_printf(F_STR("Ressetting UAV inertial frame"));
+		}
+		break;
 		default:
 			m_full_protocol.discard_rx_message();
 		break;
