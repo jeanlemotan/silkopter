@@ -171,8 +171,6 @@ static const float s_fp_g = physics::constants::g / 4096.f;
 
 IMU_MPU6000_i2c::IMU_MPU6000_i2c()
 	: m_mpu_addr(MPU6000_ADDR)
-	, m_sample_freq_div(10)
-	, m_sample_freq_counter(0)
 	, m_is_initialised(false)
 	, m_buffer_idx(0)
 {
@@ -195,66 +193,60 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 {
 	auto* imu = reinterpret_cast<IMU_MPU6000_i2c*>(ptr);
 	
-	if (--imu->m_sample_freq_counter <= 0)
-	{	
-		imu->m_sample_freq_counter = imu->m_sample_freq_div;
-
-		if (i2c::try_lock())
-		{
-			Raw_MPU_Data raw_data;
+	if (i2c::try_lock())
+	{
+		Raw_MPU_Data raw_data;
 			
-			auto& buffer = imu->m_buffers[imu->m_buffer_idx];
+		auto& buffer = imu->m_buffers[imu->m_buffer_idx];
 
-			if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(&raw_data), 7))
+		if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(&raw_data), 7))
+		{
+			buffer.accel_sum.x	+= raw_data.ax;
+			buffer.accel_sum.y	+= raw_data.ay;
+			buffer.accel_sum.z	+= raw_data.az;
+				
+			buffer.temp_sum		+= raw_data.temp;
+				
+			//if saturated, use the last sample
+			if (raw_data.gx < -32000 || raw_data.gx > 32000)
 			{
-				buffer.accel_sum.x	+= raw_data.ax;
-				buffer.accel_sum.y	+= raw_data.ay;
-				buffer.accel_sum.z	+= raw_data.az;
-				
-				buffer.temp_sum		+= raw_data.temp;
-				
-				//if saturated, use the last sample
-				if (raw_data.gx < -32000 || raw_data.gx > 32000)
-				{
-					raw_data.gx = imu->m_raw_gyro_sample.x;
-				}
-				else
-				{
-					imu->m_raw_gyro_sample.x = raw_data.gx;
-				}
-				if (raw_data.gy < -32000 || raw_data.gy > 32000)
-				{
-					raw_data.gy = imu->m_raw_gyro_sample.y;
-				}
-				else
-				{
-					imu->m_raw_gyro_sample.y = raw_data.gy;
-				}
-				if (raw_data.gz < -32000 || raw_data.gz > 32000)
-				{
-					raw_data.gz = imu->m_raw_gyro_sample.z;
-				}
-				else
-				{
-					imu->m_raw_gyro_sample.z = raw_data.gz;
-				}
-				
-				buffer.gyro_sum.x	+= raw_data.gx;
-				buffer.gyro_sum.y	+= raw_data.gy;
-				buffer.gyro_sum.z	+= raw_data.gz;
-				
-				//PRINT("\nGYRO: {}", (const math::vec3s32&)buffer.gyro_sum);
-				
-				buffer.sample_count++;
+				raw_data.gx = imu->m_raw_gyro_sample.x;
 			}
 			else
 			{
-				//TRACE_MSG("i2c failed");
+				imu->m_raw_gyro_sample.x = raw_data.gx;
 			}
-
-			i2c::unlock();
+			if (raw_data.gy < -32000 || raw_data.gy > 32000)
+			{
+				raw_data.gy = imu->m_raw_gyro_sample.y;
+			}
+			else
+			{
+				imu->m_raw_gyro_sample.y = raw_data.gy;
+			}
+			if (raw_data.gz < -32000 || raw_data.gz > 32000)
+			{
+				raw_data.gz = imu->m_raw_gyro_sample.z;
+			}
+			else
+			{
+				imu->m_raw_gyro_sample.z = raw_data.gz;
+			}
+				
+			buffer.gyro_sum.x	+= raw_data.gx;
+			buffer.gyro_sum.y	+= raw_data.gy;
+			buffer.gyro_sum.z	+= raw_data.gz;
+				
+			//PRINT("\nGYRO: {}", (const math::vec3s32&)buffer.gyro_sum);
+				
+			buffer.sample_count++;
 		}
-//		PRINT("\n{}:{}", now, clock::now_us() - now);
+		else
+		{
+			//TRACE_MSG("i2c failed");
+		}
+
+		i2c::unlock();
 	}
 }
 
@@ -335,47 +327,39 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     
     uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
 
-	auto scheduler_freq_hz = scheduler::get_frequency_hz();
-	
     // sample rate and filtering
     // to minimise the effects of aliasing we choose a filter
     // that is less than half of the sample rate  
-	uint16_t sample_rate_hz = static_cast<uint16_t>(sample_rate);
+	chrono::millis period(10);
     switch (sample_rate)
 	{
     case Sample_Rate::_50_HZ:
 		rate = MPUREG_SMPLRT_50HZ;
 		default_filter = BITS_DLPF_CFG_10HZ;
-		m_sample_time = chrono::millis(20);
+		period = chrono::millis(20);
         break;
     case Sample_Rate::_100_HZ:
     	rate = MPUREG_SMPLRT_100HZ;
         default_filter = BITS_DLPF_CFG_42HZ;
-		m_sample_time = chrono::millis(10);
+		period = chrono::millis(10);
         break;
     case Sample_Rate::_250_HZ:
 		rate = MPUREG_SMPLRT_250HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
-		m_sample_time = chrono::millis(4);
+		period = chrono::millis(4);
 		break;
     case Sample_Rate::_500_HZ:
 		rate = MPUREG_SMPLRT_500HZ;
 		default_filter = BITS_DLPF_CFG_98HZ;
-		m_sample_time = chrono::millis(2);
+		period = chrono::millis(2);
 	    break;
     default:
 		rate = 0;
 		PANIC();
     }
-
-	m_sample_freq_div = scheduler_freq_hz / sample_rate_hz;
-	//check the sample rate is compatible with the scheduler frequency
-	if (m_sample_freq_div * sample_rate_hz != scheduler_freq_hz)
-	{
-		PANIC();
-	}	
 	
-	debug::printf(F_STR("\nIMU scheduler frequency divider: {}"), m_sample_freq_div);
+	m_sample_time = period;
+
 	
     set_filter_register(0, default_filter);
 
@@ -412,6 +396,11 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     i2c::write_register(m_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
     
     i2c::unlock();
+	
+	//m_last_refresh_time = clock::now_us();
+
+	// start the timer process to read samples
+	board::scheduler::register_callback(period, &poll_data, this);
 	
     return true;
 }
@@ -506,11 +495,6 @@ void IMU_MPU6000_i2c::init(Sample_Rate rate)
 			PANIC_MSG("Failed to boot MPU6000 5 times");
 		}
 	} while (1);
-
-	m_last_refresh_time = clock::now_us();
-
-	// start the timer process to read samples
-	board::scheduler::register_callback(&poll_data, this);
 }
 
 bool IMU_MPU6000_i2c::get_data(Data& data) const

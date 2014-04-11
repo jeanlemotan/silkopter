@@ -14,11 +14,19 @@ namespace board
 {
 namespace scheduler
 {
-    
 
-static volatile bool s_is_in_callback = false;
+
+static uint16_t s_frequency = 1000;
 static bool s_is_initialized = false;
-static std::pair<Callback, void*> s_callbacks[MAX_CALLBACK_COUNT]; 
+struct CB_Data
+{
+	Callback callback = nullptr;
+	void* user_data = nullptr;
+	int8_t period = 1;
+	int8_t counter = 1;
+	bool is_executing = false;
+};
+static CB_Data s_callbacks[MAX_CALLBACK_COUNT]; 
 static uint8_t s_callback_count = 0;
 
 // AVRScheduler timer interrupt period is controlled by TCNT2.
@@ -26,7 +34,6 @@ static uint8_t s_callback_count = 0;
 // 256-62 gives a 1kHz period.
 // 256-31 gives a 2kHz period.
 static volatile uint8_t s_timer_reset_value = (256 - 62);
-static Frequency s_frequency = Frequency::_1000_HZ;
 
 static void _run_timer_procs();
 
@@ -39,32 +46,29 @@ ISR(TIMER2_OVF_vect)
 
 void _run_timer_procs()
 {
-	if (s_is_in_callback)
-	{
-#ifdef NDEBUG
-		//PANIC_MSG("timers in progress");
-#else
-		//PRINT("\ntimers in progress");
-#endif
-		return;
-	}
-	s_is_in_callback = true;
-
 	// now call the timer based drivers
 	for (int i = 0; i < s_callback_count; i++)
 	{
-		s_callbacks[i].first(s_callbacks[i].second);
+		auto& data = s_callbacks[i];
+		--data.counter;
+		if (data.counter <= 0)
+		{
+			data.counter = data.period;
+			if (!data.is_executing)
+			{
+				data.is_executing = true;
+				data.callback(data.user_data);
+				data.is_executing = false;
+			}
+		}
 	}
-
-	//	hal.gpio->write(45,0);
-	s_is_in_callback = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC API
 
 
-void init(Frequency freq)
+void init()
 {
 	if (s_is_initialized)
 	{
@@ -72,9 +76,7 @@ void init(Frequency freq)
 	}
 	s_is_initialized = true;
 
-	s_frequency = freq;
-	auto freq_hz = static_cast<uint16_t>(freq);
-	s_timer_reset_value = 256 - (31 * (2000 / freq_hz));
+	s_timer_reset_value = 256 - (31 * (2000 / s_frequency));
 	
     /* TIMER2: Setup the overflow interrupt to occur at 1khz. */
     TIMSK2 = 0;                     /* Disable timer interrupt */
@@ -89,26 +91,37 @@ void init(Frequency freq)
 	clock::init();
 }
 
-void register_callback(Callback cb, void* user_data)
+void register_callback(chrono::millis _period, Callback cb, void* user_data)
 {
 	if (!cb)
 	{
 		return;
 	}
-    for (int i = 0; i < s_callback_count; i++) 
+	ASSERT(_period < chrono::millis(10000));
+	
+	int16_t period = _period.count;
+	
+	for (int i = 0; i < s_callback_count; i++) 
 	{
-        if (s_callbacks[i].first == cb && s_callbacks[i].second == user_data) 
+		if (s_callbacks[i].callback == cb && 
+			s_callbacks[i].user_data == user_data && 
+			s_callbacks[i].period == period)
 		{
-            return;
-        }
-    }
+			return;
+		}
+	}
 
     if (s_callback_count < MAX_CALLBACK_COUNT) 
 	{
         /* this write to _timer_proc can be outside the critical section
          * because that memory won't be used until _num_timer_procs is
          * incremented. */
-        s_callbacks[s_callback_count] = std::pair<Callback, void*>(cb, user_data);
+		CB_Data data;
+		data.callback = cb;
+		data.period = std::max(period, 1);
+		data.counter = data.period;
+		data.user_data = user_data;
+        s_callbacks[s_callback_count] = data;
         /* _num_timer_procs is used from interrupt, and multiple bytes long. */
         {
             util::Scope_Sync ss();
@@ -123,18 +136,9 @@ void stop()
 	TIMSK2 = 0;
 }
 
-bool is_in_callback() 
+uint16_t get_frequency()
 {
-    return s_is_in_callback;
-}
-
-Frequency get_frequency()
-{
-	return s_frequency;	
-}
-uint16_t get_frequency_hz()
-{
-	return static_cast<uint16_t>(s_frequency);
+	return s_frequency;
 }
 
 }

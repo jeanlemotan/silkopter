@@ -22,7 +22,7 @@ private:
 	
 	bool					m_is_initialized;
 	bool					m_is_healthy;
-	chrono::time_us			m_last_update_time;
+	chrono::time_ms			m_last_update_time;
 	/* Gates access to asynchronous state: */
 
 	mutable float			m_temperature;

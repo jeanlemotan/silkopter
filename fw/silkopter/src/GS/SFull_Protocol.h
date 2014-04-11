@@ -39,9 +39,7 @@ public:
 	void tx_uav_acceleration(math::vec3f const& accel);
 	void tx_uav_velocity(math::vec3f const& accel);
 	void tx_uav_position(math::vec3f const& accel);
-
 	void tx_uav_attitude(math::vec3f const& euler);
-
 	void tx_uav_phase(UAV::Phase phase);
 	void tx_uav_control_mode(UAV::Control_Mode mode);
 	void tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame);

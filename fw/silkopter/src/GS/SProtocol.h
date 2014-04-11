@@ -107,16 +107,13 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	//uav
 		
-	virtual void tx_uav_acceleration(math::vec3f const& accel) = 0;	
-	virtual void tx_uav_velocity(math::vec3f const& accel) = 0;
-	virtual void tx_uav_position(math::vec3f const& accel) = 0;
-
-	virtual void tx_uav_attitude(math::vec3f const& euler) = 0;
-
+	virtual void tx_uav_acceleration(math::vec3f const& acceleration) = 0;	
+	virtual void tx_uav_velocity(math::vec3f const& velocity) = 0;
+	virtual void tx_uav_position(math::vec3f const& position) = 0;
+	virtual void tx_uav_attitude(math::vec3f const& attitude) = 0;
 	virtual void tx_uav_phase(UAV::Phase phase) = 0;
 	virtual void tx_uav_control_mode(UAV::Control_Mode mode) = 0;
 	virtual void tx_uav_control_reference_frame(UAV::Control_Reference_Frame frame) = 0;
-
 
 	//////////////////////////////////////////////////////////////////////////
 	//commands

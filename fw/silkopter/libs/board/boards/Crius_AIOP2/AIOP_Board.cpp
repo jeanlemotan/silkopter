@@ -67,7 +67,7 @@ namespace board
 	{
 		s_init_params = params;
 		
-		scheduler::init(s_init_params.scheduler_frequency);
+		scheduler::init();
 		i2c::init();
 		gpio::init();
 

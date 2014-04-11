@@ -204,13 +204,14 @@ void SFull_Protocol::tx_uav_position(math::vec3f const& position)
 	m_tx_buffer.append(position);
 	flush_tx_message();
 }
-
 void SFull_Protocol::tx_uav_attitude(math::vec3f const& euler)
 {
 	start_tx_message(TX_Message::UAV_ATTITUDE);
 	m_tx_buffer.append(euler);
 	flush_tx_message();
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 void SFull_Protocol::tx_uav_phase(UAV::Phase phase)
 {

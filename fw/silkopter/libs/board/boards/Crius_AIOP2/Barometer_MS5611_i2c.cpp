@@ -25,9 +25,6 @@ namespace board
 #define CMD_CONVERT_D1_OSR4096 0x48   // Maximum resolution (oversampling)
 #define CMD_CONVERT_D2_OSR4096 0x58   // Maximum resolution (oversampling)
 
-static const uint32_t			k_update_frequency = 50;
-static const chrono::micros		k_delay(1000000 / k_update_frequency);
-
 //////////////////////////////////////////////////////////////////////////
 
 static uint16_t _read_uint16(uint8_t reg)
@@ -119,19 +116,12 @@ void Barometer_MS5611_i2c::poll_data(void* ptr)
 	auto* baro = reinterpret_cast<Barometer_MS5611_i2c*>(ptr);
 	ASSERT(baro);
 	
-	auto now = clock::now_us();
-	// Throttle read rate to 100hz maximum.
-	if (now - baro->m_last_update_time < k_delay)
-	{
-		return;
-	}
-
 	if (!i2c::try_lock())
 	{
 		return;
 	}
 
-	baro->m_last_update_time = now;
+	baro->m_last_update_time = clock::now_ms();
 
 	auto& buffer = baro->m_buffers[baro->m_buffer_idx];
 
@@ -207,12 +197,12 @@ bool Barometer_MS5611_i2c::init_hardware()
 
 	//Send a command to read Temp first
 	_write(CMD_CONVERT_D2_OSR4096);
-	m_last_update_time = clock::now_us();
+	m_last_update_time = clock::now_ms();
 	m_stage = 0;
 	m_temperature = 0;
 	m_pressure = 0;
 
-	scheduler::register_callback(poll_data, this);
+	scheduler::register_callback(chrono::millis(20), poll_data, this);
 			
 	i2c::unlock();
 

@@ -32,23 +32,14 @@ namespace board
 	}
 	namespace scheduler
 	{
-		enum class Frequency
-		{
-			_250_HZ		= 250,
-			_500_HZ		= 500,
-			_1000_HZ	= 1000,
-			_2000_HZ	= 2000,
-		};
-		extern Frequency get_frequency();
-		extern uint16_t get_frequency_hz();
-		
-		extern void init(Frequency freq);
-
+		extern void init();
 		extern void stop();
 
-		static const uint8_t MAX_CALLBACK_COUNT = 4;
+		extern uint16_t get_frequency();
+
+		static const uint8_t MAX_CALLBACK_COUNT = 8;
 		typedef void(*Callback)(void* user_data);
-		extern void register_callback(Callback cb, void* user_data = 0);
+		extern void register_callback(chrono::millis period, Callback cb, void* user_data = 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -56,8 +47,7 @@ namespace board
 	struct Init_Params
 	{
 		Init_Params()
-			: scheduler_frequency(scheduler::Frequency::_500_HZ)
-			, main_imu_idx(0)
+			: main_imu_idx(0)
 			, main_imu_sample_rate(IMU::Sample_Rate::_500_HZ)
 			, gs_full_uart_idx(0)
 			, gs_full_uart_baud(115200)
@@ -72,8 +62,6 @@ namespace board
 		{
 		}
 			
-		scheduler::Frequency scheduler_frequency;
-		
 		//IMU
 		uint8_t main_imu_idx; //required!!!
 		IMU::Sample_Rate main_imu_sample_rate;

@@ -54,16 +54,16 @@ void UAV::process()
 	m_dt = now - m_last_time;
 	m_dts = m_dt;
 	m_last_time = now;
-	
+
 	read_sonar_data();
 	read_gps_data();
 	read_baro_data();
 	read_compass_data();
 
-	bool imu_valid = board::get_main_imu().get_data(m_imu_data);
+	bool imu_valid = board::get_main_imu().get_data(m_sensor_data.imu);
 	if (imu_valid)
 	{
-		m_status.attitude.process(m_imu_data, m_dts);
+		m_status.attitude.process(m_sensor_data.imu, m_dts);
 	}
 	
 	compute_linear_motion();
@@ -88,13 +88,24 @@ void UAV::read_compass_data()
 
 void UAV::compute_linear_motion()
 {
-//	math::vec3f gravity = math::transform(m_status.attitude.get_world_to_local_rotation(), math::vec3f(0, 0, 1));
-// 	m_status.acceleration = m_imu_data.accelerometer.value - gravity * physics::constants::g;
-// 	m_status.velocity += m_status.acceleration * m_dts;
-// 	m_status.velocity = math::lerp(m_status.velocity, math::vec3f::zero, 0.01f);
-// 	
-// 	m_status.position += m_status.velocity * m_dts;
-// 	m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
+	auto& imu = m_sensor_data.imu;
+	float dt = m_dts.count;
+	
+	math::vec3f gravity = math::transform(m_status.attitude.get_world_to_local_rotation(), math::vec3f(0, 0, 1));
+	
+	auto acceleration = imu.acceleration - gravity * physics::constants::g;
+	m_crt_acceleration = acceleration;//math::lerp(m_crt_acceleration, acceleration, dt);
+	
+	m_status.acceleration = m_old_acceleration + (m_crt_acceleration - m_old_acceleration) * 0.5f;
+	m_old_acceleration = m_crt_acceleration;
+	
+	m_status.velocity += m_status.acceleration * dt;
+	//m_status.velocity = math::lerp(m_status.velocity, math::vec3f::zero, 0.01f);
+	
+	m_status.position += (m_old_velocity + (m_status.velocity - m_old_velocity) * 0.5f) * dt;
+	m_old_velocity = m_status.velocity;
+	
+	//m_status.position = math::lerp(m_status.position, math::vec3f::zero, 0.01f);
 }
 
 	

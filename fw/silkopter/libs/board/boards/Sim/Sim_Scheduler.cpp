@@ -13,9 +13,8 @@ namespace scheduler
 {
 
 static bool s_is_initialized = false;
-static Frequency s_frequency;
 
-void init(Frequency freq)
+void init()
 {
 	if (s_is_initialized)
 	{
@@ -38,13 +37,10 @@ bool is_in_callback()
 	return false;
 }
 
-Frequency get_frequency()
+
+uint16_t get_frequency()
 {
-	return s_frequency;	
-}
-uint16_t get_frequency_hz()
-{
-	return static_cast<uint16_t>(s_frequency);
+	return 1000;
 }
 
 }

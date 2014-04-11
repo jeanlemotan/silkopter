@@ -197,12 +197,22 @@ private:
 	void read_compass_data();
 
 	void compute_linear_motion();
+
+	struct Sensor_Data	
+	{
+		board::IMU::Data imu;
+		//board::gps::Data m_gps_data;
+		//board::sonar::Data m_sonar_data;
+		//board::baro::Data m_baro_data;
+		//board::compass::Data m_compass_data;
+	};
 	
-	board::IMU::Data m_imu_data;
-	//board::gps::Data m_gps_data;
-	//board::sonar::Data m_sonar_data;
-	//board::baro::Data m_baro_data;
-	//board::compass::Data m_compass_data;
+
+	Sensor_Data m_sensor_data;
+	
+	math::vec3f m_crt_acceleration;
+	math::vec3f m_old_acceleration;
+	math::vec3f m_old_velocity;
 };
 
 };

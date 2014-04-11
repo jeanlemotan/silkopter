@@ -47,7 +47,7 @@ namespace board
 	{
 		s_init_params = params;
 		
-		scheduler::init(s_init_params.scheduler_frequency);
+		scheduler::init();
 
 		//initialize debug first to get asserts early
 		s_uarts[0].begin(115200);

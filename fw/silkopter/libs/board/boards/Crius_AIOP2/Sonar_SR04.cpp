@@ -86,7 +86,7 @@ Sonar_SR04::Sonar_SR04()
 	PCMSK0 |= (1 << PCINT4); // Enable interrup o sonar ECHO pin: B4 - D10
 	PCICR |= (1 << PCIE0); // PCINT0 Interrupt enable for PORTB
 	
-	scheduler::register_callback(measure, this);
+	scheduler::register_callback(chrono::millis(5), measure, this);
 }
 
 bool Sonar_SR04::get_data(Data& data) const
