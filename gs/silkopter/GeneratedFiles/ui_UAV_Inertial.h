@@ -15,6 +15,7 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "qcustomplot.h"
@@ -30,6 +31,7 @@ public:
     QCustomPlot *velocity_plot;
     QCustomPlot *position_plot;
     QVBoxLayout *verticalLayout;
+    QPushButton *reset_inertial_frame;
     QWidget *position_map;
     QWidget *attitude;
 
@@ -62,6 +64,11 @@ public:
 
         verticalLayout = new QVBoxLayout();
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        reset_inertial_frame = new QPushButton(UAV_Inertial);
+        reset_inertial_frame->setObjectName(QStringLiteral("reset_inertial_frame"));
+
+        verticalLayout->addWidget(reset_inertial_frame);
+
         position_map = new QWidget(UAV_Inertial);
         position_map->setObjectName(QStringLiteral("position_map"));
 
@@ -84,6 +91,7 @@ public:
     void retranslateUi(QWidget *UAV_Inertial)
     {
         UAV_Inertial->setWindowTitle(QApplication::translate("UAV_Inertial", "Form", 0));
+        reset_inertial_frame->setText(QApplication::translate("UAV_Inertial", "Reset", 0));
     } // retranslateUi
 
 };

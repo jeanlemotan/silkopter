@@ -54,6 +54,7 @@ public:
 	bool set_stream_message(RX_Message message, bool enabled);
 	bool set_send_all_message_once();
 	bool set_send_message_once(RX_Message message);
+	bool reset_uav_inertial_frame();
 
 	template<class Payload>
 	struct Data
@@ -95,19 +96,22 @@ private:
 	std::vector<uint8_t> m_tx_buffer;
 
 	//each has a corresponding receive method
-	enum class TX_Message
+	enum class TX_Message : uint8_t
 	{
-		NONE,
+		NONE = 0,
 
 		//control messages
-		STREAM_MESSAGE, //the message will be streamed continuously
-		STREAM_ALL_MESSAGES, //all messages will be streamed continuously
-		SEND_MESSAGE_ONCE, //the message will be sent once
-		SEND_ALL_MESSAGES_ONCE, //all message will be sent once
+		STREAM_MESSAGE = 10, //the message will be streamed continuously
+		STREAM_ALL_MESSAGES = 11, //all messages will be streamed continuously
+		SEND_MESSAGE_ONCE = 12, //the message will be sent once
+		SEND_ALL_MESSAGES_ONCE = 13, //all message will be sent once
 
 		//calibration
-		SET_BOARD_ACCELEROMETER_BIAS_SCALE,
-		SET_BOARD_GYROSCOPE_BIAS,
+		SET_BOARD_ACCELEROMETER_BIAS_SCALE = 20,
+		SET_BOARD_GYROSCOPE_BIAS = 21,
+
+		//UAV
+		RESET_UAV_INERTIAL_FRAME = 30,
 	};
 
 	struct Message

@@ -30,6 +30,14 @@ UAV_Inertial::UAV_Inertial(QWidget *parent /* = 0 */)
 	m_ui.position_plot->graph(2)->setPen(QPen(Qt::blue));
 
 	m_last_time = std::chrono::high_resolution_clock::now();
+
+	connect(m_ui.reset_inertial_frame, &QPushButton::released, [this]() 
+	{
+		if (m_protocol && m_protocol->is_connected())
+		{ 
+			m_protocol->reset_uav_inertial_frame();
+		}
+	});
 }
 
 UAV_Inertial::~UAV_Inertial()
@@ -60,6 +68,8 @@ void UAV_Inertial::update()
 	m_last_time = now;
 
 	assert(m_protocol);
+
+	m_ui.reset_inertial_frame->setEnabled(m_protocol->is_connected());
 
 	if (isVisible() && m_protocol->is_connected())
 	{

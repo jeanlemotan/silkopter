@@ -414,6 +414,12 @@ bool SFull_Protocol::set_send_message_once(RX_Message message)
 	auto crc = flush_tx_message();
 	return wait_for_response(crc, std::chrono::seconds(1));
 }
+bool SFull_Protocol::reset_uav_inertial_frame()
+{
+	start_tx_message(TX_Message::RESET_UAV_INERTIAL_FRAME);
+	auto crc = flush_tx_message();
+	return wait_for_response(crc, std::chrono::seconds(1));
+}
 
 //////////////////////////////////////////////////////////////////////////
 
