@@ -193,6 +193,16 @@ bool GS::send_data(uint32_t step)
 		}
 		return false;
 	}
+	case 11:
+	{
+		if (get_send_option(SProtocol::TX_Message::BOARD_COMPASS) != Send_Option::DISABLED)
+		{
+			board::Compass::Data data;
+			bool is_valid = board::get_main_compass() ? board::get_main_compass()->get_data(data) : false;
+			m_full_protocol.tx_board_compass(is_valid, data.direction);
+		}
+		return false;
+	}
 	case 13:
 	{
 		if (get_send_option(SProtocol::TX_Message::BOARD_GYROSCOPE) != Send_Option::DISABLED)
@@ -205,7 +215,7 @@ bool GS::send_data(uint32_t step)
 	}
 	case 18:
 	{
-		if (get_send_option(SProtocol::TX_Message::BOARD_SONAR_DISTANCE) != Send_Option::DISABLED)
+		if (get_send_option(SProtocol::TX_Message::BOARD_SONAR) != Send_Option::DISABLED)
 		{
 			// 		board::sonar::Data data;
 			// 		board::sonar::get_data(data);
@@ -215,13 +225,13 @@ bool GS::send_data(uint32_t step)
 	}
 	case 20:
 	{
-		if (get_send_option(SProtocol::TX_Message::BOARD_BARO_PRESSURE) != Send_Option::DISABLED)
+		if (get_send_option(SProtocol::TX_Message::BOARD_BAROMETER) != Send_Option::DISABLED)
 		{
 			board::Barometer::Data data;
 			if (board::get_main_barometer())
 			{
 				bool is_valid = board::get_main_barometer()->get_data(data);
-				m_full_protocol.tx_board_baro_pressure(is_valid, data.pressure);
+				m_full_protocol.tx_board_barometer(is_valid, data.pressure);
 			}
 		}
 		return false;

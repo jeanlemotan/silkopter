@@ -329,7 +329,7 @@ error:
     s_lockup_count++;
     return false;
 }
-bool read_registers_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t size)
+bool read_registers_uint16_le(uint8_t addr, uint8_t reg, uint16_t* data, uint8_t size)
 {
 	ASSERT(s_is_initialized);
 	ASSERT(s_is_locked);

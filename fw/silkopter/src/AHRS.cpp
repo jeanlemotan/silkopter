@@ -19,7 +19,7 @@ void AHRS::process(board::IMU::Data const& data, chrono::secondsf dt)
  	{
 		//calculate the pitch/roll from the accel. We'll use this to fix the gyro drift using a complimentary filter
 		float accel_pitch_x = math::atan2<float, math::fast>(accel.y, accel.z);
-		float accel_roll_y = -math::atan2<float, math::fast>(accel.x, math::sqrt<math::fast>(accel.y*accel.y + accel.z*accel.z));
+		float accel_roll_y = -math::atan2<float, math::fast>(accel.x, math::sqrt<float, math::fast>(accel.y*accel.y + accel.z*accel.z));
 
 		m_euler.x = math::lerp(m_euler.x, accel_pitch_x, data.dt.count);
 		m_euler.y = math::lerp(m_euler.y, accel_roll_y, data.dt.count);

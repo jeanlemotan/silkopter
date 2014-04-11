@@ -207,7 +207,7 @@ private:
 		//board::gps::Data m_gps_data;
 		//board::sonar::Data m_sonar_data;
 		//board::baro::Data m_baro_data;
-		//board::compass::Data m_compass_data;
+		board::Compass::Data compass;
 	};
 	
 

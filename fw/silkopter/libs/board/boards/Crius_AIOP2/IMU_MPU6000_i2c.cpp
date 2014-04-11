@@ -14,150 +14,150 @@ namespace board
 {
 
 // MPU 6000 I2C Address
-#define MPU6000_ADDR 0x68
+static const uint8_t MPU6000_ADDR						= 0x68;
 
 // MPU 6000 registers
-#define MPUREG_XG_OFFS_TC                               0x00
-#define MPUREG_YG_OFFS_TC                               0x01
-#define MPUREG_ZG_OFFS_TC                               0x02
-#define MPUREG_X_FINE_GAIN                              0x03
-#define MPUREG_Y_FINE_GAIN                              0x04
-#define MPUREG_Z_FINE_GAIN                              0x05
-#define MPUREG_XA_OFFS_H                                0x06    // X axis accelerometer offset (high byte)
-#define MPUREG_XA_OFFS_L                                0x07    // X axis accelerometer offset (low byte)
-#define MPUREG_YA_OFFS_H                                0x08    // Y axis accelerometer offset (high byte)
-#define MPUREG_YA_OFFS_L                                0x09    // Y axis accelerometer offset (low byte)
-#define MPUREG_ZA_OFFS_H                                0x0A    // Z axis accelerometer offset (high byte)
-#define MPUREG_ZA_OFFS_L                                0x0B    // Z axis accelerometer offset (low byte)
-#define MPUREG_PRODUCT_ID                               0x0C    // Product ID Register
-#define MPUREG_XG_OFFS_USRH                     0x13    // X axis gyro offset (high byte)
-#define MPUREG_XG_OFFS_USRL                     0x14    // X axis gyro offset (low byte)
-#define MPUREG_YG_OFFS_USRH                     0x15    // Y axis gyro offset (high byte)
-#define MPUREG_YG_OFFS_USRL                     0x16    // Y axis gyro offset (low byte)
-#define MPUREG_ZG_OFFS_USRH                     0x17    // Z axis gyro offset (high byte)
-#define MPUREG_ZG_OFFS_USRL                     0x18    // Z axis gyro offset (low byte)
-#define MPUREG_SMPLRT_DIV                               0x19    // sample rate.  Fsample= 1Khz/(<this value>+1) = 200Hz
-	#define MPUREG_SMPLRT_1000HZ                             0x00
-	#define MPUREG_SMPLRT_500HZ                              0x01
-	#define MPUREG_SMPLRT_250HZ                              0x03
-	#define MPUREG_SMPLRT_200HZ                              0x04
-	#define MPUREG_SMPLRT_100HZ                              0x09
-	#define MPUREG_SMPLRT_50HZ                               0x13
-#define MPUREG_CONFIG                                           0x1A
-#define MPUREG_GYRO_CONFIG 0x1B
+static const uint8_t MPUREG_XG_OFFS_TC					= 0x00;
+static const uint8_t MPUREG_YG_OFFS_TC					= 0x01;
+static const uint8_t MPUREG_ZG_OFFS_TC					= 0x02;
+static const uint8_t MPUREG_X_FINE_GAIN					= 0x03;
+static const uint8_t MPUREG_Y_FINE_GAIN					= 0x04;
+static const uint8_t MPUREG_Z_FINE_GAIN					= 0x05;
+static const uint8_t MPUREG_XA_OFFS_H					= 0x06;    // X axis accelerometer offset (high byte)
+static const uint8_t MPUREG_XA_OFFS_L					= 0x07;    // X axis accelerometer offset (low byte)
+static const uint8_t MPUREG_YA_OFFS_H					= 0x08;    // Y axis accelerometer offset (high byte)
+static const uint8_t MPUREG_YA_OFFS_L					= 0x09;    // Y axis accelerometer offset (low byte)
+static const uint8_t MPUREG_ZA_OFFS_H					= 0x0A;    // Z axis accelerometer offset (high byte)
+static const uint8_t MPUREG_ZA_OFFS_L					= 0x0B;    // Z axis accelerometer offset (low byte)
+static const uint8_t MPUREG_PRODUCT_ID					= 0x0C;    // Product ID Register
+static const uint8_t MPUREG_XG_OFFS_USRH				= 0x13;    // X axis gyro offset (high byte)
+static const uint8_t MPUREG_XG_OFFS_USRL				= 0x14;    // X axis gyro offset (low byte)
+static const uint8_t MPUREG_YG_OFFS_USRH				= 0x15;    // Y axis gyro offset (high byte)
+static const uint8_t MPUREG_YG_OFFS_USRL				= 0x16;    // Y axis gyro offset (low byte)
+static const uint8_t MPUREG_ZG_OFFS_USRH				= 0x17;    // Z axis gyro offset (high byte)
+static const uint8_t MPUREG_ZG_OFFS_USRL				= 0x18;    // Z axis gyro offset (low byte)
+static const uint8_t MPUREG_SMPLRT_DIV					= 0x19;    // sample rate.  Fsample= 1Khz/(<this value>+1) = 200Hz
+	static const uint8_t MPUREG_SMPLRT_1000HZ			= 0x00;
+	static const uint8_t MPUREG_SMPLRT_500HZ			= 0x01;
+	static const uint8_t MPUREG_SMPLRT_250HZ			= 0x03;
+	static const uint8_t MPUREG_SMPLRT_200HZ			= 0x04;
+	static const uint8_t MPUREG_SMPLRT_100HZ			= 0x09;
+	static const uint8_t MPUREG_SMPLRT_50HZ				= 0x13;
+static const uint8_t MPUREG_CONFIG						= 0x1A;
+static const uint8_t MPUREG_GYRO_CONFIG					= 0x1B;
 // bit definitions for MPUREG_GYRO_CONFIG
-#       define BITS_GYRO_FS_250DPS                              0x00
-#       define BITS_GYRO_FS_500DPS                              0x08
-#       define BITS_GYRO_FS_1000DPS                             0x10
-#       define BITS_GYRO_FS_2000DPS                             0x18
-#       define BITS_GYRO_FS_MASK                                0x18    // only bits 3 and 4 are used for gyro full scale so use this to mask off other bits
-#       define BITS_GYRO_ZGYRO_SELFTEST                 0x20
-#       define BITS_GYRO_YGYRO_SELFTEST                 0x40
-#       define BITS_GYRO_XGYRO_SELFTEST                 0x80
-#define MPUREG_ACCEL_CONFIG 0x1C
-#define MPUREG_MOT_THR                                  0x1F    // detection threshold for Motion interrupt generation.  Motion is detected when the absolute value of any of the accelerometer measurements exceeds this
-#define MPUREG_MOT_DUR                                  0x20    // duration counter threshold for Motion interrupt generation. The duration counter ticks at 1 kHz, therefore MOT_DUR has a unit of 1 LSB = 1 ms
-#define MPUREG_ZRMOT_THR                                0x21    // detection threshold for Zero Motion interrupt generation.
-#define MPUREG_ZRMOT_DUR                                0x22    // duration counter threshold for Zero Motion interrupt generation. The duration counter ticks at 16 Hz, therefore ZRMOT_DUR has a unit of 1 LSB = 64 ms.
-#define MPUREG_FIFO_EN 0x23
-#define MPUREG_INT_PIN_CFG 0x37
-#       define BIT_I2C_BYPASS_EN                                0x02 
-#       define BIT_INT_RD_CLEAR                                 0x10    // clear the interrupt when any read occurs
-#       define BIT_LATCH_INT_EN                                 0x20    // latch data ready pin 
-#define MPUREG_INT_ENABLE 0x38
-// bit definitions for MPUREG_INT_ENABLE
-#       define BIT_RAW_RDY_EN                                   0x01
-#       define BIT_DMP_INT_EN                                   0x02    // enabling this bit (DMP_INT_EN) also enables RAW_RDY_EN it seems
-#       define BIT_UNKNOWN_INT_EN                               0x04
-#       define BIT_I2C_MST_INT_EN                               0x08
-#       define BIT_FIFO_OFLOW_EN                                0x10
-#       define BIT_ZMOT_EN                                              0x20
-#       define BIT_MOT_EN                                               0x40
-#       define BIT_FF_EN                                                0x80
-#define MPUREG_INT_STATUS 0x3A
-// bit definitions for MPUREG_INT_STATUS (same bit pattern as above because this register shows what interrupt actually fired)
-#       define BIT_RAW_RDY_INT                                  0x01
-#       define BIT_DMP_INT                                              0x02
-#       define BIT_UNKNOWN_INT                                  0x04
-#       define BIT_I2C_MST_INT                                  0x08
-#       define BIT_FIFO_OFLOW_INT                               0x10
-#       define BIT_ZMOT_INT                                             0x20
-#       define BIT_MOT_INT                                              0x40
-#       define BIT_FF_INT                                               0x80
-#define MPUREG_ACCEL_XOUT_H                             0x3B
-#define MPUREG_ACCEL_XOUT_L                             0x3C
-#define MPUREG_ACCEL_YOUT_H                             0x3D
-#define MPUREG_ACCEL_YOUT_L                             0x3E
-#define MPUREG_ACCEL_ZOUT_H                             0x3F
-#define MPUREG_ACCEL_ZOUT_L                             0x40
-#define MPUREG_TEMP_OUT_H                               0x41
-#define MPUREG_TEMP_OUT_L                               0x42
-#define MPUREG_GYRO_XOUT_H                              0x43
-#define MPUREG_GYRO_XOUT_L                              0x44
-#define MPUREG_GYRO_YOUT_H                              0x45
-#define MPUREG_GYRO_YOUT_L                              0x46
-#define MPUREG_GYRO_ZOUT_H                              0x47
-#define MPUREG_GYRO_ZOUT_L                              0x48
-#define MPUREG_USER_CTRL                                0x6A
-// bit definitions for MPUREG_USER_CTRL
-#       define BIT_USER_CTRL_SIG_COND_RESET             0x01            // resets signal paths and results registers for all sensors (gyros, accel, temp)
-#       define BIT_USER_CTRL_I2C_MST_RESET              0x02            // reset I2C Master (only applicable if I2C_MST_EN bit is set)
-#       define BIT_USER_CTRL_FIFO_RESET                 0x04            // Reset (i.e. clear) FIFO buffer
-#       define BIT_USER_CTRL_DMP_RESET                  0x08            // Reset DMP
-#       define BIT_USER_CTRL_I2C_IF_DIS                 0x10            // Disable primary I2C interface and enable hal.spi->interface
-#       define BIT_USER_CTRL_I2C_MST_EN                 0x20            // Enable MPU to act as the I2C Master to external slave sensors
-#       define BIT_USER_CTRL_FIFO_EN                    0x40            // Enable FIFO operations
-#       define BIT_USER_CTRL_DMP_EN                             0x80            // Enable DMP operations
-#define MPUREG_PWR_MGMT_1                               0x6B
-#       define BIT_PWR_MGMT_1_CLK_INTERNAL              0x00            // clock set to internal 8Mhz oscillator
-#       define BIT_PWR_MGMT_1_CLK_XGYRO                 0x01            // PLL with X axis gyroscope reference
-#       define BIT_PWR_MGMT_1_CLK_YGYRO                 0x02            // PLL with Y axis gyroscope reference
-#       define BIT_PWR_MGMT_1_CLK_ZGYRO                 0x03            // PLL with Z axis gyroscope reference
-#       define BIT_PWR_MGMT_1_CLK_EXT32KHZ              0x04            // PLL with external 32.768kHz reference
-#       define BIT_PWR_MGMT_1_CLK_EXT19MHZ              0x05            // PLL with external 19.2MHz reference
-#       define BIT_PWR_MGMT_1_CLK_STOP                  0x07            // Stops the clock and keeps the timing generator in reset
-#       define BIT_PWR_MGMT_1_TEMP_DIS                  0x08            // disable temperature sensor
-#       define BIT_PWR_MGMT_1_CYCLE                             0x20            // put sensor into cycle mode.  cycles between sleep mode and waking up to take a single sample of data from active sensors at a rate determined by LP_WAKE_CTRL
-#       define BIT_PWR_MGMT_1_SLEEP                             0x40            // put sensor into low power sleep mode
-#       define BIT_PWR_MGMT_1_DEVICE_RESET              0x80            // reset entire device
-#define MPUREG_PWR_MGMT_2                               0x6C            // allows the user to configure the frequency of wake-ups in Accelerometer Only Low Power Mode
-#define MPUREG_BANK_SEL                                 0x6D            // DMP bank selection register (used to indirectly access DMP registers)
-#define MPUREG_MEM_START_ADDR                   0x6E            // DMP memory start address (used to indirectly write to dmp memory)
-#define MPUREG_MEM_R_W                                  0x6F            // DMP related register
-#define MPUREG_DMP_CFG_1                                0x70            // DMP related register
-#define MPUREG_DMP_CFG_2                                0x71            // DMP related register
-#define MPUREG_FIFO_COUNTH 0x72
-#define MPUREG_FIFO_COUNTL 0x73
-#define MPUREG_FIFO_R_W 0x74
-#define MPUREG_WHOAMI                                   0x75
+	static const uint8_t BITS_GYRO_FS_250DPS			= 0x00;
+	static const uint8_t BITS_GYRO_FS_500DPS			= 0x08;
+	static const uint8_t BITS_GYRO_FS_1000DPS			= 0x10;
+	static const uint8_t BITS_GYRO_FS_2000DPS			= 0x18;
+	static const uint8_t BITS_GYRO_FS_MASK				= 0x18;    // only bits 3 and 4 are used for gyro full scale so use this to mask off other bits
+	static const uint8_t BITS_GYRO_ZGYRO_SELFTEST		= 0x20;
+	static const uint8_t BITS_GYRO_YGYRO_SELFTEST		= 0x40;
+	static const uint8_t BITS_GYRO_XGYRO_SELFTEST		= 0x80;
+static const uint8_t MPUREG_ACCEL_CONFIG				= 0x1C;
+static const uint8_t MPUREG_MOT_THR						= 0x1F;    // detection threshold for Motion interrupt generation.  Motion is detected when the absolute value of any of the accelerometer measurements exceeds this
+static const uint8_t MPUREG_MOT_DUR						= 0x20;    // duration counter threshold for Motion interrupt generation. The duration counter ticks at 1 kHz, therefore MOT_DUR has a unit of 1 LSB = 1 ms
+static const uint8_t MPUREG_ZRMOT_THR					= 0x21;    // detection threshold for Zero Motion interrupt generation.
+static const uint8_t MPUREG_ZRMOT_DUR					= 0x22;    // duration counter threshold for Zero Motion interrupt generation. The duration counter ticks at 16 Hz, therefore ZRMOT_DUR has a unit of 1 LSB = 64 ms.
+static const uint8_t MPUREG_FIFO_EN						= 0x23;
+static const uint8_t MPUREG_INT_PIN_CFG					= 0x37;
+	static const uint8_t BIT_I2C_BYPASS_EN				= 0x02; 
+	static const uint8_t BIT_INT_RD_CLEAR				= 0x10;    // clear the interrupt when any read occurs
+	static const uint8_t BIT_LATCH_INT_EN				= 0x20;    // latch data ready pin 
+static const uint8_t MPUREG_INT_ENABLE					= 0x38;
+// bit definitions for MPUREG_INT_ENABLE				= 	
+	static const uint8_t BIT_RAW_RDY_EN					= 0x01;
+	static const uint8_t BIT_DMP_INT_EN					= 0x02;    // enabling this bit (DMP_INT_EN) also enables RAW_RDY_EN it seems
+	static const uint8_t BIT_UNKNOWN_INT_EN				= 0x04;
+	static const uint8_t BIT_I2C_MST_INT_EN				= 0x08;
+	static const uint8_t BIT_FIFO_OFLOW_EN				= 0x10;
+	static const uint8_t BIT_ZMOT_EN					= 0x20;
+	static const uint8_t BIT_MOT_EN						= 0x40;
+	static const uint8_t BIT_FF_EN						= 0x80;
+static const uint8_t MPUREG_INT_STATUS					= 0x3A;
+// bit definitions for MPUREG_INT_STATUS (same bit patte= rn s ab;ove because this register shows what interrupt actually fired)
+	static const uint8_t BIT_RAW_RDY_INT				= 0x01;
+	static const uint8_t BIT_DMP_INT					= 0x02;
+	static const uint8_t BIT_UNKNOWN_INT				= 0x04;
+	static const uint8_t BIT_I2C_MST_INT				= 0x08;
+	static const uint8_t BIT_FIFO_OFLOW_INT				= 0x10;
+	static const uint8_t BIT_ZMOT_INT					= 0x20;
+	static const uint8_t BIT_MOT_INT					= 0x40;
+	static const uint8_t BIT_FF_INT						= 0x80;
+static const uint8_t MPUREG_ACCEL_XOUT_H				= 0x3B;
+static const uint8_t MPUREG_ACCEL_XOUT_L				= 0x3C;
+static const uint8_t MPUREG_ACCEL_YOUT_H				= 0x3D;
+static const uint8_t MPUREG_ACCEL_YOUT_L				= 0x3E;
+static const uint8_t MPUREG_ACCEL_ZOUT_H				= 0x3F;
+static const uint8_t MPUREG_ACCEL_ZOUT_L				= 0x40;
+static const uint8_t MPUREG_TEMP_OUT_H					= 0x41;
+static const uint8_t MPUREG_TEMP_OUT_L					= 0x42;
+static const uint8_t MPUREG_GYRO_XOUT_H					= 0x43;
+static const uint8_t MPUREG_GYRO_XOUT_L					= 0x44;
+static const uint8_t MPUREG_GYRO_YOUT_H					= 0x45;
+static const uint8_t MPUREG_GYRO_YOUT_L					= 0x46;
+static const uint8_t MPUREG_GYRO_ZOUT_H					= 0x47;
+static const uint8_t MPUREG_GYRO_ZOUT_L					= 0x48;
+static const uint8_t MPUREG_USER_CTRL					= 0x6A;
+// bit definitions for MPUREG_USER_CTRL					= 	
+	static const uint8_t BIT_USER_CTRL_SIG_COND_RESET	= 0x01;            // resets signal paths and results registers for all sensors (gyros, accel, temp)
+	static const uint8_t BIT_USER_CTRL_I2C_MST_RESET	= 0x02;            // reset I2C Master (only applicable if I2C_MST_EN bit is set)
+	static const uint8_t BIT_USER_CTRL_FIFO_RESET		= 0x04;            // Reset (i.e. clear) FIFO buffer
+	static const uint8_t BIT_USER_CTRL_DMP_RESET		= 0x08;            // Reset DMP
+	static const uint8_t BIT_USER_CTRL_I2C_IF_DIS		= 0x10;            // Disable primary I2C interface and enable hal.spi->interface
+	static const uint8_t BIT_USER_CTRL_I2C_MST_EN		= 0x20;            // Enable MPU to act as the I2C Master to external slave sensors
+	static const uint8_t BIT_USER_CTRL_FIFO_EN			= 0x40;            // Enable FIFO operations
+	static const uint8_t BIT_USER_CTRL_DMP_EN			= 0x80;            // Enable DMP operations
+static const uint8_t MPUREG_PWR_MGMT_1					= 0x6B;
+	static const uint8_t BIT_PWR_MGMT_1_CLK_INTERNAL	= 0x00;            // clock set to internal 8Mhz oscillator
+	static const uint8_t BIT_PWR_MGMT_1_CLK_XGYRO		= 0x01;            // PLL with X axis gyroscope reference
+	static const uint8_t BIT_PWR_MGMT_1_CLK_YGYRO		= 0x02;            // PLL with Y axis gyroscope reference
+	static const uint8_t BIT_PWR_MGMT_1_CLK_ZGYRO		= 0x03;            // PLL with Z axis gyroscope reference
+	static const uint8_t BIT_PWR_MGMT_1_CLK_EXT32KHZ	= 0x04;            // PLL with external 32.768kHz reference
+	static const uint8_t BIT_PWR_MGMT_1_CLK_EXT19MHZ	= 0x05;            // PLL with external 19.2MHz reference
+	static const uint8_t BIT_PWR_MGMT_1_CLK_STOP		= 0x07;            // Stops the clock and keeps the timing generator in reset
+	static const uint8_t BIT_PWR_MGMT_1_TEMP_DIS		= 0x08;            // disable temperature sensor
+	static const uint8_t BIT_PWR_MGMT_1_CYCLE			= 0x20;            // put sensor into cycle mode.  cycles between sleep mode and waking up to take a single sample of data from active sensors at a rate determined by LP_WAKE_CTRL
+	static const uint8_t BIT_PWR_MGMT_1_SLEEP			= 0x40;            // put sensor into low power sleep mode
+	static const uint8_t BIT_PWR_MGMT_1_DEVICE_RESET	= 0x80;            // reset entire device
+static const uint8_t MPUREG_PWR_MGMT_2					= 0x6C;            // allows the user to configure the frequency of wake-ups in Accelerometer Only Low Power Mode
+static const uint8_t MPUREG_BANK_SEL					= 0x6D;            // DMP bank selection register (used to indirectly access DMP registers)
+static const uint8_t MPUREG_MEM_START_ADDR				= 0x6E;            // DMP memory start address (used to indirectly write to dmp memory)
+static const uint8_t MPUREG_MEM_R_W						= 0x6F;            // DMP related register
+static const uint8_t MPUREG_DMP_CFG_1					= 0x70;            // DMP related register
+static const uint8_t MPUREG_DMP_CFG_2					= 0x71;            // DMP related register
+static const uint8_t MPUREG_FIFO_COUNTH					= 0x72;
+static const uint8_t MPUREG_FIFO_COUNTL					= 0x73;
+static const uint8_t MPUREG_FIFO_R_W					= 0x74;
+static const uint8_t MPUREG_WHOAMI						= 0x75;
 
 
 // Configuration bits MPU 3000 and MPU 6000 (not revised)?
-#define BITS_DLPF_CFG_256HZ_NOLPF2  0x00
-#define BITS_DLPF_CFG_188HZ         0x01
-#define BITS_DLPF_CFG_98HZ          0x02
-#define BITS_DLPF_CFG_42HZ          0x03
-#define BITS_DLPF_CFG_20HZ          0x04
-#define BITS_DLPF_CFG_10HZ          0x05
-#define BITS_DLPF_CFG_5HZ           0x06
-#define BITS_DLPF_CFG_2100HZ_NOLPF  0x07
-#define BITS_DLPF_CFG_MASK          0x07
+static const uint8_t BITS_DLPF_CFG_256HZ_NOLPF2			= 0x00;
+static const uint8_t BITS_DLPF_CFG_188HZ				= 0x01;
+static const uint8_t BITS_DLPF_CFG_98HZ					= 0x02;
+static const uint8_t BITS_DLPF_CFG_42HZ					= 0x03;
+static const uint8_t BITS_DLPF_CFG_20HZ					= 0x04;
+static const uint8_t BITS_DLPF_CFG_10HZ					= 0x05;
+static const uint8_t BITS_DLPF_CFG_5HZ					= 0x06;
+static const uint8_t BITS_DLPF_CFG_2100HZ_NOLPF			= 0x07;
+static const uint8_t BITS_DLPF_CFG_MASK					= 0x07;
 
 											// Product ID Description for MPU6000
 											// high 4 bits 	low 4 bits
 											// Product Name	Product Revision
-#define MPU6000_REV_A4				0x04 	// 0000			0100
-#define MPU6000ES_REV_C4 			0x14 	// 0001			0100
-#define MPU6000ES_REV_C5 			0x15 	// 0001			0101
-#define MPU6000ES_REV_D6 			0x16	// 0001			0110
-#define MPU6000ES_REV_D7 			0x17	// 0001			0111
-#define MPU6000ES_REV_D8 			0x18	// 0001			1000	
-#define MPU6000_REV_C4 				0x54	// 0101			0100 
-#define MPU6000_REV_C5 				0x55	// 0101			0101
-#define MPU6000_REV_D6 				0x56	// 0101			0110	
-#define MPU6000_REV_D7 				0x57	// 0101			0111
-#define MPU6000_REV_D8 				0x58	// 0101			1000
-#define MPU6000_REV_D9 				0x59	// 0101			1001
+static const uint8_t MPU6000_REV_A4						= 0x04; 	// 0000			0100
+static const uint8_t MPU6000ES_REV_C4 					= 0x14; 	// 0001			0100
+static const uint8_t MPU6000ES_REV_C5 					= 0x15; 	// 0001			0101
+static const uint8_t MPU6000ES_REV_D6 					= 0x16;	// 0001			0110
+static const uint8_t MPU6000ES_REV_D7 					= 0x17;	// 0001			0111
+static const uint8_t MPU6000ES_REV_D8 					= 0x18;	// 0001			1000	
+static const uint8_t MPU6000_REV_C4 					= 0x54;	// 0101			0100 
+static const uint8_t MPU6000_REV_C5 					= 0x55;	// 0101			0101
+static const uint8_t MPU6000_REV_D6 					= 0x56;	// 0101			0110	
+static const uint8_t MPU6000_REV_D7 					= 0x57;	// 0101			0111
+static const uint8_t MPU6000_REV_D8 					= 0x58;	// 0101			1000
+static const uint8_t MPU6000_REV_D9 					= 0x59;	// 0101			1001
 
 /* 
  *  RM-MPU-6000A-00.pdf, page 33, section 4.25 lists LSB sensitivity of
@@ -171,8 +171,6 @@ static const float s_fp_g = physics::constants::g / 4096.f;
 
 IMU_MPU6000_i2c::IMU_MPU6000_i2c()
 	: m_mpu_addr(MPU6000_ADDR)
-	, m_is_initialised(false)
-	, m_buffer_idx(0)
 {
 }
 
@@ -195,11 +193,13 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 	
 	if (i2c::try_lock())
 	{
-		Raw_MPU_Data raw_data;
-			
 		auto& buffer = imu->m_buffers[imu->m_buffer_idx];
 
-		if (i2c::read_registers_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, reinterpret_cast<uint16_t*>(&raw_data), 7))
+		Raw_MPU_Data raw_data;
+		bool data_ok = i2c::read_registers_uint16_le(imu->m_mpu_addr, MPUREG_ACCEL_XOUT_H, raw_data);
+		i2c::unlock(); //unlock immediately
+		
+		if (data_ok)
 		{
 			buffer.accel_sum.x	+= raw_data.ax;
 			buffer.accel_sum.y	+= raw_data.ay;
@@ -245,8 +245,6 @@ void IMU_MPU6000_i2c::poll_data(void* ptr)
 		{
 			//TRACE_MSG("i2c failed");
 		}
-
-		i2c::unlock();
 	}
 }
 
@@ -277,7 +275,7 @@ void IMU_MPU6000_i2c::set_filter_register(uint8_t filter_hz, uint8_t default_fil
     if (filter != 0) 
 	{
         //_last_filter_hz = filter_hz;
-        i2c::write_register(m_mpu_addr, MPUREG_CONFIG, filter);
+        i2c::write_registers(m_mpu_addr, MPUREG_CONFIG, filter);
     }
 }
 
@@ -297,17 +295,17 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     uint8_t reg_val;
     for (tries = 0; tries < 5; tries++) 
 	{
-		i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
+		i2c::write_registers(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
 		clock::delay(chrono::millis(100));
 			
 		// Wake up device and select GyroZ clock. Note that the
 		// MPU6000 starts up in sleep mode, and it can take some time
 		// for it to come out of sleep
-		i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_CLK_ZGYRO);
+		i2c::write_registers(m_mpu_addr, MPUREG_PWR_MGMT_1, BIT_PWR_MGMT_1_CLK_ZGYRO);
 		clock::delay(chrono::millis(5));
 			
 		// check it has woken up
-		i2c::read_register(m_mpu_addr, MPUREG_PWR_MGMT_1, reg_val);
+		i2c::read_registers(m_mpu_addr, MPUREG_PWR_MGMT_1, reg_val);
 		if (reg_val == BIT_PWR_MGMT_1_CLK_ZGYRO) 
 		{
 			break;
@@ -322,10 +320,11 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
     }
 
     // only used for wake-up in accelerometer only low power mode
-    i2c::write_register(m_mpu_addr, MPUREG_PWR_MGMT_2, 0);
+    i2c::write_registers(m_mpu_addr, MPUREG_PWR_MGMT_2, uint8_t(0));
     clock::delay(chrono::millis(1));
     
-    uint8_t default_filter = BITS_DLPF_CFG_10HZ, rate = MPUREG_SMPLRT_50HZ;
+    uint8_t default_filter = BITS_DLPF_CFG_10HZ;
+	uint8_t rate = MPUREG_SMPLRT_50HZ;
 
     // sample rate and filtering
     // to minimise the effects of aliasing we choose a filter
@@ -365,14 +364,14 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 
     // set sample rate to 200Hz, and use _sample_divider to give
     // the requested rate to the application
-    i2c::write_register(m_mpu_addr, MPUREG_SMPLRT_DIV, rate);
+    i2c::write_registers(m_mpu_addr, MPUREG_SMPLRT_DIV, rate);
     clock::delay(chrono::millis(1));
 
-    i2c::write_register(m_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS);
+    i2c::write_registers(m_mpu_addr, MPUREG_GYRO_CONFIG, BITS_GYRO_FS_1000DPS);
     clock::delay(chrono::millis(1));
 
 		// Get chip revision
-    i2c::read_register(m_mpu_addr, MPUREG_PRODUCT_ID, reg_val);
+    i2c::read_registers(m_mpu_addr, MPUREG_PRODUCT_ID, reg_val);
 
 		// Select Accel scale
 	if ((reg_val == MPU6000_REV_A4) || (reg_val == MPU6000ES_REV_C4) || (reg_val == MPU6000ES_REV_C5) ||
@@ -380,20 +379,20 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 	{
 		// Accel scale 8g (4096 LSB/g)
 		// Rev C has different scaling than rev D
-		i2c::write_register(m_mpu_addr, MPUREG_ACCEL_CONFIG, 1<<3);
+		i2c::write_registers(m_mpu_addr, MPUREG_ACCEL_CONFIG, uint8_t(1<<3));
 	} 
 	else 
 	{
 		// Accel scale 8g (4096 LSB/g)
-		i2c::write_register(m_mpu_addr, MPUREG_ACCEL_CONFIG, 2<<3);
+		i2c::write_registers(m_mpu_addr, MPUREG_ACCEL_CONFIG, uint8_t(2<<3));
 	}
 			
     clock::delay(chrono::millis(1));
 
     // Enable I2C bypass mode, to work with Magnetometer 5883L
     // Disable I2C Master mode
-    i2c::write_register(m_mpu_addr, MPUREG_USER_CTRL, 0);
-    i2c::write_register(m_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
+    i2c::write_registers(m_mpu_addr, MPUREG_USER_CTRL, uint8_t(0));
+    i2c::write_registers(m_mpu_addr, MPUREG_INT_PIN_CFG, BIT_I2C_BYPASS_EN);
     
     i2c::unlock();
 	
@@ -402,11 +401,45 @@ bool IMU_MPU6000_i2c::init_hardware(Sample_Rate sample_rate)
 	// start the timer process to read samples
 	board::scheduler::register_callback(period, &poll_data, this);
 	
-    return true;
+	return true;
 }
 
-bool IMU_MPU6000_i2c::refresh_data(Data& data) const
+//////////////////////////////////////////////////////////////////////////
+// PUBLIC API
+
+void IMU_MPU6000_i2c::init(Sample_Rate rate)
 {
+	if (m_is_initialised)
+	{
+		return;
+	}
+	m_is_initialised = true;
+	
+	i2c::init();
+
+	uint8_t tries = 0;
+	do
+	{
+		bool success = init_hardware(rate);
+		if (success)
+		{
+			break;
+		}
+		else
+		{
+			clock::delay(chrono::millis(50));
+		}
+		
+		if (tries++ > 5)
+		{
+			PANIC_MSG("Failed to boot MPU6000 5 times");
+		}
+	} while (1);
+}
+
+bool IMU_MPU6000_i2c::get_data(Data& data) const
+{
+	ASSERT(m_is_initialised);
 #ifdef SIMULATOR
 	m_buffers[m_buffer_idx].sample_count = 1;
 #endif
@@ -462,45 +495,6 @@ bool IMU_MPU6000_i2c::refresh_data(Data& data) const
 	data = m_out_data;
 
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// PUBLIC API
-
-void IMU_MPU6000_i2c::init(Sample_Rate rate)
-{
-	if (m_is_initialised)
-	{
-		return;
-	}
-	m_is_initialised = true;
-	
-	i2c::init();
-
-	uint8_t tries = 0;
-	do
-	{
-		bool success = init_hardware(rate);
-		if (success)
-		{
-			break;
-		}
-		else
-		{
-			clock::delay(chrono::millis(50));
-		}
-		
-		if (tries++ > 5)
-		{
-			PANIC_MSG("Failed to boot MPU6000 5 times");
-		}
-	} while (1);
-}
-
-bool IMU_MPU6000_i2c::get_data(Data& data) const
-{
-	ASSERT(m_is_initialised);
-	return refresh_data(data);
 }
 
 void IMU_MPU6000_i2c::set_calibration_data(Calibration_Data const& data)

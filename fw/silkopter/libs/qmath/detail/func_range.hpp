@@ -266,7 +266,7 @@ namespace math
 	{
 		float ix = floor(x);
 		float frac = x - ix;
-		float p = pow<float>(10.f, (float)decimals);
+		float p = ::powf(10.f, (float)decimals);
 		float f = floor(round(frac * p));
 		f /= p;
 		return ix + f;

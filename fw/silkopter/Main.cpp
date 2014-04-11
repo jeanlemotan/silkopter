@@ -18,6 +18,7 @@ extern "C" void __cxa_guard_release (__guard *g) {*(char *)g = 1;};
 extern "C" void __cxa_guard_abort (__guard *) {};
 extern "C" void __cxa_pure_virtual() { while (1); }
 	
+
 int main(void)
 {
 	sei();
@@ -41,7 +42,7 @@ int main(void)
 		//auto start = now;
 
 		uav.process();
-
+		
 		
 // 		{
 // 			float max_error = 0.f;
@@ -51,25 +52,24 @@ int main(void)
 // 			for (volatile size_t i = 0; i < range; i++)
 // 			{
 // 				float angle = ((i * range_inv) * math::anglef::_2pi.radians);
-// 				float sin, cos;
-// 				math::sin_cos(angle, sin, cos);
-// 				float fsin, fcos;
-// 				math::sin_cos<float, math::fast>(angle, fsin, fcos);
-// 				float serror = math::abs(sin - fsin);
-// 				float cerror = math::abs(cos - fcos);
-// 				max_error = math::max(max_error, serror);
-// 				max_error = math::max(max_error, cerror);
-// //				avg_error += serror;
+// 				float res = math::sqrt(angle);
+// 				float fres = __float32_flip_sqrt_float32(angle);
+// 				float error = math::abs(res - fres);
+// 				max_error = math::max(max_error, error);
+// 				avg_error += error;
 // 			}
 // 			avg_error /= float(range);
-// 			PRINT("\nmax_error = {}, avg_error = {}", max_error, avg_error);
+// 			debug::printf("\nmax_error = {}, avg_error = {}", max_error, avg_error);
 // 			float t = 0, t1 = 0;
 // 			{
 // 				TIMED_BLOCK();
 // 				for (volatile size_t i = 0; i < range; i++)
 // 				{
 // 					float angle = i * math::anglef::_2pi.radians * range_inv;
-// 					t += math::sin(angle);
+// 					t += math::sqrt(angle);
+// 					t += math::sqrt(t);
+// 					t += math::sqrt(t);
+// 					t += math::sqrt(t);
 // 				}
 // 			}
 // 			{
@@ -77,10 +77,13 @@ int main(void)
 // 				for (volatile size_t i = 0; i < range; i++)
 // 				{
 // 					float angle = i * math::anglef::_2pi.radians * range_inv;
-// 					t1 += math::sin<float, math::fast>(angle);
+// 					t1 += __float32_flip_sqrt_float32(angle);
+// 					t1 += __float32_flip_sqrt_float32(t);
+// 					t1 += __float32_flip_sqrt_float32(t);
+// 					t1 += __float32_flip_sqrt_float32(t);
 // 				}
 // 			}
-// 			PRINT("\n{} == {}", t, t1);
+// 			debug::printf("\n{} == {}", t, t1);
 // 		}
 // 
 		

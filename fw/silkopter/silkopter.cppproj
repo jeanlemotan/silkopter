@@ -323,10 +323,10 @@
     <Compile Include="libs\board\boards\Crius_AIOP2\Barometer_MS5611_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_i2c.cpp">
+    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_5883L_i2c.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_i2c.h">
+    <Compile Include="libs\board\boards\Crius_AIOP2\Compass_HMC5843_5883L_i2c.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="libs\board\boards\Crius_AIOP2\AIOP_Board.cpp">

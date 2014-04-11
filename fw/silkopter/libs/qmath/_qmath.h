@@ -98,8 +98,8 @@ namespace math
 	typedef triangle3<float>	triangle3f;
 }//namespace math
 
-#include "detail/func_common.h"
 #include "detail/func_test.h"
+#include "detail/func_common.h"
 #include "detail/func_range.h"
 #include "detail/func_trig.h"
 #include "detail/func_interp.h"
@@ -133,9 +133,9 @@ namespace math
 #include "detail/cast.hpp"
 
 
-#include "detail/func_common.hpp"
 #include "detail/func_range.hpp"
 #include "detail/func_test.hpp"
+#include "detail/func_common.hpp"
 #include "detail/func_trig.hpp"
 #include "detail/func_interp.hpp"
 #include "detail/func_projection.hpp"

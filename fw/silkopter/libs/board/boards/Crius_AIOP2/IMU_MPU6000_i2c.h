@@ -28,20 +28,18 @@ public:
 private:
 	 //mutable chrono::time_us m_last_refresh_time;
 	 uint8_t m_mpu_addr;
-	 bool m_is_initialised;
+	 bool m_is_initialised = 0;
 
 	struct Buffer
 	{
-		Buffer() : temp_sum(0), sample_count(0) {}
-	
 		volatile math::vec3s32 accel_sum;
 		volatile math::vec3s32 gyro_sum;
-		volatile uint16_t temp_sum;
+		volatile uint16_t temp_sum = 0;
 		//volatile chrono::micros delta_time_sum;
-		volatile uint8_t sample_count;
+		volatile uint8_t sample_count = 0;
 	};
 	mutable volatile Buffer m_buffers[2];
-	mutable volatile uint8_t m_buffer_idx;
+	mutable volatile uint8_t m_buffer_idx = 0;
 
 	Calibration_Data m_calibration_data;
 
@@ -54,8 +52,6 @@ private:
 	mutable Data m_out_data;
 	
 	static void poll_data(void* ptr);
-	bool refresh_data(Data& data) const;
-	//chrono::time_ms s_last_refresh_time;
 
 	void set_filter_register(uint8_t filter_hz, uint8_t default_filter);
 	bool init_hardware(Sample_Rate sample_rate);

@@ -12,51 +12,20 @@
 namespace board
 {
 
-#define MS5611_ADDR 0x77
-#define CMD_MS5611_RESET 0x1E
-#define CMD_MS5611_PROM_Setup 0xA0
-#define CMD_MS5611_PROM_C1 0xA2
-#define CMD_MS5611_PROM_C2 0xA4
-#define CMD_MS5611_PROM_C3 0xA6
-#define CMD_MS5611_PROM_C4 0xA8
-#define CMD_MS5611_PROM_C5 0xAA
-#define CMD_MS5611_PROM_C6 0xAC
-#define CMD_MS5611_PROM_CRC 0xAE
-#define CMD_CONVERT_D1_OSR4096 0x48   // Maximum resolution (oversampling)
-#define CMD_CONVERT_D2_OSR4096 0x58   // Maximum resolution (oversampling)
+static const uint8_t MS5611_ADDR = 0x77;
+static const uint8_t CMD_MS5611_RESET = 0x1E;
+static const uint8_t CMD_MS5611_PROM_Setup = 0xA0;
+static const uint8_t CMD_MS5611_PROM_C1 = 0xA2;
+static const uint8_t CMD_MS5611_PROM_C2 = 0xA4;
+static const uint8_t CMD_MS5611_PROM_C3 = 0xA6;
+static const uint8_t CMD_MS5611_PROM_C4 = 0xA8;
+static const uint8_t CMD_MS5611_PROM_C5 = 0xAA;
+static const uint8_t CMD_MS5611_PROM_C6 = 0xAC;
+static const uint8_t CMD_MS5611_PROM_CRC = 0xAE;
+static const uint8_t CMD_CONVERT_D1_OSR4096 = 0x48;   // Maximum resolution (oversampling)
+static const uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;   // Maximum resolution (oversampling)
 
 //////////////////////////////////////////////////////////////////////////
-
-static uint16_t _read_uint16(uint8_t reg)
-{
-	uint16_t buf[1];
-	if (i2c::read_registers_le(MS5611_ADDR, reg, buf, 1))
-	{
-		return buf[0];
-	}
-	//TRACE_MSG("i2c failed");
-	return 0;
-}
-
-static uint32_t _read_adc()
-{
-	uint8_t buf[3];
-	if (i2c::read_registers(MS5611_ADDR, 0x00, buf, sizeof(buf)))
-	{
-		return (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-	}
-	//TRACE_MSG("i2c failed");
-	return 0;
-}
-
-static void _write(uint8_t reg)
-{
-	if (i2c::write(MS5611_ADDR, &reg, 1))
-	{
-		return;
-	}
-	//TRACE_MSG("i2c failed");
-}
 
 Barometer_MS5611_i2c::Barometer_MS5611_i2c()
 	: m_is_initialized(false)
@@ -121,15 +90,50 @@ void Barometer_MS5611_i2c::poll_data(void* ptr)
 		return;
 	}
 
+	uint8_t d1_buf[3];
+	bool d1_data_ok = false;
+	
+	uint8_t d2_buf[3];
+	bool d2_data_ok = false;
+	
 	baro->m_last_update_time = clock::now_ms();
-
 	auto& buffer = baro->m_buffers[baro->m_buffer_idx];
 
 	baro->m_stage++;
+
+	{
+		d1_data_ok = i2c::write(MS5611_ADDR, CMD_CONVERT_D1_OSR4096);
+		d1_data_ok = d1_data_ok && i2c::read_registers(MS5611_ADDR, 0x00, d1_buf);
+	}
 	if ((baro->m_stage & 7) == 0)
 	{
-		_write(CMD_CONVERT_D2_OSR4096); // Command to read temperature
-		buffer.d2 += _read_adc();// On state 0 we read temp
+		d2_data_ok = i2c::write(MS5611_ADDR, CMD_CONVERT_D2_OSR4096);
+		d2_data_ok = d2_data_ok && i2c::read_registers(MS5611_ADDR, 0x00, d2_buf);
+	}
+	i2c::unlock();
+
+	if (d1_data_ok)
+	{
+		uint32_t val = (((uint32_t)d1_buf[0]) << 16) | (((uint32_t)d1_buf[1]) << 8) | d1_buf[2];
+		buffer.d1 += val;// On state 0 we read temp
+
+		buffer.d1_count++;
+		if (buffer.d1_count == 128)
+		{
+			// we have summed 128 values. This only happens
+			// when we stop reading the barometer for a long time
+			// (more than 1.2 seconds)
+			buffer.d1 >>= 1;
+			buffer.d1_count = 64;
+		}
+		buffer.has_data = true;
+	}
+
+	if (d2_data_ok)
+	{
+		uint32_t val = (((uint32_t)d2_buf[0]) << 16) | (((uint32_t)d2_buf[1]) << 8) | d2_buf[2];
+		buffer.d2 += val;// On state 0 we read temp
+				
 		buffer.d2_count++;
 		if (buffer.d2_count == 32)
 		{
@@ -140,21 +144,6 @@ void Barometer_MS5611_i2c::poll_data(void* ptr)
 			buffer.d2_count = 16;
 		}
 	}
-
-	_write(CMD_CONVERT_D1_OSR4096);      // Command to read pressure
-	buffer.d1 += _read_adc();
-	buffer.d1_count++;
-	if (buffer.d1_count == 128)
-	{
-		// we have summed 128 values. This only happens
-		// when we stop reading the barometer for a long time
-		// (more than 1.2 seconds)
-		buffer.d1 >>= 1;
-		buffer.d1_count = 64;
-	}
-	buffer.has_data = true;
-
-	i2c::unlock();
 }
 
 
@@ -176,27 +165,37 @@ bool Barometer_MS5611_i2c::init_hardware()
 		return false;
 	}
 
-	_write(CMD_MS5611_RESET);
+	if (!i2c::write(MS5611_ADDR, CMD_MS5611_RESET))
+	{
+		return false;
+	}
 	clock::delay(chrono::millis(50));
 
 	// We read the factory calibration
 	// The on-chip CRC is not used
-	uint32_t C1 = _read_uint16(CMD_MS5611_PROM_C1);
-	uint32_t C2 = _read_uint16(CMD_MS5611_PROM_C2);
-	uint32_t C3 = _read_uint16(CMD_MS5611_PROM_C3);
-	uint32_t C4 = _read_uint16(CMD_MS5611_PROM_C4);
-	uint32_t C5 = _read_uint16(CMD_MS5611_PROM_C5);
-	uint32_t C6 = _read_uint16(CMD_MS5611_PROM_C6);
+	uint16_t C1, C2, C3, C4, C5, C6;
+	if (!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C1, C1) ||
+		!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C2, C2) ||
+		!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C3, C3) ||
+		!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C4, C4) ||
+		!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C5, C5) ||
+		!i2c::read_registers_uint16_le(MS5611_ADDR, CMD_MS5611_PROM_C6, C6))
+	{
+		return false;
+	}
+	
 	m_c1f = C1;
 	m_c2f = C2;
 	m_c3f = C3;
 	m_c4f = C4;
 	m_c5f = (C5 << 8);
 	m_c6f = C6;
-//	PRINT(":{} {} {} {} {} {}:", C1, C2, C3, C4, C5, C6);
 
 	//Send a command to read Temp first
-	_write(CMD_CONVERT_D2_OSR4096);
+	if (!i2c::write(MS5611_ADDR, CMD_CONVERT_D2_OSR4096))
+	{
+		return false;
+	}
 	m_last_update_time = clock::now_ms();
 	m_stage = 0;
 	m_temperature = 0;

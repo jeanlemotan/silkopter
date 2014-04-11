@@ -60,6 +60,9 @@ void UAV::process()
 	read_baro_data();
 	read_compass_data();
 
+	bool compass_valid = board::get_main_compass()->get_data(m_sensor_data.compass);
+	//debug::printf("\ncompass:: {}", m_sensor_data.compass.radians);
+
 	bool imu_valid = board::get_main_imu().get_data(m_sensor_data.imu);
 	if (imu_valid)
 	{

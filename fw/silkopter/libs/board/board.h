@@ -55,10 +55,10 @@ namespace board
 			, gs_compact_uart_baud(9600)
 			, gps_uart_idx(-1)
 			, gps_uart_baud(115200)
-			, altitude_sonar_idx(-1)
-			, main_thermometer_idx(-1)
-			, main_barometer_idx(-1)
-			, main_compass_idx(-1)
+			, altitude_sonar_idx(0)
+			, main_thermometer_idx(0)
+			, main_barometer_idx(0)
+			, main_compass_idx(0)
 		{
 		}
 			

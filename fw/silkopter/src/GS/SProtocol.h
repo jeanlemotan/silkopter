@@ -31,11 +31,12 @@ public:
 		BOARD_GYROSCOPE = 10,
 		BOARD_ACCELEROMETER = 11,
 		BOARD_TEMPERATURE = 12,
-		BOARD_BARO_PRESSURE = 13,
-		BOARD_SONAR_DISTANCE = 14,
-		BOARD_GPS_ALTITUDE = 15,
-		BOARD_RC_IN = 16,
-		BOARD_PWM_OUT = 17,
+		BOARD_BAROMETER = 13,
+		BOARD_COMPASS = 14,
+		BOARD_SONAR = 15,
+		BOARD_GPS_ALTITUDE = 16,
+		BOARD_RC_IN = 17,
+		BOARD_PWM_OUT = 18,
 
 		//////////////////////////////////////////////////////////////////////////
 		//UAV
@@ -98,10 +99,11 @@ public:
 	
 	virtual void tx_board_gyroscope(bool is_valid, math::vec3f const& gyro) = 0;
 	virtual void tx_board_accelerometer(bool is_valid, math::vec3f const& accel) = 0;
+	virtual void tx_board_compass(bool is_valid, math::vec3f const& gauss) = 0;
 	virtual void tx_board_temperature(bool is_valid, float temp) = 0;
 	
-	virtual void tx_board_baro_pressure(bool is_valid, float pressure) = 0;
-	virtual void tx_board_sonar_distance(bool is_valid, float distance) = 0;
+	virtual void tx_board_barometer(bool is_valid, float pressure) = 0;
+	virtual void tx_board_sonar(bool is_valid, float distance) = 0;
 	virtual void tx_board_gps_altitude(bool is_valid, float altitude) = 0;
 
 	virtual void tx_board_rc_in(uint8_t count, int16_t const* values) = 0;

@@ -123,6 +123,16 @@ void SFull_Protocol::tx_board_accelerometer(bool is_valid, math::vec3f const& ac
 	}
 	flush_tx_message();
 }
+void SFull_Protocol::tx_board_compass(bool is_valid, math::vec3f const& gauss)
+{
+	start_tx_message(TX_Message::BOARD_COMPASS);
+	m_tx_buffer.append(is_valid);
+	if (is_valid)
+	{
+		m_tx_buffer.append(gauss);
+	}
+	flush_tx_message();
+}
 void SFull_Protocol::tx_board_temperature(bool is_valid, float temp)
 {
 	start_tx_message(TX_Message::BOARD_TEMPERATURE);
@@ -133,9 +143,9 @@ void SFull_Protocol::tx_board_temperature(bool is_valid, float temp)
 	}
 	flush_tx_message();
 }
-void SFull_Protocol::tx_board_baro_pressure(bool is_valid, float pressure)
+void SFull_Protocol::tx_board_barometer(bool is_valid, float pressure)
 {
-	start_tx_message(TX_Message::BOARD_BARO_PRESSURE);
+	start_tx_message(TX_Message::BOARD_BAROMETER);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{
@@ -143,9 +153,9 @@ void SFull_Protocol::tx_board_baro_pressure(bool is_valid, float pressure)
 	}
 	flush_tx_message();
 }
-void SFull_Protocol::tx_board_sonar_distance(bool is_valid, float distance)
+void SFull_Protocol::tx_board_sonar(bool is_valid, float distance)
 {
-	start_tx_message(TX_Message::BOARD_SONAR_DISTANCE);
+	start_tx_message(TX_Message::BOARD_SONAR);
 	m_tx_buffer.append(is_valid);
 	if (is_valid)
 	{

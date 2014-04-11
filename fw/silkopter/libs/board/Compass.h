@@ -1,6 +1,9 @@
 #pragma once
 
 #include "util/Noncopyable.h"
+#include "_qmath.h"
+#include <stdint.h>
+#include <stddef.h>
 
 namespace board
 {
@@ -10,7 +13,7 @@ namespace board
 	public:
 		struct Data
 		{
-			math::vec3f radians;
+			math::vec3f direction;
 		};
 		
 		//returns true if data is valid.

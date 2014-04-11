@@ -16,7 +16,7 @@
 #include "board/boards/Crius_AIOP2/Barometer_MS5611_i2c.h"
 #include "board/boards/Crius_AIOP2/IMU_MPU6000_i2c.h"
 #include "board/boards/Crius_AIOP2/Sonar_SR04.h"
-#include "board/boards/Crius_AIOP2/Compass_HMC5843_i2c.h"
+#include "board/boards/Crius_AIOP2/Compass_HMC5843_5883L_i2c.h"
 #include "board/boards/Crius_AIOP2/AIOP_RC_In.h"
 #include "board/boards/Crius_AIOP2/AIOP_PWM_Out.h"
 
@@ -58,7 +58,7 @@ namespace board
  	static AIOP_RC_In s_rc_in;
  	static AIOP_PWM_Out s_pwm_out;
 	static Barometer_MS5611_i2c s_barometer;
-	static Compass_HMC5843 s_compass;
+	static Compass_HMC5843_5883L_i2c s_compass;
 	static AVR_EEPROM s_eeprom;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -74,6 +74,8 @@ namespace board
 		//initialize debug first to get asserts early
 		s_uarts[0].begin(115200);
 		debug::init(&s_uarts[0]);
+		
+		debug::printf("\n...Crius AIOP Board...");
 		
 		if (s_init_params.gs_full_uart_idx >= UART_COUNT)
 		{
@@ -99,7 +101,7 @@ namespace board
 		s_rc_in.init();
 		s_pwm_out.init();
 		s_barometer.init();
-		//s_compass.init();
+		s_compass.init();
 
 		s_init_params.main_thermometer_idx = math::clamp<int8_t>(s_init_params.main_thermometer_idx, 0, 2);
 		
