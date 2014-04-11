@@ -7,6 +7,15 @@ Attitude::Attitude(QWidget* parent /* = 0 */)
 
 }
 
+void Attitude::set_euler(math::vec3f const& euler)
+{
+	if (m_euler != euler)
+	{
+		m_euler = euler;
+		update();
+	}
+}
+
 void Attitude::paintEvent(QPaintEvent* ev)
 {
 	QPainter painter(this);

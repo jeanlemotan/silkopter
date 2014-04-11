@@ -41,6 +41,7 @@ public:
     QPushButton *accelerometer_calibrate;
     QCustomPlot *sonar_plot;
     QCustomPlot *barometer_plot;
+    QCustomPlot *compass_plot;
 
     void setupUi(QWidget *Sensors)
     {
@@ -129,6 +130,11 @@ public:
         barometer_plot->setObjectName(QStringLiteral("barometer_plot"));
 
         verticalLayout_3->addWidget(barometer_plot);
+
+        compass_plot = new QCustomPlot(Sensors);
+        compass_plot->setObjectName(QStringLiteral("compass_plot"));
+
+        verticalLayout_3->addWidget(compass_plot);
 
 
         horizontalLayout->addLayout(verticalLayout_3);

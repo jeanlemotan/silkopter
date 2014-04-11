@@ -22,6 +22,13 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
 	m_ui.gyroscope_plot->addGraph();
 	m_ui.gyroscope_plot->graph(2)->setPen(QPen(Qt::blue));
 
+	m_ui.compass_plot->addGraph();
+	m_ui.compass_plot->graph(0)->setPen(QPen(Qt::red));
+	m_ui.compass_plot->addGraph();
+	m_ui.compass_plot->graph(1)->setPen(QPen(Qt::green));
+	m_ui.compass_plot->addGraph();
+	m_ui.compass_plot->graph(2)->setPen(QPen(Qt::blue));
+
 	m_ui.barometer_plot->addGraph();
 	m_ui.barometer_plot->graph(0)->setPen(QPen(Qt::red));
 
@@ -51,8 +58,9 @@ void Sensors::set_stream_messages()
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_TIME, true);
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_ACCELEROMETER, true);
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_GYROSCOPE, true);
-	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_BARO_PRESSURE, true);
-	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_SONAR_DISTANCE, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_BAROMETER, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_SONAR, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::BOARD_COMPASS, true);
 }
 
 
@@ -101,8 +109,12 @@ void Sensors::update()
 			m_ui.accelerometer_plot->graph(1)->addData(seconds, m_protocol->data_board_accelerometer.value.y);
 			m_ui.accelerometer_plot->graph(2)->addData(seconds, m_protocol->data_board_accelerometer.value.z);
 
-			m_ui.sonar_plot->graph(0)->addData(seconds, m_protocol->data_board_sonar_distance.value);
-			m_ui.barometer_plot->graph(0)->addData(seconds, m_protocol->data_board_baro_pressure.value);
+			m_ui.compass_plot->graph(0)->addData(seconds, m_protocol->data_board_compass.value.x);
+			m_ui.compass_plot->graph(1)->addData(seconds, m_protocol->data_board_compass.value.y);
+			m_ui.compass_plot->graph(2)->addData(seconds, m_protocol->data_board_compass.value.z);
+
+			m_ui.sonar_plot->graph(0)->addData(seconds, m_protocol->data_board_sonar.value);
+			m_ui.barometer_plot->graph(0)->addData(seconds, m_protocol->data_board_barometer.value);
 
 			//printf("\n%f, %f, %f", m_protocol->data_board_accelerometer.value.x, m_protocol->data_board_accelerometer.value.y, m_protocol->data_board_accelerometer.value.z);
 
@@ -116,6 +128,9 @@ void Sensors::update()
 				m_ui.accelerometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
 				m_ui.accelerometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
 				m_ui.accelerometer_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.compass_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.compass_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
+				m_ui.compass_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
 				m_ui.barometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
 				m_ui.sonar_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
 			}
@@ -126,6 +141,9 @@ void Sensors::update()
 
 			m_ui.accelerometer_plot->rescaleAxes(true);
 			m_ui.accelerometer_plot->replot();
+
+			m_ui.compass_plot->rescaleAxes(true);
+			m_ui.compass_plot->replot();
 
 			m_ui.barometer_plot->rescaleAxes(true);
 			m_ui.barometer_plot->replot();

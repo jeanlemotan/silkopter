@@ -18,6 +18,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include "Attitude.h"
 #include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
@@ -33,7 +34,7 @@ public:
     QVBoxLayout *verticalLayout;
     QPushButton *reset_inertial_frame;
     QWidget *position_map;
-    QWidget *attitude;
+    Attitude *attitude;
 
     void setupUi(QWidget *UAV_Inertial)
     {
@@ -74,7 +75,7 @@ public:
 
         verticalLayout->addWidget(position_map);
 
-        attitude = new QWidget(UAV_Inertial);
+        attitude = new Attitude(UAV_Inertial);
         attitude->setObjectName(QStringLiteral("attitude"));
 
         verticalLayout->addWidget(attitude);

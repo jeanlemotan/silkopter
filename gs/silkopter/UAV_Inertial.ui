@@ -40,7 +40,7 @@
       <widget class="QWidget" name="position_map" native="true"/>
      </item>
      <item>
-      <widget class="QWidget" name="attitude" native="true"/>
+      <widget class="Attitude" name="attitude" native="true"/>
      </item>
     </layout>
    </item>
@@ -51,6 +51,12 @@
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Attitude</class>
+   <extends>QWidget</extends>
+   <header>Attitude.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -22,11 +22,12 @@ public:
 		BOARD_GYROSCOPE = 10,
 		BOARD_ACCELEROMETER = 11,
 		BOARD_TEMPERATURE = 12,
-		BOARD_BARO_PRESSURE = 13,
-		BOARD_SONAR_DISTANCE = 14,
-		BOARD_GPS_ALTITUDE = 15,
-		BOARD_RC_IN = 16,
-		BOARD_PWM_OUT = 17,
+		BOARD_BAROMETER = 13,
+		BOARD_COMPASS = 14,
+		BOARD_SONAR = 15,
+		BOARD_GPS_ALTITUDE = 16,
+		BOARD_RC_IN = 17,
+		BOARD_PWM_OUT = 18,
 
 		//////////////////////////////////////////////////////////////////////////
 		//UAV
@@ -59,9 +60,8 @@ public:
 	template<class Payload>
 	struct Data
 	{
-		Data() : is_valid(false), value() {}
-		bool is_valid;
-		Payload value;
+		bool is_valid = false;
+		Payload value = Payload();
 	};
 
 	Data<uint8_t> data_board_cpu_usage;
@@ -70,9 +70,10 @@ public:
 	Data<std::vector<int16_t>> data_board_pwm_out;
 	Data<math::vec3f> data_board_gyroscope;
 	Data<math::vec3f> data_board_accelerometer;
+	Data<math::vec3f> data_board_compass;
 	Data<float> data_board_temperature;
-	Data<float> data_board_baro_pressure;
-	Data<float> data_board_sonar_distance;
+	Data<float> data_board_barometer;
+	Data<float> data_board_sonar;
 	Data<float> data_board_gps_altitude;
 	Data<math::vec3f> data_uav_acceleration;
 	Data<math::vec3f> data_uav_velocity;

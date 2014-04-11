@@ -58,6 +58,7 @@ void UAV_Inertial::set_stream_messages()
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::UAV_ACCELERATION, true);
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::UAV_VELOCITY, true);
 	m_protocol->set_stream_message(SFull_Protocol::RX_Message::UAV_POSITION, true);
+	m_protocol->set_stream_message(SFull_Protocol::RX_Message::UAV_ATTITUDE, true);
 }
 
 
@@ -99,6 +100,8 @@ void UAV_Inertial::update()
 			m_ui.position_plot->graph(0)->addData(seconds, m_protocol->data_uav_position.value.x);
 			m_ui.position_plot->graph(1)->addData(seconds, m_protocol->data_uav_position.value.y);
 			m_ui.position_plot->graph(2)->addData(seconds, m_protocol->data_uav_position.value.z);
+
+			m_ui.attitude->set_euler(m_protocol->data_uav_attitude.value);
 
 			//////////////////////////////////////////////////////////////////////////
 

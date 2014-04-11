@@ -139,6 +139,9 @@
        <item>
         <widget class="QCustomPlot" name="barometer_plot" native="true"/>
        </item>
+       <item>
+        <widget class="QCustomPlot" name="compass_plot" native="true"/>
+       </item>
       </layout>
      </item>
     </layout>

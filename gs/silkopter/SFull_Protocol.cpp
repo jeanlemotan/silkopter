@@ -299,14 +299,19 @@ void SFull_Protocol::process_rx_message(Message const& message)
 			read_optional_data(data_board_temperature, message.payload, off);
 			}
 			break;
-		case RX_Message::BOARD_BARO_PRESSURE:
+		case RX_Message::BOARD_BAROMETER:
 			{
-			read_optional_data(data_board_baro_pressure, message.payload, off);
+			read_optional_data(data_board_barometer, message.payload, off);
 			}
 			break;
-		case RX_Message::BOARD_SONAR_DISTANCE:
+		case RX_Message::BOARD_COMPASS:
 			{
-			read_optional_data(data_board_sonar_distance, message.payload, off);
+				read_optional_data(data_board_compass, message.payload, off);
+			}
+			break;
+		case RX_Message::BOARD_SONAR:
+			{
+			read_optional_data(data_board_sonar, message.payload, off);
 			}
 			break;
 		case RX_Message::BOARD_GPS_ALTITUDE:
