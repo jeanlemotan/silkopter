@@ -1,0 +1,48 @@
+#########################################################################
+#                                                                       #
+#                                                                       #
+#                                                                       #
+#    _____ _ _ _           _                                            #
+#   |   __|_| | |_ ___ ___| |_ ___ ___                                  #
+#   |__   | | | '_| . | . |  _| -_|  _|                                 #
+#   |_____|_|_|_,_|___|  _|_| |___|_|                                   #
+#                     |_|                                               #
+#                                                                       #
+#                                                                       #
+#  Copyright (C) 2014 Catalin Vasile                                    #
+#                                                                       #
+#  Web:     http://jeanleflambeur.wordpress.com/                        #
+#  e-mail:  catalin.vasile@gmail.com                                    #
+#                                                                       #
+#                                                                       #
+#########################################################################
+
+
+
+This contains the code for the Silkopter UAV controller, ground station, simulator and additional libraries.
+
+
+Folders:
+
+qbase - base library with various utilities
+qdata - filesystem and stream library
+qinput - gamepad, mouse, touch and keyboard abstraction
+qmath - math lib
+q - 3d rendering engine used by the simulator and ground station
+silkopter/brain - raspberry pi software. The actual UAV FC
+silkopter/gs - ground station
+silkopter/io_board - the old Crius board firmware
+silkopter/sim - io_board simulator
+silkopter/libs - common code used by the brain, gs and sim projects
+
+The q* libraries started initially as a mobile 3d game engine so most of the code is very game-oriented.
+
+There are QTCreator projects in each folder and the whole code heavily uses C++11. It should compile with GCC4.7+ and clang3.2+
+
+
+
+
+
+
+For licensing, check the LICENSE.txt file.
+

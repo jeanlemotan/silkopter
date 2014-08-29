@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>play.png</file>
+        <file>Simulator.ico</file>
+        <file>stop.png</file>
+        <file>move.png</file>
+        <file>rotate.png</file>
+        <file>test.png</file>
+        <file>restart.png</file>
+    </qresource>
+</RCC>

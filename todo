@@ -1,0 +1,33 @@
+*- Video_Server: multi stream encoding
+*	- high res 720-900p for file saving
+*	- medim res 360/480p for streaming
+*	- low res 140p for emergency streaming
+&- Video_Server: camera controls - shutter speed, saturation, contrast, brightness, iso
+*- Input: secure TCP communication channel
+*- Sensor_Board: comm channel with the crius
+*- crius FW
+*	- idle mode
+*	- armed mode
+*	- calibration mode
+*- GS: ground station calibration update
+* rate pid
+* UAV inputs - ouya controller
+* Camera inputs
+* Sim: simulator update
+*- drotek 10dof imu support
+
+- fix motor mixer
+- raspi PWM output tests using servoblaster
+- stability pid
+- statibility tests
+- latency tests
+- GPS code
+- odroid-w support
+	- ADC for current/voltage sensors
+
+- basic flight modes
+	- idle
+	- armed
+	- flying
+	- auto take off
+	- auto land
