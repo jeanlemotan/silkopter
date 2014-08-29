@@ -13,10 +13,8 @@ namespace video
 		Pass(Pass&&);
 		auto operator=(Pass&&) -> Pass&;
         
-#if !defined(_WIN32)
-        Pass(Pass const& other) = default;
-        auto operator=(Pass const& other) -> Pass& = default;
-#endif
+        Pass(Pass const&) = default;
+        auto operator=(Pass const&) -> Pass& = default;
 
 		void set_name(String const& name);
 		auto get_name() const -> String;

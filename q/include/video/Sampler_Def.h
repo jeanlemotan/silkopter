@@ -21,14 +21,12 @@ namespace video
 
 	public:
         Sampler_Def() = default;
-        Sampler_Def(Sampler_Def&& other) = default;
+        Sampler_Def(Sampler_Def&&) = default;
 		Sampler_Def(String const& name, Sampler const& def);
 		Sampler_Def(String const& name, String const& human_name, Sampler const& def);
 
-#if !defined(_WIN32)
-		Sampler_Def(Sampler_Def const& other) = default;
+        Sampler_Def(Sampler_Def const&) = default;
 		Sampler_Def& operator=(Sampler_Def const& other) = default;
-#endif
 
 		String	get_human_name() const; //a pretty name to be displayed to the user, in an editor for example
 		String	get_name() const; //the name to be used in the shader

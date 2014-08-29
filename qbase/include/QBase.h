@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined _WIN32 || defined _WIN64
+#if defined _MSC_VER
 #	pragma warning(disable: 4201) //disable the nameless struct/union warning on W4
 #	pragma warning(disable: 4324) //disable the padding warning on W4
 #	pragma warning(disable: 4127) //disable the constant expression in conditional that pops up in the assert macro

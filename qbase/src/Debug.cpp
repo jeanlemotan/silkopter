@@ -6,7 +6,7 @@
 #	include "board/board.h"
 #else
 #	include <set>
-#   if defined Q_WINDOWS
+#   if defined _MSC_VER
 #       pragma warning( disable : 4996)
 #   endif
 #endif

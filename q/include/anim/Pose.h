@@ -21,10 +21,8 @@ namespace anim
 		Pose();
 		Pose(Pose&& other);
 
-#if !defined(_WIN32)
-		Pose(Pose const& other) = default;
-		Pose& operator=(Pose const& other) = default;
-#endif
+        Pose(Pose const&) = default;
+        Pose& operator=(Pose const&) = default;
 
 		bool operator==(Pose const& other) const;
 		bool operator!=(Pose const& other) const;

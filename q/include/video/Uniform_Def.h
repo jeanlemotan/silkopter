@@ -18,8 +18,8 @@ namespace video
 		};
 
         Uniform_Def() = default;
-        Uniform_Def(Uniform_Def const& other) = default;
-        Uniform_Def(Uniform_Def&& other) = default;
+        Uniform_Def(Uniform_Def const&) = default;
+        Uniform_Def(Uniform_Def&&) = default;
 		Uniform_Def(String const& name, 
 				const Uniform& default_value, const Uniform& min_value, const Uniform& max_value);
 		Uniform_Def(String const& name, String const& human_name, 

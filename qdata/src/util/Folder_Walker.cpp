@@ -76,11 +76,11 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
 
 	char findpath[_MAX_PATH];
 	HANDLE fh; 
-	WIN32_FIND_DATA wfd; 
+    WIN32_FIND_DATAA wfd;
 	strcpy (findpath, path.get_as_string().c_str()); 
 	strcat (findpath, "/*.*");
 
-	fh = FindFirstFile (findpath, &wfd); 
+    fh = FindFirstFileA(findpath, &wfd);
 	if (fh != INVALID_HANDLE_VALUE) 
 	{ 
 		do 
@@ -90,7 +90,7 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
 				bool isDir = (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 				data.emplace_back(Path(wfd.cFileName), isDir);
 			}
-		} while (FindNextFile (fh, &wfd)); 
+        } while (FindNextFileA(fh, &wfd));
 		FindClose (fh); 
 	} 
 

@@ -17,10 +17,8 @@ namespace video
 						, bool depth_locked
 						, Render_State const& def);
 
-#if !defined(_WIN32)
-		Render_State_Def(Render_State_Def const& other) = default;
-		Render_State_Def& operator=(Render_State_Def const& other) = default;
-#endif
+        Render_State_Def(Render_State_Def const&) = default;
+        Render_State_Def& operator=(Render_State_Def const&) = default;
 
 		bool				is_blending_locked() const;
 		bool				is_culling_locked() const;

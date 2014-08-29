@@ -9,8 +9,8 @@ class Fps
 {
 public:
 	Fps(size_t fps_limit = 0);
-    Fps(Fps const& other) = default;
-    Fps& operator=(Fps const& other) = default;
+    Fps(Fps const&) = default;
+    Fps& operator=(Fps const&) = default;
 
 	void	tick();
 	float	get_fps() const;

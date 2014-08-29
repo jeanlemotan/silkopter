@@ -105,9 +105,9 @@ namespace video
 		};
 
         Render_State() = default;
-        Render_State(Render_State const& other) = default;
+        Render_State(Render_State const&) = default;
 
-        Render_State&			operator=(Render_State const& other) = default;
+        Render_State&			operator=(Render_State const&) = default;
 		bool					operator==(Render_State const& other) const;
 		DEFINE_EQ_OPERATORS(Render_State);
 

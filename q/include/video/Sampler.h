@@ -28,11 +28,11 @@ namespace video
 		};
 
         Sampler() = default;
-        Sampler(Sampler const& other) = default;
-        Sampler(Sampler&& other) = default;
+        Sampler(Sampler const&) = default;
+        Sampler(Sampler&&) = default;
         ~Sampler() = default;
 
-        Sampler&		operator=(Sampler const& other) = default;
+        Sampler&		operator=(Sampler const&) = default;
 		bool			operator==(Sampler const& other) const;
 		DEFINE_EQ_OPERATORS(Sampler);
 

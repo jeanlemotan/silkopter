@@ -300,7 +300,7 @@ bool create_folder(Path const& path)
 
 #if defined Q_WINDOWS
 
-        BOOL ret = ::CreateDirectory(subPath.get_as_string().c_str(), nullptr);
+        BOOL ret = ::CreateDirectoryA(subPath.get_as_string().c_str(), nullptr);
 		if (ret)
 		{
 			count++;

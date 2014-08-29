@@ -11,10 +11,8 @@ public:
 	Uber_Shader();
 	Uber_Shader(Uber_Shader&& other);
 
-#if !defined(_WIN32)
-    Uber_Shader(Uber_Shader const& other) = default;
-    Uber_Shader& operator=(Uber_Shader const& other) = default;
-#endif
+    Uber_Shader(Uber_Shader const&) = default;
+    Uber_Shader& operator=(Uber_Shader const&) = default;
 
 	void		set_root_path(Path const& path);
 	Path const&	get_root_path() const;

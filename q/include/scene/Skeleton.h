@@ -11,10 +11,8 @@ namespace scene
 		Skeleton();
 		Skeleton(Skeleton&& other);
 
-#if !defined(_WIN32)
-		Skeleton(Skeleton const& other) = default;
-		Skeleton& operator=(Skeleton const& other) = default;
-#endif
+        Skeleton(Skeleton const&) = default;
+        Skeleton& operator=(Skeleton const&) = default;
 
 		bool operator==(Skeleton const& other);
 		bool operator!=(Skeleton const& other);

@@ -4,7 +4,7 @@
 #include "Interned_String.h"
 
 //disable the 'strdup' warning
-#if defined Q_WINDOWS
+#if defined _MSC_VER
 #   pragma warning( disable : 4996 )
 #endif
 
