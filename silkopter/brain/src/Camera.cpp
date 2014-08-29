@@ -2,7 +2,7 @@
 #include "Camera.h"
 #include "common/input/Camera_Input.h"
 
-#undef RASPBERRY_PI
+//#undef RASPBERRY_PI
 
 #if defined RASPBERRY_PI
 extern "C"
@@ -209,7 +209,14 @@ auto Camera::start() -> Result
         return Result::FAILED;
     }
 
-    return create_components();
+    auto res = create_components();
+    if (res == Result::OK)
+    {
+        set_active_streams(m_file_sink != nullptr,
+                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+                           m_stream_quality == camera_input::Stream_Quality::LOW);
+    }
+    return res;
 }
 void Camera::stop()
 {
@@ -1064,16 +1071,22 @@ auto Camera::start_recording() -> Result
     {
         create_file_sink();
     }
-    set_active_streams(m_file_sink != nullptr,
-                       m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                       m_stream_quality == camera_input::Stream_Quality::LOW);
+    if (m_impl->camera)
+    {
+        set_active_streams(m_file_sink != nullptr,
+                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+                           m_stream_quality == camera_input::Stream_Quality::LOW);
+    }
 }
 void Camera::stop_recording()
 {
     m_file_sink.reset();
-    set_active_streams(m_file_sink != nullptr,
-                       m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                       m_stream_quality == camera_input::Stream_Quality::LOW);
+    if (m_impl->camera)
+    {
+        set_active_streams(m_file_sink != nullptr,
+                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+                           m_stream_quality == camera_input::Stream_Quality::LOW);
+    }
 }
 
 void Camera::set_iso(camera_input::Iso iso)
@@ -1089,7 +1102,10 @@ void Camera::set_shutter_speed(camera_input::Shutter_Speed ss)
 void Camera::set_stream_quality(camera_input::Stream_Quality sq)
 {
     m_stream_quality = sq;
-    set_active_streams(m_file_sink != nullptr,
-                       m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                       m_stream_quality == camera_input::Stream_Quality::LOW);
+    if (m_impl->camera)
+    {
+        set_active_streams(m_file_sink != nullptr,
+                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+                           m_stream_quality == camera_input::Stream_Quality::LOW);
+    }
 }

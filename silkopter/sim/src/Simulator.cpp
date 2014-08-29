@@ -203,7 +203,7 @@ void Simulator::update()
     }
     else
     {
-        m_camera_position_target = math::lerp(m_camera_position_target, uav.get_position(), 0.1f);
+        m_camera_position_target = math::lerp(m_camera_position_target, uav.get_position(), 0.9f);
         m_context.camera.set_position(m_camera_position_target + camera_offset);
     }
 

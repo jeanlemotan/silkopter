@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "IO_Board_RPi.h"
 #include "IO_Board_Sim.h"
+#include "common/input/Camera_Input.h"
 #include "Comms.h"
 #include "UAV.h"
 
@@ -37,6 +38,8 @@ static void setup_camera_defaults(silk::Camera& camera, silk::Video_Server& stre
     {
         streamer.send_frame(silk::Video_Server::Flags(), data, size);
     });
+
+    camera.set_stream_quality(silk::camera_input::Stream_Quality::MEDIUM);
 }
 
 
@@ -181,6 +184,7 @@ int main(int argc, char const* argv[])
 #endif
 
             comms.process();
+            streamer.process();
 
             io_board.process();
             uav.process();
