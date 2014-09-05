@@ -152,8 +152,6 @@ auto IO_Board_RPi::connect() -> Connection_Result
     m_p->mpu.init("/dev/i2c-1", MPU9250::Gyroscope_Range::_500_DPS, MPU9250::Accelerometer_Range::_4_G);
 #endif
 
-//    return Connection_Result::FAILED;
-
     m_is_connected = true;
     return Connection_Result::OK;
 }
