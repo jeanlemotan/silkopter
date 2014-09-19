@@ -56,11 +56,15 @@ namespace util
         PID(LPF const& lpf = LPF());
         PID(Params const& params, LPF const& lpf = LPF());
 
-        T process(q::Clock::duration dt, T const& input, T const& set_point);
+        void set_target(T const& target);
+        auto get_target() const -> T const&;
 
-        T get_input() const;
-        T get_error() const;
-        T get_output() const;
+        void set_input(T const& input);
+        auto get_input() const -> T const&;
+
+        auto get_output() const -> T const&;
+
+        T process(q::Clock::duration dt);
 
         void reset();
 
@@ -75,6 +79,7 @@ namespace util
         T m_integrator = T();
         //T m_last_error = T();
         T m_last_input = T();
+        T m_target = T();
         T m_input = T();
         T m_error = T();
         T m_output = T();
@@ -98,7 +103,33 @@ namespace util
     }
 
     template<class T, class LPF>
-    T PID<T, LPF>::process(q::Clock::duration dt, T const& input, T const& set_point)
+    void PID<T, LPF>::set_target(T const& target)
+    {
+        m_target = target;
+    }
+    template<class T, class LPF>
+    auto PID<T, LPF>::get_target() const -> T const&
+    {
+        return m_target;
+    }
+    template<class T, class LPF>
+    void PID<T, LPF>::set_input(T const& input)
+    {
+        m_input = input;
+    }
+    template<class T, class LPF>
+    auto PID<T, LPF>::get_input() const -> T const&
+    {
+        return m_input;
+    }
+    template<class T, class LPF>
+    auto PID<T, LPF>::get_output() const -> T const&
+    {
+        return m_output;
+    }
+
+    template<class T, class LPF>
+    T PID<T, LPF>::process(q::Clock::duration dt)
     {
 // 		if (dt >= chrono::secondsf(1))
 // 		{
@@ -112,9 +143,7 @@ namespace util
 // 		}
 
         // Compute proportional component
-        m_input = input;
-        m_error = set_point - input;
-
+        m_error = m_target - m_input;
         m_output = T();
         m_output += m_error * m_params.kp;
 
@@ -173,7 +202,7 @@ namespace util
             }
         }
         //m_last_error = error;
-        m_last_input = input;
+        m_last_input = m_input;
 
         if (math::is_positive(m_output))
         {
@@ -186,17 +215,6 @@ namespace util
         return m_output;
     }
 
-// 	template<class T, class LPF>
-// 	T PID<T, LPF>::get_error() const
-// 	{
-// 		return m_last_error;
-// 	}
-    template<class T, class LPF>
-    T PID<T, LPF>::get_output() const
-    {
-        return m_output;
-    }
-
     template<class T, class LPF>
     void PID<T, LPF>::reset()
     {
@@ -205,6 +223,7 @@ namespace util
         //m_last_error = T();
         m_last_input = T();
         m_error = T();
+        m_target = T();
         m_input = T();
         m_output = T();
     }

@@ -22,6 +22,7 @@ void Video_Client::connect()
     try
     {
         m_socket.reset(new ip::udp::socket(m_io_service, ip::udp::endpoint(ip::udp::v4(), m_port)));
+        m_socket->set_option(socket_base::receive_buffer_size(8192));
         m_server_endpoint = ip::udp::endpoint(m_server_address, m_port);
     }
     catch(std::exception const& e)
@@ -149,7 +150,7 @@ void Video_Client::process()
 	}
 }
 
-static size_t k_max_allowed_queued_frames(10);
+static size_t k_max_allowed_queued_frames(3);
 
 bool Video_Client::get_frame(uint32_t& o_frame_idx, std::vector<uint8_t>& o_data) const
 {

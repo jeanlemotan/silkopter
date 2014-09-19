@@ -11,6 +11,28 @@ MOC_DIR = ./.moc
 RCC_DIR = ./.rcc
 UI_DIR = ./.ui
 
+rpi {
+    DEFINES+=RASPBERRY_PI
+}
+
+rpi {
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = rpi/debug
+    } else {
+        DEST_FOLDER = rpi/release
+    }
+} else {
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = pc/debug
+    } else {
+        DEST_FOLDER = pc/release
+    }
+}
+
+DESTDIR = ../../../lib/$${DEST_FOLDER}
+
+
+
 SOURCES += \
     ../../../src/QDataStdAfx.cpp \
     ../../../src/data/File_Sink.cpp \

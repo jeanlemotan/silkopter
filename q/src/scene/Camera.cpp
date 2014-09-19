@@ -213,7 +213,7 @@ void Camera::update_projection_matrix() const
 		else
 		{
 			m_projection_matrix = math::perspective(m_fov_vertical, ar, m_near_distance, m_far_distance);
-			m_fov_horizontal = 2.f * math::atan(math::tan(m_fov_vertical * 0.5f) * ar);
+            m_fov_horizontal = 2.f * math::atan(math::tan(m_fov_vertical * 0.5f) * ar).radians;
 		}
 
 		m_projection_matrix_dirty = false;

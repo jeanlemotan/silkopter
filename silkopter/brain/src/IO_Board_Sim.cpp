@@ -247,12 +247,12 @@ void IO_Board_Sim::save_settings()
 //    }
 
 
-    typedef rapidjson::UTF8<> JSONCharset;
-    typedef rapidjson::GenericStringBuffer<JSONCharset> JSONBuffer;
-    typedef rapidjson::PrettyWriter<JSONBuffer> JSONWriter;
+    typedef rapidjson::UTF8<> JSON_Charset;
+    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
+    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
 
-    JSONBuffer buffer;
-    JSONWriter writer(buffer);
+    JSON_Buffer buffer;
+    JSON_Writer writer(buffer);
     m_settings.document.Accept(writer);
 
     q::data::File_Sink fs(q::Path("io_board.cfg"));
@@ -357,19 +357,30 @@ bool IO_Board_Sim::is_running() const
     return m_state == State::RUNNING;
 }
 
-void IO_Board_Sim::set_motor_output(size_t motor_idx, float output)
+void IO_Board_Sim::set_motor_throttles(float const* throttles, size_t count)
 {
-    QASSERT(motor_idx < 12);
-    if (motor_idx >= 12)
+    QASSERT(throttles != nullptr);
+    QASSERT(count <= MAX_MOTOR_COUNT);
+    if (!throttles)
     {
         return;
     }
 
-    if (motor_idx >= m_motor_outputs.size())
+    count = math::min(count, MAX_MOTOR_COUNT);
+    if (count > m_motor_outputs.size())
     {
-        m_motor_outputs.resize(motor_idx + 1);
+        m_motor_outputs.resize(count);
     }
-    m_motor_outputs[motor_idx] = output;
+
+    for (size_t i = 0; i < count; i++)
+    {
+        m_motor_outputs[i] = throttles[i];
+    }
+}
+
+void IO_Board_Sim::set_camera_rotation(math::quatf const& rot)
+{
+
 }
 
 void IO_Board_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)

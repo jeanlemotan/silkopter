@@ -177,7 +177,7 @@ namespace jsonutil
 	}
 
 	template<class T> 
-    inline void update_value(Value& value, T const& data, jsonutil::Document::AllocatorType& allocator)
+    inline void update_value(Value& value, T const& data, jsonutil::Document::AllocatorType&)
 	{
 		Value newValue(data);
 		value = newValue;

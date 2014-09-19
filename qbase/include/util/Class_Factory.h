@@ -15,23 +15,23 @@ namespace util
 			 register_class(ctor, rtti::get_class_id<T>());
 		 }
 		 template <class T>
-		 static void register_class(std::string const& className, int classId)
+         static void register_class(std::string const& class_name, int class_id)
 		 {
 			 auto* ctor = &create_class_instance_function<T>;
-			 register_class(ctor, className);
-			 register_class(ctor, classId);
+             register_class(ctor, class_name);
+             register_class(ctor, class_id);
 		 }
 
 		 template <class Base>
-		 static auto create_instance(std::string const& className) -> std::unique_ptr<Base>
+         static auto create_instance(std::string const& class_name) -> std::unique_ptr<Base>
 		 {
-			 auto it = m_name_registry.find(className);
+             auto it = m_name_registry.find(class_name);
 			 return std::unique_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second)()));
 		 }
 		 template <class Base>
-		 static auto create_instance(int classId) -> std::unique_ptr<Base>
+         static auto create_instance(int class_id) -> std::unique_ptr<Base>
 		 {
-			 auto it = m_id_registry.find(classId);
+             auto it = m_id_registry.find(class_id);
 			 return std::unique_ptr<Base>(it == m_id_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second)()));
 		 }
 
@@ -60,19 +60,19 @@ namespace util
 			}
 			m_name_registry[class_name] = creator;
 		}
-		static void register_class(create_instance_function creator, int classId)
+        static void register_class(create_instance_function creator, int class_id)
 		{
-			if (classId == 0)
+            if (class_id == 0)
 			{
 				return;
 			}
-			auto it = m_id_registry.find(classId);
+            auto it = m_id_registry.find(class_id);
 			if (it != m_id_registry.end())
 			{
-				QLOG_ERR("ClassFactory", "Error: class '{}' already defined.", classId);
+                QLOG_ERR("ClassFactory", "Error: class '{}' already defined.", class_id);
 				return;
 			}
-			m_id_registry[classId] = creator;
+            m_id_registry[class_id] = creator;
 		}
 	};
 

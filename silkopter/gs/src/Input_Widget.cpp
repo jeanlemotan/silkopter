@@ -28,9 +28,9 @@ void Input_Widget::set_throttle_mode(QString const& v)
     {
         m_new_uav_input.throttle_mode = silk::uav_input::Throttle_Mode::RATE;
     }
-    if (v == "Stable")
+    if (v == "Offset")
     {
-        m_new_uav_input.throttle_mode = silk::uav_input::Throttle_Mode::STABLE;
+        m_new_uav_input.throttle_mode = silk::uav_input::Throttle_Mode::OFFSET;
     }
     if (v == "Assisted")
     {
@@ -44,9 +44,9 @@ void Input_Widget::set_pitch_roll_mode(QString const& v)
     {
         m_new_uav_input.pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::RATE;
     }
-    if (v == "Stable")
+    if (v == "Horizontal")
     {
-        m_new_uav_input.pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::STABLE;
+        m_new_uav_input.pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
     }
     if (v == "Assisted")
     {
@@ -57,6 +57,17 @@ void Input_Widget::set_pitch_roll_mode(QString const& v)
 void Input_Widget::set_reference_frame(QString const& v)
 {
 
+}
+
+float Input_Widget::filter_stick_value(float v)
+{
+    float av = math::abs(v);
+    float sv = math::sgn(v);
+
+    constexpr float k_min = 0.15f;
+
+    av = math::max(av - k_min, 0.f) / (1 - k_min);
+    return sv * av;
 }
 
 void Input_Widget::process(silk::Comms& comms)
@@ -76,9 +87,9 @@ void Input_Widget::process(silk::Comms& comms)
         auto rs = m_gamepad->get_stick_data(qinput::Stick_Id::RIGHT);
 
         float throttle = math::clamp(m_throttle - ls.value.y * 0.1f, 0.f, 1.f);
-        float yaw = -ls.value.x;
-        float pitch = rs.value.y;
-        float roll = rs.value.x;
+        float yaw = -filter_stick_value(ls.value.x);
+        float pitch = filter_stick_value(rs.value.y);
+        float roll = filter_stick_value(rs.value.x);
 
         m_ui.throttle_value->setValue(static_cast<int>(throttle * 100));
         m_ui.yaw_value->setValue(static_cast<int>(yaw * 100));

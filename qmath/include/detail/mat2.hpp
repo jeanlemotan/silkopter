@@ -25,12 +25,12 @@ inline mat2<T>::mat2(ZUninitialized)
 }
 
 template <typename T>
-inline mat2<T>::mat2(ZRotation, T angle)
+inline mat2<T>::mat2(angle<T> const& rotation)
 : column0(vec2<T>::uninitialized)
 , column1(vec2<T>::uninitialized)
 {
 	T s, c;
-	sin_cos(angle, s, c);
+    sin_cos(rotation, s, c);
 
 	m[0] = c;
 	m[1] = s;

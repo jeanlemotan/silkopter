@@ -289,12 +289,12 @@ namespace util
             m_socket.write(m_tx_buffer, total_size);
 		}
 
-        constexpr size_t _sizeof()
+        constexpr size_t _sizeof() const
         {
             return 0;
         }
         template<typename Param, typename... Params>
-        constexpr size_t _sizeof(Param& p, Params&... params)
+        constexpr size_t _sizeof(Param& p, Params&... params) const
         {
             return sizeof(p) + _sizeof(params...);
         }

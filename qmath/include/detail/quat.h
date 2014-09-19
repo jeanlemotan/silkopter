@@ -26,10 +26,12 @@ struct quat
 	quat(quat const&);
 	template<typename U> explicit quat(quat<U> const&);
 
-	//conversion constructors
-// 	explicit quat(mat3<T> const&);
-// 	explicit quat(mat4<T> const&);
-// 	explicit quat(trans3d<T> const&);
+    template<class Policy = standard> static quat<T> look_at(vec3<T> const& front, vec3<T> const& up);
+    template<class Policy = standard> static quat<T> from_axis_x(angle<T> const& a);
+    template<class Policy = standard> static quat<T> from_axis_y(angle<T> const& a);
+    template<class Policy = standard> static quat<T> from_axis_z(angle<T> const& a);
+    //returns a quaternion that will rotate a to b
+    template<class Policy = standard> static quat<T> from_vectors(vec3<T> const& a, vec3<T> const& b);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions
@@ -54,27 +56,27 @@ struct quat
 	template<class Policy = standard> void get_as_mat3_and_inv(mat3<T>& mat, mat3<T>& inv) const;
 
 	//! cast from/to angle axis
-	template<class Policy = standard> void set_from_angle_axis(T angle, vec3<T> const& axis);
-	template<class Policy = standard> void get_as_angle_axis(T& angle, vec3<T>& axis) const;
+    template<class Policy = standard> void set_from_angle_axis(angle<T> const& angle, vec3<T> const& axis);
+    template<class Policy = standard> void get_as_angle_axis(angle<T>& angle, vec3<T>& axis) const;
 
 	//! cast from/to euler (polar rotations in a vector)
 	//these handle conversion from Euler (x, y, z) to quat
 	//All possible orders of multiplication are handled.
 	//NOTE - this doesn't imply any yaw/pitch/roll - the user gives that meaning.
-	template<class Policy = standard> void set_from_euler_xyz(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_xyz(vec3<T>& euler) const;
-	template<class Policy = standard> void set_from_euler_xzy(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_xzy(vec3<T>& euler) const;
+    template<class Policy = standard> void set_from_euler_xyz(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_xyz(angle<T>& x, angle<T>& y, angle<T>& z) const;
+    template<class Policy = standard> void set_from_euler_xzy(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_xzy(angle<T>& x, angle<T>& y, angle<T>& z) const;
 
-	template<class Policy = standard> void set_from_euler_yxz(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_yxz(vec3<T>& euler) const;
-	template<class Policy = standard> void set_from_euler_yzx(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_yzx(vec3<T>& euler) const;
+    template<class Policy = standard> void set_from_euler_yxz(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_yxz(angle<T>& x, angle<T>& y, angle<T>& z) const;
+    template<class Policy = standard> void set_from_euler_yzx(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_yzx(angle<T>& x, angle<T>& y, angle<T>& z) const;
 
-	template<class Policy = standard> void set_from_euler_zxy(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_zxy(vec3<T>& euler) const;
-	template<class Policy = standard> void set_from_euler_zyx(vec3<T> const& angles);
-	template<class Policy = standard> void get_as_euler_zyx(vec3<T>& euler) const;
+    template<class Policy = standard> void set_from_euler_zxy(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_zxy(angle<T>& x, angle<T>& y, angle<T>& z) const;
+    template<class Policy = standard> void set_from_euler_zyx(angle<T> const& x, angle<T> const& y, angle<T> const& z);
+    template<class Policy = standard> void get_as_euler_zyx(angle<T>& x, angle<T>& y, angle<T>& z) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // operators

@@ -9,7 +9,7 @@ namespace util
 // http://en.wikipedia.org/wiki/Base64
 
 // Transform 2^6 values into 64 unique chars
-static uint8_t s_char_64[64] =
+const uint8_t s_char_64[64] =
 {
 'A',//0
 'B',
@@ -77,7 +77,7 @@ static uint8_t s_char_64[64] =
 '/',
 };
 
-static const uint8_t s_char_64_rev[256] =
+const uint8_t s_char_64_rev[256] =
 {
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 
@@ -94,120 +94,116 @@ static const uint8_t s_char_64_rev[256] =
 };
 
 
-void encode_base_64(std::vector<uint8_t>& dst, uint8_t const* src, size_t srcSize)
-{
-	//dst.resize(0);
-	dst.clear();
-	dst.reserve(srcSize * 10 / 7);
+//void encode_base_64(std::vector<uint8_t>& dst, uint8_t const* src, size_t srcSize)
+//{
+//	dst.clear();
+//	dst.reserve(srcSize * 10 / 7);
 
-	size_t i = 0;
-	if (srcSize > 3)
-	{
-		// for each 3 bytes, create 4 encoded chars
-		for (i = 0; i < srcSize - 3; i += 3)
-		{
-			uint32_t bitPattern = 0;
-			bitPattern = uint32_t(src[i + 0]) << 16;
-			bitPattern += uint32_t(src[i + 1]) << 8;
-			bitPattern += src[i + 2];
-			// create 4 encoded chars taking 6 bits each time
-			for (uint32_t k = 0; k < 4; k++)
-			{
-				uint32_t index = bitPattern  >> (24 - (k + 1) * 6);
-				index = index & (0x3F);
-				QASSERT(index < 64);
-				dst.push_back(s_char_64[index]);
-			}
-		}
-	}
-	if (i < srcSize)
-	{
-		uint32_t bitPattern = 0;
-		bitPattern = uint32_t(src[i]) << 16;
-		if (i + 1 < srcSize) 
-		{
-			bitPattern += uint32_t(src[i + 1]) << 8;
-		}
-		if (i + 2 < srcSize) 
-		{
-			bitPattern += src[i + 2];
-		}
-		// create 4 encoded chars taking 6 bits each time
-		for (uint32_t k = 0; k < 4; k++)
-		{
-			uint32_t index = bitPattern  >> (24 - (k + 1) * 6);
-			index = index & (0x3F);
-			QASSERT(index < 64);
-			dst.push_back(s_char_64[index]);
-		}
-	}
+//	size_t i = 0;
+//	if (srcSize > 3)
+//	{
+//		// for each 3 bytes, create 4 encoded chars
+//		for (i = 0; i < srcSize - 3; i += 3)
+//		{
+//            uint32_t bit_pattern = uint32_t(src[i + 0]) << 16;
+//            bit_pattern += uint32_t(src[i + 1]) << 8;
+//            bit_pattern += src[i + 2];
+//			// create 4 encoded chars taking 6 bits each time
+//			for (uint32_t k = 0; k < 4; k++)
+//			{
+//                uint32_t index = bit_pattern  >> (24 - (k + 1) * 6);
+//				index = index & (0x3F);
+//				QASSERT(index < 64);
+//				dst.push_back(s_char_64[index]);
+//			}
+//		}
+//	}
+//	if (i < srcSize)
+//	{
+//		uint32_t bitPattern = 0;
+//		bitPattern = uint32_t(src[i]) << 16;
+//		if (i + 1 < srcSize)
+//		{
+//			bitPattern += uint32_t(src[i + 1]) << 8;
+//		}
+//		if (i + 2 < srcSize)
+//		{
+//			bitPattern += src[i + 2];
+//		}
+//		// create 4 encoded chars taking 6 bits each time
+//		for (uint32_t k = 0; k < 4; k++)
+//		{
+//			uint32_t index = bitPattern  >> (24 - (k + 1) * 6);
+//			index = index & (0x3F);
+//			QASSERT(index < 64);
+//			dst.push_back(s_char_64[index]);
+//		}
+//	}
 
-	// process padding
-	size_t m = srcSize % 3;
-	if (m == 1)
-	{
-		dst[dst.size() - 2] = '=';
-		dst[dst.size() - 1] = '=';
-	}
-	else if (m == 2)
-	{
-		dst[dst.size() - 1] = '=';
-	}
-}
-void decode_base_64(std::vector<uint8_t>& dst, uint8_t const* src, size_t srcSize)
-{
-	//dst.resize(0);
-	dst.clear();
-	dst.reserve(srcSize);
+//	// process padding
+//	size_t m = srcSize % 3;
+//	if (m == 1)
+//	{
+//		dst[dst.size() - 2] = '=';
+//		dst[dst.size() - 1] = '=';
+//	}
+//	else if (m == 2)
+//	{
+//		dst[dst.size() - 1] = '=';
+//	}
+//}
+//void decode_base_64(std::vector<uint8_t>& dst, uint8_t const* src, size_t src_size)
+//{
+//	//dst.resize(0);
+//	dst.clear();
+//    dst.reserve(src_size);
 
-	QASSERT(srcSize % 4 == 0);
+//    QASSERT(src_size % 4 == 0);
 
-	// for each 4 encoded chars, create 3 bytes
-	size_t i = 0;
-	if (srcSize > 4)
-	{
-		for (i = 0; i < srcSize - 4; i += 4)
-		{
-			uint32_t idx0 = s_char_64_rev[src[i + 0]];
-			uint32_t idx1 = s_char_64_rev[src[i + 1]];
-			uint32_t idx2 = s_char_64_rev[src[i + 2]];
-			uint32_t idx3 = s_char_64_rev[src[i + 3]];
-			// create bitPattern from encoded chars
-			uint32_t bitPattern;
-			bitPattern  = (idx0 << 18);
-			bitPattern += (idx1 << 12);
-			bitPattern += (idx2 <<  6);
-			bitPattern += (idx3      );
-			// split 3 bytes
-			dst.push_back((bitPattern >> 16) & 0xFF);
-			dst.push_back((bitPattern >>  8) & 0xFF);
-			dst.push_back((bitPattern      ) & 0xFF);
-		}
-	}
-	if (i + 4 <= srcSize)
-	{
-		uint32_t idx0 = s_char_64_rev[src[i + 0]];
-		uint32_t idx1 = s_char_64_rev[src[i + 1]];
-		uint32_t idx2 = s_char_64_rev[src[i + 2]];
-		uint32_t idx3 = s_char_64_rev[src[i + 3]];
-		// create bitPattern from encoded chars
-		uint32_t bitPattern;
-		bitPattern  = (idx0 << 18);
-		bitPattern += (idx1 << 12);
-		bitPattern += (idx2 <<  6);
-		bitPattern += (idx3      );
-		// split 3 bytes
-		dst.push_back((bitPattern >> 16) & 0xFF);
-		if (src[i + 2] != '=')
-		{
-			dst.push_back((bitPattern >>  8) & 0xFF);
-		}
-		if (src[i + 3] != '=')
-		{
-			dst.push_back((bitPattern) & 0xFF);
-		}	
-	}
-}
+//	// for each 4 encoded chars, create 3 bytes
+//	size_t i = 0;
+//    if (src_size > 4)
+//	{
+//        for (i = 0; i < src_size - 4; i += 4)
+//		{
+//			uint32_t idx0 = s_char_64_rev[src[i + 0]];
+//			uint32_t idx1 = s_char_64_rev[src[i + 1]];
+//			uint32_t idx2 = s_char_64_rev[src[i + 2]];
+//			uint32_t idx3 = s_char_64_rev[src[i + 3]];
+//			// create bitPattern from encoded chars
+//            uint32_t bit_pattern  = (idx0 << 18);
+//            bit_pattern += (idx1 << 12);
+//            bit_pattern += (idx2 <<  6);
+//            bit_pattern += (idx3      );
+//			// split 3 bytes
+//            dst.push_back((bit_pattern >> 16) & 0xFF);
+//            dst.push_back((bit_pattern >>  8) & 0xFF);
+//            dst.push_back((bit_pattern      ) & 0xFF);
+//		}
+//	}
+//    if (i + 4 <= src_size)
+//	{
+//		uint32_t idx0 = s_char_64_rev[src[i + 0]];
+//		uint32_t idx1 = s_char_64_rev[src[i + 1]];
+//		uint32_t idx2 = s_char_64_rev[src[i + 2]];
+//		uint32_t idx3 = s_char_64_rev[src[i + 3]];
+//		// create bitPattern from encoded chars
+//        uint32_t bit_pattern  = (idx0 << 18);
+//        bit_pattern += (idx1 << 12);
+//        bit_pattern += (idx2 <<  6);
+//        bit_pattern += (idx3      );
+//		// split 3 bytes
+//        dst.push_back((bit_pattern >> 16) & 0xFF);
+//		if (src[i + 2] != '=')
+//		{
+//            dst.push_back((bit_pattern >>  8) & 0xFF);
+//		}
+//		if (src[i + 3] != '=')
+//		{
+//            dst.push_back((bit_pattern) & 0xFF);
+//		}
+//	}
+//}
 
 
 /*

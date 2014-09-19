@@ -8,10 +8,25 @@ TARGET = brain
 target.path = /home/pi
 INSTALLS = target
 
-RASPBERRY_PI {
+rpi {
     DEFINES+=RASPBERRY_PI
 }
 
+rpi {
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = rpi/debug
+    } else {
+        DEST_FOLDER = rpi/release
+    }
+} else {
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = pc/debug
+    } else {
+        DEST_FOLDER = pc/release
+    }
+}
+
+DESTDIR = ../../../bin/$${DEST_FOLDER}
 
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
 
@@ -27,30 +42,17 @@ LIBS += -L=/opt/vc/lib/
 
 ROOT_LIBS_PATH = ../../../../..
 
-RASPBERRY_PI {
-    debug {
-        LIB_FOLDER = lib/rpi/debug
-    } else {
-        LIB_FOLDER = lib/rpi/release
-    }
-} else {
-    debug {
-        LIB_FOLDER = lib/pc/debug
-    } else {
-        LIB_FOLDER = lib/pc/release
-    }
-}
-
-LIBS += -L$${ROOT_LIBS_PATH}/qdata/$${LIB_FOLDER} -lqdata
-LIBS += -L$${ROOT_LIBS_PATH}/qmath/$${LIB_FOLDER} -lqmath
-LIBS += -L$${ROOT_LIBS_PATH}/qbase/$${LIB_FOLDER} -lqbase
+LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
+LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
+LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 LIBS += -lpthread
 LIBS += -lboost_system
 LIBS += -lboost_thread
 LIBS += -lboost_program_options
 LIBS += -lrt
-RASPBERRY_PI {
+rpi {
+    LIBS += -lpigpio
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client

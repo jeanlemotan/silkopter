@@ -2,8 +2,8 @@
 
 namespace math
 {
-	template<typename T> T degrees(T const& radians);
-	template<typename T> T radians(T const& degrees);
+    template<typename T> angle<T> radians(T const& degrees);
+    template<typename T> T degrees(angle<T> const& angle);
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -15,10 +15,15 @@ namespace math
 	template<typename T, class Policy = standard> T cos(T const& angle);
 	template<typename T, class Policy = standard> T sin(T const& angle);
 	template<typename T, class Policy = standard> T tan(T const& angle);
-	template<typename T, class Policy = standard> T acos(T const& angle);
-	template<typename T, class Policy = standard> T asin(T const& angle);
-	template<typename T, class Policy = standard> T atan(T const& angle);
-	template<typename T, class Policy = standard> T atan2(T const& y, T const& x);
 	template<typename T, class Policy = standard> void sin_cos(T const& angle, T& sin, T& cos);
 
+    template<typename T, class Policy = standard> T cos(angle<T> const& angle);
+    template<typename T, class Policy = standard> T sin(angle<T> const& angle);
+    template<typename T, class Policy = standard> T tan(angle<T> const& angle);
+    template<typename T, class Policy = standard> void sin_cos(angle<T> const& angle, T& sin, T& cos);
+
+    template<typename T, class Policy = standard> angle<T> acos(T const& v);
+    template<typename T, class Policy = standard> angle<T> asin(T const& v);
+    template<typename T, class Policy = standard> angle<T> atan(T const& v);
+    template<typename T, class Policy = standard> angle<T> atan2(T const& y, T const& x);
 }

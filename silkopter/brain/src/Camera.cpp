@@ -68,7 +68,7 @@ struct Camera::Impl
         std::vector<uint8_t> data;
         std::mutex data_mutex;
 
-        std::atomic<bool> is_active;
+        std::atomic<bool> is_active{false};
         math::vec2u32 resolution;
         size_t bitrate = 0;
 
@@ -165,6 +165,8 @@ void Camera::set_active_streams(bool high, bool medium, bool low)
     {
         return;
     }
+
+    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
 
 #if defined RASPBERRY_PI
     if (set_connection_enabled(m_impl->high.encoder_connection, high))
@@ -632,6 +634,24 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         return Component_ptr();
     }
 
+    {
+        MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
+        param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
+        param.hdr.size = sizeof(param);
+
+        param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
+        param.cir_mbs = 20;
+        param.air_mbs = 5;
+        param.air_ref = 5;
+        param.pir_mbs = 5;
+
+        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+        {
+            SILK_WARNING("failed to set INTRA REFRESH HEADER FLAG parameters");
+            return Component_ptr();
+        }
+    }
+
     if (!enable_component(encoder))
     {
         return Component_ptr();
@@ -1077,6 +1097,7 @@ auto Camera::start_recording() -> Result
                            m_stream_quality == camera_input::Stream_Quality::MEDIUM,
                            m_stream_quality == camera_input::Stream_Quality::LOW);
     }
+    return Result::OK;
 }
 void Camera::stop_recording()
 {

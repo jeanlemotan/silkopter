@@ -26,10 +26,10 @@ template<typename T> template<typename U> inline trans2d<T>::trans2d(trans2d<U> 
 	assert(is_valid());
 }
 
-template<typename T> inline trans2d<T>::trans2d(vec2<T> const& translation, T rotation, vec2<T> const& scale)
+template<typename T> inline trans2d<T>::trans2d(vec2<T> const& translation, angle<T> const& rotation, vec2<T> const& scale)
 {
 	set_translation(translation);
-	mat2<T> rot(mat2<T>::rotation, rotation);
+    mat2<T> rot(rotation);
 	set_rotation(rot);
 	post_scale(scale);
 }
@@ -124,9 +124,9 @@ template<typename T> inline trans2d<T>& trans2d<T>::set_rotation(mat2<T> const& 
 	assert(is_valid());
 	return *this;
 }
-template<typename T> inline trans2d<T>& trans2d<T>::set_rotation(T rot)
+template<typename T> inline trans2d<T>& trans2d<T>::set_rotation(angle<T> const& rot)
 {
-	return set_rotation(mat2<T>(mat2<T>::rotation, rot));
+    return set_rotation(mat2<T>(rot));
 }
 template<typename T> inline trans2d<T>& trans2d<T>::post_scale(const vec2<T>& scale)
 {

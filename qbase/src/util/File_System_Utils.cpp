@@ -37,8 +37,8 @@ bool exists(const Path& path)
 		return false;
 	}
 
-	struct stat fileStatus;
-	int ret = stat(path.get_as_string().c_str(), &fileStatus);
+    struct stat file_status;
+    int ret = stat(path.get_as_string().c_str(), &file_status);
 	if (ret != -1)
 	{
 		return true;
@@ -55,11 +55,11 @@ bool is_file(const Path& path)
 		return false;
 	}
 
-	struct stat fileStatus;
-	int ret = stat(path.get_as_string().c_str(), &fileStatus);
+    struct stat file_status;
+    int ret = stat(path.get_as_string().c_str(), &file_status);
 	if (ret != -1)
 	{
-		return ((fileStatus.st_mode & S_IFDIR) == 0) ? true : false;
+        return ((file_status.st_mode & S_IFDIR) == 0) ? true : false;
 	}
 
 	return false;
@@ -74,11 +74,11 @@ bool is_folder(Path const& path)
 		return false;
 	}
 
-	struct stat fileStatus;
-	int ret = stat(path.get_as_string().c_str(), &fileStatus);
+    struct stat file_status;
+    int ret = stat(path.get_as_string().c_str(), &file_status);
 	if (ret != -1)
 	{
-		return ((fileStatus.st_mode & S_IFDIR) != 0) ? true : false;
+        return ((file_status.st_mode & S_IFDIR) != 0) ? true : false;
 	}
 
 	return false;
@@ -260,12 +260,12 @@ Path get_absolute_folder(Path const& path)
 
 String get_disk_id(Path const& path)
 {
-	auto absPath(get_absolute_folder(path));
-	if (absPath.empty())
+    auto abs_path(get_absolute_folder(path));
+    if (abs_path.empty())
 	{
 		return String::null;
 	}
-	return absPath[0];
+    return abs_path[0];
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -292,15 +292,15 @@ bool create_folder(Path const& path)
 	size_t count = 0;//number of created directories
 	for (size_t i = 0; i < path.get_count(); i++)
 	{
-		Path subPath = path.get_sub_path(0, i + 1);
-		if (is_folder(subPath))
+        Path sub_path = path.get_sub_path(0, i + 1);
+        if (is_folder(sub_path))
 		{
 			continue;
 		}
 
 #if defined Q_WINDOWS
 
-        BOOL ret = ::CreateDirectoryA(subPath.get_as_string().c_str(), nullptr);
+        BOOL ret = ::CreateDirectoryA(sub_path.get_as_string().c_str(), nullptr);
 		if (ret)
 		{
 			count++;
@@ -309,7 +309,7 @@ bool create_folder(Path const& path)
 #elif defined Q_POSIX_API
 
 		mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
-		int ret = mkdir(subPath.get_as_string().c_str(), mode);
+        int ret = mkdir(sub_path.get_as_string().c_str(), mode);
 		if (ret == 0)
 		{
 			count++;

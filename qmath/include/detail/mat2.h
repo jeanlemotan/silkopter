@@ -24,7 +24,6 @@ struct mat2
 {
 	typedef T value_t;
 	static struct ZUninitialized {} uninitialized;
-	static struct ZRotation {} rotation;
 	static mat2<T> const zero;
 	static mat2<T> const one;
 	static mat2<T> const identity;
@@ -37,7 +36,7 @@ struct mat2
 	///////////////////////////////////////////////////////////////////////////////
 	mat2();
 	mat2(ZUninitialized);
-	mat2(ZRotation, T angle);
+    mat2(angle<T> const& rotation);
 	explicit mat2(T value);
 	mat2(mat2<T> const& other);
 	template<typename U> explicit mat2(mat2<U> const& v);
@@ -136,10 +135,7 @@ public:
 // Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-typename mat2<T>::ZUninitialized mat2<T>::uninitialized;
-template <typename T>
-typename mat2<T>::ZRotation mat2<T>::rotation;
+template <typename T> typename mat2<T>::ZUninitialized mat2<T>::uninitialized;
 
 ///////////////////////////////////////////////////////////////////////////////
 

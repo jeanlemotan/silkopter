@@ -16,10 +16,11 @@ public:
 
     enum class PWM_Frequency : uint8_t
     {
-        _50HZ,
-        _100HZ,
-        _250HZ,
-        _500HZ
+        SERVO_50HZ,
+        SERVO_100HZ,
+        SERVO_250HZ,
+        SERVO_500HZ,
+        PWM_1000Hz,
     };
 
     virtual auto connect() -> Connection_Result = 0;
@@ -31,7 +32,12 @@ public:
     //----------------------------------------------------------------------
     //motors
 
-    virtual void set_motor_output(size_t motor_idx, float output) = 0;
+    virtual void set_motor_throttles(float const* throttles, size_t count) = 0;
+
+    //----------------------------------------------------------------------
+    //camera
+
+    virtual void set_camera_rotation(math::quatf const& rot) = 0;
 
     //----------------------------------------------------------------------
     //calibration

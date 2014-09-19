@@ -91,8 +91,8 @@ void Camera_Controller3D::mouse_move_event(QMouseEvent* event)
 			math::vec2d rot(radians(m_pointer_delta_2d));
 
 			math::quatd qx, qy;
-			qx.set_from_angle_axis(-rot.x, math::vec3d(0, 0, 1));
-			qy.set_from_angle_axis(-rot.y, math::vec3d(m_camera.get_right_vector()));
+            qx.set_from_angle_axis(math::angled(-rot.x), math::vec3d(0, 0, 1));
+            qy.set_from_angle_axis(math::angled(-rot.y), math::vec3d(m_camera.get_right_vector()));
 			math::quatd qdelta = qx * qy;
 			math::vec3d p(m_camera.get_position());
 			math::vec3d dir = math::vec3d(m_press_point_3d) - p;

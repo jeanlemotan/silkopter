@@ -535,6 +535,38 @@ namespace formatting
 		dst.append('>');
 	}
 
+    template<class Dst_Adapter, class Placeholder, class P, size_t N>
+    void format_string(Dst_Adapter& dst, Placeholder const& ph, std::array<P, N> const& array)
+    {
+        dst.append('[');
+        if (!array.empty())
+        {
+            for (size_t i = 0; i + 1 < array.size(); i++)
+            {
+                format_string(dst, ph, array[i]);
+                dst.append(',');
+            }
+            format_string(dst, ph, array.back());
+        }
+        dst.append(']');
+    }
+
+    template<class Dst_Adapter, class Placeholder, class P, class Allocator>
+    void format_string(Dst_Adapter& dst, Placeholder const& ph, std::vector<P, Allocator> const& vector)
+    {
+        dst.append('[');
+        if (!vector.empty())
+        {
+            for (size_t i = 0; i + 1 < vector.size(); i++)
+            {
+                format_string(dst, ph, vector[i]);
+                dst.append(',');
+            }
+            format_string(dst, ph, vector.back());
+        }
+        dst.append(']');
+    }
+
 #ifndef Q_AVR
 	template<class Dst_String, class Placeholder, class rep, class period>
 	void format_string(Dst_String& dst, Placeholder const& ph, std::chrono::duration<rep, period> const& duration)

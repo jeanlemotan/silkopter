@@ -13,8 +13,72 @@ template <typename T> inline quat<T>::quat() : x(0), y(0), z(0), w(1) {}
 template <typename T> inline quat<T>::quat(ZUninitialized) {}
 template <typename T> inline quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
 template <typename T> inline quat<T>::quat(quat<T> const& q) : x(q.x), y(q.y), z(q.z), w(q.w) {}
-template <typename T> template <typename U> 
-	inline quat<T>::quat(quat<U> const& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w)) {}
+template <typename T> template <typename U>
+inline quat<T>::quat(quat<U> const& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w)) {}
+
+template<typename T>
+template<class Policy>
+inline quat<T> quat<T>::look_at(vec3<T> const& front, vec3<T> const& up)
+{
+    auto mat = mat3<T>::template look_at<Policy>(front, up);
+    quat<T> q;
+    q.set_from_mat3(mat);
+    return q;
+}
+
+template<typename T>
+template<class Policy>
+inline quat<T> quat<T>::from_axis_x(angle<T> const& a)
+{
+    quat<T> q(quat<T>::uninitialized);
+    q.template set_from_euler_xyz<Policy>(a, angle<T>(), angle<T>());
+    return q;
+}
+
+template<typename T>
+template<class Policy>
+inline quat<T> quat<T>::from_axis_y(angle<T> const& a)
+{
+    quat<T> q(quat<T>::uninitialized);
+    q.template set_from_euler_xyz<Policy>(angle<T>(), a, angle<T>());
+    return q;
+}
+
+template<typename T>
+template<class Policy>
+inline quat<T> quat<T>::from_axis_z(angle<T> const& a)
+{
+    quat<T> q(quat<T>::uninitialized);
+    q.template set_from_euler_xyz<Policy>(angle<T>(), angle<T>(), a);
+    return q;
+}
+
+template <typename T>
+template<class Policy>
+quat<T> quat<T>::from_vectors(vec3<T> const& a, vec3<T> const& b)
+{
+    vec3<T> axis = cross(a, b);
+    T dot = math::dot(a, b);
+    if (dot < (T)(-1.0) + std::numeric_limits<T>::epsilon())// vectors are parallel and facing in the opposite direction
+    {
+        // Try crossing with x axis.
+        vec3<T> t = cross(a,vec3<T>(1, 0, 0));
+        // If not ok, cross with y axis.
+        if(is_zero(math::length<T, Policy>(t)))
+        {
+            t = cross(a,vec3<T>(0, 1, 0));
+        }
+
+        t.template normalize<Policy>();
+        return quat<T>(t[0], t[1], t[2], 0);
+    }
+
+    // if vectors are parallel and are facing in the same direction
+    //	the axis is zero and quaternion is the identity
+    quat<T> result(axis.x * 0.5f, axis.y * 0.5f, axis.z * 0.5f, (dot + 1.0f) * 0.5f);
+    result.template normalize<Policy>();
+    return result;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions
@@ -180,9 +244,9 @@ inline void quat<T>::get_as_mat3_and_inv(mat3<T>& ret, mat3<T>& inv) const
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_xyz(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_xyz(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> a(angles*T(0.5));
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
 	vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
 	sin_cos<T, Policy>(a, s, c);
 	x = c.z*s.x*c.y + s.z*c.x*s.y;
@@ -191,239 +255,239 @@ inline void quat<T>::set_from_euler_xyz(vec3<T> const& angles)
 	w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_xzy(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_xzy(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    sin_cos<T, Policy>(a, s, c);
+    x = c.z*s.x*c.y - s.z*c.x*s.y;
+    y = c.z*c.x*s.y - s.z*s.x*c.y;
+    z = s.z*c.x*c.y + c.z*s.x*s.y;
+    w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_yxz(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_yxz(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y - sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    sin_cos<T, Policy>(a, s, c);
+    x = c.z*s.x*c.y + s.z*c.x*s.y;
+    y = c.z*c.x*s.y - s.z*s.x*c.y;
+    z = s.z*c.x*c.y - c.z*s.x*s.y;
+    w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_yzx(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_yzx(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y + sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    sin_cos<T, Policy>(a, s, c);
+    x = c.z*s.x*c.y + s.z*c.x*s.y;
+    y = c.z*c.x*s.y + s.z*s.x*c.y;
+    z = s.z*c.x*c.y - c.z*s.x*s.y;
+    w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_zxy(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_zxy(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y + cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y - sr.z*sr.x*sr.y;
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    sin_cos<T, Policy>(a, s, c);
+    x = c.z*s.x*c.y - s.z*c.x*s.y;
+    y = c.z*c.x*s.y + s.z*s.x*c.y;
+    z = s.z*c.x*c.y + c.z*s.x*s.y;
+    w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_zyx(vec3<T> const& angles)
+inline void quat<T>::set_from_euler_zyx(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
 {
-	vec3<T> r(angles*T(0.5));
-	vec3<T> sr(vec3<T>::uninitialized), cr(vec3<T>::uninitialized);
-	sin_cos<T, Policy>(r, sr, cr);
-	x = cr.z*sr.x*cr.y - sr.z*cr.x*sr.y;
-	y = cr.z*cr.x*sr.y + sr.z*sr.x*cr.y;
-	z = sr.z*cr.x*cr.y - cr.z*sr.x*sr.y;
-	w = cr.z*cr.x*cr.y + sr.z*sr.x*sr.y;
+    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    sin_cos<T, Policy>(a, s, c);
+    x = c.z*s.x*c.y - s.z*c.x*s.y;
+    y = c.z*c.x*s.y + s.z*s.x*c.y;
+    z = s.z*c.x*c.y - c.z*s.x*s.y;
+    w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_xyz(vec3<T>& res) const
+inline void quat<T>::get_as_euler_xyz(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = T(2)*(z*x + w*y);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = asin<T, Policy>(s);
-			res.x = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(x*x + y*y));
-			res.z = atan2<T, Policy>(-T(2)*(x*y - w*z), T(1) - T(2)*(z*z + y*y));
+            ay = asin<T, Policy>(s);
+            ax = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(x*x + y*y));
+            az = atan2<T, Policy>(-T(2)*(x*y - w*z), T(1) - T(2)*(z*z + y*y));
 		}
 		else
 		{
-			res.y = -angle<T>::pi2;
-			res.x = -atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
-			res.z = 0;
+            ay = -angle<T>::pi2;
+            ax = -atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
+            az = 0;
 		}
 	}
 	else
 	{
-		res.y = angle<T>::pi2;
-		res.x = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
-		res.z = 0;
+        ay = angle<T>::pi2;
+        ax = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
+        az = 0;
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_xzy(vec3<T>& res) const
+inline void quat<T>::get_as_euler_xzy(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = -T(2)*(x*y - w*z);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
-			res.x = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(z*z + x*x));
-			res.z = asin<T, Policy>(s);
+            ay = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
+            ax = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(z*z + x*x));
+            az = asin<T, Policy>(s);
 		}
 		else
 		{
-			res.y = -atan2<T, Policy>(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
-			res.x = 0;
-			res.z = -angle<T>::pi2;
+            ay = -atan2<T, Policy>(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
+            ax = 0;
+            az = -angle<T>::pi2;
 		}
 	}
 	else
 	{
-		res.y = -atan2<T, Policy>(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
-		res.x = 0;
-		res.z = angle<T>::pi2;
+        ay = -atan2<T, Policy>(T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
+        ax = 0;
+        az = angle<T>::pi2;
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_yxz(vec3<T>& res) const
+inline void quat<T>::get_as_euler_yxz(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = -T(2)*(z*y - w*x);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(x*x + y*y));
-			res.x = asin<T, Policy>(s);
-			res.z = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
+            ay = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(x*x + y*y));
+            ax = asin<T, Policy>(s);
+            az = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
 		}
 		else
 		{
-			res.y = 0;
-			res.x = -angle<T>::pi2;
-			res.z = atan2<T, Policy>(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
+            ay = 0;
+            ax = -angle<T>::pi2;
+            az = atan2<T, Policy>(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 		}
 	}
 	else
 	{
-		res.y = 0;
-		res.x = angle<T>::pi2;
-		res.z = atan2<T, Policy>(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
+        ay = 0;
+        ax = angle<T>::pi2;
+        az = atan2<T, Policy>(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_yzx(vec3<T>& res) const
+inline void quat<T>::get_as_euler_yzx(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = T(2)*(x*y + w*z);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = atan2<T, Policy>(-T(2)*(z*x - w*y), T(1) - T(2)*(z*z + y*y));
-			res.x = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
-			res.z = asin<T, Policy>(s);
+            ay = atan2<T, Policy>(-T(2)*(z*x - w*y), T(1) - T(2)*(z*z + y*y));
+            ax = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
+            az = asin<T, Policy>(s);
 		}
 		else
 		{
-			res.y = -atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
-			res.x = 0;
-			res.z = -angle<T>::pi2;
+            ay = -atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
+            ax = 0;
+            az = -angle<T>::pi2;
 		}
 	}
 	else
 	{
-		res.y = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
-		res.x = 0;
-		res.z = angle<T>::pi2;
+        ay = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
+        ax = 0;
+        az = angle<T>::pi2;
 	} 
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_zxy(vec3<T>& res) const
+inline void quat<T>::get_as_euler_zxy(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = T(2)*(z*y + w*x);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = atan2<T, Policy>(-T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
-			res.x = asin<T, Policy>(s);
-			res.z = atan2<T, Policy>(-T(2)*(x*y - w*z), T(1) - T(2)*(z*z + x*x));
+            ay = atan2<T, Policy>(-T(2)*(z*x - w*y), T(1) - T(2)*(x*x + y*y));
+            ax = asin<T, Policy>(s);
+            az = atan2<T, Policy>(-T(2)*(x*y - w*z), T(1) - T(2)*(z*z + x*x));
 		}
 		else
 		{
-			res.y = 0;
-			res.x = -angle<T>::pi2;
-			res.z = -atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
+            ay = 0;
+            ax = -angle<T>::pi2;
+            az = -atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 		}
 	}
 	else
 	{
-		res.y = 0;
-		res.x = angle<T>::pi2;
-		res.z = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
+        ay = 0;
+        ax = angle<T>::pi2;
+        az = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 	} 
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_zyx(vec3<T>& res) const
+inline void quat<T>::get_as_euler_zyx(angle<T>& ax, angle<T>& ay, angle<T>& az) const
 {
 	T const s = -T(2)*(z*x - w*y);
 	if (s < T(0.9999))
 	{
 		if (s > -T(0.9999))
 		{
-			res.y = asin<T, Policy>(s);
-			res.x = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
-			res.z = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + y*y));
+            ay = asin<T, Policy>(s);
+            ax = atan2<T, Policy>(T(2)*(z*y + w*x), T(1) - T(2)*(x*x + y*y));
+            az = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + y*y));
 		}
 		else
 		{
-			res.y = -angle<T>::pi2;
-			res.x = 0;
-			res.z = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
+            ay = -angle<T>::pi2;
+            ax = 0;
+            az = atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 		}
 	}
 	else
 	{
-		res.y = angle<T>::pi2;
-		res.x = 0;
-		res.z = -atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
+        ay = angle<T>::pi2;
+        ax = 0;
+        az = -atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 	} 
 }
 
 //! axis must be unit length
 //! angle in radians
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_angle_axis(T angle, vec3<T> const& axis)
+inline void quat<T>::set_from_angle_axis(angle<T> const& angle, vec3<T> const& axis)
 {
-	T const fHalfAngle = T(0.5)*angle;
-	T fSin;
-	sin_cos<T, Policy>(fHalfAngle, fSin, w);
-	x = fSin*axis.x;
-	y = fSin*axis.y;
-	z = fSin*axis.z;
+    T const half = T(0.5)*angle.radians;
+    T s;
+    sin_cos<T, Policy>(half, s, w);
+    x = s*axis.x;
+    y = s*axis.y;
+    z = s*axis.z;
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_angle_axis(T& angle, vec3<T> &axis) const
+inline void quat<T>::get_as_angle_axis(angle<T>& angle, vec3<T> &axis) const
 {
-	T const safeW = clamp(w, (T)-1, (T)1);
-	T const scale = sqrt<T, Policy>((T)1 - safeW * safeW);
-	angle = 2 * acos<T, Policy>(safeW);
+    T const safe_w = clamp(w, (T)-1, (T)1);
+    T const scale = sqrt<T, Policy>((T)1 - safe_w * safe_w);
+    angle = acos<T, Policy>(safe_w) * 2;
 	if (scale < std::numeric_limits<T>::epsilon())
 	{
 		axis.x = x;

@@ -148,7 +148,7 @@ void Video_Stream::process()
                 0, frame_h,
                 m_ffmpeg.rgb.data, m_ffmpeg.rgb.linesize);
 
-            //m_image_flipped = m_image;//.mirrored(false, true);
+            m_image_flipped = m_image.mirrored(true, true);
 
             update();
         }
@@ -170,7 +170,7 @@ void Video_Stream::paintEvent(QPaintEvent* ev)
 	m_painter.begin(this);
 	m_painter.setCompositionMode(QPainter::CompositionMode_Source);
 
-    m_painter.drawImage(QRectF(0, 0, m_image.width(), m_image.height()), m_image);
+    m_painter.drawImage(QRectF(0, 0, m_image.width(), m_image.height()), m_image_flipped);
 
 	m_painter.end();
 }

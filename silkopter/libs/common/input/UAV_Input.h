@@ -30,14 +30,14 @@ namespace uav_input
     enum class Throttle_Mode : uint8_t
     {
         RATE,       //throttle rate of change, per second. 1 means full throttle in one second
-        STABLE,     //-1 .. 1 are offsets from current throttle. Zero means keep same throttle
+        OFFSET,     //-1 .. 1 are offsets from current throttle. Zero means keep same throttle
         ASSISTED,   //climb speed, meters per second
     };
 
     enum class Pitch_Roll_Mode : uint8_t
     {
         RATE,       //angle rate of change - radians per second
-        STABLE,     //angle from horizontal. zero means horizontal
+        HORIZONTAL, //angle from horizontal. zero means horizontal
         ASSISTED,   //speed, meters per second
     };
 

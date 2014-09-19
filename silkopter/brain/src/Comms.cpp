@@ -56,6 +56,8 @@ void Comms::handle_accept(boost::system::error_code const& error)
         return;
     }
 
+    m_socket->set_option(socket_base::send_buffer_size(8192));
+
     m_channel.reset(new Channel(*m_socket));
     m_channel->start();
 

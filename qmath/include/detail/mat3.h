@@ -51,6 +51,8 @@ struct mat3
 
 	mat3(vec3<T> const& column0, vec3<T> const& column1, vec3<T> const& column2);
 
+    template<class Policy = standard> static mat3<T> look_at(vec3<T> const& front, vec3<T> const& up);
+
 	///////////////////////////////////////////////////////////////////////////////
 	// methods
 	///////////////////////////////////////////////////////////////////////////////

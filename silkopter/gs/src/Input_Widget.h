@@ -23,10 +23,12 @@ private:
     void set_pitch_roll_mode(QString const& v);
     void set_reference_frame(QString const& v);
 
+    float filter_stick_value(float v);
+
     struct UAV_Input
     {
-        silk::uav_input::Throttle_Mode throttle_mode = silk::uav_input::Throttle_Mode::STABLE;
-        silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::STABLE;
+        silk::uav_input::Throttle_Mode throttle_mode = silk::uav_input::Throttle_Mode::OFFSET;
+        silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
         silk::uav_input::Assists assists;
         silk::uav_input::Sticks sticks;
 

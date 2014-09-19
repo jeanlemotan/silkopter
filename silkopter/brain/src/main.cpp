@@ -57,7 +57,7 @@ int main(int argc, char const* argv[])
 	po::options_description desc("Options");
 	desc.add_options()
 		("help", "produce help message")
-        ("mtu", po::value<size_t>(), "packet size")
+        ("blind", "no camera")
         ("test", po::value<size_t>(), "test");
 
 	po::variables_map vm;
@@ -71,6 +71,7 @@ int main(int argc, char const* argv[])
 	}
 
     s_test = vm.count("test") ? vm["test"].as<size_t>() : size_t(0);
+    bool blind = vm.count("blind") != 0;
 
 	boost::asio::io_service io_service;
 
@@ -141,6 +142,7 @@ int main(int argc, char const* argv[])
         silk::Video_Server streamer(io_service);
         setup_camera_defaults(camera, streamer);
 
+        if (!blind)
         {
             auto res = camera.start();
             if (res != silk::Camera::Result::OK)
@@ -149,6 +151,9 @@ int main(int argc, char const* argv[])
                 abort();
             }
         }
+
+//        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
+
 
         while (true)
         {

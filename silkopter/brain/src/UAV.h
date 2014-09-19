@@ -97,9 +97,9 @@ public:
     void set_assist_params(Assist_Params const& params);
 
 private:
-    void process_sensor_data();
-    void process_motors();
-    void process_rate_pids(q::Clock::duration dt, math::vec3f const& angular_velocity);
+    void process_sensor_data(q::Clock::duration dt);
+    void process_motors(q::Clock::duration dt);
+    void process_input(q::Clock::duration dt);
 
     uint32_t m_last_gyroscope_sample_idx = 0;
     uint32_t m_last_accelerometer_sample_idx = 0;
@@ -127,10 +127,10 @@ private:
         Roll_Rate_PID roll_rate;
         Altitude_Rate_PID altitude_rate;
 
-//        Yaw_PID yaw;
-//        Pitch_PID pitch;
-//        Roll_PID roll;
-//        Altitude_PID altitude;
+        Yaw_PID yaw;
+        Pitch_PID pitch;
+        Roll_PID roll;
+        Altitude_PID altitude;
     } m_pids;
 
     struct Input
@@ -142,6 +142,20 @@ private:
         uav_input::Sticks sticks;
         uav_input::Assists assists;
     } m_input;
+
+    void process_input_throttle_rate(q::Clock::duration dt);
+    void process_input_throttle_offset(q::Clock::duration dt);
+    void process_input_throttle_assisted(q::Clock::duration dt);
+    void process_input_pitch_roll_rate(q::Clock::duration dt);
+    void process_input_pitch_roll_horizontal(q::Clock::duration dt);
+    void process_input_pitch_roll_assisted(q::Clock::duration dt);
+    void process_input_yaw_rate(q::Clock::duration dt);
+
+    struct Throttle
+    {
+        float reference = 0.f;
+        float current = 0.f;
+    } m_throttle;
 
     struct Linear_Motion
     {
@@ -159,6 +173,10 @@ private:
     struct Settings
     {
         rapidjson::Document document;
+
+        float max_pitch_rate = math::anglef::pi;
+        float max_roll_rate = math::anglef::pi;
+        float max_yaw_rate = math::anglef::pi;
     } m_settings;
 
     auto load_settings() -> bool;

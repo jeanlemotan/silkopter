@@ -1,7 +1,11 @@
 ﻿#include "BrainStdAfx.h"
+
+#ifdef RASPBERRY_PI
+
 #include "IO_Board_RPi.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
+#include <pigpio.h>
 
 #define USE_MPU9250
 #define USE_MS5611
@@ -19,6 +23,11 @@
 #   error "No Barometer selected"
 #endif
 
+static constexpr std::array<uint32_t, 6> MOTOR_GPIOS = {4, 17, 18, 27, 22, 23};
+constexpr uint32_t CAMERA_YAW_GPIO = 0;
+constexpr uint32_t CAMERA_PITCH_GPIO = 25;
+constexpr uint32_t CAMERA_ROLL_GPIO = 0;
+constexpr uint32_t GPIO_PWM_RANGE = 10000;
 
 using namespace silk;
 using namespace boost::asio;
@@ -45,6 +54,7 @@ IO_Board_RPi::IO_Board_RPi()
 
 IO_Board_RPi::~IO_Board_RPi()
 {
+    gpioTerminate();
 }
 
 auto IO_Board_RPi::load_settings() -> bool
@@ -119,12 +129,12 @@ void IO_Board_RPi::save_settings()
         jsonutil::set_vec3_value(json, "compass_bias", m_calibration_config.compass_bias, allocator);
     }
 
-    typedef rapidjson::UTF8<> JSONCharset;
-    typedef rapidjson::GenericStringBuffer<JSONCharset> JSONBuffer;
-    typedef rapidjson::PrettyWriter<JSONBuffer> JSONWriter;
+    typedef rapidjson::UTF8<> JSON_Charset;
+    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
+    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
 
-    JSONBuffer buffer;
-    JSONWriter writer(buffer);
+    JSON_Buffer buffer;
+    JSON_Writer writer(buffer);
     m_settings.document.Accept(writer);
 
     q::data::File_Sink fs(q::Path("io_board.cfg"));
@@ -143,6 +153,58 @@ auto IO_Board_RPi::connect() -> Connection_Result
     {
         return Connection_Result::OK;
     }
+
+    if (gpioCfgClock(2, 1, 1) < 0)
+    {
+        SILK_WARNING("Cannot configure gpio clock");
+        return Connection_Result::FAILED;
+    }
+
+    if (gpioInitialise() < 0)
+    {
+        SILK_WARNING("Cannot initialize gpio");
+        return Connection_Result::FAILED;
+    }
+
+    {
+        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
+        {
+            uint32_t freq = 0;
+            switch (m_pwm_frequency)
+            {
+            case PWM_Frequency::PWM_1000Hz: freq = 1000; break;
+            default:
+            {
+                SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_pwm_frequency));
+                gpioTerminate();
+                return Connection_Result::FAILED;
+            }
+            }
+
+            for (auto gpio: MOTOR_GPIOS)
+            {
+                if (gpioSetPWMfrequency(gpio, freq) < 0)
+                {
+                    SILK_WARNING("Cannot set pwm frequency {} on gpio {}", freq, gpio);
+                    gpioTerminate();
+                    return Connection_Result::FAILED;
+                }
+                if (gpioSetPWMrange(gpio, GPIO_PWM_RANGE) < 0)
+                {
+                    SILK_WARNING("Cannot set pwm range {} on gpio {}", GPIO_PWM_RANGE, gpio);
+                    gpioTerminate();
+                    return Connection_Result::FAILED;
+                }
+            }
+        }
+        else
+        {
+            SILK_WARNING("Non-pwm ESC support not implemented");
+            gpioTerminate();
+            return Connection_Result::FAILED;
+        }
+    }
+
 
 #ifdef USE_MS5611
     m_p->baro.init("/dev/i2c-1");
@@ -169,19 +231,63 @@ bool IO_Board_RPi::is_running() const
     return m_is_connected;
 }
 
-void IO_Board_RPi::set_motor_output(size_t motor_idx, float output)
+void IO_Board_RPi::set_motor_throttles(float const* throttles, size_t count)
 {
-    QASSERT(motor_idx < 12);
-    if (motor_idx >= 12)
+    QASSERT(throttles != nullptr);
+    if (!throttles)
     {
         return;
     }
 
-    if (motor_idx >= m_motor_outputs.size())
+    count = math::min(count, MOTOR_GPIOS.size());
+    if (count > m_motors.size())
     {
-        m_motor_outputs.resize(motor_idx + 1);
+        m_motors.resize(count);
     }
-    m_motor_outputs[motor_idx] = output;
+
+    for (size_t i = 0; i < count; i++)
+    {
+        auto throttle = math::clamp(throttles[i], 0.f, 1.f);
+        m_motors[i].throttle = throttle;
+
+        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
+        {
+            uint32_t pulse = throttle * GPIO_PWM_RANGE;
+            gpioPWM(MOTOR_GPIOS[i], pulse);
+        }
+        else
+        {
+            QASSERT(0);
+        }
+    }
+}
+
+void IO_Board_RPi::set_camera_rotation(math::quatf const& rot)
+{
+    math::anglef pitch, roll, yaw;
+    rot.get_as_euler_xyz(pitch, roll, yaw);
+
+    if (CAMERA_YAW_GPIO > 0)
+    {
+        //uint32_t pulse = (euler.z * 2500.f) + 1250.f
+        //gpioServo(CAMERA_YAW_GPIO, )
+    }
+    if (CAMERA_PITCH_GPIO > 0)
+    {
+        auto delta = math::anglef(pitch) - math::anglef(0);
+        auto x = math::clamp(delta.radians / math::anglef::pi, -1.f, 1.f);
+
+        uint32_t pulse = static_cast<uint32_t>((x * 2500.f) + 1250.f);
+        gpioServo(CAMERA_PITCH_GPIO, pulse);
+    }
+    if (CAMERA_ROLL_GPIO > 0)
+    {
+        auto delta = math::anglef(roll) - math::anglef(0);
+        auto x = math::clamp(delta.radians / math::anglef::pi, -1.f, 1.f);
+
+        uint32_t pulse = static_cast<uint32_t>((x * 2500.f) + 1250.f);
+        gpioServo(CAMERA_ROLL_GPIO, pulse);
+    }
 }
 
 void IO_Board_RPi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
@@ -294,3 +400,5 @@ void IO_Board_RPi::process()
 //    SILK_INFO("d = {}, {}", d, m_sensor_samples.size());
 }
 
+
+#endif

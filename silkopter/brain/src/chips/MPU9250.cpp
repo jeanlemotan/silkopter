@@ -291,19 +291,19 @@ auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Ra
     {
     case Gyroscope_Range::_250_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f);
+        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f);
         break;
     case Gyroscope_Range::_500_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 2.f);
+        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 2.f);
         break;
     case Gyroscope_Range::_1000_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 4.f);
+        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 4.f);
         break;
     case Gyroscope_Range::_2000_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 8.f);
+        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 8.f);
         break;
     default:
         SILK_ERR("Invalid gyroscope range.");
@@ -590,7 +590,8 @@ void MPU9250::process_compass()
     data[2] = data[2] * m_magnetic_adj[2];
 
     //change of axis according to the specs. By default the compass has front X, right Y and down Z
-    static const math::quatf rot = math::quat_axis_y(math::radians(180.f)) * math::quat_axis_z(math::radians(90.f));
+    static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
+            math::quatf::from_axis_z(math::radians(90.f));
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
     m_samples.compass = math::rotate(rot, c);

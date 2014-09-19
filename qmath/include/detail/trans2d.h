@@ -37,7 +37,7 @@ struct trans2d
 	//casting from trans3d
 	explicit trans2d(trans3d<T> const& v);
 
-	trans2d(vec2<T> const& translation, T rotation, vec2<T> const& scale);
+    trans2d(vec2<T> const& translation, angle<T> const& rotation, vec2<T> const& scale);
 	trans2d(vec2<T> const& translation, mat2<T> const& rotation, vec2<T> const& scale);
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ public:
 
 	mat2<T>		get_rotation() const;
 	trans2d<T>&	set_rotation(mat2<T> const& rot);
-	trans2d<T>&	set_rotation(T rot);
+    trans2d<T>&	set_rotation(angle<T> const& rot);
 
 	void		repair();
 	bool		is_valid() const;

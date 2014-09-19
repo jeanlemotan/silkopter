@@ -19,7 +19,9 @@ public:
     //----------------------------------------------------------------------
     //motors
 
-    void set_motor_output(size_t motor_idx, float output);
+    void set_motor_throttles(float const* throttles, size_t count);
+
+    void set_camera_rotation(math::quatf const& rot);
 
     //----------------------------------------------------------------------
     //calibration
@@ -179,7 +181,7 @@ private:
         math::vec3f compass_bias;
     } m_calibration_config;
 
-    PWM_Frequency m_pwm_frequency = PWM_Frequency::_50HZ;
+    PWM_Frequency m_pwm_frequency = PWM_Frequency::SERVO_50HZ;
     std::vector<float> m_motor_outputs;
 
     void send_configs_if_changed();

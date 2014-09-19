@@ -17,10 +17,9 @@ public:
     bool is_disconnected() const;
     bool is_running() const;
 
-    //----------------------------------------------------------------------
-    //motors
+    void set_motor_throttles(float const* throttles, size_t count);
 
-    void set_motor_output(size_t motor_idx, float output);
+    void set_camera_rotation(math::quatf const& rot);
 
     //----------------------------------------------------------------------
     //calibration
@@ -58,8 +57,12 @@ private:
         math::vec3f compass_bias;
     } m_calibration_config;
 
-    PWM_Frequency m_pwm_frequency = PWM_Frequency::_50HZ;
-    std::vector<float> m_motor_outputs;
+    PWM_Frequency m_pwm_frequency = PWM_Frequency::PWM_1000Hz;
+    struct Motor
+    {
+        float throttle = 0;
+    };
+    std::vector<Motor> m_motors;
 
     bool m_is_connected = false;
     size_t m_error_count = 0;

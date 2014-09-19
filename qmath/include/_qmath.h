@@ -55,6 +55,7 @@ namespace math
 namespace math
 {
 	typedef angle<float>		anglef;
+    typedef angle<double>		angled;
 
 	typedef vec2<int8_t>		vec2s8;
 	typedef vec2<uint8_t>		vec2u8;

@@ -38,6 +38,8 @@ LIBS += -L$${ROOT_LIBS_PATH}/qbase/$${LIB_FOLDER} -lqbase
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lOIS
 
 
+DESTDIR = ../../../bin
+
 SOURCES += \
     ../../../src/Attitude.cpp \
     ../../../src/Axis.cpp \
