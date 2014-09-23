@@ -3,120 +3,77 @@
 namespace qinput
 {
 	class Input_Mgr;
-	struct Gamepad_Event;
-
-	enum class Button_Id
-	{
-		//generic semantics
-		CONFIRM		= 0,
-		OPTION1		= 1,
-		OPTION2		= 2,
-		BACK		= 3,
-
-		OUYA_O		= 0,
-		OUYA_U		= 1,
-		OUYA_Y		= 2,
-		OUYA_A		= 3,
-
-		PS_X		= 0,
-		PS_SQUARE	= 1,
-		PS_TRIANGLE	= 2,
-		PS_CIRCLE	= 3,
-
-		XBOX_A		= 0,
-		XBOX_X		= 1,
-		XBOX_Y		= 2,
-		XBOX_B		= 3,
-
-		//////////////////////////////////////////////////////////////////////////
-
-		RIGHT_BUMPER= 100,
-		LEFT_BUMPER	= 101,
-		RIGHT_STICK	= 102,
-		LEFT_STICK	= 103,
-
-		OUYA_RIGHT_BUMPER	= 100,
-		OUYA_LEFT_BUMPER	= 101,
-		OUYA_RIGHT_STICK	= 102,
-		OUYA_LEFT_STICK		= 103,
-
-		PS_R1		= 100,
-		PS_L1		= 101,
-		PS_R3		= 102,
-		PS_L3		= 103,
-
-		XBOX_RB		= 100,
-		XBOX_LB		= 101,
-		XBOX_R3		= 102,
-		XBOX_L3		= 103,
-
-		//////////////////////////////////////////////////////////////////////////
-
-		START		= 200,
-		SELECT		= 201,
-		HOME		= 203,
-
-		PAD_UP		= 300,
-		PAD_DOWN	= 301,
-		PAD_LEFT	= 302,
-		PAD_RIGHT	= 303,
-	};
-
-	enum class Stick_Id
-	{
-		LEFT,
-		RIGHT
-	};
-
-	enum  class Trigger_Id
-	{
-		LEFT,
-		RIGHT
-	};
-
-
-	struct Gamepad_Event
-	{
-		enum class Type
-		{
-			CONNECT,
-			DISCONNECT,
-			STICK_CHANGE,
-			TRIGGER_CHANGE,
-			BUTTON_PRESS,
-			BUTTON_RELEASE,
-			SENSOR_EVENT
-		};
-
-		//all events should set the type and timestamp
-		Type type;
-        q::Clock::time_point timestamp;
-
-		//all events should set the gamepadId
-        uint32_t gamepad_id = uint32_t(-1);
-
-		//STICK_CHANGE events
-		Stick_Id stick_id;
-		math::vec2f stick_value;
-
-		//TRIGGER_CHANGE events
-		Trigger_Id trigger_id;
-		float trigger_value;
-
-		//BUTTON_PRESS/RELEASE events
-		Button_Id button_id;
-
-		//SENSOR_EVENTS
-		Sensor_Event sensor_event;
-	};
+//	struct Gamepad_Event;
 
 	class Gamepad : q::util::Noncopyable
 	{
 		friend class Input_Mgr;
 	public:
-		Gamepad(uint32_t id);
+        enum class Button
+        {
+            //////////////////////////////////////////////////////////////////////////
 
-		uint32_t get_id() const;
+            RIGHT_BUMPER    = 100,
+            LEFT_BUMPER     = 101,
+            RIGHT_TRIGGER   = 102,
+            LEFT_TRIGGER    = 103,
+            RIGHT_STICK     = 104,
+            LEFT_STICK      = 105,
+
+            //////////////////////////////////////////////////////////////////////////
+
+            START		= 200,
+            SELECT		= 201,
+            HOME		= 203,
+
+            LPAD_UP		= 300,
+            LPAD_DOWN	= 301,
+            LPAD_LEFT	= 302,
+            LPAD_RIGHT	= 303,
+
+            RPAD_UP		= 400, //triangle on the ps3, Y on xbox an ouya
+            RPAD_DOWN	= 401, //X on ps3, A on xbox, O on ouya
+            RPAD_LEFT	= 402, //square on ps3, X on xbox, U on ouya
+            RPAD_RIGHT	= 403, //circle on ps3, B on xbox, A on ouya
+
+            //gamepad specific for the RPAD
+            OUYA_O		= 401,
+            OUYA_U		= 402,
+            OUYA_Y		= 400,
+            OUYA_A		= 403,
+
+            PS_X		= 401,
+            PS_SQUARE	= 402,
+            PS_TRIANGLE	= 400,
+            PS_CIRCLE	= 403,
+
+            XBOX_A		= 401,
+            XBOX_X		= 402,
+            XBOX_Y		= 400,
+            XBOX_B		= 403,
+        };
+
+        enum class Stick
+        {
+            LEFT,
+            RIGHT
+        };
+
+        enum  class Axis
+        {
+            LEFT_TRIGGER,
+            RIGHT_TRIGGER,
+        };
+
+        enum class Type
+        {
+            OUYA
+        };
+
+        Gamepad(q::String const& name, Type type);
+
+        auto get_name() const -> q::String const&;
+        auto get_type() const -> Type;
 		
 		bool is_connected() const;
 
@@ -124,47 +81,49 @@ namespace qinput
 		{
 			math::vec2f value;
 		};
-		struct Trigger_Data
+        struct Axis_Data
 		{
-			Trigger_Data() : value(0) {}
-			Trigger_Data(Trigger_Data const& other) : value(other.value) {}
-			Trigger_Data& operator=(Trigger_Data const& other) { value = other.value; return *this; }
-
-			float value;
+            float value = 0;
 		};
 
-		Stick_Data			get_stick_data(Stick_Id id) const;
-		Trigger_Data		get_trigger_data(Trigger_Id id) const;
+        auto get_stick_data(Stick id) const -> Stick_Data;
+        auto get_axis_data(Axis id) const -> Axis_Data;
 
-		bool				is_button_inactive(Button_Id button) const;
-		bool				is_button_pressed(Button_Id button) const;
-		bool				is_button_released(Button_Id button) const;
+        bool is_button_inactive(Button button) const;
+        bool is_button_pressed(Button button) const;
+        bool is_button_released(Button button) const;
 
-		std::vector<Button_Id>	get_all_pressed_buttons() const;
-		std::vector<Button_Id>	get_all_released_buttons() const;
+        auto get_all_pressed_buttons() const -> std::vector<Button>;
+        auto get_all_released_buttons() const -> std::vector<Button>;
 
-		Sensors const&		get_sensors() const;
+        auto get_sensors() const -> Sensors const&;
 
 	protected:
-		void update(q::Clock::duration dt);
-		void add_event(Gamepad_Event const& event);
+        void update(q::Clock::duration dt);
+//		void add_event(Gamepad_Event const& event);
+        void set_connected(bool yes);
 
+        void set_stick_data(Stick stick, Stick_Data const& data);
+        void set_axis_data(Axis axis, Axis_Data const& data);
+        void set_button_pressed(Button button);
+        void set_button_released(Button button);
 
 	private:
-		void process_events(q::Clock::duration dt);
+//		void process_events(q::Clock::duration dt);
 
-		uint32_t m_id;
+        q::String m_name;
+        Type m_type;
 
-		mutable std::mutex	m_mutex;
+        mutable std::mutex	m_mutex;
 
-		mutable std::mutex	m_events_mutex;
-		std::deque<Gamepad_Event> m_events;
+//		mutable std::mutex	m_events_mutex;
+//		std::deque<Gamepad_Event> m_events;
 
-		bool				m_is_connected;
+        bool				m_is_connected = false;
 		std::array<Stick_Data, 2> m_sticks;
-		std::array<Trigger_Data, 2> m_triggers;
-		std::set<Button_Id>	m_buttons_pressed;
-		std::set<Button_Id>	m_buttons_released;
+        std::array<Axis_Data, 2> m_axes;
+        std::set<Button>	m_buttons_pressed;
+        std::set<Button>	m_buttons_released;
 
 		Sensors				m_sensors;
 	};

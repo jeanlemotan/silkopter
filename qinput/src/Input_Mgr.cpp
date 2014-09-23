@@ -1,209 +1,50 @@
 #include "QInputStdAfx.h"
 #include "QInput.h"
 
-#include "OIS/OISInputManager.h"
-#include "OIS/OISException.h"
-#include "OIS/OISJoyStick.h"
-#include "OIS/OISKeyboard.h"
-#include "OIS/OISMouse.h"
-#include "OIS/OISEvents.h"
+#include <linux/joystick.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 using namespace qinput;
 
-class Input_Mgr::Event_Handler : /*public OIS::KeyListener, public OIS::MouseListener,*/ public OIS::JoyStickListener, q::util::Noncopyable
-{
-    friend class Input_Mgr;
-protected:
-    std::shared_ptr<OIS::InputManager> m_ois;
-    Input_Mgr& m_input_mgr;
-    std::vector<std::shared_ptr<OIS::JoyStick>> m_joys;
-
-    void update()
-    {
-        for (auto& j: m_joys)
-        {
-            j->capture();
-        }
-    }
-
-public:
-    Event_Handler(Input_Mgr& input_mgr)
-        : m_input_mgr(input_mgr)
-    {
-
-    }
-
-    bool buttonPressed(const OIS::JoyStickEvent &arg, int button)
-    {
-        //std::cout << std::endl << arg.device->vendor() << ". Button Pressed # " << button;
-        Gamepad_Event event;
-        event.gamepad_id = arg.device->getID();
-        event.timestamp = q::Clock::now();
-        event.type = Gamepad_Event::Type::BUTTON_PRESS;
-        bool ok = true;
-        switch (button)
-        {
-        case 3: event.button_id = Button_Id::OUYA_O; break;
-        case 4: event.button_id = Button_Id::OUYA_U; break;
-        case 5: event.button_id = Button_Id::OUYA_Y; break;
-        case 6: event.button_id = Button_Id::OUYA_A; break;
-        case 7: event.button_id = Button_Id::LEFT_BUMPER; break;
-        case 8: event.button_id = Button_Id::RIGHT_BUMPER; break;
-        case 9: event.button_id = Button_Id::LEFT_STICK; break;
-        case 10: event.button_id = Button_Id::RIGHT_STICK; break;
-        case 11: event.button_id = Button_Id::PAD_UP; break;
-        case 12: event.button_id = Button_Id::PAD_DOWN; break;
-        case 13: event.button_id = Button_Id::PAD_LEFT; break;
-        case 14: event.button_id = Button_Id::PAD_RIGHT; break;
-        default: ok = false; break;
-        }
-        if (ok)
-        {
-            m_input_mgr.add_event(event);
-        }
-        return true;
-    }
-    bool buttonReleased( const OIS::JoyStickEvent &arg, int button )
-    {
-        //std::cout << std::endl << arg.device->vendor() << ". Button Released # " << button;
-        Gamepad_Event event;
-        event.gamepad_id = arg.device->getID();
-        event.timestamp = q::Clock::now();
-        event.type = Gamepad_Event::Type::BUTTON_RELEASE;
-        bool ok = true;
-        switch (button)
-        {
-        case 3: event.button_id = Button_Id::OUYA_O; break;
-        case 4: event.button_id = Button_Id::OUYA_U; break;
-        case 5: event.button_id = Button_Id::OUYA_Y; break;
-        case 6: event.button_id = Button_Id::OUYA_A; break;
-        case 7: event.button_id = Button_Id::LEFT_BUMPER; break;
-        case 8: event.button_id = Button_Id::RIGHT_BUMPER; break;
-        case 9: event.button_id = Button_Id::LEFT_STICK; break;
-        case 10: event.button_id = Button_Id::RIGHT_STICK; break;
-        case 11: event.button_id = Button_Id::PAD_UP; break;
-        case 12: event.button_id = Button_Id::PAD_DOWN; break;
-        case 13: event.button_id = Button_Id::PAD_LEFT; break;
-        case 14: event.button_id = Button_Id::PAD_RIGHT; break;
-        default: ok = false; break;
-        }
-        if (ok)
-        {
-            m_input_mgr.add_event(event);
-        }
-        return true;
-    }
-    bool axisMoved( const OIS::JoyStickEvent &arg, int axis )
-    {
-        //Provide a little dead zone
-        if( arg.state.mAxes[axis].abs > 2500 || arg.state.mAxes[axis].abs < -2500 )
-        {
-            //std::cout << std::endl << arg.device->vendor() << ". Axis # " << axis << " Value: " << arg.state.mAxes[axis].abs;
-        }
-
-        Gamepad_Event event;
-        event.gamepad_id = arg.device->getID();
-        event.timestamp = q::Clock::now();
-        if (axis == 0 || axis == 1)
-        {
-            event.type = Gamepad_Event::Type::STICK_CHANGE;
-            event.stick_id = Stick_Id::LEFT;
-            event.stick_value.set(arg.state.mAxes[0].abs / 32768.f, arg.state.mAxes[1].abs / 32768.f);
-        }
-        else if (axis == 3 || axis == 4)
-        {
-            event.type = Gamepad_Event::Type::STICK_CHANGE;
-            event.stick_id = Stick_Id::RIGHT;
-            event.stick_value.set(arg.state.mAxes[3].abs / 32768.f, arg.state.mAxes[4].abs / 32768.f);
-        }
-        else if (axis == 2)
-        {
-            event.type = Gamepad_Event::Type::TRIGGER_CHANGE;
-            event.trigger_id = Trigger_Id::LEFT;
-            event.trigger_value = (arg.state.mAxes[axis].abs / 32768.f);
-        }
-        else if (axis == 5)
-        {
-            event.type = Gamepad_Event::Type::TRIGGER_CHANGE;
-            event.trigger_id = Trigger_Id::RIGHT;
-            event.trigger_value = (arg.state.mAxes[axis].abs / 32768.f);
-        }
-        m_input_mgr.add_event(event);
-
-        return true;
-    }
-};
 
 Input_Mgr::Input_Mgr(q::String const& window_handle)
-	: m_last_gamepad_id(0)
 {
-    m_event_handler.reset(new Event_Handler(*this));
+    enumerate_gamepads();
 
-
-    OIS::ParamList pl;
-
-    pl.insert(std::make_pair( std::string("WINDOW"), window_handle.c_str() ));
-
-    //This never returns null.. it will raise an exception on errors
-    m_event_handler->m_ois.reset(OIS::InputManager::createInputSystem(pl), OIS::InputManager::destroyInputSystem);
-
-    //Lets enable all addons that were compiled in:
-    m_event_handler->m_ois->enableAddOnFactory(OIS::InputManager::AddOn_All);
-
-    //Print debugging information
-    uint32_t v = m_event_handler->m_ois->getVersionNumber();
-    QLOG_INFO("Input_Mgr", "OIS Version: {}\nRelease Name: {}.{}.{}\nManager: {}\nTotal Keyboards: {}\nTotal Mice: {}\nTotal JoySticks: {}",
-        (v>>16 ), ((v>>8) & 0x000000FF), (v & 0x000000FF),
-        m_event_handler->m_ois->getVersionName(),
-        m_event_handler->m_ois->inputSystemName(),
-        m_event_handler->m_ois->getNumberOfDevices(OIS::OISKeyboard),
-        m_event_handler->m_ois->getNumberOfDevices(OIS::OISMouse),
-        m_event_handler->m_ois->getNumberOfDevices(OIS::OISJoyStick));
-
-    //List all devices
-    OIS::DeviceList list = m_event_handler->m_ois->listFreeDevices();
-
-// 	g_kb = (Keyboard*)sInputManager->createInputObject( OISKeyboard, true );
-// 	g_kb->setEventCallback( &handler );
-//
-// 	g_m = (Mouse*)sInputManager->createInputObject( OISMouse, true );
-// 	g_m->setEventCallback( &handler );
-// 	const MouseState &ms = g_m->getMouseState();
-// 	ms.width = 100;
-// 	ms.height = 100;
-
-    try
     {
-        //This demo uses at most 4 joysticks - use old way to create (i.e. disregard vendor)
-        int numSticks = std::min(m_event_handler->m_ois->getNumberOfDevices(OIS::OISJoyStick), 4);
-        for (int i = 0; i < numSticks; ++i)
-        {
-            m_event_handler->m_joys.emplace_back(
-                (OIS::JoyStick*)m_event_handler->m_ois->createInputObject(OIS::OISJoyStick, true),  //constructor
-                [&](OIS::JoyStick* joy){ m_event_handler->m_ois->destroyInputObject(joy); } //destructor
-            );
+        auto& buttons = m_ouya_maping.buttons;
+        auto& sticks = m_ouya_maping.sticks;
+        auto& axes = m_ouya_maping.axes;
+        buttons[0] = Gamepad::Button::OUYA_O;
+        buttons[1] = Gamepad::Button::OUYA_U;
+        buttons[2] = Gamepad::Button::OUYA_Y;
+        buttons[3] = Gamepad::Button::OUYA_A;
 
-            auto& joy = *m_event_handler->m_joys.back();
-            joy.setEventCallback(m_event_handler.get());
-            QLOG_INFO("Input_Mgr", "Creating Joystick {}\n\tAxes: {}\n\tSliders: {}\n\tPOV/HATs: {}\n\tButtons: {}\n\tVector3: {}\n\tBuffered: {}",
-                    (i + 1),
-                    joy.getNumberOfComponents(OIS::OIS_Axis),
-                    joy.getNumberOfComponents(OIS::OIS_Slider),
-                    joy.getNumberOfComponents(OIS::OIS_POV),
-                    joy.getNumberOfComponents(OIS::OIS_Button),
-                    joy.getNumberOfComponents(OIS::OIS_Vector3),
-                    joy.buffered());
+        buttons[8] = Gamepad::Button::LPAD_UP;
+        buttons[9] = Gamepad::Button::LPAD_DOWN;
+        buttons[10] = Gamepad::Button::LPAD_LEFT;
+        buttons[11] = Gamepad::Button::LPAD_RIGHT;
 
-            Gamepad_Event event;
-            event.gamepad_id = joy.getID();
-            event.timestamp = q::Clock::now();
-            event.type = Gamepad_Event::Type::CONNECT;
-            add_event(event);
-        }
+        buttons[6] = Gamepad::Button::LEFT_STICK;
+        buttons[7] = Gamepad::Button::RIGHT_STICK;
+
+        buttons[4] = Gamepad::Button::LEFT_BUMPER;
+        buttons[5] = Gamepad::Button::RIGHT_BUMPER;
+
+        buttons[12] = Gamepad::Button::LEFT_TRIGGER;
+        buttons[13] = Gamepad::Button::RIGHT_TRIGGER;
     }
-    catch(OIS::Exception &ex)
+}
+
+Input_Mgr::~Input_Mgr()
+{
     {
-        std::cout << "\nException raised on joystick creation: " << ex.eText << std::endl;
+        std::lock_guard<std::mutex> lock(m_gamepad_mutex);
+        for (auto& g: m_gamepads)
+        {
+            close(g.fd);
+        }
     }
 }
 
@@ -222,85 +63,125 @@ Sensors const& Input_Mgr::get_sensors() const
 
 std::vector<Gamepad_cptr> Input_Mgr::get_all_gamepads() const
 {
+    enumerate_gamepads();
+
 	std::vector<Gamepad_cptr> gamepads;
-	gamepads.reserve(m_gamepads.size());
-	for (auto const& g: m_gamepads)
-	{
-		gamepads.emplace_back(g);
-	}						  
-	return gamepads;
-}
-Gamepad_cptr Input_Mgr::find_gamepad_by_id(uint32_t id) const
-{
-	auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(), [&](Gamepad_ptr const& g) { return g->get_id() == id; });
-	if (it != m_gamepads.end())
-	{
-		return *it;
-	}
-	return Gamepad_cptr();
+    {
+        std::lock_guard<std::mutex> lock(m_gamepad_mutex);
+        gamepads.reserve(m_gamepads.size());
+        for (auto const& g: m_gamepads)
+        {
+            gamepads.emplace_back(g.gamepad);
+        }
+    }
+    return gamepads;
 }
 
 void Input_Mgr::remove_disconnected_gamepads()
 {
-	m_gamepads.erase(std::remove_if(m_gamepads.begin(), m_gamepads.end(), [](Gamepad_ptr const& g)
-	{ 
-		return !g->is_connected(); 
-	}), m_gamepads.end());
+    std::lock_guard<std::mutex> lock(m_gamepad_mutex);
+
+//	m_gamepads.erase(std::remove_if(m_gamepads.begin(), m_gamepads.end(), [](Gamepad_ptr const& g)
+//	{
+//		return !g->is_connected();
+//	}), m_gamepads.end());
 }
+
+void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event const& ev)
+{
+    uint8_t type = ev.type & ~JS_EVENT_INIT;
+    if (type == JS_EVENT_BUTTON)
+    {
+        auto it = m_ouya_maping.buttons.find(ev.number);
+        if (it == m_ouya_maping.buttons.end())
+        {
+            QLOG_ERR("qinput", "unhandled ouya button {}", ev.number);
+            return;
+        }
+        if (ev.value)
+        {
+            data.gamepad->set_button_pressed(it->second);
+        }
+        else
+        {
+            data.gamepad->set_button_released(it->second);
+        }
+    }
+    else if (type == JS_EVENT_AXIS)
+    {
+        if (ev.number == 0)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+            stick.value.x = ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+        }
+        else if (ev.number == 1)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+            stick.value.y = -ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+        }
+        else if (ev.number == 3)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+            stick.value.x = ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+        }
+        else if (ev.number == 4)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+            stick.value.y = -ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+        }
+        else if (ev.number == 2)
+        {
+            Gamepad::Axis_Data v;
+            v.value = ev.value / 32767.f;
+            data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
+        }
+        else if (ev.number == 5)
+        {
+            Gamepad::Axis_Data v;
+            v.value = ev.value / 32767.f;
+            data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
+        }
+        else
+        {
+            QLOG_ERR("qinput", "unknown ouya axis {}", ev.number);
+        }
+    }
+}
+
 
 void Input_Mgr::update_gamepads(q::Clock::duration dt)
 {
+    std::lock_guard<std::mutex> lock(m_gamepad_mutex);
+
 	for (auto const& g: m_gamepads)
 	{
-		g->update(dt);
+        g.gamepad->update(dt);
+
+        struct js_event ev;
+        while (read (g.fd, &ev, sizeof(ev)) > 0)
+        {
+            switch (g.gamepad->get_type())
+            {
+            case Gamepad::Type::OUYA: process_ouya_gamepad_event(g, ev); break;
+            default: break;
+            }
+        }
 	}
-}
-
-void Input_Mgr::connect_new_gamepads(q::Clock::duration dt)
-{
-	std::lock_guard<std::mutex> lock(m_new_gamepad_event_mutex);
-	std::vector<Gamepad_ptr> new_gamepads;
-	for (auto const& event: m_new_gamepad_events)
-	{
-		if (event.type == Gamepad_Event::Type::CONNECT)
-		{
-			Gamepad_ptr g = std::make_shared<Gamepad>(event.gamepad_id);
-			m_gamepads.emplace_back(g);
-			g->add_event(event);
-			new_gamepads.emplace_back(g);
-			continue;
-		}
-
-		auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(), [&](Gamepad_ptr const& g) { return g->get_id() == event.gamepad_id; });
-		if (it != m_gamepads.end())
-		{
-			(*it)->add_event(event);
-		}
-		else
-		{
-			QLOG_WARNING("Q", "Ignored event for gamepad {0}: {1}", event.gamepad_id, (int)event.type); //ignored event
-		}
-    };
-
-	//update all new gamepads
-	for (auto const g: new_gamepads)
-	{
-		g->update(dt);
-	}
-	m_new_gamepad_events.clear();
 }
 
 void Input_Mgr::update(q::Clock::duration dt)
 {
-    m_event_handler->update();
-
 	m_touchscreen.update(dt);
 	m_keyboard.update(dt);
 	m_sensors.update(dt);
 
 	remove_disconnected_gamepads();
 	update_gamepads(dt);
-	connect_new_gamepads(dt);
+//	connect_new_gamepads(dt);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -318,16 +199,90 @@ void Input_Mgr::add_event(Sensor_Event const& event)
 {
 	m_sensors.add_event(event);
 }
-void Input_Mgr::add_event(Gamepad_Event const& event)
+
+//-----------------------------------------------------------------------------//
+
+struct Gamepad_Info
 {
-	auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(), [&](Gamepad_ptr const& g) { return g->get_id() == event.gamepad_id; });
-	if (it != m_gamepads.end())
-	{
-		(*it)->add_event(event);
-	}
-	else
-	{
-		std::lock_guard<std::mutex> lock(m_new_gamepad_event_mutex);
-		m_new_gamepad_events.emplace_back(event);
-	}
+    Gamepad::Type type;
+    q::String name;
+    size_t button_count = 0;
+    size_t axes_count = 0;
+};
+
+static boost::optional<Gamepad_Info> get_gamepad_info(int device_id)
+{
+    Gamepad_Info info;
+
+    char name[1024];
+    if (ioctl(device_id, JSIOCGNAME(sizeof(name)), name) < 0)
+    {
+        QLOG_WARNING("qinput", "Cannot read device name: {}", strerror(errno));
+        return boost::none;
+    }
+
+    info.name = name;
+
+    if (info.name.find("ouya") != q::String::npos)
+    {
+        info.type = Gamepad::Type::OUYA;
+    }
+    else
+    {
+        return boost::none;
+    }
+
+    char count = 0;
+    if (ioctl(device_id, JSIOCGAXES, &count) == -1)
+    {
+        QLOG_WARNING("qinput", "Cannot read device info: {}", strerror(errno));
+        return boost::none;
+    }
+    info.axes_count = count;
+
+    if (ioctl(device_id, JSIOCGBUTTONS, &count) == -1)
+    {
+        QLOG_WARNING("qinput", "Cannot read device info: {}", strerror(errno));
+        return boost::none;
+    }
+    info.button_count = count;
+
+    return info;
+}
+
+
+void Input_Mgr::enumerate_gamepads() const
+{
+    std::lock_guard<std::mutex> lock(m_gamepad_mutex);
+
+    for (size_t i = 0; i < 64; i++)
+    {
+        auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(),
+                               [i](Gamepad_Data const& g) { return g.id == i; });
+        if (it != m_gamepads.end())
+        {
+            return;
+        }
+
+        auto name = q::util::format2<std::string>("/dev/input/js{}", i);
+        int fd = open(name.c_str(), O_RDONLY | O_NONBLOCK);
+        if (fd == -1)
+        {
+            continue;
+        }
+
+        auto info = get_gamepad_info(fd);
+        if (!info)
+        {
+            continue;
+        }
+
+        QLOG_INFO("qinput", "found {} gamepad/joystick with {} axes and {} buttons", info->name, info->axes_count, info->button_count);
+
+        Gamepad_Data g;
+        g.gamepad = std::make_shared<Gamepad>(info->name, info->type);
+        g.id = i;
+        g.fd = fd;
+        m_gamepads.push_back(g);
+    }
 }
