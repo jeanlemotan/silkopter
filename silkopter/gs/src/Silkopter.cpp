@@ -15,7 +15,7 @@ Silkopter::Silkopter(QWidget *parent)
 
 	auto* timer = new QTimer(this);
 	timer->setSingleShot(false);
-    timer->start(16);
+    timer->start(2);
 	connect(timer, &QTimer::timeout, this, &Silkopter::process);
 
 	show();

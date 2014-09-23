@@ -485,7 +485,7 @@ void UAV::process_motors(q::Clock::duration dt)
             throttles[i] = m_motor_mixer.get_motor_output(i);
         }
 
-        SILK_INFO("{.2}", throttles);
+        //SILK_INFO("{.2}", throttles);
 
         m_io_board.set_motor_throttles(throttles.data(), m_motor_mixer.get_motor_count());
     }

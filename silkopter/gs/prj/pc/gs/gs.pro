@@ -22,8 +22,8 @@ INCLUDEPATH += ../../../../../q/include
 INCLUDEPATH += ../../../../libs
 INCLUDEPATH += /usr/include/freetype2
 
-ROOT_LIBS_PATH = $${PWD}/../../../../..
-debug {
+ROOT_LIBS_PATH = ../../../../..
+CONFIG(debug, debug|release) {
     LIB_FOLDER = lib/pc/debug
 } else {
     LIB_FOLDER = lib/pc/release
@@ -35,7 +35,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qdata/$${LIB_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/$${LIB_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/$${LIB_FOLDER} -lqbase
 
-LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lOIS
+LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale
 
 
 DESTDIR = ../../../bin

@@ -83,10 +83,10 @@ void Input_Widget::process(silk::Comms& comms)
 
     if (m_gamepad)
     {
-        auto ls = m_gamepad->get_stick_data(qinput::Stick_Id::LEFT);
-        auto rs = m_gamepad->get_stick_data(qinput::Stick_Id::RIGHT);
+        auto ls = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT);
+        auto rs = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT);
 
-        float throttle = math::clamp(m_throttle - ls.value.y * 0.1f, 0.f, 1.f);
+        float throttle = math::clamp(m_throttle + ls.value.y * 0.1f, 0.f, 1.f);
         float yaw = -filter_stick_value(ls.value.x);
         float pitch = filter_stick_value(rs.value.y);
         float roll = filter_stick_value(rs.value.x);
@@ -101,15 +101,24 @@ void Input_Widget::process(silk::Comms& comms)
         m_new_uav_input.sticks.pitch = pitch;
         m_new_uav_input.sticks.roll = roll;
 
-        if (m_gamepad->is_button_released(qinput::Button_Id::PAD_UP))
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
         {
             m_throttle += 0.05f;
         }
-        if (m_gamepad->is_button_released(qinput::Button_Id::PAD_DOWN))
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
         {
             m_throttle -= 0.05f;
         }
         m_throttle = math::clamp(m_throttle, 0.f, 1.f);
+
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::OUYA_O))
+        {
+            m_new_uav_input.arm = true;
+        }
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::OUYA_A))
+        {
+            m_new_uav_input.disarm = true;
+        }
     }
 
     if (m_uav_input.throttle_mode != m_new_uav_input.throttle_mode)

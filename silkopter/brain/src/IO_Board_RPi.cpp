@@ -247,7 +247,12 @@ void IO_Board_RPi::set_motor_throttles(float const* throttles, size_t count)
 
     for (size_t i = 0; i < count; i++)
     {
-        auto throttle = math::clamp(throttles[i], 0.f, 1.f);
+//        if (i != 0)
+//        {
+//            continue;
+//        }
+
+        auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
         m_motors[i].throttle = throttle;
 
         if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)

@@ -519,7 +519,7 @@ void Comms::message_calibration_compass()
 void Comms::send_sensor_data()
 {
     auto now = q::Clock::now();
-    auto delay = std::chrono::milliseconds(30);
+    auto delay = std::chrono::milliseconds(50);
 
     auto const& samples = m_io_board.get_sensor_samples();
     if (samples.empty() || now - m_sensors_sample.last_sent_timestamp < delay)
@@ -585,7 +585,9 @@ void Comms::send_sensor_data()
 void Comms::send_uav_data()
 {
     auto now = q::Clock::now();
-    if (now - m_uav_sent_timestamp < std::chrono::milliseconds(30))
+    auto delay = std::chrono::milliseconds(100);
+
+    if (now - m_uav_sent_timestamp < delay)
     {
         return;
     }
