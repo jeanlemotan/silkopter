@@ -21,8 +21,8 @@ namespace scene
 		float				get_parallel_zoom() const;
 
 		//switches the camera to perspective projection
-		void				set_perspective_vertical_fov(float fov);
-		float				get_perspective_vertical_fov() const;
+        void				set_perspective_vertical_fov(math::anglef fov);
+        math::anglef		get_perspective_vertical_fov() const;
 
 		void				set_near_distance(float d);
 		float				get_near_distance() const;
@@ -70,8 +70,8 @@ namespace scene
         bool				m_is_parallel = false;
 
         float				m_aspect_ratio = 1.f;
-        float				m_fov_vertical = 0.785375f;
-        mutable float		m_fov_horizontal = 0;
+        math::anglef        m_fov_vertical = math::anglef(0.785375f);
+        mutable math::anglef m_fov_horizontal;
         float				m_zoom = 1.f;
         float				m_near_distance = 1.f;
         float				m_far_distance = 1000.f;

@@ -54,14 +54,14 @@ float Camera::get_parallel_zoom() const
 	return m_zoom;
 }
 
-void Camera::set_perspective_vertical_fov(float fov)
+void Camera::set_perspective_vertical_fov(math::anglef fov)
 {
 	m_is_parallel = false;
 	m_projection_matrix_dirty = true;
 	m_view_projection_matrix_dirty = true;
 	m_fov_vertical = fov;
 }
-float Camera::get_perspective_vertical_fov() const
+math::anglef Camera::get_perspective_vertical_fov() const
 {
 	return m_fov_vertical;
 }
@@ -212,8 +212,8 @@ void Camera::update_projection_matrix() const
 		}
 		else
 		{
-			m_projection_matrix = math::perspective(m_fov_vertical, ar, m_near_distance, m_far_distance);
-            m_fov_horizontal = 2.f * math::atan(math::tan(m_fov_vertical * 0.5f) * ar).radians;
+            m_projection_matrix = math::perspective(m_fov_vertical.radians, ar, m_near_distance, m_far_distance);
+            m_fov_horizontal = 2.f * math::atan(math::tan(m_fov_vertical.radians * 0.5f) * ar);
 		}
 
 		m_projection_matrix_dirty = false;

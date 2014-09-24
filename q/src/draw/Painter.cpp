@@ -529,13 +529,13 @@ void Painter::draw_arc(Vertex const& center, math::anglef start_angle, math::ang
 	math::vec2f c2 = math::vec2f(c);
 	uint32_t color = center.color;
 
-	if (start_angle.radians > end_angle.radians)
+    if (start_angle.radians > end_angle.radians)
 	{
 		end_angle += math::anglef::_2pi;//this is ok
 	}
 	start_angle = math::anglef::_2pi - start_angle.radians;//ccw
 	end_angle = math::anglef::_2pi - end_angle.radians;//ccw
-	if (start_angle.radians > end_angle.radians)
+    if (start_angle.radians > end_angle.radians)
 	{
 		std::swap(start_angle, end_angle);
 	}
@@ -607,13 +607,13 @@ void Painter::fill_arc(Vertex const& center, math::anglef start_angle, math::ang
 	math::vec2f t = center.tex_coord;
 	uint32_t color = center.color;
 
-	if (start_angle.radians > end_angle.radians)
+    if (start_angle.radians > end_angle.radians)
 	{
 		end_angle += math::anglef::_2pi;//this is ok
 	}
 	start_angle = math::anglef::_2pi - start_angle.radians;//ccw
 	end_angle = math::anglef::_2pi - end_angle.radians;//ccw
-	if (start_angle.radians > end_angle.radians)
+    if (start_angle.radians > end_angle.radians)
 	{
 		std::swap(start_angle, end_angle);
 	}
