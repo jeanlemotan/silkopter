@@ -44,6 +44,26 @@ private:
     q::Clock::time_point m_last_time;
     silk::Comms* m_comms;
 
+    struct FFT_Data
+    {
+        size_t sample_rate = 0;
+        std::vector<math::vec3f> input;
+        std::vector<math::vec3f> output;
+
+        static const size_t MAX_INPUT_SIZE = 65536;
+        std::shared_ptr<double> temp_input;
+        std::shared_ptr<fftw_complex> temp_output;
+        fftw_plan plan;
+    };
+
+    void process_gyroscope_fft(FFT_Data& fft);
+    float m_gyroscope_sample_time = 0;
+    FFT_Data m_gyroscope_fft;
+
+    void process_accelerometer_fft(FFT_Data& fft);
+    float m_accelerometer_sample_time = 0;
+    FFT_Data m_accelerometer_fft;
+
     float m_average_sonar = 0;
     float m_average_barometer = 0;
     float m_average_thermometer = 0;

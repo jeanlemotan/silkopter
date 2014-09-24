@@ -269,8 +269,11 @@ void IO_Board_RPi::set_motor_throttles(float const* throttles, size_t count)
 
 void IO_Board_RPi::set_camera_rotation(math::quatf const& rot)
 {
-    math::anglef pitch, roll, yaw;
-    rot.get_as_euler_xyz(pitch, roll, yaw);
+    math::vec3f euler;
+    rot.get_as_euler_xyz(euler);
+    math::anglef pitch(euler.x);
+    math::anglef roll(euler.y);
+    math::anglef yaw(euler.z);
 
     if (CAMERA_YAW_GPIO > 0)
     {

@@ -70,8 +70,10 @@ private:
             MOVE
         } test = Test::NONE;
 
-        math::vec3f target;
-        math::vec3f current;
+        math::vec3f move_target;
+        math::vec3f move_current;
+        math::vec3f rotate_target;
+        math::vec3f rotate_current;
         q::Clock::duration duration{0};
         q::Clock::duration current_duration{0};
     } m_test_data;

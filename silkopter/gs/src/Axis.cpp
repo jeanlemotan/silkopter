@@ -14,8 +14,8 @@ void render_arrow(math::vec3f const& start, math::vec3f const& end, q::video::Ma
 {
     if (!s_is_initialized)
     {
-        s_axes_transforms[0] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_y(math::anglef(1.570796f)).get_as_mat3(), math::vec3f::one);
-        s_axes_transforms[1] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_x(math::anglef(-1.570796f)).get_as_mat3(), math::vec3f::one);
+        s_axes_transforms[0] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_y(1.570796f).get_as_mat3(), math::vec3f::one);
+        s_axes_transforms[1] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_x(-1.570796f).get_as_mat3(), math::vec3f::one);
         s_is_initialized = true;
     }
 
@@ -34,7 +34,7 @@ void render_arrow(math::vec3f const& start, math::vec3f const& end, q::video::Ma
     math::vec3f front = math::normalized(end - start);
     math::vec3f up = math::abs(math::dot(front, math::vec3f(0, 0, 1))) > 0.93 ? math::vec3f(0, 1, 0) : math::vec3f(0, 0, 1);
     math::mat3f rot;
-    math::multiply(rot, math::mat3f::look_at(front, up), math::quatf::from_axis_x(math::anglef(-1.570796f)).get_as_mat3());
+    math::multiply(rot, math::mat3f::look_at(front, up), math::quatf::from_axis_x(-1.570796f).get_as_mat3());
 
     math::trans3df trans(end, rot, math::vec3f::one);
     painter.set_post_clip_transform(trans);
@@ -48,8 +48,8 @@ void render_axes(q::draw::Painter& painter, float length)
 {
     if (!s_is_initialized)
     {
-        s_axes_transforms[0] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_y(math::anglef(1.570796f)).get_as_mat3(), math::vec3f::one);
-        s_axes_transforms[1] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_x(math::anglef(-1.570796f)).get_as_mat3(), math::vec3f::one);
+        s_axes_transforms[0] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_y(1.570796f).get_as_mat3(), math::vec3f::one);
+        s_axes_transforms[1] = math::trans3df(math::vec3f::zero, math::quatf::from_axis_x(-1.570796f).get_as_mat3(), math::vec3f::one);
         s_is_initialized = true;
     }
 

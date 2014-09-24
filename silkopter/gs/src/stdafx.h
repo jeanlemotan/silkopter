@@ -57,6 +57,10 @@ extern "C"
 #include <libswscale/swscale.h>
 }
 
+extern "C"
+{
+#include <fftw3.h>
+}
 
 #include "_qmath.h"
 #include "QBase.h"

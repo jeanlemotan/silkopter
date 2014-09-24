@@ -115,8 +115,8 @@ private:
     void send_sensor_data();
     struct Sensor_Data
     {
-        IO_Board::Accelerometer_Data accelerometer;
-        IO_Board::Gyroscope_Data gyroscope;
+        std::vector<IO_Board::Accelerometer_Data> accelerometer;
+        std::vector<IO_Board::Gyroscope_Data> gyroscope;
         IO_Board::Compass_Data compass;
         IO_Board::Barometer_Data barometer;
         IO_Board::Thermometer_Data thermometer;
@@ -124,7 +124,7 @@ private:
         IO_Board::Voltage_Data voltage;
         IO_Board::Current_Data current;
         q::Clock::time_point last_sent_timestamp;
-    } m_sensors_sample;
+    } m_sensors_samples;
 
     IO_Board& m_io_board;
     UAV& m_uav;
@@ -136,7 +136,7 @@ private:
     std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
     typedef util::Channel<Message,
-                        uint16_t,
+                        uint32_t,
                         boost::asio::ip::tcp::socket> Channel;
 
     std::unique_ptr<Channel> m_channel;

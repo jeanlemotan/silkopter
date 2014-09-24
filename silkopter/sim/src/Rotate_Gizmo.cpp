@@ -5,7 +5,7 @@ using namespace q;
 
 static math::vec3f s_axes_vectors[3] = { math::vec3f(1.f, 0.f, 0.f), math::vec3f(0.f, 1.f, 0.f), math::vec3f(0.f, 0.f, 1.f) };
 static uint32_t s_axes_colors[3] = { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF };
-static math::quatf s_axes_quats[3] = { math::quat_axis_y(1.570796f), math::quat_axis_x(-1.570796f), math::quatf() };
+static math::quatf s_axes_quats[3] = { math::quatf::from_axis_y(1.570796f), math::quatf::from_axis_x(-1.570796f), math::quatf() };
 
 Rotate_Gizmo::Rotate_Gizmo(float radius)
     : m_radius(radius)

@@ -71,7 +71,7 @@ Simulator::Simulator(QWidget *parent)
     m_ui.environment->set_config(&m_config);
     m_ui.sensors->set_config(&m_config);
 
-    m_context.camera.set_perspective_vertical_fov(math::radians(60.f));
+    m_context.camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
     m_context.camera.set_near_distance(0.05f);
     m_context.camera.set_far_distance(20000.f);
 
@@ -197,7 +197,7 @@ void Simulator::update()
         }
         else if (m_action == Action::ROTATE)
         {
-            rotate_uav(m_gizmos.delta, dt);
+            rotate_uav(math::vec3f(m_gizmos.delta), dt);
         }
         m_gizmos.delta = math::vec3f::zero;
     }
@@ -210,9 +210,9 @@ void Simulator::update()
     if (m_test_data.test == Test_Data::Test::ROTATE)
     {
         float mu = q::Seconds(m_test_data.current_duration).count() / q::Seconds(m_test_data.duration).count();
-        auto value = math::lerp(math::vec3f::zero, m_test_data.target, mu);
-        auto delta = value - m_test_data.current;
-        m_test_data.current = value;
+        auto value = math::lerp(math::vec3f::zero, m_test_data.rotate_target, mu);
+        auto delta = value - m_test_data.rotate_current;
+        m_test_data.rotate_current = value;
         rotate_uav(delta, dt);
         m_test_data.current_duration += dt;
         if (m_test_data.current_duration > m_test_data.duration)
@@ -287,7 +287,7 @@ void Simulator::mouse_move_event(Mouse_Event const& event)
             m_gizmos.rotate.set_override_axis_filter(m_gizmos.rotate.get_axis_filter());
             m_gizmos.point = m_world->get_uav().get_position();
             m_gizmos.local_base = m_world->get_uav().get_rotation();
-            m_gizmos.local_base.get_as_euler_xyz(m_gizmos.rotate_start);
+            m_gizmos.local_base.get_as_euler_xyz(m_gizmos.rotate_start.x, m_gizmos.rotate_start.y, m_gizmos.rotate_start.z);
             m_world->get_uav().get_body().setAngularVelocity(btVector3(0, 0, 0));
             m_world->get_uav().get_body().clearForces();
             if (m_action == Action::MOVE)
@@ -363,14 +363,13 @@ void Simulator::mouse_move_event(Mouse_Event const& event)
                 math::vec2f p = tangent.get_closest_point(m_camera_controller.get_pointer_2d());
                 float sign = math::sgn(math::dot(tangent.get_vector_normalized(), p - tangent.get_middle()));
                 float dist = 0.005f * sign * math::distance(p, tangent.get_middle());
-                math::vec3f euler = math::vec3f(dist, dist, dist) * m_gizmos.rotate.get_axis_filter();
+                auto euler = math::vec3f(dist, dist, dist) * m_gizmos.rotate.get_axis_filter();
                 if (euler != m_gizmos.rotate_start)
                 {
-                    math::vec3f delta = euler - m_gizmos.rotate_start;
-
+                    auto delta = euler - m_gizmos.rotate_start;
                     if (m_gizmos.started)
                     {
-                        m_gizmos.delta = delta;
+                        m_gizmos.delta.set(delta.x, delta.y, delta.z);
                     }
 
                     m_gizmos.started = true;
@@ -409,13 +408,13 @@ void Simulator::rotate_uav(math::vec3f const& delta, q::Clock::duration dt)
     auto& uav = m_world->get_uav();
     if (m_config.environment.is_simulation_enabled)
     {
-        auto d = math::rotate(uav.get_rotation(), delta);
+        auto d = math::rotate(uav.get_rotation(), math::vec3f(delta));
         uav.get_body().setAngularVelocity(vec3f_to_bt(d / q::Seconds(dt).count()));
     }
     else
     {
         math::quatf r;
-        r.set_from_euler_xyz(delta);
+        r.set_from_euler_xyz(delta.x, delta.y, delta.z);
         uav.set_rotation(uav.get_rotation() * r);
     }
 }
@@ -451,8 +450,8 @@ void Simulator::setup_test_ahrs()
         return;
     }
 
-    m_test_data.current.set(0, 0, 0);
-    m_test_data.target.set(math::radians(math::vec3f(ui.target_x->value(), ui.target_y->value(), ui.target_z->value())));
+    m_test_data.rotate_current = math::vec3f::zero;
+    m_test_data.rotate_target = math::radians(math::vec3f(ui.target_x->value(), ui.target_y->value(), ui.target_z->value()));
     m_test_data.duration = std::chrono::microseconds(static_cast<int64_t>(ui.duration->value() * 1000000.0));
     m_test_data.current_duration = std::chrono::seconds(0);
 

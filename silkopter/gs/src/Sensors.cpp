@@ -2,33 +2,49 @@
 #include "Sensors.h"
 #include "physics/constants.h"
 
+
 Sensors::Sensors(QWidget *parent /* = 0 */)
 	: QWidget(parent)
     , m_comms(nullptr)
 {
 	m_ui.setupUi(this);
 
-	m_ui.accelerometer_plot->addGraph();
-	m_ui.accelerometer_plot->graph(0)->setPen(QPen(Qt::red));
-	m_ui.accelerometer_plot->addGraph();
-	m_ui.accelerometer_plot->graph(1)->setPen(QPen(Qt::green));
-	m_ui.accelerometer_plot->addGraph();
-    m_ui.accelerometer_plot->graph(2)->setPen(QPen(Qt::blue));
-    //m_ui.accelerometer_plot->yAxis->setRange(-1.2, -1);
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(0)->setPen(QPen(Qt::red));
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(1)->setPen(QPen(Qt::green));
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(2)->setPen(QPen(Qt::blue));
+//    m_ui.a_plot->setInteractions(QCP::Interactions(QCP::iRangeZoom | QCP::iRangeDrag));
+    //m_ui.a_plot->yAxis->setRange(-1.2, -1);
 
-	m_ui.gyroscope_plot->addGraph();
-	m_ui.gyroscope_plot->graph(0)->setPen(QPen(Qt::red));
-	m_ui.gyroscope_plot->addGraph();
-	m_ui.gyroscope_plot->graph(1)->setPen(QPen(Qt::green));
-	m_ui.gyroscope_plot->addGraph();
-	m_ui.gyroscope_plot->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(0)->setPen(QPen(Qt::red));
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(1)->setPen(QPen(Qt::green));
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(2)->setPen(QPen(Qt::blue));
 
-	m_ui.compass_plot->addGraph();
-	m_ui.compass_plot->graph(0)->setPen(QPen(Qt::red));
-	m_ui.compass_plot->addGraph();
-	m_ui.compass_plot->graph(1)->setPen(QPen(Qt::green));
-	m_ui.compass_plot->addGraph();
-	m_ui.compass_plot->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(0)->setPen(QPen(Qt::red));
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(1)->setPen(QPen(Qt::green));
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(2)->setPen(QPen(Qt::blue));
+
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(0)->setPen(QPen(Qt::red));
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(1)->setPen(QPen(Qt::green));
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(2)->setPen(QPen(Qt::blue));
+
+    m_ui.c_plot->addGraph();
+    m_ui.c_plot->graph(0)->setPen(QPen(Qt::red));
+    m_ui.c_plot->addGraph();
+    m_ui.c_plot->graph(1)->setPen(QPen(Qt::green));
+    m_ui.c_plot->addGraph();
+    m_ui.c_plot->graph(2)->setPen(QPen(Qt::blue));
 
 	m_ui.barometer_plot->addGraph();
 	m_ui.barometer_plot->graph(0)->setPen(QPen(Qt::red));
@@ -45,13 +61,20 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
     m_ui.thermometer_plot->addGraph();
     m_ui.thermometer_plot->graph(1)->setPen(QPen(Qt::blue));
 
-	connect(m_ui.accelerometer_calibrate, &QPushButton::released, this, &Sensors::start_accelerometer_calibration);
-	connect(m_ui.gyroscope_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
-	connect(m_ui.compass_calibrate, &QPushButton::released, this, &Sensors::start_compass_calibration);
+    connect(m_ui.a_calibrate, &QPushButton::released, this, &Sensors::start_accelerometer_calibration);
+    connect(m_ui.g_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
+    connect(m_ui.c_calibrate, &QPushButton::released, this, &Sensors::start_compass_calibration);
 
     m_last_time = q::Clock::now();
 
     m_calibration.message_box.setParent(this);
+
+    // Allocate input and output buffers
+    m_gyroscope_fft.temp_input.reset(static_cast<double*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(double))), fftw_free);
+    m_gyroscope_fft.temp_output.reset(static_cast<fftw_complex*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(fftw_complex))), fftw_free);
+
+    m_accelerometer_fft.temp_input.reset(static_cast<double*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(double))), fftw_free);
+    m_accelerometer_fft.temp_output.reset(static_cast<fftw_complex*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(fftw_complex))), fftw_free);
 }
 
 Sensors::~Sensors()
@@ -71,47 +94,155 @@ void Sensors::process()
 
     QASSERT(m_comms);
 
-    m_ui.accelerometer_calibrate->setEnabled(m_comms->is_connected());
-    m_ui.gyroscope_calibrate->setEnabled(m_comms->is_connected());
+    m_ui.a_calibrate->setEnabled(m_comms->is_connected());
+    m_ui.a_test_filter->setEnabled(m_comms->is_connected());
+    m_ui.g_calibrate->setEnabled(m_comms->is_connected());
+    m_ui.g_test_filter->setEnabled(m_comms->is_connected());
 
-    if (isVisible() && m_comms->is_connected())
+    static const float graph_length_seconds = 3.f;
+
+    if (isVisible()/* && m_comms->is_connected()*/)
 	{
+        {
+            auto data = m_comms->get_sensor_gyroscope_data();
+
+
+            if (0)
+            {
+                //freq, amplitude
+                static const std::chrono::milliseconds period(1);
+                static const std::vector<std::pair<float, float>> frequencies =
+                {{10, 1}, {110, 1}, {180, 1}, {250, 1}, {310, 1}, {370, 1}, {480, 1}};
+
+                {
+                    data.value.sample_time = period;
+
+                    static q::Clock::time_point last_time = q::Clock::now();
+                    static float time = 0;
+                    auto now = q::Clock::now();
+                    auto d = std::chrono::duration_cast<std::chrono::microseconds>(now - last_time);
+                    size_t sample_count = d / period;
+                    if (sample_count > 0)
+                    {
+                        last_time = now;
+
+                        for (size_t i = 0; i < sample_count; i++)
+                        {
+                            float sample = 0;
+                            for (auto freq: frequencies)
+                            {
+                                sample += math::sin(time * math::anglef::_2pi * freq.first) * freq.second;
+                            }
+                            data.value.angular_velocities.push_back(math::vec3f(sample));
+                            time += q::Seconds(period).count();
+                        }
+                    }
+                }
+            }
+
+            m_gyroscope_fft.sample_rate = static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
+
+            float time_increment = q::Seconds(data.value.sample_time).count();
+            for (auto& av: data.value.angular_velocities)
+            {
+                m_gyroscope_sample_time += time_increment;
+                m_ui.g_plot->graph(0)->addData(m_gyroscope_sample_time, av.x);
+                m_ui.g_plot->graph(1)->addData(m_gyroscope_sample_time, av.y);
+                m_ui.g_plot->graph(2)->addData(m_gyroscope_sample_time, av.z);
+                m_gyroscope_fft.input.push_back(av);
+            }
+
+            if (m_gyroscope_sample_time > graph_length_seconds)
+            {
+                m_ui.g_plot->graph(0)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
+                m_ui.g_plot->graph(1)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
+                m_ui.g_plot->graph(2)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
+            }
+            m_ui.g_plot->rescaleAxes(true);
+            m_ui.g_plot->replot();
+
+            process_gyroscope_fft(m_gyroscope_fft);
+            if (!m_gyroscope_fft.output.empty())
+            {
+                m_ui.g_spectrum->graph(0)->clearData();
+                m_ui.g_spectrum->graph(1)->clearData();
+                m_ui.g_spectrum->graph(2)->clearData();
+
+                for (size_t i = 0; i < m_gyroscope_fft.output.size(); i++)
+                {
+                    auto const& s = m_gyroscope_fft.output[i];
+                    auto freq = (m_gyroscope_fft.sample_rate / 2) * i / m_gyroscope_fft.output.size();
+                    m_ui.g_spectrum->graph(0)->addData(freq, s.x);
+                    m_ui.g_spectrum->graph(1)->addData(freq, s.y);
+                    m_ui.g_spectrum->graph(2)->addData(freq, s.z);
+                }
+                m_ui.g_spectrum->rescaleAxes(true);
+                m_ui.g_spectrum->replot();
+            }
+        }
+
+        {
+            auto data = m_comms->get_sensor_accelerometer_data();
+            m_accelerometer_fft.sample_rate = static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
+
+            float time_increment = q::Seconds(data.value.sample_time).count();
+            for (auto& av: data.value.accelerations)
+            {
+                m_accelerometer_sample_time += time_increment;
+                m_ui.a_plot->graph(0)->addData(m_accelerometer_sample_time, av.x);
+                m_ui.a_plot->graph(1)->addData(m_accelerometer_sample_time, av.y);
+                m_ui.a_plot->graph(2)->addData(m_accelerometer_sample_time, av.z);
+                m_accelerometer_fft.input.push_back(av);
+            }
+
+            if (m_accelerometer_sample_time > graph_length_seconds)
+            {
+                m_ui.a_plot->graph(0)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
+                m_ui.a_plot->graph(1)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
+                m_ui.a_plot->graph(2)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
+            }
+            m_ui.a_plot->rescaleAxes(true);
+            m_ui.a_plot->replot();
+
+            process_accelerometer_fft(m_accelerometer_fft);
+            if (!m_accelerometer_fft.output.empty())
+            {
+                m_ui.a_spectrum->graph(0)->clearData();
+                m_ui.a_spectrum->graph(1)->clearData();
+                m_ui.a_spectrum->graph(2)->clearData();
+
+                for (size_t i = 0; i < m_accelerometer_fft.output.size(); i++)
+                {
+                    auto const& s = m_accelerometer_fft.output[i];
+                    auto freq = (m_accelerometer_fft.sample_rate / 2) * i / m_accelerometer_fft.output.size();
+                    m_ui.a_spectrum->graph(0)->addData(freq, s.x);
+                    m_ui.a_spectrum->graph(1)->addData(freq, s.y);
+                    m_ui.a_spectrum->graph(2)->addData(freq, s.z);
+                }
+                m_ui.a_spectrum->rescaleAxes(true);
+                m_ui.a_spectrum->replot();
+            }
+        }
+
+
         auto alive = m_comms->get_uav_alive_duration();
         if (alive != m_last_uav_alive_duration)
 		{
             m_last_uav_alive_duration = alive;
 
-			static const float graph_length_seconds = 3.f;
-
             double seconds = q::Seconds(alive).count();
-			//static double seconds = 0;// double(time_ms) / 1000.0;
+            //static double seconds = 0;// double(time_ms) / 1000.0;
 			//seconds += 0.01f;
 
 // 			static float s_cpu = 0;
 // 			s_cpu = math::lerp(s_cpu, m_protocol->data_board_cpu_usage.value, 0.01f);
-// 			m_ui.gyroscope_plot->graph(0)->addData(seconds, s_cpu);
-            {
-                auto data = m_comms->get_sensor_gyroscope_data();
-                auto av = data.value.angular_velocity;
-                m_ui.gyroscope_plot->graph(0)->addData(seconds, av.x);
-                m_ui.gyroscope_plot->graph(1)->addData(seconds, av.y);
-                m_ui.gyroscope_plot->graph(2)->addData(seconds, av.z);
-            }
-
-            {
-                auto data = m_comms->get_sensor_accelerometer_data();
-                auto acc = data.value.acceleration;
-                m_ui.accelerometer_plot->graph(0)->addData(seconds, acc.x);
-                m_ui.accelerometer_plot->graph(1)->addData(seconds, acc.y);
-                m_ui.accelerometer_plot->graph(2)->addData(seconds, acc.z);
-            }
-
+// 			m_ui.g_plot->graph(0)->addData(seconds, s_cpu);
             {
                 auto data = m_comms->get_sensor_compass_data();
                 auto direction = math::normalized<float, math::safe>(data.value);
-                m_ui.compass_plot->graph(0)->addData(seconds, direction.x);
-                m_ui.compass_plot->graph(1)->addData(seconds, direction.y);
-                m_ui.compass_plot->graph(2)->addData(seconds, direction.z);
+                m_ui.c_plot->graph(0)->addData(seconds, direction.x);
+                m_ui.c_plot->graph(1)->addData(seconds, direction.y);
+                m_ui.c_plot->graph(2)->addData(seconds, direction.z);
                 //SILK_INFO("compass: {}", data.value);
             }
 
@@ -140,15 +271,9 @@ void Sensors::process()
 
             if (seconds > graph_length_seconds)
             {
-                m_ui.gyroscope_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.gyroscope_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.gyroscope_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.accelerometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.accelerometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.accelerometer_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.compass_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.compass_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.compass_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
+                m_ui.c_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
+                m_ui.c_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
+                m_ui.c_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
                 m_ui.barometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
                 m_ui.barometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
                 m_ui.sonar_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
@@ -158,14 +283,8 @@ void Sensors::process()
             }
 
 
-            m_ui.gyroscope_plot->rescaleAxes(true);
-			m_ui.gyroscope_plot->replot();
-
-            m_ui.accelerometer_plot->rescaleAxes(true);
-			m_ui.accelerometer_plot->replot();
-
-			m_ui.compass_plot->rescaleAxes(true);
-			m_ui.compass_plot->replot();
+            m_ui.c_plot->rescaleAxes(true);
+            m_ui.c_plot->replot();
 
 			m_ui.barometer_plot->rescaleAxes(true);
 			m_ui.barometer_plot->replot();
@@ -180,16 +299,24 @@ void Sensors::process()
 	else
 	{
         m_last_uav_alive_duration = q::Clock::duration();
+        m_gyroscope_sample_time = 0;
+        m_accelerometer_sample_time = 0;
 
-        m_ui.gyroscope_plot->graph(0)->clearData();
-        m_ui.gyroscope_plot->graph(1)->clearData();
-        m_ui.gyroscope_plot->graph(2)->clearData();
-        m_ui.accelerometer_plot->graph(0)->clearData();
-        m_ui.accelerometer_plot->graph(1)->clearData();
-        m_ui.accelerometer_plot->graph(2)->clearData();
-        m_ui.compass_plot->graph(0)->clearData();
-        m_ui.compass_plot->graph(1)->clearData();
-        m_ui.compass_plot->graph(2)->clearData();
+        m_ui.g_plot->graph(0)->clearData();
+        m_ui.g_plot->graph(1)->clearData();
+        m_ui.g_plot->graph(2)->clearData();
+        m_ui.g_spectrum->graph(0)->clearData();
+        m_ui.g_spectrum->graph(1)->clearData();
+        m_ui.g_spectrum->graph(2)->clearData();
+        m_ui.a_plot->graph(0)->clearData();
+        m_ui.a_plot->graph(1)->clearData();
+        m_ui.a_plot->graph(2)->clearData();
+        m_ui.a_spectrum->graph(0)->clearData();
+        m_ui.a_spectrum->graph(1)->clearData();
+        m_ui.a_spectrum->graph(2)->clearData();
+        m_ui.c_plot->graph(0)->clearData();
+        m_ui.c_plot->graph(1)->clearData();
+        m_ui.c_plot->graph(2)->clearData();
         m_ui.barometer_plot->graph(0)->clearData();
         m_ui.barometer_plot->graph(1)->clearData();
         m_ui.sonar_plot->graph(0)->clearData();
@@ -201,12 +328,60 @@ void Sensors::process()
     update_calibration();
 }
 
-struct Scope_Exit
+void Sensors::process_gyroscope_fft(FFT_Data& fft)
 {
-	Scope_Exit(std::function<void()> f) : f(f) {}
-	~Scope_Exit() { f(); }
-	std::function<void()> f;
-};
+    const std::chrono::milliseconds required_duration(1000);
+    const size_t required_sample_count = math::min(
+                static_cast<size_t>(fft.sample_rate * q::Seconds(required_duration).count()),
+                fft.MAX_INPUT_SIZE);
+    if (fft.input.size() < required_sample_count)
+    {
+        fft.output.resize(0);
+        return;
+    }
+
+    size_t output_size = required_sample_count/2 + 1;
+    fft.output.resize(output_size);
+
+    auto temp_out = fft.temp_output.get();
+
+    fft.plan = fftw_plan_dft_r2c_1d(required_sample_count, fft.temp_input.get(), fft.temp_output.get(), FFTW_ESTIMATE);
+
+    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.x; });
+    fftw_execute(fft.plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        fft.output[i].x = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
+    }
+
+    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.y; });
+    fftw_execute(fft.plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        fft.output[i].y = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
+    }
+
+    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.z; });
+    fftw_execute(fft.plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        fft.output[i].z = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
+    }
+
+    //consume input
+    fft.input.erase(fft.input.begin(), fft.input.begin() + required_sample_count);
+}
+
+void Sensors::process_accelerometer_fft(FFT_Data& fft)
+{
+    if (fft.input.size() < fft.sample_rate)
+    {
+        return;
+    }
+
+
+}
+
 
 void Sensors::update_calibration()
 {
@@ -322,7 +497,7 @@ void Sensors::update_accelerometer_calibration()
             if (data.timestamp > m_calibration.last_data_timepoint && time_passed > std::chrono::seconds(2))
             {
                 m_calibration.last_data_timepoint = data.timestamp;
-                samples.push_back(data.value.acceleration);
+                std::copy(data.value.accelerations.begin(), data.value.accelerations.end(), std::back_inserter(samples));
             }
 
             auto left = std::chrono::duration_cast<std::chrono::seconds>(duration - time_passed).count();
@@ -480,7 +655,7 @@ void Sensors::update_gyroscope_calibration()
             if (data.timestamp > m_calibration.last_data_timepoint && time_passed > std::chrono::seconds(2))
             {
                 m_calibration.last_data_timepoint = data.timestamp;
-                samples.push_back(data.value.angular_velocity);
+                std::copy(data.value.angular_velocities.begin(), data.value.angular_velocities.end(), std::back_inserter(samples));
             }
 
             auto left = std::chrono::duration_cast<std::chrono::seconds>(duration - time_passed).count();

@@ -45,16 +45,16 @@ public:
     {
         typedef T data_t;
         Data() : value() {}
-
         T value;
+
         uint32_t sample_idx = 0;
         q::Clock::time_point timestamp;
     };
 
     struct Accelerometer
     {
-        math::vec3f acceleration; //meters per second^2
-        q::Clock::duration dt;
+        std::vector<math::vec3f> accelerations; //meters per second^2
+        q::Clock::duration sample_time;
     };
 
     typedef Data<Accelerometer> Accelerometer_Data;
@@ -63,8 +63,8 @@ public:
 
     struct Gyroscope
     {
-        math::vec3f angular_velocity; //radians per second
-        q::Clock::duration dt;
+        std::vector<math::vec3f> angular_velocities; //radians per second
+        q::Clock::duration sample_time;
     };
     typedef Data<Gyroscope> Gyroscope_Data;
     auto get_sensor_gyroscope_data() const -> Gyroscope_Data;
@@ -218,7 +218,7 @@ private:
     boost::asio::ip::tcp::endpoint m_remote_endpoint;
 
     typedef util::Channel<Message,
-                        uint16_t,
+                        uint32_t,
                         boost::asio::ip::tcp::socket> Channel;
 
     mutable Channel m_channel;

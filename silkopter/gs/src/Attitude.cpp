@@ -18,7 +18,7 @@ Attitude::Attitude(QWidget* parent /* = 0 */)
 
 	m_camera_controller.set_depth_getter([&](const math::vec2u32& pos) -> float { return m_widget->get_depth_at(pos); });
 
-    m_camera.set_perspective_vertical_fov(math::radians(60.f).radians);
+    m_camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
 	m_camera.set_near_distance(0.05f);
 	m_camera.set_far_distance(20000.f);
 

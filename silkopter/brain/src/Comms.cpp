@@ -522,7 +522,13 @@ void Comms::send_sensor_data()
     auto delay = std::chrono::milliseconds(50);
 
     auto const& samples = m_io_board.get_sensor_samples();
-    if (samples.empty() || now - m_sensors_sample.last_sent_timestamp < delay)
+    for (auto const& sample: samples)
+    {
+        m_sensors_samples.accelerometer.push_back(sample.accelerometer);
+        m_sensors_samples.gyroscope.push_back(sample.gyroscope);
+    }
+    //SILK_INFO("acc: {}", m_sensors_samples.accelerometer.size());
+    if (samples.empty() || now - m_sensors_samples.last_sent_timestamp < delay)
     {
         return;
     }
@@ -534,40 +540,59 @@ void Comms::send_sensor_data()
     m_channel->begin_stream();
     m_channel->add_to_stream(sensors); //we'll replace it with the real value at the end
 
-    if (sample.accelerometer.sample_idx != m_sensors_sample.accelerometer.sample_idx)
+//    if (m_sensors_samples.accelerometer.size() > 10000)
+//    {
+//        m_sensors_samples.accelerometer.clear();
+//    }
+//    if (m_sensors_samples.gyroscope.size() > 10000)
+//    {
+//        m_sensors_samples.gyroscope.clear();
+//    }
+
+    if (!m_sensors_samples.accelerometer.empty())
     {
-        m_sensors_sample.accelerometer = sample.accelerometer;
-        m_channel->add_to_stream(m_sensors_sample.accelerometer.value);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.accelerometer.size()));
+        for (auto& a: m_sensors_samples.accelerometer)
+        {
+            m_channel->add_to_stream(a.value.acceleration);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.value.dt).count()));
+        }
+        m_sensors_samples.accelerometer.clear();
         sensors.set(Sensor::ACCELEROMETER);
     }
-    if (sample.gyroscope.sample_idx != m_sensors_sample.gyroscope.sample_idx)
+    if (!m_sensors_samples.gyroscope.empty())
     {
-        m_sensors_sample.gyroscope = sample.gyroscope;
-        m_channel->add_to_stream(m_sensors_sample.gyroscope.value);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.gyroscope.size()));
+        for (auto& a: m_sensors_samples.gyroscope)
+        {
+            m_channel->add_to_stream(a.value.angular_velocity);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.value.dt).count()));
+        }
+        m_sensors_samples.gyroscope.clear();
         sensors.set(Sensor::GYROSCOPE);
     }
-    if (sample.compass.sample_idx != m_sensors_sample.compass.sample_idx)
+    if (sample.compass.sample_idx != m_sensors_samples.compass.sample_idx)
     {
-        m_sensors_sample.compass = sample.compass;
-        m_channel->add_to_stream(m_sensors_sample.compass.value);
+        m_sensors_samples.compass = sample.compass;
+        m_channel->add_to_stream(m_sensors_samples.compass.value);
         sensors.set(Sensor::COMPASS);
     }
-    if (sample.barometer.sample_idx != m_sensors_sample.barometer.sample_idx)
+    if (sample.barometer.sample_idx != m_sensors_samples.barometer.sample_idx)
     {
-        m_sensors_sample.barometer = sample.barometer;
-        m_channel->add_to_stream(m_sensors_sample.barometer.value);
+        m_sensors_samples.barometer = sample.barometer;
+        m_channel->add_to_stream(m_sensors_samples.barometer.value);
         sensors.set(Sensor::BAROMETER);
     }
-    if (sample.thermometer.sample_idx != m_sensors_sample.thermometer.sample_idx)
+    if (sample.thermometer.sample_idx != m_sensors_samples.thermometer.sample_idx)
     {
-        m_sensors_sample.thermometer = sample.thermometer;
-        m_channel->add_to_stream(m_sensors_sample.thermometer.value);
+        m_sensors_samples.thermometer = sample.thermometer;
+        m_channel->add_to_stream(m_sensors_samples.thermometer.value);
         sensors.set(Sensor::THERMOMETER);
     }
-    if (sample.sonar.sample_idx != m_sensors_sample.sonar.sample_idx)
+    if (sample.sonar.sample_idx != m_sensors_samples.sonar.sample_idx)
     {
-        m_sensors_sample.sonar = sample.sonar;
-        m_channel->add_to_stream(m_sensors_sample.sonar.value);
+        m_sensors_samples.sonar = sample.sonar;
+        m_channel->add_to_stream(m_sensors_samples.sonar.value);
         sensors.set(Sensor::SONAR);
     }
 
@@ -579,7 +604,7 @@ void Comms::send_sensor_data()
         return;
     }
 
-    m_sensors_sample.last_sent_timestamp = now;
+    m_sensors_samples.last_sent_timestamp = now;
 }
 
 void Comms::send_uav_data()

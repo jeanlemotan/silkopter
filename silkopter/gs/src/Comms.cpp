@@ -186,7 +186,20 @@ void Comms::process_message_sensors()
 
     if (sensors.test(Sensor::ACCELEROMETER) && result == Channel::Unpack_Result::OK)
     {
-        result = m_channel.unpack_param(m_sensor_data.accelerometer.value);
+        uint16_t count = 0;
+        result = m_channel.unpack_param(count);
+        m_sensor_data.accelerometer.value.accelerations.resize(count);
+        for (size_t i = 0; i < count; i++)
+        {
+            result = m_channel.unpack_param(m_sensor_data.accelerometer.value.accelerations[i]);
+            uint16_t sample_time_us = 0;
+            result = m_channel.unpack_param(sample_time_us);
+            if (result != Channel::Unpack_Result::OK)
+            {
+                break;
+            }
+            m_sensor_data.accelerometer.value.sample_time = std::chrono::microseconds(sample_time_us);
+        }
         if (result == Channel::Unpack_Result::OK)
         {
             m_sensor_data.accelerometer.timestamp = q::Clock::now();
@@ -195,7 +208,20 @@ void Comms::process_message_sensors()
     }
     if (sensors.test(Sensor::GYROSCOPE) && result == Channel::Unpack_Result::OK)
     {
-        result = m_channel.unpack_param(m_sensor_data.gyroscope.value);
+        uint16_t count = 0;
+        result = m_channel.unpack_param(count);
+        m_sensor_data.gyroscope.value.angular_velocities.resize(count);
+        for (size_t i = 0; i < count; i++)
+        {
+            result = m_channel.unpack_param(m_sensor_data.gyroscope.value.angular_velocities[i]);
+            uint16_t sample_time_us = 0;
+            result = m_channel.unpack_param(sample_time_us);
+            if (result != Channel::Unpack_Result::OK)
+            {
+                break;
+            }
+            m_sensor_data.gyroscope.value.sample_time = std::chrono::microseconds(sample_time_us);
+        }
         if (result == Channel::Unpack_Result::OK)
         {
             m_sensor_data.gyroscope.timestamp = q::Clock::now();

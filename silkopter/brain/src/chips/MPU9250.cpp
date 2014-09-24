@@ -291,19 +291,19 @@ auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Ra
     {
     case Gyroscope_Range::_250_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f);
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f);
         break;
     case Gyroscope_Range::_500_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 2.f);
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 2.f);
         break;
     case Gyroscope_Range::_1000_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 4.f);
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 4.f);
         break;
     case Gyroscope_Range::_2000_DPS:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f).radians / (131.f / 8.f);
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
         SILK_ERR("Invalid gyroscope range.");

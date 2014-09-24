@@ -35,7 +35,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qdata/$${LIB_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/$${LIB_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/$${LIB_FOLDER} -lqbase
 
-LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale
+LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3
 
 
 DESTDIR = ../../../bin
