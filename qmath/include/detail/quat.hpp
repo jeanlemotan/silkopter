@@ -28,28 +28,28 @@ inline quat<T> quat<T>::look_at(vec3<T> const& front, vec3<T> const& up)
 
 template<typename T>
 template<class Policy>
-inline quat<T> quat<T>::from_axis_x(angle<T> const& a)
+inline quat<T> quat<T>::from_axis_x(T const& a)
 {
     quat<T> q(quat<T>::uninitialized);
-    q.template set_from_euler_xyz<Policy>(a, angle<T>(), angle<T>());
+    q.template set_from_euler_xyz<Policy>(a, T(), T());
     return q;
 }
 
 template<typename T>
 template<class Policy>
-inline quat<T> quat<T>::from_axis_y(angle<T> const& a)
+inline quat<T> quat<T>::from_axis_y(T const& a)
 {
     quat<T> q(quat<T>::uninitialized);
-    q.template set_from_euler_xyz<Policy>(angle<T>(), a, angle<T>());
+    q.template set_from_euler_xyz<Policy>(T(), a, T());
     return q;
 }
 
 template<typename T>
 template<class Policy>
-inline quat<T> quat<T>::from_axis_z(angle<T> const& a)
+inline quat<T> quat<T>::from_axis_z(T const& a)
 {
     quat<T> q(quat<T>::uninitialized);
-    q.template set_from_euler_xyz<Policy>(angle<T>(), angle<T>(), a);
+    q.template set_from_euler_xyz<Policy>(T(), T(), a);
     return q;
 }
 
@@ -244,9 +244,9 @@ inline void quat<T>::get_as_mat3_and_inv(mat3<T>& ret, mat3<T>& inv) const
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_xyz(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_xyz(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
 	vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
 	sin_cos<T, Policy>(a, s, c);
 	x = c.z*s.x*c.y + s.z*c.x*s.y;
@@ -255,9 +255,9 @@ inline void quat<T>::set_from_euler_xyz(angle<T> const& ax, angle<T> const& ay, 
 	w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_xzy(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_xzy(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
     vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
@@ -266,9 +266,9 @@ inline void quat<T>::set_from_euler_xzy(angle<T> const& ax, angle<T> const& ay, 
     w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_yxz(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_yxz(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
     vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y + s.z*c.x*s.y;
@@ -277,9 +277,9 @@ inline void quat<T>::set_from_euler_yxz(angle<T> const& ax, angle<T> const& ay, 
     w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_yzx(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_yzx(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
     vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y + s.z*c.x*s.y;
@@ -288,9 +288,9 @@ inline void quat<T>::set_from_euler_yzx(angle<T> const& ax, angle<T> const& ay, 
     w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_zxy(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_zxy(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
     vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
@@ -299,9 +299,9 @@ inline void quat<T>::set_from_euler_zxy(angle<T> const& ax, angle<T> const& ay, 
     w = c.z*c.x*c.y - s.z*s.x*s.y;
 }
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_euler_zyx(angle<T> const& ax, angle<T> const& ay, angle<T> const& az)
+inline void quat<T>::set_from_euler_zyx(T const& ax, T const& ay, T const& az)
 {
-    vec3<T> a(ax.radians*T(0.5), ay.radians*T(0.5), az.radians*T(0.5));
+    vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
     vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
@@ -310,8 +310,41 @@ inline void quat<T>::set_from_euler_zyx(angle<T> const& ax, angle<T> const& ay, 
     w = c.z*c.x*c.y + s.z*s.x*s.y;
 }
 
+
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_xyz(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::set_from_euler_xyz(vec3<T> const& euler)
+{
+    set_from_euler_xyz(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::set_from_euler_xzy(vec3<T> const& euler)
+{
+    set_from_euler_xzy(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::set_from_euler_yxz(vec3<T> const& euler)
+{
+    set_from_euler_yxz(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::set_from_euler_yzx(vec3<T> const& euler)
+{
+    set_from_euler_yzx(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::set_from_euler_zxy(vec3<T> const& euler)
+{
+    set_from_euler_zxy(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::set_from_euler_zyx(vec3<T> const& euler)
+{
+    set_from_euler_zyx(euler.x, euler.y, euler.z);
+}
+
+
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_xyz(T& ax, T& ay, T& az) const
 {
 	T const s = T(2)*(z*x + w*y);
 	if (s < T(0.9999))
@@ -337,7 +370,7 @@ inline void quat<T>::get_as_euler_xyz(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_xzy(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::get_as_euler_xzy(T& ax, T& ay, T& az) const
 {
 	T const s = -T(2)*(x*y - w*z);
 	if (s < T(0.9999))
@@ -363,7 +396,7 @@ inline void quat<T>::get_as_euler_xzy(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_yxz(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::get_as_euler_yxz(T& ax, T& ay, T& az) const
 {
 	T const s = -T(2)*(z*y - w*x);
 	if (s < T(0.9999))
@@ -389,7 +422,7 @@ inline void quat<T>::get_as_euler_yxz(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 	} 
 }
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_yzx(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::get_as_euler_yzx(T& ax, T& ay, T& az) const
 {
 	T const s = T(2)*(x*y + w*z);
 	if (s < T(0.9999))
@@ -416,7 +449,7 @@ inline void quat<T>::get_as_euler_yzx(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_zxy(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::get_as_euler_zxy(T& ax, T& ay, T& az) const
 {
 	T const s = T(2)*(z*y + w*x);
 	if (s < T(0.9999))
@@ -443,7 +476,7 @@ inline void quat<T>::get_as_euler_zxy(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_euler_zyx(angle<T>& ax, angle<T>& ay, angle<T>& az) const
+inline void quat<T>::get_as_euler_zyx(T& ax, T& ay, T& az) const
 {
 	T const s = -T(2)*(z*x - w*y);
 	if (s < T(0.9999))
@@ -469,12 +502,47 @@ inline void quat<T>::get_as_euler_zyx(angle<T>& ax, angle<T>& ay, angle<T>& az) 
 	} 
 }
 
+
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_xyz(vec3<T>& euler) const
+{
+    get_as_euler_xyz(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_xzy(vec3<T>& euler) const
+{
+    get_as_euler_xzy(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_yxz(vec3<T>& euler) const
+{
+    get_as_euler_yxz(euler.x, euler.y, euler.z);
+}
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_yzx(vec3<T>& euler) const
+{
+    get_as_euler_yzx(euler.x, euler.y, euler.z);
+}
+
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_zxy(vec3<T>& euler) const
+{
+    get_as_euler_zxy(euler.x, euler.y, euler.z);
+}
+
+template <typename T> template <class Policy>
+inline void quat<T>::get_as_euler_zyx(vec3<T>& euler) const
+{
+    get_as_euler_zyx(euler.x, euler.y, euler.z);
+}
+
+
 //! axis must be unit length
 //! angle in radians
 template <typename T> template <class Policy>
-inline void quat<T>::set_from_angle_axis(angle<T> const& angle, vec3<T> const& axis)
+inline void quat<T>::set_from_angle_axis(T const& angle, vec3<T> const& axis)
 {
-    T const half = T(0.5)*angle.radians;
+    T const half = T(0.5)*angle;
     T s;
     sin_cos<T, Policy>(half, s, w);
     x = s*axis.x;
@@ -483,7 +551,7 @@ inline void quat<T>::set_from_angle_axis(angle<T> const& angle, vec3<T> const& a
 }
 
 template <typename T> template <class Policy>
-inline void quat<T>::get_as_angle_axis(angle<T>& angle, vec3<T> &axis) const
+inline void quat<T>::get_as_angle_axis(T& angle, vec3<T> &axis) const
 {
     T const safe_w = clamp(w, (T)-1, (T)1);
     T const scale = sqrt<T, Policy>((T)1 - safe_w * safe_w);

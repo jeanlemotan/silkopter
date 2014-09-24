@@ -14,14 +14,20 @@ namespace math
 	}
 
 
-	template<class Policy> inline float lerp(float a, float b, float t)
+    template<class Policy = standard> inline float lerp(float a, float b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		float x = b - a;
 		return a + x*t;
 	}
 
-	template <typename T, class Policy> angle<T> lerp(angle<T> const& a, angle<T> const& b, float t)
+    template<class T, class Policy> inline T lerp(T const& a, T const& b, float t)
+    {
+        t = detail::lerp_check_mu<Policy>(t);
+        return (T)(a*T(1.f - t) + b*T(t));
+    }
+
+    template <typename T, class Policy = standard> angle<T> lerp(angle<T> const& a, angle<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		auto start = a.radians;
@@ -44,41 +50,33 @@ namespace math
 		return angle<T>(start + ((end - start) * t));
 	}
 
-	template <typename T, class Policy> quat<T> lerp(quat<T> const& a, quat<T> const& b, float t)
+    template <typename T, class Policy = standard> quat<T> lerp(quat<T> const& a, quat<T> const& b, float t)
+	{
+        return nlerp(a, b, t);
+	}
+
+    template<class T, class Policy = standard> inline vec2<T> lerp(vec2<T> const& a, vec2<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		auto x(b - a);
-		return a + x*t;
+        return vec2<T>(a.x + x.x*T(t), a.y + x.y*T(t));
 	}
 
-	template<class T, class Policy> inline T lerp(T const& a, T const& b, float t)
-	{
-		t = detail::lerp_check_mu<Policy>(t);
-		return (T)(a*(1.f - t) + b*t);
-	}
-
-	template<class T, class Policy> inline vec2<T> lerp(vec2<T> const& a, vec2<T> const& b, float t)
+    template<class T, class Policy = standard> inline vec3<T> lerp(vec3<T> const& a, vec3<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		auto x(b - a);
-		return a + x*t;
-	}
+        return vec3<T>(a.x + x.x*T(t), a.y + x.y*T(t), a.z + x.z*T(t));
+    }
 
-	template<class T, class Policy> inline vec3<T> lerp(vec3<T> const& a, vec3<T> const& b, float t)
+    template<class T, class Policy = standard> inline vec4<T> lerp(vec4<T> const& a, vec4<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		auto x(b - a);
-		return a + x*t;
-	}
+        return vec4<T>(a.x + x.x*T(t), a.y + x.y*T(t), a.z + x.z*T(t), a.w + x.w*T(t));
+    }
 
-	template<class T, class Policy> inline vec4<T> lerp(vec4<T> const& a, vec4<T> const& b, float t)
-	{
-		t = detail::lerp_check_mu<Policy>(t);
-		auto x(b - a);
-		return a + x*t;
-	}
-
-	template<typename T, class Policy> quat<T> nlerp(quat<T> const& a, quat<T> const& b, float t)
+    template<typename T, class Policy> quat<T> nlerp(quat<T> const& a, quat<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 		quat<T> result(quat<T>::uninitialized);
@@ -98,7 +96,7 @@ namespace math
 		return normalized(result);
 	}
 
-	template<typename T, class Policy> quat<T> slerp(quat<T> const& a, quat<T> const& b, float t)
+    template<typename T, class Policy> quat<T> slerp(quat<T> const& a, quat<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
 

@@ -6,15 +6,15 @@ namespace math
 // scalars
 
 template<typename T>
-inline angle<T> radians(T const& degrees)
+inline T radians(T const& degrees)
 {
-    return angle<T>(degrees * angle<T>::pi / T(180));
+    return degrees * angle<T>::pi / T(180);
 }
 
 template<typename T>
-inline T degrees(angle<T> const& a)
+inline T degrees(T const& a)
 {
-    return a.radians * T(180) / angle<T>::pi;
+    return a * T(180) / angle<T>::pi;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -248,57 +248,52 @@ template<typename T, class Policy> inline void sin_cos(T const& angle, T& s, T& 
 //////////////////////////////////////////////////////////////////////////
 
 template<typename T, class Policy>
-inline T cos(angle<T> const& angle)
+inline T cos(T const& angle)
 {
-    return cos<T, Policy>(angle.radians);
+    return std::cos(angle);
 }
 template<typename T, class Policy>
-inline T sin(angle<T> const& angle)
+inline T sin(T const& angle)
 {
-    return sin<T, Policy>(angle.radians);
+    return std::sin(angle);
 }
 template<typename T, class Policy>
-inline T tan(angle<T> const& angle)
+inline T tan(T const& angle)
 {
-    return tan<T, Policy>(angle.radians);
-}
-template<typename T, class Policy>
-inline void sin_cos(angle<T> const& angle, T& s, T& c)
-{
-    sin_cos<T, Policy>(angle.radians, s, c);
+    return std::tan(angle);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-template<> inline angle<float> acos<float, standard>(float const& s) { return angle<float>(::acosf(s)); }
-template<> inline angle<float> asin<float, standard>(float const& s) { return angle<float>(::asinf(s)); }
-template<> inline angle<float> atan<float, standard>(float const& s) { return angle<float>(::atanf(s)); }
-template<> inline angle<float> atan2<float, standard>(float const& y, float const& x) { return angle<float>(::atan2f(y, x)); }
+template<> inline float acos<float, standard>(float const& s) { return float(::acosf(s)); }
+template<> inline float asin<float, standard>(float const& s) { return float(::asinf(s)); }
+template<> inline float atan<float, standard>(float const& s) { return float(::atanf(s)); }
+template<> inline float atan2<float, standard>(float const& y, float const& x) { return float(::atan2f(y, x)); }
 
-template<> inline angle<double> acos<double, standard>(double const& s) { return angle<double>(::acos(s)); }
-template<> inline angle<double> asin<double, standard>(double const& s) { return angle<double>(::asin(s)); }
-template<> inline angle<double> atan<double, standard>(double const& s) { return angle<double>(::atan(s)); }
-template<> inline angle<double> atan2<double, standard>(double const& y, double const& x) { return angle<double>(::atan2(y, x)); }
+template<> inline double acos<double, standard>(double const& s) { return double(::acos(s)); }
+template<> inline double asin<double, standard>(double const& s) { return double(::asin(s)); }
+template<> inline double atan<double, standard>(double const& s) { return double(::atan(s)); }
+template<> inline double atan2<double, standard>(double const& y, double const& x) { return double(::atan2(y, x)); }
 
-template<> inline angle<float> acos<float, fast>(float const& s) { return angle<float>(::acosf(s)); }
-template<> inline angle<float> asin<float, fast>(float const& s) { return angle<float>(::asinf(s)); }
-template<> inline angle<float> atan<float, fast>(float const& s) { return angle<float>(::atanf(s)); }
-template<> inline angle<float> atan2<float, fast>(float const& y, float const& x) { return angle<float>(::atan2f(y, x)); }
+template<> inline float acos<float, fast>(float const& s) { return float(::acosf(s)); }
+template<> inline float asin<float, fast>(float const& s) { return float(::asinf(s)); }
+template<> inline float atan<float, fast>(float const& s) { return float(::atanf(s)); }
+template<> inline float atan2<float, fast>(float const& y, float const& x) { return float(::atan2f(y, x)); }
 
-template<> inline angle<double> acos<double, fast>(double const& s) { return angle<double>(::acos(s)); }
-template<> inline angle<double> asin<double, fast>(double const& s) { return angle<double>(::asin(s)); }
-template<> inline angle<double> atan<double, fast>(double const& s) { return angle<double>(::atan(s)); }
-template<> inline angle<double> atan2<double, fast>(double const& y, double const& x) { return angle<double>(::atan2(y, x)); }
+template<> inline double acos<double, fast>(double const& s) { return double(::acos(s)); }
+template<> inline double asin<double, fast>(double const& s) { return double(::asin(s)); }
+template<> inline double atan<double, fast>(double const& s) { return double(::atan(s)); }
+template<> inline double atan2<double, fast>(double const& y, double const& x) { return double(::atan2(y, x)); }
 
-template<> inline angle<float> acos<float, safe>(float const& s) { return angle<float>(::acosf(s)); }
-template<> inline angle<float> asin<float, safe>(float const& s) { return angle<float>(::asinf(s)); }
-template<> inline angle<float> atan<float, safe>(float const& s) { return angle<float>(::atanf(s)); }
-template<> inline angle<float> atan2<float, safe>(float const& y, float const& x) { return angle<float>(::atan2f(y, x)); }
+template<> inline float acos<float, safe>(float const& s) { return float(::acosf(s)); }
+template<> inline float asin<float, safe>(float const& s) { return float(::asinf(s)); }
+template<> inline float atan<float, safe>(float const& s) { return float(::atanf(s)); }
+template<> inline float atan2<float, safe>(float const& y, float const& x) { return float(::atan2f(y, x)); }
 
-template<> inline angle<double> acos<double, safe>(double const& s) { return angle<double>(::acos(s)); }
-template<> inline angle<double> asin<double, safe>(double const& s) { return angle<double>(::asin(s)); }
-template<> inline angle<double> atan<double, safe>(double const& s) { return angle<double>(::atan(s)); }
-template<> inline angle<double> atan2<double, safe>(double const& y, double const& x) { return angle<double>(::atan2(y, x)); }
+template<> inline double acos<double, safe>(double const& s) { return double(::acos(s)); }
+template<> inline double asin<double, safe>(double const& s) { return double(::asin(s)); }
+template<> inline double atan<double, safe>(double const& s) { return double(::atan(s)); }
+template<> inline double atan2<double, safe>(double const& y, double const& x) { return double(::atan2(y, x)); }
 
 //////////////////////////////////////////////////////////////////////////
 // vec2
@@ -310,7 +305,7 @@ inline vec2<T> degrees(vec2<T> const& v)
 template<typename T>
 inline vec2<T> radians(vec2<T> const& v)
 {
-    return vec2<T>(radians(v.x).radians, radians(v.y).radians);
+    return vec2<T>(radians(v.x), radians(v.y));
 }
 
 template<typename T, class Policy = standard>
@@ -345,7 +340,7 @@ inline vec3<T> degrees(vec3<T> const& v)
 template<typename T>
 inline vec3<T> radians(vec3<T> const& v)
 {
-	return vec3<T>(radians(v.x), radians(v.y), radians(v.z));
+    return vec3<T>(radians(v.x), radians(v.y), radians(v.z));
 }
 template<typename T, class Policy = standard>
 inline vec3<T> cos(vec3<T> const& v)
@@ -379,7 +374,7 @@ inline vec4<T> degrees(vec4<T> const& v)
 template<typename T>
 inline vec4<T> radians(vec4<T> const& v)
 {
-	return vec4<T>(radians(v.x), radians(v.y), radians(v.z), radians(v.w));
+    return vec4<T>(radians(v.x), radians(v.y), radians(v.z), radians(v.w));
 }
 template<typename T, class Policy = standard>
 inline vec4<T> cos(vec4<T> const& v)

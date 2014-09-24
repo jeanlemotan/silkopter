@@ -720,19 +720,19 @@ namespace math
 
 		template <typename T> inline vec2<bool> is_zero(vec2<T> const& v)
 		{
-			return vec2<bool>(v.x == 0, v.y == 0);
+            return vec2<bool>(v.x == T(0), v.y == T(0));
 		}
 		template <typename T> inline vec3<bool> is_zero(vec3<T> const& v)
 		{
-			return vec3<bool>(v.x == 0, v.y == 0, v.z == 0);
+            return vec3<bool>(v.x == T(0), v.y == T(0), v.z == T(0));
 		}
 		template <typename T> inline vec4<bool> is_zero(vec4<T> const& v)
 		{
-			return vec4<bool>(v.x == 0, v.y == 0, v.z == 0, v.w == 0);
+            return vec4<bool>(v.x == T(0), v.y == T(0), v.z == T(0), v.w == T(0));
 		}
 		template <typename T> inline vec4<bool> is_zero(quat<T> const& v)
 		{
-			return vec4<bool>(v.x == 0, v.y == 0, v.z == 0, v.w == 0);
+            return vec4<bool>(v.x == T(0), v.y == T(0), v.z == T(0), v.w == T(0));
 		}
 
 		template <typename T> inline vec2<bool> is_zero(vec2<T> const& v, T tolerance)
@@ -756,19 +756,19 @@ namespace math
 
 		template <typename T> inline vec2<bool> is_one(vec2<T> const& v)
 		{
-            return vec2<bool>(v.x == 1, v.y == 1);
+            return vec2<bool>(v.x == T(1), v.y == T(1));
 		}
 		template <typename T> inline vec3<bool> is_one(vec3<T> const& v)
 		{
-            return vec3<bool>(v.x == 1, v.y == 1, v.z == 1);
+            return vec3<bool>(v.x == T(1), v.y == T(1), v.z == T(1));
 		}
 		template <typename T> inline vec4<bool> is_one(vec4<T> const& v)
 		{
-            return vec4<bool>(v.x == 1, v.y == 1, v.z == 1, v.w == 1);
+            return vec4<bool>(v.x == T(1), v.y == T(1), v.z == T(1), v.w == T(1));
 		}
 		template <typename T> inline vec4<bool> is_one(quat<T> const& v)
 		{
-            return vec4<bool>(v.x == 1, v.y == 1, v.z == 1, v.w == 1);
+            return vec4<bool>(v.x == T(1), v.y == T(1), v.z == T(1), v.w == T(1));
 		}
 
 		template <typename T> inline vec2<bool> is_one(vec2<T> const& v, T tolerance)

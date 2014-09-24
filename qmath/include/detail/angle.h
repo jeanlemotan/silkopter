@@ -22,6 +22,8 @@ struct angle
 	// Conversion constructors
 	template<typename U> explicit angle(angle<U> const& a);
 
+    explicit operator T() const { return radians; }
+
 	//! normalizes an angle to 0 .. 2PI
 	angle<T>& normalize();
 
