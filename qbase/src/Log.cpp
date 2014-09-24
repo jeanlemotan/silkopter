@@ -185,7 +185,7 @@ void q::log(logging::Level level, const String& topic, const char* file, int lin
 	}
 	if (level == logging::Level::ERR)
 	{
-        QASSERT(0);
+//        QASSERT(0);
 	}
 }
 
