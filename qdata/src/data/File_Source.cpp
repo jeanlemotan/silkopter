@@ -15,6 +15,10 @@ File_Source::File_Source(Path const& path)
 	{
 		m_size = util::fs::get_file_size(path);
 	}
+    else
+    {
+        QLOG_WARNING("fs", "Cannot open {}: {}", path, strerror(errno));
+    }
 }
 File_Source::~File_Source()
 {

@@ -34,6 +34,24 @@ namespace data
 		return sink;
 	}
 
+    template<class T, class U> Sink& operator<<(Sink& sink, const std::pair<T, U>& val)
+    {
+        sink.write((uint8_t const*)&val.first, sizeof(val.first));
+        sink.write((uint8_t const*)&val.second, sizeof(val.second));
+        return sink;
+    }
+
+    template<class T, class SIZE_T = uint32_t> Sink& operator<<(Sink& sink, const std::vector<T>& val)
+    {
+        QASSERT(val.size() <= std::numeric_limits<SIZE_T>::max());
+        sink << (SIZE_T)val.size();
+        for (auto const& v: val)
+        {
+            sink << v;
+        }
+        return sink;
+    }
+
 	inline Sink& operator<<(Sink& sink, char const* val)
 	{
 		size_t size = strlen(val);

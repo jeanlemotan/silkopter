@@ -56,6 +56,26 @@ namespace data
 		return source;
 	}
 
+    template<class T, class U> Source& operator>>(Source& source, std::pair<T, U>& val)
+    {
+        source.read((uint8_t*)&val.first, sizeof(val.first));
+        source.read((uint8_t*)&val.second, sizeof(val.second));
+        return source;
+    }
+
+    template<class T, class SIZE_T = uint32_t> Source& operator>>(Source& source, std::vector<T>& val)
+    {
+        val.clear();
+        SIZE_T size;
+        source >> size;
+        val.resize(size);
+        for (auto& v: val)
+        {
+            source >> v;
+        }
+        return source;
+    }
+
 	inline Source& operator>>(Source& source, String& val)
 	{
 		boost::auto_buffer<uint8_t, boost::store_n_bytes<1024>> buffer;
