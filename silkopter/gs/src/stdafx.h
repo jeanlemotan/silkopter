@@ -44,6 +44,7 @@
 #include <QtCore/QString>
 #include <QtCore/QtGlobal>
 #include <QtCore/QSettings>
+#include <QFileDialog>
 
 extern "C"
 {

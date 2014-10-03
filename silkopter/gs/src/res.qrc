@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>load.png</file>
+        <file>save.png</file>
+        <file>clear.png</file>
+        <file>rewind.png</file>
+        <file>play.png</file>
+    </qresource>
+</RCC>

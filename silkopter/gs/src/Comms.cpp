@@ -9,7 +9,6 @@ Comms::Comms(boost::asio::io_service& io_service)
     , m_socket(io_service)
     , m_channel(m_socket)
 {
-    //m_socket.set_option(ip::tcp::no_delay(true));
 }
 
 auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> Result
@@ -20,7 +19,7 @@ auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> R
 
         m_remote_endpoint = ip::tcp::endpoint(address, port);
         boost::system::error_code error = boost::asio::error::host_not_found;
-        m_socket.connect(m_remote_endpoint, error);
+        //m_socket.connect(m_remote_endpoint, error);
 
         if (!error)
         {
@@ -188,10 +187,11 @@ void Comms::process_message_sensors()
     {
         uint16_t count = 0;
         result = m_channel.unpack_param(count);
-        m_sensor_data.accelerometer.value.accelerations.resize(count);
+        auto start = m_sensor_data.accelerometer.value.accelerations.size();
+        m_sensor_data.accelerometer.value.accelerations.resize(start + count);
         for (size_t i = 0; i < count; i++)
         {
-            result = m_channel.unpack_param(m_sensor_data.accelerometer.value.accelerations[i]);
+            result = m_channel.unpack_param(m_sensor_data.accelerometer.value.accelerations[start + i]);
             uint16_t sample_time_us = 0;
             result = m_channel.unpack_param(sample_time_us);
             if (result != Channel::Unpack_Result::OK)
@@ -210,10 +210,11 @@ void Comms::process_message_sensors()
     {
         uint16_t count = 0;
         result = m_channel.unpack_param(count);
-        m_sensor_data.gyroscope.value.angular_velocities.resize(count);
+        auto start = m_sensor_data.gyroscope.value.angular_velocities.size();
+        m_sensor_data.gyroscope.value.angular_velocities.resize(start + count);
         for (size_t i = 0; i < count; i++)
         {
-            result = m_channel.unpack_param(m_sensor_data.gyroscope.value.angular_velocities[i]);
+            result = m_channel.unpack_param(m_sensor_data.gyroscope.value.angular_velocities[start + i]);
             uint16_t sample_time_us = 0;
             result = m_channel.unpack_param(sample_time_us);
             if (result != Channel::Unpack_Result::OK)
@@ -479,6 +480,9 @@ void Comms::process()
     {
         return;
     }
+
+    m_sensor_data.gyroscope.value.angular_velocities.clear();
+    m_sensor_data.accelerometer.value.accelerations.clear();
 
     while (auto msg = m_channel.get_next_message())
     {

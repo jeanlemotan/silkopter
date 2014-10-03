@@ -48,7 +48,10 @@ private:
     {
         size_t sample_rate = 0;
         std::vector<math::vec3f> input;
+        std::vector<math::vec3f> filtered_input;
+
         std::vector<math::vec3f> output;
+        std::vector<math::vec3f> filtered_output;
 
         static const size_t MAX_INPUT_SIZE = 65536;
         std::shared_ptr<double> temp_input;
@@ -56,7 +59,7 @@ private:
         fftw_plan plan;
     };
 
-    void process_gyroscope_fft(FFT_Data& fft);
+    void process_fft(FFT_Data& fft);
     float m_gyroscope_sample_time = 0;
     FFT_Data m_gyroscope_fft;
 
@@ -110,4 +113,42 @@ private:
         math::vec3f received_scale;
 
     } m_calibration;
+
+    struct History
+    {
+        size_t last_file_idx = 0;
+
+        //the float is the time in seconds
+        std::vector<std::pair<float, math::vec3f>> gyroscope_samples;
+        std::vector<std::pair<float, math::vec3f>> gyroscope_filtered_samples;
+
+        std::vector<std::pair<float, math::vec3f>> accelerometer_samples;
+        std::vector<std::pair<float, math::vec3f>> accelerometer_filtered_samples;
+
+        std::vector<std::pair<float, math::vec3f>> compass_samples;
+    } m_history;
+
+    struct History_Playback : History
+    {
+        bool is_playing = false;
+        bool is_loaded = false;
+        float time = 0;
+        size_t last_gyroscope_idx = 0;
+        size_t last_accelerometer_idx = 0;
+        size_t last_compass_idx = 0;
+    } m_playback;
+
+    void dump_history_to_file();
+    void load_history_from_file(q::Path const& filepath);
+    void load_history();
+    void clear_history();
+    void rewind();
+
+    static void remove_plot_data_before(QCustomPlot& plot, q::Clock::duration length);
+    static void clear_plot(QCustomPlot& plot);
+    static void add_plot_sample(QCustomPlot& plot, float key, math::vec3f const& sample);
+    static void add_plot_filtered_sample(QCustomPlot& plot, float key, math::vec3f const& sample);
+    static void prepare_fft(QCustomPlot& plot, std::vector<std::pair<float, math::vec3f>> const& samples, std::vector<math::vec3f>& output);
+    static void display_fft(QCustomPlot& plot, FFT_Data const& fft);
+    static void display_filtered_fft(QCustomPlot& plot, FFT_Data const& fft);
 };

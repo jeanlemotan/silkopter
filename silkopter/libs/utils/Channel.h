@@ -120,7 +120,7 @@ namespace util
         typedef std::vector<uint8_t> RX_Buffer_t;
 
         typedef uint8_t Magic_t;
-        typedef uint8_t Header_Crc_t;
+        typedef uint16_t Header_Crc_t;
         typedef uint16_t Data_Crc_t;
 
         static const uint8_t MAGIC = 0x3F;

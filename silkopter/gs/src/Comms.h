@@ -7,6 +7,15 @@
 namespace silk
 {
 
+template<class T> struct Data
+{
+    typedef T data_t;
+    Data() : value() {}
+    T value;
+    uint32_t sample_idx = 0;
+    q::Clock::time_point timestamp;
+};
+
 class Comms : q::util::Noncopyable
 {
 public:
@@ -41,15 +50,6 @@ public:
         m_channel.send(Message::UAV_INPUT, input, params...);
     }
 
-    template<class T> struct Data
-    {
-        typedef T data_t;
-        Data() : value() {}
-        T value;
-
-        uint32_t sample_idx = 0;
-        q::Clock::time_point timestamp;
-    };
 
     struct Accelerometer
     {

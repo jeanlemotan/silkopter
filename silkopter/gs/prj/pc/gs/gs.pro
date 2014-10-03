@@ -88,3 +88,6 @@ FORMS    += \
     ../../../src/Video_Stream.ui \
     ../../../src/Input_Widget.ui \
     ../../../src/PID_Widget.ui
+
+RESOURCES += \
+    ../../../src/res.qrc

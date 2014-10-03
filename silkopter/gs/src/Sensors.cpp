@@ -2,6 +2,37 @@
 #include "Sensors.h"
 #include "physics/constants.h"
 
+class Butterworth
+{
+public:
+    /* Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
+       Command line: /www/usr/fisher/helpers/mkfilter -Bu -Lp -o 4 -a 1.0000000000e-02 0.0000000000e+00 -l */
+
+    static constexpr size_t NZEROS  = 4;
+    static constexpr size_t NPOLES  = 4;
+    static constexpr float GAIN    = 2.286922409e+05;
+
+    float xv[NZEROS+1], yv[NPOLES+1];
+
+    float process(float t)
+      {
+        xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
+                xv[4] = t / GAIN;
+                yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4];
+                yv[4] =   (xv[0] + xv[4]) + 4 * (xv[1] + xv[3]) + 6 * xv[2]
+                             + ( -0.7816187403f * yv[0]) + (  3.3189386048f * yv[1])
+                             + ( -5.2911525842f * yv[2]) + (  3.7537627567f * yv[3]);
+        return yv[4];
+      }
+};
+
+
+Butterworth gfx, gfy, gfz;
+Butterworth afx, afy, afz;
+
+
+
+
 
 Sensors::Sensors(QWidget *parent /* = 0 */)
 	: QWidget(parent)
@@ -10,34 +41,64 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
 	m_ui.setupUi(this);
 
     m_ui.a_plot->addGraph();
-    m_ui.a_plot->graph(0)->setPen(QPen(Qt::red));
+    m_ui.a_plot->graph(0)->setPen(QPen(QColor(255, 0, 0, 64)));
     m_ui.a_plot->addGraph();
-    m_ui.a_plot->graph(1)->setPen(QPen(Qt::green));
+    m_ui.a_plot->graph(1)->setPen(QPen(QColor(0, 255, 0, 64)));
     m_ui.a_plot->addGraph();
-    m_ui.a_plot->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.a_plot->graph(2)->setPen(QPen(QColor(0, 0, 255, 64)));
+
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(3)->setPen(QPen(Qt::red));
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(4)->setPen(QPen(Qt::green));
+    m_ui.a_plot->addGraph();
+    m_ui.a_plot->graph(5)->setPen(QPen(Qt::blue));
+
 //    m_ui.a_plot->setInteractions(QCP::Interactions(QCP::iRangeZoom | QCP::iRangeDrag));
-    //m_ui.a_plot->yAxis->setRange(-1.2, -1);
 
     m_ui.a_spectrum->addGraph();
-    m_ui.a_spectrum->graph(0)->setPen(QPen(Qt::red));
+    m_ui.a_spectrum->graph(0)->setPen(QPen(QColor(255, 0, 0, 64)));
     m_ui.a_spectrum->addGraph();
-    m_ui.a_spectrum->graph(1)->setPen(QPen(Qt::green));
+    m_ui.a_spectrum->graph(1)->setPen(QPen(QColor(0, 255, 0, 64)));
     m_ui.a_spectrum->addGraph();
-    m_ui.a_spectrum->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.a_spectrum->graph(2)->setPen(QPen(QColor(0, 0, 255, 64)));
+
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(3)->setPen(QPen(Qt::red));
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(4)->setPen(QPen(Qt::green));
+    m_ui.a_spectrum->addGraph();
+    m_ui.a_spectrum->graph(5)->setPen(QPen(Qt::blue));
+    m_ui.a_spectrum->yAxis->setRange(0, 0.1f);
 
     m_ui.g_plot->addGraph();
-    m_ui.g_plot->graph(0)->setPen(QPen(Qt::red));
+    m_ui.g_plot->graph(0)->setPen(QPen(QColor(255, 0, 0, 64)));
     m_ui.g_plot->addGraph();
-    m_ui.g_plot->graph(1)->setPen(QPen(Qt::green));
+    m_ui.g_plot->graph(1)->setPen(QPen(QColor(0, 255, 0, 64)));
     m_ui.g_plot->addGraph();
-    m_ui.g_plot->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.g_plot->graph(2)->setPen(QPen(QColor(0, 0, 255, 64)));
+
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(3)->setPen(QPen(Qt::red));
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(4)->setPen(QPen(Qt::green));
+    m_ui.g_plot->addGraph();
+    m_ui.g_plot->graph(5)->setPen(QPen(Qt::blue));
 
     m_ui.g_spectrum->addGraph();
-    m_ui.g_spectrum->graph(0)->setPen(QPen(Qt::red));
+    m_ui.g_spectrum->graph(0)->setPen(QPen(QColor(255, 0, 0, 64)));
     m_ui.g_spectrum->addGraph();
-    m_ui.g_spectrum->graph(1)->setPen(QPen(Qt::green));
+    m_ui.g_spectrum->graph(1)->setPen(QPen(QColor(0, 255, 0, 64)));
     m_ui.g_spectrum->addGraph();
-    m_ui.g_spectrum->graph(2)->setPen(QPen(Qt::blue));
+    m_ui.g_spectrum->graph(2)->setPen(QPen(QColor(0, 0, 255, 64)));
+
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(3)->setPen(QPen(Qt::red));
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(4)->setPen(QPen(Qt::green));
+    m_ui.g_spectrum->addGraph();
+    m_ui.g_spectrum->graph(5)->setPen(QPen(Qt::blue));
+    m_ui.g_spectrum->yAxis->setRange(0, 0.1f);
 
     m_ui.c_plot->addGraph();
     m_ui.c_plot->graph(0)->setPen(QPen(Qt::red));
@@ -65,6 +126,12 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
     connect(m_ui.g_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
     connect(m_ui.c_calibrate, &QPushButton::released, this, &Sensors::start_compass_calibration);
 
+    connect(m_ui.save_history, &QToolButton::released, this, &Sensors::dump_history_to_file);
+    connect(m_ui.load_history, &QToolButton::released, this, &Sensors::load_history);
+    connect(m_ui.clear_history, &QToolButton::released, this, &Sensors::clear_history);
+    connect(m_ui.rewind_history, &QToolButton::released, this, &Sensors::rewind);
+    connect(m_ui.play_history, &QToolButton::toggled, [this](bool checked) { m_playback.is_playing = checked; } );
+
     m_last_time = q::Clock::now();
 
     m_calibration.message_box.setParent(this);
@@ -75,6 +142,9 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
 
     m_accelerometer_fft.temp_input.reset(static_cast<double*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(double))), fftw_free);
     m_accelerometer_fft.temp_output.reset(static_cast<fftw_complex*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(fftw_complex))), fftw_free);
+
+    q::util::fs::create_folder(q::Path("sensor_data"));
+
 }
 
 Sensors::~Sensors()
@@ -89,7 +159,7 @@ void Sensors::init(silk::Comms* comms)
 void Sensors::process()
 {
     auto now = q::Clock::now();
-    //auto d = now - m_last_time;
+    auto dt = now - m_last_time;
 	m_last_time = now;
 
     QASSERT(m_comms);
@@ -99,13 +169,46 @@ void Sensors::process()
     m_ui.g_calibrate->setEnabled(m_comms->is_connected());
     m_ui.g_test_filter->setEnabled(m_comms->is_connected());
 
-    static const float graph_length_seconds = 3.f;
+    static const std::chrono::seconds graph_length(3);
 
-    if (isVisible()/* && m_comms->is_connected()*/)
+    auto old_time = m_playback.time;
+    if (m_playback.is_playing)
+    {
+        m_playback.time += q::Seconds(dt).count();
+    }
+    //QLOG_INFO("xxx", "{}", m_history_playback.time);
+
+    if (isVisible() && (m_comms->is_connected() || m_playback.is_loaded))
 	{
         {
-            auto data = m_comms->get_sensor_gyroscope_data();
+            silk::Comms::Gyroscope_Data data;
 
+            if (m_playback.is_loaded)
+            {
+                for (size_t i = m_playback.last_gyroscope_idx; i < m_playback.gyroscope_samples.size(); i++)
+                {
+                    auto const& s = m_playback.gyroscope_samples[i];
+                    if (s.first >= old_time && s.first < m_playback.time)
+                    {
+                        data.value.angular_velocities.push_back(s.second);
+                        m_playback.last_gyroscope_idx = i;
+                    }
+                    else if (s.first >= m_playback.time)
+                    {
+                        break;
+                    }
+                }
+                if (!data.value.angular_velocities.empty())
+                {
+                    data.value.sample_time = std::chrono::milliseconds(1);
+                    data.sample_idx++;
+                    data.timestamp = now;
+                }
+            }
+            else
+            {
+                data = m_comms->get_sensor_gyroscope_data();
+            }
 
             if (0)
             {
@@ -140,93 +243,97 @@ void Sensors::process()
                 }
             }
 
-            m_gyroscope_fft.sample_rate = static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
+            m_gyroscope_fft.sample_rate = data.value.sample_time.count() == 0 ? 0 : static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
 
             float time_increment = q::Seconds(data.value.sample_time).count();
-            for (auto& av: data.value.angular_velocities)
+            for (auto const& av: data.value.angular_velocities)
             {
                 m_gyroscope_sample_time += time_increment;
-                m_ui.g_plot->graph(0)->addData(m_gyroscope_sample_time, av.x);
-                m_ui.g_plot->graph(1)->addData(m_gyroscope_sample_time, av.y);
-                m_ui.g_plot->graph(2)->addData(m_gyroscope_sample_time, av.z);
-                m_gyroscope_fft.input.push_back(av);
-            }
 
-            if (m_gyroscope_sample_time > graph_length_seconds)
+                add_plot_sample(*m_ui.g_plot, m_gyroscope_sample_time, av);
+                m_history.gyroscope_samples.emplace_back(m_gyroscope_sample_time, av);
+
+                math::vec3f f(gfx.process(av.x), gfy.process(av.y), gfz.process(av.z));
+
+                add_plot_filtered_sample(*m_ui.g_plot, m_gyroscope_sample_time, f);
+                m_history.gyroscope_filtered_samples.emplace_back(m_gyroscope_sample_time, f);
+            }
+            if (m_gyroscope_sample_time > q::Seconds(graph_length).count())
             {
-                m_ui.g_plot->graph(0)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
-                m_ui.g_plot->graph(1)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
-                m_ui.g_plot->graph(2)->removeDataBefore(m_gyroscope_sample_time - graph_length_seconds);
+                remove_plot_data_before(*m_ui.g_plot, graph_length);
             }
             m_ui.g_plot->rescaleAxes(true);
             m_ui.g_plot->replot();
 
-            process_gyroscope_fft(m_gyroscope_fft);
-            if (!m_gyroscope_fft.output.empty())
-            {
-                m_ui.g_spectrum->graph(0)->clearData();
-                m_ui.g_spectrum->graph(1)->clearData();
-                m_ui.g_spectrum->graph(2)->clearData();
-
-                for (size_t i = 0; i < m_gyroscope_fft.output.size(); i++)
-                {
-                    auto const& s = m_gyroscope_fft.output[i];
-                    auto freq = (m_gyroscope_fft.sample_rate / 2) * i / m_gyroscope_fft.output.size();
-                    m_ui.g_spectrum->graph(0)->addData(freq, s.x);
-                    m_ui.g_spectrum->graph(1)->addData(freq, s.y);
-                    m_ui.g_spectrum->graph(2)->addData(freq, s.z);
-                }
-                m_ui.g_spectrum->rescaleAxes(true);
-                m_ui.g_spectrum->replot();
-            }
+            prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_samples, m_gyroscope_fft.input);
+            prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_filtered_samples, m_gyroscope_fft.filtered_input);
+            process_fft(m_gyroscope_fft);
+            display_fft(*m_ui.g_spectrum, m_gyroscope_fft);
+            display_filtered_fft(*m_ui.g_spectrum, m_gyroscope_fft);
         }
 
         {
-            auto data = m_comms->get_sensor_accelerometer_data();
+            silk::Comms::Accelerometer_Data data;
+
+            if (m_playback.is_loaded)
+            {
+                for (size_t i = m_playback.last_accelerometer_idx; i < m_playback.accelerometer_samples.size(); i++)
+                {
+                    auto const& s = m_playback.accelerometer_samples[i];
+                    if (s.first >= old_time && s.first < m_playback.time)
+                    {
+                        data.value.accelerations.push_back(s.second);
+                        m_playback.last_accelerometer_idx = i;
+                    }
+                    else if (s.first >= m_playback.time)
+                    {
+                        break;
+                    }
+                }
+                if (!data.value.accelerations.empty())
+                {
+                    data.value.sample_time = std::chrono::milliseconds(1);
+                    data.sample_idx++;
+                    data.timestamp = now;
+                }
+            }
+            else
+            {
+                data = m_comms->get_sensor_accelerometer_data();
+            }
+
             m_accelerometer_fft.sample_rate = static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
 
             float time_increment = q::Seconds(data.value.sample_time).count();
             for (auto& av: data.value.accelerations)
             {
                 m_accelerometer_sample_time += time_increment;
-                m_ui.a_plot->graph(0)->addData(m_accelerometer_sample_time, av.x);
-                m_ui.a_plot->graph(1)->addData(m_accelerometer_sample_time, av.y);
-                m_ui.a_plot->graph(2)->addData(m_accelerometer_sample_time, av.z);
-                m_accelerometer_fft.input.push_back(av);
+                add_plot_sample(*m_ui.a_plot, m_accelerometer_sample_time, av);
+                m_history.accelerometer_samples.emplace_back(m_accelerometer_sample_time, av);
+
+                math::vec3f f(afx.process(av.x), afy.process(av.y), afz.process(av.z));
+
+                add_plot_filtered_sample(*m_ui.a_plot, m_accelerometer_sample_time, f);
+                m_history.accelerometer_filtered_samples.emplace_back(m_accelerometer_sample_time, f);
             }
 
-            if (m_accelerometer_sample_time > graph_length_seconds)
+            if (m_accelerometer_sample_time > q::Seconds(graph_length).count())
             {
-                m_ui.a_plot->graph(0)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
-                m_ui.a_plot->graph(1)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
-                m_ui.a_plot->graph(2)->removeDataBefore(m_accelerometer_sample_time - graph_length_seconds);
+                remove_plot_data_before(*m_ui.a_plot, graph_length);
             }
             m_ui.a_plot->rescaleAxes(true);
             m_ui.a_plot->replot();
 
-            process_accelerometer_fft(m_accelerometer_fft);
-            if (!m_accelerometer_fft.output.empty())
-            {
-                m_ui.a_spectrum->graph(0)->clearData();
-                m_ui.a_spectrum->graph(1)->clearData();
-                m_ui.a_spectrum->graph(2)->clearData();
-
-                for (size_t i = 0; i < m_accelerometer_fft.output.size(); i++)
-                {
-                    auto const& s = m_accelerometer_fft.output[i];
-                    auto freq = (m_accelerometer_fft.sample_rate / 2) * i / m_accelerometer_fft.output.size();
-                    m_ui.a_spectrum->graph(0)->addData(freq, s.x);
-                    m_ui.a_spectrum->graph(1)->addData(freq, s.y);
-                    m_ui.a_spectrum->graph(2)->addData(freq, s.z);
-                }
-                m_ui.a_spectrum->rescaleAxes(true);
-                m_ui.a_spectrum->replot();
-            }
+            prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_samples, m_accelerometer_fft.input);
+            prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_filtered_samples, m_accelerometer_fft.filtered_input);
+            process_fft(m_accelerometer_fft);
+            display_fft(*m_ui.a_spectrum, m_accelerometer_fft);
+            display_filtered_fft(*m_ui.a_spectrum, m_accelerometer_fft);
         }
 
 
         auto alive = m_comms->get_uav_alive_duration();
-        if (alive != m_last_uav_alive_duration)
+        if (m_comms->is_connected() && alive != m_last_uav_alive_duration)
 		{
             m_last_uav_alive_duration = alive;
 
@@ -243,6 +350,7 @@ void Sensors::process()
                 m_ui.c_plot->graph(0)->addData(seconds, direction.x);
                 m_ui.c_plot->graph(1)->addData(seconds, direction.y);
                 m_ui.c_plot->graph(2)->addData(seconds, direction.z);
+                m_history.compass_samples.emplace_back(seconds, direction);
                 //SILK_INFO("compass: {}", data.value);
             }
 
@@ -269,17 +377,12 @@ void Sensors::process()
 
 			//////////////////////////////////////////////////////////////////////////
 
-            if (seconds > graph_length_seconds)
+            if (seconds > q::Seconds(graph_length).count())
             {
-                m_ui.c_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.c_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.c_plot->graph(2)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.barometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.barometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.sonar_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.sonar_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.thermometer_plot->graph(0)->removeDataBefore(seconds - graph_length_seconds);
-                m_ui.thermometer_plot->graph(1)->removeDataBefore(seconds - graph_length_seconds);
+                remove_plot_data_before(*m_ui.c_plot, graph_length);
+                remove_plot_data_before(*m_ui.barometer_plot, graph_length);
+                remove_plot_data_before(*m_ui.sonar_plot, graph_length);
+                remove_plot_data_before(*m_ui.thermometer_plot, graph_length);
             }
 
 
@@ -302,84 +405,75 @@ void Sensors::process()
         m_gyroscope_sample_time = 0;
         m_accelerometer_sample_time = 0;
 
-        m_ui.g_plot->graph(0)->clearData();
-        m_ui.g_plot->graph(1)->clearData();
-        m_ui.g_plot->graph(2)->clearData();
-        m_ui.g_spectrum->graph(0)->clearData();
-        m_ui.g_spectrum->graph(1)->clearData();
-        m_ui.g_spectrum->graph(2)->clearData();
-        m_ui.a_plot->graph(0)->clearData();
-        m_ui.a_plot->graph(1)->clearData();
-        m_ui.a_plot->graph(2)->clearData();
-        m_ui.a_spectrum->graph(0)->clearData();
-        m_ui.a_spectrum->graph(1)->clearData();
-        m_ui.a_spectrum->graph(2)->clearData();
-        m_ui.c_plot->graph(0)->clearData();
-        m_ui.c_plot->graph(1)->clearData();
-        m_ui.c_plot->graph(2)->clearData();
-        m_ui.barometer_plot->graph(0)->clearData();
-        m_ui.barometer_plot->graph(1)->clearData();
-        m_ui.sonar_plot->graph(0)->clearData();
-        m_ui.sonar_plot->graph(1)->clearData();
-        m_ui.thermometer_plot->graph(0)->clearData();
-        m_ui.thermometer_plot->graph(1)->clearData();
+        clear_plot(*m_ui.g_plot);
+        clear_plot(*m_ui.g_spectrum);
+        clear_plot(*m_ui.a_plot);
+        clear_plot(*m_ui.a_spectrum);
+        clear_plot(*m_ui.c_plot);
+        clear_plot(*m_ui.barometer_plot);
+        clear_plot(*m_ui.sonar_plot);
+        clear_plot(*m_ui.thermometer_plot);
     }
 
     update_calibration();
 }
 
-void Sensors::process_gyroscope_fft(FFT_Data& fft)
+static void process_fft(fftw_plan& plan, size_t required_sample_count, std::vector<math::vec3f> const& input, std::vector<math::vec3f>& output, double* temp_input, fftw_complex* temp_output)
+{
+    auto start = input.end() - required_sample_count;
+    auto end = input.end();
+
+    //first remove DC
+    math::vec3f median;
+    for (auto it = start; it != end; ++it)
+    {
+        median += *it;
+    }
+    float div = 1.f / required_sample_count;
+    median *= div;
+
+    size_t output_size = required_sample_count/2 + 1;
+    output.resize(output_size);
+
+    //compute fft per component
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.x - median.x; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].x = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.y - median.y; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].y = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.z - median.z; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].z = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+}
+
+void Sensors::process_fft(FFT_Data& fft)
 {
     const std::chrono::milliseconds required_duration(1000);
     const size_t required_sample_count = math::min(
                 static_cast<size_t>(fft.sample_rate * q::Seconds(required_duration).count()),
                 fft.MAX_INPUT_SIZE);
-    if (fft.input.size() < required_sample_count)
+    if (fft.input.size() < required_sample_count || required_sample_count == 0)
     {
         fft.output.resize(0);
         return;
     }
 
-    size_t output_size = required_sample_count/2 + 1;
-    fft.output.resize(output_size);
-
-    auto temp_out = fft.temp_output.get();
-
     fft.plan = fftw_plan_dft_r2c_1d(required_sample_count, fft.temp_input.get(), fft.temp_output.get(), FFTW_ESTIMATE);
 
-    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.x; });
-    fftw_execute(fft.plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        fft.output[i].x = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
-    }
-
-    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.y; });
-    fftw_execute(fft.plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        fft.output[i].y = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
-    }
-
-    std::transform(fft.input.begin(), fft.input.begin() + required_sample_count, fft.temp_input.get(), [](math::vec3f const& v) { return v.z; });
-    fftw_execute(fft.plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        fft.output[i].z = (temp_out[i][0]*temp_out[i][0] + temp_out[i][1]*temp_out[i][1]) / (required_sample_count*required_sample_count);
-    }
-
-    //consume input
-    fft.input.erase(fft.input.begin(), fft.input.begin() + required_sample_count);
-}
-
-void Sensors::process_accelerometer_fft(FFT_Data& fft)
-{
-    if (fft.input.size() < fft.sample_rate)
-    {
-        return;
-    }
-
-
+    ::process_fft(fft.plan, required_sample_count, fft.input, fft.output, fft.temp_input.get(), fft.temp_output.get());
+    ::process_fft(fft.plan, required_sample_count, fft.filtered_input, fft.filtered_output, fft.temp_input.get(), fft.temp_output.get());
 }
 
 
@@ -1032,3 +1126,190 @@ void Sensors::calibrate_find_delta(double dS[6], double JS[6][6], double delta[6
 	}
 }
 
+void Sensors::dump_history_to_file()
+{
+    do
+    {
+        std::string filepath;
+        q::util::format(filepath, "sensor_data/sensors-{}.history", ++m_history.last_file_idx);
+        if (!q::util::fs::exists(q::Path(filepath)))
+        {
+            q::data::File_Sink file((q::Path(filepath)));
+            if (!file.is_open())
+            {
+                continue;
+            }
+
+            file << m_history.gyroscope_samples;
+            file << m_history.accelerometer_samples;
+            file << m_history.compass_samples;
+            break;
+        }
+    } while (m_history.last_file_idx < 10000);
+
+    clear_history();
+}
+
+void Sensors::load_history_from_file(q::Path const& filepath)
+{
+    q::data::File_Source file((filepath));
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    file >> m_playback.gyroscope_samples;
+    file >> m_playback.accelerometer_samples;
+    file >> m_playback.compass_samples;
+
+    rewind();
+    m_playback.is_loaded = true;
+    m_playback.is_playing = true;
+}
+
+void Sensors::load_history()
+{
+    auto fn = QFileDialog::getOpenFileName(this, "Open History", "sensor_data", "History Files(*.history)");
+    if (fn.count() == 0)
+    {
+        return;
+    }
+
+    load_history_from_file(q::Path(fn.toLatin1().data()));
+
+}
+void Sensors::clear_history()
+{
+    m_history.gyroscope_samples.clear();
+    m_history.accelerometer_samples.clear();
+    m_history.compass_samples.clear();
+
+    m_playback.gyroscope_samples.clear();
+    m_playback.accelerometer_samples.clear();
+    m_playback.compass_samples.clear();
+
+    if (m_playback.is_loaded)
+    {
+        m_playback.is_loaded = false;
+
+        clear_plot(*m_ui.a_plot);
+        clear_plot(*m_ui.g_plot);
+        clear_plot(*m_ui.g_spectrum);
+        clear_plot(*m_ui.a_spectrum);
+    }
+}
+
+void Sensors::rewind()
+{
+    m_history.gyroscope_samples.clear();
+    m_history.accelerometer_samples.clear();
+    m_history.compass_samples.clear();
+
+    m_playback.time = m_playback.gyroscope_samples.empty() ? 0 : m_playback.gyroscope_samples.front().first;
+    m_playback.last_accelerometer_idx = 0;
+    m_playback.last_gyroscope_idx = 0;
+    m_playback.last_compass_idx = 0;
+
+    clear_plot(*m_ui.g_plot);
+    clear_plot(*m_ui.a_plot);
+    clear_plot(*m_ui.g_spectrum);
+    clear_plot(*m_ui.a_spectrum);
+}
+
+
+void Sensors::remove_plot_data_before(QCustomPlot& plot, q::Clock::duration length)
+{
+    for (int i = 0; i < plot.graphCount(); i++)
+    {
+        auto graph = plot.graph(i);
+        if (graph && !graph->data()->empty())
+        {
+            plot.graph(i)->removeDataBefore(plot.graph(i)->data()->last().key - q::Seconds(length).count());
+        }
+    }
+    plot.rescaleAxes(true);
+    plot.replot();
+}
+void Sensors::clear_plot(QCustomPlot& plot)
+{
+    for (int i = 0; i < plot.graphCount(); i++)
+    {
+        auto graph = plot.graph(i);
+        if (graph)
+        {
+            plot.graph(i)->clearData();
+        }
+    }
+//    plot.rescaleAxes(true);
+    for (int i = 0; i < plot.plottableCount(); i++)
+    {
+        plot.plottable(i)->rescaleAxes();
+    }
+    plot.replot();
+}
+void Sensors::add_plot_sample(QCustomPlot& plot, float key, math::vec3f const& sample)
+{
+    plot.graph(0)->addData(key, sample.x);
+    plot.graph(1)->addData(key, sample.y);
+    plot.graph(2)->addData(key, sample.z);
+}
+void Sensors::add_plot_filtered_sample(QCustomPlot& plot, float key, math::vec3f const& sample)
+{
+    plot.graph(3)->addData(key, sample.x);
+    plot.graph(4)->addData(key, sample.y);
+    plot.graph(5)->addData(key, sample.z);
+}
+
+void Sensors::prepare_fft(QCustomPlot& plot, std::vector<std::pair<float, math::vec3f>> const& samples, std::vector<math::vec3f>& output)
+{
+    float min = plot.graph(0)->keyAxis()->range().minRange;
+    float max = plot.graph(0)->keyAxis()->range().maxRange;
+    output.clear();
+    for (auto const& v: samples)
+    {
+        if (v.first >= min && v.first < max)
+        {
+            output.push_back(v.second);
+        }
+        else if (v.first >= max)
+        {
+            break;
+        }
+    }
+}
+void Sensors::display_fft(QCustomPlot& plot, FFT_Data const& fft)
+{
+    if (!fft.output.empty())
+    {
+        clear_plot(plot);
+        for (size_t i = 1; i < fft.output.size(); i++)
+        {
+            auto const& s = fft.output[i];
+            auto freq = (fft.sample_rate / 2) * i / fft.output.size();
+            add_plot_sample(plot, freq, s);
+        }
+        for (int i = 0; i < plot.plottableCount(); i++)
+        {
+            plot.plottable(i)->rescaleAxes(true);
+        }
+        plot.replot();
+    }
+}
+void Sensors::display_filtered_fft(QCustomPlot& plot, FFT_Data const& fft)
+{
+    if (!fft.filtered_output.empty())
+    {
+        clear_plot(plot);
+        for (size_t i = 1; i < fft.filtered_output.size(); i++)
+        {
+            auto const& s = fft.filtered_output[i];
+            auto freq = (fft.sample_rate / 2) * i / fft.filtered_output.size();
+            add_plot_sample(plot, freq, s);
+        }
+        for (int i = 0; i < plot.plottableCount(); i++)
+        {
+            plot.plottable(i)->rescaleAxes(true);
+        }
+        plot.replot();
+    }
+}
