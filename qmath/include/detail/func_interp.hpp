@@ -24,7 +24,7 @@ namespace math
     template<class T, class Policy> inline T lerp(T const& a, T const& b, float t)
     {
         t = detail::lerp_check_mu<Policy>(t);
-        return (T)(a*T(1.f - t) + b*T(t));
+        return (T)(a*(1.f - t) + b*t);
     }
 
     template <typename T, class Policy = standard> angle<T> lerp(angle<T> const& a, angle<T> const& b, float t)
@@ -50,10 +50,12 @@ namespace math
 		return angle<T>(start + ((end - start) * t));
 	}
 
-    template <typename T, class Policy = standard> quat<T> lerp(quat<T> const& a, quat<T> const& b, float t)
-	{
-        return nlerp(a, b, t);
-	}
+    //NO NO NO. let it use the generic template implementation
+    //nlerm and slerp use the normal lerp so leave it commented!!!
+//    template <typename T, class Policy = standard> quat<T> lerp(quat<T> const& a, quat<T> const& b, float t)
+//	{
+//        return nlerp(a, b, t);
+//	}
 
     template<class T, class Policy = standard> inline vec2<T> lerp(vec2<T> const& a, vec2<T> const& b, float t)
 	{
