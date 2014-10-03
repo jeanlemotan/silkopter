@@ -13,9 +13,9 @@ Input_Mgr::Input_Mgr(q::String const& window_handle)
     enumerate_gamepads();
 
     {
-        auto& buttons = m_ouya_maping.buttons;
-        auto& sticks = m_ouya_maping.sticks;
-        auto& axes = m_ouya_maping.axes;
+        auto& buttons = m_ouya_mapping.buttons;
+        auto& sticks = m_ouya_mapping.sticks;
+        auto& axes = m_ouya_mapping.axes;
         buttons[0] = Gamepad::Button::OUYA_O;
         buttons[1] = Gamepad::Button::OUYA_U;
         buttons[2] = Gamepad::Button::OUYA_Y;
@@ -34,6 +34,29 @@ Input_Mgr::Input_Mgr(q::String const& window_handle)
 
         buttons[12] = Gamepad::Button::LEFT_TRIGGER;
         buttons[13] = Gamepad::Button::RIGHT_TRIGGER;
+    }
+    {
+        auto& buttons = m_ps3_mapping.buttons;
+        auto& sticks = m_ps3_mapping.sticks;
+        auto& axes = m_ps3_mapping.axes;
+        buttons[12] = Gamepad::Button::PS_TRIANGLE;
+        buttons[13] = Gamepad::Button::PS_CIRCLE;
+        buttons[14] = Gamepad::Button::PS_X;
+        buttons[15] = Gamepad::Button::PS_SQUARE;
+
+        buttons[4] = Gamepad::Button::LPAD_UP;
+        buttons[5] = Gamepad::Button::LPAD_RIGHT;
+        buttons[6] = Gamepad::Button::LPAD_DOWN;
+        buttons[7] = Gamepad::Button::LPAD_LEFT;
+
+        buttons[1] = Gamepad::Button::LEFT_STICK;
+        buttons[2] = Gamepad::Button::RIGHT_STICK;
+
+        buttons[10] = Gamepad::Button::LEFT_BUMPER;
+        buttons[11] = Gamepad::Button::RIGHT_BUMPER;
+
+        buttons[8] = Gamepad::Button::LEFT_TRIGGER;
+        buttons[9] = Gamepad::Button::RIGHT_TRIGGER;
     }
 }
 
@@ -92,8 +115,8 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
     uint8_t type = ev.type & ~JS_EVENT_INIT;
     if (type == JS_EVENT_BUTTON)
     {
-        auto it = m_ouya_maping.buttons.find(ev.number);
-        if (it == m_ouya_maping.buttons.end())
+        auto it = m_ouya_mapping.buttons.find(ev.number);
+        if (it == m_ouya_mapping.buttons.end())
         {
             QLOG_ERR("qinput", "unhandled ouya button {}", ev.number);
             return;
@@ -152,6 +175,71 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
     }
 }
 
+void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event const& ev)
+{
+    uint8_t type = ev.type & ~JS_EVENT_INIT;
+    if (type == JS_EVENT_BUTTON)
+    {
+        auto it = m_ps3_mapping.buttons.find(ev.number);
+        if (it == m_ps3_mapping.buttons.end())
+        {
+            QLOG_ERR("qinput", "unhandled ps3 button {}", ev.number);
+            return;
+        }
+        if (ev.value)
+        {
+            data.gamepad->set_button_pressed(it->second);
+        }
+        else
+        {
+            data.gamepad->set_button_released(it->second);
+        }
+    }
+    else if (type == JS_EVENT_AXIS)
+    {
+        if (ev.number == 0)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+            stick.value.x = ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+        }
+        else if (ev.number == 1)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+            stick.value.y = -ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+        }
+        else if (ev.number == 2)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+            stick.value.x = ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+        }
+        else if (ev.number == 3)
+        {
+            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+            stick.value.y = -ev.value / 32767.f;
+            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+        }
+        else if (ev.number == 12)
+        {
+            Gamepad::Axis_Data v;
+            v.value = ev.value / 32767.f;
+            data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
+        }
+        else if (ev.number == 13)
+        {
+            Gamepad::Axis_Data v;
+            v.value = ev.value / 32767.f;
+            data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
+        }
+        else
+        {
+            QLOG_ERR("qinput", "unknown ps3 axis {}", ev.number);
+        }
+    }
+}
+
 
 void Input_Mgr::update_gamepads(q::Clock::duration dt)
 {
@@ -167,6 +255,7 @@ void Input_Mgr::update_gamepads(q::Clock::duration dt)
             switch (g.gamepad->get_type())
             {
             case Gamepad::Type::OUYA: process_ouya_gamepad_event(g, ev); break;
+            case Gamepad::Type::PS3: process_ps3_gamepad_event(g, ev); break;
             default: break;
             }
         }
@@ -226,6 +315,10 @@ static boost::optional<Gamepad_Info> get_gamepad_info(int device_id)
     if (info.name.find("ouya") != q::String::npos)
     {
         info.type = Gamepad::Type::OUYA;
+    }
+    else if (info.name.find("sony playstation(r)3") != q::String::npos)
+    {
+        info.type = Gamepad::Type::PS3;
     }
     else
     {

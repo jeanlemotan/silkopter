@@ -55,9 +55,10 @@ namespace qinput
             std::map<int, Gamepad::Button> buttons;
             std::map<int, Gamepad::Axis> axes;
             std::map<int, Gamepad::Stick> sticks;
-        } m_ouya_maping, m_ps3_mapping, m_xbox_mapping;
+        } m_ouya_mapping, m_ps3_mapping, m_xbox_mapping;
 
         void process_ouya_gamepad_event(Gamepad_Data const& data, js_event const& ev);
+        void process_ps3_gamepad_event(Gamepad_Data const& data, js_event const& ev);
 
         mutable std::mutex m_gamepad_mutex;
         mutable std::vector<Gamepad_Data>	m_gamepads;
