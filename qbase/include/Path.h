@@ -19,24 +19,29 @@ public:
 	Path(Path const& other);
 	Path(Path&& other);
 	Path(Path const& from, Path const& to);
-	Path& operator=(Path&& other);
-	Path& operator=(Path const& other);
-	Path& operator=(String const& path);
-	Path& operator=(char const* path);
-
 	~Path();
 
 	//Positive index - get the path element at that index
-	//Negative index - idx = GetCount + idx (indexing from the end)
+	//Negative index - idx = get_count + idx (indexing from the end)
 	auto operator[](int idx) const -> String;
 
 	//Adding path elements
 	auto operator+(String const& path) const -> Path;
+	auto operator+(std::string const& path) const -> Path;
 	auto operator+(char const* path) const -> Path;
 	auto operator+(Path const& path) const -> Path;
+	
 	auto operator+=(String const& path) -> Path&;
+	auto operator+=(std::string const& path) -> Path&;
 	auto operator+=(char const* path) -> Path&;
 	auto operator+=(Path const& path) -> Path&;
+
+	//assignment
+    auto operator=(Path&& other) -> Path&;
+    auto operator=(Path const& other) -> Path&;
+    auto operator=(String const& path) -> Path&;
+    auto operator=(std::string const& path) -> Path&;
+    auto operator=(char const* path) -> Path&;
 
 	auto operator==(Path const& other) const -> bool;
 	auto operator!=(Path const& other) const -> bool;
@@ -44,81 +49,109 @@ public:
 	void clear();
 	void swap(Path& other);
 		 
+	//removes elements from the end of the path
+	//if size is > get_count, the path will be empty
 	void shrink(size_t size);
+
+	//sets this path to be the relative path between from and to.
+	//Example:
+	//	set('a/b/c', 'a/b/c/d') == 'd'
+	//	set('a/b/c', 'a/b/x') == '../x'
 	void set(Path const& from, Path const& to);
+
+	//returns the path in String form
+	// Path(p.get_as_string()) == p
 	auto get_as_string() const -> String;
+	//returns the path in std::string form
+	// Path(p.get_as_string()) == p
+    template<class Str_T> auto get_as() const -> Str_T;
+
+	//returns the number of elements in the path.
 	auto get_count() const -> size_t;
+	//same as get_count
 	auto size() const -> size_t;
+
+	//if idx >= 0 - returns the idx'th element from the path
+	//else, returns the idx'th element from the back
 	auto get(int idx) const -> String;
+	//returns a new path with its elements starting from idx up to:
+	// if count > 0, up to idx + count
+	// else up to back - count
 	auto get_sub_path(size_t idx, int count = 0) const -> Path;
 	void get_sub_path(Path& dst, size_t idx, int count = 0) const;
+
+	//returns true if the path doesn't have any elements (path == null)
 	auto is_empty() const -> bool;
 	auto empty() const -> bool;
 
-	auto get_hash() const -> std::size_t;
-	auto get_extension_part() const -> String;
-	auto get_name_part() const -> String;
-	auto get_filename() const -> String;
-
+	//returns true if the path starts with the prefix
 	auto starts_with(Path const& prefix) const -> bool;
+	//returns true if the path ends with the suffix
 	auto ends_with(Path const& suffix) const -> bool;
 
-	static Path				null;
+	//collapses any '..' the path might have, if possible
+	//Example:
+	//	'a/b/c/../d' == 'a/b/d'
+	//	'a/b/../../../d' == '../d'
+	void collapse_relative_path();
+
+	//returns a has for this path. Used for hash_maps
+	auto get_hash() const -> std::size_t;
+
+	//filesystem interaction
+	//returns from the last path element - if it exists - the part after the last '.' - or null if not found. This usually represents the file extension
+	auto get_extension_part() const -> String;
+	//returns from the last path element - if it exists - the part before the last '.' - or null if not found. This usually represents the file name
+	auto get_name_part() const -> String;
+	//returns the last path element - if it exists or null if not found. This usually represents the filename (name + extension)
+	auto get_filename() const -> String;
+
+	static const Path				null;
 
 private:
+	static const String 			k_separator;
+	static const String 			k_back;
+
 	void parse(char const* path, size_t size);
+    auto can_pop() const -> bool;
 
 	typedef mem::Embedded_Allocator<String, 16*sizeof(String)> Allocator;
 	Allocator::arena_type m_arena;
 
 	std::vector<String, Allocator>		m_elements;
-	mutable String		m_path;
-	mutable size_t		m_path_reserved;
-	mutable size_t		m_hash;
+	mutable size_t		m_hash = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 inline Path::Path() 
 	: m_elements(Allocator(m_arena))
-	, m_path_reserved(8)
-	, m_hash(0)
 {}
 
 inline Path::Path(char const* path) 
 	: m_elements(Allocator(m_arena))
-	, m_path_reserved(8)
-	, m_hash(0)
 {
 	QASSERT(path);
 	parse(path, strlen(path));
 }
 inline Path::Path(String const& path) 
 	: m_elements(Allocator(m_arena))
-	, m_path_reserved(8)
-	, m_hash(0)
 {
 	parse(path.c_str(), path.size());
 }
 inline Path::Path(std::string const& path) 
 	: m_elements(Allocator(m_arena))
-	, m_path_reserved(8)
-	, m_hash(0)
 {
 	parse(path.c_str(), path.size());
 }
 inline Path::Path(Path const& other)
 	: m_elements(Allocator(m_arena))
-	, m_path(other.m_path)
-	, m_path_reserved(other.m_path_reserved)
 	, m_hash(other.m_hash)
 {
 	m_elements = other.m_elements;
 }
 inline Path::Path(Path&& other) 
 	: m_elements(Allocator(m_arena))
-	, m_path(std::move(other.m_path))
-	, m_path_reserved(other.m_path_reserved)
 	, m_hash(other.m_hash)
 {
 	m_elements.resize(other.m_elements.size());
@@ -126,8 +159,6 @@ inline Path::Path(Path&& other)
 }
 inline Path::Path(Path const& from, Path const& to) 
 	: m_elements(Allocator(m_arena))
-	, m_path_reserved(8)
-	, m_hash(0)
 {
 	set(from, to);
 }
@@ -144,20 +175,21 @@ inline auto Path::operator=(Path&& other) -> Path&
 	m_elements.resize(other.m_elements.size());
 	std::copy(std::make_move_iterator(other.m_elements.begin()), std::make_move_iterator(other.m_elements.end()), m_elements.begin());
 
-	std::swap(m_path, other.m_path);
-	m_path_reserved = other.m_path_reserved;
 	m_hash = other.m_hash;
 	return *this;
 }
 inline auto Path::operator=(Path const& other) -> Path&
 {
 	m_elements = other.m_elements;
-	m_path = other.m_path;
-	m_path_reserved = other.m_path_reserved;
 	m_hash = other.m_hash;
 	return *this;
 }
 inline auto Path::operator=(String const& path) -> Path&
+{
+	parse(path.c_str(), path.size());
+	return *this;
+}
+inline auto Path::operator=(std::string const& path) -> Path&
 {
 	parse(path.c_str(), path.size());
 	return *this;
@@ -173,7 +205,14 @@ inline auto Path::operator+(String const& path) const -> Path
 	{
 		return *this;
 	}
-
+	return *this + Path(path);
+}
+inline auto Path::operator+(std::string const& path) const -> Path
+{
+	if (path.empty())
+	{
+		return *this;
+	}
 	return *this + Path(path);
 }
 inline auto Path::operator+(char const* path) const -> Path
@@ -190,17 +229,56 @@ inline auto Path::operator+(Path const& path) const -> Path
 	{
 		return *this;
 	}
+	if (empty())
+	{
+		return path;
+	}
 
 	Path p = *this;
 
 	p.m_elements.reserve(p.m_elements.size() + path.m_elements.size());
-	p.m_elements.insert(p.m_elements.end(), path.m_elements.begin(), path.m_elements.end());
-	p.m_path_reserved = p.m_elements.size() * 8;
+
+	//avoid the case of double '/'
+	if (path.m_elements.front() == k_separator)
+	{
+		p.m_elements.pop_back();
+	}
+
+	size_t i = 0;
+	//skip the first '/'
+	if (path.m_elements.front() == k_separator)
+	{
+		i = 1;
+	}
+	//collapse all the '..' from at the front of path
+	for (; i < path.m_elements.size(); i++)
+	{
+		auto const& e = path.m_elements[i];
+		if (e == k_back && p.can_pop())
+		{
+			//if elements is not empty and the last element is not '..', then remove it
+			p.m_elements.pop_back();	
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	std::copy(path.m_elements.begin() + i, path.m_elements.end(), std::back_inserter(p.m_elements));
 	p.m_hash = 0;
 
 	return p;
 }
 inline auto Path::operator+=(String const& path) -> Path&
+{
+	if (!path.empty())
+	{
+		return operator+=(Path(path));
+	}
+	return *this;
+}
+inline auto Path::operator+=(std::string const& path) -> Path&
 {
 	if (!path.empty())
 	{
@@ -218,13 +296,47 @@ inline auto Path::operator+=(char const* path) -> Path&
 }
 inline auto Path::operator+=(Path const& path) -> Path&
 {
-	if (!path.empty())
+	if (path.empty())
 	{
-		m_elements.reserve(m_elements.size() + path.m_elements.size());
-		m_elements.insert(m_elements.end(), path.m_elements.begin(), path.m_elements.end());
-		m_path_reserved = m_elements.size() * 8;
-		m_hash = 0;
+		return *this;
 	}
+	if (empty())
+	{
+		*this = path;
+		return *this;
+	}
+
+	m_elements.reserve(m_elements.size() + path.m_elements.size());
+
+	//avoid the case of double '/'
+	if (path.m_elements.front() == k_separator)
+	{
+		m_elements.pop_back();
+	}
+
+	size_t i = 0;
+	//skip the first '/'
+	if (path.m_elements.front() == k_separator)
+	{
+		i = 1;
+	}
+	//collapse all the '..' from at the front of path
+	for (; i < path.m_elements.size(); i++)
+	{
+		auto const& e = path.m_elements[i];
+		if (e == k_back && can_pop())
+		{
+			//if elements is not empty and the last element is not '..', then remove it
+			m_elements.pop_back();	
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	std::copy(path.m_elements.begin() + i, path.m_elements.end(), std::back_inserter(m_elements));
+
 	return *this;
 }
 inline auto Path::operator==(Path const& other) const -> bool
@@ -238,21 +350,13 @@ inline auto Path::operator!=(Path const& other) const -> bool
 
 inline void Path::clear()
 {
-	m_path = String::null;
-	//mElements.resize(0);
 	m_elements.clear();
-	m_path_reserved = 8;
 	m_hash = 0;
 }
 inline void Path::shrink(size_t size)
 {
-	if (size < get_count())
-	{
-		m_path = String::null;
-		m_elements.resize(size);
-		m_path_reserved = 8;
-		m_hash = 0;
-	}
+	m_elements.resize(std::min(size, get_count()));
+	m_hash = 0;
 }
 inline void Path::set(Path const& from, Path const& to)
 {
@@ -282,12 +386,14 @@ inline void Path::set(Path const& from, Path const& to)
 
 	for (size_t i = last; i < from.get_count(); i++)
 	{
-		*this += "..";
+		m_elements.push_back(k_back);
 	}
 	for (size_t i = last; i < to.get_count(); i++)
 	{
-		*this += to[i];
+		m_elements.push_back(to.m_elements[i]);
 	}
+
+	m_hash = 0;
 }
 inline void Path::parse(char const* path, size_t size)
 {
@@ -299,14 +405,32 @@ inline void Path::parse(char const* path, size_t size)
 
 	char const* start = path;
 	char const* i = path;
+
+	//special case for the first '/'
+	if (*i == '/' || *i == '\\')
+	{
+		m_elements.push_back(k_separator);
+		i++;
+		start++;
+	}
+
 	for (; *i; ++i)
 	{
 		char c = *i;
 		if (c == '/' || c == '\\')
 		{
-			if (i != start)
+			size_t count = (size_t)(i - start);
+			QASSERT(count < size);
+			if (count > 0)
 			{
-				m_elements.emplace_back(start, i);
+				if (count == 2 && start[0] == '.' && start[1] == '.' && can_pop())
+				{
+					m_elements.pop_back();
+				}
+				else
+				{
+					m_elements.emplace_back(start, i);
+				}
 			}
 			start = i + 1;
 		}
@@ -317,27 +441,40 @@ inline void Path::parse(char const* path, size_t size)
 	}
 }
 
+inline auto Path::can_pop() const -> bool
+{
+	return !m_elements.empty() && m_elements.back() != k_back && m_elements.back() != k_separator;
+}
+
 inline auto Path::get_as_string() const -> String
 {
-	if (m_path_reserved)
+	return String(get_as<std::string>());
+}
+template<class Str_T>
+inline auto Path::get_as() const -> Str_T
+{
+	Str_T buffer;
+	if (!m_elements.empty())
 	{
-		std::string str;
-		str.reserve(m_path_reserved * 2 + 32);
-
-		if (!m_elements.empty())
+		size_t size = 0;
+		for (auto const& el: m_elements)
 		{
-			for (auto const& el: m_elements)
-			{
-				str += el.c_str();
-				str.push_back('/');
-			}
-			str.pop_back();
+			size += el.size();
+			size++; //the separator
 		}
-		m_path = str;
-		m_path_reserved = 0;
-	}
 
-	return m_path;
+		buffer.resize(size);
+		size_t idx = 0;
+		for (auto const& el: m_elements)
+		{
+			std::copy(el.begin(), el.end(), buffer.begin() + idx);
+			idx += el.size();
+			buffer[idx] = '/';
+			idx++;
+		}
+		buffer.pop_back(); //remove trailing '/'
+	}
+	return buffer;
 }
 inline auto Path::size() const -> size_t
 {
@@ -369,8 +506,6 @@ inline auto Path::get_sub_path(size_t idx, int count) const -> Path
 }
 inline void Path::get_sub_path(Path& dst, size_t idx, int count /* = 0 */) const
 {
-	dst.m_path.clear();
-	dst.m_path_reserved = 8;
 	dst.m_hash = 0;
 
 	if (count == 0)
@@ -388,13 +523,30 @@ inline void Path::get_sub_path(Path& dst, size_t idx, int count /* = 0 */) const
 		{
 			dst.m_elements[i] = m_elements[idx + i];
 		}
-
-		dst.m_path_reserved = dst.m_elements.size() * 8;
 	}
 	else
 	{
-		//dst.mElements.resize(0);
 		dst.m_elements.clear();
+	}
+}
+inline void Path::collapse_relative_path()
+{
+	if (!is_empty())
+	{
+		m_hash = 0;
+		for (size_t i = 1; i < m_elements.size();)
+		{
+			if (m_elements[i] == k_back)
+			{
+				m_elements.erase(m_elements.begin() + i); //remove the ..
+				m_elements.erase(m_elements.begin() + i - 1);//remove the parent
+				i -= 1;
+			}
+			else
+			{
+				i++;
+			}
+		}
 	}
 }
 
@@ -440,8 +592,6 @@ inline auto Path::ends_with(Path const& suffix) const -> bool
 inline void Path::swap(Path& other)
 {
 	std::swap(m_elements, other.m_elements);
-	std::swap(m_path, other.m_path);
-	std::swap(m_path_reserved, other.m_path_reserved);
 	std::swap(m_hash, other.m_hash);
 }
 
@@ -517,7 +667,7 @@ namespace std
 
 inline auto operator<<(std::ostream& stream, q::Path const& path) -> std::ostream&
 {
-	stream << path.get_as_string();
+	stream << path.get_as<std::string>();
 	return stream;
 }
 
