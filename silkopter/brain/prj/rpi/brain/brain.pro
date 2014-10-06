@@ -80,13 +80,17 @@ SOURCES += \
     ../../../src/chips/MPU9250.cpp \
     ../../../src/chips/MS5611.cpp \
     ../../../src/IO_Board_RPi.cpp \
-    ../../../src/chips/i2c.cpp
+    ../../../src/chips/i2c.cpp \
+    ../../../src/HAL_Raspicam.cpp \
+    ../../../src/HAL_Sensors_Pi.cpp \
+    ../../../src/HAL_Sensors_Sim.cpp \
+    ../../../src/HAL.cpp \
+    ../../../src/HAL_Motors_PiGPIO.cpp
 
 HEADERS += \
     ../../../src/BrainStdAfx.h \
     ../../../src/IO_Board.h \
     ../../../src/Video_Server.h \
-    ../../../src/Camera.h \
     ../../../src/Toggle.h \
     ../../../../libs/common/input/Camera_Input.h \
     ../../../../libs/common/input/UAV_Input.h \
@@ -105,5 +109,16 @@ HEADERS += \
     ../../../../libs/physics/constants.h \
     ../../../src/chips/MS5611.h \
     ../../../src/IO_Board_RPi.h \
-    ../../../src/chips/i2c.h
+    ../../../src/chips/i2c.h \
+    ../../../src/HAL_Camera.h \
+    ../../../src/HAL_Raspicam.h \
+    ../../../src/HAL_Camera_Mount.h \
+    ../../../src/HAL_Motors.h \
+    ../../../src/HAL_Motors_PiGPIO.h \
+    ../../../src/HAL_Motors_Sim.h \
+    ../../../src/HAL_Sensors.h \
+    ../../../src/HAL_Sensors_Pi.h \
+    ../../../src/HAL_Sensors_Sim.h \
+    ../../../src/HAL.h \
+    ../../../src/HAL_Camera_Mount_PiGPIO.h
 

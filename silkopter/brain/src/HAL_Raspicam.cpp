@@ -1,10 +1,11 @@
 #include "BrainStdAfx.h"
-#include "Camera.h"
+#include "HAL_Camera_MMAL.h"
 #include "common/input/Camera_Input.h"
 
 //#undef RASPBERRY_PI
 
 #if defined RASPBERRY_PI
+
 extern "C"
 {
     #include "interface/vcos/vcos.h"
@@ -16,7 +17,6 @@ extern "C"
     #include "interface/mmal/util/mmal_default_components.h"
     #include "interface/mmal/util/mmal_connection.h"
 }
-#endif
 
 #define _QUOTE(str) #str
 #define QUOTE(str) _QUOTE(str)
@@ -30,15 +30,9 @@ extern "C"
 
 using namespace silk;
 
-#if defined RASPBERRY_PI
 typedef std::shared_ptr<MMAL_COMPONENT_T> Component_ptr;
 typedef std::shared_ptr<MMAL_CONNECTION_T> Connection_ptr;
 typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
-#else
-typedef std::shared_ptr<uint8_t> Component_ptr;
-typedef std::shared_ptr<uint8_t> Connection_ptr;
-typedef std::shared_ptr<uint8_t> Pool_ptr;
-#endif
 
 //////////////////////////////////////////////////////////////////////////
 /// \brief The Video_Server::Camera_Private_Data struct
@@ -50,7 +44,7 @@ typedef std::shared_ptr<uint8_t> Pool_ptr;
 ///         - low resizer
 ///             - low encoder
 
-struct Camera::Impl
+struct HAL_Camera_MMAL::Impl
 {
     //camera
     Component_ptr camera;
@@ -79,13 +73,12 @@ struct Camera::Impl
     Encoder_Data medium;
     Encoder_Data low;
 
-    Camera::Callback file_callback;
-    Camera::Callback stream_callback;
+    HAL_Camera_MMAL::Callback file_callback;
+    HAL_Camera_MMAL::Callback stream_callback;
 
     size_t frame_idx = 0;
 };
 
-#if defined RASPBERRY_PI
 static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 {
     QASSERT(connection);
@@ -102,12 +95,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
         return mmal_connection_disable(connection.get()) == MMAL_SUCCESS;
     }
 }
-#endif
 
-
-
-Camera::Camera(size_t fps)
-    : m_fps(fps)
+HAL_Camera_MMAL::HAL_Camera_MMAL()
 {
     m_impl.reset(new Impl);
 
@@ -115,14 +104,14 @@ Camera::Camera(size_t fps)
     m_impl->medium.is_active = false;
     m_impl->low.is_active = false;
 
-    m_impl->file_callback = std::bind(&Camera::file_callback, this, std::placeholders::_1, std::placeholders::_2);
+    m_impl->file_callback = std::bind(&HAL_Camera_MMAL::file_callback, this, std::placeholders::_1, std::placeholders::_2);
 }
-Camera::~Camera()
+HAL_Camera_MMAL::~HAL_Camera_MMAL()
 {
     stop();
 }
 
-void Camera::file_callback(uint8_t const* data, size_t size)
+void HAL_Camera_MMAL::file_callback(uint8_t const* data, size_t size)
 {
     QASSERT(data && size);
     if (!data || size == 0)
@@ -137,27 +126,27 @@ void Camera::file_callback(uint8_t const* data, size_t size)
     sink->write(data, size);
 }
 
-void Camera::setup_high_quality(math::vec2u32 const& resolution, size_t bitrate)
+void HAL_Camera_MMAL::setup_high_quality(math::vec2u32 const& resolution, size_t bitrate)
 {
     m_impl->high.resolution = resolution;
     m_impl->high.bitrate = bitrate;
 }
-void Camera::setup_medium_quality(math::vec2u32 const& resolution, size_t bitrate)
+void HAL_Camera_MMAL::setup_medium_quality(math::vec2u32 const& resolution, size_t bitrate)
 {
     m_impl->medium.resolution = resolution;
     m_impl->medium.bitrate = bitrate;
 }
-void Camera::setup_low_quality(math::vec2u32 const& resolution, size_t bitrate)
+void HAL_Camera_MMAL::setup_low_quality(math::vec2u32 const& resolution, size_t bitrate)
 {
     m_impl->low.resolution = resolution;
     m_impl->low.bitrate = bitrate;
 }
-void Camera::set_stream_callback(Callback cb)
+void HAL_Camera_MMAL::set_stream_callback(Callback cb)
 {
     m_impl->stream_callback = cb;
 }
 
-void Camera::set_active_streams(bool high, bool medium, bool low)
+void HAL_Camera_MMAL::set_active_streams(bool high, bool medium, bool low)
 {
     if (m_impl->high.is_active == high &&
         m_impl->medium.is_active == medium &&
@@ -168,7 +157,6 @@ void Camera::set_active_streams(bool high, bool medium, bool low)
 
     SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
 
-#if defined RASPBERRY_PI
     if (set_connection_enabled(m_impl->high.encoder_connection, high))
     {
         m_impl->high.is_active = high;
@@ -195,10 +183,9 @@ void Camera::set_active_streams(bool high, bool medium, bool low)
     {
         SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
     }
-#endif
 }
 
-auto Camera::start() -> Result
+auto HAL_Camera_MMAL::start() -> Result
 {
     if (m_impl->camera)
     {
@@ -220,7 +207,7 @@ auto Camera::start() -> Result
     }
     return res;
 }
-void Camera::stop()
+void HAL_Camera_MMAL::stop()
 {
     if (!m_impl->camera)
     {
@@ -230,7 +217,6 @@ void Camera::stop()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined RASPBERRY_PI
 
 static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
 {
@@ -775,7 +761,7 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
     mmal_buffer_header_release(buffer);
 }
 
-static void encoder_buffer_callback_fn(Camera::Impl& impl, Camera::Impl::Encoder_Data& encoder_data, Camera::Callback const& callback, MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
+static void encoder_buffer_callback_fn(HAL_Camera_MMAL::Impl& impl, HAL_Camera_MMAL::Impl::Encoder_Data& encoder_data, HAL_Camera_MMAL::Callback const& callback, MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     if (!callback)
     {
@@ -836,7 +822,7 @@ static void encoder_buffer_callback_fn(Camera::Impl& impl, Camera::Impl::Encoder
 static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    Camera::Impl* impl = reinterpret_cast<Camera::Impl*>(port->userdata);
+    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->high, impl->file_callback, port, buffer);
 }
@@ -844,7 +830,7 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    Camera::Impl* impl = reinterpret_cast<Camera::Impl*>(port->userdata);
+    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->medium, impl->stream_callback, port, buffer);
 }
@@ -852,17 +838,15 @@ static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    Camera::Impl* impl = reinterpret_cast<Camera::Impl*>(port->userdata);
+    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->low, impl->stream_callback, port, buffer);
 }
 
-#endif
 ///////////////////////////////////////////////////////////////////////////////////////
 
-auto Camera::create_components() -> Result
+auto HAL_Camera_MMAL::create_components() -> Result
 {
-#if defined RASPBERRY_PI
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
 
     // Enable the camera, and tell it its control callback function
@@ -1049,11 +1033,10 @@ auto Camera::create_components() -> Result
             return Result::FAILED;
         }
     }
-#endif
     return Result::OK;
 }
 
-void Camera::create_file_sink()
+void HAL_Camera_MMAL::create_file_sink()
 {
     char mbstr[256] = {0};
     std::time_t t = std::time(nullptr);
@@ -1085,7 +1068,7 @@ void Camera::create_file_sink()
 }
 
 
-auto Camera::start_recording() -> Result
+auto HAL_Camera_MMAL::start_recording() -> Result
 {
     if (!m_file_sink)
     {
@@ -1099,7 +1082,7 @@ auto Camera::start_recording() -> Result
     }
     return Result::OK;
 }
-void Camera::stop_recording()
+void HAL_Camera_MMAL::stop_recording()
 {
     m_file_sink.reset();
     if (m_impl->camera)
@@ -1110,17 +1093,17 @@ void Camera::stop_recording()
     }
 }
 
-void Camera::set_iso(camera_input::Iso iso)
+void HAL_Camera_MMAL::set_iso(camera_input::Iso iso)
 {
     m_iso = iso;
 }
 
-void Camera::set_shutter_speed(camera_input::Shutter_Speed ss)
+void HAL_Camera_MMAL::set_shutter_speed(camera_input::Shutter_Speed ss)
 {
     m_shutter_speed = ss;
 }
 
-void Camera::set_stream_quality(camera_input::Stream_Quality sq)
+void HAL_Camera_MMAL::set_stream_quality(camera_input::Stream_Quality sq)
 {
     m_stream_quality = sq;
     if (m_impl->camera)

@@ -3,41 +3,10 @@
 namespace silk
 {
 
-class IO_Board : q::util::Noncopyable
+class HAL_Sensors : q::util::Noncopyable
 {
 public:
-    virtual ~IO_Board() {}
-
-    enum class Connection_Result : uint8_t
-    {
-        OK,
-        FAILED
-    };
-
-    enum class PWM_Frequency : uint8_t
-    {
-        SERVO_50HZ,
-        SERVO_100HZ,
-        SERVO_250HZ,
-        SERVO_500HZ,
-        PWM_1000Hz,
-    };
-
-    virtual auto connect() -> Connection_Result = 0;
-    virtual void disconnect() = 0;
-
-    virtual bool is_disconnected() const = 0;
-    virtual bool is_running() const = 0;
-
-    //----------------------------------------------------------------------
-    //motors
-
-    virtual void set_motor_throttles(float const* throttles, size_t count) = 0;
-
-    //----------------------------------------------------------------------
-    //camera
-
-    virtual void set_camera_rotation(math::quatf const& rot) = 0;
+    virtual ~HAL_Sensors() {}
 
     //----------------------------------------------------------------------
     //calibration
@@ -82,7 +51,7 @@ public:
     typedef Data<float> Voltage_Data; //volts
     typedef Data<float> Current_Data; //amperes / second
 
-    struct Sensor_Sample
+    struct Sample
     {
         Accelerometer_Data accelerometer;
         Gyroscope_Data gyroscope;
@@ -93,7 +62,7 @@ public:
         Voltage_Data voltage;
         Current_Data current;
     };
-    virtual auto get_sensor_samples() const -> std::vector<Sensor_Sample> const& = 0;
+    virtual auto get_samples() const -> std::vector<Sensor_Sample> const& = 0;
 
     struct GPS
     {

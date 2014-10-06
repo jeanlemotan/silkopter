@@ -2,10 +2,9 @@
 
 #ifdef RASPBERRY_PI
 
-#include "IO_Board_RPi.h"
+#include "HAL_Sensors_Pi.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
-#include <pigpio.h>
 
 #define USE_MPU9250
 #define USE_MS5611
@@ -23,16 +22,10 @@
 #   error "No Barometer selected"
 #endif
 
-static constexpr std::array<uint32_t, 6> MOTOR_GPIOS = {4, 17, 18, 27, 22, 23};
-constexpr uint32_t CAMERA_YAW_GPIO = 0;
-constexpr uint32_t CAMERA_PITCH_GPIO = 25;
-constexpr uint32_t CAMERA_ROLL_GPIO = 0;
-constexpr uint32_t GPIO_PWM_RANGE = 10000;
-
 using namespace silk;
 using namespace boost::asio;
 
-struct IO_Board_RPi::Private
+struct HAL_Sensors_Pi::Impl
 {
 #ifdef USE_MPU9250
     MPU9250 mpu;
@@ -45,21 +38,20 @@ struct IO_Board_RPi::Private
 
 ///////////////////////////////////////////////////////////////
 
-IO_Board_RPi::IO_Board_RPi()
+HAL_Sensors_Pi::HAL_Sensors_Pi()
 {
     load_settings();
 
-    m_p.reset(new Private);
+    m_impl.reset(new Private);
 }
 
-IO_Board_RPi::~IO_Board_RPi()
+HAL_Sensors_Pi::~HAL_Sensors_Pi()
 {
-    gpioTerminate();
 }
 
-auto IO_Board_RPi::load_settings() -> bool
+auto HAL_Sensors_Pi::load_settings() -> bool
 {
-    q::data::File_Source fs(q::Path("io_board.cfg"));
+    q::data::File_Source fs(q::Path("sensors.cfg"));
     if (!fs.is_open())
     {
         return false;
@@ -109,7 +101,7 @@ auto IO_Board_RPi::load_settings() -> bool
 
     return true;
 }
-void IO_Board_RPi::save_settings()
+void HAL_Sensors_Pi::save_settings()
 {
     TIMED_FUNCTION();
     if (!m_settings.document.IsObject())
@@ -137,7 +129,7 @@ void IO_Board_RPi::save_settings()
     JSON_Writer writer(buffer);
     m_settings.document.Accept(writer);
 
-    q::data::File_Sink fs(q::Path("io_board.cfg"));
+    q::data::File_Sink fs(q::Path("sensors.cfg"));
     if (!fs.is_open())
     {
         SILK_WARNING("Cannot open file to save settings");
@@ -147,200 +139,73 @@ void IO_Board_RPi::save_settings()
     fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
-auto IO_Board_RPi::connect() -> Connection_Result
+auto HAL_Sensors_Pi::init() -> Result
 {
-    if (!is_disconnected())
+    if (is_initialized())
     {
-        return Connection_Result::OK;
+        return Result::OK;
     }
-
-    if (gpioCfgClock(2, 1, 1) < 0)
-    {
-        SILK_WARNING("Cannot configure gpio clock");
-        return Connection_Result::FAILED;
-    }
-
-    if (gpioInitialise() < 0)
-    {
-        SILK_WARNING("Cannot initialize gpio");
-        return Connection_Result::FAILED;
-    }
-
-    {
-        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
-        {
-            uint32_t freq = 0;
-            switch (m_pwm_frequency)
-            {
-            case PWM_Frequency::PWM_1000Hz: freq = 1000; break;
-            default:
-            {
-                SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_pwm_frequency));
-                gpioTerminate();
-                return Connection_Result::FAILED;
-            }
-            }
-
-            for (auto gpio: MOTOR_GPIOS)
-            {
-                if (gpioSetPWMfrequency(gpio, freq) < 0)
-                {
-                    SILK_WARNING("Cannot set pwm frequency {} on gpio {}", freq, gpio);
-                    gpioTerminate();
-                    return Connection_Result::FAILED;
-                }
-                if (gpioSetPWMrange(gpio, GPIO_PWM_RANGE) < 0)
-                {
-                    SILK_WARNING("Cannot set pwm range {} on gpio {}", GPIO_PWM_RANGE, gpio);
-                    gpioTerminate();
-                    return Connection_Result::FAILED;
-                }
-            }
-        }
-        else
-        {
-            SILK_WARNING("Non-pwm ESC support not implemented");
-            gpioTerminate();
-            return Connection_Result::FAILED;
-        }
-    }
-
 
 #ifdef USE_MS5611
-    m_p->baro.init("/dev/i2c-1");
+    m_impl->baro.init("/dev/i2c-1");
 #endif
 
 #ifdef USE_MPU9250
-    m_p->mpu.init("/dev/i2c-1", MPU9250::Gyroscope_Range::_500_DPS, MPU9250::Accelerometer_Range::_4_G);
+    m_impl->mpu.init("/dev/i2c-1", MPU9250::Gyroscope_Range::_500_DPS, MPU9250::Accelerometer_Range::_4_G);
 #endif
 
-    m_is_connected = true;
-    return Connection_Result::OK;
+    m_is_initialized = true;
+    return Result::OK;
 }
 
-void IO_Board_RPi::disconnect()
+void HAL_Sensors_Pi::disconnect()
 {
-    m_is_connected = false;
-}
-bool IO_Board_RPi::is_disconnected() const
-{
-    return !m_is_connected;
-}
-bool IO_Board_RPi::is_running() const
-{
-    return m_is_connected;
+    m_is_initialized = false;
 }
 
-void IO_Board_RPi::set_motor_throttles(float const* throttles, size_t count)
-{
-    QASSERT(throttles != nullptr);
-    if (!throttles)
-    {
-        return;
-    }
-
-    count = math::min(count, MOTOR_GPIOS.size());
-    if (count > m_motors.size())
-    {
-        m_motors.resize(count);
-    }
-
-    for (size_t i = 0; i < count; i++)
-    {
-//        if (i != 0)
-//        {
-//            continue;
-//        }
-
-        auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
-        m_motors[i].throttle = throttle;
-
-        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
-        {
-            uint32_t pulse = throttle * GPIO_PWM_RANGE;
-            gpioPWM(MOTOR_GPIOS[i], pulse);
-        }
-        else
-        {
-            QASSERT(0);
-        }
-    }
-}
-
-void IO_Board_RPi::set_camera_rotation(math::quatf const& rot)
-{
-    math::vec3f euler;
-    rot.get_as_euler_xyz(euler);
-    math::anglef pitch(euler.x);
-    math::anglef roll(euler.y);
-    math::anglef yaw(euler.z);
-
-    if (CAMERA_YAW_GPIO > 0)
-    {
-        //uint32_t pulse = (euler.z * 2500.f) + 1250.f
-        //gpioServo(CAMERA_YAW_GPIO, )
-    }
-    if (CAMERA_PITCH_GPIO > 0)
-    {
-        auto delta = math::anglef(pitch) - math::anglef(0);
-        auto x = math::clamp(delta.radians / math::anglef::pi, -1.f, 1.f);
-
-        uint32_t pulse = static_cast<uint32_t>((x * 2500.f) + 1250.f);
-        gpioServo(CAMERA_PITCH_GPIO, pulse);
-    }
-    if (CAMERA_ROLL_GPIO > 0)
-    {
-        auto delta = math::anglef(roll) - math::anglef(0);
-        auto x = math::clamp(delta.radians / math::anglef::pi, -1.f, 1.f);
-
-        uint32_t pulse = static_cast<uint32_t>((x * 2500.f) + 1250.f);
-        gpioServo(CAMERA_ROLL_GPIO, pulse);
-    }
-}
-
-void IO_Board_RPi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
+void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
     m_calibration_config.accelerometer_bias = bias;
     m_calibration_config.accelerometer_scale = scale;
     save_settings();
 }
-void IO_Board_RPi::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
+void HAL_Sensors_Pi::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
     bias = m_calibration_config.accelerometer_bias;
     scale = m_calibration_config.accelerometer_scale;
 }
 
-void IO_Board_RPi::set_gyroscope_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_Pi::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
     m_calibration_config.gyroscope_bias = bias;
     save_settings();
 }
-void IO_Board_RPi::get_gyroscope_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_Pi::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
     bias = m_calibration_config.gyroscope_bias;
 }
 
-void IO_Board_RPi::set_compass_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_Pi::set_compass_calibration_data(math::vec3f const& bias)
 {
     m_calibration_config.compass_bias = bias;
     save_settings();
 }
-void IO_Board_RPi::get_compass_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_Pi::get_compass_calibration_data(math::vec3f &bias) const
 {
     bias = m_calibration_config.compass_bias;
 }
 
-auto IO_Board_RPi::get_sensor_samples() const -> std::vector<Sensor_Sample> const&
+auto HAL_Sensors_Pi::get_sensor_samples() const -> std::vector<Sensor_Sample> const&
 {
     return m_sensor_samples;
 }
 
-size_t IO_Board_RPi::get_error_count() const
+size_t HAL_Sensors_Pi::get_error_count() const
 {
     return m_error_count;
 }
 
-void IO_Board_RPi::process()
+void HAL_Sensors_Pi::process()
 {
     if (is_disconnected())
     {
@@ -353,12 +218,12 @@ void IO_Board_RPi::process()
     auto start = q::Clock::now();
 
 #ifdef USE_MPU9250
-    auto a_sample_time = m_p->mpu.get_sample_time();
+    auto a_sample_time = m_impl->mpu.get_sample_time();
     auto g_sample_time = a_sample_time;
-    m_p->mpu.process();
-    auto const& g_samples = m_p->mpu.get_gyroscope_samples();
-    auto const& a_samples = m_p->mpu.get_accelerometer_samples();
-    auto compass_sample = m_p->mpu.read_compass();
+    m_impl->mpu.process();
+    auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
+    auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
+    auto compass_sample = m_impl->mpu.read_compass();
     if (compass_sample)
     {
         m_sensors.compass.value = *compass_sample - m_calibration_config.compass_bias;
@@ -367,14 +232,14 @@ void IO_Board_RPi::process()
 #endif
 
 #ifdef USE_MS5611
-    m_p->baro.process();
-    auto baro_sample = m_p->baro.read_pressure();
+    m_impl->baro.process();
+    auto baro_sample = m_impl->baro.read_pressure();
     if (baro_sample)
     {
         m_sensors.barometer.value = *baro_sample;
         m_sensors.barometer.sample_idx++;
     }
-    auto temp_sample = m_p->baro.read_temperature();
+    auto temp_sample = m_impl->baro.read_temperature();
     if (temp_sample)
     {
         m_sensors.thermometer.value = *temp_sample;

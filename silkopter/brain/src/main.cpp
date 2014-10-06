@@ -1,8 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Video_Server.h"
 #include "Camera.h"
-#include "IO_Board_RPi.h"
-#include "IO_Board_Sim.h"
+#include "HW_Interfaces.h"
 #include "common/input/Camera_Input.h"
 #include "Comms.h"
 #include "UAV.h"
@@ -111,11 +110,8 @@ int main(int argc, char const* argv[])
 
     try
     {
-#ifdef RASPBERRY_PI
-        silk::IO_Board_RPi io_board;
-#else
-        silk::IO_Board_Sim io_board(io_service);
-#endif
+        HW_Interfaces hw_interfaces;
+
         {
             auto res = io_board.connect();
             if (res != silk::IO_Board::Connection_Result::OK)

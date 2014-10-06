@@ -1,25 +1,20 @@
 #pragma once
 
-#include "IO_Board.h"
+#include "Sensor_Interface.h"
 
 namespace silk
 {
 
-class IO_Board_RPi : public IO_Board
+class Sensor_Interface_Pi : public Sensor_Interface
 {
 public:
-    IO_Board_RPi();
-    ~IO_Board_RPi();
+    Sensor_Interface_Pi();
+    ~Sensor_Interface_Pi();
 
-    auto connect() -> Connection_Result;
-    void disconnect();
+    auto init() -> Result;
+    void shutdown();
 
-    bool is_disconnected() const;
-    bool is_running() const;
-
-    void set_motor_throttles(float const* throttles, size_t count);
-
-    void set_camera_rotation(math::quatf const& rot);
+    auto is_initialized() const -> bool;
 
     //----------------------------------------------------------------------
     //calibration
@@ -44,10 +39,10 @@ public:
     void process();
 
 private:
-    auto setup_spi() -> Connection_Result;
+    auto setup_spi() -> Result;
 
-    Sensor_Sample m_sensors;
-    std::vector<Sensor_Sample> m_sensor_samples;
+    Sample m_sensors;
+    std::vector<Sample> m_samples;
 
     struct Calibration_Config
     {
@@ -57,14 +52,7 @@ private:
         math::vec3f compass_bias;
     } m_calibration_config;
 
-    PWM_Frequency m_pwm_frequency = PWM_Frequency::PWM_1000Hz;
-    struct Motor
-    {
-        float throttle = 0;
-    };
-    std::vector<Motor> m_motors;
-
-    bool m_is_connected = false;
+    bool m_is_initialized = false;
     size_t m_error_count = 0;
 
     struct Private;
