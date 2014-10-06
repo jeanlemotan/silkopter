@@ -682,11 +682,23 @@ template<class Dst_Adapter, class Placeholder>
 void format_string(Dst_Adapter& dst, Placeholder const& ph, q::Path const& p)
 {
 	QASSERT(ph.alignment == 0);
-	for (size_t i = 0; i < p.get_count(); i++)
-	{
-		format_string(dst, ph, p[i]);
-		dst.append('/');
-	}
+    if (!p.empty())
+    {
+        size_t i = 0;
+        if (p[0] == "/")
+        {
+            format_string(dst, ph, p[0]);
+            i++;
+        }
+        for (; i < p.get_count(); i++)
+        {
+            format_string(dst, ph, p[i]);
+            if (i + 1 < p.get_count())
+            {
+                dst.append('/');
+            }
+        }
+    }
 }
 
 }
