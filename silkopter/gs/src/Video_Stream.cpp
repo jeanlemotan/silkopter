@@ -13,6 +13,7 @@ Video_Stream::Video_Stream(QWidget *parent /* = 0 */)
 
 Video_Stream::~Video_Stream()
 {
+    m_client.reset();
 }
 
 void Video_Stream::init(std::shared_ptr<Video_Client> client)

@@ -2,29 +2,83 @@
 #include "Sensors.h"
 #include "physics/constants.h"
 
-class Butterworth
+
+//class Butterworth //8Hz
+//{
+//public:
+//    static constexpr size_t NZEROS  = 4;
+//    static constexpr size_t NPOLES  = 4;
+//    static constexpr double GAIN    = 2.674241096e+06;
+//    double xv[NZEROS+1], yv[NPOLES+1];
+//    double process(double t)
+//    {
+//        xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
+//                xv[4] = t / GAIN;
+//                yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4];
+//                yv[4] =   (xv[0] + xv[4]) + 4 * (xv[1] + xv[3]) + 6 * xv[2]
+//                             + ( -0.8768965608 * yv[0]) + (  3.6227607596 * yv[1])
+//                             + ( -5.6145268496 * yv[2]) + (  3.8686566679 * yv[3]);
+//        return yv[4];
+//    }
+//};
+
+//class Butterworth //10hz
+//{
+//public:
+//    static constexpr size_t NZEROS  = 6;
+//    static constexpr size_t NPOLES  = 6;
+//    static constexpr double GAIN    = 1.172113723e+09;
+//    double xv[NZEROS+1], yv[NPOLES+1];
+//    double process(double t)
+//    {
+//        xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4]; xv[4] = xv[5]; xv[5] = xv[6];
+//                xv[6] = t / GAIN;
+//                yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4]; yv[4] = yv[5]; yv[5] = yv[6];
+//                yv[6] =   (xv[0] + xv[6]) + 6 * (xv[1] + xv[5]) + 15 * (xv[2] + xv[4])
+//                             + 20 * xv[3]
+//                             + ( -0.7844171769 * yv[0]) + (  4.8969248914 * yv[1])
+//                             + (-12.7416173290 * yv[2]) + ( 17.6873761800 * yv[3])
+//                             + (-13.8155108060 * yv[4]) + (  5.7572441862 * yv[5]);
+//        return yv[6];
+//    }
+//};
+
+class Butterworth //10hz
 {
 public:
-    /* Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
-       Command line: /www/usr/fisher/helpers/mkfilter -Bu -Lp -o 4 -a 1.0000000000e-02 0.0000000000e+00 -l */
-
-    static constexpr size_t NZEROS  = 4;
-    static constexpr size_t NPOLES  = 4;
-    static constexpr float GAIN    = 2.286922409e+05;
-
+    static constexpr size_t NZEROS  = 2;
+    static constexpr size_t NPOLES  = 2;
+    static constexpr float GAIN    = 1.058546241e+03;
     float xv[NZEROS+1], yv[NPOLES+1];
-
     float process(float t)
-      {
-        xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
-                xv[4] = t / GAIN;
-                yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4];
-                yv[4] =   (xv[0] + xv[4]) + 4 * (xv[1] + xv[3]) + 6 * xv[2]
-                             + ( -0.7816187403f * yv[0]) + (  3.3189386048f * yv[1])
-                             + ( -5.2911525842f * yv[2]) + (  3.7537627567f * yv[3]);
-        return yv[4];
-      }
+    {
+        xv[0] = xv[1]; xv[1] = xv[2];
+        xv[2] = t / GAIN;
+        yv[0] = yv[1]; yv[1] = yv[2];
+        yv[2] =   (xv[0] + xv[2]) + 2 * xv[1]
+                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
+        return yv[2];
+    }
 };
+
+//class Butterworth //4, 10hz
+//{
+//public:
+//    static constexpr size_t NZEROS  = 4;
+//    static constexpr size_t NPOLES  = 4;
+//    static constexpr float GAIN    = 1.112983215e+06;
+//    float xv[NZEROS+1], yv[NPOLES+1];
+//    float process(float t)
+//      {
+//        xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
+//                xv[4] = t / GAIN;
+//                yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4];
+//                yv[4] =   (xv[0] + xv[4]) + 4 * (xv[1] + xv[3]) + 6 * xv[2]
+//                             + ( -0.8485559993f * yv[0]) + (  3.5335352195f * yv[1])
+//                             + ( -5.5208191366f * yv[2]) + (  3.8358255406f * yv[3]);
+//        return yv[4];
+//      }
+//};
 
 
 Butterworth gfx, gfy, gfz;
@@ -169,7 +223,7 @@ void Sensors::process()
     m_ui.g_calibrate->setEnabled(m_comms->is_connected());
     m_ui.g_test_filter->setEnabled(m_comms->is_connected());
 
-    static const std::chrono::seconds graph_length(3);
+    static const std::chrono::seconds graph_length(2);
 
     auto old_time = m_playback.time;
     if (m_playback.is_playing)
@@ -265,11 +319,17 @@ void Sensors::process()
             m_ui.g_plot->rescaleAxes(true);
             m_ui.g_plot->replot();
 
-            prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_samples, m_gyroscope_fft.input);
-            prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_filtered_samples, m_gyroscope_fft.filtered_input);
-            process_fft(m_gyroscope_fft);
-            display_fft(*m_ui.g_spectrum, m_gyroscope_fft);
-            display_filtered_fft(*m_ui.g_spectrum, m_gyroscope_fft);
+            if (!m_playback.is_loaded || m_playback.is_playing)
+            {
+                clear_plot(*m_ui.g_spectrum);
+                prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_samples, m_gyroscope_fft.input);
+                prepare_fft(*m_ui.g_spectrum, m_history.gyroscope_filtered_samples, m_gyroscope_fft.filtered_input);
+                process_fft(m_gyroscope_fft);
+                display_fft(*m_ui.g_spectrum, m_gyroscope_fft);
+                display_filtered_fft(*m_ui.g_spectrum, m_gyroscope_fft);
+                m_ui.g_spectrum->rescaleAxes(true);
+                m_ui.g_spectrum->replot();
+            }
         }
 
         {
@@ -324,11 +384,17 @@ void Sensors::process()
             m_ui.a_plot->rescaleAxes(true);
             m_ui.a_plot->replot();
 
-            prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_samples, m_accelerometer_fft.input);
-            prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_filtered_samples, m_accelerometer_fft.filtered_input);
-            process_fft(m_accelerometer_fft);
-            display_fft(*m_ui.a_spectrum, m_accelerometer_fft);
-            display_filtered_fft(*m_ui.a_spectrum, m_accelerometer_fft);
+            if (!m_playback.is_loaded || m_playback.is_playing)
+            {
+                clear_plot(*m_ui.a_spectrum);
+                prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_samples, m_accelerometer_fft.input);
+                prepare_fft(*m_ui.a_spectrum, m_history.accelerometer_filtered_samples, m_accelerometer_fft.filtered_input);
+                process_fft(m_accelerometer_fft);
+                display_fft(*m_ui.a_spectrum, m_accelerometer_fft);
+                display_filtered_fft(*m_ui.a_spectrum, m_accelerometer_fft);
+                m_ui.a_spectrum->rescaleAxes(true);
+                m_ui.a_spectrum->replot();
+            }
         }
 
 
@@ -417,65 +483,6 @@ void Sensors::process()
 
     update_calibration();
 }
-
-static void process_fft(fftw_plan& plan, size_t required_sample_count, std::vector<math::vec3f> const& input, std::vector<math::vec3f>& output, double* temp_input, fftw_complex* temp_output)
-{
-    auto start = input.end() - required_sample_count;
-    auto end = input.end();
-
-    //first remove DC
-    math::vec3f median;
-    for (auto it = start; it != end; ++it)
-    {
-        median += *it;
-    }
-    float div = 1.f / required_sample_count;
-    median *= div;
-
-    size_t output_size = required_sample_count/2 + 1;
-    output.resize(output_size);
-
-    //compute fft per component
-    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.x - median.x; });
-    fftw_execute(plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        output[i].x = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
-    }
-
-    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.y - median.y; });
-    fftw_execute(plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        output[i].y = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
-    }
-
-    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.z - median.z; });
-    fftw_execute(plan);
-    for (size_t i = 0; i < output_size; i++)
-    {
-        output[i].z = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
-    }
-}
-
-void Sensors::process_fft(FFT_Data& fft)
-{
-    const std::chrono::milliseconds required_duration(1000);
-    const size_t required_sample_count = math::min(
-                static_cast<size_t>(fft.sample_rate * q::Seconds(required_duration).count()),
-                fft.MAX_INPUT_SIZE);
-    if (fft.input.size() < required_sample_count || required_sample_count == 0)
-    {
-        fft.output.resize(0);
-        return;
-    }
-
-    fft.plan = fftw_plan_dft_r2c_1d(required_sample_count, fft.temp_input.get(), fft.temp_output.get(), FFTW_ESTIMATE);
-
-    ::process_fft(fft.plan, required_sample_count, fft.input, fft.output, fft.temp_input.get(), fft.temp_output.get());
-    ::process_fft(fft.plan, required_sample_count, fft.filtered_input, fft.filtered_output, fft.temp_input.get(), fft.temp_output.get());
-}
-
 
 void Sensors::update_calibration()
 {
@@ -1130,6 +1137,7 @@ void Sensors::dump_history_to_file()
 {
     do
     {
+        SILK_INFO("cwd: {}", q::util::fs::get_current_folder());
         std::string filepath;
         q::util::format(filepath, "sensor_data/sensors-{}.history", ++m_history.last_file_idx);
         if (!q::util::fs::exists(q::Path(filepath)))
@@ -1181,8 +1189,11 @@ void Sensors::load_history()
 void Sensors::clear_history()
 {
     m_history.gyroscope_samples.clear();
+    m_history.gyroscope_filtered_samples.clear();
     m_history.accelerometer_samples.clear();
+    m_history.accelerometer_filtered_samples.clear();
     m_history.compass_samples.clear();
+    m_history.compass_filtered_samples.clear();
 
     m_playback.gyroscope_samples.clear();
     m_playback.accelerometer_samples.clear();
@@ -1202,8 +1213,11 @@ void Sensors::clear_history()
 void Sensors::rewind()
 {
     m_history.gyroscope_samples.clear();
+    m_history.gyroscope_filtered_samples.clear();
     m_history.accelerometer_samples.clear();
+    m_history.accelerometer_filtered_samples.clear();
     m_history.compass_samples.clear();
+    m_history.compass_filtered_samples.clear();
 
     m_playback.time = m_playback.gyroscope_samples.empty() ? 0 : m_playback.gyroscope_samples.front().first;
     m_playback.last_accelerometer_idx = 0;
@@ -1228,7 +1242,6 @@ void Sensors::remove_plot_data_before(QCustomPlot& plot, q::Clock::duration leng
         }
     }
     plot.rescaleAxes(true);
-    plot.replot();
 }
 void Sensors::clear_plot(QCustomPlot& plot)
 {
@@ -1245,7 +1258,6 @@ void Sensors::clear_plot(QCustomPlot& plot)
     {
         plot.plottable(i)->rescaleAxes();
     }
-    plot.replot();
 }
 void Sensors::add_plot_sample(QCustomPlot& plot, float key, math::vec3f const& sample)
 {
@@ -1281,35 +1293,95 @@ void Sensors::display_fft(QCustomPlot& plot, FFT_Data const& fft)
 {
     if (!fft.output.empty())
     {
-        clear_plot(plot);
         for (size_t i = 1; i < fft.output.size(); i++)
         {
             auto const& s = fft.output[i];
             auto freq = (fft.sample_rate / 2) * i / fft.output.size();
             add_plot_sample(plot, freq, s);
         }
-        for (int i = 0; i < plot.plottableCount(); i++)
-        {
-            plot.plottable(i)->rescaleAxes(true);
-        }
-        plot.replot();
+//        for (int i = 0; i < plot.plottableCount(); i++)
+//        {
+//            plot.plottable(i)->rescaleAxes();
+//        }
+//        plot.replot();
     }
 }
 void Sensors::display_filtered_fft(QCustomPlot& plot, FFT_Data const& fft)
 {
     if (!fft.filtered_output.empty())
     {
-        clear_plot(plot);
         for (size_t i = 1; i < fft.filtered_output.size(); i++)
         {
             auto const& s = fft.filtered_output[i];
             auto freq = (fft.sample_rate / 2) * i / fft.filtered_output.size();
-            add_plot_sample(plot, freq, s);
+            add_plot_filtered_sample(plot, freq, s);
         }
-        for (int i = 0; i < plot.plottableCount(); i++)
-        {
-            plot.plottable(i)->rescaleAxes(true);
-        }
-        plot.replot();
+//        for (int i = 0; i < plot.plottableCount(); i++)
+//        {
+//            plot.plottable(i)->rescaleAxes();
+//        }
+//        plot.replot();
     }
+}
+
+static void process_fft(fftw_plan& plan, size_t required_sample_count, std::vector<math::vec3f> const& input, std::vector<math::vec3f>& output, double* temp_input, fftw_complex* temp_output)
+{
+    auto start = input.end() - required_sample_count;
+    auto end = input.end();
+
+    //first remove DC
+    math::vec3f median;
+    for (auto it = start; it != end; ++it)
+    {
+        median += *it;
+    }
+    float div = 1.f / required_sample_count;
+    median *= div;
+
+    size_t output_size = required_sample_count/2 + 1;
+    output.resize(output_size);
+
+    //compute fft per component
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.x - median.x; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].x = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.y - median.y; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].y = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+
+    std::transform(start, end, temp_input, [median](math::vec3f const& v) { return v.z - median.z; });
+    fftw_execute(plan);
+    for (size_t i = 0; i < output_size; i++)
+    {
+        output[i].z = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
+    }
+}
+
+void Sensors::process_fft(FFT_Data& fft)
+{
+    const std::chrono::milliseconds required_duration(1000);
+    const size_t required_sample_count = math::min(
+                static_cast<size_t>(fft.sample_rate * q::Seconds(required_duration).count()),
+                fft.MAX_INPUT_SIZE);
+    if (fft.input.size() < required_sample_count || required_sample_count == 0)
+    {
+        fft.output.resize(0);
+        return;
+    }
+
+    if (required_sample_count != fft.plan_sample_count)
+    {
+        fft.plan = fftw_plan_dft_r2c_1d(required_sample_count, fft.temp_input.get(), fft.temp_output.get(), FFTW_ESTIMATE);
+        fft.plan_sample_count = required_sample_count;
+    }
+
+    ::process_fft(fft.plan, required_sample_count, fft.input, fft.output, fft.temp_input.get(), fft.temp_output.get());
+    ::process_fft(fft.plan, required_sample_count, fft.filtered_input, fft.filtered_output, fft.temp_input.get(), fft.temp_output.get());
 }

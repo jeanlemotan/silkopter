@@ -17,7 +17,7 @@ private:
 	Ui::SilkopterClass m_ui;
 
 	boost::asio::io_service m_io_service;
-	bool m_stop_io_service_thread = false;
+    std::atomic<bool> m_stop_io_service_thread{ false };
 	std::thread m_io_service_thread;
 	std::shared_ptr<Video_Client> m_video_client;
 

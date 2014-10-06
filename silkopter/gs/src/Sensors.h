@@ -57,6 +57,7 @@ private:
         std::shared_ptr<double> temp_input;
         std::shared_ptr<fftw_complex> temp_output;
         fftw_plan plan;
+        size_t plan_sample_count = 0;
     };
 
     void process_fft(FFT_Data& fft);
@@ -126,6 +127,7 @@ private:
         std::vector<std::pair<float, math::vec3f>> accelerometer_filtered_samples;
 
         std::vector<std::pair<float, math::vec3f>> compass_samples;
+        std::vector<std::pair<float, math::vec3f>> compass_filtered_samples;
     } m_history;
 
     struct History_Playback : History

@@ -54,7 +54,14 @@ Silkopter::~Silkopter()
 {
     m_comms.disconnect();
 
+    m_video_client.reset();
+
 	m_stop_io_service_thread = true;
+    m_io_service.stop();
+    if (m_io_service_thread.joinable())
+    {
+        m_io_service_thread.join();
+    }
 //    if (m_io_service_thread.joinable())
 //	{
 //		m_io_service_thread.join();

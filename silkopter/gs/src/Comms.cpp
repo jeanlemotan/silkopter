@@ -19,7 +19,7 @@ auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> R
 
         m_remote_endpoint = ip::tcp::endpoint(address, port);
         boost::system::error_code error = boost::asio::error::host_not_found;
-        //m_socket.connect(m_remote_endpoint, error);
+        m_socket.connect(m_remote_endpoint, error);
 
         if (!error)
         {

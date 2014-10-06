@@ -15,6 +15,7 @@ Video_Client::Video_Client(io_service& io_service, ip::address address, uint16_t
 
 Video_Client::~Video_Client()
 {
+    m_socket.reset();
 }
 
 void Video_Client::connect()

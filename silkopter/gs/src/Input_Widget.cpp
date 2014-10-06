@@ -86,7 +86,7 @@ void Input_Widget::process(silk::Comms& comms)
         auto ls = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT);
         auto rs = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT);
 
-        float throttle = math::clamp(m_throttle + ls.value.y * 0.1f, 0.f, 1.f);
+        float throttle = math::clamp(ls.value.y, 0.f, 1.f);//math::clamp(m_throttle + ls.value.y * 0.1f, 0.f, 1.f);
         float yaw = -filter_stick_value(ls.value.x);
         float pitch = filter_stick_value(rs.value.y);
         float roll = filter_stick_value(rs.value.x);
