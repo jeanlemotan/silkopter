@@ -367,6 +367,7 @@ void Input_Mgr::enumerate_gamepads() const
         auto info = get_gamepad_info(fd);
         if (!info)
         {
+            close(fd);
             continue;
         }
 
