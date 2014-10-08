@@ -1,53 +1,89 @@
 #include "BrainStdAfx.h"
-#include "HW_Interfaces.h"
+#include "HAL.h"
 #include "HAL_Motors_PiGPIO.h"
 #include "HAL_Motors_Sim.h"
-#include "HAL_Camera_MMAL.h"
+#include "HAL_Raspicam.h"
 //#include "HAL_Camera_Sim.h"
-#include "Sensor_Interface_Pi.h"
-#include "Sensor_Interface_Sim.h"
+#include "HAL_Sensors_Pi.h"
+#include "HAL_Sensors_Sim.h"
 
+using namespace silk;
 
-HW_Interfaces::HW_Interfaces()
-{
 #ifdef RASPBERRY_PI
-    motors.reset(new HAL_Motors_PiGPIO);
-    sensor_interface.reset(new Sensor_Interface_Rpi);
-    camera.reset(new HAL_Camera_MMAL);
+struct HAL::Impl
+{
+    PiGPIO pigpio;
+};
 #else
-    motors.reset(new HAL_Motors_Sim);
-    sensor_interface.reset(new Sensor_Interface_Sim);
-    //camera.reset(new HAL_Camera_Sim);
+struct HAL::Impl
+{
+    Sim_Comms sim_comms;
+};
 #endif
+auto HAL::init() -> Result
+{
+    m_impl.reset(new Impl);
+
+#ifdef RASPBERRY_PI
+    auto m = new HAL_Motors_PiGPIO(m_impl->pigpio);
+    motors.reset(m);
+    if (m->init() != HAL_Motors_PiGPIO::Result::OK)
+    {
+        return Result::FAILED;
+    }
+
+    auto c = new HAL_Raspicam;
+    camera.reset(c);
+    if (c->init() != HAL_Raspicam::Result::OK)
+    {
+        return Result::FAILED;
+    }
+
+    auto s = new HAL_Sensors_Pi;
+    sensors.reset(s);
+    if (s->init() != HAL_Sensors_Pi::Result::OK)
+    {
+        return Result::FAILED;
+    }
+#else
+    auto m = new HAL_Motors_Sim;
+    motors.reset(m);
+    if (m->init() != HAL_Motors_Sim::Result::OK)
+    {
+        return Result::FAILED;
+    }
+
+//    auto c = new HAL_Raspicam;
+//    camera.reset(c);
+//    if (c->init() != HAL_Raspicam::Result::OK)
+//    {
+//        return Result::FAILED;
+//    }
+
+    auto s = new HAL_Sensors_Sim;
+    sensors.reset(s);
+    if (s->init() != HAL_Sensors_Sim::Result::OK)
+    {
+        return Result::FAILED;
+    }
+#endif
+
+    return Result::OK;
 }
 
-auto HW_Interfaces::init() -> Result
-{
-    if (motors && motors->init() != HAL_Motors::Result::OK)
-    {
-        return Result::FAILED;
-    }
-    if (camera && camera->init() != HAL_Camera::Result::OK)
-    {
-        return Result::FAILED;
-    }
-    if (sensor_interface && sensor_interface->init() != sensor_Interface::Result::OK)
-    {
-        return Result::FAILED;
-    }
-}
-void HW_Interfaces::shutdown()
+void HAL::process()
 {
     if (motors)
     {
-        motors->shutdown()
+        motors->process();
     }
     if (camera)
     {
-        camera->shutdown()
+        camera->process();
     }
-    if (sensor_interface)
+    if (sensors)
     {
-        sensor_interface->shutdown()
+        sensors->process();
     }
 }
+

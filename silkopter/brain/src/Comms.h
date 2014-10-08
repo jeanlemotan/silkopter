@@ -2,9 +2,8 @@
 
 #include "common/input/UAV_Input.h"
 #include "common/input/Camera_Input.h"
-#include "IO_Board.h"
+#include "HAL.h"
 #include "UAV.h"
-#include "Camera.h"
 
 namespace silk
 {
@@ -12,7 +11,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service, IO_Board& io_board, UAV& uav, Camera& camera);
+    Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav);
 
     enum class Result
     {
@@ -113,22 +112,22 @@ private:
     void message_calibration_compass();
 
     void send_sensor_data();
-    struct Sensor_Data
+    struct Sensor_Samples
     {
-        std::vector<IO_Board::Accelerometer_Data> accelerometer;
-        std::vector<IO_Board::Gyroscope_Data> gyroscope;
-        IO_Board::Compass_Data compass;
-        IO_Board::Barometer_Data barometer;
-        IO_Board::Thermometer_Data thermometer;
-        IO_Board::Sonar_Data sonar;
-        IO_Board::Voltage_Data voltage;
-        IO_Board::Current_Data current;
+        std::vector<HAL_Sensors::Gyroscope_Sample> gyroscope;
+        std::vector<HAL_Sensors::Accelerometer_Sample> accelerometer;
+        std::vector<HAL_Sensors::Compass_Sample> compass;
+        std::vector<HAL_Sensors::Barometer_Sample> barometer;
+        std::vector<HAL_Sensors::Thermometer_Sample> thermometer;
+        std::vector<HAL_Sensors::Sonar_Sample> sonar;
+        std::vector<HAL_Sensors::Voltage_Sample> voltage;
+        std::vector<HAL_Sensors::Current_Sample> current;
+        std::vector<HAL_Sensors::GPS_Sample> gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensors_samples;
 
-    IO_Board& m_io_board;
+    HAL& m_hal;
     UAV& m_uav;
-    Camera& m_camera;
     q::Clock::time_point m_uav_sent_timestamp;
     void send_uav_data();
 

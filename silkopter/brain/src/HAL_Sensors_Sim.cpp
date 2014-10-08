@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
-#include "IO_Board_Sim.h"
+#include "HAL_Sensors_Sim.h"
 #include "utils/Json_Helpers.h"
+
+#ifndef RASPBERRY_PI
 
 using namespace silk;
 using namespace boost::asio;
@@ -841,3 +843,5 @@ void IO_Board_Sim::update_watchdog()
         return;
     }
 }
+
+#endif

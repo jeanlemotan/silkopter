@@ -14,7 +14,7 @@ public:
         FAILED
     };
 
-    Result init(q::String const& device);
+    auto init(q::String const& device) -> Result;
 
     void process();
 

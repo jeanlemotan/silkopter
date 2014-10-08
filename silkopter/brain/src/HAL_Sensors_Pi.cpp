@@ -42,7 +42,7 @@ HAL_Sensors_Pi::HAL_Sensors_Pi()
 {
     load_settings();
 
-    m_impl.reset(new Private);
+    m_impl.reset(new Impl);
 }
 
 HAL_Sensors_Pi::~HAL_Sensors_Pi()
@@ -141,7 +141,8 @@ void HAL_Sensors_Pi::save_settings()
 
 auto HAL_Sensors_Pi::init() -> Result
 {
-    if (is_initialized())
+    QASSERT(!m_is_initialized);
+    if (m_is_initialized)
     {
         return Result::OK;
     }
@@ -154,13 +155,19 @@ auto HAL_Sensors_Pi::init() -> Result
     m_impl->mpu.init("/dev/i2c-1", MPU9250::Gyroscope_Range::_500_DPS, MPU9250::Accelerometer_Range::_4_G);
 #endif
 
+    auto now = q::Clock::now();
+    m_accelerometer_sample.time_point = now;
+    m_gyroscope_sample.time_point = now;
+    m_compass_sample.time_point = now;
+    m_barometer_sample.time_point = now;
+    m_sonar_sample.time_point = now;
+    m_thermometer_sample.time_point = now;
+    m_voltage_sample.time_point = now;
+    m_current_sample.time_point = now;
+    m_gps_sample.time_point = now;
+
     m_is_initialized = true;
     return Result::OK;
-}
-
-void HAL_Sensors_Pi::disconnect()
-{
-    m_is_initialized = false;
 }
 
 void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
@@ -195,9 +202,41 @@ void HAL_Sensors_Pi::get_compass_calibration_data(math::vec3f &bias) const
     bias = m_calibration_config.compass_bias;
 }
 
-auto HAL_Sensors_Pi::get_sensor_samples() const -> std::vector<Sensor_Sample> const&
+auto HAL_Sensors_Pi::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
 {
-    return m_sensor_samples;
+    return m_accelerometer_samples;
+}
+auto HAL_Sensors_Pi::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
+{
+    return m_gyroscope_samples;
+}
+auto HAL_Sensors_Pi::get_compass_samples() const -> std::vector<Compass_Sample> const&
+{
+    return m_compass_samples;
+}
+auto HAL_Sensors_Pi::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
+{
+    return m_barometer_samples;
+}
+auto HAL_Sensors_Pi::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
+{
+    return m_sonar_samples;
+}
+auto HAL_Sensors_Pi::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
+{
+    return m_thermometer_samples;
+}
+auto HAL_Sensors_Pi::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
+{
+    return m_voltage_samples;
+}
+auto HAL_Sensors_Pi::get_current_samples() const -> std::vector<Current_Sample> const&
+{
+    return m_current_samples;
+}
+auto HAL_Sensors_Pi::get_gps_samples() const -> std::vector<GPS_Sample> const&
+{
+    return m_gps_samples;
 }
 
 size_t HAL_Sensors_Pi::get_error_count() const
@@ -207,27 +246,65 @@ size_t HAL_Sensors_Pi::get_error_count() const
 
 void HAL_Sensors_Pi::process()
 {
-    if (is_disconnected())
+    QASSERT(m_is_initialized);
+    if (!m_is_initialized)
     {
-        connect();
         return;
     }
 
-    m_sensor_samples.clear();
+    m_accelerometer_samples.clear();
+    m_gyroscope_samples.clear();
+    m_compass_samples.clear();
+    m_barometer_samples.clear();
+    m_sonar_samples.clear();
+    m_thermometer_samples.clear();
+    m_voltage_samples.clear();
+    m_current_samples.clear();
+    m_gps_samples.clear();
 
     auto start = q::Clock::now();
 
 #ifdef USE_MPU9250
+    m_impl->mpu.process();
+
     auto a_sample_time = m_impl->mpu.get_sample_time();
     auto g_sample_time = a_sample_time;
-    m_impl->mpu.process();
     auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
     auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
+    QASSERT(a_samples.size() == g_samples.size());
+
+    m_gyroscope_samples.resize(g_samples.size());
+    for (size_t i = 0; i < g_samples.size(); i++)
+    {
+        m_gyroscope_sample.value = g_samples[i] - m_calibration_config.gyroscope_bias;
+        m_gyroscope_sample.dt = g_sample_time;
+        m_gyroscope_sample.time_point += g_sample_time;
+        m_gyroscope_sample.sample_idx++;
+
+        m_gyroscope_samples[i] = m_gyroscope_sample;
+    }
+    QASSERT(start - m_gyroscope_sample.time_point >= std::chrono::milliseconds(0) && start - m_gyroscope_sample.time_point < std::chrono::milliseconds(200));
+
+    m_accelerometer_samples.resize(a_samples.size());
+    for (size_t i = 0; i < a_samples.size(); i++)
+    {
+        m_accelerometer_sample.value = (a_samples[i] - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
+        m_accelerometer_sample.dt = g_sample_time;
+        m_accelerometer_sample.time_point += g_sample_time;
+        m_accelerometer_sample.sample_idx++;
+
+        m_accelerometer_samples[i] = m_accelerometer_sample;
+    }
+    QASSERT(start - m_accelerometer_sample.time_point >= std::chrono::milliseconds(0) && start - m_accelerometer_sample.time_point < std::chrono::milliseconds(200));
+
     auto compass_sample = m_impl->mpu.read_compass();
     if (compass_sample)
     {
-        m_sensors.compass.value = *compass_sample - m_calibration_config.compass_bias;
-        m_sensors.compass.sample_idx++;
+        m_compass_sample.value = *compass_sample - m_calibration_config.compass_bias;
+        m_compass_sample.sample_idx++;
+        m_compass_sample.dt = start - m_compass_sample.time_point;
+        m_compass_sample.time_point = start;
+        m_compass_samples.push_back(m_compass_sample);
     }
 #endif
 
@@ -236,38 +313,22 @@ void HAL_Sensors_Pi::process()
     auto baro_sample = m_impl->baro.read_pressure();
     if (baro_sample)
     {
-        m_sensors.barometer.value = *baro_sample;
-        m_sensors.barometer.sample_idx++;
+        m_barometer_sample.value = *baro_sample;
+        m_barometer_sample.sample_idx++;
+        m_barometer_sample.dt = start - m_barometer_sample.time_point;
+        m_barometer_sample.time_point = start;
+        m_barometer_samples.push_back(m_barometer_sample);
     }
     auto temp_sample = m_impl->baro.read_temperature();
     if (temp_sample)
     {
-        m_sensors.thermometer.value = *temp_sample;
-        m_sensors.thermometer.sample_idx++;
+        m_thermometer_sample.value = *temp_sample;
+        m_thermometer_sample.sample_idx++;
+        m_thermometer_sample.dt = start - m_thermometer_sample.time_point;
+        m_thermometer_sample.time_point = start;
+        m_thermometer_samples.push_back(m_thermometer_sample);
     }
 #endif
-
-    QASSERT(a_samples.size() == g_samples.size());
-    m_sensor_samples.resize(a_samples.size());
-    for (size_t i = 0; i < a_samples.size(); i++)
-    {
-        auto& sample = m_sensor_samples[i];
-
-        {
-            sample.accelerometer.value.acceleration = (a_samples[i] - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
-            sample.accelerometer.value.dt = a_sample_time;
-            sample.accelerometer.sample_idx = m_sensors.accelerometer.sample_idx++;
-        }
-        {
-            sample.gyroscope.value.angular_velocity = g_samples[i] - m_calibration_config.gyroscope_bias;
-            sample.gyroscope.value.dt = g_sample_time;
-            sample.gyroscope.sample_idx = m_sensors.gyroscope.sample_idx++;
-        }
-
-        sample.barometer = m_sensors.barometer;
-        sample.thermometer = m_sensors.thermometer;
-        sample.compass = m_sensors.compass;
-    }
 
 //    auto d = q::Clock::now() - start;
 //    SILK_INFO("d = {}, {}", d, m_sensor_samples.size());

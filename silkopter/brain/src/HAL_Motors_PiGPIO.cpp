@@ -8,19 +8,22 @@
 #include <pigpio.h>
 
 static constexpr std::array<uint32_t, 6> MOTOR_GPIOS = {4, 17, 18, 27, 22, 23};
+constexpr uint32_t GPIO_PWM_RANGE = 10000;
 
 using namespace silk;
 using namespace boost::asio;
 
 ///////////////////////////////////////////////////////////////
 
-HAL_Motors_PiGPIO::HAL_Motors_PiGPIO()
+HAL_Motors_PiGPIO::HAL_Motors_PiGPIO(PiGPIO& pigpio)
+    : m_pigpio(pigpio)
 {
     load_settings();
 }
 
 HAL_Motors_PiGPIO::~HAL_Motors_PiGPIO()
 {
+    shutdown();
 }
 
 auto HAL_Motors_PiGPIO::load_settings() -> bool
@@ -86,15 +89,15 @@ auto HAL_Motors_PiGPIO::init() -> Result
         return Result::OK;
     }
 
-    if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
+    if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
     {
         uint32_t freq = 0;
-        switch (m_pwm_frequency)
+        switch (m_settings.frequency)
         {
         case PWM_Frequency::PWM_1000Hz: freq = 1000; break;
         default:
         {
-            SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_pwm_frequency));
+            SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
             return Result::FAILED;
         }
         }
@@ -131,10 +134,6 @@ void HAL_Motors_PiGPIO::shutdown()
     }
     m_is_initialized = false;
 }
-auto HAL_Motors_PiGPIO::is_initialized() const -> bool
-{
-    return m_is_initialized;
-}
 
 void HAL_Motors_PiGPIO::cut_throttle()
 {
@@ -146,7 +145,7 @@ void HAL_Motors_PiGPIO::cut_throttle()
 
     for (auto gpio: MOTOR_GPIOS)
     {
-        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
+        if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
         {
             uint32_t pulse = 0;
             gpioPWM(gpio, pulse);
@@ -158,7 +157,7 @@ void HAL_Motors_PiGPIO::cut_throttle()
     }
 }
 
-void HAL_Motors_PiGPIO::set_motor_throttles(float const* throttles, size_t count)
+void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
 {
     QASSERT(m_is_initialized);
     if (!m_is_initialized)
@@ -188,7 +187,7 @@ void HAL_Motors_PiGPIO::set_motor_throttles(float const* throttles, size_t count
         auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
         m_motors[i].throttle = throttle;
 
-        if (m_pwm_frequency >= PWM_Frequency::PWM_1000Hz)
+        if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
         {
             uint32_t pulse = throttle * GPIO_PWM_RANGE;
             gpioPWM(MOTOR_GPIOS[i], pulse);

@@ -1,29 +1,31 @@
 #pragma once
 
+#include "HAL_Camera.h"
+#include "HAL_Motors.h"
+#include "HAL_Sensors.h"
+
 namespace silk
 {
 
-class Sensor_Interface;
-class Motor_Interface;
-class Camera_Interface;
 
-
-struct HW_Interfaces
+struct HAL : q::util::Noncopyable
 {
-    std::shared_ptr<Sensor_Interface> sensor_interface;
-    std::shared_ptr<Motor_Interface> motor_interface;
-    std::shared_ptr<Camera_Interface> camera_interface;
-
-    HW_Interfaces();
+    std::unique_ptr<HAL_Sensors> sensors;
+    std::unique_ptr<HAL_Motors> motors;
+    std::unique_ptr<HAL_Camera> camera;
 
     enum class Result
     {
-        OK,
+    	OK,
         FAILED
     };
 
     auto init() -> Result;
-    void shutdown();
+    void process();
+
+private:
+    struct Impl;
+    std::shared_ptr<Impl> m_impl;
 };
 
 

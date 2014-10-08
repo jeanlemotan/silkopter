@@ -1,20 +1,23 @@
 #pragma once
 
-#include "Sensor_Interface.h"
+#include "HAL_Sensors.h"
 
 namespace silk
 {
 
-class Sensor_Interface_Pi : public Sensor_Interface
+class HAL_Sensors_Pi : public HAL_Sensors
 {
 public:
-    Sensor_Interface_Pi();
-    ~Sensor_Interface_Pi();
+    HAL_Sensors_Pi();
+    ~HAL_Sensors_Pi();
+
+    enum class Result
+    {
+        OK,
+        FAILED
+    };
 
     auto init() -> Result;
-    void shutdown();
-
-    auto is_initialized() const -> bool;
 
     //----------------------------------------------------------------------
     //calibration
@@ -27,10 +30,15 @@ public:
     void set_compass_calibration_data(math::vec3f const& bias);
     void get_compass_calibration_data(math::vec3f& bias) const;
 
-    auto get_sensor_samples() const -> std::vector<Sensor_Sample> const&;
-
-//    auto get_gps_data() -> std::vector<GPS_Data> const&;
-
+    auto get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&;
+    auto get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&;
+    auto get_compass_samples() const -> std::vector<Compass_Sample> const&;
+    auto get_barometer_samples() const -> std::vector<Barometer_Sample> const&;
+    auto get_sonar_samples() const -> std::vector<Sonar_Sample> const&;
+    auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;
+    auto get_voltage_samples() const -> std::vector<Voltage_Sample> const&;
+    auto get_current_samples() const -> std::vector<Current_Sample> const&;
+    auto get_gps_samples() const -> std::vector<GPS_Sample> const&; 
 
     //----------------------------------------------------------------------
     size_t get_error_count() const;
@@ -39,10 +47,32 @@ public:
     void process();
 
 private:
-    auto setup_spi() -> Result;
+    Accelerometer_Sample m_accelerometer_sample;
+    std::vector<Accelerometer_Sample> m_accelerometer_samples;
 
-    Sample m_sensors;
-    std::vector<Sample> m_samples;
+    Gyroscope_Sample m_gyroscope_sample;
+    std::vector<Gyroscope_Sample> m_gyroscope_samples;
+
+    Compass_Sample m_compass_sample;
+    std::vector<Compass_Sample> m_compass_samples;
+
+    Barometer_Sample m_barometer_sample;
+    std::vector<Barometer_Sample> m_barometer_samples;
+
+    Sonar_Sample m_sonar_sample;
+    std::vector<Sonar_Sample> m_sonar_samples;
+
+    Thermometer_Sample m_thermometer_sample;
+    std::vector<Thermometer_Sample> m_thermometer_samples;
+
+    Voltage_Sample m_voltage_sample;
+    std::vector<Voltage_Sample> m_voltage_samples;
+
+    Current_Sample m_current_sample;
+    std::vector<Current_Sample> m_current_samples;
+
+    GPS_Sample m_gps_sample;
+    std::vector<GPS_Sample> m_gps_samples;
 
     struct Calibration_Config
     {
@@ -55,8 +85,8 @@ private:
     bool m_is_initialized = false;
     size_t m_error_count = 0;
 
-    struct Private;
-    std::shared_ptr<Private> m_p;
+    struct Impl;
+    std::shared_ptr<Impl> m_impl;
 
     struct Settings
     {

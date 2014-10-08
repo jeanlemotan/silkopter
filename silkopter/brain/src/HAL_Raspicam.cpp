@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "HAL_Camera_MMAL.h"
+#include "HAL_Raspicam.h"
 #include "common/input/Camera_Input.h"
 
 //#undef RASPBERRY_PI
@@ -44,7 +44,7 @@ typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
 ///         - low resizer
 ///             - low encoder
 
-struct HAL_Camera_MMAL::Impl
+struct HAL_Raspicam::Impl
 {
     //camera
     Component_ptr camera;
@@ -63,18 +63,18 @@ struct HAL_Camera_MMAL::Impl
         std::mutex data_mutex;
 
         std::atomic<bool> is_active{false};
-        math::vec2u32 resolution;
-        size_t bitrate = 0;
+        HAL_Raspicam::Quality quality;
 
         q::Clock::time_point start;
     };
 
+    Encoder_Data recording;
     Encoder_Data high;
     Encoder_Data medium;
     Encoder_Data low;
 
-    HAL_Camera_MMAL::Callback file_callback;
-    HAL_Camera_MMAL::Callback stream_callback;
+    HAL_Raspicam::Data_Available_Callback file_callback;
+    HAL_Raspicam::Data_Available_Callback stream_callback;
 
     size_t frame_idx = 0;
 };
@@ -96,22 +96,56 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
     }
 }
 
-HAL_Camera_MMAL::HAL_Camera_MMAL()
+HAL_Raspicam::HAL_Raspicam()
 {
     m_impl.reset(new Impl);
 
+    m_impl->recording.is_active = false;
     m_impl->high.is_active = false;
     m_impl->medium.is_active = false;
     m_impl->low.is_active = false;
 
-    m_impl->file_callback = std::bind(&HAL_Camera_MMAL::file_callback, this, std::placeholders::_1, std::placeholders::_2);
+    m_fps = 30;
+    m_impl->recording.quality.resolution.set(1280, 960);
+    m_impl->recording.quality.bitrate = 16000000;
+    m_impl->high.quality.resolution.set(1280, 960);
+    m_impl->high.quality.bitrate = 4000000;
+    m_impl->medium.quality.resolution.set(640, 480);
+    m_impl->medium.quality.bitrate = 2000000;
+    m_impl->low.quality.resolution.set(320, 240);
+    m_impl->low.quality.bitrate = 160000;
+
+
+    m_impl->file_callback = std::bind(&HAL_Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
 }
-HAL_Camera_MMAL::~HAL_Camera_MMAL()
+HAL_Raspicam::~HAL_Raspicam()
 {
-    stop();
 }
 
-void HAL_Camera_MMAL::file_callback(uint8_t const* data, size_t size)
+auto HAL_Raspicam::init() -> Result
+{
+    if (m_impl->camera)
+    {
+        return Result::OK;
+    }
+
+    auto res = create_components();
+    if (res == Result::OK)
+    {
+//        set_active_streams(m_file_sink != nullptr,
+//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+//                           m_stream_quality == camera_input::Stream_Quality::LOW);
+    }
+    return res;
+}
+
+void HAL_Raspicam::process()
+{
+
+}
+
+
+void HAL_Raspicam::file_callback(uint8_t const* data, size_t size)
 {
     QASSERT(data && size);
     if (!data || size == 0)
@@ -126,94 +160,49 @@ void HAL_Camera_MMAL::file_callback(uint8_t const* data, size_t size)
     sink->write(data, size);
 }
 
-void HAL_Camera_MMAL::setup_high_quality(math::vec2u32 const& resolution, size_t bitrate)
-{
-    m_impl->high.resolution = resolution;
-    m_impl->high.bitrate = bitrate;
-}
-void HAL_Camera_MMAL::setup_medium_quality(math::vec2u32 const& resolution, size_t bitrate)
-{
-    m_impl->medium.resolution = resolution;
-    m_impl->medium.bitrate = bitrate;
-}
-void HAL_Camera_MMAL::setup_low_quality(math::vec2u32 const& resolution, size_t bitrate)
-{
-    m_impl->low.resolution = resolution;
-    m_impl->low.bitrate = bitrate;
-}
-void HAL_Camera_MMAL::set_stream_callback(Callback cb)
+void HAL_Raspicam::set_data_callback(Data_Available_Callback cb)
 {
     m_impl->stream_callback = cb;
 }
 
-void HAL_Camera_MMAL::set_active_streams(bool high, bool medium, bool low)
-{
-    if (m_impl->high.is_active == high &&
-        m_impl->medium.is_active == medium &&
-        m_impl->low.is_active == low)
-    {
-        return;
-    }
+//void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
+//{
+//    if (m_impl->high.is_active == high &&
+//        m_impl->medium.is_active == medium &&
+//        m_impl->low.is_active == low)
+//    {
+//        return;
+//    }
 
-    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
+//    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
 
-    if (set_connection_enabled(m_impl->high.encoder_connection, high))
-    {
-        m_impl->high.is_active = high;
-    }
-    else
-    {
-        SILK_WARNING("Cannot {} high bitrate encoder", high ? "enable" : "disable");
-    }
+//    if (set_connection_enabled(m_impl->high.encoder_connection, high))
+//    {
+//        m_impl->high.is_active = high;
+//    }
+//    else
+//    {
+//        SILK_WARNING("Cannot {} high bitrate encoder", high ? "enable" : "disable");
+//    }
 
-    if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
-    {
-        m_impl->medium.is_active = medium;
-    }
-    else
-    {
-        SILK_WARNING("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
-    }
+//    if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
+//    {
+//        m_impl->medium.is_active = medium;
+//    }
+//    else
+//    {
+//        SILK_WARNING("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
+//    }
 
-    if (set_connection_enabled(m_impl->low.resizer_connection, low))
-    {
-        m_impl->low.is_active = low;
-    }
-    else
-    {
-        SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
-    }
-}
-
-auto HAL_Camera_MMAL::start() -> Result
-{
-    if (m_impl->camera)
-    {
-        return Result::OK;
-    }
-
-    if (!q::util::fs::create_folder(q::Path("capture")))
-    {
-        SILK_WARNING("Cannot create capture folder");
-        return Result::FAILED;
-    }
-
-    auto res = create_components();
-    if (res == Result::OK)
-    {
-        set_active_streams(m_file_sink != nullptr,
-                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                           m_stream_quality == camera_input::Stream_Quality::LOW);
-    }
-    return res;
-}
-void HAL_Camera_MMAL::stop()
-{
-    if (!m_impl->camera)
-    {
-        return;
-    }
-}
+//    if (set_connection_enabled(m_impl->low.resizer_connection, low))
+//    {
+//        m_impl->low.is_active = low;
+//    }
+//    else
+//    {
+//        SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
+//    }
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -761,7 +750,11 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
     mmal_buffer_header_release(buffer);
 }
 
-static void encoder_buffer_callback_fn(HAL_Camera_MMAL::Impl& impl, HAL_Camera_MMAL::Impl::Encoder_Data& encoder_data, HAL_Camera_MMAL::Callback const& callback, MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
+static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
+                                       HAL_Raspicam::Impl::Encoder_Data& encoder_data,
+                                       HAL_Raspicam::Data_Available_Callback const& callback,
+                                       MMAL_PORT_T* port,
+                                       MMAL_BUFFER_HEADER_T* buffer)
 {
     if (!callback)
     {
@@ -822,7 +815,7 @@ static void encoder_buffer_callback_fn(HAL_Camera_MMAL::Impl& impl, HAL_Camera_M
 static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
+    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->high, impl->file_callback, port, buffer);
 }
@@ -830,7 +823,7 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
+    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->medium, impl->stream_callback, port, buffer);
 }
@@ -838,14 +831,14 @@ static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    HAL_Camera_MMAL::Impl* impl = reinterpret_cast<HAL_Camera_MMAL::Impl*>(port->userdata);
+    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     encoder_buffer_callback_fn(*impl, impl->low, impl->stream_callback, port, buffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-auto HAL_Camera_MMAL::create_components() -> Result
+auto HAL_Raspicam::create_components() -> Result
 {
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
 
@@ -865,12 +858,12 @@ auto HAL_Camera_MMAL::create_components() -> Result
         MMAL_PARAMETER_CAMERA_CONFIG_T cam_config;
         cam_config.hdr.id = MMAL_PARAMETER_CAMERA_CONFIG;
         cam_config.hdr.size = sizeof(cam_config);
-        cam_config.max_stills_w = m_impl->high.resolution.x;
-        cam_config.max_stills_h = m_impl->high.resolution.y;
+        cam_config.max_stills_w = m_impl->high.quality.resolution.x;
+        cam_config.max_stills_h = m_impl->high.quality.resolution.y;
         cam_config.stills_yuv422 = 0;
         cam_config.one_shot_stills = 0;
-        cam_config.max_preview_video_w = m_impl->high.resolution.x;
-        cam_config.max_preview_video_h = m_impl->high.resolution.y;
+        cam_config.max_preview_video_w = m_impl->high.quality.resolution.x;
+        cam_config.max_preview_video_h = m_impl->high.quality.resolution.y;
         cam_config.num_preview_video_frames = 3;
         cam_config.stills_capture_circular_buffer_height = 0;
         cam_config.fast_preview_resume = 0;
@@ -889,7 +882,7 @@ auto HAL_Camera_MMAL::create_components() -> Result
         auto* format = camera_preview_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        setup_video_format(format, m_impl->high.resolution, true, m_fps);
+        setup_video_format(format, m_impl->high.quality.resolution, true, m_fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
@@ -904,7 +897,7 @@ auto HAL_Camera_MMAL::create_components() -> Result
         auto* format = camera_video_port->format;
         format->encoding = MMAL_ENCODING_OPAQUE;
         format->encoding_variant = MMAL_ENCODING_I420;
-        setup_video_format(format, m_impl->high.resolution, true, m_fps);
+        setup_video_format(format, m_impl->high.quality.resolution, true, m_fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
@@ -919,12 +912,12 @@ auto HAL_Camera_MMAL::create_components() -> Result
         auto* format = camera_capture_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        format->es->video.width = VCOS_ALIGN_UP(m_impl->high.resolution.x, 32);
-        format->es->video.height = VCOS_ALIGN_UP(m_impl->high.resolution.y, 16);
+        format->es->video.width = VCOS_ALIGN_UP(m_impl->high.quality.resolution.x, 32);
+        format->es->video.height = VCOS_ALIGN_UP(m_impl->high.quality.resolution.y, 16);
         format->es->video.crop.x = 0;
         format->es->video.crop.y = 0;
-        format->es->video.crop.width = m_impl->high.resolution.x;
-        format->es->video.crop.height = m_impl->high.resolution.y;
+        format->es->video.crop.width = m_impl->high.quality.resolution.x;
+        format->es->video.crop.height = m_impl->high.quality.resolution.y;
         format->es->video.frame_rate.num = 0;
         format->es->video.frame_rate.den = 1;
         format->es->video.par.num = 1;
@@ -964,7 +957,7 @@ auto HAL_Camera_MMAL::create_components() -> Result
 
 
     //high
-    m_impl->high.encoder = create_encoder_component_for_saving(camera_video_port, m_impl->high.resolution, m_impl->high.bitrate);
+    m_impl->high.encoder = create_encoder_component_for_saving(camera_video_port, m_impl->high.quality.resolution, m_impl->high.quality.bitrate);
     m_impl->high.encoder_connection = connect_ports(camera_video_port, m_impl->high.encoder->input[0]);
     if (!m_impl->high.encoder_connection || !set_connection_enabled(m_impl->high.encoder_connection, true))
     {
@@ -980,14 +973,14 @@ auto HAL_Camera_MMAL::create_components() -> Result
     }
 
     //medium
-    m_impl->medium.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_impl->medium.resolution, m_fps);
+    m_impl->medium.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_impl->medium.quality.resolution, m_fps);
     m_impl->medium.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], m_impl->medium.resizer->input[0]);
     if (!m_impl->medium.resizer_connection)
     {
         SILK_ERR("Cannot create medium bitrate resizer");
         return Result::FAILED;
     }
-    m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_impl->medium.resolution, m_impl->medium.bitrate);
+    m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_impl->medium.quality.resolution, m_impl->medium.quality.bitrate);
     m_impl->medium.encoder_connection = connect_ports(m_impl->medium.resizer->output[0], m_impl->medium.encoder->input[0]);
     if (!m_impl->medium.encoder_connection || !set_connection_enabled(m_impl->medium.encoder_connection, true))
     {
@@ -1002,14 +995,14 @@ auto HAL_Camera_MMAL::create_components() -> Result
     }
 
     //low
-    m_impl->low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_impl->low.resolution, m_fps);
+    m_impl->low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_impl->low.quality.resolution, m_fps);
     m_impl->low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], m_impl->low.resizer->input[0]);
     if (!m_impl->low.resizer_connection)
     {
         SILK_ERR("Cannot create low bitrate resizer");
         return Result::FAILED;
     }
-    m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_impl->low.resolution, m_impl->low.bitrate);
+    m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_impl->low.quality.resolution, m_impl->low.quality.bitrate);
     m_impl->low.encoder_connection = connect_ports(m_impl->low.resizer->output[0], m_impl->low.encoder->input[0]);
     if (!m_impl->low.encoder_connection || !set_connection_enabled(m_impl->low.encoder_connection, true))
     {
@@ -1036,7 +1029,7 @@ auto HAL_Camera_MMAL::create_components() -> Result
     return Result::OK;
 }
 
-void HAL_Camera_MMAL::create_file_sink()
+void HAL_Raspicam::create_file_sink()
 {
     char mbstr[256] = {0};
     std::time_t t = std::time(nullptr);
@@ -1068,48 +1061,56 @@ void HAL_Camera_MMAL::create_file_sink()
 }
 
 
-auto HAL_Camera_MMAL::start_recording() -> Result
+auto HAL_Raspicam::start_recording() -> Result
 {
+    if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
+    {
+        SILK_WARNING("Cannot create capture folder");
+        return Result::FAILED;
+    }
+
     if (!m_file_sink)
     {
         create_file_sink();
     }
     if (m_impl->camera)
     {
-        set_active_streams(m_file_sink != nullptr,
-                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                           m_stream_quality == camera_input::Stream_Quality::LOW);
+//        set_active_streams(m_file_sink != nullptr,
+//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+//                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
     return Result::OK;
 }
-void HAL_Camera_MMAL::stop_recording()
+void HAL_Raspicam::stop_recording()
 {
     m_file_sink.reset();
     if (m_impl->camera)
     {
-        set_active_streams(m_file_sink != nullptr,
-                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                           m_stream_quality == camera_input::Stream_Quality::LOW);
+//        set_active_streams(m_file_sink != nullptr,
+//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+//                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
 }
 
-void HAL_Camera_MMAL::set_iso(camera_input::Iso iso)
+void HAL_Raspicam::set_iso(camera_input::Iso iso)
 {
     m_iso = iso;
 }
 
-void HAL_Camera_MMAL::set_shutter_speed(camera_input::Shutter_Speed ss)
+void HAL_Raspicam::set_shutter_speed(camera_input::Shutter_Speed ss)
 {
     m_shutter_speed = ss;
 }
 
-void HAL_Camera_MMAL::set_stream_quality(camera_input::Stream_Quality sq)
+void HAL_Raspicam::set_quality(camera_input::Stream_Quality sq)
 {
     m_stream_quality = sq;
     if (m_impl->camera)
     {
-        set_active_streams(m_file_sink != nullptr,
-                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-                           m_stream_quality == camera_input::Stream_Quality::LOW);
+//        set_active_streams(m_file_sink != nullptr,
+//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+//                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
 }
+
+#endif

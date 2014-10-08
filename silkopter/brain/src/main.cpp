@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Video_Server.h"
-#include "Camera.h"
-#include "HW_Interfaces.h"
+#include "HAL.h"
 #include "common/input/Camera_Input.h"
 #include "Comms.h"
 #include "UAV.h"
@@ -27,19 +26,19 @@ namespace boost
     }
 }
 
-static void setup_camera_defaults(silk::Camera& camera, silk::Video_Server& streamer)
-{
-    camera.setup_high_quality(math::vec2u32(1280, 960), 16000000);
-    camera.setup_medium_quality(math::vec2u32(640, 480), 2000000);
-    camera.setup_low_quality(math::vec2u32(320, 240), 160000);
+//static void setup_camera_defaults(silk::Camera& camera, silk::Video_Server& streamer)
+//{
+//    camera.setup_high_quality(math::vec2u32(1280, 960), 16000000);
+//    camera.setup_medium_quality(math::vec2u32(640, 480), 2000000);
+//    camera.setup_low_quality(math::vec2u32(320, 240), 160000);
 
-    camera.set_stream_callback([&](uint8_t const* data, size_t size)
-    {
-        streamer.send_frame(silk::Video_Server::Flags(), data, size);
-    });
+//    camera.set_stream_callback([&](uint8_t const* data, size_t size)
+//    {
+//        streamer.send_frame(silk::Video_Server::Flags(), data, size);
+//    });
 
-    camera.set_stream_quality(silk::camera_input::Stream_Quality::MEDIUM);
-}
+//    camera.set_stream_quality(silk::camera_input::Stream_Quality::MEDIUM);
+//}
 
 
 int main(int argc, char const* argv[])
@@ -110,20 +109,19 @@ int main(int argc, char const* argv[])
 
     try
     {
-        HW_Interfaces hw_interfaces;
+        silk::HAL hal;
 
         {
-            auto res = io_board.connect();
-            if (res != silk::IO_Board::Connection_Result::OK)
+            auto res = hal.init();
+            if (res != silk::HAL::Result::OK)
             {
-                SILK_ERR("Cannot connect to the io_board! Aborting");
+                SILK_ERR("Hardware failure! Aborting");
                 abort();
             }
         }
 
-        silk::UAV uav(io_board);
-        silk::Camera camera(30);
-        silk::Comms comms(io_service, io_board, uav, camera);
+        silk::UAV uav(hal);
+        silk::Comms comms(io_service, hal, uav);
         //start listening for a remote system
         {
             auto res = comms.start_listening(comm_port);
@@ -136,17 +134,7 @@ int main(int argc, char const* argv[])
 
         //create streamer and camera objects
         silk::Video_Server streamer(io_service);
-        setup_camera_defaults(camera, streamer);
-
-        if (!blind)
-        {
-            auto res = camera.start();
-            if (res != silk::Camera::Result::OK)
-            {
-                SILK_ERR("Cannot start camera! Aborting");
-                abort();
-            }
-        }
+//        setup_camera_defaults(camera, streamer);
 
 //        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
 
@@ -187,7 +175,7 @@ int main(int argc, char const* argv[])
             comms.process();
             streamer.process();
 
-            io_board.process();
+            hal.process();
             uav.process();
 
             boost::this_thread::sleep_for(boost::chrono::nanoseconds(1));
@@ -197,9 +185,7 @@ int main(int argc, char const* argv[])
         SILK_INFO("Stopping everything");
 
         streamer.stop();
-        camera.stop();
         comms.disconnect();
-        io_board.disconnect();
     }
     catch (std::exception const& e)
     {

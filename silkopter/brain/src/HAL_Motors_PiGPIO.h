@@ -1,14 +1,36 @@
 #pragma once
 
+#include "HAL_Motors.h"
+#include "PiGPIO.h"
+
 namespace silk
 {
 
-class HAL_Motors_PiGPIO : q::util::Noncopyable
+class HAL_Motors_PiGPIO : public HAL_Motors
 {
 public:
     HAL_Motors_PiGPIO(PiGPIO& pigpio);
     ~HAL_Motors_PiGPIO();
 
+    enum class Result
+    {
+        OK,
+        FAILED
+    };
+
+    auto init() -> Result;
+    void shutdown();
+
+    //----------------------------------------------------------------------
+    //motors
+
+    void set_throttles(float const* throttles, size_t count);
+    void cut_throttle();
+
+    //----------------------------------------------------------------------
+    void process();
+
+private:
     enum class PWM_Frequency : uint8_t
     {
         SERVO_50HZ,
@@ -18,29 +40,9 @@ public:
         PWM_1000Hz,
     };
 
-    struct Params
-    {
-        size_t count = 4;
-        PWM_Frequency frequency = PWM_Frequency::PWM_1000Hz;
-    };
-
-    auto init() -> Result;
-    void shutdown();
-
-    //----------------------------------------------------------------------
-    //motors
-
-    auto get_count() const -> size_t;
-    void set_throttles(float const* throttles, size_t count);
-    void cut_throttle();
-
-    //----------------------------------------------------------------------
-    void process();
-
-private:
     PiGPIO& m_pigpio;
+    bool m_is_initialized = false;
 
-    PWM_Frequency m_pwm_frequency = PWM_Frequency::PWM_1000Hz;
     struct Motor
     {
         float throttle = 0;
@@ -55,6 +57,8 @@ private:
 
     struct Settings
     {
+        size_t count = 4;
+        PWM_Frequency frequency = PWM_Frequency::PWM_1000Hz;
         rapidjson::Document document;
     } m_settings;
 

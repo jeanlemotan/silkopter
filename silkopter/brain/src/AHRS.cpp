@@ -5,12 +5,10 @@ extern size_t s_test;
 
 using namespace silk;
 
-void AHRS::process(IO_Board::Sensor_Sample const& sensors)
+void AHRS::process(HAL_Sensors::Gyroscope_Sample const& gyroscope,
+                   HAL_Sensors::Accelerometer_Sample const& accelerometer,
+                   HAL_Sensors::Compass_Sample const& compass)
 {
-    auto const& accelerometer = sensors.accelerometer;
-    auto const& gyroscope = sensors.gyroscope;
-    auto const& compass = sensors.compass;
-
     bool rotation_dirty = false;
     float av_length = 0.f;
 
@@ -21,8 +19,8 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
     {
         m_last_gyroscope_sample_idx = gyroscope.sample_idx;
 
-        auto omega = gyroscope.value.angular_velocity;
-        auto dts = q::Seconds(gyroscope.value.dt).count();
+        auto omega = gyroscope.value;
+        auto dts = q::Seconds(gyroscope.dt).count();
 
         auto theta = omega * dts;
         auto theta_magnitude = math::length(theta);
@@ -30,7 +28,7 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
         {
             auto av = theta*0.5f;
             av_length = theta_magnitude;
-            auto& a = m_local_to_world_quat;
+            auto& a = m_b2e_quat;
             float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
             float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
             float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -46,10 +44,10 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
 //            dq.set_from_angle_axis(theta_magnitude, theta / theta_magnitude);
 
 //            av_length = theta_magnitude;
-//            m_local_to_world_quat = m_local_to_world_quat * dq;
-//            m_local_to_world_quat.normalize<math::safe>();
+//            m_b2e_quat = m_b2e_quat * dq;
+//            m_b2e_quat.normalize<math::safe>();
 
-            m_angular_velocity = gyroscope.value.angular_velocity;
+            m_angular_velocity = gyroscope.value;
 //            m_euler += gyroscope.value.angular_velocity * dts;
 //            static int xxx = 0;
 //            xxx++;
@@ -71,15 +69,15 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
 
 //        SILK_INFO("{} / {}", accelerometer.value.acceleration, compass.value);
 
-        m_earth_frame_up = math::normalized<float, math::safe>(accelerometer.value.acceleration); //acceleration points opposite of gravity - so up
+        m_earth_frame_up = math::normalized<float, math::safe>(accelerometer.value); //acceleration points opposite of gravity - so up
         m_earth_frame_front = math::normalized<float, math::safe>(compass.value); //this is always good
         m_earth_frame_right = math::normalized<float, math::safe>(math::cross(m_earth_frame_front, m_earth_frame_up));
         m_earth_frame_front = math::cross(m_earth_frame_right, m_earth_frame_up);
         //m_earth_frame_up = math::cross(m_earth_frame_right, m_earth_frame_front);
 
         math::mat3f mat(m_earth_frame_front, m_earth_frame_right, m_earth_frame_up);
-        m_local_to_world_quat_noisy.set_from_mat3(mat);
-        m_local_to_world_quat_noisy.invert();
+        m_b2e_quat_noisy.set_from_mat3(mat);
+        m_b2e_quat_noisy.invert();
 
         auto now = q::Clock::now();
         auto dt = now - m_last_correction_timestamp;
@@ -91,7 +89,7 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
         if (xxx > 0)
         {
             xxx--;
-            m_local_to_world_quat = m_local_to_world_quat_noisy;
+            m_b2e_quat = m_b2e_quat_noisy;
         }
         else
         {
@@ -100,8 +98,8 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
                 float mu = dtf * 0.5f + av_length;
-                m_local_to_world_quat = math::nlerp<float, math::safe>(m_local_to_world_quat, m_local_to_world_quat_noisy, mu);
-                m_local_to_world_quat = math::normalized<float, math::safe>(m_local_to_world_quat);
+                m_b2e_quat = math::nlerp<float, math::safe>(m_b2e_quat, m_b2e_quat_noisy, mu);
+                m_b2e_quat = math::normalized<float, math::safe>(m_b2e_quat);
             }
         }
 
@@ -110,8 +108,8 @@ void AHRS::process(IO_Board::Sensor_Sample const& sensors)
 
     if (rotation_dirty)
     {
-        m_world_to_local_quat = math::inverse<float, math::safe>(m_local_to_world_quat);
-        m_local_to_world_quat.get_as_mat3_and_inv<math::safe>(m_local_to_world_mat, m_world_to_local_mat);
+        m_e2b_quat = math::inverse<float, math::safe>(m_b2e_quat);
+        m_b2e_quat.get_as_mat3_and_inv<math::safe>(m_b2e_mat, m_e2b_mat);
     }
 
 
@@ -122,46 +120,46 @@ auto AHRS::get_angular_velocity() const -> math::vec3f const&
 {
     return m_angular_velocity;
 }
-math::quatf const& AHRS::get_local_to_world_quat() const
+math::quatf const& AHRS::get_b2e_quat() const
 {
-    return m_local_to_world_quat;
+    return m_b2e_quat;
 }
-math::mat3f const& AHRS::get_local_to_world_mat() const
+math::mat3f const& AHRS::get_b2e_mat() const
 {
-    return m_local_to_world_mat;
+    return m_b2e_mat;
 }
-math::quatf const& AHRS::get_world_to_local_quat() const
+math::quatf const& AHRS::get_e2b_quat() const
 {
-    return m_world_to_local_quat;
+    return m_e2b_quat;
 }
-math::mat3f const& AHRS::get_world_to_local_mat() const
+math::mat3f const& AHRS::get_e2b_mat() const
 {
-    return m_world_to_local_mat;
+    return m_e2b_mat;
 }
 math::vec3f const& AHRS::get_front_vector() const
 {
-    return m_local_to_world_mat.get_axis_y();
+    return m_b2e_mat.get_axis_y();
 }
 math::vec3f const& AHRS::get_right_vector() const
 {
-    return m_local_to_world_mat.get_axis_x();
+    return m_b2e_mat.get_axis_x();
 }
 math::vec3f const& AHRS::get_up_vector() const
 {
-    return m_local_to_world_mat.get_axis_z();
+    return m_b2e_mat.get_axis_z();
 }
 
 void AHRS::reset()
 {
-    m_local_to_world_mat = math::mat3f::identity;
-    m_local_to_world_quat = math::quatf::identity;
-    m_world_to_local_mat = math::mat3f::identity;
-    m_world_to_local_quat = math::quatf::identity;
+    m_b2e_mat = math::mat3f::identity;
+    m_b2e_quat = math::quatf::identity;
+    m_e2b_mat = math::mat3f::identity;
+    m_e2b_quat = math::quatf::identity;
 
     m_earth_frame_front = math::vec3f::zero;
     m_earth_frame_right = math::vec3f::zero;
     m_earth_frame_up = math::vec3f::zero;
-    m_local_to_world_quat_noisy = math::quatf::identity;
+    m_b2e_quat_noisy = math::quatf::identity;
 
     m_angular_velocity = math::vec3f::zero;
 }

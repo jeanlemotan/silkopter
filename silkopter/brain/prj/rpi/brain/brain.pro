@@ -71,25 +71,23 @@ SOURCES += \
     ../../../src/BrainStdAfx.cpp \
     ../../../src/main.cpp \
     ../../../src/Video_Server.cpp \
-    ../../../src/Camera.cpp \
     ../../../src/UAV.cpp \
     ../../../src/Comms.cpp \
     ../../../src/AHRS.cpp \
     ../../../src/Motor_Mixer.cpp \
-    ../../../src/IO_Board_Sim.cpp \
     ../../../src/chips/MPU9250.cpp \
     ../../../src/chips/MS5611.cpp \
-    ../../../src/IO_Board_RPi.cpp \
     ../../../src/chips/i2c.cpp \
     ../../../src/HAL_Raspicam.cpp \
     ../../../src/HAL_Sensors_Pi.cpp \
     ../../../src/HAL_Sensors_Sim.cpp \
     ../../../src/HAL.cpp \
-    ../../../src/HAL_Motors_PiGPIO.cpp
+    ../../../src/HAL_Motors_PiGPIO.cpp \
+    ../../../src/PiGPIO.cpp \
+    ../../../src/Sim_Comms.cpp
 
 HEADERS += \
     ../../../src/BrainStdAfx.h \
-    ../../../src/IO_Board.h \
     ../../../src/Video_Server.h \
     ../../../src/Toggle.h \
     ../../../../libs/common/input/Camera_Input.h \
@@ -104,11 +102,9 @@ HEADERS += \
     ../../../src/AHRS.h \
     ../../../src/Motor_Mixer.h \
     ../../../../libs/utils/Timed_Scope.h \
-    ../../../src/IO_Board_Sim.h \
     ../../../src/chips/MPU9250.h \
     ../../../../libs/physics/constants.h \
     ../../../src/chips/MS5611.h \
-    ../../../src/IO_Board_RPi.h \
     ../../../src/chips/i2c.h \
     ../../../src/HAL_Camera.h \
     ../../../src/HAL_Raspicam.h \
@@ -120,5 +116,7 @@ HEADERS += \
     ../../../src/HAL_Sensors_Pi.h \
     ../../../src/HAL_Sensors_Sim.h \
     ../../../src/HAL.h \
-    ../../../src/HAL_Camera_Mount_PiGPIO.h
+    ../../../src/HAL_Camera_Mount_PiGPIO.h \
+    ../../../src/PiGPIO.h \
+    ../../../src/Sim_Comms.h
 

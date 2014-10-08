@@ -11,20 +11,6 @@ public:
     HAL_Camera_Mount_PiGPIO(PiGPIO& pigpio);
     ~HAL_Camera_Mount_PiGPIO();
 
-    struct Params
-    {
-        size_t fps = 30;
-    };
-
-    enum class Result : uint8_t
-    {
-        OK,
-        FAILED
-    };
-
-    auto init() -> Result;
-    void shutdown();
-
     //----------------------------------------------------------------------
     //mount
 

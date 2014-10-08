@@ -30,7 +30,7 @@ public:
         _16_G = 16,
     };
 
-    Result init(q::String const& device, Gyroscope_Range gr, Accelerometer_Range ar);
+    auto init(q::String const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> Result;
 
     void process();
 
@@ -39,7 +39,7 @@ public:
     auto get_gyroscope_samples() const -> std::vector<math::vec3f> const&;
     auto get_accelerometer_samples() const -> std::vector<math::vec3f> const&;
 
-    q::Clock::duration get_sample_time() const;
+    auto get_sample_time() const -> q::Clock::duration;
 
 private:
     void reset_fifo();

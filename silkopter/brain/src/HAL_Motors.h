@@ -11,7 +11,6 @@ public:
     //----------------------------------------------------------------------
     //motors
 
-    virtual auto get_count() const -> size_t = 0;
     virtual void set_throttles(float const* throttles, size_t count) = 0;
     virtual void cut_throttle() = 0;
 

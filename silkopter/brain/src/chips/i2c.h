@@ -14,11 +14,11 @@ public:
         FAILED
     };
 
-    Result open(std::string const& device);
+    auto open(std::string const& device) -> Result;
     void close();
 
     void read(uint8_t address, uint8_t reg, uint8_t* data, uint32_t size);
-    uint16_t read_u16(uint8_t address, uint8_t reg)
+    auto read_u16(uint8_t address, uint8_t reg) -> uint16_t
     {
         uint8_t val[2];
         read(address, reg, val, 2);
@@ -27,7 +27,7 @@ public:
         reinterpret_cast<uint8_t*>(&t)[0] = val[1];
         return t;
     }
-    uint8_t read_u8(uint8_t address, uint8_t reg)
+    auto read_u8(uint8_t address, uint8_t reg) -> uint8_t
     {
         uint8_t t = 0;
         read(address, reg, &t, 1);

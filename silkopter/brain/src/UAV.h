@@ -3,7 +3,7 @@
 #include "common/input/UAV_Input.h"
 #include "AHRS.h"
 #include "Motor_Mixer.h"
-#include "HW_Interfaces.h"
+#include "HAL.h"
 #include "utils/PID.h"
 
 namespace silk
@@ -12,7 +12,7 @@ namespace silk
 class UAV
 {
 public:
-    UAV(HW_Interfaces& hw_interfaces);
+    UAV(HAL& hal);
 
 
     void process();
@@ -100,11 +100,14 @@ private:
     void process_motors(q::Clock::duration dt);
     void process_input(q::Clock::duration dt);
 
-    uint32_t m_last_gyroscope_sample_idx = 0;
-    uint32_t m_last_accelerometer_sample_idx = 0;
+    HAL_Sensors::Gyroscope_Sample m_last_gyroscope_sample;
+    HAL_Sensors::Accelerometer_Sample m_last_accelerometer_sample;
+    HAL_Sensors::Compass_Sample m_last_compass_sample;
+    q::Clock::time_point m_last_sample_time_point;
+
 
     q::Clock::time_point m_last_timestamp;
-    HW_Interfaces m_hw_interfaces;
+    HAL& m_hal;
     AHRS m_ahrs;
     Motor_Mixer m_motor_mixer;
 

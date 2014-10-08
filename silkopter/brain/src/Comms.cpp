@@ -4,11 +4,10 @@
 using namespace silk;
 using namespace boost::asio;
 
-Comms::Comms(boost::asio::io_service& io_service, IO_Board& io_board, UAV& uav, Camera& camera)
+Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     : m_io_service(io_service)
-    , m_io_board(io_board)
+    , m_hal(hal)
     , m_uav(uav)
-    , m_camera(camera)
 {
     m_ping_time = q::Clock::now();
 }
@@ -112,46 +111,49 @@ void Comms::message_camera_input()
         return;
     }
 
-    switch (q)
-    {
-    case Input::START_RECORDING:
-        m_camera.start_recording();
-        break;
-    case Input::STOP_RECORDING:
-        m_camera.stop_recording();
-        break;
-    case Input::ISO:
+    if (m_hal.camera)
+    {    
+        switch (q)
         {
-            Iso iso;
-            if (m_channel->unpack_param(iso) == Channel::Unpack_Result::OK)
+        case Input::START_RECORDING:
+            m_hal.camera->start_recording();
+            break;
+        case Input::STOP_RECORDING:
+            m_hal.camera->stop_recording();
+            break;
+        case Input::ISO:
             {
-                m_camera.set_iso(iso);
+                Iso iso;
+                if (m_channel->unpack_param(iso) == Channel::Unpack_Result::OK)
+                {
+                    m_hal.camera->set_iso(iso);
+                }
             }
-        }
-        break;
-    case Input::SHUTTER_SPEED:
-        {
-            Shutter_Speed ss;
-            if (m_channel->unpack_param(ss) == Channel::Unpack_Result::OK)
+            break;
+        case Input::SHUTTER_SPEED:
             {
-                m_camera.set_shutter_speed(ss);
+                Shutter_Speed ss;
+                if (m_channel->unpack_param(ss) == Channel::Unpack_Result::OK)
+                {
+                    m_hal.camera->set_shutter_speed(ss);
+                }
             }
-        }
-        break;
-    case Input::STREAM_QUALITY:
-        {
-            Stream_Quality sq;
-            if (m_channel->unpack_param(sq) == Channel::Unpack_Result::OK)
+            break;
+        case Input::STREAM_QUALITY:
             {
-                m_camera.set_stream_quality(sq);
+                Stream_Quality sq;
+                if (m_channel->unpack_param(sq) == Channel::Unpack_Result::OK)
+                {
+                    m_hal.camera->set_quality(sq);
+                }
             }
-        }
-        break;
-    default:
-        SILK_INFO("BAD Camera input received {}", static_cast<int>(q));
-        break;
-    };
-
+            break;
+        default:
+            SILK_INFO("BAD Camera input received {}", static_cast<int>(q));
+            break;
+        };
+    }
+    
     m_channel->end_unpack();
 
     SILK_INFO("Camera input received");
@@ -445,11 +447,12 @@ void Comms::message_assist_params()
 
 void Comms::message_calibration_accelerometer()
 {
+    QASSERT(m_hal.sensors);
     math::vec3f bias, scale;
     if (m_channel->get_message_size() == 0)
     {
         SILK_INFO("Accelerometer calibration set req");
-        m_io_board.get_accelerometer_calibration_data(bias, scale);
+        m_hal.sensors->get_accelerometer_calibration_data(bias, scale);
         m_channel->send(Message::CALIBRATION_ACCELEROMETER, bias, scale);
     }
     else
@@ -458,7 +461,7 @@ void Comms::message_calibration_accelerometer()
         if (result == Channel::Unpack_Result::OK)
         {
             SILK_INFO("Accelerometer calibration changed");
-            m_io_board.set_accelerometer_calibration_data(bias, scale);
+            m_hal.sensors->set_accelerometer_calibration_data(bias, scale);
             m_channel->send(Message::CALIBRATION_ACCELEROMETER, bias, scale);
         }
         else
@@ -469,11 +472,12 @@ void Comms::message_calibration_accelerometer()
 }
 void Comms::message_calibration_gyroscope()
 {
+    QASSERT(m_hal.sensors);
     math::vec3f bias;
     if (m_channel->get_message_size() == 0)
     {
         SILK_INFO("Gyroscope calibration set req");
-        m_io_board.get_gyroscope_calibration_data(bias);
+        m_hal.sensors->get_gyroscope_calibration_data(bias);
         m_channel->send(Message::CALIBRATION_GYROSCOPE, bias);
     }
     else
@@ -482,7 +486,7 @@ void Comms::message_calibration_gyroscope()
         if (result == Channel::Unpack_Result::OK)
         {
             SILK_INFO("Gyroscope calibration changed");
-            m_io_board.set_gyroscope_calibration_data(bias);
+            m_hal.sensors->set_gyroscope_calibration_data(bias);
             m_channel->send(Message::CALIBRATION_GYROSCOPE, bias);
         }
         else
@@ -497,7 +501,7 @@ void Comms::message_calibration_compass()
     if (m_channel->get_message_size() == 0)
     {
         SILK_INFO("Compass calibration req, sending to GS");
-        m_io_board.get_compass_calibration_data(bias);
+        m_hal.sensors->get_compass_calibration_data(bias);
         m_channel->send(Message::CALIBRATION_COMPASS, bias);
     }
     else
@@ -506,7 +510,7 @@ void Comms::message_calibration_compass()
         if (result == Channel::Unpack_Result::OK)
         {
             SILK_INFO("Compass calibration changed");
-            m_io_board.set_compass_calibration_data(bias);
+            m_hal.sensors->set_compass_calibration_data(bias);
             m_channel->send(Message::CALIBRATION_COMPASS, bias);
         }
         else
@@ -518,91 +522,138 @@ void Comms::message_calibration_compass()
 
 void Comms::send_sensor_data()
 {
+    QASSERT(m_hal.sensors);
     auto now = q::Clock::now();
     auto delay = std::chrono::milliseconds(50);
 
-    auto const& samples = m_io_board.get_sensor_samples();
-    for (auto const& sample: samples)
     {
-        m_sensors_samples.accelerometer.push_back(sample.accelerometer);
-        m_sensors_samples.gyroscope.push_back(sample.gyroscope);
+        auto const& samples = m_hal.sensors->get_gyroscope_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.gyroscope));
     }
+    {
+        auto const& samples = m_hal.sensors->get_accelerometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.accelerometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_compass_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.compass));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_barometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.barometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_thermometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.thermometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_sonar_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.sonar));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_voltage_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.voltage));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_current_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.current));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_gps_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_sensors_samples.gps));
+    }
+
     //SILK_INFO("acc: {}", m_sensors_samples.accelerometer.size());
-    if (samples.empty() || now - m_sensors_samples.last_sent_timestamp < delay)
+    if (now - m_sensors_samples.last_sent_timestamp < delay)
     {
         return;
     }
 
-    auto const& sample = samples.back();
-
-    Sensors sensors;
-
     m_channel->begin_stream();
-    m_channel->add_to_stream(sensors); //we'll replace it with the real value at the end
 
-//    if (m_sensors_samples.accelerometer.size() > 10000)
-//    {
-//        m_sensors_samples.accelerometer.clear();
-//    }
-//    if (m_sensors_samples.gyroscope.size() > 10000)
-//    {
-//        m_sensors_samples.gyroscope.clear();
-//    }
-
-    if (!m_sensors_samples.accelerometer.empty())
-    {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.accelerometer.size()));
-        for (auto& a: m_sensors_samples.accelerometer)
-        {
-            m_channel->add_to_stream(a.value.acceleration);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.value.dt).count()));
-        }
-        m_sensors_samples.accelerometer.clear();
-        sensors.set(Sensor::ACCELEROMETER);
-    }
-    if (!m_sensors_samples.gyroscope.empty())
     {
         m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.gyroscope.size()));
         for (auto& a: m_sensors_samples.gyroscope)
         {
-            m_channel->add_to_stream(a.value.angular_velocity);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.value.dt).count()));
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.gyroscope.clear();
-        sensors.set(Sensor::GYROSCOPE);
     }
-    if (sample.compass.sample_idx != m_sensors_samples.compass.sample_idx)
     {
-        m_sensors_samples.compass = sample.compass;
-        m_channel->add_to_stream(m_sensors_samples.compass.value);
-        sensors.set(Sensor::COMPASS);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.accelerometer.size()));
+        for (auto& a: m_sensors_samples.accelerometer)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.accelerometer.clear();
     }
-    if (sample.barometer.sample_idx != m_sensors_samples.barometer.sample_idx)
     {
-        m_sensors_samples.barometer = sample.barometer;
-        m_channel->add_to_stream(m_sensors_samples.barometer.value);
-        sensors.set(Sensor::BAROMETER);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.compass.size()));
+        for (auto& a: m_sensors_samples.compass)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.compass.clear();
     }
-    if (sample.thermometer.sample_idx != m_sensors_samples.thermometer.sample_idx)
     {
-        m_sensors_samples.thermometer = sample.thermometer;
-        m_channel->add_to_stream(m_sensors_samples.thermometer.value);
-        sensors.set(Sensor::THERMOMETER);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.barometer.size()));
+        for (auto& a: m_sensors_samples.barometer)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.barometer.clear();
     }
-    if (sample.sonar.sample_idx != m_sensors_samples.sonar.sample_idx)
     {
-        m_sensors_samples.sonar = sample.sonar;
-        m_channel->add_to_stream(m_sensors_samples.sonar.value);
-        sensors.set(Sensor::SONAR);
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.thermometer.size()));
+        for (auto& a: m_sensors_samples.thermometer)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.thermometer.clear();
+    }
+    {
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.sonar.size()));
+        for (auto& a: m_sensors_samples.sonar)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.sonar.clear();
+    }
+    {
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.voltage.size()));
+        for (auto& a: m_sensors_samples.voltage)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.voltage.clear();
+    }
+    {
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.current.size()));
+        for (auto& a: m_sensors_samples.current)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.current.clear();
+    }
+    {
+        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.gps.size()));
+        for (auto& a: m_sensors_samples.gps)
+        {
+            m_channel->add_to_stream(a.value);
+            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+        }
+        m_sensors_samples.gps.clear();
     }
 
-    m_channel->add_to_stream_at(0, sensors);
     m_channel->end_stream(Message::SENSORS);
-
-    if (sensors.none())
-    {
-        return;
-    }
 
     m_sensors_samples.last_sent_timestamp = now;
 }
@@ -618,7 +669,7 @@ void Comms::send_uav_data()
     }
     m_uav_sent_timestamp = now;
 
-    m_channel->send(Message::UAV_ROTATION, m_uav.get_ahrs().get_local_to_world_quat());
+    m_channel->send(Message::UAV_ROTATION, m_uav.get_ahrs().get_b2e_quat());
     m_channel->send(Message::UAV_LINEAR_ACCELERATION, m_uav.get_linear_acceleration());
     m_channel->send(Message::UAV_VELOCITY, m_uav.get_velocity());
     m_channel->send(Message::UAV_POSITION, m_uav.get_position());

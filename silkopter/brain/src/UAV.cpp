@@ -6,8 +6,8 @@
 
 using namespace silk;
 
-UAV::UAV(IO_Board &io_board)
-    : m_io_board(io_board)
+UAV::UAV(HAL& hal)
+    : m_hal(hal)
 {
     m_last_timestamp = q::Clock::now();
 
@@ -250,8 +250,7 @@ void UAV::disarm()
     m_is_armed = false;
     m_motor_mixer.set_output_range(0, 1);
 
-    std::array<float, MAX_MOTOR_COUNT> throttles = {0};
-    m_io_board.set_motor_throttles(throttles.data(), throttles.size());
+    m_hal.motors->cut_throttle();
 }
 
 auto UAV::get_ahrs() -> AHRS const&
@@ -399,18 +398,62 @@ void UAV::process_sensor_data(q::Clock::duration dt)
         m_linear_motion.position.set(0, 0, 0);
     }
 
-//    auto start = q::Clock::now();
-    auto const& samples = m_io_board.get_sensor_samples();
-    for (auto const& sample: samples)
+    //combine accelerometer, gyroscope and compass readings
+
+    auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
+    auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
+    auto const& compass_samples = m_hal.sensors->get_compass_samples();
+
+    //find the start time_point
+    if (!gyroscope_samples.empty())
     {
-        m_ahrs.process(sample);
+        m_last_sample_time_point = math::min(m_last_sample_time_point, gyroscope_samples.front().time_point);
+    }
+    if (!accelerometer_samples.empty())
+    {
+        m_last_sample_time_point = math::min(m_last_sample_time_point, accelerometer_samples.front().time_point);
+    }
+    if (!compass_samples.empty())
+    {
+        m_last_sample_time_point = math::min(m_last_sample_time_point, compass_samples.front().time_point);
+    }
 
-        if (sample.gyroscope.sample_idx > m_last_gyroscope_sample_idx)
+    auto g_it = gyroscope_samples.begin();
+    auto a_it = accelerometer_samples.begin();
+    auto c_it = compass_samples.begin();
+
+    while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
+    {
+        bool has_new_gyroscope_sample = false;
+        bool has_new_accelerometer_sample = false;
+        bool has_new_compass_sample = false;
+        //update the current smaples
+        if (g_it != gyroscope_samples.end() && g_it->time_point <= m_last_sample_time_point)
         {
-            m_last_gyroscope_sample_idx = sample.gyroscope.sample_idx;
+            m_last_gyroscope_sample = *g_it++;
+            has_new_gyroscope_sample = true;
+        }
+        if (a_it != accelerometer_samples.end() && a_it->time_point <= m_last_sample_time_point)
+        {
+            m_last_accelerometer_sample = *a_it++;
+            has_new_accelerometer_sample = true;
+        }
+        if (c_it != compass_samples.end() && c_it->time_point <= m_last_sample_time_point)
+        {
+            m_last_compass_sample = *c_it++;
+            has_new_compass_sample = true;
+        }
+        QASSERT(has_new_gyroscope_sample || has_new_accelerometer_sample || has_new_compass_sample);
 
-            auto sample_dt = sample.gyroscope.value.dt;
-            auto const& input = sample.gyroscope.value.angular_velocity;
+        //increment the time
+        m_last_sample_time_point += math::min(math::min(m_last_gyroscope_sample.dt, m_last_accelerometer_sample.dt), m_last_compass_sample.dt);
+
+        m_ahrs.process(m_last_gyroscope_sample, m_last_accelerometer_sample, m_last_compass_sample);
+
+        if (has_new_gyroscope_sample)
+        {
+            auto sample_dt = m_last_gyroscope_sample.dt;
+            auto const& input = m_last_gyroscope_sample.value;
 
             m_pids.pitch_rate.set_input(input.x);
             m_pids.pitch_rate.process(sample_dt);
@@ -422,16 +465,14 @@ void UAV::process_sensor_data(q::Clock::duration dt)
             m_pids.yaw_rate.process(sample_dt);
         }
 
-        if (sample.accelerometer.sample_idx > m_last_accelerometer_sample_idx)
+        if (has_new_accelerometer_sample)
         {
-            m_last_accelerometer_sample_idx = sample.accelerometer.sample_idx;
-
-            float sample_dts = q::Seconds(sample.accelerometer.value.dt).count();
+            float sample_dts = q::Seconds(m_last_accelerometer_sample.dt).count();
 
             //auto old_acceleration = m_linear_motion.acceleration;
-            math::vec3f acceleration = sample.accelerometer.value.acceleration;
-            //math::vec3f gravity = math::transform(m_ahrs.get_world_to_local_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
-            auto new_acceleration = math::transform(m_ahrs.get_local_to_world_mat(), acceleration) - math::vec3f(0, 0, physics::constants::g);
+            math::vec3f acceleration = m_last_accelerometer_sample.value;
+            //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
+            auto new_acceleration = math::transform(m_ahrs.get_b2e_mat(), acceleration) - math::vec3f(0, 0, physics::constants::g);
             //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
 
 //            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
@@ -487,7 +528,7 @@ void UAV::process_motors(q::Clock::duration dt)
 
         //SILK_INFO("{.2}", throttles);
 
-        m_io_board.set_motor_throttles(throttles.data(), m_motor_mixer.get_motor_count());
+        m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
     }
 }
 
