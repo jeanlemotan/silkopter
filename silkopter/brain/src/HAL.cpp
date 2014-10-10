@@ -7,22 +7,31 @@
 #include "HAL_Sensors_Pi.h"
 #include "HAL_Sensors_Sim.h"
 
-using namespace silk;
-
 #ifdef RASPBERRY_PI
-struct HAL::Impl
+#include "PiGPIO.h"
+struct silk::HAL::Impl
 {
-    PiGPIO pigpio;
+    Impl(boost::asio::io_service& io_service)  {}
+
+    silk::PiGPIO pigpio;
 };
 #else
-struct HAL::Impl
+#include "Sim_Comms.h"
+struct silk::HAL::Impl
 {
-    Sim_Comms sim_comms;
+    Impl(boost::asio::io_service& io_service)
+        : sim_comms(io_service) {}
+
+    silk::Sim_Comms sim_comms;
 };
 #endif
-auto HAL::init() -> Result
+
+
+using namespace silk;
+
+auto HAL::init(boost::asio::io_service& io_service) -> Result
 {
-    m_impl.reset(new Impl);
+    m_impl.reset(new Impl(io_service));
 
 #ifdef RASPBERRY_PI
     auto m = new HAL_Motors_PiGPIO(m_impl->pigpio);
@@ -46,12 +55,12 @@ auto HAL::init() -> Result
         return Result::FAILED;
     }
 #else
-    auto m = new HAL_Motors_Sim;
+    auto m = new HAL_Motors_Sim(m_impl->sim_comms);
     motors.reset(m);
-    if (m->init() != HAL_Motors_Sim::Result::OK)
-    {
-        return Result::FAILED;
-    }
+//    if (m->init() != HAL_Motors_Sim::Result::OK)
+//    {
+//        return Result::FAILED;
+//    }
 
 //    auto c = new HAL_Raspicam;
 //    camera.reset(c);
@@ -60,12 +69,12 @@ auto HAL::init() -> Result
 //        return Result::FAILED;
 //    }
 
-    auto s = new HAL_Sensors_Sim;
+    auto s = new HAL_Sensors_Sim(m_impl->sim_comms);
     sensors.reset(s);
-    if (s->init() != HAL_Sensors_Sim::Result::OK)
-    {
-        return Result::FAILED;
-    }
+//    if (s->init() != HAL_Sensors_Sim::Result::OK)
+//    {
+//        return Result::FAILED;
+//    }
 #endif
 
     return Result::OK;

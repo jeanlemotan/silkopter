@@ -20,7 +20,7 @@ struct HAL : q::util::Noncopyable
         FAILED
     };
 
-    auto init() -> Result;
+    auto init(boost::asio::io_service& io_service) -> Result;
     void process();
 
 private:

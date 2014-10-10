@@ -3,6 +3,9 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
+#ifdef RASPBERRY_PI
+
+
 #define USE_AK8963
 
 using namespace silk;
@@ -615,3 +618,5 @@ q::Clock::duration MPU9250::get_sample_time() const
 {
     return m_sample_time;
 }
+
+#endif

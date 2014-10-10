@@ -40,17 +40,20 @@ public:
 private:
     Sim_Comms& m_sim_comms;
 
-    void process_message_sensor_data();
+    void handle_message(Sim_Comms::Message message, Sim_Comms::Channel& channel);
+
+    void process_message_sensor_data(Sim_Comms::Channel& channel);
     void process_message_gps_data();
 
-    auto process_accelerometer_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_gyroscope_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_compass_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_barometer_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_thermometer_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_sonar_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_voltage_sensor() -> Sim_Comms::Channel::Unpack_Result;
-    auto process_current_sensor() -> Sim_Comms::Channel::Unpack_Result;
+    auto process_accelerometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_gyroscope_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_compass_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_barometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_thermometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_sonar_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_voltage_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_current_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    auto process_gps_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
 
     Accelerometer_Sample m_accelerometer_sample;
     std::vector<Accelerometer_Sample> m_accelerometer_samples;
@@ -86,6 +89,8 @@ private:
         math::vec3f gyroscope_bias;
         math::vec3f compass_bias;
     } m_calibration_config;
+
+    size_t m_error_count = 0;
 
     struct Settings
     {

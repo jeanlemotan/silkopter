@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Sim_Comms.h"
 
+#ifndef RASPBERRY_PI
+
 using namespace silk;
 using namespace boost::asio;
 
@@ -109,6 +111,12 @@ void Sim_Comms::process_state_handshake()
     }
 }
 
+size_t Sim_Comms::get_error_count() const
+{
+    return m_error_count;
+}
+
+
 void Sim_Comms::process()
 {
     if (!m_socket.is_open())
@@ -151,3 +159,5 @@ void Sim_Comms::set_state(State state)
     m_channel.cancel_send();
 }
 
+
+#endif

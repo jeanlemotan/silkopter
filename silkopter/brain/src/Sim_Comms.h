@@ -25,6 +25,8 @@ public:
 
     bool is_connected() const;
 
+    size_t get_error_count() const;
+
     //----------------------------------------------------------------------
 
     void process();
@@ -35,14 +37,13 @@ protected:
         STAY_ALIVE,
         CONFIG,
         SENSOR_DATA,
-        GPS_DATA,
         //---
         MOTOR_OUTPUTS,
         //---
         PWM_CONFIG,
     };
 
-    enum class Sensor : uint8_t
+    enum class Sensor : uint16_t
     {
         ACCELEROMETER   = 1 << 0,   //uint8 - dt ms, vec3s16 - acceleration
         GYROSCOPE       = 1 << 1,   //uint8 - dt ms,  vec3s16 - angular velocity
@@ -52,6 +53,7 @@ protected:
         SONAR           = 1 << 5,   //uint16 - distance
         VOLTAGE         = 1 << 6,   //uint16 - voltage
         CURRENT         = 1 << 7,   //uint16 - amperes / second
+        GPS             = 1 << 8
     };
     typedef q::util::Flag_Set<Sensor, uint8_t> Sensors;
 

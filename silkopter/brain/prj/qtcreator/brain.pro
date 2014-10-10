@@ -82,7 +82,8 @@ SOURCES += \
     ../../src/HAL.cpp \
     ../../src/HAL_Motors_PiGPIO.cpp \
     ../../src/PiGPIO.cpp \
-    ../../src/Sim_Comms.cpp
+    ../../src/Sim_Comms.cpp \
+    ../../src/HAL_Motors_Sim.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \

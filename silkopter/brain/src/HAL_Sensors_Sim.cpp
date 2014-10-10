@@ -7,15 +7,15 @@
 using namespace silk;
 using namespace boost::asio;
 
-IO_Board_Sim::IO_Board_Sim(io_service& io_service)
-    : m_io_service(io_service)
-    , m_socket(io_service)
-    , m_channel(m_socket)
+HAL_Sensors_Sim::HAL_Sensors_Sim(Sim_Comms& sim_comms)
+    : m_sim_comms(sim_comms)
 {
+    sim_comms.message_received_signal.connect(std::bind(&HAL_Sensors_Sim::handle_message, this, std::placeholders::_1, std::placeholders::_2));
+
     load_settings();
 }
 
-auto IO_Board_Sim::load_settings() -> bool
+auto HAL_Sensors_Sim::load_settings() -> bool
 {
     q::data::File_Source fs(q::Path("io_board.cfg"));
     if (!fs.is_open())
@@ -187,7 +187,7 @@ auto IO_Board_Sim::load_settings() -> bool
 
     return true;
 }
-void IO_Board_Sim::save_settings()
+void HAL_Sensors_Sim::save_settings()
 {
     if (!m_settings.document.IsObject())
     {
@@ -267,580 +267,335 @@ void IO_Board_Sim::save_settings()
     fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
-auto IO_Board_Sim::connect() -> Connection_Result
+void HAL_Sensors_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    if (!is_disconnected())
-    {
-        return Connection_Result::OK;
-    }
-
-//#ifdef RASPBERRY_PI
-//    try
-//    {
-//        std::string com_port = "/dev/ttyAMA0";
-//        size_t baud = 500000;
-
-//        m_port.open(com_port);
-//        m_port.set_option(serial_port_base::baud_rate(baud));
-//        m_port.set_option(serial_port_base::parity(serial_port_base::parity::none));
-//        m_port.set_option(serial_port_base::character_size(8));
-//        m_port.set_option(serial_port_base::flow_control(serial_port_base::flow_control::none));
-//        m_port.set_option(serial_port_base::stop_bits(serial_port_base::stop_bits::one));
-
-//        m_port_adapter.start();
-//    }
-//    catch (...)
-//    {
-//        return Connection_Result::FAILED;
-//    }
-//#else
-    uint16_t port = 52523;
-    try
-    {
-        m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::endpoint(ip::tcp::v4(), port));
-        m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
-        m_acceptor->async_accept(m_socket,
-                boost::bind(&IO_Board_Sim::handle_accept, this, boost::asio::placeholders::error));
-    }
-    catch(...)
-    {
-        SILK_WARNING("Cannot start listening on port {}", port);
-        return Connection_Result::FAILED;
-    }
-
-    SILK_INFO("Started listening on port {}", port);
-    while (!m_socket.is_open())
-    {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-        SILK_INFO("Waiting for sim to connect");
-    }
-//#endif
-
-    set_state(State::HANDSHAKE);
-    return Connection_Result::OK;
+    m_calibration_config.accelerometer_bias = bias;
+    m_calibration_config.accelerometer_scale = scale;
 }
-
-//#ifndef RASPBERRY_PI
-void IO_Board_Sim::handle_accept(boost::system::error_code const& error)
-{
-    if (error)
-    {
-        SILK_WARNING("Error occured while accepting connection: {}", error.message());
-        return;
-    }
-
-    m_channel.start();
-    SILK_INFO("Connected to {}:{}", m_socket.remote_endpoint().address().to_string(), m_socket.remote_endpoint().port());
-}
-//#endif
-
-void IO_Board_Sim::disconnect()
-{
-//#ifdef RASPBERRY_PI
-//    try
-//    {
-//        m_port.close();
-//    }
-//    catch (...)
-//    {
-//    }
-//#else
-    m_acceptor.reset();
-//#endif
-
-    set_state(State::DISCONNECTED);
-}
-bool IO_Board_Sim::is_disconnected() const
-{
-    return m_state == State::DISCONNECTED;
-}
-bool IO_Board_Sim::is_running() const
-{
-    return m_state == State::RUNNING;
-}
-
-void IO_Board_Sim::set_motor_throttles(float const* throttles, size_t count)
-{
-    QASSERT(throttles != nullptr);
-    QASSERT(count <= MAX_MOTOR_COUNT);
-    if (!throttles)
-    {
-        return;
-    }
-
-    count = math::min(count, MAX_MOTOR_COUNT);
-    if (count > m_motor_outputs.size())
-    {
-        m_motor_outputs.resize(count);
-    }
-
-    for (size_t i = 0; i < count; i++)
-    {
-        m_motor_outputs[i] = throttles[i];
-    }
-}
-
-void IO_Board_Sim::set_camera_rotation(math::quatf const& rot)
-{
-
-}
-
-void IO_Board_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
-{
-    if (m_state >= State::RUNNING)
-    {
-        m_calibration_config.accelerometer_bias = bias;
-        m_calibration_config.accelerometer_scale = scale;
-    }
-}
-void IO_Board_Sim::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
+void HAL_Sensors_Sim::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
     bias = m_calibration_config.accelerometer_bias;
     scale = m_calibration_config.accelerometer_scale;
 }
 
-void IO_Board_Sim::set_gyroscope_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_Sim::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    if (m_state >= State::RUNNING)
-    {
-        m_calibration_config.gyroscope_bias = bias;
-    }
+    m_calibration_config.gyroscope_bias = bias;
 }
-void IO_Board_Sim::get_gyroscope_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_Sim::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
     bias = m_calibration_config.gyroscope_bias;
 }
 
-void IO_Board_Sim::set_compass_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_Sim::set_compass_calibration_data(math::vec3f const& bias)
 {
-    if (m_state >= State::RUNNING)
-    {
-        m_calibration_config.compass_bias = bias;
-    }
+    m_calibration_config.compass_bias = bias;
 }
-void IO_Board_Sim::get_compass_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_Sim::get_compass_calibration_data(math::vec3f &bias) const
 {
     bias = m_calibration_config.compass_bias;
 }
 
-auto IO_Board_Sim::get_sensor_samples() const -> std::vector<Sensor_Sample> const&
+auto HAL_Sensors_Sim::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
 {
-    return m_sensor_samples;
+    return m_accelerometer_samples;
+}
+auto HAL_Sensors_Sim::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
+{
+    return m_gyroscope_samples;
+}
+auto HAL_Sensors_Sim::get_compass_samples() const -> std::vector<Compass_Sample> const&
+{
+    return m_compass_samples;
+}
+auto HAL_Sensors_Sim::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
+{
+    return m_barometer_samples;
+}
+auto HAL_Sensors_Sim::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
+{
+    return m_sonar_samples;
+}
+auto HAL_Sensors_Sim::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
+{
+    return m_thermometer_samples;
+}
+auto HAL_Sensors_Sim::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
+{
+    return m_voltage_samples;
+}
+auto HAL_Sensors_Sim::get_current_samples() const -> std::vector<Current_Sample> const&
+{
+    return m_current_samples;
+}
+auto HAL_Sensors_Sim::get_gps_samples() const -> std::vector<GPS_Sample> const&
+{
+    return m_gps_samples;
 }
 
-size_t IO_Board_Sim::get_error_count() const
+size_t HAL_Sensors_Sim::get_error_count() const
 {
-    return m_error_count;
+    return m_error_count + m_sim_comms.get_error_count();
 }
 
-auto IO_Board_Sim::process_accelerometer_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
     uint8_t dt = 0;
-    math::vec3s16 v;
-    auto result = m_channel.unpack_param(dt);
-    result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    math::vec3f v;
+    auto result = channel.unpack_param(dt);
+    result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive accelerometer data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (math::vec3f(v) - m_received_config.accelerometer.bias) * m_received_config.accelerometer.scale;
-
-    Accelerometer_Data& data = m_sensors.accelerometer;
-    data.value.acceleration = (v2 - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
-    data.value.dt = std::chrono::milliseconds(dt);
-    data.sample_idx++;
+    auto& sample = m_accelerometer_sample;
+    sample.value = (v - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
+    sample.dt = std::chrono::milliseconds(dt);
+    sample.time_point += std::chrono::milliseconds(dt);
+    sample.sample_idx++;
+    m_accelerometer_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_gyroscope_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
     uint8_t dt = 0;
-    math::vec3s16 v;
-    auto result = m_channel.unpack_param(dt);
-    result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    math::vec3f v;
+    auto result = channel.unpack_param(dt);
+    result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive gyroscope data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (math::vec3f(v) - m_received_config.gyroscope.bias) * m_received_config.gyroscope.scale;
-
-    Gyroscope_Data& data = m_sensors.gyroscope;
-    data.value.angular_velocity = v2 - m_calibration_config.gyroscope_bias;
-    data.value.dt = std::chrono::milliseconds(dt);
-    data.sample_idx++;
+    auto& sample = m_gyroscope_sample;
+    sample.value = v - m_calibration_config.gyroscope_bias;
+    sample.dt = std::chrono::milliseconds(dt);
+    sample.time_point += std::chrono::milliseconds(dt);
+    sample.sample_idx++;
+    m_gyroscope_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_compass_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
-    math::vec3s16 v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    math::vec3f v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive compass data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (math::vec3f(v) - m_received_config.compass.bias) * m_received_config.compass.scale;
-
-    Compass_Data& data = m_sensors.compass;
-    data.value = v2 - m_calibration_config.compass_bias;
-    data.sample_idx++;
+    auto now = q::Clock::now();
+    auto& sample = m_compass_sample;
+    sample.value = v - m_calibration_config.gyroscope_bias;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_compass_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_barometer_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_barometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
     float v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive barometer data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (float(v) - m_received_config.barometer.bias) * m_received_config.barometer.scale;
-
-    Barometer_Data& data = m_sensors.barometer;
-    data.value = v2;
-    data.sample_idx++;
+    auto now = q::Clock::now();
+    auto& sample = m_barometer_sample;
+    sample.value = v;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_barometer_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_thermometer_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_thermometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
-    int16_t v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    float v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive thermometer data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (float(v) - m_received_config.thermometer.bias) * m_received_config.thermometer.scale;
-
-    Thermometer_Data& data = m_sensors.thermometer;
-    data.value = v2;
-    data.sample_idx++;
+    auto now = q::Clock::now();
+    auto& sample = m_thermometer_sample;
+    sample.value = v;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_thermometer_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_sonar_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_sonar_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
-    uint16_t v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    float v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive sonar data");
         m_error_count++;
         return result;
     }
 
-    auto v2 = (float(v) - m_received_config.sonar.bias) * m_received_config.sonar.scale;
-
-    Sonar_Data& data = m_sensors.sonar;
-    data.value = v2;
-    data.sample_idx++;
+    auto now = q::Clock::now();
+    auto& sample = m_sonar_sample;
+    sample.value = v;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_sonar_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_voltage_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_voltage_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
-    uint16_t v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    float v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive voltage data");
         m_error_count++;
         return result;
     }
 
-    //auto v2 = (float(v) - m_received_config.voltage.bias) * m_received_config.voltage.scale;
-
-    Voltage_Data& data = m_sensors.voltage;
-    //data.value = v2;
+    auto now = q::Clock::now();
+    auto& sample = m_voltage_sample;
+    sample.value = v;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_voltage_samples.push_back(sample);
     return result;
 }
-auto IO_Board_Sim::process_current_sensor() -> Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_current_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
 {
-    uint16_t v;
-    auto result = m_channel.unpack_param(v);
-    if (result != Channel::Unpack_Result::OK)
+    float v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive current data");
         m_error_count++;
         return result;
     }
 
-    //auto v2 = (float(v) - m_received_config.current.bias) * m_received_config.current.scale;
+    auto now = q::Clock::now();
+    auto& sample = m_current_sample;
+    sample.value = v;
+    sample.dt = sample.time_point - now;
+    sample.time_point = now;
+    sample.sample_idx++;
+    m_current_samples.push_back(sample);
+    return result;
+}
+auto HAL_Sensors_Sim::process_gps_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+{
+    GPS v;
+    auto result = channel.unpack_param(v);
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    {
+        SILK_WARNING("Failed to receive gps data");
+        m_error_count++;
+        return result;
+    }
 
-    Current_Data& data = m_sensors.current;
-    //data.value = v2;
+//    auto now = q::Clock::now();
+//    auto& sample = m_gps_sample;
+//    sample.value = v;
+//    sample.dt = sample.time_point - now;
+//    sample.time_point = now;
+//    sample.sample_idx++;
+//    m_gps_samples.push_back(sample);
     return result;
 }
 
-void IO_Board_Sim::process_message_sensor_data()
+void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)
 {
-    auto result = m_channel.begin_unpack();
-    if (result == Channel::Unpack_Result::OK)
+    auto result = channel.begin_unpack();
+    if (result == Sim_Comms::Channel::Unpack_Result::OK)
     {
-        Sensors sensors;
-        result = m_channel.unpack_param(sensors);
-        if (result == Channel::Unpack_Result::OK)
+        Sim_Comms::Sensors sensors;
+        result = channel.unpack_param(sensors);
+        if (result == Sim_Comms::Channel::Unpack_Result::OK)
         {
-            if (sensors.test(Sensor::ACCELEROMETER))
+            if (sensors.test(Sim_Comms::Sensor::ACCELEROMETER))
             {
-                result = process_accelerometer_sensor();
+                result = process_accelerometer_sensor(channel);
             }
-            if (sensors.test(Sensor::GYROSCOPE))
+            if (sensors.test(Sim_Comms::Sensor::GYROSCOPE))
             {
-                result = process_gyroscope_sensor();
+                result = process_gyroscope_sensor(channel);
             }
-            if (sensors.test(Sensor::COMPASS))
+            if (sensors.test(Sim_Comms::Sensor::COMPASS))
             {
-                result = process_compass_sensor();
+                result = process_compass_sensor(channel);
             }
-            if (sensors.test(Sensor::BAROMETER))
+            if (sensors.test(Sim_Comms::Sensor::BAROMETER))
             {
-                result = process_barometer_sensor();
+                result = process_barometer_sensor(channel);
             }
-            if (sensors.test(Sensor::THERMOMETER))
+            if (sensors.test(Sim_Comms::Sensor::THERMOMETER))
             {
-                result = process_thermometer_sensor();
+                result = process_thermometer_sensor(channel);
             }
-            if (sensors.test(Sensor::SONAR))
+            if (sensors.test(Sim_Comms::Sensor::SONAR))
             {
-                result = process_sonar_sensor();
+                result = process_sonar_sensor(channel);
             }
-            if (sensors.test(Sensor::VOLTAGE))
+            if (sensors.test(Sim_Comms::Sensor::VOLTAGE))
             {
-                result = process_voltage_sensor();
+                result = process_voltage_sensor(channel);
             }
-            if (sensors.test(Sensor::CURRENT))
+            if (sensors.test(Sim_Comms::Sensor::CURRENT))
             {
-                result = process_current_sensor();
+                result = process_current_sensor(channel);
+            }
+            if (sensors.test(Sim_Comms::Sensor::GPS))
+            {
+                result = process_gps_sensor(channel);
             }
         }
     }
-    m_channel.end_unpack();
+    channel.end_unpack();
 
-    if (result == Channel::Unpack_Result::OK)
-    {
-        m_sensor_samples.push_back(m_sensors);
-    }
-    else
+    if (result != Sim_Comms::Channel::Unpack_Result::OK)
     {
         SILK_WARNING("Failed to receive sensor data");
         m_error_count++;
     }
 }
-void IO_Board_Sim::process_message_gps_data()
-{
-    GPS v;
-    if (m_channel.unpack(v) != Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive gps data");
-        m_error_count++;
-    }
-
-    QASSERT(0);
-    GPS_Data data;
-    data.value = v;
-    //m_gps_data.push_back(data);
-}
-
 //----------------------------------------------------------------------------------
 
-void IO_Board_Sim::process_state_disconnected()
+void HAL_Sensors_Sim::process()
 {
-
-}
-void IO_Board_Sim::process_state_handshake()
-{
-    if (m_has_message)
+    if (!m_sim_comms.is_connected())
     {
-        if (m_message == Message::CONFIG)
-        {
-            auto result = m_channel.unpack(m_received_config.version,
-                                           m_received_config.has_barometer,
-                                           m_received_config.has_sonar,
-                                           m_received_config.has_gps,
-                                           m_received_config.has_voltage_sensor,
-                                           m_received_config.has_current_sensor,
-                                           m_received_config.accelerometer,
-                                           m_received_config.gyroscope,
-                                           m_received_config.compass,
-                                           m_received_config.barometer,
-                                           m_received_config.sonar,
-                                           m_received_config.thermometer);
-            if (result == Channel::Unpack_Result::OK)
-            {
-                SILK_INFO("IO Board version {}:\b \t{} barometer, \t{} gps, \t{} sonar, \t{} voltage sensor, \t{} current sensor",
-                           m_received_config.version,
-                           m_received_config.has_barometer ? "has a" : "doesn't have",
-                           m_received_config.has_gps ? "has a" : "doesn't have",
-                           m_received_config.has_sonar ? "has a" : "doesn't have",
-                           m_received_config.has_voltage_sensor ? "has a" : "doesn't have",
-                           m_received_config.has_current_sensor ? "has a" : "doesn't have");
-
-                set_state(State::RUNNING);
-            }
-            else
-            {
-                SILK_WARNING("Failed to communicate with the IO Board");
-                m_error_count++;
-            }
-        }
-        else
-        {
-            SILK_WARNING("Received wrong message: {}", static_cast<int>(m_message));
-            m_error_count++;
-        }
+        m_sim_comms.connect();
+    }
+    else
+    {
+        m_sim_comms.process();
     }
 }
-void IO_Board_Sim::process_state_running()
+
+
+void HAL_Sensors_Sim::handle_message(Sim_Comms::Message message, Sim_Comms::Channel& channel)
 {
-    auto now = q::Clock::now();
-    if (now - m_resend_timestamp > std::chrono::milliseconds(2))
+    switch (message)
     {
-        m_resend_timestamp = now;
-
-        //m_channel.stream(Message::RATE_TARGETS, m_yaw_rate_target, m_pitch_rate_target, m_roll_rate_target);
-        m_channel.begin_stream();
-        m_channel.add_to_stream(static_cast<uint8_t>(m_motor_outputs.size()));
-        for (auto const& o: m_motor_outputs)
-        {
-            auto v = static_cast<uint16_t>(math::clamp(o, 0.f, 1.f) * 65535.f);
-            m_channel.add_to_stream(v);
-        }
-        m_channel.end_stream(Message::MOTOR_OUTPUTS);
-    }
-
-    send_configs_if_changed();
-}
-
-void IO_Board_Sim::send_configs_if_changed()
-{
-}
-
-void IO_Board_Sim::process()
-{
-//#ifndef RASPBERRY_PI
-    if (!m_socket.is_open())
-    {
-        disconnect();
-    }
-//#endif
-
-    if (is_disconnected())
-    {
-        connect();
-        return;
-    }
-
-    bool interrupted = false;
-
-    m_sensor_samples.clear();
-
-    auto start = q::Clock::now();
-    do
-    {
-        {
-            static q::Clock::time_point ms;
-            auto now = q::Clock::now();
-            if (now - ms >= std::chrono::seconds(1))
-            {
-                SILK_INFO("Messages per second: {} pending: {} err: {}", m_message_count, m_channel.get_pending_data_size(), m_channel.get_error_count());
-                m_message_count = 0;
-                ms = now;
-            }
-        }
-
-        if (q::Clock::now() - start > std::chrono::milliseconds(5))
-        {
-            interrupted = true;
-            break;
-        }
-
-        m_has_message = m_channel.get_next_message(m_message);
-        if (m_has_message)
-        {
-            m_message_count++;
-            m_last_message_timestamp = q::Clock::now();
-
-            //SILK_INFO("received message {}", static_cast<int>(m_message));
-            switch (m_message)
-            {
-            case Message::SENSOR_DATA: process_message_sensor_data(); break;
-            case Message::GPS_DATA: process_message_gps_data(); break;
-
-//            case Message::CALIBRATION_CONFIG: process_message_calibration_config(); break;
-//            case Message::PID_CONFIG: process_message_pid_config(); break;
-//            case Message::MOTOR_CONFIG: process_message_motor_config(); break;
-            }
-        }
-
-        switch (m_state)
-        {
-        case State::DISCONNECTED: process_state_disconnected(); break;
-        case State::HANDSHAKE: process_state_handshake(); break;
-        case State::RUNNING: process_state_running(); break;
-        default:
-            SILK_WARNING("Unknown state: {}", static_cast<int>(m_state));
-            m_error_count++;
-            break;
-        }
-
-    } while (m_has_message);
-
-    if (interrupted)
-    {
-        //SILK_WARNING("Interrupted while processing messages / {}.", m_sensor_samples.size());
-    }
-
-    update_watchdog();
-}
-
-void IO_Board_Sim::set_state(State state)
-{
-    SILK_INFO("Switching from state {} to state {}", static_cast<int>(m_state), static_cast<int>(state));
-    m_state = state;
-    m_resend_timestamp = q::Clock::time_point();
-    m_watchdog.timeout.is_active = false;
-    m_channel.cancel_send();
-}
-
-void IO_Board_Sim::start_timeout(q::Clock::duration d, State failed_state)
-{
-    m_watchdog.timeout.is_active = true;
-    m_watchdog.timeout.duration = d;
-    m_watchdog.timeout.timestamp = q::Clock::now();
-    m_watchdog.timeout.failed_state = failed_state;
-}
-
-void IO_Board_Sim::update_watchdog()
-{
-    auto now = q::Clock::now();
-    if (m_watchdog.timeout.is_active)
-    {
-        if (now - m_watchdog.timeout.timestamp > m_watchdog.timeout.duration)
-        {
-            SILK_WARNING("Timeout!!. Going to {}", static_cast<int>(m_watchdog.timeout.failed_state));
-            set_state(m_watchdog.timeout.failed_state);
-            m_watchdog.timeout.is_active = false;
-            return;
-        }
-    }
-
-    auto duration = now - m_last_message_timestamp;
-    if (m_state > State::HANDSHAKE && duration > std::chrono::milliseconds(1000))
-    {
-        SILK_WARNING("Failed to receive messages for {}. Going to WAITING_FOR_CONFIG", duration);
-        set_state(State::HANDSHAKE);
-        return;
+    case Sim_Comms::Message::SENSOR_DATA: process_message_sensor_data(channel); break;
     }
 }
 

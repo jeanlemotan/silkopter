@@ -112,7 +112,7 @@ int main(int argc, char const* argv[])
         silk::HAL hal;
 
         {
-            auto res = hal.init();
+            auto res = hal.init(io_service);
             if (res != silk::HAL::Result::OK)
             {
                 SILK_ERR("Hardware failure! Aborting");

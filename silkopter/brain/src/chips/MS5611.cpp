@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "MS5611.h"
 
+#ifdef RASPBERRY_PI
+
 using namespace silk;
 
 //registers
@@ -160,3 +162,5 @@ boost::optional<float> MS5611::read_temperature()
     m_temperature.reset();
     return r;
 }
+
+#endif

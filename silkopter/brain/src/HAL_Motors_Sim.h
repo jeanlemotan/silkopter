@@ -11,7 +11,6 @@ class HAL_Motors_Sim : public HAL_Motors
 {
 public:
     HAL_Motors_Sim(Sim_Comms& sim_comms);
-    ~HAL_Motors_Sim();
 
     //----------------------------------------------------------------------
     //motors
