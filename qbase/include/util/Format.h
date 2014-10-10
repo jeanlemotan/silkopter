@@ -1,5 +1,7 @@
 #pragma once
 
+#include "boost/optional.hpp"
+
 namespace q
 {
 namespace util
@@ -607,6 +609,19 @@ namespace formatting
 	void format_string(Dst_String& dst, Placeholder const& ph, std::chrono::time_point<clock> const& time_point)
 	{
 		format_string(dst, ph, time_point.time_since_epoch());
+	}
+
+	template<class Dst_String, class Placeholder, class T>
+	void format_string(Dst_String& dst, Placeholder const& ph, boost::optional<T> const& opt)
+	{
+		if (opt)
+		{
+			format_string(dst, ph, *opt);
+		}
+		else
+		{
+			format_string(dst, ph, "<none>");
+		}
 	}
 
 #endif
