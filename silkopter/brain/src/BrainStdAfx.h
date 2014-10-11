@@ -5,6 +5,7 @@
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/optional.hpp>
+#include <boost/circular_buffer.hpp>
 
 #include "QBase.h"
 #include "QData.h"

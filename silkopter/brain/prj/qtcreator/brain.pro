@@ -117,5 +117,7 @@ HEADERS += \
     ../../src/HAL.h \
     ../../src/HAL_Camera_Mount_PiGPIO.h \
     ../../src/PiGPIO.h \
-    ../../src/Sim_Comms.h
+    ../../src/Sim_Comms.h \
+    ../../../libs/common/Comm_Data.h \
+    ../../../libs/common/Remote_Clock.h
 

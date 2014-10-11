@@ -9,6 +9,7 @@ Comms::Comms(boost::asio::io_service& io_service)
     , m_socket(io_service)
     , m_channel(m_socket)
 {
+    m_ping.last_time_point = q::Clock::now();
 }
 
 auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> Result
@@ -406,7 +407,7 @@ void Comms::process_message_ping()
 {
     uint64_t remote_now = 0;
     uint32_t seq = 0;
-    if (!m_channel.unpack(remote_now) || !m_channel.unpack(seq))
+    if (!m_channel.unpack(remote_now, seq))
     {
         SILK_WARNING("Failed to unpack ping");
         return;
@@ -426,7 +427,7 @@ void Comms::process_message_pong()
 {
     uint64_t remote_now = 0;
     uint32_t seq = 0;
-    if (!m_channel.unpack(remote_now) || !m_channel.unpack(seq))
+    if (!m_channel.unpack(remote_now, seq))
     {
         SILK_WARNING("Failed to unpack pong");
         return;

@@ -3,6 +3,7 @@
 #include "common/input/UAV_Input.h"
 #include "common/input/Camera_Input.h"
 #include "common/sensors/Sensor_Samples.h"
+#include "common/Comm_Data.h"
 #include "HAL.h"
 #include "UAV.h"
 
@@ -20,6 +21,7 @@ public:
     auto is_listening() const -> bool;
     auto is_connected() const -> bool;
     auto get_remote_address() const -> boost::asio::ip::address;
+    auto get_remote_clock() const -> Remote_Clock const&;
 
     void process();
 
@@ -31,105 +33,71 @@ private:
 
     void handle_accept(boost::system::error_code const& error);
 
-    enum class Message : uint16_t
-    {
-        //------------------------
-        CAMERA_INPUT,
-        UAV_INPUT,
+    void process_message_ping();
+    void process_message_pong();
 
-        //------------------------
-        //sensors
-        SENSORS,
+    void process_message_camera_input();
+    void process_message_uav_input();
 
-        //------------------------
-        //calibration
+    void process_message_raw_sensors();
 
-        CALIBRATION_ACCELEROMETER,
-        CALIBRATION_GYROSCOPE,
-        CALIBRATION_COMPASS,
+    void process_message_assist_params();
 
-        //------------------------
-        //pids
+    void process_message_yaw_rate_pid_params();
+    void process_message_pitch_rate_pid_params();
+    void process_message_roll_rate_pid_params();
+    void process_message_altitude_rate_pid_params();
+    void process_message_yaw_pid_params();
+    void process_message_pitch_pid_params();
+    void process_message_roll_pid_params();
+    void process_message_altitude_pid_params();
 
-        YAW_RATE_PID_PARAMS,
-        PITCH_RATE_PID_PARAMS,
-        ROLL_RATE_PID_PARAMS,
-        ALTITUDE_RATE_PID_PARAMS,
-
-        YAW_PID_PARAMS,
-        PITCH_PID_PARAMS,
-        ROLL_PID_PARAMS,
-        ALTITUDE_PID_PARAMS,
-
-        //------------------------
-        //uav misc params
-        ASSIST_PARAMS,
-
-        //------------------------
-        //UAV
-        UAV_PING,
-        UAV_ROTATION, //local to world
-        UAV_LINEAR_ACCELERATION,
-        UAV_VELOCITY,
-        UAV_POSITION
-    };
-
-    enum class Sensor : uint16_t
-    {
-        ACCELEROMETER   = 1 << 0,
-        GYROSCOPE       = 1 << 1,
-        COMPASS         = 1 << 2,
-        BAROMETER       = 1 << 3,
-        THERMOMETER     = 1 << 4,
-        SONAR           = 1 << 5,
-        GPS             = 1 << 6,
-        VOLTAGE         = 1 << 7,
-        CURRENT         = 1 << 8,
-    };
-    typedef q::util::Flag_Set<Sensor, uint16_t> Sensors;
-
-    void message_camera_input();
-    void message_uav_input();
-
-    void message_assist_params();
-
-    void message_yaw_rate_pid_params();
-    void message_pitch_rate_pid_params();
-    void message_roll_rate_pid_params();
-    void message_altitude_rate_pid_params();
-    void message_yaw_pid_params();
-    void message_pitch_pid_params();
-    void message_roll_pid_params();
-    void message_altitude_pid_params();
-
-    void message_calibration_accelerometer();
-    void message_calibration_gyroscope();
-    void message_calibration_compass();
+    void process_message_calibration_accelerometer();
+    void process_message_calibration_gyroscope();
+    void process_message_calibration_compass();
 
     void send_sensor_data();
+    void send_raw_sensor_data(detail::Comm_Message_Sensors sensors);
+    void store_raw_sensor_data();
+
     struct Sensor_Samples
     {
-        std::vector<Gyroscope_Sample> gyroscope;
-        std::vector<Accelerometer_Sample> accelerometer;
-        std::vector<Compass_Sample> compass;
-        std::vector<Barometer_Sample> barometer;
-        std::vector<Thermometer_Sample> thermometer;
-        std::vector<Sonar_Sample> sonar;
-        std::vector<Voltage_Sample> voltage;
-        std::vector<Current_Sample> current;
-        std::vector<GPS_Sample> gps;
+        Gyroscope_Sample gyroscope;
+        Accelerometer_Sample accelerometer;
+        Compass_Sample compass;
+        Barometer_Sample barometer;
+        Thermometer_Sample thermometer;
+        Sonar_Sample sonar;
+        Voltage_Sample voltage;
+        Current_Sample current;
+        GPS_Sample gps;
         q::Clock::time_point last_sent_timestamp;
-    } m_sensors_samples;
+    } m_sensor_samples;
+    struct Raw_Sensor_Samples
+    {
+        static const size_t MAX_SIZE = 2048;
+        boost::circular_buffer<Gyroscope_Sample> gyroscope;
+        boost::circular_buffer<Accelerometer_Sample> accelerometer;
+        boost::circular_buffer<Compass_Sample> compass;
+        boost::circular_buffer<Barometer_Sample> barometer;
+        boost::circular_buffer<Thermometer_Sample> thermometer;
+        boost::circular_buffer<Sonar_Sample> sonar;
+        boost::circular_buffer<Voltage_Sample> voltage;
+        boost::circular_buffer<Current_Sample> current;
+        boost::circular_buffer<GPS_Sample> gps;
+    } m_raw_sensor_samples;
 
     HAL& m_hal;
     UAV& m_uav;
     q::Clock::time_point m_uav_sent_timestamp;
     void send_uav_data();
 
+    Remote_Clock m_remote_clock;
+
     std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
-    typedef util::Channel<Message,
+    typedef util::Channel<detail::Comm_Message,
                         uint32_t,
                         boost::asio::ip::tcp::socket> Channel;
 
@@ -140,8 +108,14 @@ private:
 
     size_t m_error_count = 0;
 
-    q::Clock::time_point m_ping_time;
-    uint32_t m_alive_time_ms = 0;
+    struct Ping
+    {
+        uint32_t seq = 0;
+        std::map<uint32_t, q::Clock::time_point> seq_sent;
+        std::deque<q::Clock::duration> rtts;
+        q::Clock::time_point last_time_point;
+    } m_ping;
+
 };
 
 
