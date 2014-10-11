@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 
-SUBDIRS += qmath qdata qbase q gs
+SUBDIRS += qmath qdata qbase qinput q gs
 
 qbase.file = ../../../../qbase/prj/qtcreator/qbase.pro
 qdata.file = ../../../../qdata/prj/qtcreator/qdata.pro

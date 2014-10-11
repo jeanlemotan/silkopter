@@ -565,8 +565,11 @@ void MPU9250::process_compass()
     auto now = q::Clock::now();
     if (now - m_last_compass_timestamp < std::chrono::milliseconds(10))
     {
+        m_compass_sample_time = std::chrono::seconds(0);
         return;
     }
+
+    m_compass_sample_time = std::chrono::seconds(0);
 
     uint8_t tmp[8];
     m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp, 8);
@@ -584,6 +587,7 @@ void MPU9250::process_compass()
         return;
     }
 
+    m_compass_sample_time = now - m_last_compass_timestamp;
     m_last_compass_timestamp = now;
 
     short data[3];
@@ -614,9 +618,17 @@ auto MPU9250::get_accelerometer_samples() const -> std::vector<math::vec3f> cons
     return m_samples.accelerometer;
 }
 
-q::Clock::duration MPU9250::get_sample_time() const
+q::Clock::duration MPU9250::get_gyroscope_sample_time() const
 {
     return m_sample_time;
+}
+q::Clock::duration MPU9250::get_accelerometer_sample_time() const
+{
+    return m_sample_time;
+}
+q::Clock::duration MPU9250::get_compass_sample_time() const
+{
+    return m_compass_sample_time;
 }
 
 #endif

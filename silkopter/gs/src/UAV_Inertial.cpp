@@ -64,31 +64,36 @@ void UAV_Inertial::process()
 	{
         m_ui.attitude->render(*m_comms);
 
-        auto alive = m_comms->get_uav_alive_duration();
-        if (alive != m_last_uav_alive_duration)
+        auto remote_now = m_comms->get_remote_clock().now();
+        if (m_graph_remote_epoch.time_since_epoch().count() == 0)
+        {
+            m_graph_remote_epoch = remote_now;
+        }
+
+        if (remote_now != m_last_remote_time_stamp)
 		{
-            m_last_uav_alive_duration = alive;
+            m_last_remote_time_stamp = remote_now;
 
 			static const float graph_length_seconds = 3.f;
 
-            double seconds = q::Seconds(alive).count();
+            double seconds = q::Seconds(remote_now - m_graph_remote_epoch).count();
 
             {
-                auto data = m_comms->get_uav_linear_acceleration_data().value;
+                auto data = m_comms->get_uav_linear_acceleration_sample().value;
                 m_ui.acceleration_plot->graph(0)->addData(seconds, data.x);
                 m_ui.acceleration_plot->graph(1)->addData(seconds, data.y);
                 m_ui.acceleration_plot->graph(2)->addData(seconds, data.z);
             }
 
             {
-                auto data = m_comms->get_uav_velocity_data().value;
+                auto data = m_comms->get_uav_velocity_sample().value;
                 m_ui.velocity_plot->graph(0)->addData(seconds, data.x);
                 m_ui.velocity_plot->graph(1)->addData(seconds, data.y);
                 m_ui.velocity_plot->graph(2)->addData(seconds, data.z);
             }
 
             {
-                auto data = m_comms->get_uav_position_data().value;
+                auto data = m_comms->get_uav_position_sample().value;
                 m_ui.position_plot->graph(0)->addData(seconds, data.x);
                 m_ui.position_plot->graph(1)->addData(seconds, data.y);
                 m_ui.position_plot->graph(2)->addData(seconds, data.z);
@@ -121,6 +126,7 @@ void UAV_Inertial::process()
 	}
 	else
 	{
+        m_graph_remote_epoch = silk::Remote_Clock::time_point(std::chrono::seconds(0));
         m_ui.acceleration_plot->graph(0)->clearData();
         m_ui.acceleration_plot->graph(1)->clearData();
         m_ui.acceleration_plot->graph(2)->clearData();

@@ -1,19 +1,11 @@
 #pragma once
 
+#include "common/sensors/Sensor_Samples.h"
+
 namespace silk
 {
 
 //----------------------------------------------------------------------
-//data interface
-
-template<class T> struct Sensor_Sample
-{
-    Sensor_Sample() : value() {}
-    T value;
-    uint32_t sample_idx = 0; //incremented when for new samples
-    q::Clock::duration dt{0}; //the duration of this sample.
-    q::Clock::time_point time_point; //the moment in time when this sample was acquired. All samples from all sensors use the same epoch so their time_points can be compared directly
-};
 
 class HAL_Sensors : q::util::Noncopyable
 {
@@ -33,24 +25,6 @@ public:
 
     //----------------------------------------------------------------------
     //sensors
-
-    typedef Sensor_Sample<math::vec3f> Accelerometer_Sample; //meters / second^2
-    typedef Sensor_Sample<math::vec3f> Gyroscope_Sample; //radians per second
-    typedef Sensor_Sample<math::vec3f> Compass_Sample; //NOT normalized
-    typedef Sensor_Sample<float> Barometer_Sample; //kp
-    typedef Sensor_Sample<float> Sonar_Sample; //meters
-    typedef Sensor_Sample<float> Thermometer_Sample; //degrees celsius
-    typedef Sensor_Sample<float> Voltage_Sample; //volts
-    typedef Sensor_Sample<float> Current_Sample; //amperes / second
-
-    struct GPS
-    {
-        uint8_t fix_count = 0;
-        float precision = 0;
-        double latitude = 0;
-        double longitude = 0;
-    };
-    typedef Sensor_Sample<GPS> GPS_Sample;
 
     virtual auto get_accelerometer_samples() const  -> std::vector<Accelerometer_Sample> const& = 0;
     virtual auto get_gyroscope_samples() const      -> std::vector<Gyroscope_Sample> const& = 0;

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <deque>
 
 #include "boost/asio.hpp"
 #include "boost/noncopyable.hpp"

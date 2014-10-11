@@ -12,8 +12,12 @@ public:
 
     void process();
 
-    auto read_pressure() -> boost::optional<float>;
-    auto read_temperature() -> boost::optional<float>;
+    auto read_barometer() -> boost::optional<float>;
+    auto read_thermometer() -> boost::optional<float>;
+
+    auto get_barometer_sample_time() const -> q::Clock::duration;
+    auto get_thermometer_sample_time() const -> q::Clock::duration;
+
 
 private:
     i2c m_i2c;
@@ -36,6 +40,7 @@ private:
     uint8_t         m_stage = 0;
 
     q::Clock::time_point m_last_timestamp;
+    q::Clock::duration m_sample_time;
 };
 
 }

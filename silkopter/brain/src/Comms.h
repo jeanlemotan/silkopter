@@ -2,6 +2,7 @@
 
 #include "common/input/UAV_Input.h"
 #include "common/input/Camera_Input.h"
+#include "common/sensors/Sensor_Samples.h"
 #include "HAL.h"
 #include "UAV.h"
 
@@ -108,15 +109,15 @@ private:
     void send_sensor_data();
     struct Sensor_Samples
     {
-        std::vector<HAL_Sensors::Gyroscope_Sample> gyroscope;
-        std::vector<HAL_Sensors::Accelerometer_Sample> accelerometer;
-        std::vector<HAL_Sensors::Compass_Sample> compass;
-        std::vector<HAL_Sensors::Barometer_Sample> barometer;
-        std::vector<HAL_Sensors::Thermometer_Sample> thermometer;
-        std::vector<HAL_Sensors::Sonar_Sample> sonar;
-        std::vector<HAL_Sensors::Voltage_Sample> voltage;
-        std::vector<HAL_Sensors::Current_Sample> current;
-        std::vector<HAL_Sensors::GPS_Sample> gps;
+        std::vector<Gyroscope_Sample> gyroscope;
+        std::vector<Accelerometer_Sample> accelerometer;
+        std::vector<Compass_Sample> compass;
+        std::vector<Barometer_Sample> barometer;
+        std::vector<Thermometer_Sample> thermometer;
+        std::vector<Sonar_Sample> sonar;
+        std::vector<Voltage_Sample> voltage;
+        std::vector<Current_Sample> current;
+        std::vector<GPS_Sample> gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensors_samples;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/input/UAV_Input.h"
+#include "common/sensors/Sensor_Samples.h"
 #include "AHRS.h"
 #include "Motor_Mixer.h"
 #include "HAL.h"
@@ -100,9 +101,15 @@ private:
     void process_motors(q::Clock::duration dt);
     void process_input(q::Clock::duration dt);
 
-    HAL_Sensors::Gyroscope_Sample m_last_gyroscope_sample;
-    HAL_Sensors::Accelerometer_Sample m_last_accelerometer_sample;
-    HAL_Sensors::Compass_Sample m_last_compass_sample;
+    Gyroscope_Sample m_last_gyroscope_sample;
+    q::Clock::time_point m_gyroscope_sample_time_point;
+
+    Accelerometer_Sample m_last_accelerometer_sample;
+    q::Clock::time_point m_accelerometer_sample_time_point;
+
+    Compass_Sample m_last_compass_sample;
+    q::Clock::time_point m_compass_sample_time_point;
+
     q::Clock::time_point m_last_sample_time_point;
 
 

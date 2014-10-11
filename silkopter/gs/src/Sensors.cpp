@@ -225,92 +225,57 @@ void Sensors::process()
 
     static const std::chrono::seconds graph_length(2);
 
-    auto old_time = m_playback.time;
+    auto old_time = m_playback.time_point;
     if (m_playback.is_playing)
     {
-        m_playback.time += q::Seconds(dt).count();
+        m_playback.time_point += dt;
     }
     //QLOG_INFO("xxx", "{}", m_history_playback.time);
 
     if (isVisible() && (m_comms->is_connected() || m_playback.is_loaded))
 	{
         {
-            silk::Comms::Gyroscope_Data data;
+            std::vector<silk::Gyroscope_Sample> data;
 
             if (m_playback.is_loaded)
             {
                 for (size_t i = m_playback.last_gyroscope_idx; i < m_playback.gyroscope_samples.size(); i++)
                 {
                     auto const& s = m_playback.gyroscope_samples[i];
-                    if (s.first >= old_time && s.first < m_playback.time)
+                    if (s.time_point >= old_time && s.time_point < m_playback.time_point)
                     {
-                        data.value.angular_velocities.push_back(s.second);
+                        data.push_back(s);
                         m_playback.last_gyroscope_idx = i;
                     }
-                    else if (s.first >= m_playback.time)
+                    else if (s.time_point >= m_playback.time_point)
                     {
                         break;
                     }
                 }
-                if (!data.value.angular_velocities.empty())
-                {
-                    data.value.sample_time = std::chrono::milliseconds(1);
-                    data.sample_idx++;
-                    data.timestamp = now;
-                }
             }
             else
             {
-                data = m_comms->get_sensor_gyroscope_data();
+                data = m_comms->get_gyroscope_samples();
             }
 
-            if (0)
+            if (!data.empty())
             {
-                //freq, amplitude
-                static const std::chrono::milliseconds period(1);
-                static const std::vector<std::pair<float, float>> frequencies =
-                {{10, 1}, {110, 1}, {180, 1}, {250, 1}, {310, 1}, {370, 1}, {480, 1}};
+                float time_increment = q::Seconds(data.front().dt).count();
+                m_gyroscope_fft.sample_rate = static_cast<size_t>(1.f / time_increment);
 
+                for (auto const& av: data)
                 {
-                    data.value.sample_time = period;
+                    auto const& value = av.value;
+                    m_gyroscope_sample_time += time_increment;
 
-                    static q::Clock::time_point last_time = q::Clock::now();
-                    static float time = 0;
-                    auto now = q::Clock::now();
-                    auto d = std::chrono::duration_cast<std::chrono::microseconds>(now - last_time);
-                    size_t sample_count = d / period;
-                    if (sample_count > 0)
-                    {
-                        last_time = now;
+                    add_plot_sample(*m_ui.g_plot, m_gyroscope_sample_time, value);
+                    m_history.gyroscope_samples.emplace_back(m_gyroscope_sample_time, value);
 
-                        for (size_t i = 0; i < sample_count; i++)
-                        {
-                            float sample = 0;
-                            for (auto freq: frequencies)
-                            {
-                                sample += math::sin(time * math::anglef::_2pi * freq.first) * freq.second;
-                            }
-                            data.value.angular_velocities.push_back(math::vec3f(sample));
-                            time += q::Seconds(period).count();
-                        }
-                    }
+                    math::vec3f f(gfx.process(value.x), gfy.process(value.y), gfz.process(value.z));
+
+                    add_plot_filtered_sample(*m_ui.g_plot, m_gyroscope_sample_time, f);
+                    m_history.gyroscope_filtered_samples.emplace_back(m_gyroscope_sample_time, f);
                 }
-            }
-
-            m_gyroscope_fft.sample_rate = data.value.sample_time.count() == 0 ? 0 : static_cast<size_t>(1.f / q::Seconds(data.value.sample_time).count());
-
-            float time_increment = q::Seconds(data.value.sample_time).count();
-            for (auto const& av: data.value.angular_velocities)
-            {
-                m_gyroscope_sample_time += time_increment;
-
-                add_plot_sample(*m_ui.g_plot, m_gyroscope_sample_time, av);
-                m_history.gyroscope_samples.emplace_back(m_gyroscope_sample_time, av);
-
-                math::vec3f f(gfx.process(av.x), gfy.process(av.y), gfz.process(av.z));
-
-                add_plot_filtered_sample(*m_ui.g_plot, m_gyroscope_sample_time, f);
-                m_history.gyroscope_filtered_samples.emplace_back(m_gyroscope_sample_time, f);
             }
             if (m_gyroscope_sample_time > q::Seconds(graph_length).count())
             {

@@ -80,8 +80,11 @@ void MS5611::process()
     auto now = q::Clock::now();
     if (now - m_last_timestamp < std::chrono::milliseconds(5))
     {
+        m_sample_time = std::chrono::seconds(0);
         return;
     }
+
+    m_sample_time = now - m_last_timestamp;
     m_last_timestamp = now;
 
     if (m_stage == 0)
@@ -149,18 +152,28 @@ void MS5611::calculate()
     //SILK_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
-boost::optional<float> MS5611::read_pressure()
+boost::optional<float> MS5611::read_barometer()
 {
     auto r = m_pressure;
     m_pressure.reset();
     return r;
 }
 
-boost::optional<float> MS5611::read_temperature()
+boost::optional<float> MS5611::read_thermometer()
 {
     auto r = m_temperature;
     m_temperature.reset();
     return r;
 }
+
+auto MS5611::get_barometer_sample_time() const -> q::Clock::duration
+{
+    return m_sample_time;
+}
+auto MS5611::get_thermometer_sample_time() const -> q::Clock::duration
+{
+    return m_sample_time;
+}
+
 
 #endif

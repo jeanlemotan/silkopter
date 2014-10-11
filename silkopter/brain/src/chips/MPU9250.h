@@ -29,11 +29,13 @@ public:
     void process();
 
     auto read_compass() -> boost::optional<math::vec3f>;
+    auto get_compass_sample_time() const -> q::Clock::duration;
 
     auto get_gyroscope_samples() const -> std::vector<math::vec3f> const&;
     auto get_accelerometer_samples() const -> std::vector<math::vec3f> const&;
 
-    auto get_sample_time() const -> q::Clock::duration;
+    auto get_gyroscope_sample_time() const -> q::Clock::duration;
+    auto get_accelerometer_sample_time() const -> q::Clock::duration;
 
 private:
     void reset_fifo();
@@ -66,7 +68,9 @@ private:
 
     uint32_t m_sample_rate = 1000;
     q::Clock::duration m_sample_time;
+
     q::Clock::time_point m_last_compass_timestamp;
+    q::Clock::duration m_compass_sample_time;
 };
 
 }

@@ -28,31 +28,34 @@ namespace util
 		template<typename... Params>
         void send(Message_t message, Params&&... params) { _send(message, get_tx_buffer(), HEADER_SIZE, std::forward<Params>(params)...); }
 
-        void cancel_send() {}
-
         template<typename... Params>
         void stream(Message_t message, Params&&... params) { _send(message, get_tx_buffer(), HEADER_SIZE, std::forward<Params>(params)...); }
 
-        void begin_stream()
+        void begin_pack()
         {
             m_crt_tx_buffer = get_tx_buffer();
             m_crt_tx_buffer->resize(HEADER_SIZE);
         }
-        template<class Param> void add_to_stream_at(size_t off, Param const& p)
+        template<class Param> void pack_param_at(size_t off, Param const& p)
         {
             QASSERT(m_crt_tx_buffer);
             set_value_fixed(*m_crt_tx_buffer, p, HEADER_SIZE + off);
         }
-        template<class Param> void add_to_stream(Param const& p)
+        template<class Param> void pack_param(Param const& p)
         {
             QASSERT(m_crt_tx_buffer);
             auto off = m_crt_tx_buffer->size();
             set_value(*m_crt_tx_buffer, p, off);
         }
-        void end_stream(Message_t message)
+        void end_pack(Message_t message)
         {
             QASSERT(m_crt_tx_buffer);
             _send(message, m_crt_tx_buffer, m_crt_tx_buffer->size());
+        }
+
+        void flush()
+        {
+
         }
 
         //////////////////////////////////////////////////////////////////////////

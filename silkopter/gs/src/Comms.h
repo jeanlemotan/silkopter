@@ -2,19 +2,13 @@
 
 #include "common/input/Camera_Input.h"
 #include "common/input/UAV_Input.h"
+#include "common/sensors/Sensor_Samples.h"
+#include "common/Remote_Clock.h"
 #include "utils/PID.h"
 
 namespace silk
 {
 
-template<class T> struct Data
-{
-    typedef T data_t;
-    Data() : value() {}
-    T value;
-    uint32_t sample_idx = 0;
-    q::Clock::time_point timestamp;
-};
 
 class Comms : q::util::Noncopyable
 {
@@ -33,10 +27,11 @@ public:
     auto is_connected() const -> bool;
     auto get_remote_address() const -> boost::asio::ip::address;
 
+    auto get_remote_clock() const -> Remote_Clock const&;
+
     void process();
 
     auto get_error_count() const -> size_t;
-    auto get_uav_alive_duration() const -> q::Clock::duration;
 
     template<typename... Params>
     void send_camera_input(camera_input::Input input, Params&&... params)
@@ -51,59 +46,27 @@ public:
     }
 
 
-    struct Accelerometer
-    {
-        std::vector<math::vec3f> accelerations; //meters per second^2
-        q::Clock::duration sample_time;
-    };
+    auto get_accelerometer_samples() const  -> std::vector<Accelerometer_Sample> const&;
+    auto get_gyroscope_samples() const      -> std::vector<Gyroscope_Sample> const&;
+    auto get_compass_samples() const        -> std::vector<Compass_Sample> const&;
+    auto get_barometer_samples() const      -> std::vector<Barometer_Sample> const&;
+    auto get_sonar_samples() const          -> std::vector<Sonar_Sample> const&;
+    auto get_thermometer_samples() const    -> std::vector<Thermometer_Sample> const&;
+    auto get_voltage_samples() const        -> std::vector<Voltage_Sample> const&;
+    auto get_current_samples() const        -> std::vector<Current_Sample> const&;
+    auto get_gps_samples() const            -> std::vector<GPS_Sample> const&;
 
-    typedef Data<Accelerometer> Accelerometer_Data;
-    auto get_sensor_accelerometer_data() const -> Accelerometer_Data;
+    typedef Sensor_Sample<math::quatf> UAV_Rotation_Sample; //local to world
+    auto get_uav_rotation_sample() const -> UAV_Rotation_Sample;
 
+    typedef Sensor_Sample<math::vec3f> UAV_Linear_Acceleration_Sample; //meters / second^2
+    auto get_uav_linear_acceleration_sample() const -> UAV_Linear_Acceleration_Sample;
 
-    struct Gyroscope
-    {
-        std::vector<math::vec3f> angular_velocities; //radians per second
-        q::Clock::duration sample_time;
-    };
-    typedef Data<Gyroscope> Gyroscope_Data;
-    auto get_sensor_gyroscope_data() const -> Gyroscope_Data;
+    typedef Sensor_Sample<math::vec3f> UAV_Velocity_Sample; //meters / second
+    auto get_uav_velocity_sample() const -> UAV_Velocity_Sample;
 
-
-    typedef Data<math::vec3f> Compass_Data;
-    auto get_sensor_compass_data() const -> Compass_Data;
-
-
-    typedef Data<float> Barometer_Data; //kp
-    auto get_sensor_barometer_data() const -> Barometer_Data;
-
-    typedef Data<float> Sonar_Data; //meters
-    auto get_sensor_sonar_data() const -> Sonar_Data;
-
-    typedef Data<float> Thermometer_Data; //degrees celsius
-    auto get_sensor_thermometer_data() const -> Thermometer_Data;
-
-    struct GPS
-    {
-        uint8_t fix_count = 0;
-        float precision = 0;
-        double latitude = 0;
-        double longitude = 0;
-    };
-    typedef Data<GPS> GPS_Data;
-    auto get_sensor_gps_data() const -> GPS_Data;
-
-    typedef Data<math::quatf> UAV_Rotation_Data; //local to world
-    auto get_uav_rotation_data() const -> UAV_Rotation_Data;
-
-    typedef Data<math::vec3f> UAV_Linear_Acceleration_Data; //meters / second^2
-    auto get_uav_linear_acceleration_data() const -> UAV_Linear_Acceleration_Data;
-
-    typedef Data<math::vec3f> UAV_Velocity_Data; //meters / second
-    auto get_uav_velocity_data() const -> UAV_Velocity_Data;
-
-    typedef Data<math::vec3f> UAV_Position_Data; //meters
-    auto get_uav_position_data() const -> UAV_Position_Data;
+    typedef Sensor_Sample<math::vec3f> UAV_Position_Sample; //meters
+    auto get_uav_position_sample() const -> UAV_Position_Sample;
 
     //----------------------------------------------------------------------
     //calibration
@@ -173,6 +136,9 @@ private:
 
     enum class Message : uint16_t
     {
+        PING,
+        PONG,
+
         //------------------------
         CAMERA_INPUT,
         UAV_INPUT,
@@ -207,7 +173,6 @@ private:
 
         //------------------------
         //UAV
-        UAV_PING,
         UAV_ROTATION, //local to world
         UAV_LINEAR_ACCELERATION,
         UAV_VELOCITY,
@@ -223,6 +188,8 @@ private:
 
     mutable Channel m_channel;
     q::Clock::time_point m_timeout_started;
+
+    Remote_Clock m_remote_clock;
 
     size_t m_error_count = 0;
 
@@ -240,6 +207,15 @@ private:
     };
     typedef q::util::Flag_Set<Sensor, uint16_t> Sensors;
 
+
+    void process_message_ping();
+    void process_message_pong();
+
+    template<class SAMPLE_T>
+    auto unpack_sensor_sample(SAMPLE_T& sample) -> bool;
+    template<class SAMPLE_T>
+    auto unpack_sensor_samples(std::vector<SAMPLE_T>& samples) -> bool;
+
     void process_message_sensors();
 
     void process_message_calibration_accelerometer();
@@ -256,33 +232,40 @@ private:
     void process_message_roll_pid_params();
     void process_message_altitude_pid_params();
 
-    void process_message_uav_ping();
     void process_message_uav_rotation();
     void process_message_uav_linear_acceleration();
     void process_message_uav_velocity();
     void process_message_uav_position();
 
 
-    struct Sensor_Data
+    struct Sensor_Samples
     {
-        Accelerometer_Data accelerometer;
-        Gyroscope_Data gyroscope;
-        Compass_Data compass;
-        Barometer_Data barometer;
-        Thermometer_Data thermometer;
-        Sonar_Data sonar;
-        GPS_Data gps;
-    } m_sensor_data;
+        std::vector<Accelerometer_Sample> accelerometer;
+        std::vector<Gyroscope_Sample> gyroscope;
+        std::vector<Compass_Sample> compass;
+        std::vector<Barometer_Sample> barometer;
+        std::vector<Sonar_Sample> sonar;
+        std::vector<Thermometer_Sample> thermometer;
+        std::vector<Voltage_Sample> voltage;
+        std::vector<Current_Sample> current;
+        std::vector<GPS_Sample> gps;
+    } m_sensor_samples;
 
     struct UAV
     {
-        UAV_Rotation_Data rotation;
-        UAV_Linear_Acceleration_Data linear_acceleration;
-        UAV_Velocity_Data velocity;
-        UAV_Position_Data position;
+        UAV_Rotation_Sample rotation;
+        UAV_Linear_Acceleration_Sample linear_acceleration;
+        UAV_Velocity_Sample velocity;
+        UAV_Position_Sample position;
     } m_uav;
 
-    q::Clock::duration m_uav_alive_duration;
+    struct Ping
+    {
+        uint32_t seq = 0;
+        std::map<uint32_t, q::Clock::time_point> seq_sent;
+        std::deque<q::Clock::duration> rtts;
+        q::Clock::time_point last_time_point;
+    } m_ping;
 };
 
 }

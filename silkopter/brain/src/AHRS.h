@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL_Sensors.h"
+#include "common/sensors/Sensor_Samples.h"
 
 namespace silk
 {
@@ -8,9 +8,9 @@ namespace silk
 class AHRS : q::util::Noncopyable
 {
 public:
-    void process(HAL_Sensors::Gyroscope_Sample const& gyroscope,
-                 HAL_Sensors::Accelerometer_Sample const& accelerometer,
-                 HAL_Sensors::Compass_Sample const& compass);
+    void process(Gyroscope_Sample const& gyroscope,
+                 Accelerometer_Sample const& accelerometer,
+                 Compass_Sample const& compass);
 
     auto get_angular_velocity() const -> math::vec3f const&;
 

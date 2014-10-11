@@ -173,7 +173,7 @@ void Attitude::render(silk::Comms& comms)
 
     auto camera_offset = m_camera.get_position() - m_uav_position;
 
-    math::vec3f position = comms.get_uav_position_data().value;
+    math::vec3f position = comms.get_uav_position_sample().value;
     //position.z = 0;
 
     m_uav_position = position;
@@ -183,7 +183,7 @@ void Attitude::render(silk::Comms& comms)
     m_painter.set_camera(m_camera);
 
     {
-        m_attitude_quat = comms.get_uav_rotation_data().value;
+        m_attitude_quat = comms.get_uav_rotation_sample().value;
         m_local_to_world_quat = m_attitude_quat;
         m_world_to_local_quat = math::inverse<float, math::fast>(m_local_to_world_quat);
         m_local_to_world_quat.get_as_mat3_and_inv<math::fast>(m_local_to_world_mat, m_world_to_local_mat);

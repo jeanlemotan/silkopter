@@ -156,15 +156,6 @@ auto HAL_Sensors_Pi::init() -> bool
 #endif
 
     auto now = q::Clock::now();
-    m_accelerometer_sample.time_point = now;
-    m_gyroscope_sample.time_point = now;
-    m_compass_sample.time_point = now;
-    m_barometer_sample.time_point = now;
-    m_sonar_sample.time_point = now;
-    m_thermometer_sample.time_point = now;
-    m_voltage_sample.time_point = now;
-    m_current_sample.time_point = now;
-    m_gps_sample.time_point = now;
 
     m_is_initialized = true;
     return true;
@@ -267,8 +258,6 @@ void HAL_Sensors_Pi::process()
 #ifdef USE_MPU9250
     m_impl->mpu.process();
 
-    auto a_sample_time = m_impl->mpu.get_sample_time();
-    auto g_sample_time = a_sample_time;
     auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
     auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
     QASSERT(a_samples.size() == g_samples.size());
@@ -277,55 +266,46 @@ void HAL_Sensors_Pi::process()
     for (size_t i = 0; i < g_samples.size(); i++)
     {
         m_gyroscope_sample.value = g_samples[i] - m_calibration_config.gyroscope_bias;
-        m_gyroscope_sample.dt = g_sample_time;
-        m_gyroscope_sample.time_point += g_sample_time;
+        m_gyroscope_sample.dt = m_impl->mpu.get_gyroscope_sample_time();
         m_gyroscope_sample.sample_idx++;
-
         m_gyroscope_samples[i] = m_gyroscope_sample;
     }
-    QASSERT(start - m_gyroscope_sample.time_point >= std::chrono::milliseconds(0) && start - m_gyroscope_sample.time_point < std::chrono::milliseconds(200));
 
     m_accelerometer_samples.resize(a_samples.size());
     for (size_t i = 0; i < a_samples.size(); i++)
     {
         m_accelerometer_sample.value = (a_samples[i] - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
-        m_accelerometer_sample.dt = g_sample_time;
-        m_accelerometer_sample.time_point += g_sample_time;
+        m_accelerometer_sample.dt = m_impl->mpu.get_accelerometer_sample_time();
         m_accelerometer_sample.sample_idx++;
-
         m_accelerometer_samples[i] = m_accelerometer_sample;
     }
-    QASSERT(start - m_accelerometer_sample.time_point >= std::chrono::milliseconds(0) && start - m_accelerometer_sample.time_point < std::chrono::milliseconds(200));
 
     auto compass_sample = m_impl->mpu.read_compass();
     if (compass_sample)
     {
         m_compass_sample.value = *compass_sample - m_calibration_config.compass_bias;
         m_compass_sample.sample_idx++;
-        m_compass_sample.dt = start - m_compass_sample.time_point;
-        m_compass_sample.time_point = start;
+        m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
         m_compass_samples.push_back(m_compass_sample);
     }
 #endif
 
 #ifdef USE_MS5611
     m_impl->baro.process();
-    auto baro_sample = m_impl->baro.read_pressure();
+    auto baro_sample = m_impl->baro.read_barometer();
     if (baro_sample)
     {
         m_barometer_sample.value = *baro_sample;
         m_barometer_sample.sample_idx++;
-        m_barometer_sample.dt = start - m_barometer_sample.time_point;
-        m_barometer_sample.time_point = start;
+        m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
         m_barometer_samples.push_back(m_barometer_sample);
     }
-    auto temp_sample = m_impl->baro.read_temperature();
+    auto temp_sample = m_impl->baro.read_thermometer();
     if (temp_sample)
     {
         m_thermometer_sample.value = *temp_sample;
         m_thermometer_sample.sample_idx++;
-        m_thermometer_sample.dt = start - m_thermometer_sample.time_point;
-        m_thermometer_sample.time_point = start;
+        m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
         m_thermometer_samples.push_back(m_thermometer_sample);
     }
 #endif

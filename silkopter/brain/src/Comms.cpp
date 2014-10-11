@@ -555,91 +555,91 @@ void Comms::send_sensor_data()
         return;
     }
 
-    m_channel->begin_stream();
+    m_channel->begin_pack();
 
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.gyroscope.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.gyroscope.size()));
         for (auto& a: m_sensors_samples.gyroscope)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.gyroscope.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.accelerometer.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.accelerometer.size()));
         for (auto& a: m_sensors_samples.accelerometer)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.accelerometer.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.compass.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.compass.size()));
         for (auto& a: m_sensors_samples.compass)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.compass.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.barometer.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.barometer.size()));
         for (auto& a: m_sensors_samples.barometer)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.barometer.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.thermometer.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.thermometer.size()));
         for (auto& a: m_sensors_samples.thermometer)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.thermometer.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.sonar.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.sonar.size()));
         for (auto& a: m_sensors_samples.sonar)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.sonar.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.voltage.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.voltage.size()));
         for (auto& a: m_sensors_samples.voltage)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.voltage.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.current.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.current.size()));
         for (auto& a: m_sensors_samples.current)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.current.clear();
     }
     {
-        m_channel->add_to_stream(static_cast<uint16_t>(m_sensors_samples.gps.size()));
+        m_channel->pack_param(static_cast<uint16_t>(m_sensors_samples.gps.size()));
         for (auto& a: m_sensors_samples.gps)
         {
-            m_channel->add_to_stream(a.value);
-            m_channel->add_to_stream(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
+            m_channel->pack_param(a.value);
+            m_channel->pack_param(static_cast<uint16_t>(std::chrono::duration_cast<std::chrono::microseconds>(a.dt).count()));
         }
         m_sensors_samples.gps.clear();
     }
 
-    m_channel->end_stream(Message::SENSORS);
+    m_channel->end_pack(Message::SENSORS);
 
     m_sensors_samples.last_sent_timestamp = now;
 }
