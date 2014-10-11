@@ -695,6 +695,10 @@ Dynamic_Image& Dynamic_Image::flip_h()
 			}
 		}
 		break;
+    default:
+        QLOG_ERR("Q", "Image format not handled: {}", static_cast<int>(m_format));
+        break;
+
 	}
 	return *this;
 }

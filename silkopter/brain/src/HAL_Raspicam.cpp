@@ -122,15 +122,15 @@ HAL_Raspicam::~HAL_Raspicam()
 {
 }
 
-auto HAL_Raspicam::init() -> Result
+auto HAL_Raspicam::init() -> bool
 {
     if (m_impl->camera)
     {
-        return Result::OK;
+        return true;
     }
 
     auto res = create_components();
-    if (res == Result::OK)
+    if (res)
     {
 //        set_active_streams(m_file_sink != nullptr,
 //                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
@@ -838,7 +838,7 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-auto HAL_Raspicam::create_components() -> Result
+auto HAL_Raspicam::create_components() -> bool
 {
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
 
@@ -846,7 +846,7 @@ auto HAL_Raspicam::create_components() -> Result
     if (!enable_port(m_impl->camera->control, camera_control_callback))
     {
         SILK_ERR("Cannot enable camera control port");
-        return Result::FAILED;
+        return false;
     }
 
     auto camera_video_port = m_impl->camera->output[MMAL_CAMERA_VIDEO_PORT];
@@ -873,7 +873,7 @@ auto HAL_Raspicam::create_components() -> Result
         if (status != MMAL_SUCCESS)
         {
             SILK_ERR("Couldn't set camera config: error {}", status);
-            return Result::FAILED;
+            return false;
         }
     }
 
@@ -888,7 +888,7 @@ auto HAL_Raspicam::create_components() -> Result
         if (status != MMAL_SUCCESS)
         {
             SILK_ERR("Couldn't set preview port format : error {}", status);
-            return Result::FAILED;
+            return false;
         }
     }
 
@@ -903,7 +903,7 @@ auto HAL_Raspicam::create_components() -> Result
         if (status != MMAL_SUCCESS)
         {
             SILK_ERR("Couldn't set video port format : error {}", status);
-            return Result::FAILED;
+            return false;
         }
     }
 
@@ -927,7 +927,7 @@ auto HAL_Raspicam::create_components() -> Result
         if (status != MMAL_SUCCESS)
         {
             SILK_ERR("Couldn't set still port format : error {}", status);
-            return Result::FAILED;
+            return false;
         }
     }
 
@@ -938,21 +938,21 @@ auto HAL_Raspicam::create_components() -> Result
     if (!enable_component(m_impl->camera))
     {
         SILK_ERR("Cannot enable camera component");
-        return Result::FAILED;
+        return false;
     }
 
     m_impl->camera_splitter = create_splitter_component(camera_preview_port);
     if (!m_impl->camera_splitter)
     {
         SILK_ERR("Cannot create camera splitter component");
-        return Result::FAILED;
+        return false;
     }
 
     m_impl->camera_splitter_connection = connect_ports(camera_preview_port, m_impl->camera_splitter->input[0]);
     if (!m_impl->camera_splitter_connection || !set_connection_enabled(m_impl->camera_splitter_connection, true))
     {
         SILK_ERR("Cannot enable camera splitter");
-        return Result::FAILED;
+        return false;
     }
 
 
@@ -962,14 +962,14 @@ auto HAL_Raspicam::create_components() -> Result
     if (!m_impl->high.encoder_connection || !set_connection_enabled(m_impl->high.encoder_connection, true))
     {
         SILK_ERR("Cannot create high bitrate encoder");
-        return Result::FAILED;
+        return false;
     }
 
     m_impl->high.output_pool = create_output_port_pool(m_impl->high.encoder->output[0], userdata, high_encoder_buffer_callback, buffer_count);
     if (!m_impl->high.output_pool)
     {
         SILK_ERR("Cannot create high bitrate encoder port");
-        return Result::FAILED;
+        return false;
     }
 
     //medium
@@ -978,20 +978,20 @@ auto HAL_Raspicam::create_components() -> Result
     if (!m_impl->medium.resizer_connection)
     {
         SILK_ERR("Cannot create medium bitrate resizer");
-        return Result::FAILED;
+        return false;
     }
     m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_impl->medium.quality.resolution, m_impl->medium.quality.bitrate);
     m_impl->medium.encoder_connection = connect_ports(m_impl->medium.resizer->output[0], m_impl->medium.encoder->input[0]);
     if (!m_impl->medium.encoder_connection || !set_connection_enabled(m_impl->medium.encoder_connection, true))
     {
         SILK_ERR("Cannot create medium bitrate encoder");
-        return Result::FAILED;
+        return false;
     }
     m_impl->medium.output_pool = create_output_port_pool(m_impl->medium.encoder->output[0], userdata, medium_encoder_buffer_callback, buffer_count);
     if (!m_impl->medium.output_pool)
     {
         SILK_ERR("Cannot create medium bitrate encoder port");
-        return Result::FAILED;
+        return false;
     }
 
     //low
@@ -1000,20 +1000,20 @@ auto HAL_Raspicam::create_components() -> Result
     if (!m_impl->low.resizer_connection)
     {
         SILK_ERR("Cannot create low bitrate resizer");
-        return Result::FAILED;
+        return false;
     }
     m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_impl->low.quality.resolution, m_impl->low.quality.bitrate);
     m_impl->low.encoder_connection = connect_ports(m_impl->low.resizer->output[0], m_impl->low.encoder->input[0]);
     if (!m_impl->low.encoder_connection || !set_connection_enabled(m_impl->low.encoder_connection, true))
     {
         SILK_ERR("Cannot create low bitrate encoder");
-        return Result::FAILED;
+        return false;
     }
     m_impl->low.output_pool = create_output_port_pool(m_impl->low.encoder->output[0], userdata, low_encoder_buffer_callback, buffer_count);
     if (!m_impl->low.output_pool)
     {
         SILK_ERR("Cannot create low bitrate encoder port");
-        return Result::FAILED;
+        return false;
     }
 
 
@@ -1023,10 +1023,10 @@ auto HAL_Raspicam::create_components() -> Result
         if (status != MMAL_SUCCESS)
         {
             SILK_ERR("failed to start capturing");
-            return Result::FAILED;
+            return false;
         }
     }
-    return Result::OK;
+    return true;
 }
 
 void HAL_Raspicam::create_file_sink()
@@ -1061,12 +1061,12 @@ void HAL_Raspicam::create_file_sink()
 }
 
 
-auto HAL_Raspicam::start_recording() -> Result
+auto HAL_Raspicam::start_recording() -> bool
 {
     if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
     {
         SILK_WARNING("Cannot create capture folder");
-        return Result::FAILED;
+        return false;
     }
 
     if (!m_file_sink)
@@ -1079,7 +1079,7 @@ auto HAL_Raspicam::start_recording() -> Result
 //                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
 //                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
-    return Result::OK;
+    return true;
 }
 void HAL_Raspicam::stop_recording()
 {

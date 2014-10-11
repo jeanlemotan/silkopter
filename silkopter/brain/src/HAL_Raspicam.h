@@ -11,13 +11,13 @@ public:
     HAL_Raspicam();
     ~HAL_Raspicam();
 
-    auto init() -> Result;
+    auto init() -> bool;
 
     //----------------------------------------------------------------------
 
     void set_data_callback(Data_Available_Callback cb);
 
-    auto start_recording() -> Result;
+    auto start_recording() -> bool;
     void stop_recording();
 
     void set_iso(camera_input::Iso iso);
@@ -55,7 +55,7 @@ private:
     camera_input::Shutter_Speed m_shutter_speed{0};
     camera_input::Stream_Quality m_stream_quality = camera_input::Stream_Quality::MEDIUM;
 
-    auto create_components() -> Result;
+    auto create_components() -> bool;
 };
 
 }

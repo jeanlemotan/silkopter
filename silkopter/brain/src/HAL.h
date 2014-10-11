@@ -14,13 +14,7 @@ struct HAL : q::util::Noncopyable
     std::unique_ptr<HAL_Motors> motors;
     std::unique_ptr<HAL_Camera> camera;
 
-    enum class Result
-    {
-    	OK,
-        FAILED
-    };
-
-    auto init(boost::asio::io_service& io_service) -> Result;
+    auto init(boost::asio::io_service& io_service) -> bool;
     void process();
 
 private:

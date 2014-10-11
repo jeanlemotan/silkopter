@@ -8,13 +8,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#if defined RASPBERRY_PI
-extern "C"
-{
-    #include "bcm_host.h"
-}
-#endif
-
 size_t s_test = 0;
 
 namespace boost
@@ -44,11 +37,6 @@ namespace boost
 int main(int argc, char const* argv[])
 {
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
-
-#if defined RASPBERRY_PI
-    SILK_INFO("initializing bcm_host");
-    bcm_host_init();
-#endif
 
     namespace po = boost::program_options;
 
@@ -111,25 +99,19 @@ int main(int argc, char const* argv[])
     {
         silk::HAL hal;
 
+        if (!hal.init(io_service))
         {
-            auto res = hal.init(io_service);
-            if (res != silk::HAL::Result::OK)
-            {
-                SILK_ERR("Hardware failure! Aborting");
-                abort();
-            }
+            SILK_ERR("Hardware failure! Aborting");
+            abort();
         }
 
         silk::UAV uav(hal);
         silk::Comms comms(io_service, hal, uav);
         //start listening for a remote system
+        if (!comms.start_listening(comm_port))
         {
-            auto res = comms.start_listening(comm_port);
-            if (res != silk::Comms::Result::OK)
-            {
-                SILK_ERR("Cannot start communication channel! Aborting");
-                abort();
-            }
+            SILK_ERR("Cannot start communication channel! Aborting");
+            abort();
         }
 
         //create streamer and camera objects
@@ -145,8 +127,7 @@ int main(int argc, char const* argv[])
             SILK_INFO("Waiting for comms to connect...");
             if (comms.is_connected() && !streamer.is_started())
             {
-                auto res = streamer.start(comms.get_remote_address(), stream_port);
-                if (res != silk::Video_Server::Result::OK)
+                if (!streamer.start(comms.get_remote_address(), stream_port))
                 {
 #if defined RASPBERRY_PI
                     SILK_ERR("Video Server failed to start! Aborting");

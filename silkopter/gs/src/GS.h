@@ -1,20 +1,20 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_Silkopter.h"
+#include "ui_GS.h"
 #include "qcustomplot.h"
 #include "Comms.h"
 
-class Silkopter : public QMainWindow
+class GS : public QMainWindow
 {
 public:
-	Silkopter(QWidget *parent = 0);
-	~Silkopter();
+	GS(QWidget *parent = 0);
+	~GS();
 
 private:
 	void process();
 
-	Ui::SilkopterClass m_ui;
+	Ui::GSClass m_ui;
 
 	boost::asio::io_service m_io_service;
     std::atomic<bool> m_stop_io_service_thread{ false };

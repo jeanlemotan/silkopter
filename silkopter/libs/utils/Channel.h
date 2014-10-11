@@ -62,29 +62,23 @@ namespace util
         auto get_next_message() -> boost::optional<Message_t>  { return _get_next_message(); }
         auto get_next_message(Message_t& message) -> bool {  auto res = _get_next_message(); message = res ? *res : message; return res.is_initialized(); }
 
-		enum class Unpack_Result : uint8_t
-		{
-			OK = 0,				//all good
-			FAILED,				//a generic error
-		};
-
 		//decodes the next message
 		template<typename... Params>
-        auto unpack(Params&... params) -> Unpack_Result { return _unpack(size_t(0), params...); }
+        auto unpack(Params&... params) -> bool { return _unpack(size_t(0), params...); }
 
         //////////////////////////////////////////////////////////////////////////
 
-        Unpack_Result begin_unpack()
+        auto begin_unpack() -> bool
         {
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             //q::quick_logf("begin_decode: {}, {}", m_decoded.data_size, m_rx_buffer.size());
             if (m_decoded.data_size == 0)
             {
-                return Unpack_Result::FAILED;
+                return false;
             }
-            return Unpack_Result::OK;
+            return true;
         }
-        template<class Param> Unpack_Result unpack_param(Param& p)
+        template<class Param> auto unpack_param(Param& p) -> bool
         {
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             //q::quick_logf("unpack_param: {}, {}", m_decoded.data_size, m_rx_buffer.size());
@@ -92,12 +86,12 @@ namespace util
             if (m_decoded.data_size < sz || m_rx_buffer.size() < sz)
             {
                 m_error_count++;
-                return Unpack_Result::FAILED;
+                return false;
             }
             p = get_value_fixed<Param>(m_rx_buffer, 0);
             m_decoded.data_size -= sz;
             pop_front(sz);
-            return Unpack_Result::OK;
+            return true;
         }
         void end_unpack()
         {
@@ -211,7 +205,7 @@ namespace util
 		}
 
 		//decodes the next message
-        Unpack_Result _unpack(size_t /*off*/)
+        auto _unpack(size_t /*off*/) -> bool
 		{
             if (m_decoded.data_size > 0)
 			{
@@ -221,12 +215,12 @@ namespace util
                 m_decoded.magic = 0;
 			}
 
-			return Unpack_Result::OK;
+            return true;
 		}
 
 		//decodes the next message
 		template<typename Param, typename... Params>
-        Unpack_Result _unpack(size_t off, Param& p, Params&... params)
+        auto _unpack(size_t off, Param& p, Params&... params) -> bool
 		{
             {
                 std::lock_guard<std::mutex> lg(m_rx_mutex);
@@ -234,7 +228,7 @@ namespace util
                 if (m_rx_buffer.size() < m_decoded.data_size || m_rx_buffer.size() < off + sizeof(Param))
                 {
                     m_error_count++;
-                    return Unpack_Result::FAILED;
+                    return false;
                 }
                 p = get_value<Param>(m_rx_buffer, off);
             }

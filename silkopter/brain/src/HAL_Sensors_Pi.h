@@ -11,13 +11,7 @@ public:
     HAL_Sensors_Pi();
     ~HAL_Sensors_Pi();
 
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
-    auto init() -> Result;
+    auto init() -> bool;
 
     //----------------------------------------------------------------------
     //calibration

@@ -85,7 +85,7 @@ auto Gamepad::get_sensors() const -> Sensors const&
 	return m_sensors;
 }
 
-void Gamepad::update(q::Clock::duration dt)
+void Gamepad::update(q::Clock::duration/* dt*/)
 {
 	{
 		std::lock_guard<std::mutex> sm(m_mutex);

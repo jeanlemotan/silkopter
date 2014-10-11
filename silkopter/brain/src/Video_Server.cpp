@@ -22,7 +22,7 @@ Video_Server::Video_Server(boost::asio::io_service& io_service)
     SILK_INFO("Video server created");
 }
 
-auto Video_Server::start(boost::asio::ip::address const& address, uint16_t port) -> Result
+auto Video_Server::start(boost::asio::ip::address const& address, uint16_t port) -> bool
 {
     stop();
     try
@@ -34,11 +34,11 @@ auto Video_Server::start(boost::asio::ip::address const& address, uint16_t port)
     catch(...)
     {
         SILK_WARNING("Cannot connect to {}:{}", address.to_string(), port);
-        return Result::FAILED;
+        return false;
     }
 
     SILK_INFO("Connected to {}:{}", m_endpoint.address().to_string(), m_port);
-    return Result::OK;
+    return true;
 }
 
 void Video_Server::stop()
@@ -62,16 +62,16 @@ static void set_value(std::vector<uint8_t>& t, T const& val, size_t& off)
 	off += sizeof(T);
 }
 
-auto Video_Server::send_frame(Flags flags, uint8_t const* data, size_t data_size) -> Result
+auto Video_Server::send_frame(Flags flags, uint8_t const* data, size_t data_size) -> bool
 {
     if (data_size == 0)
     {
-        return Result::OK;
+        return true;
     }
     if (!m_socket)
     {
         SILK_WARNING("Cannot send frame as the streamer is not connected");
-        return Result::FAILED;
+        return false;
     }
 
     uint32_t frame_idx = ++m_last_encoded_frame_idx;
@@ -146,7 +146,7 @@ auto Video_Server::send_frame(Flags flags, uint8_t const* data, size_t data_size
             }
         }
         SILK_WARNING("skipping frame {} due to inssuficient packets ({})", frame_idx, packet_idx);
-        return Result::FAILED;
+        return false;
     }
     else
     {
@@ -166,7 +166,7 @@ auto Video_Server::send_frame(Flags flags, uint8_t const* data, size_t data_size
         }
     }
 
-    return Result::OK;
+    return true;
 }
 
 void Video_Server::handle_frame_packet_send(std::shared_ptr<Frame_Packet> frame_packet, const boost::system::error_code& error, std::size_t /*bytes_transferred*/)

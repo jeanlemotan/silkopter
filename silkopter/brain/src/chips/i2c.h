@@ -8,13 +8,7 @@ class i2c : public q::util::Noncopyable
 public:
     ~i2c();
 
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
-    auto open(std::string const& device) -> Result;
+    auto open(std::string const& device) -> bool;
     void close();
 
     void read(uint8_t address, uint8_t reg, uint8_t* data, uint32_t size);

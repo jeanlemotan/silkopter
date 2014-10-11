@@ -8,13 +8,7 @@ namespace silk
 class MS5611 : public q::util::Noncopyable
 {
 public:
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
-    auto init(q::String const& device) -> Result;
+    auto init(q::String const& device) -> bool;
 
     void process();
 

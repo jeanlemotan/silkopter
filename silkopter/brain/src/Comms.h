@@ -13,13 +13,7 @@ class Comms : q::util::Noncopyable
 public:
     Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav);
 
-    enum class Result
-    {
-        OK,
-        FAILED,
-    };
-
-    auto start_listening(uint16_t port) -> Result;
+    auto start_listening(uint16_t port) -> bool;
     void disconnect();
 
     auto is_listening() const -> bool;

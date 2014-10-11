@@ -81,12 +81,12 @@ void HAL_Motors_PiGPIO::save_settings()
     fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
-auto HAL_Motors_PiGPIO::init() -> Result
+auto HAL_Motors_PiGPIO::init() -> bool
 {
     QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
-        return Result::OK;
+        return true;
     }
 
     if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
@@ -98,7 +98,7 @@ auto HAL_Motors_PiGPIO::init() -> Result
         default:
         {
             SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
-            return Result::FAILED;
+            return false;
         }
         }
 
@@ -107,23 +107,23 @@ auto HAL_Motors_PiGPIO::init() -> Result
             if (gpioSetPWMfrequency(gpio, freq) < 0)
             {
                 SILK_WARNING("Cannot set pwm frequency {} on gpio {}", freq, gpio);
-                return Result::FAILED;
+                return false;
             }
             if (gpioSetPWMrange(gpio, GPIO_PWM_RANGE) < 0)
             {
                 SILK_WARNING("Cannot set pwm range {} on gpio {}", GPIO_PWM_RANGE, gpio);
-                return Result::FAILED;
+                return false;
             }
         }
     }
     else
     {
         SILK_WARNING("Non-pwm ESC support not implemented");
-        return Result::FAILED;
+        return false;
     }
 
     m_is_initialized = true;
-    return Result::OK;
+    return true;
 }
 
 void HAL_Motors_PiGPIO::shutdown()

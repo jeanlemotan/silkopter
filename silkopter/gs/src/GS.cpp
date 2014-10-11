@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "Silkopter.h"
+#include "GS.h"
 
 
 static const float k_calibration_sample_count = 100;
 
-Silkopter::Silkopter(QWidget *parent)
+GS::GS(QWidget *parent)
 	: QMainWindow(parent)
     //, m_gyro_calibrarion_samples(k_calibration_sample_count)
     , m_comms(m_io_service)
@@ -16,7 +16,7 @@ Silkopter::Silkopter(QWidget *parent)
 	auto* timer = new QTimer(this);
 	timer->setSingleShot(false);
     timer->start(2);
-	connect(timer, &QTimer::timeout, this, &Silkopter::process);
+	connect(timer, &QTimer::timeout, this, &GS::process);
 
 	show();
 
@@ -50,7 +50,7 @@ Silkopter::Silkopter(QWidget *parent)
     connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
 }
 
-Silkopter::~Silkopter()
+GS::~GS()
 {
     m_comms.disconnect();
 
@@ -69,7 +69,7 @@ Silkopter::~Silkopter()
     //m_protocol.stop();
 }
 
-void Silkopter::set_uav_address(std::string const& address)
+void GS::set_uav_address(std::string const& address)
 {
     m_uav_address = address;
     QSettings settings;
@@ -78,7 +78,7 @@ void Silkopter::set_uav_address(std::string const& address)
     m_ui.statusBar->showMessage(q::util::format2<std::string>("Connecting to {}", address).c_str(), 2000);
 }
 
-void Silkopter::process()
+void GS::process()
 {
     if (!m_comms.is_connected() && !m_uav_address.empty())
     {

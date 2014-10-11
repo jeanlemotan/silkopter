@@ -11,13 +11,7 @@ class PiGPIO : q::util::Noncopyable
 public:
 	~PiGPIO();
 
-	enum class Result
-	{
-		OK,
-		FAILED,
-	};
-
-	auto init() -> Result;
+    auto init() -> bool;
 };
 
 

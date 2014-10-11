@@ -12,13 +12,7 @@ public:
     HAL_Motors_PiGPIO(PiGPIO& pigpio);
     ~HAL_Motors_PiGPIO();
 
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
-    auto init() -> Result;
+    auto init() -> bool;
     void shutdown();
 
     //----------------------------------------------------------------------

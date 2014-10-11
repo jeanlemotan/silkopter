@@ -12,7 +12,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     m_ping_time = q::Clock::now();
 }
 
-auto Comms::start_listening(uint16_t port) -> Result
+auto Comms::start_listening(uint16_t port) -> bool
 {
     for (int tries = 10; tries >= 0; tries--)
     {
@@ -32,20 +32,22 @@ auto Comms::start_listening(uint16_t port) -> Result
 
             m_acceptor->async_accept(*m_socket,
                                      boost::bind(&Comms::handle_accept, this, boost::asio::placeholders::error));
+
+            break;
         }
         catch(std::exception e)
         {
             SILK_WARNING("Cannot start listening on port {}: {}", port, e.what());
             if (tries == 0)
             {
-                return Result::FAILED;
+                return false;
             }
         }
     }
 
     m_is_listening = true;
     SILK_INFO("Started listening on port {}", port);
-    return Result::OK;
+    return true;
 }
 void Comms::handle_accept(boost::system::error_code const& error)
 {
@@ -94,19 +96,17 @@ void Comms::message_camera_input()
 {
     using namespace camera_input;
 
-    auto res = m_channel->begin_unpack();
-    QASSERT(res == Channel::Unpack_Result::OK);
-    if (res != Channel::Unpack_Result::OK)
+    if (!m_channel->begin_unpack())
     {
+        SILK_ERR("Cannot unpack camera input message");
         m_channel->end_unpack();
         return;
     }
 
     Input q;
-    res = m_channel->unpack_param(q);
-    QASSERT(res == Channel::Unpack_Result::OK);
-    if (res != Channel::Unpack_Result::OK)
+    if (!m_channel->unpack_param(q))
     {
+        SILK_ERR("Cannot unpack camera input message");
         m_channel->end_unpack();
         return;
     }
@@ -124,7 +124,7 @@ void Comms::message_camera_input()
         case Input::ISO:
             {
                 Iso iso;
-                if (m_channel->unpack_param(iso) == Channel::Unpack_Result::OK)
+                if (m_channel->unpack_param(iso))
                 {
                     m_hal.camera->set_iso(iso);
                 }
@@ -133,7 +133,7 @@ void Comms::message_camera_input()
         case Input::SHUTTER_SPEED:
             {
                 Shutter_Speed ss;
-                if (m_channel->unpack_param(ss) == Channel::Unpack_Result::OK)
+                if (m_channel->unpack_param(ss))
                 {
                     m_hal.camera->set_shutter_speed(ss);
                 }
@@ -142,7 +142,7 @@ void Comms::message_camera_input()
         case Input::STREAM_QUALITY:
             {
                 Stream_Quality sq;
-                if (m_channel->unpack_param(sq) == Channel::Unpack_Result::OK)
+                if (m_channel->unpack_param(sq))
                 {
                     m_hal.camera->set_quality(sq);
                 }
@@ -162,19 +162,17 @@ void Comms::message_uav_input()
 {
     using namespace uav_input;
 
-    auto res = m_channel->begin_unpack();
-    QASSERT(res == Channel::Unpack_Result::OK);
-    if (res != Channel::Unpack_Result::OK)
+    if (!m_channel->begin_unpack())
     {
+        SILK_ERR("Cannot unpack uav input message");
         m_channel->end_unpack();
         return;
     }
 
     Input q;
-    res = m_channel->unpack_param(q);
-    QASSERT(res == Channel::Unpack_Result::OK);
-    if (res != Channel::Unpack_Result::OK)
+    if (!m_channel->unpack_param(q))
     {
+        SILK_ERR("Cannot unpack uav input message");
         m_channel->end_unpack();
         return;
     }
@@ -183,7 +181,7 @@ void Comms::message_uav_input()
     case Input::THROTTLE_MODE:
         {
             Throttle_Mode v;
-            if (m_channel->unpack_param(v) == Channel::Unpack_Result::OK)
+            if (m_channel->unpack_param(v))
             {
                 m_uav.set_throttle_mode(v);
             }
@@ -192,7 +190,7 @@ void Comms::message_uav_input()
     case Input::PITCH_ROLL_MODE:
         {
             Pitch_Roll_Mode v;
-            if (m_channel->unpack_param(v) == Channel::Unpack_Result::OK)
+            if (m_channel->unpack_param(v))
             {
                 m_uav.set_pitch_roll_mode(v);
             }
@@ -201,7 +199,7 @@ void Comms::message_uav_input()
     case Input::YAW_MODE:
         {
             Yaw_Mode v;
-            if (m_channel->unpack_param(v) == Channel::Unpack_Result::OK)
+            if (m_channel->unpack_param(v))
             {
                 m_uav.set_yaw_mode(v);
             }
@@ -210,7 +208,7 @@ void Comms::message_uav_input()
     case Input::STICKS:
         {
             Sticks v;
-            if (m_channel->unpack_param(v) == Channel::Unpack_Result::OK)
+            if (m_channel->unpack_param(v))
             {
                 m_uav.set_sticks(v);
             }
@@ -219,7 +217,7 @@ void Comms::message_uav_input()
     case Input::ASSISTS:
         {
             Assists v;
-            if (m_channel->unpack_param(v) == Channel::Unpack_Result::OK)
+            if (m_channel->unpack_param(v))
             {
                 m_uav.set_assists(v);
             }
@@ -255,8 +253,7 @@ void Comms::message_yaw_rate_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("yaw rate pid params changed");
             m_uav.set_yaw_rate_pid_params(params);
@@ -277,8 +274,7 @@ void Comms::message_pitch_rate_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("pitch rate pid params changed");
             m_uav.set_pitch_rate_pid_params(params);
@@ -299,8 +295,7 @@ void Comms::message_roll_rate_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("roll rate pid params changed");
             m_uav.set_roll_rate_pid_params(params);
@@ -321,8 +316,7 @@ void Comms::message_altitude_rate_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("altitude rate pid params changed");
             m_uav.set_altitude_rate_pid_params(params);
@@ -343,8 +337,7 @@ void Comms::message_yaw_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("yaw pid params changed");
             m_uav.set_yaw_pid_params(params);
@@ -365,8 +358,7 @@ void Comms::message_pitch_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("pitch pid params changed");
             m_uav.set_pitch_pid_params(params);
@@ -387,8 +379,7 @@ void Comms::message_roll_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("roll pid params changed");
             m_uav.set_roll_pid_params(params);
@@ -409,8 +400,7 @@ void Comms::message_altitude_pid_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("altitude pid params changed");
             m_uav.set_altitude_pid_params(params);
@@ -432,8 +422,7 @@ void Comms::message_assist_params()
     }
     else
     {
-        auto result = m_channel->unpack(params);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(params))
         {
             SILK_INFO("assist params changed");
             m_uav.set_assist_params(params);
@@ -457,8 +446,7 @@ void Comms::message_calibration_accelerometer()
     }
     else
     {
-        auto result = m_channel->unpack(bias, scale);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(bias, scale))
         {
             SILK_INFO("Accelerometer calibration changed");
             m_hal.sensors->set_accelerometer_calibration_data(bias, scale);
@@ -482,8 +470,7 @@ void Comms::message_calibration_gyroscope()
     }
     else
     {
-        auto result = m_channel->unpack(bias);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(bias))
         {
             SILK_INFO("Gyroscope calibration changed");
             m_hal.sensors->set_gyroscope_calibration_data(bias);
@@ -506,8 +493,7 @@ void Comms::message_calibration_compass()
     }
     else
     {
-        auto result = m_channel->unpack(bias);
-        if (result == Channel::Unpack_Result::OK)
+        if (m_channel->unpack(bias))
         {
             SILK_INFO("Compass calibration changed");
             m_hal.sensors->set_compass_calibration_data(bias);

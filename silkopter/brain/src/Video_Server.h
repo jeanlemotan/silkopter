@@ -9,13 +9,7 @@ namespace silk
 	public:
         Video_Server(boost::asio::io_service& io_service);
 
-        enum class Result
-        {
-            OK,
-            FAILED
-        };
-
-        auto start(boost::asio::ip::address const& address, uint16_t port) -> Result;
+        auto start(boost::asio::ip::address const& address, uint16_t port) -> bool;
         void stop();
         auto is_started() const -> bool;
 
@@ -29,7 +23,7 @@ namespace silk
 
         //sends a video frame.
         //The data needs to be alive only for the duration of this call.
-        auto send_frame(Flags flags, uint8_t const* data, size_t size) -> Result;
+        auto send_frame(Flags flags, uint8_t const* data, size_t size) -> bool;
 
 	private:
         struct Frame_Header

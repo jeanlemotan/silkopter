@@ -34,15 +34,15 @@ i2c::~i2c()
     close();
 }
 
-auto i2c::open(const std::string &device) -> Result
+auto i2c::open(const std::string &device) -> bool
 {
     m_fd = ::open(device.c_str(), O_RDWR);
     if (m_fd < 0)
     {
         SILK_ERR("can't open {}: {}", device, strerror(errno));
-        return Result::FAILED;
+        return false;
     }
-    return Result::OK;
+    return true;
 }
 void i2c::close()
 {

@@ -45,7 +45,7 @@ namespace qinput
 
         struct Gamepad_Data
         {
-            int id = 0;
+            size_t id = 0;
             int fd = 0;
             Gamepad_ptr gamepad;
         };

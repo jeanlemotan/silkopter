@@ -260,17 +260,17 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 #endif
 
 
-auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Range ar) -> Result
+auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 {
     m_gyroscope_rate = gr;
     m_accelerometer_range = ar;
 
     SILK_INFO("initializing device: {}", device);
 
-    if (m_i2c.open(device.c_str()) != i2c::Result::OK)
+    if (!m_i2c.open(device.c_str()))
     {
         SILK_ERR("can't open {}: {}", device, strerror(errno));
-        return Result::FAILED;
+        return false;
     }
 
     m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
@@ -286,7 +286,7 @@ auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Ra
     SILK_INFO("device {} id: {x}", device, who_am_i);
     if (who_am_i != 0x71)
     {
-        return Result::FAILED;
+        return false;
     }
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
@@ -310,7 +310,7 @@ auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Ra
         break;
     default:
         SILK_ERR("Invalid gyroscope range.");
-        return Result::FAILED;
+        return false;
     }
 
     uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
@@ -375,10 +375,10 @@ auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Ra
 //        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 //    }
 
-    return Result::OK;
+    return true;
 }
 
-auto MPU9250::setup_compass() -> Result
+auto MPU9250::setup_compass() -> bool
 {
 #ifdef USE_AK8963
     mpu_set_bypass(1);
@@ -397,7 +397,7 @@ auto MPU9250::setup_compass() -> Result
     if (akm_addr > 0x0F)
     {
         SILK_ERR("Compass not found.");
-        return Result::FAILED;
+        return false;
     }
 
     m_compass_addr = akm_addr;
@@ -459,9 +459,9 @@ auto MPU9250::setup_compass() -> Result
 
 //    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
 
-    return Result::OK;
+    return true;
 #else
-    return Result::OK;
+    return true;
 #endif
 }
 

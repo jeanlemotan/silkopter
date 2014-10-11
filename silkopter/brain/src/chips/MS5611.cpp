@@ -30,14 +30,14 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
-auto MS5611::init(const q::String& device) -> Result
+auto MS5611::init(const q::String& device) -> bool
 {
     SILK_INFO("initializing device: {}", device);
 
-    if (m_i2c.open(device.c_str()) != i2c::Result::OK)
+    if (!m_i2c.open(device.c_str()))
     {
         SILK_ERR("can't open {}: {}", device, strerror(errno));
-        return Result::FAILED;
+        return false;
     }
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
@@ -72,7 +72,7 @@ auto MS5611::init(const q::String& device) -> Result
 
 //    exit(1);
 
-    return Result::OK;
+    return true;
 }
 
 void MS5611::process()

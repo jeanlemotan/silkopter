@@ -45,15 +45,18 @@ private:
     void process_message_sensor_data(Sim_Comms::Channel& channel);
     void process_message_gps_data();
 
-    auto process_accelerometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_gyroscope_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_compass_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_barometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_thermometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_sonar_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_voltage_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_current_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
-    auto process_gps_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result;
+    template<class SAMPLE_T>
+    auto unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample, std::vector<SAMPLE_T>& samples) -> bool;
+
+    auto process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_compass_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_barometer_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_thermometer_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_sonar_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_voltage_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_current_sensor(Sim_Comms::Channel& channel) -> bool;
+    auto process_gps_sensor(Sim_Comms::Channel& channel) -> bool;
 
     Accelerometer_Sample m_accelerometer_sample;
     std::vector<Accelerometer_Sample> m_accelerometer_samples;

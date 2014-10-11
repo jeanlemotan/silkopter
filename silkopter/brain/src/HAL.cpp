@@ -8,76 +8,83 @@
 #include "HAL_Sensors_Sim.h"
 
 #ifdef RASPBERRY_PI
-#include "PiGPIO.h"
-struct silk::HAL::Impl
-{
-    Impl(boost::asio::io_service& io_service)  {}
+    extern "C"
+    {
+        #include "bcm_host.h"
+    }
+    #include "PiGPIO.h"
+    struct silk::HAL::Impl
+    {
+        Impl(boost::asio::io_service& io_service)  {}
 
-    silk::PiGPIO pigpio;
-};
+        silk::PiGPIO pigpio;
+    };
 #else
-#include "Sim_Comms.h"
-struct silk::HAL::Impl
-{
-    Impl(boost::asio::io_service& io_service)
-        : sim_comms(io_service) {}
+    #include "Sim_Comms.h"
+    struct silk::HAL::Impl
+    {
+        Impl(boost::asio::io_service& io_service)
+            : sim_comms(io_service) {}
 
-    silk::Sim_Comms sim_comms;
-};
+        silk::Sim_Comms sim_comms;
+    };
 #endif
 
 
 using namespace silk;
 
-auto HAL::init(boost::asio::io_service& io_service) -> Result
+auto HAL::init(boost::asio::io_service& io_service) -> bool
 {
     m_impl.reset(new Impl(io_service));
 
 #ifdef RASPBERRY_PI
+    SILK_INFO("initializing bcm_host");
+    bcm_host_init();
+
     auto m = new HAL_Motors_PiGPIO(m_impl->pigpio);
     motors.reset(m);
-    if (m->init() != HAL_Motors_PiGPIO::Result::OK)
+    if (!m->init())
     {
-        return Result::FAILED;
+        return false;
     }
 
     auto c = new HAL_Raspicam;
     camera.reset(c);
-    if (c->init() != HAL_Raspicam::Result::OK)
+    if (!c->init())
     {
-        return Result::FAILED;
+        return false;
     }
 
     auto s = new HAL_Sensors_Pi;
     sensors.reset(s);
-    if (s->init() != HAL_Sensors_Pi::Result::OK)
+    if (!s->init())
     {
-        return Result::FAILED;
+        return false;
     }
 #else
     auto m = new HAL_Motors_Sim(m_impl->sim_comms);
     motors.reset(m);
 //    if (m->init() != HAL_Motors_Sim::Result::OK)
 //    {
-//        return Result::FAILED;
+//        return false;
 //    }
 
 //    auto c = new HAL_Raspicam;
 //    camera.reset(c);
 //    if (c->init() != HAL_Raspicam::Result::OK)
 //    {
-//        return Result::FAILED;
+//        return false;
 //    }
 
     auto s = new HAL_Sensors_Sim(m_impl->sim_comms);
     sensors.reset(s);
 //    if (s->init() != HAL_Sensors_Sim::Result::OK)
 //    {
-//        return Result::FAILED;
+//        return false;
 //    }
 #endif
 
-    return Result::OK;
+    return true;
 }
 
 void HAL::process()

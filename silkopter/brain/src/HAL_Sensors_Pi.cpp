@@ -139,12 +139,12 @@ void HAL_Sensors_Pi::save_settings()
     fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
-auto HAL_Sensors_Pi::init() -> Result
+auto HAL_Sensors_Pi::init() -> bool
 {
     QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
-        return Result::OK;
+        return true;
     }
 
 #ifdef USE_MS5611
@@ -167,7 +167,7 @@ auto HAL_Sensors_Pi::init() -> Result
     m_gps_sample.time_point = now;
 
     m_is_initialized = true;
-    return Result::OK;
+    return true;
 }
 
 void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)

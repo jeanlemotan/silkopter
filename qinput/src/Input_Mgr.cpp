@@ -8,14 +8,14 @@
 using namespace qinput;
 
 
-Input_Mgr::Input_Mgr(q::String const& window_handle)
+Input_Mgr::Input_Mgr(q::String const& /*window_handle*/)
 {
     enumerate_gamepads();
 
     {
         auto& buttons = m_ouya_mapping.buttons;
-        auto& sticks = m_ouya_mapping.sticks;
-        auto& axes = m_ouya_mapping.axes;
+        //auto& sticks = m_ouya_mapping.sticks;
+        //auto& axes = m_ouya_mapping.axes;
         buttons[0] = Gamepad::Button::OUYA_O;
         buttons[1] = Gamepad::Button::OUYA_U;
         buttons[2] = Gamepad::Button::OUYA_Y;
@@ -37,8 +37,8 @@ Input_Mgr::Input_Mgr(q::String const& window_handle)
     }
     {
         auto& buttons = m_ps3_mapping.buttons;
-        auto& sticks = m_ps3_mapping.sticks;
-        auto& axes = m_ps3_mapping.axes;
+        //auto& sticks = m_ps3_mapping.sticks;
+        //auto& axes = m_ps3_mapping.axes;
         buttons[12] = Gamepad::Button::PS_TRIANGLE;
         buttons[13] = Gamepad::Button::PS_CIRCLE;
         buttons[14] = Gamepad::Button::PS_X;
@@ -350,8 +350,7 @@ void Input_Mgr::enumerate_gamepads() const
 
     for (size_t i = 0; i < 64; i++)
     {
-        auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(),
-                               [i](Gamepad_Data const& g) { return g.id == i; });
+        auto it = std::find_if(m_gamepads.begin(), m_gamepads.end(), [i](Gamepad_Data const& g) { return g.id == i; });
         if (it != m_gamepads.end())
         {
             return;

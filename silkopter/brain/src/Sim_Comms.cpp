@@ -13,11 +13,11 @@ Sim_Comms::Sim_Comms(io_service& io_service)
 {
 }
 
-auto Sim_Comms::connect() -> Result
+auto Sim_Comms::connect() -> bool
 {
     if (is_connected())
     {
-        return Result::OK;
+        return true;
     }
 
     uint16_t port = 52523;
@@ -31,7 +31,7 @@ auto Sim_Comms::connect() -> Result
     catch(...)
     {
         SILK_WARNING("Cannot start listening on port {}", port);
-        return Result::FAILED;
+        return false;
     }
 
     SILK_INFO("Started listening on port {}", port);
@@ -42,7 +42,7 @@ auto Sim_Comms::connect() -> Result
     }
 
     set_state(State::HANDSHAKE);
-    return Result::OK;
+    return true;
 }
 
 void Sim_Comms::handle_accept(boost::system::error_code const& error)
@@ -85,9 +85,9 @@ void Sim_Comms::process_state_handshake()
                                            m_received_config.has_gps,
                                            m_received_config.has_voltage_sensor,
                                            m_received_config.has_current_sensor);
-            if (result == Channel::Unpack_Result::OK)
+            if (result)
             {
-                SILK_INFO("IO Board version {}:\b \t{} barometer, \t{} gps, \t{} sonar, \t{} voltage sensor, \t{} current sensor",
+                SILK_INFO("Sim version {}:\b \t{} barometer, \t{} gps, \t{} sonar, \t{} voltage sensor, \t{} current sensor",
                            m_received_config.version,
                            m_received_config.has_barometer ? "has a" : "doesn't have",
                            m_received_config.has_gps ? "has a" : "doesn't have",

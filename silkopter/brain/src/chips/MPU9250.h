@@ -9,12 +9,6 @@ namespace silk
 class MPU9250 : public q::util::Noncopyable
 {
 public:
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
     enum class Gyroscope_Range
     {
         _250_DPS = 250,
@@ -30,7 +24,7 @@ public:
         _16_G = 16,
     };
 
-    auto init(q::String const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> Result;
+    auto init(q::String const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool;
 
     void process();
 
@@ -44,7 +38,7 @@ public:
 private:
     void reset_fifo();
 
-    auto setup_compass() -> Result;
+    auto setup_compass() -> bool;
     void mpu_set_bypass(bool on);
     void process_compass();
 

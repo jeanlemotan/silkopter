@@ -338,17 +338,15 @@ size_t HAL_Sensors_Sim::get_error_count() const
     return m_error_count + m_sim_comms.get_error_count();
 }
 
-auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool
 {
     uint8_t dt = 0;
     math::vec3f v;
-    auto result = channel.unpack_param(dt);
-    result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    if (!channel.unpack_param(dt) || !channel.unpack_param(v))
     {
         SILK_WARNING("Failed to receive accelerometer data");
         m_error_count++;
-        return result;
+        return false;
     }
 
     auto& sample = m_accelerometer_sample;
@@ -357,19 +355,17 @@ auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) 
     sample.time_point += std::chrono::milliseconds(dt);
     sample.sample_idx++;
     m_accelerometer_samples.push_back(sample);
-    return result;
+    return true;
 }
-auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool
 {
     uint8_t dt = 0;
     math::vec3f v;
-    auto result = channel.unpack_param(dt);
-    result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    if (!channel.unpack_param(dt) || !channel.unpack_param(v))
     {
         SILK_WARNING("Failed to receive gyroscope data");
         m_error_count++;
-        return result;
+        return false;
     }
 
     auto& sample = m_gyroscope_sample;
@@ -378,17 +374,16 @@ auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> S
     sample.time_point += std::chrono::milliseconds(dt);
     sample.sample_idx++;
     m_gyroscope_samples.push_back(sample);
-    return result;
+    return false;
 }
-auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> bool
 {
     math::vec3f v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    if (!channel.unpack_param(v))
     {
         SILK_WARNING("Failed to receive compass data");
         m_error_count++;
-        return result;
+        return false;
     }
 
     auto now = q::Clock::now();
@@ -398,137 +393,61 @@ auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> Sim
     sample.time_point = now;
     sample.sample_idx++;
     m_compass_samples.push_back(sample);
-    return result;
+    return true;
 }
-auto HAL_Sensors_Sim::process_barometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+
+template<class SAMPLE_T>
+auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample, std::vector<SAMPLE_T>& samples) -> bool
 {
-    float v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    decltype(sample.value) v;
+    if (!channel.unpack_param(v))
     {
-        SILK_WARNING("Failed to receive barometer data");
+        SILK_WARNING("Failed to receive sensor sample");
         m_error_count++;
-        return result;
+        return false;
     }
 
     auto now = q::Clock::now();
-    auto& sample = m_barometer_sample;
     sample.value = v;
     sample.dt = sample.time_point - now;
     sample.time_point = now;
     sample.sample_idx++;
-    m_barometer_samples.push_back(sample);
-    return result;
+    samples.push_back(sample);
+    return true;
 }
-auto HAL_Sensors_Sim::process_thermometer_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
-{
-    float v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive thermometer data");
-        m_error_count++;
-        return result;
-    }
 
-    auto now = q::Clock::now();
-    auto& sample = m_thermometer_sample;
-    sample.value = v;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
-    sample.sample_idx++;
-    m_thermometer_samples.push_back(sample);
-    return result;
+auto HAL_Sensors_Sim::process_barometer_sensor(Sim_Comms::Channel& channel) -> bool
+{
+    return unpack_sensor_sample(channel, m_barometer_sample, m_barometer_samples);
 }
-auto HAL_Sensors_Sim::process_sonar_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_thermometer_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    float v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive sonar data");
-        m_error_count++;
-        return result;
-    }
-
-    auto now = q::Clock::now();
-    auto& sample = m_sonar_sample;
-    sample.value = v;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
-    sample.sample_idx++;
-    m_sonar_samples.push_back(sample);
-    return result;
+    return unpack_sensor_sample(channel, m_thermometer_sample, m_thermometer_samples);
 }
-auto HAL_Sensors_Sim::process_voltage_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_sonar_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    float v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive voltage data");
-        m_error_count++;
-        return result;
-    }
-
-    auto now = q::Clock::now();
-    auto& sample = m_voltage_sample;
-    sample.value = v;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
-    sample.sample_idx++;
-    m_voltage_samples.push_back(sample);
-    return result;
+    return unpack_sensor_sample(channel, m_sonar_sample, m_sonar_samples);
 }
-auto HAL_Sensors_Sim::process_current_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_voltage_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    float v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive current data");
-        m_error_count++;
-        return result;
-    }
-
-    auto now = q::Clock::now();
-    auto& sample = m_current_sample;
-    sample.value = v;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
-    sample.sample_idx++;
-    m_current_samples.push_back(sample);
-    return result;
+    return unpack_sensor_sample(channel, m_voltage_sample, m_voltage_samples);
 }
-auto HAL_Sensors_Sim::process_gps_sensor(Sim_Comms::Channel& channel) -> Sim_Comms::Channel::Unpack_Result
+auto HAL_Sensors_Sim::process_current_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    GPS v;
-    auto result = channel.unpack_param(v);
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
-    {
-        SILK_WARNING("Failed to receive gps data");
-        m_error_count++;
-        return result;
-    }
-
-//    auto now = q::Clock::now();
-//    auto& sample = m_gps_sample;
-//    sample.value = v;
-//    sample.dt = sample.time_point - now;
-//    sample.time_point = now;
-//    sample.sample_idx++;
-//    m_gps_samples.push_back(sample);
-    return result;
+    return unpack_sensor_sample(channel, m_current_sample, m_current_samples);
+}
+auto HAL_Sensors_Sim::process_gps_sensor(Sim_Comms::Channel& channel) -> bool
+{
+    return unpack_sensor_sample(channel, m_gps_sample, m_gps_samples);
 }
 
 void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)
 {
-    auto result = channel.begin_unpack();
-    if (result == Sim_Comms::Channel::Unpack_Result::OK)
+    bool result = false;
+    if (channel.begin_unpack())
     {
         Sim_Comms::Sensors sensors;
-        result = channel.unpack_param(sensors);
-        if (result == Sim_Comms::Channel::Unpack_Result::OK)
+        if (channel.unpack_param(sensors))
         {
             if (sensors.test(Sim_Comms::Sensor::ACCELEROMETER))
             {
@@ -570,7 +489,7 @@ void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)
     }
     channel.end_unpack();
 
-    if (result != Sim_Comms::Channel::Unpack_Result::OK)
+    if (!result)
     {
         SILK_WARNING("Failed to receive sensor data");
         m_error_count++;

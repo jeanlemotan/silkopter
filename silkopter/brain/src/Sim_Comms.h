@@ -14,13 +14,7 @@ class Sim_Comms : q::util::Noncopyable
 public:
     Sim_Comms(boost::asio::io_service& io_service);
 
-    enum class Result
-    {
-        OK,
-        FAILED
-    };
-
-    auto connect() -> Result;
+    auto connect() -> bool;
     void disconnect();
 
     bool is_connected() const;
