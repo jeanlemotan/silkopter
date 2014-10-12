@@ -262,15 +262,15 @@ auto UAV::get_motor_mixer() -> Motor_Mixer const&
     return m_motor_mixer;
 }
 
-auto UAV::get_linear_acceleration() const -> math::vec3f const&
+auto UAV::get_linear_acceleration_w() const -> math::vec3f const&
 {
     return m_linear_motion.acceleration;
 }
-auto UAV::get_velocity() const -> math::vec3f const&
+auto UAV::get_velocity_w() const -> math::vec3f const&
 {
     return m_linear_motion.velocity;
 }
-auto UAV::get_position() const -> math::vec3f const&
+auto UAV::get_position_w() const -> math::vec3f const&
 {
     return m_linear_motion.position;
 }
@@ -475,7 +475,7 @@ void UAV::process_sensor_data(q::Clock::duration dt)
             //auto old_acceleration = m_linear_motion.acceleration;
             math::vec3f acceleration = m_last_accelerometer_sample.value;
             //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
-            auto new_acceleration = math::transform(m_ahrs.get_b2e_mat(), acceleration) - math::vec3f(0, 0, physics::constants::g);
+            auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
             //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
 
 //            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);

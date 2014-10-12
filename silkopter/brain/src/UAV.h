@@ -30,9 +30,9 @@ public:
     auto get_ahrs() -> AHRS const&;
     auto get_motor_mixer() -> Motor_Mixer const&;
 
-    auto get_linear_acceleration() const -> math::vec3f const&;
-    auto get_velocity() const -> math::vec3f const&;
-    auto get_position() const -> math::vec3f const&;
+    auto get_linear_acceleration_w() const -> math::vec3f const&;
+    auto get_velocity_w() const -> math::vec3f const&;
+    auto get_position_w() const -> math::vec3f const&;
 
     typedef util::PID<float, util::Butterworth_500_20_LPF> Yaw_Rate_PID;
     typedef util::PID<float, util::Butterworth_500_20_LPF> Pitch_Rate_PID;

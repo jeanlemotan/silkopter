@@ -866,10 +866,10 @@ void Comms::send_uav_data()
     }
     m_uav_sent_timestamp = now;
 
-    m_channel->send(detail::Comm_Message::UAV_ROTATION, m_uav.get_ahrs().get_b2e_quat());
-    m_channel->send(detail::Comm_Message::UAV_LINEAR_ACCELERATION, m_uav.get_linear_acceleration());
-    m_channel->send(detail::Comm_Message::UAV_VELOCITY, m_uav.get_velocity());
-    m_channel->send(detail::Comm_Message::UAV_POSITION, m_uav.get_position());
+    m_channel->send(detail::Comm_Message::UAV_ROTATION_L2W, m_uav.get_ahrs().get_quat_l2w());
+    m_channel->send(detail::Comm_Message::UAV_LINEAR_ACCELERATION_W, m_uav.get_linear_acceleration_w());
+    m_channel->send(detail::Comm_Message::UAV_VELOCITY_W, m_uav.get_velocity_w());
+    m_channel->send(detail::Comm_Message::UAV_POSITION_W, m_uav.get_position_w());
 }
 
 void Comms::process()

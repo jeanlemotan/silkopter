@@ -28,7 +28,7 @@ void AHRS::process(Gyroscope_Sample const& gyroscope,
         {
             auto av = theta*0.5f;
             av_length = theta_magnitude;
-            auto& a = m_b2e_quat;
+            auto& a = m_quat_l2w;
             float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
             float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
             float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -69,15 +69,15 @@ void AHRS::process(Gyroscope_Sample const& gyroscope,
 
 //        SILK_INFO("{} / {}", accelerometer.value.acceleration, compass.value);
 
-        m_earth_frame_up = math::normalized<float, math::safe>(accelerometer.value); //acceleration points opposite of gravity - so up
-        m_earth_frame_front = math::normalized<float, math::safe>(compass.value); //this is always good
-        m_earth_frame_right = math::normalized<float, math::safe>(math::cross(m_earth_frame_front, m_earth_frame_up));
-        m_earth_frame_front = math::cross(m_earth_frame_right, m_earth_frame_up);
+        m_noisy_up_w = math::normalized<float, math::safe>(accelerometer.value); //acceleration points opposite of gravity - so up
+        m_noisy_front_w = math::normalized<float, math::safe>(compass.value); //this is always good
+        m_noisy_right_w = math::normalized<float, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
+        m_noisy_front_w = math::cross(m_noisy_right_w, m_noisy_up_w);
         //m_earth_frame_up = math::cross(m_earth_frame_right, m_earth_frame_front);
 
-        math::mat3f mat(m_earth_frame_front, m_earth_frame_right, m_earth_frame_up);
-        m_b2e_quat_noisy.set_from_mat3(mat);
-        m_b2e_quat_noisy.invert();
+        math::mat3f mat(m_noisy_front_w, m_noisy_right_w, m_noisy_up_w);
+        m_noisy_quat_l2w.set_from_mat3(mat);
+        m_noisy_quat_l2w.invert();
 
         auto now = q::Clock::now();
         auto dt = now - m_last_correction_timestamp;
@@ -89,7 +89,7 @@ void AHRS::process(Gyroscope_Sample const& gyroscope,
         if (xxx > 0)
         {
             xxx--;
-            m_b2e_quat = m_b2e_quat_noisy;
+            m_quat_l2w = m_noisy_quat_l2w;
         }
         else
         {
@@ -98,8 +98,8 @@ void AHRS::process(Gyroscope_Sample const& gyroscope,
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
                 float mu = dtf * 0.5f + av_length;
-                m_b2e_quat = math::nlerp<float, math::safe>(m_b2e_quat, m_b2e_quat_noisy, mu);
-                m_b2e_quat = math::normalized<float, math::safe>(m_b2e_quat);
+                m_quat_l2w = math::nlerp<float, math::safe>(m_quat_l2w, m_noisy_quat_l2w, mu);
+                m_quat_l2w = math::normalized<float, math::safe>(m_quat_l2w);
             }
         }
 
@@ -108,58 +108,73 @@ void AHRS::process(Gyroscope_Sample const& gyroscope,
 
     if (rotation_dirty)
     {
-        m_e2b_quat = math::inverse<float, math::safe>(m_b2e_quat);
-        m_b2e_quat.get_as_mat3_and_inv<math::safe>(m_b2e_mat, m_e2b_mat);
+        m_quat_w2l = math::inverse<float, math::safe>(m_quat_l2w);
+        m_quat_l2w.get_as_mat3_and_inv<math::safe>(m_mat_l2w, m_mat_w2l);
     }
 
 
     //q::quick_logf("front {}, right {}, down {}", get_front_vector(), get_right_vector(), get_up_vector());
 }
 
-auto AHRS::get_angular_velocity() const -> math::vec3f const&
+auto AHRS::get_angular_velocity_l() const -> math::vec3f const&
 {
     return m_angular_velocity;
 }
-math::quatf const& AHRS::get_b2e_quat() const
+math::quatf const& AHRS::get_quat_l2w() const
 {
-    return m_b2e_quat;
+    return m_quat_l2w;
 }
-math::mat3f const& AHRS::get_b2e_mat() const
+math::mat3f const& AHRS::get_mat_l2w() const
 {
-    return m_b2e_mat;
+    return m_mat_l2w;
 }
-math::quatf const& AHRS::get_e2b_quat() const
+math::quatf const& AHRS::get_quat_w2l() const
 {
-    return m_e2b_quat;
+    return m_quat_w2l;
 }
-math::mat3f const& AHRS::get_e2b_mat() const
+math::mat3f const& AHRS::get_mat_w2l() const
 {
-    return m_e2b_mat;
+    return m_mat_w2l;
 }
-math::vec3f const& AHRS::get_front_vector() const
+math::vec3f const& AHRS::get_front_vector_w() const
 {
-    return m_b2e_mat.get_axis_y();
+    return m_mat_l2w.get_axis_y();
 }
-math::vec3f const& AHRS::get_right_vector() const
+math::vec3f const& AHRS::get_right_vector_w() const
 {
-    return m_b2e_mat.get_axis_x();
+    return m_mat_l2w.get_axis_x();
 }
-math::vec3f const& AHRS::get_up_vector() const
+math::vec3f const& AHRS::get_up_vector_w() const
 {
-    return m_b2e_mat.get_axis_z();
+    return m_mat_l2w.get_axis_z();
+}
+math::vec3f const& AHRS::get_front_vector_l() const
+{
+    static const math::vec3f front(0, 1, 0);
+    return front;
+}
+math::vec3f const& AHRS::get_right_vector_l() const
+{
+    static const math::vec3f right(1, 0, 0);
+    return right;
+}
+math::vec3f const& AHRS::get_up_vector_l() const
+{
+    static const math::vec3f up(0, 0, 1);
+    return up;
 }
 
 void AHRS::reset()
 {
-    m_b2e_mat = math::mat3f::identity;
-    m_b2e_quat = math::quatf::identity;
-    m_e2b_mat = math::mat3f::identity;
-    m_e2b_quat = math::quatf::identity;
+    m_mat_l2w = math::mat3f::identity;
+    m_quat_l2w = math::quatf::identity;
+    m_mat_w2l = math::mat3f::identity;
+    m_quat_w2l = math::quatf::identity;
 
-    m_earth_frame_front = math::vec3f::zero;
-    m_earth_frame_right = math::vec3f::zero;
-    m_earth_frame_up = math::vec3f::zero;
-    m_b2e_quat_noisy = math::quatf::identity;
+    m_noisy_front_w = math::vec3f::zero;
+    m_noisy_right_w = math::vec3f::zero;
+    m_noisy_up_w = math::vec3f::zero;
+    m_noisy_quat_l2w = math::quatf::identity;
 
     m_angular_velocity = math::vec3f::zero;
 }

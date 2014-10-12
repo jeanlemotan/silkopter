@@ -83,7 +83,6 @@ void Attitude::render_ground(q::draw::Painter& painter, q::scene::Camera const& 
 
     const float k_size = 10000;
     const int k_line_count = 60;
-    const int k_fade_size = 10;
 
     painter.fill_rectangle(q::draw::Vertex(math::vec3f(-k_size, -k_size, 0), 0x20FFFFFF), q::draw::Vertex(math::vec3f(k_size, k_size, 0), 0x20FFFFFF));
     for (int i = 0; i < k_line_count; i++)
@@ -173,7 +172,7 @@ void Attitude::render(silk::Comms& comms)
 
     auto camera_offset = m_camera.get_position() - m_uav_position;
 
-    math::vec3f position = comms.get_uav_position_sample().value;
+    math::vec3f position = comms.get_uav_position_w();
     //position.z = 0;
 
     m_uav_position = position;
@@ -183,7 +182,7 @@ void Attitude::render(silk::Comms& comms)
     m_painter.set_camera(m_camera);
 
     {
-        m_attitude_quat = comms.get_uav_rotation_sample().value;
+        m_attitude_quat = comms.get_uav_rotation_l2w();
         m_local_to_world_quat = m_attitude_quat;
         m_world_to_local_quat = math::inverse<float, math::fast>(m_local_to_world_quat);
         m_local_to_world_quat.get_as_mat3_and_inv<math::fast>(m_local_to_world_mat, m_world_to_local_mat);

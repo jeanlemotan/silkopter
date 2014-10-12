@@ -79,21 +79,21 @@ void UAV_Inertial::process()
             double seconds = q::Seconds(remote_now - m_graph_remote_epoch).count();
 
             {
-                auto data = m_comms->get_uav_linear_acceleration_sample().value;
+                auto data = m_comms->get_uav_linear_acceleration_w();
                 m_ui.acceleration_plot->graph(0)->addData(seconds, data.x);
                 m_ui.acceleration_plot->graph(1)->addData(seconds, data.y);
                 m_ui.acceleration_plot->graph(2)->addData(seconds, data.z);
             }
 
             {
-                auto data = m_comms->get_uav_velocity_sample().value;
+                auto data = m_comms->get_uav_velocity_w();
                 m_ui.velocity_plot->graph(0)->addData(seconds, data.x);
                 m_ui.velocity_plot->graph(1)->addData(seconds, data.y);
                 m_ui.velocity_plot->graph(2)->addData(seconds, data.z);
             }
 
             {
-                auto data = m_comms->get_uav_position_sample().value;
+                auto data = m_comms->get_uav_position_w();
                 m_ui.position_plot->graph(0)->addData(seconds, data.x);
                 m_ui.position_plot->graph(1)->addData(seconds, data.y);
                 m_ui.position_plot->graph(2)->addData(seconds, data.z);

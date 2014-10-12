@@ -45,11 +45,10 @@ namespace detail
 
         //------------------------
         //UAV
-        UAV_PING,
-        UAV_ROTATION, //local to world
-        UAV_LINEAR_ACCELERATION,
-        UAV_VELOCITY,
-        UAV_POSITION
+        UAV_ROTATION_L2W,
+        UAV_LINEAR_ACCELERATION_W,
+        UAV_VELOCITY_W,
+        UAV_POSITION_W
     };
 
     enum class Comm_Message_Sensor : uint16_t

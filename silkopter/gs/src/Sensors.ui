@@ -45,67 +45,6 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QToolButton" name="save_history">
-        <property name="text">
-         <string>S</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="clear_history">
-        <property name="text">
-         <string>C</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="load_history">
-        <property name="text">
-         <string>L</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/icons/load.png</normaloff>:/icons/load.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="rewind_history">
-        <property name="text">
-         <string>R</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/icons/rewind.png</normaloff>:/icons/rewind.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="play_history">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -256,16 +195,6 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QCustomPlot" name="g_spectrum" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QCustomPlot" name="g_plot" native="true">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
@@ -306,25 +235,6 @@
                   </property>
                   <property name="text">
                    <string>Calibrate</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="g_test_filter">
-                  <property name="minimumSize">
-                   <size>
-                    <width>140</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Test Filters</string>
                   </property>
                  </widget>
                 </item>
@@ -407,16 +317,6 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QCustomPlot" name="a_spectrum" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QCustomPlot" name="a_plot" native="true">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
@@ -457,25 +357,6 @@
                   </property>
                   <property name="text">
                    <string>Calibrate</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="a_test_filter">
-                  <property name="minimumSize">
-                   <size>
-                    <width>140</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Test Filters</string>
                   </property>
                  </widget>
                 </item>
@@ -714,9 +595,7 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>show_gyroscope</sender>

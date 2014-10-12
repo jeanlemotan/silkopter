@@ -4,6 +4,7 @@
 #include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "common/Remote_Clock.h"
+#include "common/Comm_Data.h"
 #include "utils/PID.h"
 
 namespace silk
@@ -36,37 +37,30 @@ public:
     template<typename... Params>
     void send_camera_input(camera_input::Input input, Params&&... params)
     {
-        m_channel.send(Message::CAMERA_INPUT, input, params...);
+        m_channel.send(detail::Comm_Message::CAMERA_INPUT, input, params...);
     }
 
     template<typename... Params>
     void send_uav_input(uav_input::Input input, Params&&... params)
     {
-        m_channel.send(Message::UAV_INPUT, input, params...);
+        m_channel.send(detail::Comm_Message::UAV_INPUT, input, params...);
     }
 
 
-    auto get_accelerometer_samples() const  -> std::vector<Accelerometer_Sample> const&;
-    auto get_gyroscope_samples() const      -> std::vector<Gyroscope_Sample> const&;
-    auto get_compass_samples() const        -> std::vector<Compass_Sample> const&;
-    auto get_barometer_samples() const      -> std::vector<Barometer_Sample> const&;
-    auto get_sonar_samples() const          -> std::vector<Sonar_Sample> const&;
-    auto get_thermometer_samples() const    -> std::vector<Thermometer_Sample> const&;
-    auto get_voltage_samples() const        -> std::vector<Voltage_Sample> const&;
-    auto get_current_samples() const        -> std::vector<Current_Sample> const&;
-    auto get_gps_samples() const            -> std::vector<GPS_Sample> const&;
+    auto get_accelerometer_sample() const  -> Accelerometer_Sample const&;
+    auto get_gyroscope_sample() const      -> Gyroscope_Sample const&;
+    auto get_compass_sample() const        -> Compass_Sample const&;
+    auto get_barometer_sample() const      -> Barometer_Sample const&;
+    auto get_sonar_sample() const          -> Sonar_Sample const&;
+    auto get_thermometer_sample() const    -> Thermometer_Sample const&;
+    auto get_voltage_sample() const        -> Voltage_Sample const&;
+    auto get_current_sample() const        -> Current_Sample const&;
+    auto get_gps_sample() const            -> GPS_Sample const&;
 
-    typedef Sensor_Sample<math::quatf> UAV_Rotation_Sample; //local to world
-    auto get_uav_rotation_sample() const -> UAV_Rotation_Sample;
-
-    typedef Sensor_Sample<math::vec3f> UAV_Linear_Acceleration_Sample; //meters / second^2
-    auto get_uav_linear_acceleration_sample() const -> UAV_Linear_Acceleration_Sample;
-
-    typedef Sensor_Sample<math::vec3f> UAV_Velocity_Sample; //meters / second
-    auto get_uav_velocity_sample() const -> UAV_Velocity_Sample;
-
-    typedef Sensor_Sample<math::vec3f> UAV_Position_Sample; //meters
-    auto get_uav_position_sample() const -> UAV_Position_Sample;
+    auto get_uav_rotation_l2w() const -> math::quatf const&;
+    auto get_uav_linear_acceleration_w() const -> math::vec3f const&;
+    auto get_uav_velocity_w() const -> math::vec3f const&;
+    auto get_uav_position_w() const -> math::vec3f const&;
 
     //----------------------------------------------------------------------
     //calibration
@@ -134,55 +128,10 @@ private:
     boost::asio::io_service& m_io_service;
     uint16_t m_port = 0;
 
-    enum class Message : uint16_t
-    {
-        PING,
-        PONG,
-
-        //------------------------
-        CAMERA_INPUT,
-        UAV_INPUT,
-
-        //------------------------
-        //sensors
-        SENSORS,
-
-        //------------------------
-        //calibration
-
-        CALIBRATION_ACCELEROMETER,
-        CALIBRATION_GYROSCOPE,
-        CALIBRATION_COMPASS,
-
-        //------------------------
-        //pids
-
-        YAW_RATE_PID_PARAMS,
-        PITCH_RATE_PID_PARAMS,
-        ROLL_RATE_PID_PARAMS,
-        ALTITUDE_RATE_PID_PARAMS,
-
-        YAW_PID_PARAMS,
-        PITCH_PID_PARAMS,
-        ROLL_PID_PARAMS,
-        ALTITUDE_PID_PARAMS,
-
-        //------------------------
-        //uav misc params
-        ASSIST_PARAMS,
-
-        //------------------------
-        //UAV
-        UAV_ROTATION, //local to world
-        UAV_LINEAR_ACCELERATION,
-        UAV_VELOCITY,
-        UAV_POSITION
-    };
-
     boost::asio::ip::tcp::socket m_socket;
     boost::asio::ip::tcp::endpoint m_remote_endpoint;
 
-    typedef util::Channel<Message,
+    typedef util::Channel<detail::Comm_Message,
                         uint32_t,
                         boost::asio::ip::tcp::socket> Channel;
 
@@ -192,21 +141,6 @@ private:
     Remote_Clock m_remote_clock;
 
     size_t m_error_count = 0;
-
-    enum class Sensor : uint16_t
-    {
-        ACCELEROMETER   = 1 << 0,
-        GYROSCOPE       = 1 << 1,
-        COMPASS         = 1 << 2,
-        BAROMETER       = 1 << 3,
-        THERMOMETER     = 1 << 4,
-        SONAR           = 1 << 5,
-        GPS             = 1 << 6,
-        VOLTAGE         = 1 << 7,
-        CURRENT         = 1 << 8,
-    };
-    typedef q::util::Flag_Set<Sensor, uint16_t> Sensors;
-
 
     void process_message_ping();
     void process_message_pong();
@@ -232,31 +166,31 @@ private:
     void process_message_roll_pid_params();
     void process_message_altitude_pid_params();
 
-    void process_message_uav_rotation();
-    void process_message_uav_linear_acceleration();
-    void process_message_uav_velocity();
-    void process_message_uav_position();
+    void process_message_uav_rotation_l2w();
+    void process_message_uav_linear_acceleration_w();
+    void process_message_uav_velocity_w();
+    void process_message_uav_position_w();
 
 
     struct Sensor_Samples
     {
-        std::vector<Accelerometer_Sample> accelerometer;
-        std::vector<Gyroscope_Sample> gyroscope;
-        std::vector<Compass_Sample> compass;
-        std::vector<Barometer_Sample> barometer;
-        std::vector<Sonar_Sample> sonar;
-        std::vector<Thermometer_Sample> thermometer;
-        std::vector<Voltage_Sample> voltage;
-        std::vector<Current_Sample> current;
-        std::vector<GPS_Sample> gps;
+        Accelerometer_Sample accelerometer;
+        Gyroscope_Sample gyroscope;
+        Compass_Sample compass;
+        Barometer_Sample barometer;
+        Sonar_Sample sonar;
+        Thermometer_Sample thermometer;
+        Voltage_Sample voltage;
+        Current_Sample current;
+        GPS_Sample gps;
     } m_sensor_samples;
 
     struct UAV
     {
-        UAV_Rotation_Sample rotation;
-        UAV_Linear_Acceleration_Sample linear_acceleration;
-        UAV_Velocity_Sample velocity;
-        UAV_Position_Sample position;
+        math::quatf rotation_l2w;
+        math::vec3f linear_acceleration_w;
+        math::vec3f velocity_w;
+        math::vec3f position_w;
     } m_uav;
 
     struct Ping
