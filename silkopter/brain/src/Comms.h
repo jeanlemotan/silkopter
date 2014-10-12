@@ -56,9 +56,11 @@ private:
     void process_message_calibration_gyroscope();
     void process_message_calibration_compass();
 
-    void send_sensor_data();
-    void send_raw_sensor_data(detail::Comm_Message_Sensors sensors);
-    void store_raw_sensor_data();
+    void send_sensor_samples();
+    void send_raw_sensor_samples(detail::Comm_Message_Sensors sensors);
+
+    void store_raw_sensor_samples();
+    void clear_raw_sensor_samples();
 
     struct Sensor_Samples
     {
@@ -75,16 +77,16 @@ private:
     } m_sensor_samples;
     struct Raw_Sensor_Samples
     {
-        static const size_t MAX_SIZE = 2048;
-        boost::circular_buffer<Gyroscope_Sample> gyroscope;
-        boost::circular_buffer<Accelerometer_Sample> accelerometer;
-        boost::circular_buffer<Compass_Sample> compass;
-        boost::circular_buffer<Barometer_Sample> barometer;
-        boost::circular_buffer<Thermometer_Sample> thermometer;
-        boost::circular_buffer<Sonar_Sample> sonar;
-        boost::circular_buffer<Voltage_Sample> voltage;
-        boost::circular_buffer<Current_Sample> current;
-        boost::circular_buffer<GPS_Sample> gps;
+        q::Clock::time_point last_sent;
+        std::vector<Gyroscope_Sample> gyroscope;
+        std::vector<Accelerometer_Sample> accelerometer;
+        std::vector<Compass_Sample> compass;
+        std::vector<Barometer_Sample> barometer;
+        std::vector<Thermometer_Sample> thermometer;
+        std::vector<Sonar_Sample> sonar;
+        std::vector<Voltage_Sample> voltage;
+        std::vector<Current_Sample> current;
+        std::vector<GPS_Sample> gps;
     } m_raw_sensor_samples;
 
     HAL& m_hal;

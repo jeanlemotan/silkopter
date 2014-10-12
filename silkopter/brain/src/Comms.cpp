@@ -11,15 +11,15 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 {
     m_ping.last_time_point = q::Clock::now();
 
-    m_raw_sensor_samples.gyroscope.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.accelerometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.compass.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.barometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.thermometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.sonar.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.voltage.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.current.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
-    m_raw_sensor_samples.gps.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.gyroscope.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.accelerometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.compass.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.barometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.thermometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.sonar.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.voltage.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.current.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.gps.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
 }
 
 auto Comms::start_listening(uint16_t port) -> bool
@@ -513,7 +513,7 @@ void Comms::process_message_raw_sensors()
         return;
     }
 
-    send_raw_sensor_data(sensors);
+    send_raw_sensor_samples(sensors);
 }
 
 
@@ -589,7 +589,7 @@ void Comms::process_message_calibration_compass()
     }
 }
 
-void Comms::send_raw_sensor_data(detail::Comm_Message_Sensors sensors)
+void Comms::send_raw_sensor_samples(detail::Comm_Message_Sensors sensors)
 {
     QASSERT(m_hal.sensors);
     if (!sensors.any())
@@ -604,89 +604,120 @@ void Comms::send_raw_sensor_data(detail::Comm_Message_Sensors sensors)
     if (sensors.test(detail::Comm_Message_Sensor::GYROSCOPE))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.gyroscope.size()));
-        for (auto& a: m_raw_sensor_samples.gyroscope)
-        {
-            m_channel->pack_param(a);
-        }
-        m_raw_sensor_samples.gyroscope.clear();
+        for (auto& a: m_raw_sensor_samples.gyroscope) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::ACCELEROMETER))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.accelerometer.size()));
-        for (auto& a: m_raw_sensor_samples.accelerometer)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.accelerometer.clear();
+        for (auto& a: m_raw_sensor_samples.accelerometer) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::COMPASS))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.compass.size()));
-        for (auto& a: m_raw_sensor_samples.compass)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.compass.clear();
+        for (auto& a: m_raw_sensor_samples.compass) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::BAROMETER))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.barometer.size()));
-        for (auto& a: m_raw_sensor_samples.barometer)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.barometer.clear();
+        for (auto& a: m_raw_sensor_samples.barometer) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::THERMOMETER))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.thermometer.size()));
-        for (auto& a: m_raw_sensor_samples.thermometer)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.thermometer.clear();
+        for (auto& a: m_raw_sensor_samples.thermometer) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::SONAR))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.sonar.size()));
-        for (auto& a: m_raw_sensor_samples.sonar)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.sonar.clear();
+        for (auto& a: m_raw_sensor_samples.sonar) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::VOLTAGE))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.voltage.size()));
-        for (auto& a: m_raw_sensor_samples.voltage)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.voltage.clear();
+        for (auto& a: m_raw_sensor_samples.voltage) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::CURRENT))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.current.size()));
-        for (auto& a: m_raw_sensor_samples.current)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.current.clear();
+        for (auto& a: m_raw_sensor_samples.current) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::GPS))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.gps.size()));
-        for (auto& a: m_raw_sensor_samples.gps)
-        {
-            m_channel->pack_param(a.value);
-        }
-        m_raw_sensor_samples.gps.clear();
+        for (auto& a: m_raw_sensor_samples.gps) { m_channel->pack_param(a); }
     }
 
     m_channel->end_pack(detail::Comm_Message::SENSORS);
+
+    m_raw_sensor_samples.last_sent = q::Clock::now();
+    clear_raw_sensor_samples();
 }
 
-void Comms::send_sensor_data()
+void Comms::clear_raw_sensor_samples()
+{
+    m_raw_sensor_samples.gyroscope.clear();
+    m_raw_sensor_samples.accelerometer.clear();
+    m_raw_sensor_samples.compass.clear();
+    m_raw_sensor_samples.barometer.clear();
+    m_raw_sensor_samples.thermometer.clear();
+    m_raw_sensor_samples.sonar.clear();
+    m_raw_sensor_samples.voltage.clear();
+    m_raw_sensor_samples.current.clear();
+    m_raw_sensor_samples.gps.clear();
+}
+
+void Comms::store_raw_sensor_samples()
+{
+    constexpr std::chrono::seconds MAX_DURATION{4};
+
+    auto now = q::Clock::now();
+    if (now - m_raw_sensor_samples.last_sent >= MAX_DURATION)
+    {
+        clear_raw_sensor_samples();
+        return;
+    }
+
+    {
+        auto const& samples = m_hal.sensors->get_gyroscope_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gyroscope));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_accelerometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.accelerometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_compass_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.compass));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_barometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.barometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_thermometer_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.thermometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_sonar_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.sonar));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_voltage_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.voltage));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_current_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.current));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_gps_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gps));
+    }
+
+}
+
+
+void Comms::send_sensor_samples()
 {
     QASSERT(m_hal.sensors);
     auto now = q::Clock::now();
@@ -823,46 +854,6 @@ void Comms::send_sensor_data()
     m_sensor_samples.last_sent_timestamp = now;
 }
 
-void Comms::store_raw_sensor_data()
-{
-    {
-        auto const& samples = m_hal.sensors->get_gyroscope_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gyroscope));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_accelerometer_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.accelerometer));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_compass_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.compass));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_barometer_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.barometer));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_thermometer_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.thermometer));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_sonar_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.sonar));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_voltage_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.voltage));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_current_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.current));
-    }
-    {
-        auto const& samples = m_hal.sensors->get_gps_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gps));
-    }
-
-}
 
 void Comms::send_uav_data()
 {
@@ -927,9 +918,9 @@ void Comms::process()
         }
     }
 
-    store_raw_sensor_data();
+    store_raw_sensor_samples();
 
-    send_sensor_data();
+    send_sensor_samples();
     send_uav_data();
 
     auto now = q::Clock::now();
