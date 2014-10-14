@@ -2,6 +2,8 @@
 
 #ifdef RASPBERRY_PI
 
+#include "hal_motors_gpio.cfg.hpp"
+
 #include "HAL_Motors_PiGPIO.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
@@ -28,26 +30,11 @@ HAL_Motors_PiGPIO::~HAL_Motors_PiGPIO()
 
 auto HAL_Motors_PiGPIO::load_settings() -> bool
 {
-    q::data::File_Source fs(q::Path("motors.cfg"));
-    if (!fs.is_open())
+    autojsoncxx::ParsingResult result;
+    Motors m;
+    if (!autojsoncxx::from_json_file("motors.cfg", m, result))
     {
-        return false;
-    }
-
-    auto size = fs.get_size();
-
-    std::vector<char> data(size + 1);
-    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
-    if (result != size)
-    {
-        SILK_WARNING("Failed to read settings.");
-        return false;
-    }
-
-    data[size] = 0;
-    if (m_settings.document.Parse<0>(data.data()).HasParseError())
-    {
-        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
+        SILK_WARNING("Failed to load motors.cfg: {}", result.description());
         return false;
     }
 
@@ -55,30 +42,30 @@ auto HAL_Motors_PiGPIO::load_settings() -> bool
 }
 void HAL_Motors_PiGPIO::save_settings()
 {
-    TIMED_FUNCTION();
-    if (!m_settings.document.IsObject())
-    {
-        m_settings.document.SetObject();
-    }
+//    TIMED_FUNCTION();
+//    if (!m_settings.document.IsObject())
+//    {
+//        m_settings.document.SetObject();
+//    }
 
-    auto& allocator = m_settings.document.GetAllocator();
+//    auto& allocator = m_settings.document.GetAllocator();
 
-    typedef rapidjson::UTF8<> JSON_Charset;
-    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
-    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
+//    typedef rapidjson::UTF8<> JSON_Charset;
+//    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
+//    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
 
-    JSON_Buffer buffer;
-    JSON_Writer writer(buffer);
-    m_settings.document.Accept(writer);
+//    JSON_Buffer buffer;
+//    JSON_Writer writer(buffer);
+//    m_settings.document.Accept(writer);
 
-    q::data::File_Sink fs(q::Path("motors.cfg"));
-    if (!fs.is_open())
-    {
-        SILK_WARNING("Cannot open file to save settings");
-        return;
-    }
+//    q::data::File_Sink fs(q::Path("motors.cfg"));
+//    if (!fs.is_open())
+//    {
+//        SILK_WARNING("Cannot open file to save settings");
+//        return;
+//    }
 
-    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
+//    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
 auto HAL_Motors_PiGPIO::init() -> bool

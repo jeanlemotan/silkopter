@@ -17,7 +17,7 @@ HAL_Sensors_Sim::HAL_Sensors_Sim(Sim_Comms& sim_comms)
 
 auto HAL_Sensors_Sim::load_settings() -> bool
 {
-    q::data::File_Source fs(q::Path("io_board.cfg"));
+    q::data::File_Source fs(q::Path("sensors.cfg"));
     if (!fs.is_open())
     {
         return false;
@@ -257,7 +257,7 @@ void HAL_Sensors_Sim::save_settings()
     JSON_Writer writer(buffer);
     m_settings.document.Accept(writer);
 
-    q::data::File_Sink fs(q::Path("io_board.cfg"));
+    q::data::File_Sink fs(q::Path("sensors.cfg"));
     if (!fs.is_open())
     {
         SILK_WARNING("Cannot open file to save settings");
@@ -338,82 +338,36 @@ size_t HAL_Sensors_Sim::get_error_count() const
     return m_error_count + m_sim_comms.get_error_count();
 }
 
-auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool
-{
-    uint8_t dt = 0;
-    math::vec3f v;
-    if (!channel.unpack_param(dt) || !channel.unpack_param(v))
-    {
-        SILK_WARNING("Failed to receive accelerometer data");
-        m_error_count++;
-        return false;
-    }
-
-    auto& sample = m_accelerometer_sample;
-    sample.value = (v - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
-    sample.dt = std::chrono::milliseconds(dt);
-    sample.time_point += std::chrono::milliseconds(dt);
-    sample.sample_idx++;
-    m_accelerometer_samples.push_back(sample);
-    return true;
-}
-auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool
-{
-    uint8_t dt = 0;
-    math::vec3f v;
-    if (!channel.unpack_param(dt) || !channel.unpack_param(v))
-    {
-        SILK_WARNING("Failed to receive gyroscope data");
-        m_error_count++;
-        return false;
-    }
-
-    auto& sample = m_gyroscope_sample;
-    sample.value = v - m_calibration_config.gyroscope_bias;
-    sample.dt = std::chrono::milliseconds(dt);
-    sample.time_point += std::chrono::milliseconds(dt);
-    sample.sample_idx++;
-    m_gyroscope_samples.push_back(sample);
-    return false;
-}
-auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> bool
-{
-    math::vec3f v;
-    if (!channel.unpack_param(v))
-    {
-        SILK_WARNING("Failed to receive compass data");
-        m_error_count++;
-        return false;
-    }
-
-    auto now = q::Clock::now();
-    auto& sample = m_compass_sample;
-    sample.value = v - m_calibration_config.gyroscope_bias;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
-    sample.sample_idx++;
-    m_compass_samples.push_back(sample);
-    return true;
-}
-
 template<class SAMPLE_T>
 auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample, std::vector<SAMPLE_T>& samples) -> bool
 {
+    uint8_t dt = 0;
     decltype(sample.value) v;
-    if (!channel.unpack_param(v))
+    if (!channel.unpack_param(dt) || !channel.unpack_param(v))
     {
         SILK_WARNING("Failed to receive sensor sample");
         m_error_count++;
         return false;
     }
 
-    auto now = q::Clock::now();
     sample.value = v;
-    sample.dt = sample.time_point - now;
-    sample.time_point = now;
+    sample.dt = std::chrono::milliseconds(dt);
     sample.sample_idx++;
     samples.push_back(sample);
     return true;
+}
+
+auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool
+{
+    return unpack_sensor_sample(channel, m_accelerometer_sample, m_accelerometer_samples);
+}
+auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool
+{
+    return unpack_sensor_sample(channel, m_gyroscope_sample, m_gyroscope_samples);
+}
+auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> bool
+{
+    return unpack_sensor_sample(channel, m_compass_sample, m_compass_samples);
 }
 
 auto HAL_Sensors_Sim::process_barometer_sensor(Sim_Comms::Channel& channel) -> bool

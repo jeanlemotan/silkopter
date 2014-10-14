@@ -26,14 +26,14 @@ void HAL_Motors_Sim::set_throttles(float const* throttles, size_t count)
         return;
     }
     QASSERT(count < 256);
-    m_sim_comms.m_channel.begin_stream();
-    m_sim_comms.m_channel.add_to_stream(static_cast<uint8_t>(count));
+    m_sim_comms.m_channel.begin_pack();
+    m_sim_comms.m_channel.pack_param(static_cast<uint8_t>(count));
     for (size_t i = 0; i < count; i++)
     {
        auto v = math::clamp(throttles[i], 0.f, 1.f);
-       m_sim_comms.m_channel.add_to_stream(v);
+       m_sim_comms.m_channel.pack_param(v);
     }
-    m_sim_comms.m_channel.end_stream(Sim_Comms::Message::MOTOR_OUTPUTS);
+    m_sim_comms.m_channel.end_pack(Sim_Comms::Message::MOTOR_OUTPUTS);
 }
 
 void HAL_Motors_Sim::process()

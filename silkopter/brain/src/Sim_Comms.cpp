@@ -156,7 +156,6 @@ void Sim_Comms::set_state(State state)
 {
     SILK_INFO("Switching from state {} to state {}", static_cast<int>(m_state), static_cast<int>(state));
     m_state = state;
-    m_channel.cancel_send();
 }
 
 

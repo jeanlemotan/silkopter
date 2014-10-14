@@ -97,7 +97,7 @@ private:
 
     struct Settings
     {
-        rapidjson::Document document;
+//        rapidjson::Document document;
     } m_settings;
 
     auto load_settings() -> bool;

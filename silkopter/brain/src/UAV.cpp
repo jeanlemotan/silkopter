@@ -17,203 +17,203 @@ UAV::UAV(HAL& hal)
 
 auto UAV::load_settings() -> bool
 {
-    TIMED_FUNCTION();
+//    TIMED_FUNCTION();
 
-    ////////////////////////////////////////////////////////////////////////
-    //defaults
+//    ////////////////////////////////////////////////////////////////////////
+//    //defaults
 
-    //configure a quad
-    m_motor_mixer.remove_all_motors();
-    m_motor_mixer.add_motor({ math::vec2f(0, 1), false });
-    m_motor_mixer.add_motor({ math::vec2f(-1, 0), true });
-    m_motor_mixer.add_motor({ math::vec2f(0, -1), false });
-    m_motor_mixer.add_motor({ math::vec2f(1, 0), true });
+//    //configure a quad
+//    m_motor_mixer.remove_all_motors();
+//    m_motor_mixer.add_motor({ math::vec2f(0, 1), false });
+//    m_motor_mixer.add_motor({ math::vec2f(-1, 0), true });
+//    m_motor_mixer.add_motor({ math::vec2f(0, -1), false });
+//    m_motor_mixer.add_motor({ math::vec2f(1, 0), true });
 
-    m_pids.yaw_rate.set_params(Yaw_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
-    m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
-    m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
+//    m_pids.yaw_rate.set_params(Yaw_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
+//    m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
+//    m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
 
-    ////////////////////////////////////////////////////////////////////////
+//    ////////////////////////////////////////////////////////////////////////
 
 
-    q::data::File_Source fs(q::Path("uav.cfg"));
-    if (!fs.is_open())
-    {
-        return false;
-    }
+//    q::data::File_Source fs(q::Path("uav.cfg"));
+//    if (!fs.is_open())
+//    {
+//        return false;
+//    }
 
-    auto size = fs.get_size();
+//    auto size = fs.get_size();
 
-    std::vector<char> data(size + 1);
-    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
-    if (result != size)
-    {
-        SILK_WARNING("Failed to read settings.");
-        return false;
-    }
+//    std::vector<char> data(size + 1);
+//    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
+//    if (result != size)
+//    {
+//        SILK_WARNING("Failed to read settings.");
+//        return false;
+//    }
 
-    data[size] = 0;
-    if (m_settings.document.Parse<0>(data.data()).HasParseError())
-    {
-        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
-        return false;
-    }
+//    data[size] = 0;
+//    if (m_settings.document.Parse<0>(data.data()).HasParseError())
+//    {
+//        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
+//        return false;
+//    }
 
-    auto finder = jsonutil::Member_Finder(m_settings.document, "motor_config");
-    if (finder.is_valid())
-    {
-        auto& json = finder.get_value();
-        {
-            finder = jsonutil::Member_Finder(json, "motors");
-            if (finder.is_type(rapidjson::kArrayType))
-            {
-                SILK_WARNING("Cannot read motors");
-            }
-            else
-            {
-                auto motor_count = math::min<uint8_t>(MAX_MOTOR_COUNT, finder.get_value().Size());
-                if (motor_count < 4 || (motor_count & 1) == 1)
-                {
-                    SILK_WARNING("To few motors / odd number of morors specified: {}", motor_count);
-                }
-                else
-                {
-                    std::vector<Motor_Mixer::Motor_Info> motors;
-                    for (uint8_t i = 0; i < motor_count; i++)
-                    {
-                        auto& mj = finder.get_value()[i];
-                        auto position = jsonutil::get_vec2_value<float>(mj, "position");
-                        auto clockwise = jsonutil::get_bool_value(mj, "clockwise");
-                        if (!position || !clockwise)
-                        {
-                            SILK_WARNING("Cannot read motor {}", i);
-                            motors.clear();
-                            break;
-                        }
-                        motors.emplace_back(*position, *clockwise);
-                    }
+//    auto finder = jsonutil::Member_Finder(m_settings.document, "motor_config");
+//    if (finder.is_valid())
+//    {
+//        auto& json = finder.get_value();
+//        {
+//            finder = jsonutil::Member_Finder(json, "motors");
+//            if (finder.is_type(rapidjson::kArrayType))
+//            {
+//                SILK_WARNING("Cannot read motors");
+//            }
+//            else
+//            {
+//                auto motor_count = math::min<uint8_t>(MAX_MOTOR_COUNT, finder.get_value().Size());
+//                if (motor_count < 4 || (motor_count & 1) == 1)
+//                {
+//                    SILK_WARNING("To few motors / odd number of morors specified: {}", motor_count);
+//                }
+//                else
+//                {
+//                    std::vector<Motor_Mixer::Motor_Info> motors;
+//                    for (uint8_t i = 0; i < motor_count; i++)
+//                    {
+//                        auto& mj = finder.get_value()[i];
+//                        auto position = jsonutil::get_vec2_value<float>(mj, "position");
+//                        auto clockwise = jsonutil::get_bool_value(mj, "clockwise");
+//                        if (!position || !clockwise)
+//                        {
+//                            SILK_WARNING("Cannot read motor {}", i);
+//                            motors.clear();
+//                            break;
+//                        }
+//                        motors.emplace_back(*position, *clockwise);
+//                    }
 
-                    if (!motors.empty())
-                    {
-                        m_motor_mixer.remove_all_motors();
-                        for (auto const& m: motors)
-                        {
-                            m_motor_mixer.add_motor(m);
-                        }
-                    }
-                }
-            }
-        }
-    }
+//                    if (!motors.empty())
+//                    {
+//                        m_motor_mixer.remove_all_motors();
+//                        for (auto const& m: motors)
+//                        {
+//                            m_motor_mixer.add_motor(m);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    finder = jsonutil::Member_Finder(m_settings.document, "pid_config");
-    if (finder.is_valid())
-    {
-        auto& json = finder.get_value();
-        {
-            auto params = jsonutil::get_pid_params<Yaw_Rate_PID::Params>(json, "yaw_rate");
-            if (!params)
-            {
-                SILK_WARNING("Cannot read yaw_rate");
-            }
-            else
-            {
-                m_pids.yaw_rate.set_params(*params);
-            }
-        }
-        {
-            auto params = jsonutil::get_pid_params<Pitch_Rate_PID::Params>(json, "pitch_rate");
-            if (!params)
-            {
-                SILK_WARNING("Cannot read pitch_rate");
-            }
-            else
-            {
-                m_pids.pitch_rate.set_params(*params);
-            }
-        }
-        {
-            auto params = jsonutil::get_pid_params<Roll_Rate_PID::Params>(json, "roll_rate");
-            if (!params)
-            {
-                SILK_WARNING("Cannot read roll_rate");
-            }
-            else
-            {
-                m_pids.roll_rate.set_params(*params);
-            }
-        }
-        {
-            auto params = jsonutil::get_pid_params<Altitude_Rate_PID::Params>(json, "altitude_rate");
-            if (!params)
-            {
-                SILK_WARNING("Cannot read altitude_rate");
-            }
-            else
-            {
-                m_pids.altitude_rate.set_params(*params);
-            }
-        }
-    }
+//    finder = jsonutil::Member_Finder(m_settings.document, "pid_config");
+//    if (finder.is_valid())
+//    {
+//        auto& json = finder.get_value();
+//        {
+//            auto params = jsonutil::get_pid_params<Yaw_Rate_PID::Params>(json, "yaw_rate");
+//            if (!params)
+//            {
+//                SILK_WARNING("Cannot read yaw_rate");
+//            }
+//            else
+//            {
+//                m_pids.yaw_rate.set_params(*params);
+//            }
+//        }
+//        {
+//            auto params = jsonutil::get_pid_params<Pitch_Rate_PID::Params>(json, "pitch_rate");
+//            if (!params)
+//            {
+//                SILK_WARNING("Cannot read pitch_rate");
+//            }
+//            else
+//            {
+//                m_pids.pitch_rate.set_params(*params);
+//            }
+//        }
+//        {
+//            auto params = jsonutil::get_pid_params<Roll_Rate_PID::Params>(json, "roll_rate");
+//            if (!params)
+//            {
+//                SILK_WARNING("Cannot read roll_rate");
+//            }
+//            else
+//            {
+//                m_pids.roll_rate.set_params(*params);
+//            }
+//        }
+//        {
+//            auto params = jsonutil::get_pid_params<Altitude_Rate_PID::Params>(json, "altitude_rate");
+//            if (!params)
+//            {
+//                SILK_WARNING("Cannot read altitude_rate");
+//            }
+//            else
+//            {
+//                m_pids.altitude_rate.set_params(*params);
+//            }
+//        }
+//    }
 
     return true;
 }
 void UAV::save_settings()
 {
-    TIMED_FUNCTION();
+//    TIMED_FUNCTION();
 
-    if (!m_settings.document.IsObject())
-    {
-        m_settings.document.SetObject();
-    }
+//    if (!m_settings.document.IsObject())
+//    {
+//        m_settings.document.SetObject();
+//    }
 
-    auto& allocator = m_settings.document.GetAllocator();
+//    auto& allocator = m_settings.document.GetAllocator();
 
-    auto& motor_config = jsonutil::get_or_add_member(m_settings.document, "motor_config", rapidjson::kObjectType, allocator);
-    auto& pid_config = jsonutil::get_or_add_member(m_settings.document, "pid_config", rapidjson::kObjectType, allocator);
+//    auto& motor_config = jsonutil::get_or_add_member(m_settings.document, "motor_config", rapidjson::kObjectType, allocator);
+//    auto& pid_config = jsonutil::get_or_add_member(m_settings.document, "pid_config", rapidjson::kObjectType, allocator);
 
-    {
-        auto& json = motor_config;
-        json.SetObject();
-        {
-            auto& vj = jsonutil::get_or_add_member(json, "motors", rapidjson::kArrayType, allocator);
-            vj.Clear();
-            for (uint8_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
-            {
-                rapidjson::Value v;
-                v.SetObject();
-                jsonutil::set_vec2_value(v, "position", m_motor_mixer.get_motor_info(i).position, allocator);
-                v.AddMember("clockwise", m_motor_mixer.get_motor_info(i).clockwise, allocator);
-                vj.PushBack(v, allocator);
-            }
-        }
-    }
-    {
-        auto& json = pid_config;
-        json.SetObject();
-        jsonutil::set_pid_params<Yaw_Rate_PID::Params>(json, "yaw_rate", m_pids.yaw_rate.get_params(), allocator);
-        jsonutil::set_pid_params<Pitch_Rate_PID::Params>(json, "pitch_rate", m_pids.pitch_rate.get_params(), allocator);
-        jsonutil::set_pid_params<Roll_Rate_PID::Params>(json, "roll_rate", m_pids.roll_rate.get_params(), allocator);
-        jsonutil::set_pid_params<Altitude_Rate_PID::Params>(json, "altitude_rate", m_pids.altitude_rate.get_params(), allocator);
-    }
+//    {
+//        auto& json = motor_config;
+//        json.SetObject();
+//        {
+//            auto& vj = jsonutil::get_or_add_member(json, "motors", rapidjson::kArrayType, allocator);
+//            vj.Clear();
+//            for (uint8_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
+//            {
+//                rapidjson::Value v;
+//                v.SetObject();
+//                jsonutil::set_vec2_value(v, "position", m_motor_mixer.get_motor_info(i).position, allocator);
+//                v.AddMember("clockwise", m_motor_mixer.get_motor_info(i).clockwise, allocator);
+//                vj.PushBack(v, allocator);
+//            }
+//        }
+//    }
+//    {
+//        auto& json = pid_config;
+//        json.SetObject();
+//        jsonutil::set_pid_params<Yaw_Rate_PID::Params>(json, "yaw_rate", m_pids.yaw_rate.get_params(), allocator);
+//        jsonutil::set_pid_params<Pitch_Rate_PID::Params>(json, "pitch_rate", m_pids.pitch_rate.get_params(), allocator);
+//        jsonutil::set_pid_params<Roll_Rate_PID::Params>(json, "roll_rate", m_pids.roll_rate.get_params(), allocator);
+//        jsonutil::set_pid_params<Altitude_Rate_PID::Params>(json, "altitude_rate", m_pids.altitude_rate.get_params(), allocator);
+//    }
 
 
-    typedef rapidjson::UTF8<> JSON_Charset;
-    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
-    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
+//    typedef rapidjson::UTF8<> JSON_Charset;
+//    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
+//    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
 
-    JSON_Buffer buffer;
-    JSON_Writer writer(buffer);
-    m_settings.document.Accept(writer);
+//    JSON_Buffer buffer;
+//    JSON_Writer writer(buffer);
+//    m_settings.document.Accept(writer);
 
-    q::data::File_Sink fs(q::Path("uav.cfg"));
-    if (!fs.is_open())
-    {
-        SILK_WARNING("Cannot open file to save settings");
-        return;
-    }
+//    q::data::File_Sink fs(q::Path("uav.cfg"));
+//    if (!fs.is_open())
+//    {
+//        SILK_WARNING("Cannot open file to save settings");
+//        return;
+//    }
 
-    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
+//    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
 void UAV::set_throttle_mode(uav_input::Throttle_Mode mode)

@@ -53,7 +53,7 @@ private:
     {
         size_t count = 4;
         PWM_Frequency frequency = PWM_Frequency::PWM_1000Hz;
-        rapidjson::Document document;
+//        rapidjson::Document document;
     } m_settings;
 
     auto load_settings() -> bool;

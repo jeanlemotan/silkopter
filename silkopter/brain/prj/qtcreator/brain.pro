@@ -35,11 +35,13 @@ DESTDIR = ../../bin/$${DEST_FOLDER}
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
 
 INCLUDEPATH += ../../src
+INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
-INCLUDEPATH += ../../../../rapidjson/include
+INCLUDEPATH += ../../../../autojsoncxx/include
+INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 
 LIBS += -L=/opt/vc/lib/
 
@@ -80,10 +82,10 @@ SOURCES += \
     ../../src/HAL_Sensors_Pi.cpp \
     ../../src/HAL_Sensors_Sim.cpp \
     ../../src/HAL.cpp \
-    ../../src/HAL_Motors_PiGPIO.cpp \
-    ../../src/PiGPIO.cpp \
     ../../src/Sim_Comms.cpp \
-    ../../src/HAL_Motors_Sim.cpp
+    ../../src/HAL_Motors_Sim.cpp \
+    ../../src/PiGPIO.cpp \
+    ../../src/HAL_Motors_PiGPIO.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -109,15 +111,15 @@ HEADERS += \
     ../../src/HAL_Raspicam.h \
     ../../src/HAL_Camera_Mount.h \
     ../../src/HAL_Motors.h \
-    ../../src/HAL_Motors_PiGPIO.h \
     ../../src/HAL_Motors_Sim.h \
     ../../src/HAL_Sensors.h \
     ../../src/HAL_Sensors_Pi.h \
     ../../src/HAL_Sensors_Sim.h \
     ../../src/HAL.h \
-    ../../src/HAL_Camera_Mount_PiGPIO.h \
     ../../src/PiGPIO.h \
     ../../src/Sim_Comms.h \
     ../../../libs/common/Comm_Data.h \
-    ../../../libs/common/Remote_Clock.h
+    ../../../libs/common/Remote_Clock.h \
+    ../../src/HAL_Camera_Mount_PiGPIO.h \
+    ../../src/HAL_Motors_PiGPIO.h
 

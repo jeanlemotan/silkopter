@@ -181,8 +181,6 @@ private:
 
     struct Settings
     {
-        rapidjson::Document document;
-
         float max_pitch_rate = math::anglef::pi;
         float max_roll_rate = math::anglef::pi;
         float max_yaw_rate = math::anglef::pi;
