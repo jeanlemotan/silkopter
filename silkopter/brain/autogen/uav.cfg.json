@@ -1,0 +1,26 @@
+[
+{
+    "name": "PID",
+    "members":
+    [
+        ["double", "kP", {"required": true}],
+        ["double", "kI", {"required": true}],
+        ["double", "kD", {"required": true}],
+        ["double", "max", {"required": true}]
+    ]
+},
+{
+    "name": "PIDs",
+    "members":
+    [
+        ["PID", "yaw_rate", {"required": true}],
+        ["PID", "pitch_rate", {"required": true}],
+        ["PID", "roll_rate", {"required": true}],
+        ["PID", "altitude_rate", {"required": true}],
+        ["PID", "yaw", {"required": true}],
+        ["PID", "pitch", {"required": true}],
+        ["PID", "roll", {"required": true}],
+        ["PID", "altitude", {"required": true}]
+    ]
+}
+]

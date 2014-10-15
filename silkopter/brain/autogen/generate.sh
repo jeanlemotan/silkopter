@@ -1,3 +1,8 @@
 #!/bin/bash
 
-ls -1 *.json | xargs ../../../autojsoncxx/autojsoncxx.py -i
+for i in *.json
+do
+	printf $i
+	printf "\n"
+  	../../../autojsoncxx/autojsoncxx.py -i $i
+done

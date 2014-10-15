@@ -1,0 +1,18 @@
+[
+{
+    "name": "Motor",
+    "members":
+    [
+        ["double", "x", {"required": true}],
+        ["double", "y", {"required": true}],
+        ["bool", "clockwise", {"required": true}]
+    ]
+},
+{
+    "name": "Motors",
+    "members":
+    [
+        ["std::vector<Motor>", "motors", {"required": true}]
+    ]
+}
+]

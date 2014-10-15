@@ -1,19 +1,8 @@
-[
 {
-    "name": "Motor",
+    "name": "GPIO_Pins",
     "members":
     [
-        ["double", "x", {"required": true}],
-        ["double", "y", {"required": true}],
-        ["bool", "clockwise", {"required": true}]
-    ]
-},
-{
-    "name": "Motors",
-    "members":
-    [
-        ["std::vector<Motor>", "motors", {"required": true}],
+        ["std::vector<uint8_t>", "pins", {"required": true}],
         ["size_t", "frequency", {"required": true}]
     ]
 }
-]
