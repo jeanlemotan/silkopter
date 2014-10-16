@@ -4,6 +4,8 @@
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
 
+#include "uav.cfg.hpp"
+
 using namespace silk;
 
 UAV::UAV(HAL& hal)
@@ -17,6 +19,14 @@ UAV::UAV(HAL& hal)
 
 auto UAV::load_settings() -> bool
 {
+    autojsoncxx::ParsingResult result;
+    UAV_Config cfg;
+    if (!autojsoncxx::from_json_file("uav.cfg", cfg, result))
+    {
+        SILK_WARNING("Failed to load uav.cfg: {}", result.description());
+        return false;
+    }
+
 //    TIMED_FUNCTION();
 
 //    ////////////////////////////////////////////////////////////////////////
@@ -160,6 +170,10 @@ auto UAV::load_settings() -> bool
 }
 void UAV::save_settings()
 {
+    UAV_Config cfg;
+    autojsoncxx::to_pretty_json_file("uav.cfg", cfg);
+
+
 //    TIMED_FUNCTION();
 
 //    if (!m_settings.document.IsObject())

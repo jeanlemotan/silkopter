@@ -17,36 +17,36 @@ HAL_Sensors_Sim::HAL_Sensors_Sim(Sim_Comms& sim_comms)
 
 auto HAL_Sensors_Sim::load_settings() -> bool
 {
-    q::data::File_Source fs(q::Path("sensors.cfg"));
-    if (!fs.is_open())
-    {
-        return false;
-    }
+//    q::data::File_Source fs(q::Path("sensors.cfg"));
+//    if (!fs.is_open())
+//    {
+//        return false;
+//    }
 
-    auto size = fs.get_size();
+//    auto size = fs.get_size();
 
-    std::vector<char> data(size + 1);
-    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
-    if (result != size)
-    {
-        SILK_WARNING("Failed to read settings.");
-        return false;
-    }
+//    std::vector<char> data(size + 1);
+//    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
+//    if (result != size)
+//    {
+//        SILK_WARNING("Failed to read settings.");
+//        return false;
+//    }
 
-    data[size] = 0;
-    if (m_settings.document.Parse<0>(data.data()).HasParseError())
-    {
-        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
-        return false;
-    }
+//    data[size] = 0;
+//    if (m_settings.document.Parse<0>(data.data()).HasParseError())
+//    {
+//        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
+//        return false;
+//    }
 
-    auto finder = jsonutil::Member_Finder(m_settings.document, "calibration_config");
-    if (!finder.is_valid())
-    {
-        SILK_WARNING("Cannot find root");
-        return false;
-    }
-    auto& calibration_config = finder.get_value();
+//    auto finder = jsonutil::Member_Finder(m_settings.document, "calibration_config");
+//    if (!finder.is_valid())
+//    {
+//        SILK_WARNING("Cannot find root");
+//        return false;
+//    }
+//    auto& calibration_config = finder.get_value();
 
 //    finder = jsonutil::Member_Finder(m_settings.document, "motor_config");
 //    if (!finder.is_valid())
@@ -64,22 +64,22 @@ auto HAL_Sensors_Sim::load_settings() -> bool
 //    }
 //    auto& pid_config = finder.get_value();
 
-    {
-        auto& json = calibration_config;
-        auto abias = jsonutil::get_vec3_value<float>(json, "accelerometer_bias");
-        auto ascale = jsonutil::get_vec3_value<float>(json, "accelerometer_scale");
-        auto gbias = jsonutil::get_vec3_value<float>(json, "gyroscope_bias");
-        auto cbias = jsonutil::get_vec3_value<float>(json, "compass_bias");
-        if (!abias || !ascale || !gbias || !cbias)
-        {
-            SILK_WARNING("Cannot read calibration config");
-            return false;
-        }
-        m_calibration_config.accelerometer_bias = *abias;
-        m_calibration_config.accelerometer_scale = *ascale;
-        m_calibration_config.gyroscope_bias = *gbias;
-        m_calibration_config.compass_bias = *cbias;
-    }
+//    {
+//        auto& json = calibration_config;
+//        auto abias = jsonutil::get_vec3_value<float>(json, "accelerometer_bias");
+//        auto ascale = jsonutil::get_vec3_value<float>(json, "accelerometer_scale");
+//        auto gbias = jsonutil::get_vec3_value<float>(json, "gyroscope_bias");
+//        auto cbias = jsonutil::get_vec3_value<float>(json, "compass_bias");
+//        if (!abias || !ascale || !gbias || !cbias)
+//        {
+//            SILK_WARNING("Cannot read calibration config");
+//            return false;
+//        }
+//        m_calibration_config.accelerometer_bias = *abias;
+//        m_calibration_config.accelerometer_scale = *ascale;
+//        m_calibration_config.gyroscope_bias = *gbias;
+//        m_calibration_config.compass_bias = *cbias;
+//    }
 
 //    {
 //        auto& json = motor_config;
@@ -189,24 +189,24 @@ auto HAL_Sensors_Sim::load_settings() -> bool
 }
 void HAL_Sensors_Sim::save_settings()
 {
-    if (!m_settings.document.IsObject())
-    {
-        m_settings.document.SetObject();
-    }
+//    if (!m_settings.document.IsObject())
+//    {
+//        m_settings.document.SetObject();
+//    }
 
-    auto& allocator = m_settings.document.GetAllocator();
+//    auto& allocator = m_settings.document.GetAllocator();
 
-    auto& calibration_config = jsonutil::get_or_add_member(m_settings.document, "calibration_config", rapidjson::kObjectType, allocator);
-//    auto& motor_config = jsonutil::get_or_add_member(m_settings.document, "motor_config", rapidjson::kObjectType, allocator);
-//    auto& pid_config = jsonutil::get_or_add_member(m_settings.document, "pid_config", rapidjson::kObjectType, allocator);
+//    auto& calibration_config = jsonutil::get_or_add_member(m_settings.document, "calibration_config", rapidjson::kObjectType, allocator);
+////    auto& motor_config = jsonutil::get_or_add_member(m_settings.document, "motor_config", rapidjson::kObjectType, allocator);
+////    auto& pid_config = jsonutil::get_or_add_member(m_settings.document, "pid_config", rapidjson::kObjectType, allocator);
 
-    {
-        auto& json = calibration_config;
-        jsonutil::set_vec3_value(json, "accelerometer_bias", m_calibration_config.accelerometer_bias, allocator);
-        jsonutil::set_vec3_value(json, "accelerometer_scale", m_calibration_config.accelerometer_scale, allocator);
-        jsonutil::set_vec3_value(json, "gyroscope_bias", m_calibration_config.gyroscope_bias, allocator);
-        jsonutil::set_vec3_value(json, "compass_bias", m_calibration_config.compass_bias, allocator);
-    }
+//    {
+//        auto& json = calibration_config;
+//        jsonutil::set_vec3_value(json, "accelerometer_bias", m_calibration_config.accelerometer_bias, allocator);
+//        jsonutil::set_vec3_value(json, "accelerometer_scale", m_calibration_config.accelerometer_scale, allocator);
+//        jsonutil::set_vec3_value(json, "gyroscope_bias", m_calibration_config.gyroscope_bias, allocator);
+//        jsonutil::set_vec3_value(json, "compass_bias", m_calibration_config.compass_bias, allocator);
+//    }
 //    {
 //        auto& json = motor_config;
 //        {
@@ -249,22 +249,22 @@ void HAL_Sensors_Sim::save_settings()
 //    }
 
 
-    typedef rapidjson::UTF8<> JSON_Charset;
-    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
-    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
+//    typedef rapidjson::UTF8<> JSON_Charset;
+//    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
+//    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
 
-    JSON_Buffer buffer;
-    JSON_Writer writer(buffer);
-    m_settings.document.Accept(writer);
+//    JSON_Buffer buffer;
+//    JSON_Writer writer(buffer);
+//    m_settings.document.Accept(writer);
 
-    q::data::File_Sink fs(q::Path("sensors.cfg"));
-    if (!fs.is_open())
-    {
-        SILK_WARNING("Cannot open file to save settings");
-        return;
-    }
+//    q::data::File_Sink fs(q::Path("sensors.cfg"));
+//    if (!fs.is_open())
+//    {
+//        SILK_WARNING("Cannot open file to save settings");
+//        return;
+//    }
 
-    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
+//    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
 }
 
 void HAL_Sensors_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)

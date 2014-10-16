@@ -2,7 +2,7 @@
     "name": "GPIO_Pins",
     "members":
     [
-        ["std::vector<uint8_t>", "pins", {"required": true}],
+        ["std::vector<size_t>", "pins", {"required": true}],
         ["size_t", "frequency", {"required": true}]
     ]
 }

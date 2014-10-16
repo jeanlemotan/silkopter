@@ -1,6 +1,6 @@
 [
 {
-    "name": "PID",
+    "name": "PID_Params",
     "members":
     [
         ["double", "kP", {"required": true}],
@@ -13,14 +13,31 @@
     "name": "PIDs",
     "members":
     [
-        ["PID", "yaw_rate", {"required": true}],
-        ["PID", "pitch_rate", {"required": true}],
-        ["PID", "roll_rate", {"required": true}],
-        ["PID", "altitude_rate", {"required": true}],
-        ["PID", "yaw", {"required": true}],
-        ["PID", "pitch", {"required": true}],
-        ["PID", "roll", {"required": true}],
-        ["PID", "altitude", {"required": true}]
+        ["PID_Params", "yaw_rate", {"required": true}],
+        ["PID_Params", "pitch_rate", {"required": true}],
+        ["PID_Params", "roll_rate", {"required": true}],
+        ["PID_Params", "altitude_rate", {"required": true}],
+        ["PID_Params", "yaw", {"required": true}],
+        ["PID_Params", "pitch", {"required": true}],
+        ["PID_Params", "roll", {"required": true}],
+        ["PID_Params", "altitude", {"required": true}]
+    ]
+},
+{
+    "name": "Motor",
+    "members":
+    [
+        ["double", "x", {"required": true}],
+        ["double", "y", {"required": true}],
+        ["bool", "clockwise", {"required": true}]
+    ]
+},
+{
+    "name": "UAV_Config",
+    "members":
+    [
+        ["std::vector<Motor>", "motors", {"required": true}],
+        ["PIDs", "pids", {"required":true}]
     ]
 }
 ]

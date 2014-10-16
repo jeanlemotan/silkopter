@@ -28,7 +28,7 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 struct GPIO_Pins {
- std::vector<uint8_t> pins;
+ std::vector<size_t> pins;
 size_t frequency;
 
 explicit GPIO_Pins():pins(), frequency() {  }
@@ -46,7 +46,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<uint8_t> > handler_0;
+    SAXEventHandler< std::vector<size_t> > handler_0;
 SAXEventHandler< size_t > handler_1;bool has_pins;
 bool has_frequency;
 
@@ -413,7 +413,7 @@ struct Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb43177
     {
         w.StartObject();
 
-        w.Key("\x70\x69\x6e\x73"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, std::vector<uint8_t> >()(w, value.pins);
+        w.Key("\x70\x69\x6e\x73"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, std::vector<size_t> >()(w, value.pins);
 w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, size_t >()(w, value.frequency);
 
         w.EndObject();
