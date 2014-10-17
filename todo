@@ -14,10 +14,14 @@
 * UAV inputs - ouya controller
 * Camera inputs
 * Sim: simulator update
-*- drotek 10dof imu support
+* drotek 10dof imu support
+* fix motor mixer
+* raspi PWM output tests using servoblaster
+* use autojsoncxx for settings serialization
+* vibration tests and filtering
+* reorganized HW code into HAL interfaces
 
-- fix motor mixer
-- raspi PWM output tests using servoblaster
+
 - stability pid
 - statibility tests
 - latency tests
