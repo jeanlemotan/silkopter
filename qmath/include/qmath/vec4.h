@@ -57,11 +57,11 @@ struct vec4
 	// Methods
 	// Use only non-mutable methods here pls
 
-	vec4<T>& set(T x, T y, T z, T w);
-	template<typename U> vec4<T>& set(vec4<U> const& v);
+    void set(T x, T y, T z, T w);
+    template<typename U> void set(vec4<U> const& v);
 
 	void set_length(T len);
-	vec4<T>& normalize();
+    template<class Policy = standard> void normalize();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // operators

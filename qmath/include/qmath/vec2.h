@@ -48,11 +48,11 @@ struct vec2
 // member functions
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	vec2<T>& set(T x, T y);
-	template<typename U> vec2<T>& set(vec2<U> const& v);
+    void set(T x, T y);
+    template<typename U> void set(vec2<U> const& v);
 
 	void set_length(T len);
-	vec2<T>& normalize();
+    template<class Policy = standard> void normalize();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // operators

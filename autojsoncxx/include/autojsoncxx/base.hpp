@@ -456,6 +456,62 @@ public:
 };
 
 template <>
+class SAXEventHandler<float> : public BaseSAXEventHandler<SAXEventHandler<float> > {
+private:
+    float* m_value;
+
+public:
+    explicit SAXEventHandler(float* v)
+        : m_value(v)
+    {
+    }
+
+    bool Int(int i)
+    {
+        *m_value = i;
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        *m_value = i;
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        const utility::int64_t threshold = 1LL << 53;
+        if (i > threshold || i < -threshold)
+            return this->set_out_of_range("int64_t");
+        // the maximum value of float is much larger, but we want to prevent precision loss
+
+        *m_value = static_cast<float>(i);
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        const utility::uint64_t threshold = 1ULL << 53;
+        if (i > threshold)
+            return this->set_out_of_range("uint64_t");
+
+        *m_value = static_cast<float>(i);
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        *m_value = static_cast<float>(d);
+        return true;
+    }
+
+    static const char* type_name()
+    {
+        return "float";
+    }
+};
+
+template <>
 class SAXEventHandler<std::string> : public BaseSAXEventHandler<SAXEventHandler<std::string> > {
 private:
     std::string* m_value;
@@ -544,6 +600,14 @@ struct Serializer<Writer, utility::uint64_t> {
 template <class Writer>
 struct Serializer<Writer, double> {
     void operator()(Writer& w, double d) const
+    {
+        w.Double(d);
+    }
+};
+
+template <class Writer>
+struct Serializer<Writer, float> {
+    void operator()(Writer& w, float d) const
     {
         w.Double(d);
     }

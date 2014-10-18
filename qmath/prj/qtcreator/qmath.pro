@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
 INCLUDEPATH += ../../include
+INCLUDEPATH += ../../../qbase/include
+INCLUDEPATH += /usr/include/lua5.1
 
 rpi {
     DEFINES+=RASPBERRY_PI
@@ -31,73 +33,75 @@ DESTDIR = ../../lib/$${DEST_FOLDER}
 
 
 SOURCES += \
-    ../../src/data.cpp
+    ../../src/data.cpp \
+    ../../src/lua_binding.cpp
 
 HEADERS += \
     ../../include/qmath.h \
     ../../include/_qmath.h \
-    ../../include/detail/aabb2.h \
-    ../../include/detail/aabb2.hpp \
-    ../../include/detail/aabb3.h \
-    ../../include/detail/aabb3.hpp \
-    ../../include/detail/angle.h \
-    ../../include/detail/angle.hpp \
-    ../../include/detail/cast.h \
-    ../../include/detail/cast.hpp \
-    ../../include/detail/color.h \
-    ../../include/detail/color.hpp \
-    ../../include/detail/constants.h \
-    ../../include/detail/func_binary.h \
-    ../../include/detail/func_binary.hpp \
-    ../../include/detail/func_common.h \
-    ../../include/detail/func_common.hpp \
-    ../../include/detail/func_interp.h \
-    ../../include/detail/func_interp.hpp \
-    ../../include/detail/func_projection.h \
-    ../../include/detail/func_projection.hpp \
-    ../../include/detail/func_range.h \
-    ../../include/detail/func_range.hpp \
-    ../../include/detail/func_rayintersect.h \
-    ../../include/detail/func_rayintersect.hpp \
-    ../../include/detail/func_static_constructors.h \
-    ../../include/detail/func_static_constructors.hpp \
-    ../../include/detail/func_string.h \
-    ../../include/detail/func_string.hpp \
-    ../../include/detail/func_test.h \
-    ../../include/detail/func_test.hpp \
-    ../../include/detail/func_transform.h \
-    ../../include/detail/func_transform.hpp \
-    ../../include/detail/func_trig.h \
-    ../../include/detail/func_trig.hpp \
-    ../../include/detail/line2.h \
-    ../../include/detail/line2.hpp \
-    ../../include/detail/line3.h \
-    ../../include/detail/line3.hpp \
-    ../../include/detail/mat2.h \
-    ../../include/detail/mat2.hpp \
-    ../../include/detail/mat3.h \
-    ../../include/detail/mat3.hpp \
-    ../../include/detail/mat4.h \
-    ../../include/detail/mat4.hpp \
-    ../../include/detail/packet.h \
-    ../../include/detail/packet.hpp \
-    ../../include/detail/plane.h \
-    ../../include/detail/plane.hpp \
-    ../../include/detail/quat.h \
-    ../../include/detail/quat.hpp \
-    ../../include/detail/rect.h \
-    ../../include/detail/rect.hpp \
-    ../../include/detail/standard_types.h \
-    ../../include/detail/trans2d.h \
-    ../../include/detail/trans2d.hpp \
-    ../../include/detail/trans3d.h \
-    ../../include/detail/trans3d.hpp \
-    ../../include/detail/triangle3.h \
-    ../../include/detail/triangle3.hpp \
-    ../../include/detail/vec2.h \
-    ../../include/detail/vec2.hpp \
-    ../../include/detail/vec3.h \
-    ../../include/detail/vec3.hpp \
-    ../../include/detail/vec4.h \
-    ../../include/detail/vec4.hpp
+    ../../include/qmath/aabb2.h \
+    ../../include/qmath/aabb2.hpp \
+    ../../include/qmath/aabb3.h \
+    ../../include/qmath/aabb3.hpp \
+    ../../include/qmath/angle.h \
+    ../../include/qmath/angle.hpp \
+    ../../include/qmath/cast.h \
+    ../../include/qmath/cast.hpp \
+    ../../include/qmath/color.h \
+    ../../include/qmath/color.hpp \
+    ../../include/qmath/constants.h \
+    ../../include/qmath/func_binary.h \
+    ../../include/qmath/func_binary.hpp \
+    ../../include/qmath/func_common.h \
+    ../../include/qmath/func_common.hpp \
+    ../../include/qmath/func_interp.h \
+    ../../include/qmath/func_interp.hpp \
+    ../../include/qmath/func_projection.h \
+    ../../include/qmath/func_projection.hpp \
+    ../../include/qmath/func_range.h \
+    ../../include/qmath/func_range.hpp \
+    ../../include/qmath/func_rayintersect.h \
+    ../../include/qmath/func_rayintersect.hpp \
+    ../../include/qmath/func_static_constructors.h \
+    ../../include/qmath/func_static_constructors.hpp \
+    ../../include/qmath/func_string.h \
+    ../../include/qmath/func_string.hpp \
+    ../../include/qmath/func_test.h \
+    ../../include/qmath/func_test.hpp \
+    ../../include/qmath/func_transform.h \
+    ../../include/qmath/func_transform.hpp \
+    ../../include/qmath/func_trig.h \
+    ../../include/qmath/func_trig.hpp \
+    ../../include/qmath/line2.h \
+    ../../include/qmath/line2.hpp \
+    ../../include/qmath/line3.h \
+    ../../include/qmath/line3.hpp \
+    ../../include/qmath/lua_binding.h \
+    ../../include/qmath/mat2.h \
+    ../../include/qmath/mat2.hpp \
+    ../../include/qmath/mat3.h \
+    ../../include/qmath/mat3.hpp \
+    ../../include/qmath/mat4.h \
+    ../../include/qmath/mat4.hpp \
+    ../../include/qmath/packet.h \
+    ../../include/qmath/packet.hpp \
+    ../../include/qmath/plane.h \
+    ../../include/qmath/plane.hpp \
+    ../../include/qmath/quat.h \
+    ../../include/qmath/quat.hpp \
+    ../../include/qmath/rect.h \
+    ../../include/qmath/rect.hpp \
+    ../../include/qmath/standard_types.h \
+    ../../include/qmath/trans2d.h \
+    ../../include/qmath/trans2d.hpp \
+    ../../include/qmath/trans3d.h \
+    ../../include/qmath/trans3d.hpp \
+    ../../include/qmath/triangle3.h \
+    ../../include/qmath/triangle3.hpp \
+    ../../include/qmath/vec2.h \
+    ../../include/qmath/vec2.hpp \
+    ../../include/qmath/vec3.h \
+    ../../include/qmath/vec3.hpp \
+    ../../include/qmath/vec4.h \
+    ../../include/qmath/vec4.hpp
 

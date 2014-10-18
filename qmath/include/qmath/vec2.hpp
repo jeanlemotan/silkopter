@@ -23,17 +23,15 @@ template<typename U>
 inline vec2<T>::vec2(vec2<U> const& v) : x(T(v.x)), y(T(v.y)) {}
 
 template<typename T>
-inline vec2<T>& vec2<T>::set(T _x, T _y)
+inline void vec2<T>::set(T _x, T _y)
 {
 	x = _x;
 	y = _y;
-	return *this;
 }
-template<typename T> template<typename U> inline vec2<T>& vec2<T>::set(vec2<U> const& v)
+template<typename T> template<typename U> inline void vec2<T>::set(vec2<U> const& v)
 {
 	x = v.x;
 	y = v.y;
-	return *this;
 }
 
 template <typename T>
@@ -45,10 +43,10 @@ inline void vec2<T>::set_length(T len)
 }
 
 template <typename T>
-inline vec2<T>& vec2<T>::normalize()
+template<class Policy>
+inline void vec2<T>::normalize()
 {
-	*this = normalized(*this);
-	return *this;
+    *this = normalized<T, Policy>(*this);
 }
 
 template<typename T>

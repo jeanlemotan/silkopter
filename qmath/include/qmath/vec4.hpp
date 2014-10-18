@@ -14,21 +14,19 @@ namespace math
 	template<typename T> inline vec4<T>::vec4(vec3<T> const& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
 	
 	template<typename T> template<typename U> inline vec4<T>::vec4(vec4<U> const& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)), w(T(v.w)) {}
-	template<typename T> inline vec4<T>& vec4<T>::set(T _x, T _y, T _z, T _w)
+    template<typename T> inline void vec4<T>::set(T _x, T _y, T _z, T _w)
 	{
 		x = _x;
 		y = _y;
 		z = _z;
 		w = _w;
-		return *this;
 	}
-	template<typename T> template<typename U> inline vec4<T>& vec4<T>::set(vec4<U> const& v)
+    template<typename T> template<typename U> inline void vec4<T>::set(vec4<U> const& v)
 	{
 		x = v.x;
 		y = v.y;
 		z = v.z;
 		w = v.w;
-		return *this;
 	}
 
 	template <typename T> inline void vec4<T>::set_length(T len)
@@ -38,10 +36,9 @@ namespace math
 		*this *= (len/oldLen);
 	}
 
-	template <typename T> inline vec4<T>& vec4<T>::normalize()
+    template <typename T> template<class Policy> inline void vec4<T>::normalize()
 	{
-		*this = normalized(*this);
-		return *this;
+        *this = normalized<T, Policy>(*this);
 	}
 	template<typename T> inline bool vec4<T>::operator==(vec4<T> const& v) const
 	{
