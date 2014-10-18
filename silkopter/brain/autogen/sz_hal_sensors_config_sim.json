@@ -1,5 +1,7 @@
 {
-    "name": "HAL_Sensors_Sim_Config",
+	"definition" : false,
+	"namespace" : "silk::HAL_Sensors_Sim",
+    "name": "Config",
     "members":
     [
         ["math::vec3f", "accelerometer_bias", {"required": true}],

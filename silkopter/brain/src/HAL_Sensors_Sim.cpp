@@ -23,59 +23,52 @@ HAL_Sensors_Sim::HAL_Sensors_Sim(Sim_Comms& sim_comms)
 auto HAL_Sensors_Sim::load_settings() -> bool
 {
     autojsoncxx::ParsingResult result;
-    HAL_Sensors_Sim_Config cfg;
+    Config cfg;
     if (!autojsoncxx::from_json_file("sensors_sim.cfg", cfg, result))
     {
         SILK_WARNING("Failed to load sensors_sim.cfg: {}", result.description());
         return false;
     }
 
-    m_calibration_config.accelerometer_bias = cfg.accelerometer_bias;
-    m_calibration_config.accelerometer_scale = cfg.accelerometer_scale;
-    m_calibration_config.gyroscope_bias = cfg.gyroscope_bias;
-    m_calibration_config.compass_bias = cfg.compass_bias;
+    m_config = cfg;
 
     return true;
 }
 void HAL_Sensors_Sim::save_settings()
 {
-    HAL_Sensors_Sim_Config cfg;
-
-    cfg.accelerometer_bias = m_calibration_config.accelerometer_bias;
-    cfg.accelerometer_scale = m_calibration_config.accelerometer_scale;
-    cfg.gyroscope_bias = m_calibration_config.gyroscope_bias;
-    cfg.compass_bias = m_calibration_config.compass_bias;
-
-    autojsoncxx::to_pretty_json_file("sensors_sim.cfg", cfg);
+    autojsoncxx::to_pretty_json_file("sensors_sim.cfg", m_config);
 }
 
 void HAL_Sensors_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    m_calibration_config.accelerometer_bias = bias;
-    m_calibration_config.accelerometer_scale = scale;
+    m_config.accelerometer_bias = bias;
+    m_config.accelerometer_scale = scale;
+    save_settings();
 }
 void HAL_Sensors_Sim::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
-    bias = m_calibration_config.accelerometer_bias;
-    scale = m_calibration_config.accelerometer_scale;
+    bias = m_config.accelerometer_bias;
+    scale = m_config.accelerometer_scale;
 }
 
 void HAL_Sensors_Sim::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    m_calibration_config.gyroscope_bias = bias;
+    m_config.gyroscope_bias = bias;
+    save_settings();
 }
 void HAL_Sensors_Sim::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
-    bias = m_calibration_config.gyroscope_bias;
+    bias = m_config.gyroscope_bias;
 }
 
 void HAL_Sensors_Sim::set_compass_calibration_data(math::vec3f const& bias)
 {
-    m_calibration_config.compass_bias = bias;
+    m_config.compass_bias = bias;
+    save_settings();
 }
 void HAL_Sensors_Sim::get_compass_calibration_data(math::vec3f &bias) const
 {
-    bias = m_calibration_config.compass_bias;
+    bias = m_config.compass_bias;
 }
 
 auto HAL_Sensors_Sim::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&

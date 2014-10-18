@@ -56,6 +56,8 @@ HAL_Sensors_Pi::~HAL_Sensors_Pi()
 
 auto HAL_Sensors_Pi::load_settings() -> bool
 {
+    TIMED_FUNCTION();
+
     autojsoncxx::ParsingResult result;
     Config cfg;
     if (!autojsoncxx::from_json_file("sensors_pi.cfg", cfg, result))
@@ -78,11 +80,15 @@ auto HAL_Sensors_Pi::load_settings() -> bool
 }
 void HAL_Sensors_Pi::save_settings()
 {
+    TIMED_FUNCTION();
+
     autojsoncxx::to_pretty_json_file("sensors_pi.cfg", m_config);
 }
 
 auto HAL_Sensors_Pi::init() -> bool
 {
+    TIMED_FUNCTION();
+
     QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
@@ -97,39 +103,27 @@ auto HAL_Sensors_Pi::init() -> bool
 #endif
 
 #ifdef USE_MPU9250
-    MPU9250::Gyroscope_Range g_range;
-    switch (m_config.gyroscope_range)
     {
-    case 250: g_range = MPU9250::Gyroscope_Range::_250_DPS; break;
-    case 500: g_range = MPU9250::Gyroscope_Range::_500_DPS; break;
-    case 1000: g_range = MPU9250::Gyroscope_Range::_1000_DPS; break;
-    case 2000: g_range = MPU9250::Gyroscope_Range::_2000_DPS; break;
-    default:
-        SILK_WARNING("Invalid gyroscope range {}. Using 500 DPS", m_config.gyroscope_range);
-        g_range = MPU9250::Gyroscope_Range::_500_DPS;
-        break;
-    }
+        typedef MPU9250::Gyroscope_Range G_Range;
+        typedef MPU9250::Accelerometer_Range A_Range;
 
-    MPU9250::Accelerometer_Range a_range;
-    switch (m_config.accelerometer_range)
-    {
-    case 2: a_range = MPU9250::Accelerometer_Range::_2_G; break;
-    case 4: a_range = MPU9250::Accelerometer_Range::_4_G; break;
-    case 8: a_range = MPU9250::Accelerometer_Range::_8_G; break;
-    case 16: a_range = MPU9250::Accelerometer_Range::_16_G; break;
-    default:
-        SILK_WARNING("Invalid accelerometer range {}. Using 4G", m_config.accelerometer_range);
-        a_range = MPU9250::Accelerometer_Range::_4_G;
-        break;
-    }
+        std::set<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
+        std::set<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
 
-    if (!m_impl->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
-    {
-        return false;
+        auto g_it = g_ranges.find(static_cast<G_Range>(m_config.gyroscope_range));
+        auto g_range = g_it != g_ranges.end() ? *g_it : G_Range::_500_DPS;
+        SILK_INFO("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
+
+        auto a_it = a_ranges.find(static_cast<A_Range>(m_config.accelerometer_range));
+        auto a_range = a_it != a_ranges.end() ? *a_it : A_Range::_4_G;
+        SILK_INFO("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
+
+        if (!m_impl->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
+        {
+            return false;
+        }
     }
 #endif
-
-    auto now = q::Clock::now();
 
     m_is_initialized = true;
     return true;
@@ -232,55 +226,59 @@ void HAL_Sensors_Pi::process()
 #ifdef USE_MPU9250
     m_impl->mpu.process();
 
-    auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
-    auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
-    QASSERT(a_samples.size() == g_samples.size());
-
-    m_gyroscope_samples.resize(g_samples.size());
-    for (size_t i = 0; i < g_samples.size(); i++)
     {
-        m_gyroscope_sample.value = g_samples[i] - m_config.gyroscope_bias;
-        m_gyroscope_sample.dt = m_impl->mpu.get_gyroscope_sample_time();
-        m_gyroscope_sample.sample_idx++;
-        m_gyroscope_samples[i] = m_gyroscope_sample;
-    }
+        auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
+        auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
+        QASSERT(a_samples.size() == g_samples.size());
 
-    m_accelerometer_samples.resize(a_samples.size());
-    for (size_t i = 0; i < a_samples.size(); i++)
-    {
-        m_accelerometer_sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
-        m_accelerometer_sample.dt = m_impl->mpu.get_accelerometer_sample_time();
-        m_accelerometer_sample.sample_idx++;
-        m_accelerometer_samples[i] = m_accelerometer_sample;
-    }
+        m_gyroscope_samples.resize(g_samples.size());
+        for (size_t i = 0; i < g_samples.size(); i++)
+        {
+            m_gyroscope_sample.value = g_samples[i] - m_config.gyroscope_bias;
+            m_gyroscope_sample.dt = m_impl->mpu.get_gyroscope_sample_time();
+            m_gyroscope_sample.sample_idx++;
+            m_gyroscope_samples[i] = m_gyroscope_sample;
+        }
 
-    auto compass_sample = m_impl->mpu.read_compass();
-    if (compass_sample)
-    {
-        m_compass_sample.value = *compass_sample - m_config.compass_bias;
-        m_compass_sample.sample_idx++;
-        m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
-        m_compass_samples.push_back(m_compass_sample);
+        m_accelerometer_samples.resize(a_samples.size());
+        for (size_t i = 0; i < a_samples.size(); i++)
+        {
+            m_accelerometer_sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
+            m_accelerometer_sample.dt = m_impl->mpu.get_accelerometer_sample_time();
+            m_accelerometer_sample.sample_idx++;
+            m_accelerometer_samples[i] = m_accelerometer_sample;
+        }
+
+        auto compass_sample = m_impl->mpu.read_compass();
+        if (compass_sample)
+        {
+            m_compass_sample.value = *compass_sample - m_config.compass_bias;
+            m_compass_sample.sample_idx++;
+            m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
+            m_compass_samples.push_back(m_compass_sample);
+        }
     }
 #endif
 
 #ifdef USE_MS5611
     m_impl->baro.process();
-    auto baro_sample = m_impl->baro.read_barometer();
-    if (baro_sample)
     {
-        m_barometer_sample.value = *baro_sample;
-        m_barometer_sample.sample_idx++;
-        m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
-        m_barometer_samples.push_back(m_barometer_sample);
-    }
-    auto temp_sample = m_impl->baro.read_thermometer();
-    if (temp_sample)
-    {
-        m_thermometer_sample.value = *temp_sample;
-        m_thermometer_sample.sample_idx++;
-        m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
-        m_thermometer_samples.push_back(m_thermometer_sample);
+        auto baro_sample = m_impl->baro.read_barometer();
+        if (baro_sample)
+        {
+            m_barometer_sample.value = *baro_sample;
+            m_barometer_sample.sample_idx++;
+            m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
+            m_barometer_samples.push_back(m_barometer_sample);
+        }
+        auto temp_sample = m_impl->baro.read_thermometer();
+        if (temp_sample)
+        {
+            m_thermometer_sample.value = *temp_sample;
+            m_thermometer_sample.sample_idx++;
+            m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
+            m_thermometer_samples.push_back(m_thermometer_sample);
+        }
     }
 #endif
 

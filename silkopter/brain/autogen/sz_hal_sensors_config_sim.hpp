@@ -27,22 +27,12 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-struct HAL_Sensors_Sim_Config {
- math::vec3f accelerometer_bias;
-math::vec3f accelerometer_scale;
-math::vec3f gyroscope_bias;
-math::vec3f compass_bias;
-
-explicit HAL_Sensors_Sim_Config():accelerometer_bias(), accelerometer_scale(), gyroscope_bias(), compass_bias() {  }
-
-
- 
-};
+//struct Config;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::HAL_Sensors_Sim_Config > {
+class SAXEventHandler< ::silk::HAL_Sensors_Sim::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -109,7 +99,7 @@ has_compass_bias = false;
     }
 
 public:
-    explicit SAXEventHandler( ::HAL_Sensors_Sim_Config * obj)
+    explicit SAXEventHandler( ::silk::HAL_Sensors_Sim::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->accelerometer_bias)
@@ -508,17 +498,17 @@ case 3:
     }
 };
 
-template < class Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2 >
-struct Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, ::HAL_Sensors_Sim_Config > {
+template < class Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2 >
+struct Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, ::silk::HAL_Sensors_Sim::Config > {
 
-    void operator()( Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2& w, const ::HAL_Sensors_Sim_Config& value) const
+    void operator()( Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2& w, const ::silk::HAL_Sensors_Sim::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.accelerometer_bias);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.accelerometer_scale);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.gyroscope_bias);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.compass_bias);
+        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_bias);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_scale);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.gyroscope_bias);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.compass_bias);
 
         w.EndObject();
     }

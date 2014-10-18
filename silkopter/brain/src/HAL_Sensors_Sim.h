@@ -37,6 +37,14 @@ public:
     size_t get_error_count() const;
     void process();
 
+    struct Config
+    {
+        math::vec3f accelerometer_bias;
+        math::vec3f accelerometer_scale = math::vec3f(1);
+        math::vec3f gyroscope_bias;
+        math::vec3f compass_bias;
+    };
+
 private:
     Sim_Comms& m_sim_comms;
 
@@ -85,13 +93,7 @@ private:
     GPS_Sample m_gps_sample;
     std::vector<GPS_Sample> m_gps_samples;
 
-    struct Calibration_Config
-    {
-        math::vec3f accelerometer_bias;
-        math::vec3f accelerometer_scale = math::vec3f(1);
-        math::vec3f gyroscope_bias;
-        math::vec3f compass_bias;
-    } m_calibration_config;
+    Config m_config;
 
     size_t m_error_count = 0;
 
