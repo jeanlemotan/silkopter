@@ -8,7 +8,7 @@ namespace silk
 class MS5611 : public q::util::Noncopyable
 {
 public:
-    auto init(q::String const& device) -> bool;
+    auto init(std::string const& device) -> bool;
 
     void process();
 

@@ -3,11 +3,10 @@
 namespace util
 {
 
-    template<class T>
     class Nop_LPF
     {
     public:
-        T process(T const& t)
+        float process(float t)
         {
             return t;
         }
@@ -37,38 +36,40 @@ namespace util
         }
     };
 
-    template<class T, class LPF = Nop_LPF<T>>
+    struct PID_Params
+    {
+        PID_Params() = default;
+        PID_Params(float kp, float ki, float kd, float max)
+            : kp(kp), ki(ki), kd(kd), max(max) {}
+
+        float kp = 0;
+        float ki = 0;
+        float kd = 0;
+        float max = 0;
+    };
+
+    template<class LPF = Nop_LPF>
     class PID
     {
     public:
-        struct Params
-        {
-            Params() = default;
-            Params(float kp, float ki, float kd, T const& max)
-                : kp(kp), ki(ki), kd(kd), max(max) {}
+        typedef PID_Params Params;
 
-            float kp = 0;
-            float ki = 0;
-            float kd = 0;
-            T max = T();
-        };
+        explicit PID(LPF const& lpf = LPF());
+        explicit PID(Params const& params, LPF const& lpf = LPF());
 
-        PID(LPF const& lpf = LPF());
-        PID(Params const& params, LPF const& lpf = LPF());
+        void set_target(float target);
+        auto get_target() const -> float;
 
-        void set_target(T const& target);
-        auto get_target() const -> T const&;
+        void set_input(float input);
+        auto get_input() const -> float;
 
-        void set_input(T const& input);
-        auto get_input() const -> T const&;
+        auto get_output() const -> float;
 
-        auto get_output() const -> T const&;
-
-        T process(q::Clock::duration dt);
+        float process(q::Clock::duration dt);
 
         void reset();
 
-        Params const& get_params() const;
+        auto get_params() const -> Params const&;
         void set_params(Params const& params);
 
     private:
@@ -76,60 +77,60 @@ namespace util
         Params m_params;
         bool m_has_ki = false;
         bool m_has_kd = false;
-        T m_integrator = T();
-        //T m_last_error = T();
-        T m_last_input = T();
-        T m_target = T();
-        T m_input = T();
-        T m_error = T();
-        T m_output = T();
-        T m_last_derivative = T();
+        float m_integrator = 0;
+        //float m_last_error = 0;
+        float m_last_input = 0;
+        float m_target = 0;
+        float m_input = 0;
+        float m_error = 0;
+        float m_output = 0;
+        float m_last_derivative = 0;
         bool m_has_last_derivative = false;
         q::Clock::duration m_duration;
     };
 
 
-    template<class T, class LPF>
-    PID<T, LPF>::PID(LPF const& lpf)
+    template<class LPF>
+    PID<LPF>::PID(LPF const& lpf)
         : m_lpf(lpf)
     {
     }
 
-    template<class T, class LPF>
-    PID<T, LPF>::PID(Params const& params, LPF const& lpf)
+    template<class LPF>
+    PID<LPF>::PID(Params const& params, LPF const& lpf)
         : m_lpf(lpf)
     {
         set_params(params);
     }
 
-    template<class T, class LPF>
-    void PID<T, LPF>::set_target(T const& target)
+    template<class LPF>
+    void PID<LPF>::set_target(float target)
     {
         m_target = target;
     }
-    template<class T, class LPF>
-    auto PID<T, LPF>::get_target() const -> T const&
+    template<class LPF>
+    auto PID<LPF>::get_target() const -> float
     {
         return m_target;
     }
-    template<class T, class LPF>
-    void PID<T, LPF>::set_input(T const& input)
+    template<class LPF>
+    void PID<LPF>::set_input(float input)
     {
         m_input = input;
     }
-    template<class T, class LPF>
-    auto PID<T, LPF>::get_input() const -> T const&
+    template<class LPF>
+    auto PID<LPF>::get_input() const -> float
     {
         return m_input;
     }
-    template<class T, class LPF>
-    auto PID<T, LPF>::get_output() const -> T const&
+    template<class LPF>
+    auto PID<LPF>::get_output() const -> float
     {
         return m_output;
     }
 
-    template<class T, class LPF>
-    T PID<T, LPF>::process(q::Clock::duration dt)
+    template<class LPF>
+    float PID<LPF>::process(q::Clock::duration dt)
     {
 // 		if (dt >= chrono::secondsf(1))
 // 		{
@@ -144,7 +145,7 @@ namespace util
 
         // Compute proportional component
         m_error = m_target - m_input;
-        m_output = T();
+        m_output = 0;
         m_output += m_error * m_params.kp;
 
         auto dts = q::Seconds(dt).count();
@@ -215,26 +216,26 @@ namespace util
         return m_output;
     }
 
-    template<class T, class LPF>
-    void PID<T, LPF>::reset()
+    template<class LPF>
+    void PID<LPF>::reset()
     {
-        m_integrator = T();
+        m_integrator = 0;
         m_has_last_derivative = false;
-        //m_last_error = T();
-        m_last_input = T();
-        m_error = T();
-        m_target = T();
-        m_input = T();
-        m_output = T();
+        //m_last_error = 0;
+        m_last_input = 0;
+        m_error = 0;
+        m_target = 0;
+        m_input = 0;
+        m_output = 0;
     }
 
-    template<class T, class LPF>
-    auto PID<T, LPF>::get_params() const -> Params const&
+    template<class LPF>
+    auto PID<LPF>::get_params() const -> Params const&
     {
         return m_params;
     }
-    template<class T, class LPF>
-    void PID<T, LPF>::set_params(Params const& params)
+    template<class LPF>
+    void PID<LPF>::set_params(Params const& params)
     {
         m_params = params;
         m_has_ki = !math::is_zero(params.ki);

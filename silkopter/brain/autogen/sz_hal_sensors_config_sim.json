@@ -1,0 +1,10 @@
+{
+    "name": "HAL_Sensors_Sim_Config",
+    "members":
+    [
+        ["math::vec3f", "accelerometer_bias", {"required": true}],
+        ["math::vec3f", "accelerometer_scale", {"required": true}],
+        ["math::vec3f", "gyroscope_bias", {"required": true}],
+        ["math::vec3f", "compass_bias", {"required": true}]
+    ]
+}

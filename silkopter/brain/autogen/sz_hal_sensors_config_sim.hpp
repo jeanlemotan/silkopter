@@ -27,11 +27,13 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-struct GPIO_Pins {
- std::vector<size_t> pins;
-size_t frequency;
+struct HAL_Sensors_Sim_Config {
+ math::vec3f accelerometer_bias;
+math::vec3f accelerometer_scale;
+math::vec3f gyroscope_bias;
+math::vec3f compass_bias;
 
-explicit GPIO_Pins():pins(), frequency() {  }
+explicit HAL_Sensors_Sim_Config():accelerometer_bias(), accelerometer_scale(), gyroscope_bias(), compass_bias() {  }
 
 
  
@@ -40,15 +42,19 @@ explicit GPIO_Pins():pins(), frequency() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::GPIO_Pins > {
+class SAXEventHandler< ::HAL_Sensors_Sim_Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<size_t> > handler_0;
-SAXEventHandler< size_t > handler_1;bool has_pins;
-bool has_frequency;
+    SAXEventHandler< math::vec3f > handler_0;
+SAXEventHandler< math::vec3f > handler_1;
+SAXEventHandler< math::vec3f > handler_2;
+SAXEventHandler< math::vec3f > handler_3;bool has_accelerometer_bias;
+bool has_accelerometer_scale;
+bool has_gyroscope_bias;
+bool has_compass_bias;
 
     bool check_depth(const char* type)
     {
@@ -63,9 +69,13 @@ bool has_frequency;
     {
         switch (state) {
             case 0:
-    return "pins";
+    return "accelerometer_bias";
 case 1:
-    return "frequency";
+    return "accelerometer_scale";
+case 2:
+    return "gyroscope_bias";
+case 3:
+    return "compass_bias";
         default:
             break;
         }
@@ -92,16 +102,20 @@ case 1:
 
     void reset_flags()
     {
-        has_pins = false;
-has_frequency = false;
+        has_accelerometer_bias = false;
+has_accelerometer_scale = false;
+has_gyroscope_bias = false;
+has_compass_bias = false;
     }
 
 public:
-    explicit SAXEventHandler( ::GPIO_Pins * obj)
+    explicit SAXEventHandler( ::HAL_Sensors_Sim_Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pins)
-, handler_1(&obj->frequency)
+        , handler_0(&obj->accelerometer_bias)
+, handler_1(&obj->accelerometer_scale)
+, handler_2(&obj->gyroscope_bias)
+, handler_3(&obj->compass_bias)
     {
         reset_flags();
     }
@@ -118,6 +132,12 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -138,6 +158,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -156,6 +182,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -176,6 +208,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -194,6 +232,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -214,6 +258,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -232,6 +282,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -252,6 +308,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -266,10 +328,14 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x70\x69\x6e\x73", 4))
-						 { state=0; has_pins = true; }
-else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9))
-						 { state=1; has_frequency = true; }
+            else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73", 18))
+						 { state=0; has_accelerometer_bias = true; }
+else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65", 19))
+						 { state=1; has_accelerometer_scale = true; }
+else if (utility::string_equal(str, length, "\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73", 14))
+						 { state=2; has_gyroscope_bias = true; }
+else if (utility::string_equal(str, length, "\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73", 12))
+						 { state=3; has_compass_bias = true; }
             else {
                 state = -1;
                 return true;
@@ -283,6 +349,12 @@ else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x7
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -304,6 +376,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -323,6 +401,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
         default:
             break;
         }
@@ -341,6 +425,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -362,12 +452,20 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_pins) set_missing_required("pins");
-if (!has_frequency) set_missing_required("frequency");
+            if (!has_accelerometer_bias) set_missing_required("accelerometer_bias");
+if (!has_accelerometer_scale) set_missing_required("accelerometer_scale");
+if (!has_gyroscope_bias) set_missing_required("gyroscope_bias");
+if (!has_compass_bias) set_missing_required("compass_bias");
         }
         return the_error.empty();
     }
@@ -390,6 +488,10 @@ if (!has_frequency) set_missing_required("frequency");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -406,15 +508,17 @@ case 1:
     }
 };
 
-template < class Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20 >
-struct Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, ::GPIO_Pins > {
+template < class Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2 >
+struct Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, ::HAL_Sensors_Sim_Config > {
 
-    void operator()( Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20& w, const ::GPIO_Pins& value) const
+    void operator()( Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2& w, const ::HAL_Sensors_Sim_Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x70\x69\x6e\x73"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, std::vector<size_t> >()(w, value.pins);
-w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, size_t >()(w, value.frequency);
+        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.accelerometer_bias);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.accelerometer_scale);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.gyroscope_bias);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writerd32893ae3e785193a4dd4b6912e8c18278e83b0467b193fce70f44f67cce03a2, math::vec3f >()(w, value.compass_bias);
 
         w.EndObject();
     }

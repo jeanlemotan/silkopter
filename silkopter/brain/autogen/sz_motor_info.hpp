@@ -27,28 +27,20 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-struct GPIO_Pins {
- std::vector<size_t> pins;
-size_t frequency;
-
-explicit GPIO_Pins():pins(), frequency() {  }
-
-
- 
-};
+//struct Motor_Info;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::GPIO_Pins > {
+class SAXEventHandler< ::silk::Motor_Mixer::Motor_Info > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<size_t> > handler_0;
-SAXEventHandler< size_t > handler_1;bool has_pins;
-bool has_frequency;
+    SAXEventHandler< math::vec2f > handler_0;
+SAXEventHandler< bool > handler_1;bool has_position;
+bool has_clockwise;
 
     bool check_depth(const char* type)
     {
@@ -63,9 +55,9 @@ bool has_frequency;
     {
         switch (state) {
             case 0:
-    return "pins";
+    return "position";
 case 1:
-    return "frequency";
+    return "clockwise";
         default:
             break;
         }
@@ -92,16 +84,16 @@ case 1:
 
     void reset_flags()
     {
-        has_pins = false;
-has_frequency = false;
+        has_position = false;
+has_clockwise = false;
     }
 
 public:
-    explicit SAXEventHandler( ::GPIO_Pins * obj)
+    explicit SAXEventHandler( ::silk::Motor_Mixer::Motor_Info * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pins)
-, handler_1(&obj->frequency)
+        , handler_0(&obj->position)
+, handler_1(&obj->clockwise)
     {
         reset_flags();
     }
@@ -266,10 +258,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x70\x69\x6e\x73", 4))
-						 { state=0; has_pins = true; }
-else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9))
-						 { state=1; has_frequency = true; }
+            else if (utility::string_equal(str, length, "\x70\x6f\x73\x69\x74\x69\x6f\x6e", 8))
+						 { state=0; has_position = true; }
+else if (utility::string_equal(str, length, "\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9))
+						 { state=1; has_clockwise = true; }
             else {
                 state = -1;
                 return true;
@@ -366,8 +358,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_pins) set_missing_required("pins");
-if (!has_frequency) set_missing_required("frequency");
+            if (!has_position) set_missing_required("position");
+if (!has_clockwise) set_missing_required("clockwise");
         }
         return the_error.empty();
     }
@@ -406,15 +398,15 @@ case 1:
     }
 };
 
-template < class Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20 >
-struct Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, ::GPIO_Pins > {
+template < class Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a >
+struct Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, ::silk::Motor_Mixer::Motor_Info > {
 
-    void operator()( Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20& w, const ::GPIO_Pins& value) const
+    void operator()( Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a& w, const ::silk::Motor_Mixer::Motor_Info& value) const
     {
         w.StartObject();
 
-        w.Key("\x70\x69\x6e\x73"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, std::vector<size_t> >()(w, value.pins);
-w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, size_t >()(w, value.frequency);
+        w.Key("\x70\x6f\x73\x69\x74\x69\x6f\x6e"); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, math::vec2f >()(w, value.position);
+w.Key("\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65"); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, bool >()(w, value.clockwise);
 
         w.EndObject();
     }

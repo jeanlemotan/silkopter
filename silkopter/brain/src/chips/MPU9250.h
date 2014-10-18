@@ -24,7 +24,7 @@ public:
         _16_G = 16,
     };
 
-    auto init(q::String const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool;
+    auto init(std::string const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool;
 
     void process();
 

@@ -1,0 +1,10 @@
+{
+    "definition" : false,
+    "namespace" : "silk::Motor_Mixer",
+    "name": "Motor_Info",
+    "members":
+    [
+        ["math::vec2f", "position", {"required": true}],
+        ["bool", "clockwise", {"required": true}]
+    ]
+}

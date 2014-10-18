@@ -260,7 +260,7 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 #endif
 
 
-auto MPU9250::init(const q::String& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool
+auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 {
     m_gyroscope_rate = gr;
     m_accelerometer_range = ar;

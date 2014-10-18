@@ -1,0 +1,16 @@
+{
+	"definition" : false,
+	"namespace" : "silk::HAL_Sensors_Pi",
+    "name": "Config",
+    "members":
+    [
+        ["math::vec3f", "accelerometer_bias", {"required": true}],
+        ["math::vec3f", "accelerometer_scale", {"required": true}],
+        ["math::vec3f", "gyroscope_bias", {"required": true}],
+        ["math::vec3f", "compass_bias", {"required": true}],
+        ["std::string", "mpu_i2c_device", {"required": false}],
+        ["std::string", "barometer_i2c_device", {"required": false}],
+        ["size_t", "gyroscope_range", {"required": false}],
+        ["size_t", "accelerometer_range", {"required": false}]
+    ]
+}

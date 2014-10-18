@@ -1,0 +1,47 @@
+[
+{
+	"definition" : false,
+	"namespace" : "math",
+    "name": "vec2f",
+    "members":
+    [
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}]
+    ]
+},
+{
+    "definition" : false,
+    "namespace" : "math",
+    "name": "vec3f",
+    "members":
+    [
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}]
+    ]
+},
+{
+    "definition" : false,
+    "namespace" : "math",
+    "name": "vec4f",
+    "members":
+    [
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}],
+        ["float", "w", {"required": true}]
+    ]
+},
+{
+    "definition" : false,
+    "namespace" : "math",
+    "name": "quatf",
+    "members":
+    [
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}],
+        ["float", "w", {"required": true}]
+    ]
+}
+]

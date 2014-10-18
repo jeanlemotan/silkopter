@@ -95,11 +95,6 @@ private:
 
     size_t m_error_count = 0;
 
-    struct Settings
-    {
-//        rapidjson::Document document;
-    } m_settings;
-
     auto load_settings() -> bool;
     void save_settings();
 };

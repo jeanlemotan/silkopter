@@ -34,15 +34,15 @@ public:
     auto get_velocity_w() const -> math::vec3f const&;
     auto get_position_w() const -> math::vec3f const&;
 
-    typedef util::PID<float, util::Butterworth_500_20_LPF> Yaw_Rate_PID;
-    typedef util::PID<float, util::Butterworth_500_20_LPF> Pitch_Rate_PID;
-    typedef util::PID<float, util::Butterworth_500_20_LPF> Roll_Rate_PID;
-    typedef util::PID<float, util::Butterworth_500_20_LPF> Altitude_Rate_PID;
+    typedef util::PID<util::Butterworth_500_20_LPF> Yaw_Rate_PID;
+    typedef util::PID<util::Butterworth_500_20_LPF> Pitch_Rate_PID;
+    typedef util::PID<util::Butterworth_500_20_LPF> Roll_Rate_PID;
+    typedef util::PID<util::Butterworth_500_20_LPF> Altitude_Rate_PID;
 
-    typedef util::PID<float> Yaw_PID;
-    typedef util::PID<float> Pitch_PID;
-    typedef util::PID<float> Roll_PID;
-    typedef util::PID<float> Altitude_PID;
+    typedef util::PID<> Yaw_PID;
+    typedef util::PID<> Pitch_PID;
+    typedef util::PID<> Roll_PID;
+    typedef util::PID<> Altitude_PID;
 
     auto get_yaw_rate_pid_params() const -> Yaw_Rate_PID::Params;
     void set_yaw_rate_pid_params(Yaw_Rate_PID::Params const& params);

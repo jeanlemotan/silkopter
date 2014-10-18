@@ -6,6 +6,10 @@
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_sensors_config_pi.hpp"
+
+
 #define USE_MPU9250
 #define USE_MS5611
 
@@ -40,9 +44,10 @@ struct HAL_Sensors_Pi::Impl
 
 HAL_Sensors_Pi::HAL_Sensors_Pi()
 {
-    load_settings();
-
     m_impl.reset(new Impl);
+
+    load_settings();
+    save_settings();
 }
 
 HAL_Sensors_Pi::~HAL_Sensors_Pi()
@@ -51,92 +56,29 @@ HAL_Sensors_Pi::~HAL_Sensors_Pi()
 
 auto HAL_Sensors_Pi::load_settings() -> bool
 {
-//    q::data::File_Source fs(q::Path("sensors.cfg"));
-//    if (!fs.is_open())
-//    {
-//        return false;
-//    }
+    autojsoncxx::ParsingResult result;
+    Config cfg;
+    if (!autojsoncxx::from_json_file("sensors_pi.cfg", cfg, result))
+    {
+        SILK_WARNING("Failed to load sensors_pi.cfg: {}", result.description());
+        return false;
+    }
 
-//    auto size = fs.get_size();
-
-//    std::vector<char> data(size + 1);
-//    auto result = fs.read(reinterpret_cast<uint8_t*>(data.data()), size);
-//    if (result != size)
-//    {
-//        SILK_WARNING("Failed to read settings.");
-//        return false;
-//    }
-
-//    data[size] = 0;
-//    if (m_settings.document.Parse<0>(data.data()).HasParseError())
-//    {
-//        SILK_WARNING("Failed to parse settings: {}:{}", m_settings.document.GetErrorOffset(), m_settings.document.GetParseError());
-//        return false;
-//    }
-
-//    auto finder = jsonutil::Member_Finder(m_settings.document, "calibration_config");
-//    if (!finder.is_valid())
-//    {
-//        SILK_WARNING("Cannot find root");
-//        return false;
-//    }
-//    auto& calibration_config = finder.get_value();
-
-//    {
-//        auto& json = calibration_config;
-//        auto abias = jsonutil::get_vec3_value<float>(json, "accelerometer_bias");
-//        auto ascale = jsonutil::get_vec3_value<float>(json, "accelerometer_scale");
-//        auto gbias = jsonutil::get_vec3_value<float>(json, "gyroscope_bias");
-//        auto cbias = jsonutil::get_vec3_value<float>(json, "compass_bias");
-//        if (!abias || !ascale || !gbias || !cbias)
-//        {
-//            SILK_WARNING("Cannot read calibration config");
-//            return false;
-//        }
-//        m_calibration_config.accelerometer_bias = *abias;
-//        m_calibration_config.accelerometer_scale = *ascale;
-//        m_calibration_config.gyroscope_bias = *gbias;
-//        m_calibration_config.compass_bias = *cbias;
-//    }
+    m_config = cfg;
+    if (m_config.barometer_i2c_device.empty())
+    {
+        m_config.barometer_i2c_device = "/dev/i2c-1";
+    }
+    if (m_config.mpu_i2c_device.empty())
+    {
+        m_config.mpu_i2c_device = "/dev/i2c-1";
+    }
 
     return true;
 }
 void HAL_Sensors_Pi::save_settings()
 {
-//    TIMED_FUNCTION();
-//    if (!m_settings.document.IsObject())
-//    {
-//        m_settings.document.SetObject();
-//    }
-
-//    auto& allocator = m_settings.document.GetAllocator();
-
-//    auto& calibration_config = jsonutil::get_or_add_member(m_settings.document, "calibration_config", rapidjson::kObjectType, allocator);
-
-//    {
-//        auto& json = calibration_config;
-//        jsonutil::set_vec3_value(json, "accelerometer_bias", m_calibration_config.accelerometer_bias, allocator);
-//        jsonutil::set_vec3_value(json, "accelerometer_scale", m_calibration_config.accelerometer_scale, allocator);
-//        jsonutil::set_vec3_value(json, "gyroscope_bias", m_calibration_config.gyroscope_bias, allocator);
-//        jsonutil::set_vec3_value(json, "compass_bias", m_calibration_config.compass_bias, allocator);
-//    }
-
-//    typedef rapidjson::UTF8<> JSON_Charset;
-//    typedef rapidjson::GenericStringBuffer<JSON_Charset> JSON_Buffer;
-//    typedef rapidjson::PrettyWriter<JSON_Buffer> JSON_Writer;
-
-//    JSON_Buffer buffer;
-//    JSON_Writer writer(buffer);
-//    m_settings.document.Accept(writer);
-
-//    q::data::File_Sink fs(q::Path("sensors.cfg"));
-//    if (!fs.is_open())
-//    {
-//        SILK_WARNING("Cannot open file to save settings");
-//        return;
-//    }
-
-//    fs.write(reinterpret_cast<uint8_t const*>(buffer.GetString()), buffer.GetSize());
+    autojsoncxx::to_pretty_json_file("sensors_pi.cfg", m_config);
 }
 
 auto HAL_Sensors_Pi::init() -> bool
@@ -148,11 +90,43 @@ auto HAL_Sensors_Pi::init() -> bool
     }
 
 #ifdef USE_MS5611
-    m_impl->baro.init("/dev/i2c-1");
+    if (!m_impl->baro.init(m_config.barometer_i2c_device))
+    {
+        return false;
+    }
 #endif
 
 #ifdef USE_MPU9250
-    m_impl->mpu.init("/dev/i2c-1", MPU9250::Gyroscope_Range::_500_DPS, MPU9250::Accelerometer_Range::_4_G);
+    MPU9250::Gyroscope_Range g_range;
+    switch (m_config.gyroscope_range)
+    {
+    case 250: g_range = MPU9250::Gyroscope_Range::_250_DPS; break;
+    case 500: g_range = MPU9250::Gyroscope_Range::_500_DPS; break;
+    case 1000: g_range = MPU9250::Gyroscope_Range::_1000_DPS; break;
+    case 2000: g_range = MPU9250::Gyroscope_Range::_2000_DPS; break;
+    default:
+        SILK_WARNING("Invalid gyroscope range {}. Using 500 DPS", m_config.gyroscope_range);
+        g_range = MPU9250::Gyroscope_Range::_500_DPS;
+        break;
+    }
+
+    MPU9250::Accelerometer_Range a_range;
+    switch (m_config.accelerometer_range)
+    {
+    case 2: a_range = MPU9250::Accelerometer_Range::_2_G; break;
+    case 4: a_range = MPU9250::Accelerometer_Range::_4_G; break;
+    case 8: a_range = MPU9250::Accelerometer_Range::_8_G; break;
+    case 16: a_range = MPU9250::Accelerometer_Range::_16_G; break;
+    default:
+        SILK_WARNING("Invalid accelerometer range {}. Using 4G", m_config.accelerometer_range);
+        a_range = MPU9250::Accelerometer_Range::_4_G;
+        break;
+    }
+
+    if (!m_impl->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
+    {
+        return false;
+    }
 #endif
 
     auto now = q::Clock::now();
@@ -163,34 +137,34 @@ auto HAL_Sensors_Pi::init() -> bool
 
 void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    m_calibration_config.accelerometer_bias = bias;
-    m_calibration_config.accelerometer_scale = scale;
+    m_config.accelerometer_bias = bias;
+    m_config.accelerometer_scale = scale;
     save_settings();
 }
 void HAL_Sensors_Pi::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
-    bias = m_calibration_config.accelerometer_bias;
-    scale = m_calibration_config.accelerometer_scale;
+    bias = m_config.accelerometer_bias;
+    scale = m_config.accelerometer_scale;
 }
 
 void HAL_Sensors_Pi::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    m_calibration_config.gyroscope_bias = bias;
+    m_config.gyroscope_bias = bias;
     save_settings();
 }
 void HAL_Sensors_Pi::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
-    bias = m_calibration_config.gyroscope_bias;
+    bias = m_config.gyroscope_bias;
 }
 
 void HAL_Sensors_Pi::set_compass_calibration_data(math::vec3f const& bias)
 {
-    m_calibration_config.compass_bias = bias;
+    m_config.compass_bias = bias;
     save_settings();
 }
 void HAL_Sensors_Pi::get_compass_calibration_data(math::vec3f &bias) const
 {
-    bias = m_calibration_config.compass_bias;
+    bias = m_config.compass_bias;
 }
 
 auto HAL_Sensors_Pi::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
@@ -265,7 +239,7 @@ void HAL_Sensors_Pi::process()
     m_gyroscope_samples.resize(g_samples.size());
     for (size_t i = 0; i < g_samples.size(); i++)
     {
-        m_gyroscope_sample.value = g_samples[i] - m_calibration_config.gyroscope_bias;
+        m_gyroscope_sample.value = g_samples[i] - m_config.gyroscope_bias;
         m_gyroscope_sample.dt = m_impl->mpu.get_gyroscope_sample_time();
         m_gyroscope_sample.sample_idx++;
         m_gyroscope_samples[i] = m_gyroscope_sample;
@@ -274,7 +248,7 @@ void HAL_Sensors_Pi::process()
     m_accelerometer_samples.resize(a_samples.size());
     for (size_t i = 0; i < a_samples.size(); i++)
     {
-        m_accelerometer_sample.value = (a_samples[i] - m_calibration_config.accelerometer_bias) * m_calibration_config.accelerometer_scale;
+        m_accelerometer_sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
         m_accelerometer_sample.dt = m_impl->mpu.get_accelerometer_sample_time();
         m_accelerometer_sample.sample_idx++;
         m_accelerometer_samples[i] = m_accelerometer_sample;
@@ -283,7 +257,7 @@ void HAL_Sensors_Pi::process()
     auto compass_sample = m_impl->mpu.read_compass();
     if (compass_sample)
     {
-        m_compass_sample.value = *compass_sample - m_calibration_config.compass_bias;
+        m_compass_sample.value = *compass_sample - m_config.compass_bias;
         m_compass_sample.sample_idx++;
         m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
         m_compass_samples.push_back(m_compass_sample);

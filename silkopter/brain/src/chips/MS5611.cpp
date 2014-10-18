@@ -30,7 +30,7 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
-auto MS5611::init(const q::String& device) -> bool
+auto MS5611::init(const std::string& device) -> bool
 {
     SILK_INFO("initializing device: {}", device);
 

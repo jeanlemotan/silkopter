@@ -27,28 +27,24 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-struct GPIO_Pins {
- std::vector<size_t> pins;
-size_t frequency;
-
-explicit GPIO_Pins():pins(), frequency() {  }
-
-
- 
-};
+//struct PID_Params;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::GPIO_Pins > {
+class SAXEventHandler< ::util::PID_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<size_t> > handler_0;
-SAXEventHandler< size_t > handler_1;bool has_pins;
-bool has_frequency;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;bool has_kp;
+bool has_ki;
+bool has_kd;
+bool has_max;
 
     bool check_depth(const char* type)
     {
@@ -63,9 +59,13 @@ bool has_frequency;
     {
         switch (state) {
             case 0:
-    return "pins";
+    return "kp";
 case 1:
-    return "frequency";
+    return "ki";
+case 2:
+    return "kd";
+case 3:
+    return "max";
         default:
             break;
         }
@@ -92,16 +92,20 @@ case 1:
 
     void reset_flags()
     {
-        has_pins = false;
-has_frequency = false;
+        has_kp = false;
+has_ki = false;
+has_kd = false;
+has_max = false;
     }
 
 public:
-    explicit SAXEventHandler( ::GPIO_Pins * obj)
+    explicit SAXEventHandler( ::util::PID_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pins)
-, handler_1(&obj->frequency)
+        , handler_0(&obj->kp)
+, handler_1(&obj->ki)
+, handler_2(&obj->kd)
+, handler_3(&obj->max)
     {
         reset_flags();
     }
@@ -118,6 +122,12 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -138,6 +148,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -156,6 +172,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -176,6 +198,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -194,6 +222,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -214,6 +248,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -232,6 +272,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -252,6 +298,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -266,10 +318,14 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x70\x69\x6e\x73", 4))
-						 { state=0; has_pins = true; }
-else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9))
-						 { state=1; has_frequency = true; }
+            else if (utility::string_equal(str, length, "\x6b\x70", 2))
+						 { state=0; has_kp = true; }
+else if (utility::string_equal(str, length, "\x6b\x69", 2))
+						 { state=1; has_ki = true; }
+else if (utility::string_equal(str, length, "\x6b\x64", 2))
+						 { state=2; has_kd = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78", 3))
+						 { state=3; has_max = true; }
             else {
                 state = -1;
                 return true;
@@ -283,6 +339,12 @@ else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x7
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -304,6 +366,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -323,6 +391,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
         default:
             break;
         }
@@ -341,6 +415,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -362,12 +442,20 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_pins) set_missing_required("pins");
-if (!has_frequency) set_missing_required("frequency");
+            if (!has_kp) set_missing_required("kp");
+if (!has_ki) set_missing_required("ki");
+if (!has_kd) set_missing_required("kd");
+if (!has_max) set_missing_required("max");
         }
         return the_error.empty();
     }
@@ -390,6 +478,10 @@ if (!has_frequency) set_missing_required("frequency");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -406,15 +498,17 @@ case 1:
     }
 };
 
-template < class Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20 >
-struct Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, ::GPIO_Pins > {
+template < class Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23 >
+struct Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, ::util::PID_Params > {
 
-    void operator()( Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20& w, const ::GPIO_Pins& value) const
+    void operator()( Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23& w, const ::util::PID_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x70\x69\x6e\x73"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, std::vector<size_t> >()(w, value.pins);
-w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79"); Serializer< Writer9139de9af1789271a60d87ef7951e69514e17406e8b2905deb431771d6147e20, size_t >()(w, value.frequency);
+        w.Key("\x6b\x70"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kp);
+w.Key("\x6b\x69"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.ki);
+w.Key("\x6b\x64"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kd);
+w.Key("\x6d\x61\x78"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.max);
 
         w.EndObject();
     }

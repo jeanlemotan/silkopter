@@ -40,6 +40,18 @@ public:
     //----------------------------------------------------------------------
     void process();
 
+    struct Config
+    {
+        math::vec3f accelerometer_bias;
+        math::vec3f accelerometer_scale = math::vec3f(1);
+        math::vec3f gyroscope_bias;
+        math::vec3f compass_bias;
+        size_t gyroscope_range = 500;
+        size_t accelerometer_range = 4;
+        std::string mpu_i2c_device;
+        std::string barometer_i2c_device;
+    };
+
 private:
     Accelerometer_Sample m_accelerometer_sample;
     std::vector<Accelerometer_Sample> m_accelerometer_samples;
@@ -68,24 +80,13 @@ private:
     GPS_Sample m_gps_sample;
     std::vector<GPS_Sample> m_gps_samples;
 
-    struct Calibration_Config
-    {
-        math::vec3f accelerometer_bias;
-        math::vec3f accelerometer_scale = math::vec3f(1);
-        math::vec3f gyroscope_bias;
-        math::vec3f compass_bias;
-    } m_calibration_config;
-
     bool m_is_initialized = false;
     size_t m_error_count = 0;
 
+    Config m_config;
+
     struct Impl;
     std::shared_ptr<Impl> m_impl;
-
-    struct Settings
-    {
-//        rapidjson::Document document;
-    } m_settings;
 
     auto load_settings() -> bool;
     void save_settings();
