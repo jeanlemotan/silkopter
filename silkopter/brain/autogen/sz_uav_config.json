@@ -18,7 +18,12 @@
     "members":
     [
         ["std::vector<silk::Motor_Mixer::Motor_Info>", "motors", {"required": true}],
-        ["PIDs", "pids", {"required":true}]
+        ["PIDs", "pids", {"required":true}],
+        ["float", "max_throttle_rate", {"required":true}],
+        ["float", "max_pitch_rate", {"required":true}],
+        ["float", "max_roll_rate", {"required":true}],
+        ["float", "max_yaw_rate", {"required":true}],
+        ["float", "max_altitude_rate", {"required":true}]
     ]
 }
 ]

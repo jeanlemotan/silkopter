@@ -55,7 +55,7 @@ inline quat<T> quat<T>::from_axis_z(T const& a)
 
 template <typename T>
 template<class Policy>
-quat<T> quat<T>::from_vectors(vec3<T> const& a, vec3<T> const& b)
+quat<T> quat<T>::from_a_to_b(vec3<T> const& a, vec3<T> const& b)
 {
     vec3<T> axis = cross(a, b);
     T dot = math::dot(a, b);
@@ -78,6 +78,15 @@ quat<T> quat<T>::from_vectors(vec3<T> const& a, vec3<T> const& b)
     quat<T> result(axis.x * 0.5f, axis.y * 0.5f, axis.z * 0.5f, (dot + 1.0f) * 0.5f);
     result.template normalize<Policy>();
     return result;
+}
+
+template <typename T>
+template<class Policy>
+quat<T> quat<T>::from_a_to_b(quat<T> const& a, quat<T> const& b)
+{
+    auto ia = a;
+    ia.invert();
+    return ia * b;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +112,7 @@ inline void quat<T>::normalize()
 	z *= n;
 	w *= n;
 }
-template <typename T> template <class Policy>
+template <typename T>
 inline void quat<T>::invert()
 {
 	x = -x;

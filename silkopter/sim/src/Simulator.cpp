@@ -5,6 +5,7 @@
 Simulator::Simulator(QWidget *parent)
 	: QMainWindow(parent)
     , m_camera_controller(m_context.camera)
+    , m_input_mgr("")
 {
     m_ui.setupUi(this);
 
@@ -160,6 +161,7 @@ Simulator::~Simulator()
 // 	m_ui.widget = nullptr;
 }
 
+math::quatf xxx_rot;
 
 void Simulator::update()
 {
@@ -177,7 +179,7 @@ void Simulator::update()
 	q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(math::vec4f(math::vec3f(m_render_widget->width() / 3024.f, 0, 0), 1));
 	q::System::inst().get_renderer()->get_render_target()->clear_all();
 
-    auto const& uav = m_world->get_uav();
+    auto& uav = m_world->get_uav();
 
 	auto now = q::Clock::now();
 	auto dt = now - m_last_time;
@@ -188,6 +190,20 @@ void Simulator::update()
     m_world->process(dt);
 
     m_ui.status->process(uav);
+
+    {
+        m_input_mgr.update(dt);
+        auto gamepads = m_input_mgr.get_all_gamepads();
+        if (!gamepads.empty())
+        {
+            auto gamepad = gamepads[0];
+
+            auto ls = gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value;
+            auto rs = gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+
+            xxx_rot.set_from_euler_xyz(-rs.y*3.1415f, rs.x*3.1415f, -ls.x*3.1415f);
+        }
+    }
 
     if (m_gizmos.started)
     {
@@ -244,6 +260,25 @@ void Simulator::update()
             m_gizmos.select.set_transform(trans);
             m_gizmos.select.render(m_context);
         }
+    }
+
+    //test
+    {
+        math::trans3df trans(uav.get_position() + math::vec3f(3, 0, 0), xxx_rot, math::vec3f::one);
+        m_gizmos.move.set_transform(trans);
+        m_gizmos.move.render(m_context, m_camera_controller.get_pointer_2d());
+
+        auto& cr = uav.get_rotation();
+        auto diff = math::quatf::from_a_to_b(cr, xxx_rot);
+
+        math::vec3f diff_euler;
+        diff.get_as_euler_xyz(diff_euler);
+
+        diff_euler = (diff_euler) * math::radians(1.f);
+        math::quatf q;
+        q.set_from_euler_xyz(diff_euler);
+
+        uav.set_rotation(uav.get_rotation() * q);
     }
 
     m_context.painter.flush();

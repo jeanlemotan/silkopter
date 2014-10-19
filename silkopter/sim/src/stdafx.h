@@ -52,6 +52,7 @@
 #include "_qmath.h"
 #include "QBase.h"
 #include "QData.h"
+#include "QInput.h"
 #include "q.h"
 
 #include "utils/Channel.h"

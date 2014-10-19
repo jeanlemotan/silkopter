@@ -2,7 +2,7 @@
 
 #ifdef RASPBERRY_PI
 
-#include "hal_motors_gpio.cfg.hpp"
+//#include "hal_motors_gpio.cfg.hpp"
 
 #include "HAL_Motors_PiGPIO.h"
 #include "utils/Json_Helpers.h"
@@ -30,13 +30,13 @@ HAL_Motors_PiGPIO::~HAL_Motors_PiGPIO()
 
 auto HAL_Motors_PiGPIO::load_settings() -> bool
 {
-    autojsoncxx::ParsingResult result;
-    GPIO_Pins m;
-    if (!autojsoncxx::from_json_file("motors_gpio.cfg", m, result))
-    {
-        SILK_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
-        return false;
-    }
+//    autojsoncxx::ParsingResult result;
+//    GPIO_Pins m;
+//    if (!autojsoncxx::from_json_file("motors_gpio.cfg", m, result))
+//    {
+//        SILK_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
+//        return false;
+//    }
 
     return true;
 }

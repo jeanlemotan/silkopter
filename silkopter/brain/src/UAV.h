@@ -99,6 +99,9 @@ public:
 private:
     void process_sensor_data(q::Clock::duration dt);
     void process_motors(q::Clock::duration dt);
+    void process_rate_pids();
+    void process_stability_pids();
+    void process_motion();
     void process_input(q::Clock::duration dt);
 
     Gyroscope_Sample m_last_gyroscope_sample;

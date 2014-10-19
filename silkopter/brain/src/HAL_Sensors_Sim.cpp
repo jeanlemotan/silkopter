@@ -288,9 +288,9 @@ void HAL_Sensors_Sim::process()
 
 void HAL_Sensors_Sim::handle_message(Sim_Comms::Message message, Sim_Comms::Channel& channel)
 {
-    switch (message)
+    if (message == Sim_Comms::Message::SENSOR_DATA)
     {
-    case Sim_Comms::Message::SENSOR_DATA: process_message_sensor_data(channel); break;
+        process_message_sensor_data(channel);
     }
 }
 

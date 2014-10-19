@@ -31,6 +31,8 @@ private:
 
     void update();
 
+    qinput::Input_Mgr m_input_mgr;
+
 	std::unique_ptr<World> m_world;
 
 	q::Clock::time_point m_last_time;

@@ -31,7 +31,9 @@ struct quat
     template<class Policy = standard> static quat<T> from_axis_y(T const& a);
     template<class Policy = standard> static quat<T> from_axis_z(T const& a);
     //returns a quaternion that will rotate a to b
-    template<class Policy = standard> static quat<T> from_vectors(vec3<T> const& a, vec3<T> const& b);
+    template<class Policy = standard> static quat<T> from_a_to_b(vec3<T> const& a, vec3<T> const& b);
+    //returns a quaternion that will rotate a to b
+    template<class Policy = standard> static quat<T> from_a_to_b(quat<T> const& a, quat<T> const& b);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions
@@ -44,7 +46,7 @@ struct quat
 	template<class Policy = standard> void normalize();
 
 	//! Inverts this quat
-	template<class Policy = standard> void invert();
+    void invert();
 
 	//! Set quat to identity
 	void set_identity();

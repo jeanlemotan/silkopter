@@ -18,6 +18,7 @@ INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
+INCLUDEPATH += ../../../../qinput/include
 INCLUDEPATH += ../../../../q/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
@@ -33,6 +34,7 @@ CONFIG(debug, debug|release) {
 LIBS += -L$${ROOT_LIBS_PATH}/q/lib/$${DEST_FOLDER} -lq
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
+LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lBulletCollision -lBulletDynamics -lLinearMath
