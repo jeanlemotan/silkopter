@@ -276,6 +276,7 @@ void Sensors::start_accelerometer_calibration()
     m_calibration.message_box.setWindowTitle("Accelerometer Calibration");
     m_calibration.message_box.setText(msg.c_str());
     m_calibration.message_box.setWindowModality(Qt::ApplicationModal);
+    m_calibration.message_box.setStandardButtons(QMessageBox::Button::Ok);
     m_calibration.message_box.show();
 }
 
@@ -459,6 +460,7 @@ void Sensors::start_gyroscope_calibration()
     m_calibration.message_box.setWindowTitle("Gyroscope Calibration");
     m_calibration.message_box.setText(msg.c_str());
     m_calibration.message_box.setWindowModality(Qt::ApplicationModal);
+    m_calibration.message_box.setStandardButtons(QMessageBox::Button::Ok);
     m_calibration.message_box.show();
 }
 
@@ -603,6 +605,7 @@ void Sensors::start_compass_calibration()
     m_calibration.message_box.setWindowTitle("Compass Calibration");
     m_calibration.message_box.setText(msg.c_str());
     m_calibration.message_box.setWindowModality(Qt::ApplicationModal);
+    m_calibration.message_box.setStandardButtons(QMessageBox::Button::Ok);
     m_calibration.message_box.show();
 }
 

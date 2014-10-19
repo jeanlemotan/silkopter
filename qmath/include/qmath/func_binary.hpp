@@ -11,7 +11,7 @@ template<typename T> inline bool is_pot(T x)
 
 template<typename T> inline T get_min_pot(T min)
 {
-	assert(min < ~0u);
+    QASSERT(min < ~0u);
 	T result = 1;
 	while (result < min) 
 	{	
@@ -21,7 +21,7 @@ template<typename T> inline T get_min_pot(T min)
 }
 template<typename T> inline T get_max_pot(T max)
 {
-	assert(max > 0);
+    QASSERT(max > 0);
 	T result = 1;
 	T crt = result;
 	while (crt <= max) 
@@ -34,7 +34,7 @@ template<typename T> inline T get_max_pot(T max)
 
 template<typename T> inline int8_t get_pot(T val)
 {
-	assert(val > 0);
+    QASSERT(val > 0);
 	int8_t shift = -1;
 	while (val)
 	{

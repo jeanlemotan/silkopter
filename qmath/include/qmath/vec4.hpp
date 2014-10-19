@@ -32,7 +32,7 @@ namespace math
 	template <typename T> inline void vec4<T>::set_length(T len)
 	{
 		T oldLen = length(*this);
-		assert(oldLen != 0);
+        QASSERT(oldLen != 0);
 		*this *= (len/oldLen);
 	}
 
@@ -57,20 +57,20 @@ namespace math
 
 	template<typename T> inline T& vec4<T>::operator[](uint8_t i) 
 	{
-		assert(i < sizeof(*this) / sizeof(T));
+        QASSERT(i < sizeof(*this) / sizeof(T));
 
-		//if you hit this ASSERT, your compiler introduces padding. Check for #pragma packs without pop
-		assert(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
+        //if you hit this QASSERT, your compiler introduces padding. Check for #pragma packs without pop
+        QASSERT(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
 
 		return ((T*)this)[i];
 	}
 
 	template<typename T> inline T const& vec4<T>::operator[](uint8_t i) const
 	{
-		assert(i < sizeof(*this) / sizeof(T));
+        QASSERT(i < sizeof(*this) / sizeof(T));
 
-		//if you hit this ASSERT, your compiler introduces padding. Check for #pragma packs without pop
-		assert(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
+        //if you hit this QASSERT, your compiler introduces padding. Check for #pragma packs without pop
+        QASSERT(&((T*)this)[0] == &x && &((T*)this)[1] == &y);
 
 		return ((T*)this)[i];
 	}
@@ -100,13 +100,13 @@ namespace math
 
 	template<typename T> inline vec4<T> vec4<T>::operator/(T s) const
 	{
-		assert(s != T(0));
+        QASSERT(s != T(0));
 		return vec4<T>(x / s, y / s, z / s, w / s);
 	}
 
 	template<> inline vec4<float> vec4<float>::operator/(float s) const
 	{
-		assert(s != float(0));
+        QASSERT(s != float(0));
 		float ts = float(1) / s;
 		return vec4<float>(x * ts, y * ts, z * ts, w * ts);
 	}
@@ -191,7 +191,7 @@ namespace math
 
 	template<typename T> inline vec4<T>& vec4<T>::operator/=(T s)
 	{
-		assert(s != T(0));
+        QASSERT(s != T(0));
 		x /= s;
 		y /= s;
 		z /= s;
@@ -201,7 +201,7 @@ namespace math
 
 	template<> inline vec4<float>& vec4<float>::operator/=(float s)
 	{
-		assert(s != float(0));
+        QASSERT(s != float(0));
 		float ts = float(1) / s;
 		x *= ts;
 		y *= ts;
@@ -212,7 +212,7 @@ namespace math
 
 	template<typename T> inline vec4<T>& vec4<T>::operator/=(vec4<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0) && v.w != T(0));
+        QASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0) && v.w != T(0));
 		x /= v.x;
 		y /= v.y;
 		z /= v.z;
@@ -238,7 +238,7 @@ namespace math
 
 	template<typename T> inline vec4<T> operator/(vec4<T> const& u, vec4<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0) && v.w != T(0));
+        QASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0) && v.w != T(0));
 		return vec4<T>(u.x / v.x, u.y / v.y, u.z / v.z, u.w / v.w);
 	}
 

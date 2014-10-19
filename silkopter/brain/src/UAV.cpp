@@ -26,6 +26,11 @@ UAV::UAV(HAL& hal)
     m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
     m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
 
+    m_gyroscope_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_accelerometer_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_compass_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_last_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+
 
     load_settings();
     save_settings();
@@ -311,10 +316,10 @@ void UAV::process_sensor_data(q::Clock::duration dt)
         if (c_it != compass_samples.end() && m_compass_sample_time_point <= m_last_sample_time_point)
         {
             m_last_compass_sample = *c_it++;
-            m_compass_sample_time_point += m_last_gyroscope_sample.dt;
+            m_compass_sample_time_point += m_last_compass_sample.dt;
             has_new_compass_sample = true;
         }
-        QASSERT(has_new_gyroscope_sample || has_new_accelerometer_sample || has_new_compass_sample);
+        //QASSERT(has_new_gyroscope_sample || has_new_accelerometer_sample || has_new_compass_sample);
 
         //increment the time
         m_last_sample_time_point += math::min(math::min(m_last_gyroscope_sample.dt, m_last_accelerometer_sample.dt), m_last_compass_sample.dt);

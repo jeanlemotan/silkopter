@@ -11,8 +11,10 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 {
     m_ping.last_time_point = q::Clock::now();
 
-//    m_raw_sensor_samples.gyroscope.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+    m_ping.rtts.set_capacity(100);
+
 //    m_raw_sensor_samples.accelerometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
+//    m_raw_sensor_samples.gyroscope.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
 //    m_raw_sensor_samples.compass.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
 //    m_raw_sensor_samples.barometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
 //    m_raw_sensor_samples.thermometer.set_capacity(Raw_Sensor_Samples::MAX_SIZE);
@@ -109,7 +111,7 @@ auto Comms::get_remote_clock() const -> Remote_Clock const&
 
 void Comms::process_message_ping()
 {
-    uint64_t remote_now = 0;
+    Remote_Clock::rep remote_now = 0;
     uint32_t seq = 0;
     if (!m_channel->unpack(remote_now, seq))
     {
@@ -117,10 +119,10 @@ void Comms::process_message_ping()
         return;
     }
 
-    m_channel->send(detail::Comm_Message::PONG, static_cast<uint64_t>(q::Clock::now().time_since_epoch().count()), seq);
+    m_channel->send(detail::Comm_Message::PONG, seq);
     m_channel->flush();
 
-    if (m_remote_clock.now().time_since_epoch().count() < remote_now)
+    if (remote_now < m_remote_clock.now().time_since_epoch().count())
     {
         SILK_WARNING("Setting remote time in the past!!!");
     }
@@ -129,28 +131,25 @@ void Comms::process_message_ping()
 }
 void Comms::process_message_pong()
 {
-    uint64_t remote_now = 0;
     uint32_t seq = 0;
-    if (!m_channel->unpack(remote_now, seq))
+    if (!m_channel->unpack(seq))
     {
         SILK_WARNING("Failed to unpack pong");
         return;
     }
-    if (m_remote_clock.now().time_since_epoch().count() < remote_now)
-    {
-        SILK_WARNING("Setting remote time in the past!!!");
-    }
-    m_remote_clock.set_now(Remote_Clock::duration(remote_now));
-    //SILK_INFO("Remote Clock set to {}", m_remote_clock.now());
 
     auto it = m_ping.seq_sent.find(seq);
     if (it != m_ping.seq_sent.end())
     {
         auto rtt = q::Clock::now() - it->second;
         m_ping.rtts.push_back(rtt);
-        while (m_ping.rtts.size() > 1024)
+        static q::Clock::time_point xxx = q::Clock::now();
+        if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
         {
-            m_ping.rtts.pop_front();
+            xxx = q::Clock::now();
+            auto sum = std::accumulate(m_ping.rtts.begin(), m_ping.rtts.end(), q::Clock::duration(0));
+            sum /= m_ping.rtts.size();
+            SILK_INFO("RTT: {}", sum);
         }
         m_ping.seq_sent.erase(it);
     }
@@ -601,15 +600,15 @@ void Comms::send_raw_sensor_samples(detail::Comm_Message_Sensors sensors)
 
     m_channel->pack_param(sensors);
 
-    if (sensors.test(detail::Comm_Message_Sensor::GYROSCOPE))
-    {
-        m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.gyroscope.size()));
-        for (auto& a: m_raw_sensor_samples.gyroscope) { m_channel->pack_param(a); }
-    }
     if (sensors.test(detail::Comm_Message_Sensor::ACCELEROMETER))
     {
         m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.accelerometer.size()));
         for (auto& a: m_raw_sensor_samples.accelerometer) { m_channel->pack_param(a); }
+    }
+    if (sensors.test(detail::Comm_Message_Sensor::GYROSCOPE))
+    {
+        m_channel->pack_param(static_cast<uint32_t>(m_raw_sensor_samples.gyroscope.size()));
+        for (auto& a: m_raw_sensor_samples.gyroscope) { m_channel->pack_param(a); }
     }
     if (sensors.test(detail::Comm_Message_Sensor::COMPASS))
     {
@@ -655,8 +654,8 @@ void Comms::send_raw_sensor_samples(detail::Comm_Message_Sensors sensors)
 
 void Comms::clear_raw_sensor_samples()
 {
-    m_raw_sensor_samples.gyroscope.clear();
     m_raw_sensor_samples.accelerometer.clear();
+    m_raw_sensor_samples.gyroscope.clear();
     m_raw_sensor_samples.compass.clear();
     m_raw_sensor_samples.barometer.clear();
     m_raw_sensor_samples.thermometer.clear();
@@ -678,12 +677,12 @@ void Comms::store_raw_sensor_samples()
     }
 
     {
-        auto const& samples = m_hal.sensors->get_gyroscope_samples();
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gyroscope));
-    }
-    {
         auto const& samples = m_hal.sensors->get_accelerometer_samples();
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.accelerometer));
+    }
+    {
+        auto const& samples = m_hal.sensors->get_gyroscope_samples();
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gyroscope));
     }
     {
         auto const& samples = m_hal.sensors->get_compass_samples();
@@ -732,75 +731,75 @@ void Comms::send_sensor_samples()
     detail::Comm_Message_Sensors sensors;
 
     {
-        auto const& samples = m_hal.sensors->get_gyroscope_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.gyroscope.sample_idx)
-        {
-            sensors.set(detail::Comm_Message_Sensor::GYROSCOPE);
-            m_sensor_samples.gyroscope = samples.back();
-        }
-    }
-    {
-        auto const& samples = m_hal.sensors->get_accelerometer_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.accelerometer.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_accelerometer_sample();
+        if (sample.sample_idx != m_sensor_samples.accelerometer.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::ACCELEROMETER);
-            m_sensor_samples.accelerometer = samples.back();
+            m_sensor_samples.accelerometer = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_compass_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.compass.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_gyroscope_sample();
+        if (sample.sample_idx != m_sensor_samples.gyroscope.sample_idx)
+        {
+            sensors.set(detail::Comm_Message_Sensor::GYROSCOPE);
+            m_sensor_samples.gyroscope = sample;
+        }
+    }
+    {
+        auto const& sample = m_hal.sensors->get_last_compass_sample();
+        if (sample.sample_idx != m_sensor_samples.compass.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::COMPASS);
-            m_sensor_samples.compass = samples.back();
+            m_sensor_samples.compass = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_barometer_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.barometer.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_barometer_sample();
+        if (sample.sample_idx != m_sensor_samples.barometer.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::BAROMETER);
-            m_sensor_samples.barometer = samples.back();
+            m_sensor_samples.barometer = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_thermometer_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.thermometer.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_thermometer_sample();
+        if (sample.sample_idx != m_sensor_samples.thermometer.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::THERMOMETER);
-            m_sensor_samples.thermometer = samples.back();
+            m_sensor_samples.thermometer = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_sonar_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.sonar.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_sonar_sample();
+        if (sample.sample_idx != m_sensor_samples.sonar.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::SONAR);
-            m_sensor_samples.sonar = samples.back();
+            m_sensor_samples.sonar = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_voltage_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.voltage.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_voltage_sample();
+        if (sample.sample_idx != m_sensor_samples.voltage.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::VOLTAGE);
-            m_sensor_samples.voltage = samples.back();
+            m_sensor_samples.voltage = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_current_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.current.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_current_sample();
+        if (sample.sample_idx != m_sensor_samples.current.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::CURRENT);
-            m_sensor_samples.current = samples.back();
+            m_sensor_samples.current = sample;
         }
     }
     {
-        auto const& samples = m_hal.sensors->get_gps_samples();
-        if (!samples.empty() && samples.back().sample_idx != m_sensor_samples.gps.sample_idx)
+        auto const& sample = m_hal.sensors->get_last_gps_sample();
+        if (sample.sample_idx != m_sensor_samples.gps.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::GPS);
-            m_sensor_samples.gps = samples.back();
+            m_sensor_samples.gps = sample;
         }
     }
 
@@ -812,13 +811,13 @@ void Comms::send_sensor_samples()
     m_channel->begin_pack();
     m_channel->pack_param(sensors);
 
-    if (sensors.test(detail::Comm_Message_Sensor::GYROSCOPE))
-    {
-        m_channel->pack_param(m_sensor_samples.gyroscope);
-    }
     if (sensors.test(detail::Comm_Message_Sensor::ACCELEROMETER))
     {
         m_channel->pack_param(m_sensor_samples.accelerometer);
+    }
+    if (sensors.test(detail::Comm_Message_Sensor::GYROSCOPE))
+    {
+        m_channel->pack_param(m_sensor_samples.gyroscope);
     }
     if (sensors.test(detail::Comm_Message_Sensor::COMPASS))
     {
@@ -884,7 +883,7 @@ void Comms::process()
     }
     QASSERT(m_channel);
 
-    if (auto msg = m_channel->get_next_message())
+    while (auto msg = m_channel->get_next_message())
     {
         switch (msg.get())
         {
@@ -927,12 +926,26 @@ void Comms::process()
 
     if (now - m_ping.last_time_point >= std::chrono::milliseconds(100))
     {
-        if (m_ping.seq_sent.size() > 100)
+        m_ping.last_time_point = now;
+
+        if (m_ping.seq_sent.size() > 1000)
         {
-            m_ping.seq_sent.clear();
+            std::chrono::seconds max_d(1);
+            for (auto it = m_ping.seq_sent.begin(); it != m_ping.seq_sent.end(); )
+            {
+                if (now - it->second > max_d)
+                {
+                    it = m_ping.seq_sent.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
         }
+
         m_ping.seq_sent[m_ping.seq] = now;
-        m_channel->send(detail::Comm_Message::PONG, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
+        m_channel->send(detail::Comm_Message::PING, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
         m_ping.seq++;
     }
 }

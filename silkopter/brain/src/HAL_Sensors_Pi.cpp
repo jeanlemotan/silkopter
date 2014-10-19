@@ -197,6 +197,42 @@ auto HAL_Sensors_Pi::get_gps_samples() const -> std::vector<GPS_Sample> const&
 {
     return m_gps_samples;
 }
+auto HAL_Sensors_Pi::get_last_accelerometer_sample() const  -> Accelerometer_Sample const&
+{
+    return m_accelerometer_sample;
+}
+auto HAL_Sensors_Pi::get_last_gyroscope_sample() const      -> Gyroscope_Sample const&
+{
+    return m_gyroscope_sample;
+}
+auto HAL_Sensors_Pi::get_last_compass_sample() const        -> Compass_Sample const&
+{
+    return m_compass_sample;
+}
+auto HAL_Sensors_Pi::get_last_barometer_sample() const      -> Barometer_Sample const&
+{
+    return m_barometer_sample;
+}
+auto HAL_Sensors_Pi::get_last_sonar_sample() const          -> Sonar_Sample const&
+{
+    return m_sonar_sample;
+}
+auto HAL_Sensors_Pi::get_last_thermometer_sample() const    -> Thermometer_Sample const&
+{
+    return m_thermometer_sample;
+}
+auto HAL_Sensors_Pi::get_last_voltage_sample() const        -> Voltage_Sample const&
+{
+    return m_voltage_sample;
+}
+auto HAL_Sensors_Pi::get_last_current_sample() const        -> Current_Sample const&
+{
+    return m_current_sample;
+}
+auto HAL_Sensors_Pi::get_last_gps_sample() const            -> GPS_Sample const&
+{
+    return m_gps_sample;
+}
 
 size_t HAL_Sensors_Pi::get_error_count() const
 {

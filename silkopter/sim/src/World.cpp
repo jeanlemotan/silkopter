@@ -26,11 +26,12 @@ World::World(boost::asio::io_service& io_service, Config& config)
     , m_config(config)
     , m_uav(config.uav)
 {
-    m_accelerometer.quantization_scale = math::vec3f(m_config.accelerometer.range * physics::constants::g / 32767.f);
-    m_gyroscope.quantization_scale = math::vec3f(1.f / 1880.f);
-    m_compass.quantization_scale = math::vec3f(1.f / 10.f);
+    auto now = q::Clock::now();
 
-    m_physics_timestamp = q::Clock::now();
+    m_physics_timestamp = now;
+    m_last_accelerometer_time_point = now;
+    m_last_gyroscope_time_point = now;
+    m_last_compass_time_point = now;
 }
 
 World::~World()
@@ -158,19 +159,7 @@ void World::process_state_handshake()
                        m_config.sonar.is_enabled,
                        false,//config.has_gps,
                        false,//config.has_voltage_sensor,
-                       false,//config.has_current_sensor,
-                       m_accelerometer.quantization_bias,
-                       m_accelerometer.quantization_scale,
-                       m_gyroscope.quantization_bias,
-                       m_gyroscope.quantization_scale,
-                       m_compass.quantization_bias,
-                       m_compass.quantization_scale,
-                       m_barometer.quantization_bias,
-                       m_barometer.quantization_scale,
-                       m_sonar.quantization_bias,
-                       m_sonar.quantization_scale,
-                       m_thermometer.quantization_bias,
-                       m_thermometer.quantization_scale
+                       false//config.has_current_sensor,
                        );
 
         m_state = State::RUNNING;
@@ -191,14 +180,14 @@ void World::process_state_running()
             uint8_t motor_count = 0;
             m_channel.begin_unpack();
             auto res = m_channel.unpack_param(motor_count);
-            if (res == Channel::Unpack_Result::OK && motor_count > 0)
+            if (res && motor_count > 0)
             {
                 auto& motors = m_uav.m_motors;
                 motor_count = math::min<size_t>(motor_count, motors.size());
                 for (size_t i = 0; i < motor_count; i++)
                 {
                     uint16_t v = 0;
-                    if (m_channel.unpack_param(v) == Channel::Unpack_Result::OK)
+                    if (m_channel.unpack_param(v))
                     {
                         float throttle = float(v) / 65535.f;
                         motors[i].set_throttle(throttle);
@@ -293,95 +282,101 @@ void World::process_sensors()
     auto now = m_physics_timestamp;
     Sensors sensors;
 
-    if (now - m_accelerometer.last_timestamp >= m_config.accelerometer.sample_period)
+    auto dt = now - m_last_accelerometer_time_point;
+    if (dt >= m_config.accelerometer.sample_period)
     {
-        m_accelerometer.last_timestamp = now;
+        m_last_accelerometer_time_point = now;
 
         auto acceleration = m_uav.get_acceleration();
 
         auto noise = math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * m_config.accelerometer.noise;
         auto acc = acceleration + noise;
 
-        m_accelerometer.value = acc;
-        m_accelerometer.value += m_config.accelerometer.bias;
-        m_accelerometer.value *= m_config.accelerometer.scale;
+        m_accelerometer_sample.dt = dt;
+        m_accelerometer_sample.sample_idx++;
+        m_accelerometer_sample.value = acc;
+        m_accelerometer_sample.value += m_config.accelerometer.bias;
+        m_accelerometer_sample.value *= m_config.accelerometer.scale;
         sensors.set(Sensor::ACCELEROMETER);
     }
-    if (now - m_gyroscope.last_timestamp >= m_config.gyroscope.sample_period)
+    dt = now - m_last_gyroscope_time_point;
+    if (dt >= m_config.gyroscope.sample_period)
     {
-        m_gyroscope.last_timestamp = now;
+        m_last_gyroscope_time_point = now;
 
         auto noise = math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * math::radians(m_config.gyroscope.noise_degrees);
-        m_gyroscope.value = m_uav.get_angular_velocity() + noise;
-        m_gyroscope.value += math::radians(m_config.gyroscope.bias_degrees);
+        m_gyroscope_sample.value = m_uav.get_angular_velocity() + noise;
+        m_gyroscope_sample.value += math::radians(m_config.gyroscope.bias_degrees);
+        m_gyroscope_sample.dt = dt;
+        m_gyroscope_sample.sample_idx++;
 
         sensors.set(Sensor::GYROSCOPE);
     }
-    if (now - m_compass.last_timestamp >= m_config.compass.sample_period)
+    dt = now - m_last_compass_time_point;
+    if (dt >= m_config.compass.sample_period)
     {
-        m_compass.last_timestamp = now;
+        m_last_compass_time_point = now;
 
         auto direction = math::transform(m_uav.m_world_to_local_mat, math::vec3f(-1000, 0, 0));
         direction += math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * m_config.compass.noise;
         direction += m_config.compass.bias;
 
-        m_compass.value = direction;
+        m_compass_sample.value = direction;
+        m_compass_sample.dt = dt;
+        m_compass_sample.sample_idx++;
         sensors.set(Sensor::COMPASS);
     }
 
 
     if (sensors.any())
     {
-        m_channel.begin_stream();
-        m_channel.add_to_stream(static_cast<uint8_t>(sensors.value()));
+        m_channel.begin_pack();
+        m_channel.pack_param(sensors);
 
         if (sensors.test(Sensor::ACCELEROMETER))
         {
-            auto dt_ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_config.accelerometer.sample_period);
-            QASSERT(dt_ms.count() > 0);
-            m_channel.add_to_stream(static_cast<uint8_t>(dt_ms.count()));
-            m_channel.add_to_stream(math::vec3s16(m_accelerometer.value / m_accelerometer.quantization_scale));
+            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_accelerometer_sample.dt).count()));
+            m_channel.pack_param(m_accelerometer_sample.value);
         }
         if (sensors.test(Sensor::GYROSCOPE))
         {
-            auto dt_ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_config.gyroscope.sample_period);
-            QASSERT(dt_ms.count() > 0);
-            m_channel.add_to_stream(static_cast<uint8_t>(dt_ms.count()));
-            m_channel.add_to_stream(math::vec3s16(m_gyroscope.value / m_gyroscope.quantization_scale));
+            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_gyroscope_sample.dt).count()));
+            m_channel.pack_param(m_gyroscope_sample.value);
         }
         if (sensors.test(Sensor::COMPASS))
         {
-            m_channel.add_to_stream(math::vec3s16(m_compass.value / m_compass.quantization_scale));
+            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_compass_sample.dt).count()));
+            m_channel.pack_param(m_compass_sample.value);
         }
         if (sensors.test(Sensor::BAROMETER))
         {
             QASSERT(0);
-//            m_channel.add_to_stream(m_barometer_data.pressure);
+//            m_channel.pack_param(m_barometer_data.pressure);
         }
         if (sensors.test(Sensor::THERMOMETER))
         {
             QASSERT(0);
-//            m_channel.add_to_stream(m_thermometer_data.temperature);
+//            m_channel.pack_param(m_thermometer_data.temperature);
         }
         if (sensors.test(Sensor::SONAR))
         {
             QASSERT(0);
-//            m_channel.add_to_stream(m_sonar_data.distance);
+//            m_channel.pack_param(m_sonar_data.distance);
         }
         if (sensors.test(Sensor::VOLTAGE))
         {
             QASSERT(0);
 //            uint16_t d = m_sonar_data.distance * 1000.f;
-//            m_channel.add_to_stream(d);
+//            m_channel.pack_param(d);
         }
         if (sensors.test(Sensor::CURRENT))
         {
             QASSERT(0);
 //            uint16_t d = m_sonar_data.distance * 1000.f;
-//            m_channel.add_to_stream(d);
+//            m_channel.pack_param(d);
         }
 
-        m_channel.end_stream(Message::SENSOR_DATA);
+        m_channel.end_pack(Message::SENSOR_DATA);
     }
 
 }

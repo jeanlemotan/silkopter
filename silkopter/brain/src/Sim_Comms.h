@@ -33,8 +33,6 @@ protected:
         SENSOR_DATA,
         //---
         MOTOR_OUTPUTS,
-        //---
-        PWM_CONFIG,
     };
 
     enum class Sensor : uint16_t
@@ -49,7 +47,7 @@ protected:
         CURRENT         = 1 << 7,   //uint16 - amperes / second
         GPS             = 1 << 8
     };
-    typedef q::util::Flag_Set<Sensor, uint8_t> Sensors;
+    typedef q::util::Flag_Set<Sensor, uint16_t> Sensors;
 
     enum class State : uint8_t
     {

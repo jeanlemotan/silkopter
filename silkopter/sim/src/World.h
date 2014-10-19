@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "UAV.h"
+#include "common/sensors/Sensor_Samples.h"
 
 class World : q::util::Noncopyable
 {
@@ -42,14 +43,11 @@ private:
         STAY_ALIVE,
         CONFIG,
         SENSOR_DATA,
-        GPS_DATA,
         //---
         MOTOR_OUTPUTS,
-        //---
-        PWM_CONFIG,
     };
 
-    enum class Sensor : uint8_t
+    enum class Sensor : uint16_t
     {
         ACCELEROMETER   = 1 << 0,   //uint8 - dt ms, vec3s16 - acceleration
         GYROSCOPE       = 1 << 1,   //uint8 - dt ms,  vec3s16 - angular velocity
@@ -59,8 +57,9 @@ private:
         SONAR           = 1 << 5,   //uint16 - distance
         VOLTAGE         = 1 << 6,   //uint16 - voltage
         CURRENT         = 1 << 7,   //uint16 - amperes / second
+        GPS             = 1 << 8
     };
-    typedef q::util::Flag_Set<Sensor, uint8_t> Sensors;
+    typedef q::util::Flag_Set<Sensor, uint16_t> Sensors;
 
     boost::asio::io_service& m_io_service;
     uint16_t m_port = 0;
@@ -71,24 +70,29 @@ private:
 
     Config& m_config;
 
-    template<class T>
-    struct Sensor_Data
-    {
-        T value;
-        T quantization_scale;
-        T quantization_bias;
-        q::Clock::time_point last_timestamp;
-    };
-
     math::vec3f m_old_linear_velocity;
     math::quatf m_old_rotation;
 
-    Sensor_Data<math::vec3f> m_accelerometer;
-    Sensor_Data<math::vec3f> m_gyroscope;
-    Sensor_Data<math::vec3f> m_compass;
-    Sensor_Data<float> m_barometer;
-    Sensor_Data<float> m_thermometer;
-    Sensor_Data<float> m_sonar;
+    silk::Accelerometer_Sample m_accelerometer_sample;
+    q::Clock::time_point m_last_accelerometer_time_point;
+
+    silk::Gyroscope_Sample m_gyroscope_sample;
+    q::Clock::time_point m_last_gyroscope_time_point;
+
+    silk::Compass_Sample m_compass_sample;
+    q::Clock::time_point m_last_compass_time_point;
+
+    silk::Barometer_Sample m_barometer_sample;
+    q::Clock::time_point m_last_barometer_time_point;
+
+    silk::Thermometer_Sample m_thermometer_sample;
+    q::Clock::time_point m_last_thermometer_time_point;
+
+    silk::Sonar_Sample m_sonar_sample;
+    q::Clock::time_point m_last_sonar_time_point;
+
+    silk::GPS_Sample m_gps_sample;
+    q::Clock::time_point m_last_gps_time_point;
 
     void process_sensors();
 

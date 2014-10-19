@@ -108,6 +108,43 @@ auto HAL_Sensors_Sim::get_gps_samples() const -> std::vector<GPS_Sample> const&
     return m_gps_samples;
 }
 
+auto HAL_Sensors_Sim::get_last_accelerometer_sample() const  -> Accelerometer_Sample const&
+{
+    return m_accelerometer_sample;
+}
+auto HAL_Sensors_Sim::get_last_gyroscope_sample() const      -> Gyroscope_Sample const&
+{
+    return m_gyroscope_sample;
+}
+auto HAL_Sensors_Sim::get_last_compass_sample() const        -> Compass_Sample const&
+{
+    return m_compass_sample;
+}
+auto HAL_Sensors_Sim::get_last_barometer_sample() const      -> Barometer_Sample const&
+{
+    return m_barometer_sample;
+}
+auto HAL_Sensors_Sim::get_last_sonar_sample() const          -> Sonar_Sample const&
+{
+    return m_sonar_sample;
+}
+auto HAL_Sensors_Sim::get_last_thermometer_sample() const    -> Thermometer_Sample const&
+{
+    return m_thermometer_sample;
+}
+auto HAL_Sensors_Sim::get_last_voltage_sample() const        -> Voltage_Sample const&
+{
+    return m_voltage_sample;
+}
+auto HAL_Sensors_Sim::get_last_current_sample() const        -> Current_Sample const&
+{
+    return m_current_sample;
+}
+auto HAL_Sensors_Sim::get_last_gps_sample() const            -> GPS_Sample const&
+{
+    return m_gps_sample;
+}
+
 size_t HAL_Sensors_Sim::get_error_count() const
 {
     return m_error_count + m_sim_comms.get_error_count();
@@ -228,6 +265,16 @@ void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)
 
 void HAL_Sensors_Sim::process()
 {
+    m_accelerometer_samples.clear();
+    m_gyroscope_samples.clear();
+    m_compass_samples.clear();
+    m_barometer_samples.clear();
+    m_sonar_samples.clear();
+    m_thermometer_samples.clear();
+    m_voltage_samples.clear();
+    m_current_samples.clear();
+    m_gps_samples.clear();
+
     if (!m_sim_comms.is_connected())
     {
         m_sim_comms.connect();

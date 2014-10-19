@@ -4,7 +4,7 @@ namespace math
 	{
 		template<class Policy> inline float lerp_check_mu(float t)
 		{
-			assert(t >= 0 && t <= 1);
+            QASSERT(t >= 0 && t <= 1);
 			return t;
 		}
 		template<> inline float lerp_check_mu<safe>(float t)

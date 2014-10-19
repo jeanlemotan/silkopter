@@ -92,7 +92,7 @@ inline mat2<T>::mat2(vec2<T> const& column0, vec2<T> const& column1)
 template<typename T>
 inline void mat2<T>::set(T const values[4])
 {
-	assert(values);
+    QASSERT(values);
 	memcpy(m, values, sizeof(T)*4);
 }
 
@@ -132,13 +132,13 @@ inline void mat2<T>::transpose()
 template <typename T>
 inline vec2<T> mat2<T>::get_row(uint8_t row) const
 {
-	assert(row < 2);
+    QASSERT(row < 2);
 	return vec2<T>(m[row], m[row + 2]);
 }
 template <typename T>
 inline void mat2<T>::set_row(uint8_t row, vec2<T> const& v)
 {
-	assert(row < 2);
+    QASSERT(row < 2);
 	m[row    ] = v.x;
 	m[row + 2] = v.y;
 }
@@ -146,14 +146,14 @@ inline void mat2<T>::set_row(uint8_t row, vec2<T> const& v)
 template <typename T>
 inline vec2<T> const& mat2<T>::get_column(uint8_t column) const
 {
-	assert(column < 2);
+    QASSERT(column < 2);
 	uint8_t idx = column * 2;
 	return *(vec2<T> const*)(&m[idx]);
 }
 template <typename T>
 inline void mat2<T>::set_column(uint8_t column, vec2<T> const& v)
 {
-	assert(column < 2);
+    QASSERT(column < 2);
 	uint8_t idx = column * 2;
 	m[idx    ] = v.x;
 	m[idx + 1] = v.y;
@@ -229,14 +229,14 @@ inline T const* mat2<T>::data() const
 template <typename T>
 inline T& mat2<T>::operator()(uint8_t column, uint8_t row)
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 
 template <typename T>
 inline T const& mat2<T>::operator()(uint8_t column, uint8_t row) const
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 

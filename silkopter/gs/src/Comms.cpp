@@ -10,6 +10,8 @@ Comms::Comms(boost::asio::io_service& io_service)
     , m_channel(m_socket)
 {
     m_ping.last_time_point = q::Clock::now();
+
+    m_ping.rtts.set_capacity(100);
 }
 
 auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> Result
@@ -360,7 +362,7 @@ void Comms::process_message_altitude_pid_params()
 
 void Comms::process_message_ping()
 {
-    uint64_t remote_now = 0;
+    Remote_Clock::rep remote_now = 0;
     uint32_t seq = 0;
     if (!m_channel.unpack(remote_now, seq))
     {
@@ -368,10 +370,10 @@ void Comms::process_message_ping()
         return;
     }
 
-    m_channel.send(detail::Comm_Message::PONG, static_cast<uint64_t>(q::Clock::now().time_since_epoch().count()), seq);
+    m_channel.send(detail::Comm_Message::PONG, seq);
     m_channel.flush();
 
-    if (m_remote_clock.now().time_since_epoch().count() < remote_now)
+    if (remote_now < m_remote_clock.now().time_since_epoch().count())
     {
         SILK_WARNING("Setting remote time in the past!!!");
     }
@@ -380,29 +382,18 @@ void Comms::process_message_ping()
 }
 void Comms::process_message_pong()
 {
-    uint64_t remote_now = 0;
     uint32_t seq = 0;
-    if (!m_channel.unpack(remote_now, seq))
+    if (!m_channel.unpack(seq))
     {
         SILK_WARNING("Failed to unpack pong");
         return;
     }
-    if (m_remote_clock.now().time_since_epoch().count() < remote_now)
-    {
-        SILK_WARNING("Setting remote time in the past!!!");
-    }
-    m_remote_clock.set_now(Remote_Clock::duration(remote_now));
-    //SILK_INFO("Remote Clock set to {}", m_remote_clock.now());
 
     auto it = m_ping.seq_sent.find(seq);
     if (it != m_ping.seq_sent.end())
     {
         auto rtt = q::Clock::now() - it->second;
         m_ping.rtts.push_back(rtt);
-        while (m_ping.rtts.size() > 1024)
-        {
-            m_ping.rtts.pop_front();
-        }
         m_ping.seq_sent.erase(it);
     }
     else
@@ -516,12 +507,25 @@ void Comms::process()
     auto now = q::Clock::now();
     if (now - m_ping.last_time_point >= std::chrono::milliseconds(100))
     {
-        if (m_ping.seq_sent.size() > 100)
+        m_ping.last_time_point = now;
+
+        if (m_ping.seq_sent.size() > 1000)
         {
-            m_ping.seq_sent.clear();
+            std::chrono::seconds max_d(1);
+            for (auto it = m_ping.seq_sent.begin(); it != m_ping.seq_sent.end(); )
+            {
+                if (now - it->second > max_d)
+                {
+                    it = m_ping.seq_sent.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
         }
         m_ping.seq_sent[m_ping.seq] = now;
-        m_channel.send(detail::Comm_Message::PONG, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
+        m_channel.send(detail::Comm_Message::PING, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
         m_ping.seq++;
     }
 }

@@ -34,6 +34,16 @@ public:
     auto get_current_samples() const -> std::vector<Current_Sample> const&;
     auto get_gps_samples() const -> std::vector<GPS_Sample> const&;
 
+    auto get_last_accelerometer_sample() const  -> Accelerometer_Sample const&;
+    auto get_last_gyroscope_sample() const      -> Gyroscope_Sample const&;
+    auto get_last_compass_sample() const        -> Compass_Sample const&;
+    auto get_last_barometer_sample() const      -> Barometer_Sample const&;
+    auto get_last_sonar_sample() const          -> Sonar_Sample const&;
+    auto get_last_thermometer_sample() const    -> Thermometer_Sample const&;
+    auto get_last_voltage_sample() const        -> Voltage_Sample const&;
+    auto get_last_current_sample() const        -> Current_Sample const&;
+    auto get_last_gps_sample() const            -> GPS_Sample const&;
+
     size_t get_error_count() const;
     void process();
 

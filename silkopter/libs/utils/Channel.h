@@ -67,16 +67,22 @@ namespace util
 
 		//decodes the next message
 		template<typename... Params>
-        auto unpack(Params&... params) -> bool { return _unpack(size_t(0), params...); }
+        auto unpack(Params&... params) -> bool
+        {
+            std::lock_guard<std::mutex> lg(m_rx_mutex);
+            return _unpack(size_t(0), params...);
+        }
 
         //////////////////////////////////////////////////////////////////////////
 
         auto begin_unpack() -> bool
         {
+            m_rx_mutex.lock();
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             //q::quick_logf("begin_decode: {}, {}", m_decoded.data_size, m_rx_buffer.size());
             if (m_decoded.data_size == 0)
             {
+                m_rx_mutex.unlock();
                 return false;
             }
             return true;
@@ -104,10 +110,15 @@ namespace util
                 pop_front(m_decoded.data_size);
                 m_decoded.data_size = 0;
             }
+            m_rx_mutex.unlock();
         }
 
         auto get_message_size() const -> Message_Size_t { return m_decoded.data_size; }
-        size_t get_pending_data_size() const { return m_rx_buffer.size(); }
+        size_t get_pending_data_size() const
+        {
+            std::lock_guard<std::mutex> lg(m_rx_mutex);
+            return m_rx_buffer.size();
+        }
         size_t get_error_count() const { return m_error_count; }
 
 		//////////////////////////////////////////////////////////////////////////
@@ -212,7 +223,6 @@ namespace util
 		{
             if (m_decoded.data_size > 0)
 			{
-                std::lock_guard<std::mutex> lg(m_rx_mutex);
                 pop_front(m_decoded.data_size);
                 m_decoded.data_size = 0;
                 m_decoded.magic = 0;
@@ -225,16 +235,13 @@ namespace util
 		template<typename Param, typename... Params>
         auto _unpack(size_t off, Param& p, Params&... params) -> bool
 		{
+            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+            if (m_rx_buffer.size() < m_decoded.data_size || m_rx_buffer.size() < off + sizeof(Param))
             {
-                std::lock_guard<std::mutex> lg(m_rx_mutex);
-                QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-                if (m_rx_buffer.size() < m_decoded.data_size || m_rx_buffer.size() < off + sizeof(Param))
-                {
-                    m_error_count++;
-                    return false;
-                }
-                p = get_value<Param>(m_rx_buffer, off);
+                m_error_count++;
+                return false;
             }
+            p = get_value<Param>(m_rx_buffer, off);
 
             return _unpack(off, params...);
 		}

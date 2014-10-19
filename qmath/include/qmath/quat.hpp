@@ -97,7 +97,6 @@ template <typename T> template <class Policy>
 inline void quat<T>::normalize()
 {
 	T n = x*x + y*y + z*z + w*w;
-	assert(n != 0);
 	n = inv_sqrt<T, Policy>(n);
 	x *= n;
 	y *= n;

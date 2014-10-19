@@ -197,7 +197,7 @@ private:
     {
         uint32_t seq = 0;
         std::map<uint32_t, q::Clock::time_point> seq_sent;
-        std::deque<q::Clock::duration> rtts;
+        boost::circular_buffer<q::Clock::duration> rtts;
         q::Clock::time_point last_time_point;
     } m_ping;
 };

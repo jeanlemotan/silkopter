@@ -136,13 +136,13 @@ namespace math
 	//////////////////////////////////////////////////////////////////////////
 	template <typename T> inline bool equals(T v1, T v2, T tolerance)
 	{
-		assert(tolerance >= T(0));
+        QASSERT(tolerance >= T(0));
 		return abs(v1 - v2) <= tolerance;
 	}
 
 	inline bool equals(float v1, float v2, float tolerance)
 	{
-		assert(tolerance >= 0);
+        QASSERT(tolerance >= 0);
 		// http://realtimecollisiondetection.net/pubs/Tolerances/
 		// Abs(x - y) <= Max(absTol, relTol * Max(Abs(x), Abs(y)))
 		// we assume absTol=relTol, this leaves
@@ -279,7 +279,7 @@ namespace math
 
 	template <typename T> inline bool is_zero(T v, T tolerance)
 	{
-		assert(tolerance >= 0);
+        QASSERT(tolerance >= 0);
 		return abs(v) <= tolerance;
 	}
 	template <typename T> inline bool is_zero(angle<T> const& v, T tolerance)
@@ -407,7 +407,7 @@ namespace math
 
 	template <typename T> inline bool is_one(T v, T tolerance)
 	{
-		assert(tolerance >= 0);
+        QASSERT(tolerance >= 0);
 		return abs(v - T(1)) <= tolerance;
 	}
 	template <typename T> inline bool is_one(vec2<T> const& v, T tolerance)
@@ -900,7 +900,7 @@ namespace math
 
 	template<typename T, class Policy> inline T inverse(T const& v)
 	{
-		assert(v != 0);
+        QASSERT(v != 0);
 		return 1 / v;
 	}
 	template<> inline float inverse<float, safe>(float const& v)
@@ -915,35 +915,35 @@ namespace math
 	{
 		mat2<T> tmp(v);
 		bool res = tmp.template invert<Policy>();
-		assert(res);
+        QASSERT(res);
 		return tmp;
 	}
 	template<typename T, class Policy = standard> inline mat3<T> inverse(mat3<T> const& v)
 	{
 		mat3<T> tmp(v);
 		bool res = tmp.template invert<Policy>();
-		assert(res);
+        QASSERT(res);
 		return tmp;
 	}
 	template<typename T, class Policy = standard> inline trans2d<T> inverse(const trans2d<T>& v)
 	{
 		trans2d<T> tmp(v);
 		bool res = tmp.template invert<Policy>();
-		assert(res);
+        QASSERT(res);
 		return tmp;
 	}
 	template<typename T, class Policy = standard> inline mat4<T> inverse(const mat4<T>& v)
 	{
 		mat4<T> tmp(v);
 		bool res = tmp.template invert<Policy>();
-		assert(res);
+        QASSERT(res);
 		return tmp;
 	}
 	template<typename T, class Policy = standard> inline trans3d<T> inverse(trans3d<T> const& v)
 	{
 		trans3d<T> tmp(v);
 		bool res = tmp.template invert<Policy>();
-		assert(res);
+        QASSERT(res);
 		return tmp;
 	}
 	template<typename T, class Policy = standard> inline quat<T> inverse(quat<T> const& v)
@@ -955,12 +955,12 @@ namespace math
 
 	template<typename T, class Policy> inline T inv_sqrt(T const& v)
 	{
-		assert(!is_zero(v));
+        QASSERT(!is_zero(v));
 		return inverse<T, Policy>(sqrt<T, Policy>(v));
 	}
 	template<> inline float inv_sqrt<float, fast>(float const& v)
 	{
-		assert(!is_zero(v));
+        QASSERT(!is_zero(v));
 #ifdef __AVR__
         return inverse<float, fast>(sqrt<float, fast>(v));
 #else
@@ -1330,7 +1330,7 @@ namespace math
 			auto const* __restrict s1 = src1;
 			auto const* __restrict s2 = src2;
 
-			assert(src1 && src2 && dst && count);
+            QASSERT(src1 && src2 && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				*d = dot(*s1, *s2);
@@ -1345,7 +1345,7 @@ namespace math
 			auto const* __restrict s1 = src1;
 			auto const* __restrict s2 = src2;
 
-			assert(src1 && src2 && dst && count);
+            QASSERT(src1 && src2 && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				*d = dot(*s1, *s2);

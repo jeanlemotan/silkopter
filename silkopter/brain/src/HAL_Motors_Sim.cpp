@@ -14,7 +14,7 @@ HAL_Motors_Sim::HAL_Motors_Sim(Sim_Comms& sim_comms)
 
 void HAL_Motors_Sim::cut_throttle()
 {
-    static std::array<float, 256> zero_throttles = {0};
+    static std::array<float, 255> zero_throttles = {0};
     set_throttles(zero_throttles.data(), zero_throttles.size());
 }
 

@@ -29,7 +29,7 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 	template <typename T> inline void vec3<T>::set_length(T len)
 	{
 		T oldLen = length(*this);
-		assert(oldLen != 0);
+        QASSERT(oldLen != 0);
 		*this *= (len/oldLen);
 	}
 
@@ -54,13 +54,13 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<typename T> inline T& vec3<T>::operator[](uint8_t i) 
 	{
-		assert(i < 3);
+        QASSERT(i < 3);
 		return ((T*)this)[i];
 	}
 
 	template<typename T> inline T const& vec3<T>::operator[](uint8_t i) const
 	{
-		assert(i < 3);
+        QASSERT(i < 3);
 		return ((T*)this)[i];
 	}
 
@@ -89,13 +89,13 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<typename T> inline vec3<T> vec3<T>::operator/(T s) const
 	{
-		assert(s != T(0));
+        QASSERT(s != T(0));
 		return vec3<T>(x / s, y / s, z / s);
 	}
 
 	template<> inline vec3<float> vec3<float>::operator/(float s) const
 	{
-		assert(s != float(0));
+        QASSERT(s != float(0));
 		float ts = float(1) / s;
 		return vec3<float>(x * ts, y * ts, z * ts);
 	}
@@ -171,7 +171,7 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<typename T> inline vec3<T>& vec3<T>::operator/=(T s)
 	{
-		assert(s != T(0));
+        QASSERT(s != T(0));
 		x /= s;
 		y /= s;
 		z /= s;
@@ -180,7 +180,7 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<> inline vec3<float>& vec3<float>::operator/=(float s)
 	{
-		assert(s != float(0));
+        QASSERT(s != float(0));
 		float ts = float(1) / s;
 		x *= ts;
 		y *= ts;
@@ -190,7 +190,7 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<typename T> inline vec3<T>& vec3<T>::operator/=(vec3<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0));
+        QASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0));
 		x /= v.x;
 		y /= v.y;
 		z /= v.z;
@@ -215,7 +215,7 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
 	template<typename T> inline vec3<T> operator/(vec3<T> const& u, vec3<T> const& v)
 	{
-		assert(v.x != T(0) && v.y != T(0) && v.z != T(0));
+        QASSERT(v.x != T(0) && v.y != T(0) && v.z != T(0));
 		return vec3<T>(u.x / v.x, u.y / v.y, u.z / v.z);
 	}
 

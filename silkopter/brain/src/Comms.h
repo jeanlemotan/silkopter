@@ -64,8 +64,8 @@ private:
 
     struct Sensor_Samples
     {
-        Gyroscope_Sample gyroscope;
         Accelerometer_Sample accelerometer;
+        Gyroscope_Sample gyroscope;
         Compass_Sample compass;
         Barometer_Sample barometer;
         Thermometer_Sample thermometer;
@@ -78,8 +78,8 @@ private:
     struct Raw_Sensor_Samples
     {
         q::Clock::time_point last_sent;
-        std::vector<Gyroscope_Sample> gyroscope;
         std::vector<Accelerometer_Sample> accelerometer;
+        std::vector<Gyroscope_Sample> gyroscope;
         std::vector<Compass_Sample> compass;
         std::vector<Barometer_Sample> barometer;
         std::vector<Thermometer_Sample> thermometer;
@@ -114,7 +114,7 @@ private:
     {
         uint32_t seq = 0;
         std::map<uint32_t, q::Clock::time_point> seq_sent;
-        std::deque<q::Clock::duration> rtts;
+        boost::circular_buffer<q::Clock::duration> rtts;
         q::Clock::time_point last_time_point;
     } m_ping;
 

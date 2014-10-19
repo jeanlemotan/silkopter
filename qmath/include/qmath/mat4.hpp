@@ -102,7 +102,7 @@ inline mat4<T>::mat4(vec4<T> const& column0, vec4<T> const& column1, vec4<T> con
 template<typename T>
 inline void mat4<T>::set(T const values[16])
 {
-	assert(values);
+    QASSERT(values);
 	memcpy(m, values, sizeof(T)*16);
 }
 
@@ -192,14 +192,14 @@ inline void mat4<T>::transpose()
 template <typename T>
 inline vec4<T> mat4<T>::get_row(uint8_t row) const
 {
-	assert(row < 4);
+    QASSERT(row < 4);
 	return vec4<T>(m[row + 0], m[row + 4], m[row + 8], m[row + 12]);
 }
 
 template <typename T>
 inline void mat4<T>::set_row(uint8_t row, vec4<T> const& v)
 {
-	assert(row < 4);
+    QASSERT(row < 4);
 	m[row + 0] = v.x;
 	m[row + 4] = v.y;
 	m[row + 8] = v.z;
@@ -209,14 +209,14 @@ inline void mat4<T>::set_row(uint8_t row, vec4<T> const& v)
 template <typename T>
 inline vec4<T> const& mat4<T>::get_column(uint8_t column) const
 {
-	assert(column < 4);
+    QASSERT(column < 4);
     return columns[column];
 }
 
 template <typename T>
 inline void mat4<T>::set_column(uint8_t column, vec4<T> const& v)
 {
-	assert(column < 4);
+    QASSERT(column < 4);
     columns[column] = v;
 }
 
@@ -299,14 +299,14 @@ inline T const* mat4<T>::data() const
 template <typename T>
 inline T& mat4<T>::operator()(uint8_t column, uint8_t row)
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 
 template <typename T>
 inline T const& mat4<T>::operator()(uint8_t column, uint8_t row) const
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 

@@ -37,7 +37,6 @@ LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3
 
-
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}
 RCC_DIR = ./.rcc/$${DEST_FOLDER}

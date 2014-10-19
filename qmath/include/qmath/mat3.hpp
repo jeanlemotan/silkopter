@@ -134,7 +134,7 @@ inline mat3<T> mat3<T>::look_at(vec3<T> const& front, vec3<T> const& up)
 template<typename T>
 inline void mat3<T>::set(T const values[9])
 {
-	assert(values);
+    QASSERT(values);
 	memcpy(m, values, sizeof(T)*element_count);
 }
 
@@ -202,13 +202,13 @@ inline void mat3<T>::transpose()
 template <typename T>
 inline vec3<T> mat3<T>::get_row(uint8_t row) const
 {
-	assert(row < row_count);
+    QASSERT(row < row_count);
 	return vec3<T>(m[row + 0], m[row + 3], m[row + 6]);
 }
 template <typename T>
 inline void mat3<T>::set_row(uint8_t row, vec3<T> const& v)
 {
-	assert(row < row_count);
+    QASSERT(row < row_count);
 	m[row + 0] = v.x;
 	m[row + 3] = v.y;
 	m[row + 6] = v.z;
@@ -217,14 +217,14 @@ inline void mat3<T>::set_row(uint8_t row, vec3<T> const& v)
 template <typename T>
 inline vec3<T> const& mat3<T>::get_column(uint8_t column) const
 {
-	assert(column < column_count);
+    QASSERT(column < column_count);
 	uint8_t idx = column * row_count;
 	return reinterpret_cast<vec3<T> const&>(m[idx + 0]);
 }
 template <typename T>
 inline void mat3<T>::set_column(uint8_t column, vec3<T> const& v)
 {
-	assert(column < column_count);
+    QASSERT(column < column_count);
 	uint8_t idx = column * row_count;
 	m[idx + 0] = v.x;
 	m[idx + 1] = v.y;
@@ -326,14 +326,14 @@ inline T const* mat3<T>::data() const
 template <typename T>
 inline T& mat3<T>::operator()(uint8_t column, uint8_t row)
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 
 template <typename T>
 inline T const& mat3<T>::operator()(uint8_t column, uint8_t row) const
 {
-	assert(column < column_count && row < row_count);
+    QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
 }
 

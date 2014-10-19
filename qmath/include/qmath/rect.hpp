@@ -236,7 +236,7 @@ void rect<T>::clamp_to_max(const T& size)
 template <typename T>
 void rect<T>::clamp_to_max(const vec2<T>& maxSize)
 {
-	assert(maxSize.x >= 0.0f && maxSize.y >= 0.0f);
+    QASSERT(maxSize.x >= 0.0f && maxSize.y >= 0.0f);
 
 	T curWidth = get_width();
 	if (curWidth > maxSize.x)
