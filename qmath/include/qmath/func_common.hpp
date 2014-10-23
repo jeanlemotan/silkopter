@@ -949,7 +949,7 @@ namespace math
 	template<typename T, class Policy = standard> inline quat<T> inverse(quat<T> const& v)
 	{
 		quat<T> tmp(v);
-		tmp.template invert<Policy>();
+        tmp.invert();
 		return tmp;
 	}
 

@@ -365,7 +365,8 @@ void UAV::process_rate_pids()
 
 void UAV::process_stability_pids()
 {
-
+    //these are dot products (i.e. -1 .. 1) not angles
+    //auto pitch = math::dot(m_ahrs.get_up_vector_l(), )
 }
 
 void UAV::process_motion()
