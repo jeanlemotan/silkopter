@@ -161,7 +161,7 @@ Simulator::~Simulator()
 // 	m_ui.widget = nullptr;
 }
 
-math::quatf xxx_rot;
+//math::quatf xxx_rot;
 
 void Simulator::update()
 {
@@ -191,19 +191,19 @@ void Simulator::update()
 
     m_ui.status->process(uav);
 
-    {
-        m_input_mgr.update(dt);
-        auto gamepads = m_input_mgr.get_all_gamepads();
-        if (!gamepads.empty())
-        {
-            auto gamepad = gamepads[0];
+//    {
+//        m_input_mgr.update(dt);
+//        auto gamepads = m_input_mgr.get_all_gamepads();
+//        if (!gamepads.empty())
+//        {
+//            auto gamepad = gamepads[0];
 
-            auto ls = gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value;
-            auto rs = gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+//            auto ls = gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value;
+//            auto rs = gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
 
-            xxx_rot.set_from_euler_xyz(-rs.y*3.1415f, rs.x*3.1415f, -ls.x*3.1415f);
-        }
-    }
+//            xxx_rot.set_from_euler_xyz(-rs.y*3.1415f, rs.x*3.1415f, -ls.x*3.1415f);
+//        }
+//    }
 
     if (m_gizmos.started)
     {
@@ -263,23 +263,23 @@ void Simulator::update()
     }
 
     //test
-    {
-        math::trans3df trans(uav.get_position() + math::vec3f(3, 0, 0), xxx_rot, math::vec3f::one);
-        m_gizmos.move.set_transform(trans);
-        m_gizmos.move.render(m_context, m_camera_controller.get_pointer_2d());
+//    {
+//        math::trans3df trans(uav.get_position() + math::vec3f(3, 0, 0), xxx_rot, math::vec3f::one);
+//        m_gizmos.move.set_transform(trans);
+//        m_gizmos.move.render(m_context, m_camera_controller.get_pointer_2d());
 
-        auto& cr = uav.get_rotation();
-        auto diff = math::quatf::from_a_to_b(cr, xxx_rot);
+//        auto& cr = uav.get_rotation();
+//        auto diff = math::quatf::from_a_to_b(cr, xxx_rot);
 
-        math::vec3f diff_euler;
-        diff.get_as_euler_xyz(diff_euler);
+//        math::vec3f diff_euler;
+//        diff.get_as_euler_xyz(diff_euler);
 
-        diff_euler = (diff_euler) * math::radians(1.f);
-        math::quatf q;
-        q.set_from_euler_xyz(diff_euler);
+//        diff_euler = (diff_euler) * math::radians(1.f);
+//        math::quatf q;
+//        q.set_from_euler_xyz(diff_euler);
 
-        uav.set_rotation(uav.get_rotation() * q);
-    }
+//        uav.set_rotation(uav.get_rotation() * q);
+//    }
 
     m_context.painter.flush();
 

@@ -186,11 +186,10 @@ void World::process_state_running()
                 motor_count = math::min<size_t>(motor_count, motors.size());
                 for (size_t i = 0; i < motor_count; i++)
                 {
-                    uint16_t v = 0;
+                    float v = 0;
                     if (m_channel.unpack_param(v))
                     {
-                        float throttle = float(v) / 65535.f;
-                        motors[i].set_throttle(throttle);
+                        motors[i].set_throttle(v);
                     }
                 }
             }

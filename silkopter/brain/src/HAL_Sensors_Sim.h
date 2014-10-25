@@ -64,7 +64,7 @@ private:
     void process_message_gps_data();
 
     template<class SAMPLE_T>
-    auto unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample, std::vector<SAMPLE_T>& samples) -> bool;
+    auto unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample) -> bool;
 
     auto process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool;
     auto process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool;

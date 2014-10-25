@@ -105,6 +105,7 @@ void UAV::process(q::Clock::duration dt)
     //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
     //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
 
+    //motors
     float total_rpm = 0.f;
     for (auto const& m: m_motors)
     {
@@ -112,10 +113,10 @@ void UAV::process(q::Clock::duration dt)
         auto force = m_local_to_world_mat.get_axis_z() * m.get_force();
         math::vec3f local_pos(m.m_position * m_config.radius);
         auto pos = math::transform(m_local_to_world_mat, local_pos);
-
         m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
     }
 
+    //yaw
     {
         auto torque = math::transform(m_local_to_world_mat, math::vec3f(0, 0, total_rpm * 0.0001f));
         m_body->applyTorque(vec3f_to_bt(torque));
@@ -123,23 +124,23 @@ void UAV::process(q::Clock::duration dt)
 
     //air drag
     auto velocity = bt_to_vec3f(m_body->getLinearVelocity());
-    if (math::length_sq(velocity) == 0)
+    if (math::length_sq(velocity) != 0)
     {
-        return;
+        for (auto const& m : m_motors)
+        {
+            float intensity = math::abs(math::dot(m_local_to_world_mat.get_axis_z(), math::normalized(velocity)));
+            float drag = intensity * m.get_air_drag();
+            auto force = (-velocity) * drag;
+
+            math::vec3f local_pos(m.m_position * m_config.radius);
+            auto pos = math::transform(m_local_to_world_mat, local_pos);
+
+            m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
+        }
     }
 
-    for (auto const& m : m_motors)
-    {
-        float intensity = math::abs(math::dot(m_local_to_world_mat.get_axis_z(), math::normalized(velocity)));
-        float drag = intensity * m.get_air_drag();
-        auto force = (-velocity) * drag;
-
-        math::vec3f local_pos(m.m_position * m_config.radius);
-        auto pos = math::transform(m_local_to_world_mat, local_pos);
-
-        m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
-    }
-
+    \
+    //UI movement interaction
     {
         m_force = math::lerp(m_force, m_target_force, dts * 10.f);
         m_body->applyForce(vec3f_to_bt(m_force), btVector3(0, 0, 0));
@@ -151,6 +152,7 @@ void UAV::reset()
 {
     btTransform trans;
     trans.setIdentity();
+    trans.setOrigin(btVector3(0, 0, m_config.height/2.f));
     m_body->setWorldTransform(trans);
     m_body->setAngularVelocity(btVector3(0, 0, 0));
     m_body->setLinearVelocity(btVector3(0, 0, 0));

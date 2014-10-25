@@ -17,6 +17,10 @@
     {
         Impl(boost::asio::io_service& io_service)  {}
 
+        void process()
+        {
+        }
+
         silk::PiGPIO pigpio;
     };
 #else
@@ -25,6 +29,18 @@
     {
         Impl(boost::asio::io_service& io_service)
             : sim_comms(io_service) {}
+
+        void process()
+        {
+            if (!sim_comms.is_connected())
+            {
+                sim_comms.connect();
+            }
+            else
+            {
+                sim_comms.process();
+            }
+        }
 
         silk::Sim_Comms sim_comms;
     };
@@ -101,5 +117,8 @@ void HAL::process()
     {
         sensors->process();
     }
+
+    //NOTE!!! this HAS to be here, at the end. The SIM comms depends on it
+    m_impl->process();
 }
 

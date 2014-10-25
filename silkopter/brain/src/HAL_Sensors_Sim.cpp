@@ -151,7 +151,7 @@ size_t HAL_Sensors_Sim::get_error_count() const
 }
 
 template<class SAMPLE_T>
-auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample, std::vector<SAMPLE_T>& samples) -> bool
+auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample) -> bool
 {
     uint8_t dt = 0;
     decltype(sample.value) v;
@@ -163,48 +163,95 @@ auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T
     }
 
     sample.value = v;
-    sample.dt = std::chrono::milliseconds(dt);
+    sample.dt = std::chrono::microseconds(dt);
     sample.sample_idx++;
-    samples.push_back(sample);
     return true;
 }
 
 auto HAL_Sensors_Sim::process_accelerometer_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_accelerometer_sample, m_accelerometer_samples);
+    if (unpack_sensor_sample(channel, m_accelerometer_sample))
+    {
+        m_accelerometer_sample.value = (m_accelerometer_sample.value - m_config.accelerometer_bias) * m_config.accelerometer_scale;
+        m_accelerometer_samples.push_back(m_accelerometer_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_gyroscope_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_gyroscope_sample, m_gyroscope_samples);
+    if (unpack_sensor_sample(channel, m_gyroscope_sample))
+    {
+        m_gyroscope_sample.value = m_gyroscope_sample.value - m_config.accelerometer_bias;
+        m_gyroscope_samples.push_back(m_gyroscope_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_compass_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_compass_sample, m_compass_samples);
+    if (unpack_sensor_sample(channel, m_compass_sample))
+    {
+        m_compass_sample.value = m_compass_sample.value - m_config.accelerometer_bias;
+        m_compass_samples.push_back(m_compass_sample);
+        return true;
+    }
+    return false;
 }
 
 auto HAL_Sensors_Sim::process_barometer_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_barometer_sample, m_barometer_samples);
+    if (unpack_sensor_sample(channel, m_barometer_sample))
+    {
+        m_barometer_samples.push_back(m_barometer_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_thermometer_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_thermometer_sample, m_thermometer_samples);
+    if (unpack_sensor_sample(channel, m_thermometer_sample))
+    {
+        m_thermometer_samples.push_back(m_thermometer_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_sonar_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_sonar_sample, m_sonar_samples);
+    if (unpack_sensor_sample(channel, m_sonar_sample))
+    {
+        m_sonar_samples.push_back(m_sonar_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_voltage_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_voltage_sample, m_voltage_samples);
+    if (unpack_sensor_sample(channel, m_voltage_sample))
+    {
+        m_voltage_samples.push_back(m_voltage_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_current_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_current_sample, m_current_samples);
+    if (unpack_sensor_sample(channel, m_current_sample))
+    {
+        m_current_samples.push_back(m_current_sample);
+        return true;
+    }
+    return false;
 }
 auto HAL_Sensors_Sim::process_gps_sensor(Sim_Comms::Channel& channel) -> bool
 {
-    return unpack_sensor_sample(channel, m_gps_sample, m_gps_samples);
+    if (unpack_sensor_sample(channel, m_gps_sample))
+    {
+        m_gps_samples.push_back(m_gps_sample);
+        return true;
+    }
+    return false;
 }
 
 void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)

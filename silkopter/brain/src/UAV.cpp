@@ -302,27 +302,42 @@ void UAV::process_sensor_data(q::Clock::duration dt)
         bool has_new_accelerometer_sample = false;
         bool has_new_compass_sample = false;
         //update the current smaples
-        if (g_it != gyroscope_samples.end() && m_gyroscope_sample_time_point <= m_last_sample_time_point)
+
+        q::Clock::duration min_dt{999999};
+        if (g_it != gyroscope_samples.end())
         {
-            m_last_gyroscope_sample = *g_it++;
-            m_gyroscope_sample_time_point += m_last_gyroscope_sample.dt;
-            has_new_gyroscope_sample = true;
+            min_dt = math::min(min_dt, g_it->dt);
+            if (m_gyroscope_sample_time_point <= m_last_sample_time_point)
+            {
+                m_last_gyroscope_sample = *g_it++;
+                m_gyroscope_sample_time_point += m_last_gyroscope_sample.dt;
+                has_new_gyroscope_sample = true;
+            }
         }
-        if (a_it != accelerometer_samples.end() && m_accelerometer_sample_time_point <= m_last_sample_time_point)
+        if (a_it != accelerometer_samples.end())
         {
-            m_last_accelerometer_sample = *a_it++;
-            m_accelerometer_sample_time_point += m_last_accelerometer_sample.dt;
-            has_new_accelerometer_sample = true;
+            min_dt = math::min(min_dt, a_it->dt);
+            if (m_accelerometer_sample_time_point <= m_last_sample_time_point)
+            {
+                m_last_accelerometer_sample = *a_it++;
+                m_accelerometer_sample_time_point += m_last_accelerometer_sample.dt;
+                has_new_accelerometer_sample = true;
+            }
         }
-        if (c_it != compass_samples.end() && m_compass_sample_time_point <= m_last_sample_time_point)
+        if (c_it != compass_samples.end())
         {
-            m_last_compass_sample = *c_it++;
-            m_compass_sample_time_point += m_last_compass_sample.dt;
-            has_new_compass_sample = true;
+            min_dt = math::min(min_dt, c_it->dt);
+            if (m_compass_sample_time_point <= m_last_sample_time_point)
+            {
+                m_last_compass_sample = *c_it++;
+                m_compass_sample_time_point += m_last_compass_sample.dt;
+                has_new_compass_sample = true;
+            }
         }
+        QASSERT(min_dt.count() != 999999);
 
         //increment the time
-        m_last_sample_time_point += math::min(math::min(m_last_gyroscope_sample.dt, m_last_accelerometer_sample.dt), m_last_compass_sample.dt);
+        m_last_sample_time_point += min_dt;
 
         //-------------------------------------
         //USING THE SAMPLES

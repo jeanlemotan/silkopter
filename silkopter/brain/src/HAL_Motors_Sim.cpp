@@ -38,14 +38,6 @@ void HAL_Motors_Sim::set_throttles(float const* throttles, size_t count)
 
 void HAL_Motors_Sim::process()
 {
-    if (!m_sim_comms.is_connected())
-    {
-        m_sim_comms.connect();
-    }
-    else
-    {
-        m_sim_comms.process();
-    }
 }
 
 
