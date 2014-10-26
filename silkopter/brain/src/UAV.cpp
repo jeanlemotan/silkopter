@@ -14,8 +14,6 @@ using namespace silk;
 UAV::UAV(HAL& hal)
     : m_hal(hal)
 {
-    m_last_timestamp = q::Clock::now();
-
     //defaults
     m_motor_mixer.add_motor({ math::vec2f(0, 1), false });
     m_motor_mixer.add_motor({ math::vec2f(-1, 0), true });
@@ -152,34 +150,51 @@ auto UAV::get_position_w() const -> math::vec3f const&
 void UAV::process()
 {
     auto now = q::Clock::now();
-    auto dt = now - m_last_timestamp;
-    m_last_timestamp = now;
-    static q::Clock::duration min_dt, max_dt, avg_dt;
-    static int xxx = 0;
-    if (xxx == 0)
+
     {
-        //SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
-        min_dt = dt;
-        max_dt = dt;
-        avg_dt = std::chrono::milliseconds(0);
-    }
-    min_dt = std::min(min_dt, dt);
-    max_dt = std::max(max_dt, dt);
-    avg_dt += dt;
-    xxx++;
-    if (xxx == 1000)
-    {
-        avg_dt = avg_dt / xxx;
-        xxx = 0;
+//        static q::Clock::time_point last_timestamp = q::Clock::now();
+//        auto dt = now - last_timestamp;
+//        last_timestamp = now;
+//        static q::Clock::duration min_dt, max_dt, avg_dt;
+//        static int xxx = 0;
+//        if (xxx == 0)
+//        {
+//            //SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
+//            min_dt = dt;
+//            max_dt = dt;
+//            avg_dt = std::chrono::milliseconds(0);
+//        }
+//        min_dt = std::min(min_dt, dt);
+//        max_dt = std::max(max_dt, dt);
+//        avg_dt += dt;
+//        xxx++;
+//        if (xxx == 1000)
+//        {
+//            avg_dt = avg_dt / xxx;
+//            xxx = 0;
+//        }
     }
 
-    process_input(dt);
-    process_sensor_data(dt);
-    process_motors(dt);
+    //process samples at real-time - as they come
+    process_sensor_data();
+
+    process_input();
+    process_pids();
+    process_motors();
 }
 
-void UAV::process_input(q::Clock::duration dt)
+void UAV::process_input()
 {
+    constexpr std::chrono::milliseconds PROCESS_PERIOD{10};
+
+    auto now = q::Clock::now();
+    auto dt = now - m_input.last_process_timestamp;
+    if (dt < PROCESS_PERIOD)
+    {
+        return;
+    }
+    m_input.last_process_timestamp = now;
+
     if (m_input.throttle_mode == uav_input::Throttle_Mode::RATE)
     {
         process_input_throttle_rate(dt);
@@ -211,6 +226,22 @@ void UAV::process_input(q::Clock::duration dt)
     {
         process_input_yaw_rate(dt);
     }
+}
+
+void UAV::process_pids()
+{
+    constexpr std::chrono::milliseconds PROCESS_PERIOD{5};
+
+    auto now = q::Clock::now();
+    auto dt = now - m_pids.last_process_timestamp;
+    if (dt < PROCESS_PERIOD)
+    {
+        return;
+    }
+    m_pids.last_process_timestamp = now;
+
+    process_rate_pids(dt);
+    process_stability_pids(dt);
 }
 
 void UAV::process_input_throttle_rate(q::Clock::duration dt)
@@ -251,16 +282,8 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
     m_pids.yaw_rate.set_target(m_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
-void UAV::process_sensor_data(q::Clock::duration dt)
+void UAV::process_sensor_data()
 {
-    QUNUSED(dt);
-//    static int xxx = 100;
-//    xxx--;
-//    if (xxx > 0)
-//    {
-//        return;
-//    }
-
     static q::Clock::time_point xxx = q::Clock::now();
     auto now = q::Clock::now();
     if (now - xxx > std::chrono::seconds(10))
@@ -271,25 +294,11 @@ void UAV::process_sensor_data(q::Clock::duration dt)
         m_linear_motion.position.set(0, 0, 0);
     }
 
-    //combine accelerometer, gyroscope and compass readings
 
+    //combine accelerometer, gyroscope and compass readings
     auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
     auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
     auto const& compass_samples = m_hal.sensors->get_compass_samples();
-
-    //find the start time_point
-//    if (!gyroscope_samples.empty())
-//    {
-//        m_last_sample_time_point = math::min(m_last_sample_time_point, gyroscope_samples.front().time_point);
-//    }
-//    if (!accelerometer_samples.empty())
-//    {
-//        m_last_sample_time_point = math::min(m_last_sample_time_point, accelerometer_samples.front().time_point);
-//    }
-//    if (!compass_samples.empty())
-//    {
-//        m_last_sample_time_point = math::min(m_last_sample_time_point, compass_samples.front().time_point);
-//    }
 
     auto g_it = gyroscope_samples.begin();
     auto a_it = accelerometer_samples.begin();
@@ -346,7 +355,8 @@ void UAV::process_sensor_data(q::Clock::duration dt)
 
         if (has_new_gyroscope_sample)
         {
-            process_rate_pids();
+            m_pids.angular_velocity += m_last_gyroscope_sample.value;
+            m_pids.angular_velocity_samples++;
         }
 
         if (has_new_accelerometer_sample)
@@ -354,31 +364,33 @@ void UAV::process_sensor_data(q::Clock::duration dt)
             process_motion();
         }
     }
-
-    process_stability_pids();
-
-//    SILK_INFO("time: {} for {} samples", q::Clock::now() - start, samples.size());
-
-
-    //m_position = math::lerp(m_position, math::vec3f::zero, 0.01f);
 }
 
-void UAV::process_rate_pids()
+void UAV::process_rate_pids(q::Clock::duration dt)
 {
-    auto sample_dt = m_last_gyroscope_sample.dt;
-    auto const& input = m_last_gyroscope_sample.value;
+    if (m_pids.angular_velocity_samples == 0)
+    {
+        return;
+    }
+
+    m_pids.angular_velocity /= static_cast<float>(m_pids.angular_velocity_samples);
+    auto input = m_pids.angular_velocity;
+
+    m_pids.angular_velocity.set(0, 0, 0);
+    m_pids.angular_velocity_samples = 0;
 
     m_pids.pitch_rate.set_input(input.x);
-    m_pids.pitch_rate.process(sample_dt);
+    m_pids.pitch_rate.process(dt);
 
     m_pids.roll_rate.set_input(input.y);
-    m_pids.roll_rate.process(sample_dt);
+    m_pids.roll_rate.process(dt);
 
     m_pids.yaw_rate.set_input(input.z);
-    m_pids.yaw_rate.process(sample_dt);
+    m_pids.yaw_rate.process(dt);
+
 }
 
-void UAV::process_stability_pids()
+void UAV::process_stability_pids(q::Clock::duration dt)
 {
     //these are dot products (i.e. -1 .. 1) not angles
     //auto pitch = math::dot(m_ahrs.get_up_vector_l(), )
@@ -418,10 +430,8 @@ void UAV::process_motion()
     }
 }
 
-void UAV::process_motors(q::Clock::duration dt)
+void UAV::process_motors()
 {
-    QUNUSED(dt);
-
     if (m_is_armed)
     {
         m_motor_mixer.set_data(m_input.sticks.throttle,

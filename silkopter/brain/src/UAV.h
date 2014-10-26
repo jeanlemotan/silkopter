@@ -97,12 +97,14 @@ public:
     void set_assist_params(Assist_Params const& params);
 
 private:
-    void process_sensor_data(q::Clock::duration dt);
-    void process_motors(q::Clock::duration dt);
-    void process_rate_pids();
-    void process_stability_pids();
+    void process_sensor_data();
+    void process_motors();
     void process_motion();
-    void process_input(q::Clock::duration dt);
+    void process_input();
+
+    void process_pids();
+    void process_rate_pids(q::Clock::duration dt);
+    void process_stability_pids(q::Clock::duration dt);
 
     Gyroscope_Sample m_last_gyroscope_sample;
     q::Clock::time_point m_gyroscope_sample_time_point;
@@ -116,7 +118,6 @@ private:
     q::Clock::time_point m_last_sample_time_point;
 
 
-    q::Clock::time_point m_last_timestamp;
     HAL& m_hal;
     AHRS m_ahrs;
     Motor_Mixer m_motor_mixer;
@@ -134,6 +135,11 @@ private:
 
     struct PIDs
     {
+        q::Clock::time_point last_process_timestamp{std::chrono::seconds(0)};
+
+        math::vec3f angular_velocity;
+        size_t angular_velocity_samples = 0;
+
         Yaw_Rate_PID yaw_rate;
         Pitch_Rate_PID pitch_rate;
         Roll_Rate_PID roll_rate;
@@ -147,6 +153,8 @@ private:
 
     struct Input
     {
+        q::Clock::time_point last_process_timestamp{std::chrono::seconds(0)};
+
         uav_input::Throttle_Mode throttle_mode;
         uav_input::Pitch_Roll_Mode pitch_roll_mode;
         uav_input::Yaw_Mode yaw_mode;

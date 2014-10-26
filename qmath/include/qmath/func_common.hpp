@@ -72,7 +72,7 @@ namespace math
 
 	template <typename T> inline bool equals(T v1, T v2)
 	{
-		return v1 == v2;
+        return v1 == v2;
 	}
 	template <typename T> inline bool equals(angle<T> const& v1, angle<T> const& v2)
 	{
@@ -149,7 +149,7 @@ namespace math
 		// Abs(x - y) <= absTol * Max(1.0f, Abs(x), Abs(y))
 		return abs(v1 - v2) <= tolerance * max(max(1.0f, abs(v1)), abs(v2));
 	}
-	template <typename T> inline bool equals(angle<T> const& v1, angle<T> const& v2, T tolerance)
+    template <typename T> inline bool equals(angle<T> const& v1, angle<T> const& v2, T tolerance)
 	{
 		return equals(v1.radians, v2.radians, tolerance);
 	}
@@ -215,7 +215,7 @@ namespace math
 
 	template <typename T> inline bool is_zero(T v)
 	{
-		return v == T(0);
+        return v == T(0);
 	}
 	template <typename T> inline bool is_zero(angle<T> const& v)
 	{
@@ -347,7 +347,7 @@ namespace math
 
 	template <typename T> inline bool is_one(T v)
 	{
-		return v == T(1);
+        return v == T(1);
 	}
 	template <typename T> inline bool is_one(vec2<T> const& v)
 	{

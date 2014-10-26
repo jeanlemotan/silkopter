@@ -79,13 +79,13 @@ namespace util
         bool m_has_kd = false;
         float m_integrator = 0;
         //float m_last_error = 0;
-        float m_last_input = 0;
+        float m_last_filtered_input = 0;
         float m_target = 0;
         float m_input = 0;
         float m_error = 0;
         float m_output = 0;
-        float m_last_derivative = 0;
-        bool m_has_last_derivative = false;
+        float m_clamped_output = 0;
+        bool m_is_last_filtered_input_valid = false;
         q::Clock::duration m_duration;
     };
 
@@ -126,25 +126,17 @@ namespace util
     template<class LPF>
     auto PID<LPF>::get_output() const -> float
     {
-        return m_output;
+        return m_clamped_output;
     }
 
     template<class LPF>
     float PID<LPF>::process(q::Clock::duration dt)
     {
-// 		if (dt >= chrono::secondsf(1))
-// 		{
-// 			dt = 0;
-//
-// 			// if this PID hasn't been used for a full second then zero
-// 			// the intergator term. This prevents I buildup from a
-// 			// previous fight mode from causing a massive return before
-// 			// the integrator gets a chance to correct itself
-// 			reset();
-// 		}
-
         // Compute proportional component
         m_error = m_target - m_input;
+
+        bool is_saturated = m_output <= -m_params.max || m_output >= m_params.max;
+
         m_output = 0;
         m_output += m_error * m_params.kp;
 
@@ -152,81 +144,49 @@ namespace util
         if (dts > 0)
         {
             // Compute integral component if time has elapsed
-            if (m_has_ki)
+            if (m_has_ki && !is_saturated)
             {
-                m_integrator += (m_error * m_params.ki) * dts;
-                if (math::is_positive(m_integrator))
-                {
-                    m_integrator = math::min(m_integrator, m_params.max);
-                }
-                else
-                {
-                    m_integrator = math::max(m_integrator, -m_params.max);
-                }
-                m_output += m_integrator;
+                m_integrator += m_error * dts;
+                m_output += m_params.ki * m_integrator;
             }
 
             // Compute derivative component if time has elapsed
             if (m_has_kd)
             {
-                float derivative;
-
-                if (!m_has_last_derivative)
+                float filtered_input = m_lpf.process(m_input);
+                if (!m_is_last_filtered_input_valid)
                 {
-                    // we've just done a reset, suppress the first derivative
-                    // term as we don't want a sudden change in input to cause
-                    // a large D output change
-                    derivative = 0;
-                    m_has_last_derivative = true;
-                }
-                else
-                {
-                    //derivative = (m_error - m_last_error) / dt.count;
-                    derivative = (m_input - m_last_input) / dts;
+                    m_last_filtered_input = filtered_input;
+                    m_is_last_filtered_input_valid = true;
                 }
 
-                derivative = m_lpf.process(derivative);
+                //float derivative = (m_error - m_last_error) / dt.count;
+                float derivative = (filtered_input - m_last_filtered_input) / dts;
 
-                // 			// discrete low pass filter, cuts out the
-                // 			// high frequency noise that can drive the controller crazy
-                // 			float RC = 1 / (2 * PI*_fCut);
-                // 			derivative = m_last_derivative +
-                // 				((delta_time / (RC + delta_time)) *
-                // 				(derivative - _last_derivative));
-
-                // update state
-                m_last_derivative = derivative;
+                m_last_filtered_input = filtered_input;
 
                 // add in derivative component
                 //m_output += m_params.kd * derivative;
                 m_output -= m_params.kd * derivative;
             }
         }
-        //m_last_error = error;
-        m_last_input = m_input;
 
-        if (math::is_positive(m_output))
-        {
-            m_output = math::min(m_output, m_params.max);
-        }
-        else
-        {
-            m_output = math::max(m_output, -m_params.max);
-        }
-        return m_output;
+        m_clamped_output = math::clamp(m_output, -m_params.max, m_params.max);
+        return m_clamped_output;
     }
 
     template<class LPF>
     void PID<LPF>::reset()
     {
         m_integrator = 0;
-        m_has_last_derivative = false;
+        m_is_last_filtered_input_valid = false;
         //m_last_error = 0;
-        m_last_input = 0;
+        m_last_filtered_input = 0;
         m_error = 0;
         m_target = 0;
         m_input = 0;
         m_output = 0;
+        m_clamped_output = 0;
     }
 
     template<class LPF>
@@ -238,8 +198,8 @@ namespace util
     void PID<LPF>::set_params(Params const& params)
     {
         m_params = params;
-        m_has_ki = !math::is_zero(params.ki);
-        m_has_kd = !math::is_zero(params.kd);
+        m_has_ki = !math::is_zero(params.ki, math::epsilon<float>());
+        m_has_kd = !math::is_zero(params.kd, math::epsilon<float>());
     }
 
 }
