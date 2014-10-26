@@ -9,6 +9,8 @@ INCLUDEPATH += ../../../qdata/include
 INCLUDEPATH += ../../../qmath/include
 INCLUDEPATH += /usr/include/freetype2
 
+PRECOMPILED_HEADER = ../../include/QStdAfx.h
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
@@ -35,7 +37,6 @@ DESTDIR = ../../lib/$${DEST_FOLDER}
 
 
 SOURCES += \
-    ../../src/QStdAfx.cpp \
     ../../src/anim/Animation.cpp \
     ../../src/draw/Painter.cpp \
     ../../src/draw/Sprite.cpp \

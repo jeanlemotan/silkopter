@@ -22,6 +22,8 @@ INCLUDEPATH += ../../../../q/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
 
+PRECOMPILED_HEADER = ../../include/stdafx.h
+
 ROOT_LIBS_PATH = ../../../..
 CONFIG(debug, debug|release) {
     DEST_FOLDER = pc/debug
@@ -53,7 +55,6 @@ SOURCES += \
     ../../src/Render_Widget.cpp \
     ../../src/Sensors.cpp \
     ../../src/GS.cpp \
-    ../../src/stdafx.cpp \
     ../../src/UAV_Inertial.cpp \
     ../../src/Video_Client.cpp \
     ../../src/Video_Stream.cpp \

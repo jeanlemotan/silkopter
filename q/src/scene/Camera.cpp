@@ -257,6 +257,7 @@ void Camera::set_rotation(math::quatf const& rot)
 	m_view_matrix_dirty = m_view_projection_matrix_dirty = true;
 
 	m_rotation = rot;
+    m_final_rotation = m_rotation * m_coordinate_system;
 	//refresh vectors
 	refresh_vectors();
 }

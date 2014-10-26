@@ -24,6 +24,9 @@ INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
 INCLUDEPATH += /usr/include/bullet
 
+PRECOMPILED_HEADER = ../../include/stdafx.h
+
+
 ROOT_LIBS_PATH = $${PWD}/../../../..
 CONFIG(debug, debug|release) {
     DEST_FOLDER = pc/debug
@@ -84,7 +87,6 @@ SOURCES += \
     ../../src/Render_Widget.cpp \
     ../../src/Simulator.cpp \
     ../../src/Status_Widget.cpp \
-    ../../src/stdafx.cpp \
     ../../src/World.cpp \
     ../../src/UAV.cpp \
     ../../src/Sensors_Widget.cpp \

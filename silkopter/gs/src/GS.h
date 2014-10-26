@@ -14,6 +14,9 @@ public:
 private:
 	void process();
 
+    void closeEvent(QCloseEvent* event);
+    void read_settings();
+
 	Ui::GSClass m_ui;
 
 	boost::asio::io_service m_io_service;

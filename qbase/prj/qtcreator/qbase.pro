@@ -5,6 +5,9 @@ CONFIG -= qt
 CONFIG += c++11
 INCLUDEPATH += ../../include
 
+PRECOMPILED_HEADER = ../../include/QBaseStdAfx.h
+
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
@@ -38,7 +41,6 @@ SOURCES += \
     ../../src/Log.cpp \
     ../../src/Path.cpp \
     ../../src/Profiler.cpp \
-    ../../src/QBaseStdAfx.cpp \
     ../../src/thread/Scheduler.cpp \
     ../../src/thread/Task.cpp \
     ../../src/thread/Worker_Thread.cpp \

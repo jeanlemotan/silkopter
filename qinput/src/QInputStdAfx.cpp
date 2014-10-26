@@ -1,1 +1,0 @@
-#include "QInputStdAfx.h"

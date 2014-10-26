@@ -76,16 +76,6 @@ Simulator::Simulator(QWidget *parent)
     m_context.camera.set_near_distance(0.05f);
     m_context.camera.set_far_distance(20000.f);
 
-	{
-		QSettings settings;
-		math::vec3f position;
-		math::from_string(position, std::string(settings.value("camera/position", "0,0,0").toString().toLatin1().data()));
-        m_context.camera.set_position(position);
-		math::quatf rotation;
-		math::from_string(rotation, std::string(settings.value("camera/rotation", "0,0,0,1").toString().toLatin1().data()));
-        m_context.camera.set_rotation(rotation);
-	}
-
     m_context.scene.set_camera(m_context.camera);
     m_context.painter.set_camera(m_context.camera);
 
@@ -101,7 +91,6 @@ Simulator::Simulator(QWidget *parent)
 
 
 	show();
-
 
     //////////////////////////////////////////////////////////////////////////
     // load resources
@@ -145,6 +134,8 @@ Simulator::Simulator(QWidget *parent)
 	timer->setSingleShot(false);
 	timer->start(16);
 	connect(timer, &QTimer::timeout, this, &Simulator::update);
+
+    read_settings();
 }
 
 Simulator::~Simulator()
@@ -161,6 +152,33 @@ Simulator::~Simulator()
 // 	m_ui.widget = nullptr;
 }
 
+void Simulator::closeEvent(QCloseEvent* event)
+{
+    QSettings settings;
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+
+    settings.setValue("camera/position", math::to_string(m_context.camera.get_position() - m_camera_position_target).c_str());
+    settings.setValue("camera/rotation", math::to_string(m_context.camera.get_rotation()).c_str());
+
+    QMainWindow::closeEvent(event);
+}
+
+void Simulator::read_settings()
+{
+    QSettings settings;
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+
+    {
+        math::vec3f position;
+        math::from_string(position, std::string(settings.value("camera/position", "0,0,0").toString().toLatin1().data()));
+        m_context.camera.set_position(position);
+        math::quatf rotation;
+        math::from_string(rotation, std::string(settings.value("camera/rotation", "0,0,0,1").toString().toLatin1().data()));
+        m_context.camera.set_rotation(rotation);
+    }
+}
 //math::quatf xxx_rot;
 
 void Simulator::update()

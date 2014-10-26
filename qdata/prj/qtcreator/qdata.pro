@@ -6,6 +6,9 @@ CONFIG += c++11
 INCLUDEPATH += ../../include
 INCLUDEPATH += ../../../qbase/include
 
+PRECOMPILED_HEADER = ../../include/QDataStdAfx.h
+
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
@@ -33,7 +36,6 @@ DESTDIR = ../../lib/$${DEST_FOLDER}
 
 
 SOURCES += \
-    ../../src/QDataStdAfx.cpp \
     ../../src/data/File_Sink.cpp \
     ../../src/data/File_Source.cpp \
     ../../src/data/File_System.cpp \

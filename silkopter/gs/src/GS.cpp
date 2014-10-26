@@ -48,6 +48,8 @@ GS::GS(QWidget *parent)
 
     connect(m_ui.action_connect_uav, &QAction::triggered, [this](bool) { set_uav_address("192.168.0.110"); });
     connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
+
+    read_settings();
 }
 
 GS::~GS()
@@ -68,6 +70,23 @@ GS::~GS()
 //	}
     //m_protocol.stop();
 }
+
+void GS::closeEvent(QCloseEvent* event)
+{
+    QSettings settings;
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+
+    QMainWindow::closeEvent(event);
+}
+
+void GS::read_settings()
+{
+    QSettings settings;
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+}
+
 
 void GS::set_uav_address(std::string const& address)
 {

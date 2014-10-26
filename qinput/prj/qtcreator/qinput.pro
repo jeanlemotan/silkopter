@@ -7,6 +7,9 @@ INCLUDEPATH += ../../include
 INCLUDEPATH += ../../../qbase/include
 INCLUDEPATH += ../../../qmath/include
 
+PRECOMPILED_HEADER = ../../include/QInputStdAfx.h
+
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
@@ -36,7 +39,6 @@ SOURCES += \
     ../../src/Gamepad.cpp \
     ../../src/Input_Mgr.cpp \
     ../../src/Keyboard.cpp \
-    ../../src/QInputStdAfx.cpp \
     ../../src/Sensors.cpp \
     ../../src/Touchscreen.cpp
 

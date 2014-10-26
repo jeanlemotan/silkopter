@@ -19,6 +19,9 @@ public:
 	~Simulator();
 
 private:
+    void closeEvent(QCloseEvent* event);
+    void read_settings();
+
     void mouse_press_event(Mouse_Event const& event);
     void mouse_release_event(Mouse_Event const& event);
     void mouse_move_event(Mouse_Event const& event);
