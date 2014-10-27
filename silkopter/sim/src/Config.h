@@ -2,17 +2,29 @@
 
 struct Config
 {
+    struct Propeller
+    {
+        float diameter = 0; //inches
+        float pitch = 0; //inches
+    };
+
     struct Motor
     {
         math::vec2f position;
         bool clockwise = true;
-        float drag = 0;
-        float max_rpm = 0;
+        float Kv = 0; //rpm / volt
+        float Rm = 0; //coil resistence
+        float Io = 0; //no-load current
         float acceleration = 0;
         float decceleration = 0;
-        std::vector<std::pair<float, float>> thrust_curve;
-        std::vector<std::pair<float, float>> amps_curve;
+        Propeller propeller;
     };
+
+    struct Battery
+    {
+        float volts = 0;
+        float capacity = 0;
+    } battery;
 
     struct UAV
     {

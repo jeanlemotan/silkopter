@@ -44,6 +44,13 @@ Simulator::Simulator(QWidget *parent)
 
 
     {
+        m_config.battery.volts = 11.4f;
+        m_config.battery.capacity = 2.2f;
+
+        Config::Propeller propeller;
+        propeller.diameter = 9.f;
+        propeller.pitch = 4.7f;
+
         math::vec2f positions[] = {math::vec2f(0, 1), math::vec2f(-1, 0), math::vec2f(0, -1), math::vec2f(1, 0)};
         bool clockwise[] = {false, true, false, true};
 
@@ -51,20 +58,14 @@ Simulator::Simulator(QWidget *parent)
         for (uint8_t i = 0; i < 4; i++)
         {
             Config::Motor motor;
+            motor.propeller = propeller;
             motor.position = positions[i];
             motor.clockwise = clockwise[i];
-            motor.max_rpm = 7470 + rnd.get_float()*500.f;
+            motor.Kv = 1240.f;
+            motor.Rm = 0.6f;
+            motor.Io = 0.5f;
             motor.acceleration = 20000 + rnd.get_float()*1000.f;
             motor.decceleration = 15000 + rnd.get_float()*2000.f;
-            motor.drag = rnd.get_positive_float()*0.1f;
-
-            float max_amps = 9.5f + rnd.get_float()*1.5f;
-            float max_thrust = 0.756f + rnd.get_float()*0.17f;
-
-            motor.amps_curve.push_back(std::make_pair(0.f, 0.f));
-            motor.amps_curve.push_back(std::make_pair(1.f, max_amps));
-            motor.thrust_curve.push_back(std::make_pair(0.f, 0.f));
-            motor.thrust_curve.push_back(std::make_pair(1.f, max_thrust));
             m_config.uav.motors.push_back(motor);
         }
     }
@@ -136,6 +137,9 @@ Simulator::Simulator(QWidget *parent)
 	connect(timer, &QTimer::timeout, this, &Simulator::update);
 
     read_settings();
+
+    m_ui.environment->notify_config_changed();
+    m_ui.sensors->notify_config_changed();
 }
 
 Simulator::~Simulator()

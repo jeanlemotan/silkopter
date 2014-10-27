@@ -153,7 +153,7 @@ size_t HAL_Sensors_Sim::get_error_count() const
 template<class SAMPLE_T>
 auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T& sample) -> bool
 {
-    uint8_t dt = 0;
+    uint32_t dt = 0;
     decltype(sample.value) v;
     if (!channel.unpack_param(dt) || !channel.unpack_param(v))
     {

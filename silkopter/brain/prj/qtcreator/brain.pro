@@ -119,7 +119,7 @@ HEADERS += \
     ../../src/PiGPIO.h \
     ../../src/Sim_Comms.h \
     ../../../libs/common/Comm_Data.h \
-    ../../../libs/common/Remote_Clock.h \
     ../../src/HAL_Camera_Mount_PiGPIO.h \
-    ../../src/HAL_Motors_PiGPIO.h
+    ../../src/HAL_Motors_PiGPIO.h \
+    ../../../libs/common/Manual_Clock.h
 

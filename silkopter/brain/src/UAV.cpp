@@ -27,8 +27,8 @@ UAV::UAV(HAL& hal)
     m_gyroscope_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
     m_accelerometer_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
     m_compass_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_last_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
 
+    m_sensor_clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
 
     load_settings();
     save_settings();
@@ -146,42 +146,127 @@ auto UAV::get_position_w() const -> math::vec3f const&
     return m_linear_motion.position;
 }
 
-
-void UAV::process()
+void UAV::process_sensor_data()
 {
+    static q::Clock::time_point xxx = q::Clock::now();
     auto now = q::Clock::now();
-
+    if (now - xxx > std::chrono::seconds(10))
     {
-//        static q::Clock::time_point last_timestamp = q::Clock::now();
-//        auto dt = now - last_timestamp;
-//        last_timestamp = now;
-//        static q::Clock::duration min_dt, max_dt, avg_dt;
-//        static int xxx = 0;
-//        if (xxx == 0)
-//        {
-//            //SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
-//            min_dt = dt;
-//            max_dt = dt;
-//            avg_dt = std::chrono::milliseconds(0);
-//        }
-//        min_dt = std::min(min_dt, dt);
-//        max_dt = std::max(max_dt, dt);
-//        avg_dt += dt;
-//        xxx++;
-//        if (xxx == 1000)
-//        {
-//            avg_dt = avg_dt / xxx;
-//            xxx = 0;
-//        }
+        xxx = now;
+        m_linear_motion.acceleration.set(0, 0, 0);
+        m_linear_motion.velocity.set(0, 0, 0);
+        m_linear_motion.position.set(0, 0, 0);
     }
 
-    //process samples at real-time - as they come
-    process_sensor_data();
 
-    process_input();
-    process_pids();
-    process_motors();
+    //combine accelerometer, gyroscope and compass readings
+    auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
+    auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
+    auto const& compass_samples = m_hal.sensors->get_compass_samples();
+
+    auto g_it = gyroscope_samples.begin();
+    auto a_it = accelerometer_samples.begin();
+    auto c_it = compass_samples.begin();
+
+    //this matches the sensor samples that might come at different rates
+    while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
+    {
+        bool has_new_gyroscope_sample = false;
+        bool has_new_accelerometer_sample = false;
+        bool has_new_compass_sample = false;
+        //update the current smaples
+
+        auto sensor_now = m_sensor_clock.now();
+
+        Manual_Clock::duration min_dt{999999};
+        if (g_it != gyroscope_samples.end())
+        {
+            min_dt = math::min(min_dt, g_it->dt);
+            if (m_gyroscope_sample_time_point <= sensor_now)
+            {
+                m_last_gyroscope_sample = *g_it++;
+                m_gyroscope_sample_time_point += m_last_gyroscope_sample.dt;
+                has_new_gyroscope_sample = true;
+            }
+        }
+        if (a_it != accelerometer_samples.end())
+        {
+            min_dt = math::min(min_dt, a_it->dt);
+            if (m_accelerometer_sample_time_point <= sensor_now)
+            {
+                m_last_accelerometer_sample = *a_it++;
+                m_accelerometer_sample_time_point += m_last_accelerometer_sample.dt;
+                has_new_accelerometer_sample = true;
+            }
+        }
+        if (c_it != compass_samples.end())
+        {
+            min_dt = math::min(min_dt, c_it->dt);
+            if (m_compass_sample_time_point <= sensor_now)
+            {
+                m_last_compass_sample = *c_it++;
+                m_compass_sample_time_point += m_last_compass_sample.dt;
+                has_new_compass_sample = true;
+            }
+        }
+        QASSERT(min_dt.count() != 999999);
+
+        //increment the time
+        sensor_now += min_dt;
+        m_sensor_clock.advance(min_dt);
+
+        //-------------------------------------
+        //USING THE SAMPLES
+
+        m_ahrs.process(m_last_gyroscope_sample, m_last_accelerometer_sample, m_last_compass_sample);
+
+        if (has_new_gyroscope_sample)
+        {
+            m_pids.angular_velocity += m_last_gyroscope_sample.value;
+            m_pids.angular_velocity_samples++;
+        }
+
+        if (has_new_accelerometer_sample)
+        {
+            process_motion();
+        }
+    }
 }
+
+void UAV::process_motion()
+{
+    float sample_dts = q::Seconds(m_last_accelerometer_sample.dt).count();
+
+    //auto old_acceleration = m_linear_motion.acceleration;
+    math::vec3f acceleration = m_last_accelerometer_sample.value;
+    //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
+    auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
+    //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
+
+//            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
+//            m_linear_motion.velocity += dts * (old_acceleration + new_acceleration) * 0.5f;
+//            m_linear_motion.acceleration = new_acceleration;
+
+    m_linear_motion.acceleration = new_acceleration;
+    m_linear_motion.velocity += m_linear_motion.acceleration * sample_dts;
+    m_linear_motion.position += m_linear_motion.velocity * sample_dts;
+
+    //        m_linear_motion.velocity = math::lerp(m_linear_motion.velocity, math::vec3f::zero, dts * 0.5f);
+
+    //SILK_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
+
+//            m_linear_motion.position.z = math::lerp<float, math::safe>(
+//                        m_linear_motion.position.z,
+//                        sample.sonar.value,
+//                        dts * 0.9f);
+
+    if (m_linear_motion.position.z < 0)
+    {
+        m_linear_motion.position.z = 0;
+        m_linear_motion.velocity.z = std::max(0.f, m_linear_motion.velocity.z);
+    }
+}
+
 
 void UAV::process_input()
 {
@@ -228,22 +313,6 @@ void UAV::process_input()
     }
 }
 
-void UAV::process_pids()
-{
-    constexpr std::chrono::milliseconds PROCESS_PERIOD{5};
-
-    auto now = q::Clock::now();
-    auto dt = now - m_pids.last_process_timestamp;
-    if (dt < PROCESS_PERIOD)
-    {
-        return;
-    }
-    m_pids.last_process_timestamp = now;
-
-    process_rate_pids(dt);
-    process_stability_pids(dt);
-}
-
 void UAV::process_input_throttle_rate(q::Clock::duration dt)
 {
     float dts = q::Seconds(dt).count();
@@ -282,92 +351,18 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
     m_pids.yaw_rate.set_target(m_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
-void UAV::process_sensor_data()
+void UAV::process_rate_pids()
 {
-    static q::Clock::time_point xxx = q::Clock::now();
-    auto now = q::Clock::now();
-    if (now - xxx > std::chrono::seconds(10))
+    constexpr std::chrono::milliseconds PROCESS_PERIOD{5};
+
+    auto now = m_sensor_clock.now();
+    auto dt = now - m_pids.last_rate_process_timestamp;
+    if (dt < PROCESS_PERIOD)
     {
-        xxx = now;
-        m_linear_motion.acceleration.set(0, 0, 0);
-        m_linear_motion.velocity.set(0, 0, 0);
-        m_linear_motion.position.set(0, 0, 0);
+        return;
     }
+    m_pids.last_rate_process_timestamp = now;
 
-
-    //combine accelerometer, gyroscope and compass readings
-    auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
-    auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
-    auto const& compass_samples = m_hal.sensors->get_compass_samples();
-
-    auto g_it = gyroscope_samples.begin();
-    auto a_it = accelerometer_samples.begin();
-    auto c_it = compass_samples.begin();
-
-    //this matches the sensor samples that might come at different rates
-    while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
-    {
-        bool has_new_gyroscope_sample = false;
-        bool has_new_accelerometer_sample = false;
-        bool has_new_compass_sample = false;
-        //update the current smaples
-
-        q::Clock::duration min_dt{999999};
-        if (g_it != gyroscope_samples.end())
-        {
-            min_dt = math::min(min_dt, g_it->dt);
-            if (m_gyroscope_sample_time_point <= m_last_sample_time_point)
-            {
-                m_last_gyroscope_sample = *g_it++;
-                m_gyroscope_sample_time_point += m_last_gyroscope_sample.dt;
-                has_new_gyroscope_sample = true;
-            }
-        }
-        if (a_it != accelerometer_samples.end())
-        {
-            min_dt = math::min(min_dt, a_it->dt);
-            if (m_accelerometer_sample_time_point <= m_last_sample_time_point)
-            {
-                m_last_accelerometer_sample = *a_it++;
-                m_accelerometer_sample_time_point += m_last_accelerometer_sample.dt;
-                has_new_accelerometer_sample = true;
-            }
-        }
-        if (c_it != compass_samples.end())
-        {
-            min_dt = math::min(min_dt, c_it->dt);
-            if (m_compass_sample_time_point <= m_last_sample_time_point)
-            {
-                m_last_compass_sample = *c_it++;
-                m_compass_sample_time_point += m_last_compass_sample.dt;
-                has_new_compass_sample = true;
-            }
-        }
-        QASSERT(min_dt.count() != 999999);
-
-        //increment the time
-        m_last_sample_time_point += min_dt;
-
-        //-------------------------------------
-        //USING THE SAMPLES
-
-        m_ahrs.process(m_last_gyroscope_sample, m_last_accelerometer_sample, m_last_compass_sample);
-
-        if (has_new_gyroscope_sample)
-        {
-            m_pids.angular_velocity += m_last_gyroscope_sample.value;
-            m_pids.angular_velocity_samples++;
-        }
-
-        if (has_new_accelerometer_sample)
-        {
-            process_motion();
-        }
-    }
-}
-
-void UAV::process_rate_pids(q::Clock::duration dt)
-{
     if (m_pids.angular_velocity_samples == 0)
     {
         return;
@@ -390,44 +385,20 @@ void UAV::process_rate_pids(q::Clock::duration dt)
 
 }
 
-void UAV::process_stability_pids(q::Clock::duration dt)
+void UAV::process_stability_pids()
 {
+    constexpr std::chrono::milliseconds PROCESS_PERIOD{10};
+
+    auto now = m_sensor_clock.now();
+    auto dt = now - m_pids.last_rate_process_timestamp;
+    if (dt < PROCESS_PERIOD)
+    {
+        return;
+    }
+    m_pids.last_rate_process_timestamp = now;
+
     //these are dot products (i.e. -1 .. 1) not angles
     //auto pitch = math::dot(m_ahrs.get_up_vector_l(), )
-}
-
-void UAV::process_motion()
-{
-    float sample_dts = q::Seconds(m_last_accelerometer_sample.dt).count();
-
-    //auto old_acceleration = m_linear_motion.acceleration;
-    math::vec3f acceleration = m_last_accelerometer_sample.value;
-    //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
-    auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
-    //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
-
-//            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
-//            m_linear_motion.velocity += dts * (old_acceleration + new_acceleration) * 0.5f;
-//            m_linear_motion.acceleration = new_acceleration;
-
-    m_linear_motion.acceleration = new_acceleration;
-    m_linear_motion.velocity += m_linear_motion.acceleration * sample_dts;
-    m_linear_motion.position += m_linear_motion.velocity * sample_dts;
-
-    //        m_linear_motion.velocity = math::lerp(m_linear_motion.velocity, math::vec3f::zero, dts * 0.5f);
-
-    //SILK_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
-
-//            m_linear_motion.position.z = math::lerp<float, math::safe>(
-//                        m_linear_motion.position.z,
-//                        sample.sonar.value,
-//                        dts * 0.9f);
-
-    if (m_linear_motion.position.z < 0)
-    {
-        m_linear_motion.position.z = 0;
-        m_linear_motion.velocity.z = std::max(0.f, m_linear_motion.velocity.z);
-    }
 }
 
 void UAV::process_motors()
@@ -534,4 +505,43 @@ auto UAV::get_assist_params() const -> Assist_Params
 void UAV::set_assist_params(Assist_Params const& params)
 {
     m_assist_params = params;
+}
+
+void UAV::process()
+{
+    //auto now = q::Clock::now();
+
+    {
+//        static q::Clock::time_point last_timestamp = q::Clock::now();
+//        auto dt = now - last_timestamp;
+//        last_timestamp = now;
+//        static q::Clock::duration min_dt, max_dt, avg_dt;
+//        static int xxx = 0;
+//        if (xxx == 0)
+//        {
+//            //SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
+//            min_dt = dt;
+//            max_dt = dt;
+//            avg_dt = std::chrono::milliseconds(0);
+//        }
+//        min_dt = std::min(min_dt, dt);
+//        max_dt = std::max(max_dt, dt);
+//        avg_dt += dt;
+//        xxx++;
+//        if (xxx == 1000)
+//        {
+//            avg_dt = avg_dt / xxx;
+//            xxx = 0;
+//        }
+    }
+
+    //SILK_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());
+
+    //process samples at real-time - as they come
+    process_sensor_data();
+
+    process_input();
+    process_rate_pids();
+    process_stability_pids();
+    process_motors();
 }

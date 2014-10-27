@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/Remote_Clock.h"
-
 namespace silk
 {
 

@@ -23,10 +23,12 @@ auto Sim_Comms::connect() -> bool
     uint16_t port = 52523;
     try
     {
-        m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::endpoint(ip::tcp::v4(), port));
+        m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::v4());
         m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
-        m_acceptor->async_accept(m_socket,
-                boost::bind(&Sim_Comms::handle_accept, this, boost::asio::placeholders::error));
+        m_acceptor->bind(ip::tcp::endpoint(ip::tcp::v4(), port));
+        m_acceptor->listen();
+
+        m_acceptor->async_accept(m_socket, boost::bind(&Sim_Comms::handle_accept, this, boost::asio::placeholders::error));
     }
     catch(...)
     {

@@ -21,7 +21,7 @@ public:
     auto is_listening() const -> bool;
     auto is_connected() const -> bool;
     auto get_remote_address() const -> boost::asio::ip::address;
-    auto get_remote_clock() const -> Remote_Clock const&;
+    auto get_remote_clock() const -> Manual_Clock const&;
 
     void process();
 
@@ -94,7 +94,7 @@ private:
     q::Clock::time_point m_uav_sent_timestamp;
     void send_uav_data();
 
-    Remote_Clock m_remote_clock;
+    Manual_Clock m_remote_clock;
 
     std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;

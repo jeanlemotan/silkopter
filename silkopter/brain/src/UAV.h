@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Manual_Clock.h"
 #include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "AHRS.h"
@@ -102,21 +103,19 @@ private:
     void process_motion();
     void process_input();
 
-    void process_pids();
-    void process_rate_pids(q::Clock::duration dt);
-    void process_stability_pids(q::Clock::duration dt);
+    void process_rate_pids();
+    void process_stability_pids();
 
     Gyroscope_Sample m_last_gyroscope_sample;
-    q::Clock::time_point m_gyroscope_sample_time_point;
+    Manual_Clock::time_point m_gyroscope_sample_time_point;
 
     Accelerometer_Sample m_last_accelerometer_sample;
-    q::Clock::time_point m_accelerometer_sample_time_point;
+    Manual_Clock::time_point m_accelerometer_sample_time_point;
 
     Compass_Sample m_last_compass_sample;
-    q::Clock::time_point m_compass_sample_time_point;
+    Manual_Clock::time_point m_compass_sample_time_point;
 
-    q::Clock::time_point m_last_sample_time_point;
-
+    Manual_Clock m_sensor_clock;
 
     HAL& m_hal;
     AHRS m_ahrs;
@@ -135,7 +134,7 @@ private:
 
     struct PIDs
     {
-        q::Clock::time_point last_process_timestamp{std::chrono::seconds(0)};
+        Manual_Clock::time_point last_rate_process_timestamp{std::chrono::seconds(0)};
 
         math::vec3f angular_velocity;
         size_t angular_velocity_samples = 0;
@@ -145,6 +144,7 @@ private:
         Roll_Rate_PID roll_rate;
         Altitude_Rate_PID altitude_rate;
 
+        Manual_Clock::time_point last_statility_process_timestamp{std::chrono::seconds(0)};
         Yaw_PID yaw;
         Pitch_PID pitch;
         Roll_PID roll;

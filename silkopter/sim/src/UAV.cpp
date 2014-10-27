@@ -7,16 +7,7 @@ UAV::UAV(Config::UAV& config)
 {
     for (auto const& m: config.motors)
     {
-        Motor motor(m.position, m.clockwise, m.max_rpm, m.acceleration, m.decceleration, m.drag);
-
-        for (auto const& c: m.thrust_curve)
-        {
-            motor.get_thrust_curve().add_point(c.first, c.second);
-        }
-        for (auto const& c: m.amps_curve)
-        {
-            motor.get_amps_curve().add_point(c.first, c.second);
-        }
+        Motor motor(m);
         m_motors.push_back(motor);
     }
 
@@ -94,12 +85,18 @@ void UAV::process(q::Clock::duration dt)
         //SILK_INFO("v: {.4} / a: {.4}", m_velocity, m_linear_acceleration);
     }
 
+    auto velocity = bt_to_vec3f(m_body->getLinearVelocity());
+    float air_speed = math::dot(m_local_to_world_mat.get_axis_z(), velocity);
+
     for (auto& m: m_motors)
     {
+        m.set_air_speed(air_speed);
         m.process(dt);
     }
 
+
     //motors
+
 
     //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
     //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
@@ -107,14 +104,23 @@ void UAV::process(q::Clock::duration dt)
 
     //motors
     float total_rpm = 0.f;
+    float total_force = 0.f;
     for (auto const& m: m_motors)
     {
-        total_rpm += m.get_rpm() * (m.m_is_clockwise ? 1.f : -1.f);
-        auto force = m_local_to_world_mat.get_axis_z() * m.get_force();
-        math::vec3f local_pos(m.m_position * m_config.radius);
+        auto const& config = m.get_config();
+
+        total_rpm += m.compute_rpm() * (config.clockwise ? 1.f : -1.f);
+
+        auto dir = m_local_to_world_mat.get_axis_z();
+
+        float force = m.compute_force();
+        total_force += force;
+        math::vec3f local_pos(config.position * m_config.radius);
         auto pos = math::transform(m_local_to_world_mat, local_pos);
-        m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
+        m_body->applyForce(vec3f_to_bt(dir * force), vec3f_to_bt(pos));
     }
+
+    SILK_INFO("total_force {}", total_force);
 
     //yaw
     {
@@ -123,20 +129,19 @@ void UAV::process(q::Clock::duration dt)
     }
 
     //air drag
-    auto velocity = bt_to_vec3f(m_body->getLinearVelocity());
     if (math::length_sq(velocity) != 0)
     {
-        for (auto const& m : m_motors)
-        {
-            float intensity = math::abs(math::dot(m_local_to_world_mat.get_axis_z(), math::normalized(velocity)));
-            float drag = intensity * m.get_air_drag();
-            auto force = (-velocity) * drag;
+//        for (auto const& m : m_motors)
+//        {
+//            float intensity = math::abs(math::dot(m_local_to_world_mat.get_axis_z(), math::normalized(velocity)));
+//            float drag = intensity * m.get_air_drag();
+//            auto force = (-velocity) * drag;
 
-            math::vec3f local_pos(m.m_position * m_config.radius);
-            auto pos = math::transform(m_local_to_world_mat, local_pos);
+//            math::vec3f local_pos(m.m_position * m_config.radius);
+//            auto pos = math::transform(m_local_to_world_mat, local_pos);
 
-            m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
-        }
+//            m_body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
+//        }
     }
 
     \

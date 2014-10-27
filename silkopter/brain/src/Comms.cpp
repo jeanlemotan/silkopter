@@ -38,12 +38,13 @@ auto Comms::start_listening(uint16_t port) -> bool
             m_port = port;
             m_socket = std::make_unique<ip::tcp::socket>(m_io_service);
 
-            m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::endpoint(ip::tcp::v4(), port));
+            m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::v4());
             m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
             m_acceptor->set_option(ip::tcp::no_delay(true));
+            m_acceptor->bind(ip::tcp::endpoint(ip::tcp::v4(), port));
+            m_acceptor->listen();
 
-            m_acceptor->async_accept(*m_socket,
-                                     boost::bind(&Comms::handle_accept, this, boost::asio::placeholders::error));
+            m_acceptor->async_accept(*m_socket, boost::bind(&Comms::handle_accept, this, boost::asio::placeholders::error));
 
             break;
         }
@@ -104,14 +105,14 @@ auto Comms::get_error_count() const -> size_t
     return m_error_count;
 }
 
-auto Comms::get_remote_clock() const -> Remote_Clock const&
+auto Comms::get_remote_clock() const -> Manual_Clock const&
 {
     return m_remote_clock;
 }
 
 void Comms::process_message_ping()
 {
-    Remote_Clock::rep remote_now = 0;
+    Manual_Clock::rep remote_now = 0;
     uint32_t seq = 0;
     if (!m_channel->unpack(remote_now, seq))
     {
@@ -126,7 +127,7 @@ void Comms::process_message_ping()
     {
         SILK_WARNING("Setting remote time in the past!!!");
     }
-    m_remote_clock.set_now(Remote_Clock::duration(remote_now));
+    m_remote_clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(remote_now)));
     //SILK_INFO("Remote Clock set to {}", m_remote_clock.now());
 }
 void Comms::process_message_pong()

@@ -189,7 +189,7 @@ void World::process_state_running()
                     float v = 0;
                     if (m_channel.unpack_param(v))
                     {
-                        motors[i].set_throttle(v);
+                        motors[i].set_volts(v * m_config.battery.volts);
                     }
                 }
             }
@@ -334,17 +334,17 @@ void World::process_sensors()
 
         if (sensors.test(Sensor::ACCELEROMETER))
         {
-            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_accelerometer_sample.dt).count()));
+            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_accelerometer_sample.dt).count()));
             m_channel.pack_param(m_accelerometer_sample.value);
         }
         if (sensors.test(Sensor::GYROSCOPE))
         {
-            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_gyroscope_sample.dt).count()));
+            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_gyroscope_sample.dt).count()));
             m_channel.pack_param(m_gyroscope_sample.value);
         }
         if (sensors.test(Sensor::COMPASS))
         {
-            m_channel.pack_param(static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_compass_sample.dt).count()));
+            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_compass_sample.dt).count()));
             m_channel.pack_param(m_compass_sample.value);
         }
         if (sensors.test(Sensor::BAROMETER))
@@ -458,9 +458,11 @@ void World::render_uav(Render_Context& context)
         const float motor_radius = 0.12f;
         for (auto const& m : m_uav.m_motors)
 		{
-            context.painter.draw_circle(q::draw::Vertex(m.m_position*m_config.uav.radius, 0xFFFFFFFF), motor_radius);
-            float ratio = m.get_rpm() / m.get_max_rpm();
-            context.painter.fill_circle(q::draw::Vertex(m.m_position*m_config.uav.radius, 0xFF00FF00), motor_radius * ratio);
+            auto const& config = m.get_config();
+
+            context.painter.draw_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFFFFFFFF), motor_radius);
+            float ratio = m.compute_rpm() / (config.kv * m_config.battery.volts);
+            context.painter.fill_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFF00FF00), motor_radius * ratio);
 		}
 	}
 
