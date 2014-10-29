@@ -48,6 +48,7 @@ Simulator::Simulator(QWidget *parent)
         m_config.battery.capacity = 2.2f;
 
         Config::Propeller propeller;
+        propeller.factor = 0.12f;
         propeller.diameter = 9.f;
         propeller.pitch = 4.7f;
 

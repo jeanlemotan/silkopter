@@ -228,12 +228,12 @@ void UAV::process_sensor_data()
 
         if (has_new_accelerometer_sample)
         {
-            process_motion();
+            process_dead_reckoning();
         }
     }
 }
 
-void UAV::process_motion()
+void UAV::process_dead_reckoning()
 {
     float sample_dts = q::Seconds(m_last_accelerometer_sample.dt).count();
 

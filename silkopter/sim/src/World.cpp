@@ -461,7 +461,7 @@ void World::render_uav(Render_Context& context)
             auto const& config = m.get_config();
 
             context.painter.draw_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFFFFFFFF), motor_radius);
-            float ratio = m.compute_rpm() / (config.kv * m_config.battery.volts);
+            float ratio = m.compute_rpm() / (config.Kv * m_config.battery.volts);
             context.painter.fill_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFF00FF00), motor_radius * ratio);
 		}
 	}

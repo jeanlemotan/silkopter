@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
 
+#include "utils/RUDP.h"
+
 using namespace silk;
 using namespace boost::asio;
 
@@ -9,6 +11,8 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     , m_hal(hal)
     , m_uav(uav)
 {
+    util::RUDP rudp;
+
     m_ping.last_time_point = q::Clock::now();
 
     m_ping.rtts.set_capacity(100);

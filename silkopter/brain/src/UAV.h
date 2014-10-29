@@ -100,7 +100,7 @@ public:
 private:
     void process_sensor_data();
     void process_motors();
-    void process_motion();
+    void process_dead_reckoning();
     void process_input();
 
     void process_rate_pids();

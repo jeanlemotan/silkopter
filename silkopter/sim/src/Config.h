@@ -6,6 +6,7 @@ struct Config
     {
         float diameter = 0; //inches
         float pitch = 0; //inches
+        float factor = 0;
     };
 
     struct Motor

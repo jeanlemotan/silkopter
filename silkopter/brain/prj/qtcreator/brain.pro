@@ -121,5 +121,6 @@ HEADERS += \
     ../../../libs/common/Comm_Data.h \
     ../../src/HAL_Camera_Mount_PiGPIO.h \
     ../../src/HAL_Motors_PiGPIO.h \
-    ../../../libs/common/Manual_Clock.h
+    ../../../libs/common/Manual_Clock.h \
+    ../../../libs/utils/RUDP.h
 
