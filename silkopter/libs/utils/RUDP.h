@@ -33,7 +33,7 @@ namespace util
         struct Send_Params
         {
             uint8_t channel_idx = 0;
-            int32_t priority = 0; //Higher means higher priority. Can be negative
+            int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             q::Clock::duration bump_priority_after = q::Clock::duration{0}; //zero means never
             q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
@@ -87,6 +87,7 @@ namespace util
 
         struct Confirmation_Header : Header
         {
+            uint32_t confirmed_ids; //bit X confirms fragment id + X
         };
 
         struct Ping_Header : Header
@@ -104,6 +105,7 @@ namespace util
             struct Fragment
             {
                 Send_Params params;
+                float priority = 0;
                 q::Clock::time_point added_time_point;
                 q::Clock::time_point sent_time_point;
                 Buffer_t data;
@@ -113,20 +115,9 @@ namespace util
             std::vector<Fragment_ptr> fragment_pool;
             std::mutex fragment_pool_mutex;
 
-            struct Queue
-            {
-                int8_t priority = 0;
-                std::deque<Fragment_ptr> fragments;
-                std::mutex mutex;
-            };
-
             //waiting to be sent
-            std::vector<Queue> to_send;
-            std::mutex to_send_mutex;
-
-            //waiting for confirmation
-            std::deque<Fragment_ptr> waiting;
-            std::mutex waiting_mutex;
+            std::deque<Fragment_ptr> send_queue;
+            std::mutex send_queue_mutex;
         } m_tx;
 
         struct
@@ -141,6 +132,8 @@ namespace util
         //sent pings
         std::deque<Ping_Header> m_pings;
         std::mutex m_pings_mutex;
+        boost::circular_buffer<q::Clock::duration> m_rtts;
+        q::Clock::duration m_rtt;
 
 
         struct Stats
@@ -159,9 +152,12 @@ namespace util
         size_t m_pings_sent;
         size_t m_pongs_received;
 
-        std::array<uint32_t, 256> m_channel_ids = {0};
+        std::atomic<uint32_t> m_last_id = {0};
         std::array<Stats, 256> m_channel_stats;
         Stats m_global_stats;
+
+        std::atomic_bool m_is_sending = {false};
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(2);
 
         TX::Fragment_ptr get_new_fragment()
         {
@@ -183,12 +179,89 @@ namespace util
             return fragment;
         }
 
-        void handle_send(std::shared_ptr<TX::Buffer_t> buffer_ptr,
-                         const boost::system::error_code& /*error*/,
-                         std::size_t /*bytes_transferred*/)
+        void process_send_queue()
         {
-//            std::lock_guard<std::mutex> lg(m_tx_buffer_pool_mutex);
-//            m_tx_buffer_pool.push_back(buffer_ptr);
+//            std::lock_guard<std::mutex> lg(m_tx.to_send_mutex);
+
+            auto now = q::Clock::now();
+
+            //eliminate old fragments
+            m_tx.send_queue.erase(std::remove_if(m_tx.send_queue.begin(), m_tx.send_queue.end(), [&](const TX::Fragment_ptr& f)
+            {
+                return now - f->added_time_point >= f->params.cancel_after;
+            }), m_tx.send_queue.end());
+
+            //calculate priorities
+            for (auto& fragment: m_tx.send_queue)
+            {
+                if (now - fragment->sent_time_point < std::min(MIN_RESEND_DURATION, m_rtt))
+                {
+                    fragment->priority = -1000;
+                }
+                else
+                {
+                    float priority = static_cast<float>(fragment->params.importance) * 0.0078125f;
+                    if (now - fragment->added_time_point >= fragment->params.bump_priority_after)
+                    {
+                        priority += 0.5f;
+                    }
+
+                    fragment->priority = priority;
+                }
+            }
+
+            std::nth_element(m_tx.send_queue.begin(), m_tx.send_queue.begin(), m_tx.send_queue.end(), [](const TX::Fragment_ptr& f0, const TX::Fragment_ptr& f1)
+            {
+                return f0->priority > f1->priority;
+            });
+        }
+
+        void send_fragment()
+        {
+            if (m_is_sending)
+            {
+                return;
+            }
+
+            std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
+
+            process_send_queue();
+            if (m_tx.send_queue.empty())
+            {
+                return;
+            }
+
+            auto fragment = m_tx.send_queue.front();
+            if (fragment->priority < -1.f)
+            {
+                return;
+            }
+
+            if (m_is_sending.exchange(true))
+            {
+                //was already sending, return
+                return;
+            }
+
+            fragment->sent_time_point = q::Clock::now();
+
+//            m_socket.async_write_some(boost::asio::buffer(fragment->data.data(), fragment->size()),
+//                boost::bind(&RUDP::handle_send, this,
+//                fragment,
+//                boost::asio::placeholders::error));
+
+            if (fragment->params.is_reliable)
+            {
+                m_tx.send_queue.push_back(fragment);
+            }
+        }
+
+        void handle_send(std::shared_ptr<TX::Fragment> /*fragment*/,
+                         const boost::system::error_code& /*error*/)
+        {
+            m_is_sending = false;
+
+            send_fragment();
         }
 
         void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
