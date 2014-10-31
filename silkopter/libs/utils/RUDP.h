@@ -61,6 +61,7 @@ namespace util
             uint8_t flag_is_1st_fragment : 1;
             uint8_t flag_is_fragment : 1;
             uint8_t flag_is_cancel_fragments : 1;
+            uint8_t flag_is_confirmation : 1;
             uint8_t flag_ping : 1;
             uint8_t flag_pong : 1;
             uint8_t channel_idx;
@@ -250,6 +251,38 @@ namespace util
 //                fragment,
 //                boost::asio::placeholders::error));
 
+            Header const& header = get_header(fragment->data.data());
+            Stats& stats = m_channel_stats[header.channel_idx];
+            stats.bytes_sent += fragment->data.size();
+            if (header.flag_is_1st_fragment)
+            {
+                stats.packets_sent++;
+                stats.fragments_sent++;
+            }
+            else if (header.flag_is_fragment)
+            {
+                stats.fragments_sent++;
+            }
+            else if (header.flag_is_confirmation)
+            {
+                stats.confirmations_sent++;
+            }
+            else if (header.flag_ping)
+            {
+                m_pings_sent++;
+            }
+
+                    size_t packets_sent = 0;
+                    size_t packets_received = 0;
+                    size_t packets_resent = 0;
+                    size_t confirmations_sent = 0;
+                    size_t confirmations_received = 0;
+                    size_t bytes_sent = 0;
+                    size_t bytes_received = 0;
+                    size_t payload_bytes_sent = 0;
+                    size_t payload_bytes_received = 0;
+
+
             if (fragment->params.is_reliable)
             {
                 m_tx.send_queue.push_back(fragment);
@@ -282,41 +315,6 @@ namespace util
 //                start();
 //            }
         }
-
-        void send_to_socket(std::shared_ptr<std::vector<uint8_t>> buffer, size_t size)
-        {
-//            if (!buffer->empty())
-//            {
-//                m_socket.async_write_some(boost::asio::buffer(*buffer, size),
-//                    boost::bind(&This_t::handle_send, this,
-//                    buffer,
-//                    boost::asio::placeholders::error,
-//                    boost::asio::placeholders::bytes_transferred));
-//            }
-        }
-
-        //////////////////////////////////////////////////////////////////////////
-
-//        std::shared_ptr<TX_Buffer_t> get_tx_buffer()
-//        {
-//            std::lock_guard<std::mutex> lg(m_tx_buffer_pool_mutex);
-//            std::shared_ptr<TX_Buffer_t> buffer_ptr;
-//            if (!m_tx_buffer_pool.empty())
-//            {
-//                buffer_ptr = m_tx_buffer_pool.back();
-//                m_tx_buffer_pool.pop_back();
-//            }
-//            else
-//            {
-//                buffer_ptr = std::make_shared<TX_Buffer_t>();
-//            }
-//            buffer_ptr->reserve(32);
-//            if (buffer_ptr->size() < HEADER_SIZE)
-//            {
-//                buffer_ptr->resize(HEADER_SIZE);
-//            }
-//            return buffer_ptr;
-//        }
 
    };
 
