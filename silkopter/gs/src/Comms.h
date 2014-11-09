@@ -3,7 +3,7 @@
 #include "common/input/Camera_Input.h"
 #include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
-#include "common/Remote_Clock.h"
+#include "common/Manual_Clock.h"
 #include "common/Comm_Data.h"
 #include "utils/PID.h"
 
@@ -28,7 +28,7 @@ public:
     auto is_connected() const -> bool;
     auto get_remote_address() const -> boost::asio::ip::address;
 
-    auto get_remote_clock() const -> Remote_Clock const&;
+    auto get_remote_clock() const -> Manual_Clock const&;
 
     void process();
 
@@ -138,9 +138,12 @@ private:
     mutable Channel m_channel;
     q::Clock::time_point m_timeout_started;
 
-    Remote_Clock m_remote_clock;
+    Manual_Clock m_remote_clock;
 
     size_t m_error_count = 0;
+
+    void handle_connect(const boost::system::error_code& error);
+
 
     void process_message_ping();
     void process_message_pong();

@@ -85,7 +85,7 @@ HEADERS  += \
     ../../src/Input_Widget.h \
     ../../src/PID_Widget.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
-    ../../../libs/common/Remote_Clock.h \
+    ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/Channel.h \
     ../../../libs/common/Comm_Data.h
 

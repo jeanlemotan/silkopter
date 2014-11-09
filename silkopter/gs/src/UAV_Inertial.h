@@ -2,7 +2,7 @@
 
 #include "ui_UAV_Inertial.h"
 #include "Comms.h"
-#include "common/Remote_Clock.h"
+#include "common/Manual_Clock.h"
 
 class UAV_Inertial : public QWidget
 {
@@ -21,8 +21,8 @@ private:
 
 	Ui::UAV_Inertial m_ui;
 
-    silk::Remote_Clock::time_point m_last_remote_time_stamp;
-    silk::Remote_Clock::time_point m_graph_remote_epoch;
+    silk::Manual_Clock::time_point m_last_remote_time_stamp;
+    silk::Manual_Clock::time_point m_graph_remote_epoch;
 
     q::Clock::time_point m_last_time;
     silk::Comms* m_comms;

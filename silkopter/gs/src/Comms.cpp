@@ -18,23 +18,12 @@ auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> R
 {
     try
     {
-        disconnect();
+        SILK_INFO("Trying to connect to {}:{}", address.to_string(), port);
 
         m_remote_endpoint = ip::tcp::endpoint(address, port);
-        boost::system::error_code error = boost::asio::error::host_not_found;
-        m_socket.connect(m_remote_endpoint, error);
-
-        if (!error)
-        {
-            SILK_INFO("Connected to {}:{}", address.to_string(), port);
-            m_channel.start();
-        }
-        else
-        {
-            m_socket.close();
-            SILK_WARNING("Connect failed: {}", error.message());
-            return Result::FAILED;
-        }
+        m_socket.async_connect(m_remote_endpoint,
+                              boost::bind(&Comms::handle_connect, this,
+                              placeholders::error));
     }
     catch(...)
     {
@@ -45,6 +34,20 @@ auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> R
 
     return Result::OK;
 }
+void Comms::handle_connect(const boost::system::error_code& error)
+{
+    if (!error)
+    {
+        SILK_INFO("Connected to {}:{}", m_remote_endpoint.address().to_string(), m_remote_endpoint.port());
+        m_channel.start();
+    }
+    else
+    {
+        m_socket.close();
+        SILK_WARNING("Failed to connect to {}:{} - {}", m_remote_endpoint.address().to_string(), m_remote_endpoint.port(), error.message());
+    }
+}
+
 void Comms::disconnect()
 {
     m_socket.close();
@@ -65,7 +68,7 @@ auto Comms::get_error_count() const -> size_t
     return m_error_count;
 }
 
-auto Comms::get_remote_clock() const -> Remote_Clock const&
+auto Comms::get_remote_clock() const -> Manual_Clock const&
 {
     return m_remote_clock;
 }
@@ -362,7 +365,7 @@ void Comms::process_message_altitude_pid_params()
 
 void Comms::process_message_ping()
 {
-    Remote_Clock::rep remote_now = 0;
+    Manual_Clock::rep remote_now = 0;
     uint32_t seq = 0;
     if (!m_channel.unpack(remote_now, seq))
     {
@@ -377,7 +380,7 @@ void Comms::process_message_ping()
     {
         SILK_WARNING("Setting remote time in the past!!!");
     }
-    m_remote_clock.set_now(Remote_Clock::duration(remote_now));
+    m_remote_clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(remote_now)));
     //SILK_INFO("Remote Clock set to {}", m_remote_clock.now());
 }
 void Comms::process_message_pong()

@@ -126,7 +126,7 @@ void UAV_Inertial::process()
 	}
 	else
 	{
-        m_graph_remote_epoch = silk::Remote_Clock::time_point(std::chrono::seconds(0));
+        m_graph_remote_epoch = silk::Manual_Clock::time_point(std::chrono::seconds(0));
         m_ui.acceleration_plot->graph(0)->clearData();
         m_ui.acceleration_plot->graph(1)->clearData();
         m_ui.acceleration_plot->graph(2)->clearData();
