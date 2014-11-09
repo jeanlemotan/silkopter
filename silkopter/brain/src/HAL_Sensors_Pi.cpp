@@ -46,6 +46,9 @@ HAL_Sensors_Pi::HAL_Sensors_Pi()
 {
     m_impl.reset(new Impl);
 
+    m_config.barometer_i2c_device = "/dev/i2c-1";
+    m_config.mpu_i2c_device = "/dev/i2c-1";
+
     load_settings();
     save_settings();
 }

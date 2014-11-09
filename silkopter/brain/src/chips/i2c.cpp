@@ -36,6 +36,9 @@ i2c::~i2c()
 
 auto i2c::open(const std::string &device) -> bool
 {
+    close();
+
+    m_device = device;
     m_fd = ::open(device.c_str(), O_RDWR);
     if (m_fd < 0)
     {
@@ -53,9 +56,10 @@ void i2c::close()
     }
 }
 
-void i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size)
+bool i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size)
 {
     QASSERT(m_fd >= 0);
+
     struct i2c_rdwr_ioctl_data io;
     struct i2c_msg msg[2];
 
@@ -74,9 +78,11 @@ void i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size)
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         SILK_WARNING("i2c read reg failed: {}", strerror(errno));
+        return false;
     }
+    return true;
 }
-void i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size)
+bool i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size)
 {
     QASSERT(m_fd >= 0);
     struct i2c_rdwr_ioctl_data io;
@@ -99,7 +105,9 @@ void i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size)
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         SILK_WARNING("i2c write reg failed: {}", strerror(errno));
+        return false;
     }
+    return true;
 }
 
 

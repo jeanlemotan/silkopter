@@ -1,5 +1,6 @@
 #include <thread>
 #include <functional>
+#include <unordered_map>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>

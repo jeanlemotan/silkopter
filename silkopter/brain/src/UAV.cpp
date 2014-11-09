@@ -168,6 +168,8 @@ void UAV::process_sensor_data()
     auto a_it = accelerometer_samples.begin();
     auto c_it = compass_samples.begin();
 
+    const auto max_allowed_dt = std::chrono::milliseconds(500);
+
     //this matches the sensor samples that might come at different rates
     while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
     {
@@ -181,6 +183,7 @@ void UAV::process_sensor_data()
         Manual_Clock::duration min_dt{999999};
         if (g_it != gyroscope_samples.end())
         {
+            QASSERT(g_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, g_it->dt);
             if (m_gyroscope_sample_time_point <= sensor_now)
             {
@@ -191,6 +194,7 @@ void UAV::process_sensor_data()
         }
         if (a_it != accelerometer_samples.end())
         {
+            QASSERT(a_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, a_it->dt);
             if (m_accelerometer_sample_time_point <= sensor_now)
             {
@@ -201,6 +205,7 @@ void UAV::process_sensor_data()
         }
         if (c_it != compass_samples.end())
         {
+            QASSERT(c_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, c_it->dt);
             if (m_compass_sample_time_point <= sensor_now)
             {
@@ -209,7 +214,7 @@ void UAV::process_sensor_data()
                 has_new_compass_sample = true;
             }
         }
-        QASSERT(min_dt.count() != 999999);
+        QASSERT(min_dt.count() < 999999);
 
         //increment the time
         sensor_now += min_dt;
@@ -509,30 +514,30 @@ void UAV::set_assist_params(Assist_Params const& params)
 
 void UAV::process()
 {
-    //auto now = q::Clock::now();
+    auto now = q::Clock::now();
 
     {
-//        static q::Clock::time_point last_timestamp = q::Clock::now();
-//        auto dt = now - last_timestamp;
-//        last_timestamp = now;
-//        static q::Clock::duration min_dt, max_dt, avg_dt;
-//        static int xxx = 0;
-//        if (xxx == 0)
-//        {
-//            //SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
-//            min_dt = dt;
-//            max_dt = dt;
-//            avg_dt = std::chrono::milliseconds(0);
-//        }
-//        min_dt = std::min(min_dt, dt);
-//        max_dt = std::max(max_dt, dt);
-//        avg_dt += dt;
-//        xxx++;
-//        if (xxx == 1000)
-//        {
-//            avg_dt = avg_dt / xxx;
-//            xxx = 0;
-//        }
+        static q::Clock::time_point last_timestamp = q::Clock::now();
+        auto dt = now - last_timestamp;
+        last_timestamp = now;
+        static q::Clock::duration min_dt, max_dt, avg_dt;
+        static int xxx = 0;
+        if (xxx == 0)
+        {
+            SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
+            min_dt = dt;
+            max_dt = dt;
+            avg_dt = std::chrono::milliseconds(0);
+        }
+        min_dt = std::min(min_dt, dt);
+        max_dt = std::max(max_dt, dt);
+        avg_dt += dt;
+        xxx++;
+        if (xxx == 1000)
+        {
+            avg_dt = avg_dt / xxx;
+            xxx = 0;
+        }
     }
 
     //SILK_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());

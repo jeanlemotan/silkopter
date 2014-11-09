@@ -34,7 +34,7 @@ auto MS5611::init(const std::string& device) -> bool
 {
     SILK_INFO("initializing device: {}", device);
 
-    if (!m_i2c.open(device.c_str()))
+    if (!m_i2c.open(device))
     {
         SILK_ERR("can't open {}: {}", device, strerror(errno));
         return false;

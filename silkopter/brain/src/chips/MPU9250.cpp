@@ -267,7 +267,7 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
 
     SILK_INFO("initializing device: {}", device);
 
-    if (!m_i2c.open(device.c_str()))
+    if (!m_i2c.open(device))
     {
         SILK_ERR("can't open {}: {}", device, strerror(errno));
         return false;
@@ -459,10 +459,10 @@ auto MPU9250::setup_compass() -> bool
 
 //    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
 
-    return true;
-#else
-    return true;
 #endif
+
+    m_last_compass_timestamp = q::Clock::now();
+    return true;
 }
 
 void MPU9250::mpu_set_bypass(bool on)
@@ -508,13 +508,22 @@ void MPU9250::process()
 
 //    i2c_acquire(ADDR_MPU9250);
 
+    //auto now = q::Clock::now();
+    //static q::Clock::time_point last_timestamp = q::Clock::now();
+   // auto dt = now - last_timestamp;
+   // last_timestamp = now;
+
     auto fifo_count = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH);
+
+   // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
+   // SILK_INFO("{.2}b/ms", xxx);
+
     uint16_t fc2 = 0;
     if (fifo_count >= m_fifo_sample_size)
     {
-        if (fifo_count >= 2048)
+        if (fifo_count >= 4000)
         {
-            SILK_WARNING("resetting fifo");
+            SILK_WARNING("resetting fifo: {}", fifo_count);
             reset_fifo();
             fifo_count = 0;
         }
@@ -526,7 +535,14 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             auto* data = m_fifo_buffer.data();
 
-            m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, data, to_read);
+            {
+                //auto start = q::Clock::now();
+
+                m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, data, to_read);
+
+                //auto d = q::Clock::now() - start;
+                //QLOG_INFO("", "{}: {}us", to_read, d.count());
+            }
 
             //reset_fifo();
             //fc2 = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH);

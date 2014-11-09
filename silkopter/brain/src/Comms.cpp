@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
 
-#include "utils/RUDP.h"
 
 using namespace silk;
 using namespace boost::asio;
@@ -10,8 +9,19 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     : m_io_service(io_service)
     , m_hal(hal)
     , m_uav(uav)
+    , m_socket2(io_service)
+    , m_rudp(m_socket2)
 {
-    util::RUDP rudp;
+    util::RUDP::Send_Params params;
+    //params.destination = ip::udp::endpoint(ip::address::from_string("127.0.0.1"), 22222);
+    std::string s = "bubu mimi";
+    s = std::string(32000000, 'x');
+    m_rudp.start();
+
+    m_rudp.send(0, reinterpret_cast<uint8_t const*>(s.data()), s.size());
+
+    while (1)
+        m_rudp.process();
 
     m_ping.last_time_point = q::Clock::now();
 
@@ -143,7 +153,7 @@ void Comms::process_message_pong()
         return;
     }
 
-    auto it = m_ping.seq_sent.find(seq);
+    auto it = std::find_if(m_ping.seq_sent.begin(), m_ping.seq_sent.end(), [seq](Ping::Seq_Sent::value_type const& v) { return v.first == seq; });
     if (it != m_ping.seq_sent.end())
     {
         auto rtt = q::Clock::now() - it->second;
@@ -935,21 +945,14 @@ void Comms::process()
 
         if (m_ping.seq_sent.size() > 1000)
         {
-            std::chrono::seconds max_d(1);
-            for (auto it = m_ping.seq_sent.begin(); it != m_ping.seq_sent.end(); )
+            auto begin = std::remove_if(m_ping.seq_sent.begin(), m_ping.seq_sent.end(), [now](Ping::Seq_Sent::value_type const& v)
             {
-                if (now - it->second > max_d)
-                {
-                    it = m_ping.seq_sent.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+                return now - v.second < std::chrono::seconds(1);
+            });
+            m_ping.seq_sent.erase(begin, m_ping.seq_sent.end());
         }
 
-        m_ping.seq_sent[m_ping.seq] = now;
+        m_ping.seq_sent.emplace_back(m_ping.seq, now);
         m_channel->send(detail::Comm_Message::PING, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
         m_ping.seq++;
     }

@@ -57,6 +57,11 @@ auto HAL::init(boost::asio::io_service& io_service) -> bool
     SILK_INFO("initializing bcm_host");
     bcm_host_init();
 
+    if (!m_impl->pigpio.init())
+    {
+        return false;
+    }
+
     auto m = new HAL_Motors_PiGPIO(m_impl->pigpio);
     motors.reset(m);
     if (!m->init())

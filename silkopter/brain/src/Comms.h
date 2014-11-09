@@ -6,6 +6,7 @@
 #include "common/Comm_Data.h"
 #include "HAL.h"
 #include "UAV.h"
+#include "utils/RUDP.h"
 
 namespace silk
 {
@@ -99,6 +100,9 @@ private:
     std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
+    boost::asio::ip::udp::socket m_socket2;
+    util::RUDP m_rudp;
+
     typedef util::Channel<detail::Comm_Message,
                         uint32_t,
                         boost::asio::ip::tcp::socket> Channel;
@@ -113,7 +117,8 @@ private:
     struct Ping
     {
         uint32_t seq = 0;
-        std::map<uint32_t, q::Clock::time_point> seq_sent;
+        typedef std::vector<std::pair<uint32_t, q::Clock::time_point>> Seq_Sent;
+        Seq_Sent seq_sent;
         boost::circular_buffer<q::Clock::duration> rtts;
         q::Clock::time_point last_time_point;
     } m_ping;
