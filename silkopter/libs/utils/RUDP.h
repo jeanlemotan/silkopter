@@ -223,11 +223,15 @@ namespace util
             std::array<uint32_t, MAX_CHANNELS> last_packet_ids = {0};
         } m_rx;
 
-        //sent pings
-        std::deque<Ping_Header> m_pings;
-        std::mutex m_pings_mutex;
-        boost::circular_buffer<q::Clock::duration> m_rtts;
-        q::Clock::duration m_rtt;
+        struct Ping
+        {
+            q::Clock::time_point last_time_point;
+            std::vector<Ping_Header> sent;
+            std::mutex sent_mutex;
+
+            boost::circular_buffer<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
+            q::Clock::duration rtt;
+        } m_ping;
 
 
         struct Stats
@@ -254,9 +258,7 @@ namespace util
             size_t rx_pongs = 0;
         };
 
-        size_t m_pings_sent;
-        size_t m_pongs_received;
-
+        q::Clock::time_point m_init_time_point;
         std::atomic<uint32_t> m_last_id = {0};
         Stats m_global_stats;
 
@@ -317,7 +319,7 @@ namespace util
 
             auto now = q::Clock::now();
 
-            auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_rtt / 10);
+            auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt / 10);
 
             auto best_it = m_tx.send_queue.begin();
 
@@ -384,6 +386,7 @@ namespace util
                 QASSERT(0);
                 return;
             }
+            datagram->added = q::Clock::now();
             //add to the queue
             {
                 std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
@@ -404,6 +407,18 @@ namespace util
                 if (pheader.fragment_idx == 0)
                 {
                     stats.tx_packets++;
+                }
+            }
+            if (header.type == TYPE_PING)
+            {
+                auto const& pheader = get_header<Ping_Header>(datagram.data);
+                if (pheader.flag_is_pong == 0)
+                {
+                    stats.tx_pongs++;
+                }
+                else
+                {
+                    stats.tx_pings++;
                 }
             }
         }
@@ -526,8 +541,6 @@ namespace util
         void send_packet_reply(Packet_Header const& header, bool is_cancelled)
         {
             auto datagram = m_tx.acquire_datagram(sizeof(Packet_Reply_Header));
-            datagram->added = q::Clock::now();
-
             auto& cheader = get_header<Packet_Reply_Header>(datagram->data);
             cheader.id = header.id;
             cheader.channel_idx = header.channel_idx;
@@ -548,6 +561,39 @@ namespace util
         void send_packet_reply_confirm(Packet_Header const& header)
         {
             send_packet_reply(header, false);
+        }
+
+        void send_packet_ping()
+        {
+            auto datagram = m_tx.acquire_datagram(sizeof(Ping_Header));
+            auto& header = get_header<Ping_Header>(datagram->data);
+            header.id = ++m_last_id;
+            header.type = TYPE_PING;
+            header.time_point = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now() - m_init_time_point).count());
+
+            {
+                std::lock_guard<std::mutex> lg(m_ping.sent_mutex);
+                m_ping.sent.push_back(header);
+            }
+
+            auto crc = q::util::compute_murmur_hash32(datagram->data.data(), datagram->data.size());
+            header.crc = crc;
+
+            add_and_send_datagram(datagram);
+        }
+        void send_packet_pong(Ping_Header const& ping)
+        {
+            auto datagram = m_tx.acquire_datagram(sizeof(Ping_Header));
+            auto& header = get_header<Ping_Header>(datagram->data);
+            header.id = ping.id;
+            header.type = TYPE_PING;
+            header.time_point = ping.time_point;
+            header.flag_is_pong = true;
+
+            auto crc = q::util::compute_murmur_hash32(datagram->data.data(), datagram->data.size());
+            header.crc = crc;
+
+            add_and_send_datagram(datagram);
         }
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram)
@@ -708,11 +754,58 @@ namespace util
 
             if (header.flag_is_pong)
             {
-                m_global_stats.tx_pongs++;
+                m_global_stats.rx_pongs++;
+
+                auto id = header.id;
+                auto now = q::Clock::now();
+
+                //find the ping and compute its rtt
+                {
+                    std::lock_guard<std::mutex> lg(m_ping.sent_mutex);
+                    auto it = std::find_if(m_ping.sent.begin(), m_ping.sent.end(), [id](Ping_Header const& p) { return p.id == id; });
+                    if (it != m_ping.sent.end())
+                    {
+                        auto rtt = now - m_init_time_point + std::chrono::milliseconds(it->time_point);
+                        m_ping.rtts.push_back(std::make_pair(now, rtt));
+                        m_ping.sent.erase(it);
+                    }
+                    else
+                    {
+                        SILK_WARNING("invalid ping seq received: {}", id);
+                    }
+                }
+
+                //calculate average rtt
+                q::Clock::duration total_rtt{0};
+                size_t total = 0;
+                for (auto it = m_ping.rtts.begin(); it != m_ping.rtts.end(); ++it)
+                {
+                    auto when = it->first;
+                    auto rtt = it->second;
+                    if (now - when < std::chrono::seconds(1))
+                    {
+                        total_rtt += rtt;
+                        total++;
+                    }
+                }
+                if (total > 0)
+                {
+                    total_rtt /= total;
+                }
+                m_ping.rtt = total_rtt;
+
+                static q::Clock::time_point xxx = q::Clock::now();
+                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
+                {
+                    xxx = q::Clock::now();
+                    SILK_INFO("RTT: {}", m_ping.rtt);
+                }
             }
             else
             {
-                m_global_stats.tx_pings++;
+                m_global_stats.rx_pings++;
+
+                send_packet_pong(header);
             }
 
             m_rx.release_datagram(datagram);
@@ -731,6 +824,10 @@ namespace util
         hsz == hsz;
 
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
+
+        m_init_time_point = q::Clock::now();
+        m_ping.last_time_point = q::Clock::now();
+        m_ping.rtts.set_capacity(100);
     }
 
 
@@ -779,8 +876,6 @@ namespace util
 
             auto& params = m_send_params[channel_idx];
             fragment->params = params;
-            fragment->added = now;
-
 
             size_t h_size = 0;
             if (i == 0)
@@ -866,10 +961,10 @@ namespace util
         }
         m_rx.incoming_queue.clear();
 
+        auto now = q::Clock::now();
+
         //process complete packages
         {
-            auto now = q::Clock::now();
-
             for (size_t ch = 0; ch < m_rx.incomplete_queues.size(); ch++)
             {
                 auto& q = m_rx.incomplete_queues[ch];
@@ -911,6 +1006,13 @@ namespace util
                 m_rx.last_packet_ids[ch] = id;
                 m_global_stats.rx_packets++;
             }
+        }
+
+        if (now - m_ping.last_time_point > std::chrono::milliseconds(100))
+        {
+            m_ping.last_time_point = now;
+
+            send_packet_ping();
         }
 
         send_datagram();
