@@ -1,5 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
+#include "utils/Timed_Scope.h"
 
 
 using namespace silk;
@@ -15,13 +16,32 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     util::RUDP::Send_Params params;
     //params.destination = ip::udp::endpoint(ip::address::from_string("127.0.0.1"), 22222);
     std::string s = "bubu mimi";
-    s = std::string(32000000, 'x');
+    s = std::string(100000, 'x');
     m_rudp.start();
 
-    m_rudp.send(0, reinterpret_cast<uint8_t const*>(s.data()), s.size());
+    //q::logging::set_level(q::logging::Level::WARNING);
 
-    while (1)
-        m_rudp.process();
+    while(1)
+    {
+        TIMED_SCOPE();
+        {
+            TIMED_SCOPE();
+            for (int i = 0; i < 1; i++)
+            {
+                m_rudp.send(0, reinterpret_cast<uint8_t const*>(s.data()), s.size());
+            }
+        }
+
+        {
+            TIMED_SCOPE();
+            std::string ss;
+            while (!m_rudp.receive(0, ss))
+            {
+                m_rudp.process();
+                //std::this_thread::yield();//sleep_for(std::chrono::microseconds(10));
+            }
+        }
+    }
 
     m_ping.last_time_point = q::Clock::now();
 
