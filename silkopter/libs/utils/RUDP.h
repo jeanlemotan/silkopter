@@ -115,16 +115,16 @@ namespace util
 
         static const int MAX_PRIORITY = 127;
         static const int MIN_PRIORITY = -127;
+        //special priorities
         static const int DENY_PRIORITY = -128;
+        static const int PACKET_REPLY_DATAGRAM_PRIORITY = 126;
+        static const int PING_DATAGRAM_PRIORITY = 127;
 
         struct TX
         {
             struct Datagram
             {
                 Send_Params params;
-                int priority = 0;
-                q::Clock::time_point added;
-                q::Clock::time_point sent;
                 Buffer_t data;
             };
             typedef std::shared_ptr<Datagram> Datagram_ptr;
@@ -134,9 +134,6 @@ namespace util
             Datagram_ptr acquire_datagram(size_t data_size)
             {
                 auto datagram = datagram_pool.acquire();
-                datagram->added = q::Clock::time_point(q::Clock::duration{0});
-                datagram->sent = q::Clock::time_point(q::Clock::duration{0});
-                datagram->priority = 0;
                 datagram->data.resize(0); //this will force zero-ing the data
                 datagram->data.resize(data_size);
                 return datagram;
@@ -151,7 +148,16 @@ namespace util
             }
 
             //waiting to be sent
-            std::vector<Datagram_ptr> send_queue;
+            struct Send_Queue_Item
+            {
+                Header header; //header duplicated from the data
+                int priority = 0;
+                q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
+                q::Clock::time_point sent = q::Clock::time_point(q::Clock::duration{0});
+                Datagram_ptr datagram;
+            };
+
+            std::vector<Send_Queue_Item> send_queue;
             std::mutex send_queue_mutex;
         } m_tx;
 
@@ -308,7 +314,7 @@ namespace util
             return 0;
         }
 
-        std::vector<TX::Datagram_ptr>::iterator process_send_queue()
+        std::vector<TX::Send_Queue_Item>::iterator process_send_queue()
         {
 //            std::lock_guard<std::mutex> lg(m_tx.to_send_mutex);
 
@@ -322,47 +328,54 @@ namespace util
             auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt / 10);
 
             auto best_it = m_tx.send_queue.begin();
+            auto best_age = now - best_it->sent;
 
             //calculate priorities
             for (auto it = m_tx.send_queue.begin(); it != m_tx.send_queue.end();)
             {
-                auto const& dg = *it;
-                auto const& params = dg->params;
+                auto const& params = it->datagram->params;
 
                 //eliminate old datagrams
-                if (params.cancel_after.count() > 0 && now - dg->added >= params.cancel_after)
+                if (params.cancel_after.count() > 0 && now - it->added >= params.cancel_after)
                 {
+                    m_tx.release_datagram(it->datagram);
                     m_tx.send_queue.erase(it);
                     continue;
                 }
 
-                if (now - dg->sent < min_resend_duration)
+                auto const& header = it->header;
+                if (header.type == TYPE_PACKET_REPLY)
                 {
-                    dg->priority = DENY_PRIORITY;
+                    it->priority = PACKET_REPLY_DATAGRAM_PRIORITY;
+                }
+                else if (header.type == TYPE_PING)
+                {
+                    it->priority = PING_DATAGRAM_PRIORITY;
                 }
                 else
                 {
-                    int priority = params.importance;
-                    if (params.bump_priority_after.count() > 0 && now - dg->added >= params.bump_priority_after)
+                    if (now - it->sent < min_resend_duration)
                     {
-                        priority += 63; //bump it by half
+                        it->priority = DENY_PRIORITY;
                     }
+                    else
+                    {
+                        int priority = params.importance;
+                        if (params.bump_priority_after.count() > 0 && now - it->added >= params.bump_priority_after)
+                        {
+                            priority += 63; //bump it by half
+                        }
 
-                    dg->priority = priority;
-                }
-                auto& header = get_header<Header>(dg->data);
-                if (header.type == TYPE_PACKET_REPLY)
-                {
-                    dg->priority = MAX_PRIORITY;
+                        it->priority = priority;
+                    }
                 }
 
                 {
-                    auto const& best = *best_it;
-                    auto age0 = now - dg->sent;
-                    auto age1 = now - best->sent;
-                    if ((dg->priority > best->priority) || (dg->priority == best->priority && age0 > age1))
+                    auto age = now - it->sent;
+                    if ((it->priority > best_it->priority) || (it->priority == best_it->priority && age > best_age))
                     {
                         best_it = it;
+                        best_age = age;
                     }
                 }
                 ++it;
@@ -386,32 +399,41 @@ namespace util
                 QASSERT(0);
                 return;
             }
-            datagram->added = q::Clock::now();
+            TX::Send_Queue_Item item;
+            item.header = get_header<Header>(datagram->data);
+            item.added = q::Clock::now();
+            item.sent = q::Clock::time_point(q::Clock::duration{0});
+            item.priority = 0;
+            item.datagram = datagram;
+
+            auto const& hhh = get_header<Header>(datagram->data);
+            QASSERT(hhh.crc != 0);
+            QASSERT(item.header.crc != 0);
+
             //add to the queue
             {
                 std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
-                m_tx.send_queue.push_back(datagram);
+                m_tx.send_queue.push_back(item);
             }
             send_datagram();
         }
 
-        void update_stats(Stats& stats, TX::Datagram const& datagram)
+        void update_stats(Stats& stats, TX::Send_Queue_Item const& item)
         {
-            auto const& header = get_header<Header>(datagram.data);
             stats.tx_datagrams++;
-            stats.tx_resent_datagrams += datagram.sent.time_since_epoch().count() == 0 ? 0 : 1;
-            stats.tx_bytes += datagram.data.size();
-            if (header.type == TYPE_PACKET)
+            stats.tx_resent_datagrams += item.sent.time_since_epoch().count() == 0 ? 0 : 1;
+            stats.tx_bytes += item.datagram->data.size();
+            if (item.header.type == TYPE_PACKET)
             {
-                auto const& pheader = get_header<Packet_Header>(datagram.data);
+                auto const& pheader = get_header<Packet_Header>(item.datagram->data);
                 if (pheader.fragment_idx == 0)
                 {
                     stats.tx_packets++;
                 }
             }
-            if (header.type == TYPE_PING)
+            if (item.header.type == TYPE_PING)
             {
-                auto const& pheader = get_header<Ping_Header>(datagram.data);
+                auto const& pheader = get_header<Ping_Header>(item.datagram->data);
                 if (pheader.flag_is_pong == 0)
                 {
                     stats.tx_pongs++;
@@ -449,7 +471,7 @@ namespace util
                 return;
             }
 
-            TX::Datagram_ptr datagram;
+            TX::Send_Queue_Item* item_ptr = nullptr;
             {
                 std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
 
@@ -459,25 +481,32 @@ namespace util
                     return;
                 }
 
-                datagram = *it;
-                if (datagram->priority < MIN_PRIORITY)
+                auto& item = *it;
+                if (item.priority < MIN_PRIORITY)
                 {
                     return;
                 }
+                QASSERT(item.header.crc != 0);
 
                 //if the datagram is not reliable remove it from the queue. Otherwise leave it there to be resent
-                auto const& header = get_header<Header>(datagram->data);
-                if (!header.flag_is_reliable)
+                if (item.header.type != TYPE_PACKET || !item.header.flag_is_reliable)
                 {
                     pop_unordered(m_tx.send_queue, it);
                 }
+
+                item_ptr = &item;
             }
+            QASSERT(item_ptr);
+            auto const& datagram = item_ptr->datagram;
             QASSERT(datagram);
+            {
+                auto const& hhh = get_header<Header>(datagram->data);
+                QASSERT(hhh.crc != 0);
+            }
 
-            auto const& header = get_header<Header>(datagram->data);
-            update_stats(m_global_stats, *datagram);
+            update_stats(m_global_stats, *item_ptr);
 
-            datagram->sent = q::Clock::now();
+            item_ptr->sent = q::Clock::now();
 
 //            m_socket.async_send_to(boost::asio::buffer(datagram->data.data(), datagram->data.size()),
 //                                   m_destination,
@@ -489,6 +518,10 @@ namespace util
             //---test
             auto rx_datagram = m_rx.acquire_datagram(datagram->data.size());
             rx_datagram->data = datagram->data;
+            {
+                auto const& hhh = get_header<Header>(rx_datagram->data);
+                QASSERT(hhh.crc != 0);
+            }
             //process_incoming_datagram(rx_datagram);
             std::thread([this,rx_datagram]()
             {
@@ -699,9 +732,9 @@ namespace util
 
                 std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
                 m_tx.send_queue.erase(std::remove_if(m_tx.send_queue.begin(), m_tx.send_queue.end(),
-                        [id, channel_idx](const TX::Datagram_ptr& d)
+                        [id, channel_idx](const TX::Send_Queue_Item& item)
                         {
-                            auto const& hdr = get_header<Header>(d->data);
+                            auto const& hdr = item.header;
                             return (hdr.type != TYPE_PACKET_REPLY && hdr.id == id && hdr.channel_idx == channel_idx);
                         }), m_tx.send_queue.end());
 
@@ -722,12 +755,11 @@ namespace util
                 std::lock_guard<std::mutex> lg(m_tx.send_queue_mutex);
                 for (auto it = m_tx.send_queue.begin(); it != m_tx.send_queue.end(); ++it)
                 {
-                    auto const& d = (*it);
-                    auto const& hdr = get_header<Header>(d->data);
+                    auto const& hdr = it->header;
                     if (hdr.type != TYPE_PACKET_REPLY && hdr.id == id && hdr.channel_idx == channel_idx)
                     {
                         QASSERT(hdr.type == TYPE_PACKET);
-                        auto const& phdr = get_header<Packet_Header>(d->data);
+                        auto const& phdr = get_header<Packet_Header>(it->datagram->data);
                         if (phdr.fragment_idx == fragment_idx)
                         {
                             m_tx.send_queue.erase(it);
@@ -765,7 +797,7 @@ namespace util
                     auto it = std::find_if(m_ping.sent.begin(), m_ping.sent.end(), [id](Ping_Header const& p) { return p.id == id; });
                     if (it != m_ping.sent.end())
                     {
-                        auto rtt = now - m_init_time_point + std::chrono::milliseconds(it->time_point);
+                        auto rtt = now - m_init_time_point - std::chrono::milliseconds(it->time_point);
                         m_ping.rtts.push_back(std::make_pair(now, rtt));
                         m_ping.sent.erase(it);
                     }
@@ -795,7 +827,7 @@ namespace util
                 m_ping.rtt = total_rtt;
 
                 static q::Clock::time_point xxx = q::Clock::now();
-                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
+//                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
                 {
                     xxx = q::Clock::now();
                     SILK_INFO("RTT: {}", m_ping.rtt);
@@ -917,6 +949,7 @@ namespace util
     template<class T>
     inline bool RUDP::receive(uint8_t channel_idx, T& data)
     {
+        data.clear();
         if (channel_idx >= MAX_CHANNELS)
         {
             QASSERT(0);
@@ -999,7 +1032,7 @@ namespace util
                 }
                 QASSERT(packet->fragments[0]);
 
-                SILK_INFO("Received packet {}", id);
+                //SILK_INFO("Received packet {}", id);
 
                 m_rx.complete_queues[ch].push_back(std::move(packet));
                 q.erase(q.begin());

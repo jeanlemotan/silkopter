@@ -21,11 +21,13 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
     //q::logging::set_level(q::logging::Level::WARNING);
 
+    std::string ss;
+
     while(1)
     {
-        TIMED_SCOPE();
+//        TIMED_SCOPE();
         {
-            TIMED_SCOPE();
+//            TIMED_SCOPE();
             for (int i = 0; i < 1; i++)
             {
                 m_rudp.send(0, reinterpret_cast<uint8_t const*>(s.data()), s.size());
@@ -33,13 +35,13 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
         }
 
         {
-            TIMED_SCOPE();
-            std::string ss;
-            while (!m_rudp.receive(0, ss))
+//            TIMED_SCOPE();
+            do
             {
                 m_rudp.process();
-                //std::this_thread::yield();//sleep_for(std::chrono::microseconds(10));
+                std::this_thread::yield();//sleep_for(std::chrono::microseconds(10));
             }
+            while (!m_rudp.receive(0, ss));
         }
     }
 
