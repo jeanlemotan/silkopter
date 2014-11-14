@@ -43,8 +43,8 @@ namespace util
         enum Type
         {
             TYPE_PACKET             =   0,
-            TYPE_PACKETS_CONFIRMATION    =   1,
-            TYPE_PACKET_CANCEL      =   2,
+            TYPE_PACKETS_CONFIRMED  =   1,
+            TYPE_PACKETS_CANCELLED  =   2,
             TYPE_PING               =   3,
         };
 
@@ -71,14 +71,14 @@ namespace util
             uint32_t fragment_count : 8;
         };
 
-        struct Packets_Confirmation_Header : Header
+        struct Packets_Confirmed_Header : Header
         {
-            static const size_t MAX_CONFIRMATIONS = 20; //HAS to be smaller than MAX_CHANNELS as it's stored in the channel_idx field
+            static const size_t MAX_PACKED = 20; //HAS to be smaller than MAX_CHANNELS as it's stored in the channel_idx field
         };
 
-        struct Packet_Cancel_Header : Header
+        struct Packets_Cancelled_Header : Header
         {
-            uint8_t fragment_idx;
+            static const size_t MAX_PACKED = 20; //HAS to be smaller than MAX_CHANNELS as it's stored in the channel_idx field
         };
 
         struct Ping_Header : Header
@@ -124,8 +124,6 @@ namespace util
         static const int MIN_PRIORITY = -127;
         //special priorities
         static const int DENY_PRIORITY = -128;
-        static const int PACKETS_CONFIRM_DATAGRAM_PRIORITY = 126;
-        static const int PING_DATAGRAM_PRIORITY = 127;
 
         struct TX
         {
@@ -167,6 +165,7 @@ namespace util
             };
 
             Datagram_ptr confirmations;
+            Datagram_ptr cancellations;
 
             Send_Queue ping_queue;
             Send_Queue packet_comfirmation_queue;
@@ -281,7 +280,7 @@ namespace util
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(10);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(1000);
 
         size_t m_mtu = 1024;
         boost::asio::ip::udp::endpoint m_destination;
@@ -319,8 +318,8 @@ namespace util
                 auto const& pheader = get_header<Packet_Header>(data);
                 return (pheader.fragment_idx == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header);
             }
-            case Type::TYPE_PACKETS_CONFIRMATION: return sizeof(Packets_Confirmation_Header);
-            case Type::TYPE_PACKET_CANCEL: return sizeof(Packet_Cancel_Header);
+            case Type::TYPE_PACKETS_CONFIRMED: return sizeof(Packets_Confirmed_Header);
+            case Type::TYPE_PACKETS_CANCELLED: return sizeof(Packets_Cancelled_Header);
             case Type::TYPE_PING: return sizeof(Ping_Header);
             }
             QASSERT(0);
@@ -600,19 +599,17 @@ namespace util
 
         void send_all_confirmations()
         {
-            if (!m_tx.confirmations)
+            if (m_tx.confirmations)
             {
-                return;
-            }
-
-            auto& cheader = get_header<Packets_Confirmation_Header>(m_tx.confirmations->data);
-            if (cheader.channel_idx > 0)
-            {
-                cheader.id = ++m_last_id;
-                cheader.flag_is_reliable = false;
-                cheader.type = TYPE_PACKETS_CONFIRMATION;
-                add_and_send_datagram(m_tx.packet_comfirmation_queue, m_tx.confirmations);
-                m_tx.confirmations.reset();
+                auto& cheader = get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
+                if (cheader.channel_idx > 0)
+                {
+                    cheader.id = ++m_last_id;
+                    cheader.flag_is_reliable = false;
+                    cheader.type = TYPE_PACKETS_CONFIRMED;
+                    add_and_send_datagram(m_tx.packet_comfirmation_queue, m_tx.confirmations);
+                    m_tx.confirmations.reset();
+                }
             }
         }
 
@@ -620,16 +617,15 @@ namespace util
         {
             if (!m_tx.confirmations)
             {
-                m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmation_Header));
+                m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmed_Header));
             }
 
-            auto* cheader = &get_header<Packets_Confirmation_Header>(m_tx.confirmations->data);
-            if (cheader->channel_idx >= Packets_Confirmation_Header::MAX_CONFIRMATIONS)
+            auto* cheader = &get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
+            if (cheader->channel_idx >= Packets_Confirmed_Header::MAX_PACKED)
             {
                 send_all_confirmations();
-
-                m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmation_Header));
-                cheader = &get_header<Packets_Confirmation_Header>(m_tx.confirmations->data);
+                m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmed_Header));
+                cheader = &get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
             }
 
             cheader->channel_idx++;
@@ -645,21 +641,52 @@ namespace util
             *reinterpret_cast<uint32_t*>(data.data() + off) = (id << 8) | fragment_idx;
 
             {
-                uint32_t* conf = reinterpret_cast<uint32_t*>(data.data() + sizeof(Packets_Confirmation_Header));
+                uint32_t* conf = reinterpret_cast<uint32_t*>(data.data() + sizeof(Packets_Confirmed_Header));
                 auto id = *conf >> 8;
                 auto fidx = *conf & 0xFF;
             }
         }
-        void send_packet_cancel(Packet_Header const& header)
+        void send_all_cancellations()
         {
-            auto datagram = m_tx.acquire_datagram(sizeof(Packet_Cancel_Header));
-            auto& cheader = get_header<Packet_Cancel_Header>(datagram->data);
-            cheader.id = header.id;
-            cheader.channel_idx = header.channel_idx;
-            cheader.flag_is_reliable = false;
-            cheader.type = TYPE_PACKET_CANCEL;
-            cheader.fragment_idx = header.fragment_idx;
-            add_and_send_datagram(m_tx.packet_cancel_queue, datagram);
+            if (m_tx.cancellations)
+            {
+                auto& cheader = get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
+                if (cheader.channel_idx > 0)
+                {
+                    cheader.id = ++m_last_id;
+                    cheader.flag_is_reliable = false;
+                    cheader.type = TYPE_PACKETS_CANCELLED;
+                    add_and_send_datagram(m_tx.packet_comfirmation_queue, m_tx.cancellations);
+                    m_tx.cancellations.reset();
+                }
+            }
+        }
+
+        void add_packet_cancellation(Packet_Header const& header)
+        {
+            if (!m_tx.cancellations)
+            {
+                m_tx.cancellations = m_tx.acquire_datagram(sizeof(Packets_Cancelled_Header));
+            }
+
+            auto* cheader = &get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
+            if (cheader->channel_idx >= Packets_Cancelled_Header::MAX_PACKED)
+            {
+                send_all_cancellations();
+                m_tx.cancellations = m_tx.acquire_datagram(sizeof(Packets_Cancelled_Header));
+                cheader = &get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
+            }
+
+            cheader->channel_idx++;
+
+            auto& data = m_tx.cancellations->data;
+            auto off = data.size();
+            data.resize(data.size() + sizeof(uint32_t));
+            //AFTER this point, the header might be broken
+
+            uint32_t id = header.id;
+            QASSERT((reinterpret_cast<size_t>(data.data() + off) & 3) == 0);
+            *reinterpret_cast<uint32_t*>(data.data() + off) = id;
         }
 
         void send_packet_ping()
@@ -719,8 +746,8 @@ namespace util
             switch (header.type)
             {
             case Type::TYPE_PACKET: process_packet_datagram(datagram); break;
-            case Type::TYPE_PACKETS_CONFIRMATION: process_packets_confirmation_datagram(datagram); break;
-            case Type::TYPE_PACKET_CANCEL: process_packet_cancel_datagram(datagram); break;
+            case Type::TYPE_PACKETS_CONFIRMED: process_packets_confirmed_datagram(datagram); break;
+            case Type::TYPE_PACKETS_CANCELLED: process_packets_cancelled_datagram(datagram); break;
             case Type::TYPE_PING: process_ping_datagram(datagram); break;
             }
         }
@@ -741,7 +768,7 @@ namespace util
 
                 if (header.flag_is_reliable)
                 {
-                    send_packet_cancel(header);
+                    add_packet_cancellation(header);
                 }
 
                 m_rx.release_datagram(datagram);
@@ -779,18 +806,18 @@ namespace util
 
             //HH SILK_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
         }
-        void process_packets_confirmation_datagram(RX::Datagram_ptr& datagram)
+        void process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
         {
             QASSERT(datagram);
-            auto const& header = get_header<Packets_Confirmation_Header>(datagram->data);
+            auto const& header = get_header<Packets_Confirmed_Header>(datagram->data);
 
             auto count = header.channel_idx;
             QASSERT(count > 0);
 
-            QASSERT(datagram->data.size() == sizeof(Packets_Confirmation_Header) + sizeof(uint32_t)*count);
+            QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
 
             //first unpack the confirmations in an array
-            uint32_t* conf = reinterpret_cast<uint32_t*>(datagram->data.data() + sizeof(Packets_Confirmation_Header));
+            uint32_t* conf = reinterpret_cast<uint32_t*>(datagram->data.data() + sizeof(Packets_Confirmed_Header));
             uint32_t* conf_end = conf + count;
             auto id = *conf >> 8;
             auto fidx = *conf & 0xFF;
@@ -832,21 +859,32 @@ namespace util
 
             m_rx.release_datagram(datagram);
         }
-        void process_packet_cancel_datagram(RX::Datagram_ptr& datagram)
+        void process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
         {
             QASSERT(datagram);
-            auto const& header = get_header<Packet_Cancel_Header>(datagram->data);
+            auto const& header = get_header<Packets_Cancelled_Header>(datagram->data);
 
-            auto id = header.id;
-            auto channel_idx = header.channel_idx;
+            auto count = header.channel_idx;
+            QASSERT(count > 0);
+
+            QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
+
+            //first unpack the confirmations in an array
+            uint32_t* conf = reinterpret_cast<uint32_t*>(datagram->data.data() + sizeof(Packets_Confirmed_Header));
+            uint32_t* conf_end = conf + count;
+
+            //sort the confirmations ascending so we can search fast
+            std::sort(conf, conf_end);
+
             auto size_before = m_tx.packet_queue.datagrams.size();
 
             std::lock_guard<std::mutex> lg(m_tx.packet_queue.mutex);
             m_tx.packet_queue.datagrams.erase(std::remove_if(m_tx.packet_queue.datagrams.begin(), m_tx.packet_queue.datagrams.end(),
-                    [id, channel_idx](const TX::Datagram_ptr& d)
+                    [conf, conf_end](const TX::Datagram_ptr& d)
                     {
                         auto const& hdr = get_header<Header>(d->data);
-                        return (hdr.type != TYPE_PACKET_CANCEL && hdr.id == id && hdr.channel_idx == channel_idx);
+                        auto lb = std::lower_bound(conf, conf_end, hdr.id);
+                        return (hdr.type != TYPE_PACKETS_CANCELLED && lb != conf_end && *lb == hdr.id);
                     }), m_tx.packet_queue.datagrams.end());
 
             auto size_after = m_tx.packet_queue.datagrams.size();
@@ -855,7 +893,7 @@ namespace util
             {
                 m_global_stats.tx_cancelled_datagrams += size_before - size_after;
                 m_global_stats.tx_cancelled_packets ++;
-                SILK_INFO("Cancelling packet {}: {} fragments removed", id, size_before - size_after);
+                SILK_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
             }
 
             m_rx.release_datagram(datagram);
@@ -934,8 +972,8 @@ namespace util
         hsz =sizeof(Packet_Main_Header);
         hsz =sizeof(Packet_Header);
 
-        hsz =sizeof(Packets_Confirmation_Header);
-        static_assert(sizeof(Packets_Confirmation_Header) % sizeof(uint32_t) == 0, "Bad alignment");
+        hsz =sizeof(Packets_Confirmed_Header);
+        static_assert(sizeof(Packets_Confirmed_Header) % sizeof(uint32_t) == 0, "Bad alignment");
 
         hsz =sizeof(Ping_Header);
 
@@ -1078,6 +1116,7 @@ namespace util
         m_rx.incoming_queue.clear();
 
         send_all_confirmations();
+        send_all_cancellations();
 
         auto now = q::Clock::now();
 
