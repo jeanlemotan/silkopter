@@ -16,7 +16,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     util::RUDP::Send_Params params;
     //params.destination = ip::udp::endpoint(ip::address::from_string("127.0.0.1"), 22222);
     std::string s = "bubu mimi";
-    s = std::string(100000, 'x');
+    s = std::string(10000, 'x');
     m_rudp.start();
 
     //q::logging::set_level(q::logging::Level::WARNING);
@@ -25,7 +25,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
     while(1)
     {
-//        TIMED_SCOPE();
+        //TIMED_SCOPE();
         {
 //            TIMED_SCOPE();
             for (int i = 0; i < 1; i++)
@@ -42,6 +42,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
                 std::this_thread::yield();//sleep_for(std::chrono::microseconds(10));
             }
             while (!m_rudp.receive(0, ss));
+            QASSERT(ss == s);
         }
     }
 
