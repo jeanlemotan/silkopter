@@ -46,6 +46,7 @@ namespace util
             TYPE_PACKETS_CONFIRMED  =   1,
             TYPE_PACKETS_CANCELLED  =   2,
             TYPE_PING               =   3,
+            TYPE_PONG               =   4,
         };
 
         static const size_t MAX_CHANNELS = 32;
@@ -53,15 +54,15 @@ namespace util
 #pragma pack(push, 1)
         struct Header
         {
-            uint32_t id : 24;
-            uint32_t channel_idx : 5;
-            uint8_t flag_is_reliable : 1;
-            uint8_t type : 2;
+            uint8_t type : 4;
             uint32_t crc;
         };
 
         struct Packet_Header : Header
         {
+            uint32_t id : 24;
+            uint32_t channel_idx : 5;
+            uint32_t flag_is_reliable : 1;
             uint8_t fragment_idx;
         };
 
@@ -73,18 +74,26 @@ namespace util
 
         struct Packets_Confirmed_Header : Header
         {
-            static const size_t MAX_PACKED = 20; //HAS to be smaller than MAX_CHANNELS as it's stored in the channel_idx field
+            static const size_t MAX_PACKED = 20;
+            uint8_t count;
         };
 
         struct Packets_Cancelled_Header : Header
         {
-            static const size_t MAX_PACKED = 20; //HAS to be smaller than MAX_CHANNELS as it's stored in the channel_idx field
+            static const size_t MAX_PACKED = 20;
+            uint8_t count;
         };
 
         struct Ping_Header : Header
         {
             uint32_t time_point; //ms
-            uint8_t flag_is_pong : 1;
+            uint16_t seq;
+        };
+
+        struct Pong_Header : Header
+        {
+            uint32_t time_point; //ms
+            uint16_t seq;
         };
 
 #pragma pack(pop)
@@ -104,7 +113,7 @@ namespace util
                 std::lock_guard<std::mutex> lg(mutex);
                 if (!pool.empty())
                 {
-                    auto item = pool.back();
+                    auto item = std::move(pool.back());
                     pool.pop_back();
                     return item;
                 }
@@ -113,10 +122,10 @@ namespace util
                     return std::make_shared<T>();
                 }
             }
-            void release(std::shared_ptr<T> const& item)
+            void release(std::shared_ptr<T>&& item)
             {
                 std::lock_guard<std::mutex> lg(mutex);
-                pool.push_back(item);
+                pool.emplace_back(std::move(item));
             }
         };
 
@@ -149,27 +158,32 @@ namespace util
                 datagram->sent = q::Clock::time_point(q::Clock::duration{0});
                 return datagram;
             }
-            void release_datagram(Datagram_ptr& datagram)
+            void release_datagram(Datagram_ptr&& datagram)
             {
                 if (datagram)
                 {
-                    datagram_pool.release(datagram);
+                    datagram_pool.release(std::move(datagram));
                 }
                 datagram.reset();
             }
 
-            struct Send_Queue
-            {
-                std::vector<Datagram_ptr> datagrams;
-                std::mutex mutex;
-            };
-
+            std::mutex confirmatrions_mutex;
             Datagram_ptr confirmations;
+
+            std::mutex cancellations_mutex;
             Datagram_ptr cancellations;
 
-            Send_Queue ping_queue;
-            Send_Queue packet_comfirmation_queue;
-            Send_Queue packet_cancel_queue;
+            typedef std::vector<Datagram_ptr> Send_Queue;
+
+            struct Internal_Queues
+            {
+                std::mutex mutex;
+                Send_Queue ping;
+                Send_Queue packet_comfirmation;
+                Send_Queue packet_cancel;
+            } internal_queues;
+
+            std::mutex packet_queue_mutex;
             Send_Queue packet_queue;
         } m_tx;
 
@@ -191,11 +205,11 @@ namespace util
                 datagram->data.resize(data_size);
                 return datagram;
             }
-            void release_datagram(Datagram_ptr& datagram)
+            void release_datagram(Datagram_ptr&& datagram)
             {
                 if (datagram)
                 {
-                    datagram_pool.release(datagram);
+                    datagram_pool.release(std::move(datagram));
                 }
                 datagram.reset();
             }
@@ -221,34 +235,40 @@ namespace util
                 packet->added = q::Clock::now();
                 return packet;
             }
-            void release_packet(Packet_ptr& packet)
+            void release_packet(Packet_ptr&& packet)
             {
                 if (packet)
                 {
                     for (auto& f: packet->fragments)
                     {
-                        release_datagram(f);
+                        release_datagram(std::move(f));
                         f.reset();
                     }
-                    packet_pool.release(packet);
+                    packet_pool.release(std::move(packet));
                 }
                 packet.reset();
             }
 
+            struct Packet_Queue
+            {
+                std::map<uint32_t, Packet_ptr> packets;
+                std::mutex mutex;
+            };
+
             //waiting to be received
-            std::array<std::map<uint32_t, Packet_ptr>, MAX_CHANNELS> incomplete_queues;
-            std::array<std::deque<Packet_ptr>, MAX_CHANNELS> complete_queues;
+            std::array<Packet_Queue, MAX_CHANNELS> packet_queues;
             std::array<uint32_t, MAX_CHANNELS> last_packet_ids = {0};
         } m_rx;
 
         struct Ping
         {
+            uint16_t last_seq = 0;
             q::Clock::time_point last_time_point;
             std::vector<Ping_Header> sent;
             std::mutex sent_mutex;
 
             boost::circular_buffer<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
-            q::Clock::duration rtt;
+            q::Clock::duration rtt = q::Clock::duration{0};
         } m_ping;
 
 
@@ -282,7 +302,7 @@ namespace util
         std::atomic_bool m_is_sending = {false};
         const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(1000);
 
-        size_t m_mtu = 1024;
+        size_t m_mtu = 32;
         boost::asio::ip::udp::endpoint m_destination;
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
@@ -321,32 +341,39 @@ namespace util
             case Type::TYPE_PACKETS_CONFIRMED: return sizeof(Packets_Confirmed_Header);
             case Type::TYPE_PACKETS_CANCELLED: return sizeof(Packets_Cancelled_Header);
             case Type::TYPE_PING: return sizeof(Ping_Header);
+            case Type::TYPE_PONG: return sizeof(Pong_Header);
             }
             QASSERT(0);
             return 0;
         }
 
-        std::vector<TX::Datagram_ptr>::iterator process_packet_queue()
+        uint32_t compute_crc(uint8_t const* data, size_t size)
+        {
+            auto crc = q::util::compute_murmur_hash32(data, size);
+            //crc ^= (crc >> 28);
+            //crc &= 0xFFFFF;
+            return crc;
+        }
+
+        TX::Send_Queue::iterator process_packet_queue()
         {
 //            std::lock_guard<std::mutex> lg(m_tx.to_send_mutex);
 
             auto& queue = m_tx.packet_queue;
-            if (queue.datagrams.empty())
+            if (queue.empty())
             {
-                return queue.datagrams.end();
+                return queue.end();
             }
 
             auto now = q::Clock::now();
 
             auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt / 10);
 
-            auto best_it = queue.datagrams.begin();
+            auto best_it = queue.begin();
             auto best_age = now - (*best_it)->sent;
 
-            size_t replies = 0;
-
             //calculate priorities
-            for (auto it = queue.datagrams.begin(); it != queue.datagrams.end();)
+            for (auto it = queue.begin(); it != queue.end();)
             {
                 auto& datagram = *it;
                 auto const& params = datagram->params;
@@ -354,8 +381,8 @@ namespace util
                 //eliminate old datagrams
                 if (params.cancel_after.count() > 0 && now - datagram->added >= params.cancel_after)
                 {
-                    m_tx.release_datagram(datagram);
-                    queue.datagrams.erase(it);
+                    m_tx.release_datagram(std::move(datagram));
+                    erase_unordered(queue, it);
                     continue;
                 }
 
@@ -388,7 +415,29 @@ namespace util
             return best_it;
         }
 
-        void add_and_send_datagram(TX::Send_Queue& queue, TX::Datagram_ptr const& datagram)
+        void prepare_to_send_datagram(TX::Datagram& datagram)
+        {
+            auto& header = get_header<Header>(datagram.data);
+            auto crc = compute_crc(datagram.data.data(), datagram.data.size());
+            header.crc = crc;
+
+            datagram.added = q::Clock::now();
+            datagram.sent = q::Clock::time_point(q::Clock::duration{0});
+            datagram.priority = 0;
+
+//            if (header.crc == 0)
+//            {
+//                for (auto x: datagram->data)
+//                {
+//                    SILK_INFO("{}", x);
+//                }
+//                SILK_INFO("crc: {}/{}", crc, static_cast<int>(header.crc));
+//            }
+
+//            QASSERT_MSG(header.crc != 0, "{}", crc);
+        }
+
+        void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram)
         {
             if (!datagram)
             {
@@ -396,20 +445,12 @@ namespace util
                 return;
             }
 
-            auto& header = get_header<Header>(datagram->data);
-            auto crc = q::util::compute_murmur_hash32(datagram->data.data(), datagram->data.size());
-            header.crc = crc;
-
-            datagram->added = q::Clock::now();
-            datagram->sent = q::Clock::time_point(q::Clock::duration{0});
-            datagram->priority = 0;
-
-            QASSERT(header.crc != 0);
+            prepare_to_send_datagram(*datagram);
 
             //add to the queue
             {
-                std::lock_guard<std::mutex> lg(queue.mutex);
-                queue.datagrams.push_back(datagram);
+                std::lock_guard<std::mutex> lg(mutex);
+                queue.push_back(datagram);
             }
             send_datagram();
         }
@@ -429,28 +470,23 @@ namespace util
             }
             else if (header.type == TYPE_PING)
             {
-                auto const& pheader = get_header<Ping_Header>(datagram.data);
-                if (pheader.flag_is_pong == 0)
-                {
-                    stats.tx_pongs++;
-                }
-                else
-                {
-                    stats.tx_pings++;
-                }
+                stats.tx_pings++;
+            }
+            else if (header.type == TYPE_PONG)
+            {
+                stats.tx_pongs++;
             }
         }
 
         //to avoid popping front in vectors
         //Note - I use a vector instead of a deque because the deque is too slow at iterating.
         //The pop_front can be implemented optimally for vectors if order need not be preserved.
-        template<class T> static void pop_unordered(std::vector<T>& c, typename std::vector<T>::iterator it)
+        template<class T> static void erase_unordered(std::vector<T>& c, typename std::vector<T>::iterator it)
         {
             QASSERT(!c.empty());
-            if (c.size() == 1)
+            if (it + 1 == c.end())
             {
-                QASSERT(it == c.begin());
-                c.clear();
+                c.pop_back();
             }
             else
             {
@@ -469,36 +505,36 @@ namespace util
 
             TX::Datagram_ptr datagram;
 
-            //first try the pings
             {
-                auto& queue = m_tx.ping_queue;
-                std::lock_guard<std::mutex> lg(queue.mutex);
-                if (!queue.datagrams.empty())
+                std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
+                //first try the pings
                 {
-                    datagram = std::move(queue.datagrams.front());
-                    pop_unordered(queue.datagrams, queue.datagrams.begin());
+                    auto& queue = m_tx.internal_queues.ping;
+                    if (!queue.empty())
+                    {
+                        datagram = std::move(queue.front());
+                        erase_unordered(queue, queue.begin());
+                    }
                 }
-            }
-            //next the confirmations
-            if (!datagram)
-            {
-                auto& queue = m_tx.packet_comfirmation_queue;
-                std::lock_guard<std::mutex> lg(queue.mutex);
-                if (!queue.datagrams.empty())
+                //next the confirmations
+                if (!datagram)
                 {
-                    datagram = std::move(queue.datagrams.front());
-                    pop_unordered(queue.datagrams, queue.datagrams.begin());
+                    auto& queue = m_tx.internal_queues.packet_comfirmation;
+                    if (!queue.empty())
+                    {
+                        datagram = std::move(queue.front());
+                        erase_unordered(queue, queue.begin());
+                    }
                 }
-            }
-            //next the cancels
-            if (!datagram)
-            {
-                auto& queue = m_tx.packet_cancel_queue;
-                std::lock_guard<std::mutex> lg(queue.mutex);
-                if (!queue.datagrams.empty())
+                //next the cancels
+                if (!datagram)
                 {
-                    datagram = std::move(queue.datagrams.front());
-                    pop_unordered(queue.datagrams, queue.datagrams.begin());
+                    auto& queue = m_tx.internal_queues.packet_cancel;
+                    if (!queue.empty())
+                    {
+                        datagram = std::move(queue.front());
+                        erase_unordered(queue, queue.begin());
+                    }
                 }
             }
 
@@ -506,16 +542,16 @@ namespace util
             if (!datagram)
             {
                 auto& queue = m_tx.packet_queue;
-                std::lock_guard<std::mutex> lg(queue.mutex);
+                std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
                 auto it = process_packet_queue();
-                if (it != queue.datagrams.end() && (*it)->priority >= MIN_PRIORITY)
+                if (it != queue.end() && (*it)->priority >= MIN_PRIORITY)
                 {
                     //if the datagram is not reliable remove it from the queue. Otherwise leave it there to be resent
                     if (!(*it)->params.is_reliable)
                     {
                         datagram = std::move(*it);
-                        pop_unordered(m_tx.packet_queue.datagrams, it);
+                        erase_unordered(m_tx.packet_queue, it);
                     }
                     else
                     {
@@ -541,18 +577,14 @@ namespace util
 //                                   boost::asio::placeholders::error));
 
 
-            //m_tx.release_datagram(datagram);
 //            SILK_INFO("Sending datagram {}", static_cast<int>(get_header<Header>(datagram->data).id));
 
-            //process_incoming_datagram(rx_datagram);
             std::thread([this,datagram]()
             {
-                auto rx_datagram = m_rx.acquire_datagram(datagram->data.size());
-                rx_datagram->data = datagram->data;
 //                SILK_INFO("Receiving datagram {}", static_cast<int>(get_header<Header>(datagram->data).id));
-
-                std::lock_guard<std::mutex> lg(m_rx.incoming_queue_mutex);
-                m_rx.incoming_queue.push_back(rx_datagram);
+                QASSERT(datagram->data.size() <= m_rx.temp_buffer.size());
+                std::copy(datagram->data.begin(), datagram->data.end(), m_rx.temp_buffer.begin());
+                handle_receive(boost::system::error_code(), datagram->data.size());
                 handle_send(datagram, boost::system::error_code());
             }).detach();
         }
@@ -560,9 +592,10 @@ namespace util
         void handle_send(std::shared_ptr<TX::Datagram> datagram,
                          const boost::system::error_code& /*error*/)
         {
-            if (!datagram->params.is_reliable)
+            auto& header = get_header<Header>(datagram->data);
+            if (header.type != TYPE_PACKET || !datagram->params.is_reliable)
             {
-                m_tx.release_datagram(datagram);
+                m_tx.release_datagram(std::move(datagram));
             }
 
             m_is_sending = false;
@@ -587,27 +620,23 @@ namespace util
                     auto datagram = m_rx.acquire_datagram(bytes_transferred);
                     std::copy(m_rx.temp_buffer.begin(), m_rx.temp_buffer.begin() + bytes_transferred, datagram->data.begin());
 
-                    //add it to the queue. It will be processed laterz in the process function
-                    {
-                        std::lock_guard<std::mutex> lg(m_rx.incoming_queue_mutex);
-                        m_rx.incoming_queue.push_back(datagram);
-                    }
+                    process_incoming_datagram(datagram);
+                    QASSERT(datagram == nullptr);
                 }
-                start();
+                //start();
             }
         }
 
-        void send_all_confirmations()
+        void send_pending_confirmations()
         {
+            std::lock_guard<std::mutex> lg(m_tx.confirmatrions_mutex);
             if (m_tx.confirmations)
             {
                 auto& cheader = get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
-                if (cheader.channel_idx > 0)
+                if (cheader.count > 0)
                 {
-                    cheader.id = ++m_last_id;
-                    cheader.flag_is_reliable = false;
                     cheader.type = TYPE_PACKETS_CONFIRMED;
-                    add_and_send_datagram(m_tx.packet_comfirmation_queue, m_tx.confirmations);
+                    add_and_send_datagram(m_tx.internal_queues.packet_comfirmation, m_tx.internal_queues.mutex, m_tx.confirmations);
                     m_tx.confirmations.reset();
                 }
             }
@@ -615,48 +644,44 @@ namespace util
 
         void add_packet_confirmation(Packet_Header const& header)
         {
+            std::lock_guard<std::mutex> lg(m_tx.confirmatrions_mutex);
             if (!m_tx.confirmations)
             {
                 m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmed_Header));
             }
 
             auto* cheader = &get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
-            if (cheader->channel_idx >= Packets_Confirmed_Header::MAX_PACKED)
+            if (cheader->count >= Packets_Confirmed_Header::MAX_PACKED)
             {
-                send_all_confirmations();
+                cheader->type = TYPE_PACKETS_CONFIRMED;
+                add_and_send_datagram(m_tx.internal_queues.packet_comfirmation, m_tx.internal_queues.mutex, m_tx.confirmations);
+
                 m_tx.confirmations = m_tx.acquire_datagram(sizeof(Packets_Confirmed_Header));
                 cheader = &get_header<Packets_Confirmed_Header>(m_tx.confirmations->data);
             }
 
-            cheader->channel_idx++;
+            cheader->count++;
 
             auto& data = m_tx.confirmations->data;
             auto off = data.size();
-            data.resize(data.size() + sizeof(uint32_t));
+            data.resize(off + sizeof(uint32_t));
             //AFTER this point, the header might be broken
 
             uint32_t id = header.id;
             uint32_t fragment_idx = header.fragment_idx;
-            QASSERT((reinterpret_cast<size_t>(data.data() + off) & 3) == 0);
-            *reinterpret_cast<uint32_t*>(data.data() + off) = (id << 8) | fragment_idx;
-
-            {
-                uint32_t* conf = reinterpret_cast<uint32_t*>(data.data() + sizeof(Packets_Confirmed_Header));
-                auto id = *conf >> 8;
-                auto fidx = *conf & 0xFF;
-            }
+            uint32_t cd = (id << 8) | fragment_idx;
+            std::copy(reinterpret_cast<uint8_t*>(&cd), reinterpret_cast<uint8_t*>(&cd) + sizeof(uint32_t), data.data() + off);
         }
-        void send_all_cancellations()
+        void send_pending_cancellations()
         {
+            std::lock_guard<std::mutex> lg(m_tx.cancellations_mutex);
             if (m_tx.cancellations)
             {
                 auto& cheader = get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
-                if (cheader.channel_idx > 0)
+                if (cheader.count > 0)
                 {
-                    cheader.id = ++m_last_id;
-                    cheader.flag_is_reliable = false;
                     cheader.type = TYPE_PACKETS_CANCELLED;
-                    add_and_send_datagram(m_tx.packet_comfirmation_queue, m_tx.cancellations);
+                    add_and_send_datagram(m_tx.internal_queues.packet_cancel, m_tx.internal_queues.mutex, m_tx.cancellations);
                     m_tx.cancellations.reset();
                 }
             }
@@ -664,20 +689,23 @@ namespace util
 
         void add_packet_cancellation(Packet_Header const& header)
         {
+            std::lock_guard<std::mutex> lg(m_tx.cancellations_mutex);
             if (!m_tx.cancellations)
             {
                 m_tx.cancellations = m_tx.acquire_datagram(sizeof(Packets_Cancelled_Header));
             }
 
             auto* cheader = &get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
-            if (cheader->channel_idx >= Packets_Cancelled_Header::MAX_PACKED)
+            if (cheader->count >= Packets_Cancelled_Header::MAX_PACKED)
             {
-                send_all_cancellations();
+                cheader->type = TYPE_PACKETS_CANCELLED;
+                add_and_send_datagram(m_tx.internal_queues.packet_cancel, m_tx.internal_queues.mutex, m_tx.cancellations);
+
                 m_tx.cancellations = m_tx.acquire_datagram(sizeof(Packets_Cancelled_Header));
                 cheader = &get_header<Packets_Cancelled_Header>(m_tx.cancellations->data);
             }
 
-            cheader->channel_idx++;
+            cheader->count++;
 
             auto& data = m_tx.cancellations->data;
             auto off = data.size();
@@ -685,15 +713,14 @@ namespace util
             //AFTER this point, the header might be broken
 
             uint32_t id = header.id;
-            QASSERT((reinterpret_cast<size_t>(data.data() + off) & 3) == 0);
-            *reinterpret_cast<uint32_t*>(data.data() + off) = id;
+            std::copy(reinterpret_cast<uint8_t*>(&id), reinterpret_cast<uint8_t*>(&id) + sizeof(uint32_t), data.data() + off);
         }
 
         void send_packet_ping()
         {
             auto datagram = m_tx.acquire_datagram(sizeof(Ping_Header));
             auto& header = get_header<Ping_Header>(datagram->data);
-            header.id = ++m_last_id;
+            header.seq = ++m_ping.last_seq;
             header.type = TYPE_PING;
             header.time_point = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now() - m_init_time_point).count());
 
@@ -701,17 +728,16 @@ namespace util
                 std::lock_guard<std::mutex> lg(m_ping.sent_mutex);
                 m_ping.sent.push_back(header);
             }
-            add_and_send_datagram(m_tx.ping_queue, datagram);
+            add_and_send_datagram(m_tx.internal_queues.ping, m_tx.internal_queues.mutex, datagram);
         }
         void send_packet_pong(Ping_Header const& ping)
         {
-            auto datagram = m_tx.acquire_datagram(sizeof(Ping_Header));
-            auto& header = get_header<Ping_Header>(datagram->data);
-            header.id = ping.id;
-            header.type = TYPE_PING;
+            auto datagram = m_tx.acquire_datagram(sizeof(Pong_Header));
+            auto& header = get_header<Pong_Header>(datagram->data);
+            header.seq = ping.seq;
+            header.type = TYPE_PONG;
             header.time_point = ping.time_point;
-            header.flag_is_pong = true;
-            add_and_send_datagram(m_tx.ping_queue, datagram);
+            add_and_send_datagram(m_tx.internal_queues.ping, m_tx.internal_queues.mutex, datagram);
         }
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram)
@@ -721,7 +747,7 @@ namespace util
             if (h_size == 0)
             {
                 SILK_WARNING("Unknonw header.");
-                m_rx.release_datagram(datagram);
+                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -731,14 +757,14 @@ namespace util
 
             auto crc1 = header.crc;
             header.crc = 0;
-            auto crc2 = q::util::compute_murmur_hash32(datagram->data.data(), datagram->data.size());
+            auto crc2 = compute_crc(datagram->data.data(), datagram->data.size());
             if (crc1 != crc2)
             {
                 m_global_stats.rx_corrupted_datagrams++;
                 auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
 
                 SILK_WARNING("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
-                m_rx.release_datagram(datagram);
+                m_rx.release_datagram(std::move(datagram));
                 return;
             }
             m_global_stats.rx_good_datagrams++;
@@ -749,7 +775,10 @@ namespace util
             case Type::TYPE_PACKETS_CONFIRMED: process_packets_confirmed_datagram(datagram); break;
             case Type::TYPE_PACKETS_CANCELLED: process_packets_cancelled_datagram(datagram); break;
             case Type::TYPE_PING: process_ping_datagram(datagram); break;
+            case Type::TYPE_PONG: process_pong_datagram(datagram); break;
+            default: QASSERT(0); m_rx.release_datagram(std::move(datagram)); break;
             }
+            m_rx.release_datagram(std::move(datagram));
         }
 
         void process_packet_datagram(RX::Datagram_ptr& datagram)
@@ -771,7 +800,7 @@ namespace util
                     add_packet_cancellation(header);
                 }
 
-                m_rx.release_datagram(datagram);
+                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -780,8 +809,9 @@ namespace util
                 add_packet_confirmation(header);
             }
 
-            auto& queue = m_rx.incomplete_queues[ch];
-            auto& packet = queue[id];
+            auto& queue = m_rx.packet_queues[ch];
+            std::lock_guard<std::mutex> lg(queue.mutex);
+            auto& packet = queue.packets[id];
             if (!packet)
             {
                 packet = m_rx.acquire_packet();
@@ -792,7 +822,7 @@ namespace util
                 m_global_stats.rx_duplicated_datagrams++;
 
                 SILK_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
-                m_rx.release_datagram(datagram);
+                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -811,30 +841,32 @@ namespace util
             QASSERT(datagram);
             auto const& header = get_header<Packets_Confirmed_Header>(datagram->data);
 
-            auto count = header.channel_idx;
+            auto count = header.count;
             QASSERT(count > 0);
 
             QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
 
             //first unpack the confirmations in an array
-            uint32_t* conf = reinterpret_cast<uint32_t*>(datagram->data.data() + sizeof(Packets_Confirmed_Header));
-            uint32_t* conf_end = conf + count;
-            auto id = *conf >> 8;
-            auto fidx = *conf & 0xFF;
+            auto* src = datagram->data.data() + sizeof(Packets_Confirmed_Header);
+
+            std::array<uint32_t, Packets_Confirmed_Header::MAX_PACKED> conf;
+            std::copy(src, src + sizeof(uint32_t)*count, reinterpret_cast<uint8_t*>(conf.data()));
+            auto conf_end = conf.begin() + count;
 
             //sort the confirmations ascending so we can search fast
-            std::sort(conf, conf_end);
+            std::sort(conf.begin(), conf_end);
 
-            std::lock_guard<std::mutex> lg(m_tx.packet_queue.mutex);
-            auto size_before = m_tx.packet_queue.datagrams.size();
-            for (auto it = m_tx.packet_queue.datagrams.begin(); it != m_tx.packet_queue.datagrams.end();)
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            auto size_before = m_tx.packet_queue.size();
+            for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
             {
                 auto const& hdr = get_header<Packet_Header>((*it)->data);
                 uint32_t x = (hdr.id << 8) | hdr.fragment_idx;
-                auto lb = std::lower_bound(conf, conf_end, x);
+                auto lb = std::lower_bound(conf.begin(), conf_end, x);
                 if (lb != conf_end && *lb == x)
                 {
-                    m_tx.packet_queue.datagrams.erase(it);
+                    m_tx.release_datagram(std::move(*it));
+                    erase_unordered(m_tx.packet_queue, it);
                     count--;
                     if (count == 0)
                     {
@@ -849,7 +881,7 @@ namespace util
             }
 
 
-            auto size_after = m_tx.packet_queue.datagrams.size();
+            auto size_after = m_tx.packet_queue.size();
             QASSERT(size_before > size_after);
             if (size_before >= size_after)
             {
@@ -857,37 +889,40 @@ namespace util
                 //HH SILK_INFO("Confirming fragment {} for packet {}", fragment_idx, id);
             }
 
-            m_rx.release_datagram(datagram);
+            m_rx.release_datagram(std::move(datagram));
         }
         void process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
         {
             QASSERT(datagram);
             auto const& header = get_header<Packets_Cancelled_Header>(datagram->data);
 
-            auto count = header.channel_idx;
+            auto count = header.count;
             QASSERT(count > 0);
 
             QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
 
             //first unpack the confirmations in an array
-            uint32_t* conf = reinterpret_cast<uint32_t*>(datagram->data.data() + sizeof(Packets_Confirmed_Header));
-            uint32_t* conf_end = conf + count;
+            auto* src = datagram->data.data() + sizeof(Packets_Confirmed_Header);
+
+            std::array<uint32_t, Packets_Confirmed_Header::MAX_PACKED> conf;
+            std::copy(src, src + sizeof(uint32_t)*count, reinterpret_cast<uint8_t*>(conf.data()));
+            auto conf_end = conf.begin() + count;
 
             //sort the confirmations ascending so we can search fast
-            std::sort(conf, conf_end);
+            std::sort(conf.begin(), conf_end);
 
-            auto size_before = m_tx.packet_queue.datagrams.size();
+            auto size_before = m_tx.packet_queue.size();
 
-            std::lock_guard<std::mutex> lg(m_tx.packet_queue.mutex);
-            m_tx.packet_queue.datagrams.erase(std::remove_if(m_tx.packet_queue.datagrams.begin(), m_tx.packet_queue.datagrams.end(),
-                    [conf, conf_end](const TX::Datagram_ptr& d)
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            m_tx.packet_queue.erase(std::remove_if(m_tx.packet_queue.begin(), m_tx.packet_queue.end(),
+                    [&conf, &conf_end](const TX::Datagram_ptr& d)
                     {
-                        auto const& hdr = get_header<Header>(d->data);
-                        auto lb = std::lower_bound(conf, conf_end, hdr.id);
+                        auto const& hdr = get_header<Packet_Header>(d->data);
+                        auto lb = std::lower_bound(conf.begin(), conf_end, hdr.id);
                         return (hdr.type != TYPE_PACKETS_CANCELLED && lb != conf_end && *lb == hdr.id);
-                    }), m_tx.packet_queue.datagrams.end());
+                    }), m_tx.packet_queue.end());
 
-            auto size_after = m_tx.packet_queue.datagrams.size();
+            auto size_after = m_tx.packet_queue.size();
             QASSERT(size_before >= size_after);
             if (size_before > size_after)
             {
@@ -896,71 +931,72 @@ namespace util
                 SILK_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
             }
 
-            m_rx.release_datagram(datagram);
+            m_rx.release_datagram(std::move(datagram));
         }
         void process_ping_datagram(RX::Datagram_ptr& datagram)
         {
             QASSERT(datagram);
             auto& header = get_header<Ping_Header>(datagram->data);
 
-            if (header.flag_is_pong)
+            m_global_stats.rx_pings++;
+            send_packet_pong(header);
+
+            m_rx.release_datagram(std::move(datagram));
+        }
+        void process_pong_datagram(RX::Datagram_ptr& datagram)
+        {
+            QASSERT(datagram);
+            auto& header = get_header<Pong_Header>(datagram->data);
+
+            m_global_stats.rx_pongs++;
+
+            auto seq = header.seq;
+            auto now = q::Clock::now();
+
+            //find the ping and compute its rtt
             {
-                m_global_stats.rx_pongs++;
-
-                auto id = header.id;
-                auto now = q::Clock::now();
-
-                //find the ping and compute its rtt
+                std::lock_guard<std::mutex> lg(m_ping.sent_mutex);
+                auto it = std::find_if(m_ping.sent.begin(), m_ping.sent.end(), [seq](Ping_Header const& p) { return p.seq == seq; });
+                if (it != m_ping.sent.end())
                 {
-                    std::lock_guard<std::mutex> lg(m_ping.sent_mutex);
-                    auto it = std::find_if(m_ping.sent.begin(), m_ping.sent.end(), [id](Ping_Header const& p) { return p.id == id; });
-                    if (it != m_ping.sent.end())
-                    {
-                        auto rtt = now - m_init_time_point - std::chrono::milliseconds(it->time_point);
-                        m_ping.rtts.push_back(std::make_pair(now, rtt));
-                        m_ping.sent.erase(it);
-                        //SILK_INFO("good ping seq received: {}", id);
-                    }
-                    else
-                    {
-                        SILK_WARNING("invalid ping seq received: {}", id);
-                    }
+                    auto rtt = now - m_init_time_point - std::chrono::milliseconds(it->time_point);
+                    m_ping.rtts.push_back(std::make_pair(now, rtt));
+                    erase_unordered(m_ping.sent, it);
+                    //SILK_INFO("good ping seq received: {}", seq);
                 }
-
-                //calculate average rtt
-                q::Clock::duration total_rtt{0};
-                size_t total = 0;
-                for (auto it = m_ping.rtts.begin(); it != m_ping.rtts.end(); ++it)
+                else
                 {
-                    auto when = it->first;
-                    auto rtt = it->second;
-                    if (now - when < std::chrono::seconds(1))
-                    {
-                        total_rtt += rtt;
-                        total++;
-                    }
+                    SILK_WARNING("invalid ping seq received: {}", seq);
                 }
-                if (total > 0)
-                {
-                    total_rtt /= total;
-                }
-                m_ping.rtt = total_rtt;
+            }
 
-                static q::Clock::time_point xxx = q::Clock::now();
+            //calculate average rtt
+            q::Clock::duration total_rtt{0};
+            size_t total = 0;
+            for (auto it = m_ping.rtts.begin(); it != m_ping.rtts.end(); ++it)
+            {
+                auto when = it->first;
+                auto rtt = it->second;
+                if (now - when < std::chrono::seconds(1))
+                {
+                    total_rtt += rtt;
+                    total++;
+                }
+            }
+            if (total > 0)
+            {
+                total_rtt /= total;
+            }
+            m_ping.rtt = total_rtt;
+
+            static q::Clock::time_point xxx = q::Clock::now();
 //                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
-                {
-                    xxx = q::Clock::now();
-                    SILK_INFO("RTT: {}", m_ping.rtt);
-                }
-            }
-            else
             {
-                m_global_stats.rx_pings++;
-
-                send_packet_pong(header);
+                xxx = q::Clock::now();
+                SILK_INFO("RTT: {}", m_ping.rtt);
             }
 
-            m_rx.release_datagram(datagram);
+            m_rx.release_datagram(std::move(datagram));
         }
 
    };
@@ -973,8 +1009,6 @@ namespace util
         hsz =sizeof(Packet_Header);
 
         hsz =sizeof(Packets_Confirmed_Header);
-        static_assert(sizeof(Packets_Confirmed_Header) % sizeof(uint32_t) == 0, "Bad alignment");
-
         hsz =sizeof(Ping_Header);
 
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
@@ -1009,60 +1043,67 @@ namespace util
 
         size_t max_fragment_size = m_mtu;
         size_t left = size;
-        size_t fragment_count = ((size - 1) / m_mtu) + 1;
+        size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
         if (fragment_count > 255)
         {
             //SILK_WARNING("Too many fragments: {}. Ignoring mtu.", fragment_count);
             fragment_count = 255;
             max_fragment_size = ((size - 1) / fragment_count) + 1;
+            fragment_count = ((size - 1) / max_fragment_size) + 1;
         }
 
-        auto now = q::Clock::now();
+        //auto now = q::Clock::now();
 
-        auto id = ++m_last_id;
-        for (size_t i = 0; i < fragment_count; i++)
         {
-            QASSERT(left > 0);
-            auto fragment_size = math::min(max_fragment_size, left);
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
-            auto datagram_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header)) + fragment_size;
-            auto fragment = m_tx.acquire_datagram(datagram_size);
-
-            auto& params = m_send_params[channel_idx];
-            fragment->params = params;
-
-            size_t h_size = 0;
-            if (i == 0)
+            auto id = ++m_last_id;
+            for (size_t i = 0; i < fragment_count; i++)
             {
-                h_size = sizeof(Packet_Main_Header);
-                auto& f_header = get_header<Packet_Main_Header>(fragment->data);
-                f_header.packet_size = size;
-                f_header.fragment_count = fragment_count;
+                QASSERT(left > 0);
+                auto fragment_size = math::min(max_fragment_size, left);
+
+                auto datagram_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header)) + fragment_size;
+                auto fragment = m_tx.acquire_datagram(datagram_size);
+
+                auto& params = m_send_params[channel_idx];
+                fragment->params = params;
+
+                size_t h_size = 0;
+                if (i == 0)
+                {
+                    h_size = sizeof(Packet_Main_Header);
+                    auto& f_header = get_header<Packet_Main_Header>(fragment->data);
+                    f_header.packet_size = size;
+                    f_header.fragment_count = fragment_count;
+                }
+                else
+                {
+                    h_size = sizeof(Packet_Header);
+                    //auto& f_header = get_header<Packet_Header>(fragment->data);
+                }
+                QASSERT(h_size > 0);
+
+                fragment->data.resize(h_size + fragment_size);
+                std::copy(data, data + fragment_size, fragment->data.begin() + h_size);
+
+                auto& header = get_header<Packet_Header>(fragment->data);
+                header.id = id;
+                header.channel_idx = channel_idx;
+                header.flag_is_reliable = params.is_reliable;
+                header.type = TYPE_PACKET;
+                header.fragment_idx = i;
+
+                //HH SILK_INFO("Sending fragment {} for packet {}", header.fragment_idx, id);
+
+                data += fragment_size;
+                left -= fragment_size;
+
+                prepare_to_send_datagram(*fragment);
+                m_tx.packet_queue.push_back(fragment);
             }
-            else
-            {
-                h_size = sizeof(Packet_Header);
-                auto& f_header = get_header<Packet_Header>(fragment->data);
-            }
-            QASSERT(h_size > 0);
-
-            fragment->data.resize(h_size + fragment_size);
-            std::copy(data, data + fragment_size, fragment->data.begin() + h_size);
-
-            auto& header = get_header<Packet_Header>(fragment->data);
-            header.id = id;
-            header.channel_idx = channel_idx;
-            header.flag_is_reliable = params.is_reliable;
-            header.type = TYPE_PACKET;
-            header.fragment_idx = i;
-
-            //HH SILK_INFO("Sending fragment {} for packet {}", header.fragment_idx, id);
-
-            data += fragment_size;
-            left -= fragment_size;
-
-            add_and_send_datagram(m_tx.packet_queue, fragment);
         }
+
         send_datagram();
     }
 
@@ -1075,14 +1116,49 @@ namespace util
             QASSERT(0);
             return false;
         }
-        auto& q = m_rx.complete_queues[channel_idx];
-        if (q.empty())
+
+        auto& queue = m_rx.packet_queues[channel_idx];
+        std::lock_guard<std::mutex> lg(queue.mutex);
+        if (queue.packets.empty())
         {
             return false;
         }
-        auto& packet = q.front();
+        auto packet = queue.packets.begin()->second;
         QASSERT(packet);
 
+        auto id = packet->any_header.id;
+        QASSERT(id > 0);
+
+        auto now = q::Clock::now();
+
+        //no header yet or not all packages received?
+        if (!packet->fragments[0] || packet->received_fragment_count < packet->main_header.fragment_count)
+        {
+            auto const& params = m_receive_params[channel_idx];
+            auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
+            if (now - packet->added >= max_receive_time)
+            {
+                SILK_WARNING("Canceling packet {}", id);
+                add_packet_cancellation(packet->any_header);
+                send_pending_cancellations();
+                m_rx.release_packet(std::move(packet));
+                queue.packets.erase(queue.packets.begin());
+                m_rx.last_packet_ids[channel_idx] = id;
+                m_global_stats.rx_dropped_packets++;
+            }
+
+            //SILK_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+            return false;
+        }
+        QASSERT(packet->fragments[0]);
+
+        //SILK_INFO("Received packet {}", id);
+
+        queue.packets.erase(queue.packets.begin());
+        m_rx.last_packet_ids[channel_idx] = id;
+        m_global_stats.rx_packets++;
+
+        //copy the data
         auto const& main_header = packet->main_header;
         data.resize(main_header.packet_size);
         size_t off = 0;
@@ -1099,77 +1175,40 @@ namespace util
         }
         QASSERT(off == main_header.packet_size);
 
-        m_rx.release_packet(packet);
-        q.pop_front();
+        m_rx.release_packet(std::move(packet));
         return true;
     }
 
     inline void RUDP::process()
     {
-        std::lock_guard<std::mutex> lg(m_rx.incoming_queue_mutex);
-        //SILK_INFO("Processing {}", m_rx.incoming_queue.size());
-        for (auto& f: m_rx.incoming_queue)
-        {
-            process_incoming_datagram(f);
-            QASSERT(f == nullptr);
-        }
-        m_rx.incoming_queue.clear();
-
-        send_all_confirmations();
-        send_all_cancellations();
+        send_pending_confirmations();
+        send_pending_cancellations();
 
         auto now = q::Clock::now();
-
-        //process complete packages
-        {
-            for (size_t ch = 0; ch < m_rx.incomplete_queues.size(); ch++)
-            {
-                auto& q = m_rx.incomplete_queues[ch];
-                if (q.empty())
-                {
-                    continue;
-                }
-                auto& packet = q.begin()->second;
-                QASSERT(packet);
-
-                auto id = packet->any_header.id;
-                QASSERT(id > 0);
-
-                //no header yet or not all packages received?
-                if (!packet->fragments[0] ||
-                        packet->received_fragment_count < packet->main_header.fragment_count)
-                {
-//                    auto const& params = m_receive_params[ch];
-//                    auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
-//                    if (now - packet->added >= max_receive_time)
-//                    {
-//                        SILK_WARNING("Canceling packet {}", id);
-//                        send_packet_reply_cancel(packet->any_header);
-//                        m_rx.release_packet(packet);
-//                        q.erase(q.begin());
-//                        m_rx.last_packet_ids[ch] = id;
-//                        m_global_stats.rx_dropped_packets++;
-//                    }
-
-                    //SILK_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
-                    continue;
-                }
-                QASSERT(packet->fragments[0]);
-
-                //SILK_INFO("Received packet {}", id);
-
-                m_rx.complete_queues[ch].push_back(std::move(packet));
-                q.erase(q.begin());
-                m_rx.last_packet_ids[ch] = id;
-                m_global_stats.rx_packets++;
-            }
-        }
-
         if (now - m_ping.last_time_point > std::chrono::milliseconds(100))
         {
             m_ping.last_time_point = now;
             send_packet_ping();
         }
+    }
+
+    inline void RUDP::set_send_params(uint8_t channel_idx, Send_Params const& params)
+    {
+        if (channel_idx >= MAX_CHANNELS)
+        {
+            QASSERT(0);
+            return;
+        }
+        m_send_params[channel_idx] = params;
+    }
+    inline void RUDP::set_receive_params(uint8_t channel_idx, Receive_Params const& params)
+    {
+        if (channel_idx >= MAX_CHANNELS)
+        {
+            QASSERT(0);
+            return;
+        }
+        m_receive_params[channel_idx] = params;
     }
 
 }

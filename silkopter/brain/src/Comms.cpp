@@ -15,31 +15,38 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 {
     util::RUDP::Send_Params params;
     //params.destination = ip::udp::endpoint(ip::address::from_string("127.0.0.1"), 22222);
+    params.is_reliable = true;
+    m_rudp.set_send_params(0, params);
+
     std::string s = "bubu mimi";
-    s = std::string(10000, 'x');
+    s = std::string(8200, 'x');
     m_rudp.start();
 
     //q::logging::set_level(q::logging::Level::WARNING);
 
     std::string ss;
 
-    while(1)
+#ifdef NDEBUG
+    printf("XXXXXXXXXXXXXXXX");
+#endif
+
     {
-        //TIMED_SCOPE();
+        TIMED_SCOPE();
+        size_t count = 1000;
+        SILK_INFO("sending");
+        for (size_t i = 0; i < count; i++)
         {
-//            TIMED_SCOPE();
             for (int i = 0; i < 1; i++)
             {
                 m_rudp.send(0, reinterpret_cast<uint8_t const*>(s.data()), s.size());
             }
-        }
+            m_rudp.process();
 
-        {
-//            TIMED_SCOPE();
             do
             {
                 m_rudp.process();
-                std::this_thread::yield();//sleep_for(std::chrono::microseconds(10));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                std::this_thread::yield();
             }
             while (!m_rudp.receive(0, ss));
             QASSERT(ss == s);

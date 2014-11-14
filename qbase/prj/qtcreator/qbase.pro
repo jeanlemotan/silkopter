@@ -17,12 +17,14 @@ rpi {
         DEST_FOLDER = rpi/debug
     } else {
         DEST_FOLDER = rpi/release
+        DEFINES += NDEBUG
     }
 } else {
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
     } else {
         DEST_FOLDER = pc/release
+        DEFINES += NDEBUG
     }
 }
 
