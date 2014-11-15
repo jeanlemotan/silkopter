@@ -7,9 +7,6 @@ namespace detail
 
     enum class Comm_Message : uint16_t
     {
-        PING,
-        PONG,
-        
         //------------------------
         CAMERA_INPUT,
         UAV_INPUT,

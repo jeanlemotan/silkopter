@@ -22,7 +22,7 @@ public:
         FAILED,
     };
 
-    auto connect(boost::asio::ip::address const& address, uint16_t port) -> Result;
+    auto start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> Result;
     void disconnect();
 
     auto is_connected() const -> bool;
@@ -37,13 +37,13 @@ public:
     template<typename... Params>
     void send_camera_input(camera_input::Input input, Params&&... params)
     {
-        m_channel.send(detail::Comm_Message::CAMERA_INPUT, input, params...);
+        m_channel.pack(detail::Comm_Message::CAMERA_INPUT, input, params...);
     }
 
     template<typename... Params>
     void send_uav_input(uav_input::Input input, Params&&... params)
     {
-        m_channel.send(detail::Comm_Message::UAV_INPUT, input, params...);
+        m_channel.pack(detail::Comm_Message::UAV_INPUT, input, params...);
     }
 
 
@@ -126,27 +126,20 @@ public:
 
 private:
     boost::asio::io_service& m_io_service;
-    uint16_t m_port = 0;
 
-    boost::asio::ip::tcp::socket m_socket;
-    boost::asio::ip::tcp::endpoint m_remote_endpoint;
+    boost::asio::ip::udp::socket m_send_socket;
+    boost::asio::ip::udp::socket m_receive_socket;
+    boost::asio::ip::udp::endpoint m_remote_endpoint;
 
-    typedef util::Channel<detail::Comm_Message,
-                        uint32_t,
-                        boost::asio::ip::tcp::socket> Channel;
+    typedef util::Channel<detail::Comm_Message, uint16_t> Channel;
 
+    util::RUDP m_rudp;
     mutable Channel m_channel;
     q::Clock::time_point m_timeout_started;
 
     Manual_Clock m_remote_clock;
 
     size_t m_error_count = 0;
-
-    void handle_connect(const boost::system::error_code& error);
-
-
-    void process_message_ping();
-    void process_message_pong();
 
     template<class SAMPLE_T>
     auto unpack_sensor_sample(SAMPLE_T& sample) -> bool;
@@ -195,14 +188,6 @@ private:
         math::vec3f velocity_w;
         math::vec3f position_w;
     } m_uav;
-
-    struct Ping
-    {
-        uint32_t seq = 0;
-        std::map<uint32_t, q::Clock::time_point> seq_sent;
-        boost::circular_buffer<q::Clock::duration> rtts;
-        q::Clock::time_point last_time_point;
-    } m_ping;
 };
 
 }

@@ -92,7 +92,9 @@ int main(int argc, char const* argv[])
 //        }
 //    }
 
-    uint16_t comm_port = 52524;
+    uint16_t send_port = 52520;
+    uint16_t receive_port = 52521;
+
     uint16_t stream_port = 52525;
 
     try
@@ -108,7 +110,7 @@ int main(int argc, char const* argv[])
         silk::UAV uav(hal);
         silk::Comms comms(io_service, hal, uav);
         //start listening for a remote system
-        if (!comms.start_listening(comm_port))
+        if (!comms.start(send_port, receive_port))
         {
             SILK_ERR("Cannot start communication channel! Aborting");
             abort();
@@ -125,17 +127,17 @@ int main(int argc, char const* argv[])
         {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
             SILK_INFO("Waiting for comms to connect...");
-            if (comms.is_connected() && !streamer.is_started())
+            if (comms.is_connected()/* && !streamer.is_started()*/)
             {
-                if (!streamer.start(comms.get_remote_address(), stream_port))
-                {
-#if defined RASPBERRY_PI
-                    SILK_ERR("Video Server failed to start! Aborting");
-                    abort();
-#else
-                    //in simulation mode, the video server is allowed to fail because of UDP
-#endif
-                }
+//                if (!streamer.start(comms.get_remote_address(), stream_port))
+//                {
+//#if defined RASPBERRY_PI
+//                    SILK_ERR("Video Server failed to start! Aborting");
+//                    abort();
+//#else
+//                    //in simulation mode, the video server is allowed to fail because of UDP
+//#endif
+//                }
                 break;
             }
         }
@@ -144,14 +146,14 @@ int main(int argc, char const* argv[])
 
         while (true)
         {
-#if defined RASPBERRY_PI
-            if (comms.is_connected() && !streamer.is_started())
-            {
-                streamer.start(comms.get_remote_address(), stream_port);
-            }
-#else
-            //in simulation mode, the video server is allowed to fail because of UDP
-#endif
+//#if defined RASPBERRY_PI
+//            if (comms.is_connected() && !streamer.is_started())
+//            {
+//                streamer.start(comms.get_remote_address(), stream_port);
+//            }
+//#else
+//            //in simulation mode, the video server is allowed to fail because of UDP
+//#endif
 
             comms.process();
             streamer.process();
@@ -166,7 +168,6 @@ int main(int argc, char const* argv[])
         SILK_INFO("Stopping everything");
 
         streamer.stop();
-        comms.disconnect();
     }
     catch (std::exception const& e)
     {

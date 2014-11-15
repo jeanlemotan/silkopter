@@ -4,58 +4,69 @@
 using namespace silk;
 using namespace boost::asio;
 
+constexpr uint8_t COMMS_CHANNEL = 12;
+
+
 Comms::Comms(boost::asio::io_service& io_service)
     : m_io_service(io_service)
-    , m_socket(io_service)
-    , m_channel(m_socket)
+    , m_send_socket(io_service)
+    , m_receive_socket(io_service)
+    , m_rudp(m_send_socket, m_receive_socket)
+    , m_channel(m_rudp)
 {
-    m_ping.last_time_point = q::Clock::now();
+    util::RUDP::Send_Params sparams;
+    sparams.is_reliable = true;
+    sparams.is_compressed = true;
+    sparams.importance = 127;
+    m_rudp.set_send_params(COMMS_CHANNEL, sparams);
 
-    m_ping.rtts.set_capacity(100);
+    util::RUDP::Receive_Params rparams;
+    rparams.max_receive_time = std::chrono::seconds(999999);
+    m_rudp.set_receive_params(COMMS_CHANNEL, rparams);
 }
 
-auto Comms::connect(boost::asio::ip::address const& address, uint16_t port) -> Result
+auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> Result
 {
     try
     {
-        SILK_INFO("Trying to connect to {}:{}", address.to_string(), port);
+        m_send_socket.open(ip::udp::v4());
+        m_send_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_send_socket.set_option(socket_base::broadcast(true));
+        m_send_socket.set_option(socket_base::send_buffer_size(1024));
+        m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
+        //m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
+        m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address_v4::broadcast(), send_port));
 
-        m_remote_endpoint = ip::tcp::endpoint(address, port);
-        m_socket.async_connect(m_remote_endpoint,
-                              boost::bind(&Comms::handle_connect, this,
-                              placeholders::error));
+        m_receive_socket.open(ip::udp::v4());
+        m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_receive_socket.set_option(socket_base::receive_buffer_size(1024));
+        m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
+        m_rudp.set_receive_endpoint(ip::udp::endpoint(ip::address_v4::any(), receive_port));
+
+        m_rudp.start();
+
+        SILK_INFO("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
     catch(...)
     {
-        m_socket.close();
+        m_send_socket.close();
+        m_receive_socket.close();
         SILK_WARNING("Connect failed");
         return Result::FAILED;
     }
 
     return Result::OK;
 }
-void Comms::handle_connect(const boost::system::error_code& error)
-{
-    if (!error)
-    {
-        SILK_INFO("Connected to {}:{}", m_remote_endpoint.address().to_string(), m_remote_endpoint.port());
-        m_channel.start();
-    }
-    else
-    {
-        m_socket.close();
-        SILK_WARNING("Failed to connect to {}:{} - {}", m_remote_endpoint.address().to_string(), m_remote_endpoint.port(), error.message());
-    }
-}
 
 void Comms::disconnect()
 {
-    m_socket.close();
+    m_send_socket.close();
+    m_receive_socket.close();
 }
 
 auto Comms::is_connected() const -> bool
 {
-    return m_socket.is_open();
+    return m_send_socket.is_open() && m_receive_socket.is_open();
 }
 
 auto Comms::get_remote_address() const -> boost::asio::ip::address
@@ -130,67 +141,67 @@ auto Comms::get_uav_position_w() const -> math::vec3f const&
 
 void Comms::set_yaw_rate_pid_params(Yaw_Rate_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::YAW_RATE_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::YAW_RATE_PID_PARAMS, params);
 }
 void Comms::request_yaw_rate_pid_params()
 {
-    m_channel.send(detail::Comm_Message::YAW_RATE_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::YAW_RATE_PID_PARAMS);
 }
 void Comms::set_pitch_rate_pid_params(Pitch_Rate_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::PITCH_RATE_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::PITCH_RATE_PID_PARAMS, params);
 }
 void Comms::request_pitch_rate_pid_params()
 {
-    m_channel.send(detail::Comm_Message::PITCH_RATE_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::PITCH_RATE_PID_PARAMS);
 }
 void Comms::set_roll_rate_pid_params(Roll_Rate_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::ROLL_RATE_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::ROLL_RATE_PID_PARAMS, params);
 }
 void Comms::request_roll_rate_pid_params()
 {
-    m_channel.send(detail::Comm_Message::ROLL_RATE_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::ROLL_RATE_PID_PARAMS);
 }
 void Comms::set_altitude_rate_pid_params(Altitude_Rate_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS, params);
 }
 void Comms::request_altitude_rate_pid_params()
 {
-    m_channel.send(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS);
 }
 void Comms::set_yaw_pid_params(Yaw_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::YAW_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::YAW_PID_PARAMS, params);
 }
 void Comms::request_yaw_pid_params()
 {
-    m_channel.send(detail::Comm_Message::YAW_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::YAW_PID_PARAMS);
 }
 void Comms::set_pitch_pid_params(Pitch_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::PITCH_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::PITCH_PID_PARAMS, params);
 }
 void Comms::request_pitch_pid_params()
 {
-    m_channel.send(detail::Comm_Message::PITCH_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::PITCH_PID_PARAMS);
 }
 void Comms::set_roll_pid_params(Roll_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::ROLL_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::ROLL_PID_PARAMS, params);
 }
 void Comms::request_roll_pid_params()
 {
-    m_channel.send(detail::Comm_Message::ROLL_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::ROLL_PID_PARAMS);
 }
 void Comms::set_altitude_pid_params(Altitude_PID::Params const& params)
 {
-    m_channel.send(detail::Comm_Message::ALTITUDE_PID_PARAMS, params);
+    m_channel.pack(detail::Comm_Message::ALTITUDE_PID_PARAMS, params);
 }
 void Comms::request_altitude_pid_params()
 {
-    m_channel.send(detail::Comm_Message::ALTITUDE_PID_PARAMS);
+    m_channel.pack(detail::Comm_Message::ALTITUDE_PID_PARAMS);
 }
 
 void Comms::process_message_sensors()
@@ -241,6 +252,10 @@ void Comms::process_message_sensors()
     }
 
     m_channel.end_unpack();
+
+    static int xxx = 0;
+    xxx++;
+    SILK_INFO("SS: {}", xxx);
 
     if (!res)
     {
@@ -363,48 +378,6 @@ void Comms::process_message_altitude_pid_params()
     altitude_pid_params_received.execute(params);
 }
 
-void Comms::process_message_ping()
-{
-    Manual_Clock::rep remote_now = 0;
-    uint32_t seq = 0;
-    if (!m_channel.unpack(remote_now, seq))
-    {
-        SILK_WARNING("Failed to unpack ping");
-        return;
-    }
-
-    m_channel.send(detail::Comm_Message::PONG, seq);
-    m_channel.flush();
-
-    if (remote_now < m_remote_clock.now().time_since_epoch().count())
-    {
-        SILK_WARNING("Setting remote time in the past!!!");
-    }
-    m_remote_clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(remote_now)));
-    //SILK_INFO("Remote Clock set to {}", m_remote_clock.now());
-}
-void Comms::process_message_pong()
-{
-    uint32_t seq = 0;
-    if (!m_channel.unpack(seq))
-    {
-        SILK_WARNING("Failed to unpack pong");
-        return;
-    }
-
-    auto it = m_ping.seq_sent.find(seq);
-    if (it != m_ping.seq_sent.end())
-    {
-        auto rtt = q::Clock::now() - it->second;
-        m_ping.rtts.push_back(rtt);
-        m_ping.seq_sent.erase(it);
-    }
-    else
-    {
-        SILK_WARNING("invalid ping seq received: {}", seq);
-    }
-}
-
 void Comms::process_message_uav_rotation_l2w()
 {
     if (!m_channel.unpack_param(m_uav.rotation_l2w))
@@ -440,30 +413,30 @@ void Comms::process_message_uav_position_w()
 
 void Comms::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_ACCELEROMETER, bias, scale);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_ACCELEROMETER, bias, scale);
 }
 
 void Comms::request_accelerometer_calibration_data() const
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_ACCELEROMETER);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_ACCELEROMETER);
 }
 
 void Comms::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_GYROSCOPE, bias);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_GYROSCOPE, bias);
 }
 void Comms::request_gyroscope_calibration_data() const
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_GYROSCOPE);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_GYROSCOPE);
 }
 
 void Comms::set_compass_calibration_data(math::vec3f const& bias)
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_COMPASS, bias);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_COMPASS, bias);
 }
 void Comms::request_compass_calibration_data() const
 {
-    m_channel.send(detail::Comm_Message::CALIBRATION_COMPASS);
+    m_channel.pack(detail::Comm_Message::CALIBRATION_COMPASS);
 }
 
 void Comms::process()
@@ -473,7 +446,11 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_channel.get_next_message())
+    static int xxx = 0;
+    xxx++;
+    SILK_INFO("LOOP: {}", xxx);
+
+    while (auto msg = m_channel.get_next_message(COMMS_CHANNEL))
     {
         switch (msg.get())
         {
@@ -489,9 +466,6 @@ void Comms::process()
             case detail::Comm_Message::ROLL_PID_PARAMS: process_message_roll_pid_params(); break;
             case detail::Comm_Message::ALTITUDE_PID_PARAMS: process_message_altitude_pid_params(); break;
 
-            case detail::Comm_Message::PING:  process_message_ping(); break;
-            case detail::Comm_Message::PONG:  process_message_pong(); break;
-
             case detail::Comm_Message::CALIBRATION_ACCELEROMETER:  process_message_calibration_accelerometer(); break;
             case detail::Comm_Message::CALIBRATION_GYROSCOPE:  process_message_calibration_gyroscope(); break;
             case detail::Comm_Message::CALIBRATION_COMPASS:  process_message_calibration_compass(); break;
@@ -506,31 +480,10 @@ void Comms::process()
             break;
         }
     }
+//    SILK_INFO("*********** LOOP: {}", xxx);
 
-    auto now = q::Clock::now();
-    if (now - m_ping.last_time_point >= std::chrono::milliseconds(100))
-    {
-        m_ping.last_time_point = now;
-
-        if (m_ping.seq_sent.size() > 1000)
-        {
-            std::chrono::seconds max_d(1);
-            for (auto it = m_ping.seq_sent.begin(); it != m_ping.seq_sent.end(); )
-            {
-                if (now - it->second > max_d)
-                {
-                    it = m_ping.seq_sent.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-        }
-        m_ping.seq_sent[m_ping.seq] = now;
-        m_channel.send(detail::Comm_Message::PING, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
-        m_ping.seq++;
-    }
+    m_rudp.process();
+    m_channel.send(COMMS_CHANNEL);
 }
 
 

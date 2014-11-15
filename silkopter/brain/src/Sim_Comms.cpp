@@ -6,10 +6,14 @@
 using namespace silk;
 using namespace boost::asio;
 
+constexpr uint8_t SIM_COMMS_CHANNEL = 13;
+
 Sim_Comms::Sim_Comms(io_service& io_service)
-    : m_io_service(io_service)
-    , m_socket(io_service)
-    , m_channel(m_socket)
+//    : m_io_service(io_service)
+    : m_send_socket(io_service)
+    , m_receive_socket(io_service)
+    , m_rudp(m_send_socket, m_receive_socket)
+    , m_channel(m_rudp)
 {
 }
 
@@ -20,48 +24,47 @@ auto Sim_Comms::connect() -> bool
         return true;
     }
 
-    uint16_t port = 52523;
-    try
-    {
-        m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::v4());
-        m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
-        m_acceptor->bind(ip::tcp::endpoint(ip::tcp::v4(), port));
-        m_acceptor->listen();
+//    uint16_t port = 52523;
+//    try
+//    {
+//        m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::v4());
+//        m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
+//        m_acceptor->bind(ip::tcp::endpoint(ip::tcp::v4(), port));
+//        m_acceptor->listen();
 
-        m_acceptor->async_accept(m_socket, boost::bind(&Sim_Comms::handle_accept, this, boost::asio::placeholders::error));
-    }
-    catch(...)
-    {
-        SILK_WARNING("Cannot start listening on port {}", port);
-        return false;
-    }
+//        m_acceptor->async_accept(m_socket, boost::bind(&Sim_Comms::handle_accept, this, boost::asio::placeholders::error));
+//    }
+//    catch(...)
+//    {
+//        SILK_WARNING("Cannot start listening on port {}", port);
+//        return false;
+//    }
 
-    SILK_INFO("Started listening on port {}", port);
-    while (!m_socket.is_open())
-    {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-        SILK_INFO("Waiting for sim to connect");
-    }
+//    SILK_INFO("Started listening on port {}", port);
+//    while (!m_socket.is_open())
+//    {
+//        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+//        SILK_INFO("Waiting for sim to connect");
+//    }
 
     set_state(State::HANDSHAKE);
     return true;
 }
 
-void Sim_Comms::handle_accept(boost::system::error_code const& error)
-{
-    if (error)
-    {
-        SILK_WARNING("Error occured while accepting connection: {}", error.message());
-        return;
-    }
+//void Sim_Comms::handle_accept(boost::system::error_code const& error)
+//{
+//    if (error)
+//    {
+//        SILK_WARNING("Error occured while accepting connection: {}", error.message());
+//        return;
+//    }
 
-    m_channel.start();
-    SILK_INFO("Connected to {}:{}", m_socket.remote_endpoint().address().to_string(), m_socket.remote_endpoint().port());
-}
+//    m_channel.start();
+//    SILK_INFO("Connected to {}:{}", m_socket.remote_endpoint().address().to_string(), m_socket.remote_endpoint().port());
+//}
 
 void Sim_Comms::disconnect()
 {
-    m_acceptor.reset();
     set_state(State::DISCONNECTED);
 }
 bool Sim_Comms::is_connected() const
@@ -121,10 +124,10 @@ size_t Sim_Comms::get_error_count() const
 
 void Sim_Comms::process()
 {
-    if (!m_socket.is_open())
-    {
-        disconnect();
-    }
+//    if (!m_socket.is_open())
+//    {
+//        disconnect();
+//    }
 
     if (!is_connected())
     {
@@ -134,7 +137,7 @@ void Sim_Comms::process()
 
     do
     {
-        m_has_message = m_channel.get_next_message(m_message);
+        m_has_message = m_channel.get_next_message(SIM_COMMS_CHANNEL, m_message);
         if (m_has_message)
         {
             m_message_count++;

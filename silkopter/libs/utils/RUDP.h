@@ -16,10 +16,17 @@ namespace util
     public:
         typedef boost::asio::ip::udp::socket Socket_t;
 
-        RUDP(Socket_t& socket);
+        RUDP(Socket_t& send_socket, Socket_t& receive_socket);
 
         void set_mtu(size_t mtu);
-        void set_destination(boost::asio::ip::udp::endpoint destination);
+        void set_send_endpoint(boost::asio::ip::udp::endpoint endpoint)
+        {
+            m_tx.endpoint = endpoint;
+        }
+        void set_receive_endpoint(boost::asio::ip::udp::endpoint endpoint)
+        {
+            m_rx.endpoint = endpoint;
+        }
 
         void start();
 
@@ -106,7 +113,8 @@ namespace util
 
 #pragma pack(pop)
 
-        Socket_t& m_socket;
+        Socket_t& m_send_socket;
+        Socket_t& m_receive_socket;
 
         typedef std::vector<uint8_t> Buffer_t;
 
@@ -142,6 +150,7 @@ namespace util
 
         struct TX
         {
+            boost::asio::ip::udp::endpoint endpoint;
             std::vector<uint8_t> compression_buffer;
 
             struct Datagram
@@ -195,9 +204,10 @@ namespace util
 
         struct RX
         {
+            boost::asio::ip::udp::endpoint endpoint;
             std::vector<uint8_t> compression_buffer;
 
-            std::array<uint8_t, 32768> temp_buffer;
+            std::vector<uint8_t> temp_buffer;
 
             struct Datagram
             {
@@ -262,7 +272,7 @@ namespace util
 
             //waiting to be received
             std::array<Packet_Queue, MAX_CHANNELS> packet_queues;
-            std::array<uint32_t, MAX_CHANNELS> last_packet_ids = {0};
+            std::array<uint32_t, MAX_CHANNELS> last_packet_ids;
         } m_rx;
 
         struct Ping
@@ -307,8 +317,7 @@ namespace util
         std::atomic_bool m_is_sending = {false};
         const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(1000);
 
-        size_t m_mtu = 32;
-        boost::asio::ip::udp::endpoint m_destination;
+        size_t m_mtu = 400;
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
@@ -513,6 +522,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
+                        RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -523,6 +533,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
+                        RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -533,6 +544,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
+                        RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -559,6 +571,10 @@ namespace util
                         datagram->sent = q::Clock::now();
                     }
                 }
+                if (datagram)
+                {
+                    RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
+                }
             }
             if (!datagram)
             {
@@ -570,14 +586,12 @@ namespace util
 
             update_stats(m_global_stats, *datagram);
 
-            m_socket.async_send_to(boost::asio::buffer(datagram->data.data(), datagram->data.size()),
-                                   m_destination,
-                                   boost::bind(&RUDP::handle_send, this,
-                                   datagram,
-                                   boost::asio::placeholders::error));
+            m_send_socket.async_send_to(boost::asio::buffer(datagram->data),
+                                m_tx.endpoint,
+                                boost::bind(&RUDP::handle_send, this,
+                                datagram,
+                                boost::asio::placeholders::error));
 
-
-//            RUDP_INFO("Sending datagram {}", static_cast<int>(get_header<Header>(datagram->data).id));
 
 //            std::thread([this,datagram]()
 //            {
@@ -609,14 +623,13 @@ namespace util
                 if (error != boost::asio::error::eof)
                 {
                     RUDP_ERR("Error on socket receive: {}", error.message());
-                    m_socket.close();
+                    //m_socket.close();
                 }
             }
             else
             {
                 if (bytes_transferred > 0)
                 {
-                    //                RUDP_INFO("Receiving datagram {}", static_cast<int>(get_header<Header>(datagram->data).id));
                     auto datagram = m_rx.acquire_datagram(bytes_transferred);
                     std::copy(m_rx.temp_buffer.begin(), m_rx.temp_buffer.begin() + bytes_transferred, datagram->data.begin());
 
@@ -834,7 +847,7 @@ namespace util
             }
             packet->fragments[fragment_idx] = std::move(datagram);
 
-            //HH RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+            RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
         }
         void process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
         {
@@ -843,6 +856,7 @@ namespace util
 
             auto count = header.count;
             QASSERT(count > 0);
+            RUDP_INFO("Confirming {} datagrams", count);
 
             QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
 
@@ -865,6 +879,7 @@ namespace util
                 auto lb = std::lower_bound(conf.begin(), conf_end, x);
                 if (lb != conf_end && *lb == x)
                 {
+                    RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                     m_tx.release_datagram(std::move(*it));
                     erase_unordered(m_tx.packet_queue, it);
                     count--;
@@ -882,11 +897,10 @@ namespace util
 
 
             auto size_after = m_tx.packet_queue.size();
-            QASSERT(size_before > size_after);
+            //QASSERT(size_before > size_after);
             if (size_before >= size_after)
             {
                 m_global_stats.tx_confirmed_datagrams += size_before - size_after;
-                //HH RUDP_INFO("Confirming fragment {} for packet {}", fragment_idx, id);
             }
 
             m_rx.release_datagram(std::move(datagram));
@@ -1001,15 +1015,20 @@ namespace util
 
    };
 
-    inline RUDP::RUDP(Socket_t& socket)
-        : m_socket(socket)
+    inline RUDP::RUDP(Socket_t& send_socket, Socket_t& receive_socket)
+        : m_send_socket(send_socket)
+        , m_receive_socket(receive_socket)
     {
-        auto hsz =sizeof(Header);
-        hsz =sizeof(Packet_Main_Header);
-        hsz =sizeof(Packet_Header);
+        m_rx.temp_buffer.resize(100 * 1024);
 
-        hsz =sizeof(Packets_Confirmed_Header);
-        hsz =sizeof(Ping_Header);
+//        auto hsz =sizeof(Header);
+//        hsz =sizeof(Packet_Main_Header);
+//        hsz =sizeof(Packet_Header);
+
+//        hsz =sizeof(Packets_Confirmed_Header);
+//        hsz =sizeof(Ping_Header);
+
+        std::fill(m_rx.last_packet_ids.begin(), m_rx.last_packet_ids.end(), 0);
 
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
@@ -1021,10 +1040,11 @@ namespace util
 
     inline void RUDP::start()
     {
-        m_socket.async_receive(boost::asio::buffer(m_rx.temp_buffer.data(), m_rx.temp_buffer.size()),
-                                boost::bind(&RUDP::handle_receive, this,
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred));
+        m_receive_socket.async_receive_from(boost::asio::buffer(m_rx.temp_buffer),
+                               m_rx.endpoint,
+                               boost::bind(&RUDP::handle_receive, this,
+                               boost::asio::placeholders::error,
+                               boost::asio::placeholders::bytes_transferred));
     }
 
     inline void RUDP::send(uint8_t channel_idx, uint8_t const* data, size_t size)
@@ -1158,7 +1178,7 @@ namespace util
         {
             auto const& params = m_receive_params[channel_idx];
             auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
-            if (now - packet->added >= max_receive_time)
+            if (max_receive_time.count() > 0 && now - packet->added >= max_receive_time)
             {
                 RUDP_WARNING("Canceling packet {}", id);
                 add_packet_cancellation(packet->any_header);
@@ -1174,7 +1194,7 @@ namespace util
         }
         QASSERT(packet->fragments[0]);
 
-        //RUDP_INFO("Received packet {}", id);
+        RUDP_INFO("Received packet {}", id);
 
         queue.packets.erase(queue.packets.begin());
         m_rx.last_packet_ids[channel_idx] = id;
@@ -1221,6 +1241,8 @@ namespace util
             m_ping.last_time_point = now;
             send_packet_ping();
         }
+
+        send_datagram();
     }
 
     inline void RUDP::set_send_params(uint8_t channel_idx, Send_Params const& params)

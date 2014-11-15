@@ -105,7 +105,7 @@ void GS::process()
 {
     if (!m_comms.is_connected() && !m_uav_address.empty())
     {
-        m_comms.connect(boost::asio::ip::address::from_string(m_uav_address), 52524);
+        m_comms.start(boost::asio::ip::address::from_string(m_uav_address), 52521, 52520);
     }
 
     m_comms.process();

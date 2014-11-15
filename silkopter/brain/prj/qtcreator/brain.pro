@@ -58,6 +58,7 @@ LIBS += -lboost_system
 LIBS += -lboost_thread
 LIBS += -lboost_program_options
 LIBS += -lrt
+LIBS += -lz
 rpi {
     LIBS += -lpigpio
     LIBS += -lmmal_core

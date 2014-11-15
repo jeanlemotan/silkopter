@@ -518,7 +518,7 @@ void MPU9250::process()
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // SILK_INFO("{.2}b/ms", xxx);
 
-    uint16_t fc2 = 0;
+    //uint16_t fc2 = 0;
     if (fifo_count >= m_fifo_sample_size)
     {
         if (fifo_count >= 4000)

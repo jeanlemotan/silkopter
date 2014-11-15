@@ -168,14 +168,14 @@ void UAV::process_sensor_data()
     auto a_it = accelerometer_samples.begin();
     auto c_it = compass_samples.begin();
 
-    const auto max_allowed_dt = std::chrono::milliseconds(500);
+    //const auto max_allowed_dt = std::chrono::milliseconds(500);
 
     //this matches the sensor samples that might come at different rates
     while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
     {
         bool has_new_gyroscope_sample = false;
         bool has_new_accelerometer_sample = false;
-        bool has_new_compass_sample = false;
+        //bool has_new_compass_sample = false;
         //update the current smaples
 
         auto sensor_now = m_sensor_clock.now();
@@ -211,7 +211,7 @@ void UAV::process_sensor_data()
             {
                 m_last_compass_sample = *c_it++;
                 m_compass_sample_time_point += m_last_compass_sample.dt;
-                has_new_compass_sample = true;
+//                has_new_compass_sample = true;
             }
         }
         QASSERT(min_dt.count() < 999999);

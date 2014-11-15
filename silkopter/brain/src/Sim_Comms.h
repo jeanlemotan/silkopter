@@ -66,19 +66,17 @@ protected:
         bool has_current_sensor = false;
     };
 
-    typedef util::Channel<Message, uint8_t, boost::asio::ip::tcp::socket> Channel;
+    typedef util::Channel<Message, uint32_t> Channel;
 
     auto get_channel() -> Channel&;
 
     q::util::Signal<void(Message message, Channel& channel)> message_received_signal;
 
 private:
-    boost::asio::io_service& m_io_service;
-
-    boost::asio::ip::tcp::socket m_socket;
-    std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
+    boost::asio::ip::udp::socket m_send_socket;
+    boost::asio::ip::udp::socket m_receive_socket;
+    util::RUDP m_rudp;
     Channel m_channel;
-    void handle_accept(boost::system::error_code const& error);
 
     q::Clock::time_point m_resend_timestamp;
     q::Clock::time_point m_stay_alive_timestamp;
