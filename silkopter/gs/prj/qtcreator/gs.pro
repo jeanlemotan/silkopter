@@ -78,7 +78,6 @@ HEADERS  += \
     ../../src/Video_Stream.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
-    ../../../libs/utils/Serial_Channel.h \
     ../../../libs/common/input/Camera_Input.h \
     ../../../libs/common/input/UAV_Input.h \
     ../../src/Comms.h \
@@ -87,7 +86,10 @@ HEADERS  += \
     ../../../libs/common/sensors/Sensor_Samples.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/Channel.h \
-    ../../../libs/common/Comm_Data.h
+    ../../../libs/common/Comm_Data.h \
+    ../../../libs/utils/Json_Helpers.h \
+    ../../../libs/utils/RUDP.h \
+    ../../../libs/utils/Timed_Scope.h
 
 FORMS    += \
     ../../src/Sensors.ui \

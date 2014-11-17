@@ -1,7 +1,9 @@
 #pragma once
 
-#include <algorithm>
+//#include <algorithm>
 #include <zlib.h>
+#include <boost/asio.hpp>
+#include <boost/circular_buffer.hpp>
 
 #define RUDP_DBG(fmt, ...)  QLOG_DBG("rudp", fmt, ##__VA_ARGS__)
 #define RUDP_INFO(fmt, ...)  QLOG_INFO("rudp", fmt, ##__VA_ARGS__)
@@ -311,11 +313,11 @@ namespace util
         };
 
         q::Clock::time_point m_init_time_point;
-        std::atomic<uint32_t> m_last_id = {0};
+        std::array<uint32_t, MAX_CHANNELS> m_last_id;
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(1000);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(10);
 
         size_t m_mtu = 400;
 
@@ -383,9 +385,10 @@ namespace util
 
             auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt / 10);
 
-            auto best_it = queue.end();
+            auto best = queue.end();
             q::Clock::duration best_age{0};
             auto best_priority = MIN_PRIORITY;
+            uint32_t best_id = static_cast<uint32_t>(-1);
 
             //calculate priorities
             for (auto it = queue.begin(); it != queue.end();)
@@ -396,7 +399,10 @@ namespace util
                 //eliminate old datagrams
                 if (params.cancel_after.count() > 0 && now - datagram->added >= params.cancel_after)
                 {
-                    m_tx.release_datagram(std::move(datagram));
+                    if (!datagram->params.is_reliable)
+                    {
+                        m_tx.release_datagram(std::move(datagram));
+                    }
                     erase_unordered(queue, it);
                     continue;
                 }
@@ -409,20 +415,24 @@ namespace util
                         priority += 63; //bump it by half
                     }
 
-                    auto age = now - datagram->sent;
-                    if (best_it == queue.end() ||
-                        (priority > best_priority) ||
-                        (priority == best_priority && age > best_age))
+                    auto const& header = get_header<Packet_Header>(datagram->data);
+
+                    auto age = now - datagram->added;
+                    if (best == queue.end() ||
+                        (priority > best_priority) ||                                                   //most important first
+                        (priority == best_priority && age > best_age) ||                                //oldest first
+                        (priority == best_priority && age == best_age && header.id < best_id))          //smaller ids first
                     {
-                        best_it = it;
+                        best = it;
                         best_age = age;
                         best_priority = priority;
+                        best_id = header.id;
                     }
                 }
                 ++it;
             }
 
-            return best_it;
+            return best;
         }
 
         void prepare_to_send_datagram(TX::Datagram& datagram)
@@ -431,7 +441,10 @@ namespace util
             auto crc = compute_crc(datagram.data.data(), datagram.data.size());
             header.crc = crc;
 
-            datagram.added = q::Clock::now();
+            if (datagram.added.time_since_epoch().count() == 0)
+            {
+                datagram.added = q::Clock::now();
+            }
             datagram.sent = q::Clock::time_point(q::Clock::duration{0});
 
 //            if (header.crc == 0)
@@ -522,7 +535,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
-                        RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
+                        //RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -533,7 +546,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
-                        RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
+                        //RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -544,7 +557,7 @@ namespace util
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
-                        RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
+                        //RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
                 }
@@ -573,7 +586,7 @@ namespace util
                 }
                 if (datagram)
                 {
-                    RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
+                    //RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
                 }
             }
             if (!datagram)
@@ -606,6 +619,17 @@ namespace util
                          const boost::system::error_code& /*error*/)
         {
             auto& header = get_header<Header>(datagram->data);
+
+            if (header.type == TYPE_PACKET)
+            {
+                auto& pheader = get_header<Packet_Header>(datagram->data);
+                auto dt = q::Clock::now() - datagram->sent;
+                if (dt < std::chrono::seconds(500))
+                {
+                    //RUDP_INFO("packet {}, size {} took {}", (int)pheader.id, datagram->data.size(), dt);
+                }
+            }
+
             if (header.type != TYPE_PACKET || !datagram->params.is_reliable)
             {
                 m_tx.release_datagram(std::move(datagram));
@@ -655,7 +679,7 @@ namespace util
             }
         }
 
-        void add_packet_confirmation(Packet_Header const& header)
+        void add_packet_confirmation(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx)
         {
             std::lock_guard<std::mutex> lg(m_tx.confirmations_mutex);
             if (!m_tx.confirmations)
@@ -677,13 +701,14 @@ namespace util
 
             auto& data = m_tx.confirmations->data;
             auto off = data.size();
-            data.resize(off + sizeof(uint32_t));
+            data.resize(off + 1 + 3 + 1); //channel_idx:1 + id:3 + fragment_idx:1
             //AFTER this point, the header might be broken
 
-            uint32_t id = header.id;
-            uint32_t fragment_idx = header.fragment_idx;
-            uint32_t cd = (id << 8) | fragment_idx;
-            std::copy(reinterpret_cast<uint8_t*>(&cd), reinterpret_cast<uint8_t*>(&cd) + sizeof(uint32_t), data.data() + off);
+            data[off + 0] = channel_idx;
+            data[off + 1] = reinterpret_cast<uint8_t const*>(&id)[0];
+            data[off + 2] = reinterpret_cast<uint8_t const*>(&id)[1];
+            data[off + 3] = reinterpret_cast<uint8_t const*>(&id)[2];
+            data[off + 4] = fragment_idx;
         }
         void send_pending_cancellations()
         {
@@ -700,7 +725,7 @@ namespace util
             }
         }
 
-        void add_packet_cancellation(Packet_Header const& header)
+        void add_packet_cancellation(uint8_t channel_idx, uint32_t id)
         {
             std::lock_guard<std::mutex> lg(m_tx.cancellations_mutex);
             if (!m_tx.cancellations)
@@ -722,11 +747,13 @@ namespace util
 
             auto& data = m_tx.cancellations->data;
             auto off = data.size();
-            data.resize(data.size() + sizeof(uint32_t));
+            data.resize(data.size() + 1 + 3);//channel_idx:1 + id:3
             //AFTER this point, the header might be broken
 
-            uint32_t id = header.id;
-            std::copy(reinterpret_cast<uint8_t*>(&id), reinterpret_cast<uint8_t*>(&id) + sizeof(uint32_t), data.data() + off);
+            data[off + 0] = channel_idx;
+            data[off + 1] = reinterpret_cast<uint8_t const*>(&id)[0];
+            data[off + 2] = reinterpret_cast<uint8_t const*>(&id)[1];
+            data[off + 3] = reinterpret_cast<uint8_t const*>(&id)[2];
         }
 
         void send_packet_ping()
@@ -791,7 +818,7 @@ namespace util
             case Type::TYPE_PONG: process_pong_datagram(datagram); break;
             default: QASSERT(0); m_rx.release_datagram(std::move(datagram)); break;
             }
-            m_rx.release_datagram(std::move(datagram));
+            //m_rx.release_datagram(std::move(datagram));
         }
 
         void process_packet_datagram(RX::Datagram_ptr& datagram)
@@ -799,18 +826,18 @@ namespace util
             QASSERT(datagram);
             auto const& header = get_header<Packet_Header>(datagram->data);
 
-            auto ch = header.channel_idx;
+            auto channel_idx = header.channel_idx;
             auto fragment_idx = header.fragment_idx;
             auto id = header.id;
-            if (id <= m_rx.last_packet_ids[ch])
+            if (id <= m_rx.last_packet_ids[channel_idx])
             {
                 m_global_stats.rx_zombie_datagrams++;
 
-                RUDP_WARNING("Blast from the past - datagram {} for packet id {}.", fragment_idx, id);
+                RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
 
                 if (header.flag_is_reliable)
                 {
-                    add_packet_cancellation(header);
+                    add_packet_cancellation(channel_idx, id);
                 }
 
                 m_rx.release_datagram(std::move(datagram));
@@ -819,10 +846,10 @@ namespace util
 
             if (header.flag_is_reliable)
             {
-                add_packet_confirmation(header);
+                add_packet_confirmation(channel_idx, id, fragment_idx);
             }
 
-            auto& queue = m_rx.packet_queues[ch];
+            auto& queue = m_rx.packet_queues[channel_idx];
             std::lock_guard<std::mutex> lg(queue.mutex);
             auto& packet = queue.packets[id];
             if (!packet)
@@ -847,39 +874,68 @@ namespace util
             }
             packet->fragments[fragment_idx] = std::move(datagram);
 
-            RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+            //RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
         }
         void process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
         {
             QASSERT(datagram);
             auto const& header = get_header<Packets_Confirmed_Header>(datagram->data);
 
-            auto count = header.count;
+            size_t count = header.count;
             QASSERT(count > 0);
-            RUDP_INFO("Confirming {} datagrams", count);
+            if (count > 1)
+            {
+                int a = 0;
+            }
+            //RUDP_INFO("Confirming {} datagrams", count);
 
-            QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
+            QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + (1 + 3 + 1)*count);
 
             //first unpack the confirmations in an array
-            auto* src = datagram->data.data() + sizeof(Packets_Confirmed_Header);
+            uint8_t const* src = datagram->data.data() + sizeof(Packets_Confirmed_Header);
 
-            std::array<uint32_t, Packets_Confirmed_Header::MAX_PACKED> conf;
-            std::copy(src, src + sizeof(uint32_t)*count, reinterpret_cast<uint8_t*>(conf.data()));
-            auto conf_end = conf.begin() + count;
+            uint64_t conf[Packets_Confirmed_Header::MAX_PACKED];
+            for (size_t i = 0; i < count; i++)
+            {
+                conf[i] = 0;
+                uint8_t* c = reinterpret_cast<uint8_t*>(&conf[i]);
+                c[0] = *src++;//channel_idx
+                c[1] = *src++;//id
+                c[2] = *src++;//id
+                c[3] = *src++;//id
+                c[4] = *src++;//fragment_idx
+                uint32_t idd = 0;
+                reinterpret_cast<uint8_t*>(&idd)[0] = c[1];
+                reinterpret_cast<uint8_t*>(&idd)[1] = c[2];
+                reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
+                //RUDP_INFO("Trying to confirm packet {}", idd);
+            }
+            auto conf_end = conf + count;
 
             //sort the confirmations ascending so we can search fast
-            std::sort(conf.begin(), conf_end);
+            std::sort(conf, conf_end);
+
+            uint64_t key = 0;
+            auto* k = reinterpret_cast<uint8_t*>(&key);
 
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
             auto size_before = m_tx.packet_queue.size();
             for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
             {
                 auto const& hdr = get_header<Packet_Header>((*it)->data);
-                uint32_t x = (hdr.id << 8) | hdr.fragment_idx;
-                auto lb = std::lower_bound(conf.begin(), conf_end, x);
-                if (lb != conf_end && *lb == x)
+
+                uint32_t id = hdr.id;
+                //update the key
+                k[0] = hdr.channel_idx;
+                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+                k[4] = hdr.fragment_idx;
+
+                auto lb = std::lower_bound(conf, conf_end, key);
+                if (lb != conf_end && *lb == key)
                 {
-                    RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+                    //RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                     m_tx.release_datagram(std::move(*it));
                     erase_unordered(m_tx.packet_queue, it);
                     count--;
@@ -913,28 +969,61 @@ namespace util
             auto count = header.count;
             QASSERT(count > 0);
 
-            QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + sizeof(uint32_t)*count);
+            QASSERT(datagram->data.size() == sizeof(Packets_Cancelled_Header) + (1 + 3)*count);
+
+            //RUDP_INFO("Cancelling {} datagrams", count);
 
             //first unpack the confirmations in an array
-            auto* src = datagram->data.data() + sizeof(Packets_Confirmed_Header);
+            uint8_t* src = datagram->data.data() + sizeof(Packets_Cancelled_Header);
 
-            std::array<uint32_t, Packets_Confirmed_Header::MAX_PACKED> conf;
-            std::copy(src, src + sizeof(uint32_t)*count, reinterpret_cast<uint8_t*>(conf.data()));
-            auto conf_end = conf.begin() + count;
+            uint32_t conf[Packets_Cancelled_Header::MAX_PACKED];
+            for (size_t i = 0; i < count; i++)
+            {
+                conf[i] = 0;
+                uint8_t* c = reinterpret_cast<uint8_t*>(&conf[i]);
+                c[0] = *src++;//channel_idx
+                c[1] = *src++;//id
+                c[2] = *src++;//id
+                c[3] = *src++;//id
+                uint32_t idd = 0;
+                reinterpret_cast<uint8_t*>(&idd)[0] = c[1];
+                reinterpret_cast<uint8_t*>(&idd)[1] = c[2];
+                reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
+                //RUDP_INFO("Trying to cancel packet {}", idd);
+            }
+            uint32_t* conf_end = conf + count;
 
             //sort the confirmations ascending so we can search fast
-            std::sort(conf.begin(), conf_end);
+            std::sort(conf, conf_end);
 
             auto size_before = m_tx.packet_queue.size();
 
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            m_tx.packet_queue.erase(std::remove_if(m_tx.packet_queue.begin(), m_tx.packet_queue.end(),
-                    [&conf, &conf_end](const TX::Datagram_ptr& d)
-                    {
-                        auto const& hdr = get_header<Packet_Header>(d->data);
-                        auto lb = std::lower_bound(conf.begin(), conf_end, hdr.id);
-                        return (hdr.type != TYPE_PACKETS_CANCELLED && lb != conf_end && *lb == hdr.id);
-                    }), m_tx.packet_queue.end());
+            for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
+            {
+                auto const& hdr = get_header<Packet_Header>((*it)->data);
+
+                uint32_t id = hdr.id;
+                //update the key
+                uint32_t key = 0;
+                uint8_t* k = reinterpret_cast<uint8_t*>(&key);
+                k[0] = hdr.channel_idx;
+                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+
+                auto lb = std::lower_bound(conf, conf_end, key);
+                if (lb != conf_end && *lb == key)
+                {
+                    RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+                    m_tx.release_datagram(std::move(*it));
+                    erase_unordered(m_tx.packet_queue, it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
 
             auto size_after = m_tx.packet_queue.size();
             QASSERT(size_before >= size_after);
@@ -942,7 +1031,7 @@ namespace util
             {
                 m_global_stats.tx_cancelled_datagrams += size_before - size_after;
                 m_global_stats.tx_cancelled_packets ++;
-                RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
+                //RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
             }
 
             m_rx.release_datagram(std::move(datagram));
@@ -1029,6 +1118,7 @@ namespace util
 //        hsz =sizeof(Ping_Header);
 
         std::fill(m_rx.last_packet_ids.begin(), m_rx.last_packet_ids.end(), 0);
+        std::fill(m_last_id.begin(), m_last_id.end(), 0);
 
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
@@ -1095,12 +1185,12 @@ namespace util
             fragment_count = ((size - 1) / max_fragment_size) + 1;
         }
 
-        //auto now = q::Clock::now();
+        auto now = q::Clock::now();
 
         {
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
-            auto id = ++m_last_id;
+            auto id = ++m_last_id[channel_idx];
             for (size_t i = 0; i < fragment_count; i++)
             {
                 QASSERT(left > 0);
@@ -1142,6 +1232,7 @@ namespace util
                 data += fragment_size;
                 left -= fragment_size;
 
+                fragment->added = now;
                 prepare_to_send_datagram(*fragment);
                 m_tx.packet_queue.push_back(fragment);
             }
@@ -1165,6 +1256,12 @@ namespace util
         {
             return false;
         }
+
+        auto const& params = m_receive_params[channel_idx];
+
+        auto& last_packet_id = m_rx.last_packet_ids[channel_idx];
+        auto next_expected_id = last_packet_id + 1;
+
         auto packet = queue.packets.begin()->second;
         QASSERT(packet);
 
@@ -1172,20 +1269,34 @@ namespace util
         QASSERT(id > 0);
 
         auto now = q::Clock::now();
+        auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
+        bool is_late = (max_receive_time.count() > 0 && now - packet->added >= max_receive_time);
+
+        //the next packet in sequence is missing - wait for it some more or cancel
+        if (id > next_expected_id)
+        {
+            if (is_late)
+            {
+                RUDP_WARNING("Canceling ghost packet {}", id);
+                add_packet_cancellation(channel_idx, id);
+                send_pending_cancellations();
+                last_packet_id++;
+                m_global_stats.rx_dropped_packets++;
+            }
+            return false;
+        }
 
         //no header yet or not all packages received?
         if (!packet->fragments[0] || packet->received_fragment_count < packet->main_header.fragment_count)
         {
-            auto const& params = m_receive_params[channel_idx];
-            auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
-            if (max_receive_time.count() > 0 && now - packet->added >= max_receive_time)
+            if (is_late)
             {
                 RUDP_WARNING("Canceling packet {}", id);
-                add_packet_cancellation(packet->any_header);
+                add_packet_cancellation(channel_idx, id);
                 send_pending_cancellations();
                 m_rx.release_packet(std::move(packet));
                 queue.packets.erase(queue.packets.begin());
-                m_rx.last_packet_ids[channel_idx] = id;
+                last_packet_id = id;
                 m_global_stats.rx_dropped_packets++;
             }
 
@@ -1197,7 +1308,7 @@ namespace util
         RUDP_INFO("Received packet {}", id);
 
         queue.packets.erase(queue.packets.begin());
-        m_rx.last_packet_ids[channel_idx] = id;
+        last_packet_id = id;
         m_global_stats.rx_packets++;
 
         //copy the data
@@ -1236,7 +1347,7 @@ namespace util
         send_pending_cancellations();
 
         auto now = q::Clock::now();
-        if (now - m_ping.last_time_point > std::chrono::milliseconds(100))
+        if (now - m_ping.last_time_point > std::chrono::milliseconds(1000))
         {
             m_ping.last_time_point = now;
             send_packet_ping();
