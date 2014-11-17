@@ -26,8 +26,9 @@ GS::GS(QWidget *parent)
     {
 		while (!m_stop_io_service_thread)
 		{
-            m_io_service.run_one();
+            m_io_service.run();
             m_io_service.reset();
+            std::this_thread::yield();
         }
 	});
 

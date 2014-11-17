@@ -69,7 +69,7 @@ int main(int argc, char const* argv[])
 		{
             io_service.run();
             io_service.reset();
-            boost::this_thread::sleep_for(boost::chrono::microseconds(1000));
+            boost::this_thread::yield();
         }
  	});
 
@@ -161,8 +161,7 @@ int main(int argc, char const* argv[])
             hal.process();
             uav.process();
 
-            boost::this_thread::sleep_for(boost::chrono::nanoseconds(1));
-            //boost::this_thread::yield();
+            boost::this_thread::yield();
         }
 
         SILK_INFO("Stopping everything");

@@ -514,31 +514,31 @@ void UAV::set_assist_params(Assist_Params const& params)
 
 void UAV::process()
 {
-    auto now = q::Clock::now();
+//    auto now = q::Clock::now();
 
-    {
-        static q::Clock::time_point last_timestamp = q::Clock::now();
-        auto dt = now - last_timestamp;
-        last_timestamp = now;
-        static q::Clock::duration min_dt, max_dt, avg_dt;
-        static int xxx = 0;
-        if (xxx == 0)
-        {
-            SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
-            min_dt = dt;
-            max_dt = dt;
-            avg_dt = std::chrono::milliseconds(0);
-        }
-        min_dt = std::min(min_dt, dt);
-        max_dt = std::max(max_dt, dt);
-        avg_dt += dt;
-        xxx++;
-        if (xxx == 1000)
-        {
-            avg_dt = avg_dt / xxx;
-            xxx = 0;
-        }
-    }
+//    {
+//        static q::Clock::time_point last_timestamp = q::Clock::now();
+//        auto dt = now - last_timestamp;
+//        last_timestamp = now;
+//        static q::Clock::duration min_dt, max_dt, avg_dt;
+//        static int xxx = 0;
+//        if (xxx == 0)
+//        {
+//            SILK_INFO("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
+//            min_dt = dt;
+//            max_dt = dt;
+//            avg_dt = std::chrono::milliseconds(0);
+//        }
+//        min_dt = std::min(min_dt, dt);
+//        max_dt = std::max(max_dt, dt);
+//        avg_dt += dt;
+//        xxx++;
+//        if (xxx == 1000)
+//        {
+//            avg_dt = avg_dt / xxx;
+//            xxx = 0;
+//        }
+//    }
 
     //SILK_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());
 

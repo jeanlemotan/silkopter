@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/Channel.h"
 
 namespace silk
 {

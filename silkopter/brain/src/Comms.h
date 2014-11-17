@@ -6,6 +6,7 @@
 #include "common/Comm_Data.h"
 #include "HAL.h"
 #include "UAV.h"
+#include "utils/Channel.h"
 #include "utils/RUDP.h"
 
 namespace silk
@@ -99,6 +100,8 @@ private:
 //    std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
 //    std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
+    uint16_t m_send_port = 0;
+    uint16_t m_receive_port = 0;
     boost::asio::ip::udp::socket m_send_socket;
     boost::asio::ip::udp::socket m_receive_socket;
     util::RUDP m_rudp;

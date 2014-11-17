@@ -86,56 +86,31 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
 auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
 {
-    m_send_socket.open(ip::udp::v4());
-    m_send_socket.set_option(ip::udp::socket::reuse_address(true));
-    m_send_socket.set_option(socket_base::broadcast(true));
-    m_send_socket.set_option(socket_base::send_buffer_size(1024));
-    m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
-    m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address_v4::broadcast(), send_port));
+    try
+    {
+        m_send_socket.open(ip::udp::v4());
+        m_send_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
+        //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address::from_string("192.168.1.37"), send_port));
 
-    m_receive_socket.open(ip::udp::v4());
-    m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
-    m_receive_socket.set_option(socket_base::receive_buffer_size(1024));
-    m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
-    m_rudp.set_receive_endpoint(ip::udp::endpoint(ip::address_v4::any(), receive_port));
+        m_receive_socket.open(ip::udp::v4());
+        m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
 
-    m_rudp.start();
+        m_rudp.start();
+    }
+    catch(std::exception e)
+    {
+        SILK_WARNING("Cannot start comms on ports s:{} r:{}", send_port, receive_port);
+        return false;
+    }
 
+    m_send_port = send_port;
+    m_receive_port = receive_port;
 
-//    for (int tries = 10; tries >= 0; tries--)
-//    {
-//        try
-//        {
-//            disconnect();
-//            m_is_listening = false;
-
-//            m_channel.reset();
-
-//            m_port = port;
-//            m_socket = std::make_unique<ip::tcp::socket>(m_io_service);
-
-//            m_acceptor = std::make_unique<ip::tcp::acceptor>(m_io_service, ip::tcp::v4());
-//            m_acceptor->set_option(ip::tcp::acceptor::reuse_address(true));
-//            m_acceptor->set_option(ip::tcp::no_delay(true));
-//            m_acceptor->bind(ip::tcp::endpoint(ip::tcp::v4(), port));
-//            m_acceptor->listen();
-
-//            m_acceptor->async_accept(*m_socket, boost::bind(&Comms::handle_accept, this, boost::asio::placeholders::error));
-
-//            break;
-//        }
-//        catch(std::exception e)
-//        {
-//            SILK_WARNING("Cannot start listening on port {}: {}", port, e.what());
-//            if (tries == 0)
-//            {
-//                return false;
-//            }
-//        }
-//    }
 
     m_is_connected = true;
-    SILK_INFO("Started sending on port {} and receiving on port {}", send_port, receive_port);
+    SILK_INFO("Started sending on ports s:{} r:{}", send_port, receive_port);
 
     return true;
 }
@@ -788,7 +763,7 @@ void Comms::send_sensor_samples()
 {
     QASSERT(m_hal.sensors);
     auto now = q::Clock::now();
-    auto delay = std::chrono::milliseconds(50);
+    auto delay = std::chrono::milliseconds(30);
 
     //SILK_INFO("acc: {}", m_sensors_samples.accelerometer.size());
     if (now - m_sensor_samples.last_sent_timestamp < delay)
@@ -799,10 +774,12 @@ void Comms::send_sensor_samples()
     detail::Comm_Message_Sensors sensors;
 
     {
-        auto const& sample = m_hal.sensors->get_last_accelerometer_sample();
-        if (sample.sample_idx != m_sensor_samples.accelerometer.sample_idx)
+        static q::util::Rand rnd;
+        auto sample = m_hal.sensors->get_last_accelerometer_sample();
+        //if (sample.sample_idx != m_sensor_samples.accelerometer.sample_idx)
         {
             sensors.set(detail::Comm_Message_Sensor::ACCELEROMETER);
+            sample.value.set(rnd.get_float(), rnd.get_float(), rnd.get_float());
             m_sensor_samples.accelerometer = sample;
         }
     }
@@ -979,28 +956,17 @@ void Comms::process()
 
     store_raw_sensor_samples();
 
-    send_sensor_samples();
-    send_uav_data();
+    //send_sensor_samples();
+    //send_uav_data();
 
-//    auto now = q::Clock::now();
-
-//    if (now - m_ping.last_time_point >= std::chrono::milliseconds(100))
-//    {
-//        m_ping.last_time_point = now;
-
-//        if (m_ping.seq_sent.size() > 1000)
-//        {
-//            auto begin = std::remove_if(m_ping.seq_sent.begin(), m_ping.seq_sent.end(), [now](Ping::Seq_Sent::value_type const& v)
-//            {
-//                return now - v.second < std::chrono::seconds(1);
-//            });
-//            m_ping.seq_sent.erase(begin, m_ping.seq_sent.end());
-//        }
-
-//        m_ping.seq_sent.emplace_back(m_ping.seq, now);
-//        m_channel.pack(detail::Comm_Message::PING, static_cast<uint64_t>(now.time_since_epoch().count()), m_ping.seq);
-//        m_ping.seq++;
-//    }
+    {
+        if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())
+        {
+            auto endpoint = m_rudp.get_last_receive_endpoint();
+            endpoint.port(m_send_port);
+            m_rudp.set_send_endpoint(endpoint);
+        }
+    }
 
     m_rudp.process();
     m_channel.send(COMMS_CHANNEL);

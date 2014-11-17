@@ -32,16 +32,16 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
         m_send_socket.open(ip::udp::v4());
         m_send_socket.set_option(ip::udp::socket::reuse_address(true));
         //m_send_socket.set_option(socket_base::broadcast(true));
-        m_send_socket.set_option(socket_base::send_buffer_size(1024));
+        //m_send_socket.set_option(socket_base::send_buffer_size(1024));
         m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
         m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
         //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address_v4::broadcast(), send_port));
 
         m_receive_socket.open(ip::udp::v4());
         m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
-        m_receive_socket.set_option(socket_base::receive_buffer_size(1024));
+        //m_receive_socket.set_option(socket_base::receive_buffer_size(1024));
         m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
-        m_rudp.set_receive_endpoint(ip::udp::endpoint(ip::address_v4::any(), receive_port));
+//        m_rudp.set_receive_endpoint(ip::udp::endpoint(ip::address_v4::any(), receive_port));
 
         m_rudp.start();
 

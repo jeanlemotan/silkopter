@@ -841,6 +841,10 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
 auto HAL_Raspicam::create_components() -> bool
 {
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
+    if (!m_impl->camera)
+    {
+        return false;
+    }
 
     // Enable the camera, and tell it its control callback function
     if (!enable_port(m_impl->camera->control, camera_control_callback))
