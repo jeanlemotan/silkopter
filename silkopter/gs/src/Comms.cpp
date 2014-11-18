@@ -16,7 +16,7 @@ Comms::Comms(boost::asio::io_service& io_service)
     , m_telemetry_channel(m_rudp)
 {
     util::RUDP::Send_Params sparams;
-    sparams.is_compressed = false;
+    sparams.is_compressed = true;
 
     sparams.is_reliable = false;
     sparams.importance = 64;
@@ -500,4 +500,7 @@ void Comms::process()
     m_telemetry_channel.send(TELEMETRY_CHANNEL);
 }
 
-
+auto Comms::get_rudp() -> util::RUDP&
+{
+    return m_rudp;
+}

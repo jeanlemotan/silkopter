@@ -151,7 +151,7 @@ namespace detail
         void set_receive_params(uint8_t channel_idx, Receive_Params const& params);
         void set_global_receive_params(Receive_Params const& params);
 
-        void send(uint8_t channel_idx, uint8_t const* data, size_t size);
+        auto send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
         bool receive(uint8_t channel_idx, std::vector<uint8_t>& data);
 
         void process();
@@ -431,14 +431,7 @@ namespace detail
 
             auto now = q::Clock::now();
 
-            auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt);
-
-            auto best = queue.end();
-            q::Clock::duration best_age{0};
-            auto best_priority = MIN_PRIORITY;
-            uint32_t best_id = static_cast<uint32_t>(-1);
-
-            //calculate priorities
+            //erase late packets
             for (auto it = queue.begin(); it != queue.end();)
             {
                 auto& datagram = *it;
@@ -450,10 +443,24 @@ namespace detail
                     erase_unordered(queue, it);
                     continue;
                 }
+                ++it;
+            }
 
+            auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt);
+
+            auto best = queue.end();
+            q::Clock::duration best_age{0};
+            auto best_priority = MIN_PRIORITY;
+            uint32_t best_id = static_cast<uint32_t>(-1);
+
+            //calculate priorities
+            for (auto it = queue.begin(); it != queue.end(); ++it)
+            {
+                auto& datagram = *it;
                 if (!datagram->is_in_transit &&
                      now - datagram->sent > min_resend_duration)
                 {
+                    auto const& params = datagram->params;
                     int priority = params.importance;
                     if (params.bump_priority_after.count() > 0 && now - datagram->added >= params.bump_priority_after)
                     {
@@ -474,7 +481,6 @@ namespace detail
                         best_id = header.id;
                     }
                 }
-                ++it;
             }
 
             return best;
@@ -1194,18 +1200,18 @@ namespace detail
                                 boost::asio::placeholders::bytes_transferred));
     }
 
-    inline void RUDP::send(uint8_t channel_idx, uint8_t const* data, size_t size)
+    inline auto RUDP::send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
     {
         if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
         {
             QASSERT(0);
-            return;
+            return false;
         }
 
         if (size >= (1 << 24))
         {
             RUDP_ERR("Packet too big: {}.", size);
-            return;
+            return false;
         }
 
         auto const& params = m_send_params[channel_idx];
@@ -1296,6 +1302,8 @@ namespace detail
         }
 
         send_datagram();
+
+        return true;
     }
 
     inline bool RUDP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)

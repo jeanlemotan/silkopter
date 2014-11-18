@@ -34,7 +34,7 @@ GS::GS(QWidget *parent)
 
     //m_comm_channel.connect(boost::asio::ip::address::from_string("127.0.0.1"), 52524);
 
-    m_video_client.reset(new Video_Client(m_io_service, boost::asio::ip::address::from_string("192.168.1.110"), 52525));
+    m_video_client.reset(new Video_Client(m_comms.get_rudp()));
 
     m_ui.sensors->init(&m_comms);
     m_ui.uav_inertial->init(&m_comms);
@@ -51,7 +51,7 @@ GS::GS(QWidget *parent)
         }
     }
 
-    set_uav_address("192.168.1.35");
+    set_uav_address("192.168.1.110");
 
     connect(m_ui.action_connect_uav, &QAction::triggered, [this](bool) { set_uav_address("192.168.1.110"); });
     connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });

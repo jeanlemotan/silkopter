@@ -35,6 +35,8 @@ public:
     };
 
 private:
+    void set_active_streams(bool high, bool medium, bool low);
+
     struct Params
     {
         size_t fps = 30;

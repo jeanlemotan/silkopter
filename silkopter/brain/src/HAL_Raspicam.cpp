@@ -132,9 +132,9 @@ auto HAL_Raspicam::init() -> bool
     auto res = create_components();
     if (res)
     {
-//        set_active_streams(m_file_sink != nullptr,
-//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-//                           m_stream_quality == camera_input::Stream_Quality::LOW);
+        set_active_streams(false,
+                           true,
+                           false);
     }
     return res;
 }
@@ -165,44 +165,44 @@ void HAL_Raspicam::set_data_callback(Data_Available_Callback cb)
     m_impl->stream_callback = cb;
 }
 
-//void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
-//{
-//    if (m_impl->high.is_active == high &&
-//        m_impl->medium.is_active == medium &&
-//        m_impl->low.is_active == low)
-//    {
-//        return;
-//    }
+void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
+{
+    if (m_impl->high.is_active == high &&
+        m_impl->medium.is_active == medium &&
+        m_impl->low.is_active == low)
+    {
+        return;
+    }
 
-//    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
+    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
 
-//    if (set_connection_enabled(m_impl->high.encoder_connection, high))
-//    {
-//        m_impl->high.is_active = high;
-//    }
-//    else
-//    {
-//        SILK_WARNING("Cannot {} high bitrate encoder", high ? "enable" : "disable");
-//    }
+    if (set_connection_enabled(m_impl->high.encoder_connection, high))
+    {
+        m_impl->high.is_active = high;
+    }
+    else
+    {
+        SILK_WARNING("Cannot {} high bitrate encoder", high ? "enable" : "disable");
+    }
 
-//    if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
-//    {
-//        m_impl->medium.is_active = medium;
-//    }
-//    else
-//    {
-//        SILK_WARNING("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
-//    }
+    if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
+    {
+        m_impl->medium.is_active = medium;
+    }
+    else
+    {
+        SILK_WARNING("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
+    }
 
-//    if (set_connection_enabled(m_impl->low.resizer_connection, low))
-//    {
-//        m_impl->low.is_active = low;
-//    }
-//    else
-//    {
-//        SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
-//    }
-//}
+    if (set_connection_enabled(m_impl->low.resizer_connection, low))
+    {
+        m_impl->low.is_active = low;
+    }
+    else
+    {
+        SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 

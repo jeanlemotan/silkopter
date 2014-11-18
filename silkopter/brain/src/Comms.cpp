@@ -19,7 +19,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     , m_telemetry_channel(m_rudp)
 {
     util::RUDP::Send_Params sparams;
-    sparams.is_compressed = false;
+    sparams.is_compressed = true;
 
     sparams.is_reliable = false;
     sparams.importance = 64;

@@ -19,19 +19,19 @@ namespace boost
     }
 }
 
-//static void setup_camera_defaults(silk::Camera& camera, silk::Video_Server& streamer)
-//{
+static void setup_camera_defaults(silk::HAL_Camera& camera, silk::Video_Server& streamer)
+{
 //    camera.setup_high_quality(math::vec2u32(1280, 960), 16000000);
 //    camera.setup_medium_quality(math::vec2u32(640, 480), 2000000);
 //    camera.setup_low_quality(math::vec2u32(320, 240), 160000);
 
-//    camera.set_stream_callback([&](uint8_t const* data, size_t size)
-//    {
-//        streamer.send_frame(silk::Video_Server::Flags(), data, size);
-//    });
+    camera.set_data_callback([&](uint8_t const* data, size_t size)
+    {
+        streamer.send_frame(silk::Video_Server::Flags(), data, size);
+    });
 
-//    camera.set_stream_quality(silk::camera_input::Stream_Quality::MEDIUM);
-//}
+    camera.set_quality(silk::camera_input::Stream_Quality::MEDIUM);
+}
 
 
 int main(int argc, char const* argv[])
@@ -117,8 +117,11 @@ int main(int argc, char const* argv[])
         }
 
         //create streamer and camera objects
-        silk::Video_Server streamer(io_service);
-//        setup_camera_defaults(camera, streamer);
+        silk::Video_Server streamer(comms.get_rudp());
+        if (hal.camera)
+        {
+            setup_camera_defaults(*hal.camera, streamer);
+        }
 
 //        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
 
@@ -129,15 +132,6 @@ int main(int argc, char const* argv[])
             SILK_INFO("Waiting for comms to connect...");
             if (comms.is_connected()/* && !streamer.is_started()*/)
             {
-//                if (!streamer.start(comms.get_remote_address(), stream_port))
-//                {
-//#if defined RASPBERRY_PI
-//                    SILK_ERR("Video Server failed to start! Aborting");
-//                    abort();
-//#else
-//                    //in simulation mode, the video server is allowed to fail because of UDP
-//#endif
-//                }
                 break;
             }
         }
@@ -146,17 +140,7 @@ int main(int argc, char const* argv[])
 
         while (true)
         {
-//#if defined RASPBERRY_PI
-//            if (comms.is_connected() && !streamer.is_started())
-//            {
-//                streamer.start(comms.get_remote_address(), stream_port);
-//            }
-//#else
-//            //in simulation mode, the video server is allowed to fail because of UDP
-//#endif
-
             comms.process();
-            streamer.process();
 
             hal.process();
             uav.process();
@@ -165,8 +149,6 @@ int main(int argc, char const* argv[])
         }
 
         SILK_INFO("Stopping everything");
-
-        streamer.stop();
     }
     catch (std::exception const& e)
     {

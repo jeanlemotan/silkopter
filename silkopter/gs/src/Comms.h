@@ -29,6 +29,7 @@ public:
     auto get_remote_address() const -> boost::asio::ip::address;
 
     auto get_remote_clock() const -> Manual_Clock const&;
+    auto get_rudp() -> util::RUDP&;
 
     void process();
 
