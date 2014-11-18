@@ -37,13 +37,13 @@ public:
     template<typename... Params>
     void send_camera_input(camera_input::Input input, Params&&... params)
     {
-        m_channel.pack(detail::Comm_Message::CAMERA_INPUT, input, params...);
+        m_comms_channel.pack(detail::Comm_Message::CAMERA_INPUT, input, params...);
     }
 
     template<typename... Params>
     void send_uav_input(uav_input::Input input, Params&&... params)
     {
-        m_channel.pack(detail::Comm_Message::UAV_INPUT, input, params...);
+        m_comms_channel.pack(detail::Comm_Message::UAV_INPUT, input, params...);
     }
 
 
@@ -130,10 +130,12 @@ private:
     boost::asio::ip::udp::socket m_socket;
     boost::asio::ip::udp::endpoint m_remote_endpoint;
 
-    typedef util::Channel<detail::Comm_Message, uint16_t> Channel;
+    typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
+    typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
 
     util::RUDP m_rudp;
-    mutable Channel m_channel;
+    mutable Comms_Channel m_comms_channel;
+    mutable Telemetry_Channel m_telemetry_channel;
     q::Clock::time_point m_timeout_started;
 
     Manual_Clock m_remote_clock;

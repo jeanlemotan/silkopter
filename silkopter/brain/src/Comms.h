@@ -58,7 +58,7 @@ private:
     void process_message_calibration_compass();
 
     void send_sensor_samples();
-    void send_raw_sensor_samples(detail::Comm_Message_Sensors sensors);
+    void send_raw_sensor_samples(detail::Telemetry_Message_Sensors sensors);
 
     void store_raw_sensor_samples();
     void clear_raw_sensor_samples();
@@ -105,8 +105,10 @@ private:
     boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
-    typedef util::Channel<detail::Comm_Message, uint16_t> Channel;
-    Channel m_channel;
+    typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
+    typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
+    Comms_Channel m_comms_channel;
+    Telemetry_Channel m_telemetry_channel;
 //    q::Clock::time_point m_timeout_started;
 
     bool m_is_connected = false;

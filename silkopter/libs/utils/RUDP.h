@@ -46,6 +46,8 @@ namespace detail
     template<class T>
     struct Pool
     {
+        std::function<void(T&)> release;
+
         struct Items
         {
             std::vector<std::unique_ptr<T>> items;
@@ -65,8 +67,13 @@ namespace detail
             m_pool = std::make_shared<Items>();
 
             auto items_ref = m_pool;
-            m_destructor = [items_ref, this](detail::Pool_Item_Base* t)
+            m_garbage_collector = [items_ref, this](detail::Pool_Item_Base* t)
             {
+                if (release)
+                {
+                    release(static_cast<T&>(*t));
+                }
+
                 std::lock_guard<std::mutex> lg(items_ref->mutex);
                 items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
                 x_returned++;
@@ -90,7 +97,7 @@ namespace detail
             else
             {
                 item = new T;
-                item->gc = m_destructor;
+                item->gc = m_garbage_collector;
                 x_new++;
                 RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
             }
@@ -99,7 +106,7 @@ namespace detail
         }
 
     private:
-        std::function<void(detail::Pool_Item_Base*)> m_destructor;
+        std::function<void(detail::Pool_Item_Base*)> m_garbage_collector;
     };
 }
 
@@ -116,11 +123,11 @@ namespace detail
             RUDP_INFO("Sending to {}:{} endpoint", endpoint.address().to_string(), endpoint.port());
             m_tx.endpoint = endpoint;
         }
-        auto get_send_endpoint() -> boost::asio::ip::udp::endpoint const&
+        auto get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&
         {
             return m_tx.endpoint;
         }
-        auto get_last_receive_endpoint() -> boost::asio::ip::udp::endpoint const&
+        auto get_last_receive_endpoint() const -> boost::asio::ip::udp::endpoint const&
         {
             return m_rx.endpoint;
         }
@@ -1157,6 +1164,14 @@ namespace detail
 
 //        hsz =sizeof(Packets_Confirmed_Header);
 //        hsz =sizeof(Ping_Header);
+        m_rx.packet_pool.release = [](RX::Packet& p)
+        {
+            for (auto& f: p.fragments)
+            {
+                f.reset();
+            }
+        };
+
         m_rx.temp_buffer.resize(100 * 1024);
 
         std::fill(m_rx.last_packet_ids.begin(), m_rx.last_packet_ids.end(), 0);
