@@ -4,6 +4,7 @@
 #include <zlib.h>
 #include <boost/asio.hpp>
 #include <boost/circular_buffer.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #define RUDP_DBG(fmt, ...)  QLOG_DBG("rudp", fmt, ##__VA_ARGS__)
 #define RUDP_INFO(fmt, ...)  QLOG_INFO("rudp", fmt, ##__VA_ARGS__)
@@ -12,6 +13,95 @@
 
 namespace util
 {
+namespace detail
+{
+
+    struct Pool_Item_Base
+    {
+        std::function<void(Pool_Item_Base* p)> gc;
+        std::atomic_size_t count;
+    };
+    inline void intrusive_ptr_add_ref(Pool_Item_Base* p)
+    {
+        QASSERT(p);
+        ++p->count;
+    }
+    inline void intrusive_ptr_release(Pool_Item_Base* p)
+    {
+        QASSERT(p);
+        if (--p->count == 0u)
+        {
+            if (p->gc)
+            {
+                p->gc(p);
+            }
+            else
+            {
+                QASSERT(0);
+                delete p;
+            }
+        }
+    }
+
+    template<class T>
+    struct Pool
+    {
+        struct Items
+        {
+            std::vector<std::unique_ptr<T>> items;
+            std::mutex mutex;
+        };
+
+        std::shared_ptr<Items> m_pool;
+
+        typedef boost::intrusive_ptr<T> Ptr;
+
+        int x_new = 0;
+        int x_reused = 0;
+        int x_returned = 0;
+
+        Pool()
+        {
+            m_pool = std::make_shared<Items>();
+
+            auto items_ref = m_pool;
+            m_destructor = [items_ref, this](detail::Pool_Item_Base* t)
+            {
+                std::lock_guard<std::mutex> lg(items_ref->mutex);
+                items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
+                x_returned++;
+//                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+            };
+        }
+
+        Ptr acquire()
+        {
+            //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
+
+            std::lock_guard<std::mutex> lg(m_pool->mutex);
+            T* item = nullptr;
+            if (!m_pool->items.empty())
+            {
+                item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
+                m_pool->items.pop_back();
+                x_reused++;
+//                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+            }
+            else
+            {
+                item = new T;
+                item->gc = m_destructor;
+                x_new++;
+                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+            }
+            QASSERT(item);
+            return Ptr(item);
+        }
+
+    private:
+        std::function<void(detail::Pool_Item_Base*)> m_destructor;
+    };
+}
 
     class RUDP : q::util::Noncopyable
     {
@@ -123,51 +213,6 @@ namespace util
 
         typedef std::vector<uint8_t> Buffer_t;
 
-        template<class T>
-        struct Pool
-        {
-            struct Items
-            {
-                std::vector<std::unique_ptr<T>> items;
-                std::mutex mutex;
-            };
-
-            std::shared_ptr<Items> m_items;
-
-            std::function<void(T*)> m_destructor;
-
-            Pool()
-            {
-                m_items = std::make_shared<Items>();
-
-                auto items_ref = m_items;
-                m_destructor = [items_ref](T* t)
-                {
-                    std::lock_guard<std::mutex> lg(items_ref->mutex);
-                    items_ref->items.emplace_back(t); //will create a unique pointer from the raw one
-                };
-            }
-
-            std::shared_ptr<T> acquire()
-            {
-                //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
-
-                std::lock_guard<std::mutex> lg(m_items->mutex);
-                T* item = nullptr;
-                if (!m_items->items.empty())
-                {
-                    item = m_items->items.back().release(); //release the raw ptr from the control of the unique ptr
-                    m_items->items.pop_back();
-                }
-                else
-                {
-                    item = new T;
-                }
-                QASSERT(item);
-                return std::shared_ptr<T>(item, m_destructor);
-            }
-        };
-
         static const int MAX_PRIORITY = 127;
         static const int MIN_PRIORITY = -127;
 
@@ -176,7 +221,7 @@ namespace util
             boost::asio::ip::udp::endpoint endpoint;
             std::vector<uint8_t> compression_buffer;
 
-            struct Datagram
+            struct Datagram : public detail::Pool_Item_Base
             {
                 Send_Params params;
                 q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
@@ -184,9 +229,9 @@ namespace util
                 bool is_in_transit = false;
                 Buffer_t data;
             };
-            typedef std::shared_ptr<Datagram> Datagram_ptr;
+            typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
 
-            Pool<Datagram> datagram_pool;
+            detail::Pool<Datagram> datagram_pool;
 
             Datagram_ptr acquire_datagram(size_t data_size)
             {
@@ -228,12 +273,12 @@ namespace util
 
             std::vector<uint8_t> temp_buffer;
 
-            struct Datagram
+            struct Datagram : public detail::Pool_Item_Base
             {
                 Buffer_t data;
             };
-            typedef std::shared_ptr<Datagram> Datagram_ptr;
-            Pool<Datagram> datagram_pool;
+            typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
+            detail::Pool<Datagram> datagram_pool;
 
             Datagram_ptr acquire_datagram(size_t data_size)
             {
@@ -243,7 +288,7 @@ namespace util
                 return datagram;
             }
 
-            struct Packet
+            struct Packet : public detail::Pool_Item_Base
             {
                 size_t received_fragment_count = 0;
                 q::Clock::time_point added;
@@ -251,8 +296,8 @@ namespace util
                 Packet_Header any_header;
                 std::array<Datagram_ptr, 256> fragments;
             };
-            typedef std::shared_ptr<Packet> Packet_ptr;
-            Pool<Packet> packet_pool;
+            typedef detail::Pool<Packet>::Ptr Packet_ptr;
+            detail::Pool<Packet> packet_pool;
 
             Packet_ptr acquire_packet()
             {
@@ -614,8 +659,7 @@ namespace util
 //            }).detach();
         }
 
-        void handle_send(std::shared_ptr<TX::Datagram> datagram,
-                         const boost::system::error_code& /*error*/)
+        void handle_send(TX::Datagram_ptr datagram, const boost::system::error_code& /*error*/)
         {
             QASSERT(datagram->is_in_transit);
 
