@@ -18,7 +18,7 @@ namespace util
     public:
         typedef boost::asio::ip::udp::socket Socket_t;
 
-        RUDP(Socket_t& send_socket, Socket_t& receive_socket);
+        RUDP(Socket_t& socket);
 
         void set_mtu(size_t mtu);
         void set_send_endpoint(boost::asio::ip::udp::endpoint const& endpoint)
@@ -119,35 +119,52 @@ namespace util
 
 #pragma pack(pop)
 
-        Socket_t& m_send_socket;
-        Socket_t& m_receive_socket;
+        Socket_t& m_socket;
 
         typedef std::vector<uint8_t> Buffer_t;
 
         template<class T>
         struct Pool
         {
-            std::vector<std::shared_ptr<T>> pool;
-            std::mutex mutex;
+            struct Items
+            {
+                std::vector<std::unique_ptr<T>> items;
+                std::mutex mutex;
+            };
+
+            std::shared_ptr<Items> m_items;
+
+            std::function<void(T*)> m_destructor;
+
+            Pool()
+            {
+                m_items = std::make_shared<Items>();
+
+                auto items_ref = m_items;
+                m_destructor = [items_ref](T* t)
+                {
+                    std::lock_guard<std::mutex> lg(items_ref->mutex);
+                    items_ref->items.emplace_back(t); //will create a unique pointer from the raw one
+                };
+            }
 
             std::shared_ptr<T> acquire()
             {
-                std::lock_guard<std::mutex> lg(mutex);
-                if (!pool.empty())
+                //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
+
+                std::lock_guard<std::mutex> lg(m_items->mutex);
+                T* item = nullptr;
+                if (!m_items->items.empty())
                 {
-                    auto item = std::move(pool.back());
-                    pool.pop_back();
-                    return item;
+                    item = m_items->items.back().release(); //release the raw ptr from the control of the unique ptr
+                    m_items->items.pop_back();
                 }
                 else
                 {
-                    return std::make_shared<T>();
+                    item = new T;
                 }
-            }
-            void release(std::shared_ptr<T>&& item)
-            {
-                std::lock_guard<std::mutex> lg(mutex);
-                pool.emplace_back(std::move(item));
+                QASSERT(item);
+                return std::shared_ptr<T>(item, m_destructor);
             }
         };
 
@@ -164,6 +181,7 @@ namespace util
                 Send_Params params;
                 q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent = q::Clock::time_point(q::Clock::duration{0});
+                bool is_in_transit = false;
                 Buffer_t data;
             };
             typedef std::shared_ptr<Datagram> Datagram_ptr;
@@ -177,15 +195,8 @@ namespace util
                 datagram->data.resize(data_size);
                 datagram->added = q::Clock::time_point(q::Clock::duration{0});
                 datagram->sent = q::Clock::time_point(q::Clock::duration{0});
+                datagram->is_in_transit = false;
                 return datagram;
-            }
-            void release_datagram(Datagram_ptr&& datagram)
-            {
-                if (datagram)
-                {
-                    datagram_pool.release(std::move(datagram));
-                }
-                datagram.reset();
             }
 
             std::mutex crt_confirmations_mutex;
@@ -215,7 +226,7 @@ namespace util
             boost::asio::ip::udp::endpoint endpoint;
             std::vector<uint8_t> compression_buffer;
 
-            //std::vector<uint8_t> temp_buffer;
+            std::vector<uint8_t> temp_buffer;
 
             struct Datagram
             {
@@ -230,14 +241,6 @@ namespace util
                 datagram->data.resize(0); //this will force zero-ing the data
                 datagram->data.resize(data_size);
                 return datagram;
-            }
-            void release_datagram(Datagram_ptr&& datagram)
-            {
-                if (datagram)
-                {
-                    datagram_pool.release(std::move(datagram));
-                }
-                datagram.reset();
             }
 
             struct Packet
@@ -257,19 +260,6 @@ namespace util
                 packet->received_fragment_count = 0;
                 packet->added = q::Clock::now();
                 return packet;
-            }
-            void release_packet(Packet_ptr&& packet)
-            {
-                if (packet)
-                {
-                    for (auto& f: packet->fragments)
-                    {
-                        release_datagram(std::move(f));
-                        f.reset();
-                    }
-                    packet_pool.release(std::move(packet));
-                }
-                packet.reset();
             }
 
             struct Packet_Queue
@@ -405,15 +395,12 @@ namespace util
                 //eliminate old datagrams
                 if (params.cancel_after.count() > 0 && now - datagram->added >= params.cancel_after)
                 {
-                    if (!datagram->params.is_reliable)
-                    {
-                        m_tx.release_datagram(std::move(datagram));
-                    }
                     erase_unordered(queue, it);
                     continue;
                 }
 
-                if (now - datagram->sent > min_resend_duration)
+                if (!datagram->is_in_transit &&
+                     now - datagram->sent > min_resend_duration)
                 {
                     int priority = params.importance;
                     if (params.bump_priority_after.count() > 0 && now - datagram->added >= params.bump_priority_after)
@@ -605,12 +592,14 @@ namespace util
                 m_is_sending = false;
                 return;
             }
+            QASSERT(!datagram->is_in_transit);
 
             //RUDP_INFO("send allowed {}", q::Clock::now());
 
             update_stats(m_global_stats, *datagram);
 
-            m_send_socket.async_send_to(boost::asio::buffer(datagram->data),
+            datagram->is_in_transit = true;
+            m_socket.async_send_to(boost::asio::buffer(datagram->data),
                                 m_tx.endpoint,
                                 boost::bind(&RUDP::handle_send, this,
                                 datagram,
@@ -628,6 +617,8 @@ namespace util
         void handle_send(std::shared_ptr<TX::Datagram> datagram,
                          const boost::system::error_code& /*error*/)
         {
+            QASSERT(datagram->is_in_transit);
+
             m_is_sending = false;
             send_datagram();
 
@@ -649,13 +640,10 @@ namespace util
                 }
             }
 
-            if (header.type != TYPE_PACKET || !datagram->params.is_reliable)
-            {
-                m_tx.release_datagram(std::move(datagram));
-            }
+            datagram->is_in_transit = false;
         }
 
-        void handle_receive(RX::Datagram_ptr datagram, const boost::system::error_code& error, std::size_t bytes_transferred)
+        void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
         {
             if (error)
             {
@@ -664,21 +652,21 @@ namespace util
                     RUDP_ERR("Error on socket receive: {}", error.message());
                     //m_socket.close();
                 }
-                m_rx.release_datagram(std::move(datagram));
             }
             else
             {
-                start();
-
-                datagram->data.resize(bytes_transferred);
+                RX::Datagram_ptr datagram;
                 if (bytes_transferred > 0)
                 {
-                    process_incoming_datagram(datagram);
-                    QASSERT(datagram == nullptr);
+                    datagram = m_rx.acquire_datagram(bytes_transferred);
+                    std::copy(m_rx.temp_buffer.begin(), m_rx.temp_buffer.begin() + bytes_transferred, datagram->data.begin());
                 }
-                else
+
+                start();
+
+                if (datagram)
                 {
-                    m_rx.release_datagram(std::move(datagram));
+                    process_incoming_datagram(datagram);
                 }
             }
         }
@@ -787,6 +775,7 @@ namespace util
 
                 prepare_to_send_datagram(*m_tx.internal_queues.ping);
             }
+
             send_datagram();
         }
         void send_packet_pong(Ping_Header const& ping)
@@ -811,7 +800,6 @@ namespace util
             if (h_size == 0)
             {
                 RUDP_WARNING("Unknonw header.");
-                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -828,7 +816,6 @@ namespace util
                 auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
 
                 RUDP_WARNING("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
-                m_rx.release_datagram(std::move(datagram));
                 return;
             }
             m_global_stats.rx_good_datagrams++;
@@ -840,7 +827,7 @@ namespace util
             case Type::TYPE_PACKETS_CANCELLED: process_packets_cancelled_datagram(datagram); break;
             case Type::TYPE_PING: process_ping_datagram(datagram); break;
             case Type::TYPE_PONG: process_pong_datagram(datagram); break;
-            default: QASSERT(0); m_rx.release_datagram(std::move(datagram)); break;
+            default: QASSERT(0); break;
             }
             //m_rx.release_datagram(std::move(datagram));
         }
@@ -864,7 +851,6 @@ namespace util
                     add_packet_cancellation(channel_idx, id);
                 }
 
-                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -886,7 +872,6 @@ namespace util
                 m_global_stats.rx_duplicated_datagrams++;
 
                 RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
-                m_rx.release_datagram(std::move(datagram));
                 return;
             }
 
@@ -960,7 +945,6 @@ namespace util
                 if (lb != conf_end && *lb == key)
                 {
                     //RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
-                    m_tx.release_datagram(std::move(*it));
                     erase_unordered(m_tx.packet_queue, it);
                     count--;
                     if (count == 0)
@@ -982,8 +966,6 @@ namespace util
             {
                 m_global_stats.tx_confirmed_datagrams += size_before - size_after;
             }
-
-            m_rx.release_datagram(std::move(datagram));
         }
         void process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
         {
@@ -1020,9 +1002,8 @@ namespace util
             //sort the confirmations ascending so we can search fast
             std::sort(conf, conf_end);
 
-            auto size_before = m_tx.packet_queue.size();
-
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            auto size_before = m_tx.packet_queue.size();
             for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
             {
                 auto const& hdr = get_header<Packet_Header>((*it)->data);
@@ -1040,7 +1021,6 @@ namespace util
                 if (lb != conf_end && *lb == key)
                 {
                     RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
-                    m_tx.release_datagram(std::move(*it));
                     erase_unordered(m_tx.packet_queue, it);
                 }
                 else
@@ -1057,8 +1037,6 @@ namespace util
                 m_global_stats.tx_cancelled_packets ++;
                 //RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
             }
-
-            m_rx.release_datagram(std::move(datagram));
         }
         void process_ping_datagram(RX::Datagram_ptr& datagram)
         {
@@ -1067,8 +1045,6 @@ namespace util
 
             m_global_stats.rx_pings++;
             send_packet_pong(header);
-
-            m_rx.release_datagram(std::move(datagram));
         }
         void process_pong_datagram(RX::Datagram_ptr& datagram)
         {
@@ -1089,7 +1065,7 @@ namespace util
             else
             {
                 auto rtt = now - m_ping.last_sent_time_point;
-                //RUDP_INFO("RTT: {} / {}", rtt, m_ping.rtt);
+                RUDP_INFO("RTT: {} / {}", rtt, m_ping.rtt);
                 m_ping.rtts.push_back(std::make_pair(m_ping.last_sent_time_point, rtt));
             }
 
@@ -1124,15 +1100,12 @@ namespace util
                 xxx = q::Clock::now();
                 //RUDP_INFO("RTT: {}", m_ping.rtt);
             }
-
-            m_rx.release_datagram(std::move(datagram));
         }
 
    };
 
-    inline RUDP::RUDP(Socket_t& send_socket, Socket_t& receive_socket)
-        : m_send_socket(send_socket)
-        , m_receive_socket(receive_socket)
+    inline RUDP::RUDP(Socket_t& socket)
+        : m_socket(socket)
     {
 //        auto hsz =sizeof(Header);
 //        hsz =sizeof(Packet_Main_Header);
@@ -1140,6 +1113,7 @@ namespace util
 
 //        hsz =sizeof(Packets_Confirmed_Header);
 //        hsz =sizeof(Ping_Header);
+        m_rx.temp_buffer.resize(100 * 1024);
 
         std::fill(m_rx.last_packet_ids.begin(), m_rx.last_packet_ids.end(), 0);
         std::fill(m_last_id.begin(), m_last_id.end(), 0);
@@ -1154,12 +1128,9 @@ namespace util
 
     inline void RUDP::start()
     {
-        RX::Datagram_ptr datagram = m_rx.acquire_datagram(m_mtu * 2);
-
-        m_receive_socket.async_receive_from(boost::asio::buffer(datagram->data),
+        m_socket.async_receive_from(boost::asio::buffer(m_rx.temp_buffer),
                                 m_rx.endpoint,
                                 boost::bind(&RUDP::handle_receive, this,
-                                datagram,
                                 boost::asio::placeholders::error,
                                 boost::asio::placeholders::bytes_transferred));
     }
@@ -1321,7 +1292,6 @@ namespace util
                 RUDP_WARNING("Canceling packet {}", id);
                 add_packet_cancellation(channel_idx, id);
                 send_pending_cancellations();
-                m_rx.release_packet(std::move(packet));
                 queue.packets.erase(queue.packets.begin());
                 last_packet_id = id;
                 m_global_stats.rx_dropped_packets++;
@@ -1355,7 +1325,6 @@ namespace util
             data.resize(main_header.packet_size);
             auto ds = static_cast<unsigned long>(data.size());
             int ret = uncompress(data.data(), &ds, m_rx.compression_buffer.data(), static_cast<uLong>(m_rx.compression_buffer.size()));
-            m_rx.release_packet(std::move(packet));
             QASSERT(ret == Z_OK);
             return ret == Z_OK;
         }
@@ -1363,7 +1332,6 @@ namespace util
         {
             QASSERT(m_rx.compression_buffer.size() == main_header.packet_size);
             std::swap(data, m_rx.compression_buffer);
-            m_rx.release_packet(std::move(packet));
             return true;
         }
     }
@@ -1381,11 +1349,15 @@ namespace util
 
             if (!m_ping.is_done && d >= PING_TIMEOUT)
             {
+                m_ping.last_sent_time_point = q::Clock::now();
+                m_ping.is_done = false;
+
                 RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
                 send_packet_ping();
             }
             else if (m_ping.is_done && d > std::chrono::milliseconds(100))
             {
+                m_ping.last_sent_time_point = q::Clock::now();
                 m_ping.is_done = false;
                 send_packet_ping();
             }

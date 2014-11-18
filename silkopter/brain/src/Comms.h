@@ -102,8 +102,7 @@ private:
 
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
-    boost::asio::ip::udp::socket m_send_socket;
-    boost::asio::ip::udp::socket m_receive_socket;
+    boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
     typedef util::Channel<detail::Comm_Message, uint16_t> Channel;

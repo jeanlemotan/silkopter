@@ -74,8 +74,7 @@ protected:
     q::util::Signal<void(Message message, Channel& channel)> message_received_signal;
 
 private:
-    boost::asio::ip::udp::socket m_send_socket;
-    boost::asio::ip::udp::socket m_receive_socket;
+    boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
     Channel m_channel;
 

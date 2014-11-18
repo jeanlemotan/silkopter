@@ -9,9 +9,8 @@ constexpr uint8_t COMMS_CHANNEL = 12;
 
 Comms::Comms(boost::asio::io_service& io_service)
     : m_io_service(io_service)
-    , m_send_socket(io_service)
-    , m_receive_socket(io_service)
-    , m_rudp(m_send_socket, m_receive_socket)
+    , m_socket(io_service)
+    , m_rudp(m_socket)
     , m_channel(m_rudp)
 {
     util::RUDP::Send_Params sparams;
@@ -29,19 +28,12 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 {
     try
     {
-        m_send_socket.open(ip::udp::v4());
-        m_send_socket.set_option(ip::udp::socket::reuse_address(true));
-        //m_send_socket.set_option(socket_base::broadcast(true));
-        //m_send_socket.set_option(socket_base::send_buffer_size(1024));
-        m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
-        m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
-        //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address_v4::broadcast(), send_port));
+        m_socket.open(ip::udp::v4());
+        m_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_socket.set_option(socket_base::send_buffer_size(65536));
+        m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
 
-        m_receive_socket.open(ip::udp::v4());
-        m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
-        //m_receive_socket.set_option(socket_base::receive_buffer_size(1024));
-        m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
-//        m_rudp.set_receive_endpoint(ip::udp::endpoint(ip::address_v4::any(), receive_port));
+        m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
 
         m_rudp.start();
 
@@ -49,8 +41,7 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
     }
     catch(...)
     {
-        m_send_socket.close();
-        m_receive_socket.close();
+        m_socket.close();
         SILK_WARNING("Connect failed");
         return Result::FAILED;
     }
@@ -60,13 +51,12 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 
 void Comms::disconnect()
 {
-    m_send_socket.close();
-    m_receive_socket.close();
+    m_socket.close();
 }
 
 auto Comms::is_connected() const -> bool
 {
-    return m_send_socket.is_open() && m_receive_socket.is_open();
+    return m_socket.is_open();
 }
 
 auto Comms::get_remote_address() const -> boost::asio::ip::address

@@ -127,8 +127,7 @@ public:
 private:
     boost::asio::io_service& m_io_service;
 
-    boost::asio::ip::udp::socket m_send_socket;
-    boost::asio::ip::udp::socket m_receive_socket;
+    boost::asio::ip::udp::socket m_socket;
     boost::asio::ip::udp::endpoint m_remote_endpoint;
 
     typedef util::Channel<detail::Comm_Message, uint16_t> Channel;

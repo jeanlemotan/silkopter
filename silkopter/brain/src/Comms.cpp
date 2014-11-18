@@ -12,9 +12,8 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     : m_io_service(io_service)
     , m_hal(hal)
     , m_uav(uav)
-    , m_send_socket(io_service)
-    , m_receive_socket(io_service)
-    , m_rudp(m_send_socket, m_receive_socket)
+    , m_socket(io_service)
+    , m_rudp(m_socket)
     , m_channel(m_rudp)
 {
     util::RUDP::Send_Params sparams;
@@ -88,14 +87,11 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        m_send_socket.open(ip::udp::v4());
-        m_send_socket.set_option(ip::udp::socket::reuse_address(true));
-        m_send_socket.bind(ip::udp::endpoint(ip::udp::v4(), send_port));
+        m_socket.open(ip::udp::v4());
+        m_socket.set_option(ip::udp::socket::reuse_address(true));
+        m_socket.set_option(socket_base::send_buffer_size(65536));
+        m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
         //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address::from_string("192.168.1.37"), send_port));
-
-        m_receive_socket.open(ip::udp::v4());
-        m_receive_socket.set_option(ip::udp::socket::reuse_address(true));
-        m_receive_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
 
         m_rudp.start();
     }
@@ -968,8 +964,23 @@ void Comms::process()
         }
     }
 
-    m_rudp.process();
-    m_channel.send(COMMS_CHANNEL);
+    static std::vector<uint8_t> buf;
+    if (buf.empty())
+    {
+        buf.resize(20000);
+        std::generate(buf.begin(), buf.end(), [](){ return rand() % 50;});
+    }
+
+    while(true)
+    {
+        m_rudp.send(12, buf.data(), buf.size());
+
+        m_rudp.process();
+        //m_channel.send(COMMS_CHANNEL);
+        static int xxx = 0;
+        SILK_INFO("{}", xxx);
+        xxx++;
+    }
 }
 
 auto Comms::get_rudp() -> util::RUDP&

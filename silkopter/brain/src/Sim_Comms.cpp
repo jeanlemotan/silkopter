@@ -10,9 +10,8 @@ constexpr uint8_t SIM_COMMS_CHANNEL = 13;
 
 Sim_Comms::Sim_Comms(io_service& io_service)
 //    : m_io_service(io_service)
-    : m_send_socket(io_service)
-    , m_receive_socket(io_service)
-    , m_rudp(m_send_socket, m_receive_socket)
+    : m_socket(io_service)
+    , m_rudp(m_socket)
     , m_channel(m_rudp)
 {
 }
