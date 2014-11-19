@@ -14,7 +14,7 @@ Video_Server::Video_Server(util::RUDP& rudp)
     sparams.is_compressed = false;
     sparams.is_reliable = false;
     sparams.importance = 0;
-    sparams.cancel_after = std::chrono::microseconds(30);
+    sparams.cancel_after = std::chrono::milliseconds(30);
     m_rudp.set_send_params(VIDEO_CHANNEL, sparams);
 
     SILK_INFO("Video server created");

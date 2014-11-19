@@ -12,7 +12,7 @@ Video_Client::Video_Client(util::RUDP& rudp)
     : m_rudp(rudp)
 {
     util::RUDP::Receive_Params rparams;
-    rparams.max_receive_time = std::chrono::milliseconds(10);
+    rparams.max_receive_time = std::chrono::milliseconds(30);
     m_rudp.set_receive_params(VIDEO_CHANNEL, rparams);
 }
 
