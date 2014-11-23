@@ -19,17 +19,20 @@ namespace detail
     struct Pool_Item_Base
     {
         std::function<void(Pool_Item_Base* p)> gc;
-        std::atomic_size_t count;
+        std::atomic_size_t count = {0};
     };
     inline void intrusive_ptr_add_ref(Pool_Item_Base* p)
     {
         QASSERT(p);
-        ++p->count;
+        if (p->count.fetch_add(1, std::memory_order_relaxed) > 999)
+        {
+            QASSERT(0);
+        }
     }
     inline void intrusive_ptr_release(Pool_Item_Base* p)
     {
         QASSERT(p);
-        if (--p->count == 0u)
+        if (p->count.fetch_sub(1, std::memory_order_release) == 1u)
         {
             if (p->gc)
             {
@@ -47,14 +50,6 @@ namespace detail
     struct Pool
     {
         std::function<void(T&)> release;
-
-        struct Items
-        {
-            std::vector<std::unique_ptr<T>> items;
-            std::mutex mutex;
-        };
-
-        std::shared_ptr<Items> m_pool;
 
         typedef boost::intrusive_ptr<T> Ptr;
 
@@ -107,6 +102,13 @@ namespace detail
 
     private:
         std::function<void(detail::Pool_Item_Base*)> m_garbage_collector;
+        struct Items
+        {
+            std::vector<std::unique_ptr<T>> items;
+            std::mutex mutex;
+        };
+
+        std::shared_ptr<Items> m_pool;
     };
 }
 
@@ -139,6 +141,7 @@ namespace detail
             int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             bool is_compressed = true;
+            bool cancel_on_new_data = false; //if true, new packets cancel old-unsent packets
             q::Clock::duration bump_priority_after = q::Clock::duration{0}; //zero means never
             q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
         };
@@ -152,11 +155,15 @@ namespace detail
         void set_global_receive_params(Receive_Params const& params);
 
         auto send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
+        auto try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
+
         bool receive(uint8_t channel_idx, std::vector<uint8_t>& data);
 
         void process();
 
     private:
+
+        auto _send_locked(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
 
         enum Type
         {
@@ -226,14 +233,20 @@ namespace detail
         struct TX
         {
             boost::asio::ip::udp::endpoint endpoint;
-            std::vector<uint8_t> compression_buffer;
+
+            struct Channel_Data
+            {
+                std::mutex send_mutex;
+                std::vector<uint8_t> compression_buffer;
+            };
+            std::array<Channel_Data, MAX_CHANNELS> channel_data;
 
             struct Datagram : public detail::Pool_Item_Base
             {
                 Send_Params params;
                 q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent = q::Clock::time_point(q::Clock::duration{0});
-                bool is_in_transit = false;
+                std::atomic_bool is_in_transit = {false};
                 Buffer_t data;
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
@@ -243,6 +256,7 @@ namespace detail
             Datagram_ptr acquire_datagram(size_t data_size)
             {
                 auto datagram = datagram_pool.acquire();
+                QASSERT(!datagram->is_in_transit);
                 datagram->data.resize(0); //this will force zero-ing the data
                 datagram->data.resize(data_size);
                 datagram->added = q::Clock::time_point(q::Clock::duration{0});
@@ -367,7 +381,7 @@ namespace detail
         std::atomic_bool m_is_sending = {false};
         const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(50);
 
-        size_t m_mtu = 400;
+        size_t m_mtu = 1000;
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
@@ -460,6 +474,7 @@ namespace detail
                 if (!datagram->is_in_transit &&
                      now - datagram->sent > min_resend_duration)
                 {
+                    QASSERT(!datagram->is_in_transit);
                     auto const& params = datagram->params;
                     int priority = params.importance;
                     if (params.bump_priority_after.count() > 0 && now - datagram->added >= params.bump_priority_after)
@@ -479,6 +494,7 @@ namespace detail
                         best_age = age;
                         best_priority = priority;
                         best_id = header.id;
+                        QASSERT(!datagram->is_in_transit);
                     }
                 }
             }
@@ -585,12 +601,14 @@ namespace detail
                 if (m_tx.internal_queues.pong)
                 {
                     datagram = std::move(m_tx.internal_queues.pong);
+                    QASSERT(!datagram->is_in_transit);
                     m_tx.internal_queues.pong.reset();
                     //RUDP_INFO("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
                 }
                 else if (m_tx.internal_queues.ping)
                 {
                     datagram = std::move(m_tx.internal_queues.ping);
+                    QASSERT(!datagram->is_in_transit);
                     m_tx.internal_queues.ping.reset();
                     //RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
                 }
@@ -602,6 +620,7 @@ namespace detail
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
+                        QASSERT(!datagram->is_in_transit);
                         //RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
@@ -613,6 +632,7 @@ namespace detail
                     if (!queue.empty())
                     {
                         datagram = std::move(queue.front());
+                        QASSERT(!datagram->is_in_transit);
                         //RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
                         erase_unordered(queue, queue.begin());
                     }
@@ -632,11 +652,13 @@ namespace detail
                     if (!(*it)->params.is_reliable)
                     {
                         datagram = std::move(*it);
+                        QASSERT(!datagram->is_in_transit);
                         erase_unordered(m_tx.packet_queue, it);
                     }
                     else
                     {
                         datagram = *it;
+                        QASSERT(!datagram->is_in_transit);
                         datagram->sent = q::Clock::now();
                     }
                 }
@@ -676,9 +698,6 @@ namespace detail
         {
             QASSERT(datagram->is_in_transit);
 
-            m_is_sending = false;
-            send_datagram();
-
             auto& header = get_header<Header>(datagram->data);
 
             if (header.type == TYPE_PING)
@@ -687,15 +706,18 @@ namespace detail
                 m_ping.last_sent_time_point = q::Clock::now();
             }
 
-            if (header.type == TYPE_PACKET)
-            {
-                auto& pheader = get_header<Packet_Header>(datagram->data);
-                auto dt = q::Clock::now() - datagram->sent;
-                if (dt < std::chrono::seconds(500))
-                {
-                    //RUDP_INFO("packet {}, size {} took {}", (int)pheader.id, datagram->data.size(), dt);
-                }
-            }
+//            if (header.type == TYPE_PACKET)
+//            {
+//                auto& pheader = get_header<Packet_Header>(datagram->data);
+//                auto dt = q::Clock::now() - datagram->sent;
+//                if (dt < std::chrono::seconds(500))
+//                {
+//                    //RUDP_INFO("packet {}, size {} took {}", (int)pheader.id, datagram->data.size(), dt);
+//                }
+//            }
+
+            m_is_sending = false;
+            send_datagram();
 
             datagram->is_in_transit = false;
         }
@@ -949,10 +971,10 @@ namespace detail
 
             size_t count = header.count;
             QASSERT(count > 0);
-            if (count > 1)
-            {
-                int a = 0;
-            }
+//            if (count > 1)
+//            {
+//                int a = 0;
+//            }
             //RUDP_INFO("Confirming {} datagrams", count);
 
             QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + (1 + 3 + 1)*count);
@@ -1009,11 +1031,9 @@ namespace detail
                         break;
                     }
                     //TODO - eliminate the element from conf as well
+                    continue;
                 }
-                else
-                {
-                    ++it;
-                }
+                ++it;
             }
 
 
@@ -1079,11 +1099,9 @@ namespace detail
                 {
                     RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                     erase_unordered(m_tx.packet_queue, it);
+                    continue;
                 }
-                else
-                {
-                    ++it;
-                }
+                ++it;
             }
 
             auto size_after = m_tx.packet_queue.size();
@@ -1122,7 +1140,7 @@ namespace detail
             else
             {
                 auto rtt = now - m_ping.last_sent_time_point;
-                RUDP_INFO("RTT: {} / {}", rtt, m_ping.rtt);
+                //RUDP_INFO("RTT: {} / {}", rtt, m_ping.rtt);
                 m_ping.rtts.push_back(std::make_pair(m_ping.last_sent_time_point, rtt));
             }
 
@@ -1208,6 +1226,33 @@ namespace detail
             return false;
         }
 
+        auto& channel_data = m_tx.channel_data[channel_idx];
+        std::lock_guard<std::mutex> lg(channel_data.send_mutex);
+
+        return _send_locked(channel_idx, data, size);
+    }
+    inline auto RUDP::try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+    {
+        if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
+        {
+            QASSERT(0);
+            return false;
+        }
+
+        auto& channel_data = m_tx.channel_data[channel_idx];
+        if (channel_data.send_mutex.try_lock())
+        {
+            bool res = _send_locked(channel_idx, data, size);
+            channel_data.send_mutex.unlock();
+            return res;
+        }
+        RUDP_WARNING("Cannot send packet because still sending previous one");
+        return false;
+    }
+
+    inline auto RUDP::_send_locked(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+    {
+        //The send mutex should be locked here!!!
         if (size >= (1 << 24))
         {
             RUDP_ERR("Packet too big: {}.", size);
@@ -1216,23 +1261,25 @@ namespace detail
 
         auto const& params = m_send_params[channel_idx];
 
-        bool is_compressed = params.is_compressed;
+        auto& channel_data = m_tx.channel_data[channel_idx];
+
+        bool is_compressed = false;//params.is_compressed;
         size_t uncompressed_size = size;
         if (is_compressed)
         {
             auto comp_size = compressBound(static_cast<uLong>(size));
-            m_tx.compression_buffer.resize(comp_size);
-            int ret = compress(m_tx.compression_buffer.data(), &comp_size, data, static_cast<uLong>(size));
+            channel_data.compression_buffer.resize(comp_size);
+            int ret = compress(channel_data.compression_buffer.data(), &comp_size, data, static_cast<uLong>(size));
             if (ret == Z_OK)
             {
-                m_tx.compression_buffer.resize(comp_size);
-                data = m_tx.compression_buffer.data();
+                channel_data.compression_buffer.resize(comp_size);
+                data = channel_data.compression_buffer.data();
                 size = comp_size;
             }
             else
             {
                 RUDP_WARNING("Cannot compress data: {}. Sending uncompressed", ret);
-                m_tx.compression_buffer.clear();
+                channel_data.compression_buffer.clear();
                 is_compressed = false;
             }
         }
@@ -1254,6 +1301,23 @@ namespace detail
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
             auto id = ++m_last_id[channel_idx];
+
+            //cancel all previous packets if needed
+            if (params.cancel_on_new_data)
+            {
+                for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
+                {
+                    auto const& hdr = get_header<Packet_Header>((*it)->data);
+                    if (hdr.id < id)
+                    {
+                        erase_unordered(m_tx.packet_queue, it);
+                        continue;
+                    }
+                    ++it;
+                }
+            }
+
+            //add the new fragments
             for (size_t i = 0; i < fragment_count; i++)
             {
                 QASSERT(left > 0);
@@ -1317,90 +1381,107 @@ namespace detail
 
         auto& queue = m_rx.packet_queues[channel_idx];
         std::lock_guard<std::mutex> lg(queue.mutex);
-        if (queue.packets.empty())
-        {
-            return false;
-        }
 
         auto const& params = m_receive_params[channel_idx];
 
+
         auto& last_packet_id = m_rx.last_packet_ids[channel_idx];
-        auto next_expected_id = last_packet_id + 1;
 
-        auto packet = queue.packets.begin()->second;
-        QASSERT(packet);
-
-        auto id = packet->any_header.id;
-        QASSERT(id > 0);
-
-        auto now = q::Clock::now();
-        auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
-        bool is_late = (max_receive_time.count() > 0 && now - packet->added >= max_receive_time);
-
-        //the next packet in sequence is missing - wait for it some more or cancel
-        if (id > next_expected_id)
+        while (true)
         {
-            if (is_late)
+            if (queue.packets.empty())
             {
-                RUDP_WARNING("Canceling ghost packet {}", id);
-                add_packet_cancellation(channel_idx, id);
-                send_pending_cancellations();
-                last_packet_id++;
-                m_global_stats.rx_dropped_packets++;
+                break;
             }
-            return false;
-        }
+            auto packet = queue.packets.begin()->second;
+            QASSERT(packet);
 
-        //no header yet or not all packages received?
-        if (!packet->fragments[0] || packet->received_fragment_count < packet->main_header.fragment_count)
-        {
-            if (is_late)
+            auto next_expected_id = last_packet_id + 1;
+
+            auto id = packet->any_header.id;
+            QASSERT(id > 0);
+
+            auto now = q::Clock::now();
+            auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
+            bool is_late = (max_receive_time.count() > 0 && now - packet->added >= max_receive_time);
+
+            //the next packet in sequence is missing - wait for it some more or cancel
+            if (id > next_expected_id)
             {
+                if (!is_late)
+                {
+                    //wait some more
+                    break;
+                }
+
+                //waited enough, cancel the pending packet
+                RUDP_WARNING("Canceling ghost packet {}", next_expected_id);
+                add_packet_cancellation(channel_idx, next_expected_id);
+                last_packet_id = next_expected_id;
+                m_global_stats.rx_dropped_packets++;
+                continue;
+            }
+
+            //no header yet or not all packages received?
+            if (!packet->fragments[0] || packet->received_fragment_count < packet->main_header.fragment_count)
+            {
+                if (!is_late)
+                {
+                    break;
+                }
+
                 RUDP_WARNING("Canceling packet {}", id);
                 add_packet_cancellation(channel_idx, id);
-                send_pending_cancellations();
                 queue.packets.erase(queue.packets.begin());
                 last_packet_id = id;
                 m_global_stats.rx_dropped_packets++;
+
+                //RUDP_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+                continue;
+            }
+            QASSERT(packet->fragments[0]);
+
+            //RUDP_INFO("Received packet {}", id);
+
+            queue.packets.erase(queue.packets.begin());
+            last_packet_id = id;
+            m_global_stats.rx_packets++;
+
+            //copy the data
+            auto const& main_header = packet->main_header;
+            m_rx.compression_buffer.clear();
+            m_rx.compression_buffer.reserve(main_header.packet_size);
+            for (size_t i = 0; i < main_header.fragment_count; i++)
+            {
+                auto const& fragment = packet->fragments[i];
+                auto header_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
+                QASSERT(fragment->data.size() > header_size);
+                std::copy(fragment->data.begin() + header_size, fragment->data.end(), std::back_inserter(m_rx.compression_buffer));
             }
 
-            //RUDP_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
-            return false;
-        }
-        QASSERT(packet->fragments[0]);
-
-        //RUDP_INFO("Received packet {}", id);
-
-        queue.packets.erase(queue.packets.begin());
-        last_packet_id = id;
-        m_global_stats.rx_packets++;
-
-        //copy the data
-        auto const& main_header = packet->main_header;
-        m_rx.compression_buffer.clear();
-        m_rx.compression_buffer.reserve(main_header.packet_size);
-        for (size_t i = 0; i < main_header.fragment_count; i++)
-        {
-            auto const& fragment = packet->fragments[i];
-            auto header_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
-            QASSERT(fragment->data.size() > header_size);
-            std::copy(fragment->data.begin() + header_size, fragment->data.end(), std::back_inserter(m_rx.compression_buffer));
+            if (main_header.flag_is_compressed)
+            {
+                data.resize(main_header.packet_size);
+                auto ds = static_cast<unsigned long>(data.size());
+                int ret = uncompress(data.data(), &ds, m_rx.compression_buffer.data(), static_cast<uLong>(m_rx.compression_buffer.size()));
+                if (ret != Z_OK)
+                {
+                    RUDP_WARNING("Decompression error: {}", ret);
+                    data.clear();
+                }
+                //return true;//ret == Z_OK;
+            }
+            else
+            {
+                QASSERT(m_rx.compression_buffer.size() == main_header.packet_size);
+                std::swap(data, m_rx.compression_buffer);
+            }
+            break;
         }
 
-        if (main_header.flag_is_compressed)
-        {
-            data.resize(main_header.packet_size);
-            auto ds = static_cast<unsigned long>(data.size());
-            int ret = uncompress(data.data(), &ds, m_rx.compression_buffer.data(), static_cast<uLong>(m_rx.compression_buffer.size()));
-            QASSERT(ret == Z_OK);
-            return ret == Z_OK;
-        }
-        else
-        {
-            QASSERT(m_rx.compression_buffer.size() == main_header.packet_size);
-            std::swap(data, m_rx.compression_buffer);
-            return true;
-        }
+        send_pending_cancellations();
+
+        return !data.empty();
     }
 
     inline void RUDP::process()

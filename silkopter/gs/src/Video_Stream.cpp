@@ -95,7 +95,7 @@ void Video_Stream::process()
         return;
     }
 
-    bool new_frame = m_client->get_frame(m_frame_idx, m_data);
+    bool new_frame = m_client->get_frame(m_data);
     if (new_frame)
     {
         AVPacket packet;

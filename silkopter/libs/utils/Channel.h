@@ -14,7 +14,7 @@ namespace util
         typedef MESSAGE_SIZE_T Message_Size_t;
         typedef Channel<MESSAGE_T, MESSAGE_SIZE_T> This_t;
 
-        Channel(RUDP& rudp) : m_rudp(rudp) {}
+        Channel(RUDP& rudp, uint8_t channel_idx) : m_rudp(rudp), m_channel_idx(channel_idx) {}
 
 		//////////////////////////////////////////////////////////////////////////
 
@@ -61,12 +61,21 @@ namespace util
             m_data_start_off = 0;
         }
 
-        void send(uint8_t channel_idx)
+        void send()
         {
             if (!m_tx_buffer.empty())
             {
                 //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-                m_rudp.send(channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                m_rudp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                m_tx_buffer.clear();
+            }
+        }
+        void try_sending()
+        {
+            if (!m_tx_buffer.empty())
+            {
+                //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
+                m_rudp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
                 m_tx_buffer.clear();
             }
         }
@@ -75,8 +84,8 @@ namespace util
 
 		//returns the nest message or nothing.
 		//the message, if any, has to be decoded with decode_next_message(...)
-        auto get_next_message(uint8_t channel_idx) -> boost::optional<Message_t>  { return _get_next_message(channel_idx); }
-        auto get_next_message(uint8_t channel_idx, Message_t& message) -> bool {  auto res = _get_next_message(channel_idx); message = res ? *res : message; return res.is_initialized(); }
+        auto get_next_message() -> boost::optional<Message_t>  { return _get_next_message(); }
+        auto get_next_message(Message_t& message) -> bool {  auto res = _get_next_message(); message = res ? *res : message; return res.is_initialized(); }
 
 		//decodes the next message
 		template<typename... Params>
@@ -142,7 +151,9 @@ namespace util
         template<class T> T get_value_fixed(RX_Buffer_t const& t, size_t off)
         {
             QASSERT(off + sizeof(T) <= t.size());
-            T val = *reinterpret_cast<T const*>(t.data() + off);
+            T val;
+            auto const* src = t.data() + off;
+            std::copy(src, src + sizeof(T), reinterpret_cast<uint8_t*>(&val));
             return val;
         }
         template<class T> T get_value(RX_Buffer_t const& t, size_t& off)
@@ -154,7 +165,8 @@ namespace util
         template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
         {
             QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
-            *reinterpret_cast<T*>(t.data() + off) = val;
+            auto const* src = reinterpret_cast<uint8_t const*>(&val);
+            std::copy(src, src + sizeof(T), t.data() + off);
         }
         template<class Container, class T> void set_value(Container& t, T const& val, size_t& off)
         {
@@ -173,7 +185,7 @@ namespace util
 
 		//returns the nest message or nothing.
 		//the message, if any, has to be decoded with decode_next_message(...)
-        auto _get_next_message(uint8_t channel_idx) -> boost::optional<Message_t>
+        auto _get_next_message() -> boost::optional<Message_t>
 		{
             if (m_decoded.data_size > 0)
             {
@@ -185,7 +197,7 @@ namespace util
 
             if (m_rx_buffer.empty())
             {
-                m_rudp.receive(channel_idx, m_rx_buffer);
+                m_rudp.receive(m_channel_idx, m_rx_buffer);
                 if (!m_rx_buffer.empty())
                 {
                     //q::quick_logf("Received {} bytes", m_rx_buffer.size());
@@ -193,7 +205,7 @@ namespace util
             }
             else
             {
-                m_rudp.receive(channel_idx, m_temp_rx_buffer);
+                m_rudp.receive(m_channel_idx, m_temp_rx_buffer);
                 if (!m_temp_rx_buffer.empty())
                 {
                     //q::quick_logf("Received {} bytes", m_temp_rx_buffer.size());
@@ -280,6 +292,7 @@ namespace util
         //////////////////////////////////////////////////////////////////////////
 
         util::RUDP& m_rudp;
+        uint8_t m_channel_idx = 0;
         RX_Buffer_t m_rx_buffer;
         RX_Buffer_t m_temp_rx_buffer;
         TX_Buffer_t m_tx_buffer;

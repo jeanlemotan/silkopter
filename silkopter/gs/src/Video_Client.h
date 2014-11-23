@@ -14,7 +14,7 @@ public:
 public:
 	void process();
 
-    bool get_frame(uint32_t& frame_idx, std::vector<uint8_t>& data) const;
+    bool get_frame(std::vector<uint8_t>& data) const;
 
 	void set_max_bitrate(uint32_t max_bitrate);
 	void set_shutter_speed(std::chrono::microseconds speed);
@@ -25,7 +25,7 @@ public:
 
 private:
     util::RUDP& m_rudp;
-
+    mutable std::vector<uint8_t> m_frame_data;
 };
 
 

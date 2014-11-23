@@ -15,14 +15,14 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     , m_uav(uav)
     , m_socket(io_service)
     , m_rudp(m_socket)
-    , m_comms_channel(m_rudp)
-    , m_telemetry_channel(m_rudp)
+    , m_comms_channel(m_rudp, COMMS_CHANNEL)
+    , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
 {
     util::RUDP::Send_Params sparams;
     sparams.is_compressed = true;
 
     sparams.is_reliable = false;
-    sparams.importance = 64;
+    sparams.importance = 0;
     m_rudp.set_send_params(TELEMETRY_CHANNEL, sparams);
 
     sparams.is_reliable = true;
@@ -658,10 +658,10 @@ void Comms::send_sensor_samples()
     {
         static q::util::Rand rnd;
         auto sample = m_hal.sensors->get_last_accelerometer_sample();
-        //if (sample.sample_idx != m_sensor_samples.accelerometer.sample_idx)
+        if (sample.sample_idx != m_sensor_samples.accelerometer.sample_idx)
         {
             sensors.set(detail::Telemetry_Message_Sensor::ACCELEROMETER);
-            sample.value.set(rnd.get_float(), rnd.get_float(), rnd.get_float());
+//            sample.value.set(rnd.get_float(), rnd.get_float(), rnd.get_float());
             m_sensor_samples.accelerometer = sample;
         }
     }
@@ -805,7 +805,7 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_comms_channel.get_next_message(COMMS_CHANNEL))
+    while (auto msg = m_comms_channel.get_next_message())
     {
         switch (msg.get())
         {
@@ -851,8 +851,8 @@ void Comms::process()
     }
 
     m_rudp.process();
-    m_comms_channel.send(COMMS_CHANNEL);
-    m_telemetry_channel.send(TELEMETRY_CHANNEL);
+    m_comms_channel.send();
+    m_telemetry_channel.try_sending();
 
 
 //    static std::vector<uint8_t> buf;

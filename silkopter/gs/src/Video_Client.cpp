@@ -104,9 +104,17 @@ void Video_Client::process()
 
 static size_t k_max_allowed_queued_frames(3);
 
-bool Video_Client::get_frame(uint32_t& o_frame_idx, std::vector<uint8_t>& o_data) const
+bool Video_Client::get_frame(std::vector<uint8_t>& o_data) const
 {
-    return m_rudp.receive(VIDEO_CHANNEL, o_data);
+    m_frame_data.clear();
+    o_data.clear();
+
+    while (m_rudp.receive(VIDEO_CHANNEL, m_frame_data))
+    {
+        std::swap(m_frame_data, o_data);
+    }
+
+    return !o_data.empty();
 
 //	auto now = q::Clock::now();
 

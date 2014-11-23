@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef Q_POSIX_API
+#   include <signal.h>
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 
@@ -131,6 +135,8 @@ do 																				\
 
 #if defined Q_WINDOWS
 #	define QBREAK() __debugbreak()
+#elif defined Q_POSIX_API
+#	define QBREAK() raise(SIGTRAP)
 #else
 #	define QBREAK() assert(0)
 #endif

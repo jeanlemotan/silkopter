@@ -12,8 +12,8 @@ Comms::Comms(boost::asio::io_service& io_service)
     : m_io_service(io_service)
     , m_socket(io_service)
     , m_rudp(m_socket)
-    , m_comms_channel(m_rudp)
-    , m_telemetry_channel(m_rudp)
+    , m_comms_channel(m_rudp, COMMS_CHANNEL)
+    , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
 {
     util::RUDP::Send_Params sparams;
     sparams.is_compressed = true;
@@ -255,10 +255,6 @@ void Comms::process_message_sensors()
 
     channel.end_unpack();
 
-    static int xxx = 0;
-    xxx++;
-    SILK_INFO("SS: {}", xxx);
-
     if (!res)
     {
         SILK_WARNING("Failed to receive sensors data");
@@ -451,7 +447,7 @@ void Comms::process()
 //    static int xxx = 0;
 //    xxx++;
 //    SILK_INFO("LOOP: {}", xxx);
-    while (auto msg = m_telemetry_channel.get_next_message(TELEMETRY_CHANNEL))
+    while (auto msg = m_telemetry_channel.get_next_message())
     {
         switch (msg.get())
         {
@@ -468,7 +464,7 @@ void Comms::process()
         }
     }
 
-    while (auto msg = m_comms_channel.get_next_message(COMMS_CHANNEL))
+    while (auto msg = m_comms_channel.get_next_message())
     {
         switch (msg.get())
         {
@@ -496,8 +492,8 @@ void Comms::process()
 //    SILK_INFO("*********** LOOP: {}", xxx);
 
     m_rudp.process();
-    m_comms_channel.send(COMMS_CHANNEL);
-    m_telemetry_channel.send(TELEMETRY_CHANNEL);
+    m_comms_channel.send();
+    m_telemetry_channel.try_sending();
 }
 
 auto Comms::get_rudp() -> util::RUDP&

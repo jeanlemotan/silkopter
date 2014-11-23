@@ -23,8 +23,6 @@ private:
 	QPainter m_painter;
 	QImage m_image;
 	QImage m_image_flipped;
-	//Video_Client::Frame_Data m_frame;
-	uint32_t m_frame_idx = 0;
 	math::vec2u16 m_resolution;
 	std::vector<uint8_t> m_data;
 	std::shared_ptr<Video_Client> m_client;
