@@ -67,8 +67,8 @@ public:
         std::string mpu_i2c_device;
         std::string barometer_i2c_device;
 
-        float current_scale = 68.181818182f;
-        float voltage_scale = 37.878787879f;
+        float current_scale = 34.0f;
+        float voltage_scale = 39.33f;
     };
 
 private:

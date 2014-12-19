@@ -370,20 +370,20 @@ void HAL_Sensors_Pi::process()
 #ifdef USE_ODROIDW_ADC
     m_impl->adc.process();
     {
-        auto val = m_impl->adc.read_adc0_sample();
+        auto val = m_impl->adc.read_current_sample();
         if (val)
         {
             m_current_sample.value = *val * m_config.current_scale;
-            m_current_sample.dt = m_impl->adc.get_adc0_sample_time();
+            m_current_sample.dt = m_impl->adc.get_current_sample_time();
             m_current_sample.sample_idx++;
             m_current_samples.push_back(m_current_sample);
         }
 
-        val = m_impl->adc.read_adc1_sample();
+        val = m_impl->adc.read_voltage_sample();
         if (val)
         {
             m_voltage_sample.value = *val * m_config.voltage_scale;
-            m_voltage_sample.dt = m_impl->adc.get_adc1_sample_time();
+            m_voltage_sample.dt = m_impl->adc.get_voltage_sample_time();
             m_voltage_sample.sample_idx++;
             m_voltage_samples.push_back(m_voltage_sample);
         }

@@ -4,6 +4,7 @@
 #include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "AHRS.h"
+#include "Battery.h"
 #include "Motor_Mixer.h"
 #include "HAL.h"
 #include "utils/PID.h"
@@ -29,6 +30,7 @@ public:
     void disarm();
 
     auto get_ahrs() -> AHRS const&;
+    auto get_battery() -> Battery const&;
     auto get_motor_mixer() -> Motor_Mixer const&;
 
     auto get_linear_acceleration_w() const -> math::vec3f const&;
@@ -98,7 +100,8 @@ public:
     void set_assist_params(Assist_Params const& params);
 
 private:
-    void process_sensor_data();
+    void process_battery_sensor_data();
+    void process_imu_sensor_data();
     void process_motors();
     void process_dead_reckoning();
     void process_input();
@@ -106,19 +109,23 @@ private:
     void process_rate_pids();
     void process_stability_pids();
 
-    Gyroscope_Sample m_last_gyroscope_sample;
-    Manual_Clock::time_point m_gyroscope_sample_time_point;
+    struct IMU
+    {
+        Gyroscope_Sample last_gyroscope_sample;
+        Manual_Clock::time_point gyroscope_sample_time_point;
 
-    Accelerometer_Sample m_last_accelerometer_sample;
-    Manual_Clock::time_point m_accelerometer_sample_time_point;
+        Accelerometer_Sample last_accelerometer_sample;
+        Manual_Clock::time_point accelerometer_sample_time_point;
 
-    Compass_Sample m_last_compass_sample;
-    Manual_Clock::time_point m_compass_sample_time_point;
+        Compass_Sample last_compass_sample;
+        Manual_Clock::time_point compass_sample_time_point;
 
-    Manual_Clock m_sensor_clock;
+        Manual_Clock clock;
+    } m_imu;
 
     HAL& m_hal;
     AHRS m_ahrs;
+    Battery m_battery;
     Motor_Mixer m_motor_mixer;
 
     enum class State

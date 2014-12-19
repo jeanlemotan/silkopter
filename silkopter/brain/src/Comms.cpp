@@ -792,10 +792,15 @@ void Comms::send_uav_data()
     }
     m_uav_sent_timestamp = now;
 
-    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_ROTATION_L2W, m_uav.get_ahrs().get_quat_l2w());
+    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_AHRS_ROTATION_L2W, m_uav.get_ahrs().get_quat_l2w());
     m_telemetry_channel.pack(detail::Telemetry_Message::UAV_LINEAR_ACCELERATION_W, m_uav.get_linear_acceleration_w());
     m_telemetry_channel.pack(detail::Telemetry_Message::UAV_VELOCITY_W, m_uav.get_velocity_w());
     m_telemetry_channel.pack(detail::Telemetry_Message::UAV_POSITION_W, m_uav.get_position_w());
+    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_POSITION_W, m_uav.get_position_w());
+
+    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_CAPACITY_USED, m_uav.get_battery().get_capacity_used());
+    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_CURRENT, m_uav.get_battery().get_average_current());
+    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_VOLTAGE, m_uav.get_battery().get_average_voltage());
 }
 
 void Comms::process()

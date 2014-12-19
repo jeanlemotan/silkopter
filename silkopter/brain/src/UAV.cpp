@@ -24,11 +24,10 @@ UAV::UAV(HAL& hal)
     m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
     m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
 
-    m_gyroscope_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_accelerometer_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_compass_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-
-    m_sensor_clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
+    m_imu.gyroscope_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.accelerometer_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.compass_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
 
     load_settings();
     save_settings();
@@ -128,6 +127,10 @@ auto UAV::get_ahrs() -> AHRS const&
 {
     return m_ahrs;
 }
+auto UAV::get_battery() -> Battery const&
+{
+    return m_battery;
+}
 auto UAV::get_motor_mixer() -> Motor_Mixer const&
 {
     return m_motor_mixer;
@@ -146,7 +149,12 @@ auto UAV::get_position_w() const -> math::vec3f const&
     return m_linear_motion.position;
 }
 
-void UAV::process_sensor_data()
+void UAV::process_battery_sensor_data()
+{
+    m_battery.process(m_hal.sensors->get_current_samples(), m_hal.sensors->get_voltage_samples());
+}
+
+void UAV::process_imu_sensor_data()
 {
     static q::Clock::time_point xxx = q::Clock::now();
     auto now = q::Clock::now();
@@ -157,7 +165,6 @@ void UAV::process_sensor_data()
         m_linear_motion.velocity.set(0, 0, 0);
         m_linear_motion.position.set(0, 0, 0);
     }
-
 
     //combine accelerometer, gyroscope and compass readings
     auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
@@ -178,17 +185,17 @@ void UAV::process_sensor_data()
         //bool has_new_compass_sample = false;
         //update the current smaples
 
-        auto sensor_now = m_sensor_clock.now();
+        auto sensor_now = m_imu.clock.now();
 
         Manual_Clock::duration min_dt{999999};
         if (g_it != gyroscope_samples.end())
         {
             QASSERT(g_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, g_it->dt);
-            if (m_gyroscope_sample_time_point <= sensor_now)
+            if (m_imu.gyroscope_sample_time_point <= sensor_now)
             {
-                m_last_gyroscope_sample = *g_it++;
-                m_gyroscope_sample_time_point += m_last_gyroscope_sample.dt;
+                m_imu.last_gyroscope_sample = *g_it++;
+                m_imu.gyroscope_sample_time_point += m_imu.last_gyroscope_sample.dt;
                 has_new_gyroscope_sample = true;
             }
         }
@@ -196,10 +203,10 @@ void UAV::process_sensor_data()
         {
             QASSERT(a_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, a_it->dt);
-            if (m_accelerometer_sample_time_point <= sensor_now)
+            if (m_imu.accelerometer_sample_time_point <= sensor_now)
             {
-                m_last_accelerometer_sample = *a_it++;
-                m_accelerometer_sample_time_point += m_last_accelerometer_sample.dt;
+                m_imu.last_accelerometer_sample = *a_it++;
+                m_imu.accelerometer_sample_time_point += m_imu.last_accelerometer_sample.dt;
                 has_new_accelerometer_sample = true;
             }
         }
@@ -207,10 +214,10 @@ void UAV::process_sensor_data()
         {
             QASSERT(c_it->dt < std::chrono::seconds(100));
             min_dt = math::min(min_dt, c_it->dt);
-            if (m_compass_sample_time_point <= sensor_now)
+            if (m_imu.compass_sample_time_point <= sensor_now)
             {
-                m_last_compass_sample = *c_it++;
-                m_compass_sample_time_point += m_last_compass_sample.dt;
+                m_imu.last_compass_sample = *c_it++;
+                m_imu.compass_sample_time_point += m_imu.last_compass_sample.dt;
 //                has_new_compass_sample = true;
             }
         }
@@ -218,16 +225,16 @@ void UAV::process_sensor_data()
 
         //increment the time
         sensor_now += min_dt;
-        m_sensor_clock.advance(min_dt);
+        m_imu.clock.advance(min_dt);
 
         //-------------------------------------
         //USING THE SAMPLES
 
-        m_ahrs.process(m_last_gyroscope_sample, m_last_accelerometer_sample, m_last_compass_sample);
+        m_ahrs.process(m_imu.last_gyroscope_sample, m_imu.last_accelerometer_sample, m_imu.last_compass_sample);
 
         if (has_new_gyroscope_sample)
         {
-            m_pids.angular_velocity += m_last_gyroscope_sample.value;
+            m_pids.angular_velocity += m_imu.last_gyroscope_sample.value;
             m_pids.angular_velocity_samples++;
         }
 
@@ -240,10 +247,10 @@ void UAV::process_sensor_data()
 
 void UAV::process_dead_reckoning()
 {
-    float sample_dts = q::Seconds(m_last_accelerometer_sample.dt).count();
+    float sample_dts = q::Seconds(m_imu.last_accelerometer_sample.dt).count();
 
     //auto old_acceleration = m_linear_motion.acceleration;
-    math::vec3f acceleration = m_last_accelerometer_sample.value;
+    math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
     //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
     auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
     //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
@@ -360,7 +367,7 @@ void UAV::process_rate_pids()
 {
     constexpr std::chrono::milliseconds PROCESS_PERIOD{5};
 
-    auto now = m_sensor_clock.now();
+    auto now = m_imu.clock.now();
     auto dt = now - m_pids.last_rate_process_timestamp;
     if (dt < PROCESS_PERIOD)
     {
@@ -394,7 +401,7 @@ void UAV::process_stability_pids()
 {
     constexpr std::chrono::milliseconds PROCESS_PERIOD{10};
 
-    auto now = m_sensor_clock.now();
+    auto now = m_imu.clock.now();
     auto dt = now - m_pids.last_rate_process_timestamp;
     if (dt < PROCESS_PERIOD)
     {
@@ -543,7 +550,8 @@ void UAV::process()
     //SILK_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());
 
     //process samples at real-time - as they come
-    process_sensor_data();
+    process_imu_sensor_data();
+    process_battery_sensor_data();
 
     process_input();
     process_rate_pids();

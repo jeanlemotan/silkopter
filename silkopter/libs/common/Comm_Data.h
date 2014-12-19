@@ -14,10 +14,13 @@ enum class Telemetry_Message : uint8_t
 
     //------------------------
     //UAV
-    UAV_ROTATION_L2W,
+    UAV_AHRS_ROTATION_L2W,
     UAV_LINEAR_ACCELERATION_W,
     UAV_VELOCITY_W,
-    UAV_POSITION_W
+    UAV_POSITION_W,
+    UAV_BATTERY_CAPACITY_USED,
+    UAV_BATTERY_CURRENT,
+    UAV_BATTERY_VOLTAGE,
 };
 
 enum class Telemetry_Message_Sensor : uint16_t

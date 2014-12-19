@@ -12,11 +12,11 @@ public:
 
     void process();
 
-    auto read_adc0_sample() -> boost::optional<float>;
-    auto read_adc1_sample() -> boost::optional<float>;
+    auto read_current_sample() -> boost::optional<float>;
+    auto read_voltage_sample() -> boost::optional<float>;
 
-    auto get_adc0_sample_time() const -> q::Clock::duration;
-    auto get_adc1_sample_time() const -> q::Clock::duration;
+    auto get_current_sample_time() const -> q::Clock::duration;
+    auto get_voltage_sample_time() const -> q::Clock::duration;
 
 private:
     i2c m_i2c;
@@ -30,8 +30,8 @@ private:
         q::Clock::time_point last_time_point;
     };
 
-    ADC m_adc0;
-    ADC m_adc1;
+    ADC m_adc_current;
+    ADC m_adc_voltage;
 };
 
 }
