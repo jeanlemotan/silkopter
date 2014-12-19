@@ -41,10 +41,14 @@ private:
     SAXEventHandler< math::vec3f > handler_0;
 SAXEventHandler< math::vec3f > handler_1;
 SAXEventHandler< math::vec3f > handler_2;
-SAXEventHandler< math::vec3f > handler_3;bool has_accelerometer_bias;
+SAXEventHandler< math::vec3f > handler_3;
+SAXEventHandler< float > handler_4;
+SAXEventHandler< float > handler_5;bool has_accelerometer_bias;
 bool has_accelerometer_scale;
 bool has_gyroscope_bias;
 bool has_compass_bias;
+bool has_current_scale;
+bool has_voltage_scale;
 
     bool check_depth(const char* type)
     {
@@ -66,6 +70,10 @@ case 2:
     return "gyroscope_bias";
 case 3:
     return "compass_bias";
+case 4:
+    return "current_scale";
+case 5:
+    return "voltage_scale";
         default:
             break;
         }
@@ -96,6 +104,8 @@ case 3:
 has_accelerometer_scale = false;
 has_gyroscope_bias = false;
 has_compass_bias = false;
+has_current_scale = false;
+has_voltage_scale = false;
     }
 
 public:
@@ -106,6 +116,8 @@ public:
 , handler_1(&obj->accelerometer_scale)
 , handler_2(&obj->gyroscope_bias)
 , handler_3(&obj->compass_bias)
+, handler_4(&obj->current_scale)
+, handler_5(&obj->voltage_scale)
     {
         reset_flags();
     }
@@ -128,6 +140,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -154,6 +172,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
         default:
             break;
         }
@@ -178,6 +202,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -204,6 +234,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
         default:
             break;
         }
@@ -228,6 +264,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -254,6 +296,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
         default:
             break;
         }
@@ -278,6 +326,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -304,6 +358,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
         default:
             break;
         }
@@ -326,6 +386,10 @@ else if (utility::string_equal(str, length, "\x67\x79\x72\x6f\x73\x63\x6f\x70\x6
 						 { state=2; has_gyroscope_bias = true; }
 else if (utility::string_equal(str, length, "\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73", 12))
 						 { state=3; has_compass_bias = true; }
+else if (utility::string_equal(str, length, "\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65", 13))
+						 { state=4; has_current_scale = true; }
+else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65", 13))
+						 { state=5; has_voltage_scale = true; }
             else {
                 state = -1;
                 return true;
@@ -345,6 +409,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -372,6 +442,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
         default:
             break;
         }
@@ -397,6 +473,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
 
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
         default:
             break;
         }
@@ -421,6 +503,12 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -448,6 +536,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
 
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
             default:
                 break;
             }
@@ -456,6 +550,8 @@ case 3:
 if (!has_accelerometer_scale) set_missing_required("accelerometer_scale");
 if (!has_gyroscope_bias) set_missing_required("gyroscope_bias");
 if (!has_compass_bias) set_missing_required("compass_bias");
+if (!has_current_scale) set_missing_required("current_scale");
+if (!has_voltage_scale) set_missing_required("voltage_scale");
         }
         return the_error.empty();
     }
@@ -482,6 +578,10 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -509,6 +609,8 @@ struct Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96c
 w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_scale);
 w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.gyroscope_bias);
 w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.compass_bias);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.current_scale);
+w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.voltage_scale);
 
         w.EndObject();
     }

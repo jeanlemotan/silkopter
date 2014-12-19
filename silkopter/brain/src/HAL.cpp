@@ -71,9 +71,10 @@ auto HAL::init(boost::asio::io_service& io_service) -> bool
 
     auto c = new HAL_Raspicam;
     camera.reset(c);
-    if (!c->init())
+//    if (!c->init())
     {
-        return false;
+        SILK_WARNING("*** Camera failed, continuing without");
+        //return false;
     }
 
     auto s = new HAL_Sensors_Pi;

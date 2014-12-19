@@ -12,7 +12,7 @@
 
 #define USE_MPU9250
 #define USE_MS5611
-
+#define USE_ODROIDW_ADC
 
 #ifdef USE_MPU9250
 #   include "chips/MPU9250.h"
@@ -26,6 +26,10 @@
 #   error "No Barometer selected"
 #endif
 
+#ifdef USE_ODROIDW_ADC
+#   include "chips/OdroidW_ADC.h"
+#endif
+
 using namespace silk;
 using namespace boost::asio;
 
@@ -37,6 +41,10 @@ struct HAL_Sensors_Pi::Impl
 
 #ifdef USE_MS5611
     MS5611 baro;
+#endif
+
+#ifdef USE_ODROIDW_ADC
+    OdroidW_ADC adc;
 #endif
 };
 
@@ -110,21 +118,35 @@ auto HAL_Sensors_Pi::init() -> bool
         typedef MPU9250::Gyroscope_Range G_Range;
         typedef MPU9250::Accelerometer_Range A_Range;
 
-        std::set<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
-        std::set<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
+        std::vector<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
+        std::vector<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
 
-        auto g_it = g_ranges.find(static_cast<G_Range>(m_config.gyroscope_range));
-        auto g_range = g_it != g_ranges.end() ? *g_it : G_Range::_500_DPS;
+        std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](G_Range a, G_Range b)
+        {
+            return math::abs(static_cast<int>(a) - m_config.gyroscope_range) < math::abs(static_cast<int>(b) - m_config.gyroscope_range);
+        });
+        G_Range g_range = g_ranges.front();
+
+        std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](A_Range a, A_Range b)
+        {
+            return math::abs(static_cast<int>(a) - m_config.accelerometer_range) < math::abs(static_cast<int>(b) - m_config.accelerometer_range);
+        });
+        A_Range a_range = a_ranges.front();
+
         SILK_INFO("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
-
-        auto a_it = a_ranges.find(static_cast<A_Range>(m_config.accelerometer_range));
-        auto a_range = a_it != a_ranges.end() ? *a_it : A_Range::_4_G;
         SILK_INFO("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
 
         if (!m_impl->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
         {
             return false;
         }
+    }
+#endif
+
+#ifdef USE_ODROIDW_ADC
+    if (!m_impl->adc.init(std::chrono::milliseconds(0), std::chrono::milliseconds(500)))
+    {
+        return false;
     }
 #endif
 
@@ -163,6 +185,30 @@ void HAL_Sensors_Pi::get_compass_calibration_data(math::vec3f &bias) const
 {
     bias = m_config.compass_bias;
 }
+
+void HAL_Sensors_Pi::set_current_calibration_data(float scale)
+{
+    m_config.current_scale = scale;
+    save_settings();
+}
+
+void HAL_Sensors_Pi::get_current_calibration_data(float& scale) const
+{
+    scale = m_config.current_scale;
+}
+
+void HAL_Sensors_Pi::set_voltage_calibration_data(float scale)
+{
+    m_config.voltage_scale = scale;
+    save_settings();
+}
+void HAL_Sensors_Pi::get_voltage_calibration_data(float& scale) const
+{
+    scale = m_config.voltage_scale;
+}
+
+
+
 
 auto HAL_Sensors_Pi::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
 {
@@ -317,6 +363,29 @@ void HAL_Sensors_Pi::process()
             m_thermometer_sample.sample_idx++;
             m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
             m_thermometer_samples.push_back(m_thermometer_sample);
+        }
+    }
+#endif
+
+#ifdef USE_ODROIDW_ADC
+    m_impl->adc.process();
+    {
+        auto val = m_impl->adc.read_adc0_sample();
+        if (val)
+        {
+            m_current_sample.value = *val * m_config.current_scale;
+            m_current_sample.dt = m_impl->adc.get_adc0_sample_time();
+            m_current_sample.sample_idx++;
+            m_current_samples.push_back(m_current_sample);
+        }
+
+        val = m_impl->adc.read_adc1_sample();
+        if (val)
+        {
+            m_voltage_sample.value = *val * m_config.voltage_scale;
+            m_voltage_sample.dt = m_impl->adc.get_adc1_sample_time();
+            m_voltage_sample.sample_idx++;
+            m_voltage_samples.push_back(m_voltage_sample);
         }
     }
 #endif

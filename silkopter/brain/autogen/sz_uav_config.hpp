@@ -765,8 +765,13 @@ w.Key("\x61\x6c\x74\x69\x74\x75\x64\x65"); Serializer< Writer997e4a334c890b96f51
 struct UAV_Config {
  std::vector<silk::Motor_Mixer::Motor_Info> motors;
 PIDs pids;
+float max_throttle_rate;
+float max_pitch_rate;
+float max_roll_rate;
+float max_yaw_rate;
+float max_altitude_rate;
 
-explicit UAV_Config():motors(), pids() {  }
+explicit UAV_Config():motors(), pids(), max_throttle_rate(), max_pitch_rate(), max_roll_rate(), max_yaw_rate(), max_altitude_rate() {  }
 
 
  
@@ -782,8 +787,18 @@ private:
     int depth;
 
     SAXEventHandler< std::vector<silk::Motor_Mixer::Motor_Info> > handler_0;
-SAXEventHandler< PIDs > handler_1;bool has_motors;
+SAXEventHandler< PIDs > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;
+SAXEventHandler< float > handler_4;
+SAXEventHandler< float > handler_5;
+SAXEventHandler< float > handler_6;bool has_motors;
 bool has_pids;
+bool has_max_throttle_rate;
+bool has_max_pitch_rate;
+bool has_max_roll_rate;
+bool has_max_yaw_rate;
+bool has_max_altitude_rate;
 
     bool check_depth(const char* type)
     {
@@ -801,6 +816,16 @@ bool has_pids;
     return "motors";
 case 1:
     return "pids";
+case 2:
+    return "max_throttle_rate";
+case 3:
+    return "max_pitch_rate";
+case 4:
+    return "max_roll_rate";
+case 5:
+    return "max_yaw_rate";
+case 6:
+    return "max_altitude_rate";
         default:
             break;
         }
@@ -829,6 +854,11 @@ case 1:
     {
         has_motors = false;
 has_pids = false;
+has_max_throttle_rate = false;
+has_max_pitch_rate = false;
+has_max_roll_rate = false;
+has_max_yaw_rate = false;
+has_max_altitude_rate = false;
     }
 
 public:
@@ -837,6 +867,11 @@ public:
         , depth(0)
         , handler_0(&obj->motors)
 , handler_1(&obj->pids)
+, handler_2(&obj->max_throttle_rate)
+, handler_3(&obj->max_pitch_rate)
+, handler_4(&obj->max_roll_rate)
+, handler_5(&obj->max_yaw_rate)
+, handler_6(&obj->max_altitude_rate)
     {
         reset_flags();
     }
@@ -853,6 +888,21 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
+
+case 6:
+    return checked_event_forwarding(handler_6.Null());
 
         default:
             break;
@@ -873,6 +923,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
+case 6:
+    return checked_event_forwarding(handler_6.Bool(b));
+
         default:
             break;
         }
@@ -891,6 +956,21 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int(i));
 
         default:
             break;
@@ -911,6 +991,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint(i));
+
         default:
             break;
         }
@@ -929,6 +1024,21 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int64(i));
 
         default:
             break;
@@ -949,6 +1059,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint64(i));
+
         default:
             break;
         }
@@ -967,6 +1092,21 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
+
+case 6:
+    return checked_event_forwarding(handler_6.Double(d));
 
         default:
             break;
@@ -987,6 +1127,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.String(str, length, copy));
+
         default:
             break;
         }
@@ -1005,6 +1160,16 @@ case 1:
 						 { state=0; has_motors = true; }
 else if (utility::string_equal(str, length, "\x70\x69\x64\x73", 4))
 						 { state=1; has_pids = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x74\x68\x72\x6f\x74\x74\x6c\x65\x5f\x72\x61\x74\x65", 17))
+						 { state=2; has_max_throttle_rate = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65", 14))
+						 { state=3; has_max_pitch_rate = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65", 13))
+						 { state=4; has_max_roll_rate = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x79\x61\x77\x5f\x72\x61\x74\x65", 12))
+						 { state=5; has_max_yaw_rate = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65", 17))
+						 { state=6; has_max_altitude_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -1018,6 +1183,21 @@ else if (utility::string_equal(str, length, "\x70\x69\x64\x73", 4))
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.Key(str, length, copy));
 
             default:
                 break;
@@ -1039,6 +1219,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartArray());
+
         default:
             break;
         }
@@ -1058,6 +1253,21 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndArray(length));
+
         default:
             break;
         }
@@ -1076,6 +1286,21 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartObject());
 
             default:
                 break;
@@ -1097,12 +1322,32 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_motors) set_missing_required("motors");
 if (!has_pids) set_missing_required("pids");
+if (!has_max_throttle_rate) set_missing_required("max_throttle_rate");
+if (!has_max_pitch_rate) set_missing_required("max_pitch_rate");
+if (!has_max_roll_rate) set_missing_required("max_roll_rate");
+if (!has_max_yaw_rate) set_missing_required("max_yaw_rate");
+if (!has_max_altitude_rate) set_missing_required("max_altitude_rate");
         }
         return the_error.empty();
     }
@@ -1125,6 +1370,16 @@ if (!has_pids) set_missing_required("pids");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
+case 6:
+     handler_6.ReapError(errs); break;
 
         default:
             break;
@@ -1150,6 +1405,11 @@ struct Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a69
 
         w.Key("\x6d\x6f\x74\x6f\x72\x73"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, std::vector<silk::Motor_Mixer::Motor_Info> >()(w, value.motors);
 w.Key("\x70\x69\x64\x73"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, PIDs >()(w, value.pids);
+w.Key("\x6d\x61\x78\x5f\x74\x68\x72\x6f\x74\x74\x6c\x65\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_throttle_rate);
+w.Key("\x6d\x61\x78\x5f\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_pitch_rate);
+w.Key("\x6d\x61\x78\x5f\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_roll_rate);
+w.Key("\x6d\x61\x78\x5f\x79\x61\x77\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_yaw_rate);
+w.Key("\x6d\x61\x78\x5f\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_altitude_rate);
 
         w.EndObject();
     }

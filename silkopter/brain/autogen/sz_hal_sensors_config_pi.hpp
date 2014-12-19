@@ -42,13 +42,17 @@ private:
 SAXEventHandler< math::vec3f > handler_1;
 SAXEventHandler< math::vec3f > handler_2;
 SAXEventHandler< math::vec3f > handler_3;
-SAXEventHandler< std::string > handler_4;
-SAXEventHandler< std::string > handler_5;
-SAXEventHandler< size_t > handler_6;
-SAXEventHandler< size_t > handler_7;bool has_accelerometer_bias;
+SAXEventHandler< float > handler_4;
+SAXEventHandler< float > handler_5;
+SAXEventHandler< std::string > handler_6;
+SAXEventHandler< std::string > handler_7;
+SAXEventHandler< size_t > handler_8;
+SAXEventHandler< size_t > handler_9;bool has_accelerometer_bias;
 bool has_accelerometer_scale;
 bool has_gyroscope_bias;
 bool has_compass_bias;
+bool has_voltage_scale;
+bool has_current_scale;
 
     bool check_depth(const char* type)
     {
@@ -71,12 +75,16 @@ case 2:
 case 3:
     return "compass_bias";
 case 4:
-    return "mpu_i2c_device";
+    return "voltage_scale";
 case 5:
-    return "barometer_i2c_device";
+    return "current_scale";
 case 6:
-    return "gyroscope_range";
+    return "mpu_i2c_device";
 case 7:
+    return "barometer_i2c_device";
+case 8:
+    return "gyroscope_range";
+case 9:
     return "accelerometer_range";
         default:
             break;
@@ -108,6 +116,8 @@ case 7:
 has_accelerometer_scale = false;
 has_gyroscope_bias = false;
 has_compass_bias = false;
+has_voltage_scale = false;
+has_current_scale = false;
 
 
 
@@ -122,10 +132,12 @@ public:
 , handler_1(&obj->accelerometer_scale)
 , handler_2(&obj->gyroscope_bias)
 , handler_3(&obj->compass_bias)
-, handler_4(&obj->mpu_i2c_device)
-, handler_5(&obj->barometer_i2c_device)
-, handler_6(&obj->gyroscope_range)
-, handler_7(&obj->accelerometer_range)
+, handler_4(&obj->voltage_scale)
+, handler_5(&obj->current_scale)
+, handler_6(&obj->mpu_i2c_device)
+, handler_7(&obj->barometer_i2c_device)
+, handler_8(&obj->gyroscope_range)
+, handler_9(&obj->accelerometer_range)
     {
         reset_flags();
     }
@@ -160,6 +172,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Null());
+
+case 8:
+    return checked_event_forwarding(handler_8.Null());
+
+case 9:
+    return checked_event_forwarding(handler_9.Null());
 
         default:
             break;
@@ -198,6 +216,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Bool(b));
 
+case 8:
+    return checked_event_forwarding(handler_8.Bool(b));
+
+case 9:
+    return checked_event_forwarding(handler_9.Bool(b));
+
         default:
             break;
         }
@@ -234,6 +258,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Int(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Int(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Int(i));
 
         default:
             break;
@@ -272,6 +302,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Uint(i));
 
+case 8:
+    return checked_event_forwarding(handler_8.Uint(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Uint(i));
+
         default:
             break;
         }
@@ -308,6 +344,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Int64(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Int64(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Int64(i));
 
         default:
             break;
@@ -346,6 +388,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Uint64(i));
 
+case 8:
+    return checked_event_forwarding(handler_8.Uint64(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Uint64(i));
+
         default:
             break;
         }
@@ -382,6 +430,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Double(d));
+
+case 8:
+    return checked_event_forwarding(handler_8.Double(d));
+
+case 9:
+    return checked_event_forwarding(handler_9.Double(d));
 
         default:
             break;
@@ -420,6 +474,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.String(str, length, copy));
 
+case 8:
+    return checked_event_forwarding(handler_8.String(str, length, copy));
+
+case 9:
+    return checked_event_forwarding(handler_9.String(str, length, copy));
+
         default:
             break;
         }
@@ -442,14 +502,18 @@ else if (utility::string_equal(str, length, "\x67\x79\x72\x6f\x73\x63\x6f\x70\x6
 						 { state=2; has_gyroscope_bias = true; }
 else if (utility::string_equal(str, length, "\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73", 12))
 						 { state=3; has_compass_bias = true; }
+else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65", 13))
+						 { state=4; has_voltage_scale = true; }
+else if (utility::string_equal(str, length, "\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65", 13))
+						 { state=5; has_current_scale = true; }
 else if (utility::string_equal(str, length, "\x6d\x70\x75\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65", 14))
-						 { state=4;  }
-else if (utility::string_equal(str, length, "\x62\x61\x72\x6f\x6d\x65\x74\x65\x72\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65", 20))
-						 { state=5;  }
-else if (utility::string_equal(str, length, "\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15))
 						 { state=6;  }
-else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19))
+else if (utility::string_equal(str, length, "\x62\x61\x72\x6f\x6d\x65\x74\x65\x72\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65", 20))
 						 { state=7;  }
+else if (utility::string_equal(str, length, "\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15))
+						 { state=8;  }
+else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19))
+						 { state=9;  }
             else {
                 state = -1;
                 return true;
@@ -481,6 +545,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Key(str, length, copy));
+
+case 8:
+    return checked_event_forwarding(handler_8.Key(str, length, copy));
+
+case 9:
+    return checked_event_forwarding(handler_9.Key(str, length, copy));
 
             default:
                 break;
@@ -520,6 +590,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.StartArray());
 
+case 8:
+    return checked_event_forwarding(handler_8.StartArray());
+
+case 9:
+    return checked_event_forwarding(handler_9.StartArray());
+
         default:
             break;
         }
@@ -557,6 +633,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.EndArray(length));
 
+case 8:
+    return checked_event_forwarding(handler_8.EndArray(length));
+
+case 9:
+    return checked_event_forwarding(handler_9.EndArray(length));
+
         default:
             break;
         }
@@ -593,6 +675,12 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.StartObject());
+
+case 8:
+    return checked_event_forwarding(handler_8.StartObject());
+
+case 9:
+    return checked_event_forwarding(handler_9.StartObject());
 
             default:
                 break;
@@ -632,6 +720,12 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.EndObject(length));
 
+case 8:
+    return checked_event_forwarding(handler_8.EndObject(length));
+
+case 9:
+    return checked_event_forwarding(handler_9.EndObject(length));
+
             default:
                 break;
             }
@@ -640,6 +734,8 @@ case 7:
 if (!has_accelerometer_scale) set_missing_required("accelerometer_scale");
 if (!has_gyroscope_bias) set_missing_required("gyroscope_bias");
 if (!has_compass_bias) set_missing_required("compass_bias");
+if (!has_voltage_scale) set_missing_required("voltage_scale");
+if (!has_current_scale) set_missing_required("current_scale");
         }
         return the_error.empty();
     }
@@ -674,6 +770,10 @@ case 6:
      handler_6.ReapError(errs); break;
 case 7:
      handler_7.ReapError(errs); break;
+case 8:
+     handler_8.ReapError(errs); break;
+case 9:
+     handler_9.ReapError(errs); break;
 
         default:
             break;
@@ -701,6 +801,8 @@ struct Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064
 w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.accelerometer_scale);
 w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.gyroscope_bias);
 w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.compass_bias);
+w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, float >()(w, value.voltage_scale);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, float >()(w, value.current_scale);
 w.Key("\x6d\x70\x75\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, std::string >()(w, value.mpu_i2c_device);
 w.Key("\x62\x61\x72\x6f\x6d\x65\x74\x65\x72\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, std::string >()(w, value.barometer_i2c_device);
 w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, size_t >()(w, value.gyroscope_range);

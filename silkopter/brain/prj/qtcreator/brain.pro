@@ -88,7 +88,8 @@ SOURCES += \
     ../../src/Sim_Comms.cpp \
     ../../src/HAL_Motors_Sim.cpp \
     ../../src/PiGPIO.cpp \
-    ../../src/HAL_Motors_PiGPIO.cpp
+    ../../src/HAL_Motors_PiGPIO.cpp \
+    ../../src/chips/OdroidW_ADC.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -126,5 +127,6 @@ HEADERS += \
     ../../src/HAL_Motors_PiGPIO.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
-    ../../../libs/common/sensors/Sensor_Samples.h
+    ../../../libs/common/sensors/Sensor_Samples.h \
+    ../../src/chips/OdroidW_ADC.h
 

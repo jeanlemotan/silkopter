@@ -23,6 +23,12 @@ public:
     virtual void set_compass_calibration_data(math::vec3f const& bias) = 0;
     virtual void get_compass_calibration_data(math::vec3f& bias) const = 0;
 
+    virtual void set_current_calibration_data(float scale) = 0;
+    virtual void get_current_calibration_data(float& scale) const = 0;
+
+    virtual void set_voltage_calibration_data(float scale) = 0;
+    virtual void get_voltage_calibration_data(float& scale) const = 0;
+
     //----------------------------------------------------------------------
     //sensors
 

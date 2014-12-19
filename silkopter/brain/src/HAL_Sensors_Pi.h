@@ -24,6 +24,12 @@ public:
     void set_compass_calibration_data(math::vec3f const& bias);
     void get_compass_calibration_data(math::vec3f& bias) const;
 
+    void set_current_calibration_data(float scale);
+    void get_current_calibration_data(float& scale) const;
+
+    void set_voltage_calibration_data(float scale);
+    void get_voltage_calibration_data(float& scale) const;
+
     auto get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&;
     auto get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&;
     auto get_compass_samples() const -> std::vector<Compass_Sample> const&;
@@ -60,6 +66,9 @@ public:
         size_t accelerometer_range = 4;
         std::string mpu_i2c_device;
         std::string barometer_i2c_device;
+
+        float current_scale = 68.181818182f;
+        float voltage_scale = 37.878787879f;
     };
 
 private:

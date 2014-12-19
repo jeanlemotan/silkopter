@@ -7,6 +7,8 @@
         ["math::vec3f", "accelerometer_bias", {"required": true}],
         ["math::vec3f", "accelerometer_scale", {"required": true}],
         ["math::vec3f", "gyroscope_bias", {"required": true}],
-        ["math::vec3f", "compass_bias", {"required": true}]
+        ["math::vec3f", "compass_bias", {"required": true}],
+        ["float", "current_scale", {"required": true}],
+        ["float", "voltage_scale", {"required": true}]
     ]
 }

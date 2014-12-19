@@ -13,6 +13,36 @@
 
 namespace util
 {
+    namespace detail
+    {
+        struct Pool_Item_Base
+        {
+            std::function<void(Pool_Item_Base* p)> gc;
+            std::atomic_size_t count = {0};
+        };
+
+        template<class T> struct Pool
+        {
+            std::function<void(T&)> release;
+            typedef boost::intrusive_ptr<T> Ptr;
+
+            int x_new = 0;
+            int x_reused = 0;
+            int x_returned = 0;
+
+            Pool();
+            auto acquire() -> Ptr;
+
+        private:
+            std::function<void(Pool_Item_Base*)> m_garbage_collector;
+            struct Items
+            {
+                std::vector<std::unique_ptr<T>> items;
+                std::mutex mutex;
+            };
+            std::shared_ptr<Items> m_pool;
+        };
+    }
 
     class RUDP : q::util::Noncopyable
     {
@@ -54,36 +84,6 @@ namespace util
         void process();
 
     private:
-
-        struct Pool_Item_Base
-        {
-            std::function<void(Pool_Item_Base* p)> gc;
-            std::atomic_size_t count = {0};
-        };
-        friend void intrusive_ptr_add_ref(Pool_Item_Base* p);
-        friend void intrusive_ptr_release(Pool_Item_Base* p);
-
-        template<class T> struct Pool
-        {
-            std::function<void(T&)> release;
-            typedef boost::intrusive_ptr<T> Ptr;
-
-            int x_new = 0;
-            int x_reused = 0;
-            int x_returned = 0;
-
-            Pool();
-            auto acquire() -> Ptr;
-
-        private:
-            std::function<void(Pool_Item_Base*)> m_garbage_collector;
-            struct Items
-            {
-                std::vector<std::unique_ptr<T>> items;
-                std::mutex mutex;
-            };
-            std::shared_ptr<Items> m_pool;
-        };
 
         auto _send_locked(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
 
@@ -163,7 +163,7 @@ namespace util
             };
             std::array<Channel_Data, MAX_CHANNELS> channel_data;
 
-            struct Datagram : public Pool_Item_Base
+            struct Datagram : public detail::Pool_Item_Base
             {
                 Send_Params params;
                 q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
@@ -171,9 +171,9 @@ namespace util
                 std::atomic_bool is_in_transit = {false};
                 Buffer_t data;
             };
-            typedef Pool<Datagram>::Ptr Datagram_ptr;
+            typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
 
-            Pool<Datagram> datagram_pool;
+            detail::Pool<Datagram> datagram_pool;
             Datagram_ptr acquire_datagram(size_t data_size);
 
             std::mutex crt_confirmations_mutex;
@@ -205,15 +205,15 @@ namespace util
 
             std::vector<uint8_t> temp_buffer;
 
-            struct Datagram : public Pool_Item_Base
+            struct Datagram : public detail::Pool_Item_Base
             {
                 Buffer_t data;
             };
-            typedef Pool<Datagram>::Ptr Datagram_ptr;
-            Pool<Datagram> datagram_pool;
+            typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
+            detail::Pool<Datagram> datagram_pool;
             Datagram_ptr acquire_datagram(size_t data_size);
 
-            struct Packet : public Pool_Item_Base
+            struct Packet : public detail::Pool_Item_Base
             {
                 size_t received_fragment_count = 0;
                 q::Clock::time_point added;
@@ -221,8 +221,8 @@ namespace util
                 Packet_Header any_header;
                 std::array<Datagram_ptr, 256> fragments;
             };
-            typedef Pool<Packet>::Ptr Packet_ptr;
-            Pool<Packet> packet_pool;
+            typedef detail::Pool<Packet>::Ptr Packet_ptr;
+            detail::Pool<Packet> packet_pool;
             Packet_ptr acquire_packet();
 
             struct Packet_Queue
@@ -322,73 +322,74 @@ namespace util
         void process_pong_datagram(RX::Datagram_ptr& datagram);
    };
 
-    inline void intrusive_ptr_add_ref(RUDP::Pool_Item_Base* p)
+    namespace detail
     {
-        QASSERT(p);
-        if (p->count.fetch_add(1, std::memory_order_relaxed) > 999)
+        inline void intrusive_ptr_add_ref(Pool_Item_Base* p)
         {
-            QASSERT(0);
-        }
-    }
-    inline void intrusive_ptr_release(RUDP::Pool_Item_Base* p)
-    {
-        QASSERT(p);
-        if (p->count.fetch_sub(1, std::memory_order_release) == 1u)
-        {
-            if (p->gc)
+            QASSERT(p);
+            if (p->count.fetch_add(1, std::memory_order_relaxed) > 999)
             {
-                p->gc(p);
+                QASSERT(0);
+            }
+        }
+        inline void intrusive_ptr_release(Pool_Item_Base* p)
+        {
+            QASSERT(p);
+            if (p->count.fetch_sub(1, std::memory_order_release) == 1u)
+            {
+                if (p->gc)
+                {
+                    p->gc(p);
+                }
+                else
+                {
+                    QASSERT(0);
+                    delete p;
+                }
+            }
+        }
+        template<class T> Pool<T>::Pool()
+        {
+            m_pool = std::make_shared<Items>();
+
+            auto items_ref = m_pool;
+            m_garbage_collector = [items_ref, this](Pool_Item_Base* t)
+            {
+                if (release)
+                {
+                    release(static_cast<T&>(*t));
+                }
+
+                std::lock_guard<std::mutex> lg(items_ref->mutex);
+                items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
+                x_returned++;
+    //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+            };
+        }
+
+        template<class T> auto Pool<T>::acquire() -> Ptr
+        {
+            //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
+
+            std::lock_guard<std::mutex> lg(m_pool->mutex);
+            T* item = nullptr;
+            if (!m_pool->items.empty())
+            {
+                item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
+                m_pool->items.pop_back();
+                x_reused++;
+    //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
             }
             else
             {
-                QASSERT(0);
-                delete p;
+                item = new T;
+                item->gc = m_garbage_collector;
+                x_new++;
+                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
             }
+            QASSERT(item);
+            return Ptr(item);
         }
-    }
-    template<class T>
-    RUDP::Pool<T>::Pool()
-    {
-        m_pool = std::make_shared<Items>();
-
-        auto items_ref = m_pool;
-        m_garbage_collector = [items_ref, this](Pool_Item_Base* t)
-        {
-            if (release)
-            {
-                release(static_cast<T&>(*t));
-            }
-
-            std::lock_guard<std::mutex> lg(items_ref->mutex);
-            items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
-            x_returned++;
-//                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-        };
-    }
-
-    template<class T>
-    auto RUDP::Pool<T>::acquire() -> Ptr
-    {
-        //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
-
-        std::lock_guard<std::mutex> lg(m_pool->mutex);
-        T* item = nullptr;
-        if (!m_pool->items.empty())
-        {
-            item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
-            m_pool->items.pop_back();
-            x_reused++;
-//                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-        }
-        else
-        {
-            item = new T;
-            item->gc = m_garbage_collector;
-            x_new++;
-            RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-        }
-        QASSERT(item);
-        return Ptr(item);
     }
 
     inline auto RUDP::TX::acquire_datagram(size_t data_size) -> RUDP::TX::Datagram_ptr
