@@ -799,8 +799,14 @@ void Comms::send_uav_data()
     m_telemetry_channel.pack(detail::Telemetry_Message::UAV_POSITION_W, m_uav.get_position_w());
 
     m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_CAPACITY_USED, m_uav.get_battery().get_capacity_used());
-    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_CURRENT, m_uav.get_battery().get_average_current());
-    m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_VOLTAGE, m_uav.get_battery().get_average_voltage());
+    {
+        auto avg = m_uav.get_battery().get_average_current();
+        m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_CURRENT, avg.is_initialized(), avg.get_value_or(0.f));
+    }
+    {
+        auto avg = m_uav.get_battery().get_average_voltage();
+        m_telemetry_channel.pack(detail::Telemetry_Message::UAV_BATTERY_VOLTAGE, avg.is_initialized(), avg.get_value_or(0.f));
+    }
 }
 
 void Comms::process()
@@ -838,6 +844,7 @@ void Comms::process()
                 SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
+            SILK_INFO("Received message: {}", static_cast<int>(msg.get()));
         }
     }
 

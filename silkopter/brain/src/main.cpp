@@ -57,7 +57,7 @@ int main(int argc, char const* argv[])
 	}
 
     s_test = vm.count("test") ? vm["test"].as<size_t>() : size_t(0);
-    bool blind = vm.count("blind") != 0;
+    //bool blind = vm.count("blind") != 0;
 
 	boost::asio::io_service io_service;
 
@@ -95,7 +95,7 @@ int main(int argc, char const* argv[])
     uint16_t send_port = 52520;
     uint16_t receive_port = 52521;
 
-    uint16_t stream_port = 52525;
+    //uint16_t stream_port = 52525;
 
     try
     {
