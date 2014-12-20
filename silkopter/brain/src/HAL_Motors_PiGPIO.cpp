@@ -14,7 +14,11 @@ extern "C"
 }
 
 static constexpr std::array<uint32_t, 6> MOTOR_GPIOS = {17, 27, 22, 23, 18, 24};
-constexpr uint32_t GPIO_PWM_RANGE = 10000;
+//constexpr uint32_t GPIO_PWM_RANGE = 10000;
+
+
+constexpr size_t MIN_PULSE = 1000;
+constexpr size_t MAX_PULSE = 2000;
 
 using namespace silk;
 using namespace boost::asio;
@@ -62,26 +66,33 @@ auto HAL_Motors_PiGPIO::init() -> bool
     //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
     for (auto gpio: MOTOR_GPIOS)
     {
-        auto f = set_pull_up_down(gpio, PI_PUD_DOWN);
-        if (f < 0)
+        if (set_pull_up_down(gpio, PI_PUD_DOWN) < 0)
         {
-            SILK_WARNING("Cannot set GPIO pull down mode on gpio {}", gpio);
+            SILK_ERR("GPIO {}: Cannot set pull down mode", gpio);
+            return false;
+        }
+        if (set_mode(gpio, PI_OUTPUT) < 0)
+        {
+            SILK_ERR("GPIO {}: Cannot set GPIO mode to output", gpio);
             return false;
         }
     }
 
     //now configure the pin for PWM or servo
-    if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
+    //if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
     {
         uint32_t freq = 0;
         switch (m_settings.frequency)
         {
-        case PWM_Frequency::PWM_1000Hz: freq = 1000; break;
-        default:
-        {
-            SILK_WARNING("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
-            return false;
-        }
+            case PWM_Frequency::SERVO_50HZ: freq = 50; break;
+            case PWM_Frequency::SERVO_100HZ: freq = 100; break;
+            case PWM_Frequency::SERVO_200HZ: freq = 200; break;
+            case PWM_Frequency::SERVO_400HZ: freq = 400; break;
+            default:
+            {
+                SILK_ERR("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
+                return false;
+            }
         }
 
         for (auto gpio: MOTOR_GPIOS)
@@ -89,23 +100,24 @@ auto HAL_Motors_PiGPIO::init() -> bool
             auto f = set_PWM_frequency(gpio, freq);
             if (f < 0)
             {
-                SILK_WARNING("Cannot set pwm frequency {} on gpio {}", freq, gpio);
+                SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
                 return false;
             }
-            if (set_PWM_range(gpio, GPIO_PWM_RANGE) < 0)
+            m_range = 1000000 / freq;
+            if (set_PWM_range(gpio, m_range) < 0)
             {
-                SILK_WARNING("Cannot set pwm range {} on gpio {}", GPIO_PWM_RANGE, gpio);
+                SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, m_range);
                 return false;
             }
 
-            SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, GPIO_PWM_RANGE);
+            SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, m_range);
         }
     }
-    else
-    {
-        SILK_WARNING("Non-pwm ESC support not implemented");
-        return false;
-    }
+//    else
+//    {
+//        SILK_WARNING("Non-pwm ESC support not implemented");
+//        return false;
+//    }
 
     m_is_initialized = true;
     return true;
@@ -130,15 +142,7 @@ void HAL_Motors_PiGPIO::cut_throttle()
 
     for (auto gpio: MOTOR_GPIOS)
     {
-        if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
-        {
-            uint32_t pulse = 0;
-            set_PWM_dutycycle(gpio, pulse);
-        }
-        else
-        {
-            QASSERT(0);
-        }
+        set_PWM_dutycycle(gpio, MIN_PULSE);
     }
 }
 
@@ -172,15 +176,8 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
         auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
         m_motors[i].throttle = throttle;
 
-        if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
-        {
-            uint32_t pulse = throttle * GPIO_PWM_RANGE;
-            set_PWM_dutycycle(MOTOR_GPIOS[i], pulse);
-        }
-        else
-        {
-            QASSERT(0);
-        }
+        uint32_t pulse = throttle * (MAX_PULSE - MIN_PULSE);
+        set_PWM_dutycycle(MOTOR_GPIOS[i], MIN_PULSE + pulse);
     }
 }
 

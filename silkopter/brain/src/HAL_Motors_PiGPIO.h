@@ -29,9 +29,9 @@ private:
     {
         SERVO_50HZ,
         SERVO_100HZ,
-        SERVO_250HZ,
-        SERVO_500HZ,
-        PWM_1000Hz,
+        SERVO_200HZ,
+        SERVO_400HZ,
+        //PWM_1000Hz, //don't use as the RPI puts the pins high when shutting down!!! This will cause motors to spin
     };
 
     PiGPIO& m_pigpio;
@@ -44,7 +44,9 @@ private:
     std::vector<Motor> m_motors;
 
     bool m_is_connected = false;
-    size_t m_error_count = 0;
+    //size_t m_error_count = 0;
+
+    size_t m_range = 0;
 
     struct Impl;
     std::shared_ptr<Impl> m_impl;
@@ -52,7 +54,7 @@ private:
     struct Settings
     {
         size_t count = 4;
-        PWM_Frequency frequency = PWM_Frequency::PWM_1000Hz;
+        PWM_Frequency frequency = PWM_Frequency::SERVO_50HZ;
 //        rapidjson::Document document;
     } m_settings;
 
