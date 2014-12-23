@@ -8,6 +8,9 @@ class HAL_Motors : q::util::Noncopyable
 public:
     virtual ~HAL_Motors() {}
 
+    virtual auto init() -> bool = 0;
+    virtual void shutdown() = 0;
+
     //----------------------------------------------------------------------
     //motors
 

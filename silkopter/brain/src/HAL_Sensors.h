@@ -12,6 +12,9 @@ class HAL_Sensors : q::util::Noncopyable
 public:
     virtual ~HAL_Sensors() {}
 
+    virtual auto init() -> bool = 0;
+    virtual void shutdown() = 0;
+
     //----------------------------------------------------------------------
     //calibration
     virtual void set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale) = 0;

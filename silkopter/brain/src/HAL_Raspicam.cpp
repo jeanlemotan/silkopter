@@ -28,7 +28,9 @@ extern "C"
 #define MMAL_CAMERA_VIDEO_PORT 1
 #define MMAL_CAMERA_CAPTURE_PORT 2
 
-using namespace silk;
+namespace silk
+{
+
 
 typedef std::shared_ptr<MMAL_COMPONENT_T> Component_ptr;
 typedef std::shared_ptr<MMAL_CONNECTION_T> Connection_ptr;
@@ -81,6 +83,8 @@ struct HAL_Raspicam::Impl
 
 static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 {
+//    SCOPED_PINS_GUARD;
+
     QASSERT(connection);
     if (yes == connection->is_enabled)
     {
@@ -95,6 +99,7 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
         return mmal_connection_disable(connection.get()) == MMAL_SUCCESS;
     }
 }
+
 
 HAL_Raspicam::HAL_Raspicam()
 {
@@ -138,6 +143,12 @@ auto HAL_Raspicam::init() -> bool
     }
     return res;
 }
+
+void HAL_Raspicam::shutdown()
+{
+    QASSERT(m_impl->camera);
+}
+
 
 void HAL_Raspicam::process()
 {
@@ -209,6 +220,8 @@ void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
 
 static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
 {
+//    SCOPED_PINS_GUARD;
+
     QASSERT(format);
     std::string prefix(tabs, '\t');
     char encoding[5] = {0};
@@ -232,6 +245,8 @@ static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
 
 static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port);
     std::string prefix(tabs, '\t');
     SILK_INFO("{}name: {}", prefix, port->name);
@@ -258,6 +273,8 @@ static Connection_ptr connect_ports(MMAL_PORT_T* output, MMAL_PORT_T* input)
 
 static Component_ptr create_component(char const* name, size_t min_input_count, size_t min_output_count)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(name);
 
     SILK_INFO("Creating component {}", name);
@@ -293,6 +310,8 @@ static Component_ptr create_component(char const* name, size_t min_input_count, 
 
 static bool enable_port(MMAL_PORT_T* port, MMAL_PORT_BH_CB_T cb)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port);
     QASSERT(cb);
 
@@ -307,6 +326,8 @@ static bool enable_port(MMAL_PORT_T* port, MMAL_PORT_BH_CB_T cb)
 }
 static bool enable_component(Component_ptr component)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(component);
     SILK_INFO("Enabling component {}", component->name);
     MMAL_STATUS_T status;
@@ -319,6 +340,8 @@ static bool enable_component(Component_ptr component)
 }
 static void copy_format(MMAL_PORT_T* dst, MMAL_PORT_T* src)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(dst);
     QASSERT(src);
 
@@ -333,6 +356,8 @@ static void copy_format(MMAL_PORT_T* dst, MMAL_PORT_T* src)
 }
 static bool commit_format(MMAL_PORT_T* port)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port);
 
     SILK_INFO("Trying to set new format to port {}:", port->name);
@@ -355,6 +380,8 @@ static bool commit_format(MMAL_PORT_T* port)
 
 MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER_T* buffer, void* userdata)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(pool);
     QASSERT(buffer);
 
@@ -382,6 +409,8 @@ MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER
 
 static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T* userdata, MMAL_PORT_BH_CB_T cb, uint32_t buffer_count)
 {
+    //    SCOPED_PINS_GUARD;;
+
     //setup video port buffer and a pool to hold them
     port->buffer_size = math::max(port->buffer_size_recommended, port->buffer_size_min);
     port->buffer_num = math::max(port->buffer_num_recommended, port->buffer_num_min);
@@ -432,6 +461,8 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
 
 static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(encoder);
     QASSERT(bitrate > 0);
 
@@ -488,6 +519,8 @@ static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, mat
 
 static Component_ptr create_encoder_component_for_saving(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
 {
+    //    SCOPED_PINS_GUARD;;
+
     Component_ptr encoder = create_component(MMAL_COMPONENT_DEFAULT_VIDEO_ENCODER, 1, 1);
     if (!encoder)
     {
@@ -545,6 +578,8 @@ static Component_ptr create_encoder_component_for_saving(MMAL_PORT_T* src, math:
 
 static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
 {
+    //    SCOPED_PINS_GUARD;;
+
     Component_ptr encoder = create_component(MMAL_COMPONENT_DEFAULT_VIDEO_ENCODER, 1, 1);
     if (!encoder)
     {
@@ -642,6 +677,8 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 
 static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u32 const& resolution, bool align, size_t fps)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(format);
     QASSERT(resolution.x > 0 && resolution.y > 0);
     QASSERT(fps > 0);
@@ -662,6 +699,8 @@ static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u32 const& re
 
 static Component_ptr create_splitter_component(MMAL_PORT_T* src)
 {
+    //    SCOPED_PINS_GUARD;;
+
     Component_ptr splitter = create_component(MMAL_COMPONENT_DEFAULT_SPLITTER, 1, 3);
     if (!splitter)
     {
@@ -693,6 +732,8 @@ static Component_ptr create_splitter_component(MMAL_PORT_T* src)
 
 static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t fps)
 {
+    //    SCOPED_PINS_GUARD;;
+
     Component_ptr resizer = create_component("vc.ril.resize", 1, 1);
     if (!resizer)
     {
@@ -744,6 +785,8 @@ static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u32 co
 
 static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port && buffer);
     //GCamera->OnCameraControlCallback(port, buffer);
     SILK_INFO("Camera control callback called: {}, {}", port, buffer);
@@ -756,6 +799,8 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
                                        MMAL_PORT_T* port,
                                        MMAL_BUFFER_HEADER_T* buffer)
 {
+    //    SCOPED_PINS_GUARD;;
+
     if (!callback)
     {
         MMAL_CALL(mmal_buffer_header_release(buffer));
@@ -814,6 +859,8 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
 
 static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port && buffer);
     HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
@@ -830,6 +877,8 @@ static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER
 
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+    //    SCOPED_PINS_GUARD;;
+
     QASSERT(port && buffer);
     HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
@@ -840,6 +889,8 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
 
 auto HAL_Raspicam::create_components() -> bool
 {
+    //    SCOPED_PINS_GUARD;;
+
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
     if (!m_impl->camera)
     {
@@ -1117,4 +1168,9 @@ void HAL_Raspicam::set_quality(camera_input::Stream_Quality sq)
     }
 }
 
+}
+
+
 #endif
+
+

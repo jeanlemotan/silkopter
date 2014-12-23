@@ -90,7 +90,8 @@ SOURCES += \
     ../../src/PiGPIO.cpp \
     ../../src/HAL_Motors_PiGPIO.cpp \
     ../../src/chips/OdroidW_ADC.cpp \
-    ../../src/Battery.cpp
+    ../../src/Battery.cpp \
+    ../../src/chips/SRF02.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -130,5 +131,6 @@ HEADERS += \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
     ../../src/chips/OdroidW_ADC.h \
-    ../../src/Battery.h
+    ../../src/Battery.h \
+    ../../src/chips/SRF02.h
 

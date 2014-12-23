@@ -12,6 +12,7 @@ public:
     ~HAL_Sensors_Pi();
 
     auto init() -> bool;
+    void shutdown();
 
     //----------------------------------------------------------------------
     //calibration

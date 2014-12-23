@@ -10,6 +10,9 @@ class HAL_Camera : q::util::Noncopyable
 public:
     virtual ~HAL_Camera() {}
 
+    virtual auto init() -> bool = 0;
+    virtual void shutdown() = 0;
+
     //----------------------------------------------------------------------
 
     typedef std::function<void(uint8_t const* data, size_t size)> Data_Available_Callback;

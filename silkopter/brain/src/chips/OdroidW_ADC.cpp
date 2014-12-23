@@ -5,10 +5,14 @@
 
 #ifdef RASPBERRY_PI
 
+extern "C"
+{
+    #include "pigpiod_if.h"
+}
+
 
 namespace silk
 {
-
 
 constexpr uint8_t ADDR = 0x32;
 
@@ -72,6 +76,11 @@ void OdroidW_ADC::process()
 
 auto OdroidW_ADC::read_sample(size_t idx) -> boost::optional<float>
 {
+    set_mode(28, PI_INPUT);
+    set_mode(29, PI_INPUT);
+    set_mode(0, PI_ALT0);
+    set_mode(1, PI_ALT0);
+
     uint8_t adc_sel = 0;
     uint8_t addr_H = 0;
     uint8_t addr_L = 0;
@@ -94,6 +103,11 @@ auto OdroidW_ADC::read_sample(size_t idx) -> boost::optional<float>
 
     int rawdata_H = m_i2c.read_u8(ADDR, addr_H);
     int rawdata_L = m_i2c.read_u8(ADDR, addr_L);
+
+    set_mode(0, PI_INPUT);
+    set_mode(1, PI_INPUT);
+    set_mode(28, PI_ALT0);
+    set_mode(29, PI_ALT0);
 
     int result = (unsigned int)(rawdata_H << 4) | (rawdata_L&0xf);
 

@@ -13,6 +13,7 @@
 #define USE_MPU9250
 #define USE_MS5611
 #define USE_ODROIDW_ADC
+#define USE_SRF02
 
 #ifdef USE_MPU9250
 #   include "chips/MPU9250.h"
@@ -28,6 +29,10 @@
 
 #ifdef USE_ODROIDW_ADC
 #   include "chips/OdroidW_ADC.h"
+#endif
+
+#ifdef USE_SRF02
+#   include "chips/SRF02.h"
 #endif
 
 using namespace silk;
@@ -46,6 +51,10 @@ struct HAL_Sensors_Pi::Impl
 #ifdef USE_ODROIDW_ADC
     OdroidW_ADC adc;
 #endif
+
+#ifdef USE_SRF02
+    SRF02 sonar;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////
@@ -54,8 +63,8 @@ HAL_Sensors_Pi::HAL_Sensors_Pi()
 {
     m_impl.reset(new Impl);
 
-    m_config.barometer_i2c_device = "/dev/i2c-1";
-    m_config.mpu_i2c_device = "/dev/i2c-1";
+    m_config.barometer_i2c_device = "/dev/i2c-0";
+    m_config.mpu_i2c_device = "/dev/i2c-0";
 
     load_settings();
     save_settings();
@@ -80,11 +89,11 @@ auto HAL_Sensors_Pi::load_settings() -> bool
     m_config = cfg;
     if (m_config.barometer_i2c_device.empty())
     {
-        m_config.barometer_i2c_device = "/dev/i2c-1";
+        m_config.barometer_i2c_device = "/dev/i2c-0";
     }
     if (m_config.mpu_i2c_device.empty())
     {
-        m_config.mpu_i2c_device = "/dev/i2c-1";
+        m_config.mpu_i2c_device = "/dev/i2c-0";
     }
 
     return true;
@@ -150,8 +159,21 @@ auto HAL_Sensors_Pi::init() -> bool
     }
 #endif
 
+#ifdef USE_SRF02
+    if (!m_impl->sonar.init(std::chrono::milliseconds(0)))
+    {
+        return false;
+    }
+#endif
+
     m_is_initialized = true;
     return true;
+}
+
+void HAL_Sensors_Pi::shutdown()
+{
+    QASSERT(m_is_initialized);
+    m_is_initialized = false;
 }
 
 void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
@@ -386,6 +408,21 @@ void HAL_Sensors_Pi::process()
             m_voltage_sample.dt = m_impl->adc.get_voltage_sample_time();
             m_voltage_sample.sample_idx++;
             m_voltage_samples.push_back(m_voltage_sample);
+        }
+    }
+#endif
+
+#ifdef USE_SRF02
+    m_impl->sonar.process();
+    {
+        auto val = m_impl->sonar.read_distance();
+        if (val)
+        {
+            SILK_INFO("DISTANCE: {}", *val);
+            m_sonar_sample.value = *val;
+            m_sonar_sample.dt = m_impl->sonar.get_sample_time();
+            m_sonar_sample.sample_idx++;
+            m_sonar_samples.push_back(m_sonar_sample);
         }
     }
 #endif

@@ -8,6 +8,9 @@ class HAL_Camera_Mount : q::util::Noncopyable
 public:
     virtual ~HAL_Camera_Mount() {}
 
+    virtual auto init() -> bool = 0;
+    virtual void shutdown() = 0;
+
     //----------------------------------------------------------------------
     //mount
 

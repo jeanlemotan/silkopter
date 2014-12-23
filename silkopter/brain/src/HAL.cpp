@@ -8,105 +8,78 @@
 #include "HAL_Sensors_Sim.h"
 
 #ifdef RASPBERRY_PI
-    extern "C"
-    {
-        #include "bcm_host.h"
-    }
-    #include "PiGPIO.h"
-    struct silk::HAL::Impl
-    {
-        Impl(boost::asio::io_service& io_service)  {}
-
-        void process()
-        {
-        }
-
-        silk::PiGPIO pigpio;
-    };
-#else
-    #include "Sim_Comms.h"
-    struct silk::HAL::Impl
-    {
-        Impl(boost::asio::io_service& io_service)
-            : sim_comms(io_service) {}
-
-        void process()
-        {
-            if (!sim_comms.is_connected())
-            {
-                sim_comms.connect();
-            }
-            else
-            {
-                sim_comms.process();
-            }
-        }
-
-        silk::Sim_Comms sim_comms;
-    };
+extern "C"
+{
+    #include "bcm_host.h"
+    #include "pigpiod_if.h"
+}
 #endif
 
 
 using namespace silk;
 
-auto HAL::init(boost::asio::io_service& io_service) -> bool
+auto HAL::init() -> bool
 {
-    m_impl.reset(new Impl(io_service));
-
 #ifdef RASPBERRY_PI
+
     SILK_INFO("initializing bcm_host");
     bcm_host_init();
 
-    if (!m_impl->pigpio.init())
+    SILK_INFO("Connecting to pigpiod daemon");
+    if (pigpio_start(nullptr, nullptr) < 0)
     {
+        SILK_ERR("Cannot connect to pigpiod. Make sure it's started.");
         return false;
     }
 
-    auto m = new HAL_Motors_PiGPIO(m_impl->pigpio);
-    motors.reset(m);
-    if (!m->init())
-    {
-        return false;
-    }
+    set_mode(0, PI_INPUT);
+    set_mode(1, PI_INPUT);
+    set_mode(28, PI_ALT0);
+    set_mode(29, PI_ALT0);
 
-    auto c = new HAL_Raspicam;
-    camera.reset(c);
-//    if (!c->init())
-    {
-        SILK_WARNING("*** Camera failed, continuing without");
-        //return false;
-    }
-
-    auto s = new HAL_Sensors_Pi;
-    sensors.reset(s);
-    if (!s->init())
-    {
-        return false;
-    }
+    motors.reset(new HAL_Motors_PiGPIO());
+    camera.reset(new HAL_Raspicam());
+    sensors.reset(new HAL_Sensors_Pi());
 #else
-    auto m = new HAL_Motors_Sim(m_impl->sim_comms);
-    motors.reset(m);
-//    if (m->init() != HAL_Motors_Sim::Result::OK)
-//    {
-//        return false;
-//    }
-
-//    auto c = new HAL_Raspicam;
-//    camera.reset(c);
-//    if (c->init() != HAL_Raspicam::Result::OK)
-//    {
-//        return false;
-//    }
-
-    auto s = new HAL_Sensors_Sim(m_impl->sim_comms);
-    sensors.reset(s);
-//    if (s->init() != HAL_Sensors_Sim::Result::OK)
-//    {
-//        return false;
-//    }
+//    motors.reset(new HAL_Motors_Sim());
+////    camera.reset(new HAL_Raspicam());
+//    sensors.reset(new HAL_Sensors_Sim());
 #endif
 
+    if (motors && !motors->init())
+    {
+        return false;
+    }
+//    if (camera && !camera->init())
+//    {
+//        return false;
+//    }
+    if (sensors && !sensors->init())
+    {
+        return false;
+    }
+
     return true;
+}
+
+void HAL::shutdown()
+{
+    if (motors)
+    {
+        motors->shutdown();
+    }
+    if (camera)
+    {
+        camera->shutdown();
+    }
+    if (sensors)
+    {
+        sensors->shutdown();
+    }
+
+#ifdef RASPBERRY_PI
+    pigpio_stop();
+#endif
 }
 
 void HAL::process()
@@ -125,6 +98,6 @@ void HAL::process()
     }
 
     //NOTE!!! this HAS to be here, at the end. The SIM comms depends on it
-    m_impl->process();
+    //m_impl->process();
 }
 

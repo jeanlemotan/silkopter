@@ -100,8 +100,7 @@ int main(int argc, char const* argv[])
     try
     {
         silk::HAL hal;
-
-        if (!hal.init(io_service))
+        if (!hal.init())
         {
             SILK_ERR("Hardware failure! Aborting");
             abort();

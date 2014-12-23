@@ -14,7 +14,8 @@ struct HAL : q::util::Noncopyable
     std::unique_ptr<HAL_Motors> motors;
     std::unique_ptr<HAL_Camera> camera;
 
-    auto init(boost::asio::io_service& io_service) -> bool;
+    auto init() -> bool;
+    void shutdown();
     void process();
 
 private:
