@@ -1,7 +1,6 @@
 #pragma once
 
 #include "HAL_Motors.h"
-#include "PiGPIO.h"
 
 namespace silk
 {
@@ -41,11 +40,6 @@ private:
         float throttle = 0;
     };
     std::vector<Motor> m_motors;
-
-    bool m_is_connected = false;
-    //size_t m_error_count = 0;
-
-    size_t m_range = 0;
 
     struct Impl;
     std::shared_ptr<Impl> m_impl;

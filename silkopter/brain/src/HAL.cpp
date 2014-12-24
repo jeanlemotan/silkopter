@@ -3,7 +3,7 @@
 #include "HAL_Motors_PiGPIO.h"
 #include "HAL_Motors_Sim.h"
 #include "HAL_Raspicam.h"
-//#include "HAL_Camera_Sim.h"
+#include "HAL_Camera_Mount_PiGPIO.h"
 #include "HAL_Sensors_Pi.h"
 #include "HAL_Sensors_Sim.h"
 
@@ -40,6 +40,7 @@ auto HAL::init() -> bool
     motors.reset(new HAL_Motors_PiGPIO());
     camera.reset(new HAL_Raspicam());
     sensors.reset(new HAL_Sensors_Pi());
+    camera_mount.reset(new HAL_Camera_Mount_PiGPIO());
 #else
 //    motors.reset(new HAL_Motors_Sim());
 ////    camera.reset(new HAL_Raspicam());
@@ -55,6 +56,10 @@ auto HAL::init() -> bool
         return false;
     }
     if (sensors && !sensors->init())
+    {
+        return false;
+    }
+    if (camera_mount && !camera_mount->init())
     {
         return false;
     }

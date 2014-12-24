@@ -87,11 +87,11 @@ SOURCES += \
     ../../src/HAL.cpp \
     ../../src/Sim_Comms.cpp \
     ../../src/HAL_Motors_Sim.cpp \
-    ../../src/PiGPIO.cpp \
     ../../src/HAL_Motors_PiGPIO.cpp \
     ../../src/chips/OdroidW_ADC.cpp \
     ../../src/Battery.cpp \
-    ../../src/chips/SRF02.cpp
+    ../../src/chips/SRF02.cpp \
+    ../../src/HAL_Camera_Mount_PiGPIO.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -122,7 +122,6 @@ HEADERS += \
     ../../src/HAL_Sensors_Pi.h \
     ../../src/HAL_Sensors_Sim.h \
     ../../src/HAL.h \
-    ../../src/PiGPIO.h \
     ../../src/Sim_Comms.h \
     ../../../libs/common/Comm_Data.h \
     ../../src/HAL_Camera_Mount_PiGPIO.h \

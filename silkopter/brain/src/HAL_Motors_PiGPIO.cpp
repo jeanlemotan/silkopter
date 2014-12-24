@@ -102,14 +102,14 @@ auto HAL_Motors_PiGPIO::init() -> bool
                 SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
                 return false;
             }
-            m_range = 1000000 / freq;
-            if (set_PWM_range(gpio, m_range) < 0)
+            auto range = 1000000 / freq;
+            if (set_PWM_range(gpio, range) < 0)
             {
-                SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, m_range);
+                SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
                 return false;
             }
 
-            SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, m_range);
+            SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
         }
     }
 //    else

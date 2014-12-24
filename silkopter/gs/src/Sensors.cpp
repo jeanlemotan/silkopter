@@ -220,8 +220,9 @@ void Sensors::process()
                 if (sample.value < m_barometer_range.first || sample.value >= m_barometer_range.second)
                 {
                     auto range = math::abs(m_barometer_range.second - m_barometer_range.first);
-                    m_barometer_range.first = sample.value - range * 0.5f;
-                    m_barometer_range.second = sample.value + range * 0.5f;
+                    auto min = math::max(sample.value - range * 0.5f, 0.f);
+                    m_barometer_range.first = min;
+                    m_barometer_range.second = min + range;
                     m_ui.bt_plot->yAxis->setRange(m_barometer_range.first, m_barometer_range.second);
                 }
             }
@@ -252,8 +253,9 @@ void Sensors::process()
                 if (sample.value < m_voltage_range.first || sample.value >= m_voltage_range.second)
                 {
                     auto range = math::abs(m_voltage_range.second - m_voltage_range.first);
-                    m_voltage_range.first = sample.value - range * 0.5f;
-                    m_voltage_range.second = sample.value + range * 0.5f;
+                    auto min = math::max(sample.value - range * 0.5f, 0.f);
+                    m_voltage_range.first = min;
+                    m_voltage_range.second = min + range;
                     m_ui.vc_plot->yAxis->setRange(m_voltage_range.first, m_voltage_range.second);
                 }
             }
