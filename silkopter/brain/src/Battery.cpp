@@ -110,7 +110,7 @@ void Battery::process(const std::vector<Current_Sample>& current_samples, const 
     if (xxx > 20)
     {
         xxx = 0;
-        SILK_INFO("{}V, {}A, {}Ah", m_average_voltage, m_average_current, m_capacity_used_mah);
+        //SILK_INFO("{}V, {}A, {}Ah", m_average_voltage, m_average_current, m_capacity_used_mah);
     }
 }
 

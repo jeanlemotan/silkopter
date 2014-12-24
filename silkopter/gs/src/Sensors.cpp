@@ -117,20 +117,33 @@ Sensors::Sensors(QWidget *parent /* = 0 */)
     m_ui.c_plot->addGraph();
     m_ui.c_plot->graph(2)->setPen(QPen(Qt::blue));
 
-	m_ui.barometer_plot->addGraph();
-	m_ui.barometer_plot->graph(0)->setPen(QPen(Qt::red));
-    m_ui.barometer_plot->addGraph();
-    m_ui.barometer_plot->graph(1)->setPen(QPen(Qt::blue));
+    m_barometer_range = std::make_pair(9000.f, 9005.f);
+    m_ui.bt_plot->addGraph();
+    m_ui.bt_plot->graph(0)->setPen(QPen(Qt::blue));
+    m_ui.bt_plot->yAxis->setLabel("Pressure");
+
+    m_thermometer_range = std::make_pair(9000.f, 9010.f);
+    m_ui.bt_plot->addGraph(m_ui.bt_plot->xAxis, m_ui.bt_plot->yAxis2);
+    m_ui.bt_plot->graph(1)->setPen(QPen(Qt::red));
+    m_ui.bt_plot->yAxis2->setLabel("Temperature");
+    m_ui.bt_plot->yAxis2->setVisible(true);
+//    m_ui.bt_plot->yAxis2->setRange(0, 55);
 
     m_ui.sonar_plot->addGraph();
     m_ui.sonar_plot->graph(0)->setPen(QPen(Qt::red));
     m_ui.sonar_plot->addGraph();
     m_ui.sonar_plot->graph(1)->setPen(QPen(Qt::blue));
 
-    m_ui.thermometer_plot->addGraph();
-    m_ui.thermometer_plot->graph(0)->setPen(QPen(Qt::red));
-    m_ui.thermometer_plot->addGraph();
-    m_ui.thermometer_plot->graph(1)->setPen(QPen(Qt::blue));
+    m_voltage_range = std::make_pair(9000.f, 9005.f);
+    m_ui.vc_plot->addGraph();
+    m_ui.vc_plot->graph(0)->setPen(QPen(Qt::blue));
+    m_ui.vc_plot->yAxis->setLabel("Voltage");
+
+    m_current_range = std::make_pair(9000.f, 9010.f);
+    m_ui.vc_plot->addGraph(m_ui.vc_plot->xAxis, m_ui.vc_plot->yAxis2);
+    m_ui.vc_plot->graph(1)->setPen(QPen(Qt::red));
+    m_ui.vc_plot->yAxis2->setLabel("Current");
+    m_ui.vc_plot->yAxis2->setVisible(true);
 
     connect(m_ui.a_calibrate, &QPushButton::released, this, &Sensors::start_accelerometer_calibration);
     connect(m_ui.g_calibrate, &QPushButton::released, this, &Sensors::start_gyroscope_calibration);
@@ -201,26 +214,70 @@ void Sensors::process()
         }
 
         {
-            auto const& sample = m_comms->get_barometer_sample();
-            add_plot_sample(*m_ui.barometer_plot, m_plot_x_value, sample.value);
+            {
+                auto const& sample = m_comms->get_barometer_sample();
+                m_ui.bt_plot->graph(0)->addData(m_plot_x_value, sample.value);
+                if (sample.value < m_barometer_range.first || sample.value >= m_barometer_range.second)
+                {
+                    auto range = math::abs(m_barometer_range.second - m_barometer_range.first);
+                    m_barometer_range.first = sample.value - range * 0.5f;
+                    m_barometer_range.second = sample.value + range * 0.5f;
+                    m_ui.bt_plot->yAxis->setRange(m_barometer_range.first, m_barometer_range.second);
+                }
+            }
+            {
+                auto const& sample = m_comms->get_thermometer_sample();
+                m_ui.bt_plot->graph(1)->addData(m_plot_x_value, sample.value);
+                if (sample.value < m_thermometer_range.first || sample.value >= m_thermometer_range.second)
+                {
+                    auto range = math::abs(m_thermometer_range.second - m_thermometer_range.first);
+                    m_thermometer_range.first = sample.value - range * 0.5f;
+                    m_thermometer_range.second = sample.value + range * 0.5f;
+                    m_ui.bt_plot->yAxis2->setRange(m_thermometer_range.first, m_thermometer_range.second);
+                }
+            }
             if (m_plot_x_value > q::Seconds(graph_length).count())
             {
-                remove_plot_data_before(*m_ui.barometer_plot, graph_length);
+                remove_plot_data_before(*m_ui.bt_plot, graph_length);
             }
-            m_ui.barometer_plot->rescaleAxes(true);
-            m_ui.barometer_plot->replot();
+            m_ui.bt_plot->graph(0)->rescaleAxes(true, true);//rescaleAxes(true);
+            m_ui.bt_plot->graph(1)->rescaleAxes(true, true);
+            m_ui.bt_plot->replot();
         }
 
         {
-            auto const& sample = m_comms->get_thermometer_sample();
-            add_plot_sample(*m_ui.thermometer_plot, m_plot_x_value, sample.value);
+            {
+                auto const& sample = m_comms->get_voltage_sample();
+                m_ui.vc_plot->graph(0)->addData(m_plot_x_value, sample.value);
+                if (sample.value < m_voltage_range.first || sample.value >= m_voltage_range.second)
+                {
+                    auto range = math::abs(m_voltage_range.second - m_voltage_range.first);
+                    m_voltage_range.first = sample.value - range * 0.5f;
+                    m_voltage_range.second = sample.value + range * 0.5f;
+                    m_ui.vc_plot->yAxis->setRange(m_voltage_range.first, m_voltage_range.second);
+                }
+            }
+            {
+                auto const& sample = m_comms->get_current_sample();
+                m_ui.vc_plot->graph(1)->addData(m_plot_x_value, sample.value);
+                if (sample.value < m_current_range.first || sample.value >= m_current_range.second)
+                {
+                    auto range = math::abs(m_current_range.second - m_current_range.first);
+                    auto min = math::max(sample.value - range * 0.5f, 0.f);
+                    m_current_range.first = min;
+                    m_current_range.second = min + range;
+                    m_ui.vc_plot->yAxis2->setRange(m_current_range.first, m_current_range.second);
+                }
+            }
             if (m_plot_x_value > q::Seconds(graph_length).count())
             {
-                remove_plot_data_before(*m_ui.thermometer_plot, graph_length);
+                remove_plot_data_before(*m_ui.vc_plot, graph_length);
             }
-            m_ui.thermometer_plot->rescaleAxes(true);
-            m_ui.thermometer_plot->replot();
+            m_ui.vc_plot->graph(0)->rescaleAxes(true, true);//rescaleAxes(true);
+            m_ui.vc_plot->graph(1)->rescaleAxes(true, true);
+            m_ui.vc_plot->replot();
         }
+
 
         {
             auto const& sample = m_comms->get_sonar_sample();
@@ -229,7 +286,9 @@ void Sensors::process()
             {
                 remove_plot_data_before(*m_ui.sonar_plot, graph_length);
             }
-            m_ui.sonar_plot->rescaleAxes(true);
+            //m_ui.sonar_plot->rescaleAxes(true);
+            m_ui.sonar_plot->graph(0)->rescaleAxes(true, true);
+            m_ui.sonar_plot->graph(1)->rescaleAxes(true, true);
             m_ui.sonar_plot->replot();
         }
 	}
@@ -240,9 +299,9 @@ void Sensors::process()
         clear_plot(*m_ui.g_plot);
         clear_plot(*m_ui.a_plot);
         clear_plot(*m_ui.c_plot);
-        clear_plot(*m_ui.barometer_plot);
+        clear_plot(*m_ui.bt_plot);
         clear_plot(*m_ui.sonar_plot);
-        clear_plot(*m_ui.thermometer_plot);
+        clear_plot(*m_ui.vc_plot);
     }
 
     update_calibration();
@@ -908,9 +967,10 @@ void Sensors::remove_plot_data_before(QCustomPlot& plot, q::Clock::duration leng
         if (graph && !graph->data()->empty())
         {
             plot.graph(i)->removeDataBefore(plot.graph(i)->data()->last().key - q::Seconds(length).count());
+            plot.graph(i)->rescaleKeyAxis(false, false);
         }
     }
-    plot.rescaleAxes(true);
+    //plot.rescaleAxes(true);
 }
 void Sensors::clear_plot(QCustomPlot& plot)
 {

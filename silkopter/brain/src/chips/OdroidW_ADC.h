@@ -12,8 +12,8 @@ public:
 
     void process();
 
-    auto read_current_sample() -> boost::optional<float>;
-    auto read_voltage_sample() -> boost::optional<float>;
+    auto read_current() -> boost::optional<float>;
+    auto read_voltage() -> boost::optional<float>;
 
     auto get_current_sample_time() const -> q::Clock::duration;
     auto get_voltage_sample_time() const -> q::Clock::duration;

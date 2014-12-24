@@ -9,7 +9,7 @@ namespace silk
 class HAL_Motors_PiGPIO : public HAL_Motors
 {
 public:
-    HAL_Motors_PiGPIO(PiGPIO& pigpio);
+    HAL_Motors_PiGPIO();
     ~HAL_Motors_PiGPIO();
 
     auto init() -> bool;
@@ -34,7 +34,6 @@ private:
         //PWM_1000Hz, //don't use as the RPI puts the pins high when shutting down!!! This will cause motors to spin
     };
 
-    PiGPIO& m_pigpio;
     bool m_is_initialized = false;
 
     struct Motor

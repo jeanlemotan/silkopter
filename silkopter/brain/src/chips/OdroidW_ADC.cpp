@@ -69,17 +69,60 @@ auto OdroidW_ADC::init(q::Clock::duration current_sample_time, q::Clock::duratio
     return true;
 }
 
+struct Mode_Guard
+{
+    Mode_Guard()
+    {
+        set_mode(28, PI_INPUT);
+        set_mode(29, PI_INPUT);
+        set_mode(0, PI_ALT0);
+        set_mode(1, PI_ALT0);
+    }
+    ~Mode_Guard()
+    {
+        set_mode(28, PI_ALT0);
+        set_mode(29, PI_ALT0);
+        set_mode(0, PI_INPUT);
+        set_mode(1, PI_INPUT);
+    }
+};
+
 void OdroidW_ADC::process()
 {
+    int read = 0;
 
+    auto now = q::Clock::now();
+    if (now - m_adc_current.last_time_point >= m_adc_current.sample_time)
+    {
+        m_adc_current.last_time_point = now;
+        read |= 0x1;
+    }
+
+    if (now - m_adc_voltage.last_time_point >= m_adc_voltage.sample_time)
+    {
+        m_adc_voltage.last_time_point = now;
+        read |= 0x2;
+    }
+
+    if (!read)
+    {
+        return;
+    }
+
+    Mode_Guard mg;
+
+    if (read & 0x1)
+    {
+        m_adc_current.data = read_sample(0);
+    }
+    if (read & 0x2)
+    {
+        m_adc_voltage.data = read_sample(1);
+    }
 }
 
 auto OdroidW_ADC::read_sample(size_t idx) -> boost::optional<float>
 {
-    set_mode(28, PI_INPUT);
-    set_mode(29, PI_INPUT);
-    set_mode(0, PI_ALT0);
-    set_mode(1, PI_ALT0);
 
     uint8_t adc_sel = 0;
     uint8_t addr_H = 0;
@@ -98,18 +141,19 @@ auto OdroidW_ADC::read_sample(size_t idx) -> boost::optional<float>
     }
 
     // Start AIN0/AIN1 pin single-mode & 1-time conversion mode for ADC
-    m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, adc_sel);
+    if (!m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, adc_sel))
+    {
+        return boost::none;
+    }
     boost::this_thread::sleep_for(boost::chrono::microseconds(300));
 
-    int rawdata_H = m_i2c.read_u8(ADDR, addr_H);
-    int rawdata_L = m_i2c.read_u8(ADDR, addr_L);
+    std::array<uint8_t, 2> buf;
+    if (!m_i2c.read(ADDR, addr_H, buf.data(), buf.size()))
+    {
+        return boost::none;
+    }
 
-    set_mode(0, PI_INPUT);
-    set_mode(1, PI_INPUT);
-    set_mode(28, PI_ALT0);
-    set_mode(29, PI_ALT0);
-
-    int result = (unsigned int)(rawdata_H << 4) | (rawdata_L&0xf);
+    int result = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
 
     // Stop AD conversion */
     //m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, uint8_t(0x00));
@@ -117,27 +161,17 @@ auto OdroidW_ADC::read_sample(size_t idx) -> boost::optional<float>
     return math::clamp(static_cast<float>(result) / 4095.f, 0.f, 1.f);
 }
 
-auto OdroidW_ADC::read_current_sample() -> boost::optional<float>
+auto OdroidW_ADC::read_current() -> boost::optional<float>
 {
-    auto now = q::Clock::now();
-    if (now - m_adc_current.last_time_point >= m_adc_current.sample_time)
-    {
-        m_adc_current.last_time_point = now;
-        m_adc_current.data = read_sample(0);
-        return m_adc_current.data;
-    }
-    return boost::none;
+    auto res = m_adc_current.data;
+    m_adc_current.data.reset();
+    return res;
 }
-auto OdroidW_ADC::read_voltage_sample() -> boost::optional<float>
+auto OdroidW_ADC::read_voltage() -> boost::optional<float>
 {
-    auto now = q::Clock::now();
-    if (now - m_adc_voltage.last_time_point >= m_adc_voltage.sample_time)
-    {
-        m_adc_voltage.last_time_point = now;
-        m_adc_voltage.data = read_sample(1);
-        return m_adc_voltage.data;
-    }
-    return boost::none;
+    auto res = m_adc_voltage.data;
+    m_adc_voltage.data.reset();
+    return res;
 }
 
 auto OdroidW_ADC::get_current_sample_time() const -> q::Clock::duration

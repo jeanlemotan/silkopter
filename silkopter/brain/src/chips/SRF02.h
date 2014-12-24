@@ -18,12 +18,10 @@ public:
 private:
     i2c m_i2c;
 
-    auto read_distance(size_t idx) -> boost::optional<float>;
-
     boost::optional<float> m_data;
     q::Clock::duration m_sample_time;
     q::Clock::time_point m_last_time_point;
-    q::Clock::time_point m_measurement_start;
+    int m_state = 0;
 };
 
 }

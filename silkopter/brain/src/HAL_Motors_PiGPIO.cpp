@@ -25,8 +25,7 @@ using namespace boost::asio;
 
 ///////////////////////////////////////////////////////////////
 
-HAL_Motors_PiGPIO::HAL_Motors_PiGPIO(PiGPIO& pigpio)
-    : m_pigpio(pigpio)
+HAL_Motors_PiGPIO::HAL_Motors_PiGPIO()
 {
     load_settings();
 }

@@ -48,6 +48,12 @@ private:
     float m_average_barometer = 0;
     float m_average_thermometer = 0;
 
+    std::pair<float, float> m_barometer_range;
+    std::pair<float, float> m_thermometer_range;
+
+    std::pair<float, float> m_voltage_range;
+    std::pair<float, float> m_current_range;
+
     struct Calibration
     {
         enum class Sensor

@@ -50,10 +50,10 @@ auto HAL::init() -> bool
     {
         return false;
     }
-//    if (camera && !camera->init())
-//    {
-//        return false;
-//    }
+    if (camera && !camera->init())
+    {
+        return false;
+    }
     if (sensors && !sensors->init())
     {
         return false;

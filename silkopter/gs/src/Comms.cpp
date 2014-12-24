@@ -453,7 +453,7 @@ void Comms::process()
         {
             case detail::Telemetry_Message::SENSORS:  process_message_sensors(); break;
 
-            case detail::Telemetry_Message::UAV_ROTATION_L2W:  process_message_uav_rotation_l2w(); break;
+            case detail::Telemetry_Message::UAV_AHRS_ROTATION_L2W:  process_message_uav_rotation_l2w(); break;
             case detail::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  process_message_uav_linear_acceleration_w(); break;
             case detail::Telemetry_Message::UAV_VELOCITY_W:  process_message_uav_velocity_w(); break;
             case detail::Telemetry_Message::UAV_POSITION_W:  process_message_uav_position_w(); break;

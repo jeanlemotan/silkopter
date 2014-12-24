@@ -59,6 +59,7 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
 
     m_sample_time = math::max(sample_time, q::Clock::duration(MEASUREMENT_DURATION));
     m_last_time_point = q::Clock::now();
+    m_state = 0;
 
     return true;
 }
@@ -73,33 +74,36 @@ auto SRF02::read_distance() -> boost::optional<float>
     auto now = q::Clock::now();
 
     //begin?
-    if (m_measurement_start.time_since_epoch().count() == 0)
+    if (m_state == 0)
     {
         if (now - m_last_time_point < m_sample_time)
         {
             return boost::none;
         }
 
+        m_state = 1;
         m_last_time_point = now;
-        m_measurement_start = now;
         m_i2c.write_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
         return boost::none; //we have to wait first
     }
 
     //wait for echo
-    if (now - m_measurement_start < MEASUREMENT_DURATION)
+    if (now - m_last_time_point < MEASUREMENT_DURATION)
     {
         return boost::none;
     }
 
-    m_measurement_start = q::Clock::time_point(std::chrono::seconds(0));
+    m_state = 0;
 
-    int rawdata_H = m_i2c.read_u8(ADDR, RANGE_H);
-    int rawdata_L = m_i2c.read_u8(ADDR, RANGE_L);
+    std::array<uint8_t, 4> buf;
+    m_i2c.read(ADDR, RANGE_H, buf.data(), buf.size());
 
-    int result = (unsigned int)(rawdata_H << 8) | rawdata_L;
+    int d = (unsigned int)(buf[0] << 8) | buf[1];
+    int min_d = (unsigned int)(buf[2] << 8) | buf[3];
 
-    float distance = static_cast<float>(result) / 100.f; //meters
+    float distance = static_cast<float>(d) / 100.f; //meters
+    float min_distance = static_cast<float>(min_d) / 100.f; //meters
+
     return (distance > MAX_VALID_DISTANCE) ? boost::none : boost::optional<float>(distance);
 }
 

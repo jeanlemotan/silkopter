@@ -392,7 +392,7 @@ void HAL_Sensors_Pi::process()
 #ifdef USE_ODROIDW_ADC
     m_impl->adc.process();
     {
-        auto val = m_impl->adc.read_current_sample();
+        auto val = m_impl->adc.read_current();
         if (val)
         {
             m_current_sample.value = *val * m_config.current_scale;
@@ -401,7 +401,7 @@ void HAL_Sensors_Pi::process()
             m_current_samples.push_back(m_current_sample);
         }
 
-        val = m_impl->adc.read_voltage_sample();
+        val = m_impl->adc.read_voltage();
         if (val)
         {
             m_voltage_sample.value = *val * m_config.voltage_scale;
@@ -418,7 +418,7 @@ void HAL_Sensors_Pi::process()
         auto val = m_impl->sonar.read_distance();
         if (val)
         {
-            SILK_INFO("DISTANCE: {}", *val);
+            //SILK_INFO("DISTANCE: {}", *val);
             m_sonar_sample.value = *val;
             m_sonar_sample.dt = m_impl->sonar.get_sample_time();
             m_sonar_sample.sample_idx++;
