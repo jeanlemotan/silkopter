@@ -78,9 +78,6 @@ SOURCES += \
     ../../src/Comms.cpp \
     ../../src/AHRS.cpp \
     ../../src/Motor_Mixer.cpp \
-    ../../src/chips/MPU9250.cpp \
-    ../../src/chips/MS5611.cpp \
-    ../../src/chips/i2c.cpp \
     ../../src/HAL_Raspicam.cpp \
     ../../src/HAL_Sensors_Pi.cpp \
     ../../src/HAL_Sensors_Sim.cpp \
@@ -88,10 +85,15 @@ SOURCES += \
     ../../src/Sim_Comms.cpp \
     ../../src/HAL_Motors_Sim.cpp \
     ../../src/HAL_Motors_PiGPIO.cpp \
-    ../../src/chips/OdroidW_ADC.cpp \
     ../../src/Battery.cpp \
-    ../../src/chips/SRF02.cpp \
-    ../../src/HAL_Camera_Mount_PiGPIO.cpp
+    ../../src/HAL_Camera_Mount_PiGPIO.cpp \
+    ../../src/GPS.cpp \
+    ../../src/sensors/GPS_UBLOX.cpp \
+    ../../src/sensors/i2c.cpp \
+    ../../src/sensors/MPU9250.cpp \
+    ../../src/sensors/MS5611.cpp \
+    ../../src/sensors/OdroidW_ADC.cpp \
+    ../../src/sensors/SRF02.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -109,10 +111,7 @@ HEADERS += \
     ../../src/AHRS.h \
     ../../src/Motor_Mixer.h \
     ../../../libs/utils/Timed_Scope.h \
-    ../../src/chips/MPU9250.h \
     ../../../libs/physics/constants.h \
-    ../../src/chips/MS5611.h \
-    ../../src/chips/i2c.h \
     ../../src/HAL_Camera.h \
     ../../src/HAL_Raspicam.h \
     ../../src/HAL_Camera_Mount.h \
@@ -129,7 +128,12 @@ HEADERS += \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
-    ../../src/chips/OdroidW_ADC.h \
     ../../src/Battery.h \
-    ../../src/chips/SRF02.h
+    ../../src/GPS.h \
+    ../../src/sensors/GPS_UBLOX.h \
+    ../../src/sensors/i2c.h \
+    ../../src/sensors/MPU9250.h \
+    ../../src/sensors/MS5611.h \
+    ../../src/sensors/OdroidW_ADC.h \
+    ../../src/sensors/SRF02.h
 

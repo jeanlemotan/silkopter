@@ -207,7 +207,7 @@ void Comms::process_message_uav_input()
             }
         }
         break;
-    case Input::CAMERA_ROTATION:
+    case Input::CAMERA_MOUNT_ROTATION:
         {
             math::vec3f rot;
             if (m_comms_channel.unpack_param(rot))
