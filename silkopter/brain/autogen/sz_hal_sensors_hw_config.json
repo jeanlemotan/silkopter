@@ -1,6 +1,6 @@
 {
 	"definition" : false,
-	"namespace" : "silk::HAL_Sensors_Pi",
+	"namespace" : "silk::HAL_Sensors_HW",
     "name": "Config",
     "members":
     [

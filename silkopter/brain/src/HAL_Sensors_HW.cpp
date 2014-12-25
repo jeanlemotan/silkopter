@@ -2,12 +2,12 @@
 
 #ifdef RASPBERRY_PI
 
-#include "HAL_Sensors_Pi.h"
+#include "HAL_Sensors_HW.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_sensors_config_pi.hpp"
+#include "sz_hal_sensors_hw_config.hpp"
 
 
 #define USE_MPU9250
@@ -16,29 +16,29 @@
 #define USE_SRF02
 
 #ifdef USE_MPU9250
-#   include "chips/MPU9250.h"
+#   include "sensors/MPU9250.h"
 #else
 #   error "No IMU selected"
 #endif
 
 #ifdef USE_MS5611
-#   include "chips/MS5611.h"
+#   include "sensors/MS5611.h"
 #else
 #   error "No Barometer selected"
 #endif
 
 #ifdef USE_ODROIDW_ADC
-#   include "chips/OdroidW_ADC.h"
+#   include "sensors/OdroidW_ADC.h"
 #endif
 
 #ifdef USE_SRF02
-#   include "chips/SRF02.h"
+#   include "sensors/SRF02.h"
 #endif
 
 using namespace silk;
 using namespace boost::asio;
 
-struct HAL_Sensors_Pi::Impl
+struct HAL_Sensors_HW::Impl
 {
 #ifdef USE_MPU9250
     MPU9250 mpu;
@@ -59,7 +59,7 @@ struct HAL_Sensors_Pi::Impl
 
 ///////////////////////////////////////////////////////////////
 
-HAL_Sensors_Pi::HAL_Sensors_Pi()
+HAL_Sensors_HW::HAL_Sensors_HW()
 {
     m_impl.reset(new Impl);
 
@@ -70,11 +70,11 @@ HAL_Sensors_Pi::HAL_Sensors_Pi()
     save_settings();
 }
 
-HAL_Sensors_Pi::~HAL_Sensors_Pi()
+HAL_Sensors_HW::~HAL_Sensors_HW()
 {
 }
 
-auto HAL_Sensors_Pi::load_settings() -> bool
+auto HAL_Sensors_HW::load_settings() -> bool
 {
     TIMED_FUNCTION();
 
@@ -98,14 +98,14 @@ auto HAL_Sensors_Pi::load_settings() -> bool
 
     return true;
 }
-void HAL_Sensors_Pi::save_settings()
+void HAL_Sensors_HW::save_settings()
 {
     TIMED_FUNCTION();
 
     autojsoncxx::to_pretty_json_file("sensors_pi.cfg", m_config);
 }
 
-auto HAL_Sensors_Pi::init() -> bool
+auto HAL_Sensors_HW::init() -> bool
 {
     TIMED_FUNCTION();
 
@@ -170,61 +170,61 @@ auto HAL_Sensors_Pi::init() -> bool
     return true;
 }
 
-void HAL_Sensors_Pi::shutdown()
+void HAL_Sensors_HW::shutdown()
 {
     QASSERT(m_is_initialized);
     m_is_initialized = false;
 }
 
-void HAL_Sensors_Pi::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
+void HAL_Sensors_HW::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
     m_config.accelerometer_bias = bias;
     m_config.accelerometer_scale = scale;
     save_settings();
 }
-void HAL_Sensors_Pi::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
+void HAL_Sensors_HW::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
     bias = m_config.accelerometer_bias;
     scale = m_config.accelerometer_scale;
 }
 
-void HAL_Sensors_Pi::set_gyroscope_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_HW::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
     m_config.gyroscope_bias = bias;
     save_settings();
 }
-void HAL_Sensors_Pi::get_gyroscope_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_HW::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
     bias = m_config.gyroscope_bias;
 }
 
-void HAL_Sensors_Pi::set_compass_calibration_data(math::vec3f const& bias)
+void HAL_Sensors_HW::set_compass_calibration_data(math::vec3f const& bias)
 {
     m_config.compass_bias = bias;
     save_settings();
 }
-void HAL_Sensors_Pi::get_compass_calibration_data(math::vec3f &bias) const
+void HAL_Sensors_HW::get_compass_calibration_data(math::vec3f &bias) const
 {
     bias = m_config.compass_bias;
 }
 
-void HAL_Sensors_Pi::set_current_calibration_data(float scale)
+void HAL_Sensors_HW::set_current_calibration_data(float scale)
 {
     m_config.current_scale = scale;
     save_settings();
 }
 
-void HAL_Sensors_Pi::get_current_calibration_data(float& scale) const
+void HAL_Sensors_HW::get_current_calibration_data(float& scale) const
 {
     scale = m_config.current_scale;
 }
 
-void HAL_Sensors_Pi::set_voltage_calibration_data(float scale)
+void HAL_Sensors_HW::set_voltage_calibration_data(float scale)
 {
     m_config.voltage_scale = scale;
     save_settings();
 }
-void HAL_Sensors_Pi::get_voltage_calibration_data(float& scale) const
+void HAL_Sensors_HW::get_voltage_calibration_data(float& scale) const
 {
     scale = m_config.voltage_scale;
 }
@@ -232,85 +232,85 @@ void HAL_Sensors_Pi::get_voltage_calibration_data(float& scale) const
 
 
 
-auto HAL_Sensors_Pi::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
+auto HAL_Sensors_HW::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
 {
     return m_accelerometer_samples;
 }
-auto HAL_Sensors_Pi::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
+auto HAL_Sensors_HW::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
 {
     return m_gyroscope_samples;
 }
-auto HAL_Sensors_Pi::get_compass_samples() const -> std::vector<Compass_Sample> const&
+auto HAL_Sensors_HW::get_compass_samples() const -> std::vector<Compass_Sample> const&
 {
     return m_compass_samples;
 }
-auto HAL_Sensors_Pi::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
+auto HAL_Sensors_HW::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
 {
     return m_barometer_samples;
 }
-auto HAL_Sensors_Pi::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
+auto HAL_Sensors_HW::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
 {
     return m_sonar_samples;
 }
-auto HAL_Sensors_Pi::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
+auto HAL_Sensors_HW::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
 {
     return m_thermometer_samples;
 }
-auto HAL_Sensors_Pi::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
+auto HAL_Sensors_HW::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
 {
     return m_voltage_samples;
 }
-auto HAL_Sensors_Pi::get_current_samples() const -> std::vector<Current_Sample> const&
+auto HAL_Sensors_HW::get_current_samples() const -> std::vector<Current_Sample> const&
 {
     return m_current_samples;
 }
-auto HAL_Sensors_Pi::get_gps_samples() const -> std::vector<GPS_Sample> const&
+auto HAL_Sensors_HW::get_gps_samples() const -> std::vector<GPS_Sample> const&
 {
     return m_gps_samples;
 }
-auto HAL_Sensors_Pi::get_last_accelerometer_sample() const  -> Accelerometer_Sample const&
+auto HAL_Sensors_HW::get_last_accelerometer_sample() const  -> Accelerometer_Sample const&
 {
     return m_accelerometer_sample;
 }
-auto HAL_Sensors_Pi::get_last_gyroscope_sample() const      -> Gyroscope_Sample const&
+auto HAL_Sensors_HW::get_last_gyroscope_sample() const      -> Gyroscope_Sample const&
 {
     return m_gyroscope_sample;
 }
-auto HAL_Sensors_Pi::get_last_compass_sample() const        -> Compass_Sample const&
+auto HAL_Sensors_HW::get_last_compass_sample() const        -> Compass_Sample const&
 {
     return m_compass_sample;
 }
-auto HAL_Sensors_Pi::get_last_barometer_sample() const      -> Barometer_Sample const&
+auto HAL_Sensors_HW::get_last_barometer_sample() const      -> Barometer_Sample const&
 {
     return m_barometer_sample;
 }
-auto HAL_Sensors_Pi::get_last_sonar_sample() const          -> Sonar_Sample const&
+auto HAL_Sensors_HW::get_last_sonar_sample() const          -> Sonar_Sample const&
 {
     return m_sonar_sample;
 }
-auto HAL_Sensors_Pi::get_last_thermometer_sample() const    -> Thermometer_Sample const&
+auto HAL_Sensors_HW::get_last_thermometer_sample() const    -> Thermometer_Sample const&
 {
     return m_thermometer_sample;
 }
-auto HAL_Sensors_Pi::get_last_voltage_sample() const        -> Voltage_Sample const&
+auto HAL_Sensors_HW::get_last_voltage_sample() const        -> Voltage_Sample const&
 {
     return m_voltage_sample;
 }
-auto HAL_Sensors_Pi::get_last_current_sample() const        -> Current_Sample const&
+auto HAL_Sensors_HW::get_last_current_sample() const        -> Current_Sample const&
 {
     return m_current_sample;
 }
-auto HAL_Sensors_Pi::get_last_gps_sample() const            -> GPS_Sample const&
+auto HAL_Sensors_HW::get_last_gps_sample() const            -> GPS_Sample const&
 {
     return m_gps_sample;
 }
 
-size_t HAL_Sensors_Pi::get_error_count() const
+size_t HAL_Sensors_HW::get_error_count() const
 {
     return m_error_count;
 }
 
-void HAL_Sensors_Pi::process()
+void HAL_Sensors_HW::process()
 {
     QASSERT(m_is_initialized);
     if (!m_is_initialized)

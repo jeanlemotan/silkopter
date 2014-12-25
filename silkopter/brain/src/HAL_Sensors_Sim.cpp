@@ -5,7 +5,7 @@
 #ifndef RASPBERRY_PI
 
 #include "sz_math.hpp"
-#include "sz_hal_sensors_config_sim.hpp"
+#include "sz_hal_sensors_sim_config.hpp"
 
 
 using namespace silk;

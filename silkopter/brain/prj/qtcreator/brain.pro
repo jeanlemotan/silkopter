@@ -79,7 +79,6 @@ SOURCES += \
     ../../src/AHRS.cpp \
     ../../src/Motor_Mixer.cpp \
     ../../src/HAL_Raspicam.cpp \
-    ../../src/HAL_Sensors_Pi.cpp \
     ../../src/HAL_Sensors_Sim.cpp \
     ../../src/HAL.cpp \
     ../../src/Sim_Comms.cpp \
@@ -93,7 +92,8 @@ SOURCES += \
     ../../src/sensors/MPU9250.cpp \
     ../../src/sensors/MS5611.cpp \
     ../../src/sensors/OdroidW_ADC.cpp \
-    ../../src/sensors/SRF02.cpp
+    ../../src/sensors/SRF02.cpp \
+    ../../src/HAL_Sensors_HW.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -118,7 +118,6 @@ HEADERS += \
     ../../src/HAL_Motors.h \
     ../../src/HAL_Motors_Sim.h \
     ../../src/HAL_Sensors.h \
-    ../../src/HAL_Sensors_Pi.h \
     ../../src/HAL_Sensors_Sim.h \
     ../../src/HAL.h \
     ../../src/Sim_Comms.h \
@@ -135,5 +134,7 @@ HEADERS += \
     ../../src/sensors/MPU9250.h \
     ../../src/sensors/MS5611.h \
     ../../src/sensors/OdroidW_ADC.h \
-    ../../src/sensors/SRF02.h
+    ../../src/sensors/SRF02.h \
+    ../../src/HAL_Sensors_HW.h \
+    ../../src/sensors/GPS_Interface.h
 

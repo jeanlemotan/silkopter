@@ -32,7 +32,7 @@
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::silk::HAL_Sensors_Pi::Config > {
+class SAXEventHandler< ::silk::HAL_Sensors_HW::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -125,7 +125,7 @@ has_current_scale = false;
     }
 
 public:
-    explicit SAXEventHandler( ::silk::HAL_Sensors_Pi::Config * obj)
+    explicit SAXEventHandler( ::silk::HAL_Sensors_HW::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->accelerometer_bias)
@@ -790,23 +790,23 @@ case 9:
     }
 };
 
-template < class Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579 >
-struct Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, ::silk::HAL_Sensors_Pi::Config > {
+template < class Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7 >
+struct Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, ::silk::HAL_Sensors_HW::Config > {
 
-    void operator()( Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579& w, const ::silk::HAL_Sensors_Pi::Config& value) const
+    void operator()( Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7& w, const ::silk::HAL_Sensors_HW::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.accelerometer_bias);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.accelerometer_scale);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.gyroscope_bias);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, math::vec3f >()(w, value.compass_bias);
-w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, float >()(w, value.voltage_scale);
-w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, float >()(w, value.current_scale);
-w.Key("\x6d\x70\x75\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, std::string >()(w, value.mpu_i2c_device);
-w.Key("\x62\x61\x72\x6f\x6d\x65\x74\x65\x72\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, std::string >()(w, value.barometer_i2c_device);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, size_t >()(w, value.gyroscope_range);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65"); Serializer< Writera9543170a7842b30ba5eeca4186896221a7f674ca43ceebbd0aa064c3e402579, size_t >()(w, value.accelerometer_range);
+        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, math::vec3f >()(w, value.accelerometer_bias);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, math::vec3f >()(w, value.accelerometer_scale);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, math::vec3f >()(w, value.gyroscope_bias);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, math::vec3f >()(w, value.compass_bias);
+w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, float >()(w, value.voltage_scale);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, float >()(w, value.current_scale);
+w.Key("\x6d\x70\x75\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, std::string >()(w, value.mpu_i2c_device);
+w.Key("\x62\x61\x72\x6f\x6d\x65\x74\x65\x72\x5f\x69\x32\x63\x5f\x64\x65\x76\x69\x63\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, std::string >()(w, value.barometer_i2c_device);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, size_t >()(w, value.gyroscope_range);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, size_t >()(w, value.accelerometer_range);
 
         w.EndObject();
     }

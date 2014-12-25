@@ -4,7 +4,7 @@
 #include "HAL_Motors_Sim.h"
 #include "HAL_Raspicam.h"
 #include "HAL_Camera_Mount_PiGPIO.h"
-#include "HAL_Sensors_Pi.h"
+#include "HAL_Sensors_HW.h"
 #include "HAL_Sensors_Sim.h"
 
 #ifdef RASPBERRY_PI
@@ -39,7 +39,7 @@ auto HAL::init() -> bool
 
     motors.reset(new HAL_Motors_PiGPIO());
     camera.reset(new HAL_Raspicam());
-    sensors.reset(new HAL_Sensors_Pi());
+    sensors.reset(new HAL_Sensors_HW());
     camera_mount.reset(new HAL_Camera_Mount_PiGPIO());
 #else
 //    motors.reset(new HAL_Motors_Sim());

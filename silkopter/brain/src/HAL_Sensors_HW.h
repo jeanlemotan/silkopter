@@ -5,11 +5,11 @@
 namespace silk
 {
 
-class HAL_Sensors_Pi : public HAL_Sensors
+class HAL_Sensors_HW : public HAL_Sensors
 {
 public:
-    HAL_Sensors_Pi();
-    ~HAL_Sensors_Pi();
+    HAL_Sensors_HW();
+    ~HAL_Sensors_HW();
 
     auto init() -> bool;
     void shutdown();
