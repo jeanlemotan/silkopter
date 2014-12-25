@@ -12,7 +12,7 @@ public:
 
 public:
     void init(qinput::Input_Mgr* input);
-    void process(silk::Comms& comms);
+    void process(q::Duration dt, silk::Comms& comms);
 
 private:
     Ui::Input_Widget m_ui;
@@ -25,12 +25,17 @@ private:
 
     float filter_stick_value(float v);
 
+    void process_uav_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad);
+    void process_camera_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad);
+
+
     struct UAV_Input
     {
         silk::uav_input::Throttle_Mode throttle_mode = silk::uav_input::Throttle_Mode::OFFSET;
         silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
         silk::uav_input::Assists assists;
         silk::uav_input::Sticks sticks;
+        math::vec3f camera_rotation;
 
         bool arm = false;
         bool disarm = false;
@@ -38,7 +43,16 @@ private:
         bool take_off = false;
     } m_uav_input, m_new_uav_input;
 
-    float m_throttle = 0.f;
+    struct Base_Throttle
+    {
+        float value = 0.f;
+        bool wait_for_zero = false;
+    } m_base_throttle;
+
+
+    struct Camera_Input
+    {
+    } m_camera_input, m_new_camera_input;
 };
 
 

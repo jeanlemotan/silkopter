@@ -14,7 +14,7 @@ public:
     //----------------------------------------------------------------------
     //mount
 
-    virtual void set_rotation(math::quatf const& rot) = 0;
+    virtual void set_rotation(math::vec3f const& rot) = 0;
 
     //----------------------------------------------------------------------
     

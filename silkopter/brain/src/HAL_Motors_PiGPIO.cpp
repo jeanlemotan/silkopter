@@ -13,7 +13,7 @@ extern "C"
 #include <pigpiod_if.h>
 }
 
-static constexpr std::array<uint32_t, 6> MOTOR_GPIOS = {17, 27, 22, 23, 18, 24};
+static constexpr std::array<int32_t, 6> MOTOR_GPIOS = {17, 27, 22, 23, -1, -1};
 //constexpr uint32_t GPIO_PWM_RANGE = 10000;
 
 
@@ -65,15 +65,18 @@ auto HAL_Motors_PiGPIO::init() -> bool
     //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
     for (auto gpio: MOTOR_GPIOS)
     {
-        if (set_pull_up_down(gpio, PI_PUD_DOWN) < 0)
+        if (gpio >= 0)
         {
-            SILK_ERR("GPIO {}: Cannot set pull down mode", gpio);
-            return false;
-        }
-        if (set_mode(gpio, PI_OUTPUT) < 0)
-        {
-            SILK_ERR("GPIO {}: Cannot set GPIO mode to output", gpio);
-            return false;
+            if (set_pull_up_down(gpio, PI_PUD_DOWN) < 0)
+            {
+                SILK_ERR("GPIO {}: Cannot set pull down mode", gpio);
+                return false;
+            }
+            if (set_mode(gpio, PI_OUTPUT) < 0)
+            {
+                SILK_ERR("GPIO {}: Cannot set GPIO mode to output", gpio);
+                return false;
+            }
         }
     }
 
@@ -96,20 +99,23 @@ auto HAL_Motors_PiGPIO::init() -> bool
 
         for (auto gpio: MOTOR_GPIOS)
         {
-            auto f = set_PWM_frequency(gpio, freq);
-            if (f < 0)
+            if (gpio >= 0)
             {
-                SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
-                return false;
-            }
-            auto range = 1000000 / freq;
-            if (set_PWM_range(gpio, range) < 0)
-            {
-                SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
-                return false;
-            }
+                auto f = set_PWM_frequency(gpio, freq);
+                if (f < 0)
+                {
+                    SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
+                    return false;
+                }
+                auto range = 1000000 / freq;
+                if (set_PWM_range(gpio, range) < 0)
+                {
+                    SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
+                    return false;
+                }
 
-            SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
+                SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
+            }
         }
     }
 //    else
@@ -141,7 +147,10 @@ void HAL_Motors_PiGPIO::cut_throttle()
 
     for (auto gpio: MOTOR_GPIOS)
     {
-        set_PWM_dutycycle(gpio, MIN_PULSE);
+        if (gpio >= 0)
+        {
+            set_PWM_dutycycle(gpio, MIN_PULSE);
+        }
     }
 }
 
@@ -167,16 +176,20 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
 
     for (size_t i = 0; i < count; i++)
     {
-//        if (i != 0)
-//        {
-//            continue;
-//        }
+        auto gpio = MOTOR_GPIOS[i];
+        if (gpio >= 0)
+        {
+            //        if (i != 0)
+            //        {
+            //            continue;
+            //        }
 
-        auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
-        m_motors[i].throttle = throttle;
+            auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
+            m_motors[i].throttle = throttle;
 
-        uint32_t pulse = throttle * (MAX_PULSE - MIN_PULSE);
-        set_PWM_dutycycle(MOTOR_GPIOS[i], MIN_PULSE + pulse);
+            uint32_t pulse = throttle * (MAX_PULSE - MIN_PULSE);
+            set_PWM_dutycycle(gpio, MIN_PULSE + pulse);
+        }
     }
 }
 

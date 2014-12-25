@@ -70,23 +70,23 @@ float Input_Widget::filter_stick_value(float v)
     return sv * av;
 }
 
-void Input_Widget::process(silk::Comms& comms)
+void Input_Widget::process_uav_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad)
 {
-    if (!m_gamepad)
     {
-        auto gamepads = m_input_mgr->get_all_gamepads();
-        if (!gamepads.empty())
+        auto ls = gamepad.get_stick_data(qinput::Gamepad::Stick::LEFT);
+        auto rs = gamepad.get_stick_data(qinput::Gamepad::Stick::RIGHT);
+
+        float throttle = m_base_throttle.value;
+
+        if (m_base_throttle.wait_for_zero)
         {
-            m_gamepad = gamepads[0];
+            m_base_throttle.wait_for_zero = !math::is_zero(ls.value.y, 0.05f);
         }
-    }
+        else
+        {
+            throttle = math::clamp(throttle + ls.value.y, 0.f, 1.f);
+        }
 
-    if (m_gamepad)
-    {
-        auto ls = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT);
-        auto rs = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT);
-
-        float throttle = math::clamp(m_throttle + ls.value.y, 0.f, 1.f);
         float yaw = -filter_stick_value(ls.value.x);
         float pitch = filter_stick_value(rs.value.y);
         float roll = filter_stick_value(rs.value.x);
@@ -101,34 +101,47 @@ void Input_Widget::process(silk::Comms& comms)
         m_new_uav_input.sticks.pitch = pitch;
         m_new_uav_input.sticks.roll = roll;
 
-        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
+        if (gamepad.is_button_released(qinput::Gamepad::Button::LEFT_BUMPER))
         {
-            m_throttle += 0.05f;
+            m_base_throttle.value = throttle;
+            m_base_throttle.wait_for_zero = true;
         }
-        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
-        {
-            m_throttle -= 0.05f;
-        }
-        m_throttle = math::clamp(m_throttle, 0.f, 1.f);
+    }
 
-        if (m_gamepad->is_button_released(qinput::Gamepad::Button::OUYA_O))
-        {
-            m_new_uav_input.arm = true;
-        }
-        if (m_gamepad->is_button_released(qinput::Gamepad::Button::OUYA_A))
-        {
-            m_new_uav_input.disarm = true;
-        }
+    if (gamepad.is_button_released(qinput::Gamepad::Button::OUYA_O))
+    {
+        m_new_uav_input.arm = true;
+    }
+    if (gamepad.is_button_released(qinput::Gamepad::Button::OUYA_A))
+    {
+        m_new_uav_input.disarm = true;
+    }
+
+    auto dts = q::Seconds(dt).count();
+
+    if (m_gamepad->is_button_pressed(qinput::Gamepad::Button::LPAD_UP))
+    {
+        m_new_uav_input.camera_rotation.x += math::radians(90.f) * dts;
+    }
+    if (m_gamepad->is_button_pressed(qinput::Gamepad::Button::LPAD_DOWN))
+    {
+        m_new_uav_input.camera_rotation.x -= math::radians(90.f) * dts;
+    }
+    m_new_uav_input.camera_rotation = math::clamp(m_new_uav_input.camera_rotation, math::vec3f(-math::anglef::pi), math::vec3f(math::anglef::pi));
+
+
+    // send
+    if (m_uav_input.camera_rotation != m_new_uav_input.camera_rotation)
+    {
+        comms.send_uav_input(silk::uav_input::Input::CAMERA_ROTATION, m_new_uav_input.camera_rotation);
     }
 
     if (m_uav_input.throttle_mode != m_new_uav_input.throttle_mode)
     {
-        m_uav_input.throttle_mode = m_new_uav_input.throttle_mode;
         comms.send_uav_input(silk::uav_input::Input::THROTTLE_MODE, m_uav_input.throttle_mode);
     }
     if (m_uav_input.pitch_roll_mode != m_new_uav_input.pitch_roll_mode)
     {
-        m_uav_input.pitch_roll_mode = m_new_uav_input.pitch_roll_mode;
         comms.send_uav_input(silk::uav_input::Input::PITCH_ROLL_MODE, m_uav_input.pitch_roll_mode);
     }
     if (m_uav_input.sticks.throttle != m_new_uav_input.sticks.throttle ||
@@ -136,10 +149,13 @@ void Input_Widget::process(silk::Comms& comms)
         m_uav_input.sticks.pitch != m_new_uav_input.sticks.pitch ||
         m_uav_input.sticks.roll != m_new_uav_input.sticks.roll)
     {
-        m_uav_input.sticks = m_new_uav_input.sticks;
         comms.send_uav_input(silk::uav_input::Input::STICKS, m_uav_input.sticks);
     }
 
+    //store the change
+    m_uav_input = m_new_uav_input;
+
+    //toggles
     if (m_new_uav_input.arm)
     {
         m_new_uav_input.arm = false;
@@ -159,6 +175,30 @@ void Input_Widget::process(silk::Comms& comms)
     {
         m_new_uav_input.take_off = false;
         comms.send_uav_input(silk::uav_input::Input::TAKE_OFF);
+    }
+}
+
+void Input_Widget::process_camera_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad)
+{
+    m_camera_input = m_new_camera_input;
+}
+
+
+void Input_Widget::process(q::Duration dt, silk::Comms& comms)
+{
+    if (!m_gamepad)
+    {
+        auto gamepads = m_input_mgr->get_all_gamepads();
+        if (!gamepads.empty())
+        {
+            m_gamepad = gamepads[0];
+        }
+    }
+
+    if (m_gamepad)
+    {
+        process_uav_input(dt, comms, *m_gamepad);
+        process_camera_input(dt, comms, *m_gamepad);
     }
 }
 

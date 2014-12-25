@@ -127,7 +127,7 @@ void GS::process()
 
     //m_comms.send_camera_input(silk::camera_input::Input::STREAM_QUALITY, silk::camera_input::Stream_Quality::LOW);
 
-    m_ui.input->process(m_comms);
+    m_ui.input->process(dt, m_comms);
 
     m_input_mgr->update(dt);
 

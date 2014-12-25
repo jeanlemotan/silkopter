@@ -207,6 +207,15 @@ void Comms::process_message_uav_input()
             }
         }
         break;
+    case Input::CAMERA_ROTATION:
+        {
+            math::vec3f rot;
+            if (m_comms_channel.unpack_param(rot))
+            {
+                m_hal.camera_mount->set_rotation(rot);
+            }
+        }
+        break;
     case Input::ASSISTS:
         {
             Assists v;
@@ -233,7 +242,7 @@ void Comms::process_message_uav_input()
 
     m_comms_channel.end_unpack();
 
-    SILK_INFO("UAV input received");
+    //SILK_INFO("UAV input received");
 }
 
 void Comms::process_message_yaw_rate_pid_params()
@@ -844,7 +853,7 @@ void Comms::process()
                 SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
-            SILK_INFO("Received message: {}", static_cast<int>(msg.get()));
+            //SILK_INFO("Received message: {}", static_cast<int>(msg.get()));
         }
     }
 

@@ -17,7 +17,7 @@ public:
     //----------------------------------------------------------------------
     //mount
 
-    void set_rotation(math::quatf const& rot);
+    void set_rotation(math::vec3f const& rot); //radians for each axis
 
     //----------------------------------------------------------------------
     void process();
@@ -33,11 +33,25 @@ private:
 
     struct Settings
     {
-        size_t min_pulse = 1000;
-        size_t max_pulse = 2000;
+        struct End
+        {
+            float angle;
+            uint32_t pulse;
+        };
+        struct Range
+        {
+            End min { -math::anglef::pi, 1000 };
+            End max { math::anglef::pi, 2000 };
+        };
 
-        PWM_Frequency frequency = PWM_Frequency::SERVO_50HZ;
+        Range x_range;
+        Range y_range;
+        Range z_range;
+
+        PWM_Frequency frequency = PWM_Frequency::SERVO_200HZ;
     } m_settings;
+
+    static auto compute_pulse(float angle, Settings::Range const& range) -> uint32_t;
 
     bool m_is_initialized = false;
 
