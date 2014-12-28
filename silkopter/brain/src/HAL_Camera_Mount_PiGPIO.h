@@ -51,6 +51,10 @@ private:
         PWM_Frequency frequency = PWM_Frequency::SERVO_200HZ;
     } m_settings;
 
+    math::vec3f m_rotation;
+    math::vec3f m_last_rotation;
+    q::Clock::time_point m_last_time_point;
+
     static auto compute_pulse(float angle, Settings::Range const& range) -> uint32_t;
 
     bool m_is_initialized = false;

@@ -48,12 +48,18 @@ auto MS5611::init(const std::string& device) -> bool
 
     // We read the factory calibration
     // The on-chip CRC is not used
-    auto C1 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C1);
-    auto C2 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C2);
-    auto C3 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C3);
-    auto C4 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C4);
-    auto C5 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C5);
-    auto C6 = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C6);
+    uint16_t C1, C2, C3, C4, C5, C6;
+    auto res = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C1, C1);
+    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C2, C2);
+    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C3, C3);
+    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C4, C4);
+    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C5, C5);
+    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C6, C6);
+    if (!res)
+    {
+        SILK_ERR("MS5611 not found!");
+        return false;
+    }
     SILK_INFO("PROM: {} {} {} {} {} {}", C1, C2, C3, C4, C5, C6);
 
     m_c1 = C1;

@@ -81,6 +81,10 @@ void HAL::shutdown()
     {
         sensors->shutdown();
     }
+    if (camera_mount)
+    {
+        camera_mount->shutdown();
+    }
 
 #ifdef RASPBERRY_PI
     pigpio_stop();
@@ -100,6 +104,10 @@ void HAL::process()
     if (sensors)
     {
         sensors->process();
+    }
+    if (camera_mount)
+    {
+        camera_mount->process();
     }
 
     //NOTE!!! this HAS to be here, at the end. The SIM comms depends on it

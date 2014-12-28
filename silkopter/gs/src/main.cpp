@@ -2,6 +2,7 @@
 #include "GS.h"
 #include <QtWidgets/QApplication>
 
+
 int main(int argc, char *argv[])
 {
 	q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));

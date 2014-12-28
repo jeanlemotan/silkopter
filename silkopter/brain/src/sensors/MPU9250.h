@@ -28,12 +28,11 @@ public:
 
     void process();
 
-    auto read_compass() -> boost::optional<math::vec3f>;
-    auto get_compass_sample_time() const -> q::Clock::duration;
-
+    auto get_compass_samples() const -> std::vector<math::vec3f> const&;
     auto get_gyroscope_samples() const -> std::vector<math::vec3f> const&;
     auto get_accelerometer_samples() const -> std::vector<math::vec3f> const&;
 
+    auto get_compass_sample_time() const -> q::Clock::duration;
     auto get_gyroscope_sample_time() const -> q::Clock::duration;
     auto get_accelerometer_sample_time() const -> q::Clock::duration;
 
@@ -59,7 +58,7 @@ private:
     {
         std::vector<math::vec3f> gyroscope;
         std::vector<math::vec3f> accelerometer;
-        boost::optional<math::vec3f> compass;
+        std::vector<math::vec3f> compass;
     } m_samples;
 
     float m_accelerometer_scale_inv = 1.f;

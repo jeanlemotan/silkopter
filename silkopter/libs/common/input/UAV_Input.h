@@ -17,7 +17,7 @@ namespace uav_input
         LAND,               //land
         LIGHTS_ON,          //turn on the lights
         ASSISTS,
-        CAMERA_ROTATION,
+        CAMERA_MOUNT_ROTATION,
     };
 
     struct Sticks

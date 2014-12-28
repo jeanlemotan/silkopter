@@ -51,9 +51,11 @@ GS::GS(QWidget *parent)
         }
     }
 
-    set_uav_address("192.168.1.110");
+    set_uav_address("10.10.10.10");
+    //set_uav_address("192.168.1.110");
 
     connect(m_ui.action_connect_uav, &QAction::triggered, [this](bool) { set_uav_address("192.168.1.110"); });
+    connect(m_ui.action_connect_uav_ah, &QAction::triggered, [this](bool) { set_uav_address("10.10.10.10"); });
     connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
 
     read_settings();

@@ -102,6 +102,8 @@ auto GPS_UBLOX::init(int fd) -> bool
     }
 
     m_fd = fd;
+
+    return true;
 }
 void GPS_UBLOX::process()
 {

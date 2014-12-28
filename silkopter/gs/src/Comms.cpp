@@ -457,6 +457,9 @@ void Comms::process()
             case detail::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  process_message_uav_linear_acceleration_w(); break;
             case detail::Telemetry_Message::UAV_VELOCITY_W:  process_message_uav_velocity_w(); break;
             case detail::Telemetry_Message::UAV_POSITION_W:  process_message_uav_position_w(); break;
+            case detail::Telemetry_Message::UAV_BATTERY_CAPACITY_USED:  break;
+            case detail::Telemetry_Message::UAV_BATTERY_CURRENT:  break;
+            case detail::Telemetry_Message::UAV_BATTERY_VOLTAGE:  break;
             default:
                 SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;

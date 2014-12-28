@@ -223,8 +223,8 @@ void Sensors::process()
                     auto min = math::max(sample.value - range * 0.5f, 0.f);
                     m_barometer_range.first = min;
                     m_barometer_range.second = min + range;
-                    m_ui.bt_plot->yAxis->setRange(m_barometer_range.first, m_barometer_range.second);
                 }
+                m_ui.bt_plot->yAxis->setRange(m_barometer_range.first, m_barometer_range.second);
             }
             {
                 auto const& sample = m_comms->get_thermometer_sample();
@@ -234,8 +234,8 @@ void Sensors::process()
                     auto range = math::abs(m_thermometer_range.second - m_thermometer_range.first);
                     m_thermometer_range.first = sample.value - range * 0.5f;
                     m_thermometer_range.second = sample.value + range * 0.5f;
-                    m_ui.bt_plot->yAxis2->setRange(m_thermometer_range.first, m_thermometer_range.second);
                 }
+                m_ui.bt_plot->yAxis2->setRange(m_thermometer_range.first, m_thermometer_range.second);
             }
             if (m_plot_x_value > q::Seconds(graph_length).count())
             {
@@ -256,8 +256,8 @@ void Sensors::process()
                     auto min = math::max(sample.value - range * 0.5f, 0.f);
                     m_voltage_range.first = min;
                     m_voltage_range.second = min + range;
-                    m_ui.vc_plot->yAxis->setRange(m_voltage_range.first, m_voltage_range.second);
                 }
+                m_ui.vc_plot->yAxis->setRange(m_voltage_range.first, m_voltage_range.second);
             }
             {
                 auto const& sample = m_comms->get_current_sample();
@@ -268,8 +268,8 @@ void Sensors::process()
                     auto min = math::max(sample.value - range * 0.5f, 0.f);
                     m_current_range.first = min;
                     m_current_range.second = min + range;
-                    m_ui.vc_plot->yAxis2->setRange(m_current_range.first, m_current_range.second);
                 }
+                m_ui.vc_plot->yAxis2->setRange(m_current_range.first, m_current_range.second);
             }
             if (m_plot_x_value > q::Seconds(graph_length).count())
             {

@@ -126,7 +126,7 @@ auto Battery::compute_cell_count() -> boost::optional<size_t>
     //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
     if (!m_average_current || *m_average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
     {
-        SILK_WARNING("Skipping cell count detection: the current is not healthy: {}A", m_average_current);
+        SILK_WARNING("Skipping cell count detection: the current is not healthy: {}", m_average_current);
         return boost::none;
     }
 

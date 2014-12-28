@@ -9,6 +9,7 @@
 #include <sys/resource.h>
 
 size_t s_test = 0;
+bool s_exit = false;
 
 namespace boost
 {
@@ -19,24 +20,23 @@ namespace boost
     }
 }
 
-static void setup_camera_defaults(silk::HAL_Camera& camera, silk::Video_Server& streamer)
+// Define the function to be called when ctrl-c (SIGINT) signal is sent to process
+void signal_handler(int signum)
 {
-//    camera.setup_high_quality(math::vec2u32(1280, 960), 16000000);
-//    camera.setup_medium_quality(math::vec2u32(640, 480), 2000000);
-//    camera.setup_low_quality(math::vec2u32(320, 240), 160000);
-
-    camera.set_data_callback([&](uint8_t const* data, size_t size)
-    {
-        streamer.send_frame(silk::Video_Server::Flags(), data, size);
-    });
-
-    camera.set_quality(silk::camera_input::Stream_Quality::MEDIUM);
+    s_exit = true;
+    SILK_INFO("Exitting due to signal {}", signum);
 }
+
 
 
 int main(int argc, char const* argv[])
 {
+    signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
+    signal(SIGKILL, signal_handler);
+    signal(SIGUSR1, signal_handler);
+
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
+    q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIME, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
     namespace po = boost::program_options;
 
@@ -65,7 +65,7 @@ int main(int argc, char const* argv[])
 
     auto io_thread = boost::thread([&io_service]()
 	{
-		while (true)
+        while (!s_exit)
 		{
             io_service.run();
             io_service.reset();
@@ -119,13 +119,17 @@ int main(int argc, char const* argv[])
         silk::Video_Server streamer(comms.get_rudp());
         if (hal.camera)
         {
-            setup_camera_defaults(*hal.camera, streamer);
+            hal.camera->set_data_callback([&](uint8_t const* data, size_t size)
+            {
+                streamer.send_frame(silk::Video_Server::Flags(), data, size);
+            });
+            hal.camera->set_quality(silk::camera_input::Stream_Quality::MEDIUM);
         }
 
 //        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
 
 
-        while (true)
+        while (!s_exit)
         {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
             SILK_INFO("Waiting for comms to connect...");
@@ -137,7 +141,7 @@ int main(int argc, char const* argv[])
 
         SILK_INFO("All systems up. Ready to fly...");
 
-        while (true)
+        while (!s_exit)
         {
             comms.process();
 
@@ -148,6 +152,12 @@ int main(int argc, char const* argv[])
         }
 
         SILK_INFO("Stopping everything");
+
+        if (hal.camera)
+        {
+            hal.camera->set_data_callback(nullptr);
+        }
+
     }
     catch (std::exception const& e)
     {
@@ -155,7 +165,11 @@ int main(int argc, char const* argv[])
         abort();
     }
 
-    io_thread.join();
+    if (io_thread.joinable())
+    {
+        boost::this_thread::yield();
+        io_thread.join();
+    }
 
 	SILK_INFO("Closing");
 }

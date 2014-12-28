@@ -101,6 +101,8 @@ auto HAL_Camera_Mount_PiGPIO::init() -> bool
         }
     }
 
+    m_last_time_point = q::Clock::now();
+
     m_is_initialized = true;
     return true;
 }
@@ -118,6 +120,42 @@ void HAL_Camera_Mount_PiGPIO::process()
         return;
     }
 
+    constexpr std::chrono::milliseconds UPDATE_PERIOD(50);
+
+    auto now = q::Clock::now();
+    if (now - m_last_time_point < UPDATE_PERIOD)
+    {
+        return;
+    }
+    m_last_time_point = now;
+
+    if (m_rotation != m_last_rotation)
+    {
+        m_last_rotation = m_rotation;
+
+        //SILK_INFO("mount rotation: {}", m_rotation);
+
+        //x - pitch
+//        if (SERVOS[0].first >= 0)
+//        {
+//            auto pulse = compute_pulse(m_rotation.x, m_settings.x_range);
+//            set_PWM_dutycycle(SERVOS[0].first, pulse);
+//        }
+
+//        //y - roll
+//        if (SERVOS[1].first >= 0)
+//        {
+//            auto pulse = compute_pulse(m_rotation.y, m_settings.y_range);
+//            set_PWM_dutycycle(SERVOS[1].first, pulse);
+//        }
+
+//        //z - yaw
+//        if (SERVOS[2].first >= 0)
+//        {
+//            auto pulse = compute_pulse(m_rotation.z, m_settings.z_range);
+//            set_PWM_dutycycle(SERVOS[2].first, pulse);
+//        }
+    }
 }
 
 auto HAL_Camera_Mount_PiGPIO::compute_pulse(float angle, Settings::Range const& range) -> uint32_t
@@ -136,26 +174,7 @@ auto HAL_Camera_Mount_PiGPIO::compute_pulse(float angle, Settings::Range const& 
 
 void HAL_Camera_Mount_PiGPIO::set_rotation(math::vec3f const& rot)
 {
-    //x - pitch
-    if (SERVOS[0].first >= 0)
-    {
-        auto pulse = compute_pulse(rot.x, m_settings.x_range);
-        set_PWM_dutycycle(SERVOS[0].first, pulse);
-    }
-
-    //y - roll
-    if (SERVOS[1].first >= 0)
-    {
-        auto pulse = compute_pulse(rot.y, m_settings.y_range);
-        set_PWM_dutycycle(SERVOS[1].first, pulse);
-    }
-
-    //z - yaw
-    if (SERVOS[2].first >= 0)
-    {
-        auto pulse = compute_pulse(rot.z, m_settings.z_range);
-        set_PWM_dutycycle(SERVOS[2].first, pulse);
-    }
+    m_rotation = rot;
 }
 
 #endif

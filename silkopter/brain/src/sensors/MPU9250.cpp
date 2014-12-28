@@ -273,21 +273,23 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
         return false;
     }
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
+    auto res = m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, 0);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    auto who_am_i = m_i2c.read_u8(ADDR_MPU9250, MPU_REG_WHO_AM_I);
-    SILK_INFO("device {} id: {x}", device, who_am_i);
-    if (who_am_i != 0x71)
+    uint8_t who_am_i;
+    res &= m_i2c.read_u8(ADDR_MPU9250, MPU_REG_WHO_AM_I, who_am_i);
+    if (!res || who_am_i != 0x71)
     {
+        SILK_ERR("Cannot find mpu9250");
         return false;
     }
+    SILK_INFO("device {} id: {x}", device, who_am_i);
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (gr)
@@ -334,10 +336,10 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
         break;
     }
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_GYRO_CONFIG, gyro_range);
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG, accel_range);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_GYRO_CONFIG, gyro_range);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG, accel_range);
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
     //m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
 
 
@@ -345,27 +347,32 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     m_sample_rate = 1000;
     QASSERT(m_sample_rate >= 100 && m_sample_rate <= 1000);
     uint8_t rate = 1000 / m_sample_rate - 1;
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_SMPLRT_DIV, rate);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_SMPLRT_DIV, rate);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     m_sample_time = std::chrono::milliseconds(1000 / m_sample_rate);
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_2, 0);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
     //m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
 
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
     m_fifo_sample_size = 12;
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
-    setup_compass();
+    res &= setup_compass();
+    if (!res)
+    {
+        SILK_ERR("Failed to setup mpu9250");
+        return false;
+    }
 
     SILK_INFO("using MPU9250 device: {}", device);
 
@@ -387,8 +394,9 @@ auto MPU9250::setup_compass() -> bool
     uint8_t akm_addr = 0;
     for (akm_addr = 0x0C; akm_addr <= 0x0F; akm_addr++)
     {
-        auto data = m_i2c.read_u8(akm_addr, AKM_REG_WHOAMI);
-        if (data == AKM_WHOAMI)
+        uint8_t data;
+        auto res = m_i2c.read_u8(akm_addr, AKM_REG_WHOAMI, data);
+        if (res && data == AKM_WHOAMI)
         {
             break;
         }
@@ -469,7 +477,8 @@ void MPU9250::mpu_set_bypass(bool on)
 {
     if (on)
     {
-        auto tmp = m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL);
+        uint8_t tmp;
+        m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
         tmp &= ~MPU_BIT_I2C_MST;
         m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
@@ -479,21 +488,14 @@ void MPU9250::mpu_set_bypass(bool on)
     else
     {
         // Enable I2C master mode if compass is being used.
-        auto tmp = m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL);
+        uint8_t tmp;
+        m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
         tmp |= MPU_BIT_I2C_MST;
         m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
         tmp = 0;
         m_i2c.write_u8(ADDR_MPU9250, MPU_REG_INT_PIN_CFG, tmp);
     }
-}
-
-
-auto MPU9250::read_compass() -> boost::optional<math::vec3f>
-{
-    auto r = m_samples.compass;
-    m_samples.compass.reset();
-    return r;
 }
 
 void MPU9250::reset_fifo()
@@ -505,6 +507,7 @@ void MPU9250::process()
 {
     m_samples.gyroscope.clear();
     m_samples.accelerometer.clear();
+    m_samples.compass.clear();
 
 //    i2c_acquire(ADDR_MPU9250);
 
@@ -513,13 +516,14 @@ void MPU9250::process()
    // auto dt = now - last_timestamp;
    // last_timestamp = now;
 
-    auto fifo_count = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH);
+    uint16_t fifo_count;
+    auto res = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH, fifo_count);
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // SILK_INFO("{.2}b/ms", xxx);
 
     //uint16_t fc2 = 0;
-    if (fifo_count >= m_fifo_sample_size)
+    if (res && fifo_count >= m_fifo_sample_size)
     {
         if (fifo_count >= 4000)
         {
@@ -538,7 +542,7 @@ void MPU9250::process()
             {
                 //auto start = q::Clock::now();
 
-                m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, data, to_read);
+                res = m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, data, to_read);
 
                 //auto d = q::Clock::now() - start;
                 //QLOG_INFO("", "{}: {}us", to_read, d.count());
@@ -547,24 +551,27 @@ void MPU9250::process()
             //reset_fifo();
             //fc2 = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH);
 
-            QASSERT(sample_count >= 1);
-            m_samples.gyroscope.resize(sample_count);
-            m_samples.accelerometer.resize(sample_count);
-            size_t off = 0;
-            for (size_t i = 0; i < sample_count; i++)
+            if (res)
             {
+                QASSERT(sample_count >= 1);
+                m_samples.gyroscope.resize(sample_count);
+                m_samples.accelerometer.resize(sample_count);
+                size_t off = 0;
+                for (size_t i = 0; i < sample_count; i++)
                 {
-                    short x = (data[off] << 8) | data[off + 1]; off += 2;
-                    short y = (data[off] << 8) | data[off + 1]; off += 2;
-                    short z = (data[off] << 8) | data[off + 1]; off += 2;
-                    m_samples.accelerometer[i].set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
-                }
+                    {
+                        short x = (data[off] << 8) | data[off + 1]; off += 2;
+                        short y = (data[off] << 8) | data[off + 1]; off += 2;
+                        short z = (data[off] << 8) | data[off + 1]; off += 2;
+                        m_samples.accelerometer[i].set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
+                    }
 
-                {
-                    short x = (data[off] << 8) | data[off + 1]; off += 2;
-                    short y = (data[off] << 8) | data[off + 1]; off += 2;
-                    short z = (data[off] << 8) | data[off + 1]; off += 2;
-                    m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
+                    {
+                        short x = (data[off] << 8) | data[off + 1]; off += 2;
+                        short y = (data[off] << 8) | data[off + 1]; off += 2;
+                        short z = (data[off] << 8) | data[off + 1]; off += 2;
+                        m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
+                    }
                 }
             }
         }
@@ -588,8 +595,10 @@ void MPU9250::process_compass()
     m_compass_sample_time = std::chrono::seconds(0);
 
     uint8_t tmp[8];
-    m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp, 8);
-
+    if (!m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp, 8))
+    {
+        return;
+    }
     if (!(tmp[0] & AKM_DATA_READY))
     {
         return;
@@ -620,7 +629,7 @@ void MPU9250::process_compass()
             math::quatf::from_axis_z(math::radians(90.f));
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
-    m_samples.compass = math::rotate(rot, c);
+    m_samples.compass.push_back(math::rotate(rot, c));
 //    SILK_INFO("c: {}", *m_samples.compass);
 #endif
 }
@@ -632,6 +641,10 @@ auto MPU9250::get_gyroscope_samples() const -> std::vector<math::vec3f> const&
 auto MPU9250::get_accelerometer_samples() const -> std::vector<math::vec3f> const&
 {
     return m_samples.accelerometer;
+}
+auto MPU9250::get_compass_samples() const -> std::vector<math::vec3f> const&
+{
+    return m_samples.compass;
 }
 
 q::Clock::duration MPU9250::get_gyroscope_sample_time() const

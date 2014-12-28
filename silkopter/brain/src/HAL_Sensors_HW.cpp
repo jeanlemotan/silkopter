@@ -153,7 +153,7 @@ auto HAL_Sensors_HW::init() -> bool
 #endif
 
 #ifdef USE_ODROIDW_ADC
-    if (!m_impl->adc.init(std::chrono::milliseconds(0), std::chrono::milliseconds(500)))
+    if (!m_impl->adc.init(std::chrono::milliseconds(0), std::chrono::milliseconds(0)))
     {
         return false;
     }
@@ -337,6 +337,7 @@ void HAL_Sensors_HW::process()
         auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
         auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
         QASSERT(a_samples.size() == g_samples.size());
+        auto const& c_samples = m_impl->mpu.get_compass_samples();
 
         m_gyroscope_samples.resize(g_samples.size());
         for (size_t i = 0; i < g_samples.size(); i++)
@@ -356,13 +357,13 @@ void HAL_Sensors_HW::process()
             m_accelerometer_samples[i] = m_accelerometer_sample;
         }
 
-        auto compass_sample = m_impl->mpu.read_compass();
-        if (compass_sample)
+        m_compass_samples.resize(c_samples.size());
+        for (size_t i = 0; i < c_samples.size(); i++)
         {
-            m_compass_sample.value = *compass_sample - m_config.compass_bias;
-            m_compass_sample.sample_idx++;
+            m_compass_sample.value = c_samples[i] - m_config.compass_bias;
             m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
-            m_compass_samples.push_back(m_compass_sample);
+            m_compass_sample.sample_idx++;
+            m_compass_samples[i] = m_compass_sample;
         }
     }
 #endif

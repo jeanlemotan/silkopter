@@ -48,6 +48,8 @@ typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
 
 struct HAL_Raspicam::Impl
 {
+    std::mutex mutex;
+
     //camera
     Component_ptr camera;
     Component_ptr camera_splitter;
@@ -125,6 +127,42 @@ HAL_Raspicam::HAL_Raspicam()
 }
 HAL_Raspicam::~HAL_Raspicam()
 {
+    {
+        //first kill the pools to disable the callbacks
+        m_impl->low.output_pool.reset();
+        m_impl->medium.output_pool.reset();
+        m_impl->high.output_pool.reset();
+        m_impl->recording.output_pool.reset();
+    }
+
+    //wait for the callbacks to die
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
+    m_impl->low.resizer_connection.reset();
+    m_impl->low.encoder_connection.reset();
+    m_impl->low.resizer.reset();
+    m_impl->low.encoder.reset();
+
+    m_impl->medium.resizer_connection.reset();
+    m_impl->medium.encoder_connection.reset();
+    m_impl->medium.resizer.reset();
+    m_impl->medium.encoder.reset();
+
+    m_impl->high.resizer_connection.reset();
+    m_impl->high.encoder_connection.reset();
+    m_impl->high.resizer.reset();
+    m_impl->high.encoder.reset();
+
+    m_impl->recording.resizer_connection.reset();
+    m_impl->recording.encoder_connection.reset();
+    m_impl->recording.resizer.reset();
+    m_impl->recording.encoder.reset();
+
+    m_impl->camera_splitter_connection.reset();
+    m_impl->camera_splitter.reset();
+    mmal_port_disable(m_impl->camera->control);
+    m_impl->camera.reset();
 }
 
 auto HAL_Raspicam::init() -> bool
@@ -173,11 +211,15 @@ void HAL_Raspicam::file_callback(uint8_t const* data, size_t size)
 
 void HAL_Raspicam::set_data_callback(Data_Available_Callback cb)
 {
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
+
     m_impl->stream_callback = cb;
 }
 
 void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
 {
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
+
     if (m_impl->high.is_active == high &&
         m_impl->medium.is_active == medium &&
         m_impl->low.is_active == low)
@@ -420,7 +462,7 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
 
     MMAL_POOL_T* p = nullptr;
     p = MMAL_CALL(mmal_port_pool_create(port, port->buffer_num, port->buffer_size));
-    Pool_ptr o_pool(p, [=](MMAL_POOL_T* pool) { mmal_port_pool_destroy(port, pool); } );
+    Pool_ptr o_pool(p, [=](MMAL_POOL_T* pool) { mmal_port_disable(port); mmal_port_pool_destroy(port, pool); } );
     if (!o_pool)
     {
         return Pool_ptr();
@@ -799,8 +841,6 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
                                        MMAL_PORT_T* port,
                                        MMAL_BUFFER_HEADER_T* buffer)
 {
-    //    SCOPED_PINS_GUARD;;
-
     if (!callback)
     {
         MMAL_CALL(mmal_buffer_header_release(buffer));
@@ -820,7 +860,7 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
         size_t off = encoder_data.data.size();
         if (off == 0 && is_end_frame) //complete frame and the data is empty - send the buffer directly to avoid a copy
         {
-            if (encoder_data.is_active)
+            if (encoder_data.is_active && callback)
             {
                 callback(buffer->data, buffer->length);
             }
@@ -842,7 +882,7 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
     if (!sent && is_end_frame)
     {
         std::lock_guard<std::mutex> lg(encoder_data.data_mutex);
-        if (encoder_data.is_active)
+        if (encoder_data.is_active && callback)
         {
             callback(encoder_data.data.data(), encoder_data.data.size());
         }
@@ -864,6 +904,8 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
     QASSERT(port && buffer);
     HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
+    std::lock_guard<std::mutex> lg(impl->mutex);
+
     encoder_buffer_callback_fn(*impl, impl->high, impl->file_callback, port, buffer);
 }
 
@@ -872,16 +914,18 @@ static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER
     QASSERT(port && buffer);
     HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
+    std::lock_guard<std::mutex> lg(impl->mutex);
+
     encoder_buffer_callback_fn(*impl, impl->medium, impl->stream_callback, port, buffer);
 }
 
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
-    //    SCOPED_PINS_GUARD;;
-
     QASSERT(port && buffer);
     HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
+    std::lock_guard<std::mutex> lg(impl->mutex);
+
     encoder_buffer_callback_fn(*impl, impl->low, impl->stream_callback, port, buffer);
 }
 
@@ -1128,6 +1172,8 @@ auto HAL_Raspicam::start_recording() -> bool
     {
         create_file_sink();
     }
+
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
     if (m_impl->camera)
     {
 //        set_active_streams(m_file_sink != nullptr,
@@ -1139,6 +1185,8 @@ auto HAL_Raspicam::start_recording() -> bool
 void HAL_Raspicam::stop_recording()
 {
     m_file_sink.reset();
+
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
     if (m_impl->camera)
     {
 //        set_active_streams(m_file_sink != nullptr,
@@ -1160,6 +1208,8 @@ void HAL_Raspicam::set_shutter_speed(camera_input::Shutter_Speed ss)
 void HAL_Raspicam::set_quality(camera_input::Stream_Quality sq)
 {
     m_stream_quality = sq;
+
+    std::lock_guard<std::mutex> lg(m_impl->mutex);
     if (m_impl->camera)
     {
 //        set_active_streams(m_file_sink != nullptr,

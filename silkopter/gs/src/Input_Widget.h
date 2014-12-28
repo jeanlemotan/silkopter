@@ -35,7 +35,7 @@ private:
         silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
         silk::uav_input::Assists assists;
         silk::uav_input::Sticks sticks;
-        math::vec3f camera_rotation;
+        math::vec3f camera_mount_rotation;
 
         bool arm = false;
         bool disarm = false;

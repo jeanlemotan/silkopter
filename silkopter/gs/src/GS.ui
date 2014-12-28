@@ -123,6 +123,7 @@
      <string>Connect</string>
     </property>
     <addaction name="action_connect_uav"/>
+    <addaction name="action_connect_uav_ah"/>
     <addaction name="action_connect_simulator"/>
     <addaction name="separator"/>
    </widget>
@@ -157,6 +158,11 @@
   <action name="action_connect_simulator">
    <property name="text">
     <string>Simulator</string>
+   </property>
+  </action>
+  <action name="action_connect_uav_ah">
+   <property name="text">
+    <string>UAV ah</string>
    </property>
   </action>
  </widget>

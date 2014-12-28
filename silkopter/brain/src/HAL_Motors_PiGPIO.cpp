@@ -118,6 +118,8 @@ auto HAL_Motors_PiGPIO::init() -> bool
             }
         }
     }
+
+    cut_throttle();
 //    else
 //    {
 //        SILK_WARNING("Non-pwm ESC support not implemented");

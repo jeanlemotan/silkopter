@@ -48,8 +48,9 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
         return false;
     }
 
-    auto rev = m_i2c.read_u8(ADDR, SW_REV_CMD);
-    if (rev == 255)
+    uint8_t rev = 0;
+    auto ret = m_i2c.read_u8(ADDR, SW_REV_CMD, rev);
+    if (!ret || rev == 255)
     {
         SILK_ERR("Failed to initialize SRF02");
         return false;

@@ -187,7 +187,7 @@ void UAV::process_imu_sensor_data()
 
         auto sensor_now = m_imu.clock.now();
 
-        Manual_Clock::duration min_dt{999999};
+        Manual_Clock::duration min_dt{std::numeric_limits<uint32_t>::max()};
         if (g_it != gyroscope_samples.end())
         {
             QASSERT(g_it->dt < std::chrono::seconds(100));
@@ -221,7 +221,7 @@ void UAV::process_imu_sensor_data()
 //                has_new_compass_sample = true;
             }
         }
-        QASSERT(min_dt.count() < 999999);
+        QASSERT(min_dt.count() < std::numeric_limits<uint32_t>::max());
 
         //increment the time
         sensor_now += min_dt;

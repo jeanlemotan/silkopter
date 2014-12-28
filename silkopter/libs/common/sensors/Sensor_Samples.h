@@ -22,10 +22,15 @@ typedef Sensor_Sample<float> Current_Sample; //amperes / second
 
 struct GPS
 {
-    uint8_t fix_count = 0;
-    float precision = 0;
-    double latitude = 0;
-    double longitude = 0;
+    uint8_t sattelite_count = 0;
+    float precision = std::numeric_limits<float>::max();
+
+    boost::optional<double> longitude; //radians
+    boost::optional<double> latitude; //radians
+    boost::optional<float> altitude; //meters
+    boost::optional<math::vec2f> speed_2d; //meters/second but x/y only
+    boost::optional<math::vec2f> speed; //meters/second
+    boost::optional<math::vec2f> direction; //normalized
 };
 typedef Sensor_Sample<GPS> GPS_Sample;
 

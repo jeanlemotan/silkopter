@@ -121,35 +121,35 @@ void Input_Widget::process_uav_input(q::Duration dt, silk::Comms& comms, qinput:
 
     if (m_gamepad->is_button_pressed(qinput::Gamepad::Button::LPAD_UP))
     {
-        m_new_uav_input.camera_rotation.x += math::radians(90.f) * dts;
+        m_new_uav_input.camera_mount_rotation.x += math::radians(90.f) * dts;
     }
     if (m_gamepad->is_button_pressed(qinput::Gamepad::Button::LPAD_DOWN))
     {
-        m_new_uav_input.camera_rotation.x -= math::radians(90.f) * dts;
+        m_new_uav_input.camera_mount_rotation.x -= math::radians(90.f) * dts;
     }
-    m_new_uav_input.camera_rotation = math::clamp(m_new_uav_input.camera_rotation, math::vec3f(-math::anglef::pi), math::vec3f(math::anglef::pi));
+    m_new_uav_input.camera_mount_rotation = math::clamp(m_new_uav_input.camera_mount_rotation, math::vec3f(-math::anglef::pi), math::vec3f(math::anglef::pi));
 
 
     // send
-    if (m_uav_input.camera_rotation != m_new_uav_input.camera_rotation)
+    if (m_uav_input.camera_mount_rotation != m_new_uav_input.camera_mount_rotation)
     {
-        comms.send_uav_input(silk::uav_input::Input::CAMERA_ROTATION, m_new_uav_input.camera_rotation);
+        comms.send_uav_input(silk::uav_input::Input::CAMERA_MOUNT_ROTATION, m_new_uav_input.camera_mount_rotation);
     }
 
     if (m_uav_input.throttle_mode != m_new_uav_input.throttle_mode)
     {
-        comms.send_uav_input(silk::uav_input::Input::THROTTLE_MODE, m_uav_input.throttle_mode);
+        comms.send_uav_input(silk::uav_input::Input::THROTTLE_MODE, m_new_uav_input.throttle_mode);
     }
     if (m_uav_input.pitch_roll_mode != m_new_uav_input.pitch_roll_mode)
     {
-        comms.send_uav_input(silk::uav_input::Input::PITCH_ROLL_MODE, m_uav_input.pitch_roll_mode);
+        comms.send_uav_input(silk::uav_input::Input::PITCH_ROLL_MODE, m_new_uav_input.pitch_roll_mode);
     }
     if (m_uav_input.sticks.throttle != m_new_uav_input.sticks.throttle ||
         m_uav_input.sticks.yaw != m_new_uav_input.sticks.yaw ||
         m_uav_input.sticks.pitch != m_new_uav_input.sticks.pitch ||
         m_uav_input.sticks.roll != m_new_uav_input.sticks.roll)
     {
-        comms.send_uav_input(silk::uav_input::Input::STICKS, m_uav_input.sticks);
+        comms.send_uav_input(silk::uav_input::Input::STICKS, m_new_uav_input.sticks);
     }
 
     //store the change
