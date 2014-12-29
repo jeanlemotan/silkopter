@@ -68,8 +68,13 @@ auto MS5611::init(const std::string& device) -> bool
     m_c4 = C4;
     m_c5 = C5;
     m_c6 = C6;
+    if (m_c1 == 0 || m_c2 == 0 || m_c3 == 0 || m_c4 == 0 || m_c5 == 0 || m_c6 == 0)
+    {
+        SILK_ERR("MS5611 seems broken!");
+        return false;
+    }
 
-    m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR1024);
+    m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256);
 
 //    while(true)
 //    {
@@ -84,7 +89,7 @@ auto MS5611::init(const std::string& device) -> bool
 void MS5611::process()
 {
     auto now = q::Clock::now();
-    if (now - m_last_timestamp < std::chrono::milliseconds(5))
+    if (now - m_last_timestamp < std::chrono::milliseconds(10))
     {
         m_sample_time = std::chrono::seconds(0);
         return;
@@ -93,35 +98,47 @@ void MS5611::process()
     m_sample_time = now - m_last_timestamp;
     m_last_timestamp = now;
 
+    constexpr size_t PRESSURE_TO_TEMPERATURE_RATIO = 10;
+
+    std::array<uint8_t, 3> buf;
+
     if (m_stage == 0)
     {
-        uint8_t temperature_buf[3];
-        m_i2c.read(ADDR_MS5611, 0x00, temperature_buf, sizeof(temperature_buf));
+        //read temperature
+
+        if (m_i2c.read(ADDR_MS5611, 0x00, buf.data(), buf.size()))
         {
-            uint32_t val = (((uint32_t)temperature_buf[0]) << 16) | (((uint32_t)temperature_buf[1]) << 8) | temperature_buf[2];
+            double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
             m_temperature_reading = val;
+
         }
 
-        m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR1024); //read pressure next
-        m_stage++;
+        //next
+        if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256)) //read pressure next
+        {
+            m_stage++;
+        }
     }
     else
     {
-        uint8_t pressure_buf[3];
-        m_i2c.read(ADDR_MS5611, 0x00, pressure_buf, sizeof(pressure_buf));
+        //read pressure
+
+        if (m_i2c.read(ADDR_MS5611, 0x00, buf.data(), buf.size()))
         {
-            uint32_t val = (((uint32_t)pressure_buf[0]) << 16) | (((uint32_t)pressure_buf[1]) << 8) | pressure_buf[2];
-            m_pressure_reading = val;// On state 0 we read temp
+            double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
+            m_pressure_reading = val;
         }
 
-        if (m_stage == 1)
+        //next
+        if (m_stage >= PRESSURE_TO_TEMPERATURE_RATIO)
         {
-            m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR1024); //read temp next
-            m_stage = 0;
+            if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256)) //read temp next
+            {
+                m_stage = 0;
+            }
         }
-        else
+        else if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256)) //read pressure next
         {
-            m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR1024); //read pressure next
             m_stage++;
         }
     }
@@ -129,17 +146,35 @@ void MS5611::process()
     calculate();
 }
 
+class Butterworth //10hz
+{
+public:
+    static constexpr size_t NZEROS  = 2;
+    static constexpr size_t NPOLES  = 2;
+    static constexpr float GAIN    = 1.058546241e+03;
+    float xv[NZEROS+1], yv[NPOLES+1];
+    float process(float t)
+    {
+        xv[0] = xv[1]; xv[1] = xv[2];
+        xv[2] = t / GAIN;
+        yv[0] = yv[1]; yv[1] = yv[2];
+        yv[2] =   (xv[0] + xv[2]) + 2 * xv[1]
+                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
+        return yv[2];
+    }
+};
+
 void MS5611::calculate()
 {
     // Formulas from manufacturer datasheet
     // sub -20c temperature compensation is not included
 
     double dT = m_temperature_reading - m_c5 * 256.0;
-    double TEMP = (dT * m_c6)*0.00000011920928955078125;
+    double TEMP = 2000.0 + (dT * m_c6)*0.00000011920928955078125;
     double OFF = m_c2 * 65536.0 + (m_c4 * dT) * 0.0078125;
     double SENS = m_c1 * 32768.0 + (m_c3 * dT) * 0.00390625;
 
-    if (TEMP < 0)
+    if (TEMP < 2000.0)
     {
         // second order temperature compensation when under 20 degrees C
         double T2 = (dT*dT) / 0x80000000;
@@ -151,9 +186,14 @@ void MS5611::calculate()
         SENS = SENS - SENS2;
     }
 
-    m_temperature = static_cast<float>((TEMP + 2000.0) * 0.01);
+    m_temperature = static_cast<float>(TEMP) * 0.01;
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
     m_pressure = static_cast<float>((m_pressure_reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+
+//    static Butterworth xxx;
+//    m_pressure = xxx.process(m_pressure.get());
+//    double alt = (1.0 - math::pow(m_pressure.get() / 1013.25, 0.190284)) * 4430769.396f;
+//    SILK_INFO("{} / {}, cm: {}", m_temperature, m_pressure, alt);
 
     //SILK_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }

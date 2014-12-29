@@ -73,7 +73,6 @@ rpi {
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
     ../../src/main.cpp \
-    ../../src/Video_Server.cpp \
     ../../src/UAV.cpp \
     ../../src/Comms.cpp \
     ../../src/AHRS.cpp \
@@ -97,7 +96,6 @@ SOURCES += \
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
-    ../../src/Video_Server.h \
     ../../src/Toggle.h \
     ../../../libs/common/input/Camera_Input.h \
     ../../../libs/common/input/UAV_Input.h \

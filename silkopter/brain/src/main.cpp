@@ -1,5 +1,4 @@
 #include "BrainStdAfx.h"
-#include "Video_Server.h"
 #include "HAL.h"
 #include "common/input/Camera_Input.h"
 #include "Comms.h"
@@ -115,13 +114,11 @@ int main(int argc, char const* argv[])
             abort();
         }
 
-        //create streamer and camera objects
-        silk::Video_Server streamer(comms.get_rudp());
         if (hal.camera)
         {
             hal.camera->set_data_callback([&](uint8_t const* data, size_t size)
             {
-                streamer.send_frame(silk::Video_Server::Flags(), data, size);
+                comms.send_video_frame(silk::Comms::Video_Flags(), data, size);
             });
             hal.camera->set_quality(silk::camera_input::Stream_Quality::MEDIUM);
         }
@@ -133,7 +130,7 @@ int main(int argc, char const* argv[])
         {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
             SILK_INFO("Waiting for comms to connect...");
-            if (comms.is_connected()/* && !streamer.is_started()*/)
+            if (comms.is_connected())
             {
                 break;
             }

@@ -97,7 +97,9 @@ namespace util
         };
 
         static const size_t MAX_CHANNELS = 32;
-        const q::Clock::duration PING_TIMEOUT = std::chrono::seconds(4);
+
+        const q::Clock::duration PING_TIMEOUT = std::chrono::milliseconds(500);
+        static const size_t PING_MIN_AVERAGE_SAMPLES = 4;
 
 #pragma pack(push, 1)
         struct Header
@@ -216,7 +218,7 @@ namespace util
             struct Packet : public detail::Pool_Item_Base
             {
                 size_t received_fragment_count = 0;
-                q::Clock::time_point added;
+                q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
                 Packet_Main_Header main_header;
                 Packet_Header any_header;
                 std::array<Datagram_ptr, 256> fragments;
@@ -239,9 +241,8 @@ namespace util
         struct Ping
         {
             std::mutex mutex;
-            q::Clock::time_point last_sent_time_point;
             uint16_t last_seq = 0;
-            bool is_done = false;
+            bool is_done = true;
 
             boost::circular_buffer<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
             q::Clock::duration rtt = q::Clock::duration{0};
@@ -271,12 +272,13 @@ namespace util
             size_t rx_pongs = 0;
         };
 
-        q::Clock::time_point m_init_time_point;
+        q::Clock::time_point m_init_time_point = q::Clock::time_point(q::Clock::duration{0});
         std::array<uint32_t, MAX_CHANNELS> m_last_id;
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(50);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
+        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(80);
 
         size_t m_mtu = 1000;
 
@@ -284,6 +286,9 @@ namespace util
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
         Receive_Params m_global_receive_params;
 
+        int xxx_queued = 0;
+        int xxx_on_air = 0;
+        int xxx_sent = 0;
 
         template<class H> static auto get_header(Buffer_t const& data) -> H const&;
         template<class H> static auto get_header(Buffer_t& data) -> H&;
@@ -313,6 +318,8 @@ namespace util
 
         void send_packet_ping();
         void send_packet_pong(Ping_Header const& ping);
+
+        void process_pings();
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram);
         void process_packet_datagram(RX::Datagram_ptr& datagram);
@@ -364,6 +371,7 @@ namespace util
                 items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
                 x_returned++;
     //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+//                RUDP_INFO("{}// returned: {} / {}", m_pool.get(), t, x_returned);
             };
         }
 
@@ -378,6 +386,7 @@ namespace util
                 item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
                 m_pool->items.pop_back();
                 x_reused++;
+//                RUDP_INFO("{}// recycled: {} / {}", m_pool.get(), item, x_reused);
     //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
             }
             else
@@ -385,7 +394,11 @@ namespace util
                 item = new T;
                 item->gc = m_garbage_collector;
                 x_new++;
-                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+                //if (x_new > 1000)
+                {
+//                    RUDP_INFO("{}// allocated: {} / {}", m_pool.get(), item, x_new);
+                    //RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+                }
             }
             QASSERT(item);
             return Ptr(item);
@@ -507,7 +520,6 @@ namespace util
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
         m_init_time_point = q::Clock::now();
-        m_ping.last_sent_time_point = q::Clock::now();
         m_ping.rtts.set_capacity(100);
     }
 
@@ -623,7 +635,7 @@ namespace util
         size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
         if (fragment_count > 255)
         {
-            //RUDP_WARNING("Too many fragments: {}. Ignoring mtu.", fragment_count);
+            RUDP_WARNING("Too many fragments: {}. Ignoring mtu.", fragment_count);
             fragment_count = 255;
             max_fragment_size = ((size - 1) / fragment_count) + 1;
             fragment_count = ((size - 1) / max_fragment_size) + 1;
@@ -688,8 +700,6 @@ namespace util
                 header.type = TYPE_PACKET;
                 header.fragment_idx = i;
 
-                //HH RUDP_INFO("Sending fragment {} for packet {}", header.fragment_idx, id);
-
                 data += fragment_size;
                 left -= fragment_size;
 
@@ -749,7 +759,7 @@ namespace util
                 }
 
                 //waited enough, cancel the pending packet
-                RUDP_WARNING("Canceling ghost packet {}", next_expected_id);
+//                RUDP_WARNING("Canceling ghost packet {}", next_expected_id);
                 add_packet_cancellation(channel_idx, next_expected_id);
                 last_packet_id = next_expected_id;
                 m_global_stats.rx_dropped_packets++;
@@ -764,18 +774,18 @@ namespace util
                     break;
                 }
 
-                RUDP_WARNING("Canceling packet {}", id);
+//                RUDP_WARNING("Canceling packet {}", id);
                 add_packet_cancellation(channel_idx, id);
                 queue.packets.erase(queue.packets.begin());
                 last_packet_id = id;
                 m_global_stats.rx_dropped_packets++;
 
-                //RUDP_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+//                RUDP_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
                 continue;
             }
             QASSERT(packet->fragments[0]);
 
-            //RUDP_INFO("Received packet {}", id);
+//            RUDP_INFO("Received packet {}", id);
 
             queue.packets.erase(queue.packets.begin());
             last_packet_id = id;
@@ -813,37 +823,74 @@ namespace util
             break;
         }
 
-        send_pending_cancellations();
-
         return !data.empty();
+    }
+
+    inline void RUDP::process_pings()
+    {
+        std::lock_guard<std::mutex> lg(m_ping.mutex);
+
+        auto now = q::Clock::now();
+
+        //process current ping
+        if (!m_ping.is_done)
+        {
+            QASSERT(!m_ping.rtts.empty());
+            q::Clock::duration tt = now - m_ping.rtts.back().first;
+            if (tt >= PING_TIMEOUT)
+            {
+                //timeout
+                m_ping.is_done = true;
+                RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
+            }
+            else
+            {
+                //still ongoing, put the crt duration in the rtts
+                m_ping.rtts.back().second = tt;
+            }
+        }
+
+        //send another ping, but not too often
+        if (m_ping.is_done)
+        {
+            if (m_ping.rtts.empty() ||
+                    now - m_ping.rtts.back().first > std::chrono::milliseconds(100))
+            {
+                send_packet_ping();
+            }
+        }
+
+        //calculate average rtt
+        {
+            q::Clock::duration total_rtt{0};
+            size_t total = 0;
+            for (auto it = m_ping.rtts.rbegin(); it != m_ping.rtts.rend(); ++it)
+            {
+                auto sent_time_point = it->first;
+                auto rtt = it->second;
+                //we have a few samples of at most one second total?
+                if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_time_point > std::chrono::seconds(1))
+                {
+                    break;
+                }
+                total_rtt += rtt;
+                total++;
+            }
+            m_ping.rtt = (total > 0) ? q::Clock::duration(total_rtt / total) : PING_TIMEOUT;
+//            RUDP_INFO("RTT: {}", m_ping.rtt);
+        }
     }
 
     inline void RUDP::process()
     {
+//        {
+//            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+//            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
+//        }
         send_pending_confirmations();
         send_pending_cancellations();
 
-        {
-            std::lock_guard<std::mutex> lg(m_ping.mutex);
-
-            auto now = q::Clock::now();
-            q::Clock::duration d = now - m_ping.last_sent_time_point;
-
-            if (!m_ping.is_done && d >= PING_TIMEOUT)
-            {
-                m_ping.last_sent_time_point = q::Clock::now();
-                m_ping.is_done = false;
-
-                RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
-                send_packet_ping();
-            }
-            else if (m_ping.is_done && d > std::chrono::milliseconds(100))
-            {
-                m_ping.last_sent_time_point = q::Clock::now();
-                m_ping.is_done = false;
-                send_packet_ping();
-            }
-        }
+        process_pings();
 
         send_datagram();
     }
@@ -940,7 +987,7 @@ namespace util
             ++it;
         }
 
-        auto min_resend_duration = std::max(MIN_RESEND_DURATION, m_ping.rtt);
+        auto min_resend_duration = math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
 
         auto best = queue.end();
         q::Clock::duration best_age{0};
@@ -1001,14 +1048,14 @@ namespace util
                 datagram = std::move(m_tx.internal_queues.pong);
                 QASSERT(!datagram->is_in_transit);
                 m_tx.internal_queues.pong.reset();
-                //RUDP_INFO("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
+//                RUDP_INFO("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
             }
             else if (m_tx.internal_queues.ping)
             {
                 datagram = std::move(m_tx.internal_queues.ping);
                 QASSERT(!datagram->is_in_transit);
                 m_tx.internal_queues.ping.reset();
-                //RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
+//                RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
             }
 
             //next the confirmations
@@ -1019,7 +1066,7 @@ namespace util
                 {
                     datagram = std::move(queue.front());
                     QASSERT(!datagram->is_in_transit);
-                    //RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
+//                    RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                     erase_unordered(queue, queue.begin());
                 }
             }
@@ -1031,7 +1078,7 @@ namespace util
                 {
                     datagram = std::move(queue.front());
                     QASSERT(!datagram->is_in_transit);
-                    //RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
+//                    RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
                     erase_unordered(queue, queue.begin());
                 }
             }
@@ -1062,7 +1109,7 @@ namespace util
             }
             if (datagram)
             {
-                //RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
+//                RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
             }
         }
         if (!datagram)
@@ -1075,6 +1122,13 @@ namespace util
         //RUDP_INFO("send allowed {}", q::Clock::now());
 
         update_stats(m_global_stats, *datagram);
+
+//        {
+//            auto& header = get_header<Header>(datagram->data);
+//            RUDP_INFO("{}: sending {}", header.crc, q::Clock::now());
+//        }
+
+        xxx_on_air++;
 
         datagram->is_in_transit = true;
         m_socket.async_send_to(boost::asio::buffer(datagram->data),
@@ -1096,12 +1150,21 @@ namespace util
     {
         QASSERT(datagram->is_in_transit);
 
+        xxx_on_air--;
+        xxx_sent++;
+
         auto& header = get_header<Header>(datagram->data);
+
+//        {
+//            auto& header = get_header<Header>(datagram->data);
+//            RUDP_INFO("{}: done sending {}", header.crc, q::Clock::now());
+//        }
 
         if (header.type == TYPE_PING)
         {
             std::lock_guard<std::mutex> lg(m_ping.mutex);
-            m_ping.last_sent_time_point = q::Clock::now();
+            QASSERT(!m_ping.rtts.empty());
+            m_ping.rtts.back().first = q::Clock::now();
         }
 
 //            if (header.type == TYPE_PACKET)
@@ -1251,6 +1314,10 @@ namespace util
             header.type = TYPE_PING;
 
             prepare_to_send_datagram(*m_tx.internal_queues.ping);
+
+            m_ping.is_done = false;
+            //the time will get overwritten when the pack actually gets sent
+            m_ping.rtts.push_back(std::make_pair(q::Clock::now(), std::chrono::milliseconds(0)));
         }
 
         send_datagram();
@@ -1321,7 +1388,7 @@ namespace util
         {
             m_global_stats.rx_zombie_datagrams++;
 
-            RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
+//            RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
 
             if (header.flag_is_reliable)
             {
@@ -1348,7 +1415,7 @@ namespace util
         {
             m_global_stats.rx_duplicated_datagrams++;
 
-            RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
+//            RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
             return;
         }
 
@@ -1360,7 +1427,7 @@ namespace util
         }
         packet->fragments[fragment_idx] = std::move(datagram);
 
-        //RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+//        RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
     }
     inline void RUDP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
     {
@@ -1373,7 +1440,7 @@ namespace util
 //            {
 //                int a = 0;
 //            }
-        //RUDP_INFO("Confirming {} datagrams", count);
+//        RUDP_INFO("Confirming {} datagrams", count);
 
         QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + (1 + 3 + 1)*count);
 
@@ -1421,7 +1488,7 @@ namespace util
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-                //RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                 erase_unordered(m_tx.packet_queue, it);
                 count--;
                 if (count == 0)
@@ -1452,7 +1519,7 @@ namespace util
 
         QASSERT(datagram->data.size() == sizeof(Packets_Cancelled_Header) + (1 + 3)*count);
 
-        //RUDP_INFO("Cancelling {} datagrams", count);
+//        RUDP_INFO("Cancelling {} datagrams", count);
 
         //first unpack the confirmations in an array
         uint8_t* src = datagram->data.data() + sizeof(Packets_Cancelled_Header);
@@ -1495,7 +1562,7 @@ namespace util
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-                RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                 erase_unordered(m_tx.packet_queue, it);
                 continue;
             }
@@ -1508,7 +1575,7 @@ namespace util
         {
             m_global_stats.tx_cancelled_datagrams += size_before - size_after;
             m_global_stats.tx_cancelled_packets ++;
-            //RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
+//            RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
         }
     }
     inline void RUDP::process_ping_datagram(RX::Datagram_ptr& datagram)
@@ -1537,42 +1604,20 @@ namespace util
         }
         else
         {
-            auto rtt = now - m_ping.last_sent_time_point;
-            //RUDP_INFO("RTT: {} / {}", rtt, m_ping.rtt);
-            m_ping.rtts.push_back(std::make_pair(m_ping.last_sent_time_point, rtt));
+            auto rtt = now - m_ping.rtts.back().first;
+            m_ping.rtts.back().second = rtt;
         }
 
         m_ping.is_done = true;
 
-        //calculate average rtt
-        q::Clock::duration total_rtt{0};
-        size_t total = 0;
-        for (auto it = m_ping.rtts.rbegin(); it != m_ping.rtts.rend(); ++it)
-        {
-            auto sent_time_point = it->first;
-            auto rtt = it->second;
-            if (now - sent_time_point > std::chrono::seconds(1))
-            {
-                break;
-            }
-            total_rtt += rtt;
-            total++;
-        }
-        if (total > 0)
-        {
-            m_ping.rtt = total_rtt / total;
-        }
-        else
-        {
-            m_ping.rtt = PING_TIMEOUT;
-        }
+////        RUDP_INFO("RTT: {}", m_ping.rtt);
 
-        static q::Clock::time_point xxx = q::Clock::now();
-//                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
-        {
-            xxx = q::Clock::now();
-            //RUDP_INFO("RTT: {}", m_ping.rtt);
-        }
+//        static q::Clock::time_point xxx = q::Clock::now();
+////                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
+//        {
+//            xxx = q::Clock::now();
+//            //RUDP_INFO("RTT: {}", m_ping.rtt);
+//        }
     }
 
 

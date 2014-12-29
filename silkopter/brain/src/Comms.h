@@ -29,6 +29,15 @@ public:
 
     auto get_error_count() const -> size_t;
 
+    enum class Video_Flag : uint8_t
+    {
+        FLAG_KEYFRAME = 1 << 0,
+    };
+    typedef q::util::Flag_Set<Video_Flag, uint8_t> Video_Flags;
+    //sends a video frame.
+    //The data needs to be alive only for the duration of this call.
+    auto send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool;
+
 private:
     boost::asio::io_service& m_io_service;
 
@@ -92,13 +101,10 @@ private:
 
     HAL& m_hal;
     UAV& m_uav;
-    q::Clock::time_point m_uav_sent_timestamp;
+    q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
     void send_uav_data();
 
     Manual_Clock m_remote_clock;
-
-//    std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
-//    std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
@@ -108,22 +114,14 @@ private:
     typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
     typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
     Comms_Channel m_comms_channel;
+    q::Clock::time_point m_last_comms_sent_time_stamp = q::Clock::now();
+
     Telemetry_Channel m_telemetry_channel;
-//    q::Clock::time_point m_timeout_started;
+    q::Clock::time_point m_last_telemetry_sent_time_stamp = q::Clock::now();
 
     bool m_is_connected = false;
 
     size_t m_error_count = 0;
-
-//    struct Ping
-//    {
-//        uint32_t seq = 0;
-//        typedef std::vector<std::pair<uint32_t, q::Clock::time_point>> Seq_Sent;
-//        Seq_Sent seq_sent;
-//        boost::circular_buffer<q::Clock::duration> rtts;
-//        q::Clock::time_point last_time_point;
-//    } m_ping;
-
 };
 
 

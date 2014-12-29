@@ -153,7 +153,7 @@ auto HAL_Sensors_HW::init() -> bool
 #endif
 
 #ifdef USE_ODROIDW_ADC
-    if (!m_impl->adc.init(std::chrono::milliseconds(0), std::chrono::milliseconds(0)))
+    if (!m_impl->adc.init())
     {
         return false;
     }
@@ -368,28 +368,6 @@ void HAL_Sensors_HW::process()
     }
 #endif
 
-#ifdef USE_MS5611
-    m_impl->baro.process();
-    {
-        auto baro_sample = m_impl->baro.read_barometer();
-        if (baro_sample)
-        {
-            m_barometer_sample.value = *baro_sample;
-            m_barometer_sample.sample_idx++;
-            m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
-            m_barometer_samples.push_back(m_barometer_sample);
-        }
-        auto temp_sample = m_impl->baro.read_thermometer();
-        if (temp_sample)
-        {
-            m_thermometer_sample.value = *temp_sample;
-            m_thermometer_sample.sample_idx++;
-            m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
-            m_thermometer_samples.push_back(m_thermometer_sample);
-        }
-    }
-#endif
-
 #ifdef USE_ODROIDW_ADC
     m_impl->adc.process();
     {
@@ -424,6 +402,31 @@ void HAL_Sensors_HW::process()
             m_sonar_sample.dt = m_impl->sonar.get_sample_time();
             m_sonar_sample.sample_idx++;
             m_sonar_samples.push_back(m_sonar_sample);
+        }
+    }
+#endif
+
+#ifdef USE_MS5611
+    //*******************************************************************//
+    //KEEP BARO LAST to avoid i2c noise from talking to other sensors!!!!!!!!!
+    //*******************************************************************//
+    m_impl->baro.process();
+    {
+        auto baro_sample = m_impl->baro.read_barometer();
+        if (baro_sample)
+        {
+            m_barometer_sample.value = *baro_sample;
+            m_barometer_sample.sample_idx++;
+            m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
+            m_barometer_samples.push_back(m_barometer_sample);
+        }
+        auto temp_sample = m_impl->baro.read_thermometer();
+        if (temp_sample)
+        {
+            m_thermometer_sample.value = *temp_sample;
+            m_thermometer_sample.sample_idx++;
+            m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
+            m_thermometer_samples.push_back(m_thermometer_sample);
         }
     }
 #endif

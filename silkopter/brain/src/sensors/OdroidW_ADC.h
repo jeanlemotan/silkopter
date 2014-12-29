@@ -8,7 +8,7 @@ namespace silk
 class OdroidW_ADC : public q::util::Noncopyable
 {
 public:
-    auto init(q::Clock::duration adc0_sample_time, q::Clock::duration adc1_sample_time) -> bool;
+    auto init() -> bool;
 
     void process();
 
@@ -21,14 +21,15 @@ public:
 private:
     i2c m_i2c;
 
-    auto read_sample(size_t idx) -> boost::optional<float>;
-
     struct ADC
     {
         boost::optional<float> data;
-        q::Clock::duration sample_time;
-        q::Clock::time_point last_time_point;
+        q::Clock::duration sample_time = q::Clock::duration(0);
+        q::Clock::time_point last_time_point = q::Clock::now();
     };
+
+    q::Clock::time_point m_last_time_point = q::Clock::now();
+    size_t m_stage = 0;
 
     ADC m_adc_current;
     ADC m_adc_voltage;

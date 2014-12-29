@@ -61,6 +61,15 @@ namespace util
             m_data_start_off = 0;
         }
 
+        auto has_tx_data() const -> bool
+        {
+            return !m_tx_buffer.empty();
+        }
+        auto has_rx_data() const -> bool
+        {
+            return !m_rx_buffer.empty();
+        }
+
         void send()
         {
             if (!m_tx_buffer.empty())
@@ -125,10 +134,6 @@ namespace util
         }
 
         auto get_message_size() const -> size_t { return m_decoded.data_size; }
-        size_t get_pending_data_size() const
-        {
-            return m_rx_buffer.size();
-        }
 
 		//////////////////////////////////////////////////////////////////////////
 
