@@ -106,6 +106,8 @@ private:
 
     Manual_Clock m_remote_clock;
 
+    q::Clock::time_point m_last_rudp_time_stamp = q::Clock::now();
+
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
     boost::asio::ip::udp::socket m_socket;
@@ -114,10 +116,7 @@ private:
     typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
     typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
     Comms_Channel m_comms_channel;
-    q::Clock::time_point m_last_comms_sent_time_stamp = q::Clock::now();
-
     Telemetry_Channel m_telemetry_channel;
-    q::Clock::time_point m_last_telemetry_sent_time_stamp = q::Clock::now();
 
     bool m_is_connected = false;
 

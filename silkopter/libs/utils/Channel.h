@@ -139,7 +139,7 @@ namespace util
 
 	private:
         typedef std::vector<uint8_t> TX_Buffer_t;
-        typedef std::vector<uint8_t> RX_Buffer_t;
+        typedef std::deque<uint8_t> RX_Buffer_t;
 
         static const size_t MESSAGE_OFFSET = 0;
         static const size_t SIZE_OFFSET = MESSAGE_OFFSET + sizeof(Message_t);
@@ -157,8 +157,7 @@ namespace util
         {
             QASSERT(off + sizeof(T) <= t.size());
             T val;
-            auto const* src = t.data() + off;
-            std::copy(src, src + sizeof(T), reinterpret_cast<uint8_t*>(&val));
+            std::copy(t.begin() + off, t.begin() + off + sizeof(T), reinterpret_cast<uint8_t*>(&val));
             return val;
         }
         template<class T> T get_value(RX_Buffer_t const& t, size_t& off)
@@ -200,25 +199,14 @@ namespace util
                 m_decoded.is_valid = false;
             }
 
-            if (m_rx_buffer.empty())
+            m_rudp.receive(m_channel_idx, m_temp_rx_buffer);
+            if (!m_temp_rx_buffer.empty())
             {
-                m_rudp.receive(m_channel_idx, m_rx_buffer);
-                if (!m_rx_buffer.empty())
-                {
-                    //q::quick_logf("Received {} bytes", m_rx_buffer.size());
-                }
-            }
-            else
-            {
-                m_rudp.receive(m_channel_idx, m_temp_rx_buffer);
-                if (!m_temp_rx_buffer.empty())
-                {
-                    //q::quick_logf("Received {} bytes", m_temp_rx_buffer.size());
-                    auto off = m_rx_buffer.size();
-                    m_rx_buffer.resize(off + m_temp_rx_buffer.size());
-                    std::copy(m_temp_rx_buffer.begin(), m_temp_rx_buffer.end(), m_rx_buffer.begin() + off);
-                    m_temp_rx_buffer.clear();
-                }
+                //q::quick_logf("Received {} bytes", m_temp_rx_buffer.size());
+                auto off = m_rx_buffer.size();
+                m_rx_buffer.resize(off + m_temp_rx_buffer.size());
+                std::copy(m_temp_rx_buffer.begin(), m_temp_rx_buffer.end(), m_rx_buffer.begin() + off);
+                m_temp_rx_buffer.clear();
             }
 
             return decode_message() ? boost::optional<Message_t>(m_decoded.message) : boost::none;
@@ -299,7 +287,7 @@ namespace util
         util::RUDP& m_rudp;
         uint8_t m_channel_idx = 0;
         RX_Buffer_t m_rx_buffer;
-        RX_Buffer_t m_temp_rx_buffer;
+        std::vector<uint8_t> m_temp_rx_buffer;
         TX_Buffer_t m_tx_buffer;
         size_t m_size_off = 0;
         size_t m_data_start_off = 0;

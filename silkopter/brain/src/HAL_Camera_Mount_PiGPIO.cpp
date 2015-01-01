@@ -8,7 +8,7 @@
 
 extern "C"
 {
-#include <pigpiod_if.h>
+    #include <pigpio.h>
 }
 
 //yaw pitch roll
@@ -80,19 +80,19 @@ auto HAL_Camera_Mount_PiGPIO::init() -> bool
         auto name = SERVOS[i].second;
         if (gpio >= 0)
         {
-            auto f = set_PWM_frequency(gpio, freq);
+            auto f = gpioSetPWMfrequency(gpio, freq);
             if (f < 0)
             {
                 SILK_ERR("{} GPIO {}: Cannot set pwm frequency {}", name, gpio, freq);
                 return false;
             }
             auto range = 1000000 / freq;
-            if (set_PWM_range(gpio, range) < 0)
+            if (gpioSetPWMrange(gpio, range) < 0)
             {
                 SILK_ERR("{} GPIO {}: Cannot set pwm range {} on gpio {}", name, gpio, range);
                 return false;
             }
-            set_PWM_dutycycle(gpio, 1500);
+            gpioPWM(gpio, 1500);
             SILK_INFO("{} GPIO {}: PWM frequency {} (requested {}), range {}", name, gpio, f, freq, range);
         }
         else
@@ -120,7 +120,7 @@ void HAL_Camera_Mount_PiGPIO::process()
         return;
     }
 
-    constexpr std::chrono::milliseconds UPDATE_PERIOD(50);
+    constexpr std::chrono::milliseconds UPDATE_PERIOD(20);
 
     auto now = q::Clock::now();
     if (now - m_last_time_point < UPDATE_PERIOD)
@@ -136,25 +136,25 @@ void HAL_Camera_Mount_PiGPIO::process()
         //SILK_INFO("mount rotation: {}", m_rotation);
 
         //x - pitch
-//        if (SERVOS[0].first >= 0)
-//        {
-//            auto pulse = compute_pulse(m_rotation.x, m_settings.x_range);
-//            set_PWM_dutycycle(SERVOS[0].first, pulse);
-//        }
+        if (SERVOS[0].first >= 0)
+        {
+            auto pulse = compute_pulse(m_rotation.x, m_settings.x_range);
+            gpioPWM(SERVOS[0].first, pulse);
+        }
 
-//        //y - roll
-//        if (SERVOS[1].first >= 0)
-//        {
-//            auto pulse = compute_pulse(m_rotation.y, m_settings.y_range);
-//            set_PWM_dutycycle(SERVOS[1].first, pulse);
-//        }
+        //y - roll
+        if (SERVOS[1].first >= 0)
+        {
+            auto pulse = compute_pulse(m_rotation.y, m_settings.y_range);
+            gpioPWM(SERVOS[1].first, pulse);
+        }
 
-//        //z - yaw
-//        if (SERVOS[2].first >= 0)
-//        {
-//            auto pulse = compute_pulse(m_rotation.z, m_settings.z_range);
-//            set_PWM_dutycycle(SERVOS[2].first, pulse);
-//        }
+        //z - yaw
+        if (SERVOS[2].first >= 0)
+        {
+            auto pulse = compute_pulse(m_rotation.z, m_settings.z_range);
+            gpioPWM(SERVOS[2].first, pulse);
+        }
     }
 }
 

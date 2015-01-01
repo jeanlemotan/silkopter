@@ -67,12 +67,12 @@ auto HAL_Motors_PiGPIO::init() -> bool
     {
         if (gpio >= 0)
         {
-            if (set_pull_up_down(gpio, PI_PUD_DOWN) < 0)
+            if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
             {
                 SILK_ERR("GPIO {}: Cannot set pull down mode", gpio);
                 return false;
             }
-            if (set_mode(gpio, PI_OUTPUT) < 0)
+            if (gpioSetMode(gpio, PI_OUTPUT) < 0)
             {
                 SILK_ERR("GPIO {}: Cannot set GPIO mode to output", gpio);
                 return false;
@@ -101,14 +101,14 @@ auto HAL_Motors_PiGPIO::init() -> bool
         {
             if (gpio >= 0)
             {
-                auto f = set_PWM_frequency(gpio, freq);
+                auto f = gpioSetPWMfrequency(gpio, freq);
                 if (f < 0)
                 {
                     SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
                     return false;
                 }
                 auto range = 1000000 / freq;
-                if (set_PWM_range(gpio, range) < 0)
+                if (gpioSetPWMrange(gpio, range) < 0)
                 {
                     SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
                     return false;
@@ -151,7 +151,7 @@ void HAL_Motors_PiGPIO::cut_throttle()
     {
         if (gpio >= 0)
         {
-            set_PWM_dutycycle(gpio, MIN_PULSE);
+            gpioPWM(gpio, MIN_PULSE);
         }
     }
 }
@@ -190,7 +190,7 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
             m_motors[i].throttle = throttle;
 
             uint32_t pulse = throttle * (MAX_PULSE - MIN_PULSE);
-            set_PWM_dutycycle(gpio, MIN_PULSE + pulse);
+            gpioPWM(gpio, MIN_PULSE + pulse);
         }
     }
 }

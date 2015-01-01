@@ -332,7 +332,6 @@ void HAL_Sensors_HW::process()
 
 #ifdef USE_MPU9250
     m_impl->mpu.process();
-
     {
         auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
         auto const& a_samples = m_impl->mpu.get_accelerometer_samples();

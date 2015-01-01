@@ -60,17 +60,22 @@ int main(int argc, char const* argv[])
 
 	boost::asio::io_service io_service;
 
-	SILK_INFO("Creating io_service thread");
+    SILK_INFO("Creating io_service thread");
 
     auto io_thread = boost::thread([&io_service]()
-	{
+    {
         while (!s_exit)
-		{
-            io_service.run();
-            io_service.reset();
-            boost::this_thread::yield();
+        {
+            auto start = q::Clock::now();
+            //do
+            //{
+                io_service.run();
+                io_service.reset();
+            //} while (q::Clock::now() - start < std::chrono::milliseconds(1));
+            //boost::this_thread::yield();
+            boost::this_thread::sleep_for(boost::chrono::microseconds(500));
         }
- 	});
+    });
 
 //    {
 //        int policy = SCHED_FIFO;
@@ -138,14 +143,23 @@ int main(int argc, char const* argv[])
 
         SILK_INFO("All systems up. Ready to fly...");
 
+        constexpr std::chrono::milliseconds PERIOD(3);
+
         while (!s_exit)
         {
+            auto start = q::Clock::now();
+
             comms.process();
 
             hal.process();
             uav.process();
 
-            boost::this_thread::yield();
+            auto d = q::Clock::now() - start;
+            if (d < PERIOD)
+            {
+                auto left_over = std::chrono::duration_cast<std::chrono::microseconds>(PERIOD - d).count();
+                boost::this_thread::sleep_for(boost::chrono::microseconds(left_over));
+            }
         }
 
         SILK_INFO("Stopping everything");
@@ -154,7 +168,7 @@ int main(int argc, char const* argv[])
         {
             hal.camera->set_data_callback(nullptr);
         }
-
+        hal.shutdown();
     }
     catch (std::exception const& e)
     {

@@ -7,6 +7,8 @@ using namespace boost::asio;
 constexpr uint8_t COMMS_CHANNEL = 12;
 constexpr uint8_t TELEMETRY_CHANNEL = 13;
 
+constexpr q::Clock::duration SEND_EVERY = std::chrono::milliseconds(30);
+
 
 Comms::Comms(boost::asio::io_service& io_service)
     : m_io_service(io_service)
@@ -15,23 +17,33 @@ Comms::Comms(boost::asio::io_service& io_service)
     , m_comms_channel(m_rudp, COMMS_CHANNEL)
     , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
 {
-    util::RUDP::Send_Params sparams;
-    sparams.is_compressed = true;
+    {
+        util::RUDP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = false;
+        params.importance = 64;
+        m_rudp.set_send_params(TELEMETRY_CHANNEL, params);
+    }
 
-    sparams.is_reliable = false;
-    sparams.importance = 64;
-    m_rudp.set_send_params(TELEMETRY_CHANNEL, sparams);
+    {
+        util::RUDP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = true;
+        params.importance = 127;
+        m_rudp.set_send_params(COMMS_CHANNEL, params);
+    }
 
-    sparams.is_reliable = true;
-    sparams.importance = 127;
-    m_rudp.set_send_params(COMMS_CHANNEL, sparams);
+    {
+        util::RUDP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(999999);
+        m_rudp.set_receive_params(COMMS_CHANNEL, params);
+    }
 
-    util::RUDP::Receive_Params rparams;
-    rparams.max_receive_time = std::chrono::seconds(999999);
-    m_rudp.set_receive_params(COMMS_CHANNEL, rparams);
-
-    rparams.max_receive_time = std::chrono::milliseconds(50);
-    m_rudp.set_receive_params(TELEMETRY_CHANNEL, rparams);
+    {
+        util::RUDP::Receive_Params params;
+        params.max_receive_time = std::chrono::milliseconds(50);
+        m_rudp.set_receive_params(TELEMETRY_CHANNEL, params);
+    }
 
 }
 
@@ -495,8 +507,18 @@ void Comms::process()
 //    SILK_INFO("*********** LOOP: {}", xxx);
 
     m_rudp.process();
-    m_comms_channel.send();
-    m_telemetry_channel.try_sending();
+
+    auto now = q::Clock::now();
+    if (m_comms_channel.has_tx_data() && now - m_last_comms_sent_time_stamp >= SEND_EVERY)
+    {
+        m_last_comms_sent_time_stamp = now;
+        m_comms_channel.send();
+    }
+    if (m_telemetry_channel.has_tx_data() && now - m_last_telemetry_sent_time_stamp >= SEND_EVERY)
+    {
+        m_last_telemetry_sent_time_stamp = now;
+        m_telemetry_channel.try_sending();
+    }
 }
 
 auto Comms::get_rudp() -> util::RUDP&

@@ -60,7 +60,7 @@ LIBS += -lboost_program_options
 LIBS += -lrt
 LIBS += -lz
 rpi {
-    LIBS += -lpigpiod_if
+    LIBS += -lpigpio
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client

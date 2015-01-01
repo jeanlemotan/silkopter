@@ -131,13 +131,15 @@ private:
     boost::asio::ip::udp::socket m_socket;
     boost::asio::ip::udp::endpoint m_remote_endpoint;
 
+    util::RUDP m_rudp;
+
     typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
     typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
-
-    util::RUDP m_rudp;
     mutable Comms_Channel m_comms_channel;
+    q::Clock::time_point m_last_comms_sent_time_stamp = q::Clock::now();
+
     mutable Telemetry_Channel m_telemetry_channel;
-    q::Clock::time_point m_timeout_started;
+    q::Clock::time_point m_last_telemetry_sent_time_stamp = q::Clock::now();
 
     Manual_Clock m_remote_clock;
 

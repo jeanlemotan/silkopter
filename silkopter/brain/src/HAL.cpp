@@ -11,7 +11,7 @@
 extern "C"
 {
     #include "bcm_host.h"
-    #include "pigpiod_if.h"
+    #include "pigpio.h"
 }
 #endif
 
@@ -22,21 +22,46 @@ auto HAL::init() -> bool
 {
 #ifdef RASPBERRY_PI
 
-    SILK_INFO("initializing bcm_host");
+    SILK_INFO("Initializing bcm_host");
     bcm_host_init();
 
-    SILK_INFO("Connecting to pigpiod daemon");
-    if (pigpio_start(nullptr, nullptr) < 0)
+    SILK_INFO("Initializing pigpio");
+    if (gpioCfgClock(4, 1, 0) < 0 ||
+        gpioCfgPermissions(static_cast<uint64_t>(-1)) ||
+        gpioCfgInterfaces(PI_DISABLE_SOCK_IF | PI_DISABLE_FIFO_IF))
     {
-        SILK_ERR("Cannot connect to pigpiod. Make sure it's started.");
+        SILK_ERR("Cannot configure pigpio");
+        return false;
+    }
+    if (gpioInitialise() < 0)
+    {
+        SILK_ERR("Cannot initialize pigpio");
         return false;
     }
 
-    set_mode(0, PI_INPUT);
-    set_mode(1, PI_INPUT);
-    set_mode(28, PI_ALT0);
-    set_mode(29, PI_ALT0);
+    //if ran with sudo, revert to normal user
+    if (geteuid() == 0 && getuid() != 0)
+    {
+        SILK_INFO("Giving up root for {}", getuid());
+        if (setuid(getuid()) < 0)
+        {
+            SILK_ERR("Cannot give up root priviledges");
+            return false;
+        }
+    }
 
+    SILK_INFO("Configuring i2c pin modes");
+    auto res = gpioSetMode(0, PI_INPUT);
+    res |= gpioSetMode(1, PI_INPUT);
+    res |= gpioSetMode(28, PI_ALT0);
+    res |= gpioSetMode(29, PI_ALT0);
+    if (res)
+    {
+        SILK_ERR("Cannot initialize pigpio i2c pin modes");
+        return false;
+    }
+
+    SILK_INFO("Creating HW devices");
     motors.reset(new HAL_Motors_PiGPIO());
     camera.reset(new HAL_Raspicam());
     sensors.reset(new HAL_Sensors_HW());
@@ -47,6 +72,7 @@ auto HAL::init() -> bool
 //    sensors.reset(new HAL_Sensors_Sim());
 #endif
 
+    SILK_INFO("Initializing HW devices");
     if (motors && !motors->init())
     {
         return false;
@@ -87,7 +113,7 @@ void HAL::shutdown()
     }
 
 #ifdef RASPBERRY_PI
-    pigpio_stop();
+    gpioTerminate();
 #endif
 }
 

@@ -10,7 +10,7 @@ constexpr uint8_t COMMS_CHANNEL = 12;
 constexpr uint8_t TELEMETRY_CHANNEL = 13;
 constexpr uint8_t VIDEO_CHANNEL = 4;
 
-constexpr q::Clock::duration SEND_EVERY = std::chrono::milliseconds(30);
+constexpr q::Clock::duration RUDP_PERIOD = std::chrono::milliseconds(30);
 
 Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     : m_io_service(io_service)
@@ -41,11 +41,11 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
     {
         util::RUDP::Send_Params params;
-        params.is_compressed = true;
+        params.is_compressed = false;
         params.is_reliable = false;
-        params.importance = 0;
-        params.cancel_on_new_data = true;
-        params.cancel_after = std::chrono::milliseconds(200);
+        params.importance = 10;
+//        params.cancel_on_new_data = true;
+        params.cancel_after = std::chrono::milliseconds(100);
         m_rudp.set_send_params(VIDEO_CHANNEL, params);
     }
 
@@ -68,7 +68,7 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
     {
         m_socket.open(ip::udp::v4());
         m_socket.set_option(ip::udp::socket::reuse_address(true));
-        m_socket.set_option(socket_base::send_buffer_size(65536));
+        //m_socket.set_option(socket_base::send_buffer_size(65536));
         m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
         //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address::from_string("192.168.1.37"), send_port));
 
@@ -904,20 +904,16 @@ void Comms::process()
         }
     }
 
-    m_rudp.process();
-
     auto now = q::Clock::now();
-    if (m_comms_channel.has_tx_data() && now - m_last_comms_sent_time_stamp >= SEND_EVERY)
+    if (now - m_last_rudp_time_stamp >= RUDP_PERIOD)
     {
-        m_last_comms_sent_time_stamp = now;
+        m_last_rudp_time_stamp = now;
+
+        m_rudp.process();
+
         m_comms_channel.send();
-    }
-    if (m_telemetry_channel.has_tx_data() && now - m_last_telemetry_sent_time_stamp >= SEND_EVERY)
-    {
-        m_last_telemetry_sent_time_stamp = now;
         m_telemetry_channel.try_sending();
     }
-
 
 //    static std::vector<uint8_t> buf;
 //    if (buf.empty())

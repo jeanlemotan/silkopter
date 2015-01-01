@@ -35,13 +35,19 @@ private:
         silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
         silk::uav_input::Assists assists;
         silk::uav_input::Sticks sticks;
-        math::vec3f camera_mount_rotation;
 
         bool arm = false;
         bool disarm = false;
         bool land = false;
         bool take_off = false;
     } m_uav_input, m_new_uav_input;
+
+    struct Camera_Mount_Input
+    {
+        math::vec3f base_rotation;
+        math::vec3f delta_rotation;
+        math::vec3f final_rotation;
+    } m_new_cm_input, m_cm_input;
 
     struct Base_Throttle
     {

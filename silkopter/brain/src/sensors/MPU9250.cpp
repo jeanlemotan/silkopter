@@ -535,43 +535,25 @@ void MPU9250::process()
         {
             auto sample_count = fifo_count / m_fifo_sample_size;
             auto to_read = sample_count * m_fifo_sample_size;
+            QASSERT(sample_count >= 1);
 
             m_fifo_buffer.resize(to_read);
-            auto* data = m_fifo_buffer.data();
-
+            if (m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
-                //auto start = q::Clock::now();
-
-                res = m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, data, to_read);
-
-                //auto d = q::Clock::now() - start;
-                //QLOG_INFO("", "{}: {}us", to_read, d.count());
-            }
-
-            //reset_fifo();
-            //fc2 = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH);
-
-            if (res)
-            {
-                QASSERT(sample_count >= 1);
                 m_samples.gyroscope.resize(sample_count);
                 m_samples.accelerometer.resize(sample_count);
-                size_t off = 0;
+                auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
-                    {
-                        short x = (data[off] << 8) | data[off + 1]; off += 2;
-                        short y = (data[off] << 8) | data[off + 1]; off += 2;
-                        short z = (data[off] << 8) | data[off + 1]; off += 2;
-                        m_samples.accelerometer[i].set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
-                    }
+                    short x = (data[0] << 8) | data[1]; data += 2;
+                    short y = (data[0] << 8) | data[1]; data += 2;
+                    short z = (data[0] << 8) | data[1]; data += 2;
+                    m_samples.accelerometer[i].set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
 
-                    {
-                        short x = (data[off] << 8) | data[off + 1]; off += 2;
-                        short y = (data[off] << 8) | data[off + 1]; off += 2;
-                        short z = (data[off] << 8) | data[off + 1]; off += 2;
-                        m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
-                    }
+                    x = (data[0] << 8) | data[1]; data += 2;
+                    y = (data[0] << 8) | data[1]; data += 2;
+                    z = (data[0] << 8) | data[1]; data += 2;
+                    m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
                 }
             }
         }
@@ -594,8 +576,8 @@ void MPU9250::process_compass()
 
     m_compass_sample_time = std::chrono::seconds(0);
 
-    uint8_t tmp[8];
-    if (!m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp, 8))
+    std::array<uint8_t, 8> tmp;
+    if (!m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp.data(), tmp.size()))
     {
         return;
     }

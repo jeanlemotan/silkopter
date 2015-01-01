@@ -108,7 +108,7 @@ namespace util
             uint8_t type : 4;
         };
 
-        struct Packet_Header : Header
+        struct Packet_Header : public Header
         {
             uint32_t id : 24;
             uint32_t channel_idx : 5;
@@ -117,30 +117,30 @@ namespace util
             uint8_t fragment_idx;
         };
 
-        struct Packet_Main_Header : Packet_Header
+        struct Packet_Main_Header : public Packet_Header
         {
             uint32_t packet_size : 24;
             uint32_t fragment_count : 8;
         };
 
-        struct Packets_Confirmed_Header : Header
+        struct Packets_Confirmed_Header : public Header
         {
             static const size_t MAX_PACKED = 20;
             uint8_t count;
         };
 
-        struct Packets_Cancelled_Header : Header
+        struct Packets_Cancelled_Header : public Header
         {
             static const size_t MAX_PACKED = 20;
             uint8_t count;
         };
 
-        struct Ping_Header : Header
+        struct Ping_Header : public Header
         {
             uint16_t seq;
         };
 
-        struct Pong_Header : Header
+        struct Pong_Header : public Header
         {
             uint16_t seq;
         };
@@ -277,10 +277,10 @@ namespace util
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
-        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(80);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
+        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(50);
 
-        size_t m_mtu = 1000;
+        size_t m_mtu = 2000;
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
@@ -654,7 +654,7 @@ namespace util
                 for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
                 {
                     auto const& hdr = get_header<Packet_Header>((*it)->data);
-                    if (hdr.id < id)
+                    if (hdr.channel_idx == channel_idx && hdr.id < id)
                     {
                         erase_unordered(m_tx.packet_queue, it);
                         continue;
@@ -674,24 +674,6 @@ namespace util
 
                 fragment->params = params;
 
-                size_t h_size = 0;
-                if (i == 0)
-                {
-                    h_size = sizeof(Packet_Main_Header);
-                    auto& f_header = get_header<Packet_Main_Header>(fragment->data);
-                    f_header.packet_size = uncompressed_size;
-                    f_header.fragment_count = fragment_count;
-                }
-                else
-                {
-                    h_size = sizeof(Packet_Header);
-                    //auto& f_header = get_header<Packet_Header>(fragment->data);
-                }
-                QASSERT(h_size > 0);
-
-                fragment->data.resize(h_size + fragment_size);
-                std::copy(data, data + fragment_size, fragment->data.begin() + h_size);
-
                 auto& header = get_header<Packet_Header>(fragment->data);
                 header.id = id;
                 header.channel_idx = channel_idx;
@@ -699,6 +681,19 @@ namespace util
                 header.flag_is_compressed = is_compressed;
                 header.type = TYPE_PACKET;
                 header.fragment_idx = i;
+
+                if (i == 0)
+                {
+                    auto& f_header = get_header<Packet_Main_Header>(fragment->data);
+                    f_header.packet_size = uncompressed_size;
+                    f_header.fragment_count = fragment_count;
+
+                    std::copy(data, data + fragment_size, fragment->data.begin() + sizeof(Packet_Main_Header));
+                }
+                else
+                {
+                    std::copy(data, data + fragment_size, fragment->data.begin() + sizeof(Packet_Header));
+                }
 
                 data += fragment_size;
                 left -= fragment_size;
@@ -841,7 +836,7 @@ namespace util
             {
                 //timeout
                 m_ping.is_done = true;
-                RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
+//                RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
             }
             else
             {
@@ -883,10 +878,10 @@ namespace util
 
     inline void RUDP::process()
     {
-//        {
+        {
 //            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 //            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
-//        }
+        }
         send_pending_confirmations();
         send_pending_cancellations();
 
@@ -1562,7 +1557,10 @@ namespace util
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-//                RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+                if (hdr.channel_idx == 4)
+                {
+                    //RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+                }
                 erase_unordered(m_tx.packet_queue, it);
                 continue;
             }

@@ -7,7 +7,7 @@
 
 extern "C"
 {
-    #include "pigpiod_if.h"
+    #include "pigpio.h"
 }
 
 
@@ -18,17 +18,17 @@ struct Mode_Guard
 {
     Mode_Guard()
     {
-        set_mode(28, PI_INPUT);
-        set_mode(29, PI_INPUT);
-        set_mode(0, PI_ALT0);
-        set_mode(1, PI_ALT0);
+        gpioSetMode(28, PI_INPUT);
+        gpioSetMode(29, PI_INPUT);
+        gpioSetMode(0, PI_ALT0);
+        gpioSetMode(1, PI_ALT0);
     }
     ~Mode_Guard()
     {
-        set_mode(28, PI_ALT0);
-        set_mode(29, PI_ALT0);
-        set_mode(0, PI_INPUT);
-        set_mode(1, PI_INPUT);
+        gpioSetMode(28, PI_ALT0);
+        gpioSetMode(29, PI_ALT0);
+        gpioSetMode(0, PI_INPUT);
+        gpioSetMode(1, PI_INPUT);
     }
 };
 

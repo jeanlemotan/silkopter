@@ -117,10 +117,10 @@ HAL_Raspicam::HAL_Raspicam()
     m_impl->recording.quality.bitrate = 16000000;
     m_impl->high.quality.resolution.set(1280, 960);
     m_impl->high.quality.bitrate = 4000000;
-    m_impl->medium.quality.resolution.set(640, 480);
+    m_impl->medium.quality.resolution.set(800, 600);
     m_impl->medium.quality.bitrate = 2000000;
     m_impl->low.quality.resolution.set(320, 240);
-    m_impl->low.quality.bitrate = 160000;
+    m_impl->low.quality.bitrate = 100000;
 
 
     m_impl->file_callback = std::bind(&HAL_Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
@@ -175,6 +175,7 @@ auto HAL_Raspicam::init() -> bool
     auto res = create_components();
     if (res)
     {
+        //start_recording();
         set_active_streams(false,
                            true,
                            false);
@@ -685,6 +686,15 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         SILK_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE");
         return Component_ptr();
     }
+
+//    {
+//        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
+//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+//        {
+//            SILK_WARNING("failed to set MMAL_PARAMETER_INTRAPERIOD");
+//            return Component_ptr();
+//        }
+//    }
 
     {
         MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
