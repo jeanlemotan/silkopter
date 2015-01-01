@@ -12,19 +12,21 @@ public:
 
     void process();
 
-    auto read_current() -> boost::optional<float>;
-    auto read_voltage() -> boost::optional<float>;
+    struct Data
+    {
+        float value;
+        q::Clock::duration dt;
+    };
 
-    auto get_current_sample_time() const -> q::Clock::duration;
-    auto get_voltage_sample_time() const -> q::Clock::duration;
+    auto get_current_data() -> boost::optional<Data>;
+    auto get_voltage_data() -> boost::optional<Data>;
 
 private:
     i2c m_i2c;
 
     struct ADC
     {
-        boost::optional<float> data;
-        q::Clock::duration sample_time = q::Clock::duration(0);
+        boost::optional<Data> data;
         q::Clock::time_point last_time_point = q::Clock::now();
     };
 

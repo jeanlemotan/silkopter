@@ -20,7 +20,7 @@ typedef Sensor_Sample<float> Thermometer_Sample; //degrees celsius
 typedef Sensor_Sample<float> Voltage_Sample; //volts
 typedef Sensor_Sample<float> Current_Sample; //amperes / second
 
-struct GPS
+struct GPS_Data
 {
     uint8_t sattelite_count = 0;
     float precision = std::numeric_limits<float>::max();
@@ -32,6 +32,6 @@ struct GPS
     boost::optional<math::vec2f> speed; //meters/second
     boost::optional<math::vec2f> direction; //normalized
 };
-typedef Sensor_Sample<GPS> GPS_Sample;
+typedef Sensor_Sample<GPS_Data> GPS_Sample;
 
 }

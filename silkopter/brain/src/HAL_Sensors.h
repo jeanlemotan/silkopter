@@ -56,10 +56,6 @@ public:
     virtual auto get_last_gps_sample() const            -> GPS_Sample const& = 0;
 
     //----------------------------------------------------------------------
-    //returns how many comm errors we've got
-    virtual size_t get_error_count() const = 0;
-
-    //----------------------------------------------------------------------
     virtual void process() = 0;
 };
 

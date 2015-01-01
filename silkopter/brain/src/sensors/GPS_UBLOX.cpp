@@ -9,10 +9,6 @@ constexpr uint8_t PREAMBLE2 = 0x62;
 
 GPS_UBLOX::~GPS_UBLOX()
 {
-    if (m_fd)
-    {
-        close(m_fd);
-    }
 }
 
 auto GPS_UBLOX::detect(uint8_t const* data, size_t size) -> bool
@@ -33,20 +29,14 @@ auto GPS_UBLOX::detect(uint8_t const* data, size_t size) -> bool
     for (size_t i = 0; i < size; i++)
     {
         auto const d = data[i];
+        auto next = step + 1;
         switch (step)
         {
-        case 1:
-            if (d == PREAMBLE2)
-            {
-                step++;
-                break;
-            }
-            step = 0;
         case 0:
-            if (d == PREAMBLE1)
-            {
-                step++;
-            }
+            step = (d == PREAMBLE1) ? next : 0;
+            break;
+        case 1:
+            step = (d == PREAMBLE2) ? next : 0;
             break;
         case 2:
             step++;
@@ -68,17 +58,10 @@ auto GPS_UBLOX::detect(uint8_t const* data, size_t size) -> bool
             break;
         case 6:
             ck_b += (ck_a += d);
-            if (++payload_counter == payload_length)
-            {
-                step++;
-            }
+            step = (++payload_counter == payload_length) ? next : step;
             break;
         case 7:
-            step++;
-            if (ck_a != d)
-            {
-                step = 0;
-            }
+            step = (ck_a == d) ? next : 0;
             break;
         case 8:
             step = 0;

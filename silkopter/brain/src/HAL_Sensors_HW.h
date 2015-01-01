@@ -67,6 +67,8 @@ public:
         size_t accelerometer_range = 4;
         std::string mpu_i2c_device;
         std::string barometer_i2c_device;
+        std::string gps_device;
+        size_t gps_baud = 38400;
 
         float current_scale = 32.2f;
         float voltage_scale = 39.33f;
@@ -100,13 +102,14 @@ private:
     GPS_Sample m_gps_sample;
     std::vector<GPS_Sample> m_gps_samples;
 
+    void process_gps();
+
     bool m_is_initialized = false;
-    size_t m_error_count = 0;
 
     Config m_config;
 
-    struct Impl;
-    std::shared_ptr<Impl> m_impl;
+    struct Sensors;
+    std::shared_ptr<Sensors> m_sensors;
 
     auto load_settings() -> bool;
     void save_settings();

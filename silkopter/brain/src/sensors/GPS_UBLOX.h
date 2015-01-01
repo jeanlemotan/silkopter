@@ -1,12 +1,12 @@
 #pragma once
 
-#include "GPS_Interface.h"
+#include "GPS_Protocol.h"
 
 
 namespace silk
 {
 
-class GPS_UBLOX : public  GPS_Interface
+class GPS_UBLOX : public GPS_Protocol
 {
 public:
     ~GPS_UBLOX();

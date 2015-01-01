@@ -9,6 +9,8 @@
 #include "sz_math.hpp"
 #include "sz_hal_sensors_hw_config.hpp"
 
+#include "sensors/GPS_Detector.h"
+
 
 #define USE_MPU9250
 #define USE_MS5611
@@ -38,7 +40,7 @@
 using namespace silk;
 using namespace boost::asio;
 
-struct HAL_Sensors_HW::Impl
+struct HAL_Sensors_HW::Sensors
 {
 #ifdef USE_MPU9250
     MPU9250 mpu;
@@ -55,13 +57,15 @@ struct HAL_Sensors_HW::Impl
 #ifdef USE_SRF02
     SRF02 sonar;
 #endif
+
+    GPS_Detector gps_detector;
 };
 
 ///////////////////////////////////////////////////////////////
 
 HAL_Sensors_HW::HAL_Sensors_HW()
 {
-    m_impl.reset(new Impl);
+    m_sensors.reset(new Sensors);
 
     m_config.barometer_i2c_device = "/dev/i2c-0";
     m_config.mpu_i2c_device = "/dev/i2c-0";
@@ -95,6 +99,10 @@ auto HAL_Sensors_HW::load_settings() -> bool
     {
         m_config.mpu_i2c_device = "/dev/i2c-0";
     }
+    if (m_config.gps_device.empty())
+    {
+        m_config.gps_device = "/dev/ttyAMA0";
+    }
 
     return true;
 }
@@ -116,7 +124,7 @@ auto HAL_Sensors_HW::init() -> bool
     }
 
 #ifdef USE_MS5611
-    if (!m_impl->baro.init(m_config.barometer_i2c_device))
+    if (!m_sensors->baro.init(m_config.barometer_i2c_device))
     {
         return false;
     }
@@ -145,7 +153,7 @@ auto HAL_Sensors_HW::init() -> bool
         SILK_INFO("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
         SILK_INFO("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
 
-        if (!m_impl->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
+        if (!m_sensors->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
         {
             return false;
         }
@@ -153,18 +161,23 @@ auto HAL_Sensors_HW::init() -> bool
 #endif
 
 #ifdef USE_ODROIDW_ADC
-    if (!m_impl->adc.init())
+    if (!m_sensors->adc.init())
     {
         return false;
     }
 #endif
 
 #ifdef USE_SRF02
-    if (!m_impl->sonar.init(std::chrono::milliseconds(0)))
+    if (!m_sensors->sonar.init(std::chrono::milliseconds(0)))
     {
         return false;
     }
 #endif
+
+    if (!m_sensors->gps_detector.init(m_config.gps_device, m_config.gps_baud))
+    {
+        return false;
+    }
 
     m_is_initialized = true;
     return true;
@@ -305,11 +318,6 @@ auto HAL_Sensors_HW::get_last_gps_sample() const            -> GPS_Sample const&
     return m_gps_sample;
 }
 
-size_t HAL_Sensors_HW::get_error_count() const
-{
-    return m_error_count;
-}
-
 void HAL_Sensors_HW::process()
 {
     QASSERT(m_is_initialized);
@@ -330,19 +338,21 @@ void HAL_Sensors_HW::process()
 
     auto start = q::Clock::now();
 
+    m_sensors->gps_detector.process();
+
 #ifdef USE_MPU9250
-    m_impl->mpu.process();
+    m_sensors->mpu.process();
     {
-        auto const& g_samples = m_impl->mpu.get_gyroscope_samples();
-        auto const& a_samples = m_impl->mpu.get_accelerometer_samples();
+        auto const& g_samples = m_sensors->mpu.get_gyroscope_samples();
+        auto const& a_samples = m_sensors->mpu.get_accelerometer_samples();
         QASSERT(a_samples.size() == g_samples.size());
-        auto const& c_samples = m_impl->mpu.get_compass_samples();
+        auto const& c_samples = m_sensors->mpu.get_compass_samples();
 
         m_gyroscope_samples.resize(g_samples.size());
         for (size_t i = 0; i < g_samples.size(); i++)
         {
             m_gyroscope_sample.value = g_samples[i] - m_config.gyroscope_bias;
-            m_gyroscope_sample.dt = m_impl->mpu.get_gyroscope_sample_time();
+            m_gyroscope_sample.dt = m_sensors->mpu.get_gyroscope_sample_time();
             m_gyroscope_sample.sample_idx++;
             m_gyroscope_samples[i] = m_gyroscope_sample;
         }
@@ -351,7 +361,7 @@ void HAL_Sensors_HW::process()
         for (size_t i = 0; i < a_samples.size(); i++)
         {
             m_accelerometer_sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
-            m_accelerometer_sample.dt = m_impl->mpu.get_accelerometer_sample_time();
+            m_accelerometer_sample.dt = m_sensors->mpu.get_accelerometer_sample_time();
             m_accelerometer_sample.sample_idx++;
             m_accelerometer_samples[i] = m_accelerometer_sample;
         }
@@ -360,7 +370,7 @@ void HAL_Sensors_HW::process()
         for (size_t i = 0; i < c_samples.size(); i++)
         {
             m_compass_sample.value = c_samples[i] - m_config.compass_bias;
-            m_compass_sample.dt = m_impl->mpu.get_compass_sample_time();
+            m_compass_sample.dt = m_sensors->mpu.get_compass_sample_time();
             m_compass_sample.sample_idx++;
             m_compass_samples[i] = m_compass_sample;
         }
@@ -368,22 +378,22 @@ void HAL_Sensors_HW::process()
 #endif
 
 #ifdef USE_ODROIDW_ADC
-    m_impl->adc.process();
+    m_sensors->adc.process();
     {
-        auto val = m_impl->adc.read_current();
-        if (val)
+        auto data = m_sensors->adc.get_current_data();
+        if (data)
         {
-            m_current_sample.value = *val * m_config.current_scale;
-            m_current_sample.dt = m_impl->adc.get_current_sample_time();
+            m_current_sample.value = data->value * m_config.current_scale;
+            m_current_sample.dt = data->dt;
             m_current_sample.sample_idx++;
             m_current_samples.push_back(m_current_sample);
         }
 
-        val = m_impl->adc.read_voltage();
-        if (val)
+        data = m_sensors->adc.get_voltage_data();
+        if (data)
         {
-            m_voltage_sample.value = *val * m_config.voltage_scale;
-            m_voltage_sample.dt = m_impl->adc.get_voltage_sample_time();
+            m_voltage_sample.value = data->value * m_config.voltage_scale;
+            m_voltage_sample.dt = data->dt;
             m_voltage_sample.sample_idx++;
             m_voltage_samples.push_back(m_voltage_sample);
         }
@@ -391,14 +401,14 @@ void HAL_Sensors_HW::process()
 #endif
 
 #ifdef USE_SRF02
-    m_impl->sonar.process();
+    m_sensors->sonar.process();
     {
-        auto val = m_impl->sonar.read_distance();
-        if (val)
+        auto data = m_sensors->sonar.get_distance_data();
+        if (data)
         {
             //SILK_INFO("DISTANCE: {}", *val);
-            m_sonar_sample.value = *val;
-            m_sonar_sample.dt = m_impl->sonar.get_sample_time();
+            m_sonar_sample.value = data->value;
+            m_sonar_sample.dt = data->dt;
             m_sonar_sample.sample_idx++;
             m_sonar_samples.push_back(m_sonar_sample);
         }
@@ -409,29 +419,37 @@ void HAL_Sensors_HW::process()
     //*******************************************************************//
     //KEEP BARO LAST to avoid i2c noise from talking to other sensors!!!!!!!!!
     //*******************************************************************//
-    m_impl->baro.process();
+    m_sensors->baro.process();
     {
-        auto baro_sample = m_impl->baro.read_barometer();
-        if (baro_sample)
+        auto b_data = m_sensors->baro.get_barometer_data();
+        if (b_data)
         {
-            m_barometer_sample.value = *baro_sample;
+            m_barometer_sample.value = b_data->value;
             m_barometer_sample.sample_idx++;
-            m_barometer_sample.dt = m_impl->baro.get_barometer_sample_time();
+            m_barometer_sample.dt = b_data->dt;
             m_barometer_samples.push_back(m_barometer_sample);
         }
-        auto temp_sample = m_impl->baro.read_thermometer();
-        if (temp_sample)
+        auto t_data = m_sensors->baro.get_thermometer_data();
+        if (t_data)
         {
-            m_thermometer_sample.value = *temp_sample;
+            m_thermometer_sample.value = t_data->value;
             m_thermometer_sample.sample_idx++;
-            m_thermometer_sample.dt = m_impl->baro.get_thermometer_sample_time();
+            m_thermometer_sample.dt = t_data->dt;
             m_thermometer_samples.push_back(m_thermometer_sample);
         }
     }
 #endif
 
+    process_gps();
+
 //    auto d = q::Clock::now() - start;
 //    SILK_INFO("d = {}, {}", d, m_sensor_samples.size());
+}
+
+void HAL_Sensors_HW::process_gps()
+{
+
+
 }
 
 

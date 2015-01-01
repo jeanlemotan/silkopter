@@ -91,11 +91,10 @@ void MS5611::process()
     auto now = q::Clock::now();
     if (now - m_last_timestamp < std::chrono::milliseconds(10))
     {
-        m_sample_time = std::chrono::seconds(0);
         return;
     }
 
-    m_sample_time = now - m_last_timestamp;
+    auto dt = now - m_last_timestamp;
     m_last_timestamp = now;
 
     constexpr size_t PRESSURE_TO_TEMPERATURE_RATIO = 10;
@@ -143,7 +142,7 @@ void MS5611::process()
         }
     }
 
-    calculate();
+    calculate(dt);
 }
 
 class Butterworth //10hz
@@ -164,7 +163,7 @@ public:
     }
 };
 
-void MS5611::calculate()
+void MS5611::calculate(q::Clock::duration dt)
 {
     // Formulas from manufacturer datasheet
     // sub -20c temperature compensation is not included
@@ -186,9 +185,12 @@ void MS5611::calculate()
         SENS = SENS - SENS2;
     }
 
-    m_temperature = static_cast<float>(TEMP) * 0.01;
+    auto t = static_cast<float>(TEMP) * 0.01;
+    auto p = static_cast<float>((m_pressure_reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+
+    m_temperature = { t, dt };
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
-    m_pressure = static_cast<float>((m_pressure_reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+    m_pressure = { p, dt };
 
 //    static Butterworth xxx;
 //    m_pressure = xxx.process(m_pressure.get());
@@ -198,28 +200,18 @@ void MS5611::calculate()
     //SILK_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
-boost::optional<float> MS5611::read_barometer()
+auto MS5611::get_barometer_data() -> boost::optional<Data>
 {
     auto r = m_pressure;
     m_pressure.reset();
     return r;
 }
 
-boost::optional<float> MS5611::read_thermometer()
+auto MS5611::get_thermometer_data() -> boost::optional<Data>
 {
     auto r = m_temperature;
     m_temperature.reset();
     return r;
 }
-
-auto MS5611::get_barometer_sample_time() const -> q::Clock::duration
-{
-    return m_sample_time;
-}
-auto MS5611::get_thermometer_sample_time() const -> q::Clock::duration
-{
-    return m_sample_time;
-}
-
 
 #endif

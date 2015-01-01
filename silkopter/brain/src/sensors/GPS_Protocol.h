@@ -6,10 +6,10 @@
 namespace silk
 {
 
-class GPS_Interface : q::util::Noncopyable
+class GPS_Protocol : q::util::Noncopyable
 {
 public:
-    virtual ~GPS_Interface() {}
+    virtual ~GPS_Protocol() {}
 
 
     //new data available. Process it and return true if the data is recognized

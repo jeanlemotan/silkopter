@@ -85,14 +85,14 @@ SOURCES += \
     ../../src/HAL_Motors_PiGPIO.cpp \
     ../../src/Battery.cpp \
     ../../src/HAL_Camera_Mount_PiGPIO.cpp \
-    ../../src/GPS.cpp \
     ../../src/sensors/GPS_UBLOX.cpp \
     ../../src/sensors/i2c.cpp \
     ../../src/sensors/MPU9250.cpp \
     ../../src/sensors/MS5611.cpp \
     ../../src/sensors/OdroidW_ADC.cpp \
     ../../src/sensors/SRF02.cpp \
-    ../../src/HAL_Sensors_HW.cpp
+    ../../src/HAL_Sensors_HW.cpp \
+    ../../src/sensors/GPS_Detector.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -126,7 +126,6 @@ HEADERS += \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
     ../../src/Battery.h \
-    ../../src/GPS.h \
     ../../src/sensors/GPS_UBLOX.h \
     ../../src/sensors/i2c.h \
     ../../src/sensors/MPU9250.h \
@@ -134,5 +133,6 @@ HEADERS += \
     ../../src/sensors/OdroidW_ADC.h \
     ../../src/sensors/SRF02.h \
     ../../src/HAL_Sensors_HW.h \
-    ../../src/sensors/GPS_Interface.h
+    ../../src/sensors/GPS_Protocol.h \
+    ../../src/sensors/GPS_Detector.h
 

@@ -12,12 +12,14 @@ public:
 
     void process();
 
-    auto read_barometer() -> boost::optional<float>;
-    auto read_thermometer() -> boost::optional<float>;
+    struct Data
+    {
+        float value;
+        q::Clock::duration dt;
+    };
 
-    auto get_barometer_sample_time() const -> q::Clock::duration;
-    auto get_thermometer_sample_time() const -> q::Clock::duration;
-
+    auto get_barometer_data() -> boost::optional<Data>;
+    auto get_thermometer_data() -> boost::optional<Data>;
 
 private:
     i2c m_i2c;
@@ -32,15 +34,14 @@ private:
     double      m_pressure_reading = 0;
     double      m_temperature_reading = 0;
 
-    boost::optional<float> m_pressure{0.0};
-    boost::optional<float> m_temperature{0.0};
+    boost::optional<Data> m_pressure;
+    boost::optional<Data> m_temperature;
 
-    void calculate();
+    void calculate(q::Clock::duration dt);
 
     uint8_t         m_stage = 0;
 
     q::Clock::time_point m_last_timestamp;
-    q::Clock::duration m_sample_time;
 };
 
 }

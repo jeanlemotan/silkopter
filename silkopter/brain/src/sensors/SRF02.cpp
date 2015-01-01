@@ -67,11 +67,6 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
 
 void SRF02::process()
 {
-
-}
-
-auto SRF02::read_distance() -> boost::optional<float>
-{
     auto now = q::Clock::now();
 
     //begin?
@@ -79,19 +74,19 @@ auto SRF02::read_distance() -> boost::optional<float>
     {
         if (now - m_last_time_point < m_sample_time)
         {
-            return boost::none;
+            return;
         }
 
         m_state = 1;
         m_last_time_point = now;
         m_i2c.write_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
-        return boost::none; //we have to wait first
+        return; //we have to wait first
     }
 
     //wait for echo
     if (now - m_last_time_point < MEASUREMENT_DURATION)
     {
-        return boost::none;
+        return;
     }
 
     m_state = 0;
@@ -105,15 +100,21 @@ auto SRF02::read_distance() -> boost::optional<float>
     float distance = static_cast<float>(d) / 100.f; //meters
     float min_distance = static_cast<float>(min_d) / 100.f; //meters
 
-    return (distance > MAX_VALID_DISTANCE) ? boost::none : boost::optional<float>(distance);
+    if (distance > MAX_VALID_DISTANCE)
+    {
+        m_data = boost::none;
+    }
+    {
+        m_data = { distance, m_sample_time };
+    }
 }
 
-auto SRF02::get_sample_time() const -> q::Clock::duration
+auto SRF02::get_distance_data() -> boost::optional<Data>
 {
-    return m_sample_time;
+    auto res = m_data;
+    m_data.reset();
+    return res;
 }
-
-
 
 
 }
