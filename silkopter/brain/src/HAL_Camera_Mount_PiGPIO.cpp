@@ -133,12 +133,13 @@ void HAL_Camera_Mount_PiGPIO::process()
     {
         m_last_rotation = m_rotation;
 
-        //SILK_INFO("mount rotation: {}", m_rotation);
+
 
         //x - pitch
         if (SERVOS[0].first >= 0)
         {
             auto pulse = compute_pulse(m_rotation.x, m_settings.x_range);
+            //SILK_INFO("mount rotation: {}", pulse);
             gpioPWM(SERVOS[0].first, pulse);
         }
 

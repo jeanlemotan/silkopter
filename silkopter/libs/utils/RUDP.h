@@ -51,7 +51,6 @@ namespace util
 
         RUDP(Socket_t& socket);
 
-        void set_mtu(size_t mtu);
         void set_send_endpoint(boost::asio::ip::udp::endpoint const& endpoint);
         auto get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&;
         auto get_last_receive_endpoint() const -> boost::asio::ip::udp::endpoint const&;
@@ -60,6 +59,7 @@ namespace util
 
         struct Send_Params
         {
+            size_t mtu = 2000;
             int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             bool is_compressed = true;
@@ -279,8 +279,6 @@ namespace util
         std::atomic_bool m_is_sending = {false};
         const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
         const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(50);
-
-        size_t m_mtu = 2000;
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
@@ -630,7 +628,7 @@ namespace util
             }
         }
 
-        size_t max_fragment_size = m_mtu;
+        size_t max_fragment_size = params.mtu;
         size_t left = size;
         size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
         if (fragment_count > 255)

@@ -114,88 +114,32 @@ private:
 
 #pragma pack(pop)
 
-
-//    enum ubs_protocol_bytes
-//    {
-//        PREAMBLE1 = 0xb5,
-//        PREAMBLE2 = 0x62,
-//        CLASS_NAV = 0x01,
-//        CLASS_ACK = 0x05,
-//        CLASS_CFG = 0x06,
-//        MSG_ACK_NACK = 0x00,
-//        MSG_ACK_ACK = 0x01,
-//        MSG_POSLLH = 0x2,
-//        MSG_STATUS = 0x3,
-//        MSG_SOL = 0x6,
-//        MSG_VELNED = 0x12,
-//        MSG_CFG_PRT = 0x00,
-//        MSG_CFG_RATE = 0x08,
-//        MSG_CFG_SET_RATE = 0x01,
-//        MSG_CFG_NAV_SETTINGS = 0x24
-//    };
-//    enum ubs_nav_fix_type
-//    {
-//        FIX_NONE = 0,
-//        FIX_DEAD_RECKONING = 1,
-//        FIX_2D = 2,
-//        FIX_3D = 3,
-//        FIX_GPS_DEAD_RECKONING = 4,
-//        FIX_TIME = 5
-//    };
-//    enum ubx_nav_status_bits
-//    {
-//        NAV_STATUS_FIX_VALID = 1
-//    };
-
-//    // Packet checksum accumulators
-//    uint8_t         _ck_a;
-//    uint8_t         _ck_b;
-
-//    // State machine state
-//    uint8_t         _step;
-//    uint8_t         _msg_id;
-//    uint16_t        _payload_length;
-//    uint16_t        _payload_counter;
-
-//	// 8 bit count of fix messages processed, used for periodic
-//	// processing
-//    uint8_t			_fix_count;
-
-//    uint8_t         _class;
-
-//    // do we have new position information?
-//    bool            _new_position;
-
-//    // do we have new speed information?
-//    bool            _new_speed;
-
-//    uint8_t         _disable_counter;
-
-//    // Buffer parse & GPS state update
-//    bool        _parse_gps();
-
-//    // used to update fix between status and position packets
-//    Fix_Status  next_fix;
-
-//    bool need_rate_update;
-//    uint8_t rate_update_step;
-//    uint32_t _last_fix_time;
-
-    struct Detection
+    struct Packet
     {
-        uint8_t payload_length = 0;
-        uint8_t payload_counter = 0;
         uint8_t step = 0;
+
+        Class cls;
+        Message message;
+        uint16_t payload_size = 0;
         uint8_t ck_a = 0;
         uint8_t ck_b = 0;
-    } m_detection;
+        std::vector<uint8_t> payload;
+    } m_packet;
+
+
+    auto decode_packet(Packet& packet, uint8_t const* data, uint8_t const* end) -> uint8_t const*;
+    void process_packet(Packet& packet);
+    void process_nav_sol_packet(Packet& packet);
+    void process_nav_pollh_packet(Packet& packet);
+    void process_nav_status_packet(Packet& packet);
+
 
     bool m_is_initialized = false;
 
-    std::vector<uint8_t> m_data;
+    std::array<uint8_t, 1024> m_buffer;
 
     std::string m_device;
-    int m_fd = 0;
+    int m_fd = -1;
     GPS_Sample m_sample;
 };
 

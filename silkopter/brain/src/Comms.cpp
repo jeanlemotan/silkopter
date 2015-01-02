@@ -23,6 +23,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 {
     {
         util::RUDP::Send_Params params;
+        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 127;
@@ -31,6 +32,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
     {
         util::RUDP::Send_Params params;
+        params.mtu = 8192;
         params.is_compressed = true;
         params.is_reliable = false;
         params.importance = 0;
@@ -41,6 +43,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
 
     {
         util::RUDP::Send_Params params;
+        params.mtu = 16000;
         params.is_compressed = false;
         params.is_reliable = false;
         params.importance = 10;

@@ -86,12 +86,12 @@ void GPS_Detector::process()
                     if (p->detect(m_buffer.data(), res))
                     {
                         auto idx = &p - &m_protocols.front();
-                        SILK_INFO("Detected GPS protocol {}", idx);
                         if (!p->init(m_fd))
                         {
                             SILK_ERR("Detected GPS protocol {} failed to initialize", idx);
                             continue;
                         }
+                        SILK_INFO("Detected GPS protocol {}", idx);
                         m_gps = std::move(p);
                         m_protocols.clear();
                         break;

@@ -26,7 +26,7 @@ auto HAL::init() -> bool
     bcm_host_init();
 
     SILK_INFO("Initializing pigpio");
-    if (gpioCfgClock(4, 1, 0) < 0 ||
+    if (gpioCfgClock(2, 1, 0) < 0 ||
         gpioCfgPermissions(static_cast<uint64_t>(-1)) ||
         gpioCfgInterfaces(PI_DISABLE_SOCK_IF | PI_DISABLE_FIFO_IF))
     {
@@ -51,11 +51,10 @@ auto HAL::init() -> bool
     }
 
     SILK_INFO("Configuring i2c pin modes");
-    auto res = gpioSetMode(0, PI_INPUT);
-    res |= gpioSetMode(1, PI_INPUT);
-    res |= gpioSetMode(28, PI_ALT0);
-    res |= gpioSetMode(29, PI_ALT0);
-    if (res)
+    if (gpioSetMode(0, PI_INPUT) ||
+        gpioSetMode(1, PI_INPUT) ||
+        gpioSetMode(28, PI_ALT0) ||
+        gpioSetMode(29, PI_ALT0))
     {
         SILK_ERR("Cannot initialize pigpio i2c pin modes");
         return false;

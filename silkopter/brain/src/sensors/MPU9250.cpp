@@ -339,8 +339,8 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_GYRO_CONFIG, gyro_range);
     res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG, accel_range);
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
-    //m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
+    //res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
 
 
     //compute the rate
@@ -355,8 +355,8 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
-    //m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
+    //res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
+    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
 
