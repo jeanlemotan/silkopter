@@ -166,6 +166,7 @@ void Input_Widget::process_uav_input(q::Duration dt, silk::Comms& comms, qinput:
 
     //store the change
     m_uav_input = m_new_uav_input;
+    m_cm_input = m_new_cm_input;
 
     //toggles
     if (m_new_uav_input.arm)

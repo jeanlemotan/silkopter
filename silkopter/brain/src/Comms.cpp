@@ -907,12 +907,12 @@ void Comms::process()
         }
     }
 
+    m_rudp.process();
+
     auto now = q::Clock::now();
     if (now - m_last_rudp_time_stamp >= RUDP_PERIOD)
     {
         m_last_rudp_time_stamp = now;
-
-        m_rudp.process();
 
         m_comms_channel.send();
         m_telemetry_channel.try_sending();

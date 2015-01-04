@@ -277,8 +277,8 @@ namespace util
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
-        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(50);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
+        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(60);
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
@@ -877,8 +877,8 @@ namespace util
     inline void RUDP::process()
     {
         {
-//            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-//            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
         }
         send_pending_confirmations();
         send_pending_cancellations();
@@ -1097,12 +1097,15 @@ namespace util
                 {
                     datagram = *it;
                     QASSERT(!datagram->is_in_transit);
-                    datagram->sent = q::Clock::now();
                 }
             }
             if (datagram)
             {
-//                RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(get_header<Packet_Header>(datagram->data).fragment_idx), static_cast<int>(get_header<Packet_Header>(datagram->data).id));
+                auto& header = get_header<Packet_Header>(datagram->data);
+//                if (header.channel_idx == 12)
+//                {
+//                    RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(header.fragment_idx), static_cast<int>(header.id));
+//                }
             }
         }
         if (!datagram)
@@ -1142,6 +1145,8 @@ namespace util
     inline void RUDP::handle_send(TX::Datagram_ptr datagram, const boost::system::error_code& /*error*/)
     {
         QASSERT(datagram->is_in_transit);
+
+        datagram->sent = q::Clock::now();
 
         xxx_on_air--;
         xxx_sent++;
@@ -1249,6 +1254,10 @@ namespace util
         data[off + 2] = reinterpret_cast<uint8_t const*>(&id)[1];
         data[off + 3] = reinterpret_cast<uint8_t const*>(&id)[2];
         data[off + 4] = fragment_idx;
+//        if (channel_idx == 12)
+//        {
+//            RUDP_INFO("Adding confirmation for fragment {} for packet {}", fragment_idx, id);
+//        }
     }
     inline void RUDP::send_pending_cancellations()
     {
@@ -1294,6 +1303,11 @@ namespace util
         data[off + 1] = reinterpret_cast<uint8_t const*>(&id)[0];
         data[off + 2] = reinterpret_cast<uint8_t const*>(&id)[1];
         data[off + 3] = reinterpret_cast<uint8_t const*>(&id)[2];
+
+//        if (channel_idx == 12)
+//        {
+//            RUDP_INFO("Adding cancellation for packet {}", id);
+//        }
     }
 
     inline void RUDP::send_packet_ping()
@@ -1381,7 +1395,10 @@ namespace util
         {
             m_global_stats.rx_zombie_datagrams++;
 
-//            RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
+//            if (header.channel_idx == 12)
+//            {
+//                RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
+//            }
 
             if (header.flag_is_reliable)
             {
@@ -1408,7 +1425,10 @@ namespace util
         {
             m_global_stats.rx_duplicated_datagrams++;
 
-//            RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
+//            if (header.channel_idx == 12)
+//            {
+//                RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
+//            }
             return;
         }
 
@@ -1454,7 +1474,10 @@ namespace util
             reinterpret_cast<uint8_t*>(&idd)[0] = c[1];
             reinterpret_cast<uint8_t*>(&idd)[1] = c[2];
             reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
-            //RUDP_INFO("Trying to confirm packet {}", idd);
+//            if (c[0] == 12)
+//            {
+//                RUDP_INFO("Trying to confirm fragment {} for packet {}", c[4], idd);
+//            }
         }
         auto conf_end = conf + count;
 
@@ -1481,7 +1504,10 @@ namespace util
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-//                RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                if (hdr.channel_idx == 12)
+//                {
+//                    RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                }
                 erase_unordered(m_tx.packet_queue, it);
                 count--;
                 if (count == 0)
@@ -1530,7 +1556,10 @@ namespace util
             reinterpret_cast<uint8_t*>(&idd)[0] = c[1];
             reinterpret_cast<uint8_t*>(&idd)[1] = c[2];
             reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
-            //RUDP_INFO("Trying to cancel packet {}", idd);
+//            if (c[0] == 12)
+//            {
+//                RUDP_INFO("Trying to cancel packet {}", idd);
+//            }
         }
         uint32_t* conf_end = conf + count;
 
@@ -1555,10 +1584,10 @@ namespace util
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-                if (hdr.channel_idx == 4)
-                {
-                    //RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
-                }
+//                if (hdr.channel_idx == 12)
+//                {
+//                    RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                }
                 erase_unordered(m_tx.packet_queue, it);
                 continue;
             }
