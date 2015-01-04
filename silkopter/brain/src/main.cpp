@@ -145,20 +145,20 @@ int main(int argc, char const* argv[])
 
         constexpr std::chrono::milliseconds PERIOD(3);
 
+        auto last = q::Clock::now();
         while (!s_exit)
         {
-            auto start = q::Clock::now();
-
-            comms.process();
-
-            hal.process();
-            uav.process();
-
-            auto d = q::Clock::now() - start;
-            if (d < PERIOD)
+            auto d = q::Clock::now() - last;
+            if (d >= PERIOD)
             {
-                auto left_over = std::chrono::duration_cast<std::chrono::microseconds>(PERIOD - d).count();
-                boost::this_thread::sleep_for(boost::chrono::microseconds(left_over));
+                comms.process();
+
+                hal.process();
+                uav.process();
+            }
+            else
+            {
+                boost::this_thread::yield();
             }
         }
 
@@ -182,6 +182,6 @@ int main(int argc, char const* argv[])
         io_thread.join();
     }
 
-	SILK_INFO("Closing");
+    SILK_INFO("Closing");
 }
 
