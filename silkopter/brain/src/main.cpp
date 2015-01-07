@@ -1,6 +1,5 @@
 #include "BrainStdAfx.h"
 #include "HAL.h"
-#include "common/input/Camera_Input.h"
 #include "Comms.h"
 #include "UAV.h"
 
@@ -22,6 +21,11 @@ namespace boost
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
 void signal_handler(int signum)
 {
+    if (s_exit)
+    {
+        SILK_INFO("Forcing an exit due to signal {}", signum);
+        abort();
+    }
     s_exit = true;
     SILK_INFO("Exitting due to signal {}", signum);
 }
@@ -66,7 +70,7 @@ int main(int argc, char const* argv[])
     {
         while (!s_exit)
         {
-            auto start = q::Clock::now();
+            //auto start = q::Clock::now();
             //do
             //{
                 io_service.run();
@@ -77,16 +81,16 @@ int main(int argc, char const* argv[])
         }
     });
 
-//    {
-//        int policy = SCHED_FIFO;
-//        struct sched_param param;
-//        param.sched_priority = 2;
+    {
+        int policy = SCHED_FIFO;
+        struct sched_param param;
+        param.sched_priority = 2;
 
-//        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
-//        {
-//            perror("main sched_setscheduler");
-//            exit(EXIT_FAILURE);
-//        }
+        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
+        {
+            perror("main sched_setscheduler");
+            exit(EXIT_FAILURE);
+        }
 
 //        param.sched_priority = 4;
 //        if (pthread_setschedparam(io_thread.native_handle(), policy, &param) != 0)
@@ -94,7 +98,7 @@ int main(int argc, char const* argv[])
 //            perror("io sched_setscheduler");
 //            exit(EXIT_FAILURE);
 //        }
-//    }
+    }
 
     uint16_t send_port = 52520;
     uint16_t receive_port = 52521;
@@ -104,14 +108,15 @@ int main(int argc, char const* argv[])
     try
     {
         silk::HAL hal;
-        if (!hal.init())
+        silk::UAV uav(hal);
+        silk::Comms comms(io_service, hal, uav);
+
+        if (!hal.init(comms))
         {
             SILK_ERR("Hardware failure! Aborting");
             abort();
         }
 
-        silk::UAV uav(hal);
-        silk::Comms comms(io_service, hal, uav);
         //start listening for a remote system
         if (!comms.start(send_port, receive_port))
         {
@@ -125,7 +130,7 @@ int main(int argc, char const* argv[])
             {
                 comms.send_video_frame(silk::Comms::Video_Flags(), data, size);
             });
-            hal.camera->set_quality(silk::camera_input::Stream_Quality::MEDIUM);
+            hal.camera->set_stream_quality(silk::comms::Camera_Params::Stream_Quality::MEDIUM);
         }
 
 //        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);

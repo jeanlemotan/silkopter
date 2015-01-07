@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ui_Input_Widget.h"
-#include "common/input/Camera_Input.h"
-#include "common/input/UAV_Input.h"
 #include "Comms.h"
 
 class Input_Widget : public QWidget
@@ -26,39 +24,28 @@ private:
     float filter_stick_value(float v);
 
     void process_uav_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad);
+    void process_camera_mount_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad);
     void process_camera_input(q::Duration dt, silk::Comms& comms, qinput::Gamepad const& gamepad);
 
 
     struct UAV_Input
     {
-        silk::uav_input::Throttle_Mode throttle_mode = silk::uav_input::Throttle_Mode::OFFSET;
-        silk::uav_input::Pitch_Roll_Mode pitch_roll_mode = silk::uav_input::Pitch_Roll_Mode::HORIZONTAL;
-        silk::uav_input::Assists assists;
-        silk::uav_input::Sticks sticks;
+        silk::comms::UAV_Input input;
 
-        bool arm = false;
-        bool disarm = false;
-        bool land = false;
-        bool take_off = false;
-    } m_uav_input, m_new_uav_input;
+        struct Base_Throttle
+        {
+            float value = 0.f;
+            bool wait_for_zero = false;
+        } base_throttle;
+    } m_uav_input;
 
     struct Camera_Mount_Input
     {
+        silk::comms::Camera_Mount_Input input;
+
         math::vec3f base_rotation;
         math::vec3f delta_rotation;
-        math::vec3f final_rotation;
-    } m_new_cm_input, m_cm_input;
-
-    struct Base_Throttle
-    {
-        float value = 0.f;
-        bool wait_for_zero = false;
-    } m_base_throttle;
-
-
-    struct Camera_Input
-    {
-    } m_camera_input, m_new_camera_input;
+    } m_camera_mount_input;
 };
 
 

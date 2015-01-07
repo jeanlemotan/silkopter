@@ -5,9 +5,9 @@ extern size_t s_test;
 
 using namespace silk;
 
-void AHRS::process(Gyroscope_Sample const& gyroscope,
-                   Accelerometer_Sample const& accelerometer,
-                   Compass_Sample const& compass)
+void AHRS::process(sensors::Gyroscope_Sample const& gyroscope,
+                   sensors::Accelerometer_Sample const& accelerometer,
+                   sensors::Compass_Sample const& compass)
 {
     bool rotation_dirty = false;
     float av_length = 0.f;

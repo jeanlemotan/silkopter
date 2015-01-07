@@ -8,6 +8,10 @@ INCLUDEPATH += ../../../qbase/include
 
 PRECOMPILED_HEADER = ../../include/QDataStdAfx.h
 
+#QMAKE_CXXFLAGS_RELEASE += -g
+#QMAKE_CFLAGS_RELEASE += -g
+#QMAKE_LFLAGS_RELEASE =
+
 
 rpi {
     DEFINES+=RASPBERRY_PI

@@ -18,7 +18,7 @@ extern "C"
 
 using namespace silk;
 
-auto HAL::init() -> bool
+auto HAL::init(Comms& comms) -> bool
 {
 #ifdef RASPBERRY_PI
 
@@ -66,9 +66,9 @@ auto HAL::init() -> bool
     sensors.reset(new HAL_Sensors_HW());
     camera_mount.reset(new HAL_Camera_Mount_PiGPIO());
 #else
-//    motors.reset(new HAL_Motors_Sim());
-////    camera.reset(new HAL_Raspicam());
-//    sensors.reset(new HAL_Sensors_Sim());
+    motors.reset(new HAL_Motors_Sim(comms));
+//    camera.reset(new HAL_Raspicam());
+    sensors.reset(new HAL_Sensors_Sim(comms));
 #endif
 
     SILK_INFO("Initializing HW devices");
@@ -134,8 +134,5 @@ void HAL::process()
     {
         camera_mount->process();
     }
-
-    //NOTE!!! this HAS to be here, at the end. The SIM comms depends on it
-    //m_impl->process();
 }
 

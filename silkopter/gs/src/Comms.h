@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/input/Camera_Input.h"
-#include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "common/Manual_Clock.h"
 #include "common/Comm_Data.h"
@@ -35,28 +33,18 @@ public:
 
     auto get_error_count() const -> size_t;
 
-    template<typename... Params>
-    void send_camera_input(camera_input::Input input, Params&&... params)
-    {
-        m_comms_channel.pack(detail::Comm_Message::CAMERA_INPUT, input, params...);
-    }
+    void send_uav_input(comms::UAV_Input const& input);
+    void send_camera_mount_input(comms::Camera_Mount_Input const& input);
 
-    template<typename... Params>
-    void send_uav_input(uav_input::Input input, Params&&... params)
-    {
-        m_comms_channel.pack(detail::Comm_Message::UAV_INPUT, input, params...);
-    }
-
-
-    auto get_accelerometer_sample() const  -> Accelerometer_Sample const&;
-    auto get_gyroscope_sample() const      -> Gyroscope_Sample const&;
-    auto get_compass_sample() const        -> Compass_Sample const&;
-    auto get_barometer_sample() const      -> Barometer_Sample const&;
-    auto get_sonar_sample() const          -> Sonar_Sample const&;
-    auto get_thermometer_sample() const    -> Thermometer_Sample const&;
-    auto get_voltage_sample() const        -> Voltage_Sample const&;
-    auto get_current_sample() const        -> Current_Sample const&;
-    auto get_gps_sample() const            -> GPS_Sample const&;
+    auto get_accelerometer_sample() const  -> sensors::Accelerometer_Sample const&;
+    auto get_gyroscope_sample() const      -> sensors::Gyroscope_Sample const&;
+    auto get_compass_sample() const        -> sensors::Compass_Sample const&;
+    auto get_barometer_sample() const      -> sensors::Barometer_Sample const&;
+    auto get_sonar_sample() const          -> sensors::Sonar_Sample const&;
+    auto get_thermometer_sample() const    -> sensors::Thermometer_Sample const&;
+    auto get_voltage_sample() const        -> sensors::Voltage_Sample const&;
+    auto get_current_sample() const        -> sensors::Current_Sample const&;
+    auto get_gps_sample() const            -> sensors::GPS_Sample const&;
 
     auto get_uav_rotation_l2w() const -> math::quatf const&;
     auto get_uav_linear_acceleration_w() const -> math::vec3f const&;
@@ -133,13 +121,12 @@ private:
 
     util::RUDP m_rudp;
 
-    typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
-    typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
-    mutable Comms_Channel m_comms_channel;
-    q::Clock::time_point m_last_comms_sent_time_stamp = q::Clock::now();
-
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
+    mutable Setup_Channel m_setup_channel;
+    mutable Input_Channel m_input_channel;
     mutable Telemetry_Channel m_telemetry_channel;
-    q::Clock::time_point m_last_telemetry_sent_time_stamp = q::Clock::now();
 
     Manual_Clock m_remote_clock;
 
@@ -171,18 +158,31 @@ private:
     void process_message_uav_velocity_w();
     void process_message_uav_position_w();
 
+    struct UAV_Input
+    {
+        const q::Clock::duration SEND_EVERY {30};
+        q::Clock::time_point last_sent_time_stamp = q::Clock::now();
+        comms::UAV_Input input;
+    } m_uav_input;
+
+    struct Camera_Mount_Input
+    {
+        const q::Clock::duration SEND_EVERY {50};
+        q::Clock::time_point last_sent_time_stamp = q::Clock::now();
+        comms::Camera_Mount_Input input;
+    } m_camera_mount_input;
 
     struct Sensor_Samples
     {
-        Accelerometer_Sample accelerometer;
-        Gyroscope_Sample gyroscope;
-        Compass_Sample compass;
-        Barometer_Sample barometer;
-        Sonar_Sample sonar;
-        Thermometer_Sample thermometer;
-        Voltage_Sample voltage;
-        Current_Sample current;
-        GPS_Sample gps;
+        sensors::Accelerometer_Sample accelerometer;
+        sensors::Gyroscope_Sample gyroscope;
+        sensors::Compass_Sample compass;
+        sensors::Barometer_Sample barometer;
+        sensors::Sonar_Sample sonar;
+        sensors::Thermometer_Sample thermometer;
+        sensors::Voltage_Sample voltage;
+        sensors::Current_Sample current;
+        sensors::GPS_Sample gps;
     } m_sensor_samples;
 
     struct UAV

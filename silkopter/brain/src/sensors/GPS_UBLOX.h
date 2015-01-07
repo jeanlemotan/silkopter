@@ -15,7 +15,7 @@ public:
 
     auto init(int fd) -> bool;
     void process();
-    auto get_sample() const -> GPS_Sample const&;
+    auto get_sample() const -> sensors::GPS_Sample const&;
 
 private:
     enum class Message : uint16_t
@@ -87,7 +87,7 @@ private:
 
     std::string m_device;
     int m_fd = -1;
-    GPS_Sample m_sample;
+    sensors::GPS_Sample m_sample;
 };
 
 

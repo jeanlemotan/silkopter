@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/input/UAV_Input.h"
-#include "common/input/Camera_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "common/Comm_Data.h"
 #include "HAL.h"
@@ -43,11 +41,11 @@ private:
 
     void handle_accept(boost::system::error_code const& error);
 
-//    void process_message_ping();
-//    void process_message_pong();
-
-    void process_message_camera_input();
     void process_message_uav_input();
+    void process_message_camera_mount_input();
+
+
+    void process_message_camera_params();
 
     void process_message_raw_sensors();
 
@@ -67,36 +65,36 @@ private:
     void process_message_calibration_compass();
 
     void send_sensor_samples();
-    void send_raw_sensor_samples(detail::Telemetry_Message_Sensors sensors);
+    void send_raw_sensor_samples(comms::Sensors sensors);
 
     void store_raw_sensor_samples();
     void clear_raw_sensor_samples();
 
     struct Sensor_Samples
     {
-        Accelerometer_Sample accelerometer;
-        Gyroscope_Sample gyroscope;
-        Compass_Sample compass;
-        Barometer_Sample barometer;
-        Thermometer_Sample thermometer;
-        Sonar_Sample sonar;
-        Voltage_Sample voltage;
-        Current_Sample current;
-        GPS_Sample gps;
+        sensors::Accelerometer_Sample accelerometer;
+        sensors::Gyroscope_Sample gyroscope;
+        sensors::Compass_Sample compass;
+        sensors::Barometer_Sample barometer;
+        sensors::Thermometer_Sample thermometer;
+        sensors::Sonar_Sample sonar;
+        sensors::Voltage_Sample voltage;
+        sensors::Current_Sample current;
+        sensors::GPS_Sample gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensor_samples;
     struct Raw_Sensor_Samples
     {
         q::Clock::time_point last_sent;
-        std::vector<Accelerometer_Sample> accelerometer;
-        std::vector<Gyroscope_Sample> gyroscope;
-        std::vector<Compass_Sample> compass;
-        std::vector<Barometer_Sample> barometer;
-        std::vector<Thermometer_Sample> thermometer;
-        std::vector<Sonar_Sample> sonar;
-        std::vector<Voltage_Sample> voltage;
-        std::vector<Current_Sample> current;
-        std::vector<GPS_Sample> gps;
+        std::vector<sensors::Accelerometer_Sample> accelerometer;
+        std::vector<sensors::Gyroscope_Sample> gyroscope;
+        std::vector<sensors::Compass_Sample> compass;
+        std::vector<sensors::Barometer_Sample> barometer;
+        std::vector<sensors::Thermometer_Sample> thermometer;
+        std::vector<sensors::Sonar_Sample> sonar;
+        std::vector<sensors::Voltage_Sample> voltage;
+        std::vector<sensors::Current_Sample> current;
+        std::vector<sensors::GPS_Sample> gps;
     } m_raw_sensor_samples;
 
     HAL& m_hal;
@@ -113,9 +111,11 @@ private:
     boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
-    typedef util::Channel<detail::Comm_Message, uint16_t> Comms_Channel;
-    typedef util::Channel<detail::Telemetry_Message, uint16_t> Telemetry_Channel;
-    Comms_Channel m_comms_channel;
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
+    Setup_Channel m_setup_channel;
+    Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;
 
     bool m_is_connected = false;

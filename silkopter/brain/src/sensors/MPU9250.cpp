@@ -211,6 +211,12 @@ constexpr uint8_t MPU_REG_WHO_AM_I                       = 0x75;
 
 //////////////////////////////////////////////////////////////////
 
+
+constexpr uint8_t USER_CTRL_VALUE = MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/;
+
+
+//////////////////////////////////////////////////////////////////
+
 #ifdef USE_AK8963
 
 //#if defined USE_AK8975
@@ -364,7 +370,7 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     m_fifo_sample_size = 12;
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/);
+    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     res &= setup_compass();
@@ -500,7 +506,13 @@ void MPU9250::mpu_set_bypass(bool on)
 
 void MPU9250::reset_fifo()
 {
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/);
+    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, 0);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
 }
 
 void MPU9250::process()
@@ -527,7 +539,7 @@ void MPU9250::process()
     {
         if (fifo_count >= 4000)
         {
-            SILK_WARNING("resetting fifo: {}", fifo_count);
+            SILK_WARNING("Resetting FIFO: {}", fifo_count);
             reset_fifo();
             fifo_count = 0;
         }
@@ -554,6 +566,10 @@ void MPU9250::process()
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
                     m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
+//                    if (math::length(m_samples.gyroscope[i]) > 1.f)
+//                    {
+//                        SILK_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
+//                    }
                 }
             }
         }

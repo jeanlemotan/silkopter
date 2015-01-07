@@ -7,9 +7,16 @@ INCLUDEPATH += ../../include
 INCLUDEPATH += ../../../qbase/include
 INCLUDEPATH += /usr/include/lua5.1
 
+
+#QMAKE_CXXFLAGS_RELEASE += -g
+#QMAKE_CFLAGS_RELEASE += -g
+#QMAKE_LFLAGS_RELEASE =
+
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
+
 
 rpi {
     CONFIG(debug, debug|release) {

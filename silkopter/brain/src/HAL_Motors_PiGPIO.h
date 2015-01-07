@@ -30,7 +30,7 @@ private:
         SERVO_100HZ,
         SERVO_200HZ,
         SERVO_400HZ,
-        //PWM_1000Hz, //don't use as the RPI puts the pins high when shutting down!!! This will cause motors to spin
+        PWM_1000HZ, //don't use as the RPI puts the pins high when shutting down!!! This will cause motors to spin
     };
 
     bool m_is_initialized = false;
@@ -44,10 +44,13 @@ private:
     struct Impl;
     std::shared_ptr<Impl> m_impl;
 
+    auto get_pulse_range() const -> std::pair<int, int>;
+
     struct Settings
     {
         size_t count = 4;
-        PWM_Frequency frequency = PWM_Frequency::SERVO_50HZ;
+        //PWM_Frequency frequency = PWM_Frequency::SERVO_50HZ;
+        PWM_Frequency frequency = PWM_Frequency::PWM_1000HZ;
 //        rapidjson::Document document;
     } m_settings;
 

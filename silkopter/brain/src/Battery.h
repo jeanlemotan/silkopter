@@ -8,8 +8,8 @@ namespace silk
 class Battery : q::util::Noncopyable
 {
 public:
-    void process(std::vector<Current_Sample> const& current_samples,
-                 std::vector<Voltage_Sample> const& voltage_samples);
+    void process(std::vector<sensors::Current_Sample> const& current_samples,
+                 std::vector<sensors::Voltage_Sample> const& voltage_samples);
 
     auto get_capacity_used() const -> float; //mAh
     auto get_average_current() const -> boost::optional<float>;

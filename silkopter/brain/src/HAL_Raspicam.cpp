@@ -1,6 +1,5 @@
 #include "BrainStdAfx.h"
 #include "HAL_Raspicam.h"
-#include "common/input/Camera_Input.h"
 
 //#undef RASPBERRY_PI
 
@@ -177,8 +176,8 @@ auto HAL_Raspicam::init() -> bool
     {
         //start_recording();
         set_active_streams(false,
-                           true,
-                           false);
+                           false,
+                           true);
     }
     return res;
 }
@@ -848,7 +847,7 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
 static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
                                        HAL_Raspicam::Impl::Encoder_Data& encoder_data,
                                        HAL_Raspicam::Data_Available_Callback const& callback,
-                                       MMAL_PORT_T* port,
+                                       MMAL_PORT_T* /*port*/,
                                        MMAL_BUFFER_HEADER_T* buffer)
 {
     if (!callback)
@@ -1205,17 +1204,17 @@ void HAL_Raspicam::stop_recording()
     }
 }
 
-void HAL_Raspicam::set_iso(camera_input::Iso iso)
+void HAL_Raspicam::set_iso(uint32_t iso)
 {
     m_iso = iso;
 }
 
-void HAL_Raspicam::set_shutter_speed(camera_input::Shutter_Speed ss)
+void HAL_Raspicam::set_shutter_speed(q::Clock::duration ss)
 {
     m_shutter_speed = ss;
 }
 
-void HAL_Raspicam::set_quality(camera_input::Stream_Quality sq)
+void HAL_Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
 {
     m_stream_quality = sq;
 

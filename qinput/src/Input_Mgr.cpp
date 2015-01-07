@@ -235,7 +235,7 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         }
         else
         {
-            QLOG_ERR("qinput", "unknown ps3 axis {}", ev.number);
+            //QLOG_ERR("qinput", "unknown ps3 axis {}", ev.number);
         }
     }
 }
@@ -245,7 +245,7 @@ void Input_Mgr::update_gamepads(q::Clock::duration dt)
 {
     std::lock_guard<std::mutex> lock(m_gamepad_mutex);
 
-	for (auto const& g: m_gamepads)
+    for (auto const& g: m_gamepads)
 	{
         g.gamepad->update(dt);
 

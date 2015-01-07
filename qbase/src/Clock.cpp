@@ -31,9 +31,14 @@ Clock::time_point Clock::now()
 
 #elif defined(Q_POSIX_API)
 
-	struct timeval ptv;
-    gettimeofday(&ptv, nullptr);
-	return time_point(duration(ptv.tv_usec + ptv.tv_sec * static_cast<rep>(period::den)));
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    return time_point(duration(ts.tv_nsec + ts.tv_sec * static_cast<rep>(period::den)));
+
+//	struct timeval ptv;
+//    gettimeofday(&ptv, nullptr);
+//	return time_point(duration(ptv.tv_usec + ptv.tv_sec * static_cast<rep>(period::den)));
 
 #else
 #	error "Define for your platform"

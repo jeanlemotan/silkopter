@@ -8,9 +8,9 @@ namespace silk
 class AHRS : q::util::Noncopyable
 {
 public:
-    void process(Gyroscope_Sample const& gyroscope,
-                 Accelerometer_Sample const& accelerometer,
-                 Compass_Sample const& compass);
+    void process(sensors::Gyroscope_Sample const& gyroscope,
+                 sensors::Accelerometer_Sample const& accelerometer,
+                 sensors::Compass_Sample const& compass);
 
     auto get_angular_velocity_l() const -> math::vec3f const&;
 

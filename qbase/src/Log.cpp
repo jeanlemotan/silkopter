@@ -81,7 +81,7 @@ void q::logging::set_level(const String& topic, Level level)
 
 	detail::sTopic[topic].level = level;
 }
-void q::log(logging::Level level, const String& topic, const char* file, int line, const String& message)
+void q::log(logging::Level level, char const* topic, const char* file, int line, const String& message)
 {
 	using namespace logging;
 
@@ -97,16 +97,19 @@ void q::log(logging::Level level, const String& topic, const char* file, int lin
 	auto decorations = detail::sDecorations;
 
 	//search for overrides for this specific topic
-	auto it = detail::sTopic.find(topic);
-	if (it != detail::sTopic.end())
-	{
-		if (!it->second.isEnabled)
-		{
-			return;
-		}
-		allowedLevel = static_cast<Level>(std::max(static_cast<int>(allowedLevel), static_cast<int>(it->second.level)));
-		decorations = it->second.decorations >= 0 ? Decorations(it->second.decorations) : decorations;
-	}
+    if (topic && topic[0] != '\0')
+    {
+        auto it = detail::sTopic.find(topic);
+        if (it != detail::sTopic.end())
+        {
+            if (!it->second.isEnabled)
+            {
+                return;
+            }
+            allowedLevel = static_cast<Level>(std::max(static_cast<int>(allowedLevel), static_cast<int>(it->second.level)));
+            decorations = it->second.decorations >= 0 ? Decorations(it->second.decorations) : decorations;
+        }
+    }
 
 	//level too low? ignore
 	if (level < allowedLevel)
@@ -130,7 +133,7 @@ void q::log(logging::Level level, const String& topic, const char* file, int lin
 		}
 	}
 
-	if (decorations.test(Decoration::TOPIC) && !topic.empty())
+    if (decorations.test(Decoration::TOPIC) && topic && topic[0] != '\0')
 	{
 		str.append("[");
 		str.append(topic);

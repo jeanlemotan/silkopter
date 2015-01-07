@@ -149,7 +149,7 @@ void Video_Stream::process()
                 0, frame_h,
                 m_ffmpeg.rgb.data, m_ffmpeg.rgb.linesize);
 
-            m_image_flipped = m_image.mirrored(true, false);
+            m_image_flipped = m_image.mirrored(false, false);
 
             update();
         }

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
-#include "common/input/UAV_Input.h"
 #include "common/sensors/Sensor_Samples.h"
 #include "AHRS.h"
 #include "Battery.h"
@@ -20,12 +20,12 @@ public:
 
     void process();
 
-    void set_throttle_mode(uav_input::Throttle_Mode mode);
-    void set_pitch_roll_mode(uav_input::Pitch_Roll_Mode mode);
-    void set_yaw_mode(uav_input::Yaw_Mode mode);
-    void set_reference_frame(uav_input::Reference_Frame frame);
-    void set_sticks(uav_input::Sticks const& sticks);
-    void set_assists(uav_input::Assists assists);
+    void set_throttle_mode(comms::UAV_Input::Throttle_Mode mode);
+    void set_pitch_roll_mode(comms::UAV_Input::Pitch_Roll_Mode mode);
+    void set_yaw_mode(comms::UAV_Input::Yaw_Mode mode);
+    void set_reference_frame(comms::UAV_Input::Reference_Frame frame);
+    void set_sticks(comms::UAV_Input::Sticks const& sticks);
+    void set_assists(comms::UAV_Input::Assists assists);
     void arm();
     void disarm();
 
@@ -106,18 +106,18 @@ private:
     void process_dead_reckoning();
     void process_input();
 
-    void process_rate_pids();
+    void process_rate_pids(sensors::Gyroscope_Sample const& sample);
     void process_stability_pids();
 
     struct IMU
     {
-        Gyroscope_Sample last_gyroscope_sample;
+        sensors::Gyroscope_Sample last_gyroscope_sample;
         Manual_Clock::time_point gyroscope_sample_time_point;
 
-        Accelerometer_Sample last_accelerometer_sample;
+        sensors::Accelerometer_Sample last_accelerometer_sample;
         Manual_Clock::time_point accelerometer_sample_time_point;
 
-        Compass_Sample last_compass_sample;
+        sensors::Compass_Sample last_compass_sample;
         Manual_Clock::time_point compass_sample_time_point;
 
         Manual_Clock clock;
@@ -141,11 +141,6 @@ private:
 
     struct PIDs
     {
-        Manual_Clock::time_point last_rate_process_timestamp{std::chrono::seconds(0)};
-
-        math::vec3f angular_velocity;
-        size_t angular_velocity_samples = 0;
-
         Yaw_Rate_PID yaw_rate;
         Pitch_Rate_PID pitch_rate;
         Roll_Rate_PID roll_rate;
@@ -162,12 +157,12 @@ private:
     {
         q::Clock::time_point last_process_timestamp{std::chrono::seconds(0)};
 
-        uav_input::Throttle_Mode throttle_mode;
-        uav_input::Pitch_Roll_Mode pitch_roll_mode;
-        uav_input::Yaw_Mode yaw_mode;
-        uav_input::Reference_Frame reference_frame;
-        uav_input::Sticks sticks;
-        uav_input::Assists assists;
+        comms::UAV_Input::Throttle_Mode throttle_mode;
+        comms::UAV_Input::Pitch_Roll_Mode pitch_roll_mode;
+        comms::UAV_Input::Yaw_Mode yaw_mode;
+        comms::UAV_Input::Reference_Frame reference_frame;
+        comms::UAV_Input::Sticks sticks;
+        comms::UAV_Input::Assists assists;
     } m_input;
 
     void process_input_throttle_rate(q::Clock::duration dt);
@@ -202,6 +197,9 @@ private:
         float max_pitch_rate = math::anglef::pi;
         float max_roll_rate = math::anglef::pi;
         float max_yaw_rate = math::anglef::pi;
+
+        float max_pitch_angle = math::radians(30.f);
+        float max_roll_angle = math::radians(30.f);
     } m_settings;
 
     auto load_settings() -> bool;

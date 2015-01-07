@@ -8,6 +8,11 @@ TARGET = brain
 target.path = /home/pi
 INSTALLS = target
 
+
+#QMAKE_CXXFLAGS_RELEASE += -g
+#QMAKE_CFLAGS_RELEASE += -g
+#QMAKE_LFLAGS_RELEASE =
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
@@ -97,8 +102,6 @@ SOURCES += \
 HEADERS += \
     ../../src/BrainStdAfx.h \
     ../../src/Toggle.h \
-    ../../../libs/common/input/Camera_Input.h \
-    ../../../libs/common/input/UAV_Input.h \
     ../../../libs/utils/Channel.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \

@@ -46,7 +46,7 @@ namespace math
 
 	template<typename T> inline T clamp(T x, T _min, T _max)
 	{
-		return min(max(x, _min), _max);
+        return math::min(math::max(x, _min), _max);
 	}
 	template<typename T> inline vec2<T> clamp(vec2<T> const& x, vec2<T> const& _min, vec2<T> const& _max)
 	{

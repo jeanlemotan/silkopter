@@ -78,8 +78,6 @@ HEADERS  += \
     ../../src/Video_Stream.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
-    ../../../libs/common/input/Camera_Input.h \
-    ../../../libs/common/input/UAV_Input.h \
     ../../src/Comms.h \
     ../../src/Input_Widget.h \
     ../../src/PID_Widget.h \

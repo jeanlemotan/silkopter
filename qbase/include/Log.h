@@ -75,14 +75,14 @@ namespace logging
 
 }
 
-	extern void log(logging::Level level, const String& topic, const char* file, int line, const String& message);
+    extern void log(logging::Level level, char const* topic, const char* file, int line, const String& message);
 
 	template<class Fmt, typename... Params>
-    void logf(logging::Level level, String const& topic, char const* file, int line, Fmt const& fmt, Params&&... params)
+    void logf(logging::Level level, char const* topic, char const* file, int line, Fmt const& fmt, Params&&... params)
 	{
 		String message;
         q::util::format(message, fmt, std::forward<Params>(params)...);
-		log(level, topic, file, line, message);
+        log(level, topic, file, line, message);
 	}
 
 	template<class Fmt, typename... Params>

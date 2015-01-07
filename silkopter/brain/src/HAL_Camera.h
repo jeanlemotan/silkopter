@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/input/Camera_Input.h"
+#include "common/Comm_Data.h"
 
 namespace silk
 {
@@ -21,9 +21,9 @@ public:
     virtual auto start_recording() -> bool = 0;
     virtual void stop_recording() = 0;
 
-    virtual void set_iso(camera_input::Iso iso) = 0;
-    virtual void set_shutter_speed(camera_input::Shutter_Speed ss) = 0;
-    virtual void set_quality(camera_input::Stream_Quality sq) = 0;
+    virtual void set_iso(uint32_t iso) = 0;
+    virtual void set_shutter_speed(q::Clock::duration ss) = 0;
+    virtual void set_stream_quality(comms::Camera_Params::Stream_Quality sq) = 0;
 
     //----------------------------------------------------------------------
     virtual void process() = 0;

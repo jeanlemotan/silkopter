@@ -876,10 +876,10 @@ namespace util
 
     inline void RUDP::process()
     {
-        {
-            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
-        }
+//        {
+//            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+//            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
+//        }
         send_pending_confirmations();
         send_pending_cancellations();
 
@@ -1101,7 +1101,7 @@ namespace util
             }
             if (datagram)
             {
-                auto& header = get_header<Packet_Header>(datagram->data);
+//                auto& header = get_header<Packet_Header>(datagram->data);
 //                if (header.channel_idx == 12)
 //                {
 //                    RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(header.fragment_idx), static_cast<int>(header.id));

@@ -245,77 +245,77 @@ void HAL_Sensors_HW::get_voltage_calibration_data(float& scale) const
 
 
 
-auto HAL_Sensors_HW::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
+auto HAL_Sensors_HW::get_accelerometer_samples() const -> std::vector<sensors::Accelerometer_Sample> const&
 {
     return m_accelerometer_samples;
 }
-auto HAL_Sensors_HW::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
+auto HAL_Sensors_HW::get_gyroscope_samples() const -> std::vector<sensors::Gyroscope_Sample> const&
 {
     return m_gyroscope_samples;
 }
-auto HAL_Sensors_HW::get_compass_samples() const -> std::vector<Compass_Sample> const&
+auto HAL_Sensors_HW::get_compass_samples() const -> std::vector<sensors::Compass_Sample> const&
 {
     return m_compass_samples;
 }
-auto HAL_Sensors_HW::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
+auto HAL_Sensors_HW::get_barometer_samples() const -> std::vector<sensors::Barometer_Sample> const&
 {
     return m_barometer_samples;
 }
-auto HAL_Sensors_HW::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
+auto HAL_Sensors_HW::get_sonar_samples() const -> std::vector<sensors::Sonar_Sample> const&
 {
     return m_sonar_samples;
 }
-auto HAL_Sensors_HW::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
+auto HAL_Sensors_HW::get_thermometer_samples() const -> std::vector<sensors::Thermometer_Sample> const&
 {
     return m_thermometer_samples;
 }
-auto HAL_Sensors_HW::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
+auto HAL_Sensors_HW::get_voltage_samples() const -> std::vector<sensors::Voltage_Sample> const&
 {
     return m_voltage_samples;
 }
-auto HAL_Sensors_HW::get_current_samples() const -> std::vector<Current_Sample> const&
+auto HAL_Sensors_HW::get_current_samples() const -> std::vector<sensors::Current_Sample> const&
 {
     return m_current_samples;
 }
-auto HAL_Sensors_HW::get_gps_samples() const -> std::vector<GPS_Sample> const&
+auto HAL_Sensors_HW::get_gps_samples() const -> std::vector<sensors::GPS_Sample> const&
 {
     return m_gps_samples;
 }
-auto HAL_Sensors_HW::get_last_accelerometer_sample() const  -> Accelerometer_Sample const&
+auto HAL_Sensors_HW::get_last_accelerometer_sample() const  -> sensors::Accelerometer_Sample const&
 {
-    return m_accelerometer_sample;
+    return m_last_accelerometer_sample;
 }
-auto HAL_Sensors_HW::get_last_gyroscope_sample() const      -> Gyroscope_Sample const&
+auto HAL_Sensors_HW::get_last_gyroscope_sample() const      -> sensors::Gyroscope_Sample const&
 {
-    return m_gyroscope_sample;
+    return m_last_gyroscope_sample;
 }
-auto HAL_Sensors_HW::get_last_compass_sample() const        -> Compass_Sample const&
+auto HAL_Sensors_HW::get_last_compass_sample() const        -> sensors::Compass_Sample const&
 {
-    return m_compass_sample;
+    return m_last_compass_sample;
 }
-auto HAL_Sensors_HW::get_last_barometer_sample() const      -> Barometer_Sample const&
+auto HAL_Sensors_HW::get_last_barometer_sample() const      -> sensors::Barometer_Sample const&
 {
-    return m_barometer_sample;
+    return m_last_barometer_sample;
 }
-auto HAL_Sensors_HW::get_last_sonar_sample() const          -> Sonar_Sample const&
+auto HAL_Sensors_HW::get_last_sonar_sample() const          -> sensors::Sonar_Sample const&
 {
-    return m_sonar_sample;
+    return m_last_sonar_sample;
 }
-auto HAL_Sensors_HW::get_last_thermometer_sample() const    -> Thermometer_Sample const&
+auto HAL_Sensors_HW::get_last_thermometer_sample() const    -> sensors::Thermometer_Sample const&
 {
-    return m_thermometer_sample;
+    return m_last_thermometer_sample;
 }
-auto HAL_Sensors_HW::get_last_voltage_sample() const        -> Voltage_Sample const&
+auto HAL_Sensors_HW::get_last_voltage_sample() const        -> sensors::Voltage_Sample const&
 {
-    return m_voltage_sample;
+    return m_last_voltage_sample;
 }
-auto HAL_Sensors_HW::get_last_current_sample() const        -> Current_Sample const&
+auto HAL_Sensors_HW::get_last_current_sample() const        -> sensors::Current_Sample const&
 {
-    return m_current_sample;
+    return m_last_current_sample;
 }
-auto HAL_Sensors_HW::get_last_gps_sample() const            -> GPS_Sample const&
+auto HAL_Sensors_HW::get_last_gps_sample() const            -> sensors::GPS_Sample const&
 {
-    return m_gps_sample;
+    return m_last_gps_sample;
 }
 
 void HAL_Sensors_HW::process()
@@ -348,31 +348,52 @@ void HAL_Sensors_HW::process()
         QASSERT(a_samples.size() == g_samples.size());
         auto const& c_samples = m_sensors->mpu.get_compass_samples();
 
-        m_gyroscope_samples.resize(g_samples.size());
-        for (size_t i = 0; i < g_samples.size(); i++)
         {
-            m_gyroscope_sample.value = g_samples[i] - m_config.gyroscope_bias;
-            m_gyroscope_sample.dt = m_sensors->mpu.get_gyroscope_sample_time();
-            m_gyroscope_sample.sample_idx++;
-            m_gyroscope_samples[i] = m_gyroscope_sample;
+            auto dt = m_sensors->mpu.get_gyroscope_sample_time();
+            m_gyroscope_samples.resize(g_samples.size());
+            for (size_t i = 0; i < g_samples.size(); i++)
+            {
+                auto& sample = m_gyroscope_samples[i];
+                sample.value = g_samples[i] - m_config.gyroscope_bias;
+                sample.dt = dt;
+                sample.sample_idx = ++m_last_gyroscope_sample.sample_idx;
+            }
+            if (!m_gyroscope_samples.empty())
+            {
+                m_last_gyroscope_sample = m_gyroscope_samples.back();
+            }
         }
 
-        m_accelerometer_samples.resize(a_samples.size());
-        for (size_t i = 0; i < a_samples.size(); i++)
         {
-            m_accelerometer_sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
-            m_accelerometer_sample.dt = m_sensors->mpu.get_accelerometer_sample_time();
-            m_accelerometer_sample.sample_idx++;
-            m_accelerometer_samples[i] = m_accelerometer_sample;
+            auto dt = m_sensors->mpu.get_accelerometer_sample_time();
+            m_accelerometer_samples.resize(a_samples.size());
+            for (size_t i = 0; i < a_samples.size(); i++)
+            {
+                auto& sample = m_accelerometer_samples[i];
+                sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
+                sample.dt = dt;
+                sample.sample_idx = ++m_last_accelerometer_sample.sample_idx;
+            }
+            if (!m_accelerometer_samples.empty())
+            {
+                m_last_accelerometer_sample = m_accelerometer_samples.back();
+            }
         }
 
-        m_compass_samples.resize(c_samples.size());
-        for (size_t i = 0; i < c_samples.size(); i++)
         {
-            m_compass_sample.value = c_samples[i] - m_config.compass_bias;
-            m_compass_sample.dt = m_sensors->mpu.get_compass_sample_time();
-            m_compass_sample.sample_idx++;
-            m_compass_samples[i] = m_compass_sample;
+            auto dt = m_sensors->mpu.get_compass_sample_time();
+            m_compass_samples.resize(c_samples.size());
+            for (size_t i = 0; i < c_samples.size(); i++)
+            {
+                auto& sample = m_compass_samples[i];
+                sample.value = c_samples[i] - m_config.compass_bias;
+                sample.dt = dt;
+                sample.sample_idx = ++m_last_compass_sample.sample_idx;
+            }
+            if (!m_compass_samples.empty())
+            {
+                m_last_compass_sample = m_compass_samples.back();
+            }
         }
     }
 #endif
@@ -383,19 +404,19 @@ void HAL_Sensors_HW::process()
         auto data = m_sensors->adc.get_current_data();
         if (data)
         {
-            m_current_sample.value = data->value * m_config.current_scale;
-            m_current_sample.dt = data->dt;
-            m_current_sample.sample_idx++;
-            m_current_samples.push_back(m_current_sample);
+            m_last_current_sample.value = data->value * m_config.current_scale;
+            m_last_current_sample.dt = data->dt;
+            m_last_current_sample.sample_idx++;
+            m_current_samples.push_back(m_last_current_sample);
         }
 
         data = m_sensors->adc.get_voltage_data();
         if (data)
         {
-            m_voltage_sample.value = data->value * m_config.voltage_scale;
-            m_voltage_sample.dt = data->dt;
-            m_voltage_sample.sample_idx++;
-            m_voltage_samples.push_back(m_voltage_sample);
+            m_last_voltage_sample.value = data->value * m_config.voltage_scale;
+            m_last_voltage_sample.dt = data->dt;
+            m_last_voltage_sample.sample_idx++;
+            m_voltage_samples.push_back(m_last_voltage_sample);
         }
     }
 #endif
@@ -407,10 +428,10 @@ void HAL_Sensors_HW::process()
         if (data)
         {
             //SILK_INFO("DISTANCE: {}", *val);
-            m_sonar_sample.value = data->value;
-            m_sonar_sample.dt = data->dt;
-            m_sonar_sample.sample_idx++;
-            m_sonar_samples.push_back(m_sonar_sample);
+            m_last_sonar_sample.value = data->value;
+            m_last_sonar_sample.dt = data->dt;
+            m_last_sonar_sample.sample_idx++;
+            m_sonar_samples.push_back(m_last_sonar_sample);
         }
     }
 #endif
@@ -424,18 +445,18 @@ void HAL_Sensors_HW::process()
         auto b_data = m_sensors->baro.get_barometer_data();
         if (b_data)
         {
-            m_barometer_sample.value = b_data->value;
-            m_barometer_sample.sample_idx++;
-            m_barometer_sample.dt = b_data->dt;
-            m_barometer_samples.push_back(m_barometer_sample);
+            m_last_barometer_sample.value = b_data->value;
+            m_last_barometer_sample.sample_idx++;
+            m_last_barometer_sample.dt = b_data->dt;
+            m_barometer_samples.push_back(m_last_barometer_sample);
         }
         auto t_data = m_sensors->baro.get_thermometer_data();
         if (t_data)
         {
-            m_thermometer_sample.value = t_data->value;
-            m_thermometer_sample.sample_idx++;
-            m_thermometer_sample.dt = t_data->dt;
-            m_thermometer_samples.push_back(m_thermometer_sample);
+            m_last_thermometer_sample.value = t_data->value;
+            m_last_thermometer_sample.sample_idx++;
+            m_last_thermometer_sample.dt = t_data->dt;
+            m_thermometer_samples.push_back(m_last_thermometer_sample);
         }
     }
 #endif

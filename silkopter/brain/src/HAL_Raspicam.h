@@ -21,9 +21,9 @@ public:
     auto start_recording() -> bool;
     void stop_recording();
 
-    void set_iso(camera_input::Iso iso);
-    void set_shutter_speed(camera_input::Shutter_Speed ss);
-    void set_quality(camera_input::Stream_Quality sq);
+    void set_iso(uint32_t iso);
+    void set_shutter_speed(q::Clock::duration ss);
+    void set_stream_quality(comms::Camera_Params::Stream_Quality sq);
 
     //----------------------------------------------------------------------
     struct Impl;
@@ -54,9 +54,9 @@ private:
     void create_file_sink();
 
     std::shared_ptr<q::data::File_Sink> m_file_sink;
-    camera_input::Iso m_iso = 0;
-    camera_input::Shutter_Speed m_shutter_speed{0};
-    camera_input::Stream_Quality m_stream_quality = camera_input::Stream_Quality::MEDIUM;
+    uint32_t m_iso = 0;
+    q::Clock::duration m_shutter_speed{0};
+    comms::Camera_Params::Stream_Quality m_stream_quality = comms::Camera_Params::Stream_Quality::MEDIUM;
 
     auto create_components() -> bool;
 };

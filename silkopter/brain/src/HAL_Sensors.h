@@ -35,25 +35,25 @@ public:
     //----------------------------------------------------------------------
     //sensors
 
-    virtual auto get_accelerometer_samples() const  -> std::vector<Accelerometer_Sample> const& = 0;
-    virtual auto get_gyroscope_samples() const      -> std::vector<Gyroscope_Sample> const& = 0;
-    virtual auto get_compass_samples() const        -> std::vector<Compass_Sample> const& = 0;
-    virtual auto get_barometer_samples() const      -> std::vector<Barometer_Sample> const& = 0;
-    virtual auto get_sonar_samples() const          -> std::vector<Sonar_Sample> const& = 0;
-    virtual auto get_thermometer_samples() const    -> std::vector<Thermometer_Sample> const& = 0;
-    virtual auto get_voltage_samples() const        -> std::vector<Voltage_Sample> const& = 0;
-    virtual auto get_current_samples() const        -> std::vector<Current_Sample> const& = 0;
-    virtual auto get_gps_samples() const            -> std::vector<GPS_Sample> const& = 0;
+    virtual auto get_accelerometer_samples() const  -> std::vector<sensors::Accelerometer_Sample> const& = 0;
+    virtual auto get_gyroscope_samples() const      -> std::vector<sensors::Gyroscope_Sample> const& = 0;
+    virtual auto get_compass_samples() const        -> std::vector<sensors::Compass_Sample> const& = 0;
+    virtual auto get_barometer_samples() const      -> std::vector<sensors::Barometer_Sample> const& = 0;
+    virtual auto get_sonar_samples() const          -> std::vector<sensors::Sonar_Sample> const& = 0;
+    virtual auto get_thermometer_samples() const    -> std::vector<sensors::Thermometer_Sample> const& = 0;
+    virtual auto get_voltage_samples() const        -> std::vector<sensors::Voltage_Sample> const& = 0;
+    virtual auto get_current_samples() const        -> std::vector<sensors::Current_Sample> const& = 0;
+    virtual auto get_gps_samples() const            -> std::vector<sensors::GPS_Sample> const& = 0;
 
-    virtual auto get_last_accelerometer_sample() const  -> Accelerometer_Sample const& = 0;
-    virtual auto get_last_gyroscope_sample() const      -> Gyroscope_Sample const& = 0;
-    virtual auto get_last_compass_sample() const        -> Compass_Sample const& = 0;
-    virtual auto get_last_barometer_sample() const      -> Barometer_Sample const& = 0;
-    virtual auto get_last_sonar_sample() const          -> Sonar_Sample const& = 0;
-    virtual auto get_last_thermometer_sample() const    -> Thermometer_Sample const& = 0;
-    virtual auto get_last_voltage_sample() const        -> Voltage_Sample const& = 0;
-    virtual auto get_last_current_sample() const        -> Current_Sample const& = 0;
-    virtual auto get_last_gps_sample() const            -> GPS_Sample const& = 0;
+    virtual auto get_last_accelerometer_sample() const  -> sensors::Accelerometer_Sample const& = 0;
+    virtual auto get_last_gyroscope_sample() const      -> sensors::Gyroscope_Sample const& = 0;
+    virtual auto get_last_compass_sample() const        -> sensors::Compass_Sample const& = 0;
+    virtual auto get_last_barometer_sample() const      -> sensors::Barometer_Sample const& = 0;
+    virtual auto get_last_sonar_sample() const          -> sensors::Sonar_Sample const& = 0;
+    virtual auto get_last_thermometer_sample() const    -> sensors::Thermometer_Sample const& = 0;
+    virtual auto get_last_voltage_sample() const        -> sensors::Voltage_Sample const& = 0;
+    virtual auto get_last_current_sample() const        -> sensors::Current_Sample const& = 0;
+    virtual auto get_last_gps_sample() const            -> sensors::GPS_Sample const& = 0;
 
     //----------------------------------------------------------------------
     virtual void process() = 0;

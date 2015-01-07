@@ -53,7 +53,7 @@ auto compute_average(std::deque<std::pair<q::Clock::time_point, float>> const& s
 }
 
 
-void Battery::process(const std::vector<Current_Sample>& current_samples, const std::vector<Voltage_Sample>& voltage_samples)
+void Battery::process(const std::vector<sensors::Current_Sample>& current_samples, const std::vector<sensors::Voltage_Sample>& voltage_samples)
 {
     {
         //samples started at this time point

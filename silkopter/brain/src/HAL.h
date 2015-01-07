@@ -8,6 +8,7 @@
 namespace silk
 {
 
+class Comms;
 
 struct HAL : q::util::Noncopyable
 {
@@ -16,7 +17,7 @@ struct HAL : q::util::Noncopyable
     std::unique_ptr<HAL_Camera> camera;
     std::unique_ptr<HAL_Camera_Mount> camera_mount;
 
-    auto init() -> bool;
+    auto init(Comms& comms) -> bool;
     void shutdown();
     void process();
 

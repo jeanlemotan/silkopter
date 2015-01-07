@@ -17,8 +17,11 @@ static constexpr std::array<int32_t, 6> MOTOR_GPIOS = {17, 27, 22, 23, -1, -1};
 //constexpr uint32_t GPIO_PWM_RANGE = 10000;
 
 
-constexpr size_t MIN_PULSE = 1000;
-constexpr size_t MAX_PULSE = 2000;
+constexpr size_t MIN_SERVO_PULSE = 1000;
+constexpr size_t MAX_SERVO_PULSE = 2000;
+
+constexpr size_t MIN_PWM_PULSE = 0;
+constexpr size_t MAX_PWM_PULSE = 1000;
 
 using namespace silk;
 using namespace boost::asio;
@@ -81,7 +84,6 @@ auto HAL_Motors_PiGPIO::init() -> bool
     }
 
     //now configure the pin for PWM or servo
-    //if (m_settings.frequency >= PWM_Frequency::PWM_1000Hz)
     {
         uint32_t freq = 0;
         switch (m_settings.frequency)
@@ -90,6 +92,7 @@ auto HAL_Motors_PiGPIO::init() -> bool
             case PWM_Frequency::SERVO_100HZ: freq = 100; break;
             case PWM_Frequency::SERVO_200HZ: freq = 200; break;
             case PWM_Frequency::SERVO_400HZ: freq = 400; break;
+            case PWM_Frequency::PWM_1000HZ: freq = 1000; break;
             default:
             {
                 SILK_ERR("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
@@ -107,11 +110,24 @@ auto HAL_Motors_PiGPIO::init() -> bool
                     SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
                     return false;
                 }
-                auto range = 1000000 / freq;
-                if (gpioSetPWMrange(gpio, range) < 0)
+                int range = 0;
+                if (m_settings.frequency < PWM_Frequency::PWM_1000HZ)
                 {
-                    SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
-                    return false;
+                    range = 1000000 / freq;
+                    if (gpioSetPWMrange(gpio, range) < 0)
+                    {
+                        SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
+                        return false;
+                    }
+                }
+                else
+                {
+                    range = MAX_PWM_PULSE - MIN_PWM_PULSE;
+                    if (gpioSetPWMrange(gpio, range) < 0)
+                    {
+                        SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
+                        return false;
+                    }
                 }
 
                 SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
@@ -139,6 +155,18 @@ void HAL_Motors_PiGPIO::shutdown()
     m_is_initialized = false;
 }
 
+auto HAL_Motors_PiGPIO::get_pulse_range() const -> std::pair<int, int>
+{
+    if (m_settings.frequency < PWM_Frequency::PWM_1000HZ)
+    {
+        return { MIN_SERVO_PULSE, MAX_SERVO_PULSE};
+    }
+    else
+    {
+        return { MIN_PWM_PULSE, MAX_PWM_PULSE};
+    }
+}
+
 void HAL_Motors_PiGPIO::cut_throttle()
 {
     QASSERT(m_is_initialized);
@@ -147,11 +175,13 @@ void HAL_Motors_PiGPIO::cut_throttle()
         return;
     }
 
+    auto range = get_pulse_range();
+
     for (auto gpio: MOTOR_GPIOS)
     {
         if (gpio >= 0)
         {
-            gpioPWM(gpio, MIN_PULSE);
+            gpioPWM(gpio, range.first);
         }
     }
 }
@@ -176,6 +206,8 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
         m_motors.resize(count);
     }
 
+    auto range = get_pulse_range();
+
     for (size_t i = 0; i < count; i++)
     {
         auto gpio = MOTOR_GPIOS[i];
@@ -186,11 +218,11 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
             //            continue;
             //        }
 
-            auto throttle = math::clamp(throttles[i], 0.f, 0.6f);
+            auto throttle = math::clamp(throttles[i], 0.f, 1.f);
             m_motors[i].throttle = throttle;
 
-            uint32_t pulse = throttle * (MAX_PULSE - MIN_PULSE);
-            gpioPWM(gpio, MIN_PULSE + pulse);
+            int pulse = throttle * (range.second - range.first);
+            gpioPWM(gpio, range.first + pulse);
         }
     }
 }

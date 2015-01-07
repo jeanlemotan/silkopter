@@ -4,17 +4,17 @@
 using namespace silk;
 using namespace boost::asio;
 
-constexpr uint8_t COMMS_CHANNEL = 12;
-constexpr uint8_t TELEMETRY_CHANNEL = 13;
-
-constexpr q::Clock::duration SEND_EVERY = std::chrono::milliseconds(30);
+constexpr uint8_t SETUP_CHANNEL = 10;
+constexpr uint8_t INPUT_CHANNEL = 15;
+constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 
 Comms::Comms(boost::asio::io_service& io_service)
     : m_io_service(io_service)
     , m_socket(io_service)
     , m_rudp(m_socket)
-    , m_comms_channel(m_rudp, COMMS_CHANNEL)
+    , m_setup_channel(m_rudp, SETUP_CHANNEL)
+    , m_input_channel(m_rudp, INPUT_CHANNEL)
     , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
 {
     {
@@ -27,16 +27,31 @@ Comms::Comms(boost::asio::io_service& io_service)
 
     {
         util::RUDP::Send_Params params;
+        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = true;
+        params.importance = 126;
+        m_rudp.set_send_params(SETUP_CHANNEL, params);
+    }
+    {
+        util::RUDP::Send_Params params;
+        params.mtu = 100;
+        params.is_compressed = true;
+        params.is_reliable = false;
+        params.cancel_on_new_data = true;
         params.importance = 127;
-        m_rudp.set_send_params(COMMS_CHANNEL, params);
+        m_rudp.set_send_params(INPUT_CHANNEL, params);
     }
 
     {
         util::RUDP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(999999);
-        m_rudp.set_receive_params(COMMS_CHANNEL, params);
+        m_rudp.set_receive_params(SETUP_CHANNEL, params);
+    }
+    {
+        util::RUDP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(200);
+        m_rudp.set_receive_params(INPUT_CHANNEL, params);
     }
 
     {
@@ -98,39 +113,39 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
 }
 
 
-auto Comms::get_accelerometer_sample() const  -> Accelerometer_Sample const&
+auto Comms::get_accelerometer_sample() const  -> sensors::Accelerometer_Sample const&
 {
     return m_sensor_samples.accelerometer;
 }
-auto Comms::get_gyroscope_sample() const      -> Gyroscope_Sample const&
+auto Comms::get_gyroscope_sample() const      -> sensors::Gyroscope_Sample const&
 {
     return m_sensor_samples.gyroscope;
 }
-auto Comms::get_compass_sample() const        -> Compass_Sample const&
+auto Comms::get_compass_sample() const        -> sensors::Compass_Sample const&
 {
     return m_sensor_samples.compass;
 }
-auto Comms::get_barometer_sample() const      -> Barometer_Sample const&
+auto Comms::get_barometer_sample() const      -> sensors::Barometer_Sample const&
 {
     return m_sensor_samples.barometer;
 }
-auto Comms::get_sonar_sample() const          -> Sonar_Sample const&
+auto Comms::get_sonar_sample() const          -> sensors::Sonar_Sample const&
 {
     return m_sensor_samples.sonar;
 }
-auto Comms::get_thermometer_sample() const    -> Thermometer_Sample const&
+auto Comms::get_thermometer_sample() const    -> sensors::Thermometer_Sample const&
 {
     return m_sensor_samples.thermometer;
 }
-auto Comms::get_voltage_sample() const        -> Voltage_Sample const&
+auto Comms::get_voltage_sample() const        -> sensors::Voltage_Sample const&
 {
     return m_sensor_samples.voltage;
 }
-auto Comms::get_current_sample() const        -> Current_Sample const&
+auto Comms::get_current_sample() const        -> sensors::Current_Sample const&
 {
     return m_sensor_samples.current;
 }
-auto Comms::get_gps_sample() const            -> GPS_Sample const&
+auto Comms::get_gps_sample() const            -> sensors::GPS_Sample const&
 {
     return m_sensor_samples.gps;
 }
@@ -154,73 +169,73 @@ auto Comms::get_uav_position_w() const -> math::vec3f const&
 
 void Comms::set_yaw_rate_pid_params(Yaw_Rate_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::YAW_RATE_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS, params);
 }
 void Comms::request_yaw_rate_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::YAW_RATE_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS);
 }
 void Comms::set_pitch_rate_pid_params(Pitch_Rate_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::PITCH_RATE_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS, params);
 }
 void Comms::request_pitch_rate_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::PITCH_RATE_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS);
 }
 void Comms::set_roll_rate_pid_params(Roll_Rate_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::ROLL_RATE_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS, params);
 }
 void Comms::request_roll_rate_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::ROLL_RATE_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS);
 }
 void Comms::set_altitude_rate_pid_params(Altitude_Rate_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS, params);
 }
 void Comms::request_altitude_rate_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS);
 }
 void Comms::set_yaw_pid_params(Yaw_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::YAW_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS, params);
 }
 void Comms::request_yaw_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::YAW_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS);
 }
 void Comms::set_pitch_pid_params(Pitch_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::PITCH_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS, params);
 }
 void Comms::request_pitch_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::PITCH_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS);
 }
 void Comms::set_roll_pid_params(Roll_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::ROLL_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS, params);
 }
 void Comms::request_roll_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::ROLL_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS);
 }
 void Comms::set_altitude_pid_params(Altitude_PID::Params const& params)
 {
-    m_comms_channel.pack(detail::Comm_Message::ALTITUDE_PID_PARAMS, params);
+    m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS, params);
 }
 void Comms::request_altitude_pid_params()
 {
-    m_comms_channel.pack(detail::Comm_Message::ALTITUDE_PID_PARAMS);
+    m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS);
 }
 
 void Comms::process_message_sensors()
 {
     auto& channel = m_telemetry_channel;
-    detail::Telemetry_Message_Sensors sensors;
+    comms::Sensors sensors;
     if (!channel.begin_unpack() || !channel.unpack_param(sensors))
     {
         SILK_WARNING("Failed to receive sensors data");
@@ -228,39 +243,39 @@ void Comms::process_message_sensors()
     }
 
     bool res = true;
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::ACCELEROMETER))
+    if (res && sensors.test(comms::Sensor::ACCELEROMETER))
     {
         res = channel.unpack_param(m_sensor_samples.accelerometer);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::GYROSCOPE))
+    if (res && sensors.test(comms::Sensor::GYROSCOPE))
     {
         res = channel.unpack_param(m_sensor_samples.gyroscope);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::COMPASS))
+    if (res && sensors.test(comms::Sensor::COMPASS))
     {
         res = channel.unpack_param(m_sensor_samples.compass);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::BAROMETER))
+    if (res && sensors.test(comms::Sensor::BAROMETER))
     {
         res = channel.unpack_param(m_sensor_samples.barometer);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::THERMOMETER))
+    if (res && sensors.test(comms::Sensor::THERMOMETER))
     {
         res = channel.unpack_param(m_sensor_samples.thermometer);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::SONAR))
+    if (res && sensors.test(comms::Sensor::SONAR))
     {
         res = channel.unpack_param(m_sensor_samples.sonar);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::VOLTAGE))
+    if (res && sensors.test(comms::Sensor::VOLTAGE))
     {
         res = channel.unpack_param(m_sensor_samples.voltage);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::CURRENT))
+    if (res && sensors.test(comms::Sensor::CURRENT))
     {
         res = channel.unpack_param(m_sensor_samples.current);
     }
-    if (res && sensors.test(detail::Telemetry_Message_Sensor::GPS))
+    if (res && sensors.test(comms::Sensor::GPS))
     {
         res = channel.unpack_param(m_sensor_samples.gps);
     }
@@ -278,7 +293,7 @@ void Comms::process_message_sensors()
 void Comms::process_message_calibration_accelerometer()
 {
     math::vec3f bias, scale;
-    if (!m_comms_channel.unpack(bias, scale))
+    if (!m_setup_channel.unpack(bias, scale))
     {
         SILK_WARNING("Failed to receive accelerometer calibration");
         return;
@@ -288,7 +303,7 @@ void Comms::process_message_calibration_accelerometer()
 void Comms::process_message_calibration_gyroscope()
 {
     math::vec3f bias;
-    if (!m_comms_channel.unpack(bias))
+    if (!m_setup_channel.unpack(bias))
     {
         SILK_WARNING("Failed to receive gyroscope calibration");
         return;
@@ -298,7 +313,7 @@ void Comms::process_message_calibration_gyroscope()
 void Comms::process_message_calibration_compass()
 {
     math::vec3f bias;
-    if (!m_comms_channel.unpack(bias))
+    if (!m_setup_channel.unpack(bias))
     {
         SILK_WARNING("Failed to receive compass calibration");
         return;
@@ -309,7 +324,7 @@ void Comms::process_message_calibration_compass()
 void Comms::process_message_yaw_rate_pid_params()
 {
     Yaw_Rate_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive yaw rate pid params");
         return;
@@ -319,7 +334,7 @@ void Comms::process_message_yaw_rate_pid_params()
 void Comms::process_message_pitch_rate_pid_params()
 {
     Pitch_Rate_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive pitch rate pid params");
         return;
@@ -329,7 +344,7 @@ void Comms::process_message_pitch_rate_pid_params()
 void Comms::process_message_roll_rate_pid_params()
 {
     Roll_Rate_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive roll rate pid params");
         return;
@@ -339,7 +354,7 @@ void Comms::process_message_roll_rate_pid_params()
 void Comms::process_message_altitude_rate_pid_params()
 {
     Altitude_Rate_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive altitude rate pid params");
         return;
@@ -350,7 +365,7 @@ void Comms::process_message_altitude_rate_pid_params()
 void Comms::process_message_yaw_pid_params()
 {
     Yaw_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive yaw pid params");
         return;
@@ -360,7 +375,7 @@ void Comms::process_message_yaw_pid_params()
 void Comms::process_message_pitch_pid_params()
 {
     Pitch_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive pitch pid params");
         return;
@@ -370,7 +385,7 @@ void Comms::process_message_pitch_pid_params()
 void Comms::process_message_roll_pid_params()
 {
     Roll_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive roll pid params");
         return;
@@ -380,7 +395,7 @@ void Comms::process_message_roll_pid_params()
 void Comms::process_message_altitude_pid_params()
 {
     Altitude_PID::Params params;
-    if (!m_comms_channel.unpack(params))
+    if (!m_setup_channel.unpack(params))
     {
         SILK_WARNING("Failed to receive altitude pid params");
         return;
@@ -423,30 +438,40 @@ void Comms::process_message_uav_position_w()
 
 void Comms::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_ACCELEROMETER, bias, scale);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER, bias, scale);
 }
 
 void Comms::request_accelerometer_calibration_data() const
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_ACCELEROMETER);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER);
 }
 
 void Comms::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_GYROSCOPE, bias);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE, bias);
 }
 void Comms::request_gyroscope_calibration_data() const
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_GYROSCOPE);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE);
 }
 
 void Comms::set_compass_calibration_data(math::vec3f const& bias)
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_COMPASS, bias);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS, bias);
 }
 void Comms::request_compass_calibration_data() const
 {
-    m_comms_channel.pack(detail::Comm_Message::CALIBRATION_COMPASS);
+    m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS);
+}
+
+void Comms::send_uav_input(comms::UAV_Input const& input)
+{
+    m_uav_input.input = input;
+}
+
+void Comms::send_camera_mount_input(comms::Camera_Mount_Input const& input)
+{
+    m_camera_mount_input.input = input;
 }
 
 void Comms::process()
@@ -463,15 +488,15 @@ void Comms::process()
     {
         switch (msg.get())
         {
-            case detail::Telemetry_Message::SENSORS:  process_message_sensors(); break;
+            case comms::Telemetry_Message::SENSORS:  process_message_sensors(); break;
 
-            case detail::Telemetry_Message::UAV_AHRS_ROTATION_L2W:  process_message_uav_rotation_l2w(); break;
-            case detail::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  process_message_uav_linear_acceleration_w(); break;
-            case detail::Telemetry_Message::UAV_VELOCITY_W:  process_message_uav_velocity_w(); break;
-            case detail::Telemetry_Message::UAV_POSITION_W:  process_message_uav_position_w(); break;
-            case detail::Telemetry_Message::UAV_BATTERY_CAPACITY_USED:  break;
-            case detail::Telemetry_Message::UAV_BATTERY_CURRENT:  break;
-            case detail::Telemetry_Message::UAV_BATTERY_VOLTAGE:  break;
+            case comms::Telemetry_Message::UAV_AHRS_ROTATION_L2W:  process_message_uav_rotation_l2w(); break;
+            case comms::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  process_message_uav_linear_acceleration_w(); break;
+            case comms::Telemetry_Message::UAV_VELOCITY_W:  process_message_uav_velocity_w(); break;
+            case comms::Telemetry_Message::UAV_POSITION_W:  process_message_uav_position_w(); break;
+            case comms::Telemetry_Message::UAV_BATTERY_CAPACITY_USED:  break;
+            case comms::Telemetry_Message::UAV_BATTERY_CURRENT:  break;
+            case comms::Telemetry_Message::UAV_BATTERY_VOLTAGE:  break;
             default:
                 SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
@@ -479,25 +504,25 @@ void Comms::process()
         }
     }
 
-    while (auto msg = m_comms_channel.get_next_message())
+    while (auto msg = m_setup_channel.get_next_message())
     {
         switch (msg.get())
         {
-            case detail::Comm_Message::REQUEST_RAW_SENSORS:  process_message_sensors(); break;
+            case comms::Setup_Message::REQUEST_RAW_SENSORS:  process_message_sensors(); break;
 
-            case detail::Comm_Message::YAW_RATE_PID_PARAMS: process_message_yaw_rate_pid_params(); break;
-            case detail::Comm_Message::PITCH_RATE_PID_PARAMS: process_message_pitch_rate_pid_params(); break;
-            case detail::Comm_Message::ROLL_RATE_PID_PARAMS: process_message_roll_rate_pid_params(); break;
-            case detail::Comm_Message::ALTITUDE_RATE_PID_PARAMS: process_message_altitude_rate_pid_params(); break;
+            case comms::Setup_Message::YAW_RATE_PID_PARAMS: process_message_yaw_rate_pid_params(); break;
+            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: process_message_pitch_rate_pid_params(); break;
+            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: process_message_roll_rate_pid_params(); break;
+            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: process_message_altitude_rate_pid_params(); break;
 
-            case detail::Comm_Message::YAW_PID_PARAMS: process_message_yaw_pid_params(); break;
-            case detail::Comm_Message::PITCH_PID_PARAMS: process_message_pitch_pid_params(); break;
-            case detail::Comm_Message::ROLL_PID_PARAMS: process_message_roll_pid_params(); break;
-            case detail::Comm_Message::ALTITUDE_PID_PARAMS: process_message_altitude_pid_params(); break;
+            case comms::Setup_Message::YAW_PID_PARAMS: process_message_yaw_pid_params(); break;
+            case comms::Setup_Message::PITCH_PID_PARAMS: process_message_pitch_pid_params(); break;
+            case comms::Setup_Message::ROLL_PID_PARAMS: process_message_roll_pid_params(); break;
+            case comms::Setup_Message::ALTITUDE_PID_PARAMS: process_message_altitude_pid_params(); break;
 
-            case detail::Comm_Message::CALIBRATION_ACCELEROMETER:  process_message_calibration_accelerometer(); break;
-            case detail::Comm_Message::CALIBRATION_GYROSCOPE:  process_message_calibration_gyroscope(); break;
-            case detail::Comm_Message::CALIBRATION_COMPASS:  process_message_calibration_compass(); break;
+            case comms::Setup_Message::CALIBRATION_ACCELEROMETER:  process_message_calibration_accelerometer(); break;
+            case comms::Setup_Message::CALIBRATION_GYROSCOPE:  process_message_calibration_gyroscope(); break;
+            case comms::Setup_Message::CALIBRATION_COMPASS:  process_message_calibration_compass(); break;
             default:
                 SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
@@ -506,19 +531,24 @@ void Comms::process()
     }
 //    SILK_INFO("*********** LOOP: {}", xxx);
 
-    m_rudp.process();
-
     auto now = q::Clock::now();
-    if (m_comms_channel.has_tx_data() && now - m_last_comms_sent_time_stamp >= SEND_EVERY)
+
+    if (now - m_uav_input.last_sent_time_stamp >= m_uav_input.SEND_EVERY)
     {
-        m_last_comms_sent_time_stamp = now;
-        m_comms_channel.send();
+        m_uav_input.last_sent_time_stamp = now;
+        m_input_channel.pack(comms::Input_Message::UAV_INPUT, m_uav_input.input);
     }
-    if (m_telemetry_channel.has_tx_data() && now - m_last_telemetry_sent_time_stamp >= SEND_EVERY)
+    if (now - m_camera_mount_input.last_sent_time_stamp >= m_camera_mount_input.SEND_EVERY)
     {
-        m_last_telemetry_sent_time_stamp = now;
-        m_telemetry_channel.try_sending();
+        m_camera_mount_input.last_sent_time_stamp = now;
+        m_input_channel.pack(comms::Input_Message::CAMERA_MOUNT_INPUT, m_camera_mount_input.input);
     }
+
+
+    m_rudp.process();
+    m_setup_channel.send();
+    m_telemetry_channel.try_sending();
+    m_input_channel.send();
 }
 
 auto Comms::get_rudp() -> util::RUDP&

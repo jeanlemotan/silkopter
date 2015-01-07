@@ -7,7 +7,7 @@ namespace q
 	{
 	public:
 		typedef int64_t									rep;
-		typedef std::micro								period;
+        typedef std::nano								period;
 		typedef std::chrono::duration<rep, period>      duration;
 		typedef std::chrono::time_point<Clock>			time_point;
 		static const bool is_steady = true;

@@ -514,7 +514,7 @@ void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto GPS_UBLOX::get_sample() const -> GPS_Sample const&
+auto GPS_UBLOX::get_sample() const -> sensors::GPS_Sample const&
 {
 
 }

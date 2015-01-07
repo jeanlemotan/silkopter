@@ -22,7 +22,7 @@ public:
     virtual void process() = 0;
 
     //return the current sample
-    virtual auto get_sample() const -> GPS_Sample const& = 0;
+    virtual auto get_sample() const -> sensors::GPS_Sample const& = 0;
 };
 
 
