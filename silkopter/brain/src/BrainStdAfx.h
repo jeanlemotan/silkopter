@@ -12,11 +12,6 @@
 #include "QData.h"
 #include "qmath.h"
 
-#define SILK_DBG(fmt, ...)  QLOG_DBG("brain", fmt, ##__VA_ARGS__)
-#define SILK_INFO(fmt, ...)  QLOG_INFO("brain", fmt, ##__VA_ARGS__)
-#define SILK_WARNING(fmt, ...)  QLOG_WARNING("brain", fmt, ##__VA_ARGS__)
-#define SILK_ERR(fmt, ...)  QLOG_ERR("brain", fmt, ##__VA_ARGS__)
-
 namespace silk
 {
     constexpr size_t MAX_MOTOR_COUNT = 12;

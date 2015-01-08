@@ -110,7 +110,7 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
     }
     catch(std::exception e)
     {
-        SILK_WARNING("Cannot start comms on ports s:{} r:{}", send_port, receive_port);
+        QLOGW("Cannot start comms on ports s:{} r:{}", send_port, receive_port);
         return false;
     }
 
@@ -118,7 +118,7 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
     m_receive_port = receive_port;
 
     m_is_connected = true;
-    SILK_INFO("Started sending on ports s:{} r:{}", send_port, receive_port);
+    QLOGI("Started sending on ports s:{} r:{}", send_port, receive_port);
 
     return true;
 }
@@ -148,7 +148,7 @@ void Comms::process_message_camera_params()
     comms::Camera_Params v;
     if (!m_setup_channel.unpack(v))
     {
-        SILK_ERR("Cannot unpack camera params message");
+        QLOGE("Cannot unpack camera params message");
         return;
     }
 
@@ -167,14 +167,14 @@ void Comms::process_message_camera_params()
         }
     }
     
-    SILK_INFO("Camera params received");
+    QLOGI("Camera params received");
 }
 void Comms::process_message_uav_input()
 {
     comms::UAV_Input v;
     if (!m_input_channel.unpack(v))
     {
-        SILK_ERR("Cannot unpack uav input message");
+        QLOGE("Cannot unpack uav input message");
         return;
     }
 
@@ -198,7 +198,7 @@ void Comms::process_message_camera_mount_input()
     comms::Camera_Mount_Input v;
     if (!m_input_channel.unpack(v))
     {
-        SILK_ERR("Cannot unpack camera mount input message");
+        QLOGE("Cannot unpack camera mount input message");
         return;
     }
     m_hal.camera_mount->set_rotation(v.rotation);
@@ -209,19 +209,19 @@ void Comms::process_message_yaw_rate_pid_params()
     auto params = m_uav.get_yaw_rate_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("yaw rate pid params get");
+        QLOGI("yaw rate pid params get");
         m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("yaw rate pid params changed");
+            QLOGI("yaw rate pid params changed");
             m_uav.set_yaw_rate_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive yaw rate pid params");
+            QLOGW("Failed to receive yaw rate pid params");
         }
     }
 }
@@ -230,19 +230,19 @@ void Comms::process_message_pitch_rate_pid_params()
     auto params = m_uav.get_pitch_rate_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("pitch rate pid params get");
+        QLOGI("pitch rate pid params get");
         m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("pitch rate pid params changed");
+            QLOGI("pitch rate pid params changed");
             m_uav.set_pitch_rate_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive pitch rate pid params");
+            QLOGW("Failed to receive pitch rate pid params");
         }
     }
 }
@@ -251,19 +251,19 @@ void Comms::process_message_roll_rate_pid_params()
     auto params = m_uav.get_roll_rate_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("roll rate pid params get");
+        QLOGI("roll rate pid params get");
         m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("roll rate pid params changed");
+            QLOGI("roll rate pid params changed");
             m_uav.set_roll_rate_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive roll rate pid params");
+            QLOGW("Failed to receive roll rate pid params");
         }
     }
 }
@@ -272,19 +272,19 @@ void Comms::process_message_altitude_rate_pid_params()
     auto params = m_uav.get_altitude_rate_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("altitude rate pid params get");
+        QLOGI("altitude rate pid params get");
         m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("altitude rate pid params changed");
+            QLOGI("altitude rate pid params changed");
             m_uav.set_altitude_rate_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive altitude rate pid params");
+            QLOGW("Failed to receive altitude rate pid params");
         }
     }
 }
@@ -293,19 +293,19 @@ void Comms::process_message_yaw_pid_params()
     auto params = m_uav.get_yaw_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("yaw pid params get");
+        QLOGI("yaw pid params get");
         m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("yaw pid params changed");
+            QLOGI("yaw pid params changed");
             m_uav.set_yaw_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive yaw pid params");
+            QLOGW("Failed to receive yaw pid params");
         }
     }
 }
@@ -314,19 +314,19 @@ void Comms::process_message_pitch_pid_params()
     auto params = m_uav.get_pitch_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("pitch pid params get");
+        QLOGI("pitch pid params get");
         m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("pitch pid params changed");
+            QLOGI("pitch pid params changed");
             m_uav.set_pitch_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive pitch pid params");
+            QLOGW("Failed to receive pitch pid params");
         }
     }
 }
@@ -335,19 +335,19 @@ void Comms::process_message_roll_pid_params()
     auto params = m_uav.get_roll_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("roll pid params get");
+        QLOGI("roll pid params get");
         m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("roll pid params changed");
+            QLOGI("roll pid params changed");
             m_uav.set_roll_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive roll pid params");
+            QLOGW("Failed to receive roll pid params");
         }
     }
 }
@@ -356,19 +356,19 @@ void Comms::process_message_altitude_pid_params()
     auto params = m_uav.get_altitude_pid_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("altitude pid params get");
+        QLOGI("altitude pid params get");
         m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("altitude pid params changed");
+            QLOGI("altitude pid params changed");
             m_uav.set_altitude_pid_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive altitude pid params");
+            QLOGW("Failed to receive altitude pid params");
         }
     }
 }
@@ -378,19 +378,19 @@ void Comms::process_message_assist_params()
     auto params = m_uav.get_assist_params();
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("assist params get");
+        QLOGI("assist params get");
         m_setup_channel.pack(comms::Setup_Message::ASSIST_PARAMS, params);
     }
     else
     {
         if (m_setup_channel.unpack(params))
         {
-            SILK_INFO("assist params changed");
+            QLOGI("assist params changed");
             m_uav.set_assist_params(params);
         }
         else
         {
-            SILK_WARNING("Failed to receive assist params");
+            QLOGW("Failed to receive assist params");
         }
     }
 }
@@ -401,7 +401,7 @@ void Comms::process_message_raw_sensors()
     comms::Sensors sensors;
     if (!m_setup_channel.unpack(sensors))
     {
-        SILK_INFO("Failed to unpack raw sensors request");
+        QLOGI("Failed to unpack raw sensors request");
         return;
     }
 
@@ -415,7 +415,7 @@ void Comms::process_message_calibration_accelerometer()
     math::vec3f bias, scale;
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("Accelerometer calibration set req");
+        QLOGI("Accelerometer calibration set req");
         m_hal.sensors->get_accelerometer_calibration_data(bias, scale);
         m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER, bias, scale);
     }
@@ -423,13 +423,13 @@ void Comms::process_message_calibration_accelerometer()
     {
         if (m_setup_channel.unpack(bias, scale))
         {
-            SILK_INFO("Accelerometer calibration changed");
+            QLOGI("Accelerometer calibration changed");
             m_hal.sensors->set_accelerometer_calibration_data(bias, scale);
             m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER, bias, scale);
         }
         else
         {
-            SILK_WARNING("Failed to receive accelerometer calibration");
+            QLOGW("Failed to receive accelerometer calibration");
         }
     }
 }
@@ -439,7 +439,7 @@ void Comms::process_message_calibration_gyroscope()
     math::vec3f bias;
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("Gyroscope calibration set req");
+        QLOGI("Gyroscope calibration set req");
         m_hal.sensors->get_gyroscope_calibration_data(bias);
         m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE, bias);
     }
@@ -447,13 +447,13 @@ void Comms::process_message_calibration_gyroscope()
     {
         if (m_setup_channel.unpack(bias))
         {
-            SILK_INFO("Gyroscope calibration changed");
+            QLOGI("Gyroscope calibration changed");
             m_hal.sensors->set_gyroscope_calibration_data(bias);
             m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE, bias);
         }
         else
         {
-            SILK_WARNING("Failed to receive gyroscope calibration");
+            QLOGW("Failed to receive gyroscope calibration");
         }
     }
 }
@@ -462,7 +462,7 @@ void Comms::process_message_calibration_compass()
     math::vec3f bias;
     if (m_setup_channel.get_message_size() == 0)
     {
-        SILK_INFO("Compass calibration req, sending to GS");
+        QLOGI("Compass calibration req, sending to GS");
         m_hal.sensors->get_compass_calibration_data(bias);
         m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS, bias);
     }
@@ -470,13 +470,13 @@ void Comms::process_message_calibration_compass()
     {
         if (m_setup_channel.unpack(bias))
         {
-            SILK_INFO("Compass calibration changed");
+            QLOGI("Compass calibration changed");
             m_hal.sensors->set_compass_calibration_data(bias);
             m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS, bias);
         }
         else
         {
-            SILK_WARNING("Failed to receive compass calibration");
+            QLOGW("Failed to receive compass calibration");
         }
     }
 }
@@ -615,7 +615,7 @@ void Comms::send_sensor_samples()
     auto now = q::Clock::now();
     auto delay = std::chrono::milliseconds(30);
 
-    //SILK_INFO("acc: {}", m_sensors_samples.accelerometer.size());
+    //LOG_INFO("acc: {}", m_sensors_samples.accelerometer.size());
     if (now - m_sensor_samples.last_sent_timestamp < delay)
     {
         return;
@@ -800,10 +800,10 @@ void Comms::process()
             case comms::Input_Message::UAV_INPUT: process_message_uav_input(); break;
             case comms::Input_Message::CAMERA_MOUNT_INPUT: process_message_camera_mount_input(); break;
             default:
-                SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
+                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
-            //SILK_INFO("Received message: {}", static_cast<int>(msg.get()));
+            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
         }
     }
 
@@ -832,10 +832,10 @@ void Comms::process()
             case comms::Setup_Message::ASSIST_PARAMS: process_message_assist_params(); break;
 
             default:
-                SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
+                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
-            //SILK_INFO("Received message: {}", static_cast<int>(msg.get()));
+            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
         }
     }
 
@@ -879,7 +879,7 @@ void Comms::process()
 //        m_rudp.process();
 //        //m_channel.send(COMMS_CHANNEL);
 //        static int xxx = 0;
-//        SILK_INFO("{}", xxx);
+//        LOG_INFO("{}", xxx);
 //        xxx++;
 //        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
 //    }

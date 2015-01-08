@@ -14,7 +14,7 @@ namespace util
 
         ~Timed_Scope()
         {
-            QLOG_INFO("", "Scope {}:{} took {}", m_file, m_line, q::Clock::now() - m_start);
+            QLOGI("Scope {}:{} took {}", m_file, m_line, q::Clock::now() - m_start);
         }
 
 	private:

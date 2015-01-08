@@ -268,14 +268,15 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 {
+    QLOG_TOPIC("mpu9250::init");
     m_gyroscope_rate = gr;
     m_accelerometer_range = ar;
 
-    SILK_INFO("initializing device: {}", device);
+    QLOGI("initializing device: {}", device);
 
     if (!m_i2c.open(device))
     {
-        SILK_ERR("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
 
@@ -292,10 +293,10 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     res &= m_i2c.read_u8(ADDR_MPU9250, MPU_REG_WHO_AM_I, who_am_i);
     if (!res || who_am_i != 0x71)
     {
-        SILK_ERR("Cannot find mpu9250");
+        QLOGE("Cannot find mpu9250");
         return false;
     }
-    SILK_INFO("device {} id: {x}", device, who_am_i);
+    QLOGI("device {} id: {x}", device, who_am_i);
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (gr)
@@ -317,7 +318,7 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
         m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
-        SILK_ERR("Invalid gyroscope range.");
+        QLOGE("Invalid gyroscope range.");
         return false;
     }
 
@@ -376,11 +377,11 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
     res &= setup_compass();
     if (!res)
     {
-        SILK_ERR("Failed to setup mpu9250");
+        QLOGE("Failed to setup mpu9250");
         return false;
     }
 
-    SILK_INFO("using MPU9250 device: {}", device);
+    QLOGI("using MPU9250 device: {}", device);
 
 //    while (true)
 //    {
@@ -393,8 +394,9 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
 
 auto MPU9250::setup_compass() -> bool
 {
+    QLOG_TOPIC("mpu9250::setup_compass");
 #ifdef USE_AK8963
-    mpu_set_bypass(1);
+    set_bypass(1);
 
     // Find compass. Possible addresses range from 0x0C to 0x0F.
     uint8_t akm_addr = 0;
@@ -410,12 +412,12 @@ auto MPU9250::setup_compass() -> bool
 
     if (akm_addr > 0x0F)
     {
-        SILK_ERR("Compass not found.");
+        QLOGE("Compass not found.");
         return false;
     }
 
     m_compass_addr = akm_addr;
-    SILK_INFO("Compass found at 0x{X}", m_compass_addr);
+    QLOGI("Compass found at 0x{X}", m_compass_addr);
 
     m_i2c.write_u8(m_compass_addr, AKM_REG_CNTL, AKM_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -479,8 +481,9 @@ auto MPU9250::setup_compass() -> bool
     return true;
 }
 
-void MPU9250::mpu_set_bypass(bool on)
+void MPU9250::set_bypass(bool on)
 {
+    QLOG_TOPIC("mpu9250::set_bypass");
     if (on)
     {
         uint8_t tmp;
@@ -506,6 +509,7 @@ void MPU9250::mpu_set_bypass(bool on)
 
 void MPU9250::reset_fifo()
 {
+    QLOG_TOPIC("mpu9250::reset_fifo");
     m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, 0);
@@ -517,6 +521,7 @@ void MPU9250::reset_fifo()
 
 void MPU9250::process()
 {
+    QLOG_TOPIC("mpu9250::process");
     m_samples.gyroscope.clear();
     m_samples.accelerometer.clear();
     m_samples.compass.clear();
@@ -532,14 +537,14 @@ void MPU9250::process()
     auto res = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH, fifo_count);
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
-   // SILK_INFO("{.2}b/ms", xxx);
+   // LOG_INFO("{.2}b/ms", xxx);
 
     //uint16_t fc2 = 0;
     if (res && fifo_count >= m_fifo_sample_size)
     {
         if (fifo_count >= 4000)
         {
-            SILK_WARNING("Resetting FIFO: {}", fifo_count);
+            QLOGW("Resetting FIFO: {}", fifo_count);
             reset_fifo();
             fifo_count = 0;
         }
@@ -568,7 +573,7 @@ void MPU9250::process()
                     m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
 //                    if (math::length(m_samples.gyroscope[i]) > 1.f)
 //                    {
-//                        SILK_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
+//                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
 //                    }
                 }
             }
@@ -577,11 +582,12 @@ void MPU9250::process()
 
     process_compass();
 
-//    SILK_INFO("fc {} / {}", fifo_count, fc2);
+//    LOG_INFO("fc {} / {}", fifo_count, fc2);
 }
 
 void MPU9250::process_compass()
 {
+    QLOG_TOPIC("mpu9250::process_compass");
 #ifdef USE_AK8963
     auto now = q::Clock::now();
     if (now - m_last_compass_timestamp < std::chrono::milliseconds(10))
@@ -628,7 +634,7 @@ void MPU9250::process_compass()
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
     m_samples.compass.push_back(math::rotate(rot, c));
-//    SILK_INFO("c: {}", *m_samples.compass);
+//    LOG_INFO("c: {}", *m_samples.compass);
 #endif
 }
 

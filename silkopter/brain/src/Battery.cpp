@@ -1,5 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Battery.h"
+#include "utils/Timed_Scope.h"
+
+#include "sz_battery_state.hpp"
 
 namespace silk
 {
@@ -16,6 +19,8 @@ constexpr float CAPACITY_DETECTION_MAX_CURRENT = 0.4f;
 constexpr float MIN_CELL_VOLTAGE = 2.9f;
 constexpr float MAX_CELL_VOLTAGE = 4.1f;
 
+
+constexpr std::chrono::seconds SAVE_EVERY(5);
 
 template<class S>
 auto get_samples_duration(std::vector<S> const& samples) -> q::Clock::duration
@@ -52,6 +57,10 @@ auto compute_average(std::deque<std::pair<q::Clock::time_point, float>> const& s
     return a;
 }
 
+Battery::Battery()
+{
+    load_state();
+}
 
 void Battery::process(const std::vector<sensors::Current_Sample>& current_samples, const std::vector<sensors::Voltage_Sample>& voltage_samples)
 {
@@ -97,7 +106,12 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
         m_cell_count = compute_cell_count();
         if (m_cell_count)
         {
-            SILK_INFO("Detected battery cell count: {} from voltage: {}V", m_cell_count, m_average_voltage);
+            QLOGI("Detected battery cell count: {} from voltage: {}V", m_cell_count, m_average_voltage);
+            if (m_loaded_state.cell_count > 0 && m_loaded_state.cell_count != *m_cell_count)
+            {
+                m_capacity_used_mah = 0;
+                QLOGI("Battery probably changed so ignoring saved state.");
+            }
         }
     }
 
@@ -110,8 +124,10 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
     if (xxx > 20)
     {
         xxx = 0;
-        //SILK_INFO("{}V, {}A, {}Ah", m_average_voltage, m_average_current, m_capacity_used_mah);
+        //LOG_INFO("{}V, {}A, {}Ah", m_average_voltage, m_average_current, m_capacity_used_mah);
     }
+
+    save_state();
 }
 
 auto Battery::compute_cell_count() -> boost::optional<size_t>
@@ -119,14 +135,14 @@ auto Battery::compute_cell_count() -> boost::optional<size_t>
     //wait to get a good voltage average
     if (!m_average_voltage || m_voltage_samples.size() < CELL_COUNT_DETECTION_MIN_SAMPLES)
     {
-        SILK_WARNING("Skipping cell count detection: the voltage is not healthy: {}V from {} samples", m_average_voltage, m_voltage_samples.size());
+        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples", m_average_voltage, m_voltage_samples.size());
         return boost::none;
     }
 
     //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
     if (!m_average_current || *m_average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
     {
-        SILK_WARNING("Skipping cell count detection: the current is not healthy: {}", m_average_current);
+        QLOGW("Skipping cell count detection: the current is not healthy: {}", m_average_current);
         return boost::none;
     }
 
@@ -145,6 +161,35 @@ auto Battery::compute_cell_count() -> boost::optional<size_t>
     return boost::none;
 }
 
+void Battery::save_state()
+{
+    auto now = q::Clock::now();
+    if (now - m_last_save_time_point < SAVE_EVERY)
+    {
+        return;
+    }
+    m_last_save_time_point = now;
+
+    TIMED_FUNCTION();
+
+    m_saved_state.capacity_used = m_capacity_used_mah;
+    m_saved_state.cell_count = m_cell_count ? m_cell_count.get() : 0;
+    autojsoncxx::to_pretty_json_file("battery_state.cfg", m_saved_state);
+
+    QLOGI("Capacity used: {}mAh", m_capacity_used_mah);
+}
+
+void Battery::load_state()
+{
+    autojsoncxx::ParsingResult result;
+    if (!autojsoncxx::from_json_file("battery_state.cfg", m_loaded_state, result))
+    {
+        QLOGW("Failed to load battery_state.cfg: {}", result.description());
+        return;
+    }
+
+    m_capacity_used_mah = m_loaded_state.capacity_used;
+}
 
 auto Battery::get_capacity_used() const -> float
 {

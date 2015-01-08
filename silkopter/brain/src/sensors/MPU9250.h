@@ -40,7 +40,7 @@ private:
     void reset_fifo();
 
     auto setup_compass() -> bool;
-    void mpu_set_bypass(bool on);
+    void set_bypass(bool on);
     void process_compass();
 
     i2c m_i2c;

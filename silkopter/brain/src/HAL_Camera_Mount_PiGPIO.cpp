@@ -26,6 +26,7 @@ using namespace boost::asio;
 
 HAL_Camera_Mount_PiGPIO::HAL_Camera_Mount_PiGPIO()
 {
+    QLOG_TOPIC("camera_mount");
     load_settings();
 }
 
@@ -40,7 +41,7 @@ auto HAL_Camera_Mount_PiGPIO::load_settings() -> bool
 //    GPIO_Pins m;
 //    if (!autojsoncxx::from_json_file("motors_gpio.cfg", m, result))
 //    {
-//        SILK_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
+//        LOG_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
 //        return false;
 //    }
 
@@ -52,6 +53,8 @@ void HAL_Camera_Mount_PiGPIO::save_settings()
 
 auto HAL_Camera_Mount_PiGPIO::init() -> bool
 {
+    QLOG_TOPIC("camera_mount::init");
+
     //QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
@@ -69,7 +72,7 @@ auto HAL_Camera_Mount_PiGPIO::init() -> bool
         case PWM_Frequency::SERVO_400HZ: freq = 400; break;
         default:
         {
-            SILK_ERR("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
+            QLOGE("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
             return false;
         }
     }
@@ -83,21 +86,21 @@ auto HAL_Camera_Mount_PiGPIO::init() -> bool
             auto f = gpioSetPWMfrequency(gpio, freq);
             if (f < 0)
             {
-                SILK_ERR("{} GPIO {}: Cannot set pwm frequency {}", name, gpio, freq);
+                QLOGE("{} GPIO {}: Cannot set pwm frequency {}", name, gpio, freq);
                 return false;
             }
             auto range = 1000000 / freq;
             if (gpioSetPWMrange(gpio, range) < 0)
             {
-                SILK_ERR("{} GPIO {}: Cannot set pwm range {} on gpio {}", name, gpio, range);
+                QLOGE("{} GPIO {}: Cannot set pwm range {} on gpio {}", name, gpio, range);
                 return false;
             }
             gpioPWM(gpio, 1500);
-            SILK_INFO("{} GPIO {}: PWM frequency {} (requested {}), range {}", name, gpio, f, freq, range);
+            QLOGI("{} GPIO {}: PWM frequency {} (requested {}), range {}", name, gpio, f, freq, range);
         }
         else
         {
-            SILK_INFO("{} Servo disabled", name);
+            QLOGI("{} Servo disabled", name);
         }
     }
 
@@ -139,7 +142,7 @@ void HAL_Camera_Mount_PiGPIO::process()
         if (SERVOS[0].first >= 0)
         {
             auto pulse = compute_pulse(m_rotation.x, m_settings.x_range);
-            //SILK_INFO("mount rotation: {}", pulse);
+            //LOG_INFO("mount rotation: {}", pulse);
             gpioPWM(SERVOS[0].first, pulse);
         }
 

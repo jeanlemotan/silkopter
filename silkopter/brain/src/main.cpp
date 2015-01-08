@@ -13,7 +13,7 @@ namespace boost
 {
 	void throw_exception(std::exception const & e)
 	{
-		SILK_ERR("boost::exception {}", e.what());
+        QLOGE("boost::exception {}", e.what());
 		throw e;
     }
 }
@@ -23,11 +23,11 @@ void signal_handler(int signum)
 {
     if (s_exit)
     {
-        SILK_INFO("Forcing an exit due to signal {}", signum);
+        QLOGI("Forcing an exit due to signal {}", signum);
         abort();
     }
     s_exit = true;
-    SILK_INFO("Exitting due to signal {}", signum);
+    QLOGI("Exitting due to signal {}", signum);
 }
 
 
@@ -40,6 +40,8 @@ int main(int argc, char const* argv[])
 
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIME, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
+
+    QLOG_TOPIC("silk");
 
     namespace po = boost::program_options;
 
@@ -64,7 +66,7 @@ int main(int argc, char const* argv[])
 
 	boost::asio::io_service io_service;
 
-    SILK_INFO("Creating io_service thread");
+    QLOGI("Creating io_service thread");
 
     auto io_thread = boost::thread([&io_service]()
     {
@@ -113,14 +115,14 @@ int main(int argc, char const* argv[])
 
         if (!hal.init(comms))
         {
-            SILK_ERR("Hardware failure! Aborting");
+            QLOGE("Hardware failure! Aborting");
             abort();
         }
 
         //start listening for a remote system
         if (!comms.start(send_port, receive_port))
         {
-            SILK_ERR("Cannot start communication channel! Aborting");
+            QLOGE("Cannot start communication channel! Aborting");
             abort();
         }
 
@@ -139,14 +141,14 @@ int main(int argc, char const* argv[])
         while (!s_exit)
         {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-            SILK_INFO("Waiting for comms to connect...");
+            QLOGI("Waiting for comms to connect...");
             if (comms.is_connected())
             {
                 break;
             }
         }
 
-        SILK_INFO("All systems up. Ready to fly...");
+        QLOGI("All systems up. Ready to fly...");
 
         constexpr std::chrono::milliseconds PERIOD(3);
 
@@ -167,7 +169,7 @@ int main(int argc, char const* argv[])
             }
         }
 
-        SILK_INFO("Stopping everything");
+        QLOGI("Stopping everything");
 
         if (hal.camera)
         {
@@ -177,7 +179,7 @@ int main(int argc, char const* argv[])
     }
     catch (std::exception const& e)
     {
-        SILK_ERR("exception: {}", e.what());
+        QLOGE("exception: {}", e.what());
         abort();
     }
 
@@ -187,6 +189,6 @@ int main(int argc, char const* argv[])
         io_thread.join();
     }
 
-    SILK_INFO("Closing");
+    QLOGI("Closing");
 }
 

@@ -30,11 +30,13 @@ using namespace boost::asio;
 
 HAL_Motors_PiGPIO::HAL_Motors_PiGPIO()
 {
+    QLOG_TOPIC("motors");
     load_settings();
 }
 
 HAL_Motors_PiGPIO::~HAL_Motors_PiGPIO()
 {
+    QLOG_TOPIC("~motors");
     shutdown();
 }
 
@@ -44,7 +46,7 @@ auto HAL_Motors_PiGPIO::load_settings() -> bool
 //    GPIO_Pins m;
 //    if (!autojsoncxx::from_json_file("motors_gpio.cfg", m, result))
 //    {
-//        SILK_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
+//        LOG_WARNING("Failed to load motors_gpio.cfg: {}", result.description());
 //        return false;
 //    }
 
@@ -56,6 +58,7 @@ void HAL_Motors_PiGPIO::save_settings()
 
 auto HAL_Motors_PiGPIO::init() -> bool
 {
+    QLOG_TOPIC("motors::init");
     //QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
@@ -72,12 +75,12 @@ auto HAL_Motors_PiGPIO::init() -> bool
         {
             if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
             {
-                SILK_ERR("GPIO {}: Cannot set pull down mode", gpio);
+                QLOGE("GPIO {}: Cannot set pull down mode", gpio);
                 return false;
             }
             if (gpioSetMode(gpio, PI_OUTPUT) < 0)
             {
-                SILK_ERR("GPIO {}: Cannot set GPIO mode to output", gpio);
+                QLOGE("GPIO {}: Cannot set GPIO mode to output", gpio);
                 return false;
             }
         }
@@ -95,7 +98,7 @@ auto HAL_Motors_PiGPIO::init() -> bool
             case PWM_Frequency::PWM_1000HZ: freq = 1000; break;
             default:
             {
-                SILK_ERR("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
+                QLOGE("Cannot recognize pwm frequency {}", static_cast<int>(m_settings.frequency));
                 return false;
             }
         }
@@ -107,7 +110,7 @@ auto HAL_Motors_PiGPIO::init() -> bool
                 auto f = gpioSetPWMfrequency(gpio, freq);
                 if (f < 0)
                 {
-                    SILK_ERR("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
+                    QLOGE("GPIO {}: Cannot set pwm frequency {}", gpio, freq);
                     return false;
                 }
                 int range = 0;
@@ -116,7 +119,7 @@ auto HAL_Motors_PiGPIO::init() -> bool
                     range = 1000000 / freq;
                     if (gpioSetPWMrange(gpio, range) < 0)
                     {
-                        SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
+                        QLOGE("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
                         return false;
                     }
                 }
@@ -125,12 +128,12 @@ auto HAL_Motors_PiGPIO::init() -> bool
                     range = MAX_PWM_PULSE - MIN_PWM_PULSE;
                     if (gpioSetPWMrange(gpio, range) < 0)
                     {
-                        SILK_ERR("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
+                        QLOGE("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, range);
                         return false;
                     }
                 }
 
-                SILK_INFO("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
+                QLOGI("GPIO {}: PWM frequency {} (requested {}), range {}", gpio, f, freq, range);
             }
         }
     }
@@ -138,7 +141,7 @@ auto HAL_Motors_PiGPIO::init() -> bool
     cut_throttle();
 //    else
 //    {
-//        SILK_WARNING("Non-pwm ESC support not implemented");
+//        LOG_WARNING("Non-pwm ESC support not implemented");
 //        return false;
 //    }
 
@@ -213,12 +216,14 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
         auto gpio = MOTOR_GPIOS[i];
         if (gpio >= 0)
         {
-            //        if (i != 0)
-            //        {
-            //            continue;
-            //        }
+//            if (i != 1)
+//            {
+//                continue;
+//            }
 
             auto throttle = math::clamp(throttles[i], 0.f, 1.f);
+            //throttle = math::sqrt(throttle);
+
             m_motors[i].throttle = throttle;
 
             int pulse = throttle * (range.second - range.first);

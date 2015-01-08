@@ -39,7 +39,7 @@ auto UAV::load_settings() -> bool
     UAV_Config cfg;
     if (!autojsoncxx::from_json_file("uav.cfg", cfg, result))
     {
-        SILK_WARNING("Failed to load uav.cfg: {}", result.description());
+        QLOGW("Failed to load uav.cfg: {}", result.description());
         return false;
     }
 
@@ -195,6 +195,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.gyroscope_sample_time_point <= sensor_now)
             {
                 m_imu.last_gyroscope_sample = *g_it++;
+                m_imu.last_gyroscope_sample.value = m_imu.gyroscope_filter.process(m_imu.last_gyroscope_sample.value);
                 m_imu.gyroscope_sample_time_point += m_imu.last_gyroscope_sample.dt;
                 has_new_gyroscope_sample = true;
             }
@@ -206,6 +207,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.accelerometer_sample_time_point <= sensor_now)
             {
                 m_imu.last_accelerometer_sample = *a_it++;
+                m_imu.last_accelerometer_sample.value = m_imu.accelerometer_filter.process(m_imu.last_accelerometer_sample.value);
                 m_imu.accelerometer_sample_time_point += m_imu.last_accelerometer_sample.dt;
                 has_new_accelerometer_sample = true;
             }
@@ -217,6 +219,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.compass_sample_time_point <= sensor_now)
             {
                 m_imu.last_compass_sample = *c_it++;
+                m_imu.last_compass_sample.value = m_imu.compass_filter.process(m_imu.last_compass_sample.value);
                 m_imu.compass_sample_time_point += m_imu.last_compass_sample.dt;
 //                has_new_compass_sample = true;
             }
@@ -251,7 +254,7 @@ void UAV::process_dead_reckoning()
     math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
     //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
     auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
-    //SILK_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
+    //LOG_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
 
 //            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
 //            m_linear_motion.velocity += dts * (old_acceleration + new_acceleration) * 0.5f;
@@ -263,7 +266,7 @@ void UAV::process_dead_reckoning()
 
     //        m_linear_motion.velocity = math::lerp(m_linear_motion.velocity, math::vec3f::zero, dts * 0.5f);
 
-    //SILK_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
+    //LOG_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
 
 //            m_linear_motion.position.z = math::lerp<float, math::safe>(
 //                        m_linear_motion.position.z,
@@ -338,7 +341,7 @@ void UAV::process_input_throttle_offset(q::Clock::duration dt)
 void UAV::process_input_throttle_assisted(q::Clock::duration dt)
 {
     QUNUSED(dt);
-    SILK_WARNING("assisted throttle not implemented");
+    QLOGW("assisted throttle not implemented");
 }
 void UAV::process_input_pitch_roll_rate(q::Clock::duration dt)
 {
@@ -370,11 +373,17 @@ void UAV::process_input_pitch_roll_horizontal(q::Clock::duration dt)
 
     v = math::clamp(diff.y / m_settings.max_roll_angle, -1.f, 1.f);
     m_pids.roll.set_input(v);
+
+    m_pids.pitch.process(dt);
+    m_pids.roll.process(dt);
+
+    m_pids.pitch_rate.set_target(-m_pids.pitch.get_output() * m_settings.max_pitch_rate);
+    m_pids.roll_rate.set_target(-m_pids.roll.get_output() * m_settings.max_roll_rate);
 }
 void UAV::process_input_pitch_roll_assisted(q::Clock::duration dt)
 {
     QUNUSED(dt);
-    SILK_WARNING("assisted pitch/roll not implemented");
+    QLOGW("assisted pitch/roll not implemented");
 }
 void UAV::process_input_yaw_rate(q::Clock::duration dt)
 {
@@ -397,27 +406,6 @@ void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
 
 }
 
-void UAV::process_stability_pids()
-{
-    constexpr std::chrono::milliseconds PROCESS_PERIOD{10};
-
-    auto now = m_imu.clock.now();
-    auto dt = now - m_pids.last_statility_process_timestamp;
-    if (dt < PROCESS_PERIOD)
-    {
-        return;
-    }
-    m_pids.last_statility_process_timestamp = now;
-
-    m_pids.pitch.process(PROCESS_PERIOD);
-    m_pids.roll.process(PROCESS_PERIOD);
-
-    m_pids.pitch_rate.set_target(-m_pids.pitch.get_output() * m_settings.max_pitch_rate);
-    m_pids.roll_rate.set_target(-m_pids.roll.get_output() * m_settings.max_roll_rate);
-
-    //SILK_INFO("stab in: {} / {}  ::: out: {} / {}", m_pids.pitch.get_input(), m_pids.roll.get_input(), m_pids.pitch.get_output(), m_pids.roll.get_output());
-}
-
 void UAV::process_motors()
 {
     if (m_is_armed)
@@ -427,7 +415,7 @@ void UAV::process_motors()
                                0,//m_pids.pitch_rate.get_output(),
                                -m_pids.roll_rate.get_output());
 
-        //SILK_INFO("{} / {}, {}", m_angular_velocity, m_pids.pitch_rate.get_output(), m_pids.roll_rate.get_output());
+        //LOG_INFO("{} / {}, {}", m_angular_velocity, m_pids.pitch_rate.get_output(), m_pids.roll_rate.get_output());
 
         std::array<float, 4> throttles;
         for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
@@ -435,7 +423,7 @@ void UAV::process_motors()
             throttles[i] = m_motor_mixer.get_motor_output(i);
         }
 
-        SILK_INFO("{.2}", throttles);
+        QLOGI("{.2}", throttles);
 
         m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
     }
@@ -536,7 +524,7 @@ void UAV::process()
         static int xxx = 0;
         if (xxx == 0 && max_dt > std::chrono::milliseconds(10))
         {
-            SILK_INFO("{}: min {}, max {}, avg {}", now, min_dt, max_dt, avg_dt);
+            QLOGI("{}: min {}, max {}, avg {}", now, min_dt, max_dt, avg_dt);
             min_dt = dt;
             max_dt = dt;
             avg_dt = std::chrono::milliseconds(0);
@@ -552,13 +540,12 @@ void UAV::process()
         }
     }
 
-    //SILK_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());
+    //LOG_INFO("Sensor lag: {}", m_sensor_clock.now_rt() - m_sensor_clock.now());
 
     //process samples at real-time - as they come
     process_imu_sensor_data();
     process_battery_sensor_data();
 
     process_input();
-    process_stability_pids();
     process_motors();
 }

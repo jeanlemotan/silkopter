@@ -12,6 +12,26 @@
 namespace silk
 {
 
+class Butterworth //10hz
+{
+public:
+    static constexpr size_t NZEROS  = 2;
+    static constexpr size_t NPOLES  = 2;
+    static constexpr float GAIN    = 1.058546241e+03;
+    math::vec3f xv[NZEROS+1], yv[NPOLES+1];
+    math::vec3f process(math::vec3f const& t)
+    {
+//        xv[0] = xv[1]; xv[1] = xv[2];
+//        xv[2] = t / GAIN;
+//        yv[0] = yv[1]; yv[1] = yv[2];
+//        yv[2] =   (xv[0] + xv[2]) + 2.f * xv[1]
+//                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
+//        return yv[2];
+        return t;
+    }
+};
+
+
 class UAV
 {
 public:
@@ -107,16 +127,18 @@ private:
     void process_input();
 
     void process_rate_pids(sensors::Gyroscope_Sample const& sample);
-    void process_stability_pids();
 
     struct IMU
     {
+        Butterworth gyroscope_filter;
         sensors::Gyroscope_Sample last_gyroscope_sample;
         Manual_Clock::time_point gyroscope_sample_time_point;
 
+        Butterworth accelerometer_filter;
         sensors::Accelerometer_Sample last_accelerometer_sample;
         Manual_Clock::time_point accelerometer_sample_time_point;
 
+        Butterworth compass_filter;
         sensors::Compass_Sample last_compass_sample;
         Manual_Clock::time_point compass_sample_time_point;
 
@@ -146,7 +168,6 @@ private:
         Roll_Rate_PID roll_rate;
         Altitude_Rate_PID altitude_rate;
 
-        Manual_Clock::time_point last_statility_process_timestamp{std::chrono::seconds(0)};
         Yaw_PID yaw;
         Pitch_PID pitch;
         Roll_PID roll;

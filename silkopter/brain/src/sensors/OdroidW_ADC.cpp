@@ -113,12 +113,13 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 
 auto OdroidW_ADC::init() -> bool
 {
+    QLOG_TOPIC("adc::init");
     std::string device("/dev/i2c-0");
-    SILK_INFO("initializing device: {}", device);
+    QLOGI("initializing device: {}", device);
 
     if (!m_i2c.open(device))
     {
-        SILK_ERR("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
 
@@ -128,10 +129,10 @@ auto OdroidW_ADC::init() -> bool
     auto res = m_i2c.read_u8(ADDR, 0x36, control);
     if (!res || control == 0xff)
     {
-        SILK_ERR("rc5t619 not found");
+        QLOGE("rc5t619 not found");
         return false;
     }
-    SILK_INFO("rc5t619 found: {}", control);
+    QLOGI("rc5t619 found: {}", control);
 
     // Set ADRQ=00 to stop ADC
     res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, 0x0);
@@ -149,7 +150,7 @@ auto OdroidW_ADC::init() -> bool
     res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
     if (!res)
     {
-        SILK_INFO("Failed to init rc5t619");
+        QLOGI("Failed to init rc5t619");
         return false;
     }
 
@@ -159,6 +160,7 @@ auto OdroidW_ADC::init() -> bool
 
 void OdroidW_ADC::process()
 {
+    QLOG_TOPIC("adc::process");
     auto now = q::Clock::now();
     if (now - m_last_time_point < std::chrono::milliseconds(20))
     {
@@ -170,7 +172,7 @@ void OdroidW_ADC::process()
     constexpr size_t CURRENT_TO_VOLTAGE_RATIO = 10;
 
 
-//    SILK_INFO("ADC{} : {}:{} -> {}", idx, buf[0], buf[1], result);
+//    LOG_INFO("ADC{} : {}:{} -> {}", idx, buf[0], buf[1], result);
 
     // Stop AD conversion */
     //m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, uint8_t(0x00));

@@ -32,11 +32,12 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 auto MS5611::init(const std::string& device) -> bool
 {
-    SILK_INFO("initializing device: {}", device);
+    QLOG_TOPIC("ms5611::init");
+    QLOGI("initializing device: {}", device);
 
     if (!m_i2c.open(device))
     {
-        SILK_ERR("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
 
@@ -57,10 +58,10 @@ auto MS5611::init(const std::string& device) -> bool
     res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C6, C6);
     if (!res)
     {
-        SILK_ERR("MS5611 not found!");
+        QLOGE("MS5611 not found!");
         return false;
     }
-    SILK_INFO("PROM: {} {} {} {} {} {}", C1, C2, C3, C4, C5, C6);
+    QLOGI("PROM: {} {} {} {} {} {}", C1, C2, C3, C4, C5, C6);
 
     m_c1 = C1;
     m_c2 = C2;
@@ -70,7 +71,7 @@ auto MS5611::init(const std::string& device) -> bool
     m_c6 = C6;
     if (m_c1 == 0 || m_c2 == 0 || m_c3 == 0 || m_c4 == 0 || m_c5 == 0 || m_c6 == 0)
     {
-        SILK_ERR("MS5611 seems broken!");
+        QLOGE("MS5611 seems broken!");
         return false;
     }
 
@@ -88,6 +89,7 @@ auto MS5611::init(const std::string& device) -> bool
 
 void MS5611::process()
 {
+    QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
     if (now - m_last_timestamp < std::chrono::milliseconds(10))
     {
@@ -195,9 +197,9 @@ void MS5611::calculate(q::Clock::duration dt)
 //    static Butterworth xxx;
 //    m_pressure = xxx.process(m_pressure.get());
 //    double alt = (1.0 - math::pow(m_pressure.get() / 1013.25, 0.190284)) * 4430769.396f;
-//    SILK_INFO("{} / {}, cm: {}", m_temperature, m_pressure, alt);
+//    LOG_INFO("{} / {}, cm: {}", m_temperature, m_pressure, alt);
 
-    //SILK_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
+    //LOG_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
 auto MS5611::get_barometer_data() -> boost::optional<Data>

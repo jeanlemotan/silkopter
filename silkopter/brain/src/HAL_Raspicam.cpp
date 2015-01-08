@@ -19,7 +19,7 @@ extern "C"
 
 #define _QUOTE(str) #str
 #define QUOTE(str) _QUOTE(str)
-//#define MMAL_CALL(x) x, SILK_INFO("MMAL: {}", QUOTE(x))
+//#define MMAL_CALL(x) x, LOG_INFO("MMAL: {}", QUOTE(x))
 #define MMAL_CALL(x) x
 
 // Standard port setting for the camera component
@@ -104,6 +104,7 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 HAL_Raspicam::HAL_Raspicam()
 {
+    QLOG_TOPIC("raspicam");
     m_impl.reset(new Impl);
 
     m_impl->recording.is_active = false;
@@ -126,6 +127,7 @@ HAL_Raspicam::HAL_Raspicam()
 }
 HAL_Raspicam::~HAL_Raspicam()
 {
+    QLOG_TOPIC("~raspicam");
     {
         //first kill the pools to disable the callbacks
         m_impl->low.output_pool.reset();
@@ -166,6 +168,7 @@ HAL_Raspicam::~HAL_Raspicam()
 
 auto HAL_Raspicam::init() -> bool
 {
+    QLOG_TOPIC("raspicam::init");
     if (m_impl->camera)
     {
         return true;
@@ -190,7 +193,7 @@ void HAL_Raspicam::shutdown()
 
 void HAL_Raspicam::process()
 {
-
+    QLOG_TOPIC("raspicam::process");
 }
 
 
@@ -227,7 +230,7 @@ void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
         return;
     }
 
-    SILK_INFO("activating streams high {}, medium {}, low {}", high, medium, low);
+    QLOGI("activating streams high {}, medium {}, low {}", high, medium, low);
 
     if (set_connection_enabled(m_impl->high.encoder_connection, high))
     {
@@ -235,7 +238,7 @@ void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
     }
     else
     {
-        SILK_WARNING("Cannot {} high bitrate encoder", high ? "enable" : "disable");
+        QLOGW("Cannot {} high bitrate encoder", high ? "enable" : "disable");
     }
 
     if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
@@ -244,7 +247,7 @@ void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
     }
     else
     {
-        SILK_WARNING("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
+        QLOGW("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
     }
 
     if (set_connection_enabled(m_impl->low.resizer_connection, low))
@@ -253,7 +256,7 @@ void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
     }
     else
     {
-        SILK_WARNING("Cannot {} low bitrate encoder", low ? "enable" : "disable");
+        QLOGW("Cannot {} low bitrate encoder", low ? "enable" : "disable");
     }
 }
 
@@ -273,16 +276,16 @@ static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
     memcpy(encoding_variant, &format->encoding_variant, 4);
     memcpy(color_space, &format->es->video.color_space, 4);
 
-    SILK_INFO("{}type: {}", prefix, format->type);
-    SILK_INFO("{}encoding: {} / variant: {}", prefix, encoding, encoding_variant);
-    SILK_INFO("{}bitrate: {}", prefix, format->bitrate);
-    SILK_INFO("{}flags: {}", prefix, format->flags);
-    SILK_INFO("{}extradata_size: {}", prefix, format->extradata_size);
-    SILK_INFO("{}width: {} / height: {}", prefix, format->es->video.width, format->es->video.height);
-    SILK_INFO("{}crop (x: {}, y: {}, w: {}, h: {})", prefix, format->es->video.crop.x, format->es->video.crop.y, format->es->video.crop.width, format->es->video.crop.height);
-    SILK_INFO("{}frame_rate: num: {} / den: {}", prefix, format->es->video.frame_rate.num, format->es->video.frame_rate.den);
-    SILK_INFO("{}par: num: {} / den: {}", prefix, format->es->video.par.num, format->es->video.par.den);
-    SILK_INFO("{}color_space: {}", prefix, color_space);
+    QLOGI("{}type: {}", prefix, format->type);
+    QLOGI("{}encoding: {} / variant: {}", prefix, encoding, encoding_variant);
+    QLOGI("{}bitrate: {}", prefix, format->bitrate);
+    QLOGI("{}flags: {}", prefix, format->flags);
+    QLOGI("{}extradata_size: {}", prefix, format->extradata_size);
+    QLOGI("{}width: {} / height: {}", prefix, format->es->video.width, format->es->video.height);
+    QLOGI("{}crop (x: {}, y: {}, w: {}, h: {})", prefix, format->es->video.crop.x, format->es->video.crop.y, format->es->video.crop.width, format->es->video.crop.height);
+    QLOGI("{}frame_rate: num: {} / den: {}", prefix, format->es->video.frame_rate.num, format->es->video.frame_rate.den);
+    QLOGI("{}par: num: {} / den: {}", prefix, format->es->video.par.num, format->es->video.par.den);
+    QLOGI("{}color_space: {}", prefix, color_space);
 }
 
 static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
@@ -291,17 +294,17 @@ static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
 
     QASSERT(port);
     std::string prefix(tabs, '\t');
-    SILK_INFO("{}name: {}", prefix, port->name);
-    SILK_INFO("{}type: {}", prefix, port->type);
-    SILK_INFO("{}index: {} / index_all: {}", prefix, port->index, port->index_all);
-    SILK_INFO("{}is_enabled: {}", prefix, port->is_enabled);
-    SILK_INFO("{}buffer_num_min: {} / buffer_size_min: {} / buffer_alignment_min: {}",
+    QLOGI("{}name: {}", prefix, port->name);
+    QLOGI("{}type: {}", prefix, port->type);
+    QLOGI("{}index: {} / index_all: {}", prefix, port->index, port->index_all);
+    QLOGI("{}is_enabled: {}", prefix, port->is_enabled);
+    QLOGI("{}buffer_num_min: {} / buffer_size_min: {} / buffer_alignment_min: {}",
                prefix, port->buffer_num_min, port->buffer_size_min, port->buffer_alignment_min);
-    SILK_INFO("{}buffer_num_recommended: {} / buffer_size_recommended: {}",
+    QLOGI("{}buffer_num_recommended: {} / buffer_size_recommended: {}",
                prefix, port->buffer_num_recommended, port->buffer_size_recommended);
-    SILK_INFO("{}buffer_num: {} / buffer_size: {}", prefix, port->buffer_num, port->buffer_size);
-    SILK_INFO("{}capabilities: {}", prefix, port->capabilities);
-    SILK_INFO("{}format:", prefix);
+    QLOGI("{}buffer_num: {} / buffer_size: {}", prefix, port->buffer_num, port->buffer_size);
+    QLOGI("{}capabilities: {}", prefix, port->capabilities);
+    QLOGI("{}format:", prefix);
     dump_format_info(tabs + 1, port->format);
 }
 
@@ -319,31 +322,31 @@ static Component_ptr create_component(char const* name, size_t min_input_count, 
 
     QASSERT(name);
 
-    SILK_INFO("Creating component {}", name);
+    QLOGI("Creating component {}", name);
     MMAL_COMPONENT_T* component = nullptr;
     MMAL_STATUS_T status;
     status = MMAL_CALL(mmal_component_create(name, &component));
     if (status != MMAL_SUCCESS)
     {
-        SILK_WARNING("\tCannot create component {}: {}", name, status);
+        QLOGW("\tCannot create component {}: {}", name, status);
         return Component_ptr();
     }
-    SILK_INFO("\t{} has {} inputs and {} outputs:", name, component->input_num, component->output_num);
+    QLOGI("\t{} has {} inputs and {} outputs:", name, component->input_num, component->output_num);
     if (component->input_num < min_input_count || component->output_num < min_output_count)
     {
-        SILK_WARNING("\t{} has an invalid number of inputs and/or outputs: {}<{}, {}<{}", name,
+        QLOGW("\t{} has an invalid number of inputs and/or outputs: {}<{}, {}<{}", name,
                       component->input_num, min_input_count, component->output_num, min_output_count);
         return Component_ptr();
     }
 
 //    for (size_t i = 0; i < component->input_num; i++)
 //    {
-//        SILK_INFO("\tinitial input port config {}", i);
+//        LOG_INFO("\tinitial input port config {}", i);
 //        dump_port_info(2, component->input[i]);
 //    }
 //    for (size_t i = 0; i < component->output_num; i++)
 //    {
-//        SILK_INFO("\tinitial output port config {}", i);
+//        LOG_INFO("\tinitial output port config {}", i);
 //        dump_port_info(2, component->output[i]);
 //    }
 
@@ -357,12 +360,12 @@ static bool enable_port(MMAL_PORT_T* port, MMAL_PORT_BH_CB_T cb)
     QASSERT(port);
     QASSERT(cb);
 
-    SILK_INFO("Enabling port {} from {}. CB: {}", port->name, port->component->name, cb);
+    QLOGI("Enabling port {} from {}. CB: {}", port->name, port->component->name, cb);
     MMAL_STATUS_T status;
     status = MMAL_CALL(mmal_port_enable(port, cb));
     if (status != MMAL_SUCCESS)
     {
-        SILK_WARNING("Unable to enable port {} from {}: {}", port->name, port->component->name, status);
+        QLOGW("Unable to enable port {} from {}: {}", port->name, port->component->name, status);
     }
     return status == MMAL_SUCCESS;
 }
@@ -371,12 +374,12 @@ static bool enable_component(Component_ptr component)
     //    SCOPED_PINS_GUARD;;
 
     QASSERT(component);
-    SILK_INFO("Enabling component {}", component->name);
+    QLOGI("Enabling component {}", component->name);
     MMAL_STATUS_T status;
     status = MMAL_CALL(mmal_component_enable(component.get()));
     if (status != MMAL_SUCCESS)
     {
-        SILK_WARNING("Unable to enable component {}: {}", component->name, status);
+        QLOGW("Unable to enable component {}: {}", component->name, status);
     }
     return status == MMAL_SUCCESS;
 }
@@ -387,13 +390,13 @@ static void copy_format(MMAL_PORT_T* dst, MMAL_PORT_T* src)
     QASSERT(dst);
     QASSERT(src);
 
-    SILK_INFO("Copying format from {} to {}:", src->name, dst->name);
+    QLOGI("Copying format from {} to {}:", src->name, dst->name);
 
     MMAL_CALL(mmal_format_copy(dst->format, src->format));
 
-//    SILK_INFO("src format:");
+//    LOG_INFO("src format:");
 //    dump_format_info(1, src->format);
-//    SILK_INFO("dst format:");
+//    LOG_INFO("dst format:");
 //    dump_format_info(1, dst->format);
 }
 static bool commit_format(MMAL_PORT_T* port)
@@ -402,14 +405,14 @@ static bool commit_format(MMAL_PORT_T* port)
 
     QASSERT(port);
 
-    SILK_INFO("Trying to set new format to port {}:", port->name);
+    QLOGI("Trying to set new format to port {}:", port->name);
     //dump_format_info(1, port->format);
 
     MMAL_STATUS_T status;
     status = MMAL_CALL(mmal_port_format_commit(port));
     if (status != MMAL_SUCCESS)
     {
-        SILK_WARNING("Unable to commit format on port {}", port->name);
+        QLOGW("Unable to commit format on port {}", port->name);
         return false;
     }
 
@@ -430,7 +433,7 @@ MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER
     MMAL_PORT_T* port = reinterpret_cast<MMAL_PORT_T*>(userdata);
     QASSERT(port);
 
-    //SILK_INFO("{}: RETURNING buffer {} / port {} size {}k", port->name, buffer, port, buffer->length / 1024.f);
+    //LOG_INFO("{}: RETURNING buffer {} / port {} size {}k", port->name, buffer, port, buffer->length / 1024.f);
 
     // and send one back to the port (if still open)
     if (port->is_enabled)
@@ -439,12 +442,12 @@ MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER
         status = MMAL_CALL(mmal_port_send_buffer(port, buffer));
         if (status != MMAL_SUCCESS)
         {
-            SILK_WARNING("Unable to return a buffer to the encoder port: {}", status);
+            QLOGW("Unable to return a buffer to the encoder port: {}", status);
         }
     }
     else
     {
-        SILK_WARNING("Port is disabled");
+        QLOGW("Port is disabled");
     }
     return MMAL_TRUE;
 }
@@ -458,7 +461,7 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
     port->buffer_num = math::max(port->buffer_num_recommended, port->buffer_num_min);
     port->buffer_num = math::max(port->buffer_num, buffer_count);
 
-    SILK_INFO("Creating port {} pool with {} buffers of size {}", port->name, port->buffer_num, port->buffer_size);
+    QLOGI("Creating port {} pool with {} buffers of size {}", port->name, port->buffer_num, port->buffer_size);
 
     MMAL_POOL_T* p = nullptr;
     p = MMAL_CALL(mmal_port_pool_create(port, port->buffer_num, port->buffer_size));
@@ -480,19 +483,19 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
     {
         int num = 0;
         num = MMAL_CALL(mmal_queue_length(o_pool->queue));
-        SILK_INFO("enabling {} buffers for {} port {}", num, port->component->name, port->name);
+        QLOGI("enabling {} buffers for {} port {}", num, port->component->name, port->name);
         for (int i = 0; i < num; i++)
         {
             MMAL_BUFFER_HEADER_T* buffer = nullptr;
             buffer = MMAL_CALL(mmal_queue_get(o_pool->queue));
             if (!buffer)
             {
-                SILK_WARNING("Unable to get a required buffer {} from pool queue", i);
+                QLOGW("Unable to get a required buffer {} from pool queue", i);
                 return Pool_ptr();
             }
             if (mmal_port_send_buffer(port, buffer) != MMAL_SUCCESS)
             {
-                SILK_WARNING("Unable to send a buffer to encoder output port ({})", i);
+                QLOGW("Unable to send a buffer to encoder output port ({})", i);
                 return Pool_ptr();
             }
         }
@@ -551,7 +554,7 @@ static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, mat
     output->format->es->video.par.den = 1;
 
     // Commit the port changes to the output port
-    SILK_INFO("setting format for encoder component {}", encoder->name);
+    QLOGI("setting format for encoder component {}", encoder->name);
     bool res = commit_format(output);
 
     //output->buffer_num = 3;
@@ -587,20 +590,20 @@ static Component_ptr create_encoder_component_for_saving(MMAL_PORT_T* src, math:
         status = MMAL_CALL(mmal_port_parameter_set(encoder->output[0], &param.hdr));
         if (status != MMAL_SUCCESS)
         {
-            SILK_WARNING("Failed to set H264 profile");
+            QLOGW("Failed to set H264 profile");
             return Component_ptr();
         }
     }
 
     if (mmal_port_parameter_set_boolean(encoder->input[0], MMAL_PARAMETER_VIDEO_IMMUTABLE_INPUT, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set IMMUTABLE INPUT parameters");
+        QLOGW("failed to set IMMUTABLE INPUT parameters");
         return Component_ptr();
     }
     //set INLINE HEADER flag to generate SPS and PPS for every IDR if requested
     if (mmal_port_parameter_set_boolean(encoder->output[0], MMAL_PARAMETER_VIDEO_ENCODE_INLINE_HEADER, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set INLINE HEADER FLAG parameters");
+        QLOGW("failed to set INLINE HEADER FLAG parameters");
         return Component_ptr();
     }
 
@@ -647,42 +650,42 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         status = MMAL_CALL(mmal_port_parameter_set(output, &param.hdr));
         if (status != MMAL_SUCCESS)
         {
-            SILK_WARNING("Failed to set H264 profile");
+            QLOGW("Failed to set H264 profile");
             return Component_ptr();
         }
     }
 
     if (mmal_port_parameter_set_boolean(input, MMAL_PARAMETER_VIDEO_IMMUTABLE_INPUT, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set IMMUTABLE INPUT parameters");
+        QLOGW("failed to set IMMUTABLE INPUT parameters");
         return Component_ptr();
     }
     //set INLINE HEADER flag to generate SPS and PPS for every IDR if requested
     if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_INLINE_HEADER, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set INLINE HEADER FLAG parameters");
+        QLOGW("failed to set INLINE HEADER FLAG parameters");
         return Component_ptr();
     }
 
     //fails with I420
 //    if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_H264_LOW_LATENCY, 1) != MMAL_SUCCESS)
 //    {
-//        SILK_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_LOW_LATENCY");
+//        LOG_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_LOW_LATENCY");
 //        return Component_ptr();
 //    }
     if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_H264_AU_DELIMITERS, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_AU_DELIMITERS");
+        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_AU_DELIMITERS");
         return Component_ptr();
     }
     if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS");
+        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS");
         return Component_ptr();
     }
     if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE, 1) != MMAL_SUCCESS)
     {
-        SILK_WARNING("failed to set MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE");
+        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE");
         return Component_ptr();
     }
 
@@ -690,7 +693,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 //        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
 //        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
 //        {
-//            SILK_WARNING("failed to set MMAL_PARAMETER_INTRAPERIOD");
+//            LOG_WARNING("failed to set MMAL_PARAMETER_INTRAPERIOD");
 //            return Component_ptr();
 //        }
 //    }
@@ -708,7 +711,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 
         if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
         {
-            SILK_WARNING("failed to set INTRA REFRESH HEADER FLAG parameters");
+            QLOGW("failed to set INTRA REFRESH HEADER FLAG parameters");
             return Component_ptr();
         }
     }
@@ -840,7 +843,7 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
 
     QASSERT(port && buffer);
     //GCamera->OnCameraControlCallback(port, buffer);
-    SILK_INFO("Camera control callback called: {}, {}", port, buffer);
+    QLOGI("Camera control callback called: {}, {}", port, buffer);
     mmal_buffer_header_release(buffer);
 }
 
@@ -901,7 +904,7 @@ static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
 //    if (is_end_frame)
 //    {
 //        size_t ms = (q::Clock::now() - encoder_data.start).count() / 1000;
-//        SILK_INFO("ENCODER {}: {}", encoder_data.resolution, ms);
+//        LOG_INFO("ENCODER {}: {}", encoder_data.resolution, ms);
 //        encoder_data.start = q::Clock::now();
 //    }
 }
@@ -953,7 +956,7 @@ auto HAL_Raspicam::create_components() -> bool
     // Enable the camera, and tell it its control callback function
     if (!enable_port(m_impl->camera->control, camera_control_callback))
     {
-        SILK_ERR("Cannot enable camera control port");
+        QLOGE("Cannot enable camera control port");
         return false;
     }
 
@@ -980,7 +983,7 @@ auto HAL_Raspicam::create_components() -> bool
         status = MMAL_CALL(mmal_port_parameter_set(m_impl->camera->control, &cam_config.hdr));
         if (status != MMAL_SUCCESS)
         {
-            SILK_ERR("Couldn't set camera config: error {}", status);
+            QLOGE("Couldn't set camera config: error {}", status);
             return false;
         }
     }
@@ -995,7 +998,7 @@ auto HAL_Raspicam::create_components() -> bool
         status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
         {
-            SILK_ERR("Couldn't set preview port format : error {}", status);
+            QLOGE("Couldn't set preview port format : error {}", status);
             return false;
         }
     }
@@ -1010,7 +1013,7 @@ auto HAL_Raspicam::create_components() -> bool
         status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
         {
-            SILK_ERR("Couldn't set video port format : error {}", status);
+            QLOGE("Couldn't set video port format : error {}", status);
             return false;
         }
     }
@@ -1034,7 +1037,7 @@ auto HAL_Raspicam::create_components() -> bool
         status = MMAL_CALL(mmal_port_format_commit(camera_capture_port));
         if (status != MMAL_SUCCESS)
         {
-            SILK_ERR("Couldn't set still port format : error {}", status);
+            QLOGE("Couldn't set still port format : error {}", status);
             return false;
         }
     }
@@ -1045,21 +1048,21 @@ auto HAL_Raspicam::create_components() -> bool
     //enable the camera
     if (!enable_component(m_impl->camera))
     {
-        SILK_ERR("Cannot enable camera component");
+        QLOGE("Cannot enable camera component");
         return false;
     }
 
     m_impl->camera_splitter = create_splitter_component(camera_preview_port);
     if (!m_impl->camera_splitter)
     {
-        SILK_ERR("Cannot create camera splitter component");
+        QLOGE("Cannot create camera splitter component");
         return false;
     }
 
     m_impl->camera_splitter_connection = connect_ports(camera_preview_port, m_impl->camera_splitter->input[0]);
     if (!m_impl->camera_splitter_connection || !set_connection_enabled(m_impl->camera_splitter_connection, true))
     {
-        SILK_ERR("Cannot enable camera splitter");
+        QLOGE("Cannot enable camera splitter");
         return false;
     }
 
@@ -1069,14 +1072,14 @@ auto HAL_Raspicam::create_components() -> bool
     m_impl->high.encoder_connection = connect_ports(camera_video_port, m_impl->high.encoder->input[0]);
     if (!m_impl->high.encoder_connection || !set_connection_enabled(m_impl->high.encoder_connection, true))
     {
-        SILK_ERR("Cannot create high bitrate encoder");
+        QLOGE("Cannot create high bitrate encoder");
         return false;
     }
 
     m_impl->high.output_pool = create_output_port_pool(m_impl->high.encoder->output[0], userdata, high_encoder_buffer_callback, buffer_count);
     if (!m_impl->high.output_pool)
     {
-        SILK_ERR("Cannot create high bitrate encoder port");
+        QLOGE("Cannot create high bitrate encoder port");
         return false;
     }
 
@@ -1085,20 +1088,20 @@ auto HAL_Raspicam::create_components() -> bool
     m_impl->medium.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], m_impl->medium.resizer->input[0]);
     if (!m_impl->medium.resizer_connection)
     {
-        SILK_ERR("Cannot create medium bitrate resizer");
+        QLOGE("Cannot create medium bitrate resizer");
         return false;
     }
     m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_impl->medium.quality.resolution, m_impl->medium.quality.bitrate);
     m_impl->medium.encoder_connection = connect_ports(m_impl->medium.resizer->output[0], m_impl->medium.encoder->input[0]);
     if (!m_impl->medium.encoder_connection || !set_connection_enabled(m_impl->medium.encoder_connection, true))
     {
-        SILK_ERR("Cannot create medium bitrate encoder");
+        QLOGE("Cannot create medium bitrate encoder");
         return false;
     }
     m_impl->medium.output_pool = create_output_port_pool(m_impl->medium.encoder->output[0], userdata, medium_encoder_buffer_callback, buffer_count);
     if (!m_impl->medium.output_pool)
     {
-        SILK_ERR("Cannot create medium bitrate encoder port");
+        QLOGE("Cannot create medium bitrate encoder port");
         return false;
     }
 
@@ -1107,20 +1110,20 @@ auto HAL_Raspicam::create_components() -> bool
     m_impl->low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], m_impl->low.resizer->input[0]);
     if (!m_impl->low.resizer_connection)
     {
-        SILK_ERR("Cannot create low bitrate resizer");
+        QLOGE("Cannot create low bitrate resizer");
         return false;
     }
     m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_impl->low.quality.resolution, m_impl->low.quality.bitrate);
     m_impl->low.encoder_connection = connect_ports(m_impl->low.resizer->output[0], m_impl->low.encoder->input[0]);
     if (!m_impl->low.encoder_connection || !set_connection_enabled(m_impl->low.encoder_connection, true))
     {
-        SILK_ERR("Cannot create low bitrate encoder");
+        QLOGE("Cannot create low bitrate encoder");
         return false;
     }
     m_impl->low.output_pool = create_output_port_pool(m_impl->low.encoder->output[0], userdata, low_encoder_buffer_callback, buffer_count);
     if (!m_impl->low.output_pool)
     {
-        SILK_ERR("Cannot create low bitrate encoder port");
+        QLOGE("Cannot create low bitrate encoder port");
         return false;
     }
 
@@ -1130,7 +1133,7 @@ auto HAL_Raspicam::create_components() -> bool
         status = MMAL_CALL(mmal_port_parameter_set_boolean(camera_video_port, MMAL_PARAMETER_CAPTURE, 1));
         if (status != MMAL_SUCCESS)
         {
-            SILK_ERR("failed to start capturing");
+            QLOGE("failed to start capturing");
             return false;
         }
     }
@@ -1164,7 +1167,7 @@ void HAL_Raspicam::create_file_sink()
         file_idx++;
     } while (file_idx < 16);
 
-    SILK_WARNING("Failed to create capture file.");
+    QLOGW("Failed to create capture file.");
     m_file_sink.reset();
 }
 
@@ -1173,7 +1176,7 @@ auto HAL_Raspicam::start_recording() -> bool
 {
     if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
     {
-        SILK_WARNING("Cannot create capture folder");
+        QLOGW("Cannot create capture folder");
         return false;
     }
 

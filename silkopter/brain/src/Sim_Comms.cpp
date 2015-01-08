@@ -35,15 +35,15 @@ auto Sim_Comms::connect() -> bool
 //    }
 //    catch(...)
 //    {
-//        SILK_WARNING("Cannot start listening on port {}", port);
+//        LOG_WARNING("Cannot start listening on port {}", port);
 //        return false;
 //    }
 
-//    SILK_INFO("Started listening on port {}", port);
+//    LOG_INFO("Started listening on port {}", port);
 //    while (!m_socket.is_open())
 //    {
 //        boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-//        SILK_INFO("Waiting for sim to connect");
+//        LOG_INFO("Waiting for sim to connect");
 //    }
 
     set_state(State::HANDSHAKE);
@@ -54,12 +54,12 @@ auto Sim_Comms::connect() -> bool
 //{
 //    if (error)
 //    {
-//        SILK_WARNING("Error occured while accepting connection: {}", error.message());
+//        LOG_WARNING("Error occured while accepting connection: {}", error.message());
 //        return;
 //    }
 
 //    m_channel.start();
-//    SILK_INFO("Connected to {}:{}", m_socket.remote_endpoint().address().to_string(), m_socket.remote_endpoint().port());
+//    LOG_INFO("Connected to {}:{}", m_socket.remote_endpoint().address().to_string(), m_socket.remote_endpoint().port());
 //}
 
 void Sim_Comms::disconnect()
@@ -91,7 +91,7 @@ void Sim_Comms::process_state_handshake()
                                            m_received_config.has_current_sensor);
             if (result)
             {
-                SILK_INFO("Sim version {}:\b \t{} barometer, \t{} gps, \t{} sonar, \t{} voltage sensor, \t{} current sensor",
+                LOG_INFO("Sim version {}:\b \t{} barometer, \t{} gps, \t{} sonar, \t{} voltage sensor, \t{} current sensor",
                            m_received_config.version,
                            m_received_config.has_barometer ? "has a" : "doesn't have",
                            m_received_config.has_gps ? "has a" : "doesn't have",
@@ -103,13 +103,13 @@ void Sim_Comms::process_state_handshake()
             }
             else
             {
-                SILK_WARNING("Failed to communicate with the Simulator");
+                LOG_WARNING("Failed to communicate with the Simulator");
                 m_error_count++;
             }
         }
         else
         {
-            SILK_WARNING("Received wrong message: {}", static_cast<int>(m_message));
+            LOG_WARNING("Received wrong message: {}", static_cast<int>(m_message));
             m_error_count++;
         }
     }
@@ -158,7 +158,7 @@ void Sim_Comms::process()
 
 void Sim_Comms::set_state(State state)
 {
-    SILK_INFO("Switching from state {} to state {}", static_cast<int>(m_state), static_cast<int>(state));
+    LOG_INFO("Switching from state {} to state {}", static_cast<int>(m_state), static_cast<int>(state));
     m_state = state;
 }
 

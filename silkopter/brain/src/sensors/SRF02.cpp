@@ -39,12 +39,13 @@ constexpr float MAX_VALID_DISTANCE = 5.f;
 
 auto SRF02::init(q::Clock::duration sample_time) -> bool
 {
+    QLOG_TOPIC("srf02::init");
     std::string device("/dev/i2c-0");
-    SILK_INFO("initializing device: {}", device);
+    QLOGI("initializing device: {}", device);
 
     if (!m_i2c.open(device))
     {
-        SILK_ERR("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
 
@@ -52,11 +53,11 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
     auto ret = m_i2c.read_u8(ADDR, SW_REV_CMD, rev);
     if (!ret || rev == 255)
     {
-        SILK_ERR("Failed to initialize SRF02");
+        QLOGE("Failed to initialize SRF02");
         return false;
     }
 
-    SILK_INFO("SRF02 Revision: {}", rev);
+    QLOGI("SRF02 Revision: {}", rev);
 
     m_sample_time = math::max(sample_time, q::Clock::duration(MEASUREMENT_DURATION));
     m_last_time_point = q::Clock::now();
@@ -67,6 +68,7 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
 
 void SRF02::process()
 {
+    QLOG_TOPIC("srf02::process");
     auto now = q::Clock::now();
 
     //begin?

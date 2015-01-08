@@ -65,6 +65,8 @@ struct HAL_Sensors_HW::Sensors
 
 HAL_Sensors_HW::HAL_Sensors_HW()
 {
+    QLOG_TOPIC("sensors");
+
     m_sensors.reset(new Sensors);
 
     m_config.barometer_i2c_device = "/dev/i2c-0";
@@ -86,7 +88,7 @@ auto HAL_Sensors_HW::load_settings() -> bool
     Config cfg;
     if (!autojsoncxx::from_json_file("sensors_pi.cfg", cfg, result))
     {
-        SILK_WARNING("Failed to load sensors_pi.cfg: {}", result.description());
+        QLOGW("Failed to load sensors_pi.cfg: {}", result.description());
         return false;
     }
 
@@ -115,6 +117,7 @@ void HAL_Sensors_HW::save_settings()
 
 auto HAL_Sensors_HW::init() -> bool
 {
+    QLOG_TOPIC("sensors::init");
     TIMED_FUNCTION();
 
     QASSERT(!m_is_initialized);
@@ -150,8 +153,8 @@ auto HAL_Sensors_HW::init() -> bool
         });
         A_Range a_range = a_ranges.front();
 
-        SILK_INFO("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
-        SILK_INFO("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
+        QLOGI("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
+        QLOGI("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
 
         if (!m_sensors->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
         {
@@ -318,8 +321,30 @@ auto HAL_Sensors_HW::get_last_gps_sample() const            -> sensors::GPS_Samp
     return m_last_gps_sample;
 }
 
+class Butterworth //10hz
+{
+public:
+    static constexpr size_t NZEROS  = 2;
+    static constexpr size_t NPOLES  = 2;
+    static constexpr float GAIN    = 1.058546241e+03;
+    math::vec3f xv[NZEROS+1], yv[NPOLES+1];
+    math::vec3f process(math::vec3f const& t)
+    {
+        xv[0] = xv[1]; xv[1] = xv[2];
+        xv[2] = t / GAIN;
+        yv[0] = yv[1]; yv[1] = yv[2];
+        yv[2] =   (xv[0] + xv[2]) + 2.f * xv[1]
+                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
+        return yv[2];
+    }
+};
+
+Butterworth bg, ba, bc;
+
 void HAL_Sensors_HW::process()
 {
+    QLOG_TOPIC("sensors::process");
+
     QASSERT(m_is_initialized);
     if (!m_is_initialized)
     {
@@ -354,7 +379,7 @@ void HAL_Sensors_HW::process()
             for (size_t i = 0; i < g_samples.size(); i++)
             {
                 auto& sample = m_gyroscope_samples[i];
-                sample.value = g_samples[i] - m_config.gyroscope_bias;
+                sample.value = bg.process(g_samples[i] - m_config.gyroscope_bias);
                 sample.dt = dt;
                 sample.sample_idx = ++m_last_gyroscope_sample.sample_idx;
             }
@@ -370,7 +395,7 @@ void HAL_Sensors_HW::process()
             for (size_t i = 0; i < a_samples.size(); i++)
             {
                 auto& sample = m_accelerometer_samples[i];
-                sample.value = (a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale;
+                sample.value = ba.process((a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale);
                 sample.dt = dt;
                 sample.sample_idx = ++m_last_accelerometer_sample.sample_idx;
             }
@@ -386,7 +411,7 @@ void HAL_Sensors_HW::process()
             for (size_t i = 0; i < c_samples.size(); i++)
             {
                 auto& sample = m_compass_samples[i];
-                sample.value = c_samples[i] - m_config.compass_bias;
+                sample.value = bc.process(c_samples[i] - m_config.compass_bias);
                 sample.dt = dt;
                 sample.sample_idx = ++m_last_compass_sample.sample_idx;
             }
@@ -427,7 +452,7 @@ void HAL_Sensors_HW::process()
         auto data = m_sensors->sonar.get_distance_data();
         if (data)
         {
-            //SILK_INFO("DISTANCE: {}", *val);
+            //LOG_INFO("DISTANCE: {}", *val);
             m_last_sonar_sample.value = data->value;
             m_last_sonar_sample.dt = data->dt;
             m_last_sonar_sample.sample_idx++;
@@ -464,7 +489,7 @@ void HAL_Sensors_HW::process()
     process_gps();
 
 //    auto d = q::Clock::now() - start;
-//    SILK_INFO("d = {}, {}", d, m_sensor_samples.size());
+//    LOG_INFO("d = {}, {}", d, m_sensor_samples.size());
 }
 
 void HAL_Sensors_HW::process_gps()

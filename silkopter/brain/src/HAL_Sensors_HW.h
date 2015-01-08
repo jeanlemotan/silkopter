@@ -70,7 +70,7 @@ public:
         std::string gps_device;
         size_t gps_baud = 38400;
 
-        float current_scale = 32.2f;
+        float current_scale = 24.8f;
         float voltage_scale = 39.33f;
     };
 

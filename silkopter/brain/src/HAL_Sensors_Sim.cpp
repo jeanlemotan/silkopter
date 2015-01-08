@@ -26,7 +26,7 @@ auto HAL_Sensors_Sim::load_settings() -> bool
     Config cfg;
     if (!autojsoncxx::from_json_file("sensors_sim.cfg", cfg, result))
     {
-        SILK_WARNING("Failed to load sensors_sim.cfg: {}", result.description());
+        LOG_WARNING("Failed to load sensors_sim.cfg: {}", result.description());
         return false;
     }
 
@@ -157,7 +157,7 @@ auto HAL_Sensors_Sim::unpack_sensor_sample(Sim_Comms::Channel& channel, SAMPLE_T
     decltype(sample.value) v;
     if (!channel.unpack_param(dt) || !channel.unpack_param(v))
     {
-        SILK_WARNING("Failed to receive sensor sample");
+        LOG_WARNING("Failed to receive sensor sample");
         m_error_count++;
         return false;
     }
@@ -304,7 +304,7 @@ void HAL_Sensors_Sim::process_message_sensor_data(Sim_Comms::Channel& channel)
 
     if (!result)
     {
-        SILK_WARNING("Failed to receive sensor data");
+        LOG_WARNING("Failed to receive sensor data");
         m_error_count++;
     }
 }

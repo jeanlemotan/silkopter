@@ -54,7 +54,7 @@ void AHRS::process(sensors::Gyroscope_Sample const& gyroscope,
 //            if (xxx > 100)
 //            {
 //                xxx = 0;
-//                SILK_INFO("{}/{}", math::degrees(m_euler), gyroscope.sample_idx);
+//                LOG_INFO("{}/{}", math::degrees(m_euler), gyroscope.sample_idx);
 //            }
         }
 
@@ -67,7 +67,7 @@ void AHRS::process(sensors::Gyroscope_Sample const& gyroscope,
         m_last_compass_sample_idx = compass.sample_idx;
         m_last_accelerometer_sample_idx = accelerometer.sample_idx;
 
-//        SILK_INFO("{} / {}", accelerometer.value.acceleration, compass.value);
+//        LOG_INFO("{} / {}", accelerometer.value.acceleration, compass.value);
 
         m_noisy_up_w = math::normalized<float, math::safe>(accelerometer.value); //acceleration points opposite of gravity - so up
         m_noisy_front_w = math::normalized<float, math::safe>(compass.value); //this is always good

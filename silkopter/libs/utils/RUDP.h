@@ -6,11 +6,6 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#define RUDP_DBG(fmt, ...)  QLOG_DBG("rudp", fmt, ##__VA_ARGS__)
-#define RUDP_INFO(fmt, ...)  QLOG_INFO("rudp", fmt, ##__VA_ARGS__)
-#define RUDP_WARNING(fmt, ...)  QLOG_WARNING("rudp", fmt, ##__VA_ARGS__)
-#define RUDP_ERR(fmt, ...)  QLOG_ERR("rudp", fmt, ##__VA_ARGS__)
-
 namespace util
 {
     namespace detail
@@ -368,8 +363,8 @@ namespace util
                 std::lock_guard<std::mutex> lg(items_ref->mutex);
                 items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
                 x_returned++;
-    //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-//                RUDP_INFO("{}// returned: {} / {}", m_pool.get(), t, x_returned);
+    //                QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+//                QLOGI("{}// returned: {} / {}", m_pool.get(), t, x_returned);
             };
         }
 
@@ -384,8 +379,8 @@ namespace util
                 item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
                 m_pool->items.pop_back();
                 x_reused++;
-//                RUDP_INFO("{}// recycled: {} / {}", m_pool.get(), item, x_reused);
-    //                RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+//                QLOGI("{}// recycled: {} / {}", m_pool.get(), item, x_reused);
+    //                QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
             }
             else
             {
@@ -394,8 +389,8 @@ namespace util
                 x_new++;
                 //if (x_new > 1000)
                 {
-//                    RUDP_INFO("{}// allocated: {} / {}", m_pool.get(), item, x_new);
-                    //RUDP_INFO("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
+//                    QLOGI("{}// allocated: {} / {}", m_pool.get(), item, x_new);
+                    //QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
                 }
             }
             QASSERT(item);
@@ -541,7 +536,7 @@ namespace util
     }
     inline void RUDP::set_send_endpoint(boost::asio::ip::udp::endpoint const& endpoint)
     {
-        RUDP_INFO("Sending to {}:{} endpoint", endpoint.address().to_string(), endpoint.port());
+        QLOGI("Sending to {}:{} endpoint", endpoint.address().to_string(), endpoint.port());
         m_tx.endpoint = endpoint;
     }
     inline auto RUDP::get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&
@@ -590,7 +585,7 @@ namespace util
             channel_data.send_mutex.unlock();
             return res;
         }
-        RUDP_WARNING("Cannot send packet because still sending previous one");
+        QLOGW("Cannot send packet because still sending previous one");
         return false;
     }
 
@@ -599,7 +594,7 @@ namespace util
         //The send mutex should be locked here!!!
         if (size >= (1 << 24))
         {
-            RUDP_ERR("Packet too big: {}.", size);
+            QLOGE("Packet too big: {}.", size);
             return false;
         }
 
@@ -622,7 +617,7 @@ namespace util
             }
             else
             {
-                RUDP_WARNING("Cannot compress data: {}. Sending uncompressed", ret);
+                QLOGW("Cannot compress data: {}. Sending uncompressed", ret);
                 channel_data.compression_buffer.clear();
                 is_compressed = false;
             }
@@ -633,7 +628,7 @@ namespace util
         size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
         if (fragment_count > 255)
         {
-            RUDP_WARNING("Too many fragments: {}. Ignoring mtu.", fragment_count);
+            QLOGW("Too many fragments: {}. Ignoring mtu.", fragment_count);
             fragment_count = 255;
             max_fragment_size = ((size - 1) / fragment_count) + 1;
             fragment_count = ((size - 1) / max_fragment_size) + 1;
@@ -752,7 +747,7 @@ namespace util
                 }
 
                 //waited enough, cancel the pending packet
-//                RUDP_WARNING("Canceling ghost packet {}", next_expected_id);
+//                QLOGW("Canceling ghost packet {}", next_expected_id);
                 add_packet_cancellation(channel_idx, next_expected_id);
                 last_packet_id = next_expected_id;
                 m_global_stats.rx_dropped_packets++;
@@ -767,18 +762,18 @@ namespace util
                     break;
                 }
 
-//                RUDP_WARNING("Canceling packet {}", id);
+//                QLOGW("Canceling packet {}", id);
                 add_packet_cancellation(channel_idx, id);
                 queue.packets.erase(queue.packets.begin());
                 last_packet_id = id;
                 m_global_stats.rx_dropped_packets++;
 
-//                RUDP_WARNING("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+//                QLOGW("Still waiting for packet {}: {}/{} received", id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
                 continue;
             }
             QASSERT(packet->fragments[0]);
 
-//            RUDP_INFO("Received packet {}", id);
+//            QLOGI("Received packet {}", id);
 
             queue.packets.erase(queue.packets.begin());
             last_packet_id = id;
@@ -803,7 +798,7 @@ namespace util
                 int ret = uncompress(data.data(), &ds, m_rx.compression_buffer.data(), static_cast<uLong>(m_rx.compression_buffer.size()));
                 if (ret != Z_OK)
                 {
-                    RUDP_WARNING("Decompression error: {}", ret);
+                    QLOGW("Decompression error: {}", ret);
                     data.clear();
                 }
                 //return true;//ret == Z_OK;
@@ -834,7 +829,7 @@ namespace util
             {
                 //timeout
                 m_ping.is_done = true;
-//                RUDP_WARNING("Ping {} timeout", m_ping.last_seq);
+//                QLOGW("Ping {} timeout", m_ping.last_seq);
             }
             else
             {
@@ -870,7 +865,7 @@ namespace util
                 total++;
             }
             m_ping.rtt = (total > 0) ? q::Clock::duration(total_rtt / total) : PING_TIMEOUT;
-//            RUDP_INFO("RTT: {}", m_ping.rtt);
+//            QLOGI("RTT: {}", m_ping.rtt);
         }
     }
 
@@ -878,7 +873,7 @@ namespace util
     {
 //        {
 //            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-//            RUDP_INFO("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
+//            QLOGI("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
 //        }
         send_pending_confirmations();
         send_pending_cancellations();
@@ -904,9 +899,9 @@ namespace util
 //            {
 //                for (auto x: datagram->data)
 //                {
-//                    RUDP_INFO("{}", x);
+//                    QLOGI("{}", x);
 //                }
-//                RUDP_INFO("crc: {}/{}", crc, static_cast<int>(header.crc));
+//                QLOGI("crc: {}/{}", crc, static_cast<int>(header.crc));
 //            }
 
 //            QASSERT_MSG(header.crc != 0, "{}", crc);
@@ -1027,7 +1022,7 @@ namespace util
         if (m_is_sending.exchange(true))
         {
             //was already sending, return
-            //RUDP_INFO("send blocked {}", q::Clock::now());
+            //QLOGI("send blocked {}", q::Clock::now());
             return;
         }
 
@@ -1041,14 +1036,14 @@ namespace util
                 datagram = std::move(m_tx.internal_queues.pong);
                 QASSERT(!datagram->is_in_transit);
                 m_tx.internal_queues.pong.reset();
-//                RUDP_INFO("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
+//                QLOGI("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
             }
             else if (m_tx.internal_queues.ping)
             {
                 datagram = std::move(m_tx.internal_queues.ping);
                 QASSERT(!datagram->is_in_transit);
                 m_tx.internal_queues.ping.reset();
-//                RUDP_INFO("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
+//                QLOGI("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
             }
 
             //next the confirmations
@@ -1059,7 +1054,7 @@ namespace util
                 {
                     datagram = std::move(queue.front());
                     QASSERT(!datagram->is_in_transit);
-//                    RUDP_INFO("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
+//                    QLOGI("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                     erase_unordered(queue, queue.begin());
                 }
             }
@@ -1071,7 +1066,7 @@ namespace util
                 {
                     datagram = std::move(queue.front());
                     QASSERT(!datagram->is_in_transit);
-//                    RUDP_INFO("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
+//                    QLOGI("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
                     erase_unordered(queue, queue.begin());
                 }
             }
@@ -1104,7 +1099,7 @@ namespace util
 //                auto& header = get_header<Packet_Header>(datagram->data);
 //                if (header.channel_idx == 12)
 //                {
-//                    RUDP_INFO("Sending fragment {} packet {}", static_cast<int>(header.fragment_idx), static_cast<int>(header.id));
+//                    QLOGI("Sending fragment {} packet {}", static_cast<int>(header.fragment_idx), static_cast<int>(header.id));
 //                }
             }
         }
@@ -1115,13 +1110,13 @@ namespace util
         }
         QASSERT(!datagram->is_in_transit);
 
-        //RUDP_INFO("send allowed {}", q::Clock::now());
+        //QLOGI("send allowed {}", q::Clock::now());
 
         update_stats(m_global_stats, *datagram);
 
 //        {
 //            auto& header = get_header<Header>(datagram->data);
-//            RUDP_INFO("{}: sending {}", header.crc, q::Clock::now());
+//            QLOGI("{}: sending {}", header.crc, q::Clock::now());
 //        }
 
         xxx_on_air++;
@@ -1155,7 +1150,7 @@ namespace util
 
 //        {
 //            auto& header = get_header<Header>(datagram->data);
-//            RUDP_INFO("{}: done sending {}", header.crc, q::Clock::now());
+//            QLOGI("{}: done sending {}", header.crc, q::Clock::now());
 //        }
 
         if (header.type == TYPE_PING)
@@ -1171,7 +1166,7 @@ namespace util
 //                auto dt = q::Clock::now() - datagram->sent;
 //                if (dt < std::chrono::seconds(500))
 //                {
-//                    //RUDP_INFO("packet {}, size {} took {}", (int)pheader.id, datagram->data.size(), dt);
+//                    //QLOGI("packet {}, size {} took {}", (int)pheader.id, datagram->data.size(), dt);
 //                }
 //            }
 
@@ -1187,7 +1182,7 @@ namespace util
         {
             if (error != boost::asio::error::eof)
             {
-                RUDP_ERR("Error on socket receive: {}", error.message());
+                QLOGE("Error on socket receive: {}", error.message());
                 //m_socket.close();
             }
         }
@@ -1256,7 +1251,7 @@ namespace util
         data[off + 4] = fragment_idx;
 //        if (channel_idx == 12)
 //        {
-//            RUDP_INFO("Adding confirmation for fragment {} for packet {}", fragment_idx, id);
+//            QLOGI("Adding confirmation for fragment {} for packet {}", fragment_idx, id);
 //        }
     }
     inline void RUDP::send_pending_cancellations()
@@ -1306,7 +1301,7 @@ namespace util
 
 //        if (channel_idx == 12)
 //        {
-//            RUDP_INFO("Adding cancellation for packet {}", id);
+//            QLOGI("Adding cancellation for packet {}", id);
 //        }
     }
 
@@ -1350,7 +1345,7 @@ namespace util
         size_t h_size = get_header_size(datagram->data);
         if (h_size == 0)
         {
-            RUDP_WARNING("Unknonw header.");
+            QLOGW("Unknonw header.");
             return;
         }
 
@@ -1366,7 +1361,7 @@ namespace util
             m_global_stats.rx_corrupted_datagrams++;
             auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
 
-            RUDP_WARNING("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
+            QLOGW("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
             return;
         }
         m_global_stats.rx_good_datagrams++;
@@ -1397,7 +1392,7 @@ namespace util
 
 //            if (header.channel_idx == 12)
 //            {
-//                RUDP_WARNING("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
+//                QLOGW("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
 //            }
 
             if (header.flag_is_reliable)
@@ -1427,7 +1422,7 @@ namespace util
 
 //            if (header.channel_idx == 12)
 //            {
-//                RUDP_WARNING("Duplicated fragment {} for packet {}.", fragment_idx, id);
+//                QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
 //            }
             return;
         }
@@ -1440,7 +1435,7 @@ namespace util
         }
         packet->fragments[fragment_idx] = std::move(datagram);
 
-//        RUDP_INFO("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+//        QLOGI("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
     }
     inline void RUDP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
     {
@@ -1453,7 +1448,7 @@ namespace util
 //            {
 //                int a = 0;
 //            }
-//        RUDP_INFO("Confirming {} datagrams", count);
+//        QLOGI("Confirming {} datagrams", count);
 
         QASSERT(datagram->data.size() == sizeof(Packets_Confirmed_Header) + (1 + 3 + 1)*count);
 
@@ -1476,7 +1471,7 @@ namespace util
             reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
 //            if (c[0] == 12)
 //            {
-//                RUDP_INFO("Trying to confirm fragment {} for packet {}", c[4], idd);
+//                QLOGI("Trying to confirm fragment {} for packet {}", c[4], idd);
 //            }
         }
         auto conf_end = conf + count;
@@ -1506,7 +1501,7 @@ namespace util
             {
 //                if (hdr.channel_idx == 12)
 //                {
-//                    RUDP_INFO("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                    QLOGI("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
 //                }
                 erase_unordered(m_tx.packet_queue, it);
                 count--;
@@ -1538,7 +1533,7 @@ namespace util
 
         QASSERT(datagram->data.size() == sizeof(Packets_Cancelled_Header) + (1 + 3)*count);
 
-//        RUDP_INFO("Cancelling {} datagrams", count);
+//        QLOGI("Cancelling {} datagrams", count);
 
         //first unpack the confirmations in an array
         uint8_t* src = datagram->data.data() + sizeof(Packets_Cancelled_Header);
@@ -1558,7 +1553,7 @@ namespace util
             reinterpret_cast<uint8_t*>(&idd)[2] = c[3];
 //            if (c[0] == 12)
 //            {
-//                RUDP_INFO("Trying to cancel packet {}", idd);
+//                QLOGI("Trying to cancel packet {}", idd);
 //            }
         }
         uint32_t* conf_end = conf + count;
@@ -1586,7 +1581,7 @@ namespace util
             {
 //                if (hdr.channel_idx == 12)
 //                {
-//                    RUDP_INFO("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                    QLOGI("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
 //                }
                 erase_unordered(m_tx.packet_queue, it);
                 continue;
@@ -1600,7 +1595,7 @@ namespace util
         {
             m_global_stats.tx_cancelled_datagrams += size_before - size_after;
             m_global_stats.tx_cancelled_packets ++;
-//            RUDP_INFO("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
+//            QLOGI("Cancelling packets {}: {} fragments removed", count, size_before - size_after);
         }
     }
     inline void RUDP::process_ping_datagram(RX::Datagram_ptr& datagram)
@@ -1625,7 +1620,7 @@ namespace util
 
         if (header.seq != m_ping.last_seq || m_ping.is_done)
         {
-            RUDP_WARNING("invalid ping seq received: {}", seq);
+            QLOGW("invalid ping seq received: {}", seq);
         }
         else
         {
@@ -1635,13 +1630,13 @@ namespace util
 
         m_ping.is_done = true;
 
-////        RUDP_INFO("RTT: {}", m_ping.rtt);
+////        QLOGI("RTT: {}", m_ping.rtt);
 
 //        static q::Clock::time_point xxx = q::Clock::now();
 ////                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
 //        {
 //            xxx = q::Clock::now();
-//            //RUDP_INFO("RTT: {}", m_ping.rtt);
+//            //QLOGI("RTT: {}", m_ping.rtt);
 //        }
     }
 

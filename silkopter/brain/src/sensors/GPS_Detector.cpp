@@ -20,6 +20,7 @@ GPS_Detector::~GPS_Detector()
 
 auto GPS_Detector::init(std::string const& device, size_t baud) -> bool
 {
+    QLOG_TOPIC("gps_detector::init");
     QASSERT(m_fd < 0);
     if (m_fd >= 0)
     {
@@ -39,14 +40,14 @@ auto GPS_Detector::init(std::string const& device, size_t baud) -> bool
 
     if (b < 0)
     {
-        SILK_ERR("Invalid baud requested: {}", baud);
+        QLOGE("Invalid baud requested: {}", baud);
         return false;
     }
 
     m_fd = open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (m_fd < 0)
     {
-        SILK_ERR("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
 
@@ -63,13 +64,14 @@ auto GPS_Detector::init(std::string const& device, size_t baud) -> bool
 
     m_protocols.push_back(std::unique_ptr<GPS_Protocol>(new GPS_UBLOX()));
 
-    SILK_INFO("GPS Detection started on {}", device);
+    QLOGI("GPS Detection started on {}", device);
 
     return true;
 }
 
 void GPS_Detector::process()
 {
+    QLOG_TOPIC("gps_detector::process");
     if (m_gps)
     {
         m_gps->process();
@@ -88,10 +90,10 @@ void GPS_Detector::process()
                         auto idx = &p - &m_protocols.front();
                         if (!p->init(m_fd))
                         {
-                            SILK_ERR("Detected GPS protocol {} failed to initialize", idx);
+                            QLOGE("Detected GPS protocol {} failed to initialize", idx);
                             continue;
                         }
-                        SILK_INFO("Detected GPS protocol {}", idx);
+                        QLOGI("Detected GPS protocol {}", idx);
                         m_gps = std::move(p);
                         m_protocols.clear();
                         break;

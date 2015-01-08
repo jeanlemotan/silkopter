@@ -183,7 +183,7 @@ auto GPS_UBLOX::decode_packet(Packet& packet, uint8_t const* data, uint8_t const
     for (auto it = data; it != end; ++it)
     {
         auto const d = *it;
-        //SILK_INFO("step: {}, d: {}", step, d);
+        //LOG_INFO("step: {}, d: {}", step, d);
         auto next = step + 1;
         switch (step)
         {
@@ -250,10 +250,11 @@ auto GPS_UBLOX::decode_packet(Packet& packet, uint8_t const* data, uint8_t const
 
 auto GPS_UBLOX::init(int fd) -> bool
 {
+    QLOG_TOPIC("gps_ublox::init");
     QASSERT(!m_is_initialized);
     if (m_is_initialized)
     {
-        SILK_ERR("Already initialized with fd: {}", m_fd);
+        QLOGE("Already initialized with fd: {}", m_fd);
         return false;
     }
 
@@ -267,7 +268,7 @@ auto GPS_UBLOX::init(int fd) -> bool
         send_packet(Message::CFG_RATE, data);
         if (!wait_for_ack(ACK_TIMEOUT) || *m_ack == false)
         {
-            SILK_ERR("Cannot change GPS rate");
+            QLOGE("Cannot change GPS rate");
             return false;
         }
     }
@@ -286,7 +287,7 @@ auto GPS_UBLOX::init(int fd) -> bool
             send_packet(Message::CFG_MSG, data);
             if (!wait_for_ack(ACK_TIMEOUT) || *m_ack == false)
             {
-                SILK_ERR("Cannot change GPS rate or {} for message {}", m.second, static_cast<int>(m.first));
+                QLOGE("Cannot change GPS rate or {} for message {}", m.second, static_cast<int>(m.first));
                 return false;
             }
         }
@@ -309,6 +310,7 @@ auto GPS_UBLOX::init(int fd) -> bool
 }
 void GPS_UBLOX::process()
 {
+    QLOG_TOPIC("gps_ublox::process");
     if (m_fd < 0)
     {
         return;
@@ -341,6 +343,7 @@ void GPS_UBLOX::process()
 
 auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
 {
+    QLOG_TOPIC("gps_ublox::wait_for_ack");
     if (m_fd < 0)
     {
         return false;
@@ -383,7 +386,7 @@ void GPS_UBLOX::process_packet(Packet& packet)
     case Message::MON_VER: process_mon_ver_packet(packet); break;
     case Message::MON_HW: process_mon_hw_packet(packet); break;
 
-        //default: SILK_INFO("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
+        //default: LOG_INFO("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
     }
 
 }
@@ -393,7 +396,7 @@ void GPS_UBLOX::process_nav_pollh_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_POLLH));
     NAV_POLLH& data = reinterpret_cast<NAV_POLLH&>(*packet.payload.data());
 
-    //SILK_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
+    //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
 }
 
 void GPS_UBLOX::process_nav_status_packet(Packet& packet)
@@ -401,7 +404,7 @@ void GPS_UBLOX::process_nav_status_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_STATUS));
     NAV_STATUS& data = reinterpret_cast<NAV_STATUS&>(*packet.payload.data());
 
-    //SILK_INFO("STATUS: iTOW:{}, Fix:{}, flags:{}, fs:{}, flags2:{}", data.iTOW, data.gpsFix, data.flags, data.fixStat, data.flags2);
+    //LOG_INFO("STATUS: iTOW:{}, Fix:{}, flags:{}, fs:{}, flags2:{}", data.iTOW, data.gpsFix, data.flags, data.fixStat, data.flags2);
 
     //gpsFix
 //    - 0x00 = no fix
@@ -420,7 +423,7 @@ void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
 
     if (data.numSV > 0)
     {
-        SILK_INFO("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
+        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
                   data.flags,
                   math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
                   data.pAcc / 100.f,
@@ -443,7 +446,7 @@ void GPS_UBLOX::process_cfg_prt_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(CFG_PRT));
     CFG_PRT& data = reinterpret_cast<CFG_PRT&>(*packet.payload.data());
 
-    SILK_INFO("GPS port config: {}baud", data.baudRate);
+    QLOGI("GPS port config: {}baud", data.baudRate);
 }
 
 void GPS_UBLOX::process_cfg_ant_packet(Packet& packet)
@@ -460,7 +463,7 @@ void GPS_UBLOX::process_cfg_msg_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(CFG_MSG));
     CFG_MSG& data = reinterpret_cast<CFG_MSG&>(*packet.payload.data());
 
-    SILK_INFO("GPS class {} message {} has a rate of {}", data.msgClass, data.msgID, data.rate);
+    QLOGI("GPS class {} message {} has a rate of {}", data.msgClass, data.msgID, data.rate);
 }
 
 void GPS_UBLOX::process_cfg_rate_packet(Packet& packet)
@@ -468,7 +471,7 @@ void GPS_UBLOX::process_cfg_rate_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(CFG_RATE));
     CFG_RATE& data = reinterpret_cast<CFG_RATE&>(*packet.payload.data());
 
-    SILK_INFO("GPS rate config: Measurement every {}ms, NAV every {} {}", data.measRate, data.navRate, data.navRate == 1 ? "cycle" : "cycles");
+    QLOGI("GPS rate config: Measurement every {}ms, NAV every {} {}", data.measRate, data.navRate, data.navRate == 1 ? "cycle" : "cycles");
 }
 
 void GPS_UBLOX::process_cfg_sbas_packet(Packet& packet)
@@ -485,7 +488,7 @@ void GPS_UBLOX::process_cfg_sbas_packet(Packet& packet)
 //        data.mode = 0;
 //        if (!send_packet(packet.message, data))
 //        {
-//            SILK_WARNING("Cannot deactivate SBAS");
+//            LOG_WARNING("Cannot deactivate SBAS");
 //        }
 //    }
 }
@@ -493,7 +496,7 @@ void GPS_UBLOX::process_cfg_sbas_packet(Packet& packet)
 void GPS_UBLOX::process_inf_notice_packet(Packet& packet)
 {
     q::String str(reinterpret_cast<char const*>(packet.payload.data()), packet.payload.size());
-    SILK_INFO("GPS notice: {}", str);
+    QLOGI("GPS notice: {}", str);
 }
 
 void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
@@ -501,7 +504,7 @@ void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(MON_HW));
     MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
 
-    SILK_INFO("GPS HW: jamming:{}, noise:{}", data.jamInd, data.noisePerMS);
+    QLOGI("GPS HW: jamming:{}, noise:{}", data.jamInd, data.noisePerMS);
 }
 
 void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
@@ -509,7 +512,7 @@ void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
     QASSERT(packet.payload.size() >= sizeof(MON_VER));
     MON_VER& data = reinterpret_cast<MON_VER&>(*packet.payload.data());
 
-    SILK_INFO("GPS Version SW:{} / HW:{}", data.swVersion, data.hwVersion);
+    QLOGI("GPS Version SW:{} / HW:{}", data.swVersion, data.hwVersion);
 }
 
 ///////////////////////////////
@@ -556,7 +559,7 @@ auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_
 
     if (write(m_fd, buffer.data(), off) < 0)
     {
-        SILK_ERR("Cannot write message {} to GPS. Write failed: {}", static_cast<uint8_t>(msg), strerror(errno));
+        QLOGE("Cannot write message {} to GPS. Write failed: {}", static_cast<uint8_t>(msg), strerror(errno));
         return false;
     }
 
