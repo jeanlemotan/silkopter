@@ -35,7 +35,7 @@ protected:
 	{
 		if (!s_creating_instance)
 		{
-			QLOG_ERR("Q::Singleton", "Singleton instance created with new T instead of T::create. Exiting...");
+            QLOGE("Singleton instance created with new T instead of T::create. Exiting...");
 			exit(1);
 			//if we don't exit here, the app will crash for sure later on in weird way. 
 			//So choose instead to crash in a nice place

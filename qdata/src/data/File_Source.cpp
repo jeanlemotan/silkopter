@@ -17,7 +17,7 @@ File_Source::File_Source(Path const& path)
 	}
     else
     {
-        QLOG_WARNING("fs", "Cannot open {}: {}", path, strerror(errno));
+        QLOGW("Cannot open {}: {}", path, strerror(errno));
     }
 }
 File_Source::~File_Source()

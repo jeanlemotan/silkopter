@@ -69,7 +69,7 @@ void Zip_Data_Pack::load()
 	size_t central_dir_offset = find_central_directory_offset(*source);
 	if (central_dir_offset == static_cast<size_t>(-1))
 	{
-		QLOG_ERR("Q", "Corrupted zip file '{}'", m_path);
+        QLOGE("Corrupted zip file '{}'", m_path);
 		return;
 	}
 
@@ -135,7 +135,7 @@ void Zip_Data_Pack::load()
 
 		if (!is_compression_supported(fd.compression_method))
 		{
- 			QLOG_ERR("Q", "Zip file '{}' is compressed with an unsupported compression - {}. File ignored.", str_buffer, fd.compression_method);
+            QLOGE("Zip file '{}' is compressed with an unsupported compression - {}. File ignored.", str_buffer, fd.compression_method);
 			continue;
 		}
 
@@ -270,7 +270,7 @@ Source_uptr Zip_Data_Pack::open(Path const& path) const
 		std::vector<uint8_t> decompressed(uncompressed_size);
 		if (decompressed.size() > 32000)
 		{
-			QLOG_WARNING("Q", "Decompressing '{}' file from '{}' fs: {}K -> {}K.", fd.path, m_path, compressed_size / 1024, uncompressed_size / 1024);
+            QLOGW("Decompressing '{}' file from '{}' fs: {}K -> {}K.", fd.path, m_path, compressed_size / 1024, uncompressed_size / 1024);
 		}
 
 		std::vector<uint8_t> compressed(compressed_size);
@@ -300,14 +300,14 @@ Source_uptr Zip_Data_Pack::open(Path const& path) const
 
 		if (err != Z_OK)
 		{
-			QLOG_ERR("Q", "Error {} while decompressing file '{}' from pack '{}'", err, fd.path, m_path);
+            QLOGE("Error {} while decompressing file '{}' from pack '{}'", err, fd.path, m_path);
 			return Source_uptr();
 		}
 		return Source_uptr(new Memory_Source(std::move(decompressed)));
 	}
 	else
 	{
-		QLOG_ERR("Q", "Error while decompressing file '{}' from pack '{}': Compression method {} not supported.", fd.path, m_path, fd.compression_method);
+        QLOGE("Error while decompressing file '{}' from pack '{}': Compression method {} not supported.", fd.path, m_path, fd.compression_method);
 		return Source_uptr();
 	}
 

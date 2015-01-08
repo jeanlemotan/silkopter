@@ -23,17 +23,17 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
 	data.reserve(512);
 
     auto* cwd = getcwd(nullptr, 0);
-    QLOG_INFO("FolderWalker", "current folder: {}", cwd);
+    QLOGD("current folder: {}", cwd);
     free(cwd);
 
-	QLOG_INFO("FolderWalker", "*** +folder: {}", path);
+    QLOGD("*** +folder: {}", path);
 
     DIR* dip = nullptr;
     struct dirent* dit = nullptr;
 
     if ((dip = opendir(path.get_as_string().c_str())) == nullptr)
 	{
-        QLOG_WARNING("FolderWalker", "*** cannot open folder: {} - {}", path, strerror(errno));
+        QLOGW("*** cannot open folder: {} - {}", path, strerror(errno));
 		return data;
 	}
 
@@ -42,11 +42,11 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
         if (util::strcmp(dit->d_name, "..") != 0 && util::strcmp(dit->d_name, ".") != 0)
 		{
 			data.emplace_back(Path(dit->d_name), dit->d_type == DT_DIR);
-			QLOG_INFO("FolderWalker", "***    file: {}", dit->d_name);
+            QLOGD("***    file: {}", dit->d_name);
 		}
 	}	
 
-	QLOG_INFO("FolderWalker", "*** -folder: {}", path);
+    QLOGD("*** -folder: {}", path);
 
 	closedir(dip);
 #undef Q_MAX_PATH
@@ -138,7 +138,7 @@ void Folder_Walker::refresh()
 
 	Path root(m_root);
 
-	QLOG_INFO("FolderWalker", "*** walker root: {}", root);
+    QLOGD("*** walker root: {}", root);
 
 	while (!paths.empty())
 	{
@@ -152,7 +152,7 @@ void Folder_Walker::refresh()
 
 		for(auto const& p: d)
 		{
-			QLOG_INFO("FolderWalker", "*** walker x {}: {}", p.second, p.first);
+            QLOGD("*** walker x {}: {}", p.second, p.first);
 
 			if (p.second)
 			{
@@ -164,7 +164,7 @@ void Folder_Walker::refresh()
 				m_all_collected_files.back().path = path + p.first;
 				m_all_collected_files.back().full_path = root + m_all_collected_files.back().path;
 
-				QLOG_INFO("FolderWalker", "*** walker y: {}", m_all_collected_files.back().full_path);
+                QLOGD("*** walker y: {}", m_all_collected_files.back().full_path);
 			}
 		};
 

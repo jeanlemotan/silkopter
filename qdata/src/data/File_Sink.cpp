@@ -12,7 +12,7 @@ File_Sink::File_Sink(Path const& path)
 	m_file = fopen(path.get_as_string().c_str(), "wb");
     if (!m_file)
     {
-        QLOG_WARNING("fs", "Cannot open {}: {}", path, strerror(errno));
+        QLOGW("Cannot open {}: {}", path, strerror(errno));
     }
 }
 File_Sink::~File_Sink()

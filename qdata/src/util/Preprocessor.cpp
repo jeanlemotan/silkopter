@@ -132,7 +132,7 @@ std::string Preprocessor::resolve_includes(Path const& path, std::string const& 
 		auto link = m_file_system.open(new_path);
 		if (!link)
 		{
-			QLOG_ERR("Preprocessor", "Cannot open file '{}' while preprocessing", new_path);
+            QLOGE("Cannot open file '{}' while preprocessing", new_path);
 			return src;
 		}
 

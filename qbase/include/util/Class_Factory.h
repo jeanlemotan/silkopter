@@ -55,7 +55,7 @@ namespace util
 			auto it = m_name_registry.find(class_name);
 			if (it != m_name_registry.end())
 			{
-				QLOG_ERR("ClassFctory", "Error: class '{}' already defined.", class_name);
+                QLOGE("Error: class '{}' already defined.", class_name);
 				return;
 			}
 			m_name_registry[class_name] = creator;
@@ -69,7 +69,7 @@ namespace util
             auto it = m_id_registry.find(class_id);
 			if (it != m_id_registry.end())
 			{
-                QLOG_ERR("ClassFactory", "Error: class '{}' already defined.", class_id);
+                QLOGE("Error: class '{}' already defined.", class_id);
 				return;
 			}
             m_id_registry[class_id] = creator;

@@ -67,6 +67,24 @@ namespace logging
 	extern void set_level(Level level);
 	extern void set_level(String const& topic, Level level);
 
+/////////////////////////////////////////////////////////////////////////////////////
+// Scoped topics
+
+    extern void push_topic(char const* topic);
+    extern void pop_topic();
+
+    struct Scoped_Topic
+    {
+        template<int N> Scoped_Topic(const char (&topic)[N])
+        {
+            push_topic(topic);
+        }
+        ~Scoped_Topic()
+        {
+            pop_topic();
+        }
+    };
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // The log functions
@@ -75,14 +93,14 @@ namespace logging
 
 }
 
-    extern void log(logging::Level level, char const* topic, const char* file, int line, const String& message);
+    extern void log(logging::Level level, const char* file, int line, const String& message);
 
 	template<class Fmt, typename... Params>
-    void logf(logging::Level level, char const* topic, char const* file, int line, Fmt const& fmt, Params&&... params)
+    void logf(logging::Level level, char const* file, int line, Fmt const& fmt, Params&&... params)
 	{
 		String message;
         q::util::format(message, fmt, std::forward<Params>(params)...);
-        log(level, topic, file, line, message);
+        log(level, file, line, message);
 	}
 
 	template<class Fmt, typename... Params>
@@ -90,13 +108,14 @@ namespace logging
 	{
 		String message;
         q::util::format(message, fmt, std::forward<Params>(params)...);
-        log(logging::Level::INFO, "", nullptr, 0, message);
+        log(logging::Level::INFO, nullptr, 0, message);
 	}
 
-#   define QLOG_DBG(topic, fmt, ...) 	q::logf(q::logging::Level::DBG, topic, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#   define QLOG_INFO(topic, fmt, ...) 		q::logf(q::logging::Level::INFO, topic, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#   define QLOG_WARNING(topic, fmt, ...) 	q::logf(q::logging::Level::WARNING, topic, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#   define QLOG_ERR(topic, fmt, ...) 	q::logf(q::logging::Level::ERR, topic, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#   define QLOG_TOPIC(topic)    q::logging::Scoped_Topic st_##__LINE__(topic)
+#   define QLOGD(fmt, ...)      q::logf(q::logging::Level::DBG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#   define QLOGI(fmt, ...) 		q::logf(q::logging::Level::INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#   define QLOGW(fmt, ...)      q::logf(q::logging::Level::WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#   define QLOGE(fmt, ...)      q::logf(q::logging::Level::ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 #else
 
@@ -110,10 +129,10 @@ namespace logging
 		}
 	}
 
-#   define QLOG_DBG(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOG_INFO(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOG_WARNING(topic, fmt, ...) q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOG_ERR(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
+#   define QLOGD(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
+#   define QLOGI(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
+#   define QLOGW(topic, fmt, ...)   q::quick_logf(fmt, ##__VA_ARGS__)
+#   define QLOGE(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
 
 #endif
 
