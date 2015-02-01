@@ -155,7 +155,7 @@ void Video_Stream::process()
         }
         else
         {
-            //SILK_WARNING("Discarded frame {}", m_frame.header.idx);
+            //QLOGW("Discarded frame {}", m_frame.header.idx);
         }
     }
 }

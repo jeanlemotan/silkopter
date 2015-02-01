@@ -75,12 +75,12 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 
         m_rudp.start();
 
-        SILK_INFO("Started sending on port {} and receiving on port {}", send_port, receive_port);
+        QLOGI("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
     catch(...)
     {
         m_socket.close();
-        SILK_WARNING("Connect failed");
+        QLOGW("Connect failed");
         return Result::FAILED;
     }
 
@@ -238,7 +238,7 @@ void Comms::process_message_sensors()
     comms::Sensors sensors;
     if (!channel.begin_unpack() || !channel.unpack_param(sensors))
     {
-        SILK_WARNING("Failed to receive sensors data");
+        QLOGW("Failed to receive sensors data");
         return;
     }
 
@@ -284,7 +284,7 @@ void Comms::process_message_sensors()
 
     if (!res)
     {
-        SILK_WARNING("Failed to receive sensors data");
+        QLOGW("Failed to receive sensors data");
         return;
     }
 }
@@ -295,7 +295,7 @@ void Comms::process_message_calibration_accelerometer()
     math::vec3f bias, scale;
     if (!m_setup_channel.unpack(bias, scale))
     {
-        SILK_WARNING("Failed to receive accelerometer calibration");
+        QLOGW("Failed to receive accelerometer calibration");
         return;
     }
     accelerometer_calibration_data_received.execute(bias, scale);
@@ -305,7 +305,7 @@ void Comms::process_message_calibration_gyroscope()
     math::vec3f bias;
     if (!m_setup_channel.unpack(bias))
     {
-        SILK_WARNING("Failed to receive gyroscope calibration");
+        QLOGW("Failed to receive gyroscope calibration");
         return;
     }
     gyroscope_calibration_data_received.execute(bias);
@@ -315,7 +315,7 @@ void Comms::process_message_calibration_compass()
     math::vec3f bias;
     if (!m_setup_channel.unpack(bias))
     {
-        SILK_WARNING("Failed to receive compass calibration");
+        QLOGW("Failed to receive compass calibration");
         return;
     }
     compass_calibration_data_received.execute(bias);
@@ -326,7 +326,7 @@ void Comms::process_message_yaw_rate_pid_params()
     Yaw_Rate_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive yaw rate pid params");
+        QLOGW("Failed to receive yaw rate pid params");
         return;
     }
     yaw_rate_pid_params_received.execute(params);
@@ -336,7 +336,7 @@ void Comms::process_message_pitch_rate_pid_params()
     Pitch_Rate_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive pitch rate pid params");
+        QLOGW("Failed to receive pitch rate pid params");
         return;
     }
     pitch_rate_pid_params_received.execute(params);
@@ -346,7 +346,7 @@ void Comms::process_message_roll_rate_pid_params()
     Roll_Rate_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive roll rate pid params");
+        QLOGW("Failed to receive roll rate pid params");
         return;
     }
     roll_rate_pid_params_received.execute(params);
@@ -356,7 +356,7 @@ void Comms::process_message_altitude_rate_pid_params()
     Altitude_Rate_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive altitude rate pid params");
+        QLOGW("Failed to receive altitude rate pid params");
         return;
     }
     altitude_rate_pid_params_received.execute(params);
@@ -367,7 +367,7 @@ void Comms::process_message_yaw_pid_params()
     Yaw_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive yaw pid params");
+        QLOGW("Failed to receive yaw pid params");
         return;
     }
     yaw_pid_params_received.execute(params);
@@ -377,7 +377,7 @@ void Comms::process_message_pitch_pid_params()
     Pitch_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive pitch pid params");
+        QLOGW("Failed to receive pitch pid params");
         return;
     }
     pitch_pid_params_received.execute(params);
@@ -387,7 +387,7 @@ void Comms::process_message_roll_pid_params()
     Roll_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive roll pid params");
+        QLOGW("Failed to receive roll pid params");
         return;
     }
     roll_pid_params_received.execute(params);
@@ -397,7 +397,7 @@ void Comms::process_message_altitude_pid_params()
     Altitude_PID::Params params;
     if (!m_setup_channel.unpack(params))
     {
-        SILK_WARNING("Failed to receive altitude pid params");
+        QLOGW("Failed to receive altitude pid params");
         return;
     }
     altitude_pid_params_received.execute(params);
@@ -407,7 +407,7 @@ void Comms::process_message_uav_rotation_l2w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.rotation_l2w))
     {
-        SILK_WARNING("Failed to receive uav rotation");
+        QLOGW("Failed to receive uav rotation");
         return;
     }
 }
@@ -415,7 +415,7 @@ void Comms::process_message_uav_linear_acceleration_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.linear_acceleration_w))
     {
-        SILK_WARNING("Failed to receive uav linear_acceleration");
+        QLOGW("Failed to receive uav linear_acceleration");
         return;
     }
 }
@@ -423,7 +423,7 @@ void Comms::process_message_uav_velocity_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.velocity_w))
     {
-        SILK_WARNING("Failed to receive uav velocity");
+        QLOGW("Failed to receive uav velocity");
         return;
     }
 }
@@ -431,7 +431,7 @@ void Comms::process_message_uav_position_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.position_w))
     {
-        SILK_WARNING("Failed to receive uav position");
+        QLOGW("Failed to receive uav position");
         return;
     }
 }
@@ -483,7 +483,7 @@ void Comms::process()
 
 //    static int xxx = 0;
 //    xxx++;
-//    SILK_INFO("LOOP: {}", xxx);
+//    QLOGI("LOOP: {}", xxx);
     while (auto msg = m_telemetry_channel.get_next_message())
     {
         switch (msg.get())
@@ -498,7 +498,7 @@ void Comms::process()
             case comms::Telemetry_Message::UAV_BATTERY_CURRENT:  break;
             case comms::Telemetry_Message::UAV_BATTERY_VOLTAGE:  break;
             default:
-                SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
+                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
         }
@@ -524,12 +524,12 @@ void Comms::process()
             case comms::Setup_Message::CALIBRATION_GYROSCOPE:  process_message_calibration_gyroscope(); break;
             case comms::Setup_Message::CALIBRATION_COMPASS:  process_message_calibration_compass(); break;
             default:
-                SILK_WARNING("Received unhandled message: {}", static_cast<int>(msg.get()));
+                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
             break;
         }
     }
-//    SILK_INFO("*********** LOOP: {}", xxx);
+//    QLOGI("*********** LOOP: {}", xxx);
 
     auto now = q::Clock::now();
 

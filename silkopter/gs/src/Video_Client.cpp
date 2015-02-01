@@ -30,7 +30,7 @@ Video_Client::~Video_Client()
 
 //		if (bytes_transferred < header_size + 1)
 //		{
-//			SILK_WARNING("Bad video packet received. Size is too small: {} bytes", bytes_transferred);
+//			QLOGW("Bad video packet received. Size is too small: {} bytes", bytes_transferred);
 //		}
 //		else
 //		{
@@ -41,17 +41,17 @@ Video_Client::~Video_Client()
 
 //			if (frame_idx < m_frames.last_served_idx)
 //			{
-//				SILK_WARNING("skipping past packet from: frame {} packet {}", frame_idx, packet_idx);
+//				QLOGW("skipping past packet from: frame {} packet {}", frame_idx, packet_idx);
 //			}
 //			else if (bytes_transferred < payload_size)
 //			{
-//				SILK_WARNING("skipping corrupted packet from: frame {} packet {}", frame_idx, packet_idx);
+//				QLOGW("skipping corrupted packet from: frame {} packet {}", frame_idx, packet_idx);
 //			}
 //			else
 //			{
 //				std::lock_guard<std::mutex> lg(m_frames.mutex);
 
-//				//SILK_INFO("received packet: frame {} packet {}", frame_idx, packet_idx);
+//				//QLOGI("received packet: frame {} packet {}", frame_idx, packet_idx);
 
 //				auto& frame_data = m_frames.fragmented_frame_datas[frame_idx];
 //				auto& packets = frame_data.packets;
@@ -59,7 +59,7 @@ Video_Client::~Video_Client()
 
 //				if (!packets[packet_idx].data.empty())
 //				{
-//					SILK_WARNING("skipping duplicate packet from: frame {} packet {}", frame_idx, packet_idx);
+//					QLOGW("skipping duplicate packet from: frame {} packet {}", frame_idx, packet_idx);
 //				}
 //				else
 //				{
@@ -94,7 +94,7 @@ Video_Client::~Video_Client()
 //	}
 //    else
 //    {
-//        SILK_ERR("error receiving packet: {}", error.message());
+//        QLOGE("error receiving packet: {}", error.message());
 //    }
 //}
 
@@ -124,7 +124,7 @@ bool Video_Client::get_frame(std::vector<uint8_t>& o_data) const
 //		return false;
 //	}
 
-//	//SILK_INFO("pending frames {}", m_frames.fragmented_frame_datas.size());
+//	//QLOGI("pending frames {}", m_frames.fragmented_frame_datas.size());
 //	//for (auto it = m_frames.fragmented_frame_datas.rbegin(); it != m_frames.fragmented_frame_datas.rend(); ++it)
 //	for (auto it = m_frames.fragmented_frame_datas.begin(); it != m_frames.fragmented_frame_datas.end(); ++it)
 //	{
@@ -166,7 +166,7 @@ bool Video_Client::get_frame(std::vector<uint8_t>& o_data) const
 
 //		while (!m_frames.fragmented_frame_datas.empty() && m_frames.fragmented_frame_datas.begin()->first <= frame_idx)
 //		{
-//			//SILK_INFO("deleting incomplete frames");
+//			//QLOGI("deleting incomplete frames");
 //			m_frames.fragmented_frame_datas.erase(m_frames.fragmented_frame_datas.begin());
 //		}
 

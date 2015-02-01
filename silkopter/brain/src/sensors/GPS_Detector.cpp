@@ -83,21 +83,25 @@ void GPS_Detector::process()
             auto res = read(m_fd, m_buffer.data(), m_buffer.size());
             if (res > 0)
             {
-                for (auto& p: m_protocols)
+                for (auto it = m_protocols.begin(); it != m_protocols.end(); /* no ++ here! */)
                 {
+                    auto& p = *it;
                     if (p->detect(m_buffer.data(), res))
                     {
-                        auto idx = &p - &m_protocols.front();
+                        auto idx = std::distance(m_protocols.begin(), it);
+                        QLOGI("Detected GPS protocol {}, initializing...", idx);
                         if (!p->init(m_fd))
                         {
-                            QLOGE("Detected GPS protocol {} failed to initialize", idx);
-                            continue;
+                            QLOGE("Detected GPS protocol {} failed to initialize. Removing from detection list!", idx);
+                            m_protocols.erase(it);
+                            break;
                         }
-                        QLOGI("Detected GPS protocol {}", idx);
+                        QLOGI("GPS protocol {} initialized.", idx);
                         m_gps = std::move(p);
                         m_protocols.clear();
                         break;
                     }
+                    ++it;
                 }
             }
             else
