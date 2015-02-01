@@ -68,23 +68,23 @@ bool GLES_Fbo_Wrapper::check_complete_fbo(uint32_t fbo)
 	}
 	else if (res == gles::iGL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)
 	{
-		QLOG_ERR("Q", "Render target failed: Incomplete attachment");
+        QLOGE("Render target failed: Incomplete attachment");
 	}
 	else if (res == gles::iGL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS)
 	{
-		QLOG_ERR("Q", "Render target failed: Incomplete dimensions");
+        QLOGE("Render target failed: Incomplete dimensions");
 	}
 	else if (res == gles::iGL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT)
 	{
-		QLOG_ERR("Q", "Render target failed: Missing attachment");
+        QLOGE("Render target failed: Missing attachment");
 	}
 	else if (res == gles::iGL_FRAMEBUFFER_UNSUPPORTED)
 	{
-		QLOG_ERR("Q", "Render target failed: unsupported");
+        QLOGE("Render target failed: unsupported");
 	}
 	else
 	{
-		QLOG_ERR("Q", "Render target failed: unknown error");
+        QLOGE("Render target failed: unknown error");
 	}
 
 	return res == gles::iGL_FRAMEBUFFER_COMPLETE;

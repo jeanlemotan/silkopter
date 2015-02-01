@@ -56,12 +56,12 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 		video::Technique_ptr technique = System::inst().get_factory().load<video::Technique>(Path(name));
 		if (!technique || !technique->is_valid())
 		{
-			QLOG_WARNING("Q", "Cannot load technique '{}'. Trying the default one.", name);
+            QLOGW("Cannot load technique '{}'. Trying the default one.", name);
 			static String def("default.technique");
 			technique = System::inst().get_factory().load_by_name<video::Technique>(def);
 			if (!technique)
 			{
-				QLOG_ERR("Q", "Cannot default technique.");
+                QLOGE("Cannot default technique.");
 				return;
 			}
 		}

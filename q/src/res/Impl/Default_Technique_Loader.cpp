@@ -44,7 +44,7 @@ void DefaultTechniqueLoader::load(Path const& path, data::Source& source, Techni
 	xml_node techn = doc.child("technique");
 	if (!res || !techn)
 	{
-		QLOG_ERR("Q", "Invalid technique '{}'", path);
+        QLOGE("Invalid technique '{}'", path);
 		return;
 	}
 
@@ -82,7 +82,7 @@ bool DefaultTechniqueLoader::load_technique(Path const& path, const xml_node& ro
 	}
 	if (t.get_pass_count() == 0)
 	{
-		QLOG_ERR("Q", "No passes found in technique '{}'", path);
+        QLOGE("No passes found in technique '{}'", path);
 		return false;
 	}
 	return true;
@@ -107,7 +107,7 @@ bool DefaultTechniqueLoader::load_pass(Path const& path, const pugi::xml_node& r
 		QASSERT(rt);
 		if (!rt)
 		{
-			QLOG_ERR("Q", "Cannot find render target '{}' necessary for pass '{}'", rtname, p.get_name());
+            QLOGE("Cannot find render target '{}' necessary for pass '{}'", rtname, p.get_name());
 			return false;
 		}
 		else
@@ -163,7 +163,7 @@ bool DefaultTechniqueLoader::load_pass(Path const& path, const pugi::xml_node& r
 	xml_node shadern = root.child("shader");
 	if (!shadern)
 	{
-		QLOG_ERR("Q", "Cannot find load shader tag, technique '{}'", path);
+        QLOGE("Cannot find load shader tag, technique '{}'", path);
 		return false;
 	}
 	return load_shader(path, shadern, p);
@@ -188,7 +188,7 @@ bool DefaultTechniqueLoader::load_uniform(Path const& /*path*/, const pugi::xml_
 		bool res = System::inst().get_renderer()->link_uniform(u);
 		if (!res)
 		{
-			QLOG_ERR("Q", "Cannot link uniform {} to {}", nameStr, linkStr);
+            QLOGE("Cannot link uniform {} to {}", nameStr, linkStr);
 			return false;
 		}
 	}
@@ -211,7 +211,7 @@ bool DefaultTechniqueLoader::load_uniform(Path const& /*path*/, const pugi::xml_
 		}
 		else
 		{
-			QLOG_ERR("Q", "Cannot find precision tag");
+            QLOGE("Cannot find precision tag");
 			return false;
 		}
 
@@ -324,7 +324,7 @@ bool DefaultTechniqueLoader::parse_uniform_value(Uniform& u, String const& typeS
 	}
 	else
 	{
-		QLOG_ERR("Q", "Cannot find value tag");
+        QLOGE("Cannot find value tag");
 		return false;
 	}
 
@@ -473,7 +473,7 @@ Sampler_Def::Semantic DefaultTechniqueLoader::parse_semantic(String const& value
 	}
 	else
 	{
-		QLOG_ERR("Q", "Bad semantic - {}", value);
+        QLOGE("Bad semantic - {}", value);
 	}
 
 	return def;
@@ -508,7 +508,7 @@ bool DefaultTechniqueLoader::load_sampler(Path const& /*path*/, const pugi::xml_
 		bool res = System::inst().get_renderer()->link_sampler(s, Path(link));
 		if (!res)
 		{
-			QLOG_ERR("Q", "Cannot link sampler {} to {}", name, link);
+            QLOGE("Cannot link sampler {} to {}", name, link);
 			return false;
 		}
 	}
@@ -524,7 +524,7 @@ bool DefaultTechniqueLoader::load_attribute(Path const& path, const pugi::xml_no
 
 	if (name.empty() || link.empty())
 	{
-		QLOG_ERR("Q", "{}: Attribute without name or link.", path);
+        QLOGE("{}: Attribute without name or link.", path);
 		return false;
 	}
 
@@ -540,7 +540,7 @@ bool DefaultTechniqueLoader::load_attribute(Path const& path, const pugi::xml_no
 
 	if (a.get_component_count() == 0)
 	{
-		QLOG_ERR("Q", "{}: Attribute with bad count {}.", path, icount);
+        QLOGE("{}: Attribute with bad count {}.", path, icount);
 		return false;
 	}
 	return true;
@@ -654,7 +654,7 @@ Render_State::Blend_Formula::Factor DefaultTechniqueLoader::parse_blend_factor(S
 	}
 	else
 	{
-		QLOG_ERR("Q", "Bad blend factor - {}", val);
+        QLOGE("Bad blend factor - {}", val);
 	}
 	return def;
 }
@@ -663,7 +663,7 @@ bool DefaultTechniqueLoader::load_shader(Path const& path, const pugi::xml_node&
 {
 	if (!root)
 	{
-		QLOG_ERR("Q", "Cannot load shader pass from '{}'", path);
+        QLOGE("Cannot load shader pass from '{}'", path);
 		return false;
 	}
 	Uber_Shader shader;
@@ -675,7 +675,7 @@ bool DefaultTechniqueLoader::load_shader(Path const& path, const pugi::xml_node&
 		vs = cdata.value();
 		if (vs.empty())
 		{
-			QLOG_ERR("Q", "No source specified for vs, technique '{}'", path);
+            QLOGE("No source specified for vs, technique '{}'", path);
 			return false;
 		}
 	}
@@ -686,7 +686,7 @@ bool DefaultTechniqueLoader::load_shader(Path const& path, const pugi::xml_node&
 		fs = cdata.value();
 		if (fs.empty())
 		{
-			QLOG_ERR("Q", "No source specified for fs, technique '{}'", path);
+            QLOGE("No source specified for fs, technique '{}'", path);
 			return false;
 		}
 	}
@@ -729,7 +729,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	COLOR_FORMAT(AI_32);
 	else if (cf != "")
 	{
-		QLOG_ERR("Q", "Unknown render target color format '{}'", cf);
+        QLOGE("Unknown render target color format '{}'", cf);
 		return false;
 	}
 
@@ -745,7 +745,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 	else if (df != "")
 	{
-		QLOG_ERR("Q", "Unknown render target depth format '{}'", df);
+        QLOGE("Unknown render target depth format '{}'", df);
 		return false;
 	}
 
@@ -757,7 +757,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 	else if (sf != "")
 	{
-		QLOG_ERR("Q", "Unknown render target stencil format '{}'", sf);
+        QLOGE("Unknown render target stencil format '{}'", sf);
 		return false;
 	}
 
@@ -781,7 +781,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 	else if (af != "")
 	{
-		QLOG_ERR("Q", "Unknown render target aa format '{}'", af);
+        QLOGE("Unknown render target aa format '{}'", af);
 		return false;
 	}
 
@@ -791,7 +791,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 		float ratio = att.as_float();
 		if (math::is_zero(ratio))
 		{
-			QLOG_ERR("Q", "Cannot have a ratio of 0");
+            QLOGE("Cannot have a ratio of 0");
 			return false;
 		}
 		size = math::vec2u32(math::round(math::vec2f(System::inst().get_renderer()->get_viewport_size()) * ratio));
@@ -801,14 +801,14 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 		att = root.attribute("width");
 		if (!att)
 		{
-			QLOG_ERR("Q", "Missing width tag in render target definition");
+            QLOGE("Missing width tag in render target definition");
 			return false;
 		}
 		uint32_t w = att.as_uint();
 		att = root.attribute("height");
 		if (!att)
 		{
-			QLOG_ERR("Q", "Missing height tag in render target definition");
+            QLOGE("Missing height tag in render target definition");
 			return false;
 		}
 		uint32_t h = att.as_uint();
@@ -819,7 +819,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	String name(att.value());
 	if (name.empty())
 	{
-		QLOG_ERR("Q", "Missing name tag in render target definition");
+        QLOGE("Missing name tag in render target definition");
 		return false;
 	}
 
@@ -828,7 +828,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 		stencil_format == Render_Target::Stencil_Format::NONE &&
 		aa_format == Render_Target::AA_Format::NONE)
 	{
-		QLOG_ERR("Q", "No format specified for render target");
+        QLOGE("No format specified for render target");
 		return false;
 	}
 
@@ -840,7 +840,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 			stencil_format != rt->get_stencil_format() ||
 			aa_format != rt->get_aa_format())
 		{
-			QLOG_ERR("Q", "Render target '{}' was previously declared with a different format/size", name);
+            QLOGE("Render target '{}' was previously declared with a different format/size", name);
 			return false;
 		}
 		return true;

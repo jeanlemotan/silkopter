@@ -137,7 +137,7 @@ void GLES_Texture::upload_data(uint32_t mipmap, uint8_t const* data)
 	{
 		if (mipmap > 0)
 		{
-			QLOG_ERR("Q", "Mipmap {} specified for npot texture '{}'. Ignoring.", mipmap, get_path());
+            QLOGE("Mipmap {} specified for npot texture '{}'. Ignoring.", mipmap, get_path());
 			return;
 		}
 	}

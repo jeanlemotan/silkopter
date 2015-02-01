@@ -118,7 +118,7 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
         auto it = m_ouya_mapping.buttons.find(ev.number);
         if (it == m_ouya_mapping.buttons.end())
         {
-            QLOG_ERR("qinput", "unhandled ouya button {}", ev.number);
+            QLOGE("unhandled ouya button {}", ev.number);
             return;
         }
         if (ev.value)
@@ -170,7 +170,7 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
         }
         else
         {
-            QLOG_ERR("qinput", "unknown ouya axis {}", ev.number);
+            QLOGE("unknown ouya axis {}", ev.number);
         }
     }
 }
@@ -183,7 +183,7 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         auto it = m_ps3_mapping.buttons.find(ev.number);
         if (it == m_ps3_mapping.buttons.end())
         {
-            QLOG_ERR("qinput", "unhandled ps3 button {}", ev.number);
+            QLOGE("unhandled ps3 button {}", ev.number);
             return;
         }
         if (ev.value)
@@ -235,7 +235,7 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         }
         else
         {
-            //QLOG_ERR("qinput", "unknown ps3 axis {}", ev.number);
+            //QLOGE("unknown ps3 axis {}", ev.number);
         }
     }
 }
@@ -306,7 +306,7 @@ static boost::optional<Gamepad_Info> get_gamepad_info(int device_id)
     char name[1024];
     if (ioctl(device_id, JSIOCGNAME(sizeof(name)), name) < 0)
     {
-        QLOG_WARNING("qinput", "Cannot read device name: {}", strerror(errno));
+        QLOGW("Cannot read device name: {}", strerror(errno));
         return boost::none;
     }
 
@@ -328,14 +328,14 @@ static boost::optional<Gamepad_Info> get_gamepad_info(int device_id)
     char count = 0;
     if (ioctl(device_id, JSIOCGAXES, &count) == -1)
     {
-        QLOG_WARNING("qinput", "Cannot read device info: {}", strerror(errno));
+        QLOGW("Cannot read device info: {}", strerror(errno));
         return boost::none;
     }
     info.axes_count = count;
 
     if (ioctl(device_id, JSIOCGBUTTONS, &count) == -1)
     {
-        QLOG_WARNING("qinput", "Cannot read device info: {}", strerror(errno));
+        QLOGW("Cannot read device info: {}", strerror(errno));
         return boost::none;
     }
     info.button_count = count;
@@ -370,7 +370,7 @@ void Input_Mgr::enumerate_gamepads() const
             continue;
         }
 
-        QLOG_INFO("qinput", "found {} gamepad/joystick with {} axes and {} buttons", info->name, info->axes_count, info->button_count);
+        QLOGI("Found {} gamepad/joystick with {} axes and {} buttons", info->name, info->axes_count, info->button_count);
 
         Gamepad_Data g;
         g.gamepad = std::make_shared<Gamepad>(info->name, info->type);

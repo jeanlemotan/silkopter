@@ -53,7 +53,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 	//verification
 	if (header->u32Version != PVRTEX3_IDENT)
 	{
-		QLOG_ERR("Q", "Invalid header, '{}' is not a PVR", path);
+        QLOGE("Invalid header, '{}' is not a PVR", path);
 		return;
 	}
 
@@ -134,7 +134,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 		supported = texture && texture->supports_format(texFormat);
 		if (!supported)
 		{
-			QLOG_WARNING("Q", "PVRTC2 texture format not supprted. Will be decompressed");
+            QLOGW("PVRTC2 texture format not supprted. Will be decompressed");
 		}
 		blockSizeX = 8;
 		blockSizeY = 4;
@@ -149,7 +149,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 		supported = texture && texture->supports_format(texFormat);
 		if (!supported)
 		{
-			QLOG_WARNING("Q", "PVRTC4 texture format not supprted. Will be decompressed");
+            QLOGW("PVRTC4 texture format not supprted. Will be decompressed");
 		}
 		blockSizeX = blockSizeY = 4;
 		minBlocks = 2;
@@ -163,7 +163,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 		supported = texture && texture->supports_format(texFormat);
 		if (!supported)
 		{
-			QLOG_WARNING("Q", "ETC1 texture format not supprted. Will be decompressed");
+            QLOGW("ETC1 texture format not supprted. Will be decompressed");
 		}
 		minBlocks = 4;
 		bitsPerPixel = 4;
@@ -171,7 +171,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 	}
 	else
 	{
-		QLOG_ERR("Q", "Unknown texture format");
+        QLOGE("Unknown texture format");
 		return;
 	}
 
@@ -181,7 +181,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 	{
 		if (texture && !texture->allocate(texFormat, size))
 		{
-			QLOG_ERR("Q", "Unknown texture format");
+            QLOGE("Unknown texture format");
 			return;
 		}
 	}
@@ -189,7 +189,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 	{
 		if (texture && !texture->allocate(Texture::Format::RGBA_8, size))
 		{
-			QLOG_ERR("Q", "Unknown texture format");
+            QLOGE("Unknown texture format");
 			return;
 		}
 	}

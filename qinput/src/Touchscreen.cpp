@@ -165,7 +165,7 @@ void Touchscreen::process_events(q::Clock::duration /*dt*/)
 			}
 			break;
 		default:
-			QLOG_ERR("Q", "Ignored gamepad event - {0}", (int)event.type);
+            QLOGE("Ignored gamepad event - {0}", (int)event.type);
 			break;
 		}
 	}

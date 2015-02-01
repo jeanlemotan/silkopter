@@ -9,7 +9,7 @@ using namespace video;
 
 GLES_Render_Target::~GLES_Render_Target()
 {
-    QLOG_INFO("Q", "Deleting render target {}", get_gl_id());
+    QLOGI("Deleting render target {}", get_gl_id());
 	//TODO - check the leaks
 }
 
@@ -29,7 +29,7 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 
 	Capabilities caps = r->get_capabilities();
 
-	QLOG_INFO("Q", "Creating new render target size {}", size);
+    QLOGI("Creating new render target size {}", size);
 
 	gles::Interface interf;
 
@@ -58,11 +58,11 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 			case 16: aa = AA_Format::A16X; break;
 			default: QASSERT(0); break;
 			}
-			QLOG_INFO("Q", "Requested {} samples, got {}", req_samples, samples);
+            QLOGI("Requested {} samples, got {}", req_samples, samples);
 		}
 		else
 		{
-			QLOG_INFO("Q", "Requested {} samples but AA is not available", req_samples);
+            QLOGI("Requested {} samples but AA is not available", req_samples);
 			aa = AA_Format::NONE;
 		}
 	}
@@ -82,7 +82,7 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 	int tex_height = prefer_npot ? math::get_min_pot(s.y) : s.y;
 	math::vec2u32 tex_size(tex_width, tex_height);
 
-	QLOG_INFO("Q", "Requested size {}, real size {}", size, tex_size);
+    QLOGI("Requested size {}, real size {}", size, tex_size);
 
 	m_allocated_size = tex_size;
 
@@ -130,14 +130,14 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 			{
 				error = true;
 				int format = (int)color;
-				QLOG_ERR("Q", "Unknown color format {}", format);
+                QLOGE("Unknown color format {}", format);
 			}
 		}
 
 		if (!error)
 		{
 			int format = (int)color;
-			QLOG_INFO("Q", "Creating color texture format {}", format);
+            QLOGI("Creating color texture format {}", format);
 			m_color_buffer = Texture::create(Path());
 			bool res = m_color_buffer->allocate(tex_format, tex_size);
 			if (res)
@@ -150,7 +150,7 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 			{
 				error = true;
 				int format = (int)color;
-				QLOG_ERR("Q", "Color format unsupported {}", format);
+                QLOGE("Color format unsupported {}", format);
 			}
 		}
 	}
@@ -173,13 +173,13 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 			QASSERT(0);
 			error = true;
 			int format = (int)depth;
-			QLOG_ERR("Q", "Unknown depth format {}", format);
+            QLOGE("Unknown depth format {}", format);
 		}
 
 		if (caps.depth_texture_support)
 		{
 			int format = (int)depth;
-			QLOG_INFO("Q", "Allocating depth texture format {}", format);
+            QLOGI("Allocating depth texture format {}", format);
 			m_depth_buffer->allocate(tex_format, tex_size);
 			GLES_Texture_ptr dtex = std::static_pointer_cast<GLES_Texture>(m_depth_buffer);
 			// Now we have our depth buffer attach it to our frame buffer object.
@@ -189,7 +189,7 @@ bool GLES_Render_Target::allocate(math::vec2u32 const& size, Color_Format color,
 		else
 		{
 			int format = (int)depth;
-			QLOG_INFO("Q", "Allocating depth buffer format {}", format);
+            QLOGI("Allocating depth buffer format {}", format);
 			// Generate and bind the handle for the render buffer (which will become our depth buffer)
 			interf.iglGenRenderbuffers(1, &m_depth_buffer_gl_id);
 			interf.iglBindRenderbuffer(gles::iGL_RENDERBUFFER, m_depth_buffer_gl_id);

@@ -49,7 +49,7 @@ void GLES_Renderer::init(math::vec2u32 const& size,
 	m_default_render_target = create_default_render_target(size, color_format, depth_format, stencil_format);
 	if (!m_default_render_target)
 	{
-		QLOG_ERR("Q", "Cannot create default render target. Probably bad format.");
+        QLOGE("Cannot create default render target. Probably bad format.");
 		return;
 	}
 
@@ -132,25 +132,25 @@ void GLES_Renderer::init_capabilities()
 		float max_aniso = 0.f;
 		interf.iglGetFloatv(gles::iGL_MAX_TEXTURE_MAX_ANISOTROPY, &max_aniso); // this gets the maximum supported anisotropy level for this implementation (hardware or driver max).
 		m_capabilities.max_anisotropy = (size_t)max_aniso;
-		QLOG_INFO("Q", "\tMaximum anisotropy: {}", max_aniso);
+        QLOGI("\tMaximum anisotropy: {}", max_aniso);
 	}
 	{
 		m_capabilities.occlusion_query_support = interf.ihasExtensionPart("_occlusion_query_boolean");
-		QLOG_INFO("Q", "\tOcclusion query support: {}", m_capabilities.occlusion_query_support);
+        QLOGI("\tOcclusion query support: {}", m_capabilities.occlusion_query_support);
 	}
 
 	{
 		m_capabilities.float_texture_support =
 			interf.ihasExtensionPart("_texture_float") ||
 			interf.ihasExtensionPart("_texture_float");
-		QLOG_INFO("Q", "\tFloat texture support: {}", m_capabilities.float_texture_support);
+        QLOGI("\tFloat texture support: {}", m_capabilities.float_texture_support);
 	}
 	{
 		m_capabilities.half_float_texture_support =
 			interf.ihasExtensionPart("_texture_half_float") ||
 			interf.ihasExtensionPart("_texture_half_float") ||
 			interf.ihasExtensionPart("_half_float_pixel");
-		QLOG_INFO("Q", "\tHalf float texture support: {}", m_capabilities.half_float_texture_support);
+        QLOGI("\tHalf float texture support: {}", m_capabilities.half_float_texture_support);
 	}
 
 	{
@@ -160,17 +160,17 @@ void GLES_Renderer::init_capabilities()
 			interf.ihasExtension("GL_EXT_depth_texture") ||
 			interf.ihasExtension("GL_IMG_depth_texture") ||
 			interf.ihasExtension("GL_depth_texture");
-		QLOG_INFO("Q", "\tDepth texture support: {}", m_capabilities.depth_texture_support);
+        QLOGI("\tDepth texture support: {}", m_capabilities.depth_texture_support);
 	}
 
 	{
 		m_capabilities.pvrtc_compression_support = interf.ihasExtensionPart("pvrtc");
-		QLOG_INFO("Q", "\tPVRTC compression support: {}", m_capabilities.pvrtc_compression_support);
+        QLOGI("\tPVRTC compression support: {}", m_capabilities.pvrtc_compression_support);
 	}
 
 	{
 		m_capabilities.etc1_compression_support = interf.ihasExtensionPart("etc");
-		QLOG_INFO("Q", "\tETC compression support: {}", m_capabilities.etc1_compression_support);
+        QLOGI("\tETC compression support: {}", m_capabilities.etc1_compression_support);
 	}
 
 	{
@@ -178,7 +178,7 @@ void GLES_Renderer::init_capabilities()
 			interf.ihasExtension("GL_EXT_texture_compression_s3tc") ||
 			interf.ihasExtension("GL_OES_texture_compression_S3TC") ||
 			interf.ihasExtensionPart("dxt");
-		QLOG_INFO("Q", "\tDXT compression support: {}", m_capabilities.dxt_compression_support);
+        QLOGI("\tDXT compression support: {}", m_capabilities.dxt_compression_support);
 	}
 
 	if (interf.ihasExtension("GL_ARB_multisample") || interf.ihasExtension("GL_OES_multisample"))
@@ -189,29 +189,29 @@ void GLES_Renderer::init_capabilities()
 		int maxSamples = 0;
 		interf.iglGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 		m_capabilities.max_aa_samples = maxSamples;
-		QLOG_INFO("Q", "\tMax AA samples: {}", m_capabilities.max_aa_samples);
+        QLOGI("\tMax AA samples: {}", m_capabilities.max_aa_samples);
 	}
 
 	{
 		m_capabilities.multiple_render_targets = 1;
-		QLOG_INFO("Q", "\tMultiple render targets supported: {}", m_capabilities.multiple_render_targets);
+        QLOGI("\tMultiple render targets supported: {}", m_capabilities.multiple_render_targets);
 	}
 
 	{
 		gles::iGLint vtf;
 		interf.iglGetIntegerv(gles::iGL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &vtf);
 		m_capabilities.vertex_textures = vtf;
-		QLOG_INFO("Q", "\tVertex textures: {}", vtf);
+        QLOGI("\tVertex textures: {}", vtf);
 	}
 
 	{
 		String vendor(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VENDOR)));
 		String renderer(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_RENDERER)));
 		String version(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VERSION)));
-		QLOG_INFO("Q", "Rendering info:");
-		QLOG_INFO("Q", "\t Vendor: {}", vendor);
-		QLOG_INFO("Q", "\t Renderer: {}", renderer);
-		QLOG_INFO("Q", "\t Version: {}", version);
+        QLOGI("Rendering info:");
+        QLOGI("\t Vendor: {}", vendor);
+        QLOGI("\t Renderer: {}", renderer);
+        QLOGI("\t Version: {}", version);
 
 		if (renderer.find("powervr") != String::npos)
 		{
@@ -254,12 +254,12 @@ void GLES_Renderer::add_render_target(String const& name, Render_Target_ptr rt)
 
 	if (!rt)
 	{
-		QLOG_ERR("Q", "Trying to add empty render target with name '{}'", name);
+        QLOGE("Trying to add empty render target with name '{}'", name);
 		return;
 	}
 	if (find_render_target_by_name(name))
 	{
-		QLOG_ERR("Q", "Render target named '{}' already exists", name);
+        QLOGE("Render target named '{}' already exists", name);
 		return;
 	}
 
@@ -419,7 +419,7 @@ void GLES_Renderer::end_frame()
 
 	m_frame_idx++;
 
-	//QLOG_INFO("Q", "dc:{}, tc:{}, lc:{}, vc:{}", m_draw_calls, m_triangle_count, m_line_count, m_vertex_count);
+    //QLOGI("dc:{}, tc:{}, lc:{}, vc:{}", m_draw_calls, m_triangle_count, m_line_count, m_vertex_count);
 	//Profiler::dump();
 
 	m_cameras.clear();
@@ -476,19 +476,19 @@ Render_Target_ptr GLES_Renderer::get_post_fx_render_target(Hdr_Format format)
 	bool recreate = false;
 	if (!pfx_rt)
 	{
-		QLOG_INFO("Q", "Creating postfx render target for format {}", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {}", static_cast<int>(format));
 		recreate = true;
 	}
 	else if (pfx_rt->get_size() != rt->get_size())
 	{
-		QLOG_INFO("Q", "Creating postfx render target for format {} because of size change", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {} because of size change", static_cast<int>(format));
 		recreate = true;
 	}
 	else if (format == Hdr_Format::NONE &&
 		(rt->get_color_format() != pfx_rt->get_color_format() || rt->get_depth_format() != pfx_rt->get_depth_format() ||
 		rt->get_stencil_format() != pfx_rt->get_stencil_format() || rt->get_aa_format() != pfx_rt->get_aa_format()))
 	{
-		QLOG_INFO("Q", "Creating postfx render target for format {} because of mode change", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {} because of mode change", static_cast<int>(format));
 		recreate = true;
 	}
 
@@ -498,7 +498,7 @@ Render_Target_ptr GLES_Renderer::get_post_fx_render_target(Hdr_Format format)
 		bool res = pfx_rt->allocate(rt->get_size(), desired_color_format, rt->get_depth_format(), rt->get_stencil_format(), rt->get_aa_format(), false);
 		if (!res)
 		{
-			QLOG_ERR("Q", "Cannot create postfx render target for format {}", static_cast<int>(format));
+            QLOGE("Cannot create postfx render target for format {}", static_cast<int>(format));
 			return Render_Target_ptr();
 		}
 		m_post_fx_data.render_targets[rt_idx] = pfx_rt;

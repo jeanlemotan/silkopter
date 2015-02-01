@@ -101,7 +101,7 @@ void Shader_Source::process()
 		if (name.empty())
 		{
 			auto pos = util::find_line_char_by_offset(m_source, tag_match.position());
-			QLOG_ERR("Q", "Syntax error at {}: bad tag - {}", pos, tag);
+            QLOGE("Syntax error at {}: bad tag - {}", pos, tag);
 			return;
 		}
 
@@ -110,7 +110,7 @@ void Shader_Source::process()
 			if (!regex_match(name, name_validator_rex))
 			{
 				auto pos = util::find_line_char_by_offset(m_source, name_start_idx);
-				QLOG_ERR("Q", "Syntax error at {}: bad tag - {}", pos, tag);
+                QLOGE("Syntax error at {}: bad tag - {}", pos, tag);
 				return;
 			}
 		}
@@ -123,7 +123,7 @@ void Shader_Source::process()
 // 			if (!regex_match(index, m, index_validator_rex))
 // 			{
 // 				std::pair<size_t, size_t> pos = util::find_line_char_by_offset(m_source, index_start_idx);
-// 				QLOG_ERR("Q", "Syntax error at {}: bad tag - {}", pos, tag);
+// 				QLOGE("Syntax error at {}: bad tag - {}", pos, tag);
 // 				return;
 // 			}
 // 			index = m[1];

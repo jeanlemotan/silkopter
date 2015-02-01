@@ -2027,7 +2027,7 @@ void TL_Interface::internal_load()
 			m_extensions = ext;
 		}
 	}
-    QLOG_INFO("GL Extensions = {}", m_extensions);
+    QLOGI("GL Extensions = {}", m_extensions);
 
 	m_funcs = new GL_Ext_Functions;
 

@@ -172,7 +172,7 @@ namespace anim
 		int idx = find_idx_by_path(path);
 		if (idx >= 0)
 		{
-			QLOG_ERR("Q", "Channel '{}' already exists. Ignoring.", path);
+            QLOGE("Channel '{}' already exists. Ignoring.", path);
 			return idx;
 		}
 

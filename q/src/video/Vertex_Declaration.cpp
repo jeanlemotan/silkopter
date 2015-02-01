@@ -137,11 +137,11 @@ void Vertex_Declaration::set_index_buffer(Index_Buffer_ptr buffer)
 		size_t index_count = buffer->get_size() / sizeof(uint16_t);
 		if (index_count < m_index_count)
 		{
-			QLOG_INFO("Q", "New buffer is too small. resizing.");
+            QLOGI("New buffer is too small. resizing.");
 			bool res = buffer->allocate(m_index_count * sizeof(uint16_t), buffer->get_usage());
 			if (!res)
 			{
-				QLOG_INFO("Q", "New buffer is too small and failed to resize. Ignoring");
+                QLOGI("New buffer is too small and failed to resize. Ignoring");
 				return;
 			}
 		}
@@ -162,7 +162,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, Semantic semant
 	int idx = find_attribute_idx_by_semantic(semantic);
 	if (idx >= 0)
 	{
-		QLOG_ERR("Q", "Attribute semantic {} already exists. Ignoring.", (int)semantic);
+        QLOGE("Attribute semantic {} already exists. Ignoring.", (int)semantic);
 		return -1;
 	}
 	return add_attribute(buffer, String::null, semantic, type, count, offset, stride);
@@ -173,7 +173,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 	int idx = find_attribute_idx_by_name(name);
 	if (idx >= 0)
 	{
-		QLOG_ERR("Q", "Attribute name '{}' already exists. Ignoring.", name);
+        QLOGE("Attribute name '{}' already exists. Ignoring.", name);
 		return -1;
 	}
 	return add_attribute(buffer, name, Semantic::USER, type, count, offset, stride);
@@ -183,26 +183,26 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 {
 	if (!buffer)
 	{
-		QLOG_ERR("Q", "Attribute name '{}' has null buffer. Ignoring.", name);
+        QLOGE("Attribute name '{}' has null buffer. Ignoring.", name);
 		return -1;
 	}
 
 	if (count == 0)
 	{
-		QLOG_ERR("Q", "Attribute name '{}' has no elements. Ignoring.", name);
+        QLOGE("Attribute name '{}' has no elements. Ignoring.", name);
 		return -1;
 	}
 
 	if ((stride & 3) != 0 || (offset & 3) != 0)
 	{
-		QLOG_ERR("Q", "Attribute name '{}' needs stride or offset multiple of 4. Ignoring.", name);
+        QLOGE("Attribute name '{}' needs stride or offset multiple of 4. Ignoring.", name);
 		return -1;
 	}
 	for (auto const& data: m_attributes)
 	{
 		if (get_vertex_buffer(data.attribute.buffer_idx) == buffer && data.attribute.stride != stride)
 		{
-			QLOG_ERR("Q", "Attribute name '{}' reuses a buffer with a different stride. Ignoring.", name);
+            QLOGE("Attribute name '{}' reuses a buffer with a different stride. Ignoring.", name);
 			return -1;
 		}
 	}
@@ -210,7 +210,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 	size_t vertex_count = buffer->get_size() / stride;
 	if (m_vertex_count > 0 && m_vertex_count != vertex_count)
 	{
-		QLOG_ERR("Q", "Attribute name '{}' needs to have {} vertices. It has {} instead. Ignoring.", name, m_vertex_count, vertex_count);
+        QLOGE("Attribute name '{}' needs to have {} vertices. It has {} instead. Ignoring.", name, m_vertex_count, vertex_count);
 		return -1;
 	}
 
@@ -250,7 +250,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 	{
 		if (m_vertex_buffers.size() >= 255)
 		{
-			QLOG_ERR("Q", "Attribute name '{}' reached the max number of buffers - 256.", name);
+            QLOGE("Attribute name '{}' reached the max number of buffers - 256.", name);
 			return -1;
 		}
 
@@ -336,11 +336,11 @@ void Vertex_Declaration::replace_vertex_buffer(size_t idx, Vertex_Buffer_ptr new
 			size_t vertex_count = new_buffer->get_size() / data.attribute.stride;
 			if (vertex_count < get_vertex_count())
 			{
-				QLOG_INFO("Q", "New buffer is too small. resizing.");
+                QLOGI("New buffer is too small. resizing.");
 				bool res = new_buffer->allocate(get_vertex_count() * data.attribute.stride, new_buffer->get_usage());
 				if (!res)
 				{
-					QLOG_INFO("Q", "New buffer is too small and failed to resize. Ignoring");
+                    QLOGI("New buffer is too small and failed to resize. Ignoring");
 					continue;
 				}
 			}

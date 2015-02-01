@@ -136,7 +136,7 @@ bool Font::set_height(uint32_t height) const
 		int error = FT_Set_Char_Size((FT_Face)m_free_type_data.face, height << 6, 0, 72, 72);
 		if (error)
 		{
-			QLOG_ERR("Q", "FT_Error code 0x%02x : %s", FT_Errors[error].code, FT_Errors[error].message);
+            QLOGE("FT_Error code 0x%02x : %s", FT_Errors[error].code, FT_Errors[error].message);
 			return false;
 		}	
 	}
@@ -225,7 +225,7 @@ bool Font::render_glyph(Glyph& glyph, uint32_t codepoint, bool render)
 	FT_Error error = FT_Load_Glyph((FT_Face)m_free_type_data.face, glyphIdx, flags);
 	if (error)
 	{
-		QLOG_ERR("Q", "FT_Error code 0x%02x : %s\n", FT_Errors[error].code, FT_Errors[error].message );
+        QLOGE("FT_Error code 0x%02x : %s\n", FT_Errors[error].code, FT_Errors[error].message );
 		return false;
 	}
 

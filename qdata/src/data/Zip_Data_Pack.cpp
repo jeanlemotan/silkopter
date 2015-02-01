@@ -147,7 +147,7 @@ void Zip_Data_Pack::load()
 		// plus the size of the local header
 		fd.file_offset = relative_offset_of_local_header + 30 + filename_length + extra_field_length;
 
-		//QLOG_INFO("Q", "FILE {0}:{1}", m_files.size(), str_buffer);
+        //QLOGI("FILE {0}:{1}", m_files.size(), str_buffer);
 		m_files.push_back(fd);
 
 		if (is_directory)

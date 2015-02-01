@@ -119,7 +119,7 @@ String GLES_Shader::patch_shader(
 		case Shader_Source::Token::Type::CONDITIONAL:
 			{
 				auto pos = util::find_line_char_by_offset(src, t.value.start);
-				QLOG_ERR("Q", "Shader contains unfiltered conditionals at {0}", pos);
+                QLOGE("Shader contains unfiltered conditionals at {0}", pos);
 				return String::null;
 				break;
 			}
@@ -147,7 +147,7 @@ String GLES_Shader::patch_shader(
 
 				{
 					auto pos = util::find_line_char_by_offset(src, t.value.start);
-					QLOG_ERR("Q", "Expression '{}' cannot be found at {}", a.name.value, pos);
+                    QLOGE("Expression '{}' cannot be found at {}", a.name.value, pos);
 					return String::null;
 				}
 				break;
@@ -155,7 +155,7 @@ String GLES_Shader::patch_shader(
 		default:
 			{
 				auto pos = util::find_line_char_by_offset(src, t.value.start);
-				QLOG_ERR("Q", "Shader contains unrecognized token at {}", pos);
+                QLOGE("Shader contains unrecognized token at {}", pos);
 				return String::null;
 			}
 		}
@@ -239,7 +239,7 @@ String GLES_Shader::patch_shader(
 			{
 				const char* x[] = {"array", "scalar"};
 				auto pos = util::find_line_char_by_offset(src, exp.value.start);
-				QLOG_ERR("Q", "Uniform {} used as a {} but it's actually a {} at {}", exp.name.value, x[is_array ? 0 : 1], x[expencting_array ? 0 : 1], pos);
+                QLOGE("Uniform {} used as a {} but it's actually a {} at {}", exp.name.value, x[is_array ? 0 : 1], x[expencting_array ? 0 : 1], pos);
 				return String::null;
 			}
 
@@ -482,14 +482,14 @@ void GLES_Shader::compile(
 	m_vertex_shader_id = compile_shader(gles::iGL_VERTEX_SHADER, m_patched_vertex_shader_src);
 	//if (!mVShaderId)
 	{
-		QLOG_INFO("Q", "{}", util::get_line_annotated_string(m_patched_vertex_shader_src));
+        QLOGI("{}", util::get_line_annotated_string(m_patched_vertex_shader_src));
 	}
 	QASSERT(m_vertex_shader_id);
 
 	m_fragment_shader_id = compile_shader(gles::iGL_FRAGMENT_SHADER, m_patched_fragment_shader_src);
 	//if (!mFShaderId)
 	{
-		QLOG_INFO("Q", "{}", util::get_line_annotated_string(m_patched_fragment_shader_src));
+        QLOGI("{}", util::get_line_annotated_string(m_patched_fragment_shader_src));
 	}
 	QASSERT(m_fragment_shader_id);
 
@@ -520,7 +520,7 @@ void GLES_Shader::compile(
 
 		std::vector<char> info_log(info_log_length);
 		interf.iglGetProgramInfoLog(m_shader_id, info_log_length, &chars_written, info_log.data());
-		QLOG_ERR("Q", "{}", info_log.data());
+        QLOGE("{}", info_log.data());
 	}
 
 	interf.iglUseProgram(m_shader_id);
@@ -643,7 +643,7 @@ uint32_t GLES_Shader::compile_shader(uint32_t shaderType, String const& source)
 		std::vector<char> info_log(info_log_length);
 		interf.iglGetShaderInfoLog(shader_id, info_log_length, &chars_written, info_log.data());
 
-		QLOG_ERR("Q", "While compiling shader:\n{}\n\n{}", util::get_line_annotated_string(source), info_log.data());
+        QLOGE("While compiling shader:\n{}\n\n{}", util::get_line_annotated_string(source), info_log.data());
 
 		interf.iglDeleteShader(shader_id);
 

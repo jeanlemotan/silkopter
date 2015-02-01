@@ -44,7 +44,7 @@ void Sensors::process_events(q::Clock::duration /*dt*/)
 			}
 			break;
 		default:
-			QLOG_ERR("Q", "Ignored sensor event - {0}", (int)event.type);
+            QLOGE("Ignored sensor event - {0}", (int)event.type);
 			break;
 		}
 	}

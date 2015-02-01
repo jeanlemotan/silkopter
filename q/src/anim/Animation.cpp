@@ -314,7 +314,7 @@ int Animation::add_channel(Path const& path, std::vector<Header> const& headers)
 	int channel_idx = find_channel_idx_by_path(path);
 	if (channel_idx >= 0)
 	{
-		QLOG_ERR("Q", "Duplicated channel '{}'. Ignored.", path);
+        QLOGE("Duplicated channel '{}'. Ignored.", path);
 		return -1;
 	}
 
@@ -328,7 +328,7 @@ int Animation::add_channel(Path const& path, std::vector<Header> const& headers)
 		float t = time * (1000.f / 8.f);
 		if (t > 32767.f)
 		{
-			QLOG_ERR("Q", "Animation exceeding the max duration of 4.36 minutes. Clamped.");
+            QLOGE("Animation exceeding the max duration of 4.36 minutes. Clamped.");
 			qheaders.resize(i);
 			break;
 		}
@@ -346,7 +346,7 @@ int Animation::add_channel(Path const& path, std::vector<Quantized_Header> const
 	int channel_idx = find_channel_idx_by_path(path);
 	if (channel_idx >= 0)
 	{
-		QLOG_ERR("Q", "Duplicated channel '{}'. Ignored.", path);
+        QLOGE("Duplicated channel '{}'. Ignored.", path);
 		return -1;
 	}
 

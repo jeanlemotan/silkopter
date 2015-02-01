@@ -32,7 +32,7 @@ int Skeleton::add_node(String const& name, size_t parent_idx)
 	int idx = find_node_idx_by_name(name);
 	if (idx >= 0)
 	{
-		QLOG_ERR("Q", "Duplicated node name '{}'. Ignoring new node", name);
+        QLOGE("Duplicated node name '{}'. Ignoring new node", name);
 		return -1;
 	}
 

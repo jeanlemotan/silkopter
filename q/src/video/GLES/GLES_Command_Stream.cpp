@@ -645,7 +645,7 @@ void Command_Stream::execute()
 		case Command::RENDER: execute_render_command(m_source); break;
 		case Command::CLEAR_FBO: execute_clear_fbo_command(m_source); break;
 		default:
-			QLOG_ERR("Q", "Invalid command: {}", command);
+            QLOGE( "Invalid command: {}", command);
 			m_source.seek(m_source.get_size() - 1);
 			break;
 		}
@@ -762,7 +762,7 @@ void Command_Stream::render(gles::Interface& interf, Render_Context const& conte
 
 	if (!bind_attributes(interf, context))
 	{
-		QLOG_ERR("Q", "No attributes binded.");
+        QLOGE("No attributes binded.");
 		return;
 	}
 
@@ -779,7 +779,7 @@ void Command_Stream::render(gles::Interface& interf, Render_Context const& conte
 		}
 		if (start + count > max_count)
 		{
-			QLOG_ERR("Q", "RenderJob range ({} - {}) is out of range ({})", start, count, max_count);
+            QLOGE("RenderJob range ({} - {}) is out of range ({})", start, count, max_count);
 			return;
 		}
 
@@ -892,7 +892,7 @@ bool Command_Stream::bind_attributes(gles::Interface& interf, Command_Stream::Re
 		}
 		else
 		{
-			QLOG_WARNING("Q", "Shader '{}' is using attribute '{}' that doesn't exist in the vertex declaration!!!",
+            QLOGW("Shader '{}' is using attribute '{}' that doesn't exist in the vertex declaration!!!",
 				technique.get_path(), def.get_name());
 		}
 	}
