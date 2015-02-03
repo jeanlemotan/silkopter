@@ -9,7 +9,7 @@ public:
     Input_Widget(QWidget *parent = 0);
 
 public:
-    void init(qinput::Input_Mgr* input);
+    void init(qinput::Input_Mgr* input, silk::Comms& comms);
     void process(q::Duration dt, silk::Comms& comms);
 
 private:
@@ -30,6 +30,7 @@ private:
 
     struct UAV_Input
     {
+        boost::optional<silk::comms::Operation_Mode> operation_mode;
         silk::comms::UAV_Input input;
 
         struct Base_Throttle

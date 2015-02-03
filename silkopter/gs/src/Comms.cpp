@@ -170,10 +170,12 @@ auto Comms::get_uav_position_w() const -> math::vec3f const&
 void Comms::set_yaw_rate_pid_params(Yaw_Rate_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_yaw_rate_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_pitch_rate_pid_params(Pitch_Rate_PID::Params const& params)
 {
@@ -182,57 +184,70 @@ void Comms::set_pitch_rate_pid_params(Pitch_Rate_PID::Params const& params)
 void Comms::request_pitch_rate_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_roll_rate_pid_params(Roll_Rate_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_roll_rate_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_altitude_rate_pid_params(Altitude_Rate_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_altitude_rate_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_yaw_pid_params(Yaw_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_yaw_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_pitch_pid_params(Pitch_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_pitch_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_roll_pid_params(Roll_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_roll_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS);
+    m_setup_channel.send();
 }
 void Comms::set_altitude_pid_params(Altitude_PID::Params const& params)
 {
     m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS, params);
+    m_setup_channel.send();
 }
 void Comms::request_altitude_pid_params()
 {
     m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS);
+    m_setup_channel.send();
 }
 
-void Comms::process_message_sensors()
+void Comms::process_sensors()
 {
     auto& channel = m_telemetry_channel;
     comms::Sensors sensors;
@@ -290,120 +305,98 @@ void Comms::process_message_sensors()
 }
 
 
-void Comms::process_message_calibration_accelerometer()
+void Comms::recieve_calibration_accelerometer()
 {
     math::vec3f bias, scale;
-    if (!m_setup_channel.unpack(bias, scale))
+    if (m_setup_channel.unpack(bias, scale))
     {
-        QLOGW("Failed to receive accelerometer calibration");
-        return;
+        accelerometer_calibration_data_received.execute(bias, scale);
     }
-    accelerometer_calibration_data_received.execute(bias, scale);
 }
-void Comms::process_message_calibration_gyroscope()
+void Comms::recieve_calibration_gyroscope()
 {
     math::vec3f bias;
-    if (!m_setup_channel.unpack(bias))
+    if (m_setup_channel.unpack(bias))
     {
-        QLOGW("Failed to receive gyroscope calibration");
-        return;
+        gyroscope_calibration_data_received.execute(bias);
     }
-    gyroscope_calibration_data_received.execute(bias);
 }
-void Comms::process_message_calibration_compass()
+void Comms::recieve_calibration_compass()
 {
     math::vec3f bias;
-    if (!m_setup_channel.unpack(bias))
+    if (m_setup_channel.unpack(bias))
     {
-        QLOGW("Failed to receive compass calibration");
-        return;
+        compass_calibration_data_received.execute(bias);
     }
-    compass_calibration_data_received.execute(bias);
 }
 
-void Comms::process_message_yaw_rate_pid_params()
+void Comms::recieve_yaw_rate_pid_params()
 {
     Yaw_Rate_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive yaw rate pid params");
-        return;
+        yaw_rate_pid_params_received.execute(params);
     }
-    yaw_rate_pid_params_received.execute(params);
 }
-void Comms::process_message_pitch_rate_pid_params()
+void Comms::recieve_pitch_rate_pid_params()
 {
     Pitch_Rate_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive pitch rate pid params");
-        return;
+        pitch_rate_pid_params_received.execute(params);
     }
-    pitch_rate_pid_params_received.execute(params);
 }
-void Comms::process_message_roll_rate_pid_params()
+void Comms::recieve_roll_rate_pid_params()
 {
     Roll_Rate_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive roll rate pid params");
-        return;
+        roll_rate_pid_params_received.execute(params);
     }
-    roll_rate_pid_params_received.execute(params);
 }
-void Comms::process_message_altitude_rate_pid_params()
+void Comms::recieve_altitude_rate_pid_params()
 {
     Altitude_Rate_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive altitude rate pid params");
-        return;
+        altitude_rate_pid_params_received.execute(params);
     }
-    altitude_rate_pid_params_received.execute(params);
 }
 
-void Comms::process_message_yaw_pid_params()
+void Comms::recieve_yaw_pid_params()
 {
     Yaw_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive yaw pid params");
-        return;
+        yaw_pid_params_received.execute(params);
     }
-    yaw_pid_params_received.execute(params);
 }
-void Comms::process_message_pitch_pid_params()
+void Comms::recieve_pitch_pid_params()
 {
     Pitch_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive pitch pid params");
-        return;
+        pitch_pid_params_received.execute(params);
     }
-    pitch_pid_params_received.execute(params);
 }
-void Comms::process_message_roll_pid_params()
+void Comms::recieve_roll_pid_params()
 {
     Roll_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive roll pid params");
-        return;
+        roll_pid_params_received.execute(params);
     }
-    roll_pid_params_received.execute(params);
 }
-void Comms::process_message_altitude_pid_params()
+void Comms::recieve_altitude_pid_params()
 {
     Altitude_PID::Params params;
-    if (!m_setup_channel.unpack(params))
+    if (m_setup_channel.unpack(params))
     {
-        QLOGW("Failed to receive altitude pid params");
-        return;
+        altitude_pid_params_received.execute(params);
     }
-    altitude_pid_params_received.execute(params);
 }
 
-void Comms::process_message_uav_rotation_l2w()
+void Comms::recieve_uav_rotation_l2w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.rotation_l2w))
     {
@@ -411,7 +404,7 @@ void Comms::process_message_uav_rotation_l2w()
         return;
     }
 }
-void Comms::process_message_uav_linear_acceleration_w()
+void Comms::recieve_uav_linear_acceleration_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.linear_acceleration_w))
     {
@@ -419,7 +412,7 @@ void Comms::process_message_uav_linear_acceleration_w()
         return;
     }
 }
-void Comms::process_message_uav_velocity_w()
+void Comms::recieve_uav_velocity_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.velocity_w))
     {
@@ -427,7 +420,7 @@ void Comms::process_message_uav_velocity_w()
         return;
     }
 }
-void Comms::process_message_uav_position_w()
+void Comms::recieve_uav_position_w()
 {
     if (!m_telemetry_channel.unpack_param(m_uav.position_w))
     {
@@ -436,42 +429,116 @@ void Comms::process_message_uav_position_w()
     }
 }
 
+void Comms::recieve_request_camera_mount_input()
+{
+    comms::UAV_Input v;
+    if (m_setup_channel.unpack(v))
+    {
+        camera_mount_input_received.execute(v);
+    }
+}
+void Comms::recieve_request_uav_input()
+{
+    comms::UAV_Input v;
+    if (m_setup_channel.unpack(v))
+    {
+        uav_input_received.execute(v);
+    }
+}
+void Comms::recieve_request_motor_test_input()
+{
+    comms::UAV_Input v;
+    if (m_setup_channel.unpack(v))
+    {
+        motor_test_input_received.execute(v);
+    }
+}
+
+
 void Comms::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER, bias, scale);
+    m_setup_channel.send();
 }
 
 void Comms::request_accelerometer_calibration_data() const
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER);
+    m_setup_channel.send();
 }
 
 void Comms::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE, bias);
+    m_setup_channel.send();
 }
 void Comms::request_gyroscope_calibration_data() const
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE);
+    m_setup_channel.send();
 }
 
 void Comms::set_compass_calibration_data(math::vec3f const& bias)
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS, bias);
+    m_setup_channel.send();
 }
 void Comms::request_compass_calibration_data() const
 {
     m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS);
+    m_setup_channel.send();
 }
 
 void Comms::send_uav_input(comms::UAV_Input const& input)
 {
     m_uav_input.input = input;
 }
-
 void Comms::send_camera_mount_input(comms::Camera_Mount_Input const& input)
 {
     m_camera_mount_input.input = input;
+}
+
+void Comms::send_motor_test_input(comms::Motor_Test_Input const& input)
+{
+    m_motor_test_input.input = input;
+}
+
+
+void Comms::request_uav_input()
+{
+    m_setup_channel.pack(comms::Setup_Message::REQUEST_UAV_INPUT);
+    m_setup_channel.send();
+}
+void Comms::request_camera_mount_input()
+{
+    m_setup_channel.pack(comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT);
+    m_setup_channel.send();
+}
+void Comms::request_motor_test_input()
+{
+    m_setup_channel.pack(comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT);
+    m_setup_channel.send();
+}
+
+void Comms::set_operation_mode(comms::Operation_Mode mode)
+{
+    m_setup_channel.pack(comms::Setup_Message::OPERATION_MODE, mode);
+    m_setup_channel.send();
+}
+
+void Comms::request_operation_mode()
+{
+    m_setup_channel.pack(comms::Setup_Message::OPERATION_MODE);
+    m_setup_channel.send();
+}
+
+void Comms::recieve_operation_mode()
+{
+    comms::Operation_Mode v;
+    if (m_setup_channel.unpack(v))
+    {
+        operation_mode_received.execute(v);
+    }
 }
 
 void Comms::process()
@@ -488,12 +555,12 @@ void Comms::process()
     {
         switch (msg.get())
         {
-            case comms::Telemetry_Message::SENSORS:  process_message_sensors(); break;
+            case comms::Telemetry_Message::SENSORS:  process_sensors(); break;
 
-            case comms::Telemetry_Message::UAV_AHRS_ROTATION_L2W:  process_message_uav_rotation_l2w(); break;
-            case comms::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  process_message_uav_linear_acceleration_w(); break;
-            case comms::Telemetry_Message::UAV_VELOCITY_W:  process_message_uav_velocity_w(); break;
-            case comms::Telemetry_Message::UAV_POSITION_W:  process_message_uav_position_w(); break;
+            case comms::Telemetry_Message::UAV_AHRS_ROTATION_L2W:  recieve_uav_rotation_l2w(); break;
+            case comms::Telemetry_Message::UAV_LINEAR_ACCELERATION_W:  recieve_uav_linear_acceleration_w(); break;
+            case comms::Telemetry_Message::UAV_VELOCITY_W:  recieve_uav_velocity_w(); break;
+            case comms::Telemetry_Message::UAV_POSITION_W:  recieve_uav_position_w(); break;
             case comms::Telemetry_Message::UAV_BATTERY_CAPACITY_USED:  break;
             case comms::Telemetry_Message::UAV_BATTERY_CURRENT:  break;
             case comms::Telemetry_Message::UAV_BATTERY_VOLTAGE:  break;
@@ -508,21 +575,28 @@ void Comms::process()
     {
         switch (msg.get())
         {
-            case comms::Setup_Message::REQUEST_RAW_SENSORS:  process_message_sensors(); break;
+            case comms::Setup_Message::REQUEST_RAW_SENSORS:  process_sensors(); break;
 
-            case comms::Setup_Message::YAW_RATE_PID_PARAMS: process_message_yaw_rate_pid_params(); break;
-            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: process_message_pitch_rate_pid_params(); break;
-            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: process_message_roll_rate_pid_params(); break;
-            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: process_message_altitude_rate_pid_params(); break;
+            case comms::Setup_Message::YAW_RATE_PID_PARAMS: recieve_yaw_rate_pid_params(); break;
+            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: recieve_pitch_rate_pid_params(); break;
+            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: recieve_roll_rate_pid_params(); break;
+            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: recieve_altitude_rate_pid_params(); break;
 
-            case comms::Setup_Message::YAW_PID_PARAMS: process_message_yaw_pid_params(); break;
-            case comms::Setup_Message::PITCH_PID_PARAMS: process_message_pitch_pid_params(); break;
-            case comms::Setup_Message::ROLL_PID_PARAMS: process_message_roll_pid_params(); break;
-            case comms::Setup_Message::ALTITUDE_PID_PARAMS: process_message_altitude_pid_params(); break;
+            case comms::Setup_Message::YAW_PID_PARAMS: recieve_yaw_pid_params(); break;
+            case comms::Setup_Message::PITCH_PID_PARAMS: recieve_pitch_pid_params(); break;
+            case comms::Setup_Message::ROLL_PID_PARAMS: recieve_roll_pid_params(); break;
+            case comms::Setup_Message::ALTITUDE_PID_PARAMS: recieve_altitude_pid_params(); break;
 
-            case comms::Setup_Message::CALIBRATION_ACCELEROMETER:  process_message_calibration_accelerometer(); break;
-            case comms::Setup_Message::CALIBRATION_GYROSCOPE:  process_message_calibration_gyroscope(); break;
-            case comms::Setup_Message::CALIBRATION_COMPASS:  process_message_calibration_compass(); break;
+            case comms::Setup_Message::CALIBRATION_ACCELEROMETER:  recieve_calibration_accelerometer(); break;
+            case comms::Setup_Message::CALIBRATION_GYROSCOPE:  recieve_calibration_gyroscope(); break;
+            case comms::Setup_Message::CALIBRATION_COMPASS:  recieve_calibration_compass(); break;
+
+            case comms::Setup_Message::REQUEST_UAV_INPUT:           recieve_request_uav_input(); break;
+            case comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT:    recieve_request_motor_test_input(); break;
+            case comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT:  recieve_request_camera_mount_input(); break;
+
+            case comms::Setup_Message::OPERATION_MODE: recieve_operation_mode(); break;
+
             default:
                 QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
                 m_error_count++;
@@ -543,12 +617,17 @@ void Comms::process()
         m_camera_mount_input.last_sent_time_stamp = now;
         m_input_channel.pack(comms::Input_Message::CAMERA_MOUNT_INPUT, m_camera_mount_input.input);
     }
+    if (now - m_motor_test_input.last_sent_time_stamp >= m_motor_test_input.SEND_EVERY)
+    {
+        m_motor_test_input.last_sent_time_stamp = now;
+        m_input_channel.pack(comms::Input_Message::MOTOR_TEST_INPUT, m_motor_test_input.input);
+    }
 
 
     m_rudp.process();
     m_setup_channel.send();
     m_telemetry_channel.try_sending();
-    m_input_channel.send();
+    m_input_channel.try_sending();
 }
 
 auto Comms::get_rudp() -> util::RUDP&

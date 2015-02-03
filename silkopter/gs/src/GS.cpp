@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GS.h"
+#include "Setup_Motors_Widget.h"
 
 
 static const float k_calibration_sample_count = 100;
@@ -40,7 +41,7 @@ GS::GS(QWidget *parent)
     m_ui.uav_inertial->init(&m_comms);
     m_ui.pids->init(&m_comms);
     m_ui.video_tab->init(m_video_client);
-    m_ui.input->init(m_input_mgr.get());
+    m_ui.input->init(m_input_mgr.get(), m_comms);
 
     {
         QSettings settings;
@@ -57,6 +58,8 @@ GS::GS(QWidget *parent)
     connect(m_ui.action_connect_uav, &QAction::triggered, [this](bool) { set_uav_address("192.168.1.110"); });
     connect(m_ui.action_connect_uav_ah, &QAction::triggered, [this](bool) { set_uav_address("10.10.10.10"); });
     connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
+
+    connect(m_ui.action_setup_motors, &QAction::triggered, [this](bool) { setup_motors(); });
 
     read_settings();
 }
@@ -104,6 +107,17 @@ void GS::set_uav_address(std::string const& address)
     settings.setValue("address", address.c_str());
 
     m_ui.statusBar->showMessage(q::util::format2<std::string>("Connecting to {}", address).c_str(), 2000);
+}
+
+void GS::setup_motors()
+{
+    QDialog* dialog = new QDialog(this);
+    dialog->setLayout(new QVBoxLayout());
+    dialog->layout()->addWidget(new Setup_Motors_Widget(*m_input_mgr, m_comms, dialog));
+
+    dialog->exec();
+
+    delete dialog;
 }
 
 void GS::process()

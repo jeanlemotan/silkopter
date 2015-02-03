@@ -86,41 +86,93 @@ void UAV::save_settings()
     autojsoncxx::to_pretty_json_file("uav.cfg", cfg);
 }
 
-void UAV::set_throttle_mode(comms::UAV_Input::Throttle_Mode mode)
+void UAV::set_uav_input(comms::UAV_Input const& input)
 {
-    m_input.throttle_mode = mode;
+    m_uav_input = input;
 }
-void UAV::set_pitch_roll_mode(comms::UAV_Input::Pitch_Roll_Mode mode)
+auto UAV::get_uav_input() const -> comms::UAV_Input const&
 {
-    m_input.pitch_roll_mode = mode;
+    return m_uav_input;
 }
-void UAV::set_yaw_mode(comms::UAV_Input::Yaw_Mode mode)
+void UAV::set_camera_mount_input(comms::Camera_Mount_Input const& input)
 {
-    m_input.yaw_mode = mode;
+    m_camera_mount_input = input;
 }
-void UAV::set_reference_frame(comms::UAV_Input::Reference_Frame frame)
+auto UAV::get_camera_mount_input() const -> comms::Camera_Mount_Input const&
 {
-    m_input.reference_frame = frame;
+    return m_camera_mount_input;
 }
-void UAV::set_sticks(comms::UAV_Input::Sticks const& sticks)
+void UAV::set_motor_test_input(comms::Motor_Test_Input const& input)
 {
-    m_input.sticks = sticks;
+    m_motor_test_input = input;
 }
-void UAV::set_assists(comms::UAV_Input::Assists assists)
+auto UAV::get_motor_test_input() const -> comms::Motor_Test_Input const&
 {
-    m_input.assists = assists;
+    return m_motor_test_input;
 }
-void UAV::arm()
-{
-    m_is_armed = true;
-    m_motor_mixer.set_output_range(0.08f, 1.f);
-}
-void UAV::disarm()
-{
-    m_is_armed = false;
-    m_motor_mixer.set_output_range(0, 1);
 
-    m_hal.motors->cut_throttle();
+void UAV::set_operation_mode(comms::Operation_Mode mode)
+{
+    switch (m_operation_mode)
+    {
+        case comms::Operation_Mode::IDLE:
+        {
+            m_operation_mode = mode;
+            if (mode == comms::Operation_Mode::ARMED)
+            {
+                m_motor_mixer.set_output_range(0.08f, 1.f);
+            }
+            else
+            {
+                m_motor_mixer.set_output_range(0, 1.f);
+            }
+            m_hal.motors->cut_throttle();
+        }
+        break;
+        case comms::Operation_Mode::ARMED:
+        {
+            if (mode != comms::Operation_Mode::IDLE)
+            {
+                QLOGW("Cannot change mode to {} while armed. Disarm first!", static_cast<int>(mode));
+                return;
+            }
+
+            if (can_disarm())
+            {
+                m_operation_mode = mode;
+            }
+            else
+            {
+                QLOGW("Cannot disarm while in state {} while armed. Land first!", static_cast<int>(m_state));
+            }
+        }
+        break;
+        case comms::Operation_Mode::MOTOR_TEST:
+        {
+            if (mode != comms::Operation_Mode::IDLE)
+            {
+                QLOGW("Cannot change mode to {} while testing motors.", static_cast<int>(mode));
+                return;
+            }
+            m_operation_mode = mode;
+        }
+        break;
+        default:
+        {
+            QLOGE("Unrecognized mode {}.", static_cast<int>(m_operation_mode));
+        }
+        break;
+    }
+}
+
+comms::Operation_Mode UAV::get_operation_mode() const
+{
+    return m_operation_mode;
+}
+
+bool UAV::can_disarm() const
+{
+    return m_state <= State::ARMED || m_state == State::CRASHED;
 }
 
 auto UAV::get_ahrs() -> AHRS const&
@@ -286,41 +338,41 @@ void UAV::process_input()
     constexpr std::chrono::milliseconds PROCESS_PERIOD{10};
 
     auto now = q::Clock::now();
-    auto dt = now - m_input.last_process_timestamp;
+    auto dt = now - m_input_state.last_process_timestamp;
     if (dt < PROCESS_PERIOD)
     {
         return;
     }
-    m_input.last_process_timestamp = now;
+    m_input_state.last_process_timestamp = now;
 
-    if (m_input.throttle_mode == comms::UAV_Input::Throttle_Mode::RATE)
+    if (m_uav_input.throttle_mode == comms::UAV_Input::Throttle_Mode::RATE)
     {
         process_input_throttle_rate(dt);
     }
-    else if (m_input.throttle_mode == comms::UAV_Input::Throttle_Mode::OFFSET)
+    else if (m_uav_input.throttle_mode == comms::UAV_Input::Throttle_Mode::OFFSET)
     {
         process_input_throttle_offset(dt);
     }
-    else if (m_input.throttle_mode == comms::UAV_Input::Throttle_Mode::ASSISTED)
+    else if (m_uav_input.throttle_mode == comms::UAV_Input::Throttle_Mode::ASSISTED)
     {
         process_input_throttle_assisted(dt);
     }
 
 
-    if (m_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::RATE)
+    if (m_uav_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::RATE)
     {
         process_input_pitch_roll_rate(dt);
     }
-    else if (m_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::HORIZONTAL)
+    else if (m_uav_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::HORIZONTAL)
     {
         process_input_pitch_roll_horizontal(dt);
     }
-    else if (m_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::ASSISTED)
+    else if (m_uav_input.pitch_roll_mode == comms::UAV_Input::Pitch_Roll_Mode::ASSISTED)
     {
         process_input_pitch_roll_assisted(dt);
     }
 
-    if (m_input.yaw_mode == comms::UAV_Input::Yaw_Mode::RATE)
+    if (m_uav_input.yaw_mode == comms::UAV_Input::Yaw_Mode::RATE)
     {
         process_input_yaw_rate(dt);
     }
@@ -330,13 +382,13 @@ void UAV::process_input_throttle_rate(q::Clock::duration dt)
 {
     float dts = q::Seconds(dt).count();
 
-    m_throttle.reference = math::clamp(m_throttle.reference + m_input.sticks.throttle * dts, 0.f, 1.f);
+    m_throttle.reference = math::clamp(m_throttle.reference + m_uav_input.sticks.throttle * dts, 0.f, 1.f);
     m_throttle.current = m_throttle.reference;
 }
 void UAV::process_input_throttle_offset(q::Clock::duration dt)
 {
     QUNUSED(dt);
-    m_throttle.current = math::clamp(m_throttle.reference + m_input.sticks.throttle, 0.f, 1.f);
+    m_throttle.current = math::clamp(m_throttle.reference + m_uav_input.sticks.throttle, 0.f, 1.f);
 }
 void UAV::process_input_throttle_assisted(q::Clock::duration dt)
 {
@@ -346,16 +398,16 @@ void UAV::process_input_throttle_assisted(q::Clock::duration dt)
 void UAV::process_input_pitch_roll_rate(q::Clock::duration dt)
 {
     QUNUSED(dt);
-    m_pids.pitch_rate.set_target(m_input.sticks.pitch * m_settings.max_pitch_rate);
-    m_pids.roll_rate.set_target(m_input.sticks.roll * m_settings.max_roll_rate);
+    m_pids.pitch_rate.set_target(m_uav_input.sticks.pitch * m_settings.max_pitch_rate);
+    m_pids.roll_rate.set_target(m_uav_input.sticks.roll * m_settings.max_roll_rate);
 }
 void UAV::process_input_pitch_roll_horizontal(q::Clock::duration dt)
 {
     QUNUSED(dt);
 
     math::quatf target;
-    target.set_from_euler_xyz(-m_input.sticks.pitch*m_settings.max_pitch_angle, //pitch - X
-                              m_input.sticks.roll*m_settings.max_roll_angle,    //roll - Y
+    target.set_from_euler_xyz(-m_uav_input.sticks.pitch*m_settings.max_pitch_angle, //pitch - X
+                              m_uav_input.sticks.roll*m_settings.max_roll_angle,    //roll - Y
                               0);                                               //yaw - Z. Empty cause it's always controlled as rate
 
 
@@ -388,7 +440,7 @@ void UAV::process_input_pitch_roll_assisted(q::Clock::duration dt)
 void UAV::process_input_yaw_rate(q::Clock::duration dt)
 {
     QUNUSED(dt);
-    m_pids.yaw_rate.set_target(m_input.sticks.yaw * m_settings.max_yaw_rate);
+    m_pids.yaw_rate.set_target(m_uav_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
 void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
@@ -408,27 +460,43 @@ void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
 
 void UAV::process_motors()
 {
-    if (m_is_armed)
+    if (m_operation_mode == comms::Operation_Mode::ARMED)
     {
-        m_motor_mixer.set_data(m_input.sticks.throttle,
+        m_motor_mixer.set_data(m_uav_input.sticks.throttle,
                                0,//m_pids.yaw_rate.get_output(),
                                0,//m_pids.pitch_rate.get_output(),
-                               -m_pids.roll_rate.get_output());
+                               0);//-m_pids.roll_rate.get_output());
 
         //LOG_INFO("{} / {}, {}", m_angular_velocity, m_pids.pitch_rate.get_output(), m_pids.roll_rate.get_output());
 
         std::array<float, 4> throttles;
         for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
         {
-            throttles[i] = m_motor_mixer.get_motor_output(i);
+            throttles[i] = math::sqrt(m_motor_mixer.get_motor_output(i));
         }
 
         QLOGI("{.2}", throttles);
 
         m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
     }
+    else if (m_operation_mode == comms::Operation_Mode::MOTOR_TEST)
+    {
+        m_hal.motors->set_throttles(m_motor_test_input.throttles.data(), m_motor_mixer.get_motor_count());
+    }
+    else
+    {
+        m_hal.motors->cut_throttle();
+    }
 }
 
+void UAV::process_camera_mount()
+{
+    if (m_operation_mode == comms::Operation_Mode::IDLE ||
+        m_operation_mode == comms::Operation_Mode::ARMED)
+    {
+        m_hal.camera_mount->set_rotation(m_camera_mount_input.rotation);
+    }
+}
 
 auto UAV::get_yaw_rate_pid_params() const -> Yaw_Rate_PID::Params
 {
@@ -548,4 +616,5 @@ void UAV::process()
 
     process_input();
     process_motors();
+    process_camera_mount();
 }

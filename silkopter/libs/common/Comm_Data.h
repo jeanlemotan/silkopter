@@ -76,6 +76,21 @@ enum class Setup_Message : uint8_t
     //------------------------
     //uav misc params
     ASSIST_PARAMS,
+
+    //------------------------
+    OPERATION_MODE,
+
+    //------------------------
+    REQUEST_UAV_INPUT,
+    REQUEST_CAMERA_MOUNT_INPUT,
+    REQUEST_MOTOR_TEST_INPUT,
+};
+
+enum class Operation_Mode : uint8_t
+{
+    IDLE,
+    ARMED,
+    MOTOR_TEST
 };
 
 struct Camera_Params
@@ -106,7 +121,8 @@ struct Camera_Params
 enum class Input_Message : uint8_t
 {
     UAV_INPUT,
-    CAMERA_MOUNT_INPUT
+    CAMERA_MOUNT_INPUT,
+    MOTOR_TEST_INPUT
 };
 
 
@@ -118,7 +134,6 @@ struct UAV_Input
         {
             struct
             {
-                uint8_t armed       : 1;
                 uint8_t take_off    : 1;
                 uint8_t land        : 1;
                 uint8_t lights_on   : 1;
@@ -193,6 +208,12 @@ struct UAV_Input
 struct Camera_Mount_Input
 {
     math::vec3f rotation;
+};
+
+struct Motor_Test_Input
+{
+    static const size_t MAX_MOTOR_COUNT = 16;
+    std::array<float, MAX_MOTOR_COUNT> throttles = {{ 0 }};
 };
 
 

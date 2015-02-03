@@ -10,15 +10,30 @@ Input_Widget::Input_Widget(QWidget *parent)
     QObject::connect(m_ui.pitch_roll_mode, &QComboBox::currentTextChanged, [this](const QString& v) { set_pitch_roll_mode(v); });
     QObject::connect(m_ui.reference_frame, &QComboBox::currentTextChanged, [this](const QString& v) { set_reference_frame(v); });
 
-    QObject::connect(m_ui.arm, &QPushButton::toggled, [this](bool v) { m_uav_input.input.toggles.armed = v; });
-    QObject::connect(m_ui.land, &QPushButton::toggled, [this](bool v) { m_uav_input.input.toggles.land = v; });
-    QObject::connect(m_ui.take_off, &QPushButton::toggled, [this](bool v) { m_uav_input.input.toggles.take_off = v; });
+//    QObject::connect(m_ui.land, &QPushButton::toggled, [this](bool v) { m_uav_input.input.toggles.land = v; });
+//    QObject::connect(m_ui.take_off, &QPushButton::toggled, [this](bool v) { m_uav_input.input.toggles.take_off = v; });
 }
 
-void Input_Widget::init(qinput::Input_Mgr *input)
+void Input_Widget::init(qinput::Input_Mgr* input, silk::Comms& comms)
 {
     QASSERT(input);
     m_input_mgr = input;
+
+    auto original_ss = m_ui.arm->styleSheet();
+
+    QObject::connect(m_ui.arm, &QPushButton::released, [this, &comms]()
+    {
+        bool armed = m_uav_input.operation_mode ? ((*m_uav_input.operation_mode) == silk::comms::Operation_Mode::ARMED) : false;
+        comms.set_operation_mode(armed ? silk::comms::Operation_Mode::IDLE : silk::comms::Operation_Mode::ARMED);
+        comms.request_operation_mode();
+    });
+
+    comms.operation_mode_received.connect([this, &comms, original_ss](silk::comms::Operation_Mode m)
+    {
+        m_uav_input.operation_mode = m;
+        m_ui.arm->setStyleSheet(m == silk::comms::Operation_Mode::ARMED ? "background-color: red" : original_ss);
+        m_ui.arm->setText(m == silk::comms::Operation_Mode::ARMED ? "Disarm" : "Arm");
+    });
 }
 
 void Input_Widget::set_throttle_mode(QString const& v)
@@ -112,11 +127,13 @@ void Input_Widget::process_uav_input(q::Duration dt, silk::Comms& comms, qinput:
 
     if (gamepad.is_button_released(Gamepad::Button::OUYA_O))
     {
-        m_uav_input.input.toggles.armed = true;
+        comms.set_operation_mode(silk::comms::Operation_Mode::ARMED);
+        comms.request_operation_mode();
     }
     if (gamepad.is_button_released(Gamepad::Button::OUYA_A))
     {
-        m_uav_input.input.toggles.armed = false;
+        comms.set_operation_mode(silk::comms::Operation_Mode::IDLE);
+        comms.request_operation_mode();
     }
 
 

@@ -35,6 +35,18 @@ public:
 
     void send_uav_input(comms::UAV_Input const& input);
     void send_camera_mount_input(comms::Camera_Mount_Input const& input);
+    void send_motor_test_input(comms::Motor_Test_Input const& input);
+
+    void request_uav_input();
+    q::util::Signal<void(comms::UAV_Input const&)> uav_input_received;
+    void request_camera_mount_input();
+    q::util::Signal<void(comms::UAV_Input const&)> camera_mount_input_received;
+    void request_motor_test_input();
+    q::util::Signal<void(comms::UAV_Input const&)> motor_test_input_received;
+
+    void set_operation_mode(comms::Operation_Mode mode);
+    void request_operation_mode();
+    q::util::Signal<void(comms::Operation_Mode const&)> operation_mode_received;
 
     auto get_accelerometer_sample() const  -> sensors::Accelerometer_Sample const&;
     auto get_gyroscope_sample() const      -> sensors::Gyroscope_Sample const&;
@@ -137,26 +149,32 @@ private:
     template<class SAMPLE_T>
     auto unpack_sensor_samples(std::vector<SAMPLE_T>& samples) -> bool;
 
-    void process_message_sensors();
+    void process_sensors();
 
-    void process_message_calibration_accelerometer();
-    void process_message_calibration_gyroscope();
-    void process_message_calibration_compass();
+    void recieve_calibration_accelerometer();
+    void recieve_calibration_gyroscope();
+    void recieve_calibration_compass();
 
-    void process_message_yaw_rate_pid_params();
-    void process_message_pitch_rate_pid_params();
-    void process_message_roll_rate_pid_params();
-    void process_message_altitude_rate_pid_params();
+    void recieve_yaw_rate_pid_params();
+    void recieve_pitch_rate_pid_params();
+    void recieve_roll_rate_pid_params();
+    void recieve_altitude_rate_pid_params();
 
-    void process_message_yaw_pid_params();
-    void process_message_pitch_pid_params();
-    void process_message_roll_pid_params();
-    void process_message_altitude_pid_params();
+    void recieve_yaw_pid_params();
+    void recieve_pitch_pid_params();
+    void recieve_roll_pid_params();
+    void recieve_altitude_pid_params();
 
-    void process_message_uav_rotation_l2w();
-    void process_message_uav_linear_acceleration_w();
-    void process_message_uav_velocity_w();
-    void process_message_uav_position_w();
+    void recieve_uav_rotation_l2w();
+    void recieve_uav_linear_acceleration_w();
+    void recieve_uav_velocity_w();
+    void recieve_uav_position_w();
+
+    void recieve_request_uav_input();
+    void recieve_request_motor_test_input();
+    void recieve_request_camera_mount_input();
+
+    void recieve_operation_mode();
 
     struct UAV_Input
     {
@@ -171,6 +189,13 @@ private:
         q::Clock::time_point last_sent_time_stamp = q::Clock::now();
         comms::Camera_Mount_Input input;
     } m_camera_mount_input;
+
+    struct Motor_Test_Input
+    {
+        const q::Clock::duration SEND_EVERY {50};
+        q::Clock::time_point last_sent_time_stamp = q::Clock::now();
+        comms::Motor_Test_Input input;
+    } m_motor_test_input;
 
     struct Sensor_Samples
     {

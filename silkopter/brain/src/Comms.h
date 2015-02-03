@@ -41,28 +41,33 @@ private:
 
     void handle_accept(boost::system::error_code const& error);
 
-    void process_message_uav_input();
-    void process_message_camera_mount_input();
+    void recieve_uav_input();
+    void recieve_camera_mount_input();
+    void recieve_motor_test_input();
 
+    void recieve_request_uav_input();
+    void recieve_request_camera_mount_input();
+    void recieve_request_motor_test_input();
+    void recieve_operation_mode();
 
-    void process_message_camera_params();
+    void recieve_camera_params();
 
-    void process_message_raw_sensors();
+    void recieve_raw_sensors();
 
-    void process_message_assist_params();
+    void recieve_assist_params();
 
-    void process_message_yaw_rate_pid_params();
-    void process_message_pitch_rate_pid_params();
-    void process_message_roll_rate_pid_params();
-    void process_message_altitude_rate_pid_params();
-    void process_message_yaw_pid_params();
-    void process_message_pitch_pid_params();
-    void process_message_roll_pid_params();
-    void process_message_altitude_pid_params();
+    void recieve_yaw_rate_pid_params();
+    void recieve_pitch_rate_pid_params();
+    void recieve_roll_rate_pid_params();
+    void recieve_altitude_rate_pid_params();
+    void recieve_yaw_pid_params();
+    void recieve_pitch_pid_params();
+    void recieve_roll_pid_params();
+    void recieve_altitude_pid_params();
 
-    void process_message_calibration_accelerometer();
-    void process_message_calibration_gyroscope();
-    void process_message_calibration_compass();
+    void recieve_calibration_accelerometer();
+    void recieve_calibration_gyroscope();
+    void recieve_calibration_compass();
 
     void send_sensor_samples();
     void send_raw_sensor_samples(comms::Sensors sensors);
@@ -121,6 +126,8 @@ private:
     bool m_is_connected = false;
 
     size_t m_error_count = 0;
+
+
 };
 
 

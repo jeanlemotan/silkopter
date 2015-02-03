@@ -127,7 +127,14 @@
     <addaction name="action_connect_simulator"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="action_setup_motors"/>
+   </widget>
    <addaction name="menuConnect"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -163,6 +170,11 @@
   <action name="action_connect_uav_ah">
    <property name="text">
     <string>UAV ah</string>
+   </property>
+  </action>
+  <action name="action_setup_motors">
+   <property name="text">
+    <string>Setup Motors</string>
    </property>
   </action>
  </widget>

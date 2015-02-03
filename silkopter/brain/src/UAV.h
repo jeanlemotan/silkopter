@@ -40,14 +40,21 @@ public:
 
     void process();
 
-    void set_throttle_mode(comms::UAV_Input::Throttle_Mode mode);
-    void set_pitch_roll_mode(comms::UAV_Input::Pitch_Roll_Mode mode);
-    void set_yaw_mode(comms::UAV_Input::Yaw_Mode mode);
-    void set_reference_frame(comms::UAV_Input::Reference_Frame frame);
-    void set_sticks(comms::UAV_Input::Sticks const& sticks);
-    void set_assists(comms::UAV_Input::Assists assists);
-    void arm();
-    void disarm();
+    void set_operation_mode(comms::Operation_Mode mode);
+    auto get_operation_mode() const -> comms::Operation_Mode;
+
+    // inputs
+
+    void set_uav_input(comms::UAV_Input const& input);
+    auto get_uav_input() const -> comms::UAV_Input const&;
+
+    void set_camera_mount_input(comms::Camera_Mount_Input const& input);
+    auto get_camera_mount_input() const -> comms::Camera_Mount_Input const&;
+
+    void set_motor_test_input(comms::Motor_Test_Input const& input);
+    auto get_motor_test_input() const -> comms::Motor_Test_Input const&;
+
+    // data
 
     auto get_ahrs() -> AHRS const&;
     auto get_battery() -> Battery const&;
@@ -125,6 +132,7 @@ private:
     void process_motors();
     void process_dead_reckoning();
     void process_input();
+    void process_camera_mount();
 
     void process_rate_pids(sensors::Gyroscope_Sample const& sample);
 
@@ -150,10 +158,11 @@ private:
     Battery m_battery;
     Motor_Mixer m_motor_mixer;
 
+    bool can_disarm() const;
+
     enum class State
     {
         IDLE,
-        PRE_ARM_CHECK,
         ARMED,
         TAKE_OFF,
         AIRBORNE,
@@ -174,17 +183,14 @@ private:
         Altitude_PID altitude;
     } m_pids;
 
-    struct Input
+    comms::UAV_Input m_uav_input;
+    comms::Camera_Mount_Input m_camera_mount_input;
+    comms::Motor_Test_Input m_motor_test_input;
+
+    struct Input_State
     {
         q::Clock::time_point last_process_timestamp{std::chrono::seconds(0)};
-
-        comms::UAV_Input::Throttle_Mode throttle_mode;
-        comms::UAV_Input::Pitch_Roll_Mode pitch_roll_mode;
-        comms::UAV_Input::Yaw_Mode yaw_mode;
-        comms::UAV_Input::Reference_Frame reference_frame;
-        comms::UAV_Input::Sticks sticks;
-        comms::UAV_Input::Assists assists;
-    } m_input;
+    } m_input_state;
 
     void process_input_throttle_rate(q::Clock::duration dt);
     void process_input_throttle_offset(q::Clock::duration dt);
@@ -211,7 +217,7 @@ private:
 
     Assist_Params m_assist_params;
 
-    bool m_is_armed = false;
+    comms::Operation_Mode m_operation_mode;
 
     struct Settings
     {

@@ -60,7 +60,8 @@ SOURCES += \
     ../../src/Video_Stream.cpp \
     ../../src/Comms.cpp \
     ../../src/Input_Widget.cpp \
-    ../../src/PID_Widget.cpp
+    ../../src/PID_Widget.cpp \
+    ../../src/Setup_Motors_Widget.cpp
 
 HEADERS  += \
     ../../src/Attitude.h \
@@ -87,7 +88,8 @@ HEADERS  += \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/utils/Json_Helpers.h \
     ../../../libs/utils/RUDP.h \
-    ../../../libs/utils/Timed_Scope.h
+    ../../../libs/utils/Timed_Scope.h \
+    ../../src/Setup_Motors_Widget.h
 
 FORMS    += \
     ../../src/Sensors.ui \
@@ -95,7 +97,8 @@ FORMS    += \
     ../../src/UAV_Inertial.ui \
     ../../src/Video_Stream.ui \
     ../../src/Input_Widget.ui \
-    ../../src/PID_Widget.ui
+    ../../src/PID_Widget.ui \
+    ../../src/Setup_Motors_Widget.ui
 
 RESOURCES += \
     ../../src/res.qrc

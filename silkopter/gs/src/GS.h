@@ -44,6 +44,8 @@ private:
 
     std::unique_ptr<qinput::Input_Mgr> m_input_mgr;
 
+    void setup_motors();
+
     //uint32_t m_last_time_ms;
 };
 
