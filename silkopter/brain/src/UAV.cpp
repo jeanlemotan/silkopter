@@ -182,7 +182,7 @@ bool UAV::do_arm_check() const
 
     auto now = q::Clock::now();
 
-    bool ok = false;
+    bool ok = true;
     auto d = now - m_hal.sensors->get_last_accelerometer_sample().time_point;
     if (d > std::chrono::milliseconds(500))
     {
