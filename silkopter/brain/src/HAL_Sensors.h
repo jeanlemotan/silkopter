@@ -45,15 +45,15 @@ public:
     virtual auto get_current_samples() const        -> std::vector<sensors::Current_Sample> const& = 0;
     virtual auto get_gps_samples() const            -> std::vector<sensors::GPS_Sample> const& = 0;
 
-    virtual auto get_last_accelerometer_sample() const  -> sensors::Accelerometer_Sample const& = 0;
-    virtual auto get_last_gyroscope_sample() const      -> sensors::Gyroscope_Sample const& = 0;
-    virtual auto get_last_compass_sample() const        -> sensors::Compass_Sample const& = 0;
-    virtual auto get_last_barometer_sample() const      -> sensors::Barometer_Sample const& = 0;
-    virtual auto get_last_sonar_sample() const          -> sensors::Sonar_Sample const& = 0;
-    virtual auto get_last_thermometer_sample() const    -> sensors::Thermometer_Sample const& = 0;
-    virtual auto get_last_voltage_sample() const        -> sensors::Voltage_Sample const& = 0;
-    virtual auto get_last_current_sample() const        -> sensors::Current_Sample const& = 0;
-    virtual auto get_last_gps_sample() const            -> sensors::GPS_Sample const& = 0;
+    virtual auto get_last_accelerometer_sample() const  -> sensors::Accelerometer_TP_Sample const& = 0;
+    virtual auto get_last_gyroscope_sample() const      -> sensors::Gyroscope_TP_Sample const& = 0;
+    virtual auto get_last_compass_sample() const        -> sensors::Compass_TP_Sample const& = 0;
+    virtual auto get_last_barometer_sample() const      -> sensors::Barometer_TP_Sample const& = 0;
+    virtual auto get_last_sonar_sample() const          -> sensors::Sonar_TP_Sample const& = 0;
+    virtual auto get_last_thermometer_sample() const    -> sensors::Thermometer_TP_Sample const& = 0;
+    virtual auto get_last_voltage_sample() const        -> sensors::Voltage_TP_Sample const& = 0;
+    virtual auto get_last_current_sample() const        -> sensors::Current_TP_Sample const& = 0;
+    virtual auto get_last_gps_sample() const            -> sensors::GPS_TP_Sample const& = 0;
 
     //----------------------------------------------------------------------
     virtual void process() = 0;

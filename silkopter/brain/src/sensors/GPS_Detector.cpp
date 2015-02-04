@@ -64,7 +64,7 @@ auto GPS_Detector::init(std::string const& device, size_t baud) -> bool
 
     m_protocols.push_back(std::unique_ptr<GPS_Protocol>(new GPS_UBLOX()));
 
-    QLOGI("GPS Detection started on {}", device);
+    QLOGI("GPS Detection started on {} : {}", device, baud);
 
     return true;
 }

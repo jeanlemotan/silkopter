@@ -40,8 +40,8 @@ public:
 
     void process();
 
-    void set_operation_mode(comms::Operation_Mode mode);
-    auto get_operation_mode() const -> comms::Operation_Mode;
+    void set_mode(comms::Mode mode);
+    auto get_operation_mode() const -> comms::Mode;
 
     // inputs
 
@@ -158,7 +158,8 @@ private:
     Battery m_battery;
     Motor_Mixer m_motor_mixer;
 
-    bool can_disarm() const;
+    bool do_disarm_check() const;
+    bool do_arm_check() const;
 
     enum class State
     {
@@ -217,7 +218,7 @@ private:
 
     Assist_Params m_assist_params;
 
-    comms::Operation_Mode m_operation_mode;
+    comms::Mode m_mode;
 
     struct Settings
     {

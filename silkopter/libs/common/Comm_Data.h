@@ -86,7 +86,7 @@ enum class Setup_Message : uint8_t
     REQUEST_MOTOR_TEST_INPUT,
 };
 
-enum class Operation_Mode : uint8_t
+enum class Mode : uint8_t
 {
     IDLE,
     ARMED,

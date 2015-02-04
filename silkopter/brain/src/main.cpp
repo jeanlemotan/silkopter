@@ -86,7 +86,7 @@ int main(int argc, char const* argv[])
     {
         int policy = SCHED_FIFO;
         struct sched_param param;
-        param.sched_priority = 2;
+        param.sched_priority = 10;
 
         if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
         {

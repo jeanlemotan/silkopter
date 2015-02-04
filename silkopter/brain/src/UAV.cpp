@@ -111,68 +111,143 @@ auto UAV::get_motor_test_input() const -> comms::Motor_Test_Input const&
     return m_motor_test_input;
 }
 
-void UAV::set_operation_mode(comms::Operation_Mode mode)
+void UAV::set_mode(comms::Mode new_mode)
 {
-    switch (m_operation_mode)
+    switch (m_mode)
     {
-        case comms::Operation_Mode::IDLE:
+        case comms::Mode::IDLE:
         {
-            m_operation_mode = mode;
-            if (mode == comms::Operation_Mode::ARMED)
+            if (new_mode == comms::Mode::ARMED)
             {
-                m_motor_mixer.set_output_range(0.08f, 1.f);
+                if (do_arm_check())
+                {
+                    m_mode = new_mode;
+                    m_motor_mixer.set_output_range(0.08f, 1.f);
+                    m_hal.motors->cut_throttle();
+                }
             }
             else
             {
-                m_motor_mixer.set_output_range(0, 1.f);
+                QLOGW("Cannot change mode to {} while idle.", static_cast<int>(new_mode));
             }
-            m_hal.motors->cut_throttle();
         }
         break;
-        case comms::Operation_Mode::ARMED:
+        case comms::Mode::ARMED:
         {
-            if (mode != comms::Operation_Mode::IDLE)
+            if (new_mode == comms::Mode::IDLE)
             {
-                QLOGW("Cannot change mode to {} while armed. Disarm first!", static_cast<int>(mode));
-                return;
-            }
-
-            if (can_disarm())
-            {
-                m_operation_mode = mode;
+                if (do_disarm_check())
+                {
+                    m_mode = new_mode;
+                }
             }
             else
             {
-                QLOGW("Cannot disarm while in state {} while armed. Land first!", static_cast<int>(m_state));
+                QLOGW("Cannot change mode to {} while armed. Disarm first!", static_cast<int>(new_mode));
             }
         }
         break;
-        case comms::Operation_Mode::MOTOR_TEST:
+        case comms::Mode::MOTOR_TEST:
         {
-            if (mode != comms::Operation_Mode::IDLE)
+            if (new_mode == comms::Mode::IDLE)
             {
-                QLOGW("Cannot change mode to {} while testing motors.", static_cast<int>(mode));
-                return;
+                m_mode = new_mode;
             }
-            m_operation_mode = mode;
+            else
+            {
+                QLOGW("Cannot change mode to {} while testing motors.", static_cast<int>(new_mode));
+            }
         }
         break;
         default:
         {
-            QLOGE("Unrecognized mode {}.", static_cast<int>(m_operation_mode));
+            QLOGE("Unrecognized mode {}.", static_cast<int>(m_mode));
         }
         break;
     }
 }
 
-comms::Operation_Mode UAV::get_operation_mode() const
+comms::Mode UAV::get_operation_mode() const
 {
-    return m_operation_mode;
+    return m_mode;
 }
 
-bool UAV::can_disarm() const
+bool UAV::do_arm_check() const
 {
-    return m_state <= State::ARMED || m_state == State::CRASHED;
+    if (m_state != State::IDLE)
+    {
+        QLOGW("Can only arm from the IDLE state. Now in {} state", static_cast<int>(m_state));
+        return false;
+    }
+
+    auto now = q::Clock::now();
+
+    bool ok = false;
+    auto d = now - m_hal.sensors->get_last_accelerometer_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy accelerometer: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_gyroscope_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy gyroscope: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_compass_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy compass: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_barometer_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy barometer: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_sonar_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy sonar: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_thermometer_sample().time_point;
+    if (d > std::chrono::milliseconds(1000))
+    {
+        QLOGW("Unhealthy thermometer: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_voltage_sample().time_point;
+    if (d > std::chrono::milliseconds(1000))
+    {
+        QLOGW("Unhealthy voltage sensor: {}", d);
+        ok = false;
+    }
+    d = now - m_hal.sensors->get_last_current_sample().time_point;
+    if (d > std::chrono::milliseconds(500))
+    {
+        QLOGW("Unhealthy current sensor: {}", d);
+        ok = false;
+    }
+//    d = now - m_hal.sensors->get_last_gps_sample().time_point;
+//    if (d > std::chrono::milliseconds(4000))
+//    {
+//        QLOGW("Unhealthy GPS: {}", d);
+//        ok = false;
+//    }
+
+    return ok;
+}
+bool UAV::do_disarm_check() const
+{
+    bool ok = m_state <= State::ARMED || m_state == State::CRASHED;
+    if (!ok)
+    {
+        QLOGW("Cannot disarm while in state {} while armed. Land first!", static_cast<int>(m_state));
+    }
+    return ok;
 }
 
 auto UAV::get_ahrs() -> AHRS const&
@@ -455,12 +530,11 @@ void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
 
     m_pids.yaw_rate.set_input(input.z);
     m_pids.yaw_rate.process(sample.dt);
-
 }
 
 void UAV::process_motors()
 {
-    if (m_operation_mode == comms::Operation_Mode::ARMED)
+    if (m_mode == comms::Mode::ARMED)
     {
         m_motor_mixer.set_data(m_uav_input.sticks.throttle,
                                0,//m_pids.yaw_rate.get_output(),
@@ -475,11 +549,11 @@ void UAV::process_motors()
             throttles[i] = math::sqrt(m_motor_mixer.get_motor_output(i));
         }
 
-        QLOGI("{.2}", throttles);
+        //QLOGI("{.2}", throttles);
 
         m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
     }
-    else if (m_operation_mode == comms::Operation_Mode::MOTOR_TEST)
+    else if (m_mode == comms::Mode::MOTOR_TEST)
     {
         m_hal.motors->set_throttles(m_motor_test_input.throttles.data(), m_motor_mixer.get_motor_count());
     }
@@ -491,8 +565,8 @@ void UAV::process_motors()
 
 void UAV::process_camera_mount()
 {
-    if (m_operation_mode == comms::Operation_Mode::IDLE ||
-        m_operation_mode == comms::Operation_Mode::ARMED)
+    if (m_mode == comms::Mode::IDLE ||
+        m_mode == comms::Mode::ARMED)
     {
         m_hal.camera_mount->set_rotation(m_camera_mount_input.rotation);
     }

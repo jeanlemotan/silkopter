@@ -13,14 +13,19 @@ template<class T> struct Sample
     q::Clock::duration dt{0}; //the duration of this sample.
 };
 
+template<class T> struct TP_Sample : public Sample<T>
+{
+    q::Clock::time_point time_point;
+};
+
 typedef Sample<math::vec3f> Accelerometer_Sample; //meters / second^2
 typedef Sample<math::vec3f> Gyroscope_Sample; //radians per second
 typedef Sample<math::vec3f> Compass_Sample; //NOT normalized
-typedef Sample<float> Barometer_Sample; //kp
-typedef Sample<float> Sonar_Sample; //meters
-typedef Sample<float> Thermometer_Sample; //degrees celsius
-typedef Sample<float> Voltage_Sample; //volts
-typedef Sample<float> Current_Sample; //amperes / second
+typedef Sample<float>       Barometer_Sample; //kp
+typedef Sample<float>       Sonar_Sample; //meters
+typedef Sample<float>       Thermometer_Sample; //degrees celsius
+typedef Sample<float>       Voltage_Sample; //volts
+typedef Sample<float>       Current_Sample; //amperes / second
 
 struct GPS
 {
@@ -34,7 +39,21 @@ struct GPS
     boost::optional<math::vec2f> speed; //meters/second
     boost::optional<math::vec2f> direction; //normalized
 };
-typedef Sample<GPS> GPS_Sample;
+typedef Sample<GPS>         GPS_Sample;
+
+///////////////////////////////////////////////
+/// timestamped samples
+///
+
+typedef TP_Sample<math::vec3f>  Accelerometer_TP_Sample;
+typedef TP_Sample<math::vec3f>  Gyroscope_TP_Sample;
+typedef TP_Sample<math::vec3f>  Compass_TP_Sample;
+typedef TP_Sample<float>        Barometer_TP_Sample;
+typedef TP_Sample<float>        Sonar_TP_Sample;
+typedef TP_Sample<float>        Thermometer_TP_Sample;
+typedef TP_Sample<float>        Voltage_TP_Sample;
+typedef TP_Sample<float>        Current_TP_Sample;
+typedef TP_Sample<GPS>          GPS_TP_Sample;
 
 }
 }

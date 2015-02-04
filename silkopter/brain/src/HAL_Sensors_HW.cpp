@@ -284,39 +284,39 @@ auto HAL_Sensors_HW::get_gps_samples() const -> std::vector<sensors::GPS_Sample>
 {
     return m_gps_samples;
 }
-auto HAL_Sensors_HW::get_last_accelerometer_sample() const  -> sensors::Accelerometer_Sample const&
+auto HAL_Sensors_HW::get_last_accelerometer_sample() const  -> sensors::Accelerometer_TP_Sample const&
 {
     return m_last_accelerometer_sample;
 }
-auto HAL_Sensors_HW::get_last_gyroscope_sample() const      -> sensors::Gyroscope_Sample const&
+auto HAL_Sensors_HW::get_last_gyroscope_sample() const      -> sensors::Gyroscope_TP_Sample const&
 {
     return m_last_gyroscope_sample;
 }
-auto HAL_Sensors_HW::get_last_compass_sample() const        -> sensors::Compass_Sample const&
+auto HAL_Sensors_HW::get_last_compass_sample() const        -> sensors::Compass_TP_Sample const&
 {
     return m_last_compass_sample;
 }
-auto HAL_Sensors_HW::get_last_barometer_sample() const      -> sensors::Barometer_Sample const&
+auto HAL_Sensors_HW::get_last_barometer_sample() const      -> sensors::Barometer_TP_Sample const&
 {
     return m_last_barometer_sample;
 }
-auto HAL_Sensors_HW::get_last_sonar_sample() const          -> sensors::Sonar_Sample const&
+auto HAL_Sensors_HW::get_last_sonar_sample() const          -> sensors::Sonar_TP_Sample const&
 {
     return m_last_sonar_sample;
 }
-auto HAL_Sensors_HW::get_last_thermometer_sample() const    -> sensors::Thermometer_Sample const&
+auto HAL_Sensors_HW::get_last_thermometer_sample() const    -> sensors::Thermometer_TP_Sample const&
 {
     return m_last_thermometer_sample;
 }
-auto HAL_Sensors_HW::get_last_voltage_sample() const        -> sensors::Voltage_Sample const&
+auto HAL_Sensors_HW::get_last_voltage_sample() const        -> sensors::Voltage_TP_Sample const&
 {
     return m_last_voltage_sample;
 }
-auto HAL_Sensors_HW::get_last_current_sample() const        -> sensors::Current_Sample const&
+auto HAL_Sensors_HW::get_last_current_sample() const        -> sensors::Current_TP_Sample const&
 {
     return m_last_current_sample;
 }
-auto HAL_Sensors_HW::get_last_gps_sample() const            -> sensors::GPS_Sample const&
+auto HAL_Sensors_HW::get_last_gps_sample() const            -> sensors::GPS_TP_Sample const&
 {
     return m_last_gps_sample;
 }
@@ -361,7 +361,7 @@ void HAL_Sensors_HW::process()
     m_current_samples.clear();
     m_gps_samples.clear();
 
-    auto start = q::Clock::now();
+    auto now = q::Clock::now();
 
     m_sensors->gps_detector.process();
 
@@ -385,7 +385,8 @@ void HAL_Sensors_HW::process()
             }
             if (!m_gyroscope_samples.empty())
             {
-                m_last_gyroscope_sample = m_gyroscope_samples.back();
+                static_cast<sensors::Gyroscope_Sample&>(m_last_gyroscope_sample) = m_gyroscope_samples.back();
+                m_last_gyroscope_sample.time_point = now;
             }
         }
 
@@ -401,7 +402,8 @@ void HAL_Sensors_HW::process()
             }
             if (!m_accelerometer_samples.empty())
             {
-                m_last_accelerometer_sample = m_accelerometer_samples.back();
+                static_cast<sensors::Accelerometer_Sample&>(m_last_accelerometer_sample) = m_accelerometer_samples.back();
+                m_last_accelerometer_sample.time_point = now;
             }
         }
 
@@ -417,7 +419,8 @@ void HAL_Sensors_HW::process()
             }
             if (!m_compass_samples.empty())
             {
-                m_last_compass_sample = m_compass_samples.back();
+                static_cast<sensors::Compass_Sample&>(m_last_compass_sample) = m_compass_samples.back();
+                m_last_compass_sample.time_point = now;
             }
         }
     }
@@ -429,6 +432,7 @@ void HAL_Sensors_HW::process()
         auto data = m_sensors->adc.get_current_data();
         if (data)
         {
+            m_last_current_sample.time_point = now;
             m_last_current_sample.value = data->value * m_config.current_scale;
             m_last_current_sample.dt = data->dt;
             m_last_current_sample.sample_idx++;
@@ -438,6 +442,7 @@ void HAL_Sensors_HW::process()
         data = m_sensors->adc.get_voltage_data();
         if (data)
         {
+            m_last_voltage_sample.time_point = now;
             m_last_voltage_sample.value = data->value * m_config.voltage_scale;
             m_last_voltage_sample.dt = data->dt;
             m_last_voltage_sample.sample_idx++;
@@ -453,6 +458,7 @@ void HAL_Sensors_HW::process()
         if (data)
         {
             //LOG_INFO("DISTANCE: {}", *val);
+            m_last_sonar_sample.time_point = now;
             m_last_sonar_sample.value = data->value;
             m_last_sonar_sample.dt = data->dt;
             m_last_sonar_sample.sample_idx++;
@@ -470,6 +476,7 @@ void HAL_Sensors_HW::process()
         auto b_data = m_sensors->baro.get_barometer_data();
         if (b_data)
         {
+            m_last_barometer_sample.time_point = now;
             m_last_barometer_sample.value = b_data->value;
             m_last_barometer_sample.sample_idx++;
             m_last_barometer_sample.dt = b_data->dt;
@@ -478,6 +485,7 @@ void HAL_Sensors_HW::process()
         auto t_data = m_sensors->baro.get_thermometer_data();
         if (t_data)
         {
+            m_last_thermometer_sample.time_point = now;
             m_last_thermometer_sample.value = t_data->value;
             m_last_thermometer_sample.sample_idx++;
             m_last_thermometer_sample.dt = t_data->dt;

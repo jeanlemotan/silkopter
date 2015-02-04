@@ -207,7 +207,7 @@ void Comms::recieve_request_motor_test_input()
 }
 void Comms::recieve_operation_mode()
 {
-    comms::Operation_Mode v;
+    comms::Mode v;
     if (m_setup_channel.get_message_size() == 0)
     {
         QLOGI("operation mode get");
@@ -216,7 +216,7 @@ void Comms::recieve_operation_mode()
     else if (m_setup_channel.unpack(v))
     {
         auto old = m_uav.get_operation_mode();
-        m_uav.set_operation_mode(v);
+        m_uav.set_mode(v);
         QLOGI("operation mode changed from {} to {}/{}", static_cast<int>(old), static_cast<int>(v), static_cast<int>(m_uav.get_operation_mode()));
     }
 }
