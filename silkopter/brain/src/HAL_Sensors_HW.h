@@ -112,7 +112,7 @@ private:
     std::shared_ptr<Sensors> m_sensors;
 
     auto load_settings() -> bool;
-    void save_settings();
+    void save_settings(Config const& config);
 };
 
 }

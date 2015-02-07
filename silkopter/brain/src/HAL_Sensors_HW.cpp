@@ -73,7 +73,7 @@ HAL_Sensors_HW::HAL_Sensors_HW()
     m_config.mpu_i2c_device = "/dev/i2c-0";
 
     load_settings();
-    save_settings();
+    save_settings(m_config);
 }
 
 HAL_Sensors_HW::~HAL_Sensors_HW()
@@ -108,11 +108,11 @@ auto HAL_Sensors_HW::load_settings() -> bool
 
     return true;
 }
-void HAL_Sensors_HW::save_settings()
+void HAL_Sensors_HW::save_settings(Config const& config)
 {
     TIMED_FUNCTION();
 
-    autojsoncxx::to_pretty_json_file("sensors_pi.cfg", m_config);
+    autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
 auto HAL_Sensors_HW::init() -> bool
@@ -198,7 +198,7 @@ void HAL_Sensors_HW::set_accelerometer_calibration_data(math::vec3f const& bias,
     m_config.accelerometer_scale = scale;
     silk::async([=]()
     {
-        save_settings();
+        save_settings(m_config);
     });
 }
 void HAL_Sensors_HW::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
@@ -212,7 +212,7 @@ void HAL_Sensors_HW::set_gyroscope_calibration_data(math::vec3f const& bias)
     m_config.gyroscope_bias = bias;
     silk::async([=]()
     {
-        save_settings();
+        save_settings(m_config);
     });
 }
 void HAL_Sensors_HW::get_gyroscope_calibration_data(math::vec3f &bias) const
@@ -225,7 +225,7 @@ void HAL_Sensors_HW::set_compass_calibration_data(math::vec3f const& bias)
     m_config.compass_bias = bias;
     silk::async([=]()
     {
-        save_settings();
+        save_settings(m_config);
     });
 }
 void HAL_Sensors_HW::get_compass_calibration_data(math::vec3f &bias) const
@@ -238,7 +238,7 @@ void HAL_Sensors_HW::set_current_calibration_data(float scale)
     m_config.current_scale = scale;
     silk::async([=]()
     {
-        save_settings();
+        save_settings(m_config);
     });
 }
 
@@ -252,7 +252,7 @@ void HAL_Sensors_HW::set_voltage_calibration_data(float scale)
     m_config.voltage_scale = scale;
     silk::async([=]()
     {
-        save_settings();
+        save_settings(m_config);
     });
 }
 void HAL_Sensors_HW::get_voltage_calibration_data(float& scale) const

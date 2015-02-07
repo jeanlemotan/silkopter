@@ -361,13 +361,14 @@ void GPS_UBLOX::process()
     QLOG_TOPIC("gps_ublox::process");
     if (!m_is_setup)
     {
-        if (!m_setup_future.valid())
+        if (!m_setup_future.valid() || //first time we're starting this
+             m_setup_future.get_state() == boost::future_state::ready) //the previous async setup failed
         {
-            m_setup_future = silk::async([this]() { setup(); });
-        }
-        else if (m_setup_future.get_state() == boost::future_state::ready)
-        {
-            m_setup_future = boost::unique_future<void>();
+            if (!m_is_setup) //check again to avoid a rare race condition
+            {
+                //start the async setup
+                m_setup_future = silk::async([this]() { setup(); });
+            }
         }
         return;
     }
