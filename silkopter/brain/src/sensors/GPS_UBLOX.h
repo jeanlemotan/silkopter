@@ -15,7 +15,7 @@ public:
 
     auto init(int fd) -> bool;
     void process();
-    auto get_sample() const -> sensors::GPS_Sample const&;
+    auto get_sample() const -> boost::optional<sensors::GPS>;
 
 private:
     enum class Message : uint16_t
@@ -43,18 +43,17 @@ private:
 
     struct Packet
     {
-        uint8_t step = 0;
-
         uint8_t cls;
         Message message;
-        uint16_t payload_size = 0;
-        uint8_t ck_a = 0;
-        uint8_t ck_b = 0;
         std::vector<uint8_t> payload;
     } m_packet;
 
+    std::mutex m_mutex;
 
-    auto decode_packet(Packet& packet, uint8_t const* data, uint8_t const* end) -> uint8_t const*;
+    auto setup() -> bool;
+    void read_data();
+
+    auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool;
     void process_packet(Packet& packet);
 
     void process_nav_sol_packet(Packet& packet);
@@ -75,19 +74,35 @@ private:
     template<class T>
     auto send_packet(Message mgs, T const& payload) -> bool;
 
+    template<class T>
+    auto send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
+
     auto send_packet(Message mgs, uint8_t const* payload, size_t payload_size) -> bool;
 
     auto wait_for_ack(q::Clock::duration d) -> bool;
     boost::optional<bool> m_ack;
 
 
-    bool m_is_initialized = false;
+    std::atomic_bool m_is_setup = {false};
+    boost::unique_future<void> m_setup_future;
 
-    std::array<uint8_t, 1024> m_buffer;
+
+    std::array<uint8_t, 1024> m_temp_buffer;
+    std::deque<uint8_t> m_buffer;
 
     std::string m_device;
     int m_fd = -1;
-    sensors::GPS_Sample m_sample;
+
+    struct Sample
+    {
+        bool has_nav_status = false;
+        bool has_pollh = false;
+        bool has_sol = false;
+        sensors::GPS data;
+        boost::optional<sensors::GPS> complete;
+
+        q::Clock::time_point last_complete_time_point;
+    } m_sample;
 };
 
 

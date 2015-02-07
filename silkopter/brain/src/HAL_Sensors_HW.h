@@ -68,7 +68,7 @@ public:
         std::string mpu_i2c_device;
         std::string barometer_i2c_device;
         std::string gps_device;
-        size_t gps_baud = 115200;
+        size_t gps_baud = 38400;
 
         float current_scale = 24.8f;
         float voltage_scale = 39.33f;

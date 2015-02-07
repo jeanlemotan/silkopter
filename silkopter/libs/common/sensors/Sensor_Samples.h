@@ -29,14 +29,22 @@ typedef Sample<float>       Current_Sample; //amperes / second
 
 struct GPS
 {
+    enum class Fix : uint8_t
+    {
+        NONE,
+        FIX_2D,
+        FIX_3D
+    };
+
+    Fix fix;
     uint8_t sattelite_count = 0;
     float precision = std::numeric_limits<float>::max();
 
     boost::optional<double> longitude; //radians
     boost::optional<double> latitude; //radians
     boost::optional<float> altitude; //meters
-    boost::optional<math::vec2f> speed_2d; //meters/second but x/y only
-    boost::optional<math::vec2f> speed; //meters/second
+    boost::optional<math::vec2f> velocity_2d; //meters/second but x/y only
+    boost::optional<math::vec3f> velocity; //meters/second
     boost::optional<math::vec2f> direction; //normalized
 };
 typedef Sample<GPS>         GPS_Sample;

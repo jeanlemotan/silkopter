@@ -7,10 +7,13 @@ namespace silk
 constexpr uint8_t PREAMBLE1 = 0xB5;
 constexpr uint8_t PREAMBLE2 = 0x62;
 
+constexpr uint16_t MIN_PACKET_SIZE = 8;
 constexpr uint16_t MAX_PAYLOAD_SIZE = 256;
 
 constexpr std::chrono::milliseconds MEASUREMENT_PERIOD(200);
-constexpr std::chrono::milliseconds ACK_TIMEOUT(500);
+constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
+
+constexpr std::chrono::seconds REINIT_WATCHGOD_TIMEOUT(3);
 
 
 typedef uint8_t U1;
@@ -161,114 +164,154 @@ GPS_UBLOX::~GPS_UBLOX()
 
 auto GPS_UBLOX::detect(uint8_t const* data, size_t size) -> bool
 {
-    auto end = data + size;
-    auto last = decode_packet(m_packet, data, end);
-    return last != end;
+    if (data && size)
+    {
+        std::copy(data, data + size, std::back_inserter(m_buffer));
+    }
+    return decode_packet(m_packet, m_buffer);
 }
 
-auto GPS_UBLOX::decode_packet(Packet& packet, uint8_t const* data, uint8_t const* end) -> uint8_t const*
+auto GPS_UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
 {
-    if (!data || !end || end <= data)
+    while (buffer.size() >= MIN_PACKET_SIZE)
     {
-        QASSERT(0);
-        return end;
-    }
+        size_t step = 0;
+        size_t payload_size = 0;
+        uint8_t ck_a = 0;
+        uint8_t ck_b = 0;
+        bool is_broken = false;
 
-
-    auto& step = packet.step;
-    auto& ck_a = packet.ck_a;
-    auto& ck_b = packet.ck_b;
-    auto& payload_size = packet.payload_size;
-
-    for (auto it = data; it != end; ++it)
-    {
-        auto const d = *it;
-        //LOG_INFO("step: {}, d: {}", step, d);
-        auto next = step + 1;
-        switch (step)
+        for (auto it = buffer.begin(); it != buffer.end(); ++it)
         {
-        case 0:
-            packet.payload.clear();
-            step = (d == PREAMBLE1) ? next : 0;
-            break;
-        case 1:
-            step = (d == PREAMBLE2) ? next : 0;
-            break;
-        case 2:
-            packet.cls = d;
-            step++;
-            ck_b = ck_a = d;
-            break;
-        case 3:
-            packet.message = static_cast<Message>((d << 8) | packet.cls);
-            step++;
-            ck_b += (ck_a += d);
-            break;
-        case 4:
-            payload_size = d;
-            step++;
-            ck_b += (ck_a += d);
-            break;
-        case 5:
-            payload_size = (d << 8) | payload_size;
-            if (payload_size > MAX_PAYLOAD_SIZE)
+            auto const d = *it;
+            //LOG_INFO("step: {}, d: {}", step, d);
+            switch (step)
             {
-                step = 0;
+            case 0:
+                packet.payload.clear();
+                if (d != PREAMBLE1)
+                {
+                    is_broken = true;
+                    break;
+                }
+                step++;
                 break;
-            }
-            if (payload_size > 0)
-            {
-                packet.payload.reserve(payload_size);
-                step = next;
-            }
-            else
-            {
-                step = next + 1; //go directly to checksum
-            }
-            ck_b += (ck_a += d);
-            break;
-        case 6:
-            ck_b += (ck_a += d);
-            packet.payload.push_back(d);
-            step = (packet.payload.size() == payload_size) ? next : step;
-            break;
-        case 7:
-            step = (ck_a == d) ? next : 0;
-            break;
-        case 8:
-            step = 0;
-            if (ck_b != d)
-            {
+            case 1:
+                if (d != PREAMBLE2)
+                {
+                    is_broken = true;
+                    break;
+                }
+                step++;
                 break;
+            case 2:
+                packet.cls = d;
+                step++;
+                ck_b = ck_a = d;
+                break;
+            case 3:
+                packet.message = static_cast<Message>((d << 8) | packet.cls);
+                step++;
+                ck_b += (ck_a += d);
+                break;
+            case 4:
+                payload_size = d;
+                step++;
+                ck_b += (ck_a += d);
+                break;
+            case 5:
+                payload_size = (d << 8) | payload_size;
+                if (payload_size > MAX_PAYLOAD_SIZE)
+                {
+                    is_broken = true;
+                    break;
+                }
+                if (payload_size > 0)
+                {
+                    packet.payload.reserve(payload_size);
+                    step++;
+                }
+                else
+                {
+                    step += 2; //go directly to checksum
+                }
+                ck_b += (ck_a += d);
+                break;
+            case 6:
+                ck_b += (ck_a += d);
+                packet.payload.push_back(d);
+                step = (packet.payload.size() == payload_size) ? step + 1 : step;
+                break;
+            case 7:
+                if (ck_a != d)
+                {
+                    is_broken = true;
+                    break;
+                }
+                step++;
+                break;
+            case 8:
+                if (ck_b != d)
+                {
+                    is_broken = true;
+                    break;
+                }
+
+                //consume all the data from the buffer
+                buffer.erase(buffer.begin(), it);
+                // a valid UBlox packet
+                return true;
             }
-            // a valid UBlox packet
-            return it;
+        }
+
+        if (is_broken)
+        {
+            //remove the preamble and start again
+            buffer.pop_front();
+        }
+        else
+        {
+            //we need more data
+            return false;
         }
     }
-    return end;
+    return false;
 }
 
 auto GPS_UBLOX::init(int fd) -> bool
 {
     QLOG_TOPIC("gps_ublox::init");
-    QASSERT(!m_is_initialized);
-    if (m_is_initialized)
+
+    std::lock_guard<std::mutex> lg(m_mutex);
+
+    QASSERT(m_fd < 0);
+    if (m_fd >= 0)
     {
         QLOGE("Already initialized with fd: {}", m_fd);
         return false;
     }
 
     m_fd = fd;
+    return true;
+}
+
+auto GPS_UBLOX::setup() -> bool
+{
+    QLOG_TOPIC("gps_ublox::setup");
+
+    QLOGI("Initializing UBLOX GPS...");
+
+    tcflush(m_fd, TCIOFLUSH);
 
     {
+        QLOGI("Configuring GPS rate...");
         CFG_RATE data;
         data.measRate = std::chrono::duration_cast<std::chrono::milliseconds>(MEASUREMENT_PERIOD).count();
         data.timeRef = 0;//UTC time
         data.navRate = 1;
-        send_packet(Message::CFG_RATE, data);
-        if (!wait_for_ack(ACK_TIMEOUT) || *m_ack == false)
+        if (!send_packet_with_retry(Message::CFG_RATE, data, ACK_TIMEOUT, 3))
         {
-            QLOGE("Cannot change GPS rate");
+            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
             return false;
         }
     }
@@ -280,19 +323,24 @@ auto GPS_UBLOX::init(int fd) -> bool
                                                           }};
         for (auto m: msgs)
         {
+            QLOGI("Configuring GPS rate to {} for message idx {} (msg: {})...",
+                  m.second,
+                  std::distance(&m, msgs.data()),
+                  static_cast<int>(m.first));
+
             CFG_MSG data;
             data.msgClass = static_cast<int>(m.first) & 255;
             data.msgID = static_cast<int>(m.first) >> 8;
             data.rate = m.second;
-            send_packet(Message::CFG_MSG, data);
-            if (!wait_for_ack(ACK_TIMEOUT) || *m_ack == false)
+            if (!send_packet_with_retry(Message::CFG_MSG, data, ACK_TIMEOUT, 3))
             {
-                QLOGE("Cannot change GPS rate or {} for message {}", m.second, static_cast<int>(m.first));
+                QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
                 return false;
             }
         }
     }
 
+    QLOGI("Requesting configs");
     {
         //ask for configs
         send_packet(Message::MON_VER, nullptr, 0);
@@ -303,36 +351,72 @@ auto GPS_UBLOX::init(int fd) -> bool
         send_packet(Message::MON_HW, nullptr, 0);
     }
 
-
-    m_is_initialized = true;
-
+    m_sample.last_complete_time_point = q::Clock::now();
+    m_is_setup = true;
     return true;
 }
+
 void GPS_UBLOX::process()
 {
     QLOG_TOPIC("gps_ublox::process");
+    if (!m_is_setup)
+    {
+        if (!m_setup_future.valid())
+        {
+            m_setup_future = silk::async([this]() { setup(); });
+        }
+        else if (m_setup_future.get_state() == boost::future_state::ready)
+        {
+            m_setup_future = boost::unique_future<void>();
+        }
+        return;
+    }
+
+    QASSERT(m_fd >= 0);
     if (m_fd < 0)
     {
         return;
     }
 
+    read_data();
+
+    //watchdog
+    if (m_sample.has_nav_status && m_sample.has_pollh && m_sample.has_sol)
+    {
+        m_sample.last_complete_time_point = q::Clock::now();
+        m_sample.complete = m_sample.data;
+
+        m_sample.has_nav_status = m_sample.has_pollh = m_sample.has_sol = false;
+        m_sample.data = sensors::GPS();
+    }
+
+    //check if we need to reset
+    if (q::Clock::now() - m_sample.last_complete_time_point >= REINIT_WATCHGOD_TIMEOUT)
+    {
+        m_is_setup = false;
+    }
+}
+
+void GPS_UBLOX::read_data()
+{
+    QASSERT(m_fd >= 0);
     do
     {
-        auto res = read(m_fd, m_buffer.data(), m_buffer.size());
+        auto res = read(m_fd, m_temp_buffer.data(), m_temp_buffer.size());
         if (res > 0)
         {
-            auto const* start = m_buffer.data();
-            auto const* end = m_buffer.data() + res;
-            while (start != end)
+            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+
+            bool found = false;
+            do
             {
-                start = decode_packet(m_packet, start, end);
-                if (start != end)
+                found = decode_packet(m_packet, m_buffer);
+                if (found)
                 {
                     process_packet(m_packet);
-                    m_packet.step = 0;
                     m_packet.payload.clear();
                 }
-            }
+            } while(found);
         }
         else
         {
@@ -353,7 +437,7 @@ auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
     auto start = q::Clock::now();
     do
     {
-        process();
+        read_data();
         if (m_ack.is_initialized())
         {
             return true;
@@ -366,6 +450,8 @@ auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
 
 void GPS_UBLOX::process_packet(Packet& packet)
 {
+    QLOG_TOPIC("gps_ublox::process_packet");
+
     switch (packet.message)
     {
     case Message::ACK_ACK: m_ack = true; break;
@@ -386,7 +472,7 @@ void GPS_UBLOX::process_packet(Packet& packet)
     case Message::MON_VER: process_mon_ver_packet(packet); break;
     case Message::MON_HW: process_mon_hw_packet(packet); break;
 
-        //default: LOG_INFO("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
+    //default: QLOGI("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
     }
 
 }
@@ -397,6 +483,12 @@ void GPS_UBLOX::process_nav_pollh_packet(Packet& packet)
     NAV_POLLH& data = reinterpret_cast<NAV_POLLH&>(*packet.payload.data());
 
     //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
+
+    {
+        m_sample.data.latitude = data.lat / 10000000.f;
+        m_sample.data.longitude = data.lon / 10000000.f;
+        m_sample.has_pollh = true;
+    }
 }
 
 void GPS_UBLOX::process_nav_status_packet(Packet& packet)
@@ -414,6 +506,10 @@ void GPS_UBLOX::process_nav_status_packet(Packet& packet)
 //    - 0x04 = GPS + dead reckoning combined
 //    - 0x05 = Time only fix
 //    - 0x06..0xff = reserved
+
+    {
+        m_sample.has_nav_status = true;
+    }
 }
 
 void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
@@ -439,6 +535,21 @@ void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
 //    0x03 = 3D-Fix
 //    0x04 = GPS + dead reckoning combined
 //    0x05 = Time only fix
+
+
+    {
+        m_sample.data.sattelite_count = data.numSV;
+        m_sample.data.velocity = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+        if (data.gpsFix == 0x02)
+        {
+            m_sample.data.fix = sensors::GPS::Fix::FIX_2D;
+        }
+        else if (data.gpsFix == 0x03)
+        {
+            m_sample.data.fix = sensors::GPS::Fix::FIX_3D;
+        }
+        m_sample.has_sol = true;
+    }
 }
 
 void GPS_UBLOX::process_cfg_prt_packet(Packet& packet)
@@ -505,6 +616,8 @@ void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
     MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
 
     QLOGI("GPS HW: jamming:{}, noise:{}", data.jamInd, data.noisePerMS);
+
+    send_packet(Message::MON_HW, nullptr, 0);
 }
 
 void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
@@ -517,9 +630,9 @@ void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto GPS_UBLOX::get_sample() const -> sensors::GPS_Sample const&
+auto GPS_UBLOX::get_sample() const -> boost::optional<sensors::GPS>
 {
-
+    return m_sample.complete;
 }
 
 auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size) -> bool
@@ -550,12 +663,12 @@ auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_
     buffer[off++] = ck_a;
     buffer[off++] = ck_b;
 
-    Packet pk;
-    decode_packet(pk, buffer.data(), buffer.data() + off);
-    QASSERT(pk.ck_a == ck_a);
-    QASSERT(pk.ck_b == ck_b);
-    QASSERT(pk.message == msg);
-    QASSERT(pk.payload_size == payload_size);
+//    Packet pk;
+//    decode_packet(pk, buffer.data(), buffer.data() + off);
+//    QASSERT(pk.ck_a == ck_a);
+//    QASSERT(pk.ck_b == ck_b);
+//    QASSERT(pk.message == msg);
+//    QASSERT(pk.payload_size == payload_size);
 
     if (write(m_fd, buffer.data(), off) < 0)
     {
@@ -563,17 +676,33 @@ auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_
         return false;
     }
 
+    //tcflush(m_fd, TCIOFLUSH);
+
     return true;
 }
 
 template<class T>
-auto GPS_UBLOX::send_packet(Message msg, T const& payload) -> bool
+auto GPS_UBLOX::send_packet(Message msg, T const& data) -> bool
 {
     static_assert(sizeof(T) < 200, "Message too big");
 
-    auto res = send_packet(msg, reinterpret_cast<uint8_t const*>(&payload), sizeof(T));
+    auto res = send_packet(msg, reinterpret_cast<uint8_t const*>(&data), sizeof(T));
 
     return res;
+}
+
+template<class T>
+auto GPS_UBLOX::send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
+{
+    for (size_t i = 0; i <= retries; i++)
+    {
+        send_packet(msg, data);
+        if (wait_for_ack(timeout) && *m_ack == true)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 

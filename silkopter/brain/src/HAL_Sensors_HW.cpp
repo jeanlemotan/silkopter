@@ -196,7 +196,10 @@ void HAL_Sensors_HW::set_accelerometer_calibration_data(math::vec3f const& bias,
 {
     m_config.accelerometer_bias = bias;
     m_config.accelerometer_scale = scale;
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 void HAL_Sensors_HW::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
@@ -207,7 +210,10 @@ void HAL_Sensors_HW::get_accelerometer_calibration_data(math::vec3f &bias, math:
 void HAL_Sensors_HW::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
     m_config.gyroscope_bias = bias;
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 void HAL_Sensors_HW::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
@@ -217,7 +223,10 @@ void HAL_Sensors_HW::get_gyroscope_calibration_data(math::vec3f &bias) const
 void HAL_Sensors_HW::set_compass_calibration_data(math::vec3f const& bias)
 {
     m_config.compass_bias = bias;
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 void HAL_Sensors_HW::get_compass_calibration_data(math::vec3f &bias) const
 {
@@ -227,7 +236,10 @@ void HAL_Sensors_HW::get_compass_calibration_data(math::vec3f &bias) const
 void HAL_Sensors_HW::set_current_calibration_data(float scale)
 {
     m_config.current_scale = scale;
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 
 void HAL_Sensors_HW::get_current_calibration_data(float& scale) const
@@ -238,7 +250,10 @@ void HAL_Sensors_HW::get_current_calibration_data(float& scale) const
 void HAL_Sensors_HW::set_voltage_calibration_data(float scale)
 {
     m_config.voltage_scale = scale;
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 void HAL_Sensors_HW::get_voltage_calibration_data(float& scale) const
 {
