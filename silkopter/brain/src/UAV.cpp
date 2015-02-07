@@ -66,6 +66,8 @@ auto UAV::load_settings() -> bool
 }
 void UAV::save_settings()
 {
+    TIMED_FUNCTION();
+
     UAV_Config cfg;
 
     cfg.pids.yaw_rate = m_pids.yaw_rate.get_params();
@@ -579,7 +581,10 @@ auto UAV::get_yaw_rate_pid_params() const -> Yaw_Rate_PID::Params
 void UAV::set_yaw_rate_pid_params(Yaw_Rate_PID::Params const& params)
 {
     m_pids.yaw_rate.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_pitch_rate_pid_params() const -> Pitch_Rate_PID::Params
 {
@@ -588,7 +593,10 @@ auto UAV::get_pitch_rate_pid_params() const -> Pitch_Rate_PID::Params
 void UAV::set_pitch_rate_pid_params(Pitch_Rate_PID::Params const& params)
 {
     m_pids.pitch_rate.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_roll_rate_pid_params() const -> Roll_Rate_PID::Params
 {
@@ -597,7 +605,10 @@ auto UAV::get_roll_rate_pid_params() const -> Roll_Rate_PID::Params
 void UAV::set_roll_rate_pid_params(Roll_Rate_PID::Params const& params)
 {
     m_pids.roll_rate.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_altitude_rate_pid_params() const -> Altitude_Rate_PID::Params
 {
@@ -606,7 +617,10 @@ auto UAV::get_altitude_rate_pid_params() const -> Altitude_Rate_PID::Params
 void UAV::set_altitude_rate_pid_params(Altitude_Rate_PID::Params const& params)
 {
     m_pids.altitude_rate.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_yaw_pid_params() const -> Yaw_PID::Params
 {
@@ -615,7 +629,10 @@ auto UAV::get_yaw_pid_params() const -> Yaw_PID::Params
 void UAV::set_yaw_pid_params(Yaw_PID::Params const& params)
 {
     m_pids.yaw.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_pitch_pid_params() const -> Pitch_PID::Params
 {
@@ -624,7 +641,10 @@ auto UAV::get_pitch_pid_params() const -> Pitch_PID::Params
 void UAV::set_pitch_pid_params(Pitch_PID::Params const& params)
 {
     m_pids.pitch.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_roll_pid_params() const -> Roll_PID::Params
 {
@@ -633,7 +653,10 @@ auto UAV::get_roll_pid_params() const -> Roll_PID::Params
 void UAV::set_roll_pid_params(Roll_PID::Params const& params)
 {
     m_pids.roll.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 auto UAV::get_altitude_pid_params() const -> Altitude_PID::Params
 {
@@ -642,7 +665,10 @@ auto UAV::get_altitude_pid_params() const -> Altitude_PID::Params
 void UAV::set_altitude_pid_params(Altitude_PID::Params const& params)
 {
     m_pids.altitude.set_params(params);
-    save_settings();
+    silk::async([=]()
+    {
+        save_settings();
+    });
 }
 
 auto UAV::get_assist_params() const -> Assist_Params

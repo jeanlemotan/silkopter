@@ -170,13 +170,15 @@ void Battery::save_state()
     }
     m_last_save_time_point = now;
 
-    TIMED_FUNCTION();
-
     m_saved_state.capacity_used = m_capacity_used_mah;
     m_saved_state.cell_count = m_cell_count ? m_cell_count.get() : 0;
-    autojsoncxx::to_pretty_json_file("battery_state.cfg", m_saved_state);
 
-    QLOGI("Capacity used: {}mAh", m_capacity_used_mah);
+    silk::async([=]()
+    {
+        TIMED_FUNCTION();
+        autojsoncxx::to_pretty_json_file("battery_state.cfg", m_saved_state);
+        QLOGI("Capacity used: {}mAh", m_capacity_used_mah);
+    });
 }
 
 void Battery::load_state()

@@ -8,6 +8,7 @@
 
 size_t s_test = 0;
 bool s_exit = false;
+boost::asio::io_service s_async_io_service;
 
 namespace boost
 {
@@ -29,7 +30,6 @@ void signal_handler(int signum)
     s_exit = true;
     QLOGI("Exitting due to signal {}", signum);
 }
-
 
 
 int main(int argc, char const* argv[])
@@ -64,22 +64,26 @@ int main(int argc, char const* argv[])
     s_test = vm.count("test") ? vm["test"].as<size_t>() : size_t(0);
     //bool blind = vm.count("blind") != 0;
 
-	boost::asio::io_service io_service;
-
     QLOGI("Creating io_service thread");
 
+    boost::asio::io_service io_service;
     auto io_thread = boost::thread([&io_service]()
     {
         while (!s_exit)
         {
-            //auto start = q::Clock::now();
-            //do
-            //{
-                io_service.run();
-                io_service.reset();
-            //} while (q::Clock::now() - start < std::chrono::milliseconds(1));
-            //boost::this_thread::yield();
+            io_service.run();
+            io_service.reset();
             boost::this_thread::sleep_for(boost::chrono::microseconds(500));
+        }
+    });
+
+    auto async_thread = boost::thread([&s_async_io_service]()
+    {
+        while (!s_exit)
+        {
+            s_async_io_service.run();
+            s_async_io_service.reset();
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
         }
     });
 
@@ -163,13 +167,22 @@ int main(int argc, char const* argv[])
                 hal.process();
                 uav.process();
             }
-            else
-            {
-                boost::this_thread::yield();
-            }
+            boost::this_thread::yield();
         }
 
         QLOGI("Stopping everything");
+
+        //stop threads
+        if (io_thread.joinable())
+        {
+            boost::this_thread::yield();
+            io_thread.join();
+        }
+        if (async_thread.joinable())
+        {
+            boost::this_thread::yield();
+            async_thread.join();
+        }
 
         if (hal.camera)
         {
@@ -181,12 +194,6 @@ int main(int argc, char const* argv[])
     {
         QLOGE("exception: {}", e.what());
         abort();
-    }
-
-    if (io_thread.joinable())
-    {
-        boost::this_thread::yield();
-        io_thread.join();
     }
 
     QLOGI("Closing");
