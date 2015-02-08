@@ -1,6 +1,6 @@
 ﻿#include "BrainStdAfx.h"
 
-#ifdef RASPBERRY_PI
+#if defined RASPBERRY_PI
 
 #include "HAL_Sensors_HW.h"
 #include "utils/Json_Helpers.h"
@@ -9,56 +9,96 @@
 #include "sz_math.hpp"
 #include "sz_hal_sensors_hw_config.hpp"
 
-#include "sensors/GPS_Detector.h"
 
 
-#define USE_MPU9250
+/////////////////////////////////////////////////////////////////////////////////////
+// Sensors
+// Choose the sensor and the bus that you have
+
+#define USE_MPU9250_I2C
+//#define USE_MPU9250_SPI
+
 #define USE_MS5611
 #define USE_ODROIDW_ADC
 #define USE_SRF02
 
-#ifdef USE_MPU9250
-#   include "sensors/MPU9250.h"
+#define USE_GPS_DETECTOR_UART
+//#define USE_GPS_DETECTOR_SPI
+//#define USE_GPS_DETECTOR_I2C
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+#if defined USE_MPU9250_I2C
+#   define USE_MPU9250
+#   include "sensors/MPU9250_I2C.h"
+#elif defined USE_MPU9250_SPI
+#   define USE_MPU9250
+#   include "sensors/MPU9250_SPI.h"
 #else
-#   error "No IMU selected"
+#   error No IMU selected
 #endif
 
-#ifdef USE_MS5611
+#if defined USE_MS5611
 #   include "sensors/MS5611.h"
 #else
-#   error "No Barometer selected"
+#   error No Barometer selected
 #endif
 
-#ifdef USE_ODROIDW_ADC
+#if defined USE_ODROIDW_ADC
 #   include "sensors/OdroidW_ADC.h"
+#else
+#   error No ADC Selected
 #endif
 
-#ifdef USE_SRF02
+#if defined USE_SRF02
 #   include "sensors/SRF02.h"
+#else
+#   error No Sonar Selected
 #endif
+
+#if defined USE_GPS_DETECTOR_UART
+#   define USE_GPS_DETECTOR
+#   include "sensors/GPS_Detector_UART.h"
+#elif defined USE_GPS_DETECTOR_SPI
+#   include "sensors/GPS_Detector_SPI.h"
+#elif defined USE_GPS_DETECTOR_I2C
+#   include "sensors/GPS_Detector_I2C.h"
+#else
+#   error No GPS Selected
+#endif
+
 
 using namespace silk;
 using namespace boost::asio;
 
 struct HAL_Sensors_HW::Sensors
 {
-#ifdef USE_MPU9250
-    MPU9250 mpu;
+#if defined USE_MPU9250_I2C
+    MPU9250_I2C mpu;
+#elif defined USE_MPU9250_SPI
+    MPU9250_SPI mpu;
 #endif
 
-#ifdef USE_MS5611
+#if defined USE_MS5611
     MS5611 baro;
 #endif
 
-#ifdef USE_ODROIDW_ADC
+#if defined USE_ODROIDW_ADC
     OdroidW_ADC adc;
 #endif
 
-#ifdef USE_SRF02
+#if defined USE_SRF02
     SRF02 sonar;
 #endif
 
-    GPS_Detector gps_detector;
+#if defined USE_GPS_DETECTOR_UART
+    GPS_Detector_UART gps_detector;
+#elif defined USE_GPS_DETECTOR_SPI
+    GPS_Detector_SPI gps_detector;
+#elif defined USE_GPS_DETECTOR_I2C
+    GPS_Detector_I2C gps_detector;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////
@@ -126,14 +166,14 @@ auto HAL_Sensors_HW::init() -> bool
         return true;
     }
 
-#ifdef USE_MS5611
+#if defined USE_MS5611
     if (!m_sensors->baro.init(m_config.barometer_i2c_device))
     {
         return false;
     }
 #endif
 
-#ifdef USE_MPU9250
+#if defined USE_MPU9250
     {
         typedef MPU9250::Gyroscope_Range G_Range;
         typedef MPU9250::Accelerometer_Range A_Range;
@@ -156,31 +196,34 @@ auto HAL_Sensors_HW::init() -> bool
         QLOGI("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
         QLOGI("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
 
-        if (!m_sensors->mpu.init(m_config.mpu_i2c_device, g_range, a_range))
+        if (!m_sensors->mpu.open(m_config.mpu_i2c_device) ||
+            !m_sensors->mpu.init(g_range, a_range))
         {
             return false;
         }
     }
 #endif
 
-#ifdef USE_ODROIDW_ADC
+#if defined USE_ODROIDW_ADC
     if (!m_sensors->adc.init())
     {
         return false;
     }
 #endif
 
-#ifdef USE_SRF02
+#if defined USE_SRF02
     if (!m_sensors->sonar.init(std::chrono::milliseconds(0)))
     {
         return false;
     }
 #endif
 
+#if defined USE_GPS_DETECTOR_UART
     if (!m_sensors->gps_detector.init(m_config.gps_device, m_config.gps_baud))
     {
         return false;
     }
+#endif
 
     m_is_initialized = true;
     return true;
@@ -378,9 +421,11 @@ void HAL_Sensors_HW::process()
 
     auto now = q::Clock::now();
 
+#if defined USE_GPS_DETECTOR
     m_sensors->gps_detector.process();
+#endif
 
-#ifdef USE_MPU9250
+#if defined USE_MPU9250
     m_sensors->mpu.process();
     {
         auto const& g_samples = m_sensors->mpu.get_gyroscope_samples();
@@ -441,7 +486,7 @@ void HAL_Sensors_HW::process()
     }
 #endif
 
-#ifdef USE_ODROIDW_ADC
+#if defined USE_ODROIDW_ADC
     m_sensors->adc.process();
     {
         auto data = m_sensors->adc.get_current_data();
@@ -466,7 +511,7 @@ void HAL_Sensors_HW::process()
     }
 #endif
 
-#ifdef USE_SRF02
+#if defined USE_SRF02
     m_sensors->sonar.process();
     {
         auto data = m_sensors->sonar.get_distance_data();
@@ -482,7 +527,7 @@ void HAL_Sensors_HW::process()
     }
 #endif
 
-#ifdef USE_MS5611
+#if defined USE_MS5611
     //*******************************************************************//
     //KEEP BARO LAST to avoid i2c noise from talking to other sensors!!!!!!!!!
     //*******************************************************************//

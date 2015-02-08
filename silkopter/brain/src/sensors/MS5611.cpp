@@ -43,7 +43,7 @@ auto MS5611::init(const std::string& device) -> bool
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
-    m_i2c.write(ADDR_MS5611, CMD_MS5611_RESET);
+    m_i2c.write(ADDR_MS5611, CMD_MS5611_RESET, nullptr, 0);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
@@ -75,7 +75,7 @@ auto MS5611::init(const std::string& device) -> bool
         return false;
     }
 
-    m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256);
+    m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256, nullptr, 0);
 
 //    while(true)
 //    {
@@ -115,7 +115,7 @@ void MS5611::process()
         }
 
         //next
-        if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256)) //read pressure next
+        if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
         {
             m_stage++;
         }
@@ -133,12 +133,12 @@ void MS5611::process()
         //next
         if (m_stage >= PRESSURE_TO_TEMPERATURE_RATIO)
         {
-            if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256)) //read temp next
+            if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256, nullptr, 0)) //read temp next
             {
                 m_stage = 0;
             }
         }
-        else if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256)) //read pressure next
+        else if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
         {
             m_stage++;
         }

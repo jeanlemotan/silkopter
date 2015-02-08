@@ -278,20 +278,9 @@ auto GPS_UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bo
     return false;
 }
 
-auto GPS_UBLOX::init(int fd) -> bool
+auto GPS_UBLOX::init() -> bool
 {
     QLOG_TOPIC("gps_ublox::init");
-
-    std::lock_guard<std::mutex> lg(m_mutex);
-
-    QASSERT(m_fd < 0);
-    if (m_fd >= 0)
-    {
-        QLOGE("Already initialized with fd: {}", m_fd);
-        return false;
-    }
-
-    m_fd = fd;
     return true;
 }
 
@@ -301,7 +290,7 @@ auto GPS_UBLOX::setup() -> bool
 
     QLOGI("Initializing UBLOX GPS...");
 
-    tcflush(m_fd, TCIOFLUSH);
+//    tcflush(m_fd, TCIOFLUSH);
 
     {
         QLOGI("Configuring GPS rate...");
@@ -373,12 +362,6 @@ void GPS_UBLOX::process()
         return;
     }
 
-    QASSERT(m_fd >= 0);
-    if (m_fd < 0)
-    {
-        return;
-    }
-
     read_data();
 
     //watchdog
@@ -400,10 +383,9 @@ void GPS_UBLOX::process()
 
 void GPS_UBLOX::read_data()
 {
-    QASSERT(m_fd >= 0);
     do
     {
-        auto res = read(m_fd, m_temp_buffer.data(), m_temp_buffer.size());
+        auto res = read(m_temp_buffer.data(), m_temp_buffer.size());
         if (res > 0)
         {
             std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
@@ -429,10 +411,6 @@ void GPS_UBLOX::read_data()
 auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
 {
     QLOG_TOPIC("gps_ublox::wait_for_ack");
-    if (m_fd < 0)
-    {
-        return false;
-    }
 
     m_ack.reset();
     auto start = q::Clock::now();
@@ -616,7 +594,7 @@ void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(MON_HW));
     MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
 
-    QLOGI("GPS HW: jamming:{}, noise:{}", data.jamInd, data.noisePerMS);
+    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", data.jamInd, data.noisePerMS, data.agcCnt);
 
     send_packet(Message::MON_HW, nullptr, 0);
 }
@@ -671,7 +649,7 @@ auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_
 //    QASSERT(pk.message == msg);
 //    QASSERT(pk.payload_size == payload_size);
 
-    if (write(m_fd, buffer.data(), off) < 0)
+    if (!write(buffer.data(), off))
     {
         QLOGE("Cannot write message {} to GPS. Write failed: {}", static_cast<uint8_t>(msg), strerror(errno));
         return false;

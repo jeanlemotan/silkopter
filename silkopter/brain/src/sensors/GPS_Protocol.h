@@ -16,7 +16,7 @@ public:
     virtual auto detect(uint8_t const* data, size_t size) -> bool = 0;
 
     //once detected, initialize and take ownership of the device
-    virtual auto init(int fd) -> bool = 0;
+    virtual auto init() -> bool = 0;
 
     //call regularly to update the sample
     virtual void process() = 0;

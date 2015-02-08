@@ -1,10 +1,6 @@
 #include "BrainStdAfx.h"
 #include "GPS_Detector.h"
 
-#include <termios.h>
-
-#include "GPS_UBLOX.h"
-
 
 namespace silk
 {
@@ -12,61 +8,6 @@ namespace silk
 
 GPS_Detector::~GPS_Detector()
 {
-    if (m_fd >= 0)
-    {
-        close(m_fd);
-    }
-}
-
-auto GPS_Detector::init(std::string const& device, size_t baud) -> bool
-{
-    QLOG_TOPIC("gps_detector::init");
-    QASSERT(m_fd < 0);
-    if (m_fd >= 0)
-    {
-        return true;
-    }
-
-    int b = -1;
-    switch (baud)
-    {
-    case 9600: b = B9600; break;
-    case 19200: b = B19200; break;
-    case 38400: b = B38400; break;
-    case 57600: b = B57600; break;
-    case 115200: b = B115200; break;
-    case 230400: b = B230400; break;
-    }
-
-    if (b < 0)
-    {
-        QLOGE("Invalid baud requested: {}", baud);
-        return false;
-    }
-
-    m_fd = open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-    if (m_fd < 0)
-    {
-        QLOGE("can't open {}: {}", device, strerror(errno));
-        return false;
-    }
-
-
-    struct termios options;
-    tcgetattr(m_fd, &options);
-    cfsetispeed(&options, b);						// Set baud rate
-    cfsetospeed(&options, b);
-
-    cfmakeraw(&options);
-
-    tcflush(m_fd, TCIFLUSH);
-    tcsetattr(m_fd, TCSANOW, &options);
-
-    m_protocols.push_back(std::unique_ptr<GPS_Protocol>(new GPS_UBLOX()));
-
-    QLOGI("GPS Detection started on {} : {}", device, baud);
-
-    return true;
 }
 
 void GPS_Detector::process()
@@ -80,7 +21,7 @@ void GPS_Detector::process()
     {
         do
         {
-            auto res = read(m_fd, m_buffer.data(), m_buffer.size());
+            auto res = read(m_buffer.data(), m_buffer.size());
             if (res > 0)
             {
                 for (auto it = m_protocols.begin(); it != m_protocols.end(); /* no ++ here! */)
@@ -90,7 +31,7 @@ void GPS_Detector::process()
                     {
                         auto idx = std::distance(m_protocols.begin(), it);
                         QLOGI("Detected GPS protocol {}, initializing...", idx);
-                        if (!p->init(m_fd))
+                        if (!p->init())
                         {
                             QLOGE("Detected GPS protocol {} failed to initialize. Removing from detection list!", idx);
                             m_protocols.erase(it);

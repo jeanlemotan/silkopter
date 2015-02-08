@@ -10,8 +10,6 @@
 
 using namespace silk;
 
-static const uint8_t ADDR_MPU9250                       = 0x68;
-
 
 // mpu9250 registers
 constexpr uint8_t MPU_REG_SELF_TEST_X_GYRO               = 0x00;
@@ -265,38 +263,34 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 #endif
 
+MPU9250::~MPU9250()
+{
+}
 
-auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool
+
+auto MPU9250::init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
     m_gyroscope_rate = gr;
     m_accelerometer_range = ar;
 
-    QLOGI("initializing device: {}", device);
-
-    if (!m_i2c.open(device))
-    {
-        QLOGE("can't open {}: {}", device, strerror(errno));
-        return false;
-    }
-
-    auto res = m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
+    auto res = mpu_write_u8(MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, 0);
+    res &= mpu_write_u8(MPU_REG_PWR_MGMT_1, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
+    res &= mpu_write_u8(MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     uint8_t who_am_i;
-    res &= m_i2c.read_u8(ADDR_MPU9250, MPU_REG_WHO_AM_I, who_am_i);
+    res &= mpu_write_u8(MPU_REG_WHO_AM_I, who_am_i);
     if (!res || who_am_i != 0x71)
     {
         QLOGE("Cannot find mpu9250");
         return false;
     }
-    QLOGI("device {} id: {x}", device, who_am_i);
+    QLOGI("Found MPU9250 id: {x}", who_am_i);
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (gr)
@@ -343,35 +337,35 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
         break;
     }
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_GYRO_CONFIG, gyro_range);
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG, accel_range);
+    res &= mpu_write_u8(MPU_REG_GYRO_CONFIG, gyro_range);
+    res &= mpu_write_u8(MPU_REG_ACCEL_CONFIG, accel_range);
 
-    //res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
+    //res &= mpu_write_u8(MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
+    res &= mpu_write_u8(MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
 
 
     //compute the rate
     m_sample_rate = 1000;
     QASSERT(m_sample_rate >= 100 && m_sample_rate <= 1000);
     uint8_t rate = 1000 / m_sample_rate - 1;
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_SMPLRT_DIV, rate);
+    res &= mpu_write_u8(MPU_REG_SMPLRT_DIV, rate);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     m_sample_time = std::chrono::milliseconds(1000 / m_sample_rate);
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_PWR_MGMT_2, 0);
+    res &= mpu_write_u8(MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    //res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
+    //res &= mpu_write_u8(MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
+    mpu_write_u8(MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
 
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
+    res &= mpu_write_u8(MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
     m_fifo_sample_size = 12;
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-    res &= m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    res &= mpu_write_u8(MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     res &= setup_compass();
@@ -380,8 +374,6 @@ auto MPU9250::init(const std::string& device, Gyroscope_Range gr, Accelerometer_
         QLOGE("Failed to setup mpu9250");
         return false;
     }
-
-    QLOGI("using MPU9250 device: {}", device);
 
 //    while (true)
 //    {
@@ -399,81 +391,79 @@ auto MPU9250::setup_compass() -> bool
     set_bypass(1);
 
     // Find compass. Possible addresses range from 0x0C to 0x0F.
-    uint8_t akm_addr = 0;
-    for (akm_addr = 0x0C; akm_addr <= 0x0F; akm_addr++)
+    for (m_akm_address = 0x0C; m_akm_address <= 0x0F; m_akm_address++)
     {
         uint8_t data;
-        auto res = m_i2c.read_u8(akm_addr, AKM_REG_WHOAMI, data);
+        auto res = akm_write_u8(AKM_REG_WHOAMI, data);
         if (res && data == AKM_WHOAMI)
         {
             break;
         }
     }
 
-    if (akm_addr > 0x0F)
+    if (m_akm_address > 0x0F)
     {
         QLOGE("Compass not found.");
         return false;
     }
 
-    m_compass_addr = akm_addr;
-    QLOGI("Compass found at 0x{X}", m_compass_addr);
+    QLOGI("Compass found at 0x{X}", m_akm_address);
 
-    m_i2c.write_u8(m_compass_addr, AKM_REG_CNTL, AKM_POWER_DOWN);
+    akm_write_u8(AKM_REG_CNTL, AKM_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
-    m_i2c.write_u8(m_compass_addr, AKM_REG_CNTL, AKM_FUSE_ROM_ACCESS);
+    akm_write_u8(AKM_REG_CNTL, AKM_FUSE_ROM_ACCESS);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
-    m_i2c.read(m_compass_addr, AKM_REG_ASAX, data, 3);
+    akm_read(AKM_REG_ASAX, data, 3);
     m_magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
-    m_i2c.write_u8(m_compass_addr, AKM_REG_CNTL, AKM_POWER_DOWN);
+    akm_write_u8(AKM_REG_CNTL, AKM_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
-    m_i2c.write_u8(m_compass_addr, AKM_REG_CNTL, AKM_CONTINUOUS2_MEASUREMENT | AKM_16_BIT_MODE);
+    akm_write_u8(AKM_REG_CNTL, AKM_CONTINUOUS2_MEASUREMENT | AKM_16_BIT_MODE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
 //    mpu_set_bypass(0);
 
 //    // Set up master mode, master clock, and ES bit.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_MST_CTRL, MPU_BIT_WAIT_FOR_ES);
+//    mpu_write_u8(MPU_REG_I2C_MST_CTRL, MPU_BIT_WAIT_FOR_ES);
 
 //    // Slave 0 reads from AKM data registers.
 //    constexpr uint8_t MPU_BIT_I2C_READ = 0x80;
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV0_ADDR, MPU_BIT_I2C_READ | m_compass_addr);
+//    mpu_write_u8(MPU_REG_I2C_SLV0_ADDR, MPU_BIT_I2C_READ | m_compass_addr);
 
 //    // Compass reads start at this register.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV0_REG, AKM_REG_ST1);
+//    mpu_write_u8(MPU_REG_I2C_SLV0_REG, AKM_REG_ST1);
 
 //    // Enable slave 0, 8-byte reads.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN | 8);
+//    mpu_write_u8(MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN | 8);
 
 //    // Slave 1 changes AKM measurement mode.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_ADDR, m_compass_addr);
+//    mpu_write_u8(MPU_REG_I2C_SLV1_ADDR, m_compass_addr);
 
 //    // AKM measurement mode register.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_REG, AKM_REG_CNTL);
+//    mpu_write_u8(MPU_REG_I2C_SLV1_REG, AKM_REG_CNTL);
 
 //    // Enable slave 1, 1-byte writes.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_CTRL, MPU_BIT_I2C_SLV1_EN | 1);
+//    mpu_write_u8(MPU_REG_I2C_SLV1_CTRL, MPU_BIT_I2C_SLV1_EN | 1);
 
 //    // Set slave 1 data.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
+//    mpu_write_u8(MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
 
 //    // Trigger slave 0 and slave 1 actions at each sample.
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_I2C_SLV0_DLY_EN | MPU_BIT_I2C_SLV1_DLY_EN);
+//    mpu_write_u8(MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_I2C_SLV0_DLY_EN | MPU_BIT_I2C_SLV1_DLY_EN);
 
 //    {
 //        uint8_t div = m_sample_rate / 10 - 1;
-//        m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV4_CTRL, div);
+//        mpu_write_u8(MPU_REG_I2C_SLV4_CTRL, div);
 //    }
 
-//    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
+//    mpu_write_u8(MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
 
 #endif
 
@@ -487,36 +477,36 @@ void MPU9250::set_bypass(bool on)
     if (on)
     {
         uint8_t tmp;
-        m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
+        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         tmp &= ~MPU_BIT_I2C_MST;
-        m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
+        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
         tmp = MPU_BIT_BYPASS_EN;
-        m_i2c.write_u8(ADDR_MPU9250, MPU_REG_INT_PIN_CFG, tmp);
+        mpu_write_u8(MPU_REG_INT_PIN_CFG, tmp);
     }
     else
     {
         // Enable I2C master mode if compass is being used.
         uint8_t tmp;
-        m_i2c.read_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
+        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         tmp |= MPU_BIT_I2C_MST;
-        m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, tmp);
+        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
         tmp = 0;
-        m_i2c.write_u8(ADDR_MPU9250, MPU_REG_INT_PIN_CFG, tmp);
+        mpu_write_u8(MPU_REG_INT_PIN_CFG, tmp);
     }
 }
 
 void MPU9250::reset_fifo()
 {
     QLOG_TOPIC("mpu9250::reset_fifo");
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    mpu_write_u8(MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, 0);
+    mpu_write_u8(MPU_REG_FIFO_EN, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    mpu_write_u8(MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    m_i2c.write_u8(ADDR_MPU9250, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
+    mpu_write_u8(MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
 }
 
 void MPU9250::process()
@@ -526,15 +516,13 @@ void MPU9250::process()
     m_samples.accelerometer.clear();
     m_samples.compass.clear();
 
-//    i2c_acquire(ADDR_MPU9250);
-
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
    // auto dt = now - last_timestamp;
    // last_timestamp = now;
 
     uint16_t fifo_count;
-    auto res = m_i2c.read_u16(ADDR_MPU9250, MPU_REG_FIFO_COUNTH, fifo_count);
+    auto res = mpu_write_u16(MPU_REG_FIFO_COUNTH, fifo_count);
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // LOG_INFO("{.2}b/ms", xxx);
@@ -555,7 +543,7 @@ void MPU9250::process()
             QASSERT(sample_count >= 1);
 
             m_fifo_buffer.resize(to_read);
-            if (m_i2c.read(ADDR_MPU9250, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
+            if (mpu_read(MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
                 m_samples.gyroscope.resize(sample_count);
                 m_samples.accelerometer.resize(sample_count);
@@ -599,7 +587,7 @@ void MPU9250::process_compass()
     m_compass_sample_time = std::chrono::seconds(0);
 
     std::array<uint8_t, 8> tmp;
-    if (!m_i2c.read(m_compass_addr, AKM_REG_ST1, tmp.data(), tmp.size()))
+    if (!akm_read(AKM_REG_ST1, tmp.data(), tmp.size()))
     {
         return;
     }

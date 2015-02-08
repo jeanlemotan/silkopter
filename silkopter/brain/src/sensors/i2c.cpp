@@ -56,7 +56,12 @@ void i2c::close()
     }
 }
 
-bool i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size)
+auto i2c::is_open() const -> bool
+{
+    return m_fd >= 0;
+}
+
+auto i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size) -> bool
 {
     QASSERT(m_fd >= 0);
 
@@ -82,7 +87,7 @@ bool i2c::read(uint8_t addr, uint8_t reg, uint8_t* data, uint32_t size)
     }
     return true;
 }
-bool i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size)
+auto i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size) -> bool
 {
     QASSERT(m_fd >= 0);
     struct i2c_rdwr_ioctl_data io;
@@ -110,5 +115,32 @@ bool i2c::write(uint8_t addr, uint8_t reg, uint8_t const* data, uint32_t size)
     return true;
 }
 
+
+auto i2c::read_u16(uint8_t address, uint8_t reg, uint16_t& dst) -> bool
+{
+    uint8_t val[2];
+    if (read(address, reg, val, 2))
+    {
+        reinterpret_cast<uint8_t*>(&dst)[1] = val[0];
+        reinterpret_cast<uint8_t*>(&dst)[0] = val[1];
+        return true;
+    }
+    return false;
+}
+auto i2c::read_u8(uint8_t address, uint8_t reg, uint8_t& dst) -> bool
+{
+    return read(address, reg, &dst, 1);
+}
+auto i2c::write_u8(uint8_t address, uint8_t reg, uint8_t const& t) -> bool
+{
+    return write(address, reg, &t, 1);
+}
+auto i2c::write_u16(uint8_t address, uint8_t reg, uint16_t const& t) -> bool
+{
+    uint8_t val[2];
+    val[0] = reinterpret_cast<uint8_t const*>(&t)[1];
+    val[1] = reinterpret_cast<uint8_t const*>(&t)[0];
+    return write(address, reg, val, 2);
+}
 
 }

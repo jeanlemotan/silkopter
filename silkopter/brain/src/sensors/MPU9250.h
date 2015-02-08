@@ -1,6 +1,7 @@
 #pragma once
 
 #include "i2c.h"
+#include "spi.h"
 
 namespace silk
 {
@@ -9,6 +10,8 @@ namespace silk
 class MPU9250 : public q::util::Noncopyable
 {
 public:
+    virtual ~MPU9250();
+
     enum class Gyroscope_Range
     {
         _250_DPS = 250,
@@ -24,7 +27,7 @@ public:
         _16_G = 16,
     };
 
-    auto init(std::string const& device, Gyroscope_Range gr, Accelerometer_Range ar) -> bool;
+    auto init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool;
 
     void process();
 
@@ -36,17 +39,29 @@ public:
     auto get_gyroscope_sample_time() const -> q::Clock::duration;
     auto get_accelerometer_sample_time() const -> q::Clock::duration;
 
-private:
+protected:
+
+    virtual auto mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool = 0;
+    virtual auto mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool = 0;
+    virtual auto mpu_read_u16(uint8_t reg, uint16_t& dst) -> bool = 0;
+    virtual auto mpu_write_u8(uint8_t reg, uint8_t const& t) -> bool = 0;
+    virtual auto mpu_write_u16(uint8_t reg, uint16_t const& t) -> bool = 0;
+
+    virtual auto akm_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool = 0;
+    virtual auto akm_read_u8(uint8_t reg, uint8_t& dst) -> bool = 0;
+    virtual auto akm_read_u16(uint8_t reg, uint16_t& dst) -> bool = 0;
+    virtual auto akm_write_u8(uint8_t reg, uint8_t const& t) -> bool = 0;
+    virtual auto akm_write_u16(uint8_t reg, uint16_t const& t) -> bool = 0;
+
     void reset_fifo();
 
     auto setup_compass() -> bool;
     void set_bypass(bool on);
     void process_compass();
 
-    i2c m_i2c;
+    uint8_t m_akm_address = 0;
 
-    uint8_t m_compass_addr = 0;
-
+private:
     mutable std::vector<uint8_t> m_fifo_buffer;
 
     size_t m_fifo_sample_size = 999999;

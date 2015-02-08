@@ -9,13 +9,17 @@ namespace silk
 class GPS_UBLOX : public GPS_Protocol
 {
 public:
-    ~GPS_UBLOX();
+    virtual ~GPS_UBLOX();
 
     auto detect(uint8_t const* data, size_t size) -> bool;
 
-    auto init(int fd) -> bool;
+    auto init() -> bool;
     void process();
     auto get_sample() const -> boost::optional<sensors::GPS>;
+
+protected:
+    virtual auto read(uint8_t* data, size_t max_size) -> size_t = 0;
+    virtual auto write(uint8_t const* data, size_t size) -> bool = 0;
 
 private:
     enum class Message : uint16_t
@@ -89,9 +93,6 @@ private:
 
     std::array<uint8_t, 1024> m_temp_buffer;
     std::deque<uint8_t> m_buffer;
-
-    std::string m_device;
-    int m_fd = -1;
 
     struct Sample
     {

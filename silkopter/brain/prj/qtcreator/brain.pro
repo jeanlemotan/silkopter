@@ -97,7 +97,8 @@ SOURCES += \
     ../../src/sensors/OdroidW_ADC.cpp \
     ../../src/sensors/SRF02.cpp \
     ../../src/HAL_Sensors_HW.cpp \
-    ../../src/sensors/GPS_Detector.cpp
+    ../../src/sensors/GPS_Detector.cpp \
+    ../../src/sensors/GPS_Detector_UART.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -137,5 +138,14 @@ HEADERS += \
     ../../src/sensors/SRF02.h \
     ../../src/HAL_Sensors_HW.h \
     ../../src/sensors/GPS_Protocol.h \
-    ../../src/sensors/GPS_Detector.h
+    ../../src/sensors/GPS_Detector.h \
+    ../../src/sensors/spi.h \
+    ../../src/sensors/GPS_UBLOX_SPI.h \
+    ../../src/sensors/MPU9250_I2C.h \
+    ../../src/sensors/MPU9250_SPI.h \
+    ../../src/sensors/GPS_UBLOX_UART.h \
+    ../../src/sensors/GPS_Detector_I2C.h \
+    ../../src/sensors/GPS_Detector_SPI.h \
+    ../../src/sensors/GPS_Detector_UART.h \
+    ../../src/sensors/GPS_UBLOX_I2C.h
 
