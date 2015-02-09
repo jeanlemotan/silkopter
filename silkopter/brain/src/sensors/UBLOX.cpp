@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "GPS_UBLOX.h"
+#include "UBLOX.h"
 
 namespace silk
 {
@@ -12,7 +12,6 @@ constexpr uint8_t PREAMBLE2 = 0x62;
 constexpr uint16_t MIN_PACKET_SIZE = 8;
 constexpr uint16_t MAX_PAYLOAD_SIZE = 256;
 
-constexpr std::chrono::milliseconds MEASUREMENT_PERIOD(200);
 constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
 
 constexpr std::chrono::seconds REINIT_WATCHGOD_TIMEOUT(3);
@@ -160,20 +159,225 @@ struct MON_VER
 #pragma pack(pop)
 
 
-GPS_UBLOX::~GPS_UBLOX()
+UBLOX::UBLOX(q::String const& name)
+    : m_name(name)
 {
 }
 
-auto GPS_UBLOX::detect(uint8_t const* data, size_t size) -> bool
+UBLOX::~UBLOX()
 {
-    if (data && size)
+}
+
+auto UBLOX::get_gps_name() const -> q::String const&
+{
+    return m_name;
+}
+
+auto UBLOX::init(buses::II2C* bus, Params const& params) -> bool
+{
+    m_i2c = bus;
+    m_spi = nullptr;
+    m_uart = nullptr;
+    return init(params);
+}
+auto UBLOX::init(buses::ISPI* bus, Params const& params) -> bool
+{
+    m_spi = bus;
+    m_i2c = nullptr;
+    m_uart = nullptr;
+    return init(params);
+}
+auto UBLOX::init(buses::IUART* bus, Params const& params) -> bool
+{
+    m_spi = nullptr;
+    m_i2c = nullptr;
+    m_uart = bus;
+    return init(params);
+}
+auto UBLOX::init(Params const& params) -> bool
+{
+    QLOG_TOPIC("ublox::init");
+    if (!m_i2c && !m_spi && !m_uart)
     {
-        std::copy(data, data + size, std::back_inserter(m_buffer));
+        QLOGE("No bus configured");
+        return false;
     }
-    return decode_packet(m_packet, m_buffer);
+
+    m_params = params;
+    m_params.rate = math::clamp<size_t>(m_params.rate, 1, 5);
+
+    return true;
 }
 
-auto GPS_UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
+auto UBLOX::read(uint8_t* data, size_t max_size) -> size_t
+{
+    if (m_uart)
+    {
+        return m_uart->read(data, max_size);
+    }
+    else if (m_spi)
+    {
+        QASSERT(0);
+        return 0;
+    }
+    else if (m_i2c)
+    {
+        QASSERT(0);
+        return 0;
+    }
+}
+auto UBLOX::write(uint8_t const* data, size_t size) -> bool
+{
+    if (m_uart)
+    {
+        return m_uart->write(data, size);
+    }
+    else if (m_spi)
+    {
+        QASSERT(0);
+        return false;
+    }
+    else if (m_i2c)
+    {
+        QASSERT(0);
+        return false;
+    }
+}
+
+auto UBLOX::setup() -> bool
+{
+    QLOG_TOPIC("ublox::setup");
+
+    QLOGI("Initializing UBLOX GPS...");
+
+//    tcflush(m_fd, TCIOFLUSH);
+
+    {
+        QLOGI("Configuring GPS rate to {}...", m_params.rate);
+        CFG_RATE data;
+        data.measRate = std::chrono::milliseconds(1000 / m_params.rate).count();
+        data.timeRef = 0;//UTC time
+        data.navRate = 1;
+        if (!send_packet_with_retry(Message::CFG_RATE, data, ACK_TIMEOUT, 3))
+        {
+            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
+            return false;
+        }
+    }
+    {
+        std::array<std::pair<Message, size_t>, 3> msgs = {{
+                                                              {Message::NAV_SOL, 1},
+                                                              {Message::NAV_STATUS, 1},
+                                                              {Message::MON_HW, 1},
+                                                          }};
+        for (auto m: msgs)
+        {
+            QLOGI("Configuring GPS rate to {} for message idx {} (msg: {})...",
+                  m.second,
+                  std::distance(&m, msgs.data()),
+                  static_cast<int>(m.first));
+
+            CFG_MSG data;
+            data.msgClass = static_cast<int>(m.first) & 255;
+            data.msgID = static_cast<int>(m.first) >> 8;
+            data.rate = m.second;
+            if (!send_packet_with_retry(Message::CFG_MSG, data, ACK_TIMEOUT, 3))
+            {
+                QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
+                return false;
+            }
+        }
+    }
+
+    QLOGI("Requesting configs");
+    {
+        //ask for configs
+        send_packet(Message::MON_VER, nullptr, 0);
+        send_packet(Message::CFG_PRT, nullptr, 0);
+        send_packet(Message::CFG_RATE, nullptr, 0);
+        send_packet(Message::CFG_SBAS, nullptr, 0);
+        send_packet(Message::CFG_ANT, nullptr, 0);
+        send_packet(Message::MON_HW, nullptr, 0);
+    }
+
+    m_sample.last_complete_time_point = q::Clock::now();
+    m_is_setup = true;
+    return true;
+}
+
+void UBLOX::process()
+{
+    m_sample.samples.clear();
+
+    QLOG_TOPIC("ublox::process");
+    if (!m_is_setup)
+    {
+        if (!m_setup_future.valid() || //first time we're starting this
+             m_setup_future.get_state() == boost::future_state::ready) //the previous async setup failed
+        {
+            if (!m_is_setup) //check again to avoid a rare race condition
+            {
+                //start the async setup
+                m_setup_future = silk::async([this]() { setup(); });
+            }
+        }
+        return;
+    }
+
+    read_data();
+
+    auto now = q::Clock::now();
+    auto dt = now - m_sample.last_complete_time_point;
+
+    //watchdog
+    if (m_sample.has_nav_status && m_sample.has_pollh && m_sample.has_sol)
+    {
+        GPS_Sample sample;
+        sample.value = m_sample.data;
+        sample.dt = dt;
+        sample.sample_idx = ++m_sample.sample_idx;
+        m_sample.samples.push_back(sample);
+
+        m_sample.last_complete_time_point = now;
+
+        m_sample.has_nav_status = m_sample.has_pollh = m_sample.has_sol = false;
+        m_sample.data = sensors::Location();
+    }
+    else if (dt >= REINIT_WATCHGOD_TIMEOUT)
+    {
+        //check if we need to reset
+        m_is_setup = false;
+    }
+}
+
+void UBLOX::read_data()
+{
+    do
+    {
+        auto res = read(m_temp_buffer.data(), m_temp_buffer.size());
+        if (res > 0)
+        {
+            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+
+            bool found = false;
+            do
+            {
+                found = decode_packet(m_packet, m_buffer);
+                if (found)
+                {
+                    process_packet(m_packet);
+                    m_packet.payload.clear();
+                }
+            } while(found);
+        }
+        else
+        {
+            break;
+        }
+    } while (1);
+}
+
+auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
 {
     while (buffer.size() >= MIN_PACKET_SIZE)
     {
@@ -280,148 +484,10 @@ auto GPS_UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bo
     return false;
 }
 
-auto GPS_UBLOX::init() -> bool
+
+auto UBLOX::wait_for_ack(q::Clock::duration d) -> bool
 {
-    QLOG_TOPIC("gps_ublox::init");
-    return true;
-}
-
-auto GPS_UBLOX::setup() -> bool
-{
-    QLOG_TOPIC("gps_ublox::setup");
-
-    QLOGI("Initializing UBLOX GPS...");
-
-//    tcflush(m_fd, TCIOFLUSH);
-
-    {
-        QLOGI("Configuring GPS rate...");
-        CFG_RATE data;
-        data.measRate = std::chrono::duration_cast<std::chrono::milliseconds>(MEASUREMENT_PERIOD).count();
-        data.timeRef = 0;//UTC time
-        data.navRate = 1;
-        if (!send_packet_with_retry(Message::CFG_RATE, data, ACK_TIMEOUT, 3))
-        {
-            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-            return false;
-        }
-    }
-    {
-        std::array<std::pair<Message, size_t>, 3> msgs = {{
-                                                              {Message::NAV_SOL, 1},
-                                                              {Message::NAV_STATUS, 1},
-                                                              {Message::MON_HW, 1},
-                                                          }};
-        for (auto m: msgs)
-        {
-            QLOGI("Configuring GPS rate to {} for message idx {} (msg: {})...",
-                  m.second,
-                  std::distance(&m, msgs.data()),
-                  static_cast<int>(m.first));
-
-            CFG_MSG data;
-            data.msgClass = static_cast<int>(m.first) & 255;
-            data.msgID = static_cast<int>(m.first) >> 8;
-            data.rate = m.second;
-            if (!send_packet_with_retry(Message::CFG_MSG, data, ACK_TIMEOUT, 3))
-            {
-                QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-                return false;
-            }
-        }
-    }
-
-    QLOGI("Requesting configs");
-    {
-        //ask for configs
-        send_packet(Message::MON_VER, nullptr, 0);
-        send_packet(Message::CFG_PRT, nullptr, 0);
-        send_packet(Message::CFG_RATE, nullptr, 0);
-        send_packet(Message::CFG_SBAS, nullptr, 0);
-        send_packet(Message::CFG_ANT, nullptr, 0);
-        send_packet(Message::MON_HW, nullptr, 0);
-    }
-
-    m_sample.last_complete_time_point = q::Clock::now();
-    m_is_setup = true;
-    return true;
-}
-
-void GPS_UBLOX::process()
-{
-    m_sample.samples.clear();
-
-    QLOG_TOPIC("gps_ublox::process");
-    if (!m_is_setup)
-    {
-        if (!m_setup_future.valid() || //first time we're starting this
-             m_setup_future.get_state() == boost::future_state::ready) //the previous async setup failed
-        {
-            if (!m_is_setup) //check again to avoid a rare race condition
-            {
-                //start the async setup
-                m_setup_future = silk::async([this]() { setup(); });
-            }
-        }
-        return;
-    }
-
-    read_data();
-
-    auto now = q::Clock::now();
-    auto dt = now - m_sample.last_complete_time_point;
-
-    //watchdog
-    if (m_sample.has_nav_status && m_sample.has_pollh && m_sample.has_sol)
-    {
-        GPS_Sample sample;
-        sample.value = m_sample.data;
-        sample.dt = dt;
-        sample.sample_idx = ++m_sample.sample_idx;
-        m_sample.samples.push_back(sample);
-
-        m_sample.last_complete_time_point = now;
-
-        m_sample.has_nav_status = m_sample.has_pollh = m_sample.has_sol = false;
-        m_sample.data = sensors::Location();
-    }
-    else if (dt >= REINIT_WATCHGOD_TIMEOUT)
-    {
-        //check if we need to reset
-        m_is_setup = false;
-    }
-}
-
-void GPS_UBLOX::read_data()
-{
-    do
-    {
-        auto res = read(m_temp_buffer.data(), m_temp_buffer.size());
-        if (res > 0)
-        {
-            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
-
-            bool found = false;
-            do
-            {
-                found = decode_packet(m_packet, m_buffer);
-                if (found)
-                {
-                    process_packet(m_packet);
-                    m_packet.payload.clear();
-                }
-            } while(found);
-        }
-        else
-        {
-            break;
-        }
-    } while (1);
-}
-
-auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
-{
-    QLOG_TOPIC("gps_ublox::wait_for_ack");
+    QLOG_TOPIC("ublox::wait_for_ack");
 
     m_ack.reset();
     auto start = q::Clock::now();
@@ -438,9 +504,9 @@ auto GPS_UBLOX::wait_for_ack(q::Clock::duration d) -> bool
 }
 
 
-void GPS_UBLOX::process_packet(Packet& packet)
+void UBLOX::process_packet(Packet& packet)
 {
-    QLOG_TOPIC("gps_ublox::process_packet");
+    QLOG_TOPIC("ublox::process_packet");
 
     switch (packet.message)
     {
@@ -467,7 +533,7 @@ void GPS_UBLOX::process_packet(Packet& packet)
 
 }
 
-void GPS_UBLOX::process_nav_pollh_packet(Packet& packet)
+void UBLOX::process_nav_pollh_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(NAV_POLLH));
     NAV_POLLH& data = reinterpret_cast<NAV_POLLH&>(*packet.payload.data());
@@ -481,7 +547,7 @@ void GPS_UBLOX::process_nav_pollh_packet(Packet& packet)
     }
 }
 
-void GPS_UBLOX::process_nav_status_packet(Packet& packet)
+void UBLOX::process_nav_status_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(NAV_STATUS));
     NAV_STATUS& data = reinterpret_cast<NAV_STATUS&>(*packet.payload.data());
@@ -502,7 +568,7 @@ void GPS_UBLOX::process_nav_status_packet(Packet& packet)
     }
 }
 
-void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
+void UBLOX::process_nav_sol_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(NAV_SOL));
     NAV_SOL& data = reinterpret_cast<NAV_SOL&>(*packet.payload.data());
@@ -542,7 +608,7 @@ void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
     }
 }
 
-void GPS_UBLOX::process_cfg_prt_packet(Packet& packet)
+void UBLOX::process_cfg_prt_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(CFG_PRT));
     CFG_PRT& data = reinterpret_cast<CFG_PRT&>(*packet.payload.data());
@@ -550,7 +616,7 @@ void GPS_UBLOX::process_cfg_prt_packet(Packet& packet)
     QLOGI("GPS port config: {}baud", data.baudRate);
 }
 
-void GPS_UBLOX::process_cfg_ant_packet(Packet& packet)
+void UBLOX::process_cfg_ant_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(CFG_ANT));
     CFG_ANT& data = reinterpret_cast<CFG_ANT&>(*packet.payload.data());
@@ -559,7 +625,7 @@ void GPS_UBLOX::process_cfg_ant_packet(Packet& packet)
     a = 1;
 }
 
-void GPS_UBLOX::process_cfg_msg_packet(Packet& packet)
+void UBLOX::process_cfg_msg_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(CFG_MSG));
     CFG_MSG& data = reinterpret_cast<CFG_MSG&>(*packet.payload.data());
@@ -567,7 +633,7 @@ void GPS_UBLOX::process_cfg_msg_packet(Packet& packet)
     QLOGI("GPS class {} message {} has a rate of {}", data.msgClass, data.msgID, data.rate);
 }
 
-void GPS_UBLOX::process_cfg_rate_packet(Packet& packet)
+void UBLOX::process_cfg_rate_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(CFG_RATE));
     CFG_RATE& data = reinterpret_cast<CFG_RATE&>(*packet.payload.data());
@@ -575,7 +641,7 @@ void GPS_UBLOX::process_cfg_rate_packet(Packet& packet)
     QLOGI("GPS rate config: Measurement every {}ms, NAV every {} {}", data.measRate, data.navRate, data.navRate == 1 ? "cycle" : "cycles");
 }
 
-void GPS_UBLOX::process_cfg_sbas_packet(Packet& packet)
+void UBLOX::process_cfg_sbas_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(CFG_SBAS));
     CFG_SBAS& data = reinterpret_cast<CFG_SBAS&>(*packet.payload.data());
@@ -594,13 +660,13 @@ void GPS_UBLOX::process_cfg_sbas_packet(Packet& packet)
 //    }
 }
 
-void GPS_UBLOX::process_inf_notice_packet(Packet& packet)
+void UBLOX::process_inf_notice_packet(Packet& packet)
 {
     q::String str(reinterpret_cast<char const*>(packet.payload.data()), packet.payload.size());
     QLOGI("GPS notice: {}", str);
 }
 
-void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
+void UBLOX::process_mon_hw_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() == sizeof(MON_HW));
     MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
@@ -610,7 +676,7 @@ void GPS_UBLOX::process_mon_hw_packet(Packet& packet)
     send_packet(Message::MON_HW, nullptr, 0);
 }
 
-void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
+void UBLOX::process_mon_ver_packet(Packet& packet)
 {
     QASSERT(packet.payload.size() >= sizeof(MON_VER));
     MON_VER& data = reinterpret_cast<MON_VER&>(*packet.payload.data());
@@ -620,12 +686,12 @@ void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto GPS_UBLOX::get_gps_samples() const -> std::vector<GPS_Sample> const&
+auto UBLOX::get_gps_samples() const -> std::vector<GPS_Sample> const&
 {
     return m_sample.samples;
 }
 
-auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size) -> bool
+auto UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size) -> bool
 {
     std::array<uint8_t, 256> buffer;
     size_t off = 0;
@@ -672,7 +738,7 @@ auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_
 }
 
 template<class T>
-auto GPS_UBLOX::send_packet(Message msg, T const& data) -> bool
+auto UBLOX::send_packet(Message msg, T const& data) -> bool
 {
     static_assert(sizeof(T) < 200, "Message too big");
 
@@ -682,7 +748,7 @@ auto GPS_UBLOX::send_packet(Message msg, T const& data) -> bool
 }
 
 template<class T>
-auto GPS_UBLOX::send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
+auto UBLOX::send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
 {
     for (size_t i = 0; i <= retries; i++)
     {

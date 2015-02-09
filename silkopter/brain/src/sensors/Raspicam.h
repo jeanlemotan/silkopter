@@ -10,10 +10,25 @@ namespace sensors
 class Raspicam : public ICamera
 {
 public:
-    Raspicam();
+    Raspicam(q::String const& name);
     ~Raspicam();
 
-    auto init() -> bool;
+    struct Quality
+    {
+        math::vec2u32 resolution;
+        size_t bitrate = 0;
+    };
+
+    struct Params
+    {
+        size_t fps = 30;
+        Quality low;
+        Quality medium;
+        Quality high;
+        Quality recording;
+    };
+
+    auto init(Params const& params) -> bool;
     void shutdown();
 
     auto get_camera_name() const -> q::String const&;
@@ -33,23 +48,10 @@ public:
     struct Impl;
     void process();
 
-    struct Quality
-    {
-        math::vec2u32 resolution;
-        size_t bitrate = 0;
-    };
-
 private:
-    void set_active_streams(bool high, bool medium, bool low);
+    q::String m_name;
 
-    struct Params
-    {
-        size_t fps = 30;
-        Quality recording;//{{1280, 960}, 16000000};
-        Quality high;//{{1280, 960}, 4000000};
-        Quality medium;//{{640, 480}, 2000000};
-        Quality low;//{{320, 240}, 160000};
-    };
+    void set_active_streams(bool high, bool medium, bool low);
 
     std::shared_ptr<Impl> m_impl;
     size_t m_fps = 30;

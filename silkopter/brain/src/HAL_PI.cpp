@@ -41,9 +41,11 @@
 #include "sensors/Raspicam.h"
 #include "sensors/MPU9250.h"
 #include "sensors/MS5611.h"
-#include "sensors/OdroidW_ADC.h"
+#include "sensors/RC5T619.h"
+#include "sensors/ADC_Voltmeter.h"
+#include "sensors/ADC_Ammeter.h"
 #include "sensors/SRF02.h"
-#include "sensors/GPS_UBLOX.h"
+#include "sensors/UBLOX.h"
 
 #include "actuators/Motors_PiGPIO.h"
 #include "actuators/Gimbal_Servo_PiGPIO.h"
@@ -67,12 +69,14 @@ struct HAL_Pi::Hardware
 
     struct
     {
-        std::vector<sensors::Raspicam_uptr> raspicam;
-        std::vector<sensors::MPU9250_uptr> mpu9250;
-        std::vector<sensors::GPS_UBLOX_uptr> ublox;
-        std::vector<sensors::MS5611_uptr> ms5611;
-        sensors::OdroidW_ADC_uptr odroid_adc;
-        std::vector<sensors::SRF02_uptr> srf02;
+        std::vector<sensors::Raspicam_uptr> raspicams;
+        std::vector<sensors::MPU9250_uptr> mpu9250s;
+        std::vector<sensors::UBLOX_uptr> ubloxes;
+        std::vector<sensors::MS5611_uptr> ms5611s;
+        sensors::RC5T619_uptr rc5t619s;
+        std::vector<sensors::SRF02_uptr> srf02s;
+        std::vector<sensors::ADC_Voltmeter_uptr> adc_voltmeters;
+        std::vector<sensors::ADC_Ammeter_uptr> adc_ammeters;
     } sensors;
 
     struct
@@ -349,6 +353,8 @@ auto HAL_Pi::is_actuator_name_unique(q::String const& name) const -> bool
 
 auto HAL_Pi::init() -> bool
 {
+    buses::II2C* phy_i2c0 = nullptr;
+
     {
         auto& settings = get_settings(q::Path("hal/buses"));
 
@@ -378,6 +384,11 @@ auto HAL_Pi::init() -> bool
             if (!bus->open(q::String(b.device)))
             {
                 return false;
+            }
+            if (b.device.find("i2c0") != std::string::npos)
+            {
+                //store this for the crappy odroid adc...
+                phy_i2c0 = bus.get();
             }
             m_hw->i2cs.push_back(bus.get());
             m_hw->buses.i2cs.push_back(std::move(bus));
@@ -484,7 +495,7 @@ auto HAL_Pi::init() -> bool
             m_hw->gyroscopes.push_back(s.get());
             m_hw->compasses.push_back(s.get());
             m_hw->thermometers.push_back(s.get());
-            m_hw->sensors.mpu9250.push_back(std::move(s));
+            m_hw->sensors.mpu9250s.push_back(std::move(s));
         }
 
         for (auto& b: sz.ms5611)
@@ -524,7 +535,144 @@ auto HAL_Pi::init() -> bool
             }
             m_hw->barometers.push_back(s.get());
             m_hw->thermometers.push_back(s.get());
-            m_hw->sensors.ms5611.push_back(std::move(s));
+            m_hw->sensors.ms5611s.push_back(std::move(s));
+        }
+
+        for (auto& b: sz.raspicam)
+        {
+            auto name = q::String(b.name);
+            auto s = std::make_unique<sensors::Raspicam>(name);
+
+            sensors::Raspicam::Params params;
+            params.fps = b.fps;
+            params.recording.resolution = b.recording.resolution;
+            params.recording.bitrate = b.recording.bitrate;
+            params.high.resolution = b.high.resolution;
+            params.high.bitrate = b.high.bitrate;
+            params.medium.resolution = b.medium.resolution;
+            params.medium.bitrate = b.medium.bitrate;
+            params.low.resolution = b.low.resolution;
+            params.low.bitrate = b.low.bitrate;
+            if (!s->init(params))
+            {
+                return false;
+            }
+
+            if (!is_sensor_name_unique(s->get_camera_name()))
+            {
+                QLOGE("Duplicated sensor name: {}", name);
+                return false;
+            }
+            m_hw->cameras.push_back(s.get());
+            m_hw->sensors.raspicams.push_back(std::move(s));
+        }
+        for (auto& b: sz.srf02)
+        {
+            auto name = q::String(b.name);
+            auto bus = q::String(b.bus);
+            auto s = std::make_unique<sensors::SRF02>(name);
+
+            sensors::SRF02::Params params;
+            params.rate = b.rate;
+            params.direction = b.direction;
+            params.min_distance = b.min_distance;
+            params.max_distance = b.max_distance;
+            if (auto* d = find_i2c_by_name(bus))
+            {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                QLOGE("Invalid bus for SRF02: {}", bus);
+                return false;
+            }
+
+            if (!is_sensor_name_unique(s->get_sonar_name()))
+            {
+                QLOGE("Duplicated sensor name: {}", name);
+                return false;
+            }
+            m_hw->sonars.push_back(s.get());
+            m_hw->sensors.srf02s.push_back(std::move(s));
+        }
+        for (auto& b: sz.ublox)
+        {
+            auto name = q::String(b.name);
+            auto bus = q::String(b.bus);
+            auto s = std::make_unique<sensors::UBLOX>(name);
+
+            sensors::UBLOX::Params params;
+            params.rate = b.rate;
+            if (auto* d = find_i2c_by_name(bus))
+            {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else if (auto* d = find_spi_by_name(bus))
+            {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else if (auto* d = find_uart_by_name(bus))
+            {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                QLOGE("Invalid bus for GPS UBLOX: {}", bus);
+                return false;
+            }
+
+            if (!is_sensor_name_unique(s->get_gps_name()))
+            {
+                QLOGE("Duplicated sensor name: {}", name);
+                return false;
+            }
+            m_hw->gpses.push_back(s.get());
+            m_hw->sensors.ubloxes.push_back(std::move(s));
+        }
+        for (auto& b: sz.rc5t619)
+        {
+            auto name = q::String(b->name);
+            auto s = std::make_unique<sensors::RC5T619>(name);
+
+            sensors::RC5T619::Params params;
+            params.rate = b->rate;
+            params.voltmeter_channel = b->voltmeter_channel;
+            params.ammeter_channel = b->ammeter_channel;
+            params.current_to_voltage_ratio = b->current_to_voltage_ratio;
+            if (phy_i2c0)
+            {
+                if (!s->init(phy_i2c0, params))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                QLOGE("You need to configure the physical i2c0 bus for the OdroidW ADC.");
+                return false;
+            }
+
+            if (!is_sensor_name_unique(s->get_voltmeter_name()) ||
+                !is_sensor_name_unique(s->get_ammeter_name()))
+            {
+                QLOGE("Duplicated sensor name: {}", name);
+                return false;
+            }
+            m_hw->voltmeters.push_back(s.get());
+            m_hw->ammeters.push_back(s.get());
+            m_hw->sensors.odroid_adcs = std::move(s);
         }
     }
 

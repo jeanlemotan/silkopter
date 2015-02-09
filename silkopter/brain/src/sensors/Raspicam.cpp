@@ -104,7 +104,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 }
 
 
-Raspicam::Raspicam()
+Raspicam::Raspicam(q::String const& name)
+    : m_name(name)
 {
     QLOG_TOPIC("raspicam");
     m_impl.reset(new Impl);
@@ -113,17 +114,6 @@ Raspicam::Raspicam()
     m_impl->high.is_active = false;
     m_impl->medium.is_active = false;
     m_impl->low.is_active = false;
-
-    m_fps = 30;
-    m_impl->recording.quality.resolution.set(1280, 960);
-    m_impl->recording.quality.bitrate = 16000000;
-    m_impl->high.quality.resolution.set(1280, 960);
-    m_impl->high.quality.bitrate = 4000000;
-    m_impl->medium.quality.resolution.set(800, 600);
-    m_impl->medium.quality.bitrate = 2000000;
-    m_impl->low.quality.resolution.set(320, 240);
-    m_impl->low.quality.bitrate = 100000;
-
 
     m_impl->file_callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
 }
@@ -168,13 +158,24 @@ Raspicam::~Raspicam()
     m_impl->camera.reset();
 }
 
-auto Raspicam::init() -> bool
+auto Raspicam::get_camera_name() const -> q::String const&
+{
+    return m_name;
+}
+
+auto Raspicam::init(Params const& params) -> bool
 {
     QLOG_TOPIC("raspicam::init");
     if (m_impl->camera)
     {
         return true;
     }
+
+    m_fps = math::clamp<size_t>(params.fps, 10, 30);
+    m_impl->recording.quality = params.recording;
+    m_impl->high.quality = params.high;
+    m_impl->medium.quality = params.medium;
+    m_impl->low.quality = params.low;
 
     auto res = create_components();
     if (res)

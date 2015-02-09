@@ -99,36 +99,25 @@ auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
 
 auto MS5611::init(buses::II2C* bus, Params const& params) -> bool
 {
-    QLOG_TOPIC("ms5611::init");
-
-    QASSERT(bus);
-    if (!bus)
-    {
-        return false;
-    }
     m_i2c = bus;
     m_spi = nullptr;
-
     return init(params);
 }
 auto MS5611::init(buses::ISPI* bus, Params const& params) -> bool
 {
-    QLOG_TOPIC("ms5611::init");
-
-    QASSERT(bus);
-    if (!bus)
-    {
-        return false;
-    }
     m_spi = bus;
     m_i2c = nullptr;
-
     return init(params);
 }
 
 auto MS5611::init(Params const& params) -> bool
 {
     QLOG_TOPIC("ms5611::init");
+    if (!m_i2c && !m_spi)
+    {
+        QLOGE("No bus configured");
+        return false;
+    }
 
     m_params = params;
     m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);

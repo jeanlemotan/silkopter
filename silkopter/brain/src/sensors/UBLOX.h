@@ -1,30 +1,43 @@
 #pragma once
 
 #include "IGPS.h"
-
+#include "buses/II2C.h"
+#include "buses/ISPI.h"
+#include "buses/IUART.h"
 
 namespace silk
 {
 namespace sensors
 {
 
-class GPS_UBLOX : public IGPS, q::util::Noncopyable
+class UBLOX : public IGPS, q::util::Noncopyable
 {
 public:
-    virtual ~GPS_UBLOX();
 
-    auto detect(uint8_t const* data, size_t size) -> bool;
+    UBLOX(q::String const& name);
+    ~UBLOX();
 
-    auto init() -> bool;
+    struct Params
+    {
+        size_t rate = 5;
+    };
+
+    auto init(buses::II2C* bus, Params const& params) -> bool;
+    auto init(buses::ISPI* bus, Params const& params) -> bool;
+    auto init(buses::IUART* bus, Params const& params) -> bool;
+
     void process();
+
+    auto get_gps_name() const -> q::String const&;
 
     auto get_gps_samples() const -> std::vector<GPS_Sample> const&;
 
-protected:
-    virtual auto read(uint8_t* data, size_t max_size) -> size_t = 0;
-    virtual auto write(uint8_t const* data, size_t size) -> bool = 0;
-
 private:
+    auto init(Params const& params) -> bool;
+
+    auto read(uint8_t* data, size_t max_size) -> size_t;
+    auto write(uint8_t const* data, size_t size) -> bool;
+
     enum class Message : uint16_t
     {
         ACK_ACK     = (0x01 << 8) | 0x05,
@@ -47,6 +60,12 @@ private:
         MON_VER     = (0x04 << 8) | 0x0A,
     };
 
+    buses::II2C* m_i2c = nullptr;
+    buses::ISPI* m_spi = nullptr;
+    buses::IUART* m_uart = nullptr;
+
+    Params m_params;
+    q::String m_name;
 
     struct Packet
     {
@@ -54,8 +73,6 @@ private:
         Message message;
         std::vector<uint8_t> payload;
     } m_packet;
-
-    std::mutex m_mutex;
 
     auto setup() -> bool;
     void read_data();
@@ -111,7 +128,7 @@ private:
 };
 
 
-DECLARE_CLASS_PTR(GPS_UBLOX);
+DECLARE_CLASS_PTR(UBLOX);
 
 }
 }

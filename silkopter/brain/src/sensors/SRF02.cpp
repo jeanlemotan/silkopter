@@ -30,24 +30,32 @@ constexpr uint8_t FAKE_RAGING_MODE_US       = 0x58;
 constexpr uint8_t BURST                     = 0x5C;
 constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 
-constexpr std::chrono::milliseconds MEASUREMENT_DURATION(80);
-constexpr float MAX_VALID_DISTANCE = 5.f;
 
+SRF02::SRF02(const q::String &name)
+    : m_name(name)
+{
 
-auto SRF02::init(q::Clock::duration sample_time) -> bool
+}
+
+auto SRF02::get_sonar_name() const -> q::String const&
+{
+    return m_name;
+}
+
+auto SRF02::init(buses::II2C* bus, Params const& params) -> bool
 {
     QLOG_TOPIC("srf02::init");
-    q::String device("/dev/i2c-0");
-    QLOGI("initializing device: {}", device);
-
-    if (!m_i2c.open(device.c_str()))
+    m_i2c = bus;
+    if (!m_i2c)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
+        QLOGE("No bus configured");
         return false;
     }
 
+    m_params = params;
+
     uint8_t rev = 0;
-    auto ret = m_i2c.read_u8(ADDR, SW_REV_CMD, rev);
+    auto ret = m_i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
     if (!ret || rev == 255)
     {
         QLOGE("Failed to initialize SRF02");
@@ -56,7 +64,8 @@ auto SRF02::init(q::Clock::duration sample_time) -> bool
 
     QLOGI("SRF02 Revision: {}", rev);
 
-    m_sample_time = math::max(sample_time, q::Clock::duration(MEASUREMENT_DURATION));
+    m_dt = math::clamp(std::chrono::milliseconds(1000 / m_params.rate),
+                       std::chrono::milliseconds(100), std::chrono::milliseconds(1000));
     m_last_time_point = q::Clock::now();
     m_state = 0;
 
@@ -71,19 +80,19 @@ void SRF02::process()
     //begin?
     if (m_state == 0)
     {
-        if (now - m_last_time_point < m_sample_time)
+        if (now - m_last_time_point < m_dt)
         {
             return;
         }
 
         m_state = 1;
         m_last_time_point = now;
-        m_i2c.write_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+        m_i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
         return; //we have to wait first
     }
 
     //wait for echo
-    if (now - m_last_time_point < MEASUREMENT_DURATION)
+    if (now - m_last_time_point < m_dt)
     {
         return;
     }
@@ -91,7 +100,7 @@ void SRF02::process()
     m_state = 0;
 
     std::array<uint8_t, 4> buf;
-    m_i2c.read(ADDR, RANGE_H, buf.data(), buf.size());
+    m_i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     int d = (unsigned int)(buf[0] << 8) | buf[1];
     int min_d = (unsigned int)(buf[2] << 8) | buf[3];
@@ -101,12 +110,12 @@ void SRF02::process()
 
     m_samples.clear();
 
-    if (distance <= MAX_VALID_DISTANCE)
+    if (distance >= m_params.min_distance && distance <= m_params.max_distance)
     {
         Sonar_Sample sample;
         sample.value.value = distance;
         sample.sample_idx = ++m_sample_idx;
-        sample.dt = m_sample_time;
+        sample.dt = m_dt;
         m_samples.push_back(sample);
     }
 }

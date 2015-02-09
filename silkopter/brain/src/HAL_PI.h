@@ -45,6 +45,9 @@ public:
     auto get_all_thermometers() const   -> std::vector<sensors::IThermometer*> const&;
     auto find_thermometer_by_name(q::String const& name) const -> sensors::IThermometer*;
 
+    auto get_all_adcs() const     -> std::vector<sensors::IADC*> const&;
+    auto find_adc_by_name(q::String const& name) const -> sensors::IADC*;
+
     auto get_all_voltmeters() const     -> std::vector<sensors::IVoltmeter*> const&;
     auto find_voltmeter_by_name(q::String const& name) const -> sensors::IVoltmeter*;
 

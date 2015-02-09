@@ -13,7 +13,7 @@ class ICompass
 public:
     virtual ~ICompass() {}
 
-    virtual auto get_compass_name() const -> q::String const& = 0;
+    virtual auto get_name() const -> q::String const& = 0;
 
     struct Config
     {
@@ -21,10 +21,10 @@ public:
         math::vec3f scale = math::vec3f(1);
     };
 
-    virtual void set_compass_config(Config const& config) = 0;
-    virtual auto get_compass_config() const -> Config const& = 0;
+//    virtual void set_config(Config const& config) = 0;
+//    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_compass_samples() const -> std::vector<Compass_Sample> const& = 0;
+    virtual auto get_samples() const -> std::vector<Compass_Sample> const& = 0;
 };
 
 DECLARE_CLASS_PTR(ICompass);

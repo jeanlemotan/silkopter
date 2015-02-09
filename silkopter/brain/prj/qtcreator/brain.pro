@@ -87,11 +87,9 @@ SOURCES += \
     ../../src/Sim_Comms.cpp \
     ../../src/HAL_Motors_Sim.cpp \
     ../../src/Battery.cpp \
-    ../../src/sensors/GPS_UBLOX.cpp \
     ../../src/sensors/i2c.cpp \
     ../../src/sensors/MPU9250.cpp \
     ../../src/sensors/MS5611.cpp \
-    ../../src/sensors/OdroidW_ADC.cpp \
     ../../src/sensors/SRF02.cpp \
     ../../src/sensors/GPS_Detector.cpp \
     ../../src/sensors/GPS_Detector_UART.cpp \
@@ -103,7 +101,9 @@ SOURCES += \
     ../../src/HAL_PI.cpp \
     ../../src/buses/I2C_Pi.cpp \
     ../../src/buses/SPI_Pi.cpp \
-    ../../src/buses/UART_Pi.cpp
+    ../../src/buses/UART_Pi.cpp \
+    ../../src/sensors/UBLOX.cpp \
+    ../../src/sensors/RC5T619.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -128,11 +128,9 @@ HEADERS += \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
     ../../src/Battery.h \
-    ../../src/sensors/GPS_UBLOX.h \
     ../../src/sensors/i2c.h \
     ../../src/sensors/MPU9250.h \
     ../../src/sensors/MS5611.h \
-    ../../src/sensors/OdroidW_ADC.h \
     ../../src/sensors/SRF02.h \
     ../../src/sensors/GPS_Protocol.h \
     ../../src/sensors/GPS_Detector.h \
@@ -167,5 +165,8 @@ HEADERS += \
     ../../src/buses/UART_Pi.h \
     ../../src/buses/II2C.h \
     ../../src/buses/ISPI.h \
-    ../../src/buses/IUART.h
+    ../../src/buses/IUART.h \
+    ../../src/sensors/UBLOX.h \
+    ../../src/sensors/IADC.h \
+    ../../src/sensors/RC5T619.h
 

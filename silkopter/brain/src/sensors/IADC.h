@@ -7,10 +7,10 @@ namespace silk
 namespace sensors
 {
 
-class IAmmeter
+class IADC
 {
 public:
-    virtual ~IAmmeter() {}
+    virtual ~IADC() {}
 
     virtual auto get_name() const -> q::String const& = 0;
 
@@ -23,10 +23,10 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_samples() const -> std::vector<Ammeter_Sample> const& = 0;
+    virtual auto get_samples() const -> std::vector<ADC_Sample> const& = 0;
 };
 
-DECLARE_CLASS_PTR(IAmmeter);
+DECLARE_CLASS_PTR(IADC);
 
 }
 }

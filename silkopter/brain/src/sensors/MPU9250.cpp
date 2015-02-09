@@ -364,37 +364,27 @@ auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
 
 auto MPU9250::init(buses::II2C* i2c, Params const& params) -> bool
 {
-    QLOG_TOPIC("mpu9250::init");
-
-    QASSERT(i2c);
-    if (!i2c)
-    {
-        return false;
-    }
     m_i2c = i2c;
     m_spi = nullptr;
-
     return init(params);
 }
 
 auto MPU9250::init(buses::ISPI* spi, Params const& params) -> bool
 {
-    QLOG_TOPIC("mpu9250::init");
-
-    QASSERT(spi);
-    if (!spi)
-    {
-        return false;
-    }
     m_spi = spi;
     m_i2c = nullptr;
-
     return init(params);
 }
 
 auto MPU9250::init(Params const& params) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
+
+    if (!m_i2c && !m_spi)
+    {
+        QLOGE("No bus configured");
+        return false;
+    }
 
     std::lock_guard<MPU9250> lg(*this);
 

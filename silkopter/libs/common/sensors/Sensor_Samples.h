@@ -29,6 +29,10 @@ struct Temperature
 {
     float value = 0;//degrees celsius
 };
+struct Ratio
+{
+    float value = 0;//for ADC. 0 .. 1
+};
 struct Voltage
 {
     float value = 0;//volts
@@ -82,6 +86,7 @@ typedef Sample<Magnetic_Field>      Compass_Sample;
 typedef Sample<Pressure>            Barometer_Sample;
 typedef Sample<Distance>            Sonar_Sample;
 typedef Sample<Temperature>         Thermometer_Sample;
+typedef Sample<Ratio>               ADC_Sample;
 typedef Sample<Voltage>             Voltmeter_Sample;
 typedef Sample<Current>             Ammeter_Sample;
 typedef Sample<Location>            GPS_Sample;
@@ -96,6 +101,7 @@ typedef TP_Sample<Magnetic_Field>       Compass_TP_Sample;
 typedef TP_Sample<Pressure>             Barometer_TP_Sample;
 typedef TP_Sample<Distance>             Sonar_TP_Sample;
 typedef TP_Sample<Temperature>          Thermometer_TP_Sample;
+typedef TP_Sample<Ratio>                ADC_TP_Sample;
 typedef TP_Sample<Voltage>              Voltmeter_TP_Sample;
 typedef TP_Sample<Current>              Ammeter_TP_Sample;
 typedef TP_Sample<Location>             GPS_TP_Sample;

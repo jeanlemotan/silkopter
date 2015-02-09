@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "OdroidW_ADC.h"
+#include "RC5T619.h"
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
@@ -114,22 +114,27 @@ constexpr uint8_t RC5T619_AIN0_DATAL	 = 0x77;
 constexpr uint8_t CONVERT_ADC0           = 0x17;
 constexpr uint8_t CONVERT_ADC1           = 0x16;
 
-auto OdroidW_ADC::init() -> bool
+auto RC5T619::init(buses::II2C* bus, Params const& params) -> bool
 {
-    QLOG_TOPIC("adc::init");
-    q::String device("/dev/i2c-0");
-    QLOGI("initializing device: {}", device);
+    QLOG_TOPIC("rc5t619::init");
 
-    if (!m_i2c.open(device.c_str()))
+    m_i2c = bus;
+    if (!m_i2c)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
+        QLOGE("No bus configured");
         return false;
     }
+
+    m_params = params;
+    m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
+    m_params.adc1_ratio = math::clamp<size_t>(m_params.adc1_ratio, 1, 100);
+
+    m_dt = std::chrono::milliseconds(1000 / m_params.adc0_rate);
 
     Mode_Guard mg;
 
     uint8_t control;
-    auto res = m_i2c.read_u8(ADDR, 0x36, control);
+    auto res = m_i2c->read_register_u8(ADDR, 0x36, control);
     if (!res || control == 0xff)
     {
         QLOGE("rc5t619 not found");
@@ -138,19 +143,19 @@ auto OdroidW_ADC::init() -> bool
     QLOGI("rc5t619 found: {}", control);
 
     // Set ADRQ=00 to stop ADC
-    res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, 0x0);
+    res &= m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x0);
 
     // Set ADC auto conversion interval 250ms
-    res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT2, 0x0);
+    res &= m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT2, 0x0);
 
     // Enable AIN0, AIN1 pin conversion in auto-ADC
-    res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT1, 0xC0);
+    res &= m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT1, 0xC0);
 
     // Start auto-mode & average 4-time conversion mode for ADC
-    res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, 0x17);
+    res &= m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x17);
 
     //start by converting voltage first
-    res &= m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
+    res &= m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
     if (!res)
     {
         QLOGI("Failed to init rc5t619");
@@ -161,23 +166,20 @@ auto OdroidW_ADC::init() -> bool
 }
 
 
-void OdroidW_ADC::process()
+void RC5T619::process()
 {
-    QLOG_TOPIC("adc::process");
+    QLOG_TOPIC("rc5t619::process");
 
-    m_adc_voltage.samples.clear();
-    m_adc_current.samples.clear();
+    m_adc[0].samples.clear();
+    m_adc[1].samples.clear();
 
     auto now = q::Clock::now();
-    if (now - m_last_time_point < std::chrono::milliseconds(20))
+    if (now - m_last_time_point < m_dt)
     {
         return;
     }
 
     m_last_time_point = now;
-
-    constexpr size_t CURRENT_TO_VOLTAGE_RATIO = 10;
-
 
 //    LOG_INFO("ADC{} : {}:{} -> {}", idx, buf[0], buf[1], result);
 
@@ -191,7 +193,7 @@ void OdroidW_ADC::process()
     {
         //read coltage
 
-        if (m_i2c.read(ADDR, RC5T619_AIN1_DATAH, buf.data(), buf.size()))
+        if (m_i2c->read_register(ADDR, RC5T619_AIN1_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
@@ -206,7 +208,7 @@ void OdroidW_ADC::process()
         }
 
         //next
-        if (m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
+        if (m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
         {
             m_stage++;
         }
@@ -215,7 +217,7 @@ void OdroidW_ADC::process()
     {
         //read current
 
-        if (m_i2c.read(ADDR, RC5T619_AIN0_DATAH, buf.data(), buf.size()))
+        if (m_i2c->read_register(ADDR, RC5T619_AIN0_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
@@ -230,27 +232,27 @@ void OdroidW_ADC::process()
         }
 
         //next
-        if (m_stage >= CURRENT_TO_VOLTAGE_RATIO)
+        if (m_stage >= m_params.adc1_ratio)
         {
-            if (m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
+            if (m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
             {
                 m_stage = 0;
             }
         }
-        else if (m_i2c.write_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
+        else if (m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
         {
             m_stage++;
         }
     }
 }
 
-auto OdroidW_ADC::get_voltmeter_samples() const -> std::vector<Voltmeter_Sample> const&
+auto RC5T619::get_adc0() const -> IADC*
 {
-    return m_adc_voltage.samples;
+    return &m_adc[0];
 }
-auto OdroidW_ADC::get_ammeter_samples() const -> std::vector<Ammeter_Sample> const&
+auto RC5T619::get_adc1() const -> IADC*
 {
-    return m_adc_current.samples;
+    return &m_adc[1];
 }
 
 

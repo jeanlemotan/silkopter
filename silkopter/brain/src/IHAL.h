@@ -10,6 +10,7 @@
 #include "sensors/ICompass.h"
 #include "sensors/IBarometer.h"
 #include "sensors/IThermometer.h"
+#include "sensors/IADC.h"
 #include "sensors/IVoltmeter.h"
 #include "sensors/IAmmeter.h"
 #include "sensors/IGPS.h"
@@ -60,6 +61,9 @@ public:
 
     virtual auto get_all_thermometers() const   -> std::vector<sensors::IThermometer*> const& = 0;
     virtual auto find_thermometer_by_name(q::String const& name) const -> sensors::IThermometer* = 0;
+
+    virtual auto get_all_adcs() const     -> std::vector<sensors::IADC*> const& = 0;
+    virtual auto find_adc_by_name(q::String const& name) const -> sensors::IADC* = 0;
 
     virtual auto get_all_voltmeters() const     -> std::vector<sensors::IVoltmeter*> const& = 0;
     virtual auto find_voltmeter_by_name(q::String const& name) const -> sensors::IVoltmeter* = 0;
