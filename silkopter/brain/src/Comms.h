@@ -2,7 +2,7 @@
 
 #include "common/sensors/Sensor_Samples.h"
 #include "common/Comm_Data.h"
-#include "HAL.h"
+#include "IHAL.h"
 #include "UAV.h"
 #include "utils/Channel.h"
 #include "utils/RUDP.h"
@@ -13,7 +13,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav);
+    Comms(boost::asio::io_service& io_service, IHAL& hal, UAV& uav);
 
     auto start(uint16_t send_port, uint16_t receive_port) -> bool;
 
@@ -83,8 +83,8 @@ private:
         sensors::Barometer_Sample barometer;
         sensors::Thermometer_Sample thermometer;
         sensors::Sonar_Sample sonar;
-        sensors::Voltage_Sample voltage;
-        sensors::Current_Sample current;
+        sensors::Voltmeter_Sample voltage;
+        sensors::Ammeter_Sample current;
         sensors::GPS_Sample gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensor_samples;
@@ -97,12 +97,12 @@ private:
         std::vector<sensors::Barometer_Sample> barometer;
         std::vector<sensors::Thermometer_Sample> thermometer;
         std::vector<sensors::Sonar_Sample> sonar;
-        std::vector<sensors::Voltage_Sample> voltage;
-        std::vector<sensors::Current_Sample> current;
+        std::vector<sensors::Voltmeter_Sample> voltage;
+        std::vector<sensors::Ammeter_Sample> current;
         std::vector<sensors::GPS_Sample> gps;
     } m_raw_sensor_samples;
 
-    HAL& m_hal;
+    IHAL& m_hal;
     UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
     void send_uav_data();

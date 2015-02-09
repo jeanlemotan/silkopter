@@ -1,23 +1,23 @@
 #pragma once
 
 #include "i2c.h"
-#include "IVoltage.h"
-#include "ICurrent.h"
+#include "IVoltmeter.h"
+#include "IAmmeter.h"
 
 namespace silk
 {
 namespace sensors
 {
 
-class OdroidW_ADC : public IVoltage, public ICurrent, q::util::Noncopyable
+class OdroidW_ADC : public IVoltmeter, public IAmmeter, q::util::Noncopyable
 {
 public:
     auto init() -> bool;
 
     void process();
 
-    auto get_voltage_samples() const -> std::vector<Voltage_Sample> const&;
-    auto get_current_samples() const -> std::vector<Current_Sample> const&;
+    auto get_voltmeter_samples() const -> std::vector<Voltmeter_Sample> const&;
+    auto get_ammeter_samples() const -> std::vector<Ammeter_Sample> const&;
 
 private:
     i2c m_i2c;
@@ -27,7 +27,7 @@ private:
 
     struct ADC_V
     {
-        std::vector<Voltage_Sample> samples;
+        std::vector<Voltmeter_Sample> samples;
         q::Clock::time_point last_time_point = q::Clock::now();
         uint32_t sample_idx = 0;
     } m_adc_voltage;
@@ -35,12 +35,15 @@ private:
 
     struct ADC_C
     {
-        std::vector<Current_Sample> samples;
+        std::vector<Ammeter_Sample> samples;
         q::Clock::time_point last_time_point = q::Clock::now();
         uint32_t sample_idx = 0;
     } m_adc_current;
 
 };
+
+
+DECLARE_CLASS_PTR(OdroidW_ADC);
 
 }
 }

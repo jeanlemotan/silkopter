@@ -77,6 +77,7 @@ private:
         std::vector<Gyroscope_Sample> gyroscope;
         std::vector<Accelerometer_Sample> accelerometer;
         std::vector<Compass_Sample> compass;
+        std::vector<Thermometer_Sample> thermometer;
     } m_samples;
 
     float m_accelerometer_scale_inv = 1.f;
@@ -93,6 +94,9 @@ private:
     q::Clock::time_point m_last_compass_timestamp;
     q::Clock::duration m_compass_sample_time;
 };
+
+
+DECLARE_CLASS_PTR(MPU9250);
 
 }
 }

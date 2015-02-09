@@ -2,7 +2,7 @@
 #include "Battery.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_battery_state.hpp"
+//#include "sz_battery_state.hpp"
 
 namespace silk
 {
@@ -62,46 +62,46 @@ Battery::Battery()
     load_state();
 }
 
-void Battery::process(const std::vector<sensors::Current_Sample>& current_samples, const std::vector<sensors::Voltage_Sample>& voltage_samples)
+void Battery::process(const std::vector<sensors::Ammeter_Sample>& ammeter_samples, const std::vector<sensors::Voltmeter_Sample>& voltmeter_samples)
 {
     {
         //samples started at this time point
-        auto start = q::Clock::now() - get_samples_duration(current_samples);
+        auto start = q::Clock::now() - get_samples_duration(ammeter_samples);
 
         //process the new samples and store them
         float h = 1.f / 3600.f;
-        for (auto& s: current_samples)
+        for (auto& s: ammeter_samples)
         {
             m_capacity_used_mah += (s.value.value * m_last_current) * 0.5f * q::Seconds(s.dt).count() * h;
             m_last_current = s.value.value;
 
-            m_current_samples.emplace_back(start, s.value);
+            m_ammeter_samples.emplace_back(start, s.value.value);
             start += s.dt;
         }
-        remove_old_samples(m_current_samples, std::chrono::milliseconds(500));
-        m_average_current = compute_average(m_current_samples);
+        remove_old_samples(m_ammeter_samples, std::chrono::milliseconds(500));
+        m_average_current = compute_average(m_ammeter_samples);
     }
 
     {
         //samples started at this time point
-        auto start = q::Clock::now() - get_samples_duration(voltage_samples);
+        auto start = q::Clock::now() - get_samples_duration(voltmeter_samples);
 
         //process the new samples and store them
-        for (auto& s: voltage_samples)
+        for (auto& s: voltmeter_samples)
         {
             //voltages lower than one cell are just measurement errors
             if (s.value.value > MIN_CELL_VOLTAGE)
             {
-                m_voltage_samples.emplace_back(start, s.value.value);
+                m_voltmeter_samples.emplace_back(start, s.value.value);
             }
             start += s.dt;
         }
-        remove_old_samples(m_voltage_samples, std::chrono::seconds(5));
-        m_average_voltage = compute_average(m_voltage_samples);
+        remove_old_samples(m_voltmeter_samples, std::chrono::seconds(5));
+        m_average_voltage = compute_average(m_voltmeter_samples);
     }
 
     //new voltage data? compute cell count
-    if (!m_cell_count && !voltage_samples.empty())
+    if (!m_cell_count && !voltmeter_samples.empty())
     {
         m_cell_count = compute_cell_count();
         if (m_cell_count)
@@ -116,7 +116,7 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
     }
 
     static int xxx = 0;
-    if (!current_samples.empty())
+    if (!ammeter_samples.empty())
     {
         xxx++;
     }
@@ -133,9 +133,9 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
 auto Battery::compute_cell_count() -> boost::optional<size_t>
 {
     //wait to get a good voltage average
-    if (!m_average_voltage || m_voltage_samples.size() < CELL_COUNT_DETECTION_MIN_SAMPLES)
+    if (!m_average_voltage || m_voltmeter_samples.size() < CELL_COUNT_DETECTION_MIN_SAMPLES)
     {
-        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples", m_average_voltage, m_voltage_samples.size());
+        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples", m_average_voltage, m_voltmeter_samples.size());
         return boost::none;
     }
 
@@ -176,19 +176,19 @@ void Battery::save_state()
     silk::async([=]()
     {
         TIMED_FUNCTION();
-        autojsoncxx::to_pretty_json_file("battery_state.cfg", m_saved_state);
+        //autojsoncxx::to_pretty_json_file("battery_state.cfg", m_saved_state);
         QLOGI("Capacity used: {}mAh", m_capacity_used_mah);
     });
 }
 
 void Battery::load_state()
 {
-    autojsoncxx::ParsingResult result;
-    if (!autojsoncxx::from_json_file("battery_state.cfg", m_loaded_state, result))
-    {
-        QLOGW("Failed to load battery_state.cfg: {}", result.description());
-        return;
-    }
+    //autojsoncxx::ParsingResult result;
+//    if (!autojsoncxx::from_json_file("battery_state.cfg", m_loaded_state, result))
+//    {
+//        QLOGW("Failed to load battery_state.cfg: {}", result.description());
+//        return;
+//    }
 
     m_capacity_used_mah = m_loaded_state.capacity_used;
 }
@@ -213,12 +213,12 @@ auto Battery::get_cell_count() const -> boost::optional<size_t>
 
 void Battery::reset()
 {
-    m_current_samples.clear();
+    m_ammeter_samples.clear();
     m_average_current.reset();
     m_last_current = 0.f;
     m_capacity_used_mah = 0.f;
 
-    m_voltage_samples.clear();
+    m_voltmeter_samples.clear();
     m_average_voltage.reset();
 
     m_cell_count.reset();

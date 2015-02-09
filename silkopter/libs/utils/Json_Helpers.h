@@ -1,30 +1,108 @@
 #pragma once 
 
 #include "QBase.h"
-#include "utils/PID.h"
+#include "rapidjson/document.h"
 
-//namespace jsonutil
-//{
+namespace jsonutil
+{
 //	using namespace rapidjson;
 //	typedef rapidjson::Type Type;
 
-//    template <class VALUE = rapidjson::Value>
-//    const typename VALUE::MemberIterator find_member(VALUE& value, std::string const& name)
-//    {
-//        QASSERT(!name.empty());
-//        QASSERT(value.IsObject());
+    template <class STRING>
+    rapidjson::Value* find_value(rapidjson::Value& value, STRING const& name)
+    {
+        if (name.empty())
+        {
+            return &value;
+        }
+        if (!value.IsObject())
+        {
+            return nullptr;
+        }
+        for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++)
+        {
+            if (name == it->name.GetString())
+            {
+                return &it->value;
+            }
+        }
+        return nullptr;
+    }
 
-//        //size_t length = name.length();
+    inline rapidjson::Value* find_value(rapidjson::Value& value, q::Path const& path)
+    {
+        if (path.is_empty())
+        {
+            return &value;
+        }
+        auto v = find_value(value, path[0]);
+        if (v != nullptr)
+        {
+            auto p = path.get_sub_path(1, 0);
+            return p.is_empty() ? v : find_value(*v, p);
+        }
+        return nullptr;
+    }
 
-//        for (typename VALUE::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++)
-//        {
-//            if (it->name.GetString() == name)
-//            {
-//                return it;
-//            }
-//        }
-//        return typename VALUE::MemberIterator();
-//    }
+    template <class STRING>
+    inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, STRING const& name, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)
+    {
+        auto v = find_value(json, name);
+        if (v == nullptr)
+        {
+            rapidjson::Value n(name.c_str(), name.size(), allocator);
+            rapidjson::Value value(type);
+            return &json.AddMember(n, value, allocator);
+        }
+        else if (type == v->GetType())
+        {
+            return v;
+        }
+        return nullptr;
+    }
+
+    inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, q::Path const& path, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)
+    {
+        //first try a find
+        auto v = find_value(json, path);
+        if (type == v->GetType())
+        {
+            return v;
+        }
+
+        //now walk the path and create missing elements
+        auto p = path;
+        rapidjson::Value* parent = &json;
+        while (!p.is_empty())
+        {
+            if (p.size() == 1)
+            {
+                //last element?
+                return get_or_add_value(*parent, p[0], type, allocator);
+            }
+
+            v = find_value(*parent, p[0]);
+            if (v && !v->IsObject())
+            {
+                return nullptr;
+            }
+
+            if (v)
+            {
+                parent = v;
+                p.pop_front();
+            }
+            else
+            {
+                rapidjson::Value n(p[0].c_str(), p[0].size(), allocator);
+                rapidjson::Value value(rapidjson::kObjectType);
+                parent = &parent->AddMember(n, value, allocator);
+                p.pop_front();
+            }
+        }
+        return nullptr;
+    }
+
 
 //    template <class VALUE = rapidjson::Value>
 //    const typename VALUE::ConstMemberIterator find_member(VALUE const& value, std::string const& name)
@@ -94,62 +172,50 @@
 //    typedef Abstract_Member_Finder<rapidjson::Value, rapidjson::Value::MemberIterator> Member_Finder;
 //    typedef Abstract_Member_Finder<const rapidjson::Value, rapidjson::Value::ConstMemberIterator> Const_Member_Finder;
 
-//    inline rapidjson::Value& get_or_add_member(rapidjson::Value& json, std::string const& name, rapidjson::Type type, rapidjson::Document::AllocatorType& allocator)
-//	{
-//        auto member = find_member(json, name);
-//        if (member == rapidjson::Value::MemberIterator())
-//		{
-//            rapidjson::Value n(name.c_str(), allocator);
-//			rapidjson::Value value(type);
-//            json.AddMember(n, value, allocator);
-//            member = find_member(json, name);
-//		}
-//		else
-//		{
-//            QASSERT(type == member->value.GetType());
-//		}
-//		return member->value;
-//	}
 
-//    inline void clone_value(rapidjson::Value& dst, rapidjson::Value const& json, rapidjson::Document::AllocatorType& allocator)
-//	{
-//		using namespace rapidjson;
-//		switch (json.GetType())
-//		{
-//		case kNullType:		dst.SetNull(); break;
-//		case kFalseType:	dst.SetBool(false); break;
-//		case kTrueType:		dst.SetBool(true); break;
-//		case kObjectType:
-//            dst.SetObject();
-//            for (auto m = json.MemberBegin(); m != json.MemberEnd(); ++m)
-//			{
-//                rapidjson::Value nval(m->name.GetString(), allocator);
-//				rapidjson::Value mval;
-//                clone_value(mval, m->value, allocator);
-//                dst.AddMember(nval, mval, allocator);
-//			}
-//			break;
-//		case kArrayType:
-//			dst.SetArray();
-//			for (size_t i = 0; i < dst.Size(); i++)
-//			{
-//				rapidjson::Value mval;
-//                clone_value(mval, json[(uint32_t)(i)], allocator);
-//				dst.PushBack(mval, allocator);
-//			}
-//			break;
-//		case kStringType:
-//			dst.SetString(json.GetString(), allocator);
-//			break;
-//		case kNumberType:
-//			if (json.IsInt())			dst.SetInt(json.GetInt());
-//			else if (json.IsUint())		dst.SetUint(json.GetUint());
-//			else if (json.IsInt64())	dst.SetInt64(json.GetInt64());
-//			else if (json.IsUint64())	dst.SetUint64(json.GetUint64());
-//			else						dst.SetDouble(json.GetDouble());
-//			break;
-//		}
-//	}
+
+    inline void clone_value(rapidjson::Value& dst, rapidjson::Value const& json, rapidjson::Document::AllocatorType& allocator)
+    {
+        using namespace rapidjson;
+        switch (json.GetType())
+        {
+        case kNullType:		dst.SetNull(); break;
+        case kFalseType:	dst.SetBool(false); break;
+        case kTrueType:		dst.SetBool(true); break;
+        case kObjectType:
+            dst.SetObject();
+            for (auto m = json.MemberBegin(); m != json.MemberEnd(); ++m)
+            {
+                rapidjson::Value nval(m->name.GetString(), allocator);
+                rapidjson::Value mval;
+                clone_value(mval, m->value, allocator);
+                dst.AddMember(nval, mval, allocator);
+            }
+            break;
+        case kArrayType:
+            dst.SetArray();
+            for (size_t i = 0; i < dst.Size(); i++)
+            {
+                rapidjson::Value mval;
+                clone_value(mval, json[(uint32_t)(i)], allocator);
+                dst.PushBack(mval, allocator);
+            }
+            break;
+        case kStringType:
+            dst.SetString(json.GetString(), allocator);
+            break;
+        case kNumberType:
+            if (json.IsInt())			dst.SetInt(json.GetInt());
+            else if (json.IsUint())		dst.SetUint(json.GetUint());
+            else if (json.IsInt64())	dst.SetInt64(json.GetInt64());
+            else if (json.IsUint64())	dst.SetUint64(json.GetUint64());
+            else						dst.SetDouble(json.GetDouble());
+            break;
+        default:
+            QASSERT(0);
+            break;
+        }
+    }
 
 //    inline bool remove_all_members(rapidjson::Value& json, std::string const& name)
 //	{
@@ -341,4 +407,4 @@
 //    }
 
 
-//}
+}

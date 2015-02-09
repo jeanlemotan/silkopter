@@ -51,5 +51,8 @@ private:
     q::Clock::time_point m_last_timestamp;
 };
 
+
+DECLARE_CLASS_PTR(MS5611);
+
 }
 }

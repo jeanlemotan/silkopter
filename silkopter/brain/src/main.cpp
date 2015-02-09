@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "HAL.h"
+#include "IHAL.h"
 #include "Comms.h"
 #include "UAV.h"
 
@@ -113,15 +113,15 @@ int main(int argc, char const* argv[])
 
     try
     {
-        silk::HAL hal;
-        silk::UAV uav(hal);
-        silk::Comms comms(io_service, hal, uav);
+        silk::IHAL* hal = nullptr;
+        silk::UAV uav(*hal);
+        silk::Comms comms(io_service, *hal, uav);
 
-        if (!hal.init(comms))
-        {
-            QLOGE("Hardware failure! Aborting");
-            abort();
-        }
+//        if (!hal->init(comms))
+//        {
+//            QLOGE("Hardware failure! Aborting");
+//            abort();
+//        }
 
         //start listening for a remote system
         if (!comms.start(send_port, receive_port))
@@ -130,14 +130,14 @@ int main(int argc, char const* argv[])
             abort();
         }
 
-        if (hal.camera)
-        {
-            hal.camera->set_data_callback([&](uint8_t const* data, size_t size)
-            {
-                comms.send_video_frame(silk::Comms::Video_Flags(), data, size);
-            });
-            hal.camera->set_stream_quality(silk::comms::Camera_Params::Stream_Quality::MEDIUM);
-        }
+//        if (hal.camera)
+//        {
+//            hal.camera->set_data_callback([&](uint8_t const* data, size_t size)
+//            {
+//                comms.send_video_frame(silk::Comms::Video_Flags(), data, size);
+//            });
+//            hal.camera->set_stream_quality(silk::comms::Camera_Params::Stream_Quality::MEDIUM);
+//        }
 
 //        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
 
@@ -164,7 +164,7 @@ int main(int argc, char const* argv[])
             {
                 comms.process();
 
-                hal.process();
+                hal->process();
                 uav.process();
             }
             boost::this_thread::yield();
@@ -184,11 +184,11 @@ int main(int argc, char const* argv[])
             async_thread.join();
         }
 
-        if (hal.camera)
-        {
-            hal.camera->set_data_callback(nullptr);
-        }
-        hal.shutdown();
+//        if (hal.camera)
+//        {
+//            hal.camera->set_data_callback(nullptr);
+//        }
+        hal->shutdown();
     }
     catch (std::exception const& e)
     {

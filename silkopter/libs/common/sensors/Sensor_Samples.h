@@ -5,29 +5,39 @@ namespace silk
 namespace sensors
 {
 
-template<class T> struct Sample
+struct Acceleration
 {
-    Sample() : value() {}
-    T value;
-    uint32_t sample_idx = 0; //different for each sample. NOTE - it's allowed to wrap so don't compare like this: if (my_sample_idx > sample_idx) !!!!!!!
-    q::Clock::duration dt{0}; //the duration of this sample.
+    math::vec3f value;//meters / second^2
 };
-
-template<class T> struct TP_Sample : public Sample<T>
+struct Angular_Velocity
 {
-    q::Clock::time_point time_point;
+    math::vec3f value;//radians per second
 };
-
-typedef Sample<math::vec3f> Accelerometer_Sample; //meters / second^2
-typedef Sample<math::vec3f> Gyroscope_Sample; //radians per second
-typedef Sample<math::vec3f> Compass_Sample; //NOT normalized
-typedef Sample<float>       Barometer_Sample; //kp
-typedef Sample<float>       Sonar_Sample; //meters
-typedef Sample<float>       Thermometer_Sample; //degrees celsius
-typedef Sample<float>       Voltage_Sample; //volts
-typedef Sample<float>       Current_Sample; //amperes / second
-
-struct GPS
+struct Magnetic_Field
+{
+    math::vec3f value;//NOT normalized
+};
+struct Pressure
+{
+    float value = 0;//kp
+};
+struct Distance
+{
+    float value = 0;//meters
+};
+struct Temperature
+{
+    float value = 0;//degrees celsius
+};
+struct Voltage
+{
+    float value = 0;//volts
+};
+struct Current
+{
+    float value = 0;//amperes / second
+};
+struct Location
 {
     enum class Fix : uint8_t
     {
@@ -47,21 +57,48 @@ struct GPS
     boost::optional<math::vec3f> velocity; //meters/second
     boost::optional<math::vec2f> direction; //normalized
 };
-typedef Sample<GPS>         GPS_Sample;
+
+
+///////////////////////////
+///
+/// Samples
+
+template<class T> struct Sample
+{
+    Sample() : value() {}
+    T value;
+    uint32_t sample_idx = 0; //different for each sample. NOTE - it's allowed to wrap so don't compare like this: if (my_sample_idx > sample_idx) !!!!!!!
+    q::Clock::duration dt{0}; //the duration of this sample.
+};
+template<class T> struct TP_Sample : public Sample<T>
+{
+    q::Clock::time_point time_point;
+};
+
+
+typedef Sample<Acceleration>        Accelerometer_Sample;
+typedef Sample<Angular_Velocity>    Gyroscope_Sample;
+typedef Sample<Magnetic_Field>      Compass_Sample;
+typedef Sample<Pressure>            Barometer_Sample;
+typedef Sample<Distance>            Sonar_Sample;
+typedef Sample<Temperature>         Thermometer_Sample;
+typedef Sample<Voltage>             Voltmeter_Sample;
+typedef Sample<Current>             Ammeter_Sample;
+typedef Sample<Location>            GPS_Sample;
 
 ///////////////////////////////////////////////
 /// timestamped samples
 ///
 
-typedef TP_Sample<math::vec3f>  Accelerometer_TP_Sample;
-typedef TP_Sample<math::vec3f>  Gyroscope_TP_Sample;
-typedef TP_Sample<math::vec3f>  Compass_TP_Sample;
-typedef TP_Sample<float>        Barometer_TP_Sample;
-typedef TP_Sample<float>        Sonar_TP_Sample;
-typedef TP_Sample<float>        Thermometer_TP_Sample;
-typedef TP_Sample<float>        Voltage_TP_Sample;
-typedef TP_Sample<float>        Current_TP_Sample;
-typedef TP_Sample<GPS>          GPS_TP_Sample;
+typedef TP_Sample<Acceleration>         Accelerometer_TP_Sample;
+typedef TP_Sample<Angular_Velocity>     Gyroscope_TP_Sample;
+typedef TP_Sample<Magnetic_Field>       Compass_TP_Sample;
+typedef TP_Sample<Pressure>             Barometer_TP_Sample;
+typedef TP_Sample<Distance>             Sonar_TP_Sample;
+typedef TP_Sample<Temperature>          Thermometer_TP_Sample;
+typedef TP_Sample<Voltage>              Voltmeter_TP_Sample;
+typedef TP_Sample<Current>              Ammeter_TP_Sample;
+typedef TP_Sample<Location>             GPS_TP_Sample;
 
 }
 }

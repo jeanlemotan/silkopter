@@ -27,5 +27,7 @@ private:
     int m_state = 0;
 };
 
+DECLARE_CLASS_PTR(SRF02);
+
 }
 }

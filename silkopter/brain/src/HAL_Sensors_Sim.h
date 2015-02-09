@@ -28,8 +28,8 @@ public:
     auto get_barometer_samples() const      -> std::vector<sensors::Barometer_Sample> const&;
     auto get_sonar_samples() const          -> std::vector<sensors::Sonar_Sample> const&;
     auto get_thermometer_samples() const    -> std::vector<sensors::Thermometer_Sample> const&;
-    auto get_voltage_samples() const        -> std::vector<sensors::Voltage_Sample> const&;
-    auto get_current_samples() const        -> std::vector<sensors::Current_Sample> const&;
+    auto get_voltmeter_samples() const        -> std::vector<sensors::Voltmeter_Sample> const&;
+    auto get_ammeter_samples() const        -> std::vector<sensors::Ammeter_Sample> const&;
     auto get_gps_samples() const            -> std::vector<sensors::GPS_Sample> const&;
 
     auto get_last_accelerometer_sample() const  -> sensors::Accelerometer_TP_Sample const&;
@@ -38,8 +38,8 @@ public:
     auto get_last_barometer_sample() const      -> sensors::Barometer_TP_Sample const&;
     auto get_last_sonar_sample() const          -> sensors::Sonar_TP_Sample const&;
     auto get_last_thermometer_sample() const    -> sensors::Thermometer_TP_Sample const&;
-    auto get_last_voltage_sample() const        -> sensors::Voltage_TP_Sample const&;
-    auto get_last_current_sample() const        -> sensors::Current_TP_Sample const&;
+    auto get_last_voltage_sample() const        -> sensors::Voltmeter_TP_Sample const&;
+    auto get_last_current_sample() const        -> sensors::Ammeter_TP_Sample const&;
     auto get_last_gps_sample() const            -> sensors::GPS_TP_Sample const&;
 
     size_t get_error_count() const;
@@ -93,11 +93,11 @@ private:
     sensors::Thermometer_TP_Sample m_thermometer_sample;
     std::vector<sensors::Thermometer_Sample> m_thermometer_samples;
 
-    sensors::Voltage_TP_Sample m_voltage_sample;
-    std::vector<sensors::Voltage_Sample> m_voltage_samples;
+    sensors::Voltmeter_TP_Sample m_voltage_sample;
+    std::vector<sensors::Voltmeter_Sample> m_voltage_samples;
 
-    sensors::Current_TP_Sample m_current_sample;
-    std::vector<sensors::Current_Sample> m_current_samples;
+    sensors::Ammeter_TP_Sample m_current_sample;
+    std::vector<sensors::Ammeter_Sample> m_current_samples;
 
     sensors::GPS_TP_Sample m_gps_sample;
     std::vector<sensors::GPS_Sample> m_gps_samples;

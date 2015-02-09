@@ -82,23 +82,28 @@ SOURCES += \
     ../../src/Comms.cpp \
     ../../src/AHRS.cpp \
     ../../src/Motor_Mixer.cpp \
-    ../../src/HAL_Raspicam.cpp \
     ../../src/HAL_Sensors_Sim.cpp \
     ../../src/HAL.cpp \
     ../../src/Sim_Comms.cpp \
     ../../src/HAL_Motors_Sim.cpp \
-    ../../src/HAL_Motors_PiGPIO.cpp \
     ../../src/Battery.cpp \
-    ../../src/HAL_Camera_Mount_PiGPIO.cpp \
     ../../src/sensors/GPS_UBLOX.cpp \
     ../../src/sensors/i2c.cpp \
     ../../src/sensors/MPU9250.cpp \
     ../../src/sensors/MS5611.cpp \
     ../../src/sensors/OdroidW_ADC.cpp \
     ../../src/sensors/SRF02.cpp \
-    ../../src/HAL_Sensors_HW.cpp \
     ../../src/sensors/GPS_Detector.cpp \
-    ../../src/sensors/GPS_Detector_UART.cpp
+    ../../src/sensors/GPS_Detector_UART.cpp \
+    ../../src/sensors/Raspicam.cpp \
+    ../../src/actuators/Gimbal_Servo_PiGPIO.cpp \
+    ../../src/actuators/Motors_PiGPIO.cpp \
+    ../../src/storage/Storage_FS.cpp \
+    ../../src/storage/Storage_MB85RC.cpp \
+    ../../src/HAL_PI.cpp \
+    ../../src/buses/Bus_I2C_Pi.cpp \
+    ../../src/buses/Bus_SPI_Pi.cpp \
+    ../../src/buses/Bus_UART_Pi.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -114,18 +119,11 @@ HEADERS += \
     ../../src/Motor_Mixer.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
-    ../../src/HAL_Camera.h \
-    ../../src/HAL_Raspicam.h \
-    ../../src/HAL_Camera_Mount.h \
-    ../../src/HAL_Motors.h \
     ../../src/HAL_Motors_Sim.h \
     ../../src/HAL_Sensors.h \
     ../../src/HAL_Sensors_Sim.h \
-    ../../src/HAL.h \
     ../../src/Sim_Comms.h \
     ../../../libs/common/Comm_Data.h \
-    ../../src/HAL_Camera_Mount_PiGPIO.h \
-    ../../src/HAL_Motors_PiGPIO.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
@@ -136,7 +134,6 @@ HEADERS += \
     ../../src/sensors/MS5611.h \
     ../../src/sensors/OdroidW_ADC.h \
     ../../src/sensors/SRF02.h \
-    ../../src/HAL_Sensors_HW.h \
     ../../src/sensors/GPS_Protocol.h \
     ../../src/sensors/GPS_Detector.h \
     ../../src/sensors/spi.h \
@@ -151,11 +148,26 @@ HEADERS += \
     ../../src/sensors/IAccelerometer.h \
     ../../src/sensors/IBarometer.h \
     ../../src/sensors/ICompass.h \
-    ../../src/sensors/ICurrent.h \
     ../../src/sensors/IGPS.h \
     ../../src/sensors/IGyroscope.h \
     ../../src/sensors/IThermometer.h \
-    ../../src/sensors/IVoltage.h \
     ../../src/sensors/ISonar.h \
-    ../../src/sensors/Bus_Config.h
+    ../../src/sensors/Bus_Config.h \
+    ../../src/sensors/ICamera.h \
+    ../../src/actuators/IGimbal.h \
+    ../../src/actuators/IMotors.h \
+    ../../src/sensors/Raspicam.h \
+    ../../src/actuators/Motors_PiGPIO.h \
+    ../../src/actuators/Gimbal_Servo_PiGPIO.h \
+    ../../src/IHAL.h \
+    ../../src/sensors/IVoltmeter.h \
+    ../../src/sensors/IAmmeter.h \
+    ../../src/storage/Storage_MB85RC.h \
+    ../../src/HAL_PI.h \
+    ../../src/buses/Bus_I2C_Pi.h \
+    ../../src/buses/Bus_SPI_Pi.h \
+    ../../src/buses/Bus_UART_Pi.h \
+    ../../src/buses/IBus_I2C.h \
+    ../../src/buses/IBus_SPI.h \
+    ../../src/buses/IBus_UART.h
 

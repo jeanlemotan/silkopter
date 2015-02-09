@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "HAL_Raspicam.h"
+#include "Raspicam.h"
 
 //#undef RASPBERRY_PI
 
@@ -29,6 +29,8 @@ extern "C"
 
 namespace silk
 {
+namespace sensors
+{
 
 
 typedef std::shared_ptr<MMAL_COMPONENT_T> Component_ptr;
@@ -45,7 +47,7 @@ typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
 ///         - low resizer
 ///             - low encoder
 
-struct HAL_Raspicam::Impl
+struct Raspicam::Impl
 {
     std::mutex mutex;
 
@@ -66,7 +68,7 @@ struct HAL_Raspicam::Impl
         std::mutex data_mutex;
 
         std::atomic<bool> is_active{false};
-        HAL_Raspicam::Quality quality;
+        Raspicam::Quality quality;
 
         q::Clock::time_point start;
     };
@@ -76,8 +78,8 @@ struct HAL_Raspicam::Impl
     Encoder_Data medium;
     Encoder_Data low;
 
-    HAL_Raspicam::Data_Available_Callback file_callback;
-    HAL_Raspicam::Data_Available_Callback stream_callback;
+    Raspicam::Data_Available_Callback file_callback;
+    Raspicam::Data_Available_Callback stream_callback;
 
     size_t frame_idx = 0;
 };
@@ -102,7 +104,7 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 }
 
 
-HAL_Raspicam::HAL_Raspicam()
+Raspicam::Raspicam()
 {
     QLOG_TOPIC("raspicam");
     m_impl.reset(new Impl);
@@ -123,9 +125,9 @@ HAL_Raspicam::HAL_Raspicam()
     m_impl->low.quality.bitrate = 100000;
 
 
-    m_impl->file_callback = std::bind(&HAL_Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
+    m_impl->file_callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
 }
-HAL_Raspicam::~HAL_Raspicam()
+Raspicam::~Raspicam()
 {
     QLOG_TOPIC("~raspicam");
     {
@@ -166,7 +168,7 @@ HAL_Raspicam::~HAL_Raspicam()
     m_impl->camera.reset();
 }
 
-auto HAL_Raspicam::init() -> bool
+auto Raspicam::init() -> bool
 {
     QLOG_TOPIC("raspicam::init");
     if (m_impl->camera)
@@ -185,19 +187,19 @@ auto HAL_Raspicam::init() -> bool
     return res;
 }
 
-void HAL_Raspicam::shutdown()
+void Raspicam::shutdown()
 {
     QASSERT(m_impl->camera);
 }
 
 
-void HAL_Raspicam::process()
+void Raspicam::process()
 {
     QLOG_TOPIC("raspicam::process");
 }
 
 
-void HAL_Raspicam::file_callback(uint8_t const* data, size_t size)
+void Raspicam::file_callback(uint8_t const* data, size_t size)
 {
     QASSERT(data && size);
     if (!data || size == 0)
@@ -212,14 +214,14 @@ void HAL_Raspicam::file_callback(uint8_t const* data, size_t size)
     sink->write(data, size);
 }
 
-void HAL_Raspicam::set_data_callback(Data_Available_Callback cb)
+void Raspicam::set_data_callback(Data_Available_Callback cb)
 {
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
     m_impl->stream_callback = cb;
 }
 
-void HAL_Raspicam::set_active_streams(bool high, bool medium, bool low)
+void Raspicam::set_active_streams(bool high, bool medium, bool low)
 {
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
@@ -847,9 +849,9 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
     mmal_buffer_header_release(buffer);
 }
 
-static void encoder_buffer_callback_fn(HAL_Raspicam::Impl& impl,
-                                       HAL_Raspicam::Impl::Encoder_Data& encoder_data,
-                                       HAL_Raspicam::Data_Available_Callback const& callback,
+static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
+                                       Raspicam::Impl::Encoder_Data& encoder_data,
+                                       Raspicam::Data_Available_Callback const& callback,
                                        MMAL_PORT_T* /*port*/,
                                        MMAL_BUFFER_HEADER_T* buffer)
 {
@@ -914,7 +916,7 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
     //    SCOPED_PINS_GUARD;;
 
     QASSERT(port && buffer);
-    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
+    Raspicam::Impl* impl = reinterpret_cast<Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
@@ -924,7 +926,7 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
+    Raspicam::Impl* impl = reinterpret_cast<Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
@@ -934,7 +936,7 @@ static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
-    HAL_Raspicam::Impl* impl = reinterpret_cast<HAL_Raspicam::Impl*>(port->userdata);
+    Raspicam::Impl* impl = reinterpret_cast<Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
@@ -943,7 +945,7 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-auto HAL_Raspicam::create_components() -> bool
+auto Raspicam::create_components() -> bool
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1140,7 +1142,7 @@ auto HAL_Raspicam::create_components() -> bool
     return true;
 }
 
-void HAL_Raspicam::create_file_sink()
+void Raspicam::create_file_sink()
 {
     char mbstr[256] = {0};
     std::time_t t = std::time(nullptr);
@@ -1172,7 +1174,7 @@ void HAL_Raspicam::create_file_sink()
 }
 
 
-auto HAL_Raspicam::start_recording() -> bool
+auto Raspicam::start_recording() -> bool
 {
     if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
     {
@@ -1194,7 +1196,7 @@ auto HAL_Raspicam::start_recording() -> bool
     }
     return true;
 }
-void HAL_Raspicam::stop_recording()
+void Raspicam::stop_recording()
 {
     m_file_sink.reset();
 
@@ -1207,17 +1209,17 @@ void HAL_Raspicam::stop_recording()
     }
 }
 
-void HAL_Raspicam::set_iso(uint32_t iso)
+void Raspicam::set_iso(uint32_t iso)
 {
     m_iso = iso;
 }
 
-void HAL_Raspicam::set_shutter_speed(q::Clock::duration ss)
+void Raspicam::set_shutter_speed(q::Clock::duration ss)
 {
     m_shutter_speed = ss;
 }
 
-void HAL_Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
+void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
 {
     m_stream_quality = sq;
 
@@ -1230,8 +1232,9 @@ void HAL_Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
     }
 }
 
-}
 
+}
+}
 
 #endif
 

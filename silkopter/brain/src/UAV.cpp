@@ -4,14 +4,14 @@
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_pid_params.hpp"
-#include "sz_motor_info.hpp"
-#include "sz_uav_config.hpp"
+//#include "sz_math.hpp"
+//#include "sz_pid_params.hpp"
+//#include "sz_motor_info.hpp"
+//#include "sz_uav_config.hpp"
 
 using namespace silk;
 
-UAV::UAV(HAL& hal)
+UAV::UAV(IHAL& hal)
     : m_hal(hal)
 {
     //defaults
@@ -35,32 +35,32 @@ UAV::UAV(HAL& hal)
 
 auto UAV::load_settings() -> bool
 {
-    autojsoncxx::ParsingResult result;
-    UAV_Config cfg;
-    if (!autojsoncxx::from_json_file("uav.cfg", cfg, result))
-    {
-        QLOGW("Failed to load uav.cfg: {}", result.description());
-        return false;
-    }
+//    autojsoncxx::ParsingResult result;
+//    UAV_Config cfg;
+//    if (!autojsoncxx::from_json_file("uav.cfg", cfg, result))
+//    {
+//        QLOGW("Failed to load uav.cfg: {}", result.description());
+//        return false;
+//    }
 
-    m_pids.yaw_rate.set_params(cfg.pids.yaw_rate);
-    m_pids.pitch_rate.set_params(cfg.pids.pitch_rate);
-    m_pids.roll_rate.set_params(cfg.pids.roll_rate);
-    m_pids.altitude_rate.set_params(cfg.pids.altitude_rate);
+//    m_pids.yaw_rate.set_params(cfg.pids.yaw_rate);
+//    m_pids.pitch_rate.set_params(cfg.pids.pitch_rate);
+//    m_pids.roll_rate.set_params(cfg.pids.roll_rate);
+//    m_pids.altitude_rate.set_params(cfg.pids.altitude_rate);
 
-    m_pids.yaw.set_params(cfg.pids.yaw);
-    m_pids.pitch.set_params(cfg.pids.pitch);
-    m_pids.roll.set_params(cfg.pids.roll);
-    m_pids.altitude.set_params(cfg.pids.altitude);
+//    m_pids.yaw.set_params(cfg.pids.yaw);
+//    m_pids.pitch.set_params(cfg.pids.pitch);
+//    m_pids.roll.set_params(cfg.pids.roll);
+//    m_pids.altitude.set_params(cfg.pids.altitude);
 
-    if (!cfg.motors.empty())
-    {
-        m_motor_mixer.remove_all_motors();
-        for (auto const& mi: cfg.motors)
-        {
-            m_motor_mixer.add_motor(mi);
-        }
-    }
+//    if (!cfg.motors.empty())
+//    {
+//        m_motor_mixer.remove_all_motors();
+//        for (auto const& mi: cfg.motors)
+//        {
+//            m_motor_mixer.add_motor(mi);
+//        }
+//    }
 
     return true;
 }
@@ -68,24 +68,24 @@ void UAV::save_settings()
 {
     TIMED_FUNCTION();
 
-    UAV_Config cfg;
+//    UAV_Config cfg;
 
-    cfg.pids.yaw_rate = m_pids.yaw_rate.get_params();
-    cfg.pids.pitch_rate = m_pids.pitch_rate.get_params();
-    cfg.pids.roll_rate = m_pids.roll_rate.get_params();
-    cfg.pids.altitude_rate = m_pids.altitude_rate.get_params();
+//    cfg.pids.yaw_rate = m_pids.yaw_rate.get_params();
+//    cfg.pids.pitch_rate = m_pids.pitch_rate.get_params();
+//    cfg.pids.roll_rate = m_pids.roll_rate.get_params();
+//    cfg.pids.altitude_rate = m_pids.altitude_rate.get_params();
 
-    cfg.pids.yaw = m_pids.yaw.get_params();
-    cfg.pids.pitch = m_pids.pitch.get_params();
-    cfg.pids.roll = m_pids.roll.get_params();
-    cfg.pids.altitude = m_pids.altitude.get_params();
+//    cfg.pids.yaw = m_pids.yaw.get_params();
+//    cfg.pids.pitch = m_pids.pitch.get_params();
+//    cfg.pids.roll = m_pids.roll.get_params();
+//    cfg.pids.altitude = m_pids.altitude.get_params();
 
-    for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
-    {
-        cfg.motors.push_back(m_motor_mixer.get_motor_info(i));
-    }
+//    for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
+//    {
+//        cfg.motors.push_back(m_motor_mixer.get_motor_info(i));
+//    }
 
-    autojsoncxx::to_pretty_json_file("uav.cfg", cfg);
+//    autojsoncxx::to_pretty_json_file("uav.cfg", cfg);
 }
 
 void UAV::set_uav_input(comms::UAV_Input const& input)
@@ -125,7 +125,7 @@ void UAV::set_mode(comms::Mode new_mode)
                 {
                     m_mode = new_mode;
                     m_motor_mixer.set_output_range(0.08f, 1.f);
-                    m_hal.motors->cut_throttle();
+//                    m_hal.motors->cut_throttle();
                 }
             }
             else
@@ -184,63 +184,64 @@ bool UAV::do_arm_check() const
 
     auto now = q::Clock::now();
 
-    bool ok = true;
-    auto d = now - m_hal.sensors->get_last_accelerometer_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy accelerometer: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_gyroscope_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy gyroscope: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_compass_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy compass: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_barometer_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy barometer: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_sonar_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy sonar: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_thermometer_sample().time_point;
-    if (d > std::chrono::milliseconds(1000))
-    {
-        QLOGW("Unhealthy thermometer: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_voltage_sample().time_point;
-    if (d > std::chrono::milliseconds(1000))
-    {
-        QLOGW("Unhealthy voltage sensor: {}", d);
-        ok = false;
-    }
-    d = now - m_hal.sensors->get_last_current_sample().time_point;
-    if (d > std::chrono::milliseconds(500))
-    {
-        QLOGW("Unhealthy current sensor: {}", d);
-        ok = false;
-    }
+//    bool ok = true;
+//    auto d = now - m_hal.sensors->get_last_accelerometer_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy accelerometer: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_gyroscope_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy gyroscope: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_compass_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy compass: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_barometer_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy barometer: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_sonar_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy sonar: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_thermometer_sample().time_point;
+//    if (d > std::chrono::milliseconds(1000))
+//    {
+//        QLOGW("Unhealthy thermometer: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_voltage_sample().time_point;
+//    if (d > std::chrono::milliseconds(1000))
+//    {
+//        QLOGW("Unhealthy voltage sensor: {}", d);
+//        ok = false;
+//    }
+//    d = now - m_hal.sensors->get_last_current_sample().time_point;
+//    if (d > std::chrono::milliseconds(500))
+//    {
+//        QLOGW("Unhealthy current sensor: {}", d);
+//        ok = false;
+//    }
 //    d = now - m_hal.sensors->get_last_gps_sample().time_point;
 //    if (d > std::chrono::milliseconds(4000))
 //    {
 //        QLOGW("Unhealthy GPS: {}", d);
 //        ok = false;
 //    }
+//
+//    return ok;
 
-    return ok;
 }
 bool UAV::do_disarm_check() const
 {
@@ -280,7 +281,7 @@ auto UAV::get_position_w() const -> math::vec3f const&
 
 void UAV::process_battery_sensor_data()
 {
-    m_battery.process(m_hal.sensors->get_current_samples(), m_hal.sensors->get_voltage_samples());
+//    m_battery.process(m_hal.sensors->get_current_samples(), m_hal.sensors->get_voltage_samples());
 }
 
 void UAV::process_imu_sensor_data()
@@ -296,83 +297,83 @@ void UAV::process_imu_sensor_data()
     }
 
     //combine accelerometer, gyroscope and compass readings
-    auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
-    auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
-    auto const& compass_samples = m_hal.sensors->get_compass_samples();
+//    auto const& gyroscope_samples = m_hal.sensors->get_gyroscope_samples();
+//    auto const& accelerometer_samples = m_hal.sensors->get_accelerometer_samples();
+//    auto const& compass_samples = m_hal.sensors->get_compass_samples();
 
-    auto g_it = gyroscope_samples.begin();
-    auto a_it = accelerometer_samples.begin();
-    auto c_it = compass_samples.begin();
+//    auto g_it = gyroscope_samples.begin();
+//    auto a_it = accelerometer_samples.begin();
+//    auto c_it = compass_samples.begin();
 
-    //const auto max_allowed_dt = std::chrono::milliseconds(500);
+//    //const auto max_allowed_dt = std::chrono::milliseconds(500);
 
-    //this matches the sensor samples that might come at different rates
-    while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
-    {
-        bool has_new_gyroscope_sample = false;
-        bool has_new_accelerometer_sample = false;
-        //bool has_new_compass_sample = false;
-        //update the current smaples
+//    //this matches the sensor samples that might come at different rates
+//    while (g_it != gyroscope_samples.end() || a_it != accelerometer_samples.end() || c_it != compass_samples.end())
+//    {
+//        bool has_new_gyroscope_sample = false;
+//        bool has_new_accelerometer_sample = false;
+//        //bool has_new_compass_sample = false;
+//        //update the current smaples
 
-        auto sensor_now = m_imu.clock.now();
+//        auto sensor_now = m_imu.clock.now();
 
-        Manual_Clock::duration min_dt{std::numeric_limits<uint32_t>::max()};
-        if (g_it != gyroscope_samples.end())
-        {
-            QASSERT(g_it->dt < std::chrono::seconds(100));
-            min_dt = math::min(min_dt, g_it->dt);
-            if (m_imu.gyroscope_sample_time_point <= sensor_now)
-            {
-                m_imu.last_gyroscope_sample = *g_it++;
-                m_imu.last_gyroscope_sample.value.value = m_imu.gyroscope_filter.process(m_imu.last_gyroscope_sample.value.value);
-                m_imu.gyroscope_sample_time_point += m_imu.last_gyroscope_sample.dt;
-                has_new_gyroscope_sample = true;
-            }
-        }
-        if (a_it != accelerometer_samples.end())
-        {
-            QASSERT(a_it->dt < std::chrono::seconds(100));
-            min_dt = math::min(min_dt, a_it->dt);
-            if (m_imu.accelerometer_sample_time_point <= sensor_now)
-            {
-                m_imu.last_accelerometer_sample = *a_it++;
-                m_imu.last_accelerometer_sample.value.value = m_imu.accelerometer_filter.process(m_imu.last_accelerometer_sample.value.value);
-                m_imu.accelerometer_sample_time_point += m_imu.last_accelerometer_sample.dt;
-                has_new_accelerometer_sample = true;
-            }
-        }
-        if (c_it != compass_samples.end())
-        {
-            QASSERT(c_it->dt < std::chrono::seconds(100));
-            min_dt = math::min(min_dt, c_it->dt);
-            if (m_imu.compass_sample_time_point <= sensor_now)
-            {
-                m_imu.last_compass_sample = *c_it++;
-                m_imu.last_compass_sample.value.value = m_imu.compass_filter.process(m_imu.last_compass_sample.value.value);
-                m_imu.compass_sample_time_point += m_imu.last_compass_sample.dt;
-//                has_new_compass_sample = true;
-            }
-        }
-        QASSERT(min_dt.count() < std::numeric_limits<uint32_t>::max());
+//        Manual_Clock::duration min_dt{std::numeric_limits<uint32_t>::max()};
+//        if (g_it != gyroscope_samples.end())
+//        {
+//            QASSERT(g_it->dt < std::chrono::seconds(100));
+//            min_dt = math::min(min_dt, g_it->dt);
+//            if (m_imu.gyroscope_sample_time_point <= sensor_now)
+//            {
+//                m_imu.last_gyroscope_sample = *g_it++;
+//                m_imu.last_gyroscope_sample.value.value = m_imu.gyroscope_filter.process(m_imu.last_gyroscope_sample.value.value);
+//                m_imu.gyroscope_sample_time_point += m_imu.last_gyroscope_sample.dt;
+//                has_new_gyroscope_sample = true;
+//            }
+//        }
+//        if (a_it != accelerometer_samples.end())
+//        {
+//            QASSERT(a_it->dt < std::chrono::seconds(100));
+//            min_dt = math::min(min_dt, a_it->dt);
+//            if (m_imu.accelerometer_sample_time_point <= sensor_now)
+//            {
+//                m_imu.last_accelerometer_sample = *a_it++;
+//                m_imu.last_accelerometer_sample.value.value = m_imu.accelerometer_filter.process(m_imu.last_accelerometer_sample.value.value);
+//                m_imu.accelerometer_sample_time_point += m_imu.last_accelerometer_sample.dt;
+//                has_new_accelerometer_sample = true;
+//            }
+//        }
+//        if (c_it != compass_samples.end())
+//        {
+//            QASSERT(c_it->dt < std::chrono::seconds(100));
+//            min_dt = math::min(min_dt, c_it->dt);
+//            if (m_imu.compass_sample_time_point <= sensor_now)
+//            {
+//                m_imu.last_compass_sample = *c_it++;
+//                m_imu.last_compass_sample.value.value = m_imu.compass_filter.process(m_imu.last_compass_sample.value.value);
+//                m_imu.compass_sample_time_point += m_imu.last_compass_sample.dt;
+////                has_new_compass_sample = true;
+//            }
+//        }
+//        QASSERT(min_dt.count() < std::numeric_limits<uint32_t>::max());
 
-        //increment the time
-        sensor_now += min_dt;
-        m_imu.clock.advance(min_dt);
+//        //increment the time
+//        sensor_now += min_dt;
+//        m_imu.clock.advance(min_dt);
 
-        //-------------------------------------
-        //USING THE SAMPLES
+//        //-------------------------------------
+//        //USING THE SAMPLES
 
-        m_ahrs.process(m_imu.last_gyroscope_sample, m_imu.last_accelerometer_sample, m_imu.last_compass_sample);
+//        m_ahrs.process(m_imu.last_gyroscope_sample, m_imu.last_accelerometer_sample, m_imu.last_compass_sample);
 
-        if (has_new_gyroscope_sample)
-        {
-            process_rate_pids(m_imu.last_gyroscope_sample);
-        }
-        if (has_new_accelerometer_sample)
-        {
-            process_dead_reckoning();
-        }
-    }
+//        if (has_new_gyroscope_sample)
+//        {
+//            process_rate_pids(m_imu.last_gyroscope_sample);
+//        }
+//        if (has_new_accelerometer_sample)
+//        {
+//            process_dead_reckoning();
+//        }
+//    }
 }
 
 void UAV::process_dead_reckoning()
@@ -536,42 +537,42 @@ void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
 
 void UAV::process_motors()
 {
-    if (m_mode == comms::Mode::ARMED)
-    {
-        m_motor_mixer.set_data(m_uav_input.sticks.throttle,
-                               0,//m_pids.yaw_rate.get_output(),
-                               0,//m_pids.pitch_rate.get_output(),
-                               0);//-m_pids.roll_rate.get_output());
+//    if (m_mode == comms::Mode::ARMED)
+//    {
+//        m_motor_mixer.set_data(m_uav_input.sticks.throttle,
+//                               0,//m_pids.yaw_rate.get_output(),
+//                               0,//m_pids.pitch_rate.get_output(),
+//                               0);//-m_pids.roll_rate.get_output());
 
-        //LOG_INFO("{} / {}, {}", m_angular_velocity, m_pids.pitch_rate.get_output(), m_pids.roll_rate.get_output());
+//        //LOG_INFO("{} / {}, {}", m_angular_velocity, m_pids.pitch_rate.get_output(), m_pids.roll_rate.get_output());
 
-        std::array<float, 4> throttles;
-        for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
-        {
-            throttles[i] = math::sqrt(m_motor_mixer.get_motor_output(i));
-        }
+//        std::array<float, 4> throttles;
+//        for (size_t i = 0; i < m_motor_mixer.get_motor_count(); i++)
+//        {
+//            throttles[i] = math::sqrt(m_motor_mixer.get_motor_output(i));
+//        }
 
-        //QLOGI("{.2}", throttles);
+//        //QLOGI("{.2}", throttles);
 
-        m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
-    }
-    else if (m_mode == comms::Mode::MOTOR_TEST)
-    {
-        m_hal.motors->set_throttles(m_motor_test_input.throttles.data(), m_motor_mixer.get_motor_count());
-    }
-    else
-    {
-        m_hal.motors->cut_throttle();
-    }
+//        m_hal.motors->set_throttles(throttles.data(), m_motor_mixer.get_motor_count());
+//    }
+//    else if (m_mode == comms::Mode::MOTOR_TEST)
+//    {
+//        m_hal.motors->set_throttles(m_motor_test_input.throttles.data(), m_motor_mixer.get_motor_count());
+//    }
+//    else
+//    {
+//        m_hal.motors->cut_throttle();
+//    }
 }
 
 void UAV::process_camera_mount()
 {
-    if (m_mode == comms::Mode::IDLE ||
-        m_mode == comms::Mode::ARMED)
-    {
-        m_hal.camera_mount->set_rotation(m_camera_mount_input.rotation);
-    }
+//    if (m_mode == comms::Mode::IDLE ||
+//        m_mode == comms::Mode::ARMED)
+//    {
+//        m_hal.camera_mount->set_rotation(m_camera_mount_input.rotation);
+//    }
 }
 
 auto UAV::get_yaw_rate_pid_params() const -> Yaw_Rate_PID::Params

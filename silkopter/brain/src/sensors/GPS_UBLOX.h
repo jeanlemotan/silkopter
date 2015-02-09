@@ -110,5 +110,8 @@ private:
     } m_sample;
 };
 
+
+DECLARE_CLASS_PTR(GPS_UBLOX);
+
 }
 }

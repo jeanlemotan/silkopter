@@ -4,8 +4,8 @@
 
 #ifndef RASPBERRY_PI
 
-#include "sz_math.hpp"
-#include "sz_hal_sensors_sim_config.hpp"
+//#include "sz_math.hpp"
+//#include "sz_hal_sensors_sim_config.hpp"
 
 
 using namespace silk;
@@ -22,13 +22,13 @@ HAL_Sensors_Sim::HAL_Sensors_Sim(Sim_Comms& sim_comms)
 
 auto HAL_Sensors_Sim::load_settings() -> bool
 {
-    autojsoncxx::ParsingResult result;
-    Config cfg;
-    if (!autojsoncxx::from_json_file("sensors_sim.cfg", cfg, result))
-    {
-        LOG_WARNING("Failed to load sensors_sim.cfg: {}", result.description());
-        return false;
-    }
+//    autojsoncxx::ParsingResult result;
+//    Config cfg;
+//    if (!autojsoncxx::from_json_file("sensors_sim.cfg", cfg, result))
+//    {
+//        LOG_WARNING("Failed to load sensors_sim.cfg: {}", result.description());
+//        return false;
+//    }
 
     m_config = cfg;
 
@@ -36,7 +36,7 @@ auto HAL_Sensors_Sim::load_settings() -> bool
 }
 void HAL_Sensors_Sim::save_settings()
 {
-    autojsoncxx::to_pretty_json_file("sensors_sim.cfg", m_config);
+//    autojsoncxx::to_pretty_json_file("sensors_sim.cfg", m_config);
 }
 
 void HAL_Sensors_Sim::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)

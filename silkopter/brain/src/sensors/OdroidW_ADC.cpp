@@ -196,7 +196,7 @@ void OdroidW_ADC::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            Voltage_Sample sample;
+            Voltmeter_Sample sample;
             sample.value.value = result;
             sample.dt = now - m_adc_voltage.last_time_point;
             sample.sample_idx = ++m_adc_voltage.sample_idx;
@@ -220,7 +220,7 @@ void OdroidW_ADC::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            Current_Sample sample;
+            Ammeter_Sample sample;
             sample.value.value = result;
             sample.dt = now - m_adc_current.last_time_point;
             sample.sample_idx = ++m_adc_current.sample_idx;
@@ -244,11 +244,11 @@ void OdroidW_ADC::process()
     }
 }
 
-auto OdroidW_ADC::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
+auto OdroidW_ADC::get_voltmeter_samples() const -> std::vector<Voltmeter_Sample> const&
 {
     return m_adc_voltage.samples;
 }
-auto OdroidW_ADC::get_current_samples() const -> std::vector<Current_Sample> const&
+auto OdroidW_ADC::get_ammeter_samples() const -> std::vector<Ammeter_Sample> const&
 {
     return m_adc_current.samples;
 }

@@ -518,6 +518,7 @@ void MPU9250::process()
     m_samples.gyroscope.clear();
     m_samples.accelerometer.clear();
     m_samples.compass.clear();
+    m_samples.thermometer.clear();
 
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -655,7 +656,10 @@ auto MPU9250::get_compass_samples() const -> std::vector<Compass_Sample> const&
 {
     return m_samples.compass;
 }
-
+auto MPU9250::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
+{
+    return m_samples.thermometer;
+}
 
 
 

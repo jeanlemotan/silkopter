@@ -1,15 +1,17 @@
 #pragma once
 
-#include "HAL_Camera.h"
+#include "ICamera.h"
 
 namespace silk
 {
+namespace sensors
+{
 
-class HAL_Raspicam : public HAL_Camera
+class Raspicam : public ICamera
 {
 public:
-    HAL_Raspicam();
-    ~HAL_Raspicam();
+    Raspicam();
+    ~Raspicam();
 
     auto init() -> bool;
     void shutdown();
@@ -61,4 +63,8 @@ private:
     auto create_components() -> bool;
 };
 
+
+DECLARE_CLASS_PTR(Raspicam);
+
+}
 }
