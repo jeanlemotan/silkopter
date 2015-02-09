@@ -2,7 +2,8 @@
 
 #include "IBarometer.h"
 #include "IThermometer.h"
-#include "i2c.h"
+#include "buses/II2C.h"
+#include "buses/ISPI.h"
 
 namespace silk
 {
@@ -12,6 +13,8 @@ namespace sensors
 class MS5611 : public IBarometer, public IThermometer, q::util::Noncopyable
 {
 public:
+    MS5611(q::String const& name);
+
     struct Params
     {
         size_t rate = 100;
@@ -20,8 +23,6 @@ public:
 
     auto init(buses::II2C* bus, Params const& params) -> bool;
     auto init(buses::ISPI* bus, Params const& params) -> bool;
-
-    auto init(q::String const& device) -> bool;
 
     void process();
 
@@ -32,7 +33,24 @@ public:
     auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;
 
 private:
-    i2c m_i2c;
+    auto init(Params const& params) -> bool;
+
+    void lock();
+    void unlock();
+    auto bus_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
+    auto bus_read_u8(uint8_t reg, uint8_t& dst) -> bool;
+    auto bus_read_u16(uint8_t reg, uint16_t& dst) -> bool;
+    auto bus_write(uint8_t reg, uint8_t const* data, uint32_t size) -> bool;
+    auto bus_write_u8(uint8_t reg, uint8_t const& t) -> bool;
+    auto bus_write_u16(uint8_t reg, uint16_t const& t) -> bool;
+
+    buses::II2C* m_i2c = nullptr;
+    buses::ISPI* m_spi = nullptr;
+
+    Params m_params;
+
+    q::String m_barometer_name;
+    q::String m_thermometer_name;
 
     double		m_c1 = 0;
     double		m_c2 = 0;
@@ -55,6 +73,7 @@ private:
     uint8_t         m_stage = 0;
 
     q::Clock::time_point m_last_timestamp;
+    q::Clock::duration m_dt;
 };
 
 

@@ -486,30 +486,46 @@ auto HAL_Pi::init() -> bool
             m_hw->thermometers.push_back(s.get());
             m_hw->sensors.mpu9250.push_back(std::move(s));
         }
-    }
-    for (auto& b: sz.ms5611)
+
+        for (auto& b: sz.ms5611)
         {
-            auto name = q::String(b.device);
+            auto name = q::String(b.name);
+            auto bus = q::String(b.bus);
             auto s = std::make_unique<sensors::MS5611>(name);
-            if (!s->init(b.device, b.mode))
+
+            sensors::MS5611::Params params;
+            params.rate = b.rate;
+            params.pressure_to_temperature_ratio = b.pressure_to_temperature_ratio;
+            if (auto* d = find_i2c_by_name(bus))
             {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else if (auto* d = find_spi_by_name(bus))
+            {
+                if (!s->init(d, params))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                QLOGE("Invalid bus for MS5611: {}", bus);
                 return false;
             }
-            if (!is_sensor_name_unique(s->get_accelerometer_name()) ||
-                !is_sensor_name_unique(s->get_gyroscope_name()) ||
-                !is_sensor_name_unique(s->get_compass_name()) ||
+
+            if (!is_sensor_name_unique(s->get_barometer_name()) ||
                 !is_sensor_name_unique(s->get_thermometer_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
             }
-            m_hw->accelerometers.push_back(s.get());
-            m_hw->gyroscopes.push_back(s.get());
-            m_hw->compasses.push_back(s.get());
+            m_hw->barometers.push_back(s.get());
             m_hw->thermometers.push_back(s.get());
-            m_hw->sensors.mpu9250.push_back(std::move(s));
+            m_hw->sensors.ms5611.push_back(std::move(s));
         }
-
     }
 
     return true;

@@ -34,42 +34,123 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
+MS5611::MS5611(q::String const& name)
+{
+    m_barometer_name = name + "_barometer";
+    m_thermometer_name = name + "_thermometer";
+}
 
 auto MS5611::get_barometer_name() const -> q::String const&
 {
-
+    return m_barometer_name;
 }
 auto MS5611::get_thermometer_name() const -> q::String const&
 {
-
+    return m_thermometer_name;
 }
 
-auto MS5611::init(q::String const& device) -> bool
+void MS5611::lock()
+{
+    if (m_i2c)
+    {
+        m_i2c->lock();
+    }
+    else
+    {
+        m_spi->lock();
+    }
+}
+void MS5611::unlock()
+{
+    if (m_i2c)
+    {
+        m_i2c->unlock();
+    }
+    else
+    {
+        m_spi->unlock();
+    }
+}
+
+auto MS5611::bus_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool
+{
+    return m_i2c ? m_i2c->read_register(ADDR_MS5611, reg, data, size) : m_spi->read_register(reg, data, size);
+}
+auto MS5611::bus_read_u8(uint8_t reg, uint8_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u8(ADDR_MS5611, reg, dst) : m_spi->read_register_u8(reg, dst);
+}
+auto MS5611::bus_read_u16(uint8_t reg, uint16_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u16(ADDR_MS5611, reg, dst) : m_spi->read_register_u16(reg, dst);
+}
+auto MS5611::bus_write(uint8_t reg, uint8_t const* data, uint32_t size) -> bool
+{
+    return m_i2c ? m_i2c->write_register(ADDR_MS5611, reg, data, size) : m_spi->write_register(reg, data, size);
+}
+auto MS5611::bus_write_u8(uint8_t reg, uint8_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u8(ADDR_MS5611, reg, t) : m_spi->write_register_u8(reg, t);
+}
+auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u16(ADDR_MS5611, reg, t) : m_spi->write_register_u16(reg, t);
+}
+
+auto MS5611::init(buses::II2C* bus, Params const& params) -> bool
 {
     QLOG_TOPIC("ms5611::init");
-    QLOGI("initializing device: {}", device);
 
-    if (!m_i2c.open(device.c_str()))
+    QASSERT(bus);
+    if (!bus)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
         return false;
     }
+    m_i2c = bus;
+    m_spi = nullptr;
+
+    return init(params);
+}
+auto MS5611::init(buses::ISPI* bus, Params const& params) -> bool
+{
+    QLOG_TOPIC("ms5611::init");
+
+    QASSERT(bus);
+    if (!bus)
+    {
+        return false;
+    }
+    m_spi = bus;
+    m_i2c = nullptr;
+
+    return init(params);
+}
+
+auto MS5611::init(Params const& params) -> bool
+{
+    QLOG_TOPIC("ms5611::init");
+
+    m_params = params;
+    m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);
+    m_params.pressure_to_temperature_ratio = math::clamp<size_t>(m_params.pressure_to_temperature_ratio, 1, 10);
+
+    m_dt = std::chrono::milliseconds(1000 / m_params.rate);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
-    m_i2c.write(ADDR_MS5611, CMD_MS5611_RESET, nullptr, 0);
+    bus_write(CMD_MS5611_RESET, nullptr, 0);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     // We read the factory calibration
     // The on-chip CRC is not used
     uint16_t C1, C2, C3, C4, C5, C6;
-    auto res = m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C1, C1);
-    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C2, C2);
-    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C3, C3);
-    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C4, C4);
-    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C5, C5);
-    res &= m_i2c.read_u16(ADDR_MS5611, CMD_MS5611_PROM_C6, C6);
+    auto res = bus_read_u16(CMD_MS5611_PROM_C1, C1);
+    res &= bus_read_u16(CMD_MS5611_PROM_C2, C2);
+    res &= bus_read_u16(CMD_MS5611_PROM_C3, C3);
+    res &= bus_read_u16(CMD_MS5611_PROM_C4, C4);
+    res &= bus_read_u16(CMD_MS5611_PROM_C5, C5);
+    res &= bus_read_u16(CMD_MS5611_PROM_C6, C6);
     if (!res)
     {
         QLOGE("MS5611 not found!");
@@ -89,14 +170,7 @@ auto MS5611::init(q::String const& device) -> bool
         return false;
     }
 
-    m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256, nullptr, 0);
-
-//    while(true)
-//    {
-//        process();
-//    }
-
-//    exit(1);
+    bus_write(CMD_CONVERT_D2_OSR256, nullptr, 0);
 
     return true;
 }
@@ -108,7 +182,7 @@ void MS5611::process()
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
-    if (now - m_last_timestamp < std::chrono::milliseconds(10))
+    if (now - m_last_timestamp < m_dt)
     {
         return;
     }
@@ -116,15 +190,11 @@ void MS5611::process()
     auto dt = now - m_last_timestamp;
     m_last_timestamp = now;
 
-    constexpr size_t PRESSURE_TO_TEMPERATURE_RATIO = 10;
-
     std::array<uint8_t, 3> buf;
-
     if (m_stage == 0)
     {
         //read temperature
-
-        if (m_i2c.read(ADDR_MS5611, 0x00, buf.data(), buf.size()))
+        if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
             m_temperature_reading = val;
@@ -132,7 +202,7 @@ void MS5611::process()
         }
 
         //next
-        if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
+        if (bus_write(CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
         {
             m_stage++;
         }
@@ -140,22 +210,21 @@ void MS5611::process()
     else
     {
         //read pressure
-
-        if (m_i2c.read(ADDR_MS5611, 0x00, buf.data(), buf.size()))
+        if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
             m_pressure_reading = val;
         }
 
         //next
-        if (m_stage >= PRESSURE_TO_TEMPERATURE_RATIO)
+        if (m_stage >= m_params.pressure_to_temperature_ratio)
         {
-            if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D2_OSR256, nullptr, 0)) //read temp next
+            if (bus_write(CMD_CONVERT_D2_OSR256, nullptr, 0)) //read temp next
             {
                 m_stage = 0;
             }
         }
-        else if (m_i2c.write(ADDR_MS5611, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
+        else if (bus_write(CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
         {
             m_stage++;
         }
