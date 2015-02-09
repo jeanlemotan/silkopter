@@ -7,7 +7,7 @@
 #include "utils/Timed_Scope.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_sensors_hw_config.hpp"
+//#include "sz_hal_sensors_hw_config.hpp"
 
 
 
@@ -15,58 +15,25 @@
 // Sensors
 // Choose the sensor and the bus that you have
 
-#define USE_MPU9250_I2C
-//#define USE_MPU9250_SPI
+//#define USE_MPU9250_I2C
+////#define USE_MPU9250_SPI
 
-#define USE_MS5611
-#define USE_ODROIDW_ADC
-#define USE_SRF02
+//#define USE_MS5611
+//#define USE_ODROIDW_ADC
+//#define USE_SRF02
 
-#define USE_GPS_DETECTOR_UART
-//#define USE_GPS_DETECTOR_SPI
-//#define USE_GPS_DETECTOR_I2C
+//#define USE_GPS_DETECTOR_UART
+////#define USE_GPS_DETECTOR_SPI
+////#define USE_GPS_DETECTOR_I2C
 
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-#if defined USE_MPU9250_I2C
-#   define USE_MPU9250
-#   include "sensors/MPU9250_I2C.h"
-#elif defined USE_MPU9250_SPI
-#   define USE_MPU9250
-#   include "sensors/MPU9250_SPI.h"
-#else
-#   error No IMU selected
-#endif
-
-#if defined USE_MS5611
-#   include "sensors/MS5611.h"
-#else
-#   error No Barometer selected
-#endif
-
-#if defined USE_ODROIDW_ADC
-#   include "sensors/OdroidW_ADC.h"
-#else
-#   error No ADC Selected
-#endif
-
-#if defined USE_SRF02
-#   include "sensors/SRF02.h"
-#else
-#   error No Sonar Selected
-#endif
-
-#if defined USE_GPS_DETECTOR_UART
-#   define USE_GPS_DETECTOR
-#   include "sensors/GPS_Detector_UART.h"
-#elif defined USE_GPS_DETECTOR_SPI
-#   include "sensors/GPS_Detector_SPI.h"
-#elif defined USE_GPS_DETECTOR_I2C
-#   include "sensors/GPS_Detector_I2C.h"
-#else
-#   error No GPS Selected
-#endif
+#include "sensors/MPU9250.h"
+#include "sensors/MS5611.h"
+#include "sensors/OdroidW_ADC.h"
+#include "sensors/SRF02.h"
+#include "sensors/GPS_UBLOX.h"
 
 
 using namespace silk;
@@ -74,31 +41,24 @@ using namespace boost::asio;
 
 struct HAL_Sensors_HW::Sensors
 {
-#if defined USE_MPU9250_I2C
-    MPU9250_I2C mpu;
-#elif defined USE_MPU9250_SPI
-    MPU9250_SPI mpu;
-#endif
+    struct
+    {
+        std::unique_ptr<sensors::MPU9250> mpu9250;
+        std::unique_ptr<sensors::GPS_UBLOX> ublox;
+        std::unique_ptr<sensors::MS5611> ms5611;
+        std::unique_ptr<sensors::OdroidW_ADC> odroid_adc;
+        std::unique_ptr<sensors::SRF02> srf02;
+    } sensors;
 
-#if defined USE_MS5611
-    MS5611 baro;
-#endif
-
-#if defined USE_ODROIDW_ADC
-    OdroidW_ADC adc;
-#endif
-
-#if defined USE_SRF02
-    SRF02 sonar;
-#endif
-
-#if defined USE_GPS_DETECTOR_UART
-    GPS_Detector_UART gps_detector;
-#elif defined USE_GPS_DETECTOR_SPI
-    GPS_Detector_SPI gps_detector;
-#elif defined USE_GPS_DETECTOR_I2C
-    GPS_Detector_I2C gps_detector;
-#endif
+    sensors::IGyroscope* gyroscope = nullptr;
+    sensors::IAccelerometer* accelerometer = nullptr;
+    sensors::ICompass* compass = nullptr;
+    sensors::IBarometer* barometer = nullptr;
+    sensors::IThermometer* thermometer = nullptr;
+    sensors::IVoltage* voltage = nullptr;
+    sensors::ICurrent* current = nullptr;
+    sensors::IGPS* gps = nullptr;
+    sensors::ISonar* sonar = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -108,9 +68,6 @@ HAL_Sensors_HW::HAL_Sensors_HW()
     QLOG_TOPIC("sensors");
 
     m_sensors.reset(new Sensors);
-
-    m_config.barometer_i2c_device = "/dev/i2c-0";
-    m_config.mpu_i2c_device = "/dev/i2c-0";
 
     load_settings();
     save_settings(m_config);
@@ -124,27 +81,15 @@ auto HAL_Sensors_HW::load_settings() -> bool
 {
     TIMED_FUNCTION();
 
-    autojsoncxx::ParsingResult result;
-    Config cfg;
-    if (!autojsoncxx::from_json_file("sensors_pi.cfg", cfg, result))
-    {
-        QLOGW("Failed to load sensors_pi.cfg: {}", result.description());
-        return false;
-    }
+//    autojsoncxx::ParsingResult result;
+//    Config cfg;
+//    if (!autojsoncxx::from_json_file("sensors_pi.cfg", cfg, result))
+//    {
+//        QLOGE("Failed to load sensors_pi.cfg: {}", result.description());
+//        return false;
+//    }
 
-    m_config = cfg;
-    if (m_config.barometer_i2c_device.empty())
-    {
-        m_config.barometer_i2c_device = "/dev/i2c-0";
-    }
-    if (m_config.mpu_i2c_device.empty())
-    {
-        m_config.mpu_i2c_device = "/dev/i2c-0";
-    }
-    if (m_config.gps_device.empty())
-    {
-        m_config.gps_device = "/dev/ttyAMA0";
-    }
+//    m_config = cfg;
 
     return true;
 }
@@ -166,64 +111,100 @@ auto HAL_Sensors_HW::init() -> bool
         return true;
     }
 
-#if defined USE_MS5611
-    if (!m_sensors->baro.init(m_config.barometer_i2c_device))
-    {
-        return false;
-    }
-#endif
+//    Bus_Selector<MPU9250_I2C, MPU9250_SPI, Null_Device> selector;
 
-#if defined USE_MPU9250
-    {
-        typedef MPU9250::Gyroscope_Range G_Range;
-        typedef MPU9250::Accelerometer_Range A_Range;
+//    {
+//        boost::algorithm::to_lower(cfg.gyroscope.sensor);
+//        if (cfg.gyroscope.sensor == "mpu9250")
+//        {
+//            m_sensors->gyroscope.mpu9250 = selector.init(cfg.gyroscope);
+//            if (!m_sensors->gyroscope.mpu9250)
+//            {
+//                return false;
+//            }
+//        }
+//        else
+//        {
+//            QLOGE("Unknown sensor: {}", cfg.gyroscope.sensor);
+//            return false;
+//        }
+//    }
+//    {
+//        boost::algorithm::to_lower(cfg.accelerometer.sensor);
+//        if (cfg.accelerometer.sensor == "mpu9250")
+//        {
+//            m_sensors->accelerometer.mpu9250 = selector.init(cfg.accelerometer);
+//            if (!m_sensors->accelerometer.mpu9250)
+//            {
+//                return false;
+//            }
+//        }
+//        else
+//        {
+//            QLOGE("Unknown sensor: {}", cfg.gyroscope.sensor);
+//            return false;
+//        }
+//    }
 
-        std::vector<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
-        std::vector<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
 
-        std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](G_Range a, G_Range b)
-        {
-            return math::abs(static_cast<int>(a) - m_config.gyroscope_range) < math::abs(static_cast<int>(b) - m_config.gyroscope_range);
-        });
-        G_Range g_range = g_ranges.front();
+//#if defined USE_MS5611
+//    if (!m_sensors->baro.init(m_config.barometer_bus))
+//    {
+//        return false;
+//    }
+//#endif
 
-        std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](A_Range a, A_Range b)
-        {
-            return math::abs(static_cast<int>(a) - m_config.accelerometer_range) < math::abs(static_cast<int>(b) - m_config.accelerometer_range);
-        });
-        A_Range a_range = a_ranges.front();
+//#if defined USE_MPU9250
+//    {
+//        typedef MPU9250::Gyroscope_Range G_Range;
+//        typedef MPU9250::Accelerometer_Range A_Range;
 
-        QLOGI("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
-        QLOGI("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
+//        std::vector<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
+//        std::vector<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
 
-        if (!m_sensors->mpu.open(m_config.mpu_i2c_device) ||
-            !m_sensors->mpu.init(g_range, a_range))
-        {
-            return false;
-        }
-    }
-#endif
+//        std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](G_Range a, G_Range b)
+//        {
+//            return math::abs(static_cast<int>(a) - m_config.gyroscope_range) < math::abs(static_cast<int>(b) - m_config.gyroscope_range);
+//        });
+//        G_Range g_range = g_ranges.front();
 
-#if defined USE_ODROIDW_ADC
-    if (!m_sensors->adc.init())
-    {
-        return false;
-    }
-#endif
+//        std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](A_Range a, A_Range b)
+//        {
+//            return math::abs(static_cast<int>(a) - m_config.accelerometer_range) < math::abs(static_cast<int>(b) - m_config.accelerometer_range);
+//        });
+//        A_Range a_range = a_ranges.front();
 
-#if defined USE_SRF02
-    if (!m_sensors->sonar.init(std::chrono::milliseconds(0)))
-    {
-        return false;
-    }
-#endif
+//        QLOGI("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
+//        QLOGI("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
 
-#if defined USE_GPS_DETECTOR_UART
-    if (!m_sensors->gps_detector.init(m_config.gps_device, m_config.gps_baud))
-    {
-        return false;
-    }
-#endif
+//        if (!m_sensors->mpu.open(m_config.mpu_bus) ||
+//            !m_sensors->mpu.init(g_range, a_range))
+//        {
+//            return false;
+//        }
+//    }
+//#endif
+
+//#if defined USE_ODROIDW_ADC
+//    if (!m_sensors->adc.init())
+//    {
+//        return false;
+//    }
+//#endif
+
+//#if defined USE_SRF02
+//    if (!m_sensors->sonar.init(std::chrono::milliseconds(0)))
+//    {
+//        return false;
+//    }
+//#endif
+
+//#if defined USE_GPS_DETECTOR_UART
+//    if (!m_sensors->gps_detector.init(m_config.gps_bus, m_config.gps_baud))
+//    {
+//        return false;
+//    }
+//#endif
 
     m_is_initialized = true;
     return true;
@@ -237,8 +218,8 @@ void HAL_Sensors_HW::shutdown()
 
 void HAL_Sensors_HW::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
 {
-    m_config.accelerometer_bias = bias;
-    m_config.accelerometer_scale = scale;
+    m_config.accelerometer.bias = bias;
+    m_config.accelerometer.scale = scale;
     silk::async([=]()
     {
         save_settings(m_config);
@@ -246,13 +227,13 @@ void HAL_Sensors_HW::set_accelerometer_calibration_data(math::vec3f const& bias,
 }
 void HAL_Sensors_HW::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
 {
-    bias = m_config.accelerometer_bias;
-    scale = m_config.accelerometer_scale;
+    bias = m_config.accelerometer.bias;
+    scale = m_config.accelerometer.scale;
 }
 
 void HAL_Sensors_HW::set_gyroscope_calibration_data(math::vec3f const& bias)
 {
-    m_config.gyroscope_bias = bias;
+    m_config.gyroscope.bias = bias;
     silk::async([=]()
     {
         save_settings(m_config);
@@ -260,12 +241,12 @@ void HAL_Sensors_HW::set_gyroscope_calibration_data(math::vec3f const& bias)
 }
 void HAL_Sensors_HW::get_gyroscope_calibration_data(math::vec3f &bias) const
 {
-    bias = m_config.gyroscope_bias;
+    bias = m_config.gyroscope.bias;
 }
 
 void HAL_Sensors_HW::set_compass_calibration_data(math::vec3f const& bias)
 {
-    m_config.compass_bias = bias;
+    m_config.compass.bias = bias;
     silk::async([=]()
     {
         save_settings(m_config);
@@ -273,12 +254,12 @@ void HAL_Sensors_HW::set_compass_calibration_data(math::vec3f const& bias)
 }
 void HAL_Sensors_HW::get_compass_calibration_data(math::vec3f &bias) const
 {
-    bias = m_config.compass_bias;
+    bias = m_config.compass.bias;
 }
 
 void HAL_Sensors_HW::set_current_calibration_data(float scale)
 {
-    m_config.current_scale = scale;
+    m_config.current.scale = scale;
     silk::async([=]()
     {
         save_settings(m_config);
@@ -287,12 +268,12 @@ void HAL_Sensors_HW::set_current_calibration_data(float scale)
 
 void HAL_Sensors_HW::get_current_calibration_data(float& scale) const
 {
-    scale = m_config.current_scale;
+    scale = m_config.current.scale;
 }
 
 void HAL_Sensors_HW::set_voltage_calibration_data(float scale)
 {
-    m_config.voltage_scale = scale;
+    m_config.voltage.scale = scale;
     silk::async([=]()
     {
         save_settings(m_config);
@@ -300,7 +281,7 @@ void HAL_Sensors_HW::set_voltage_calibration_data(float scale)
 }
 void HAL_Sensors_HW::get_voltage_calibration_data(float& scale) const
 {
-    scale = m_config.voltage_scale;
+    scale = m_config.voltage.scale;
 }
 
 

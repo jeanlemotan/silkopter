@@ -72,8 +72,8 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
         float h = 1.f / 3600.f;
         for (auto& s: current_samples)
         {
-            m_capacity_used_mah += (s.value * m_last_current) * 0.5f * q::Seconds(s.dt).count() * h;
-            m_last_current = s.value;
+            m_capacity_used_mah += (s.value.value * m_last_current) * 0.5f * q::Seconds(s.dt).count() * h;
+            m_last_current = s.value.value;
 
             m_current_samples.emplace_back(start, s.value);
             start += s.dt;
@@ -90,9 +90,9 @@ void Battery::process(const std::vector<sensors::Current_Sample>& current_sample
         for (auto& s: voltage_samples)
         {
             //voltages lower than one cell are just measurement errors
-            if (s.value > MIN_CELL_VOLTAGE)
+            if (s.value.value > MIN_CELL_VOLTAGE)
             {
-                m_voltage_samples.emplace_back(start, s.value);
+                m_voltage_samples.emplace_back(start, s.value.value);
             }
             start += s.dt;
         }

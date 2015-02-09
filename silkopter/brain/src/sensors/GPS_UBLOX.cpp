@@ -3,6 +3,8 @@
 
 namespace silk
 {
+namespace sensors
+{
 
 constexpr uint8_t PREAMBLE1 = 0xB5;
 constexpr uint8_t PREAMBLE2 = 0x62;
@@ -347,6 +349,8 @@ auto GPS_UBLOX::setup() -> bool
 
 void GPS_UBLOX::process()
 {
+    m_sample.samples.clear();
+
     QLOG_TOPIC("gps_ublox::process");
     if (!m_is_setup)
     {
@@ -364,19 +368,26 @@ void GPS_UBLOX::process()
 
     read_data();
 
+    auto now = q::Clock::now();
+    auto dt = now - m_sample.last_complete_time_point;
+
     //watchdog
     if (m_sample.has_nav_status && m_sample.has_pollh && m_sample.has_sol)
     {
-        m_sample.last_complete_time_point = q::Clock::now();
-        m_sample.complete = m_sample.data;
+        GPS_Sample sample;
+        sample.value = m_sample.data;
+        sample.dt = dt;
+        sample.sample_idx = ++m_sample.sample_idx;
+        m_sample.samples.push_back(sample);
+
+        m_sample.last_complete_time_point = now;
 
         m_sample.has_nav_status = m_sample.has_pollh = m_sample.has_sol = false;
-        m_sample.data = sensors::GPS();
+        m_sample.data = sensors::Location();
     }
-
-    //check if we need to reset
-    if (q::Clock::now() - m_sample.last_complete_time_point >= REINIT_WATCHGOD_TIMEOUT)
+    else if (dt >= REINIT_WATCHGOD_TIMEOUT)
     {
+        //check if we need to reset
         m_is_setup = false;
     }
 }
@@ -521,11 +532,11 @@ void GPS_UBLOX::process_nav_sol_packet(Packet& packet)
         m_sample.data.velocity = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
         if (data.gpsFix == 0x02)
         {
-            m_sample.data.fix = sensors::GPS::Fix::FIX_2D;
+            m_sample.data.fix = sensors::Location::Fix::FIX_2D;
         }
         else if (data.gpsFix == 0x03)
         {
-            m_sample.data.fix = sensors::GPS::Fix::FIX_3D;
+            m_sample.data.fix = sensors::Location::Fix::FIX_3D;
         }
         m_sample.has_sol = true;
     }
@@ -609,9 +620,9 @@ void GPS_UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto GPS_UBLOX::get_sample() const -> boost::optional<sensors::GPS>
+auto GPS_UBLOX::get_gps_samples() const -> std::vector<GPS_Sample> const&
 {
-    return m_sample.complete;
+    return m_sample.samples;
 }
 
 auto GPS_UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size) -> bool
@@ -689,3 +700,5 @@ auto GPS_UBLOX::send_packet_with_retry(Message msg, T const& data, q::Clock::dur
 
 
 }
+}
+

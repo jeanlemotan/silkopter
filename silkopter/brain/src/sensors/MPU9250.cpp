@@ -8,7 +8,10 @@
 
 #define USE_AK8963
 
-using namespace silk;
+namespace silk
+{
+namespace sensors
+{
 
 
 // mpu9250 registers
@@ -553,12 +556,20 @@ void MPU9250::process()
                     short x = (data[0] << 8) | data[1]; data += 2;
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
-                    m_samples.accelerometer[i].set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
+                    auto& asample = m_samples.accelerometer[i];
+                    asample.value.value.set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
+                    asample.sample_idx = ++m_accelerometer_sample_idx;
+                    asample.dt = m_sample_time;
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
-                    m_samples.gyroscope[i].set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
+
+                    auto& gsample = m_samples.gyroscope[i];
+                    gsample.value.value.set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
+                    gsample.sample_idx = ++m_gyroscope_sample_idx;
+                    gsample.dt = m_sample_time;
+
 //                    if (math::length(m_samples.gyroscope[i]) > 1.f)
 //                    {
 //                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
@@ -621,35 +632,33 @@ void MPU9250::process_compass()
             math::quatf::from_axis_z(math::radians(90.f));
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
-    m_samples.compass.push_back(math::rotate(rot, c));
+
+    Compass_Sample sample;
+    sample.value.value = math::rotate(rot, c);
+    sample.sample_idx = ++m_compass_sample_idx;
+    sample.dt = m_compass_sample_time;
+
+    m_samples.compass.push_back(sample);
 //    LOG_INFO("c: {}", *m_samples.compass);
 #endif
 }
 
-auto MPU9250::get_gyroscope_samples() const -> std::vector<math::vec3f> const&
+auto MPU9250::get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&
 {
     return m_samples.gyroscope;
 }
-auto MPU9250::get_accelerometer_samples() const -> std::vector<math::vec3f> const&
+auto MPU9250::get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&
 {
     return m_samples.accelerometer;
 }
-auto MPU9250::get_compass_samples() const -> std::vector<math::vec3f> const&
+auto MPU9250::get_compass_samples() const -> std::vector<Compass_Sample> const&
 {
     return m_samples.compass;
 }
 
-q::Clock::duration MPU9250::get_gyroscope_sample_time() const
-{
-    return m_sample_time;
-}
-q::Clock::duration MPU9250::get_accelerometer_sample_time() const
-{
-    return m_sample_time;
-}
-q::Clock::duration MPU9250::get_compass_sample_time() const
-{
-    return m_compass_sample_time;
-}
 
+
+
+}
+}
 #endif

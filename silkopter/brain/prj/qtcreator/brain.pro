@@ -147,5 +147,15 @@ HEADERS += \
     ../../src/sensors/GPS_Detector_I2C.h \
     ../../src/sensors/GPS_Detector_SPI.h \
     ../../src/sensors/GPS_Detector_UART.h \
-    ../../src/sensors/GPS_UBLOX_I2C.h
+    ../../src/sensors/GPS_UBLOX_I2C.h \
+    ../../src/sensors/IAccelerometer.h \
+    ../../src/sensors/IBarometer.h \
+    ../../src/sensors/ICompass.h \
+    ../../src/sensors/ICurrent.h \
+    ../../src/sensors/IGPS.h \
+    ../../src/sensors/IGyroscope.h \
+    ../../src/sensors/IThermometer.h \
+    ../../src/sensors/IVoltage.h \
+    ../../src/sensors/ISonar.h \
+    ../../src/sensors/Bus_Config.h
 

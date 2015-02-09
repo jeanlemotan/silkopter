@@ -1,12 +1,14 @@
 #pragma once
 
-#include "GPS_Protocol.h"
+#include "IGPS.h"
 
 
 namespace silk
 {
+namespace sensors
+{
 
-class GPS_UBLOX : public GPS_Protocol
+class GPS_UBLOX : public IGPS, q::util::Noncopyable
 {
 public:
     virtual ~GPS_UBLOX();
@@ -15,7 +17,8 @@ public:
 
     auto init() -> bool;
     void process();
-    auto get_sample() const -> boost::optional<sensors::GPS>;
+
+    auto get_gps_samples() const -> std::vector<GPS_Sample> const&;
 
 protected:
     virtual auto read(uint8_t* data, size_t max_size) -> size_t = 0;
@@ -99,15 +102,13 @@ private:
         bool has_nav_status = false;
         bool has_pollh = false;
         bool has_sol = false;
-        sensors::GPS data;
-        boost::optional<sensors::GPS> complete;
+        Location data;
+        std::vector<GPS_Sample> samples;
+        uint32_t sample_idx = 0;
 
         q::Clock::time_point last_complete_time_point;
     } m_sample;
 };
 
-
-
-
-
+}
 }

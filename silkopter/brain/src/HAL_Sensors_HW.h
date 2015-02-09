@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HAL_Sensors.h"
+#include "sensors/Bus_Config.h"
 
 namespace silk
 {
@@ -57,21 +58,73 @@ public:
     //----------------------------------------------------------------------
     void process();
 
+    struct Accelerometer_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+        math::vec3f bias;
+        math::vec3f scale = math::vec3f(1);
+        size_t range = 4;
+    };
+    struct Gyroscope_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+        math::vec3f bias;
+        size_t range = 500;
+    };
+    struct Compass_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+        math::vec3f bias;
+    };
+    struct Voltage_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+        float bias = 0;
+        float scale = 39.33f;
+    };
+    struct Current_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+        float bias = 0;
+        float scale = 24.8f;
+    };
+    struct Barometer_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+    };
+    struct Thermometer_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+    };
+    struct GPS_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+    };
+    struct Sonar_Config
+    {
+        std::string sensor;
+        Bus_Config bus_config;
+    };
+
     struct Config
     {
-        math::vec3f accelerometer_bias;
-        math::vec3f accelerometer_scale = math::vec3f(1);
-        math::vec3f gyroscope_bias;
-        math::vec3f compass_bias;
-        size_t gyroscope_range = 500;
-        size_t accelerometer_range = 4;
-        std::string mpu_i2c_device;
-        std::string barometer_i2c_device;
-        std::string gps_device;
-        size_t gps_baud = 38400;
-
-        float current_scale = 24.8f;
-        float voltage_scale = 39.33f;
+        Gyroscope_Config gyroscope;
+        Accelerometer_Config accelerometer;
+        Compass_Config compass;
+        Barometer_Config barometer;
+        Thermometer_Config thermometer;
+        GPS_Config gps;
+        Current_Config current;
+        Voltage_Config voltage;
+        Sonar_Config sonar;
     };
 
 private:

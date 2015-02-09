@@ -5,14 +5,11 @@
 
 #ifdef RASPBERRY_PI
 
-extern "C"
-{
-    #include "pigpiod_if.h"
-}
-
-
 namespace silk
 {
+namespace sensors
+{
+
 
 constexpr uint8_t ADDR = 0x70;
 
@@ -102,24 +99,25 @@ void SRF02::process()
     float distance = static_cast<float>(d) / 100.f; //meters
     float min_distance = static_cast<float>(min_d) / 100.f; //meters
 
-    if (distance > MAX_VALID_DISTANCE)
+    m_samples.clear();
+
+    if (distance <= MAX_VALID_DISTANCE)
     {
-        m_data = boost::none;
-    }
-    {
-        m_data = { distance, m_sample_time };
+        Sonar_Sample sample;
+        sample.value.value = distance;
+        sample.sample_idx = ++m_sample_idx;
+        sample.dt = m_sample_time;
+        m_samples.push_back(sample);
     }
 }
 
-auto SRF02::get_distance_data() -> boost::optional<Data>
+auto SRF02::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
 {
-    auto res = m_data;
-    m_data.reset();
-    return res;
+    return m_samples;
 }
 
 
 }
-
+}
 
 #endif

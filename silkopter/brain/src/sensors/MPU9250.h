@@ -2,12 +2,18 @@
 
 #include "i2c.h"
 #include "spi.h"
+#include "IAccelerometer.h"
+#include "IGyroscope.h"
+#include "ICompass.h"
+#include "IThermometer.h"
 
 namespace silk
 {
+namespace sensors
+{
 
 
-class MPU9250 : public q::util::Noncopyable
+class MPU9250 : public IAccelerometer, public IGyroscope, public ICompass, public IThermometer, q::util::Noncopyable
 {
 public:
     virtual ~MPU9250();
@@ -31,13 +37,10 @@ public:
 
     void process();
 
-    auto get_compass_samples() const -> std::vector<math::vec3f> const&;
-    auto get_gyroscope_samples() const -> std::vector<math::vec3f> const&;
-    auto get_accelerometer_samples() const -> std::vector<math::vec3f> const&;
-
-    auto get_compass_sample_time() const -> q::Clock::duration;
-    auto get_gyroscope_sample_time() const -> q::Clock::duration;
-    auto get_accelerometer_sample_time() const -> q::Clock::duration;
+    auto get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&;
+    auto get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&;
+    auto get_compass_samples() const -> std::vector<Compass_Sample> const&;
+    auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;
 
 protected:
 
@@ -71,14 +74,18 @@ private:
 
     struct Samples
     {
-        std::vector<math::vec3f> gyroscope;
-        std::vector<math::vec3f> accelerometer;
-        std::vector<math::vec3f> compass;
+        std::vector<Gyroscope_Sample> gyroscope;
+        std::vector<Accelerometer_Sample> accelerometer;
+        std::vector<Compass_Sample> compass;
     } m_samples;
 
     float m_accelerometer_scale_inv = 1.f;
     float m_gyroscope_scale_inv = 1.f;
     float m_magnetic_adj[3];
+
+    uint32_t m_accelerometer_sample_idx = 0;
+    uint32_t m_gyroscope_sample_idx = 0;
+    uint32_t m_compass_sample_idx = 0;
 
     uint32_t m_sample_rate = 1000;
     q::Clock::duration m_sample_time;
@@ -87,4 +94,5 @@ private:
     q::Clock::duration m_compass_sample_time;
 };
 
+}
 }

@@ -216,14 +216,12 @@ void HAL_Motors_PiGPIO::set_throttles(float const* throttles, size_t count)
         auto gpio = MOTOR_GPIOS[i];
         if (gpio >= 0)
         {
-//            if (i != 1)
+//            if (i != 0)
 //            {
 //                continue;
 //            }
 
             auto throttle = math::clamp(throttles[i], 0.f, 1.f);
-            //throttle = math::sqrt(throttle);
-
             m_motors[i].throttle = throttle;
 
             int pulse = throttle * (range.second - range.first);

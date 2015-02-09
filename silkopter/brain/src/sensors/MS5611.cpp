@@ -3,7 +3,11 @@
 
 #ifdef RASPBERRY_PI
 
-using namespace silk;
+namespace silk
+{
+namespace sensors
+{
+
 
 //registers
 constexpr uint8_t CMD_MS5611_RESET = 0x1E;
@@ -89,6 +93,9 @@ auto MS5611::init(const std::string& device) -> bool
 
 void MS5611::process()
 {
+    m_pressures.clear();
+    m_temperatures.clear();
+
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
     if (now - m_last_timestamp < std::chrono::milliseconds(10))
@@ -190,9 +197,18 @@ void MS5611::calculate(q::Clock::duration dt)
     auto t = static_cast<float>(TEMP) * 0.01;
     auto p = static_cast<float>((m_pressure_reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
-    m_temperature = { t, dt };
+    Thermometer_Sample ts;
+    ts.value.value = t;
+    ts.sample_idx = ++m_thermometer_sample_idx;
+    ts.dt = dt;
+    m_temperatures.push_back(ts);
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
-    m_pressure = { p, dt };
+
+    Barometer_Sample bs;
+    bs.value.value = t;
+    bs.sample_idx = ++m_barometer_sample_idx;
+    bs.dt = dt;
+    m_pressures.push_back(bs);
 
 //    static Butterworth xxx;
 //    m_pressure = xxx.process(m_pressure.get());
@@ -202,18 +218,17 @@ void MS5611::calculate(q::Clock::duration dt)
     //LOG_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
-auto MS5611::get_barometer_data() -> boost::optional<Data>
+auto MS5611::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
 {
-    auto r = m_pressure;
-    m_pressure.reset();
-    return r;
+    return m_pressures;
 }
 
-auto MS5611::get_thermometer_data() -> boost::optional<Data>
+auto MS5611::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
 {
-    auto r = m_temperature;
-    m_temperature.reset();
-    return r;
+    return m_temperatures;
 }
 
+
+}
+}
 #endif

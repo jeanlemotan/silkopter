@@ -13,6 +13,9 @@ extern "C"
 
 namespace silk
 {
+namespace sensors
+{
+
 
 struct Mode_Guard
 {
@@ -161,6 +164,10 @@ auto OdroidW_ADC::init() -> bool
 void OdroidW_ADC::process()
 {
     QLOG_TOPIC("adc::process");
+
+    m_adc_voltage.samples.clear();
+    m_adc_current.samples.clear();
+
     auto now = q::Clock::now();
     if (now - m_last_time_point < std::chrono::milliseconds(20))
     {
@@ -188,7 +195,13 @@ void OdroidW_ADC::process()
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
-            m_adc_voltage.data = { result, now - m_adc_voltage.last_time_point };
+
+            Voltage_Sample sample;
+            sample.value.value = result;
+            sample.dt = now - m_adc_voltage.last_time_point;
+            sample.sample_idx = ++m_adc_voltage.sample_idx;
+            m_adc_voltage.samples.push_back(sample);
+
             m_adc_voltage.last_time_point = now;
         }
 
@@ -206,7 +219,13 @@ void OdroidW_ADC::process()
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
-            m_adc_current.data = { result, now - m_adc_current.last_time_point };
+
+            Current_Sample sample;
+            sample.value.value = result;
+            sample.dt = now - m_adc_current.last_time_point;
+            sample.sample_idx = ++m_adc_current.sample_idx;
+            m_adc_current.samples.push_back(sample);
+
             m_adc_current.last_time_point = now;
         }
 
@@ -225,23 +244,18 @@ void OdroidW_ADC::process()
     }
 }
 
-auto OdroidW_ADC::get_current_data() -> boost::optional<Data>
+auto OdroidW_ADC::get_voltage_samples() const -> std::vector<Voltage_Sample> const&
 {
-    auto res = m_adc_current.data;
-    m_adc_current.data.reset();
-    return res;
+    return m_adc_voltage.samples;
 }
-auto OdroidW_ADC::get_voltage_data() -> boost::optional<Data>
+auto OdroidW_ADC::get_current_samples() const -> std::vector<Current_Sample> const&
 {
-    auto res = m_adc_voltage.data;
-    m_adc_voltage.data.reset();
-    return res;
+    return m_adc_current.samples;
 }
 
 
 
-
 }
-
+}
 
 #endif

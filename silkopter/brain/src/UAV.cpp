@@ -324,7 +324,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.gyroscope_sample_time_point <= sensor_now)
             {
                 m_imu.last_gyroscope_sample = *g_it++;
-                m_imu.last_gyroscope_sample.value = m_imu.gyroscope_filter.process(m_imu.last_gyroscope_sample.value);
+                m_imu.last_gyroscope_sample.value.value = m_imu.gyroscope_filter.process(m_imu.last_gyroscope_sample.value.value);
                 m_imu.gyroscope_sample_time_point += m_imu.last_gyroscope_sample.dt;
                 has_new_gyroscope_sample = true;
             }
@@ -336,7 +336,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.accelerometer_sample_time_point <= sensor_now)
             {
                 m_imu.last_accelerometer_sample = *a_it++;
-                m_imu.last_accelerometer_sample.value = m_imu.accelerometer_filter.process(m_imu.last_accelerometer_sample.value);
+                m_imu.last_accelerometer_sample.value.value = m_imu.accelerometer_filter.process(m_imu.last_accelerometer_sample.value.value);
                 m_imu.accelerometer_sample_time_point += m_imu.last_accelerometer_sample.dt;
                 has_new_accelerometer_sample = true;
             }
@@ -348,7 +348,7 @@ void UAV::process_imu_sensor_data()
             if (m_imu.compass_sample_time_point <= sensor_now)
             {
                 m_imu.last_compass_sample = *c_it++;
-                m_imu.last_compass_sample.value = m_imu.compass_filter.process(m_imu.last_compass_sample.value);
+                m_imu.last_compass_sample.value.value = m_imu.compass_filter.process(m_imu.last_compass_sample.value.value);
                 m_imu.compass_sample_time_point += m_imu.last_compass_sample.dt;
 //                has_new_compass_sample = true;
             }
@@ -380,7 +380,7 @@ void UAV::process_dead_reckoning()
     float sample_dts = q::Seconds(m_imu.last_accelerometer_sample.dt).count();
 
     //auto old_acceleration = m_linear_motion.acceleration;
-    math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
+    math::vec3f acceleration = m_imu.last_accelerometer_sample.value.value;
     //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
     auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
     //LOG_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
@@ -522,7 +522,7 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
 
 void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
 {
-    auto input = sample.value;
+    auto input = sample.value.value;
 
     m_pids.pitch_rate.set_input(input.x);
     m_pids.pitch_rate.process(sample.dt);
