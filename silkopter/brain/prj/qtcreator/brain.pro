@@ -101,9 +101,9 @@ SOURCES += \
     ../../src/storage/Storage_FS.cpp \
     ../../src/storage/Storage_MB85RC.cpp \
     ../../src/HAL_PI.cpp \
-    ../../src/buses/Bus_I2C_Pi.cpp \
-    ../../src/buses/Bus_SPI_Pi.cpp \
-    ../../src/buses/Bus_UART_Pi.cpp
+    ../../src/buses/I2C_Pi.cpp \
+    ../../src/buses/SPI_Pi.cpp \
+    ../../src/buses/UART_Pi.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -138,8 +138,6 @@ HEADERS += \
     ../../src/sensors/GPS_Detector.h \
     ../../src/sensors/spi.h \
     ../../src/sensors/GPS_UBLOX_SPI.h \
-    ../../src/sensors/MPU9250_I2C.h \
-    ../../src/sensors/MPU9250_SPI.h \
     ../../src/sensors/GPS_UBLOX_UART.h \
     ../../src/sensors/GPS_Detector_I2C.h \
     ../../src/sensors/GPS_Detector_SPI.h \
@@ -164,10 +162,10 @@ HEADERS += \
     ../../src/sensors/IAmmeter.h \
     ../../src/storage/Storage_MB85RC.h \
     ../../src/HAL_PI.h \
-    ../../src/buses/Bus_I2C_Pi.h \
-    ../../src/buses/Bus_SPI_Pi.h \
-    ../../src/buses/Bus_UART_Pi.h \
-    ../../src/buses/IBus_I2C.h \
-    ../../src/buses/IBus_SPI.h \
-    ../../src/buses/IBus_UART.h
+    ../../src/buses/I2C_Pi.h \
+    ../../src/buses/SPI_Pi.h \
+    ../../src/buses/UART_Pi.h \
+    ../../src/buses/II2C.h \
+    ../../src/buses/ISPI.h \
+    ../../src/buses/IUART.h
 

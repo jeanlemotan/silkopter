@@ -13,6 +13,8 @@ class SRF02: public ISonar, q::util::Noncopyable
 public:
     auto init(q::Clock::duration sample_time) -> bool;
 
+    auto get_sonar_name() const -> q::String const&;
+
     void process();
 
     auto get_sonar_samples() const -> std::vector<Sonar_Sample> const&;

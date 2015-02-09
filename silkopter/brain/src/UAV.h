@@ -140,15 +140,15 @@ private:
     {
         Butterworth gyroscope_filter;
         sensors::Gyroscope_Sample last_gyroscope_sample;
-        Manual_Clock::time_point gyroscope_sample_time_point;
+        Manual_Clock::time_point gyroscope_time_point;
 
         Butterworth accelerometer_filter;
         sensors::Accelerometer_Sample last_accelerometer_sample;
-        Manual_Clock::time_point accelerometer_sample_time_point;
+        Manual_Clock::time_point accelerometer_time_point;
 
         Butterworth compass_filter;
         sensors::Compass_Sample last_compass_sample;
-        Manual_Clock::time_point compass_sample_time_point;
+        Manual_Clock::time_point compass_time_point;
 
         Manual_Clock clock;
     } m_imu;

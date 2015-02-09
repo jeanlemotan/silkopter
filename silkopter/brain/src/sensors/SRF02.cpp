@@ -37,10 +37,10 @@ constexpr float MAX_VALID_DISTANCE = 5.f;
 auto SRF02::init(q::Clock::duration sample_time) -> bool
 {
     QLOG_TOPIC("srf02::init");
-    std::string device("/dev/i2c-0");
+    q::String device("/dev/i2c-0");
     QLOGI("initializing device: {}", device);
 
-    if (!m_i2c.open(device))
+    if (!m_i2c.open(device.c_str()))
     {
         QLOGE("can't open {}: {}", device, strerror(errno));
         return false;

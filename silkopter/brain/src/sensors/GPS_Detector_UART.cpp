@@ -16,7 +16,7 @@
 //    }
 //}
 
-//auto GPS_Detector_UART::init(std::string const& device, size_t baud) -> bool
+//auto GPS_Detector_UART::init(q::String const& device, size_t baud) -> bool
 //{
 //    QLOG_TOPIC("gps_detector_uart::init");
 //    QASSERT(m_fd < 0);

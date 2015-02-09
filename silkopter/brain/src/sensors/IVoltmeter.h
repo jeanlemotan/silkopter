@@ -12,14 +12,16 @@ class IVoltmeter
 public:
     virtual ~IVoltmeter() {}
 
-    struct Calibration
+    virtual auto get_voltmeter_name() const -> q::String const& = 0;
+
+    struct Config
     {
         float bias;
         float scale = 1;
     };
 
-    virtual void set_voltmeter_calibration(Calibration const& calibration) = 0;
-    virtual auto get_voltmeter_calibration() const -> Calibration const& = 0;
+    virtual void set_voltmeter_config(Config const& config) = 0;
+    virtual auto get_voltmeter_config() const -> Config const& = 0;
 
     virtual auto get_voltmeter_samples() const -> std::vector<Voltmeter_Sample> const& = 0;
 };

@@ -12,14 +12,16 @@ class ISonar
 public:
     virtual ~ISonar() {}
 
-    struct Calibration
+    virtual auto get_sonar_name() const -> q::String const& = 0;
+
+    struct Config
     {
         float bias;
         float scale = 1;
     };
 
-    virtual void set_sonar_calibration(Calibration const& calibration) = 0;
-    virtual auto get_sonar_calibration() const -> Calibration const& = 0;
+    virtual void set_sonar_config(Config const& config) = 0;
+    virtual auto get_sonar_config() const -> Config const& = 0;
 
     virtual auto get_sonar_samples() const -> std::vector<Sonar_Sample> const& = 0;
 };

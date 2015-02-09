@@ -12,6 +12,8 @@ class ICamera : q::util::Noncopyable
 public:
     virtual ~ICamera() {}
 
+    virtual auto get_camera_name() const -> q::String const& = 0;
+
     virtual auto init() -> bool = 0;
     virtual void shutdown() = 0;
 

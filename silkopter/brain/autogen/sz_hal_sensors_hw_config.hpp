@@ -536,7 +536,14 @@ case 4:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+
     }
 };
 
@@ -547,13 +554,13 @@ struct Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d428
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.uart_baud);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer2fd5eda1cb5915d3254ce10a8a4d51500fa942b791899904ab3d4284cce3cec1, size_t >()(w, value.uart_baud);
 
-        w.EndObject();
+        w.EndObject(5);
     }
 
 };
@@ -1240,7 +1247,17 @@ case 7:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+handler_7.PrepareForReuse();
+
     }
 };
 
@@ -1251,16 +1268,16 @@ struct Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.uart_baud);
-w.Key("\x62\x69\x61\x73"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, math::vec3f >()(w, value.bias);
-w.Key("\x73\x63\x61\x6c\x65"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, math::vec3f >()(w, value.scale);
-w.Key("\x72\x61\x6e\x67\x65"); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.range);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.uart_baud);
+w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, math::vec3f >()(w, value.bias);
+w.Key("\x73\x63\x61\x6c\x65", 5, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, math::vec3f >()(w, value.scale);
+w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer56471412c0065c6b6730940b16c7dc5ff08b206435b9073970e5b30e0d00e1b4, size_t >()(w, value.range);
 
-        w.EndObject();
+        w.EndObject(8);
     }
 
 };
@@ -1899,7 +1916,16 @@ case 6:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+
     }
 };
 
@@ -1910,15 +1936,15 @@ struct Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ff
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.uart_baud);
-w.Key("\x62\x69\x61\x73"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, math::vec3f >()(w, value.bias);
-w.Key("\x72\x61\x6e\x67\x65"); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.range);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.uart_baud);
+w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, math::vec3f >()(w, value.bias);
+w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer8902ac5b153b04b02f6f919281244aae10360d15ec82d63946a29ffdaed0af41, size_t >()(w, value.range);
 
-        w.EndObject();
+        w.EndObject(7);
     }
 
 };
@@ -2509,7 +2535,15 @@ case 5:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+
     }
 };
 
@@ -2520,14 +2554,14 @@ struct Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1f
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.uart_baud);
-w.Key("\x62\x69\x61\x73"); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, math::vec3f >()(w, value.bias);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, size_t >()(w, value.uart_baud);
+w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer9c2827522df46fc23af20ec6406260b4504a0e21065da619589ee1fb3f344324, math::vec3f >()(w, value.bias);
 
-        w.EndObject();
+        w.EndObject(6);
     }
 
 };
@@ -3166,7 +3200,16 @@ case 6:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+
     }
 };
 
@@ -3177,15 +3220,15 @@ struct Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.uart_baud);
-w.Key("\x62\x69\x61\x73"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, float >()(w, value.bias);
-w.Key("\x73\x63\x61\x6c\x65"); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, float >()(w, value.scale);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, size_t >()(w, value.uart_baud);
+w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, float >()(w, value.bias);
+w.Key("\x73\x63\x61\x6c\x65", 5, false); Serializer< Writer0695c6a641f49724e8c042e77c46a6d1fa1bfd79a125efc9694e6ad9034ffa3e, float >()(w, value.scale);
 
-        w.EndObject();
+        w.EndObject(7);
     }
 
 };
@@ -3824,7 +3867,16 @@ case 6:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+
     }
 };
 
@@ -3835,15 +3887,15 @@ struct Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c0
     {
         w.StartObject();
 
-        w.Key("\x73\x65\x6e\x73\x6f\x72"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, std::string >()(w, value.sensor);
-w.Key("\x62\x75\x73"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, std::string >()(w, value.bus);
-w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.spi_speed);
-w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.spi_mode);
-w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.uart_baud);
-w.Key("\x62\x69\x61\x73"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, float >()(w, value.bias);
-w.Key("\x73\x63\x61\x6c\x65"); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, float >()(w, value.scale);
+        w.Key("\x73\x65\x6e\x73\x6f\x72", 6, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, std::string >()(w, value.sensor);
+w.Key("\x62\x75\x73", 3, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, std::string >()(w, value.bus);
+w.Key("\x73\x70\x69\x5f\x73\x70\x65\x65\x64", 9, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.spi_speed);
+w.Key("\x73\x70\x69\x5f\x6d\x6f\x64\x65", 8, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.spi_mode);
+w.Key("\x75\x61\x72\x74\x5f\x62\x61\x75\x64", 9, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, size_t >()(w, value.uart_baud);
+w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, float >()(w, value.bias);
+w.Key("\x73\x63\x61\x6c\x65", 5, false); Serializer< Writer540d74ffc3a2d15f64766f67d17d32f7272471a1789d7b315a2e4c070a6fc019, float >()(w, value.scale);
 
-        w.EndObject();
+        w.EndObject(7);
     }
 
 };
@@ -4544,7 +4596,17 @@ case 7:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+handler_7.PrepareForReuse();
+
     }
 };
 
@@ -4555,16 +4617,16 @@ struct Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd532
     {
         w.StartObject();
 
-        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Accelerometer_Config >()(w, value.accelerometer);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Gyroscope_Config >()(w, value.gyroscope);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Compass_Config >()(w, value.compass);
-w.Key("\x62\x61\x72\x6f\x6d\x65\x74\x65\x72"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.barometer);
-w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.thermometer);
-w.Key("\x67\x70\x73"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.gps);
-w.Key("\x76\x6f\x6c\x74\x61\x67\x65"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Voltage_Config >()(w, value.voltage);
-w.Key("\x63\x75\x72\x72\x65\x6e\x74"); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Current_Config >()(w, value.current);
+        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72", 13, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Accelerometer_Config >()(w, value.accelerometer);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65", 9, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Gyroscope_Config >()(w, value.gyroscope);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73", 7, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Compass_Config >()(w, value.compass);
+w.Key("\x62\x61\x72\x6f\x6d\x65\x74\x65\x72", 9, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.barometer);
+w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72", 11, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.thermometer);
+w.Key("\x67\x70\x73", 3, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Sensor_Config >()(w, value.gps);
+w.Key("\x76\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Voltage_Config >()(w, value.voltage);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer9401a7aa894b36f444ea678433b667e7ca7c5e0c409fa6866bbd53213351eca7, Current_Config >()(w, value.current);
 
-        w.EndObject();
+        w.EndObject(8);
     }
 
 };

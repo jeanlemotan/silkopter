@@ -594,7 +594,15 @@ case 5:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+
     }
 };
 
@@ -605,14 +613,14 @@ struct Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96c
     {
         w.StartObject();
 
-        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_bias);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_scale);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.gyroscope_bias);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.compass_bias);
-w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.current_scale);
-w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65"); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.voltage_scale);
+        w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x62\x69\x61\x73", 18, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_bias);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x73\x63\x61\x6c\x65", 19, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.accelerometer_scale);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x62\x69\x61\x73", 14, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.gyroscope_bias);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x62\x69\x61\x73", 12, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, math::vec3f >()(w, value.compass_bias);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x63\x61\x6c\x65", 13, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.current_scale);
+w.Key("\x76\x6f\x6c\x74\x61\x67\x65\x5f\x73\x63\x61\x6c\x65", 13, false); Serializer< Writerd60593ed3a4ba384cf96f9f202477085898b198789c87b1eef8a96cdf7f5cca2, float >()(w, value.voltage_scale);
 
-        w.EndObject();
+        w.EndObject(6);
     }
 
 };

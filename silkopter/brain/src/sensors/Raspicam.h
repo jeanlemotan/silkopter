@@ -16,6 +16,8 @@ public:
     auto init() -> bool;
     void shutdown();
 
+    auto get_camera_name() const -> q::String const&;
+
     //----------------------------------------------------------------------
 
     void set_data_callback(Data_Available_Callback cb);

@@ -16,6 +16,9 @@ public:
 
     void process();
 
+    auto get_voltmeter_name() const -> q::String const&;
+    auto get_ammeter_name() const -> q::String const&;
+
     auto get_voltmeter_samples() const -> std::vector<Voltmeter_Sample> const&;
     auto get_ammeter_samples() const -> std::vector<Ammeter_Sample> const&;
 

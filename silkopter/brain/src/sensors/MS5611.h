@@ -12,15 +12,21 @@ namespace sensors
 class MS5611 : public IBarometer, public IThermometer, q::util::Noncopyable
 {
 public:
-    auto init(std::string const& device) -> bool;
+    struct Params
+    {
+        size_t rate = 100;
+        size_t pressure_to_temperature_ratio = 10;
+    };
+
+    auto init(buses::II2C* bus, Params const& params) -> bool;
+    auto init(buses::ISPI* bus, Params const& params) -> bool;
+
+    auto init(q::String const& device) -> bool;
 
     void process();
 
-    struct Data
-    {
-        float value;
-        q::Clock::duration dt;
-    };
+    auto get_barometer_name() const -> q::String const&;
+    auto get_thermometer_name() const -> q::String const&;
 
     auto get_barometer_samples() const -> std::vector<Barometer_Sample> const&;
     auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;

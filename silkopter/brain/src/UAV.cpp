@@ -24,9 +24,9 @@ UAV::UAV(IHAL& hal)
     m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
     m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
 
-    m_imu.gyroscope_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_imu.accelerometer_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_imu.compass_sample_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.gyroscope_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.accelerometer_time_point = q::Clock::time_point(std::chrono::seconds(0));
+    m_imu.compass_time_point = q::Clock::time_point(std::chrono::seconds(0));
     m_imu.clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
 
     load_settings();

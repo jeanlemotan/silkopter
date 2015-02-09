@@ -10,7 +10,7 @@
 //public:
 //    ~GPS_Detector_UART();
 
-//    auto init(std::string const& device, size_t baud) -> bool;
+//    auto init(q::String const& device, size_t baud) -> bool;
 
 //protected:
 //    auto read(uint8_t* data, size_t max_size) -> size_t;

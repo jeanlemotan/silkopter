@@ -117,10 +117,10 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 auto OdroidW_ADC::init() -> bool
 {
     QLOG_TOPIC("adc::init");
-    std::string device("/dev/i2c-0");
+    q::String device("/dev/i2c-0");
     QLOGI("initializing device: {}", device);
 
-    if (!m_i2c.open(device))
+    if (!m_i2c.open(device.c_str()))
     {
         QLOGE("can't open {}: {}", device, strerror(errno));
         return false;

@@ -13,6 +13,8 @@ namespace silk
 namespace sensors
 {
 
+constexpr uint8_t ADDR_MPU9250 = 0x68;
+
 
 // mpu9250 registers
 constexpr uint8_t MPU_REG_SELF_TEST_X_GYRO               = 0x00;
@@ -266,16 +268,220 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 #endif
 
+MPU9250::MPU9250(q::String const& name)
+{
+    m_accelerometer_name = name + "_accelerometer";
+    m_gyroscope_name = name + "_gyroscope";
+    m_compass_name = name + "_compass";
+    m_thermometer_name = name + "_thermometer";
+}
+
 MPU9250::~MPU9250()
 {
 }
 
+auto MPU9250::get_accelerometer_name() const -> q::String const&
+{
+    return m_accelerometer_name;
+}
+auto MPU9250::get_gyroscope_name() const -> q::String const&
+{
+    return m_gyroscope_name;
+}
+auto MPU9250::get_compass_name() const -> q::String const&
+{
+    return m_compass_name;
+}
+auto MPU9250::get_thermometer_name() const -> q::String const&
+{
+    return m_thermometer_name;
+}
 
-auto MPU9250::init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool
+
+void MPU9250::lock()
+{
+    if (m_i2c)
+    {
+        m_i2c->lock();
+    }
+    else
+    {
+        m_spi->lock();
+    }
+}
+void MPU9250::unlock()
+{
+    if (m_i2c)
+    {
+        m_i2c->unlock();
+    }
+    else
+    {
+        m_spi->unlock();
+    }
+}
+
+auto MPU9250::mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool
+{
+    return m_i2c ? m_i2c->read_register(ADDR_MPU9250, reg, data, size) : m_spi->read_register(reg, data, size);
+}
+auto MPU9250::mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u8(ADDR_MPU9250, reg, dst) : m_spi->read_register_u8(reg, dst);
+}
+auto MPU9250::mpu_read_u16(uint8_t reg, uint16_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u16(ADDR_MPU9250, reg, dst) : m_spi->read_register_u16(reg, dst);
+}
+auto MPU9250::mpu_write_u8(uint8_t reg, uint8_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u8(ADDR_MPU9250, reg, t) : m_spi->write_register_u8(reg, t);
+}
+auto MPU9250::mpu_write_u16(uint8_t reg, uint16_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u16(ADDR_MPU9250, reg, t) : m_spi->write_register_u16(reg, t);
+}
+auto MPU9250::akm_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool
+{
+    return m_i2c ? m_i2c->read_register(m_akm_address, reg, data, size) : m_spi->read_register(reg, data, size);
+}
+auto MPU9250::akm_read_u8(uint8_t reg, uint8_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u8(m_akm_address, reg, dst) : m_spi->read_register_u8(reg, dst);
+}
+auto MPU9250::akm_read_u16(uint8_t reg, uint16_t& dst) -> bool
+{
+    return m_i2c ? m_i2c->read_register_u16(m_akm_address, reg, dst) : m_spi->read_register_u16(reg, dst);
+}
+auto MPU9250::akm_write_u8(uint8_t reg, uint8_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u8(m_akm_address, reg, t) : m_spi->write_register_u8(reg, t);
+}
+auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
+{
+    return m_i2c ? m_i2c->write_register_u16(m_akm_address, reg, t) : m_spi->write_register_u16(reg, t);
+}
+
+auto MPU9250::init(buses::II2C* i2c, Params const& params) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
-    m_gyroscope_rate = gr;
-    m_accelerometer_range = ar;
+
+    QASSERT(i2c);
+    if (!i2c)
+    {
+        return false;
+    }
+    m_i2c = i2c;
+    m_spi = nullptr;
+
+    return init(params);
+}
+
+auto MPU9250::init(buses::ISPI* spi, Params const& params) -> bool
+{
+    QLOG_TOPIC("mpu9250::init");
+
+    QASSERT(spi);
+    if (!spi)
+    {
+        return false;
+    }
+    m_spi = spi;
+    m_i2c = nullptr;
+
+    return init(params);
+}
+
+auto MPU9250::init(Params const& params) -> bool
+{
+    QLOG_TOPIC("mpu9250::init");
+
+    std::lock_guard<MPU9250> lg(*this);
+
+    std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
+    std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
+    std::vector<size_t> imu_rates = { 250, 500, 1000 }; //, 2000, 4000, 8000 };
+
+    m_params = params;
+    if (m_i2c)
+    {
+        //max supported on a 400Khz i2c bus
+        m_params.imu_rate = math::min<size_t>(m_params.imu_rate, 1000);
+    }
+    m_params.compass_rate = math::clamp<size_t>(m_params.compass_rate, 10, 100);
+    m_params.thermometer_rate = math::clamp<size_t>(m_params.thermometer_rate, 10, 50);
+
+    std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
+    {
+        return math::abs(a - m_params.gyroscope_range) < math::abs(b - m_params.gyroscope_range);
+    });
+    m_params.gyroscope_range = g_ranges.front();
+
+    std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](size_t a, size_t b)
+    {
+        return math::abs(a - m_params.accelerometer_range) < math::abs(b - m_params.accelerometer_range);
+    });
+    m_params.accelerometer_range = a_ranges.front();
+
+    std::nth_element(imu_rates.begin(), imu_rates.begin(), imu_rates.end(), [&](size_t a, size_t b)
+    {
+        return math::abs(a - m_params.imu_rate) < math::abs(b - m_params.imu_rate);
+    });
+    m_params.imu_rate = a_ranges.front();
+
+    QLOGI("Gyroscope range {} DPS (requested {} DPS)", m_params.gyroscope_range, params.gyroscope_range);
+    QLOGI("Accelerometer range {}G (requested {}G)", m_params.accelerometer_range, params.accelerometer_range);
+    QLOGI("Imu Rate {}Hz (requested {}Hz)", m_params.imu_rate, params.imu_rate);
+    QLOGI("Compass Rate {}Hz (requested {}Hz)", m_params.compass_rate, params.compass_rate);
+    QLOGI("Thermometer Rate {}Hz (requested {}Hz)", m_params.thermometer_rate, params.thermometer_rate);
+
+    uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
+    switch (m_params.gyroscope_range)
+    {
+    case 250:
+        gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f);
+        break;
+    case 500:
+        gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 2.f);
+        break;
+    case 1000:
+        gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 4.f);
+        break;
+    case 2000:
+        gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
+        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 8.f);
+        break;
+    default:
+        QLOGE("Invalid gyroscope range: {}", m_params.gyroscope_range);
+        return false;
+    }
+
+    uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
+    switch (m_params.accelerometer_range)
+    {
+    case 2:
+        accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
+        m_accelerometer_scale_inv = physics::constants::g / 16384.f;
+        break;
+    case 4:
+        accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
+        m_accelerometer_scale_inv = physics::constants::g / 8192.f;
+        break;
+    case 8:
+        accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
+        m_accelerometer_scale_inv = physics::constants::g / 4096.f;
+        break;
+    case 16:
+        accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
+        m_accelerometer_scale_inv = physics::constants::g / 2048.f;
+        break;
+    default:
+        QLOGE("Invalid accelerometer range: {}", m_params.accelerometer_range);
+        return false;
+    }
 
     auto res = mpu_write_u8(MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
@@ -295,51 +501,6 @@ auto MPU9250::init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool
     }
     QLOGI("Found MPU9250 id: {x}", who_am_i);
 
-    uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-    switch (gr)
-    {
-    case Gyroscope_Range::_250_DPS:
-        gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f);
-        break;
-    case Gyroscope_Range::_500_DPS:
-        gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 2.f);
-        break;
-    case Gyroscope_Range::_1000_DPS:
-        gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 4.f);
-        break;
-    case Gyroscope_Range::_2000_DPS:
-        gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_gyroscope_scale_inv = math::radians(1.f) / (131.f / 8.f);
-        break;
-    default:
-        QLOGE("Invalid gyroscope range.");
-        return false;
-    }
-
-    uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-    switch (ar)
-    {
-    case Accelerometer_Range::_2_G:
-        accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
-        m_accelerometer_scale_inv = physics::constants::g / 16384.f;
-        break;
-    case Accelerometer_Range::_4_G:
-        accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
-        m_accelerometer_scale_inv = physics::constants::g / 8192.f;
-        break;
-    case Accelerometer_Range::_8_G:
-        accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-        m_accelerometer_scale_inv = physics::constants::g / 4096.f;
-        break;
-    case Accelerometer_Range::_16_G:
-        accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
-        m_accelerometer_scale_inv = physics::constants::g / 2048.f;
-        break;
-    }
-
     res &= mpu_write_u8(MPU_REG_GYRO_CONFIG, gyro_range);
     res &= mpu_write_u8(MPU_REG_ACCEL_CONFIG, accel_range);
 
@@ -348,13 +509,13 @@ auto MPU9250::init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 
 
     //compute the rate
-    m_sample_rate = 1000;
-    QASSERT(m_sample_rate >= 100 && m_sample_rate <= 1000);
-    uint8_t rate = 1000 / m_sample_rate - 1;
-    res &= mpu_write_u8(MPU_REG_SMPLRT_DIV, rate);
+    uint8_t div = 1000 / m_params.imu_rate - 1;
+    res &= mpu_write_u8(MPU_REG_SMPLRT_DIV, div);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    m_sample_time = std::chrono::milliseconds(1000 / m_sample_rate);
+    m_imu_dt = std::chrono::milliseconds(1000 / m_params.imu_rate);
+    m_compass_dt = std::chrono::milliseconds(1000 / m_params.compass_rate);
+    m_thermometer_dt = std::chrono::milliseconds(1000 / m_params.thermometer_rate);
 
     res &= mpu_write_u8(MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -389,6 +550,8 @@ auto MPU9250::init(Gyroscope_Range gr, Accelerometer_Range ar) -> bool
 
 auto MPU9250::setup_compass() -> bool
 {
+    std::lock_guard<MPU9250> lg(*this);
+
     QLOG_TOPIC("mpu9250::setup_compass");
 #ifdef USE_AK8963
     set_bypass(1);
@@ -476,6 +639,8 @@ auto MPU9250::setup_compass() -> bool
 
 void MPU9250::set_bypass(bool on)
 {
+    std::lock_guard<MPU9250> lg(*this);
+
     QLOG_TOPIC("mpu9250::set_bypass");
     if (on)
     {
@@ -502,6 +667,8 @@ void MPU9250::set_bypass(bool on)
 
 void MPU9250::reset_fifo()
 {
+    std::lock_guard<MPU9250> lg(*this);
+
     QLOG_TOPIC("mpu9250::reset_fifo");
     mpu_write_u8(MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -514,6 +681,8 @@ void MPU9250::reset_fifo()
 
 void MPU9250::process()
 {
+    std::lock_guard<MPU9250> lg(*this);
+
     QLOG_TOPIC("mpu9250::process");
     m_samples.gyroscope.clear();
     m_samples.accelerometer.clear();
@@ -560,7 +729,7 @@ void MPU9250::process()
                     auto& asample = m_samples.accelerometer[i];
                     asample.value.value.set(x * m_accelerometer_scale_inv, y * m_accelerometer_scale_inv, z * m_accelerometer_scale_inv);
                     asample.sample_idx = ++m_accelerometer_sample_idx;
-                    asample.dt = m_sample_time;
+                    asample.dt = m_imu_dt;
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
@@ -569,7 +738,7 @@ void MPU9250::process()
                     auto& gsample = m_samples.gyroscope[i];
                     gsample.value.value.set(x * m_gyroscope_scale_inv, y * m_gyroscope_scale_inv, z * m_gyroscope_scale_inv);
                     gsample.sample_idx = ++m_gyroscope_sample_idx;
-                    gsample.dt = m_sample_time;
+                    gsample.dt = m_imu_dt;
 
 //                    if (math::length(m_samples.gyroscope[i]) > 1.f)
 //                    {
@@ -587,16 +756,15 @@ void MPU9250::process()
 
 void MPU9250::process_compass()
 {
+    std::lock_guard<MPU9250> lg(*this);
+
     QLOG_TOPIC("mpu9250::process_compass");
 #ifdef USE_AK8963
     auto now = q::Clock::now();
-    if (now - m_last_compass_timestamp < std::chrono::milliseconds(10))
+    if (now - m_last_compass_timestamp < m_compass_dt)
     {
-        m_compass_sample_time = std::chrono::seconds(0);
         return;
     }
-
-    m_compass_sample_time = std::chrono::seconds(0);
 
     std::array<uint8_t, 8> tmp;
     if (!akm_read(AKM_REG_ST1, tmp.data(), tmp.size()))
@@ -616,7 +784,7 @@ void MPU9250::process_compass()
         return;
     }
 
-    m_compass_sample_time = now - m_last_compass_timestamp;
+    auto dt = now - m_last_compass_timestamp;
     m_last_compass_timestamp = now;
 
     short data[3];
@@ -637,7 +805,7 @@ void MPU9250::process_compass()
     Compass_Sample sample;
     sample.value.value = math::rotate(rot, c);
     sample.sample_idx = ++m_compass_sample_idx;
-    sample.dt = m_compass_sample_time;
+    sample.dt = dt;
 
     m_samples.compass.push_back(sample);
 //    LOG_INFO("c: {}", *m_samples.compass);

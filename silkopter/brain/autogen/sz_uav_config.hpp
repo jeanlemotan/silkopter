@@ -708,7 +708,17 @@ case 7:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+handler_7.PrepareForReuse();
+
     }
 };
 
@@ -719,16 +729,16 @@ struct Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8
     {
         w.StartObject();
 
-        w.Key("\x79\x61\x77\x5f\x72\x61\x74\x65"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.yaw_rate);
-w.Key("\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.pitch_rate);
-w.Key("\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.roll_rate);
-w.Key("\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.altitude_rate);
-w.Key("\x79\x61\x77"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.yaw);
-w.Key("\x70\x69\x74\x63\x68"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.pitch);
-w.Key("\x72\x6f\x6c\x6c"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.roll);
-w.Key("\x61\x6c\x74\x69\x74\x75\x64\x65"); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.altitude);
+        w.Key("\x79\x61\x77\x5f\x72\x61\x74\x65", 8, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.yaw_rate);
+w.Key("\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65", 10, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.pitch_rate);
+w.Key("\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65", 9, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.roll_rate);
+w.Key("\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65", 13, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.altitude_rate);
+w.Key("\x79\x61\x77", 3, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.yaw);
+w.Key("\x70\x69\x74\x63\x68", 5, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.pitch);
+w.Key("\x72\x6f\x6c\x6c", 4, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.roll);
+w.Key("\x61\x6c\x74\x69\x74\x75\x64\x65", 8, false); Serializer< Writer997e4a334c890b96f51b3af1a89d5b252602e93ce78eb380d8eecb8eee5163bd, util::PID_Params >()(w, value.altitude);
 
-        w.EndObject();
+        w.EndObject(8);
     }
 
 };
@@ -1392,7 +1402,16 @@ case 6:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+
     }
 };
 
@@ -1403,15 +1422,15 @@ struct Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a69
     {
         w.StartObject();
 
-        w.Key("\x6d\x6f\x74\x6f\x72\x73"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, std::vector<silk::Motor_Mixer::Motor_Info> >()(w, value.motors);
-w.Key("\x70\x69\x64\x73"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, PIDs >()(w, value.pids);
-w.Key("\x6d\x61\x78\x5f\x74\x68\x72\x6f\x74\x74\x6c\x65\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_throttle_rate);
-w.Key("\x6d\x61\x78\x5f\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_pitch_rate);
-w.Key("\x6d\x61\x78\x5f\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_roll_rate);
-w.Key("\x6d\x61\x78\x5f\x79\x61\x77\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_yaw_rate);
-w.Key("\x6d\x61\x78\x5f\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65"); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_altitude_rate);
+        w.Key("\x6d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, std::vector<silk::Motor_Mixer::Motor_Info> >()(w, value.motors);
+w.Key("\x70\x69\x64\x73", 4, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, PIDs >()(w, value.pids);
+w.Key("\x6d\x61\x78\x5f\x74\x68\x72\x6f\x74\x74\x6c\x65\x5f\x72\x61\x74\x65", 17, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_throttle_rate);
+w.Key("\x6d\x61\x78\x5f\x70\x69\x74\x63\x68\x5f\x72\x61\x74\x65", 14, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_pitch_rate);
+w.Key("\x6d\x61\x78\x5f\x72\x6f\x6c\x6c\x5f\x72\x61\x74\x65", 13, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_roll_rate);
+w.Key("\x6d\x61\x78\x5f\x79\x61\x77\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_yaw_rate);
+w.Key("\x6d\x61\x78\x5f\x61\x6c\x74\x69\x74\x75\x64\x65\x5f\x72\x61\x74\x65", 17, false); Serializer< Writerab92aee6882a1f08fe079d580645375d76aafd2423f205b8af89a691d8f01519, float >()(w, value.max_altitude_rate);
 
-        w.EndObject();
+        w.EndObject(7);
     }
 
 };

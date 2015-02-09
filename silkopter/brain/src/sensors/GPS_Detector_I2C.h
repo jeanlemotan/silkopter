@@ -11,7 +11,7 @@
 //public:
 //    ~GPS_Detector_I2C();
 
-//    auto init(std::string const& device) -> bool;
+//    auto init(q::String const& device) -> bool;
 
 //protected:
 //    auto read(uint8_t* data, size_t max_size) -> size_t;

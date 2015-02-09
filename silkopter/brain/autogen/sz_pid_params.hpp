@@ -494,7 +494,13 @@ case 3:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+
     }
 };
 
@@ -505,12 +511,12 @@ struct Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7d
     {
         w.StartObject();
 
-        w.Key("\x6b\x70"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kp);
-w.Key("\x6b\x69"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.ki);
-w.Key("\x6b\x64"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kd);
-w.Key("\x6d\x61\x78"); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.max);
+        w.Key("\x6b\x70", 2, false); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kp);
+w.Key("\x6b\x69", 2, false); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.ki);
+w.Key("\x6b\x64", 2, false); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.kd);
+w.Key("\x6d\x61\x78", 3, false); Serializer< Writera20ea30e42ec6133f2664a3b08aae8dce5529d74912ddcca091ae7daddfc8a23, float >()(w, value.max);
 
-        w.EndObject();
+        w.EndObject(4);
     }
 
 };

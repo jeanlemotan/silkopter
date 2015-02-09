@@ -10,6 +10,16 @@
     ]
 },
 {
+	"definition" : false,
+	"namespace" : "math",
+    "name": "vec2u32",
+    "members":
+    [
+        ["uint32_t", "x", {"required": true}],
+        ["uint32_t", "y", {"required": true}]
+    ]
+},
+{
     "definition" : false,
     "namespace" : "math",
     "name": "vec3f",
@@ -23,6 +33,17 @@
 {
     "definition" : false,
     "namespace" : "math",
+    "name": "vec3u32",
+    "members":
+    [
+        ["uint32_t", "x", {"required": true}],
+        ["uint32_t", "y", {"required": true}],
+        ["uint32_t", "z", {"required": true}]
+    ]
+},
+{
+    "definition" : false,
+    "namespace" : "math",
     "name": "vec4f",
     "members":
     [
@@ -30,6 +51,18 @@
         ["float", "y", {"required": true}],
         ["float", "z", {"required": true}],
         ["float", "w", {"required": true}]
+    ]
+},
+{
+    "definition" : false,
+    "namespace" : "math",
+    "name": "vec4u32",
+    "members":
+    [
+        ["uint32_t", "x", {"required": true}],
+        ["uint32_t", "y", {"required": true}],
+        ["uint32_t", "z", {"required": true}],
+        ["uint32_t", "w", {"required": true}]
     ]
 },
 {

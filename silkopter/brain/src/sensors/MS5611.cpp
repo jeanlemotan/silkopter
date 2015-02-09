@@ -34,12 +34,22 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
-auto MS5611::init(const std::string& device) -> bool
+
+auto MS5611::get_barometer_name() const -> q::String const&
+{
+
+}
+auto MS5611::get_thermometer_name() const -> q::String const&
+{
+
+}
+
+auto MS5611::init(q::String const& device) -> bool
 {
     QLOG_TOPIC("ms5611::init");
     QLOGI("initializing device: {}", device);
 
-    if (!m_i2c.open(device))
+    if (!m_i2c.open(device.c_str()))
     {
         QLOGE("can't open {}: {}", device, strerror(errno));
         return false;

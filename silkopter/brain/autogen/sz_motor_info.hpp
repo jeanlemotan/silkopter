@@ -394,7 +394,11 @@ case 1:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+
     }
 };
 
@@ -405,10 +409,10 @@ struct Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb41
     {
         w.StartObject();
 
-        w.Key("\x70\x6f\x73\x69\x74\x69\x6f\x6e"); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, math::vec2f >()(w, value.position);
-w.Key("\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65"); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, bool >()(w, value.clockwise);
+        w.Key("\x70\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, math::vec2f >()(w, value.position);
+w.Key("\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writerb234f9235fe710d18bf16facd8a4d58c0f382f0433f952a0b7bdb4195f610b4a, bool >()(w, value.clockwise);
 
-        w.EndObject();
+        w.EndObject(2);
     }
 
 };
