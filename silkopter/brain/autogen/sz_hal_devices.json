@@ -1,0 +1,130 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "MPU9250",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["size_t", "imu_rate", {"required": false}],
+        ["size_t", "compass_rate", {"required": false}],
+        ["size_t", "thermometer_rate", {"required": false}],
+        ["size_t", "accelerometer_range", {"required": false}],
+        ["size_t", "gyroscope_range", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "MS5611",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["size_t", "rate", {"required": false}],
+        ["size_t", "pressure_to_temperature_ratio", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Raspicam_Quality",
+    "members":
+    [
+        ["math::vec2u32", "resolution", {"required": true}],
+        ["size_t", "bitrate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Raspicam",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["size_t", "fps", {"required": true}],
+        ["sz::Raspicam_Quality", "low", {"required": true}],
+        ["sz::Raspicam_Quality", "medium", {"required": true}],
+        ["sz::Raspicam_Quality", "high", {"required": true}],
+        ["sz::Raspicam_Quality", "recording", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "RC5T619",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["size_t", "adc0_rate", {"required": true}],
+        ["size_t", "adc1_ratio", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "UBLOX",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["size_t", "rate", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "SRF02",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["size_t", "rate", {"required": true}],
+        ["math::vec3f", "direction", {"required": true}],
+        ["float", "min_distance", {"required": false}],
+        ["float", "max_distance", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PIGPIO_PWM",
+    "members":
+    [
+        ["size_t", "gpio", {"required": true}],
+        ["size_t", "frequency", {"required": true}],
+        ["size_t", "range", {"required": true}],
+        ["size_t", "min", {"required": true}],
+        ["size_t", "max", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PIGPIO",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["size_t", "rate", {"required": true}],
+        ["std::vector<sz::PIGPIO_PWM>", "pwm_channels", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Devices",
+    "members":
+    [
+        ["std::vector<sz::MPU9250>", "mpu9250", {"required": false}],
+        ["std::vector<sz::Raspicam>", "raspicam", {"required": false}],
+        ["std::vector<sz::UBLOX>", "ublox", {"required": false}],
+        ["std::vector<sz::MS5611>", "ms5611", {"required": false}],
+        ["std::vector<sz::RC5T619>", "rc5t619", {"required": false}],
+        ["std::vector<sz::SRF02>", "srf02", {"required": false}],
+        ["boost::optional<sz::PIGPIO>", "pigpio", {"required": false}]
+    ]
+}
+
+]

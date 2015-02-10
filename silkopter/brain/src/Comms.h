@@ -70,36 +70,36 @@ private:
     void recieve_calibration_compass();
 
     void send_sensor_samples();
-    void send_raw_sensor_samples(comms::Sensors sensors);
+    void send_raw_sensor_samples(comms::Sensors sensor);
 
     void store_raw_sensor_samples();
     void clear_raw_sensor_samples();
 
     struct Sensor_Samples
     {
-        sensors::Accelerometer_Sample accelerometer;
-        sensors::Gyroscope_Sample gyroscope;
-        sensors::Compass_Sample compass;
-        sensors::Barometer_Sample barometer;
-        sensors::Thermometer_Sample thermometer;
-        sensors::Sonar_Sample sonar;
-        sensors::Voltmeter_Sample voltage;
-        sensors::Ammeter_Sample current;
-        sensors::GPS_Sample gps;
+        sensor::Accelerometer_Sample accelerometer;
+        sensor::Gyroscope_Sample gyroscope;
+        sensor::Compass_Sample compass;
+        sensor::Barometer_Sample barometer;
+        sensor::Thermometer_Sample thermometer;
+        sensor::Sonar_Sample sonar;
+        sensor::Voltmeter_Sample voltage;
+        sensor::Ammeter_Sample current;
+        sensor::GPS_Sample gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensor_samples;
     struct Raw_Sensor_Samples
     {
         q::Clock::time_point last_sent;
-        std::vector<sensors::Accelerometer_Sample> accelerometer;
-        std::vector<sensors::Gyroscope_Sample> gyroscope;
-        std::vector<sensors::Compass_Sample> compass;
-        std::vector<sensors::Barometer_Sample> barometer;
-        std::vector<sensors::Thermometer_Sample> thermometer;
-        std::vector<sensors::Sonar_Sample> sonar;
-        std::vector<sensors::Voltmeter_Sample> voltage;
-        std::vector<sensors::Ammeter_Sample> current;
-        std::vector<sensors::GPS_Sample> gps;
+        std::vector<sensor::Accelerometer_Sample> accelerometer;
+        std::vector<sensor::Gyroscope_Sample> gyroscope;
+        std::vector<sensor::Compass_Sample> compass;
+        std::vector<sensor::Barometer_Sample> barometer;
+        std::vector<sensor::Thermometer_Sample> thermometer;
+        std::vector<sensor::Sonar_Sample> sonar;
+        std::vector<sensor::Voltmeter_Sample> voltage;
+        std::vector<sensor::Ammeter_Sample> current;
+        std::vector<sensor::GPS_Sample> gps;
     } m_raw_sensor_samples;
 
     IHAL& m_hal;

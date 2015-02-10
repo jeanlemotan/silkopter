@@ -62,7 +62,7 @@ Battery::Battery()
     load_state();
 }
 
-void Battery::process(const std::vector<sensors::Ammeter_Sample>& ammeter_samples, const std::vector<sensors::Voltmeter_Sample>& voltmeter_samples)
+void Battery::process(const std::vector<sensor::Ammeter_Sample>& ammeter_samples, const std::vector<sensor::Voltmeter_Sample>& voltmeter_samples)
 {
     {
         //samples started at this time point

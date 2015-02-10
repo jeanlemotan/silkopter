@@ -1,9 +1,10 @@
 //#include <thread>
 //#include <functional>
-//#include <unordered_map>
+#include <unordered_map>
 //#include <future>
 
 #include <type_traits>
+#include <typeinfo>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>

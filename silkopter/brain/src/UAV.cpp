@@ -521,7 +521,7 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
     m_pids.yaw_rate.set_target(m_uav_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
-void UAV::process_rate_pids(sensors::Gyroscope_Sample const& sample)
+void UAV::process_rate_pids(sensor::Gyroscope_Sample const& sample)
 {
     auto input = sample.value.value;
 
