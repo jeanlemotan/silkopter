@@ -1,0 +1,45 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Bus_I2C_Pi",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "device", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Bus_SPI_Pi",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "device", {"required": true}],
+        ["size_t", "mode", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Bus_UART_Pi",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "device", {"required": true}],
+        ["size_t", "baud", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Buses_Pi",
+    "members":
+    [
+        ["std::vector<sz::Bus_I2C_Pi>", "i2c", {"required": false}],
+        ["std::vector<sz::Bus_SPI_Pi>", "spi", {"required": false}],
+        ["std::vector<sz::Bus_UART_Pi>", "uart", {"required": false}]
+    ]
+}
+]
