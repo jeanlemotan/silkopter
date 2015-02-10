@@ -158,7 +158,7 @@ Raspicam::~Raspicam()
     m_impl->camera.reset();
 }
 
-auto Raspicam::get_camera_name() const -> q::String const&
+auto Raspicam::get_name() const -> q::String const&
 {
     return m_name;
 }

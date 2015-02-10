@@ -13,7 +13,7 @@ namespace sensors
 {
 
 
-class MPU9250 : public IAccelerometer, public IGyroscope, public ICompass, public IThermometer, q::util::Noncopyable
+class MPU9250 : q::util::Noncopyable
 {
 public:
     MPU9250(q::String const& name);
@@ -33,15 +33,10 @@ public:
 
     void process();
 
-    auto get_accelerometer_name() const -> q::String const&;
-    auto get_gyroscope_name() const -> q::String const&;
-    auto get_compass_name() const -> q::String const&;
-    auto get_thermometer_name() const -> q::String const&;
-
-    auto get_accelerometer_samples() const -> std::vector<Accelerometer_Sample> const&;
-    auto get_gyroscope_samples() const -> std::vector<Gyroscope_Sample> const&;
-    auto get_compass_samples() const -> std::vector<Compass_Sample> const&;
-    auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;
+    auto get_accelerometer() -> IAccelerometer&;
+    auto get_gyroscope() -> IGyroscope&;
+    auto get_compass() -> ICompass&;
+    auto get_thermometer() -> IThermometer&;
 
     void lock();
     void unlock();
@@ -67,44 +62,63 @@ private:
     void set_bypass(bool on);
     void process_compass();
 
-    uint8_t m_akm_address = 0;
-
 private:
     buses::II2C* m_i2c = nullptr;
     buses::ISPI* m_spi = nullptr;
 
     Params m_params;
 
-    q::String m_accelerometer_name;
-    q::String m_gyroscope_name;
-    q::String m_compass_name;
-    q::String m_thermometer_name;
-
     mutable std::vector<uint8_t> m_fifo_buffer;
-
     size_t m_fifo_sample_size = 999999;
 
-    struct Samples
+    struct Accelerometer : public IAccelerometer
     {
-        std::vector<Gyroscope_Sample> gyroscope;
-        std::vector<Accelerometer_Sample> accelerometer;
-        std::vector<Compass_Sample> compass;
-        std::vector<Thermometer_Sample> thermometer;
-    } m_samples;
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Accelerometer_Sample> const& { return samples; }
 
-    float m_accelerometer_scale_inv = 1.f;
-    float m_gyroscope_scale_inv = 1.f;
-    float m_magnetic_adj[3];
+        uint32_t sample_idx = 0;
+        float scale_inv = 1.f;
+        std::vector<Accelerometer_Sample> samples;
+        q::String name;
+    } m_accelerometer;
 
-    uint32_t m_accelerometer_sample_idx = 0;
-    uint32_t m_gyroscope_sample_idx = 0;
-    uint32_t m_compass_sample_idx = 0;
+    struct Gyroscope : public IGyroscope
+    {
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Gyroscope_Sample> const& { return samples; }
+
+        uint32_t sample_idx = 0;
+        float scale_inv = 1.f;
+        std::vector<Gyroscope_Sample> samples;
+        q::String name;
+    } m_gyroscope;
+
+    struct Compass : public ICompass
+    {
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Compass_Sample> const& { return samples; }
+
+        uint8_t akm_address = 0;
+        q::Clock::duration dt;
+        q::Clock::time_point last_time_point;
+        uint32_t sample_idx = 0;
+        float magnetic_adj[3];
+        std::vector<Compass_Sample> samples;
+        q::String name;
+    } m_compass;
+
+    struct Thermometer : public IThermometer
+    {
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Thermometer_Sample> const& { return samples; }
+
+        q::Clock::duration dt;
+        uint32_t sample_idx = 0;
+        std::vector<Thermometer_Sample> samples;
+        q::String name;
+    } m_thermometer;
 
     q::Clock::duration m_imu_dt;
-    q::Clock::duration m_compass_dt;
-    q::Clock::duration m_thermometer_dt;
-
-    q::Clock::time_point m_last_compass_timestamp;
 };
 
 

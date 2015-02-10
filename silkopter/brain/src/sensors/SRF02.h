@@ -23,11 +23,10 @@ public:
 
     auto init(buses::II2C* bus, Params const& params) -> bool;
 
-    auto get_sonar_name() const -> q::String const&;
-
     void process();
 
-    auto get_sonar_samples() const -> std::vector<Sonar_Sample> const&;
+    auto get_name() const -> q::String const&;
+    auto get_samples() const -> std::vector<Sonar_Sample> const&;
 
 private:
     buses::II2C* m_i2c = nullptr;

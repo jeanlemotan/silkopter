@@ -10,7 +10,7 @@ namespace silk
 namespace sensors
 {
 
-class MS5611 : public IBarometer, public IThermometer, q::util::Noncopyable
+class MS5611 : q::util::Noncopyable
 {
 public:
     MS5611(q::String const& name);
@@ -26,11 +26,8 @@ public:
 
     void process();
 
-    auto get_barometer_name() const -> q::String const&;
-    auto get_thermometer_name() const -> q::String const&;
-
-    auto get_barometer_samples() const -> std::vector<Barometer_Sample> const&;
-    auto get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&;
+    auto get_barometer() -> IBarometer&;
+    auto get_thermometer() -> IThermometer&;
 
 private:
     auto init(Params const& params) -> bool;
@@ -49,8 +46,26 @@ private:
 
     Params m_params;
 
-    q::String m_barometer_name;
-    q::String m_thermometer_name;
+    struct Barometer : public IBarometer
+    {
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Barometer_Sample> const& { return samples; }
+
+        q::String name;
+        std::vector<Barometer_Sample> samples;
+        uint32_t sample_idx = 0;
+        double      reading = 0;
+    } m_barometer;
+    struct Thermometer : public IThermometer
+    {
+        auto get_name() const -> q::String const& { return name; }
+        auto get_samples() const -> std::vector<Thermometer_Sample> const& { return samples; }
+
+        q::String name;
+        std::vector<Thermometer_Sample> samples;
+        uint32_t sample_idx = 0;
+        double      reading = 0;
+    } m_thermometer;
 
     double		m_c1 = 0;
     double		m_c2 = 0;
@@ -58,15 +73,6 @@ private:
     double		m_c4 = 0;
     double		m_c5 = 0;
     double		m_c6 = 0;
-
-    double      m_pressure_reading = 0;
-    double      m_temperature_reading = 0;
-
-    uint32_t m_thermometer_sample_idx = 0;
-    uint32_t m_barometer_sample_idx = 0;
-
-    std::vector<Barometer_Sample> m_pressures;
-    std::vector<Thermometer_Sample> m_temperatures;
 
     void calculate(q::Clock::duration dt);
 

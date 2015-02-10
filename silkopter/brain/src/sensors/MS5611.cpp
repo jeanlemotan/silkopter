@@ -36,17 +36,17 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 MS5611::MS5611(q::String const& name)
 {
-    m_barometer_name = name + "_barometer";
-    m_thermometer_name = name + "_thermometer";
+    m_barometer.name = name + "_barometer";
+    m_thermometer.name = name + "_thermometer";
 }
 
-auto MS5611::get_barometer_name() const -> q::String const&
+auto MS5611::get_barometer() -> IBarometer&
 {
-    return m_barometer_name;
+    return m_barometer;
 }
-auto MS5611::get_thermometer_name() const -> q::String const&
+auto MS5611::get_thermometer() -> IThermometer&
 {
-    return m_thermometer_name;
+    return m_thermometer;
 }
 
 void MS5611::lock()
@@ -166,8 +166,8 @@ auto MS5611::init(Params const& params) -> bool
 
 void MS5611::process()
 {
-    m_pressures.clear();
-    m_temperatures.clear();
+    m_barometer.samples.clear();
+    m_thermometer.samples.clear();
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
@@ -186,7 +186,7 @@ void MS5611::process()
         if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_temperature_reading = val;
+            m_thermometer.reading = val;
 
         }
 
@@ -202,7 +202,7 @@ void MS5611::process()
         if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_pressure_reading = val;
+            m_barometer.reading = val;
         }
 
         //next
@@ -245,7 +245,7 @@ void MS5611::calculate(q::Clock::duration dt)
     // Formulas from manufacturer datasheet
     // sub -20c temperature compensation is not included
 
-    double dT = m_temperature_reading - m_c5 * 256.0;
+    double dT = m_thermometer.reading - m_c5 * 256.0;
     double TEMP = 2000.0 + (dT * m_c6)*0.00000011920928955078125;
     double OFF = m_c2 * 65536.0 + (m_c4 * dT) * 0.0078125;
     double SENS = m_c1 * 32768.0 + (m_c3 * dT) * 0.00390625;
@@ -263,20 +263,20 @@ void MS5611::calculate(q::Clock::duration dt)
     }
 
     auto t = static_cast<float>(TEMP) * 0.01;
-    auto p = static_cast<float>((m_pressure_reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+    auto p = static_cast<float>((m_barometer.reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
     Thermometer_Sample ts;
     ts.value.value = t;
-    ts.sample_idx = ++m_thermometer_sample_idx;
+    ts.sample_idx = ++m_thermometer.sample_idx;
     ts.dt = dt;
-    m_temperatures.push_back(ts);
+    m_thermometer.samples.push_back(ts);
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
 
     Barometer_Sample bs;
     bs.value.value = t;
-    bs.sample_idx = ++m_barometer_sample_idx;
+    bs.sample_idx = ++m_barometer.sample_idx;
     bs.dt = dt;
-    m_pressures.push_back(bs);
+    m_barometer.samples.push_back(bs);
 
 //    static Butterworth xxx;
 //    m_pressure = xxx.process(m_pressure.get());
@@ -285,17 +285,6 @@ void MS5611::calculate(q::Clock::duration dt)
 
     //LOG_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
-
-auto MS5611::get_barometer_samples() const -> std::vector<Barometer_Sample> const&
-{
-    return m_pressures;
-}
-
-auto MS5611::get_thermometer_samples() const -> std::vector<Thermometer_Sample> const&
-{
-    return m_temperatures;
-}
-
 
 }
 }

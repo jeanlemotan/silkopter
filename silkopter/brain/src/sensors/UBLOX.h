@@ -28,9 +28,8 @@ public:
 
     void process();
 
-    auto get_gps_name() const -> q::String const&;
-
-    auto get_gps_samples() const -> std::vector<GPS_Sample> const&;
+    auto get_name() const -> q::String const&;
+    auto get_samples() const -> std::vector<GPS_Sample> const&;
 
 private:
     auto init(Params const& params) -> bool;

@@ -37,7 +37,7 @@ SRF02::SRF02(const q::String &name)
 
 }
 
-auto SRF02::get_sonar_name() const -> q::String const&
+auto SRF02::get_name() const -> q::String const&
 {
     return m_name;
 }
@@ -120,7 +120,7 @@ void SRF02::process()
     }
 }
 
-auto SRF02::get_sonar_samples() const -> std::vector<Sonar_Sample> const&
+auto SRF02::get_samples() const -> std::vector<Sonar_Sample> const&
 {
     return m_samples;
 }

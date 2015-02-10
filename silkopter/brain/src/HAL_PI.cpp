@@ -42,8 +42,8 @@
 #include "sensors/MPU9250.h"
 #include "sensors/MS5611.h"
 #include "sensors/RC5T619.h"
-#include "sensors/ADC_Voltmeter.h"
-#include "sensors/ADC_Ammeter.h"
+//#include "sensors/ADC_Voltmeter.h"
+//#include "sensors/ADC_Ammeter.h"
 #include "sensors/SRF02.h"
 #include "sensors/UBLOX.h"
 
@@ -73,10 +73,10 @@ struct HAL_Pi::Hardware
         std::vector<sensors::MPU9250_uptr> mpu9250s;
         std::vector<sensors::UBLOX_uptr> ubloxes;
         std::vector<sensors::MS5611_uptr> ms5611s;
-        sensors::RC5T619_uptr rc5t619s;
+        std::vector<sensors::RC5T619_uptr> rc5t619s;
         std::vector<sensors::SRF02_uptr> srf02s;
-        std::vector<sensors::ADC_Voltmeter_uptr> adc_voltmeters;
-        std::vector<sensors::ADC_Ammeter_uptr> adc_ammeters;
+//        std::vector<sensors::ADC_Voltmeter_uptr> adc_voltmeters;
+//        std::vector<sensors::ADC_Ammeter_uptr> adc_ammeters;
     } sensors;
 
     struct
@@ -95,6 +95,7 @@ struct HAL_Pi::Hardware
     std::vector<sensors::ICompass*> compasses;
     std::vector<sensors::IBarometer*> barometers;
     std::vector<sensors::IThermometer*> thermometers;
+    std::vector<sensors::IADC*> adcs;
     std::vector<sensors::IVoltmeter*> voltmeters;
     std::vector<sensors::IAmmeter*> ammeters;
     std::vector<sensors::IGPS*> gpses;
@@ -187,7 +188,7 @@ auto HAL_Pi::get_all_i2cs() const       -> std::vector<buses::II2C*> const&
 auto HAL_Pi::find_i2c_by_name(q::String const& name) const -> buses::II2C*
 {
     auto it = std::find_if(m_hw->i2cs.begin(), m_hw->i2cs.end(),
-                           [&](buses::II2C* s) { return s->get_i2c_name() == name; });
+                           [&](buses::II2C* s) { return s->get_name() == name; });
     return it != m_hw->i2cs.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_spis() const       -> std::vector<buses::ISPI*> const&
@@ -197,7 +198,7 @@ auto HAL_Pi::get_all_spis() const       -> std::vector<buses::ISPI*> const&
 auto HAL_Pi::find_spi_by_name(q::String const& name) const -> buses::ISPI*
 {
     auto it = std::find_if(m_hw->spis.begin(), m_hw->spis.end(),
-                           [&](buses::ISPI* s) { return s->get_spi_name() == name; });
+                           [&](buses::ISPI* s) { return s->get_name() == name; });
     return it != m_hw->spis.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_uarts() const      -> std::vector<buses::IUART*> const&
@@ -207,7 +208,7 @@ auto HAL_Pi::get_all_uarts() const      -> std::vector<buses::IUART*> const&
 auto HAL_Pi::find_uart_by_name(q::String const& name) const -> buses::IUART*
 {
     auto it = std::find_if(m_hw->uarts.begin(), m_hw->uarts.end(),
-                           [&](buses::IUART* s) { return s->get_uart_name() == name; });
+                           [&](buses::IUART* s) { return s->get_name() == name; });
     return it != m_hw->uarts.end() ? *it : nullptr;
 }
 
@@ -218,7 +219,7 @@ auto HAL_Pi::get_all_cameras() const        -> std::vector<sensors::ICamera*> co
 auto HAL_Pi::find_camera_by_name(q::String const& name) const -> sensors::ICamera*
 {
     auto it = std::find_if(m_hw->cameras.begin(), m_hw->cameras.end(),
-                           [&](sensors::ICamera* s) { return s->get_camera_name() == name; });
+                           [&](sensors::ICamera* s) { return s->get_name() == name; });
     return it != m_hw->cameras.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_accelerometers() const -> std::vector<sensors::IAccelerometer*> const&
@@ -228,7 +229,7 @@ auto HAL_Pi::get_all_accelerometers() const -> std::vector<sensors::IAcceleromet
 auto HAL_Pi::find_accelerometer_by_name(q::String const& name) const -> sensors::IAccelerometer*
 {
     auto it = std::find_if(m_hw->accelerometers.begin(), m_hw->accelerometers.end(),
-                           [&](sensors::IAccelerometer* s) { return s->get_accelerometer_name() == name; });
+                           [&](sensors::IAccelerometer* s) { return s->get_name() == name; });
     return it != m_hw->accelerometers.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_gyroscopes() const     -> std::vector<sensors::IGyroscope*> const&
@@ -238,7 +239,7 @@ auto HAL_Pi::get_all_gyroscopes() const     -> std::vector<sensors::IGyroscope*>
 auto HAL_Pi::find_gyroscope_by_name(q::String const& name) const -> sensors::IGyroscope*
 {
     auto it = std::find_if(m_hw->gyroscopes.begin(), m_hw->gyroscopes.end(),
-                           [&](sensors::IGyroscope* s) { return s->get_gyroscope_name() == name; });
+                           [&](sensors::IGyroscope* s) { return s->get_name() == name; });
     return it != m_hw->gyroscopes.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_compasses() const      -> std::vector<sensors::ICompass*> const&
@@ -248,7 +249,7 @@ auto HAL_Pi::get_all_compasses() const      -> std::vector<sensors::ICompass*> c
 auto HAL_Pi::find_compass_by_name(q::String const& name) const -> sensors::ICompass*
 {
     auto it = std::find_if(m_hw->compasses.begin(), m_hw->compasses.end(),
-                           [&](sensors::ICompass* s) { return s->get_compass_name() == name; });
+                           [&](sensors::ICompass* s) { return s->get_name() == name; });
     return it != m_hw->compasses.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_barometers() const     -> std::vector<sensors::IBarometer*> const&
@@ -258,7 +259,7 @@ auto HAL_Pi::get_all_barometers() const     -> std::vector<sensors::IBarometer*>
 auto HAL_Pi::find_barometer_by_name(q::String const& name) const -> sensors::IBarometer*
 {
     auto it = std::find_if(m_hw->barometers.begin(), m_hw->barometers.end(),
-                           [&](sensors::IBarometer* s) { return s->get_barometer_name() == name; });
+                           [&](sensors::IBarometer* s) { return s->get_name() == name; });
     return it != m_hw->barometers.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_thermometers() const   -> std::vector<sensors::IThermometer*> const&
@@ -268,8 +269,18 @@ auto HAL_Pi::get_all_thermometers() const   -> std::vector<sensors::IThermometer
 auto HAL_Pi::find_thermometer_by_name(q::String const& name) const -> sensors::IThermometer*
 {
     auto it = std::find_if(m_hw->thermometers.begin(), m_hw->thermometers.end(),
-                           [&](sensors::IThermometer* s) { return s->get_thermometer_name() == name; });
+                           [&](sensors::IThermometer* s) { return s->get_name() == name; });
     return it != m_hw->thermometers.end() ? *it : nullptr;
+}
+auto HAL_Pi::get_all_adcs() const     -> std::vector<sensors::IADC*> const&
+{
+    return m_hw->adcs;
+}
+auto HAL_Pi::find_adc_by_name(q::String const& name) const -> sensors::IADC*
+{
+    auto it = std::find_if(m_hw->adcs.begin(), m_hw->adcs.end(),
+                           [&](sensors::IADC* s) { return s->get_name() == name; });
+    return it != m_hw->adcs.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_voltmeters() const     -> std::vector<sensors::IVoltmeter*> const&
 {
@@ -278,7 +289,7 @@ auto HAL_Pi::get_all_voltmeters() const     -> std::vector<sensors::IVoltmeter*>
 auto HAL_Pi::find_voltmeter_by_name(q::String const& name) const -> sensors::IVoltmeter*
 {
     auto it = std::find_if(m_hw->voltmeters.begin(), m_hw->voltmeters.end(),
-                           [&](sensors::IVoltmeter* s) { return s->get_voltmeter_name() == name; });
+                           [&](sensors::IVoltmeter* s) { return s->get_name() == name; });
     return it != m_hw->voltmeters.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_ammeters() const       -> std::vector<sensors::IAmmeter*> const&
@@ -288,7 +299,7 @@ auto HAL_Pi::get_all_ammeters() const       -> std::vector<sensors::IAmmeter*> c
 auto HAL_Pi::find_ammeter_by_name(q::String const& name) const -> sensors::IAmmeter*
 {
     auto it = std::find_if(m_hw->ammeters.begin(), m_hw->ammeters.end(),
-                           [&](sensors::IAmmeter* s) { return s->get_ammeter_name() == name; });
+                           [&](sensors::IAmmeter* s) { return s->get_name() == name; });
     return it != m_hw->ammeters.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_gpses() const          -> std::vector<sensors::IGPS*> const&
@@ -298,7 +309,7 @@ auto HAL_Pi::get_all_gpses() const          -> std::vector<sensors::IGPS*> const
 auto HAL_Pi::find_gps_by_name(q::String const& name) const -> sensors::IGPS*
 {
     auto it = std::find_if(m_hw->gpses.begin(), m_hw->gpses.end(),
-                           [&](sensors::IGPS* s) { return s->get_gps_name() == name; });
+                           [&](sensors::IGPS* s) { return s->get_name() == name; });
     return it != m_hw->gpses.end() ? *it : nullptr;
 }
 auto HAL_Pi::get_all_sonars() const         -> std::vector<sensors::ISonar*> const&
@@ -308,7 +319,7 @@ auto HAL_Pi::get_all_sonars() const         -> std::vector<sensors::ISonar*> con
 auto HAL_Pi::find_sonar_by_name(q::String const& name) const -> sensors::ISonar*
 {
     auto it = std::find_if(m_hw->sonars.begin(), m_hw->sonars.end(),
-                           [&](sensors::ISonar* s) { return s->get_sonar_name() == name; });
+                           [&](sensors::ISonar* s) { return s->get_name() == name; });
     return it != m_hw->sonars.end() ? *it : nullptr;
 }
 
@@ -323,7 +334,7 @@ auto HAL_Pi::get_all_gimbals() const        -> std::vector<actuators::IGimbal*> 
 auto HAL_Pi::find_gimbal_by_name(q::String const& name) const -> actuators::IGimbal*
 {
     auto it = std::find_if(m_hw->gimbals.begin(), m_hw->gimbals.end(),
-                           [&](actuators::IGimbal* s) { return s->get_gimbal_name() == name; });
+                           [&](actuators::IGimbal* s) { return s->get_name() == name; });
     return it != m_hw->gimbals.end() ? *it : nullptr;
 }
 
@@ -353,8 +364,6 @@ auto HAL_Pi::is_actuator_name_unique(q::String const& name) const -> bool
 
 auto HAL_Pi::init() -> bool
 {
-    buses::II2C* phy_i2c0 = nullptr;
-
     {
         auto& settings = get_settings(q::Path("hal/buses"));
 
@@ -384,11 +393,6 @@ auto HAL_Pi::init() -> bool
             if (!bus->open(q::String(b.device)))
             {
                 return false;
-            }
-            if (b.device.find("i2c0") != std::string::npos)
-            {
-                //store this for the crappy odroid adc...
-                phy_i2c0 = bus.get();
             }
             m_hw->i2cs.push_back(bus.get());
             m_hw->buses.i2cs.push_back(std::move(bus));
@@ -483,18 +487,18 @@ auto HAL_Pi::init() -> bool
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_accelerometer_name()) ||
-                !is_sensor_name_unique(s->get_gyroscope_name()) ||
-                !is_sensor_name_unique(s->get_compass_name()) ||
-                !is_sensor_name_unique(s->get_thermometer_name()))
+            if (!is_sensor_name_unique(s->get_accelerometer().get_name()) ||
+                !is_sensor_name_unique(s->get_gyroscope().get_name()) ||
+                !is_sensor_name_unique(s->get_compass().get_name()) ||
+                !is_sensor_name_unique(s->get_thermometer().get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
             }
-            m_hw->accelerometers.push_back(s.get());
-            m_hw->gyroscopes.push_back(s.get());
-            m_hw->compasses.push_back(s.get());
-            m_hw->thermometers.push_back(s.get());
+            m_hw->accelerometers.push_back(&s->get_accelerometer());
+            m_hw->gyroscopes.push_back(&s->get_gyroscope());
+            m_hw->compasses.push_back(&s->get_compass());
+            m_hw->thermometers.push_back(&s->get_thermometer());
             m_hw->sensors.mpu9250s.push_back(std::move(s));
         }
 
@@ -527,14 +531,14 @@ auto HAL_Pi::init() -> bool
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_barometer_name()) ||
-                !is_sensor_name_unique(s->get_thermometer_name()))
+            if (!is_sensor_name_unique(s->get_barometer().get_name()) ||
+                !is_sensor_name_unique(s->get_thermometer().get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
             }
-            m_hw->barometers.push_back(s.get());
-            m_hw->thermometers.push_back(s.get());
+            m_hw->barometers.push_back(&s->get_barometer());
+            m_hw->thermometers.push_back(&s->get_thermometer());
             m_hw->sensors.ms5611s.push_back(std::move(s));
         }
 
@@ -558,7 +562,7 @@ auto HAL_Pi::init() -> bool
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_camera_name()))
+            if (!is_sensor_name_unique(s->get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
@@ -590,7 +594,7 @@ auto HAL_Pi::init() -> bool
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_sonar_name()))
+            if (!is_sensor_name_unique(s->get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
@@ -633,7 +637,7 @@ auto HAL_Pi::init() -> bool
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_gps_name()))
+            if (!is_sensor_name_unique(s->get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
@@ -643,36 +647,35 @@ auto HAL_Pi::init() -> bool
         }
         for (auto& b: sz.rc5t619)
         {
-            auto name = q::String(b->name);
+            auto name = q::String(b.name);
+            auto bus = q::String(b.bus);
             auto s = std::make_unique<sensors::RC5T619>(name);
 
             sensors::RC5T619::Params params;
-            params.rate = b->rate;
-            params.voltmeter_channel = b->voltmeter_channel;
-            params.ammeter_channel = b->ammeter_channel;
-            params.current_to_voltage_ratio = b->current_to_voltage_ratio;
-            if (phy_i2c0)
+            params.adc0_rate = b.adc0_rate;
+            params.adc1_ratio = b.adc1_ratio;
+            if (auto* d = find_i2c_by_name(bus))
             {
-                if (!s->init(phy_i2c0, params))
+                if (!s->init(d, params))
                 {
                     return false;
                 }
             }
             else
             {
-                QLOGE("You need to configure the physical i2c0 bus for the OdroidW ADC.");
+                QLOGE("Invalid bus for RC5T619: {}", bus);
                 return false;
             }
 
-            if (!is_sensor_name_unique(s->get_voltmeter_name()) ||
-                !is_sensor_name_unique(s->get_ammeter_name()))
+            if (!is_sensor_name_unique(s->get_adc0().get_name()) ||
+                !is_sensor_name_unique(s->get_adc1().get_name()))
             {
                 QLOGE("Duplicated sensor name: {}", name);
                 return false;
             }
-            m_hw->voltmeters.push_back(s.get());
-            m_hw->ammeters.push_back(s.get());
-            m_hw->sensors.odroid_adcs = std::move(s);
+            m_hw->adcs.push_back(&s->get_adc0());
+            m_hw->adcs.push_back(&s->get_adc1());
+            m_hw->sensors.rc5t619s.push_back(std::move(s));
         }
     }
 

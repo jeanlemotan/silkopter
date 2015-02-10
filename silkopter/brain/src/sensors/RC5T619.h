@@ -12,6 +12,8 @@ namespace sensors
 class RC5T619 : q::util::Noncopyable
 {
 public:
+    RC5T619(q::String const& name);
+
     struct Params
     {
         size_t adc0_rate = 50;
@@ -22,8 +24,8 @@ public:
 
     void process();
 
-    auto get_adc0() const -> IADC*;
-    auto get_adc1() const -> IADC*;
+    auto get_adc0() -> IADC&;
+    auto get_adc1() -> IADC&;
 
 private:
     auto init(Params const& params) -> bool;
@@ -32,9 +34,6 @@ private:
 
     Params m_params;
 
-    q::String m_voltmeter_name;
-    q::String m_ammeter_name;
-
     q::Clock::time_point m_last_time_point = q::Clock::now();
     q::Clock::duration m_dt;
 
@@ -42,18 +41,16 @@ private:
 
     struct ADC : public IADC
     {
-        auto get_adc_name() const -> q::String const& { return name; }
+        auto get_name() const -> q::String const& { return name; }
     //    void set_adc_config(Config const& config);
     //    auto get_adc_config() const -> Config const&;
-        auto get_adc_samples() const -> std::vector<ADC_Sample> const& { return samples; }
+        auto get_samples() const -> std::vector<ADC_Sample> const& { return samples; }
 
         q::String name;
-        std::vector<Ammeter_Sample> samples;
+        std::vector<ADC_Sample> samples;
         q::Clock::time_point last_time_point = q::Clock::now();
         uint32_t sample_idx = 0;
     } m_adc[2];
-
-    q::Clock::duration m_dt;
 };
 
 

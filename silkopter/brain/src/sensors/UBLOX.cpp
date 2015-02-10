@@ -168,7 +168,7 @@ UBLOX::~UBLOX()
 {
 }
 
-auto UBLOX::get_gps_name() const -> q::String const&
+auto UBLOX::get_name() const -> q::String const&
 {
     return m_name;
 }
@@ -686,7 +686,7 @@ void UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto UBLOX::get_gps_samples() const -> std::vector<GPS_Sample> const&
+auto UBLOX::get_samples() const -> std::vector<GPS_Sample> const&
 {
     return m_sample.samples;
 }

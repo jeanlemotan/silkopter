@@ -31,7 +31,7 @@ public:
     auto init(Params const& params) -> bool;
     void shutdown();
 
-    auto get_camera_name() const -> q::String const&;
+    auto get_name() const -> q::String const&;
 
     //----------------------------------------------------------------------
 

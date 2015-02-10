@@ -114,6 +114,13 @@ constexpr uint8_t RC5T619_AIN0_DATAL	 = 0x77;
 constexpr uint8_t CONVERT_ADC0           = 0x17;
 constexpr uint8_t CONVERT_ADC1           = 0x16;
 
+RC5T619::RC5T619(q::String const& name)
+{
+    m_adc[0].name = name + "_adc0";
+    m_adc[1].name = name + "_adc1";
+}
+
+
 auto RC5T619::init(buses::II2C* bus, Params const& params) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
@@ -198,13 +205,13 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            Voltmeter_Sample sample;
+            ADC_Sample sample;
             sample.value.value = result;
-            sample.dt = now - m_adc_voltage.last_time_point;
-            sample.sample_idx = ++m_adc_voltage.sample_idx;
-            m_adc_voltage.samples.push_back(sample);
+            sample.dt = now - m_adc[1].last_time_point;
+            sample.sample_idx = ++m_adc[1].sample_idx;
+            m_adc[1].samples.push_back(sample);
 
-            m_adc_voltage.last_time_point = now;
+            m_adc[1].last_time_point = now;
         }
 
         //next
@@ -222,13 +229,13 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            Ammeter_Sample sample;
+            ADC_Sample sample;
             sample.value.value = result;
-            sample.dt = now - m_adc_current.last_time_point;
-            sample.sample_idx = ++m_adc_current.sample_idx;
-            m_adc_current.samples.push_back(sample);
+            sample.dt = now - m_adc[0].last_time_point;
+            sample.sample_idx = ++m_adc[0].sample_idx;
+            m_adc[0].samples.push_back(sample);
 
-            m_adc_current.last_time_point = now;
+            m_adc[0].last_time_point = now;
         }
 
         //next
@@ -246,13 +253,13 @@ void RC5T619::process()
     }
 }
 
-auto RC5T619::get_adc0() const -> IADC*
+auto RC5T619::get_adc0() -> IADC&
 {
-    return &m_adc[0];
+    return m_adc[0];
 }
-auto RC5T619::get_adc1() const -> IADC*
+auto RC5T619::get_adc1() -> IADC&
 {
-    return &m_adc[1];
+    return m_adc[1];
 }
 
 
