@@ -1,6 +1,8 @@
 #pragma once
 
 #include "boost/optional.hpp"
+#include <set>
+#include <vector>
 
 namespace q
 {
@@ -623,6 +625,28 @@ namespace formatting
 			format_string(dst, ph, "<none>");
 		}
 	}
+
+    template<class Dst_String, class Placeholder, class T>
+    void format_string(Dst_String& dst, Placeholder const& ph, std::vector<T> const& container)
+    {
+        if (container.empty())
+        {
+            format_string(dst, ph, "<none>");
+        }
+        else
+        {
+            format_string(dst, ph, '{');
+            for (auto& x: container)
+            {
+                format_string(dst, ph, x);
+                if (&x != &container.back())
+                {
+                    format_string(dst, ph, ',');
+                }
+            }
+            format_string(dst, ph, '}');
+        }
+    }
 
 #endif
 
