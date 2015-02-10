@@ -106,6 +106,9 @@ public:
 	//returns the last path element - if it exists or null if not found. This usually represents the filename (name + extension)
 	auto get_filename() const -> String;
 
+    auto pop_front() -> String;
+    auto pop_back() -> String;
+
 	static const Path				null;
 
 private:
@@ -629,6 +632,29 @@ inline auto Path::get_name_part() const -> String
 	}
 	return String::null;
 }
+
+inline auto Path::pop_front() -> String
+{
+    if (m_elements.empty())
+    {
+        return String::null;
+    }
+    auto s = m_elements.front();
+    m_elements.erase(m_elements.begin());
+    return s;
+}
+inline auto Path::pop_back() -> String
+{
+    if (m_elements.empty())
+    {
+        return String::null;
+    }
+    auto s = m_elements.back();
+    m_elements.pop_back();
+    return s;
+}
+
+
 inline auto Path::get_hash() const -> size_t
 {
 	size_t hash = m_hash;
