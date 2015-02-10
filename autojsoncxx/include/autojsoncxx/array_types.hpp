@@ -30,6 +30,7 @@
 #include <deque>
 #include <stack>
 #include <cassert>
+#include <iterator>
 
 #if AUTOJSONCXX_HAS_MODERN_TYPES
 #include <array>
@@ -43,7 +44,7 @@ private:
     ElementType current;
     SAXEventHandler<ElementType> internal_handler;
     utility::scoped_ptr<error::ErrorBase> the_error;
-    std::stack<signed char> state;
+    utility::stack<signed char, 32> state;
     // A stack of StartArray() and StartObject() event
     // must be recorded, so we know when the current
     // element has been fully parsed, and needs to be
@@ -208,6 +209,9 @@ public:
 
     void PrepareForReuse()
     {
+        the_error.reset();
+        state.clear();
+        internal_handler.PrepareForReuse();
     }
 };
 
@@ -312,7 +316,7 @@ struct ContainerSerializer {
         w.StartArray();
         for (ConstIteratorType it = con.begin(), end = con.end(); it != end; ++it)
             Serializer<Writer, ValueType>()(w, *it);
-        w.EndArray();
+        w.EndArray(static_cast<SizeType>(std::distance(con.begin(), con.end())));
     }
 };
 

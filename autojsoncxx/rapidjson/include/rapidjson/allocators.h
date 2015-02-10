@@ -23,7 +23,7 @@
 
 #include "rapidjson.h"
 
-namespace rapidjson {
+RAPIDJSON_NAMESPACE_BEGIN
 
 ///////////////////////////////////////////////////////////////////////////////
 // Allocator
@@ -104,9 +104,6 @@ public:
     MemoryPoolAllocator(size_t chunkSize = kDefaultChunkCapacity, BaseAllocator* baseAllocator = 0) : 
         chunkHead_(0), chunk_capacity_(chunkSize), userBuffer_(0), baseAllocator_(baseAllocator), ownBaseAllocator_(0)
     {
-        if (!baseAllocator_)
-            ownBaseAllocator_ = baseAllocator_ = new BaseAllocator();
-        AddChunk(chunk_capacity_);
     }
 
     //! Constructor with user-supplied buffer.
@@ -135,7 +132,7 @@ public:
     */
     ~MemoryPoolAllocator() {
         Clear();
-        delete ownBaseAllocator_;
+        RAPIDJSON_DELETE(ownBaseAllocator_);
     }
 
     //! Deallocates all memory chunks, excluding the user-supplied buffer.
@@ -216,6 +213,8 @@ private:
     /*! \param capacity Capacity of the chunk in bytes.
     */
     void AddChunk(size_t capacity) {
+        if (!baseAllocator_)
+            ownBaseAllocator_ = baseAllocator_ = RAPIDJSON_NEW(BaseAllocator());
         ChunkHeader* chunk = reinterpret_cast<ChunkHeader*>(baseAllocator_->Malloc(sizeof(ChunkHeader) + capacity));
         chunk->capacity = capacity;
         chunk->size = 0;
@@ -241,6 +240,6 @@ private:
     BaseAllocator* ownBaseAllocator_;   //!< base allocator created by this object.
 };
 
-} // namespace rapidjson
+RAPIDJSON_NAMESPACE_END
 
 #endif // RAPIDJSON_ENCODINGS_H_

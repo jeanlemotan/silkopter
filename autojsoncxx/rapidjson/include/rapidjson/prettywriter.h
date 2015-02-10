@@ -28,7 +28,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
-namespace rapidjson {
+RAPIDJSON_NAMESPACE_BEGIN
 
 //! Writer with indentation and spacing.
 /*!
@@ -81,6 +81,12 @@ public:
         PrettyPrefix(kStringType);
         return Base::WriteString(str, length);
     }
+
+#if RAPIDJSON_HAS_STDSTRING
+    bool String(const std::basic_string<Ch>& str) {
+      return String(str.data(), SizeType(str.size()));
+    }
+#endif
 
     bool StartObject() {
         PrettyPrefix(kObjectType);
@@ -196,7 +202,7 @@ private:
     PrettyWriter& operator=(const PrettyWriter&);
 };
 
-} // namespace rapidjson
+RAPIDJSON_NAMESPACE_END
 
 #ifdef __GNUC__
 RAPIDJSON_DIAG_POP

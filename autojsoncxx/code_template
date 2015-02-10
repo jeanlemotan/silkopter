@@ -326,7 +326,9 @@ public:
     {
         depth = 0;
         state = -1;
+        the_error.reset();
         reset_flags();
+        /* call PrepareForReuse */
     }
 };
 
@@ -339,7 +341,7 @@ struct Serializer< /* Writer */, /* TypeName */ > {
 
         /* serialize all members */
 
-        w.EndObject();
+        w.EndObject(/* count of members */);
     }
 
 };

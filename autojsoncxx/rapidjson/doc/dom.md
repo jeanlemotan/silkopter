@@ -112,9 +112,13 @@ The `parseFlags` are combination of the following bit-flags:
 
 Parse flags                   | Meaning
 ------------------------------|-----------------------------------
-`kParseDefaultFlags = 0`      | Default parse flags. 
+`kParseNoFlags`               | No flag is set.
+`kParseDefaultFlags`          | Default parse flags. It is equal to macro `RAPIDJSON_PARSE_DEFAULT_FLAGS`, which is defined as `kParseNoFlags`.
 `kParseInsituFlag`            | In-situ(destructive) parsing.
 `kParseValidateEncodingFlag`  | Validate encoding of JSON strings.
+`kParseIterativeFlag`         | Iterative(constant complexity in terms of function call stack size) parsing.
+`kParseStopWhenDoneFlag`      | After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate `kParseErrorDocumentRootNotSingular` error. Using this flag for parsing multiple JSONs in the same stream.
+`kParseFullPrecisionFlag`     | Parse number in full precision (slower). If this flag is not set, the normal precision (faster) is used. Normal precision has maximum 3 [ULP](http://en.wikipedia.org/wiki/Unit_in_the_last_place) error.
 
 By using a non-type template parameter, instead of a function parameter, C++ compiler can generate code which is optimized for specified combinations, improving speed, and reducing code size (if only using a single specialization). The downside is the flags needed to be determined in compile-time.
 
@@ -130,7 +134,6 @@ Parse Error Code                            | Description
 --------------------------------------------|---------------------------------------------------
 `kParseErrorNone`                           | No error.
 `kParseErrorDocumentEmpty`                  | The document is empty.
-`kParseErrorDocumentRootNotObjectOrArray`   | The document root must be either object or array.
 `kParseErrorDocumentRootNotSingular`        | The document root must not follow by other values.
 `kParseErrorValueInvalid`                   | Invalid value.
 `kParseErrorObjectMissName`                 | Missing a name for object member.

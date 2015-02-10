@@ -36,6 +36,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <stack>
 
 using namespace autojsoncxx;
 using namespace config;
@@ -66,6 +67,80 @@ inline Date create_date(int year, int month, int day)
     d.month = month;
     d.day = day;
     return d;
+}
+
+template <class T, std::size_t num_elements_per_node>
+inline bool is_consistent(const std::stack<T>& stk1, const utility::stack<T, num_elements_per_node>& stk2)
+{
+    if (stk1.empty() != stk2.empty())
+        return false;
+
+    if (stk1.size() != stk2.size())
+        return false;
+
+    if (!stk2.empty())
+        return stk1.top() == stk2.top();
+
+    return true;
+}
+
+TEST_CASE("Test for internal implementations", "[internal]")
+{
+    std::stack<std::string> standard_stack;
+    utility::stack<std::string, 2> test_stack;
+
+    enum operation_type {
+        PUSH,
+        POP
+    };
+
+    struct operation {
+        operation_type type;
+        std::string arg;
+
+        operation(operation_type type_)
+            : type(type_)
+        {
+        }
+
+        operation(operation_type type_, std::string arg_)
+            : type(type_)
+        {
+            arg.swap(arg_);
+        }
+    };
+
+    operation ops[] = {
+        operation(PUSH, "1"),
+        operation(POP),
+        operation(PUSH, "2"),
+        operation(PUSH, "3"),
+        operation(PUSH, "4"),
+        operation(PUSH, "5"),
+        operation(POP),
+        operation(POP),
+        operation(PUSH, "10"),
+        operation(POP),
+        operation(PUSH, "9")
+    };
+
+    for (std::size_t i = 0; i < sizeof(ops) / sizeof(*ops); ++i) {
+        switch (ops[i].type) {
+        case PUSH:
+            standard_stack.push(ops[i].arg);
+            test_stack.push(ops[i].arg);
+            break;
+
+        case POP:
+            standard_stack.pop();
+            test_stack.pop();
+            break;
+
+        default:
+            break;
+        }
+        REQUIRE(is_consistent(standard_stack, test_stack));
+    }
 }
 
 // If most of the cases fail, you probably set the work directory wrong.
@@ -337,10 +412,56 @@ TEST_CASE("Test for writing JSON", "[serialization]")
     }
     REQUIRE(users.size() == 2);
 
-    std::string output;
-    to_json_string(output, users);
+    REQUIRE(to_json_string(users) == read_all(AUTOJSONCXX_ROOT_DIRECTORY "/examples/success/user_array_compact.json"));
+}
 
-    REQUIRE(output == read_all(AUTOJSONCXX_ROOT_DIRECTORY "/examples/success/user_array_compact.json"));
+TEST_CASE("Test for DOM support", "[DOM]")
+{
+    rapidjson::Document doc;
+    ParsingResult err;
+    bool success = from_json_file(AUTOJSONCXX_ROOT_DIRECTORY "/examples/success/user_array_compact.json", doc, err);
+    {
+        CAPTURE(err.description());
+        REQUIRE(success);
+    }
+
+    SECTION("Test for parsed result", "[DOM], [parsing]")
+    {
+        REQUIRE(doc.IsArray());
+        REQUIRE(doc.Size() == 2);
+
+        const rapidjson::Value& second = doc[1u];
+        REQUIRE(second["ID"].IsUint64());
+        REQUIRE(second["ID"].GetUint64() == 13478355757133566847ULL);
+        REQUIRE(second["block_event"].IsNull());
+        REQUIRE(second["dark_history"].IsArray());
+        REQUIRE(second["dark_history"][0u].IsObject());
+        REQUIRE(second["dark_history"][0u]["description"] == "copyright infringement");
+    }
+
+    SECTION("Test for serialization", "[DOM], [serialization]")
+    {
+        std::string output;
+        to_json_string(output, doc);
+        REQUIRE(output == read_all(AUTOJSONCXX_ROOT_DIRECTORY "/examples/success/user_array_compact.json"));
+    }
+
+    SECTION("Test for to/from DOM", "[DOM], [conversion]")
+    {
+        std::vector<User> users;
+        error::ErrorStack errs;
+
+        REQUIRE(from_document(users, doc, errs));
+
+        REQUIRE(users.size() == 2);
+        REQUIRE(users[0].birthday == create_date(1984, 9, 2));
+        REQUIRE(users[0].block_event);
+        REQUIRE(users[0].block_event->details == "most likely a troll");
+
+        rapidjson::Document another_doc;
+        to_document(users, another_doc);
+        REQUIRE(doc == another_doc);
+    }
 }
 
 #if AUTOJSONCXX_HAS_VARIADIC_TEMPLATE
@@ -371,5 +492,4 @@ TEST_CASE("Test for parsing tuple type", "[parsing], [tuple]")
         REQUIRE(static_cast<const error::TypeMismatchError&>(*err.begin()).actual_type() == "null");
     }
 }
-
 #endif

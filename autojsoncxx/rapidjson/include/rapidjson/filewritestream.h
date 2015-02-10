@@ -24,7 +24,7 @@
 #include "rapidjson.h"
 #include <cstdio>
 
-namespace rapidjson {
+RAPIDJSON_NAMESPACE_BEGIN
 
 //! Wrapper of C file stream for input using fread().
 /*!
@@ -34,7 +34,7 @@ class FileWriteStream {
 public:
     typedef char Ch;    //!< Character type. Only support char.
 
-    FileWriteStream(FILE* fp, char* buffer, size_t bufferSize) : fp_(fp), buffer_(buffer), bufferEnd_(buffer + bufferSize), current_(buffer_) { 
+    FileWriteStream(std::FILE* fp, char* buffer, size_t bufferSize) : fp_(fp), buffer_(buffer), bufferEnd_(buffer + bufferSize), current_(buffer_) { 
         RAPIDJSON_ASSERT(fp_ != 0);
     }
 
@@ -80,7 +80,7 @@ private:
     FileWriteStream(const FileWriteStream&);
     FileWriteStream& operator=(const FileWriteStream&);
 
-    FILE* fp_;
+    std::FILE* fp_;
     char *buffer_;
     char *bufferEnd_;
     char *current_;
@@ -92,6 +92,6 @@ inline void PutN(FileWriteStream& stream, char c, size_t n) {
     stream.PutN(c, n);
 }
 
-} // namespace rapidjson
+RAPIDJSON_NAMESPACE_END
 
 #endif // RAPIDJSON_FILESTREAM_H_

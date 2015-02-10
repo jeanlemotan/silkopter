@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cctype>
+#include <cassert>
 
 #if AUTOJSONCXX_MODERN_COMPILER
 #define AUTOJSONCXX_HAS_MODERN_TYPES 1
@@ -175,7 +176,7 @@ namespace utility {
             return *ptr;
         }
 
-        void reset(pointer_type p)
+        void reset(pointer_type p = 0)
         {
             Deleter()(ptr);
             ptr = p;
@@ -332,6 +333,119 @@ namespace utility {
         sb += '\"';
         return sb;
     }
+
+    // The standard std::stack is insufficient because it cannot handle noncopyable types in c++03
+    template <class T, std::size_t num_elements_per_node>
+    class stack {
+    private:
+        // The node is always allocated with new, so no need for alignment tuning
+        struct node {
+            char raw_storage[sizeof(T) * num_elements_per_node];
+            node* next;
+        };
+
+        node* head;
+        std::size_t current_size;
+        std::size_t total_size;
+
+    private:
+        void deallocate_current_node()
+        {
+            for (std::size_t i = 0; i < current_size; ++i)
+                reinterpret_cast<T*>(head->raw_storage + sizeof(T) * i)->~T();
+
+            current_size = num_elements_per_node;
+            node* next = head->next;
+            operator delete(head);
+            head = next;
+        }
+
+    private:
+        stack(const stack&);
+        stack& operator=(const stack&);
+
+    public:
+        explicit stack()
+            : head(0)
+            , current_size(num_elements_per_node)
+            , total_size(0)
+        {
+        }
+
+        T& emplace()
+        {
+            if (current_size == num_elements_per_node) {
+                // operator new always return memory maximumly aligned
+                node* new_node = static_cast<node*>(operator new(sizeof(*new_node)));
+                new_node->next = head;
+                head = new_node;
+                current_size = 0;
+            }
+            T* result = new (head->raw_storage + sizeof(T) * current_size) T();
+            ++current_size;
+            ++total_size;
+            return *result;
+        }
+
+        void push(const T& value)
+        {
+            emplace() = value;
+        }
+
+        void push(T& value)
+        {
+            emplace() = value;
+        }
+
+        T& top()
+        {
+            return const_cast<T&>(static_cast<const stack<T, num_elements_per_node>*>(this)->top());
+        }
+
+        const T& top() const
+        {
+            assert(!empty());
+
+            // The below code triggers a warning about strict aliasing in some versions of gcc
+            // That is a false positive, because character type is allowed to alias any type
+            if (current_size > 0)
+                return *reinterpret_cast<T*>(head->raw_storage + sizeof(T) * (current_size - 1));
+            else
+                return *reinterpret_cast<T*>(head->next->raw_storage + sizeof(T) * (num_elements_per_node - 1));
+        }
+
+        void pop()
+        {
+            assert(!empty());
+            if (current_size == 0)
+                deallocate_current_node();
+            top().~T();
+            --current_size;
+            --total_size;
+        }
+
+        void clear()
+        {
+            while (head)
+                deallocate_current_node();
+            head = 0;
+        }
+
+        bool empty() const AUTOJSONCXX_NOEXCEPT
+        {
+            return total_size == 0;
+        }
+
+        std::size_t size() const AUTOJSONCXX_NOEXCEPT
+        {
+            return total_size;
+        }
+
+        ~stack()
+        {
+            clear();
+        }
+    };
 }
 
 namespace internal {
