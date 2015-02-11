@@ -381,7 +381,7 @@ void UAV::process_dead_reckoning()
     float sample_dts = q::Seconds(m_imu.last_accelerometer_sample.dt).count();
 
     //auto old_acceleration = m_linear_motion.acceleration;
-    math::vec3f acceleration = m_imu.last_accelerometer_sample.value.value;
+    math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
     //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
     auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
     //LOG_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
@@ -521,9 +521,9 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
     m_pids.yaw_rate.set_target(m_uav_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
-void UAV::process_rate_pids(sensor::Gyroscope_Sample const& sample)
+void UAV::process_rate_pids(node::IGyroscope::Sample const& sample)
 {
-    auto input = sample.value.value;
+    auto input = sample.value;
 
     m_pids.pitch_rate.set_input(input.x);
     m_pids.pitch_rate.process(sample.dt);

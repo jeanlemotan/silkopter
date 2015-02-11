@@ -5,9 +5,9 @@ extern size_t s_test;
 
 using namespace silk;
 
-void AHRS::process(sensor::Gyroscope_Sample const& gyroscope,
-                   sensor::Accelerometer_Sample const& accelerometer,
-                   sensor::Compass_Sample const& compass)
+void AHRS::process(node::IGyroscope::Sample const& gyroscope,
+                   node::IAccelerometer::Sample const& accelerometer,
+                   node::ICompass::Sample const& compass)
 {
     bool rotation_dirty = false;
     float av_length = 0.f;
@@ -19,7 +19,7 @@ void AHRS::process(sensor::Gyroscope_Sample const& gyroscope,
     {
         m_last_gyroscope_sample_idx = gyroscope.sample_idx;
 
-        auto omega = gyroscope.value.value;
+        auto omega = gyroscope.value;
         auto dts = q::Seconds(gyroscope.dt).count();
 
         auto theta = omega * dts;
@@ -47,7 +47,7 @@ void AHRS::process(sensor::Gyroscope_Sample const& gyroscope,
 //            m_b2e_quat = m_b2e_quat * dq;
 //            m_b2e_quat.normalize<math::safe>();
 
-            m_angular_velocity = gyroscope.value.value;
+            m_angular_velocity = gyroscope.value;
 //            m_euler += gyroscope.value.angular_velocity * dts;
 //            static int xxx = 0;
 //            xxx++;
@@ -69,8 +69,8 @@ void AHRS::process(sensor::Gyroscope_Sample const& gyroscope,
 
 //        LOG_INFO("{} / {}", accelerometer.value.acceleration, compass.value);
 
-        m_noisy_up_w = math::normalized<float, math::safe>(accelerometer.value.value); //acceleration points opposite of gravity - so up
-        m_noisy_front_w = math::normalized<float, math::safe>(compass.value.value); //this is always good
+        m_noisy_up_w = math::normalized<float, math::safe>(accelerometer.value); //acceleration points opposite of gravity - so up
+        m_noisy_front_w = math::normalized<float, math::safe>(compass.value); //this is always good
         m_noisy_right_w = math::normalized<float, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
         m_noisy_front_w = math::cross(m_noisy_right_w, m_noisy_up_w);
         //m_earth_frame_up = math::cross(m_earth_frame_right, m_earth_frame_front);

@@ -2,7 +2,7 @@
 
 #include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
-#include "common/sensors/Sensor_Samples.h"
+#include "common/node/Node_Data.h"
 #include "AHRS.h"
 #include "Battery.h"
 #include "Motor_Mixer.h"
@@ -134,20 +134,20 @@ private:
     void process_input();
     void process_camera_mount();
 
-    void process_rate_pids(sensor::Gyroscope_Sample const& sample);
+    void process_rate_pids(node::IGyroscope::Sample const& sample);
 
     struct IMU
     {
         Butterworth gyroscope_filter;
-        sensor::Gyroscope_Sample last_gyroscope_sample;
+        node::IGyroscope::Sample last_gyroscope_sample;
         Manual_Clock::time_point gyroscope_time_point;
 
         Butterworth accelerometer_filter;
-        sensor::Accelerometer_Sample last_accelerometer_sample;
+        node::IAccelerometer::Sample last_accelerometer_sample;
         Manual_Clock::time_point accelerometer_time_point;
 
         Butterworth compass_filter;
-        sensor::Compass_Sample last_compass_sample;
+        node::ICompass::Sample last_compass_sample;
         Manual_Clock::time_point compass_time_point;
 
         Manual_Clock clock;

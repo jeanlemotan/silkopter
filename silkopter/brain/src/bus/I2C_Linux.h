@@ -1,13 +1,13 @@
 #pragma once
 
-#include "interface/II2C.h"
+#include "common/node/II2C.h"
 
 namespace silk
 {
 namespace bus
 {
 
-class I2C_Linux : public II2C
+class I2C_Linux : public node::II2C
 {
 public:
     I2C_Linux(q::String const& name);

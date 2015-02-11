@@ -1,13 +1,13 @@
 #pragma once
 
-#include "interface/IUART.h"
+#include "common/node/IUART.h"
 
 namespace silk
 {
 namespace bus
 {
 
-class UART_Linux : public IUART
+class UART_Linux : public node::IUART
 {
 public:
     UART_Linux(q::String const& name);

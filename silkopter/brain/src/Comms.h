@@ -1,6 +1,15 @@
 #pragma once
 
-#include "common/sensors/Sensor_Samples.h"
+#include "common/node/IAccelerometer.h"
+#include "common/node/IGyroscope.h"
+#include "common/node/ICompass.h"
+#include "common/node/IBarometer.h"
+#include "common/node/IThermometer.h"
+#include "common/node/ISonar.h"
+#include "common/node/IGPS.h"
+#include "common/node/IAmmeter.h"
+#include "common/node/IVoltmeter.h"
+
 #include "common/Comm_Data.h"
 #include "HAL.h"
 #include "UAV.h"
@@ -77,29 +86,29 @@ private:
 
     struct Sensor_Samples
     {
-        sensor::Accelerometer_Sample accelerometer;
-        sensor::Gyroscope_Sample gyroscope;
-        sensor::Compass_Sample compass;
-        sensor::Barometer_Sample barometer;
-        sensor::Thermometer_Sample thermometer;
-        sensor::Sonar_Sample sonar;
-        sensor::Voltmeter_Sample voltage;
-        sensor::Ammeter_Sample current;
-        sensor::GPS_Sample gps;
+        node::IAccelerometer::Sample accelerometer;
+        node::IGyroscope::Sample gyroscope;
+        node::ICompass::Sample compass;
+        node::IBarometer::Sample barometer;
+        node::IThermometer::Sample thermometer;
+        node::ISonar::Sample sonar;
+        node::IVoltmeter::Sample voltage;
+        node::IAmmeter::Sample current;
+        node::IGPS::Sample gps;
         q::Clock::time_point last_sent_timestamp;
     } m_sensor_samples;
     struct Raw_Sensor_Samples
     {
         q::Clock::time_point last_sent;
-        std::vector<sensor::Accelerometer_Sample> accelerometer;
-        std::vector<sensor::Gyroscope_Sample> gyroscope;
-        std::vector<sensor::Compass_Sample> compass;
-        std::vector<sensor::Barometer_Sample> barometer;
-        std::vector<sensor::Thermometer_Sample> thermometer;
-        std::vector<sensor::Sonar_Sample> sonar;
-        std::vector<sensor::Voltmeter_Sample> voltage;
-        std::vector<sensor::Ammeter_Sample> current;
-        std::vector<sensor::GPS_Sample> gps;
+        std::vector<node::IAccelerometer::Sample> accelerometer;
+        std::vector<node::IGyroscope::Sample> gyroscope;
+        std::vector<node::ICompass::Sample> compass;
+        std::vector<node::IBarometer::Sample> barometer;
+        std::vector<node::IThermometer::Sample> thermometer;
+        std::vector<node::ISonar::Sample> sonar;
+        std::vector<node::IVoltmeter::Sample> voltage;
+        std::vector<node::IAmmeter::Sample> current;
+        std::vector<node::IGPS::Sample> gps;
     } m_raw_sensor_samples;
 
     HAL& m_hal;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "interface/ISPI.h"
+#include "common/node/ISPI.h"
 
 namespace silk
 {
 namespace bus
 {
 
-class SPI_Linux : public ISPI
+class SPI_Linux : public node::ISPI
 {
 public:
     SPI_Linux(q::String const& name);

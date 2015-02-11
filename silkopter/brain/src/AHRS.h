@@ -1,6 +1,8 @@
 #pragma once
 
-#include "common/sensors/Sensor_Samples.h"
+#include "common/node/IGyroscope.h"
+#include "common/node/IAccelerometer.h"
+#include "common/node/ICompass.h"
 
 namespace silk
 {
@@ -8,9 +10,9 @@ namespace silk
 class AHRS : q::util::Noncopyable
 {
 public:
-    void process(sensor::Gyroscope_Sample const& gyroscope,
-                 sensor::Accelerometer_Sample const& accelerometer,
-                 sensor::Compass_Sample const& compass);
+    void process(node::IGyroscope::Sample const& gyroscope,
+                 node::IAccelerometer::Sample const& accelerometer,
+                 node::ICompass::Sample const& compass);
 
     auto get_angular_velocity_l() const -> math::vec3f const&;
 

@@ -1,6 +1,14 @@
 #pragma once
 
-#include "common/sensors/Sensor_Samples.h"
+#include "common/node/IAccelerometer.h"
+#include "common/node/IGyroscope.h"
+#include "common/node/ICompass.h"
+#include "common/node/IBarometer.h"
+#include "common/node/IThermometer.h"
+#include "common/node/ISonar.h"
+#include "common/node/IGPS.h"
+#include "common/node/IAmmeter.h"
+#include "common/node/IVoltmeter.h"
 
 namespace silk
 {
@@ -35,25 +43,25 @@ public:
     //----------------------------------------------------------------------
     //sensors
 
-    virtual auto get_accelerometer_samples() const  -> std::vector<sensor::Accelerometer_Sample> const& = 0;
-    virtual auto get_gyroscope_samples() const      -> std::vector<sensor::Gyroscope_Sample> const& = 0;
-    virtual auto get_compass_samples() const        -> std::vector<sensor::Compass_Sample> const& = 0;
-    virtual auto get_barometer_samples() const      -> std::vector<sensor::Barometer_Sample> const& = 0;
-    virtual auto get_sonar_samples() const          -> std::vector<sensor::Sonar_Sample> const& = 0;
-    virtual auto get_thermometer_samples() const    -> std::vector<sensor::Thermometer_Sample> const& = 0;
-    virtual auto get_voltmeter_samples() const        -> std::vector<sensor::Voltmeter_Sample> const& = 0;
-    virtual auto get_ammeter_samples() const        -> std::vector<sensor::Ammeter_Sample> const& = 0;
-    virtual auto get_gps_samples() const            -> std::vector<sensor::GPS_Sample> const& = 0;
+    virtual auto get_accelerometer_samples() const  -> std::vector<node::IAccelerometer::Sample> const& = 0;
+    virtual auto get_gyroscope_samples() const      -> std::vector<node::IGyroscope::Sample> const& = 0;
+    virtual auto get_compass_samples() const        -> std::vector<node::ICompass::Sample> const& = 0;
+    virtual auto get_barometer_samples() const      -> std::vector<node::IBarometer::Sample> const& = 0;
+    virtual auto get_sonar_samples() const          -> std::vector<node::ISonar::Sample> const& = 0;
+    virtual auto get_thermometer_samples() const    -> std::vector<node::IThermometer::Sample> const& = 0;
+    virtual auto get_voltmeter_samples() const        -> std::vector<node::IVoltmeter::Sample> const& = 0;
+    virtual auto get_ammeter_samples() const        -> std::vector<node::IAmmeter::Sample> const& = 0;
+    virtual auto get_gps_samples() const            -> std::vector<node::IGPS::Sample> const& = 0;
 
-    virtual auto get_last_accelerometer_sample() const  -> sensor::Accelerometer_TP_Sample const& = 0;
-    virtual auto get_last_gyroscope_sample() const      -> sensor::Gyroscope_TP_Sample const& = 0;
-    virtual auto get_last_compass_sample() const        -> sensor::Compass_TP_Sample const& = 0;
-    virtual auto get_last_barometer_sample() const      -> sensor::Barometer_TP_Sample const& = 0;
-    virtual auto get_last_sonar_sample() const          -> sensor::Sonar_TP_Sample const& = 0;
-    virtual auto get_last_thermometer_sample() const    -> sensor::Thermometer_TP_Sample const& = 0;
-    virtual auto get_last_voltage_sample() const        -> sensor::Voltmeter_TP_Sample const& = 0;
-    virtual auto get_last_current_sample() const        -> sensor::Ammeter_TP_Sample const& = 0;
-    virtual auto get_last_gps_sample() const            -> sensor::GPS_TP_Sample const& = 0;
+    virtual auto get_last_accelerometer_sample() const  -> node::IAccelerometer::TP_Sample const& = 0;
+    virtual auto get_last_gyroscope_sample() const      -> node::IGyroscope::TP_Sample const& = 0;
+    virtual auto get_last_compass_sample() const        -> node::ICompass::TP_Sample const& = 0;
+    virtual auto get_last_barometer_sample() const      -> node::IBarometer::TP_Sample const& = 0;
+    virtual auto get_last_sonar_sample() const          -> node::ISonar::TP_Sample const& = 0;
+    virtual auto get_last_thermometer_sample() const    -> node::IThermometer::TP_Sample const& = 0;
+    virtual auto get_last_voltage_sample() const        -> node::IVoltmeter::TP_Sample const& = 0;
+    virtual auto get_last_current_sample() const        -> node::IAmmeter::TP_Sample const& = 0;
+    virtual auto get_last_gps_sample() const            -> node::IGPS::TP_Sample const& = 0;
 
     //----------------------------------------------------------------------
     virtual void process() = 0;

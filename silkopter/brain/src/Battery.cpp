@@ -62,7 +62,7 @@ Battery::Battery()
     load_state();
 }
 
-void Battery::process(const std::vector<sensor::Ammeter_Sample>& ammeter_samples, const std::vector<sensor::Voltmeter_Sample>& voltmeter_samples)
+void Battery::process(const std::vector<node::IAmmeter::Sample>& ammeter_samples, const std::vector<node::IVoltmeter::Sample>& voltmeter_samples)
 {
     {
         //samples started at this time point
@@ -72,10 +72,10 @@ void Battery::process(const std::vector<sensor::Ammeter_Sample>& ammeter_samples
         float h = 1.f / 3600.f;
         for (auto& s: ammeter_samples)
         {
-            m_capacity_used_mah += (s.value.value * m_last_current) * 0.5f * q::Seconds(s.dt).count() * h;
-            m_last_current = s.value.value;
+            m_capacity_used_mah += (s.value * m_last_current) * 0.5f * q::Seconds(s.dt).count() * h;
+            m_last_current = s.value;
 
-            m_ammeter_samples.emplace_back(start, s.value.value);
+            m_ammeter_samples.emplace_back(start, s.value);
             start += s.dt;
         }
         remove_old_samples(m_ammeter_samples, std::chrono::milliseconds(500));
@@ -90,9 +90,9 @@ void Battery::process(const std::vector<sensor::Ammeter_Sample>& ammeter_samples
         for (auto& s: voltmeter_samples)
         {
             //voltages lower than one cell are just measurement errors
-            if (s.value.value > MIN_CELL_VOLTAGE)
+            if (s.value > MIN_CELL_VOLTAGE)
             {
-                m_voltmeter_samples.emplace_back(start, s.value.value);
+                m_voltmeter_samples.emplace_back(start, s.value);
             }
             start += s.dt;
         }

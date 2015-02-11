@@ -77,12 +77,12 @@ rpi {
 
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
-    ../../src/device/MPU9250.cpp \
-    ../../src/device/MS5611.cpp \
-    ../../src/device/Raspicam.cpp \
-    ../../src/device/RC5T619.cpp \
-    ../../src/device/SRF02.cpp \
-    ../../src/device/UBLOX.cpp \
+    ../../src/hw_device/MPU9250.cpp \
+    ../../src/hw_device/MS5611.cpp \
+    ../../src/hw_device/Raspicam.cpp \
+    ../../src/hw_device/RC5T619.cpp \
+    ../../src/hw_device/SRF02.cpp \
+    ../../src/hw_device/UBLOX.cpp \
     ../../src/storage/Storage_FS.cpp \
     ../../src/storage/Storage_MB85RC.cpp \
     ../../src/AHRS.cpp \
@@ -96,12 +96,14 @@ SOURCES += \
     ../../src/Motors_PiGPIO.cpp \
     ../../src/Sim_Comms.cpp \
     ../../src/UAV.cpp \
-    ../../src/device/PIGPIO.cpp \
+    ../../src/hw_device/PIGPIO.cpp \
     ../../src/HAL.cpp \
     ../../src/HAL_old.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
-    ../../src/bus/I2C_Linux.cpp
+    ../../src/bus/I2C_Linux.cpp \
+    ../../src/sw_device/ADC_Ammeter.cpp \
+    ../../src/sw_device/ADC_Voltmeter.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -120,28 +122,12 @@ HEADERS += \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
-    ../../../libs/common/sensors/Sensor_Samples.h \
-    ../../src/device/MPU9250.h \
-    ../../src/device/MS5611.h \
-    ../../src/device/Raspicam.h \
-    ../../src/device/RC5T619.h \
-    ../../src/device/SRF02.h \
-    ../../src/device/UBLOX.h \
-    ../../src/interface/IAccelerometer.h \
-    ../../src/interface/IADC.h \
-    ../../src/interface/IAmmeter.h \
-    ../../src/interface/IBarometer.h \
-    ../../src/interface/ICamera.h \
-    ../../src/interface/ICompass.h \
-    ../../src/interface/IGPS.h \
-    ../../src/interface/IGyroscope.h \
-    ../../src/interface/II2C.h \
-    ../../src/interface/IPWM.h \
-    ../../src/interface/ISonar.h \
-    ../../src/interface/ISPI.h \
-    ../../src/interface/IThermometer.h \
-    ../../src/interface/IUART.h \
-    ../../src/interface/IVoltmeter.h \
+    ../../src/hw_device/MPU9250.h \
+    ../../src/hw_device/MS5611.h \
+    ../../src/hw_device/Raspicam.h \
+    ../../src/hw_device/RC5T619.h \
+    ../../src/hw_device/SRF02.h \
+    ../../src/hw_device/UBLOX.h \
     ../../src/storage/Storage_MB85RC.h \
     ../../src/Battery.h \
     ../../src/Gimbal_Servo_PiGPIO.h \
@@ -150,9 +136,27 @@ HEADERS += \
     ../../src/HAL_Sensors_Sim.h \
     ../../src/Motors_PiGPIO.h \
     ../../src/Sim_Comms.h \
-    ../../src/device/PIGPIO.h \
+    ../../src/hw_device/PIGPIO.h \
     ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
-    ../../src/bus/UART_Linux.h
+    ../../src/bus/UART_Linux.h \
+    ../../src/sw_device/ADC_Ammeter.h \
+    ../../src/sw_device/ADC_Voltmeter.h \
+    ../../../libs/common/node/IAccelerometer.h \
+    ../../../libs/common/node/IADC.h \
+    ../../../libs/common/node/IAmmeter.h \
+    ../../../libs/common/node/IBarometer.h \
+    ../../../libs/common/node/ICamera.h \
+    ../../../libs/common/node/ICompass.h \
+    ../../../libs/common/node/IGPS.h \
+    ../../../libs/common/node/IGyroscope.h \
+    ../../../libs/common/node/II2C.h \
+    ../../../libs/common/node/IPWM.h \
+    ../../../libs/common/node/ISonar.h \
+    ../../../libs/common/node/ISPI.h \
+    ../../../libs/common/node/IThermometer.h \
+    ../../../libs/common/node/IUART.h \
+    ../../../libs/common/node/IVoltmeter.h \
+    ../../../libs/common/node/Node_Data.h
 

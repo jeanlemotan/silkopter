@@ -21,15 +21,15 @@
 #include "bus/SPI_Linux.h"
 #include "bus/UART_Linux.h"
 
-#include "device/Raspicam.h"
-#include "device/MPU9250.h"
-#include "device/MS5611.h"
-#include "device/RC5T619.h"
-//#include "device/ADC_Voltmeter.h"
-//#include "device/ADC_Ammeter.h"
-#include "device/SRF02.h"
-#include "device/UBLOX.h"
-#include "device/PIGPIO.h"
+#include "hw_device/Raspicam.h"
+#include "hw_device/MPU9250.h"
+#include "hw_device/MS5611.h"
+#include "hw_device/RC5T619.h"
+#include "hw_device/SRF02.h"
+#include "hw_device/UBLOX.h"
+#include "hw_device/PIGPIO.h"
+#include "sw_device/ADC_Voltmeter.h"
+#include "sw_device/ADC_Ammeter.h"
 
 
 namespace silk
@@ -46,16 +46,22 @@ struct HAL::Hardware
         std::vector<bus::I2C_Linux_uptr> i2cs;
         std::vector<bus::SPI_Linux_uptr> spis;
         std::vector<bus::UART_Linux_uptr> uarts;
-        std::vector<device::Raspicam_uptr> raspicams;
-        std::vector<device::MPU9250_uptr> mpu9250s;
-        std::vector<device::UBLOX_uptr> ubloxes;
-        std::vector<device::MS5611_uptr> ms5611s;
-        std::vector<device::RC5T619_uptr> rc5t619s;
-        std::vector<device::SRF02_uptr> srf02s;
+    } buses;
+    struct
+    {
+        std::vector<hw_device::Raspicam_uptr> raspicams;
+        std::vector<hw_device::MPU9250_uptr> mpu9250s;
+        std::vector<hw_device::UBLOX_uptr> ubloxes;
+        std::vector<hw_device::MS5611_uptr> ms5611s;
+        std::vector<hw_device::RC5T619_uptr> rc5t619s;
+        std::vector<hw_device::SRF02_uptr> srf02s;
+        hw_device::PIGPIO_uptr pigpio;
+    } hw_devices;
+    struct
+    {
 //        std::vector<device::ADC_Voltmeter_uptr> adc_voltmeters;
 //        std::vector<device::ADC_Ammeter_uptr> adc_ammeters;
-        device::PIGPIO_uptr pigpio;
-    } devices;
+    } sw_devices;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -156,11 +162,11 @@ auto HAL::init() -> bool
             {
                 return false;
             }
-            if (!add_interface<bus::II2C>(bus.get()))
+            if (!add_interface<node::II2C>(bus.get()))
             {
                 return false;
             }
-            m_hw->devices.i2cs.push_back(std::move(bus));
+            m_hw->buses.i2cs.push_back(std::move(bus));
         }
         for (auto& b: sz.spi)
         {
@@ -169,11 +175,11 @@ auto HAL::init() -> bool
             {
                 return false;
             }
-            if (!add_interface<bus::ISPI>(bus.get()))
+            if (!add_interface<node::ISPI>(bus.get()))
             {
                 return false;
             }
-            m_hw->devices.spis.push_back(std::move(bus));
+            m_hw->buses.spis.push_back(std::move(bus));
         }
         for (auto& b: sz.uart)
         {
@@ -182,11 +188,11 @@ auto HAL::init() -> bool
             {
                 return false;
             }
-            if (!add_interface<bus::IUART>(bus.get()))
+            if (!add_interface<node::IUART>(bus.get()))
             {
                 return false;
             }
-            m_hw->devices.uarts.push_back(std::move(bus));
+            m_hw->buses.uarts.push_back(std::move(bus));
         }
     }
 
@@ -205,9 +211,9 @@ auto HAL::init() -> bool
 
         if (auto& b = sz.pigpio)
         {
-            auto s = std::make_unique<device::PIGPIO>(q::String(b->name));
+            auto s = std::make_unique<hw_device::PIGPIO>(q::String(b->name));
 
-            device::PIGPIO::Init_Params params;
+            hw_device::PIGPIO::Init_Params params;
             params.rate = std::chrono::microseconds(b->rate);
             for (size_t i = 0; i < b->pwm_channels.size(); i++)
             {
@@ -222,39 +228,39 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            for (size_t i = 0; i < device::PIGPIO::MAX_PWM_CHANNELS; i++)
+            for (size_t i = 0; i < hw_device::PIGPIO::MAX_PWM_CHANNELS; i++)
             {
                 auto* pwm = s->get_pwm_channel(i);
                 if (pwm)
                 {
-                    if (!add_interface<output::IPWM>(pwm))
+                    if (!add_interface<node::IPWM>(pwm))
                     {
                         return false;
                     }
                 }
             }
-            m_hw->devices.pigpio = std::move(s);
+            m_hw->hw_devices.pigpio = std::move(s);
         }
         for (auto& b: sz.mpu9250)
         {
             auto bus = q::String(b.bus);
-            auto s = std::make_unique<device::MPU9250>(q::String(b.name));
+            auto s = std::make_unique<hw_device::MPU9250>(q::String(b.name));
 
-            device::MPU9250::Init_Params params;
+            hw_device::MPU9250::Init_Params params;
             params.imu_rate = b.imu_rate;
             params.compass_rate = b.compass_rate;
             params.thermometer_rate = b.thermometer_rate;
             params.gyroscope_range = b.gyroscope_range;
             params.accelerometer_range = b.accelerometer_range;
 
-            if (auto* d = find_interface_by_name<bus::II2C>(bus))
+            if (auto* d = find_interface_by_name<node::II2C>(bus))
             {
                 if (!s->init(d, params))
                 {
                     return false;
                 }
             }
-            else if (auto* d = find_interface_by_name<bus::ISPI>(bus))
+            else if (auto* d = find_interface_by_name<node::ISPI>(bus))
             {
                 if (!s->init(d, params))
                 {
@@ -267,32 +273,32 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            if (!add_interface<sensor::IAccelerometer>(&s->get_accelerometer()) ||
-                !add_interface<sensor::IGyroscope>(&s->get_gyroscope()) ||
-                !add_interface<sensor::ICompass>(&s->get_compass()) ||
-                !add_interface<sensor::IThermometer>(&s->get_thermometer()))
+            if (!add_interface<node::IAccelerometer>(&s->get_accelerometer()) ||
+                !add_interface<node::IGyroscope>(&s->get_gyroscope()) ||
+                !add_interface<node::ICompass>(&s->get_compass()) ||
+                !add_interface<node::IThermometer>(&s->get_thermometer()))
             {
                 return false;
             }
-            m_hw->devices.mpu9250s.push_back(std::move(s));
+            m_hw->hw_devices.mpu9250s.push_back(std::move(s));
         }
 
         for (auto& b: sz.ms5611)
         {
             auto bus = q::String(b.bus);
-            auto s = std::make_unique<device::MS5611>(q::String(b.name));
+            auto s = std::make_unique<hw_device::MS5611>(q::String(b.name));
 
-            device::MS5611::Init_Params params;
+            hw_device::MS5611::Init_Params params;
             params.rate = b.rate;
             params.pressure_to_temperature_ratio = b.pressure_to_temperature_ratio;
-            if (auto* d = find_interface_by_name<bus::II2C>(bus))
+            if (auto* d = find_interface_by_name<node::II2C>(bus))
             {
                 if (!s->init(d, params))
                 {
                     return false;
                 }
             }
-            else if (auto* d = find_interface_by_name<bus::ISPI>(bus))
+            else if (auto* d = find_interface_by_name<node::ISPI>(bus))
             {
                 if (!s->init(d, params))
                 {
@@ -305,19 +311,19 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            if (!add_interface<sensor::IBarometer>(&s->get_barometer()) ||
-                !add_interface<sensor::IThermometer>(&s->get_thermometer()))
+            if (!add_interface<node::IBarometer>(&s->get_barometer()) ||
+                !add_interface<node::IThermometer>(&s->get_thermometer()))
             {
                 return false;
             }
-            m_hw->devices.ms5611s.push_back(std::move(s));
+            m_hw->hw_devices.ms5611s.push_back(std::move(s));
         }
 
         for (auto& b: sz.raspicam)
         {
-            auto s = std::make_unique<device::Raspicam>(q::String(b.name));
+            auto s = std::make_unique<hw_device::Raspicam>(q::String(b.name));
 
-            device::Raspicam::Init_Params params;
+            hw_device::Raspicam::Init_Params params;
             params.fps = b.fps;
             params.recording.resolution = b.recording.resolution;
             params.recording.bitrate = b.recording.bitrate;
@@ -332,23 +338,23 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            if (!add_interface<sensor::ICamera>(s.get()))
+            if (!add_interface<node::ICamera>(s.get()))
             {
                 return false;
             }
-            m_hw->devices.raspicams.push_back(std::move(s));
+            m_hw->hw_devices.raspicams.push_back(std::move(s));
         }
         for (auto& b: sz.srf02)
         {
             auto bus = q::String(b.bus);
-            auto s = std::make_unique<device::SRF02>(q::String(b.name));
+            auto s = std::make_unique<hw_device::SRF02>(q::String(b.name));
 
-            device::SRF02::Init_Params params;
+            hw_device::SRF02::Init_Params params;
             params.rate = b.rate;
             params.direction = b.direction;
             params.min_distance = b.min_distance;
             params.max_distance = b.max_distance;
-            if (auto* d = find_interface_by_name<bus::II2C>(bus))
+            if (auto* d = find_interface_by_name<node::II2C>(bus))
             {
                 if (!s->init(d, params))
                 {
@@ -361,34 +367,34 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            if (!add_interface<sensor::ISonar>(s.get()))
+            if (!add_interface<node::ISonar>(s.get()))
             {
                 return false;
             }
-            m_hw->devices.srf02s.push_back(std::move(s));
+            m_hw->hw_devices.srf02s.push_back(std::move(s));
         }
         for (auto& b: sz.ublox)
         {
             auto bus = q::String(b.bus);
-            auto s = std::make_unique<device::UBLOX>(q::String(b.name));
+            auto s = std::make_unique<hw_device::UBLOX>(q::String(b.name));
 
-            device::UBLOX::Init_Params params;
+            hw_device::UBLOX::Init_Params params;
             params.rate = b.rate;
-            if (auto* d = find_interface_by_name<bus::II2C>(bus))
+            if (auto* d = find_interface_by_name<node::II2C>(bus))
             {
                 if (!s->init(d, params))
                 {
                     return false;
                 }
             }
-            else if (auto* d = find_interface_by_name<bus::ISPI>(bus))
+            else if (auto* d = find_interface_by_name<node::ISPI>(bus))
             {
                 if (!s->init(d, params))
                 {
                     return false;
                 }
             }
-            else if (auto* d = find_interface_by_name<bus::IUART>(bus))
+            else if (auto* d = find_interface_by_name<node::IUART>(bus))
             {
                 if (!s->init(d, params))
                 {
@@ -401,18 +407,18 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            add_interface<sensor::IGPS>(s.get());
-            m_hw->devices.ubloxes.push_back(std::move(s));
+            add_interface<node::IGPS>(s.get());
+            m_hw->hw_devices.ubloxes.push_back(std::move(s));
         }
         for (auto& b: sz.rc5t619)
         {
             auto bus = q::String(b.bus);
-            auto s = std::make_unique<device::RC5T619>(q::String(b.name));
+            auto s = std::make_unique<hw_device::RC5T619>(q::String(b.name));
 
-            device::RC5T619::Init_Params params;
+            hw_device::RC5T619::Init_Params params;
             params.adc0_rate = b.adc0_rate;
             params.adc1_ratio = b.adc1_ratio;
-            if (auto* d = find_interface_by_name<bus::II2C>(bus))
+            if (auto* d = find_interface_by_name<node::II2C>(bus))
             {
                 if (!s->init(d, params))
                 {
@@ -425,12 +431,12 @@ auto HAL::init() -> bool
                 return false;
             }
 
-            if (!add_interface<sensor::IADC>(&s->get_adc0()) ||
-                !add_interface<sensor::IADC>(&s->get_adc1()))
+            if (!add_interface<node::IADC>(&s->get_adc0()) ||
+                !add_interface<node::IADC>(&s->get_adc1()))
             {
                 return false;
             }
-            m_hw->devices.rc5t619s.push_back(std::move(s));
+            m_hw->hw_devices.rc5t619s.push_back(std::move(s));
         }
     }
 

@@ -22,25 +22,25 @@ public:
     void set_compass_calibration_data(math::vec3f const& bias);
     void get_compass_calibration_data(math::vec3f& bias) const;
 
-    auto get_accelerometer_samples() const  -> std::vector<sensor::Accelerometer_Sample> const&;
-    auto get_gyroscope_samples() const      -> std::vector<sensor::Gyroscope_Sample> const&;
-    auto get_compass_samples() const        -> std::vector<sensor::Compass_Sample> const&;
-    auto get_barometer_samples() const      -> std::vector<sensor::Barometer_Sample> const&;
-    auto get_sonar_samples() const          -> std::vector<sensor::Sonar_Sample> const&;
-    auto get_thermometer_samples() const    -> std::vector<sensor::Thermometer_Sample> const&;
-    auto get_voltmeter_samples() const        -> std::vector<sensor::Voltmeter_Sample> const&;
-    auto get_ammeter_samples() const        -> std::vector<sensor::Ammeter_Sample> const&;
-    auto get_gps_samples() const            -> std::vector<sensor::GPS_Sample> const&;
+    auto get_accelerometer_samples() const  -> std::vector<node::IAccelerometer::Sample> const&;
+    auto get_gyroscope_samples() const      -> std::vector<node::IGyroscope::Sample> const&;
+    auto get_compass_samples() const        -> std::vector<node::ICompass::Sample> const&;
+    auto get_barometer_samples() const      -> std::vector<node::IBarometer::Sample> const&;
+    auto get_sonar_samples() const          -> std::vector<node::ISonar::Sample> const&;
+    auto get_thermometer_samples() const    -> std::vector<node::IThermometer::Sample> const&;
+    auto get_voltmeter_samples() const        -> std::vector<node::IVoltmeter::Sample> const&;
+    auto get_ammeter_samples() const        -> std::vector<node::IAmmeter::Sample> const&;
+    auto get_gps_samples() const            -> std::vector<node::IGPS::Sample> const&;
 
-    auto get_last_accelerometer_sample() const  -> sensor::Accelerometer_TP_Sample const&;
-    auto get_last_gyroscope_sample() const      -> sensor::Gyroscope_TP_Sample const&;
-    auto get_last_compass_sample() const        -> sensor::Compass_TP_Sample const&;
-    auto get_last_barometer_sample() const      -> sensor::Barometer_TP_Sample const&;
-    auto get_last_sonar_sample() const          -> sensor::Sonar_TP_Sample const&;
-    auto get_last_thermometer_sample() const    -> sensor::Thermometer_TP_Sample const&;
-    auto get_last_voltage_sample() const        -> sensor::Voltmeter_TP_Sample const&;
-    auto get_last_current_sample() const        -> sensor::Ammeter_TP_Sample const&;
-    auto get_last_gps_sample() const            -> sensor::GPS_TP_Sample const&;
+    auto get_last_accelerometer_sample() const  -> node::IAccelerometer::TP_Sample const&;
+    auto get_last_gyroscope_sample() const      -> node::IGyroscope::TP_Sample const&;
+    auto get_last_compass_sample() const        -> node::ICompass::TP_Sample const&;
+    auto get_last_barometer_sample() const      -> node::IBarometer::TP_Sample const&;
+    auto get_last_sonar_sample() const          -> node::ISonar::TP_Sample const&;
+    auto get_last_thermometer_sample() const    -> node::IThermometer::TP_Sample const&;
+    auto get_last_voltage_sample() const        -> node::IVoltmeter::TP_Sample const&;
+    auto get_last_current_sample() const        -> node::IAmmeter::TP_Sample const&;
+    auto get_last_gps_sample() const            -> node::IGPS::TP_Sample const&;
 
     size_t get_error_count() const;
     void process();
@@ -75,32 +75,32 @@ private:
     auto process_current_sensor(Channel& channel) -> bool;
     auto process_gps_sensor(Channel& channel) -> bool;
 
-    sensor::Accelerometer_TP_Sample m_accelerometer_sample;
-    std::vector<sensor::Accelerometer_Sample> m_accelerometer_samples;
+    node::IAccelerometer::TP_Sample m_accelerometer_sample;
+    std::vector<node::IAccelerometer::Sample> m_accelerometer_samples;
 
-    sensor::Gyroscope_TP_Sample m_gyroscope_sample;
-    std::vector<sensor::Gyroscope_Sample> m_gyroscope_samples;
+    node::IGyroscope::TP_Sample m_gyroscope_sample;
+    std::vector<node::IGyroscope::Sample> m_gyroscope_samples;
 
-    sensor::Compass_TP_Sample m_compass_sample;
-    std::vector<sensor::Compass_Sample> m_compass_samples;
+    node::ICompass::TP_Sample m_compass_sample;
+    std::vector<node::ICompass::Sample> m_compass_samples;
 
-    sensor::Barometer_TP_Sample m_barometer_sample;
-    std::vector<sensor::Barometer_Sample> m_barometer_samples;
+    node::IBarometer::TP_Sample m_barometer_sample;
+    std::vector<node::IBarometer::Sample> m_barometer_samples;
 
-    sensor::Sonar_TP_Sample m_sonar_sample;
-    std::vector<sensor::Sonar_Sample> m_sonar_samples;
+    node::ISonar::TP_Sample m_sonar_sample;
+    std::vector<node::ISonar::Sample> m_sonar_samples;
 
-    sensor::Thermometer_TP_Sample m_thermometer_sample;
-    std::vector<sensor::Thermometer_Sample> m_thermometer_samples;
+    node::IThermometer::TP_Sample m_thermometer_sample;
+    std::vector<node::IThermometer::Sample> m_thermometer_samples;
 
-    sensor::Voltmeter_TP_Sample m_voltage_sample;
-    std::vector<sensor::Voltmeter_Sample> m_voltage_samples;
+    node::IVoltmeter::TP_Sample m_voltage_sample;
+    std::vector<node::IVoltmeter::Sample> m_voltage_samples;
 
-    sensor::Ammeter_TP_Sample m_current_sample;
-    std::vector<sensor::Ammeter_Sample> m_current_samples;
+    node::IAmmeter::TP_Sample m_current_sample;
+    std::vector<node::IAmmeter::Sample> m_current_samples;
 
-    sensor::GPS_TP_Sample m_gps_sample;
-    std::vector<sensor::GPS_Sample> m_gps_samples;
+    node::IGPS::TP_Sample m_gps_sample;
+    std::vector<node::IGPS::Sample> m_gps_samples;
 
     Config m_config;
 

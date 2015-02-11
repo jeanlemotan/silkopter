@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common/sensors/Sensor_Samples.h"
+#include "common/node/IVoltmeter.h"
+#include "common/node/IAmmeter.h"
 
 namespace silk
 {
@@ -10,8 +11,8 @@ class Battery : q::util::Noncopyable
 public:
     Battery();
 
-    void process(std::vector<sensor::Ammeter_Sample> const& ammeter_samples,
-                 std::vector<sensor::Voltmeter_Sample> const& voltmeter_samples);
+    void process(std::vector<node::IAmmeter::Sample> const& ammeter_samples,
+                 std::vector<node::IVoltmeter::Sample> const& voltmeter_samples);
 
     auto get_capacity_used() const -> float; //mAh
     auto get_average_current() const -> boost::optional<float>;
