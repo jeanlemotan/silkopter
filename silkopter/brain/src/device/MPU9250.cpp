@@ -3,9 +3,6 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#ifdef RASPBERRY_PI
-
-
 #define USE_AK8963
 
 namespace silk
@@ -270,10 +267,10 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 MPU9250::MPU9250(q::String const& name)
 {
-    m_accelerometer.name = name + "_accelerometer";
-    m_gyroscope.name = name + "_gyroscope";
-    m_compass.name = name + "_compass";
-    m_thermometer.name = name + "_thermometer";
+    m_accelerometer.name = name;
+    m_gyroscope.name = name;
+    m_compass.name = name;
+    m_thermometer.name = name;
 }
 
 MPU9250::~MPU9250()
@@ -362,21 +359,21 @@ auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(m_compass.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
-auto MPU9250::init(bus::II2C* i2c, Params const& params) -> bool
+auto MPU9250::init(bus::II2C* i2c, Init_Params const& params) -> bool
 {
     m_i2c = i2c;
     m_spi = nullptr;
     return init(params);
 }
 
-auto MPU9250::init(bus::ISPI* spi, Params const& params) -> bool
+auto MPU9250::init(bus::ISPI* spi, Init_Params const& params) -> bool
 {
     m_spi = spi;
     m_i2c = nullptr;
     return init(params);
 }
 
-auto MPU9250::init(Params const& params) -> bool
+auto MPU9250::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
@@ -804,4 +801,4 @@ void MPU9250::process_compass()
 
 }
 }
-#endif
+

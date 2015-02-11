@@ -27,17 +27,21 @@ extern "C"
 #define MMAL_CAMERA_VIDEO_PORT 1
 #define MMAL_CAMERA_CAPTURE_PORT 2
 
+#endif
+
 namespace silk
 {
 namespace device
 {
 
 
+#if defined RASPBERRY_PI
+
 typedef std::shared_ptr<MMAL_COMPONENT_T> Component_ptr;
 typedef std::shared_ptr<MMAL_CONNECTION_T> Connection_ptr;
 typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
 
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 /// \brief The Video_Server::Camera_Private_Data struct
 /// connection:
 /// - camera output
@@ -103,11 +107,13 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
     }
 }
 
+#endif
 
 Raspicam::Raspicam(q::String const& name)
     : m_name(name)
 {
     QLOG_TOPIC("raspicam");
+#if defined RASPBERRY_PI
     m_impl.reset(new Impl);
 
     m_impl->recording.is_active = false;
@@ -116,10 +122,12 @@ Raspicam::Raspicam(q::String const& name)
     m_impl->low.is_active = false;
 
     m_impl->file_callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
+#endif
 }
 Raspicam::~Raspicam()
 {
     QLOG_TOPIC("~raspicam");
+#if defined RASPBERRY_PI
     {
         //first kill the pools to disable the callbacks
         m_impl->low.output_pool.reset();
@@ -156,6 +164,8 @@ Raspicam::~Raspicam()
     m_impl->camera_splitter.reset();
     mmal_port_disable(m_impl->camera->control);
     m_impl->camera.reset();
+
+#endif
 }
 
 auto Raspicam::get_name() const -> q::String const&
@@ -163,8 +173,9 @@ auto Raspicam::get_name() const -> q::String const&
     return m_name;
 }
 
-auto Raspicam::init(Params const& params) -> bool
+auto Raspicam::init(Init_Params const& params) -> bool
 {
+#if defined RASPBERRY_PI
     QLOG_TOPIC("raspicam::init");
     if (m_impl->camera)
     {
@@ -186,11 +197,17 @@ auto Raspicam::init(Params const& params) -> bool
                            true);
     }
     return res;
+#else
+    QLOGE("Raspicam is only supported on the Raspberry pi.");
+    return false;
+#endif
 }
 
 void Raspicam::shutdown()
 {
+#if defined RASPBERRY_PI
     QASSERT(m_impl->camera);
+#endif
 }
 
 
@@ -217,13 +234,16 @@ void Raspicam::file_callback(uint8_t const* data, size_t size)
 
 void Raspicam::set_data_callback(Data_Available_Callback cb)
 {
+#if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
     m_impl->stream_callback = cb;
+#endif
 }
 
 void Raspicam::set_active_streams(bool high, bool medium, bool low)
 {
+#if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
     if (m_impl->high.is_active == high &&
@@ -261,10 +281,12 @@ void Raspicam::set_active_streams(bool high, bool medium, bool low)
     {
         QLOGW("Cannot {} low bitrate encoder", low ? "enable" : "disable");
     }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if defined RASPBERRY_PI
 
 static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
 {
@@ -944,10 +966,13 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
     encoder_buffer_callback_fn(*impl, impl->low, impl->stream_callback, port, buffer);
 }
 
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 auto Raspicam::create_components() -> bool
 {
+#if defined RASPBERRY_PI
     //    SCOPED_PINS_GUARD;;
 
     m_impl->camera = create_component(MMAL_COMPONENT_DEFAULT_CAMERA, 0, 3);
@@ -1140,6 +1165,7 @@ auto Raspicam::create_components() -> bool
             return false;
         }
     }
+#endif
     return true;
 }
 
@@ -1177,6 +1203,7 @@ void Raspicam::create_file_sink()
 
 auto Raspicam::start_recording() -> bool
 {
+#if defined RASPBERRY_PI
     if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
     {
         QLOGW("Cannot create capture folder");
@@ -1195,10 +1222,12 @@ auto Raspicam::start_recording() -> bool
 //                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
 //                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
+#endif
     return true;
 }
 void Raspicam::stop_recording()
 {
+#if defined RASPBERRY_PI
     m_file_sink.reset();
 
     std::lock_guard<std::mutex> lg(m_impl->mutex);
@@ -1208,6 +1237,7 @@ void Raspicam::stop_recording()
 //                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
 //                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
+#endif
 }
 
 void Raspicam::set_iso(uint32_t iso)
@@ -1222,6 +1252,7 @@ void Raspicam::set_shutter_speed(q::Clock::duration ss)
 
 void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
 {
+#if defined RASPBERRY_PI
     m_stream_quality = sq;
 
     std::lock_guard<std::mutex> lg(m_impl->mutex);
@@ -1231,12 +1262,13 @@ void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
 //                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
 //                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
-}
-
-
-}
-}
-
 #endif
+}
+
+
+}
+}
+
+
 
 

@@ -18,7 +18,7 @@ public:
     MPU9250(q::String const& name);
     ~MPU9250();
 
-    struct Params
+    struct Init_Params
     {
         size_t imu_rate = 1000;
         size_t compass_rate = 100;
@@ -27,8 +27,8 @@ public:
         size_t accelerometer_range = 4; //gees
     };
 
-    auto init(bus::II2C* bus, Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Params const& params) -> bool;
+    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
+    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
 
     void process();
 
@@ -41,7 +41,7 @@ public:
     void unlock();
 
 private:
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     auto mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
     auto mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool;
@@ -65,7 +65,7 @@ private:
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
 
-    Params m_params;
+    Init_Params m_params;
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;

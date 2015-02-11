@@ -19,7 +19,7 @@ public:
         size_t bitrate = 0;
     };
 
-    struct Params
+    struct Init_Params
     {
         size_t fps = 30;
         Quality low;
@@ -28,7 +28,7 @@ public:
         Quality recording;
     };
 
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
     void shutdown();
 
     auto get_name() const -> q::String const&;

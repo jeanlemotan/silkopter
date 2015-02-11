@@ -173,28 +173,28 @@ auto UBLOX::get_name() const -> q::String const&
     return m_name;
 }
 
-auto UBLOX::init(bus::II2C* bus, Params const& params) -> bool
+auto UBLOX::init(bus::II2C* bus, Init_Params const& params) -> bool
 {
     m_i2c = bus;
     m_spi = nullptr;
     m_uart = nullptr;
     return init(params);
 }
-auto UBLOX::init(bus::ISPI* bus, Params const& params) -> bool
+auto UBLOX::init(bus::ISPI* bus, Init_Params const& params) -> bool
 {
     m_spi = bus;
     m_i2c = nullptr;
     m_uart = nullptr;
     return init(params);
 }
-auto UBLOX::init(bus::IUART* bus, Params const& params) -> bool
+auto UBLOX::init(bus::IUART* bus, Init_Params const& params) -> bool
 {
     m_spi = nullptr;
     m_i2c = nullptr;
     m_uart = bus;
     return init(params);
 }
-auto UBLOX::init(Params const& params) -> bool
+auto UBLOX::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("ublox::init");
     if (!m_i2c && !m_spi && !m_uart)

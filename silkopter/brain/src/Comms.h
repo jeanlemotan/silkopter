@@ -2,7 +2,7 @@
 
 #include "common/sensors/Sensor_Samples.h"
 #include "common/Comm_Data.h"
-#include "IHAL.h"
+#include "HAL.h"
 #include "UAV.h"
 #include "utils/Channel.h"
 #include "utils/RUDP.h"
@@ -13,7 +13,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service, IHAL& hal, UAV& uav);
+    Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav);
 
     auto start(uint16_t send_port, uint16_t receive_port) -> bool;
 
@@ -102,7 +102,7 @@ private:
         std::vector<sensor::GPS_Sample> gps;
     } m_raw_sensor_samples;
 
-    IHAL& m_hal;
+    HAL& m_hal;
     UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
     void send_uav_data();

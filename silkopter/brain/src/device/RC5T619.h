@@ -14,13 +14,13 @@ class RC5T619 : q::util::Noncopyable
 public:
     RC5T619(q::String const& name);
 
-    struct Params
+    struct Init_Params
     {
         size_t adc0_rate = 50;
         size_t adc1_ratio = 10;
     };
 
-    auto init(bus::II2C* bus, Params const& params) -> bool;
+    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
 
     void process();
 
@@ -28,11 +28,11 @@ public:
     auto get_adc1() -> sensor::IADC&;
 
 private:
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     bus::II2C* m_i2c = nullptr;
 
-    Params m_params;
+    Init_Params m_params;
 
     q::Clock::time_point m_last_time_point = q::Clock::now();
     q::Clock::duration m_dt;

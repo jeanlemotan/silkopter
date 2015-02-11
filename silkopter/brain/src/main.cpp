@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "IHAL.h"
+#include "HAL.h"
 #include "Comms.h"
 #include "UAV.h"
 
@@ -77,7 +77,7 @@ int main(int argc, char const* argv[])
         }
     });
 
-    auto async_thread = boost::thread([&s_async_io_service]()
+    auto async_thread = boost::thread([]()
     {
         while (!s_exit)
         {
@@ -113,15 +113,15 @@ int main(int argc, char const* argv[])
 
     try
     {
-        silk::IHAL* hal = nullptr;
-        silk::UAV uav(*hal);
-        silk::Comms comms(io_service, *hal, uav);
+        silk::HAL hal;
+        silk::UAV uav(hal);
+        silk::Comms comms(io_service, hal, uav);
 
-//        if (!hal->init(comms))
-//        {
-//            QLOGE("Hardware failure! Aborting");
-//            abort();
-//        }
+        if (!hal.init())
+        {
+            QLOGE("Hardware failure! Aborting");
+            abort();
+        }
 
         //start listening for a remote system
         if (!comms.start(send_port, receive_port))
@@ -164,7 +164,7 @@ int main(int argc, char const* argv[])
             {
                 comms.process();
 
-                hal->process();
+                hal.process();
                 uav.process();
             }
             boost::this_thread::yield();
@@ -188,7 +188,7 @@ int main(int argc, char const* argv[])
 //        {
 //            hal.camera->set_data_callback(nullptr);
 //        }
-        hal->shutdown();
+        hal.shutdown();
     }
     catch (std::exception const& e)
     {

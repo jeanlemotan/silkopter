@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "bus/UART_Pi.h"
+#include "bus/UART_Linux.h"
 
 #include <termios.h>
 
@@ -8,22 +8,22 @@ namespace silk
 namespace bus
 {
 
-UART_Pi::UART_Pi(q::String const& name)
+UART_Linux::UART_Linux(q::String const& name)
     : m_name(name)
 {
 }
 
-UART_Pi::~UART_Pi()
+UART_Linux::~UART_Linux()
 {
     close();
 }
 
-auto UART_Pi::get_name() const -> q::String const&
+auto UART_Linux::get_name() const -> q::String const&
 {
     return m_name;
 }
 
-auto UART_Pi::open(q::String const& device, size_t baud) -> bool
+auto UART_Linux::open(q::String const& device, size_t baud) -> bool
 {
     close();
 
@@ -46,7 +46,7 @@ auto UART_Pi::open(q::String const& device, size_t baud) -> bool
         return false;
     }
 
-    std::lock_guard<UART_Pi> lg(*this);
+    std::lock_guard<UART_Linux> lg(*this);
 
     m_device = device;
     m_fd = ::open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
@@ -68,48 +68,48 @@ auto UART_Pi::open(q::String const& device, size_t baud) -> bool
 
     return true;
 }
-void UART_Pi::close()
+void UART_Linux::close()
 {
     QLOG_TOPIC("bus_uart_pi");
 
     if (m_fd)
     {
-        std::lock_guard<UART_Pi> lg(*this);
+        std::lock_guard<UART_Linux> lg(*this);
 
         ::close(m_fd);
         m_fd = -1;
     }
 }
 
-void UART_Pi::lock()
+void UART_Linux::lock()
 {
     m_mutex.lock();
 }
 
-auto UART_Pi::try_lock() -> bool
+auto UART_Linux::try_lock() -> bool
 {
     return m_mutex.try_lock();
 }
-void UART_Pi::unlock()
+void UART_Linux::unlock()
 {
     m_mutex.unlock();
 }
 
-auto UART_Pi::read(uint8_t* data, uint32_t max_size) -> size_t
+auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 {
     QLOG_TOPIC("bus_uart_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<UART_Pi> lg(*this);
+    std::lock_guard<UART_Linux> lg(*this);
 
     return ::read(m_fd, data, max_size);
 }
-auto UART_Pi::write(uint8_t const* data, uint32_t size) -> bool
+auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("bus_uart_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<UART_Pi> lg(*this);
+    std::lock_guard<UART_Linux> lg(*this);
 
     return ::write(m_fd, data, size) == size;
 }

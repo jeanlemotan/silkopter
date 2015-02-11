@@ -1,48 +1,30 @@
 #pragma once
 
-#include "interface/II2C.h"
-#include "interface/ISPI.h"
-#include "interface/IUART.h"
-#include "interface/ICamera.h"
-#include "interface/IAccelerometer.h"
-#include "interface/IGyroscope.h"
-#include "interface/ICompass.h"
-#include "interface/IBarometer.h"
-#include "interface/IThermometer.h"
-#include "interface/IADC.h"
-#include "interface/IVoltmeter.h"
-#include "interface/IAmmeter.h"
-#include "interface/IGPS.h"
-#include "interface/ISonar.h"
-#include "interface/IPWM.h"
-
 #include "rapidjson/document.h"
 
 namespace silk
 {
 
-class IHAL : q::util::Noncopyable
+class HAL : q::util::Noncopyable
 {
 public:
-    virtual ~IHAL() {}
+    HAL();
+    ~HAL();
 
-    virtual auto init() -> bool = 0;
-    virtual void process() = 0;
-    virtual void shutdown() = 0;
+    auto init() -> bool;
+    void process();
+    void shutdown();
 
-    //settings
-    virtual auto get_settings(q::Path const& path) -> rapidjson::Value& = 0;
-    virtual void save_settings() const = 0;
+    auto get_settings(q::Path const& path) -> rapidjson::Value&;
+    void save_settings() const;
 
     //interfaces
     template<class T> auto get_all_interfaces() const -> std::vector<T*> const&;
     template<class T> auto find_interface_by_name(q::String const& name) const -> T*;
 
-protected:
-
+private:
     template<class T> auto add_interface(T* interface) -> bool;
 
-private:
     struct Registry_Base {};
     template <class T> struct Registry : public Registry_Base
     {
@@ -51,18 +33,36 @@ private:
     mutable std::unordered_map<size_t, std::unique_ptr<Registry_Base>> m_registry;
 
     template<class T> auto get_registry() const -> Registry<T>&;
+
+    bool m_is_initialized = false;
+
+    rapidjson::Value m_emptyValue;
+    rapidjson::Document m_settings;
+
+    struct Hardware;
+    std::shared_ptr<Hardware> m_hw;
+
+    auto load_settings() -> bool;
 };
+
+
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+
 template<class T>
-auto IHAL::get_all_interfaces() const -> std::vector<T*> const&
+auto HAL::get_all_interfaces() const -> std::vector<T*> const&
 {
     return get_registry<T>().interfaces;
 }
 template<class T>
-auto IHAL::find_interface_by_name(q::String const& name) const -> T*
+auto HAL::find_interface_by_name(q::String const& name) const -> T*
 {
     auto& interfaces = get_registry<T>().interfaces;
     auto it = std::find_if(interfaces.begin(), interfaces.end(),
@@ -71,7 +71,7 @@ auto IHAL::find_interface_by_name(q::String const& name) const -> T*
 }
 
 template<class T>
-auto IHAL::get_registry() const -> Registry<T>&
+auto HAL::get_registry() const -> Registry<T>&
 {
     size_t hash = typeid(T).hash_code();
     auto it = m_registry.find(hash);
@@ -90,7 +90,7 @@ auto IHAL::get_registry() const -> Registry<T>&
 }
 
 template<class T>
-auto IHAL::add_interface(T* interface) -> bool
+auto HAL::add_interface(T* interface) -> bool
 {
     QASSERT(interface);
     if (!interface)
@@ -106,6 +106,5 @@ auto IHAL::add_interface(T* interface) -> bool
     registry.interfaces.push_back(interface);
     return true;
 }
-
 
 }

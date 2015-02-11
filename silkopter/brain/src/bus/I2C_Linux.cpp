@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "bus/I2C_Pi.h"
+#include "bus/I2C_Linux.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -31,28 +31,28 @@ namespace silk
 namespace bus
 {
 
-I2C_Pi::I2C_Pi(q::String const& name)
+I2C_Linux::I2C_Linux(q::String const& name)
     : m_name(name)
 {
 }
 
-I2C_Pi::~I2C_Pi()
+I2C_Linux::~I2C_Linux()
 {
     close();
 }
 
-auto I2C_Pi::get_name() const -> q::String const&
+auto I2C_Linux::get_name() const -> q::String const&
 {
     return m_name;
 }
 
-auto I2C_Pi::open(q::String const& device) -> bool
+auto I2C_Linux::open(q::String const& device) -> bool
 {
     close();
 
     QLOG_TOPIC("bus_i2c_pi");
 
-    std::lock_guard<I2C_Pi> lg(*this);
+    std::lock_guard<I2C_Linux> lg(*this);
 
     m_device = device;
     m_fd = ::open(device.c_str(), O_RDWR);
@@ -63,39 +63,39 @@ auto I2C_Pi::open(q::String const& device) -> bool
     }
     return true;
 }
-void I2C_Pi::close()
+void I2C_Linux::close()
 {
     QLOG_TOPIC("bus_i2c_pi");
 
     if (m_fd)
     {
-        std::lock_guard<I2C_Pi> lg(*this);
+        std::lock_guard<I2C_Linux> lg(*this);
 
         ::close(m_fd);
         m_fd = -1;
     }
 }
 
-void I2C_Pi::lock()
+void I2C_Linux::lock()
 {
     m_mutex.lock();
 }
 
-auto I2C_Pi::try_lock() -> bool
+auto I2C_Linux::try_lock() -> bool
 {
     return m_mutex.try_lock();
 }
-void I2C_Pi::unlock()
+void I2C_Linux::unlock()
 {
     m_mutex.unlock();
 }
 
-auto I2C_Pi::read(uint8_t address, uint8_t* data, size_t size) -> bool
+auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
 {
     QLOG_TOPIC("bus_i2c_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Pi> lg(*this);
+    std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     struct i2c_msg msg[1];
@@ -114,12 +114,12 @@ auto I2C_Pi::read(uint8_t address, uint8_t* data, size_t size) -> bool
     }
     return true;
 }
-auto I2C_Pi::write(uint8_t address, uint8_t const* data, size_t size) -> bool
+auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("bus_i2c_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Pi> lg(*this);
+    std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     struct i2c_msg msg;
@@ -138,12 +138,12 @@ auto I2C_Pi::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     return true;
 }
 
-auto I2C_Pi::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
+auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
 {
     QLOG_TOPIC("bus_i2c_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Pi> lg(*this);
+    std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     struct i2c_msg msg[2];
@@ -167,12 +167,12 @@ auto I2C_Pi::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t s
     }
     return true;
 }
-auto I2C_Pi::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
+auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("bus_i2c_pi");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Pi> lg(*this);
+    std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     struct i2c_msg msg;

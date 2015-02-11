@@ -77,9 +77,6 @@ rpi {
 
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
-    ../../src/bus/I2C_Pi.cpp \
-    ../../src/bus/SPI_Pi.cpp \
-    ../../src/bus/UART_Pi.cpp \
     ../../src/device/MPU9250.cpp \
     ../../src/device/MS5611.cpp \
     ../../src/device/Raspicam.cpp \
@@ -92,16 +89,19 @@ SOURCES += \
     ../../src/Battery.cpp \
     ../../src/Comms.cpp \
     ../../src/Gimbal_Servo_PiGPIO.cpp \
-    ../../src/HAL.cpp \
     ../../src/HAL_Motors_Sim.cpp \
-    ../../src/HAL_PI.cpp \
     ../../src/HAL_Sensors_Sim.cpp \
     ../../src/main.cpp \
     ../../src/Motor_Mixer.cpp \
     ../../src/Motors_PiGPIO.cpp \
     ../../src/Sim_Comms.cpp \
     ../../src/UAV.cpp \
-    ../../src/device/PIGPIO.cpp
+    ../../src/device/PIGPIO.cpp \
+    ../../src/HAL.cpp \
+    ../../src/HAL_old.cpp \
+    ../../src/bus/UART_Linux.cpp \
+    ../../src/bus/SPI_Linux.cpp \
+    ../../src/bus/I2C_Linux.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -121,9 +121,6 @@ HEADERS += \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
     ../../../libs/common/sensors/Sensor_Samples.h \
-    ../../src/bus/I2C_Pi.h \
-    ../../src/bus/SPI_Pi.h \
-    ../../src/bus/UART_Pi.h \
     ../../src/device/MPU9250.h \
     ../../src/device/MS5611.h \
     ../../src/device/Raspicam.h \
@@ -149,11 +146,13 @@ HEADERS += \
     ../../src/Battery.h \
     ../../src/Gimbal_Servo_PiGPIO.h \
     ../../src/HAL_Motors_Sim.h \
-    ../../src/HAL_PI.h \
     ../../src/HAL_Sensors.h \
     ../../src/HAL_Sensors_Sim.h \
-    ../../src/IHAL.h \
     ../../src/Motors_PiGPIO.h \
     ../../src/Sim_Comms.h \
-    ../../src/device/PIGPIO.h
+    ../../src/device/PIGPIO.h \
+    ../../src/HAL.h \
+    ../../src/bus/I2C_Linux.h \
+    ../../src/bus/SPI_Linux.h \
+    ../../src/bus/UART_Linux.h
 

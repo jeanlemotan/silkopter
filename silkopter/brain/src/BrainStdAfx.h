@@ -40,7 +40,7 @@ namespace silk
         typedef boost::packaged_task<result_type> packaged_task;
         auto task = std::make_shared<packaged_task>(std::move(f));
         boost::unique_future<result_type> future = task->get_future();
-        s_async_io_service.post(boost::bind(&packaged_task::operator(), task));
+        s_async_io_service.post(std::bind(&packaged_task::operator(), task));
         return future;
     }
 }

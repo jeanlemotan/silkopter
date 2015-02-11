@@ -6,7 +6,7 @@
 #include "AHRS.h"
 #include "Battery.h"
 #include "Motor_Mixer.h"
-#include "IHAL.h"
+#include "HAL.h"
 #include "utils/PID.h"
 
 namespace silk
@@ -35,7 +35,7 @@ public:
 class UAV
 {
 public:
-    UAV(IHAL& hal);
+    UAV(HAL& hal);
 
 
     void process();
@@ -153,7 +153,7 @@ private:
         Manual_Clock clock;
     } m_imu;
 
-    IHAL& m_hal;
+    HAL& m_hal;
     AHRS m_ahrs;
     Battery m_battery;
     Motor_Mixer m_motor_mixer;

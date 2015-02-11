@@ -14,7 +14,7 @@ public:
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
-    struct Params
+    struct Init_Params
     {
         struct PWM
         {
@@ -29,14 +29,14 @@ public:
         std::chrono::microseconds rate = std::chrono::microseconds(5);
     };
 
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
     auto get_pwm_channel(size_t idx) -> output::IPWM*;
 
 private:
-    Params m_params;
+    Init_Params m_params;
 
     void set_pwm_value(size_t idx, float value);
 

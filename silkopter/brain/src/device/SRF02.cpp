@@ -3,8 +3,6 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#ifdef RASPBERRY_PI
-
 namespace silk
 {
 namespace device
@@ -42,7 +40,7 @@ auto SRF02::get_name() const -> q::String const&
     return m_name;
 }
 
-auto SRF02::init(bus::II2C* bus, Params const& params) -> bool
+auto SRF02::init(bus::II2C* bus, Init_Params const& params) -> bool
 {
     QLOG_TOPIC("srf02::init");
     m_i2c = bus;
@@ -129,4 +127,4 @@ auto SRF02::get_samples() const -> std::vector<sensor::Sonar_Sample> const&
 }
 }
 
-#endif
+

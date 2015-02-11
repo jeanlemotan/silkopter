@@ -15,14 +15,14 @@ class MS5611 : q::util::Noncopyable
 public:
     MS5611(q::String const& name);
 
-    struct Params
+    struct Init_Params
     {
         size_t rate = 100;
         size_t pressure_to_temperature_ratio = 10;
     };
 
-    auto init(bus::II2C* bus, Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Params const& params) -> bool;
+    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
+    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
 
     void process();
 
@@ -30,7 +30,7 @@ public:
     auto get_thermometer() -> sensor::IThermometer&;
 
 private:
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void lock();
     void unlock();
@@ -44,7 +44,7 @@ private:
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
 
-    Params m_params;
+    Init_Params m_params;
 
     struct Barometer : public sensor::IBarometer
     {

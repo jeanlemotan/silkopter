@@ -17,14 +17,14 @@ public:
     UBLOX(q::String const& name);
     ~UBLOX();
 
-    struct Params
+    struct Init_Params
     {
         size_t rate = 5;
     };
 
-    auto init(bus::II2C* bus, Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Params const& params) -> bool;
-    auto init(bus::IUART* bus, Params const& params) -> bool;
+    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
+    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
+    auto init(bus::IUART* bus, Init_Params const& params) -> bool;
 
     void process();
 
@@ -32,7 +32,7 @@ public:
     auto get_samples() const -> std::vector<sensor::GPS_Sample> const&;
 
 private:
-    auto init(Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     auto read(uint8_t* data, size_t max_size) -> size_t;
     auto write(uint8_t const* data, size_t size) -> bool;
@@ -63,7 +63,7 @@ private:
     bus::ISPI* m_spi = nullptr;
     bus::IUART* m_uart = nullptr;
 
-    Params m_params;
+    Init_Params m_params;
     q::String m_name;
 
     struct Packet

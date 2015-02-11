@@ -11,7 +11,7 @@
 
 using namespace silk;
 
-UAV::UAV(IHAL& hal)
+UAV::UAV(HAL& hal)
     : m_hal(hal)
 {
     //defaults

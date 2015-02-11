@@ -1,8 +1,6 @@
 #include "BrainStdAfx.h"
 #include "MS5611.h"
 
-#ifdef RASPBERRY_PI
-
 namespace silk
 {
 namespace device
@@ -36,8 +34,8 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 MS5611::MS5611(q::String const& name)
 {
-    m_barometer.name = name + "_barometer";
-    m_thermometer.name = name + "_thermometer";
+    m_barometer.name = name;
+    m_thermometer.name = name;
 }
 
 auto MS5611::get_barometer() -> sensor::IBarometer&
@@ -97,20 +95,20 @@ auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(ADDR_MS5611, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
-auto MS5611::init(bus::II2C* bus, Params const& params) -> bool
+auto MS5611::init(bus::II2C* bus, Init_Params const& params) -> bool
 {
     m_i2c = bus;
     m_spi = nullptr;
     return init(params);
 }
-auto MS5611::init(bus::ISPI* bus, Params const& params) -> bool
+auto MS5611::init(bus::ISPI* bus, Init_Params const& params) -> bool
 {
     m_spi = bus;
     m_i2c = nullptr;
     return init(params);
 }
 
-auto MS5611::init(Params const& params) -> bool
+auto MS5611::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("ms5611::init");
     if (!m_i2c && !m_spi)
@@ -288,4 +286,4 @@ void MS5611::calculate(q::Clock::duration dt)
 
 }
 }
-#endif
+

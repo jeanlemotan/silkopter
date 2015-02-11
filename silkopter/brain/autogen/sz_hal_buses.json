@@ -2,7 +2,7 @@
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Bus_I2C_Pi",
+    "name": "I2C_Linux",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -12,34 +12,34 @@
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Bus_SPI_Pi",
+    "name": "SPI_Linux",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "device", {"required": true}],
-        ["size_t", "mode", {"required": true}]
+        ["uint32_t", "mode", {"required": true}]
     ]
 },
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Bus_UART_Pi",
+    "name": "UART_Linux",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "device", {"required": true}],
-        ["size_t", "baud", {"required": true}]
+        ["uint32_t", "baud", {"required": true}]
     ]
 },
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Buses_Pi",
+    "name": "Buses",
     "members":
     [
-        ["std::vector<sz::Bus_I2C_Pi>", "i2c", {"required": false}],
-        ["std::vector<sz::Bus_SPI_Pi>", "spi", {"required": false}],
-        ["std::vector<sz::Bus_UART_Pi>", "uart", {"required": false}]
+        ["std::vector<sz::I2C_Linux>", "i2c", {"required": false}],
+        ["std::vector<sz::SPI_Linux>", "spi", {"required": false}],
+        ["std::vector<sz::UART_Linux>", "uart", {"required": false}]
     ]
 }
 ]

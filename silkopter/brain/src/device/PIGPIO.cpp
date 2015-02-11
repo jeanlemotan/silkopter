@@ -2,11 +2,11 @@
 #include "PIGPIO.h"
 
 #ifdef RASPBERRY_PI
-
 extern "C"
 {
     #include "pigpio.h"
 }
+#endif
 
 namespace silk
 {
@@ -21,7 +21,7 @@ PIGPIO::PIGPIO(const q::String &name)
         auto& channel = m_pwm_channels[i];
         channel.pigpio = this;
         channel.idx = i;
-        channel.name = q::util::format2<q::String>("{}_pwm{}", name, i);
+        channel.name = q::util::format2<q::String>("{}-{}", name, i);
     }
 }
 
@@ -30,10 +30,11 @@ auto PIGPIO::get_pwm_channel(size_t idx) -> output::IPWM*
     return m_params.pwm_channels[idx].gpio >= 0 ? &m_pwm_channels[idx] : nullptr;
 }
 
-auto PIGPIO::init(Params const& params) -> bool
+auto PIGPIO::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("pigpio_pwm::init");
 
+#if defined (RASPBERRY_PI)
     m_params = params;
     size_t rate = m_params.rate.count();
 
@@ -129,10 +130,15 @@ auto PIGPIO::init(Params const& params) -> bool
     }
 
     return true;
+#else
+    QLOGE("PIGPIO only supported on the raspberry pi");
+    return false;
+#endif
 }
 
 void PIGPIO::set_pwm_value(size_t idx, float value)
 {
+#if defined RASPBERRY_PI
     auto& channel = m_params.pwm_channels[idx];
     if (channel.gpio >= 0)
     {
@@ -140,10 +146,12 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
         int pulse = value * (channel.max - channel.min);
         gpioPWM(channel.gpio, channel.min + pulse);
     }
-}
-
-
-}
-}
-
+#else
+    QASSERT(0);
 #endif
+}
+
+
+}
+}
+

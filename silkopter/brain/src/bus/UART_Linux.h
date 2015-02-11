@@ -7,11 +7,11 @@ namespace silk
 namespace bus
 {
 
-class UART_Pi : public IUART
+class UART_Linux : public IUART
 {
 public:
-    UART_Pi(q::String const& name);
-    ~UART_Pi();
+    UART_Linux(q::String const& name);
+    ~UART_Linux();
 
     auto get_name() const -> q::String const&;
 
@@ -33,7 +33,7 @@ private:
     std::vector<uint8_t> m_buffer;
 };
 
-DECLARE_CLASS_PTR(UART_Pi);
+DECLARE_CLASS_PTR(UART_Linux);
 
 
 }

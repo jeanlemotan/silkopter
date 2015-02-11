@@ -13,7 +13,7 @@ class SRF02: public sensor::ISonar, q::util::Noncopyable
 public:
     SRF02(q::String const& name);
 
-    struct Params
+    struct Init_Params
     {
         size_t rate = 10;
         math::vec3f direction = math::vec3f(0, 0, -1);
@@ -21,7 +21,7 @@ public:
         float max_distance = 5.f;
     };
 
-    auto init(bus::II2C* bus, Params const& params) -> bool;
+    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
 
     void process();
 
@@ -32,7 +32,7 @@ private:
     bus::II2C* m_i2c = nullptr;
     q::String m_name;
 
-    Params m_params;
+    Init_Params m_params;
 
     std::vector<sensor::Sonar_Sample> m_samples;
     q::Clock::duration m_dt;

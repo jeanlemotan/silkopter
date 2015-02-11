@@ -30,11 +30,11 @@
 namespace sz { struct MPU9250 {
  std::string name;
 std::string bus;
-size_t imu_rate;
-size_t compass_rate;
-size_t thermometer_rate;
-size_t accelerometer_range;
-size_t gyroscope_range;
+uint32_t imu_rate;
+uint32_t compass_rate;
+uint32_t thermometer_rate;
+uint32_t accelerometer_range;
+uint32_t gyroscope_range;
 
 explicit MPU9250():name(), bus(), imu_rate(), compass_rate(), thermometer_rate(), accelerometer_range(), gyroscope_range() {  }
 
@@ -54,11 +54,11 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;
-SAXEventHandler< size_t > handler_3;
-SAXEventHandler< size_t > handler_4;
-SAXEventHandler< size_t > handler_5;
-SAXEventHandler< size_t > handler_6;bool has_name;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;
+SAXEventHandler< uint32_t > handler_4;
+SAXEventHandler< uint32_t > handler_5;
+SAXEventHandler< uint32_t > handler_6;bool has_name;
 bool has_bus;
 
     bool check_depth(const char* type)
@@ -670,11 +670,11 @@ struct Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.bus);
-w.Key("\x69\x6d\x75\x5f\x72\x61\x74\x65", 8, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, size_t >()(w, value.imu_rate);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, size_t >()(w, value.compass_rate);
-w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 16, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, size_t >()(w, value.thermometer_rate);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, size_t >()(w, value.accelerometer_range);
-w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, size_t >()(w, value.gyroscope_range);
+w.Key("\x69\x6d\x75\x5f\x72\x61\x74\x65", 8, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.imu_rate);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.compass_rate);
+w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 16, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.thermometer_rate);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.accelerometer_range);
+w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.gyroscope_range);
 
         w.EndObject(7);
     }
@@ -713,8 +713,8 @@ w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15, false)
 namespace sz { struct MS5611 {
  std::string name;
 std::string bus;
-size_t rate;
-size_t pressure_to_temperature_ratio;
+uint32_t rate;
+uint32_t pressure_to_temperature_ratio;
 
 explicit MS5611():name(), bus(), rate(), pressure_to_temperature_ratio() {  }
 
@@ -734,8 +734,8 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;
-SAXEventHandler< size_t > handler_3;bool has_name;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;bool has_name;
 bool has_bus;
 
     bool check_depth(const char* type)
@@ -1203,8 +1203,8 @@ struct Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, std::string >()(w, value.bus);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, size_t >()(w, value.rate);
-w.Key("\x70\x72\x65\x73\x73\x75\x72\x65\x5f\x74\x6f\x5f\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x5f\x72\x61\x74\x69\x6f", 29, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, size_t >()(w, value.pressure_to_temperature_ratio);
+w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, uint32_t >()(w, value.rate);
+w.Key("\x70\x72\x65\x73\x73\x75\x72\x65\x5f\x74\x6f\x5f\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x5f\x72\x61\x74\x69\x6f", 29, false); Serializer< Writer004712a5373cde9cec796ff13924f2b7a69a76869bbf158856de6dd2723c20c7, uint32_t >()(w, value.pressure_to_temperature_ratio);
 
         w.EndObject(4);
     }
@@ -1242,7 +1242,7 @@ w.Key("\x70\x72\x65\x73\x73\x75\x72\x65\x5f\x74\x6f\x5f\x74\x65\x6d\x70\x65\x72\
 
 namespace sz { struct Raspicam_Quality {
  math::vec2u32 resolution;
-size_t bitrate;
+uint32_t bitrate;
 
 explicit Raspicam_Quality():resolution(), bitrate() {  }
 
@@ -1261,7 +1261,7 @@ private:
     int depth;
 
     SAXEventHandler< math::vec2u32 > handler_0;
-SAXEventHandler< size_t > handler_1;bool has_resolution;
+SAXEventHandler< uint32_t > handler_1;bool has_resolution;
 bool has_bitrate;
 
     bool check_depth(const char* type)
@@ -1632,7 +1632,7 @@ struct Serializer< Writer5e659f2ce1f22ebc0881451f80e613b6e5e21808134677976650c77
         w.StartObject();
 
         w.Key("\x72\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e", 10, false); Serializer< Writer5e659f2ce1f22ebc0881451f80e613b6e5e21808134677976650c770fcf23b92, math::vec2u32 >()(w, value.resolution);
-w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writer5e659f2ce1f22ebc0881451f80e613b6e5e21808134677976650c770fcf23b92, size_t >()(w, value.bitrate);
+w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writer5e659f2ce1f22ebc0881451f80e613b6e5e21808134677976650c770fcf23b92, uint32_t >()(w, value.bitrate);
 
         w.EndObject(2);
     }
@@ -1670,7 +1670,7 @@ w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writer5e659f2ce1f22
 
 namespace sz { struct Raspicam {
  std::string name;
-size_t fps;
+uint32_t fps;
 sz::Raspicam_Quality low;
 sz::Raspicam_Quality medium;
 sz::Raspicam_Quality high;
@@ -1693,7 +1693,7 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< size_t > handler_1;
+SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< sz::Raspicam_Quality > handler_2;
 SAXEventHandler< sz::Raspicam_Quality > handler_3;
 SAXEventHandler< sz::Raspicam_Quality > handler_4;
@@ -2268,7 +2268,7 @@ struct Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c8
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, std::string >()(w, value.name);
-w.Key("\x66\x70\x73", 3, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, size_t >()(w, value.fps);
+w.Key("\x66\x70\x73", 3, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, uint32_t >()(w, value.fps);
 w.Key("\x6c\x6f\x77", 3, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, sz::Raspicam_Quality >()(w, value.low);
 w.Key("\x6d\x65\x64\x69\x75\x6d", 6, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, sz::Raspicam_Quality >()(w, value.medium);
 w.Key("\x68\x69\x67\x68", 4, false); Serializer< Writere1b5784d2228d0496f1fdb2d88127168bd3c3bd2aed52801e5c20c82f9bab539, sz::Raspicam_Quality >()(w, value.high);
@@ -2311,8 +2311,8 @@ w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writere1b57
 namespace sz { struct RC5T619 {
  std::string name;
 std::string bus;
-size_t adc0_rate;
-size_t adc1_ratio;
+uint32_t adc0_rate;
+uint32_t adc1_ratio;
 
 explicit RC5T619():name(), bus(), adc0_rate(), adc1_ratio() {  }
 
@@ -2332,8 +2332,8 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;
-SAXEventHandler< size_t > handler_3;bool has_name;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;bool has_name;
 bool has_bus;
 bool has_adc0_rate;
 bool has_adc1_ratio;
@@ -2805,8 +2805,8 @@ struct Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ce
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, std::string >()(w, value.bus);
-w.Key("\x61\x64\x63\x30\x5f\x72\x61\x74\x65", 9, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, size_t >()(w, value.adc0_rate);
-w.Key("\x61\x64\x63\x31\x5f\x72\x61\x74\x69\x6f", 10, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, size_t >()(w, value.adc1_ratio);
+w.Key("\x61\x64\x63\x30\x5f\x72\x61\x74\x65", 9, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, uint32_t >()(w, value.adc0_rate);
+w.Key("\x61\x64\x63\x31\x5f\x72\x61\x74\x69\x6f", 10, false); Serializer< Writerc799133d8663c6fd461c3cf54ef1c6ca15a78cde934a498b8fb52ceb6289eb07, uint32_t >()(w, value.adc1_ratio);
 
         w.EndObject(4);
     }
@@ -2845,7 +2845,7 @@ w.Key("\x61\x64\x63\x31\x5f\x72\x61\x74\x69\x6f", 10, false); Serializer< Writer
 namespace sz { struct UBLOX {
  std::string name;
 std::string bus;
-size_t rate;
+uint32_t rate;
 
 explicit UBLOX():name(), bus(), rate() {  }
 
@@ -2865,7 +2865,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;bool has_name;
+SAXEventHandler< uint32_t > handler_2;bool has_name;
 bool has_bus;
 
     bool check_depth(const char* type)
@@ -3285,7 +3285,7 @@ struct Serializer< Writerbe40cb22fed299d738e391ab836348edc5d94989a2d7315ea8a011c
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerbe40cb22fed299d738e391ab836348edc5d94989a2d7315ea8a011c3736d1430, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerbe40cb22fed299d738e391ab836348edc5d94989a2d7315ea8a011c3736d1430, std::string >()(w, value.bus);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writerbe40cb22fed299d738e391ab836348edc5d94989a2d7315ea8a011c3736d1430, size_t >()(w, value.rate);
+w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writerbe40cb22fed299d738e391ab836348edc5d94989a2d7315ea8a011c3736d1430, uint32_t >()(w, value.rate);
 
         w.EndObject(3);
     }
@@ -3324,7 +3324,7 @@ w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writerbe40cb22fed299d738e391ab8
 namespace sz { struct SRF02 {
  std::string name;
 std::string bus;
-size_t rate;
+uint32_t rate;
 math::vec3f direction;
 float min_distance;
 float max_distance;
@@ -3347,7 +3347,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;
+SAXEventHandler< uint32_t > handler_2;
 SAXEventHandler< math::vec3f > handler_3;
 SAXEventHandler< float > handler_4;
 SAXEventHandler< float > handler_5;bool has_name;
@@ -3918,7 +3918,7 @@ struct Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, std::string >()(w, value.bus);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, size_t >()(w, value.rate);
+w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, uint32_t >()(w, value.rate);
 w.Key("\x64\x69\x72\x65\x63\x74\x69\x6f\x6e", 9, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, math::vec3f >()(w, value.direction);
 w.Key("\x6d\x69\x6e\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, float >()(w, value.min_distance);
 w.Key("\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer< Writerd864a7be339c4ced46921ffc75d7f7bbc84efa05ccf5c6efb210ee5ecee29c88, float >()(w, value.max_distance);
@@ -3958,11 +3958,11 @@ w.Key("\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct PIGPIO_PWM {
- size_t gpio;
-size_t frequency;
-size_t range;
-size_t min;
-size_t max;
+ uint32_t gpio;
+uint32_t frequency;
+uint32_t range;
+uint32_t min;
+uint32_t max;
 
 explicit PIGPIO_PWM():gpio(), frequency(), range(), min(), max() {  }
 
@@ -3980,11 +3980,11 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< size_t > handler_0;
-SAXEventHandler< size_t > handler_1;
-SAXEventHandler< size_t > handler_2;
-SAXEventHandler< size_t > handler_3;
-SAXEventHandler< size_t > handler_4;bool has_gpio;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;
+SAXEventHandler< uint32_t > handler_4;bool has_gpio;
 bool has_frequency;
 bool has_range;
 bool has_min;
@@ -4504,11 +4504,11 @@ struct Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1
     {
         w.StartObject();
 
-        w.Key("\x67\x70\x69\x6f", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, size_t >()(w, value.gpio);
-w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, size_t >()(w, value.frequency);
-w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, size_t >()(w, value.range);
-w.Key("\x6d\x69\x6e", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, size_t >()(w, value.min);
-w.Key("\x6d\x61\x78", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, size_t >()(w, value.max);
+        w.Key("\x67\x70\x69\x6f", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.gpio);
+w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.frequency);
+w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.range);
+w.Key("\x6d\x69\x6e", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.min);
+w.Key("\x6d\x61\x78", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.max);
 
         w.EndObject(5);
     }
@@ -4546,7 +4546,7 @@ w.Key("\x6d\x61\x78", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a
 
 namespace sz { struct PIGPIO {
  std::string name;
-size_t rate;
+uint32_t rate;
 std::vector<sz::PIGPIO_PWM> pwm_channels;
 
 explicit PIGPIO():name(), rate(), pwm_channels() {  }
@@ -4566,7 +4566,7 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< size_t > handler_1;
+SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< std::vector<sz::PIGPIO_PWM> > handler_2;bool has_name;
 bool has_rate;
 
@@ -4986,7 +4986,7 @@ struct Serializer< Writer6303eff143c9fd5a0f0d05205b53400ac1e184747171b3b607fa5e4
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer6303eff143c9fd5a0f0d05205b53400ac1e184747171b3b607fa5e40d5e91380, std::string >()(w, value.name);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer6303eff143c9fd5a0f0d05205b53400ac1e184747171b3b607fa5e40d5e91380, size_t >()(w, value.rate);
+w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer6303eff143c9fd5a0f0d05205b53400ac1e184747171b3b607fa5e40d5e91380, uint32_t >()(w, value.rate);
 w.Key("\x70\x77\x6d\x5f\x63\x68\x61\x6e\x6e\x65\x6c\x73", 12, false); Serializer< Writer6303eff143c9fd5a0f0d05205b53400ac1e184747171b3b607fa5e40d5e91380, std::vector<sz::PIGPIO_PWM> >()(w, value.pwm_channels);
 
         w.EndObject(3);

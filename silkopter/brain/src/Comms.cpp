@@ -14,7 +14,7 @@ constexpr uint8_t SIMULATOR_CHANNEL = 30;
 
 constexpr q::Clock::duration RUDP_PERIOD = std::chrono::milliseconds(30);
 
-Comms::Comms(boost::asio::io_service& io_service, IHAL& hal, UAV& uav)
+Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
     : m_io_service(io_service)
     , m_hal(hal)
     , m_uav(uav)

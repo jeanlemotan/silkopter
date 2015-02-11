@@ -27,11 +27,11 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Bus_I2C_Pi {
+namespace sz { struct I2C_Linux {
  std::string name;
 std::string device;
 
-explicit Bus_I2C_Pi():name(), device() {  }
+explicit I2C_Linux():name(), device() {  }
 
 
  
@@ -41,7 +41,7 @@ explicit Bus_I2C_Pi():name(), device() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Bus_I2C_Pi > {
+class SAXEventHandler< ::sz::I2C_Linux > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -98,7 +98,7 @@ has_device = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Bus_I2C_Pi * obj)
+    explicit SAXEventHandler( ::sz::I2C_Linux * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -411,15 +411,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer2aab74ae14e3070475a9162333559c442de0b5be4661d94f8e37c4b75affa0b8 >
-struct Serializer< Writer2aab74ae14e3070475a9162333559c442de0b5be4661d94f8e37c4b75affa0b8, ::sz::Bus_I2C_Pi > {
+template < class Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b >
+struct Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, ::sz::I2C_Linux > {
 
-    void operator()( Writer2aab74ae14e3070475a9162333559c442de0b5be4661d94f8e37c4b75affa0b8& w, const ::sz::Bus_I2C_Pi& value) const
+    void operator()( Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b& w, const ::sz::I2C_Linux& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer2aab74ae14e3070475a9162333559c442de0b5be4661d94f8e37c4b75affa0b8, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer2aab74ae14e3070475a9162333559c442de0b5be4661d94f8e37c4b75affa0b8, std::string >()(w, value.device);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, std::string >()(w, value.name);
+w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, std::string >()(w, value.device);
 
         w.EndObject(2);
     }
@@ -455,12 +455,12 @@ w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer2aab74ae14e307047
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Bus_SPI_Pi {
+namespace sz { struct SPI_Linux {
  std::string name;
 std::string device;
-size_t mode;
+uint32_t mode;
 
-explicit Bus_SPI_Pi():name(), device(), mode() {  }
+explicit SPI_Linux():name(), device(), mode() {  }
 
 
  
@@ -470,7 +470,7 @@ explicit Bus_SPI_Pi():name(), device(), mode() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Bus_SPI_Pi > {
+class SAXEventHandler< ::sz::SPI_Linux > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -478,7 +478,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;bool has_name;
+SAXEventHandler< uint32_t > handler_2;bool has_name;
 bool has_device;
 bool has_mode;
 
@@ -532,7 +532,7 @@ has_mode = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Bus_SPI_Pi * obj)
+    explicit SAXEventHandler( ::sz::SPI_Linux * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -891,16 +891,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589 >
-struct Serializer< Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589, ::sz::Bus_SPI_Pi > {
+template < class Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca >
+struct Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, ::sz::SPI_Linux > {
 
-    void operator()( Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589& w, const ::sz::Bus_SPI_Pi& value) const
+    void operator()( Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca& w, const ::sz::SPI_Linux& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589, std::string >()(w, value.device);
-w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writerc9dc1899a041eaaecbffa009adef130f5e292ed116ea709325e3830e5dab6589, size_t >()(w, value.mode);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, std::string >()(w, value.name);
+w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, std::string >()(w, value.device);
+w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, uint32_t >()(w, value.mode);
 
         w.EndObject(3);
     }
@@ -936,12 +936,12 @@ w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writerc9dc1899a041eaaecbffa009a
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Bus_UART_Pi {
+namespace sz { struct UART_Linux {
  std::string name;
 std::string device;
-size_t baud;
+uint32_t baud;
 
-explicit Bus_UART_Pi():name(), device(), baud() {  }
+explicit UART_Linux():name(), device(), baud() {  }
 
 
  
@@ -951,7 +951,7 @@ explicit Bus_UART_Pi():name(), device(), baud() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Bus_UART_Pi > {
+class SAXEventHandler< ::sz::UART_Linux > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -959,7 +959,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< size_t > handler_2;bool has_name;
+SAXEventHandler< uint32_t > handler_2;bool has_name;
 bool has_device;
 bool has_baud;
 
@@ -1013,7 +1013,7 @@ has_baud = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Bus_UART_Pi * obj)
+    explicit SAXEventHandler( ::sz::UART_Linux * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -1372,16 +1372,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0 >
-struct Serializer< Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0, ::sz::Bus_UART_Pi > {
+template < class Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2 >
+struct Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, ::sz::UART_Linux > {
 
-    void operator()( Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0& w, const ::sz::Bus_UART_Pi& value) const
+    void operator()( Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2& w, const ::sz::UART_Linux& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0, std::string >()(w, value.device);
-w.Key("\x62\x61\x75\x64", 4, false); Serializer< Writer71256cce4f91ce9e34600fc037da3359344a0d87c94a1ff82b30aaf5d651abe0, size_t >()(w, value.baud);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, std::string >()(w, value.name);
+w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, std::string >()(w, value.device);
+w.Key("\x62\x61\x75\x64", 4, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, uint32_t >()(w, value.baud);
 
         w.EndObject(3);
     }
@@ -1417,12 +1417,12 @@ w.Key("\x62\x61\x75\x64", 4, false); Serializer< Writer71256cce4f91ce9e34600fc03
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Buses_Pi {
- std::vector<sz::Bus_I2C_Pi> i2c;
-std::vector<sz::Bus_SPI_Pi> spi;
-std::vector<sz::Bus_UART_Pi> uart;
+namespace sz { struct Buses {
+ std::vector<sz::I2C_Linux> i2c;
+std::vector<sz::SPI_Linux> spi;
+std::vector<sz::UART_Linux> uart;
 
-explicit Buses_Pi():i2c(), spi(), uart() {  }
+explicit Buses():i2c(), spi(), uart() {  }
 
 
  
@@ -1432,15 +1432,15 @@ explicit Buses_Pi():i2c(), spi(), uart() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Buses_Pi > {
+class SAXEventHandler< ::sz::Buses > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<sz::Bus_I2C_Pi> > handler_0;
-SAXEventHandler< std::vector<sz::Bus_SPI_Pi> > handler_1;
-SAXEventHandler< std::vector<sz::Bus_UART_Pi> > handler_2;
+    SAXEventHandler< std::vector<sz::I2C_Linux> > handler_0;
+SAXEventHandler< std::vector<sz::SPI_Linux> > handler_1;
+SAXEventHandler< std::vector<sz::UART_Linux> > handler_2;
 
     bool check_depth(const char* type)
     {
@@ -1492,7 +1492,7 @@ case 2:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Buses_Pi * obj)
+    explicit SAXEventHandler( ::sz::Buses * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->i2c)
@@ -1849,16 +1849,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228 >
-struct Serializer< Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228, ::sz::Buses_Pi > {
+template < class Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209 >
+struct Serializer< Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209, ::sz::Buses > {
 
-    void operator()( Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228& w, const ::sz::Buses_Pi& value) const
+    void operator()( Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209& w, const ::sz::Buses& value) const
     {
         w.StartObject();
 
-        w.Key("\x69\x32\x63", 3, false); Serializer< Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228, std::vector<sz::Bus_I2C_Pi> >()(w, value.i2c);
-w.Key("\x73\x70\x69", 3, false); Serializer< Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228, std::vector<sz::Bus_SPI_Pi> >()(w, value.spi);
-w.Key("\x75\x61\x72\x74", 4, false); Serializer< Writera2c072f388bdee5f6cd4c2c710395d31b3d48a4556b4c633cd2690494714e228, std::vector<sz::Bus_UART_Pi> >()(w, value.uart);
+        w.Key("\x69\x32\x63", 3, false); Serializer< Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209, std::vector<sz::I2C_Linux> >()(w, value.i2c);
+w.Key("\x73\x70\x69", 3, false); Serializer< Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209, std::vector<sz::SPI_Linux> >()(w, value.spi);
+w.Key("\x75\x61\x72\x74", 4, false); Serializer< Writer59fd537f00395bd5269f89b15b7a267f567cbaad2a4bd79cf3b122ae4ddf2209, std::vector<sz::UART_Linux> >()(w, value.uart);
 
         w.EndObject(3);
     }

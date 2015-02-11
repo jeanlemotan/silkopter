@@ -7,11 +7,11 @@ namespace silk
 namespace bus
 {
 
-class I2C_Pi : public II2C
+class I2C_Linux : public II2C
 {
 public:
-    I2C_Pi(q::String const& name);
-    ~I2C_Pi();
+    I2C_Linux(q::String const& name);
+    ~I2C_Linux();
 
     auto get_name() const -> q::String const&;
 
@@ -36,7 +36,7 @@ private:
     std::vector<uint8_t> m_buffer;
 };
 
-DECLARE_CLASS_PTR(I2C_Pi);
+DECLARE_CLASS_PTR(I2C_Linux);
 
 
 }

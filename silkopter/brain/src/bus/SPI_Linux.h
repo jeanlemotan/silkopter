@@ -7,11 +7,11 @@ namespace silk
 namespace bus
 {
 
-class SPI_Pi : public ISPI
+class SPI_Linux : public ISPI
 {
 public:
-    SPI_Pi(q::String const& name);
-    ~SPI_Pi();
+    SPI_Linux(q::String const& name);
+    ~SPI_Linux();
 
     auto get_name() const -> q::String const&;
 
@@ -36,7 +36,7 @@ private:
     std::vector<uint8_t> m_buffer;
 };
 
-DECLARE_CLASS_PTR(SPI_Pi);
+DECLARE_CLASS_PTR(SPI_Linux);
 
 
 }

@@ -3,13 +3,14 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#ifdef RASPBERRY_PI
+#if defined RASPBERRY_PI
 
 extern "C"
 {
     #include "pigpio.h"
 }
 
+#endif
 
 namespace silk
 {
@@ -17,21 +18,26 @@ namespace device
 {
 
 
+
 struct Mode_Guard
 {
     Mode_Guard()
     {
+#if defined RASPBERRY_PI
         gpioSetMode(28, PI_INPUT);
         gpioSetMode(29, PI_INPUT);
         gpioSetMode(0, PI_ALT0);
         gpioSetMode(1, PI_ALT0);
+#endif
     }
     ~Mode_Guard()
     {
+#if defined RASPBERRY_PI
         gpioSetMode(28, PI_ALT0);
         gpioSetMode(29, PI_ALT0);
         gpioSetMode(0, PI_INPUT);
         gpioSetMode(1, PI_INPUT);
+#endif
     }
 };
 
@@ -116,12 +122,12 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 
 RC5T619::RC5T619(q::String const& name)
 {
-    m_adc[0].name = name + "_adc0";
-    m_adc[1].name = name + "_adc1";
+    m_adc[0].name = name + "-0";
+    m_adc[1].name = name + "-1";
 }
 
 
-auto RC5T619::init(bus::II2C* bus, Params const& params) -> bool
+auto RC5T619::init(bus::II2C* bus, Init_Params const& params) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
@@ -267,4 +273,4 @@ auto RC5T619::get_adc1() -> sensor::IADC&
 }
 }
 
-#endif
+

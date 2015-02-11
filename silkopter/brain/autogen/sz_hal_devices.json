@@ -7,11 +7,11 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
-        ["size_t", "imu_rate", {"required": false}],
-        ["size_t", "compass_rate", {"required": false}],
-        ["size_t", "thermometer_rate", {"required": false}],
-        ["size_t", "accelerometer_range", {"required": false}],
-        ["size_t", "gyroscope_range", {"required": false}]
+        ["uint32_t", "imu_rate", {"required": false}],
+        ["uint32_t", "compass_rate", {"required": false}],
+        ["uint32_t", "thermometer_rate", {"required": false}],
+        ["uint32_t", "accelerometer_range", {"required": false}],
+        ["uint32_t", "gyroscope_range", {"required": false}]
     ]
 },
 {
@@ -22,8 +22,8 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
-        ["size_t", "rate", {"required": false}],
-        ["size_t", "pressure_to_temperature_ratio", {"required": false}]
+        ["uint32_t", "rate", {"required": false}],
+        ["uint32_t", "pressure_to_temperature_ratio", {"required": false}]
     ]
 },
 {
@@ -33,7 +33,7 @@
     "members":
     [
         ["math::vec2u32", "resolution", {"required": true}],
-        ["size_t", "bitrate", {"required": true}]
+        ["uint32_t", "bitrate", {"required": true}]
     ]
 },
 {
@@ -43,7 +43,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["size_t", "fps", {"required": true}],
+        ["uint32_t", "fps", {"required": true}],
         ["sz::Raspicam_Quality", "low", {"required": true}],
         ["sz::Raspicam_Quality", "medium", {"required": true}],
         ["sz::Raspicam_Quality", "high", {"required": true}],
@@ -58,8 +58,8 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
-        ["size_t", "adc0_rate", {"required": true}],
-        ["size_t", "adc1_ratio", {"required": true}]
+        ["uint32_t", "adc0_rate", {"required": true}],
+        ["uint32_t", "adc1_ratio", {"required": true}]
     ]
 },
 {
@@ -70,7 +70,7 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
-        ["size_t", "rate", {"required": false}]
+        ["uint32_t", "rate", {"required": false}]
     ]
 },
 {
@@ -81,7 +81,7 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
-        ["size_t", "rate", {"required": true}],
+        ["uint32_t", "rate", {"required": true}],
         ["math::vec3f", "direction", {"required": true}],
         ["float", "min_distance", {"required": false}],
         ["float", "max_distance", {"required": false}]
@@ -93,11 +93,11 @@
     "name": "PIGPIO_PWM",
     "members":
     [
-        ["size_t", "gpio", {"required": true}],
-        ["size_t", "frequency", {"required": true}],
-        ["size_t", "range", {"required": true}],
-        ["size_t", "min", {"required": true}],
-        ["size_t", "max", {"required": true}]
+        ["uint32_t", "gpio", {"required": true}],
+        ["uint32_t", "frequency", {"required": true}],
+        ["uint32_t", "range", {"required": true}],
+        ["uint32_t", "min", {"required": true}],
+        ["uint32_t", "max", {"required": true}]
     ]
 },
 {
@@ -107,7 +107,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["size_t", "rate", {"required": true}],
+        ["uint32_t", "rate", {"required": true}],
         ["std::vector<sz::PIGPIO_PWM>", "pwm_channels", {"required": false}]
     ]
 },
