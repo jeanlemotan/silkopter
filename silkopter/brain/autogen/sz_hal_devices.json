@@ -114,17 +114,11 @@
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Devices",
+    "name": "ADC_Ammeter",
     "members":
     [
-        ["std::vector<sz::MPU9250>", "mpu9250", {"required": false}],
-        ["std::vector<sz::Raspicam>", "raspicam", {"required": false}],
-        ["std::vector<sz::UBLOX>", "ublox", {"required": false}],
-        ["std::vector<sz::MS5611>", "ms5611", {"required": false}],
-        ["std::vector<sz::RC5T619>", "rc5t619", {"required": false}],
-        ["std::vector<sz::SRF02>", "srf02", {"required": false}],
-        ["boost::optional<sz::PIGPIO>", "pigpio", {"required": false}]
+        ["std::string", "name", {"required": true}],
+        ["std::string", "adc", {"required": true}]
     ]
 }
-
 ]

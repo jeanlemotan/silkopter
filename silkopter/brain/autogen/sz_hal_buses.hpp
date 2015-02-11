@@ -29,9 +29,9 @@
 
 namespace sz { struct I2C_Linux {
  std::string name;
-std::string device;
+std::string dev;
 
-explicit I2C_Linux():name(), device() {  }
+explicit I2C_Linux():name(), dev() {  }
 
 
  
@@ -49,7 +49,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_device;
+bool has_dev;
 
     bool check_depth(const char* type)
     {
@@ -66,7 +66,7 @@ bool has_device;
             case 0:
     return "name";
 case 1:
-    return "device";
+    return "dev";
         default:
             break;
         }
@@ -94,7 +94,7 @@ case 1:
     void reset_flags()
     {
         has_name = false;
-has_device = false;
+has_dev = false;
     }
 
 public:
@@ -102,7 +102,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->device)
+, handler_1(&obj->dev)
     {
         reset_flags();
     }
@@ -269,8 +269,8 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x64\x65\x76\x69\x63\x65", 6))
-						 { state=1; has_device = true; }
+else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
+						 { state=1; has_dev = true; }
             else {
                 state = -1;
                 return true;
@@ -368,7 +368,7 @@ case 1:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_device) set_missing_required("device");
+if (!has_dev) set_missing_required("dev");
         }
         return the_error.empty();
     }
@@ -419,7 +419,7 @@ struct Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df0
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, std::string >()(w, value.device);
+w.Key("\x64\x65\x76", 3, false); Serializer< Writer7b8059206dc67f297390e93f91a0ffc4de53e14db53db7ab4f52df091374bb3b, std::string >()(w, value.dev);
 
         w.EndObject(2);
     }
@@ -457,10 +457,10 @@ w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer7b8059206dc67f297
 
 namespace sz { struct SPI_Linux {
  std::string name;
-std::string device;
+std::string dev;
 uint32_t mode;
 
-explicit SPI_Linux():name(), device(), mode() {  }
+explicit SPI_Linux():name(), dev(), mode() {  }
 
 
  
@@ -479,7 +479,7 @@ private:
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;bool has_name;
-bool has_device;
+bool has_dev;
 bool has_mode;
 
     bool check_depth(const char* type)
@@ -497,7 +497,7 @@ bool has_mode;
             case 0:
     return "name";
 case 1:
-    return "device";
+    return "dev";
 case 2:
     return "mode";
         default:
@@ -527,7 +527,7 @@ case 2:
     void reset_flags()
     {
         has_name = false;
-has_device = false;
+has_dev = false;
 has_mode = false;
     }
 
@@ -536,7 +536,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->device)
+, handler_1(&obj->dev)
 , handler_2(&obj->mode)
     {
         reset_flags();
@@ -728,8 +728,8 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x64\x65\x76\x69\x63\x65", 6))
-						 { state=1; has_device = true; }
+else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
+						 { state=1; has_dev = true; }
 else if (utility::string_equal(str, length, "\x6d\x6f\x64\x65", 4))
 						 { state=2; has_mode = true; }
             else {
@@ -844,7 +844,7 @@ case 2:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_device) set_missing_required("device");
+if (!has_dev) set_missing_required("dev");
 if (!has_mode) set_missing_required("mode");
         }
         return the_error.empty();
@@ -899,7 +899,7 @@ struct Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, std::string >()(w, value.device);
+w.Key("\x64\x65\x76", 3, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, std::string >()(w, value.dev);
 w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writerae1fd14977b30ff0187f879ceaeb647d96acc3b5a7872c26bf06c2f0cf9c7fca, uint32_t >()(w, value.mode);
 
         w.EndObject(3);
@@ -938,10 +938,10 @@ w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writerae1fd14977b30ff0187f879ce
 
 namespace sz { struct UART_Linux {
  std::string name;
-std::string device;
+std::string dev;
 uint32_t baud;
 
-explicit UART_Linux():name(), device(), baud() {  }
+explicit UART_Linux():name(), dev(), baud() {  }
 
 
  
@@ -960,7 +960,7 @@ private:
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;bool has_name;
-bool has_device;
+bool has_dev;
 bool has_baud;
 
     bool check_depth(const char* type)
@@ -978,7 +978,7 @@ bool has_baud;
             case 0:
     return "name";
 case 1:
-    return "device";
+    return "dev";
 case 2:
     return "baud";
         default:
@@ -1008,7 +1008,7 @@ case 2:
     void reset_flags()
     {
         has_name = false;
-has_device = false;
+has_dev = false;
 has_baud = false;
     }
 
@@ -1017,7 +1017,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->device)
+, handler_1(&obj->dev)
 , handler_2(&obj->baud)
     {
         reset_flags();
@@ -1209,8 +1209,8 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x64\x65\x76\x69\x63\x65", 6))
-						 { state=1; has_device = true; }
+else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
+						 { state=1; has_dev = true; }
 else if (utility::string_equal(str, length, "\x62\x61\x75\x64", 4))
 						 { state=2; has_baud = true; }
             else {
@@ -1325,7 +1325,7 @@ case 2:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_device) set_missing_required("device");
+if (!has_dev) set_missing_required("dev");
 if (!has_baud) set_missing_required("baud");
         }
         return the_error.empty();
@@ -1380,7 +1380,7 @@ struct Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, std::string >()(w, value.name);
-w.Key("\x64\x65\x76\x69\x63\x65", 6, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, std::string >()(w, value.device);
+w.Key("\x64\x65\x76", 3, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, std::string >()(w, value.dev);
 w.Key("\x62\x61\x75\x64", 4, false); Serializer< Writer493af081240846c5eec41f47bb4e3c0086f5cb68f8dee2ea82a38cf0491212a2, uint32_t >()(w, value.baud);
 
         w.EndObject(3);

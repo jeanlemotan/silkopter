@@ -87,24 +87,24 @@ int main(int argc, char const* argv[])
         }
     });
 
-    {
-        int policy = SCHED_FIFO;
-        struct sched_param param;
-        param.sched_priority = 10;
+//    {
+//        int policy = SCHED_FIFO;
+//        struct sched_param param;
+//        param.sched_priority = 10;
 
-        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
-        {
-            perror("main sched_setscheduler");
-            exit(EXIT_FAILURE);
-        }
-
-//        param.sched_priority = 4;
-//        if (pthread_setschedparam(io_thread.native_handle(), policy, &param) != 0)
+//        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
 //        {
-//            perror("io sched_setscheduler");
+//            perror("main sched_setscheduler");
 //            exit(EXIT_FAILURE);
 //        }
-    }
+
+////        param.sched_priority = 4;
+////        if (pthread_setschedparam(io_thread.native_handle(), policy, &param) != 0)
+////        {
+////            perror("io sched_setscheduler");
+////            exit(EXIT_FAILURE);
+////        }
+//    }
 
     uint16_t send_port = 52520;
     uint16_t receive_port = 52521;

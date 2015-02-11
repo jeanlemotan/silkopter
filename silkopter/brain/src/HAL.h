@@ -16,7 +16,7 @@ public:
     void shutdown();
 
     auto get_settings(q::Path const& path) -> rapidjson::Value&;
-    void save_settings() const;
+    void save_settings();
 
     //interfaces
     template<class T> auto get_all_interfaces() const -> std::vector<T*> const&;

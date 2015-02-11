@@ -6,7 +6,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["std::string", "device", {"required": true}]
+        ["std::string", "dev", {"required": true}]
     ]
 },
 {
@@ -16,7 +16,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["std::string", "device", {"required": true}],
+        ["std::string", "dev", {"required": true}],
         ["uint32_t", "mode", {"required": true}]
     ]
 },
@@ -27,7 +27,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["std::string", "device", {"required": true}],
+        ["std::string", "dev", {"required": true}],
         ["uint32_t", "baud", {"required": true}]
     ]
 },

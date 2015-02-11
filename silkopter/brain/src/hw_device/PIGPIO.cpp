@@ -151,6 +151,9 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
 #endif
 }
 
+void PIGPIO::process()
+{
+}
 
 }
 }

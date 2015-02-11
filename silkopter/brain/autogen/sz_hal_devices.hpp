@@ -5023,16 +5023,11 @@ w.Key("\x70\x77\x6d\x5f\x63\x68\x61\x6e\x6e\x65\x6c\x73", 12, false); Serializer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Devices {
- std::vector<sz::MPU9250> mpu9250;
-std::vector<sz::Raspicam> raspicam;
-std::vector<sz::UBLOX> ublox;
-std::vector<sz::MS5611> ms5611;
-std::vector<sz::RC5T619> rc5t619;
-std::vector<sz::SRF02> srf02;
-boost::optional<sz::PIGPIO> pigpio;
+namespace sz { struct ADC_Ammeter {
+ std::string name;
+std::string adc;
 
-explicit Devices():mpu9250(), raspicam(), ublox(), ms5611(), rc5t619(), srf02(), pigpio() {  }
+explicit ADC_Ammeter():name(), adc() {  }
 
 
  
@@ -5042,19 +5037,15 @@ explicit Devices():mpu9250(), raspicam(), ublox(), ms5611(), rc5t619(), srf02(),
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Devices > {
+class SAXEventHandler< ::sz::ADC_Ammeter > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<sz::MPU9250> > handler_0;
-SAXEventHandler< std::vector<sz::Raspicam> > handler_1;
-SAXEventHandler< std::vector<sz::UBLOX> > handler_2;
-SAXEventHandler< std::vector<sz::MS5611> > handler_3;
-SAXEventHandler< std::vector<sz::RC5T619> > handler_4;
-SAXEventHandler< std::vector<sz::SRF02> > handler_5;
-SAXEventHandler< boost::optional<sz::PIGPIO> > handler_6;
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;bool has_name;
+bool has_adc;
 
     bool check_depth(const char* type)
     {
@@ -5069,19 +5060,9 @@ SAXEventHandler< boost::optional<sz::PIGPIO> > handler_6;
     {
         switch (state) {
             case 0:
-    return "mpu9250";
+    return "name";
 case 1:
-    return "raspicam";
-case 2:
-    return "ublox";
-case 3:
-    return "ms5611";
-case 4:
-    return "rc5t619";
-case 5:
-    return "srf02";
-case 6:
-    return "pigpio";
+    return "adc";
         default:
             break;
         }
@@ -5108,26 +5089,16 @@ case 6:
 
     void reset_flags()
     {
-        
-
-
-
-
-
-
+        has_name = false;
+has_adc = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Devices * obj)
+    explicit SAXEventHandler( ::sz::ADC_Ammeter * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->mpu9250)
-, handler_1(&obj->raspicam)
-, handler_2(&obj->ublox)
-, handler_3(&obj->ms5611)
-, handler_4(&obj->rc5t619)
-, handler_5(&obj->srf02)
-, handler_6(&obj->pigpio)
+        , handler_0(&obj->name)
+, handler_1(&obj->adc)
     {
         reset_flags();
     }
@@ -5144,21 +5115,6 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
-
-case 2:
-    return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
-
-case 4:
-    return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
-
-case 6:
-    return checked_event_forwarding(handler_6.Null());
 
         default:
             break;
@@ -5179,21 +5135,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
-case 2:
-    return checked_event_forwarding(handler_2.Bool(b));
-
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
-case 4:
-    return checked_event_forwarding(handler_4.Bool(b));
-
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
-case 6:
-    return checked_event_forwarding(handler_6.Bool(b));
-
         default:
             break;
         }
@@ -5212,21 +5153,6 @@ case 6:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int(i));
 
         default:
             break;
@@ -5247,21 +5173,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
-case 2:
-    return checked_event_forwarding(handler_2.Uint(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Uint(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint(i));
-
         default:
             break;
         }
@@ -5280,21 +5191,6 @@ case 6:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int64(i));
 
         default:
             break;
@@ -5315,21 +5211,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
-case 2:
-    return checked_event_forwarding(handler_2.Uint64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Uint64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint64(i));
-
         default:
             break;
         }
@@ -5348,21 +5229,6 @@ case 6:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
-
-case 2:
-    return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
-
-case 4:
-    return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
-
-case 6:
-    return checked_event_forwarding(handler_6.Double(d));
 
         default:
             break;
@@ -5383,21 +5249,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
-case 2:
-    return checked_event_forwarding(handler_2.String(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.String(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.String(str, length, copy));
-
         default:
             break;
         }
@@ -5412,20 +5263,10 @@ case 6:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6d\x70\x75\x39\x32\x35\x30", 7))
-						 { state=0;  }
-else if (utility::string_equal(str, length, "\x72\x61\x73\x70\x69\x63\x61\x6d", 8))
-						 { state=1;  }
-else if (utility::string_equal(str, length, "\x75\x62\x6c\x6f\x78", 5))
-						 { state=2;  }
-else if (utility::string_equal(str, length, "\x6d\x73\x35\x36\x31\x31", 6))
-						 { state=3;  }
-else if (utility::string_equal(str, length, "\x72\x63\x35\x74\x36\x31\x39", 7))
-						 { state=4;  }
-else if (utility::string_equal(str, length, "\x73\x72\x66\x30\x32", 5))
-						 { state=5;  }
-else if (utility::string_equal(str, length, "\x70\x69\x67\x70\x69\x6f", 6))
-						 { state=6;  }
+            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
+						 { state=0; has_name = true; }
+else if (utility::string_equal(str, length, "\x61\x64\x63", 3))
+						 { state=1; has_adc = true; }
             else {
                 state = -1;
                 return true;
@@ -5439,21 +5280,6 @@ else if (utility::string_equal(str, length, "\x70\x69\x67\x70\x69\x6f", 6))
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.Key(str, length, copy));
 
             default:
                 break;
@@ -5475,21 +5301,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
-case 2:
-    return checked_event_forwarding(handler_2.StartArray());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartArray());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartArray());
-
         default:
             break;
         }
@@ -5509,21 +5320,6 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
-case 2:
-    return checked_event_forwarding(handler_2.EndArray(length));
-
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
-case 4:
-    return checked_event_forwarding(handler_4.EndArray(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndArray(length));
-
         default:
             break;
         }
@@ -5542,21 +5338,6 @@ case 6:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartObject());
 
             default:
                 break;
@@ -5578,26 +5359,12 @@ case 6:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
-case 2:
-    return checked_event_forwarding(handler_2.EndObject(length));
-
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
-case 4:
-    return checked_event_forwarding(handler_4.EndObject(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            
+            if (!has_name) set_missing_required("name");
+if (!has_adc) set_missing_required("adc");
         }
         return the_error.empty();
     }
@@ -5620,16 +5387,6 @@ case 6:
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
-case 2:
-     handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
-case 4:
-     handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
-case 6:
-     handler_6.ReapError(errs); break;
 
         default:
             break;
@@ -5646,31 +5403,21 @@ case 6:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
-handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
-handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
-handler_6.PrepareForReuse();
 
     }
 };
 
-template < class Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957 >
-struct Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, ::sz::Devices > {
+template < class Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a >
+struct Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, ::sz::ADC_Ammeter > {
 
-    void operator()( Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957& w, const ::sz::Devices& value) const
+    void operator()( Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a& w, const ::sz::ADC_Ammeter& value) const
     {
         w.StartObject();
 
-        w.Key("\x6d\x70\x75\x39\x32\x35\x30", 7, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::MPU9250> >()(w, value.mpu9250);
-w.Key("\x72\x61\x73\x70\x69\x63\x61\x6d", 8, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::Raspicam> >()(w, value.raspicam);
-w.Key("\x75\x62\x6c\x6f\x78", 5, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::UBLOX> >()(w, value.ublox);
-w.Key("\x6d\x73\x35\x36\x31\x31", 6, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::MS5611> >()(w, value.ms5611);
-w.Key("\x72\x63\x35\x74\x36\x31\x39", 7, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::RC5T619> >()(w, value.rc5t619);
-w.Key("\x73\x72\x66\x30\x32", 5, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, std::vector<sz::SRF02> >()(w, value.srf02);
-w.Key("\x70\x69\x67\x70\x69\x6f", 6, false); Serializer< Writerc869f5d02ef2a30d2c333f35e38602647d6aa5bcf2b7a311fedc85fdf1643957, boost::optional<sz::PIGPIO> >()(w, value.pigpio);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.name);
+w.Key("\x61\x64\x63", 3, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.adc);
 
-        w.EndObject(7);
+        w.EndObject(2);
     }
 
 };
