@@ -34,22 +34,22 @@ struct mat2
 	///////////////////////////////////////////////////////////////////////////////
 	// constructors
 	///////////////////////////////////////////////////////////////////////////////
-	mat2();
-	mat2(ZUninitialized);
+    mat2();
+    mat2(ZUninitialized);
     mat2(angle<T> const& rotation);
-	explicit mat2(T value);
-	mat2(mat2<T> const& other);
-	template<typename U> explicit mat2(mat2<U> const& v);
+    explicit mat2(T value);
+    mat2(mat2<T> const& other);
+    template<typename U> explicit mat2(mat2<U> const& v);
 
 	//casting
-	explicit mat2(mat3<T> const& v);
-	explicit mat2(mat4<T> const& v);
+    explicit mat2(mat3<T> const& v);
+    explicit mat2(mat4<T> const& v);
 
 
-	mat2(T const v0, T const v1,
+    mat2(T const v0, T const v1,
 		T const v2, T const v3);
 
-	mat2(vec2<T> const& column0, vec2<T> const& column1);
+    mat2(vec2<T> const& column0, vec2<T> const& column1);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// methods

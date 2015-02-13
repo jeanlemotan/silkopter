@@ -28,22 +28,18 @@ struct i2c_msg
 
 namespace silk
 {
+namespace node
+{
 namespace bus
 {
 
-I2C_Linux::I2C_Linux(q::String const& name)
-    : m_name(name)
+I2C_Linux::I2C_Linux()
 {
 }
 
 I2C_Linux::~I2C_Linux()
 {
     close();
-}
-
-auto I2C_Linux::get_name() const -> q::String const&
-{
-    return m_name;
 }
 
 auto I2C_Linux::open(q::String const& device) -> bool
@@ -200,5 +196,6 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
 }
 
 
+}
 }
 }

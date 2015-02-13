@@ -77,12 +77,6 @@ rpi {
 
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
-    ../../src/hw_device/MPU9250.cpp \
-    ../../src/hw_device/MS5611.cpp \
-    ../../src/hw_device/Raspicam.cpp \
-    ../../src/hw_device/RC5T619.cpp \
-    ../../src/hw_device/SRF02.cpp \
-    ../../src/hw_device/UBLOX.cpp \
     ../../src/storage/Storage_FS.cpp \
     ../../src/storage/Storage_MB85RC.cpp \
     ../../src/AHRS.cpp \
@@ -96,14 +90,20 @@ SOURCES += \
     ../../src/Motors_PiGPIO.cpp \
     ../../src/Sim_Comms.cpp \
     ../../src/UAV.cpp \
-    ../../src/hw_device/PIGPIO.cpp \
     ../../src/HAL.cpp \
     ../../src/HAL_old.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
-    ../../src/bus/I2C_Linux.cpp \
-    ../../src/sw_device/ADC_Ammeter.cpp \
-    ../../src/sw_device/ADC_Voltmeter.cpp
+    ../../src/bus/I2C_Linux.cpp \ 
+    ../../src/sink/PIGPIO.cpp \
+    ../../src/source/ADC_Ammeter.cpp \
+    ../../src/source/ADC_Voltmeter.cpp \
+    ../../src/source/MPU9250.cpp \
+    ../../src/source/MS5611.cpp \
+    ../../src/source/Raspicam.cpp \
+    ../../src/source/RC5T619.cpp \
+    ../../src/source/SRF02.cpp \
+    ../../src/source/UBLOX.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -122,12 +122,6 @@ HEADERS += \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
-    ../../src/hw_device/MPU9250.h \
-    ../../src/hw_device/MS5611.h \
-    ../../src/hw_device/Raspicam.h \
-    ../../src/hw_device/RC5T619.h \
-    ../../src/hw_device/SRF02.h \
-    ../../src/hw_device/UBLOX.h \
     ../../src/storage/Storage_MB85RC.h \
     ../../src/Battery.h \
     ../../src/Gimbal_Servo_PiGPIO.h \
@@ -136,27 +130,51 @@ HEADERS += \
     ../../src/HAL_Sensors_Sim.h \
     ../../src/Motors_PiGPIO.h \
     ../../src/Sim_Comms.h \
-    ../../src/hw_device/PIGPIO.h \
     ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
-    ../../src/bus/UART_Linux.h \
-    ../../src/sw_device/ADC_Ammeter.h \
-    ../../src/sw_device/ADC_Voltmeter.h \
-    ../../../libs/common/node/IAccelerometer.h \
-    ../../../libs/common/node/IADC.h \
-    ../../../libs/common/node/IAmmeter.h \
-    ../../../libs/common/node/IBarometer.h \
-    ../../../libs/common/node/ICamera.h \
-    ../../../libs/common/node/ICompass.h \
-    ../../../libs/common/node/IGPS.h \
-    ../../../libs/common/node/IGyroscope.h \
-    ../../../libs/common/node/II2C.h \
-    ../../../libs/common/node/IPWM.h \
-    ../../../libs/common/node/ISonar.h \
-    ../../../libs/common/node/ISPI.h \
-    ../../../libs/common/node/IThermometer.h \
-    ../../../libs/common/node/IUART.h \
-    ../../../libs/common/node/IVoltmeter.h \
-    ../../../libs/common/node/Node_Data.h
+    ../../src/bus/UART_Linux.h \ 
+    ../../../libs/common/node/bus/II2C.h \
+    ../../../libs/common/node/bus/ISPI.h \
+    ../../../libs/common/node/bus/IUART.h \
+    ../../../libs/common/node/sink/IPWM.h \
+    ../../../libs/common/node/source/IAccelerometer.h \
+    ../../../libs/common/node/source/IADC.h \
+    ../../../libs/common/node/source/IAHRS.h \
+    ../../../libs/common/node/source/IAmmeter.h \
+    ../../../libs/common/node/source/IBarometer.h \
+    ../../../libs/common/node/source/ICamera.h \
+    ../../../libs/common/node/source/ICompass.h \
+    ../../../libs/common/node/source/IGPS.h \
+    ../../../libs/common/node/source/IGyroscope.h \
+    ../../../libs/common/node/source/IInertial.h \
+    ../../../libs/common/node/source/ISonar.h \
+    ../../../libs/common/node/source/IThermometer.h \
+    ../../../libs/common/node/source/IVoltmeter.h \
+    ../../src/sink/PIGPIO.h \
+    ../../src/source/ADC_Ammeter.h \
+    ../../src/source/ADC_Voltmeter.h \
+    ../../src/source/MPU9250.h \
+    ../../src/source/MS5611.h \
+    ../../src/source/Raspicam.h \
+    ../../src/source/RC5T619.h \
+    ../../src/source/SRF02.h \
+    ../../src/source/UBLOX.h \
+    ../../../libs/common/node/stream/IAcceleration.h \
+    ../../../libs/common/node/stream/IADC_Value.h \
+    ../../../libs/common/node/stream/IAngular_Velocity.h \
+    ../../../libs/common/node/stream/ICurrent.h \
+    ../../../libs/common/node/stream/IDistance.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IMagnetic_Field.h \
+    ../../../libs/common/node/stream/IPressure.h \
+    ../../../libs/common/node/stream/IReference_Frame.h \
+    ../../../libs/common/node/stream/ITemperature.h \
+    ../../../libs/common/node/stream/IVideo.h \
+    ../../../libs/common/node/stream/IVoltage.h \
+    ../../../libs/common/node/stream/Sample.h \
+    ../../../libs/common/node/bus/IBus.h \
+    ../../../libs/common/node/sink/ISink.h \
+    ../../../libs/common/node/source/ISource.h \
+    ../../../libs/common/node/stream/IStream.h
 

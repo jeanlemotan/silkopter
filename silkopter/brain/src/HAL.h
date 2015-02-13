@@ -1,9 +1,35 @@
 #pragma once
 
 #include "rapidjson/document.h"
+#include "common/node/bus/IBus.h"
+#include "common/node/source/ISource.h"
+#include "common/node/sink/ISink.h"
+#include "common/node/stream/IStream.h"
 
 namespace silk
 {
+
+class HAL;
+
+template<class Base>
+class Registry : q::util::Noncopyable
+{
+    friend class HAL;
+public:
+    template<class T> auto get_all() const -> std::vector<std::pair<q::String const&, T*>> const&;
+    template<class T> auto find_by_name(q::String const& name) const -> T*;
+
+protected:
+    typedef std::vector<std::pair<q::String const&, Base*>> Nodes;
+    typedef std::unordered_map<size_t, Nodes> Nodes_Map;
+
+    template<class T> auto add(q::String const& name, T& node) -> bool;
+
+private:
+    template<class T> auto get_nodes() const -> Nodes&;
+    mutable Nodes_Map m_nodes_map;
+};
+
 
 class HAL : q::util::Noncopyable
 {
@@ -18,21 +44,16 @@ public:
     auto get_settings(q::Path const& path) -> rapidjson::Value&;
     void save_settings();
 
-    //interfaces
-    template<class T> auto get_all_interfaces() const -> std::vector<T*> const&;
-    template<class T> auto find_interface_by_name(q::String const& name) const -> T*;
+    auto get_buses()    -> Registry<node::bus::IBus>&;
+    auto get_sources()  -> Registry<node::source::ISource>&;
+    auto get_sinks()    -> Registry<node::sink::ISink>&;
+    auto get_streams()  -> Registry<node::stream::IStream>&;
 
 private:
-    template<class T> auto add_interface(T* interface) -> bool;
-
-    struct Registry_Base {};
-    template <class T> struct Registry : public Registry_Base
-    {
-        std::vector<T*> interfaces;
-    };
-    mutable std::unordered_map<size_t, std::unique_ptr<Registry_Base>> m_registry;
-
-    template<class T> auto get_registry() const -> Registry<T>&;
+    Registry<node::bus::IBus> m_buses;
+    Registry<node::source::ISource> m_sources;
+    Registry<node::sink::ISink> m_sinks;
+    Registry<node::stream::IStream> m_streams;
 
     bool m_is_initialized = false;
 
@@ -46,65 +67,45 @@ private:
 };
 
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
+template<class Base>
 template<class T>
-auto HAL::get_all_interfaces() const -> std::vector<T*> const&
+auto Registry<Base>::get_all() const -> std::vector<std::pair<q::String const&, T*>> const&
 {
-    return get_registry<T>().interfaces;
+    return get_nodes<T>();
 }
+template<class Base>
 template<class T>
-auto HAL::find_interface_by_name(q::String const& name) const -> T*
+auto Registry<Base>::find_by_name(q::String const& name) const -> T*
 {
-    auto& interfaces = get_registry<T>().interfaces;
-    auto it = std::find_if(interfaces.begin(), interfaces.end(),
-                           [&](T* s) { return s->get_name() == name; });
-    return it != interfaces.end() ? *it : nullptr;
+    auto& nodes = get_nodes<T>();
+    auto it = std::find_if(nodes.begin(), nodes.end(),
+                           [&](std::pair<q::String const&, Base*> const& s) { return s.first == name; });
+    return it != nodes.end() ? reinterpret_cast<T*>(it->second) : nullptr;
 }
-
+template<class Base>
 template<class T>
-auto HAL::get_registry() const -> Registry<T>&
+auto Registry<Base>::add(q::String const& name, T& node) -> bool
 {
-    size_t hash = typeid(T).hash_code();
-    auto it = m_registry.find(hash);
-    Registry<T>* registry = nullptr;
-    if (it != m_registry.end())
+    if (find_by_name<T>(name))
     {
-        registry = reinterpret_cast<Registry<T>*>(it->second.get());
-    }
-    else
-    {
-        registry = new Registry<T>();
-        m_registry[hash].reset(registry);
-    }
-    QASSERT(registry);
-    return *registry;
-}
-
-template<class T>
-auto HAL::add_interface(T* interface) -> bool
-{
-    QASSERT(interface);
-    if (!interface)
-    {
+        QLOGE("Duplicated name in node {}", name);
         return false;
     }
-    if (find_interface_by_name<T>(interface->get_name()))
-    {
-        QLOGE("Duplicated name in interface {}", interface->get_name());
-        return false;
-    }
-    auto& registry = get_registry<T>();
-    registry.interfaces.push_back(interface);
+    auto& nodes = get_nodes<T>();
+    nodes.push_back({name, static_cast<Base*>(&node)});
     return true;
 }
+template<class Base>
+template<class T>
+auto Registry<Base>::get_nodes() const -> Nodes&
+{
+    size_t hash = typeid(T).hash_code();
+    Nodes& nodes = m_nodes_map[hash];
+    return nodes;
+}
+
 
 }

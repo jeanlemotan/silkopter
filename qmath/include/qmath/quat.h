@@ -20,11 +20,11 @@ struct quat
 // constructors
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	quat();
-	quat(ZUninitialized);
-	quat(T x, T y, T z, T w);
-	quat(quat const&);
-	template<typename U> explicit quat(quat<U> const&);
+    constexpr quat();
+    constexpr quat(ZUninitialized);
+    constexpr quat(T x, T y, T z, T w);
+    constexpr quat(quat const&);
+    template<typename U> explicit constexpr quat(quat<U> const&);
 
     template<class Policy = standard> static quat<T> look_at(vec3<T> const& front, vec3<T> const& up);
     template<class Policy = standard> static quat<T> from_axis_x(T const& a);

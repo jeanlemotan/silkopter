@@ -22,31 +22,30 @@ struct vec4
 
 	//////////////////////////////////////
 	// Basic constructors
-	vec4();
+    constexpr vec4();
 
 	//constructs the vector uninitialized
-	vec4(ZUninitialized);
+    constexpr vec4(ZUninitialized);
 
 	//constructs from direct x, y, z values
-	vec4(T x, T y, T z, T w);
+    constexpr vec4(T x, T y, T z, T w);
 
 	//construct from a single value - x == y == z = s
 	//this has to be explicit to avoid undesirable casts
-	explicit vec4(T s);
+    explicit constexpr vec4(T s);
 
 	//copy constructor
-	vec4(vec4<T> const& v);
+    constexpr vec4(vec4<T> const& v);
 	
 	// Conversion vector constructors
-	template<typename U>
-	explicit vec4(vec4<U> const& v);
+    template<typename U> explicit constexpr vec4(vec4<U> const& v);
 
 	//cast
 	//implementation in cast.inl
-	explicit vec4(vec2<T> const& v);
-	explicit vec4(vec2<T> const& v, T z, T w);
-	explicit vec4(vec3<T> const& v);
-	explicit vec4(vec3<T> const& v, T w);
+    explicit constexpr vec4(vec2<T> const& v);
+    explicit constexpr vec4(vec2<T> const& v, T z, T w);
+    explicit constexpr vec4(vec3<T> const& v);
+    explicit constexpr vec4(vec3<T> const& v, T w);
 
 	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,22 +5,18 @@
 
 namespace silk
 {
+namespace node
+{
 namespace bus
 {
 
-UART_Linux::UART_Linux(q::String const& name)
-    : m_name(name)
+UART_Linux::UART_Linux()
 {
 }
 
 UART_Linux::~UART_Linux()
 {
     close();
-}
-
-auto UART_Linux::get_name() const -> q::String const&
-{
-    return m_name;
 }
 
 auto UART_Linux::open(q::String const& device, size_t baud) -> bool
@@ -115,5 +111,6 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 }
 
 
+}
 }
 }

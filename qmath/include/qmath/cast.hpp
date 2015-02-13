@@ -2,10 +2,10 @@ namespace math
 {
 
 template<typename T>
-inline vec2<T>::vec2(const vec3<T>& v) : x(v.x), y(v.y) {}
+inline constexpr vec2<T>::vec2(const vec3<T>& v) : x(v.x), y(v.y) {}
 
 template<typename T>
-inline vec2<T>::vec2(const vec4<T>& v) : x(v.x), y(v.y) {}
+inline constexpr vec2<T>::vec2(const vec4<T>& v) : x(v.x), y(v.y) {}
 
 template<typename T>
 inline vec2<T>& vec2<T>::operator=(const vec3<T>& v)

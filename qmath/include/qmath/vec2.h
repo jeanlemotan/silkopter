@@ -21,28 +21,28 @@ struct vec2
 
 	//////////////////////////////////////
 	// Basic constructors
-	vec2();
+    constexpr vec2();
 
 	//constructs the vector uninitialized
-	vec2(ZUninitialized);
+    constexpr vec2(ZUninitialized);
 
 	//constructs from direct x, y values
-	vec2(T x, T y);
+    constexpr vec2(T x, T y);
 
 	//construct from a single value - x == y == s
 	//this has to be explicit to avoid undesirable casts
-	explicit vec2(T s);
+    explicit constexpr vec2(T s);
 
 	//copy constructor
-	vec2(vec2<T> const& v);
+    constexpr vec2(vec2<T> const& v);
 	
 	// Conversion vector constructors
-	template<typename U> explicit vec2(vec2<U> const& v);
+    template<typename U> explicit constexpr vec2(vec2<U> const& v);
 
 	//casting
 	//implementation is in cast.inl
-	explicit vec2(vec3<T> const& v);
-	explicit vec2(vec4<T> const& v);
+    explicit constexpr vec2(vec3<T> const& v);
+    explicit constexpr vec2(vec4<T> const& v);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions

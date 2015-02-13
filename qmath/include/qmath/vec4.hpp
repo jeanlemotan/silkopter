@@ -3,17 +3,17 @@ namespace math
 	template<typename T> vec4<T> const vec4<T>::zero(0);																		   \
 	template<typename T> vec4<T> const vec4<T>::one(1);																		   \
 
-	template<typename T> inline vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
-	template<typename T> inline vec4<T>::vec4(ZUninitialized) {}
-	template<typename T> inline vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
-	template<typename T> inline vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
-	template<typename T> inline vec4<T>::vec4(vec4<T> const& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
-	template<typename T> inline vec4<T>::vec4(vec2<T> const& v) : x(v.x), y(v.y), z(0), w(0) {}
-	template<typename T> inline vec4<T>::vec4(vec2<T> const& v, T z, T w) : x(v.x), y(v.y), z(z), w(w) {}
-	template<typename T> inline vec4<T>::vec4(vec3<T> const& v) : x(v.x), y(v.y), z(v.z), w(0) {}
-	template<typename T> inline vec4<T>::vec4(vec3<T> const& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
+    template<typename T> inline constexpr vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
+    template<typename T> inline constexpr vec4<T>::vec4(ZUninitialized) {}
+    template<typename T> inline constexpr vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
+    template<typename T> inline constexpr vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
+    template<typename T> inline constexpr vec4<T>::vec4(vec4<T> const& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
+    template<typename T> inline constexpr vec4<T>::vec4(vec2<T> const& v) : x(v.x), y(v.y), z(0), w(0) {}
+    template<typename T> inline constexpr vec4<T>::vec4(vec2<T> const& v, T z, T w) : x(v.x), y(v.y), z(z), w(w) {}
+    template<typename T> inline constexpr vec4<T>::vec4(vec3<T> const& v) : x(v.x), y(v.y), z(v.z), w(0) {}
+    template<typename T> inline constexpr vec4<T>::vec4(vec3<T> const& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
 	
-	template<typename T> template<typename U> inline vec4<T>::vec4(vec4<U> const& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)), w(T(v.w)) {}
+    template<typename T> template<typename U> inline constexpr vec4<T>::vec4(vec4<U> const& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)), w(T(v.w)) {}
     template<typename T> inline void vec4<T>::set(T _x, T _y, T _z, T _w)
 	{
 		x = _x;

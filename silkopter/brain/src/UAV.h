@@ -2,7 +2,6 @@
 
 #include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
-#include "common/node/Node_Data.h"
 #include "AHRS.h"
 #include "Battery.h"
 #include "Motor_Mixer.h"
@@ -56,8 +55,8 @@ public:
 
     // data
 
-    auto get_ahrs() -> AHRS const&;
-    auto get_battery() -> Battery const&;
+//    auto get_ahrs() -> AHRS const&;
+//    auto get_battery() -> Battery const&;
     auto get_motor_mixer() -> Motor_Mixer const&;
 
     auto get_linear_acceleration_w() const -> math::vec3f const&;
@@ -134,28 +133,28 @@ private:
     void process_input();
     void process_camera_mount();
 
-    void process_rate_pids(node::IGyroscope::Sample const& sample);
+//    void process_rate_pids(node::IAngular_Velocity_Stream::Value const& sample);
 
-    struct IMU
-    {
-        Butterworth gyroscope_filter;
-        node::IGyroscope::Sample last_gyroscope_sample;
-        Manual_Clock::time_point gyroscope_time_point;
+//    struct IMU
+//    {
+//        Butterworth gyroscope_filter;
+//        node::IGyroscope::Sample last_gyroscope_sample;
+//        Manual_Clock::time_point gyroscope_time_point;
 
-        Butterworth accelerometer_filter;
-        node::IAccelerometer::Sample last_accelerometer_sample;
-        Manual_Clock::time_point accelerometer_time_point;
+//        Butterworth accelerometer_filter;
+//        node::IAccelerometer::Sample last_accelerometer_sample;
+//        Manual_Clock::time_point accelerometer_time_point;
 
-        Butterworth compass_filter;
-        node::ICompass::Sample last_compass_sample;
-        Manual_Clock::time_point compass_time_point;
+//        Butterworth compass_filter;
+//        node::ICompass::Sample last_compass_sample;
+//        Manual_Clock::time_point compass_time_point;
 
-        Manual_Clock clock;
-    } m_imu;
+//        Manual_Clock clock;
+//    } m_imu;
 
     HAL& m_hal;
-    AHRS m_ahrs;
-    Battery m_battery;
+//    AHRS m_ahrs;
+//    Battery m_battery;
     Motor_Mixer m_motor_mixer;
 
     bool do_disarm_check() const;

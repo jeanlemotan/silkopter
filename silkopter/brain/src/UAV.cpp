@@ -24,10 +24,10 @@ UAV::UAV(HAL& hal)
     m_pids.pitch_rate.set_params(Pitch_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
     m_pids.roll_rate.set_params(Roll_Rate_PID::Params(0.1f, 0.05f, 0.001f, 0.5f));
 
-    m_imu.gyroscope_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_imu.accelerometer_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_imu.compass_time_point = q::Clock::time_point(std::chrono::seconds(0));
-    m_imu.clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
+//    m_imu.gyroscope_time_point = q::Clock::time_point(std::chrono::seconds(0));
+//    m_imu.accelerometer_time_point = q::Clock::time_point(std::chrono::seconds(0));
+//    m_imu.compass_time_point = q::Clock::time_point(std::chrono::seconds(0));
+//    m_imu.clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(0)));
 
     load_settings();
     save_settings();
@@ -253,14 +253,14 @@ bool UAV::do_disarm_check() const
     return ok;
 }
 
-auto UAV::get_ahrs() -> AHRS const&
-{
-    return m_ahrs;
-}
-auto UAV::get_battery() -> Battery const&
-{
-    return m_battery;
-}
+//auto UAV::get_ahrs() -> AHRS const&
+//{
+//    return m_ahrs;
+//}
+//auto UAV::get_battery() -> Battery const&
+//{
+//    return m_battery;
+//}
 auto UAV::get_motor_mixer() -> Motor_Mixer const&
 {
     return m_motor_mixer;
@@ -378,36 +378,36 @@ void UAV::process_imu_sensor_data()
 
 void UAV::process_dead_reckoning()
 {
-    float sample_dts = q::Seconds(m_imu.last_accelerometer_sample.dt).count();
+//    float sample_dts = q::Seconds(m_imu.last_accelerometer_sample.dt).count();
 
-    //auto old_acceleration = m_linear_motion.acceleration;
-    math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
-    //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
-    auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
-    //LOG_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
+//    //auto old_acceleration = m_linear_motion.acceleration;
+//    math::vec3f acceleration = m_imu.last_accelerometer_sample.value;
+//    //math::vec3f gravity = math::transform(m_ahrs.get_e2b_mat(), math::vec3f(0, 0, 1)) * physics::constants::g;
+//    auto new_acceleration = math::transform(m_ahrs.get_mat_l2w(), acceleration) - math::vec3f(0, 0, physics::constants::g);
+//    //LOG_INFO("acc {}, l {}", new_acceleration, math::length(new_acceleration));
 
-//            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
-//            m_linear_motion.velocity += dts * (old_acceleration + new_acceleration) * 0.5f;
-//            m_linear_motion.acceleration = new_acceleration;
+////            m_linear_motion.position += dts * (m_linear_motion.velocity + dts * old_acceleration * 0.5f);
+////            m_linear_motion.velocity += dts * (old_acceleration + new_acceleration) * 0.5f;
+////            m_linear_motion.acceleration = new_acceleration;
 
-    m_linear_motion.acceleration = new_acceleration;
-    m_linear_motion.velocity += m_linear_motion.acceleration * sample_dts;
-    m_linear_motion.position += m_linear_motion.velocity * sample_dts;
+//    m_linear_motion.acceleration = new_acceleration;
+//    m_linear_motion.velocity += m_linear_motion.acceleration * sample_dts;
+//    m_linear_motion.position += m_linear_motion.velocity * sample_dts;
 
-    //        m_linear_motion.velocity = math::lerp(m_linear_motion.velocity, math::vec3f::zero, dts * 0.5f);
+//    //        m_linear_motion.velocity = math::lerp(m_linear_motion.velocity, math::vec3f::zero, dts * 0.5f);
 
-    //LOG_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
+//    //LOG_INFO("{}: {} / {} / {}", dts, new_acceleration, m_linear_motion.velocity, m_linear_motion.position);
 
-//            m_linear_motion.position.z = math::lerp<float, math::safe>(
-//                        m_linear_motion.position.z,
-//                        sample.sonar.value,
-//                        dts * 0.9f);
+////            m_linear_motion.position.z = math::lerp<float, math::safe>(
+////                        m_linear_motion.position.z,
+////                        sample.sonar.value,
+////                        dts * 0.9f);
 
-    if (m_linear_motion.position.z < 0)
-    {
-        m_linear_motion.position.z = 0;
-        m_linear_motion.velocity.z = std::max(0.f, m_linear_motion.velocity.z);
-    }
+//    if (m_linear_motion.position.z < 0)
+//    {
+//        m_linear_motion.position.z = 0;
+//        m_linear_motion.velocity.z = std::max(0.f, m_linear_motion.velocity.z);
+//    }
 }
 
 
@@ -492,23 +492,23 @@ void UAV::process_input_pitch_roll_horizontal(q::Clock::duration dt)
     //target.set_from_euler_xyz(-rs.y*3.1415f, rs.x*3.1415f, -ls.x*3.1415f);
 
 
-    auto& crt = m_ahrs.get_quat_l2w();
-    auto diff = math::quatf::from_a_to_b(crt, target);
+//    auto& crt = m_ahrs.get_quat_l2w();
+//    auto diff = math::quatf::from_a_to_b(crt, target);
 
-    math::vec3f diff_euler;
-    diff.get_as_euler_xyz(diff_euler);
+//    math::vec3f diff_euler;
+//    diff.get_as_euler_xyz(diff_euler);
 
-    auto v = math::clamp(diff.x / m_settings.max_pitch_angle, -1.f, 1.f);
-    m_pids.pitch.set_input(v);
+//    auto v = math::clamp(diff.x / m_settings.max_pitch_angle, -1.f, 1.f);
+//    m_pids.pitch.set_input(v);
 
-    v = math::clamp(diff.y / m_settings.max_roll_angle, -1.f, 1.f);
-    m_pids.roll.set_input(v);
+//    v = math::clamp(diff.y / m_settings.max_roll_angle, -1.f, 1.f);
+//    m_pids.roll.set_input(v);
 
-    m_pids.pitch.process(dt);
-    m_pids.roll.process(dt);
+//    m_pids.pitch.process(dt);
+//    m_pids.roll.process(dt);
 
-    m_pids.pitch_rate.set_target(-m_pids.pitch.get_output() * m_settings.max_pitch_rate);
-    m_pids.roll_rate.set_target(-m_pids.roll.get_output() * m_settings.max_roll_rate);
+//    m_pids.pitch_rate.set_target(-m_pids.pitch.get_output() * m_settings.max_pitch_rate);
+//    m_pids.roll_rate.set_target(-m_pids.roll.get_output() * m_settings.max_roll_rate);
 }
 void UAV::process_input_pitch_roll_assisted(q::Clock::duration dt)
 {
@@ -521,19 +521,19 @@ void UAV::process_input_yaw_rate(q::Clock::duration dt)
     m_pids.yaw_rate.set_target(m_uav_input.sticks.yaw * m_settings.max_yaw_rate);
 }
 
-void UAV::process_rate_pids(node::IGyroscope::Sample const& sample)
-{
-    auto input = sample.value;
+//void UAV::process_rate_pids(node::IGyroscope::Sample const& sample)
+//{
+//    auto input = sample.value;
 
-    m_pids.pitch_rate.set_input(input.x);
-    m_pids.pitch_rate.process(sample.dt);
+//    m_pids.pitch_rate.set_input(input.x);
+//    m_pids.pitch_rate.process(sample.dt);
 
-    m_pids.roll_rate.set_input(input.y);
-    m_pids.roll_rate.process(sample.dt);
+//    m_pids.roll_rate.set_input(input.y);
+//    m_pids.roll_rate.process(sample.dt);
 
-    m_pids.yaw_rate.set_input(input.z);
-    m_pids.yaw_rate.process(sample.dt);
-}
+//    m_pids.yaw_rate.set_input(input.z);
+//    m_pids.yaw_rate.process(sample.dt);
+//}
 
 void UAV::process_motors()
 {

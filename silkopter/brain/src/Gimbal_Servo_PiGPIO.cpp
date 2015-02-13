@@ -28,8 +28,7 @@
 
 /////////////////////////////////////////////////////////////////
 
-//Gimbal_Servo_PiGPIO::Gimbal_Servo_PiGPIO(q::String const& name)
-//    : m_name(name)
+//Gimbal_Servo_PiGPIO::Gimbal_Servo_PiGPIO()
 //{
 //    QLOG_TOPIC("camera_mount");
 //    load_settings();
@@ -38,11 +37,6 @@
 //Gimbal_Servo_PiGPIO::~Gimbal_Servo_PiGPIO()
 //{
 //    shutdown();
-//}
-
-//auto Gimbal_Servo_PiGPIO::get_name() const -> q::String const&
-//{
-//    return m_name;
 //}
 
 //auto Gimbal_Servo_PiGPIO::load_settings() -> bool

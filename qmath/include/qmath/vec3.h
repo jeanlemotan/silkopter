@@ -13,8 +13,8 @@ struct vec3
 	T x, y, z;
 
 	static struct ZUninitialized {} uninitialized;
-	static vec3<T> const zero;
-	static vec3<T> const one;
+    static vec3<T> const zero;
+    static vec3<T> const one;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // constructors
@@ -22,29 +22,29 @@ struct vec3
 
 	//////////////////////////////////////
 	// Basic constructors
-	vec3();
+    constexpr vec3();
 
 	//constructs the vector uninitialized
-	vec3(ZUninitialized);
+    constexpr vec3(ZUninitialized);
 
 	//constructs from direct x, y, z values
-	vec3(T x, T y, T z);
+    constexpr vec3(T x, T y, T z);
 
 	//construct from a single value - x == y == z = s
 	//this has to be explicit to avoid undesirable casts
-	explicit vec3(T s);
+    explicit constexpr vec3(T s);
 
 	//copy constructor
-	vec3(vec3<T> const& v);
+    constexpr vec3(vec3<T> const& v);
 	
 	// Conversion vector constructors
-	template<typename U> explicit vec3(vec3<U> const& v);
+    template<typename U> explicit constexpr vec3(vec3<U> const& v);
 
 	//cast
 	//implementation is in cast.inl
-	explicit vec3(vec2<T> const& v);
-	explicit vec3(vec2<T> const& v, T z);
-	explicit vec3(vec4<T> const& v);
+    explicit constexpr vec3(vec2<T> const& v);
+    explicit constexpr vec3(vec2<T> const& v, T z);
+    explicit constexpr vec3(vec4<T> const& v);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // member functions

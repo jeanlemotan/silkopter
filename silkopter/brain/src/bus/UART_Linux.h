@@ -1,19 +1,19 @@
 #pragma once
 
-#include "common/node/IUART.h"
+#include "common/node/bus/IUART.h"
 
 namespace silk
+{
+namespace node
 {
 namespace bus
 {
 
-class UART_Linux : public node::IUART
+class UART_Linux : public IUART
 {
 public:
-    UART_Linux(q::String const& name);
+    UART_Linux();
     ~UART_Linux();
-
-    auto get_name() const -> q::String const&;
 
     auto open(q::String const& device, size_t baud) -> bool;
     void close();
@@ -26,7 +26,6 @@ public:
     auto write(uint8_t const* data, size_t size) -> bool;
 
 private:
-    q::String m_name;
     q::String m_device;
     int m_fd = -1;
     std::recursive_mutex m_mutex;
@@ -38,4 +37,4 @@ DECLARE_CLASS_PTR(UART_Linux);
 
 }
 }
-
+}

@@ -10,7 +10,7 @@
 //class Gimbal_Servo_PiGPIO : public IGimbal
 //{
 //public:
-//    Gimbal_Servo_PiGPIO(q::String const& name);
+//    Gimbal_Servo_PiGPIO();
 //    ~Gimbal_Servo_PiGPIO();
 
 //    auto get_name() const -> q::String const&;
@@ -27,8 +27,6 @@
 //    void process();
 
 //private:
-//    q::String m_name;
-
 //    enum class PWM_Frequency : uint8_t
 //    {
 //        SERVO_50HZ,

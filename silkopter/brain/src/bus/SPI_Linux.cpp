@@ -3,22 +3,18 @@
 
 namespace silk
 {
+namespace node
+{
 namespace bus
 {
 
-SPI_Linux::SPI_Linux(q::String const& name)
-    : m_name(name)
+SPI_Linux::SPI_Linux()
 {
 }
 
 SPI_Linux::~SPI_Linux()
 {
     close();
-}
-
-auto SPI_Linux::get_name() const -> q::String const&
-{
-    return m_name;
 }
 
 auto SPI_Linux::open(q::String const& device, size_t mode) -> bool
@@ -104,5 +100,6 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
 }
 
 
+}
 }
 }

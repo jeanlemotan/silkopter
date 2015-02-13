@@ -1,19 +1,19 @@
 #pragma once
 
-#include "common/node/ISPI.h"
+#include "common/node/bus/ISPI.h"
 
 namespace silk
+{
+namespace node
 {
 namespace bus
 {
 
-class SPI_Linux : public node::ISPI
+class SPI_Linux : public ISPI
 {
 public:
-    SPI_Linux(q::String const& name);
+    SPI_Linux();
     ~SPI_Linux();
-
-    auto get_name() const -> q::String const&;
 
     auto open(q::String const& device, size_t mode) -> bool;
     void close();
@@ -29,7 +29,6 @@ public:
     auto write_register(uint8_t reg, uint8_t const* data, size_t size) -> bool;
 
 private:
-    q::String m_name;
     q::String m_device;
     int m_fd = -1;
     std::recursive_mutex m_mutex;
@@ -41,4 +40,4 @@ DECLARE_CLASS_PTR(SPI_Linux);
 
 }
 }
-
+}
