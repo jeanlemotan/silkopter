@@ -288,15 +288,12 @@ auto HAL::init() -> bool
                     QLOGE("Invalid bus for {}: {}", sz.name, bus);
                     return false;
                 }
-                if ((i2c && !dev.init(i2c, params)) || (spi && !dev.init(spi, params)))
-                {
-                    return false;
-                }
-
-                if (!add_interface<node::IAccelerometer>(&dev.get_accelerometer()) ||
-                        !add_interface<node::IGyroscope>(&dev.get_gyroscope()) ||
-                        !add_interface<node::ICompass>(&dev.get_compass()) ||
-                        !add_interface<node::IThermometer>(&dev.get_thermometer()))
+                if ((i2c && !dev.init(i2c, params)) ||
+                    (spi && !dev.init(spi, params)) ||
+                    !add_interface<node::IAccelerometer>(&dev.get_accelerometer()) ||
+                    !add_interface<node::IGyroscope>(&dev.get_gyroscope()) ||
+                    !add_interface<node::ICompass>(&dev.get_compass()) ||
+                    !add_interface<node::IThermometer>(&dev.get_thermometer()))
                 {
                     return false;
                 }
@@ -324,13 +321,10 @@ auto HAL::init() -> bool
                     QLOGE("Invalid bus for {}: {}", sz.name, bus);
                     return false;
                 }
-                if ((i2c && !dev.init(i2c, params)) || (spi && !dev.init(spi, params)))
-                {
-                    return false;
-                }
-
-                if (!add_interface<node::IBarometer>(&dev.get_barometer()) ||
-                        !add_interface<node::IThermometer>(&dev.get_thermometer()))
+                if ((i2c && !dev.init(i2c, params)) ||
+                    (spi && !dev.init(spi, params)) ||
+                    !add_interface<node::IBarometer>(&dev.get_barometer()) ||
+                    !add_interface<node::IThermometer>(&dev.get_thermometer()))
                 {
                     return false;
                 }
@@ -356,12 +350,8 @@ auto HAL::init() -> bool
                 params.medium.bitrate = sz.medium.bitrate;
                 params.low.resolution = sz.low.resolution;
                 params.low.bitrate = sz.low.bitrate;
-                if (!dev.init(params))
-                {
-                    return false;
-                }
-
-                if (!add_interface<node::ICamera>(&dev))
+                if (!dev.init(params) ||
+                    !add_interface<node::ICamera>(&dev))
                 {
                     return false;
                 }
@@ -389,11 +379,8 @@ auto HAL::init() -> bool
                     QLOGE("Invalid bus for {}: {}", sz.name, bus);
                     return false;
                 }
-                if (!dev.init(i2c, params))
-                {
-                    return false;
-                }
-                if (!add_interface<node::ISonar>(&dev))
+                if (!dev.init(i2c, params) ||
+                    !add_interface<node::ISonar>(&dev))
                 {
                     return false;
                 }
@@ -420,11 +407,10 @@ auto HAL::init() -> bool
                     QLOGE("Invalid bus for {}: {}", sz.name, bus);
                     return false;
                 }
-                if ((i2c && !dev.init(i2c, params)) || (spi && !dev.init(spi, params)) || (uart && !dev.init(uart, params)))
-                {
-                    return false;
-                }
-                if (!add_interface<node::IGPS>(&dev))
+                if ((i2c && !dev.init(i2c, params)) ||
+                    (spi && !dev.init(spi, params)) ||
+                    (uart && !dev.init(uart, params)) ||
+                    !add_interface<node::IGPS>(&dev))
                 {
                     return false;
                 }
@@ -450,12 +436,9 @@ auto HAL::init() -> bool
                     QLOGE("Invalid bus for {}: {}", sz.name, bus);
                     return false;
                 }
-                if (!dev.init(i2c, params))
-                {
-                    return false;
-                }
-                if (!add_interface<node::IADC>(&dev.get_adc0()) ||
-                        !add_interface<node::IADC>(&dev.get_adc1()))
+                if (!dev.init(i2c, params) ||
+                    !add_interface<node::IADC>(&dev.get_adc0()) ||
+                    !add_interface<node::IADC>(&dev.get_adc1()))
                 {
                     return false;
                 }
@@ -479,11 +462,33 @@ auto HAL::init() -> bool
                     QLOGE("Invalid adc for {}: {}", sz.name, adc_name);
                     return false;
                 }
-                if (!dev.init(adc, params))
+                if (!dev.init(adc, params) ||
+                    !add_interface<node::IAmmeter>(&dev))
                 {
                     return false;
                 }
-                if (!add_interface<node::IAmmeter>(&dev))
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "ADC_Voltmeter")
+            {
+                sz::ADC_Voltmeter sz;
+                if (!autojsoncxx::from_value(sz, it->value, result))
+                {
+                    break;
+                }
+                auto adc_name = q::String(sz.adc);
+                auto wrapper = std::make_unique<Device_Wrapper<sw_device::ADC_Voltmeter>>(q::String(sz.name));
+                auto& dev = *wrapper->device;
+
+                sw_device::ADC_Voltmeter::Init_Params params;
+                auto* adc = find_interface_by_name<node::IADC>(adc_name);
+                if (!adc)
+                {
+                    QLOGE("Invalid adc for {}: {}", sz.name, adc_name);
+                    return false;
+                }
+                if (!dev.init(adc, params) ||
+                    !add_interface<node::IVoltmeter>(&dev))
                 {
                     return false;
                 }

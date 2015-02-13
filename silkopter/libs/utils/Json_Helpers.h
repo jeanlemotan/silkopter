@@ -52,7 +52,8 @@ namespace jsonutil
         {
             rapidjson::Value n(name.c_str(), name.size(), allocator);
             rapidjson::Value value(type);
-            return &json.AddMember(n, value, allocator);
+            json.AddMember(n, value, allocator);
+            return find_value(json, name);
         }
         else if (type == v->GetType())
         {
@@ -63,9 +64,14 @@ namespace jsonutil
 
     inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, q::Path const& path, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)
     {
+        if (!json.IsObject())
+        {
+            return nullptr;
+        }
+
         //first try a find
         auto v = find_value(json, path);
-        if (type == v->GetType())
+        if (v && type == v->GetType())
         {
             return v;
         }
@@ -80,23 +86,13 @@ namespace jsonutil
                 //last element?
                 return get_or_add_value(*parent, p[0], type, allocator);
             }
-
-            v = find_value(*parent, p[0]);
-            if (v && !v->IsObject())
-            {
-                return nullptr;
-            }
-
-            if (v)
-            {
-                parent = v;
-                p.pop_front();
-            }
             else
             {
-                rapidjson::Value n(p[0].c_str(), p[0].size(), allocator);
-                rapidjson::Value value(rapidjson::kObjectType);
-                parent = &parent->AddMember(n, value, allocator);
+                parent = get_or_add_value(*parent, p[0], rapidjson::kObjectType, allocator);
+                if (!parent)
+                {
+                    return nullptr;
+                }
                 p.pop_front();
             }
         }

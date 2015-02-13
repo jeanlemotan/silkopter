@@ -22,8 +22,6 @@ public:
     virtual auto read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool = 0;
     virtual auto write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool = 0;
 
-
-
     //convenience method
     auto read_register_u16(uint8_t address, uint8_t reg, uint16_t& dst) -> bool
     {

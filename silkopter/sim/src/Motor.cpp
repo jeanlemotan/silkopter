@@ -35,7 +35,8 @@ float Motor::compute_power() const
     //Abbott formula: Power (WATTS)=P(in.) X D(in.)^4 X RPM^3 X 5.33 X 10^-15
     double rpm = static_cast<double>(compute_rpm());
 
-    double power = static_cast<double>(m_config.propeller.pitch)
+    double power = static_cast<double>(m_config.propeller.factor)
+                    * static_cast<double>(m_config.propeller.pitch)
                     * math::pow(static_cast<double>(m_config.propeller.diameter), 4.0)
                     * math::pow(rpm, 3.0) * 5.33 * 10e-15;
 

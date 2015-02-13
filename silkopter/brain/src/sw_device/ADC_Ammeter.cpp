@@ -26,7 +26,7 @@ auto ADC_Ammeter::get_name() const -> q::String const&
 {
     return m_name;
 }
-auto ADC_Ammeter::get_samples() const -> std::vector<node::IADC::Sample> const&
+auto ADC_Ammeter::get_samples() const -> std::vector<node::IAmmeter::Sample> const&
 {
     return m_samples;
 }
@@ -38,7 +38,18 @@ void ADC_Ammeter::process()
     {
         return;
     }
-    m_samples = m_adc->get_samples();
+    m_samples.clear();
+    auto const& s = m_adc->get_samples();
+    m_samples.resize(s.size());
+
+    std::transform(s.begin(), s.end(), m_samples.begin(), [](node::IADC::Sample const& adc_s)
+    {
+       node::IAmmeter::Sample vs;
+       vs.dt = adc_s.dt;
+       vs.sample_idx = adc_s.sample_idx;
+       vs.value = adc_s.value;
+       return vs;
+    });
 
     //TODO - apply scale - bias
 }

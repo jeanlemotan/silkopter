@@ -120,5 +120,15 @@
         ["std::string", "name", {"required": true}],
         ["std::string", "adc", {"required": true}]
     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "ADC_Voltmeter",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "adc", {"required": true}]
+    ]
 }
 ]
