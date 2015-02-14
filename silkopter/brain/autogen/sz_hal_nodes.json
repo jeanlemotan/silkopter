@@ -133,7 +133,7 @@
 },
 {
     "definition" : false,
-    "namespace" : "silk::node::processor::LPF_Butterworth_Base",
+    "namespace" : "silk::node::processor::LPF_Base",
     "name": "Init_Params",
     "members":
     [

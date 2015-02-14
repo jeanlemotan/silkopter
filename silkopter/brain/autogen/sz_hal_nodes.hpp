@@ -5763,7 +5763,7 @@ w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serial
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::silk::node::processor::LPF_Butterworth_Base::Init_Params > {
+class SAXEventHandler< ::silk::node::processor::LPF_Base::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -5830,7 +5830,7 @@ has_cutoff_frequency = false;
     }
 
 public:
-    explicit SAXEventHandler( ::silk::node::processor::LPF_Butterworth_Base::Init_Params * obj)
+    explicit SAXEventHandler( ::silk::node::processor::LPF_Base::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -6235,17 +6235,17 @@ handler_3.PrepareForReuse();
     }
 };
 
-template < class Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466 >
-struct Serializer< Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466, ::silk::node::processor::LPF_Butterworth_Base::Init_Params > {
+template < class Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752 >
+struct Serializer< Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752, ::silk::node::processor::LPF_Base::Init_Params > {
 
-    void operator()( Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466& w, const ::silk::node::processor::LPF_Butterworth_Base::Init_Params& value) const
+    void operator()( Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752& w, const ::silk::node::processor::LPF_Base::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466, std::string >()(w, value.name);
-w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466, std::string >()(w, value.source_stream);
-w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466, uint32_t >()(w, value.poles);
-w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writer0cf487ef8390cbac66518acefab95ecc43c414f2fd5e4fc849e6fefd52d04466, uint32_t >()(w, value.cutoff_frequency);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752, std::string >()(w, value.name);
+w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752, std::string >()(w, value.source_stream);
+w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752, uint32_t >()(w, value.poles);
+w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writer463f38809fdd85769ffff24b634a4358df384b0ea6964b5633b7064f04086752, uint32_t >()(w, value.cutoff_frequency);
 
         w.EndObject(4);
     }
