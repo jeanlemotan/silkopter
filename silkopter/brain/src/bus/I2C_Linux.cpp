@@ -33,7 +33,8 @@ namespace node
 namespace bus
 {
 
-I2C_Linux::I2C_Linux()
+I2C_Linux::I2C_Linux(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -42,7 +43,7 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-auto I2C_Linux::open(q::String const& device) -> bool
+auto I2C_Linux::init(Init_Params const& params) -> bool
 {
     close();
 
@@ -50,13 +51,19 @@ auto I2C_Linux::open(q::String const& device) -> bool
 
     std::lock_guard<I2C_Linux> lg(*this);
 
-    m_device = device;
-    m_fd = ::open(device.c_str(), O_RDWR);
+    m_params = params;
+    m_fd = ::open(params.dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", params.dev, strerror(errno));
         return false;
     }
+
+    if (!m_hal.get_buses().add<bus::II2C>(params.name, *this))
+    {
+        return false;
+    }
+
     return true;
 }
 void I2C_Linux::close()

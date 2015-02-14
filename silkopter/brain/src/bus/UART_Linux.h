@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/bus/IUART.h"
 
 namespace silk
@@ -12,10 +13,17 @@ namespace bus
 class UART_Linux : public IUART
 {
 public:
-    UART_Linux();
+    UART_Linux(HAL& hal);
     ~UART_Linux();
 
-    auto open(q::String const& device, size_t baud) -> bool;
+    struct Init_Params
+    {
+        q::String name;
+        q::String dev;
+        size_t baud = 0;
+    };
+
+    auto init(Init_Params const& params) -> bool;
     void close();
 
     void lock();
@@ -26,7 +34,8 @@ public:
     auto write(uint8_t const* data, size_t size) -> bool;
 
 private:
-    q::String m_device;
+    HAL& m_hal;
+    Init_Params m_params;
     int m_fd = -1;
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;

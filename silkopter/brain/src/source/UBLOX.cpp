@@ -161,7 +161,8 @@ struct MON_VER
 #pragma pack(pop)
 
 
-UBLOX::UBLOX()
+UBLOX::UBLOX(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -169,28 +170,25 @@ UBLOX::~UBLOX()
 {
 }
 
-auto UBLOX::init(bus::II2C* bus, Init_Params const& params) -> bool
-{
-    m_i2c = bus;
-    m_spi = nullptr;
-    m_uart = nullptr;
-    return init(params);
-}
-auto UBLOX::init(bus::ISPI* bus, Init_Params const& params) -> bool
-{
-    m_spi = bus;
-    m_i2c = nullptr;
-    m_uart = nullptr;
-    return init(params);
-}
-auto UBLOX::init(bus::IUART* bus, Init_Params const& params) -> bool
-{
-    m_spi = nullptr;
-    m_i2c = nullptr;
-    m_uart = bus;
-    return init(params);
-}
 auto UBLOX::init(Init_Params const& params) -> bool
+{
+    QLOG_TOPIC("ublox::init");
+
+    m_params = params;
+
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
+    m_uart = m_hal.get_buses().find_by_name<bus::IUART>(params.bus);
+    if (init(params))
+    {
+        if (!m_hal.get_sources().add<IGPS>(params.name, *this) ||
+            !m_hal.get_streams().add<stream::ILocation>(q::util::format2<q::String>("{}/stream", params.name), m_stream))
+        {
+            return false;
+        }
+    }
+}
+auto UBLOX::init() -> bool
 {
     QLOG_TOPIC("ublox::init");
     if (!m_i2c && !m_spi && !m_uart)
@@ -199,7 +197,6 @@ auto UBLOX::init(Init_Params const& params) -> bool
         return false;
     }
 
-    m_params = params;
     m_params.rate = math::clamp<size_t>(m_params.rate, 1, 5);
 
     return true;
@@ -682,7 +679,7 @@ void UBLOX::process_mon_ver_packet(Packet& packet)
 
 ///////////////////////////////
 
-auto UBLOX::get_stream() const -> stream::ILocation const&
+auto UBLOX::get_stream() -> stream::ILocation&
 {
     return m_stream;
 }

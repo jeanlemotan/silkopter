@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/source/ICamera.h"
 
 namespace silk
@@ -12,7 +13,7 @@ namespace source
 class Raspicam : public source::ICamera
 {
 public:
-    Raspicam();
+    Raspicam(HAL& hal);
     ~Raspicam();
 
     struct Quality
@@ -23,6 +24,7 @@ public:
 
     struct Init_Params
     {
+        q::String name;
         size_t fps = 30;
         Quality low;
         Quality medium;
@@ -49,6 +51,8 @@ public:
     void process();
 
 private:
+    HAL& m_hal;
+
     void set_active_streams(bool high, bool medium, bool low);
 
     std::shared_ptr<Impl> m_impl;

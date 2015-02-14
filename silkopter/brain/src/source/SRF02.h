@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/source/ISonar.h"
 #include "common/node/bus/II2C.h"
 
@@ -13,23 +14,28 @@ namespace source
 class SRF02: public source::ISonar
 {
 public:
-    SRF02();
+    SRF02(HAL& hal);
 
     struct Init_Params
     {
+        q::String name;
+        q::String bus;
         size_t rate = 10;
         math::vec3f direction = math::vec3f(0, 0, -1);
         float min_distance = 0.2f;
         float max_distance = 5.f;
     };
 
-    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
-    auto get_stream() const -> stream::IDistance const&;
+    auto get_stream() -> stream::IDistance&;
 
 private:
+    auto init() -> bool;
+
+    HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
 
     Init_Params m_params;

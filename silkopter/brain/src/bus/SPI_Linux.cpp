@@ -8,7 +8,8 @@ namespace node
 namespace bus
 {
 
-SPI_Linux::SPI_Linux()
+SPI_Linux::SPI_Linux(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -17,21 +18,27 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-auto SPI_Linux::open(q::String const& device, size_t mode) -> bool
+auto SPI_Linux::init(Init_Params const& params) -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_spi_pi");
+    QLOG_TOPIC("bus_spi_pi::init");
 
     std::lock_guard<SPI_Linux> lg(*this);
 
-    m_device = device;
-    m_fd = ::open(device.c_str(), O_RDWR);
+    m_params = params;
+    m_fd = ::open(params.dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", params.dev, strerror(errno));
         return false;
     }
+
+    if (!m_hal.get_buses().add<bus::ISPI>(params.name, *this))
+    {
+        return false;
+    }
+
     return true;
 }
 void SPI_Linux::close()

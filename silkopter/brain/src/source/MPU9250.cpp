@@ -267,7 +267,8 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 #endif
 
-MPU9250::MPU9250()
+MPU9250::MPU9250(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -357,21 +358,31 @@ auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(m_compass.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
-auto MPU9250::init(bus::II2C* i2c, Init_Params const& params) -> bool
-{
-    m_i2c = i2c;
-    m_spi = nullptr;
-    return init(params);
-}
-
-auto MPU9250::init(bus::ISPI* spi, Init_Params const& params) -> bool
-{
-    m_spi = spi;
-    m_i2c = nullptr;
-    return init(params);
-}
-
 auto MPU9250::init(Init_Params const& params) -> bool
+{
+    QLOG_TOPIC("mpu9250::init");
+
+    m_params = params;
+
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
+    if (!init(params) ||
+        !m_hal.get_sources().add<IAccelerometer>(q::util::format2<q::String>("{}-accelerometer", params.name), m_accelerometer) ||
+        !m_hal.get_sources().add<IGyroscope>(q::util::format2<q::String>("{}-gyroscope", params.name), m_gyroscope) ||
+        !m_hal.get_sources().add<ICompass>(q::util::format2<q::String>("{}-compass", params.name), m_compass) ||
+        !m_hal.get_sources().add<IThermometer>(q::util::format2<q::String>("{}-thermometer", params.name), m_thermometer) ||
+
+        !m_hal.get_streams().add<stream::IAcceleration>(q::util::format2<q::String>("{}-accelerometer/stream", params.name), m_accelerometer.get_stream()) ||
+        !m_hal.get_streams().add<stream::IAngular_Velocity>(q::util::format2<q::String>("{}-gyroscope/stream", params.name), m_gyroscope.get_stream()) ||
+        !m_hal.get_streams().add<stream::IMagnetic_Field>(q::util::format2<q::String>("{}-compass/stream", params.name), m_compass.get_stream()) ||
+        !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<q::String>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
+    {
+        return false;
+    }
+    return true;
+}
+
+auto MPU9250::init() -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
@@ -381,13 +392,14 @@ auto MPU9250::init(Init_Params const& params) -> bool
         return false;
     }
 
+    auto params = m_params;
+
     std::lock_guard<MPU9250> lg(*this);
 
     std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
     std::vector<size_t> imu_rates = { 250, 500, 1000 }; //, 2000, 4000, 8000 };
 
-    m_params = params;
     if (m_i2c)
     {
         //max supported on a 400Khz i2c bus

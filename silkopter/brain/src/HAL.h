@@ -19,13 +19,12 @@ public:
     template<class T> auto get_all() const -> std::vector<std::pair<q::String const&, T*>> const&;
     template<class T> auto find_by_name(q::String const& name) const -> T*;
 
-protected:
-    typedef std::vector<std::pair<q::String const&, Base*>> Nodes;
-    typedef std::unordered_map<size_t, Nodes> Nodes_Map;
-
     template<class T> auto add(q::String const& name, T& node) -> bool;
 
 private:
+    typedef std::vector<std::pair<q::String const&, Base*>> Nodes;
+    typedef std::unordered_map<size_t, Nodes> Nodes_Map;
+
     template<class T> auto get_nodes() const -> Nodes&;
     mutable Nodes_Map m_nodes_map;
 };

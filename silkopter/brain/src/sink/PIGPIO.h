@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/sink/IPWM.h"
 
 namespace silk
@@ -12,7 +13,7 @@ namespace sink
 class PIGPIO : q::util::Noncopyable
 {
 public:
-    PIGPIO();
+    PIGPIO(HAL& hal);
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
@@ -27,6 +28,7 @@ public:
             size_t max = 2000;
         };
 
+        q::String name;
         std::array<PWM, MAX_PWM_CHANNELS> pwm_channels;
         std::chrono::microseconds rate = std::chrono::microseconds(5);
     };
@@ -38,6 +40,9 @@ public:
     auto get_pwm_channel(size_t idx) -> IPWM*;
 
 private:
+    auto init() -> bool;
+
+    HAL& m_hal;
     Init_Params m_params;
 
     void set_pwm_value(size_t idx, float value);

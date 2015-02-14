@@ -122,23 +122,38 @@ constexpr uint8_t RC5T619_AIN0_DATAL	 = 0x77;
 constexpr uint8_t CONVERT_ADC0           = 0x17;
 constexpr uint8_t CONVERT_ADC1           = 0x16;
 
-RC5T619::RC5T619()
+RC5T619::RC5T619(HAL& hal)
+    : m_hal(hal)
 {
 }
 
-
-auto RC5T619::init(bus::II2C* bus, Init_Params const& params) -> bool
+auto RC5T619::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
-    m_i2c = bus;
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
+    if (!init(params) ||
+        !m_hal.get_sources().add<IADC>(q::util::format2<q::String>("{}-adc0", params.name), m_adc[0]) ||
+        !m_hal.get_sources().add<IADC>(q::util::format2<q::String>("{}-adc1", params.name), m_adc[1]) ||
+
+        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<q::String>("{}-adc0/stream", params.name), m_adc[0].get_stream()) ||
+        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<q::String>("{}-adc1/stream", params.name), m_adc[1].get_stream()))
+    {
+        return false;
+    }
+    return true;
+}
+
+auto RC5T619::init() -> bool
+{
+    QLOG_TOPIC("rc5t619::init");
+
     if (!m_i2c)
     {
         QLOGE("No bus configured");
         return false;
     }
 
-    m_params = params;
     m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
     m_params.adc1_ratio = math::clamp<size_t>(m_params.adc1_ratio, 1, 100);
 

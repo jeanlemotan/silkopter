@@ -24,7 +24,7 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_stream() const -> stream::IAcceleration const& = 0;
+    virtual auto get_stream() -> stream::IAcceleration& = 0;
 };
 
 DECLARE_CLASS_PTR(IAccelerometer);

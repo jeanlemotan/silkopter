@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/source/IGPS.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
@@ -16,24 +17,24 @@ class UBLOX : public source::IGPS
 {
 public:
 
-    UBLOX();
+    UBLOX(HAL& hal);
     ~UBLOX();
 
     struct Init_Params
     {
+        q::String name;
+        q::String bus;
         size_t rate = 5;
     };
 
-    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
-    auto init(bus::IUART* bus, Init_Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
-    auto get_stream() const -> stream::ILocation const&;
+    auto get_stream() -> stream::ILocation&;
 
 private:
-    auto init(Init_Params const& params) -> bool;
+    auto init() -> bool;
 
     auto read(uint8_t* data, size_t max_size) -> size_t;
     auto write(uint8_t const* data, size_t size) -> bool;
@@ -60,6 +61,7 @@ private:
         MON_VER     = (0x04 << 8) | 0x0A,
     };
 
+    HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
     bus::IUART* m_uart = nullptr;

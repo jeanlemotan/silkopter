@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/bus/II2C.h"
 
 namespace silk
@@ -12,10 +13,16 @@ namespace bus
 class I2C_Linux : public II2C
 {
 public:
-    I2C_Linux();
+    I2C_Linux(HAL& hal);
     ~I2C_Linux();
 
-    auto open(q::String const& device) -> bool;
+    struct Init_Params
+    {
+        q::String name;
+        q::String dev;
+    };
+
+    auto init(Init_Params const& params) -> bool;
     void close();
 
     void lock();
@@ -29,7 +36,8 @@ public:
     auto write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool;
 
 private:
-    q::String m_device;
+    HAL& m_hal;
+    Init_Params m_params;
     int m_fd = -1;
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;

@@ -5025,9 +5025,9 @@ w.Key("\x70\x77\x6d\x5f\x63\x68\x61\x6e\x6e\x65\x6c\x73", 12, false); Serializer
 
 namespace sz { struct ADC_Ammeter {
  std::string name;
-std::string adc;
+std::string source_stream;
 
-explicit ADC_Ammeter():name(), adc() {  }
+explicit ADC_Ammeter():name(), source_stream() {  }
 
 
  
@@ -5045,7 +5045,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_adc;
+bool has_source_stream;
 
     bool check_depth(const char* type)
     {
@@ -5062,7 +5062,7 @@ bool has_adc;
             case 0:
     return "name";
 case 1:
-    return "adc";
+    return "source_stream";
         default:
             break;
         }
@@ -5090,7 +5090,7 @@ case 1:
     void reset_flags()
     {
         has_name = false;
-has_adc = false;
+has_source_stream = false;
     }
 
 public:
@@ -5098,7 +5098,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->adc)
+, handler_1(&obj->source_stream)
     {
         reset_flags();
     }
@@ -5265,8 +5265,8 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x61\x64\x63", 3))
-						 { state=1; has_adc = true; }
+else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
+						 { state=1; has_source_stream = true; }
             else {
                 state = -1;
                 return true;
@@ -5364,7 +5364,7 @@ case 1:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_adc) set_missing_required("adc");
+if (!has_source_stream) set_missing_required("source_stream");
         }
         return the_error.empty();
     }
@@ -5415,7 +5415,7 @@ struct Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.name);
-w.Key("\x61\x64\x63", 3, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.adc);
+w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.source_stream);
 
         w.EndObject(2);
     }
@@ -5453,9 +5453,9 @@ w.Key("\x61\x64\x63", 3, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c
 
 namespace sz { struct ADC_Voltmeter {
  std::string name;
-std::string adc;
+std::string source_stream;
 
-explicit ADC_Voltmeter():name(), adc() {  }
+explicit ADC_Voltmeter():name(), source_stream() {  }
 
 
  
@@ -5473,7 +5473,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_adc;
+bool has_source_stream;
 
     bool check_depth(const char* type)
     {
@@ -5490,7 +5490,7 @@ bool has_adc;
             case 0:
     return "name";
 case 1:
-    return "adc";
+    return "source_stream";
         default:
             break;
         }
@@ -5518,7 +5518,7 @@ case 1:
     void reset_flags()
     {
         has_name = false;
-has_adc = false;
+has_source_stream = false;
     }
 
 public:
@@ -5526,7 +5526,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->adc)
+, handler_1(&obj->source_stream)
     {
         reset_flags();
     }
@@ -5693,8 +5693,8 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x61\x64\x63", 3))
-						 { state=1; has_adc = true; }
+else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
+						 { state=1; has_source_stream = true; }
             else {
                 state = -1;
                 return true;
@@ -5792,7 +5792,7 @@ case 1:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_adc) set_missing_required("adc");
+if (!has_source_stream) set_missing_required("source_stream");
         }
         return the_error.empty();
     }
@@ -5843,7 +5843,7 @@ struct Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e96
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.name);
-w.Key("\x61\x64\x63", 3, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.adc);
+w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.source_stream);
 
         w.EndObject(2);
     }

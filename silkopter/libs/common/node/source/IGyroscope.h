@@ -25,7 +25,7 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_stream() const -> stream::IAngular_Velocity const& = 0;
+    virtual auto get_stream() -> stream::IAngular_Velocity& = 0;
 };
 
 DECLARE_CLASS_PTR(IGyroscope);

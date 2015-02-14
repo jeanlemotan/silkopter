@@ -118,7 +118,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["std::string", "adc", {"required": true}]
+        ["std::string", "source_stream", {"required": true}]
     ]
 },
 {
@@ -128,7 +128,7 @@
     "members":
     [
         ["std::string", "name", {"required": true}],
-        ["std::string", "adc", {"required": true}]
+        ["std::string", "source_stream", {"required": true}]
     ]
 }
 ]

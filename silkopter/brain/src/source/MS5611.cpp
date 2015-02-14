@@ -34,7 +34,8 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
-MS5611::MS5611()
+MS5611::MS5611(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -95,20 +96,27 @@ auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(ADDR_MS5611, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
-auto MS5611::init(bus::II2C* bus, Init_Params const& params) -> bool
-{
-    m_i2c = bus;
-    m_spi = nullptr;
-    return init(params);
-}
-auto MS5611::init(bus::ISPI* bus, Init_Params const& params) -> bool
-{
-    m_spi = bus;
-    m_i2c = nullptr;
-    return init(params);
-}
-
 auto MS5611::init(Init_Params const& params) -> bool
+{
+    QLOG_TOPIC("ms5611::init");
+
+    m_params = params;
+
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
+    if (init(params))
+    {
+        if (!m_hal.get_sources().add<IBarometer>(q::util::format2<q::String>("{}-barometer", params.name), m_barometer) ||
+            !m_hal.get_sources().add<IThermometer>(q::util::format2<q::String>("{}-thermometer", params.name), m_thermometer) ||
+
+            !m_hal.get_streams().add<stream::IPressure>(q::util::format2<q::String>("{}-barometer/stream", params.name), m_barometer.get_stream()) ||
+            !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<q::String>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
+        {
+            return false;
+        }
+    }
+}
+auto MS5611::init() -> bool
 {
     QLOG_TOPIC("ms5611::init");
     if (!m_i2c && !m_spi)
@@ -117,7 +125,6 @@ auto MS5611::init(Init_Params const& params) -> bool
         return false;
     }
 
-    m_params = params;
     m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);
     m_params.pressure_to_temperature_ratio = math::clamp<size_t>(m_params.pressure_to_temperature_ratio, 1, 10);
 

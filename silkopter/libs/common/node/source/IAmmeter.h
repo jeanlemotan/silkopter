@@ -24,7 +24,7 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_stream() const -> stream::ICurrent const& = 0;
+    virtual auto get_stream() -> stream::ICurrent& = 0;
 };
 
 DECLARE_CLASS_PTR(IAmmeter);

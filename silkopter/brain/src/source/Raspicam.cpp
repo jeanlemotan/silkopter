@@ -111,7 +111,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 #endif
 
-Raspicam::Raspicam()
+Raspicam::Raspicam(HAL& hal)
+    : m_hal(hal)
 {
     QLOG_TOPIC("raspicam");
 #if defined RASPBERRY_PI
@@ -184,14 +185,22 @@ auto Raspicam::init(Init_Params const& params) -> bool
     m_impl->medium.quality = params.medium;
     m_impl->low.quality = params.low;
 
-    auto res = create_components();
-    if (res)
+    if (!create_components())
     {
-        //start_recording();
-        set_active_streams(false,
-                           false,
-                           true);
+        return false;
     }
+
+    //start_recording();
+    set_active_streams(false,
+                       false,
+                       true);
+
+    if (!m_hal.get_sources().add<ICamera>(params.name, *this))// ||
+//        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<q::String>("{}/stream", params.name), m_accelerometer.get_stream()) ||
+    {
+        return false;
+    }
+
     return res;
 #else
     QLOGE("Raspicam is only supported on the Raspberry pi.");

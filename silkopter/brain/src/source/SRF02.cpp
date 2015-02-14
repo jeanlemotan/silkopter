@@ -31,22 +31,36 @@ constexpr uint8_t BURST                     = 0x5C;
 constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 
 
-SRF02::SRF02()
+SRF02::SRF02(HAL& hal)
+    : m_hal(hal)
 {
 
 }
 
-auto SRF02::init(bus::II2C* bus, Init_Params const& params) -> bool
+auto SRF02::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("srf02::init");
-    m_i2c = bus;
+
+    m_params = params;
+
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
+    if (!init(params) ||
+        !m_hal.get_sources().add<ISonar>(params.name, *this) ||
+        !m_hal.get_streams().add<stream::IDistance>(q::util::format2<q::String>("{}/stream", params.name), m_stream))
+    {
+        return false;
+    }
+    return true;
+}
+
+auto SRF02::init() -> bool
+{
+    QLOG_TOPIC("srf02::init");
     if (!m_i2c)
     {
         QLOGE("No bus configured");
         return false;
     }
-
-    m_params = params;
 
     uint8_t rev = 0;
     auto ret = m_i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
@@ -114,7 +128,7 @@ void SRF02::process()
     }
 }
 
-auto SRF02::get_stream() const -> stream::IDistance const&
+auto SRF02::get_stream() -> stream::IDistance&
 {
     return m_stream;
 }

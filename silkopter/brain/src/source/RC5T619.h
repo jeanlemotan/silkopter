@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/source/IADC.h"
 #include "common/node/source/IAmmeter.h"
 #include "common/node/bus/II2C.h"
@@ -14,15 +15,17 @@ namespace source
 class RC5T619 : q::util::Noncopyable
 {
 public:
-    RC5T619();
+    RC5T619(HAL& hal);
 
     struct Init_Params
     {
+        q::String name;
+        q::String bus;
         size_t adc0_rate = 50;
         size_t adc1_ratio = 10;
     };
 
-    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
@@ -30,8 +33,9 @@ public:
     auto get_adc1() -> source::IADC&;
 
 private:
-    auto init(Init_Params const& params) -> bool;
+    auto init() -> bool;
 
+    HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
 
     Init_Params m_params;
@@ -45,7 +49,7 @@ private:
     {
     //    void set_adc_config(Config const& config);
     //    auto get_adc_config() const -> Config const&;
-        auto get_stream() const -> stream::IADC_Value const& { return *this; }
+        auto get_stream() -> stream::IADC_Value& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         std::vector<Sample> samples;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/source/IAccelerometer.h"
@@ -17,11 +18,13 @@ namespace source
 class MPU9250 : q::util::Noncopyable
 {
 public:
-    MPU9250();
+    MPU9250(HAL& hal);
     ~MPU9250();
 
     struct Init_Params
     {
+        q::String name;
+        q::String bus;
         size_t imu_rate = 1000;
         size_t compass_rate = 100;
         size_t thermometer_rate = 10;
@@ -29,8 +32,7 @@ public:
         size_t accelerometer_range = 4; //gees
     };
 
-    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
@@ -43,7 +45,7 @@ public:
     void unlock();
 
 private:
-    auto init(Init_Params const& params) -> bool;
+    auto init() -> bool;
 
     auto mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
     auto mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool;
@@ -64,6 +66,7 @@ private:
     void process_compass();
 
 private:
+    HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
 
@@ -74,7 +77,7 @@ private:
 
     struct Accelerometer : public source::IAccelerometer, public stream::IAcceleration
     {
-        auto get_stream() const -> stream::IAcceleration const& { return *this; }
+        auto get_stream() -> stream::IAcceleration& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         uint32_t sample_idx = 0;
@@ -84,7 +87,7 @@ private:
 
     struct Gyroscope : public source::IGyroscope, public stream::IAngular_Velocity
     {
-        auto get_stream() const -> stream::IAngular_Velocity const& { return *this; }
+        auto get_stream() -> stream::IAngular_Velocity& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         uint32_t sample_idx = 0;
@@ -94,7 +97,7 @@ private:
 
     struct Compass : public source::ICompass, public stream::IMagnetic_Field
     {
-        auto get_stream() const -> stream::IMagnetic_Field const& { return *this; }
+        auto get_stream() -> stream::IMagnetic_Field& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         uint8_t akm_address = 0;
@@ -107,7 +110,7 @@ private:
 
     struct Thermometer : public source::IThermometer, public stream::ITemperature
     {
-        auto get_stream() const -> stream::ITemperature const& { return *this; }
+        auto get_stream() -> stream::ITemperature& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         q::Clock::duration dt;

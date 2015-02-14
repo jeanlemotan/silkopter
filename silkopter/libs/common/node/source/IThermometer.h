@@ -25,7 +25,7 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_stream() const -> stream::ITemperature const& = 0;
+    virtual auto get_stream() -> stream::ITemperature& = 0;
 };
 
 DECLARE_CLASS_PTR(IThermometer);

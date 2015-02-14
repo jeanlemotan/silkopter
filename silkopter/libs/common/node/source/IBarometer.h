@@ -24,7 +24,7 @@ public:
 //    virtual void set_config(Config const& config) = 0;
 //    virtual auto get_config() const -> Config const& = 0;
 
-    virtual auto get_stream() const -> stream::IPressure const& = 0;
+    virtual auto get_stream() -> stream::IPressure& = 0;
 };
 
 DECLARE_CLASS_PTR(IBarometer);

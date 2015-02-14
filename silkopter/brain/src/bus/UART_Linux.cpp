@@ -10,7 +10,8 @@ namespace node
 namespace bus
 {
 
-UART_Linux::UART_Linux()
+UART_Linux::UART_Linux(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -19,14 +20,16 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-auto UART_Linux::open(q::String const& device, size_t baud) -> bool
+auto UART_Linux::init(Init_Params const& params) -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_uart_pi");
+    QLOG_TOPIC("bus_uart_pi::init");
+
+    m_params = params;
 
     int b = -1;
-    switch (baud)
+    switch (params.baud)
     {
     case 9600: b = B9600; break;
     case 19200: b = B19200; break;
@@ -38,17 +41,16 @@ auto UART_Linux::open(q::String const& device, size_t baud) -> bool
 
     if (b < 0)
     {
-        QLOGE("Invalid baud requested: {}", baud);
+        QLOGE("Invalid baud requested: {}", params.baud);
         return false;
     }
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    m_device = device;
-    m_fd = ::open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    m_fd = ::open(params.dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", device, strerror(errno));
+        QLOGE("can't open {}: {}", params.dev, strerror(errno));
         return false;
     }
 
@@ -61,6 +63,11 @@ auto UART_Linux::open(q::String const& device, size_t baud) -> bool
 
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
+
+    if (!m_hal.get_buses().add<bus::IUART>(params.name, *this))
+    {
+        return false;
+    }
 
     return true;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/node/source/IBarometer.h"
 #include "common/node/source/IThermometer.h"
 #include "common/node/bus/II2C.h"
@@ -15,16 +16,17 @@ namespace source
 class MS5611 : q::util::Noncopyable
 {
 public:
-    MS5611();
+    MS5611(HAL& hal);
 
     struct Init_Params
     {
+        q::String name;
+        q::String bus;
         size_t rate = 100;
         size_t pressure_to_temperature_ratio = 10;
     };
 
-    auto init(bus::II2C* bus, Init_Params const& params) -> bool;
-    auto init(bus::ISPI* bus, Init_Params const& params) -> bool;
+    auto init(Init_Params const& params) -> bool;
 
     void process();
 
@@ -32,7 +34,7 @@ public:
     auto get_thermometer()  -> source::IThermometer&;
 
 private:
-    auto init(Init_Params const& params) -> bool;
+    auto init() -> bool;
 
     void lock();
     void unlock();
@@ -43,6 +45,7 @@ private:
     auto bus_write_u8(uint8_t reg, uint8_t const& t) -> bool;
     auto bus_write_u16(uint8_t reg, uint16_t const& t) -> bool;
 
+    HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
 
@@ -50,7 +53,7 @@ private:
 
     struct Barometer : public source::IBarometer, public stream::IPressure
     {
-        auto get_stream() const -> stream::IPressure const& { return *this; }
+        auto get_stream() -> stream::IPressure& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         std::vector<Sample> samples;
@@ -59,7 +62,7 @@ private:
     } m_barometer;
     struct Thermometer : public source::IThermometer, public stream::ITemperature
     {
-        auto get_stream() const -> stream::ITemperature const& { return *this; }
+        auto get_stream() -> stream::ITemperature& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
 
         std::vector<Sample> samples;

@@ -48,8 +48,8 @@ struct IBus_Wrapper : q::util::Noncopyable
 };
 template<class T> struct Bus_Wrapper : public IBus_Wrapper
 {
-    Bus_Wrapper(q::String const& name) : name(name), bus(new T()) {}
-    q::String name;
+    template<class... Args>
+    Bus_Wrapper(Args&&... args) : bus(new T(std::forward<Args>(args)...)) {}
     std::unique_ptr<T> bus;
 };
 
@@ -60,9 +60,9 @@ struct IDevice_Wrapper : q::util::Noncopyable
 };
 template<class T> struct Device_Wrapper : public IDevice_Wrapper
 {
-    Device_Wrapper(q::String const& name) : name(name), device(new T()) {}
+    template<class... Args>
+    Device_Wrapper(Args&&... args) : device(new T(std::forward<Args>(args)...)) {}
     void process() { device->process(); }
-    q::String name;
     std::unique_ptr<T> device;
 };
 
@@ -156,6 +156,24 @@ auto HAL::get_settings(q::Path const& path) -> rapidjson::Value&
     return *v;
 }
 
+auto HAL::get_buses()    -> Registry<node::bus::IBus>&
+{
+    return m_buses;
+}
+auto HAL::get_sources()  -> Registry<node::source::ISource>&
+{
+    return m_sources;
+}
+auto HAL::get_sinks()    -> Registry<node::sink::ISink>&
+{
+    return m_sinks;
+}
+auto HAL::get_streams()  -> Registry<node::stream::IStream>&
+{
+    return m_streams;
+}
+
+
 auto HAL::init() -> bool
 {
     using namespace silk::node;
@@ -175,10 +193,11 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::I2C_Linux>>(q::String(sz.name));
-                auto& bus = *wrapper->bus;
-                if (!bus.open(q::String(sz.dev)) ||
-                    !m_buses.add(wrapper->name, bus))
+                auto wrapper = std::make_unique<Bus_Wrapper<bus::I2C_Linux>>(*this);
+                bus::I2C_Linux::Init_Params params;
+                params.name = sz.name;
+                params.dev = sz.dev;
+                if (!wrapper->bus->init(params))
                 {
                     return false;
                 }
@@ -191,10 +210,11 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::SPI_Linux>>(q::String(sz.name));
-                auto& bus = *wrapper->bus;
-                if (!bus.open(q::String(sz.dev), sz.mode) ||
-                        !m_buses.add(wrapper->name, bus))
+                auto wrapper = std::make_unique<Bus_Wrapper<bus::SPI_Linux>>(*this);
+                bus::SPI_Linux::Init_Params params;
+                params.name = sz.name;
+                params.dev = sz.dev;
+                if (!wrapper->bus->init(params))
                 {
                     return false;
                 }
@@ -207,10 +227,11 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::UART_Linux>>(q::String(sz.name));
-                auto& bus = *wrapper->bus;
-                if (!bus.open(q::String(sz.dev), sz.baud) ||
-                        !m_buses.add(wrapper->name, bus))
+                auto wrapper = std::make_unique<Bus_Wrapper<bus::UART_Linux>>(*this);
+                bus::UART_Linux::Init_Params params;
+                params.name = sz.name;
+                params.dev = sz.dev;
+                if (!wrapper->bus->init(params))
                 {
                     return false;
                 }
@@ -242,10 +263,9 @@ auto HAL::init() -> bool
                     break;
                 }
 
-                auto wrapper = std::make_unique<Device_Wrapper<sink::PIGPIO>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<sink::PIGPIO>>(*this);
                 sink::PIGPIO::Init_Params params;
+                params.name = sz.name;
                 params.rate = std::chrono::microseconds(sz.rate);
                 for (size_t i = 0; i < sz.pwm_channels.size(); i++)
                 {
@@ -255,21 +275,9 @@ auto HAL::init() -> bool
                     params.pwm_channels[i].min = sz.pwm_channels[i].min;
                     params.pwm_channels[i].max = sz.pwm_channels[i].max;
                 }
-                if (!dev.init(params))
+                if (!wrapper->device->init(params))
                 {
                     return false;
-                }
-
-                for (size_t i = 0; i < sink::PIGPIO::MAX_PWM_CHANNELS; i++)
-                {
-                    auto* pwm = dev.get_pwm_channel(i);
-                    if (pwm)
-                    {
-                        if (!m_sinks.add(q::util::format2<q::String>("{}-pwm{}", wrapper->name, i), *pwm))
-                        {
-                            return false;
-                        }
-                    }
                 }
                 m_hw->devices.push_back(std::move(wrapper));
             }
@@ -280,30 +288,18 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto bus = q::String(sz.bus);
-                auto wrapper = std::make_unique<Device_Wrapper<source::MPU9250>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
+                auto wrapper = std::make_unique<Device_Wrapper<source::MPU9250>>(*this);
 
                 source::MPU9250::Init_Params params;
+                params.name = sz.name;
+                params.bus = sz.bus;
                 params.imu_rate = sz.imu_rate;
                 params.compass_rate = sz.compass_rate;
                 params.thermometer_rate = sz.thermometer_rate;
                 params.gyroscope_range = sz.gyroscope_range;
                 params.accelerometer_range = sz.accelerometer_range;
 
-                auto* i2c = m_buses.find_by_name<bus::II2C>(bus);
-                auto* spi = m_buses.find_by_name<bus::ISPI>(bus);
-                if (!i2c && !spi)
-                {
-                    QLOGE("Invalid bus for {}: {}", sz.name, bus);
-                    return false;
-                }
-                if ((i2c && !dev.init(i2c, params)) ||
-                    (spi && !dev.init(spi, params)) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-accelerometer", wrapper->name), dev.get_accelerometer()) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-gyroscope", wrapper->name), dev.get_gyroscope()) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-compass", wrapper->name), dev.get_compass()) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-thermometer", wrapper->name), dev.get_thermometer()))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -316,25 +312,13 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto bus = q::String(sz.bus);
-                auto wrapper = std::make_unique<Device_Wrapper<source::MS5611>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::MS5611>>(*this);
                 source::MS5611::Init_Params params;
+                params.name = sz.name;
+                params.bus = sz.bus;
                 params.rate = sz.rate;
                 params.pressure_to_temperature_ratio = sz.pressure_to_temperature_ratio;
-
-                auto* i2c = m_buses.find_by_name<bus::II2C>(bus);
-                auto* spi = m_buses.find_by_name<bus::ISPI>(bus);
-                if (!i2c && !spi)
-                {
-                    QLOGE("Invalid bus for {}: {}", sz.name, bus);
-                    return false;
-                }
-                if ((i2c && !dev.init(i2c, params)) ||
-                    (spi && !dev.init(spi, params)) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-barometer", wrapper->name), dev.get_barometer()) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-thermometer", wrapper->name), dev.get_thermometer()))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -347,10 +331,9 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Device_Wrapper<source::Raspicam>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::Raspicam>>(*this);
                 source::Raspicam::Init_Params params;
+                params.name = sz.name;
                 params.fps = sz.fps;
                 params.recording.resolution = sz.recording.resolution;
                 params.recording.bitrate = sz.recording.bitrate;
@@ -360,8 +343,7 @@ auto HAL::init() -> bool
                 params.medium.bitrate = sz.medium.bitrate;
                 params.low.resolution = sz.low.resolution;
                 params.low.bitrate = sz.low.bitrate;
-                if (!dev.init(params) ||
-                    !m_sources.add(wrapper->name, dev))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -374,23 +356,15 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto bus = q::String(sz.bus);
-                auto wrapper = std::make_unique<Device_Wrapper<source::SRF02>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::SRF02>>(*this);
                 source::SRF02::Init_Params params;
+                params.name = sz.name;
+                params.bus = sz.bus;
                 params.rate = sz.rate;
                 params.direction = sz.direction;
                 params.min_distance = sz.min_distance;
                 params.max_distance = sz.max_distance;
-                auto* i2c = m_buses.find_by_name<bus::II2C>(bus);
-                if (!i2c)
-                {
-                    QLOGE("Invalid bus for {}: {}", sz.name, bus);
-                    return false;
-                }
-                if (!dev.init(i2c, params) ||
-                    !m_sources.add(wrapper->name, dev))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -403,24 +377,12 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto bus = q::String(sz.bus);
-                auto wrapper = std::make_unique<Device_Wrapper<source::UBLOX>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::UBLOX>>(*this);
                 source::UBLOX::Init_Params params;
+                params.name = sz.name;
+                params.bus = sz.bus;
                 params.rate = sz.rate;
-                auto* i2c = m_buses.find_by_name<bus::II2C>(bus);
-                auto* spi = m_buses.find_by_name<bus::ISPI>(bus);
-                auto* uart = m_buses.find_by_name<bus::ISPI>(bus);
-                if (!i2c && !spi && !uart)
-                {
-                    QLOGE("Invalid bus for {}: {}", sz.name, bus);
-                    return false;
-                }
-                if ((i2c && !dev.init(i2c, params)) ||
-                    (spi && !dev.init(spi, params)) ||
-                    (uart && !dev.init(uart, params)) ||
-                    !m_sources.add(wrapper->name, dev))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -433,22 +395,13 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto bus = q::String(sz.bus);
-                auto wrapper = std::make_unique<Device_Wrapper<source::RC5T619>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::RC5T619>>(*this);
                 source::RC5T619::Init_Params params;
+                params.name = sz.name;
+                params.bus = sz.bus;
                 params.adc0_rate = sz.adc0_rate;
                 params.adc1_ratio = sz.adc1_ratio;
-                auto* i2c = m_buses.find_by_name<bus::II2C>(bus);
-                if (!i2c)
-                {
-                    QLOGE("Invalid bus for {}: {}", sz.name, bus);
-                    return false;
-                }
-                if (!dev.init(i2c, params) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-adc0", wrapper->name), dev.get_adc0()) ||
-                    !m_sources.add(q::util::format2<q::String>("{}-adc1", wrapper->name), dev.get_adc1()))
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -461,19 +414,11 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto adc_name = q::String(sz.adc);
-                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Ammeter>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Ammeter>>(*this);
                 source::ADC_Ammeter::Init_Params params;
-                auto* source = m_streams.find_by_name<stream::IADC_Value>(adc_name);
-                if (!source)
-                {
-                    QLOGE("Invalid adc for {}: {}", sz.name, adc_name);
-                    return false;
-                }
-                if (!dev.init(source, params) ||
-                    !m_sources.add(wrapper->name, dev))
+                params.name = sz.name;
+                params.source_stream = sz.source_stream;
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }
@@ -486,19 +431,11 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto adc_name = q::String(sz.adc);
-                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Voltmeter>>(q::String(sz.name));
-                auto& dev = *wrapper->device;
-
+                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Voltmeter>>(*this);
                 source::ADC_Voltmeter::Init_Params params;
-                auto* source = m_streams.find_by_name<stream::IADC_Value>(adc_name);
-                if (!source)
-                {
-                    QLOGE("Invalid adc for {}: {}", sz.name, adc_name);
-                    return false;
-                }
-                if (!dev.init(source, params) ||
-                    !m_sources.add(wrapper->name, dev))
+                params.name = sz.name;
+                params.source_stream = sz.source_stream;
+                if (!wrapper->device->init(params))
                 {
                     return false;
                 }

@@ -15,7 +15,8 @@ namespace node
 namespace sink
 {
 
-PIGPIO::PIGPIO()
+PIGPIO::PIGPIO(HAL& hal)
+    : m_hal(hal)
 {
     //now configure the pin for PWM or servo
     for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
@@ -35,8 +36,31 @@ auto PIGPIO::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("pigpio_pwm::init");
 
-#if defined (RASPBERRY_PI)
     m_params = params;
+
+    if (!init())
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < sink::PIGPIO::MAX_PWM_CHANNELS; i++)
+    {
+        auto* pwm = get_pwm_channel(i);
+        if (pwm)
+        {
+            if (!m_hal.get_sinks().add<IPWM>(q::util::format2<q::String>("{}-pwm{}", params.name, i), *pwm))
+            {
+                return false;
+            }
+        }
+    }
+}
+
+auto PIGPIO::init() -> bool
+{
+    QLOG_TOPIC("pigpio_pwm::init");
+
+#if defined (RASPBERRY_PI)
     size_t rate = m_params.rate.count();
 
     std::vector<size_t> rates = {1, 2, 4, 5, 8, 10};
