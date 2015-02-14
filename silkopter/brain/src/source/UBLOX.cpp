@@ -179,18 +179,17 @@ auto UBLOX::init(Init_Params const& params) -> bool
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
     m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
     m_uart = m_hal.get_buses().find_by_name<bus::IUART>(params.bus);
-    if (init(params))
+    if (!init() ||
+        !m_hal.get_sources().add<IGPS>(params.name, *this) ||
+        !m_hal.get_streams().add<stream::ILocation>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
     {
-        if (!m_hal.get_sources().add<IGPS>(params.name, *this) ||
-            !m_hal.get_streams().add<stream::ILocation>(q::util::format2<q::String>("{}/stream", params.name), m_stream))
-        {
-            return false;
-        }
+        return false;
     }
+
+    return true;
 }
 auto UBLOX::init() -> bool
 {
-    QLOG_TOPIC("ublox::init");
     if (!m_i2c && !m_spi && !m_uart)
     {
         QLOGE("No bus configured");
@@ -198,6 +197,7 @@ auto UBLOX::init() -> bool
     }
 
     m_params.rate = math::clamp<size_t>(m_params.rate, 1, 5);
+    m_stream.rate = m_params.rate;
 
     return true;
 }
@@ -655,7 +655,7 @@ void UBLOX::process_cfg_sbas_packet(Packet& packet)
 
 void UBLOX::process_inf_notice_packet(Packet& packet)
 {
-    q::String str(reinterpret_cast<char const*>(packet.payload.data()), packet.payload.size());
+    std::string str(reinterpret_cast<char const*>(packet.payload.data()), packet.payload.size());
     QLOGI("GPS notice: {}", str);
 }
 

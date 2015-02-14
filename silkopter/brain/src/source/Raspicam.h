@@ -19,13 +19,13 @@ public:
     struct Quality
     {
         math::vec2u32 resolution;
-        size_t bitrate = 0;
+        uint32_t bitrate = 0;
     };
 
     struct Init_Params
     {
-        q::String name;
-        size_t fps = 30;
+        std::string name;
+        uint32_t fps = 30;
         Quality low;
         Quality medium;
         Quality high;

@@ -1,16 +1,15 @@
 #pragma once
 
-#include "ISource.h"
-#include "common/node/Stream_Data.h"
+#include "IProcessor.h"
 
 namespace silk
 {
 namespace node
 {
-namespace source
+namespace processor
 {
 
-class IAHRS : public ISource
+class IAHRS : public IProcessor
 {
 public:
     struct Reference_Frame

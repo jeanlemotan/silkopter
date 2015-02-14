@@ -19,10 +19,10 @@ public:
 
     struct Init_Params
     {
-        q::String name;
-        q::String bus;
-        size_t adc0_rate = 50;
-        size_t adc1_ratio = 10;
+        std::string name;
+        std::string bus;
+        uint32_t adc0_rate = 50;
+        uint32_t adc1_ratio = 10;
     };
 
     auto init(Init_Params const& params) -> bool;
@@ -51,10 +51,12 @@ private:
     //    auto get_adc_config() const -> Config const&;
         auto get_stream() -> stream::IADC_Value& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
         std::vector<Sample> samples;
         q::Clock::time_point last_time_point = q::Clock::now();
         uint32_t sample_idx = 0;
+        uint32_t rate = 0;
     } m_adc[2];
 };
 

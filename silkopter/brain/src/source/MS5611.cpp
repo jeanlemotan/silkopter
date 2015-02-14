@@ -104,21 +104,20 @@ auto MS5611::init(Init_Params const& params) -> bool
 
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
     m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
-    if (init(params))
-    {
-        if (!m_hal.get_sources().add<IBarometer>(q::util::format2<q::String>("{}-barometer", params.name), m_barometer) ||
-            !m_hal.get_sources().add<IThermometer>(q::util::format2<q::String>("{}-thermometer", params.name), m_thermometer) ||
+    if (!init() ||
+        !m_hal.get_sources().add<IBarometer>(q::util::format2<std::string>("{}-barometer", params.name), m_barometer) ||
+        !m_hal.get_sources().add<IThermometer>(q::util::format2<std::string>("{}-thermometer", params.name), m_thermometer) ||
 
-            !m_hal.get_streams().add<stream::IPressure>(q::util::format2<q::String>("{}-barometer/stream", params.name), m_barometer.get_stream()) ||
-            !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<q::String>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
-        {
-            return false;
-        }
+        !m_hal.get_streams().add<stream::IPressure>(q::util::format2<std::string>("{}-barometer/stream", params.name), m_barometer.get_stream()) ||
+        !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<std::string>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
+    {
+        return false;
     }
+
+    return true;
 }
 auto MS5611::init() -> bool
 {
-    QLOG_TOPIC("ms5611::init");
     if (!m_i2c && !m_spi)
     {
         QLOGE("No bus configured");
@@ -127,6 +126,8 @@ auto MS5611::init() -> bool
 
     m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);
     m_params.pressure_to_temperature_ratio = math::clamp<size_t>(m_params.pressure_to_temperature_ratio, 1, 10);
+    m_barometer.rate = m_params.rate;
+    m_thermometer.rate = m_params.rate / m_params.pressure_to_temperature_ratio;
 
     m_dt = std::chrono::milliseconds(1000 / m_params.rate);
 

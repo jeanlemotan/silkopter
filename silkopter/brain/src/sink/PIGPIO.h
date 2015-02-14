@@ -17,20 +17,20 @@ public:
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
+    struct PWM_Params
+    {
+        int32_t gpio = -1;
+        uint32_t frequency = 50;
+        uint32_t range = 1000000 / frequency;
+        uint32_t min = 1000;
+        uint32_t max = 2000;
+    };
+
     struct Init_Params
     {
-        struct PWM
-        {
-            int gpio = -1;
-            size_t frequency = 50;
-            size_t range = 1000000 / frequency;
-            size_t min = 1000;
-            size_t max = 2000;
-        };
-
-        q::String name;
-        std::array<PWM, MAX_PWM_CHANNELS> pwm_channels;
-        std::chrono::microseconds rate = std::chrono::microseconds(5);
+        std::string name;
+        std::vector<PWM_Params> pwm_channels;
+        uint32_t period_micro = 5;
     };
 
     auto init(Init_Params const& params) -> bool;

@@ -11,7 +11,6 @@ class ISource : q::util::Noncopyable
 {
 public:
     virtual ~ISource() {}
-
 };
 
 

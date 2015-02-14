@@ -4,6 +4,7 @@
 #include "common/node/bus/IBus.h"
 #include "common/node/source/ISource.h"
 #include "common/node/sink/ISink.h"
+#include "common/node/processor/IProcessor.h"
 #include "common/node/stream/IStream.h"
 
 namespace silk
@@ -16,13 +17,13 @@ class Registry : q::util::Noncopyable
 {
     friend class HAL;
 public:
-    template<class T> auto get_all() const -> std::vector<std::pair<q::String const&, T*>> const&;
-    template<class T> auto find_by_name(q::String const& name) const -> T*;
+    template<class T> auto get_all() const -> std::vector<std::pair<std::string const&, T*>> const&;
+    template<class T> auto find_by_name(std::string const& name) const -> T*;
 
-    template<class T> auto add(q::String const& name, T& node) -> bool;
+    template<class T> auto add(std::string const& name, T& node) -> bool;
 
 private:
-    typedef std::vector<std::pair<q::String const&, Base*>> Nodes;
+    typedef std::vector<std::pair<std::string, Base*>> Nodes;
     typedef std::unordered_map<size_t, Nodes> Nodes_Map;
 
     template<class T> auto get_nodes() const -> Nodes&;
@@ -43,15 +44,17 @@ public:
     auto get_settings(q::Path const& path) -> rapidjson::Value&;
     void save_settings();
 
-    auto get_buses()    -> Registry<node::bus::IBus>&;
-    auto get_sources()  -> Registry<node::source::ISource>&;
-    auto get_sinks()    -> Registry<node::sink::ISink>&;
-    auto get_streams()  -> Registry<node::stream::IStream>&;
+    auto get_buses()        -> Registry<node::bus::IBus>&;
+    auto get_sources()      -> Registry<node::source::ISource>&;
+    auto get_sinks()        -> Registry<node::sink::ISink>&;
+    auto get_processors()   -> Registry<node::processor::IProcessor>&;
+    auto get_streams()      -> Registry<node::stream::IStream>&;
 
 private:
     Registry<node::bus::IBus> m_buses;
     Registry<node::source::ISource> m_sources;
     Registry<node::sink::ISink> m_sinks;
+    Registry<node::processor::IProcessor> m_processors;
     Registry<node::stream::IStream> m_streams;
 
     bool m_is_initialized = false;
@@ -71,22 +74,22 @@ private:
 
 template<class Base>
 template<class T>
-auto Registry<Base>::get_all() const -> std::vector<std::pair<q::String const&, T*>> const&
+auto Registry<Base>::get_all() const -> std::vector<std::pair<std::string const&, T*>> const&
 {
     return get_nodes<T>();
 }
 template<class Base>
 template<class T>
-auto Registry<Base>::find_by_name(q::String const& name) const -> T*
+auto Registry<Base>::find_by_name(std::string const& name) const -> T*
 {
     auto& nodes = get_nodes<T>();
     auto it = std::find_if(nodes.begin(), nodes.end(),
-                           [&](std::pair<q::String const&, Base*> const& s) { return s.first == name; });
+                           [&](std::pair<std::string const&, Base*> const& s) { return s.first == name; });
     return it != nodes.end() ? reinterpret_cast<T*>(it->second) : nullptr;
 }
 template<class Base>
 template<class T>
-auto Registry<Base>::add(q::String const& name, T& node) -> bool
+auto Registry<Base>::add(std::string const& name, T& node) -> bool
 {
     if (find_by_name<T>(name))
     {

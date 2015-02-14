@@ -1,0 +1,25 @@
+{
+    "hal": {
+        "buses": {
+            "I2C_Linux": {
+                "name": "i2c0",
+                "dev": "./i2c0"
+            },
+            "I2C_Linux": {
+                "name": "i2c1",
+                "dev": "./i2c1"
+            }
+        },
+        "devices": {
+            "MPU9250": {
+                "name": "imu",
+                "bus": "i2c0",
+                "imu_rate": 1000,
+                "compass_rate": 100,
+                "thermometer_rate": 10,
+                "accelerometer_range": 4,
+                "gyroscope_range": 500
+            }
+        }
+    }
+}

@@ -20,10 +20,10 @@ public:
 
     struct Init_Params
     {
-        q::String name;
-        q::String bus;
-        size_t rate = 100;
-        size_t pressure_to_temperature_ratio = 10;
+        std::string name;
+        std::string bus;
+        uint32_t rate = 100;
+        uint32_t pressure_to_temperature_ratio = 10;
     };
 
     auto init(Init_Params const& params) -> bool;
@@ -55,7 +55,9 @@ private:
     {
         auto get_stream() -> stream::IPressure& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
         double      reading = 0;
@@ -64,7 +66,9 @@ private:
     {
         auto get_stream() -> stream::ITemperature& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
         double      reading = 0;

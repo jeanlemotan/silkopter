@@ -5,7 +5,7 @@ namespace silk
 {
 namespace node
 {
-namespace source
+namespace processor
 {
 
 ADC_Ammeter::ADC_Ammeter(HAL& hal)
@@ -17,10 +17,10 @@ auto ADC_Ammeter::init(Init_Params const& params) -> bool
 {
     m_params = params;
 
-    m_source_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(params.source_stream);
+    m_stream.source_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(params.source_stream);
     if (!init(params) ||
-        !m_hal.get_sources().add<IAmmeter>(params.name, *this) ||
-        !m_hal.get_streams().add<stream::ICurrent>(q::util::format2<q::String>("{}/stream", params.name), m_stream))
+        !m_hal.get_processors().add<Base>(params.name, *this) ||
+        !m_hal.get_streams().add<stream::ICurrent>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
     {
         return false;
     }
@@ -29,14 +29,19 @@ auto ADC_Ammeter::init(Init_Params const& params) -> bool
 
 auto ADC_Ammeter::init() -> bool
 {
-    if (!m_source_stream)
+    if (!m_stream.source_stream)
     {
         QLOGE("No source specified");
         return false;
     }
 }
 
-auto ADC_Ammeter::get_stream() -> stream::ICurrent&
+auto ADC_Ammeter::get_input_stream() -> stream::IADC_Value&
+{
+    QASSERT(m_stream.source_stream);
+    return *m_stream.source_stream;
+}
+auto ADC_Ammeter::get_output_stream() -> stream::ICurrent&
 {
     return m_stream;
 }
@@ -44,13 +49,8 @@ auto ADC_Ammeter::get_stream() -> stream::ICurrent&
 
 void ADC_Ammeter::process()
 {
-    QASSERT(m_source_stream);
-    if (!m_source_stream)
-    {
-        return;
-    }
     m_stream.samples.clear();
-    auto const& s = m_source_stream->get_samples();
+    auto const& s = get_input_stream().get_samples();
     m_stream.samples.resize(s.size());
 
     std::transform(s.begin(), s.end(), m_stream.samples.begin(), [](stream::IADC_Value::Sample const& sample)

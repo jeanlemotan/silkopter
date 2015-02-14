@@ -23,13 +23,13 @@ public:
 
     struct Init_Params
     {
-        q::String name;
-        q::String bus;
-        size_t imu_rate = 1000;
-        size_t compass_rate = 100;
-        size_t thermometer_rate = 10;
-        size_t gyroscope_range = 500; //degrees per second
-        size_t accelerometer_range = 4; //gees
+        std::string name;
+        std::string bus;
+        uint32_t imu_rate = 1000;
+        uint32_t compass_rate = 100;
+        uint32_t thermometer_rate = 10;
+        uint32_t gyroscope_range = 500; //degrees per second
+        uint32_t accelerometer_range = 4; //gees
     };
 
     auto init(Init_Params const& params) -> bool;
@@ -79,7 +79,9 @@ private:
     {
         auto get_stream() -> stream::IAcceleration& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         uint32_t sample_idx = 0;
         float scale_inv = 1.f;
         std::vector<Sample> samples;
@@ -89,7 +91,9 @@ private:
     {
         auto get_stream() -> stream::IAngular_Velocity& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         uint32_t sample_idx = 0;
         float scale_inv = 1.f;
         std::vector<Sample> samples;
@@ -99,7 +103,9 @@ private:
     {
         auto get_stream() -> stream::IMagnetic_Field& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         uint8_t akm_address = 0;
         q::Clock::duration dt;
         q::Clock::time_point last_time_point;
@@ -112,7 +118,9 @@ private:
     {
         auto get_stream() -> stream::ITemperature& { return *this; }
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         q::Clock::duration dt;
         uint32_t sample_idx = 0;
         std::vector<Sample> samples;

@@ -8,11 +8,6 @@
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "rapidjson/stringbuffer.h"
 
-#include "autojsoncxx/boost_types.hpp"
-#include "sz_math.hpp"
-#include "sz_hal_buses.hpp"
-#include "sz_hal_devices.hpp"
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -29,10 +24,16 @@
 #include "source/UBLOX.h"
 #include "sink/PIGPIO.h"
 
-#include "source/ADC_Voltmeter.h"
-#include "source/ADC_Ammeter.h"
+#include "processor/ADC_Voltmeter.h"
+#include "processor/ADC_Ammeter.h"
+#include "processor/LPF_Butterworth.h"
 
 //#include "common/node/IAHRS.h"
+
+#include "autojsoncxx/boost_types.hpp"
+#include "sz_math.hpp"
+#include "sz_hal_buses.hpp"
+#include "sz_hal_devices.hpp"
 
 
 namespace silk
@@ -41,17 +42,6 @@ namespace silk
 static const q::Path k_settings_path("settings.json");
 
 using namespace boost::asio;
-
-//wrapper to keep all buses in the same container
-struct IBus_Wrapper : q::util::Noncopyable
-{
-};
-template<class T> struct Bus_Wrapper : public IBus_Wrapper
-{
-    template<class... Args>
-    Bus_Wrapper(Args&&... args) : bus(new T(std::forward<Args>(args)...)) {}
-    std::unique_ptr<T> bus;
-};
 
 //wrapper to keep all devices in the same container
 struct IDevice_Wrapper : q::util::Noncopyable
@@ -69,7 +59,7 @@ template<class T> struct Device_Wrapper : public IDevice_Wrapper
 
 struct HAL::Hardware
 {
-    std::vector<std::unique_ptr<IBus_Wrapper>> buses;
+    std::vector<std::unique_ptr<node::bus::IBus>> buses;
     std::vector<std::unique_ptr<IDevice_Wrapper>> devices;
 };
 
@@ -168,6 +158,10 @@ auto HAL::get_sinks()    -> Registry<node::sink::ISink>&
 {
     return m_sinks;
 }
+auto HAL::get_processors()  -> Registry<node::processor::IProcessor>&
+{
+    return m_processors;
+}
 auto HAL::get_streams()  -> Registry<node::stream::IStream>&
 {
     return m_streams;
@@ -185,7 +179,7 @@ auto HAL::init() -> bool
         auto it = settings.MemberBegin();
         for (; it != settings.MemberEnd(); ++it)
         {
-            q::String type(it->name.GetString());
+            std::string type(it->name.GetString());
             if (type == "I2C_Linux")
             {
                 sz::I2C_Linux sz;
@@ -193,15 +187,15 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::I2C_Linux>>(*this);
+                auto bus = std::make_unique<bus::I2C_Linux>(*this);
                 bus::I2C_Linux::Init_Params params;
                 params.name = sz.name;
                 params.dev = sz.dev;
-                if (!wrapper->bus->init(params))
+                if (!bus->init(params))
                 {
                     return false;
                 }
-                m_hw->buses.push_back(std::move(wrapper));
+                m_hw->buses.push_back(std::move(bus));
             }
             else if (type == "SPI_Linux")
             {
@@ -210,15 +204,15 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::SPI_Linux>>(*this);
+                auto bus = std::make_unique<bus::SPI_Linux>(*this);
                 bus::SPI_Linux::Init_Params params;
                 params.name = sz.name;
                 params.dev = sz.dev;
-                if (!wrapper->bus->init(params))
+                if (!bus->init(params))
                 {
                     return false;
                 }
-                m_hw->buses.push_back(std::move(wrapper));
+                m_hw->buses.push_back(std::move(bus));
             }
             else if (type == "UART_Linux")
             {
@@ -227,15 +221,15 @@ auto HAL::init() -> bool
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Bus_Wrapper<bus::UART_Linux>>(*this);
+                auto bus = std::make_unique<bus::UART_Linux>(*this);
                 bus::UART_Linux::Init_Params params;
                 params.name = sz.name;
                 params.dev = sz.dev;
-                if (!wrapper->bus->init(params))
+                if (!bus->init(params))
                 {
                     return false;
                 }
-                m_hw->buses.push_back(std::move(wrapper));
+                m_hw->buses.push_back(std::move(bus));
             }
         }
         if (!result.empty())
@@ -254,27 +248,16 @@ auto HAL::init() -> bool
         auto it = settings.MemberBegin();
         for (; it != settings.MemberEnd(); ++it)
         {
-            q::String type(it->name.GetString());
+            std::string type(it->name.GetString());
             if (type == "PIGPIO")
             {
-                sz::PIGPIO sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                sink::PIGPIO::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
 
                 auto wrapper = std::make_unique<Device_Wrapper<sink::PIGPIO>>(*this);
-                sink::PIGPIO::Init_Params params;
-                params.name = sz.name;
-                params.rate = std::chrono::microseconds(sz.rate);
-                for (size_t i = 0; i < sz.pwm_channels.size(); i++)
-                {
-                    params.pwm_channels[i].gpio = sz.pwm_channels[i].gpio;
-                    params.pwm_channels[i].frequency = sz.pwm_channels[i].frequency;
-                    params.pwm_channels[i].range = sz.pwm_channels[i].range;
-                    params.pwm_channels[i].min = sz.pwm_channels[i].min;
-                    params.pwm_channels[i].max = sz.pwm_channels[i].max;
-                }
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -283,22 +266,12 @@ auto HAL::init() -> bool
             }
             else if (type == "MPU9250")
             {
-                sz::MPU9250 sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::MPU9250::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::MPU9250>>(*this);
-
-                source::MPU9250::Init_Params params;
-                params.name = sz.name;
-                params.bus = sz.bus;
-                params.imu_rate = sz.imu_rate;
-                params.compass_rate = sz.compass_rate;
-                params.thermometer_rate = sz.thermometer_rate;
-                params.gyroscope_range = sz.gyroscope_range;
-                params.accelerometer_range = sz.accelerometer_range;
-
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -307,17 +280,12 @@ auto HAL::init() -> bool
             }
             else if (type == "MS5611")
             {
-                sz::MS5611 sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::MS5611::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::MS5611>>(*this);
-                source::MS5611::Init_Params params;
-                params.name = sz.name;
-                params.bus = sz.bus;
-                params.rate = sz.rate;
-                params.pressure_to_temperature_ratio = sz.pressure_to_temperature_ratio;
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -326,23 +294,12 @@ auto HAL::init() -> bool
             }
             else if (type == "Raspicam")
             {
-                sz::Raspicam sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::Raspicam::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::Raspicam>>(*this);
-                source::Raspicam::Init_Params params;
-                params.name = sz.name;
-                params.fps = sz.fps;
-                params.recording.resolution = sz.recording.resolution;
-                params.recording.bitrate = sz.recording.bitrate;
-                params.high.resolution = sz.high.resolution;
-                params.high.bitrate = sz.high.bitrate;
-                params.medium.resolution = sz.medium.resolution;
-                params.medium.bitrate = sz.medium.bitrate;
-                params.low.resolution = sz.low.resolution;
-                params.low.bitrate = sz.low.bitrate;
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -351,19 +308,12 @@ auto HAL::init() -> bool
             }
             else if (type == "SRF02")
             {
-                sz::SRF02 sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::SRF02::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::SRF02>>(*this);
-                source::SRF02::Init_Params params;
-                params.name = sz.name;
-                params.bus = sz.bus;
-                params.rate = sz.rate;
-                params.direction = sz.direction;
-                params.min_distance = sz.min_distance;
-                params.max_distance = sz.max_distance;
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -372,16 +322,12 @@ auto HAL::init() -> bool
             }
             else if (type == "UBLOX")
             {
-                sz::UBLOX sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::UBLOX::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::UBLOX>>(*this);
-                source::UBLOX::Init_Params params;
-                params.name = sz.name;
-                params.bus = sz.bus;
-                params.rate = sz.rate;
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -390,17 +336,12 @@ auto HAL::init() -> bool
             }
             else if (type == "RC5T619")
             {
-                sz::RC5T619 sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                source::RC5T619::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
                 auto wrapper = std::make_unique<Device_Wrapper<source::RC5T619>>(*this);
-                source::RC5T619::Init_Params params;
-                params.name = sz.name;
-                params.bus = sz.bus;
-                params.adc0_rate = sz.adc0_rate;
-                params.adc1_ratio = sz.adc1_ratio;
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -409,15 +350,12 @@ auto HAL::init() -> bool
             }
             else if (type == "ADC_Ammeter")
             {
-                sz::ADC_Ammeter sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                processor::ADC_Ammeter::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Ammeter>>(*this);
-                source::ADC_Ammeter::Init_Params params;
-                params.name = sz.name;
-                params.source_stream = sz.source_stream;
+                auto wrapper = std::make_unique<Device_Wrapper<processor::ADC_Ammeter>>(*this);
                 if (!wrapper->device->init(params))
                 {
                     return false;
@@ -426,15 +364,87 @@ auto HAL::init() -> bool
             }
             else if (type == "ADC_Voltmeter")
             {
-                sz::ADC_Voltmeter sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
+                processor::ADC_Voltmeter::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
                 {
                     break;
                 }
-                auto wrapper = std::make_unique<Device_Wrapper<source::ADC_Voltmeter>>(*this);
-                source::ADC_Voltmeter::Init_Params params;
-                params.name = sz.name;
-                params.source_stream = sz.source_stream;
+                auto wrapper = std::make_unique<Device_Wrapper<processor::ADC_Voltmeter>>(*this);
+                if (!wrapper->device->init(params))
+                {
+                    return false;
+                }
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "Acceleration_LPF_Butterworth")
+            {
+                typedef processor::LPF_Butterworth<stream::IAcceleration> Processor;
+                Processor::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
+                {
+                    break;
+                }
+                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
+                if (!wrapper->device->init(params))
+                {
+                    return false;
+                }
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "Angular_Velocity_LPF_Butterworth")
+            {
+                typedef processor::LPF_Butterworth<stream::IAngular_Velocity> Processor;
+                Processor::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
+                {
+                    break;
+                }
+                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
+                if (!wrapper->device->init(params))
+                {
+                    return false;
+                }
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "Magnetic_Field_LPF_Butterworth")
+            {
+                typedef processor::LPF_Butterworth<stream::IMagnetic_Field> Processor;
+                Processor::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
+                {
+                    break;
+                }
+                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
+                if (!wrapper->device->init(params))
+                {
+                    return false;
+                }
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "Voltage_LPF_Butterworth")
+            {
+                typedef processor::LPF_Butterworth<stream::IVoltage> Processor;
+                Processor::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
+                {
+                    break;
+                }
+                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
+                if (!wrapper->device->init(params))
+                {
+                    return false;
+                }
+                m_hw->devices.push_back(std::move(wrapper));
+            }
+            else if (type == "Current_LPF_Butterworth")
+            {
+                typedef processor::LPF_Butterworth<stream::ICurrent> Processor;
+                Processor::Init_Params params;
+                if (!autojsoncxx::from_value(params, it->value, result))
+                {
+                    break;
+                }
+                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
                 if (!wrapper->device->init(params))
                 {
                     return false;

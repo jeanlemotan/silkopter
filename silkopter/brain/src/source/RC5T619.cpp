@@ -131,13 +131,15 @@ auto RC5T619::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
-    if (!init(params) ||
-        !m_hal.get_sources().add<IADC>(q::util::format2<q::String>("{}-adc0", params.name), m_adc[0]) ||
-        !m_hal.get_sources().add<IADC>(q::util::format2<q::String>("{}-adc1", params.name), m_adc[1]) ||
+    m_params = params;
 
-        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<q::String>("{}-adc0/stream", params.name), m_adc[0].get_stream()) ||
-        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<q::String>("{}-adc1/stream", params.name), m_adc[1].get_stream()))
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_params.bus);
+    if (!init() ||
+        !m_hal.get_sources().add<IADC>(q::util::format2<std::string>("{}-adc0", m_params.name), m_adc[0]) ||
+        !m_hal.get_sources().add<IADC>(q::util::format2<std::string>("{}-adc1", m_params.name), m_adc[1]) ||
+
+        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<std::string>("{}-adc0/stream", m_params.name), m_adc[0].get_stream()) ||
+        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<std::string>("{}-adc1/stream", m_params.name), m_adc[1].get_stream()))
     {
         return false;
     }
@@ -146,8 +148,6 @@ auto RC5T619::init(Init_Params const& params) -> bool
 
 auto RC5T619::init() -> bool
 {
-    QLOG_TOPIC("rc5t619::init");
-
     if (!m_i2c)
     {
         QLOGE("No bus configured");
@@ -156,6 +156,9 @@ auto RC5T619::init() -> bool
 
     m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
     m_params.adc1_ratio = math::clamp<size_t>(m_params.adc1_ratio, 1, 100);
+
+    m_adc[0].rate = m_params.adc0_rate;
+    m_adc[1].rate = m_params.adc0_rate / m_params.adc1_ratio;
 
     m_dt = std::chrono::milliseconds(1000 / m_params.adc0_rate);
 

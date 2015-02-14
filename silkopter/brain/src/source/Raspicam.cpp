@@ -196,7 +196,7 @@ auto Raspicam::init(Init_Params const& params) -> bool
                        true);
 
     if (!m_hal.get_sources().add<ICamera>(params.name, *this))// ||
-//        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<q::String>("{}/stream", params.name), m_accelerometer.get_stream()) ||
+//        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
     {
         return false;
     }

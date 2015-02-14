@@ -49,6 +49,7 @@ INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
+INCLUDEPATH += ../../../libs/DSPFilters/include
 
 LIBS += -L=/opt/vc/lib/
 
@@ -96,14 +97,31 @@ SOURCES += \
     ../../src/bus/SPI_Linux.cpp \
     ../../src/bus/I2C_Linux.cpp \ 
     ../../src/sink/PIGPIO.cpp \
-    ../../src/source/ADC_Ammeter.cpp \
-    ../../src/source/ADC_Voltmeter.cpp \
     ../../src/source/MPU9250.cpp \
     ../../src/source/MS5611.cpp \
     ../../src/source/Raspicam.cpp \
     ../../src/source/RC5T619.cpp \
     ../../src/source/SRF02.cpp \
-    ../../src/source/UBLOX.cpp
+    ../../src/source/UBLOX.cpp \
+    ../../src/processor/ADC_Ammeter.cpp \
+    ../../src/processor/ADC_Voltmeter.cpp \
+    ../../../libs/DSPFilters/source/Bessel.cpp \
+    ../../../libs/DSPFilters/source/Biquad.cpp \
+    ../../../libs/DSPFilters/source/Butterworth.cpp \
+    ../../../libs/DSPFilters/source/Cascade.cpp \
+    ../../../libs/DSPFilters/source/ChebyshevI.cpp \
+    ../../../libs/DSPFilters/source/ChebyshevII.cpp \
+    ../../../libs/DSPFilters/source/Custom.cpp \
+    ../../../libs/DSPFilters/source/Design.cpp \
+    ../../../libs/DSPFilters/source/Documentation.cpp \
+    ../../../libs/DSPFilters/source/Elliptic.cpp \
+    ../../../libs/DSPFilters/source/Filter.cpp \
+    ../../../libs/DSPFilters/source/Legendre.cpp \
+    ../../../libs/DSPFilters/source/Param.cpp \
+    ../../../libs/DSPFilters/source/PoleFilter.cpp \
+    ../../../libs/DSPFilters/source/RBJ.cpp \
+    ../../../libs/DSPFilters/source/RootFinder.cpp \
+    ../../../libs/DSPFilters/source/State.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -140,7 +158,6 @@ HEADERS += \
     ../../../libs/common/node/sink/IPWM.h \
     ../../../libs/common/node/source/IAccelerometer.h \
     ../../../libs/common/node/source/IADC.h \
-    ../../../libs/common/node/source/IAHRS.h \
     ../../../libs/common/node/source/IAmmeter.h \
     ../../../libs/common/node/source/IBarometer.h \
     ../../../libs/common/node/source/ICamera.h \
@@ -152,8 +169,6 @@ HEADERS += \
     ../../../libs/common/node/source/IThermometer.h \
     ../../../libs/common/node/source/IVoltmeter.h \
     ../../src/sink/PIGPIO.h \
-    ../../src/source/ADC_Ammeter.h \
-    ../../src/source/ADC_Voltmeter.h \
     ../../src/source/MPU9250.h \
     ../../src/source/MS5611.h \
     ../../src/source/Raspicam.h \
@@ -176,5 +191,39 @@ HEADERS += \
     ../../../libs/common/node/bus/IBus.h \
     ../../../libs/common/node/sink/ISink.h \
     ../../../libs/common/node/source/ISource.h \
-    ../../../libs/common/node/stream/IStream.h
+    ../../../libs/common/node/stream/IStream.h \
+    ../../../libs/common/node/processor/IAHRS.h \
+    ../../../libs/common/node/processor/IInertial.h \
+    ../../../libs/common/node/processor/IProcessor.h \
+    ../../../libs/common/node/processor/ITransform.h \
+    ../../src/processor/ADC_Voltmeter.h \
+    ../../src/processor/AHRS_Complimentary.h \
+    ../../src/processor/AHRS_EKF.h \
+    ../../src/processor/Dead_Reckoning.h \
+    ../../src/processor/LPF_Butterworth.h \
+    ../../src/processor/ADC_Ammeter.h \
+    ../../../libs/DSPFilters/include/DspFilters/Bessel.h \
+    ../../../libs/DSPFilters/include/DspFilters/Biquad.h \
+    ../../../libs/DSPFilters/include/DspFilters/Butterworth.h \
+    ../../../libs/DSPFilters/include/DspFilters/Cascade.h \
+    ../../../libs/DSPFilters/include/DspFilters/ChebyshevI.h \
+    ../../../libs/DSPFilters/include/DspFilters/ChebyshevII.h \
+    ../../../libs/DSPFilters/include/DspFilters/Common.h \
+    ../../../libs/DSPFilters/include/DspFilters/Custom.h \
+    ../../../libs/DSPFilters/include/DspFilters/Design.h \
+    ../../../libs/DSPFilters/include/DspFilters/Dsp.h \
+    ../../../libs/DSPFilters/include/DspFilters/Elliptic.h \
+    ../../../libs/DSPFilters/include/DspFilters/Filter.h \
+    ../../../libs/DSPFilters/include/DspFilters/Layout.h \
+    ../../../libs/DSPFilters/include/DspFilters/Legendre.h \
+    ../../../libs/DSPFilters/include/DspFilters/MathSupplement.h \
+    ../../../libs/DSPFilters/include/DspFilters/Params.h \
+    ../../../libs/DSPFilters/include/DspFilters/PoleFilter.h \
+    ../../../libs/DSPFilters/include/DspFilters/RBJ.h \
+    ../../../libs/DSPFilters/include/DspFilters/RootFinder.h \
+    ../../../libs/DSPFilters/include/DspFilters/SmoothedFilter.h \
+    ../../../libs/DSPFilters/include/DspFilters/State.h \
+    ../../../libs/DSPFilters/include/DspFilters/Types.h \
+    ../../../libs/DSPFilters/include/DspFilters/Utilities.h \
+    ../../../libs/common/node/processor/IFilter.h
 

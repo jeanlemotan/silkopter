@@ -22,9 +22,9 @@ public:
 
     struct Init_Params
     {
-        q::String name;
-        q::String bus;
-        size_t rate = 5;
+        std::string name;
+        std::string bus;
+        uint32_t rate = 5;
     };
 
     auto init(Init_Params const& params) -> bool;
@@ -129,6 +129,9 @@ private:
     struct Stream : public stream::ILocation
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
+
+        uint32_t rate = 0;
         std::vector<Sample> samples;
     } m_stream;
 };

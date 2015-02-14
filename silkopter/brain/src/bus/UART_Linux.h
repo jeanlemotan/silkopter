@@ -18,8 +18,8 @@ public:
 
     struct Init_Params
     {
-        q::String name;
-        q::String dev;
+        std::string name;
+        std::string dev;
         size_t baud = 0;
     };
 

@@ -44,23 +44,26 @@ auto SRF02::init(Init_Params const& params) -> bool
     m_params = params;
 
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
-    if (!init(params) ||
+    if (!init() ||
         !m_hal.get_sources().add<ISonar>(params.name, *this) ||
-        !m_hal.get_streams().add<stream::IDistance>(q::util::format2<q::String>("{}/stream", params.name), m_stream))
+        !m_hal.get_streams().add<stream::IDistance>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
     {
         return false;
     }
+
     return true;
 }
 
 auto SRF02::init() -> bool
 {
-    QLOG_TOPIC("srf02::init");
     if (!m_i2c)
     {
         QLOGE("No bus configured");
         return false;
     }
+
+    m_params.rate = math::clamp<size_t>(m_params.rate, 1, 12);
+    m_stream.rate = m_params.rate;
 
     uint8_t rev = 0;
     auto ret = m_i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
@@ -72,8 +75,7 @@ auto SRF02::init() -> bool
 
     QLOGI("SRF02 Revision: {}", rev);
 
-    m_stream.dt = math::clamp(std::chrono::milliseconds(1000 / m_params.rate),
-                       std::chrono::milliseconds(100), std::chrono::milliseconds(1000));
+    m_stream.dt = std::chrono::milliseconds(1000 / m_params.rate);
     m_stream.last_time_point = q::Clock::now();
     m_state = 0;
 

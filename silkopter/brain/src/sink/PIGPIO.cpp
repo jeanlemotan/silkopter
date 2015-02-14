@@ -48,7 +48,7 @@ auto PIGPIO::init(Init_Params const& params) -> bool
         auto* pwm = get_pwm_channel(i);
         if (pwm)
         {
-            if (!m_hal.get_sinks().add<IPWM>(q::util::format2<q::String>("{}-pwm{}", params.name, i), *pwm))
+            if (!m_hal.get_sinks().add<IPWM>(q::util::format2<std::string>("{}-pwm{}", params.name, i), *pwm))
             {
                 return false;
             }

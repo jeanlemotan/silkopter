@@ -366,26 +366,25 @@ auto MPU9250::init(Init_Params const& params) -> bool
 
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
     m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
-    if (!init(params) ||
-        !m_hal.get_sources().add<IAccelerometer>(q::util::format2<q::String>("{}-accelerometer", params.name), m_accelerometer) ||
-        !m_hal.get_sources().add<IGyroscope>(q::util::format2<q::String>("{}-gyroscope", params.name), m_gyroscope) ||
-        !m_hal.get_sources().add<ICompass>(q::util::format2<q::String>("{}-compass", params.name), m_compass) ||
-        !m_hal.get_sources().add<IThermometer>(q::util::format2<q::String>("{}-thermometer", params.name), m_thermometer) ||
+    if (!init() ||
+        !m_hal.get_sources().add<IAccelerometer>(q::util::format2<std::string>("{}-accelerometer", params.name), m_accelerometer) ||
+        !m_hal.get_sources().add<IGyroscope>(q::util::format2<std::string>("{}-gyroscope", params.name), m_gyroscope) ||
+        !m_hal.get_sources().add<ICompass>(q::util::format2<std::string>("{}-compass", params.name), m_compass) ||
+        !m_hal.get_sources().add<IThermometer>(q::util::format2<std::string>("{}-thermometer", params.name), m_thermometer) ||
 
-        !m_hal.get_streams().add<stream::IAcceleration>(q::util::format2<q::String>("{}-accelerometer/stream", params.name), m_accelerometer.get_stream()) ||
-        !m_hal.get_streams().add<stream::IAngular_Velocity>(q::util::format2<q::String>("{}-gyroscope/stream", params.name), m_gyroscope.get_stream()) ||
-        !m_hal.get_streams().add<stream::IMagnetic_Field>(q::util::format2<q::String>("{}-compass/stream", params.name), m_compass.get_stream()) ||
-        !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<q::String>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
+        !m_hal.get_streams().add<stream::IAcceleration>(q::util::format2<std::string>("{}-accelerometer/stream", params.name), m_accelerometer.get_stream()) ||
+        !m_hal.get_streams().add<stream::IAngular_Velocity>(q::util::format2<std::string>("{}-gyroscope/stream", params.name), m_gyroscope.get_stream()) ||
+        !m_hal.get_streams().add<stream::IMagnetic_Field>(q::util::format2<std::string>("{}-compass/stream", params.name), m_compass.get_stream()) ||
+        !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<std::string>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
     {
         return false;
     }
+
     return true;
 }
 
 auto MPU9250::init() -> bool
 {
-    QLOG_TOPIC("mpu9250::init");
-
     if (!m_i2c && !m_spi)
     {
         QLOGE("No bus configured");
@@ -407,6 +406,12 @@ auto MPU9250::init() -> bool
     }
     m_params.compass_rate = math::clamp<size_t>(m_params.compass_rate, 10, 100);
     m_params.thermometer_rate = math::clamp<size_t>(m_params.thermometer_rate, 10, 50);
+
+    m_accelerometer.rate = m_params.imu_rate;
+    m_gyroscope.rate = m_params.imu_rate;
+    m_compass.rate = m_params.compass_rate;
+    m_thermometer.rate = m_params.thermometer_rate;
+
 
     std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
     {
