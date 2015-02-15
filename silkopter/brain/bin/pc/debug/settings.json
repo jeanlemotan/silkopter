@@ -10,7 +10,7 @@
                 "dev": "./i2c1"
             }
         },
-        "devices": {
+        "nodes": {
             "MPU9250": {
                 "name": "imu",
                 "bus": "i2c0",

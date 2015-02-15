@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
 
+#include "sz_hal_buses.hpp"
+
 #include <termios.h>
 
 namespace silk
@@ -20,11 +22,28 @@ UART_Linux::~UART_Linux()
     close();
 }
 
+auto UART_Linux::init(rapidjson::Value const& json) -> bool
+{
+    sz::UART_Linux sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize UART_Linux data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.dev = sz.dev;
+    params.baud = sz.baud;
+    return init(params);
+}
 auto UART_Linux::init(Init_Params const& params) -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_uart_pi::init");
+    QLOG_TOPIC("bus_uart_linux::init");
 
     m_params = params;
 
@@ -64,16 +83,25 @@ auto UART_Linux::init(Init_Params const& params) -> bool
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
 
-    if (!m_hal.get_buses().add<bus::IUART>(params.name, *this))
+    if (!m_params.name.empty())
     {
-        return false;
+        if (!m_hal.get_buses().add(*this))
+        {
+            return false;
+        }
     }
 
     return true;
 }
+
+auto UART_Linux::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+
 void UART_Linux::close()
 {
-    QLOG_TOPIC("bus_uart_pi");
+    QLOG_TOPIC("bus_uart_linux::clone");
 
     if (m_fd)
     {
@@ -100,7 +128,7 @@ void UART_Linux::unlock()
 
 auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 {
-    QLOG_TOPIC("bus_uart_pi");
+    QLOG_TOPIC("bus_uart_linux::read");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<UART_Linux> lg(*this);
@@ -109,7 +137,7 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 }
 auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_uart_pi");
+    QLOG_TOPIC("bus_uart_linux::write");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<UART_Linux> lg(*this);

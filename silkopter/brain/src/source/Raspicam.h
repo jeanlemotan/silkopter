@@ -32,8 +32,11 @@ public:
         Quality recording;
     };
 
+    auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
     void shutdown();
+
+    auto get_name() const -> std::string const&;
 
     //----------------------------------------------------------------------
 
@@ -52,6 +55,7 @@ public:
 
 private:
     HAL& m_hal;
+    Init_Params m_params;
 
     void set_active_streams(bool high, bool medium, bool low);
 
@@ -69,8 +73,6 @@ private:
     auto create_components() -> bool;
 };
 
-
-DECLARE_CLASS_PTR(Raspicam);
 
 }
 }

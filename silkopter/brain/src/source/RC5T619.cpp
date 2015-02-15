@@ -3,6 +3,9 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 #if defined RASPBERRY_PI
 
 extern "C"
@@ -127,22 +130,54 @@ RC5T619::RC5T619(HAL& hal)
 {
 }
 
+auto RC5T619::init(rapidjson::Value const& json) -> bool
+{
+    sz::RC5T619 sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize RC5T619 data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
+    params.adc0_rate = sz.adc0_rate;
+    params.adc1_rate_ratio = sz.adc1_rate_ratio;
+    return init(params);
+}
 auto RC5T619::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
     m_params = params;
 
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_params.bus);
-    if (!init() ||
-        !m_hal.get_sources().add<IADC>(q::util::format2<std::string>("{}-adc0", m_params.name), m_adc[0]) ||
-        !m_hal.get_sources().add<IADC>(q::util::format2<std::string>("{}-adc1", m_params.name), m_adc[1]) ||
-
-        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<std::string>("{}-adc0/stream", m_params.name), m_adc[0].get_stream()) ||
-        !m_hal.get_streams().add<stream::IADC_Value>(q::util::format2<std::string>("{}-adc1/stream", m_params.name), m_adc[1].get_stream()))
+    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
+    if (!init())
     {
         return false;
     }
+
+    if (!m_params.name.empty())
+    {
+        m_adc[0].name = q::util::format2<std::string>("{}-adc0", params.name);
+        m_adc[0].stream.name = q::util::format2<std::string>("{}/stream", m_adc[0].name);
+
+        m_adc[1].name = q::util::format2<std::string>("{}-adc1", params.name);
+        m_adc[1].stream.name = q::util::format2<std::string>("{}/stream", m_adc[1].name);
+
+        if (!m_hal.get_sources().add(m_adc[0]) ||
+            !m_hal.get_sources().add(m_adc[1]) ||
+
+            !m_hal.get_streams().add(m_adc[0].stream) ||
+            !m_hal.get_streams().add(m_adc[1].stream))
+        {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -155,10 +190,10 @@ auto RC5T619::init() -> bool
     }
 
     m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
-    m_params.adc1_ratio = math::clamp<size_t>(m_params.adc1_ratio, 1, 100);
+    m_params.adc1_rate_ratio = math::clamp<size_t>(m_params.adc1_rate_ratio, 1, 100);
 
-    m_adc[0].rate = m_params.adc0_rate;
-    m_adc[1].rate = m_params.adc0_rate / m_params.adc1_ratio;
+    m_adc[0].stream.rate = m_params.adc0_rate;
+    m_adc[1].stream.rate = m_params.adc0_rate / m_params.adc1_rate_ratio;
 
     m_dt = std::chrono::milliseconds(1000 / m_params.adc0_rate);
 
@@ -201,8 +236,8 @@ void RC5T619::process()
 {
     QLOG_TOPIC("rc5t619::process");
 
-    m_adc[0].samples.clear();
-    m_adc[1].samples.clear();
+    m_adc[0].stream.samples.clear();
+    m_adc[1].stream.samples.clear();
 
     auto now = q::Clock::now();
     if (now - m_last_time_point < m_dt)
@@ -229,13 +264,13 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            ADC::Sample sample;
+            ADC::Stream::Sample sample;
             sample.value = result;
-            sample.dt = now - m_adc[1].last_time_point;
-            sample.sample_idx = ++m_adc[1].sample_idx;
-            m_adc[1].samples.push_back(sample);
+            sample.dt = now - m_adc[1].stream.last_time_point;
+            sample.sample_idx = ++m_adc[1].stream.sample_idx;
+            m_adc[1].stream.samples.push_back(sample);
 
-            m_adc[1].last_time_point = now;
+            m_adc[1].stream.last_time_point = now;
         }
 
         //next
@@ -253,17 +288,17 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            ADC::Sample sample;
+            ADC::Stream::Sample sample;
             sample.value = result;
-            sample.dt = now - m_adc[0].last_time_point;
-            sample.sample_idx = ++m_adc[0].sample_idx;
-            m_adc[0].samples.push_back(sample);
+            sample.dt = now - m_adc[0].stream.last_time_point;
+            sample.sample_idx = ++m_adc[0].stream.sample_idx;
+            m_adc[0].stream.samples.push_back(sample);
 
-            m_adc[0].last_time_point = now;
+            m_adc[0].stream.last_time_point = now;
         }
 
         //next
-        if (m_stage >= m_params.adc1_ratio)
+        if (m_stage >= m_params.adc1_rate_ratio)
         {
             if (m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
             {

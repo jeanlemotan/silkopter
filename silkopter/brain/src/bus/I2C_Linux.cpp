@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_Linux.h"
 
+#include "sz_hal_buses.hpp"
+
 #include <errno.h>
 #include <unistd.h>
 #include <linux/i2c-dev.h>
@@ -43,11 +45,29 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
+
+auto I2C_Linux::init(rapidjson::Value const& json) -> bool
+{
+    sz::I2C_Linux sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize I2C_Linux data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.dev = sz.dev;
+    return init(params);
+}
+
 auto I2C_Linux::init(Init_Params const& params) -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::init");
 
     std::lock_guard<I2C_Linux> lg(*this);
 
@@ -59,16 +79,25 @@ auto I2C_Linux::init(Init_Params const& params) -> bool
         return false;
     }
 
-    if (!m_hal.get_buses().add<bus::II2C>(params.name, *this))
+    if (!m_params.name.empty())
     {
-        return false;
+        if (!m_hal.get_buses().add(*this))
+        {
+            return false;
+        }
     }
 
     return true;
 }
+
+auto I2C_Linux::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+
 void I2C_Linux::close()
 {
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::close");
 
     if (m_fd)
     {
@@ -95,7 +124,7 @@ void I2C_Linux::unlock()
 
 auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::read");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -119,7 +148,7 @@ auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
 }
 auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::write");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -143,7 +172,7 @@ auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 
 auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::read_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -172,7 +201,7 @@ auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_
 }
 auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_pi");
+    QLOG_TOPIC("bus_i2c_linux::write_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);

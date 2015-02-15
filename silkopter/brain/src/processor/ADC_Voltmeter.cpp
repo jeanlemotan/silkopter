@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "ADC_Voltmeter.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 namespace silk
 {
 namespace node
@@ -13,16 +16,46 @@ ADC_Voltmeter::ADC_Voltmeter(HAL& hal)
 {
 }
 
+auto ADC_Voltmeter::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+
+auto ADC_Voltmeter::init(rapidjson::Value const& json) -> bool
+{
+    sz::ADC_Voltmeter sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize ADC_Voltmeter data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.source_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.source_stream);
+    return init(params);
+}
+
 auto ADC_Voltmeter::init(Init_Params const& params) -> bool
 {
     m_params = params;
 
-    m_stream.source_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(params.source_stream);
-    if (!init(params) ||
-        !m_hal.get_processors().add<Base>(params.name, *this) ||
-        !m_hal.get_streams().add<stream::IVoltage>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
+    m_stream.source_stream = params.source_stream;
+
+    if (!init())
     {
         return false;
+    }
+
+    if (!m_params.name.empty())
+    {
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        if (!m_hal.get_streams().add(m_stream))
+        {
+            return false;
+        }
     }
     return true;
 }

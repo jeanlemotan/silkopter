@@ -187,7 +187,6 @@ HEADERS += \
     ../../../libs/common/node/stream/ITemperature.h \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
-    ../../../libs/common/node/stream/Sample.h \
     ../../../libs/common/node/bus/IBus.h \
     ../../../libs/common/node/sink/ISink.h \
     ../../../libs/common/node/source/ISource.h \
@@ -200,7 +199,6 @@ HEADERS += \
     ../../src/processor/AHRS_Complimentary.h \
     ../../src/processor/AHRS_EKF.h \
     ../../src/processor/Dead_Reckoning.h \
-    ../../src/processor/LPF_Butterworth.h \
     ../../src/processor/ADC_Ammeter.h \
     ../../../libs/DSPFilters/include/DspFilters/Bessel.h \
     ../../../libs/DSPFilters/include/DspFilters/Biquad.h \
@@ -225,5 +223,6 @@ HEADERS += \
     ../../../libs/DSPFilters/include/DspFilters/State.h \
     ../../../libs/DSPFilters/include/DspFilters/Types.h \
     ../../../libs/DSPFilters/include/DspFilters/Utilities.h \
-    ../../../libs/common/node/processor/IFilter.h
+    ../../../libs/common/node/processor/IFilter.h \
+    ../../src/processor/LPF.h
 

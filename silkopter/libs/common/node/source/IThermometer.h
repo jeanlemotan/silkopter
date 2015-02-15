@@ -28,7 +28,6 @@ public:
     virtual auto get_stream() -> stream::ITemperature& = 0;
 };
 
-DECLARE_CLASS_PTR(IThermometer);
 
 }
 }

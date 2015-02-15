@@ -32,7 +32,6 @@ public:
     virtual void process() = 0;
 };
 
-DECLARE_CLASS_PTR(ICamera);
 
 }
 }

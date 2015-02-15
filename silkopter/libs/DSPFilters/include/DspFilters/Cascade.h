@@ -60,7 +60,7 @@ public:
     template <typename Sample>
     inline Sample process (const Sample in, const Cascade& c)
     {
-      double out = in;
+      Sample out = in;
       StateType* state = m_stateArray;
       Biquad const* stage = c.m_stageArray;
       const double vsa = ac();

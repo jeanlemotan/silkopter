@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "UBLOX.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 namespace silk
 {
 namespace node
@@ -170,20 +173,50 @@ UBLOX::~UBLOX()
 {
 }
 
+auto UBLOX::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+
+auto UBLOX::init(rapidjson::Value const& json) -> bool
+{
+    sz::UBLOX sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize UBLOX data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
+    params.rate = sz.rate;
+    return init(params);
+}
 auto UBLOX::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
     m_params = params;
 
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
-    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
-    m_uart = m_hal.get_buses().find_by_name<bus::IUART>(params.bus);
-    if (!init() ||
-        !m_hal.get_sources().add<IGPS>(params.name, *this) ||
-        !m_hal.get_streams().add<stream::ILocation>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
+    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
+    m_spi = dynamic_cast<bus::ISPI*>(params.bus);
+    m_uart = dynamic_cast<bus::IUART*>(params.bus);
+    if (!init())
     {
         return false;
+    }
+
+    if (!m_params.name.empty())
+    {
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_stream))
+        {
+            return false;
+        }
     }
 
     return true;

@@ -20,11 +20,14 @@ public:
     {
         std::string name;
         std::string dev;
-        size_t baud = 0;
+        uint32_t baud = 0;
     };
 
+    auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
     void close();
+
+    auto get_name() const -> std::string const&;
 
     void lock();
     auto try_lock() -> bool;
@@ -40,9 +43,6 @@ private:
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;
 };
-
-DECLARE_CLASS_PTR(UART_Linux);
-
 
 }
 }

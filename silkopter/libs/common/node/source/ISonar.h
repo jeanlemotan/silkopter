@@ -28,7 +28,6 @@ public:
     virtual auto get_stream() -> stream::IDistance& = 0;
 };
 
-DECLARE_CLASS_PTR(ISonar);
 
 
 }

@@ -25,7 +25,6 @@ public:
     virtual auto get_stream() -> stream::ILocation& = 0;
 };
 
-DECLARE_CLASS_PTR(IGPS);
 
 }
 }

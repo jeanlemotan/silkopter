@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IStream.h"
-#include "Sample.h"
 
 namespace silk
 {
@@ -19,9 +18,23 @@ public:
     virtual ~IAngular_Velocity() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    //filter helpers
+    static const size_t FILTER_CHANNELS = 3;
+    static void get_channels(double channels[FILTER_CHANNELS], Value const& value)
+    {
+        channels[0] = value.x;
+        channels[1] = value.y;
+        channels[2] = value.z;
+    }
+    static void get_value(Value& value, double const channels[FILTER_CHANNELS])
+    {
+        value.x = channels[0];
+        value.y = channels[1];
+        value.z = channels[2];
+    }
 };
 
-DECLARE_CLASS_PTR(IAngular_Velocity);
 
 }
 }

@@ -27,8 +27,6 @@ public:
     virtual auto get_stream() -> stream::IAcceleration& = 0;
 };
 
-DECLARE_CLASS_PTR(IAccelerometer);
-
 
 }
 }

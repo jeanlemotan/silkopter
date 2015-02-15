@@ -26,14 +26,11 @@
 
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
-#include "processor/LPF_Butterworth.h"
+#include "processor/LPF.h"
 
 //#include "common/node/IAHRS.h"
 
 #include "autojsoncxx/boost_types.hpp"
-#include "sz_math.hpp"
-#include "sz_hal_buses.hpp"
-#include "sz_hal_devices.hpp"
 
 
 namespace silk
@@ -43,24 +40,24 @@ static const q::Path k_settings_path("settings.json");
 
 using namespace boost::asio;
 
-//wrapper to keep all devices in the same container
-struct IDevice_Wrapper : q::util::Noncopyable
+//wrapper to keep all nodes in the same container
+struct INode_Wrapper : q::util::Noncopyable
 {
     virtual void process() = 0;
 };
-template<class T> struct Device_Wrapper : public IDevice_Wrapper
+template<class T> struct Node_Wrapper : public INode_Wrapper
 {
     template<class... Args>
-    Device_Wrapper(Args&&... args) : device(new T(std::forward<Args>(args)...)) {}
-    void process() { device->process(); }
-    std::unique_ptr<T> device;
+    Node_Wrapper(Args&&... args) : node(new T(std::forward<Args>(args)...)) {}
+    void process() { node->process(); }
+    std::unique_ptr<T> node;
 };
 
 
 struct HAL::Hardware
 {
     std::vector<std::unique_ptr<node::bus::IBus>> buses;
-    std::vector<std::unique_ptr<IDevice_Wrapper>> devices;
+    std::vector<std::unique_ptr<INode_Wrapper>> nodes;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -107,7 +104,7 @@ void HAL::save_settings()
     {
         m_settings.SetObject();
         get_settings(q::Path("hal/buses"));
-        get_settings(q::Path("hal/devices"));
+        get_settings(q::Path("hal/nodes"));
     }
 
     auto copy = std::make_shared<rapidjson::Document>();
@@ -172,26 +169,36 @@ auto HAL::init() -> bool
 {
     using namespace silk::node;
 
+//    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<3>, 1> f;
+//    math::vec3f *x = nullptr;
+//    f.process(8, &x);
+
+    struct Acc : public stream::IAcceleration
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return 1000; }
+        std::vector<Sample> samples;
+    };
+
+
+//    processor::LPF<stream::IAcceleration> lpf;
+//    processor::LPF<stream::IAcceleration>::Init_Params params;
+//    params.source_stream
+
+//    lfp.init()
+
+
     {
         auto& settings = get_settings(q::Path("hal/buses"));
 
-        autojsoncxx::error::ErrorStack result;
         auto it = settings.MemberBegin();
         for (; it != settings.MemberEnd(); ++it)
         {
             std::string type(it->name.GetString());
             if (type == "I2C_Linux")
             {
-                sz::I2C_Linux sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
-                {
-                    break;
-                }
                 auto bus = std::make_unique<bus::I2C_Linux>(*this);
-                bus::I2C_Linux::Init_Params params;
-                params.name = sz.name;
-                params.dev = sz.dev;
-                if (!bus->init(params))
+                if (!bus->init(it->value))
                 {
                     return false;
                 }
@@ -199,16 +206,8 @@ auto HAL::init() -> bool
             }
             else if (type == "SPI_Linux")
             {
-                sz::SPI_Linux sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
-                {
-                    break;
-                }
                 auto bus = std::make_unique<bus::SPI_Linux>(*this);
-                bus::SPI_Linux::Init_Params params;
-                params.name = sz.name;
-                params.dev = sz.dev;
-                if (!bus->init(params))
+                if (!bus->init(it->value))
                 {
                     return false;
                 }
@@ -216,249 +215,154 @@ auto HAL::init() -> bool
             }
             else if (type == "UART_Linux")
             {
-                sz::UART_Linux sz;
-                if (!autojsoncxx::from_value(sz, it->value, result))
-                {
-                    break;
-                }
                 auto bus = std::make_unique<bus::UART_Linux>(*this);
-                bus::UART_Linux::Init_Params params;
-                params.name = sz.name;
-                params.dev = sz.dev;
-                if (!bus->init(params))
+                if (!bus->init(it->value))
                 {
                     return false;
                 }
                 m_hw->buses.push_back(std::move(bus));
             }
         }
-        if (!result.empty())
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Failed to parse bus {}: {}", it->name.GetString(), ss.str());
-            return false;
-        }
     }
 
     {
-        auto& settings = get_settings(q::Path("hal/devices"));
+        auto& settings = get_settings(q::Path("hal/nodes"));
 
-        autojsoncxx::error::ErrorStack result;
         auto it = settings.MemberBegin();
         for (; it != settings.MemberEnd(); ++it)
         {
             std::string type(it->name.GetString());
             if (type == "PIGPIO")
             {
-                sink::PIGPIO::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-
-                auto wrapper = std::make_unique<Device_Wrapper<sink::PIGPIO>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<sink::PIGPIO>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "MPU9250")
             {
-                source::MPU9250::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::MPU9250>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::MPU9250>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "MS5611")
             {
-                source::MS5611::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::MS5611>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::MS5611>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "Raspicam")
             {
-                source::Raspicam::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::Raspicam>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::Raspicam>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "SRF02")
             {
-                source::SRF02::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::SRF02>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::SRF02>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "UBLOX")
             {
-                source::UBLOX::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::UBLOX>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::UBLOX>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "RC5T619")
             {
-                source::RC5T619::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<source::RC5T619>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<source::RC5T619>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "ADC_Ammeter")
             {
-                processor::ADC_Ammeter::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<processor::ADC_Ammeter>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Ammeter>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
             else if (type == "ADC_Voltmeter")
             {
-                processor::ADC_Voltmeter::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<processor::ADC_Voltmeter>>(*this);
-                if (!wrapper->device->init(params))
+                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Voltmeter>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-            else if (type == "Acceleration_LPF_Butterworth")
+            else if (type == "Acceleration_LPF")
             {
-                typedef processor::LPF_Butterworth<stream::IAcceleration> Processor;
-                Processor::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
-                if (!wrapper->device->init(params))
+                typedef processor::LPF<stream::IAcceleration> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-            else if (type == "Angular_Velocity_LPF_Butterworth")
+            else if (type == "Angular_Velocity_LPF")
             {
-                typedef processor::LPF_Butterworth<stream::IAngular_Velocity> Processor;
-                Processor::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
-                if (!wrapper->device->init(params))
+                typedef processor::LPF<stream::IAngular_Velocity> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-            else if (type == "Magnetic_Field_LPF_Butterworth")
+            else if (type == "Magnetic_Field_LPF")
             {
-                typedef processor::LPF_Butterworth<stream::IMagnetic_Field> Processor;
-                Processor::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
-                if (!wrapper->device->init(params))
+                typedef processor::LPF<stream::IMagnetic_Field> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-            else if (type == "Voltage_LPF_Butterworth")
+            else if (type == "Voltage_LPF")
             {
-                typedef processor::LPF_Butterworth<stream::IVoltage> Processor;
-                Processor::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
-                if (!wrapper->device->init(params))
+                typedef processor::LPF<stream::IVoltage> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-            else if (type == "Current_LPF_Butterworth")
+            else if (type == "Current_LPF")
             {
-                typedef processor::LPF_Butterworth<stream::ICurrent> Processor;
-                Processor::Init_Params params;
-                if (!autojsoncxx::from_value(params, it->value, result))
-                {
-                    break;
-                }
-                auto wrapper = std::make_unique<Device_Wrapper<Processor>>(*this);
-                if (!wrapper->device->init(params))
+                typedef processor::LPF<stream::ICurrent> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
                 {
                     return false;
                 }
-                m_hw->devices.push_back(std::move(wrapper));
+                m_hw->nodes.push_back(std::move(wrapper));
             }
-        }
-
-        if (!result.empty())
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Failed to parse device {}: {}", it->name.GetString(), ss.str());
-            return false;
         }
     }
 

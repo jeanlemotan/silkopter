@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IProcessor.h"
+#include "ITransform.h"
 
 namespace silk
 {
@@ -10,11 +10,9 @@ namespace processor
 {
 
 template<class Stream>
-class IFilter : public IProcessor
+class IFilter : public ITransform<Stream, Stream>
 {
 public:
-    virtual auto get_input_stream() -> Stream& = 0;
-    virtual auto get_output_stream() -> Stream& = 0;
 };
 
 

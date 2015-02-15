@@ -27,8 +27,6 @@ public:
     virtual void set_value(float value) = 0;
 };
 
-DECLARE_CLASS_PTR(IPWM);
-
 }
 }
 }

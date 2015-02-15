@@ -1,8 +1,8 @@
 [
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::MPU9250",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "MPU9250",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -15,21 +15,21 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::MS5611",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "MS5611",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
         ["uint32_t", "rate", {"required": false}],
-        ["uint32_t", "pressure_to_temperature_ratio", {"required": false}]
+        ["uint32_t", "temperature_rate_ratio", {"required": false}]
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::Raspicam",
-    "name": "Quality",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Raspicam_Quality",
     "members":
     [
         ["math::vec2u32", "resolution", {"required": true}],
@@ -37,35 +37,35 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::Raspicam",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Raspicam",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["uint32_t", "fps", {"required": true}],
-        ["silk::node::source::Raspicam::Quality", "low", {"required": true}],
-        ["silk::node::source::Raspicam::Quality", "medium", {"required": true}],
-        ["silk::node::source::Raspicam::Quality", "high", {"required": true}],
-        ["silk::node::source::Raspicam::Quality", "recording", {"required": true}]
+        ["sz::Raspicam_Quality", "low", {"required": true}],
+        ["sz::Raspicam_Quality", "medium", {"required": true}],
+        ["sz::Raspicam_Quality", "high", {"required": true}],
+        ["sz::Raspicam_Quality", "recording", {"required": true}]
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::RC5T619",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "RC5T619",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
         ["uint32_t", "adc0_rate", {"required": true}],
-        ["uint32_t", "adc1_ratio", {"required": true}]
+        ["uint32_t", "adc1_rate_ratio", {"required": true}]
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::UBLOX",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "UBLOX",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -74,9 +74,9 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::source::SRF02",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "SRF02",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -88,9 +88,9 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::sink::PIGPIO",
-    "name": "PWM_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PIGPIO_PWM",
     "members":
     [
         ["int32_t", "gpio", {"required": true}],
@@ -101,20 +101,20 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::sink::PIGPIO",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PIGPIO",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["uint32_t", "period_micro", {"required": true}],
-        ["std::vector<silk::node::sink::PIGPIO::PWM_Params>", "pwm_channels", {"required": false}]
+        ["std::vector<sz::PIGPIO_PWM>", "pwm_channels", {"required": false}]
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::processor::ADC_Ammeter",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "ADC_Ammeter",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -122,9 +122,9 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::processor::ADC_Voltmeter",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "ADC_Voltmeter",
     "members":
     [
         ["std::string", "name", {"required": true}],
@@ -132,9 +132,9 @@
     ]
 },
 {
-    "definition" : false,
-    "namespace" : "silk::node::processor::LPF_Base",
-    "name": "Init_Params",
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "LPF",
     "members":
     [
         ["std::string", "name", {"required": true}],

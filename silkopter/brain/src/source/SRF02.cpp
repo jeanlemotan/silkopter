@@ -3,6 +3,9 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 namespace silk
 {
 namespace node
@@ -37,18 +40,46 @@ SRF02::SRF02(HAL& hal)
 
 }
 
+auto SRF02::init(rapidjson::Value const& json) -> bool
+{
+    sz::SRF02 sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize SRF02 data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.bus = m_hal.get_buses().find_by_name<bus::II2C>(sz.bus);
+    params.rate = sz.rate;
+    params.direction = sz.direction;
+    params.min_distance = sz.min_distance;
+    params.max_distance = sz.max_distance;
+    return init(params);
+}
+
 auto SRF02::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("srf02::init");
 
     m_params = params;
 
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
-    if (!init() ||
-        !m_hal.get_sources().add<ISonar>(params.name, *this) ||
-        !m_hal.get_streams().add<stream::IDistance>(q::util::format2<std::string>("{}/stream", params.name), m_stream))
+    if (!init())
     {
         return false;
+    }
+
+    if (!m_params.name.empty())
+    {
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_stream))
+        {
+            return false;
+        }
     }
 
     return true;
@@ -56,7 +87,7 @@ auto SRF02::init(Init_Params const& params) -> bool
 
 auto SRF02::init() -> bool
 {
-    if (!m_i2c)
+    if (!m_params.bus)
     {
         QLOGE("No bus configured");
         return false;
@@ -66,7 +97,7 @@ auto SRF02::init() -> bool
     m_stream.rate = m_params.rate;
 
     uint8_t rev = 0;
-    auto ret = m_i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
+    auto ret = m_params.bus->read_register_u8(ADDR, SW_REV_CMD, rev);
     if (!ret || rev == 255)
     {
         QLOGE("Failed to initialize SRF02");
@@ -80,6 +111,11 @@ auto SRF02::init() -> bool
     m_state = 0;
 
     return true;
+}
+
+auto SRF02::get_name() const -> std::string const&
+{
+    return m_params.name;
 }
 
 void SRF02::process()
@@ -97,7 +133,7 @@ void SRF02::process()
 
         m_state = 1;
         m_stream.last_time_point = now;
-        m_i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+        m_params.bus->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
         return; //we have to wait first
     }
 
@@ -110,7 +146,7 @@ void SRF02::process()
     m_state = 0;
 
     std::array<uint8_t, 4> buf;
-    m_i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
+    m_params.bus->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     int d = (unsigned int)(buf[0] << 8) | buf[1];
     int min_d = (unsigned int)(buf[2] << 8) | buf[3];

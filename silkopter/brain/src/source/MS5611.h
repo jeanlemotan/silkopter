@@ -21,11 +21,12 @@ public:
     struct Init_Params
     {
         std::string name;
-        std::string bus;
+        bus::IBus* bus = nullptr;
         uint32_t rate = 100;
-        uint32_t pressure_to_temperature_ratio = 10;
+        uint32_t temperature_rate_ratio = 10;
     };
 
+    auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
     void process();
@@ -51,27 +52,46 @@ private:
 
     Init_Params m_params;
 
-    struct Barometer : public source::IBarometer, public stream::IPressure
+    struct Barometer : public source::IBarometer
     {
-        auto get_stream() -> stream::IPressure& { return *this; }
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        struct Stream : public stream::IPressure
+        {
+            auto get_samples() const -> std::vector<Sample> const& { return samples; }
+            auto get_rate() const -> uint32_t { return rate; }
+            auto get_name() const -> std::string const& { return name; }
 
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        uint32_t sample_idx = 0;
-        double      reading = 0;
+            uint32_t rate = 0;
+            std::vector<Sample> samples;
+            uint32_t sample_idx = 0;
+            double      reading = 0;
+            std::string name;
+        } stream;
+
+        auto get_stream() -> stream::IPressure& { return stream; }
+        auto get_name() const -> std::string const& { return name; }
+
+        std::string name;
     } m_barometer;
-    struct Thermometer : public source::IThermometer, public stream::ITemperature
-    {
-        auto get_stream() -> stream::ITemperature& { return *this; }
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
 
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        uint32_t sample_idx = 0;
-        double      reading = 0;
+    struct Thermometer : public source::IThermometer
+    {
+        struct Stream : public stream::ITemperature
+        {
+            auto get_samples() const -> std::vector<Sample> const& { return samples; }
+            auto get_rate() const -> uint32_t { return rate; }
+            auto get_name() const -> std::string const& { return name; }
+
+            uint32_t rate = 0;
+            std::vector<Sample> samples;
+            uint32_t sample_idx = 0;
+            double      reading = 0;
+            std::string name;
+        } stream;
+
+        auto get_stream() -> stream::ITemperature& { return stream; }
+        auto get_name() const -> std::string const& { return name; }
+
+        std::string name;
     } m_thermometer;
 
     double		m_c1 = 0;
@@ -89,8 +109,6 @@ private:
     q::Clock::duration m_dt;
 };
 
-
-DECLARE_CLASS_PTR(MS5611);
 
 }
 }

@@ -23,15 +23,17 @@ public:
     struct Init_Params
     {
         std::string name;
-        std::string bus;
+        bus::IBus* bus = nullptr;
         uint32_t rate = 5;
     };
 
+    auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
     void process();
 
     auto get_stream() -> stream::ILocation&;
+    auto get_name() const -> std::string const&;
 
 private:
     auto init() -> bool;
@@ -130,14 +132,14 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
+        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
+        std::string name;
     } m_stream;
 };
 
-
-DECLARE_CLASS_PTR(UBLOX);
 
 }
 }

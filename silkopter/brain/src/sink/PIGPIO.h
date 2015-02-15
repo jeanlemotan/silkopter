@@ -30,9 +30,10 @@ public:
     {
         std::string name;
         std::vector<PWM_Params> pwm_channels;
-        uint32_t period_micro = 5;
+        std::chrono::microseconds period = std::chrono::microseconds(5);
     };
 
+    auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
     void process();
@@ -50,15 +51,15 @@ private:
     struct PWM : public IPWM
     {
         void set_value(float value) { pigpio->set_pwm_value(idx, value); }
+        auto get_name() const -> std::string const& { return name; }
 
         PIGPIO* pigpio = nullptr;
         size_t idx = 0;
+        std::string name;
     };
 
     std::array<PWM, MAX_PWM_CHANNELS> m_pwm_channels;
 };
-
-DECLARE_CLASS_PTR(PIGPIO);
 
 }
 }

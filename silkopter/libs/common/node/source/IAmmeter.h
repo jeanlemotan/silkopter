@@ -27,7 +27,6 @@ public:
     virtual auto get_stream() -> stream::ICurrent& = 0;
 };
 
-DECLARE_CLASS_PTR(IAmmeter);
 
 }
 }

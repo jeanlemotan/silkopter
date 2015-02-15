@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "PIGPIO.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 #ifdef RASPBERRY_PI
 extern "C"
 {
@@ -14,6 +17,7 @@ namespace node
 {
 namespace sink
 {
+
 
 PIGPIO::PIGPIO(HAL& hal)
     : m_hal(hal)
@@ -32,6 +36,32 @@ auto PIGPIO::get_pwm_channel(size_t idx) -> sink::IPWM*
     return m_params.pwm_channels[idx].gpio >= 0 ? &m_pwm_channels[idx] : nullptr;
 }
 
+auto PIGPIO::init(rapidjson::Value const& json) -> bool
+{
+    sz::PIGPIO sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize PIGPIO data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.period = std::chrono::microseconds(sz.period_micro);
+    params.pwm_channels.resize(sz.pwm_channels.size());
+    for (size_t i = 0; i < sz.pwm_channels.size(); i++)
+    {
+        auto& ch = params.pwm_channels[i];
+        ch.gpio = sz.pwm_channels[i].gpio;
+        ch.frequency = sz.pwm_channels[i].frequency;
+        ch.range = sz.pwm_channels[i].range;
+        ch.min = sz.pwm_channels[i].min;
+        ch.max = sz.pwm_channels[i].max;
+    }
+    return init(params);
+}
 auto PIGPIO::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("pigpio_pwm::init");
@@ -43,14 +73,18 @@ auto PIGPIO::init(Init_Params const& params) -> bool
         return false;
     }
 
-    for (size_t i = 0; i < sink::PIGPIO::MAX_PWM_CHANNELS; i++)
+    if (!m_params.name.empty())
     {
-        auto* pwm = get_pwm_channel(i);
-        if (pwm)
+        for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
         {
-            if (!m_hal.get_sinks().add<IPWM>(q::util::format2<std::string>("{}-pwm{}", params.name, i), *pwm))
+            if (m_params.pwm_channels[i].gpio >= 0)
             {
-                return false;
+                auto& pwm = m_pwm_channels[i];
+                pwm.name = q::util::format2<std::string>("{}-pwm{}", m_params.name, i);
+                if (!m_hal.get_sinks().add(pwm))
+                {
+                    return false;
+                }
             }
         }
     }
@@ -61,6 +95,12 @@ auto PIGPIO::init() -> bool
     QLOG_TOPIC("pigpio_pwm::init");
 
 #if defined (RASPBERRY_PI)
+    if (m_params.pwm_channels.size() > MAX_PWM_CHANNELS)
+    {
+        QLOGE("Too many PWM channels. Max is {}", MAX_PWM_CHANNELS);
+        return false;
+    }
+
     size_t rate = m_params.rate.count();
 
     std::vector<size_t> rates = {1, 2, 4, 5, 8, 10};

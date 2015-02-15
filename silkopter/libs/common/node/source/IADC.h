@@ -28,8 +28,6 @@ public:
     virtual auto get_stream() -> stream::IADC_Value& = 0;
 };
 
-DECLARE_CLASS_PTR(IADC);
-
 
 }
 }

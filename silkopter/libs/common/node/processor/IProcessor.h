@@ -12,6 +12,7 @@ class IProcessor : q::util::Noncopyable
 public:
     virtual ~IProcessor() {}
 
+    virtual auto get_name() const -> std::string const& = 0;
 
 };
 

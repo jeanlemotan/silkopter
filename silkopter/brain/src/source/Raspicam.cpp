@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "Raspicam.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 //#undef RASPBERRY_PI
 
 #if defined RASPBERRY_PI
@@ -74,7 +77,6 @@ struct Raspicam::Impl
         std::mutex data_mutex;
 
         std::atomic<bool> is_active{false};
-        Raspicam::Quality quality;
 
         q::Clock::time_point start;
     };
@@ -170,6 +172,35 @@ Raspicam::~Raspicam()
 #endif
 }
 
+auto Raspicam::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+
+auto Raspicam::init(rapidjson::Value const& json) -> bool
+{
+    sz::Raspicam sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize Raspicam data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.fps = sz.fps;
+    params.recording.bitrate = sz.recording.bitrate;
+    params.recording.resolution = sz.recording.resolution;
+    params.high.bitrate = sz.high.bitrate;
+    params.high.resolution = sz.high.resolution;
+    params.medium.bitrate = sz.medium.bitrate;
+    params.medium.resolution = sz.medium.resolution;
+    params.low.bitrate = sz.low.bitrate;
+    params.low.resolution = sz.low.resolution;
+    return init(params);
+}
 auto Raspicam::init(Init_Params const& params) -> bool
 {
 #if defined RASPBERRY_PI
@@ -179,11 +210,8 @@ auto Raspicam::init(Init_Params const& params) -> bool
         return true;
     }
 
-    m_fps = math::clamp<size_t>(params.fps, 10, 30);
-    m_impl->recording.quality = params.recording;
-    m_impl->high.quality = params.high;
-    m_impl->medium.quality = params.medium;
-    m_impl->low.quality = params.low;
+    m_params = params;
+    m_params.fps = math::clamp<size_t>(params.fps, 10, 30);
 
     if (!create_components())
     {

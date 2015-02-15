@@ -27,7 +27,6 @@ public:
     virtual auto get_stream() -> stream::IPressure& = 0;
 };
 
-DECLARE_CLASS_PTR(IBarometer);
 
 }
 }

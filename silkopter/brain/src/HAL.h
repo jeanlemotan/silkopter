@@ -17,17 +17,13 @@ class Registry : q::util::Noncopyable
 {
     friend class HAL;
 public:
-    template<class T> auto get_all() const -> std::vector<std::pair<std::string const&, T*>> const&;
+    template<class T> auto get_all() const -> std::vector<T*> const&;
     template<class T> auto find_by_name(std::string const& name) const -> T*;
 
-    template<class T> auto add(std::string const& name, T& node) -> bool;
+    template<class T> auto add(T& node) -> bool;
 
 private:
-    typedef std::vector<std::pair<std::string, Base*>> Nodes;
-    typedef std::unordered_map<size_t, Nodes> Nodes_Map;
-
-    template<class T> auto get_nodes() const -> Nodes&;
-    mutable Nodes_Map m_nodes_map;
+    std::vector<Base*> m_nodes;
 };
 
 
@@ -74,40 +70,28 @@ private:
 
 template<class Base>
 template<class T>
-auto Registry<Base>::get_all() const -> std::vector<std::pair<std::string const&, T*>> const&
+auto Registry<Base>::get_all() const -> std::vector<T*> const&
 {
-    return get_nodes<T>();
+    return m_nodes;
 }
 template<class Base>
 template<class T>
 auto Registry<Base>::find_by_name(std::string const& name) const -> T*
 {
-    auto& nodes = get_nodes<T>();
-    auto it = std::find_if(nodes.begin(), nodes.end(),
-                           [&](std::pair<std::string const&, Base*> const& s) { return s.first == name; });
-    return it != nodes.end() ? reinterpret_cast<T*>(it->second) : nullptr;
+    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](Base* s) { return s->get_name() == name; });
+    return it != m_nodes.end() ? dynamic_cast<T*>(*it) : nullptr;
 }
 template<class Base>
 template<class T>
-auto Registry<Base>::add(std::string const& name, T& node) -> bool
+auto Registry<Base>::add(T& node) -> bool
 {
-    if (find_by_name<T>(name))
+    if (find_by_name<Base>(node.get_name()))
     {
-        QLOGE("Duplicated name in node {}", name);
+        QLOGE("Duplicated name in node {}", node.get_name());
         return false;
     }
-    auto& nodes = get_nodes<T>();
-    nodes.push_back({name, static_cast<Base*>(&node)});
+    m_nodes.push_back(static_cast<Base*>(&node));
     return true;
 }
-template<class Base>
-template<class T>
-auto Registry<Base>::get_nodes() const -> Nodes&
-{
-    size_t hash = typeid(T).hash_code();
-    Nodes& nodes = m_nodes_map[hash];
-    return nodes;
-}
-
 
 }

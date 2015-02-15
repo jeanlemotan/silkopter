@@ -3,6 +3,9 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 #define USE_AK8963
 
 namespace silk
@@ -358,26 +361,69 @@ auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(m_compass.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
+auto MPU9250::init(rapidjson::Value const& json) -> bool
+{
+    sz::MPU9250 sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize MPU9250 data: {}", ss.str());
+        return false;
+    }
+    Init_Params params;
+    params.name = sz.name;
+    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
+    params.imu_rate = sz.imu_rate;
+    params.compass_rate = sz.compass_rate;
+    params.thermometer_rate = sz.thermometer_rate;
+    params.gyroscope_range = sz.gyroscope_range;
+    params.accelerometer_range = sz.accelerometer_range;
+    return init(params);
+}
+
+
 auto MPU9250::init(Init_Params const& params) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
     m_params = params;
 
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(params.bus);
-    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(params.bus);
-    if (!init() ||
-        !m_hal.get_sources().add<IAccelerometer>(q::util::format2<std::string>("{}-accelerometer", params.name), m_accelerometer) ||
-        !m_hal.get_sources().add<IGyroscope>(q::util::format2<std::string>("{}-gyroscope", params.name), m_gyroscope) ||
-        !m_hal.get_sources().add<ICompass>(q::util::format2<std::string>("{}-compass", params.name), m_compass) ||
-        !m_hal.get_sources().add<IThermometer>(q::util::format2<std::string>("{}-thermometer", params.name), m_thermometer) ||
 
-        !m_hal.get_streams().add<stream::IAcceleration>(q::util::format2<std::string>("{}-accelerometer/stream", params.name), m_accelerometer.get_stream()) ||
-        !m_hal.get_streams().add<stream::IAngular_Velocity>(q::util::format2<std::string>("{}-gyroscope/stream", params.name), m_gyroscope.get_stream()) ||
-        !m_hal.get_streams().add<stream::IMagnetic_Field>(q::util::format2<std::string>("{}-compass/stream", params.name), m_compass.get_stream()) ||
-        !m_hal.get_streams().add<stream::ITemperature>(q::util::format2<std::string>("{}-thermometer/stream", params.name), m_thermometer.get_stream()))
+    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
+    m_spi = dynamic_cast<bus::ISPI*>(params.bus);
+    if (!init())
     {
         return false;
+    }
+
+    if (!m_params.name.empty())
+    {
+        m_accelerometer.name = q::util::format2<std::string>("{}-accelerometer", params.name);
+        m_accelerometer.stream.name = q::util::format2<std::string>("{}/stream", m_accelerometer.name);
+
+        m_gyroscope.name = q::util::format2<std::string>("{}-gyroscope", params.name);
+        m_gyroscope.stream.name = q::util::format2<std::string>("{}/stream", m_gyroscope.name);
+
+        m_compass.name = q::util::format2<std::string>("{}-compass", params.name);
+        m_compass.stream.name = q::util::format2<std::string>("{}/stream", m_compass.name);
+
+        m_thermometer.name = q::util::format2<std::string>("{}-thermometer", params.name);
+        m_thermometer.stream.name = q::util::format2<std::string>("{}/stream", m_thermometer.name);
+
+        if (!m_hal.get_sources().add(m_accelerometer) ||
+            !m_hal.get_sources().add(m_gyroscope) ||
+            !m_hal.get_sources().add(m_compass) ||
+            !m_hal.get_sources().add(m_thermometer) ||
+
+            !m_hal.get_streams().add(m_accelerometer.get_stream()) ||
+            !m_hal.get_streams().add(m_gyroscope.get_stream()) ||
+            !m_hal.get_streams().add(m_compass.get_stream()) ||
+            !m_hal.get_streams().add(m_thermometer.get_stream()))
+        {
+            return false;
+        }
     }
 
     return true;
@@ -407,10 +453,10 @@ auto MPU9250::init() -> bool
     m_params.compass_rate = math::clamp<size_t>(m_params.compass_rate, 10, 100);
     m_params.thermometer_rate = math::clamp<size_t>(m_params.thermometer_rate, 10, 50);
 
-    m_accelerometer.rate = m_params.imu_rate;
-    m_gyroscope.rate = m_params.imu_rate;
-    m_compass.rate = m_params.compass_rate;
-    m_thermometer.rate = m_params.thermometer_rate;
+    m_accelerometer.stream.rate = m_params.imu_rate;
+    m_gyroscope.stream.rate = m_params.imu_rate;
+    m_compass.stream.rate = m_params.compass_rate;
+    m_thermometer.stream.rate = m_params.thermometer_rate;
 
 
     std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
@@ -686,10 +732,10 @@ void MPU9250::process()
     std::lock_guard<MPU9250> lg(*this);
 
     QLOG_TOPIC("mpu9250::process");
-    m_accelerometer.samples.clear();
-    m_gyroscope.samples.clear();
-    m_compass.samples.clear();
-    m_thermometer.samples.clear();
+    m_accelerometer.stream.samples.clear();
+    m_gyroscope.stream.samples.clear();
+    m_compass.stream.samples.clear();
+    m_thermometer.stream.samples.clear();
 
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -720,15 +766,15 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             if (mpu_read(MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
-                m_gyroscope.samples.resize(sample_count);
-                m_accelerometer.samples.resize(sample_count);
+                m_gyroscope.stream.samples.resize(sample_count);
+                m_accelerometer.stream.samples.resize(sample_count);
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     short x = (data[0] << 8) | data[1]; data += 2;
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
-                    auto& asample = m_accelerometer.samples[i];
+                    auto& asample = m_accelerometer.stream.samples[i];
                     asample.value.set(x * m_accelerometer.scale_inv, y * m_accelerometer.scale_inv, z * m_accelerometer.scale_inv);
                     asample.sample_idx = ++m_accelerometer.sample_idx;
                     asample.dt = m_imu_dt;
@@ -737,7 +783,7 @@ void MPU9250::process()
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
 
-                    auto& gsample = m_gyroscope.samples[i];
+                    auto& gsample = m_gyroscope.stream.samples[i];
                     gsample.value.set(x * m_gyroscope.scale_inv, y * m_gyroscope.scale_inv, z * m_gyroscope.scale_inv);
                     gsample.sample_idx = ++m_gyroscope.sample_idx;
                     gsample.dt = m_imu_dt;
@@ -804,12 +850,12 @@ void MPU9250::process_compass()
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
 
-    Compass::Sample sample;
+    Compass::Stream::Sample sample;
     sample.value = math::rotate(rot, c);
     sample.sample_idx = ++m_compass.sample_idx;
     sample.dt = dt;
 
-    m_compass.samples.push_back(sample);
+    m_compass.stream.samples.push_back(sample);
 //    LOG_INFO("c: {}", *m_samples.compass);
 #endif
 }
