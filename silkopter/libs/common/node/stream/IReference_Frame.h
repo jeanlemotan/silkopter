@@ -12,8 +12,15 @@ namespace stream
 class IReference_Frame : public IStream
 {
 public:
-    typedef math::vec3f       Value; //meters per second^2
-    typedef Sample<Value>     Sample;
+    struct Reference_Frame
+    {
+        math::vec3f front_vector_world;
+        math::vec3f right_vector_world;
+        math::vec3f up_vector_world;
+
+        math::quatf local_to_world;
+    };
+    typedef Sample<Reference_Frame>     Sample;
 
     virtual ~IReference_Frame() {}
 

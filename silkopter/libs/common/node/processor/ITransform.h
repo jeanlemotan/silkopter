@@ -13,8 +13,8 @@ template<class In, class Out>
 class ITransform : public IProcessor
 {
 public:
-    virtual auto get_input_stream() -> In& = 0;
-    virtual auto get_output_stream() -> Out& = 0;
+    virtual auto get_input_stream(size_t idx) -> In& = 0;
+    virtual auto get_output_stream(size_t idx) -> Out& = 0;
 };
 
 

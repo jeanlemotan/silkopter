@@ -34,7 +34,7 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool
     {
-
+        return false;
     }
     auto init(Init_Params const& params) -> bool
     {
@@ -58,13 +58,23 @@ public:
         return true;
     }
 
-    auto get_input_stream() -> Stream_t&
+    auto get_input_stream_count() const -> size_t
     {
+        return 1;
+    }
+    auto get_input_stream(size_t idx) -> Stream_t&
+    {
+        QASSERT(idx == 0);
         QASSERT(m_stream.source_stream);
         return *m_stream.source_stream;
     }
-    auto get_output_stream() -> Stream_t&
+    auto get_output_stream_count() const -> size_t
     {
+        return 1;
+    }
+    auto get_output_stream(size_t idx) -> Stream_t&
+    {
+        QASSERT(idx == 0);
         return m_stream;
     }
     auto get_name() const -> std::string const&
@@ -75,7 +85,7 @@ public:
     void process()
     {
         m_stream.samples.clear();
-        auto const& s = get_input_stream().get_samples();
+        auto const& s = get_input_stream(0).get_samples();
         m_stream.samples.resize(s.size());
 
         double* channels = m_channels;

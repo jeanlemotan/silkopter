@@ -69,13 +69,23 @@ auto ADC_Voltmeter::init() -> bool
     }
 }
 
-auto ADC_Voltmeter::get_input_stream() -> stream::IADC_Value&
+auto ADC_Voltmeter::get_input_stream_count() const -> size_t
 {
+    return 1;
+}
+auto ADC_Voltmeter::get_input_stream(size_t idx) -> stream::IADC_Value&
+{
+    QASSERT(idx == 0);
     QASSERT(m_stream.source_stream);
     return *m_stream.source_stream;
 }
-auto ADC_Voltmeter::get_output_stream() -> stream::IVoltage&
+auto ADC_Voltmeter::get_output_stream_count() const -> size_t
 {
+    return 1;
+}
+auto ADC_Voltmeter::get_output_stream(size_t idx) -> stream::IVoltage&
+{
+    QASSERT(idx == 0);
     return m_stream;
 }
 
@@ -83,7 +93,7 @@ auto ADC_Voltmeter::get_output_stream() -> stream::IVoltage&
 void ADC_Voltmeter::process()
 {
     m_stream.samples.clear();
-    auto const& s = get_input_stream().get_samples();
+    auto const& s = get_input_stream(0).get_samples();
     m_stream.samples.resize(s.size());
 
     std::transform(s.begin(), s.end(), m_stream.samples.begin(), [](stream::IADC_Value::Sample const& sample)

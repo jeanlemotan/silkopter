@@ -68,13 +68,23 @@ auto ADC_Ammeter::init() -> bool
     }
 }
 
-auto ADC_Ammeter::get_input_stream() -> stream::IADC_Value&
+auto ADC_Ammeter::get_input_stream_count() const -> size_t
 {
+    return 1;
+}
+auto ADC_Ammeter::get_input_stream(size_t idx) -> stream::IADC_Value&
+{
+    QASSERT(idx == 0);
     QASSERT(m_stream.source_stream);
     return *m_stream.source_stream;
 }
-auto ADC_Ammeter::get_output_stream() -> stream::ICurrent&
+auto ADC_Ammeter::get_output_stream_count() const -> size_t
 {
+    return 1;
+}
+auto ADC_Ammeter::get_output_stream(size_t idx) -> stream::ICurrent&
+{
+    QASSERT(idx == 0);
     return m_stream;
 }
 
@@ -82,7 +92,7 @@ auto ADC_Ammeter::get_output_stream() -> stream::ICurrent&
 void ADC_Ammeter::process()
 {
     m_stream.samples.clear();
-    auto const& s = get_input_stream().get_samples();
+    auto const& s = get_input_stream(0).get_samples();
     m_stream.samples.resize(s.size());
 
     std::transform(s.begin(), s.end(), m_stream.samples.begin(), [](stream::IADC_Value::Sample const& sample)

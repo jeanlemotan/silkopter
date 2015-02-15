@@ -27,6 +27,7 @@
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
 #include "processor/LPF.h"
+#include "processor/Resampler.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -195,7 +196,7 @@ auto HAL::init() -> bool
     } stream;
 
     {
-        const size_t elements = 1000;
+        const size_t elements = 30;
         const float noise = 0.3f;
         std::vector<std::pair<float, float>> freq =
         {{
@@ -220,21 +221,33 @@ auto HAL::init() -> bool
                 output += math::sin(a * f.first) * f.second;
             }
             stream.samples[i].value = output + generator();
+            stream.samples[i].dt = std::chrono::microseconds(1000000 / stream.get_rate());
         }
     }
 
     write_gnu_plot("in.dat", stream.samples);
 
     processor::LPF<Stream> lpf(*this);
-    processor::LPF<Stream>::Init_Params params;
-    params.source_stream = &stream;
-    params.cutoff_frequency = 30;
-    params.poles = 3;
-
-    lpf.init(params);
+    {
+        processor::LPF<Stream>::Init_Params params;
+        params.source_stream = &stream;
+        params.cutoff_frequency = 30;
+        params.poles = 3;
+        lpf.init(params);
+    }
     lpf.process();
+    write_gnu_plot("out.dat", lpf.get_output_stream(0).get_samples());
 
-    write_gnu_plot("out.dat", lpf.get_output_stream().get_samples());
+    processor::Resampler<Stream> resampler(*this);
+    {
+        processor::Resampler<Stream>::Init_Params params;
+        params.output_rate = 100000;
+        params.source_stream = &lpf.get_output_stream(0);
+        resampler.init(params);
+    }
+    resampler.process();
+
+    write_gnu_plot("rsout.dat", resampler.get_output_stream(0).get_samples());
 
 
     {

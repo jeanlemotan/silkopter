@@ -28,8 +28,10 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
-    auto get_input_stream() -> stream::IADC_Value&;
-    auto get_output_stream() -> stream::IVoltage&;
+    auto get_input_stream_count() const -> size_t;
+    auto get_input_stream(size_t idx) -> stream::IADC_Value&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IVoltage&;
     auto get_name() const -> std::string const&;
 
     void process();

@@ -1,6 +1,10 @@
 #pragma once
 
-#include "IProcessor.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/IReference_Frame.h"
 
 namespace silk
 {
@@ -12,29 +16,11 @@ namespace processor
 class IAHRS : public IProcessor
 {
 public:
-    struct Reference_Frame
-    {
-        struct
-        {        
-            math::vec3f angular_velocity;
-            math::vec3f gravity_acceleration;
-            math::vec3f linear_acceleration;
-        } local;
-        struct
-        {        
-            math::vec3f front_vector;
-            math::vec3f right_vector;
-            math::vec3f up_vector;
-        } world;
+    virtual auto get_input_angular_velocity_stream(size_t idx) -> stream::IAngular_Velocity& = 0;
+    virtual auto get_input_acceleration_stream(size_t idx) -> stream::IAcceleration& = 0;
+    virtual auto get_input_magnetic_field_stream(size_t idx) -> stream::IMagnetic_Field& = 0;
 
-        math::quatf local_to_world;
-        math::quatf world_to_local;
-    };
-
-    typedef node::Sample<Reference_Frame>         Sample;
-    typedef node::TP_Sample<Reference_Frame>      TP_Sample;
-
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+    virtual auto get_output_stream(size_t idx) -> stream::IReference_Frame& = 0;
 
     //constants
     static constexpr math::vec3f k_local_front_vector = math::vec3f(0, 1, 0);

@@ -34,6 +34,10 @@ public:
         value.y = channels[1];
         value.z = channels[2];
     }
+    static void lerp(Value& out, Value& a, Value& b, float mu)
+    {
+        out = math::lerp(a, b, mu);
+    }
 };
 
 
