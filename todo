@@ -21,14 +21,14 @@
 * vibration tests and filtering
 * reorganized HW code into HAL interfaces
 * config files
+* stability pid
+* latency tests
+* rewrite the TCP code to use reliable UDP with priorities
+* GPS code
+* odroid-w support
+	* ADC for current/voltage sensors
 
-- stability pid
 - statibility tests
-- latency tests
-- rewrite the TCP code to use reliable UDP with priorities
-- GPS code
-- odroid-w support
-	- ADC for current/voltage sensors
 
 - basic flight modes
 	- idle
