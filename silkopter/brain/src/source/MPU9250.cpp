@@ -598,9 +598,10 @@ auto MPU9250::init() -> bool
 
 auto MPU9250::setup_compass() -> bool
 {
+    QLOG_TOPIC("mpu9250::setup_compass");
+
     std::lock_guard<MPU9250> lg(*this);
 
-    QLOG_TOPIC("mpu9250::setup_compass");
 #ifdef USE_AK8963
     set_bypass(1);
 
@@ -687,9 +688,10 @@ auto MPU9250::setup_compass() -> bool
 
 void MPU9250::set_bypass(bool on)
 {
+    QLOG_TOPIC("mpu9250::set_bypass");
+
     std::lock_guard<MPU9250> lg(*this);
 
-    QLOG_TOPIC("mpu9250::set_bypass");
     if (on)
     {
         uint8_t tmp;
@@ -715,9 +717,10 @@ void MPU9250::set_bypass(bool on)
 
 void MPU9250::reset_fifo()
 {
+    QLOG_TOPIC("mpu9250::reset_fifo");
+
     std::lock_guard<MPU9250> lg(*this);
 
-    QLOG_TOPIC("mpu9250::reset_fifo");
     mpu_write_u8(MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     mpu_write_u8(MPU_REG_FIFO_EN, 0);
@@ -729,9 +732,10 @@ void MPU9250::reset_fifo()
 
 void MPU9250::process()
 {
+    QLOG_TOPIC("mpu9250::process");
+
     std::lock_guard<MPU9250> lg(*this);
 
-    QLOG_TOPIC("mpu9250::process");
     m_accelerometer.stream.samples.clear();
     m_gyroscope.stream.samples.clear();
     m_compass.stream.samples.clear();
@@ -804,9 +808,10 @@ void MPU9250::process()
 
 void MPU9250::process_compass()
 {
+    QLOG_TOPIC("mpu9250::process_compass");
+
     std::lock_guard<MPU9250> lg(*this);
 
-    QLOG_TOPIC("mpu9250::process_compass");
 #ifdef USE_AK8963
     auto now = q::Clock::now();
     if (now - m_compass.last_time_point < m_compass.dt)

@@ -3959,12 +3959,13 @@ w.Key("\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer
 
 namespace sz { struct PIGPIO_PWM {
  int32_t gpio;
+std::string stream;
 uint32_t frequency;
 uint32_t range;
 uint32_t min;
 uint32_t max;
 
-explicit PIGPIO_PWM():gpio(), frequency(), range(), min(), max() {  }
+explicit PIGPIO_PWM():gpio(), stream(), frequency(), range(), min(), max() {  }
 
 
  
@@ -3981,10 +3982,12 @@ private:
     int depth;
 
     SAXEventHandler< int32_t > handler_0;
-SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;
 SAXEventHandler< uint32_t > handler_3;
-SAXEventHandler< uint32_t > handler_4;bool has_gpio;
+SAXEventHandler< uint32_t > handler_4;
+SAXEventHandler< uint32_t > handler_5;bool has_gpio;
+bool has_stream;
 bool has_frequency;
 bool has_range;
 bool has_min;
@@ -4005,12 +4008,14 @@ bool has_max;
             case 0:
     return "gpio";
 case 1:
-    return "frequency";
+    return "stream";
 case 2:
-    return "range";
+    return "frequency";
 case 3:
-    return "min";
+    return "range";
 case 4:
+    return "min";
+case 5:
     return "max";
         default:
             break;
@@ -4039,6 +4044,7 @@ case 4:
     void reset_flags()
     {
         has_gpio = false;
+has_stream = false;
 has_frequency = false;
 has_range = false;
 has_min = false;
@@ -4050,10 +4056,11 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->gpio)
-, handler_1(&obj->frequency)
-, handler_2(&obj->range)
-, handler_3(&obj->min)
-, handler_4(&obj->max)
+, handler_1(&obj->stream)
+, handler_2(&obj->frequency)
+, handler_3(&obj->range)
+, handler_4(&obj->min)
+, handler_5(&obj->max)
     {
         reset_flags();
     }
@@ -4079,6 +4086,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -4108,6 +4118,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Bool(b));
 
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
         default:
             break;
         }
@@ -4135,6 +4148,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -4164,6 +4180,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
         default:
             break;
         }
@@ -4191,6 +4210,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -4220,6 +4242,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint64(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
         default:
             break;
         }
@@ -4247,6 +4272,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -4276,6 +4304,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.String(str, length, copy));
 
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
         default:
             break;
         }
@@ -4292,14 +4323,16 @@ case 4:
             }
             else if (utility::string_equal(str, length, "\x67\x70\x69\x6f", 4))
 						 { state=0; has_gpio = true; }
+else if (utility::string_equal(str, length, "\x73\x74\x72\x65\x61\x6d", 6))
+						 { state=1; has_stream = true; }
 else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9))
-						 { state=1; has_frequency = true; }
+						 { state=2; has_frequency = true; }
 else if (utility::string_equal(str, length, "\x72\x61\x6e\x67\x65", 5))
-						 { state=2; has_range = true; }
+						 { state=3; has_range = true; }
 else if (utility::string_equal(str, length, "\x6d\x69\x6e", 3))
-						 { state=3; has_min = true; }
+						 { state=4; has_min = true; }
 else if (utility::string_equal(str, length, "\x6d\x61\x78", 3))
-						 { state=4; has_max = true; }
+						 { state=5; has_max = true; }
             else {
                 state = -1;
                 return true;
@@ -4322,6 +4355,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -4352,6 +4388,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.StartArray());
 
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
         default:
             break;
         }
@@ -4380,6 +4419,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndArray(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
         default:
             break;
         }
@@ -4407,6 +4449,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -4437,11 +4482,15 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndObject(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_gpio) set_missing_required("gpio");
+if (!has_stream) set_missing_required("stream");
 if (!has_frequency) set_missing_required("frequency");
 if (!has_range) set_missing_required("range");
 if (!has_min) set_missing_required("min");
@@ -4474,6 +4523,8 @@ case 3:
      handler_3.ReapError(errs); break;
 case 4:
      handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -4493,6 +4544,7 @@ handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
 
     }
 };
@@ -4505,12 +4557,13 @@ struct Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1
         w.StartObject();
 
         w.Key("\x67\x70\x69\x6f", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, int32_t >()(w, value.gpio);
+w.Key("\x73\x74\x72\x65\x61\x6d", 6, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, std::string >()(w, value.stream);
 w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.frequency);
 w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.range);
 w.Key("\x6d\x69\x6e", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.min);
 w.Key("\x6d\x61\x78", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.max);
 
-        w.EndObject(5);
+        w.EndObject(6);
     }
 
 };

@@ -19,6 +19,7 @@ public:
 
     struct PWM_Params
     {
+        stream::IPWM_Value* stream = nullptr;
         int32_t gpio = -1;
         uint32_t frequency = 50;
         uint32_t range = 1000000 / frequency;
@@ -50,7 +51,7 @@ private:
 
     struct PWM : public IPWM
     {
-        void set_value(float value) { pigpio->set_pwm_value(idx, value); }
+        auto get_stream() -> stream::IPWM_Value& { return *pigpio->m_params.pwm_channels[idx].stream; }
         auto get_name() const -> std::string const& { return name; }
 
         PIGPIO* pigpio = nullptr;

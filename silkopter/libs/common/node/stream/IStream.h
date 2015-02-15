@@ -13,9 +13,7 @@ public:
     virtual ~IStream() {}
 
     virtual auto get_rate() const -> uint32_t = 0;
-
     virtual auto get_name() const -> std::string const& = 0;
-
 };
 
 

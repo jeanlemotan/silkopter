@@ -2,6 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/source/ICamera.h"
+#include "common/node/stream/IVideo.h"
 
 namespace silk
 {
@@ -52,6 +53,8 @@ public:
     //----------------------------------------------------------------------
     struct Impl;
     void process();
+
+    auto get_stream() -> stream::IVideo& {}
 
 private:
     HAL& m_hal;

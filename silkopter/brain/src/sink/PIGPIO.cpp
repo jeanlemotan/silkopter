@@ -38,6 +38,8 @@ auto PIGPIO::get_pwm_channel(size_t idx) -> sink::IPWM*
 
 auto PIGPIO::init(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("pigpio::init");
+
     sz::PIGPIO sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -54,6 +56,7 @@ auto PIGPIO::init(rapidjson::Value const& json) -> bool
     for (size_t i = 0; i < sz.pwm_channels.size(); i++)
     {
         auto& ch = params.pwm_channels[i];
+        ch.stream = m_hal.get_streams().find_by_name<stream::IPWM_Value>(sz.pwm_channels[i].stream);
         ch.gpio = sz.pwm_channels[i].gpio;
         ch.frequency = sz.pwm_channels[i].frequency;
         ch.range = sz.pwm_channels[i].range;
@@ -64,7 +67,7 @@ auto PIGPIO::init(rapidjson::Value const& json) -> bool
 }
 auto PIGPIO::init(Init_Params const& params) -> bool
 {
-    QLOG_TOPIC("pigpio_pwm::init");
+    QLOG_TOPIC("pigpio::init");
 
     m_params = params;
 
@@ -92,7 +95,7 @@ auto PIGPIO::init(Init_Params const& params) -> bool
 
 auto PIGPIO::init() -> bool
 {
-    QLOG_TOPIC("pigpio_pwm::init");
+    QLOG_TOPIC("pigpio::init");
 
 #if defined (RASPBERRY_PI)
     if (m_params.pwm_channels.size() > MAX_PWM_CHANNELS)
@@ -120,20 +123,30 @@ auto PIGPIO::init() -> bool
     //first validate
     for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
     {
-        auto& channel = m_params.pwm_channels[i];
-        if (channel.min >= channel.max)
+        auto& ch = m_params.pwm_channels[i];
+        if (ch.min >= ch.max)
         {
-            QLOGE("PIGPIO PWM channel {}: min ({}) is bigger than max ({})", i, channel.min, channel.max);
+            QLOGE("PIGPIO PWM channel {}: min ({}) is bigger than max ({})", i, ch.min, ch.max);
             return false;
         }
-        if (channel.max > channel.range)
+        if (ch.max > ch.range)
         {
-            QLOGE("PIGPIO PWM channel {}: max ({}) is bigger than the range ({})", i, channel.max, channel.range);
+            QLOGE("PIGPIO PWM channel {}: max ({}) is bigger than the range ({})", i, ch.max, ch.range);
             return false;
         }
-        if (std::find(frequencies.begin(), frequencies.end(), channel.frequency) == frequencies.end())
+        if (std::find(frequencies.begin(), frequencies.end(), ch.frequency) == frequencies.end())
         {
-            QLOGE("Invalid frequency {}. Supported are: {}", channel.frequency, frequencies);
+            QLOGE("Invalid frequency {}. Supported are: {}", ch.frequency, frequencies);
+            return false;
+        }
+        if (!ch.stream)
+        {
+            QLOGE("PIGPIO PWM channel {} doesn't have a stream", i);
+            return false;
+        }
+        if (ch.stream->get_rate() > ch.frequency)
+        {
+            QLOGE("PIGPIO stream {} is too fast for the PWM channel {}: {}Hz > {}Hz", ch->stream->get_name(), i, ch->stream->get_rate(), ch.frequency);
             return false;
         }
     }
@@ -175,22 +188,22 @@ auto PIGPIO::init() -> bool
     //now configure the pin for PWM or servo
     for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
     {
-        auto& channel = m_params.pwm_channels[i];
-        int gpio = channel.gpio;
+        auto& ch = m_params.pwm_channels[i];
+        int gpio = ch.gpio;
         if (gpio >= 0)
         {
-            auto f = gpioSetPWMfrequency(gpio, channel.frequency);
+            auto f = gpioSetPWMfrequency(gpio, ch.frequency);
             if (f < 0)
             {
-                QLOGE("GPIO {}: Cannot set pwm frequency {}", gpio, channel.frequency);
+                QLOGE("GPIO {}: Cannot set pwm frequency {}", gpio, ch.frequency);
                 return false;
             }
-            if (gpioSetPWMrange(gpio, channel.range) < 0)
+            if (gpioSetPWMrange(gpio, ch.range) < 0)
             {
-                QLOGE("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, channel.range);
+                QLOGE("GPIO {}: Cannot set pwm range {} on gpio {}", gpio, ch.range);
                 return false;
             }
-            QLOGI("GPIO {}: PWM frequency {} range {}", gpio, channel.frequency, channel.range);
+            QLOGI("GPIO {}: PWM frequency {} range {}", gpio, ch.frequency, ch.range);
         }
     }
 
@@ -203,13 +216,15 @@ auto PIGPIO::init() -> bool
 
 void PIGPIO::set_pwm_value(size_t idx, float value)
 {
+    QLOG_TOPIC("pigpio::set_pwm_value");
+
 #if defined RASPBERRY_PI
-    auto& channel = m_params.pwm_channels[idx];
-    if (channel.gpio >= 0)
+    auto& ch = m_params.pwm_channels[idx];
+    if (ch.gpio >= 0)
     {
         value = math::clamp(value, 0.f, 1.f);
-        int pulse = value * (channel.max - channel.min);
-        gpioPWM(channel.gpio, channel.min + pulse);
+        int pulse = value * (ch.max - ch.min);
+        gpioPWM(ch.gpio, ch.min + pulse);
     }
 #else
     QASSERT(0);
@@ -218,6 +233,27 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
 
 void PIGPIO::process()
 {
+    QLOG_TOPIC("pigpio::process");
+
+    for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
+    {
+        auto& ch = m_params.pwm_channels[i];
+        int gpio = ch.gpio;
+        if (gpio >= 0)
+        {
+            QASSERT(ch.stream);
+            auto const& samples = ch.stream->get_samples();
+            if (!samples.empty())
+            {
+                if (samples.size() > 2)
+                {
+                    QLOGW("PWM channel {} is too slow. {} samples are queued", i, samples.size());
+                }
+
+                set_pwm_value(i, samples.back().value);
+            }
+        }
+    }
 }
 
 }

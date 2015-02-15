@@ -224,5 +224,6 @@ HEADERS += \
     ../../../libs/DSPFilters/include/DspFilters/Types.h \
     ../../../libs/DSPFilters/include/DspFilters/Utilities.h \
     ../../../libs/common/node/processor/IFilter.h \
-    ../../src/processor/LPF.h
+    ../../src/processor/LPF.h \
+    ../../../libs/common/node/stream/IPWM_Value.h
 

@@ -9,13 +9,13 @@ namespace node
 namespace stream
 {
 
-class ITemperature : public IStream
+class IPWM_Value : public IStream
 {
 public:
-    typedef float             Value; //degrees celsius
+    typedef float             Value; //0 .. 1 representing duty cycle
     typedef Sample<Value>     Sample;
 
-    virtual ~ITemperature() {}
+    virtual ~IPWM_Value() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
