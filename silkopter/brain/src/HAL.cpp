@@ -425,6 +425,56 @@ auto HAL::init() -> bool
                 }
                 m_hw->nodes.push_back(std::move(wrapper));
             }
+            else if (type == "Acceleration_Resampler")
+            {
+                typedef processor::Resampler<stream::IAcceleration> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
+            else if (type == "Angular_Velocity_Resampler")
+            {
+                typedef processor::Resampler<stream::IAngular_Velocity> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
+            else if (type == "Magnetic_Field_Resampler")
+            {
+                typedef processor::Resampler<stream::IMagnetic_Field> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
+            else if (type == "Voltage_Resampler")
+            {
+                typedef processor::Resampler<stream::IVoltage> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
+            else if (type == "Current_Resampler")
+            {
+                typedef processor::Resampler<stream::ICurrent> Processor;
+                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
         }
     }
 

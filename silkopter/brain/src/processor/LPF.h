@@ -4,6 +4,9 @@
 #include "common/node/processor/IFilter.h"
 #include "DspFilters/Butterworth.h"
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 namespace silk
 {
 namespace node
@@ -34,12 +37,26 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool
     {
-        return false;
+        sz::LPF sz;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(sz, json, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize LPF data: {}", ss.str());
+            return false;
+        }
+        Init_Params params;
+        params.name = sz.name;
+        params.source_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.source_stream);
+        params.poles = sz.poles;
+        params.cutoff_frequency = sz.cutoff_frequency;
+
+        return init(params);
     }
     auto init(Init_Params const& params) -> bool
     {
         m_params = params;
-        m_stream.source_stream = m_params.source_stream;
 
         if (!init())
         {
@@ -106,14 +123,14 @@ public:
 private:
     auto init() -> bool
     {
-        m_params.poles = math::clamp<uint32_t>(m_params.poles, 1, MAX_POLES);
-
+        m_stream.source_stream = m_params.source_stream;
         if (!m_stream.source_stream)
         {
             QLOGE("No source specified");
             return false;
         }
 
+        m_params.poles = math::clamp<uint32_t>(m_params.poles, 1, MAX_POLES);
         m_dsp.setup(m_params.poles, m_stream.source_stream->get_rate(), m_params.cutoff_frequency);
 
         return true;

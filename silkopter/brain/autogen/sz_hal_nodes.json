@@ -143,5 +143,16 @@
         ["uint32_t", "poles", {"required": true}],
         ["uint32_t", "cutoff_frequency", {"required": true}]
     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Resampler",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "source_stream", {"required": true}],
+        ["uint32_t", "output_rate", {"required": true}]
+    ]
 }
 ]

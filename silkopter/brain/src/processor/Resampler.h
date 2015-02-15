@@ -5,6 +5,9 @@
 #include "DspFilters/Butterworth.h"
 #include <deque>
 
+#include "sz_math.hpp"
+#include "sz_hal_nodes.hpp"
+
 namespace silk
 {
 namespace node
@@ -33,7 +36,21 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool
     {
-        return false;
+        sz::Resampler sz;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(sz, json, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize Resampler data: {}", ss.str());
+            return false;
+        }
+        Init_Params params;
+        params.name = sz.name;
+        params.source_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.source_stream);
+        params.output_rate = sz.output_rate;
+
+        return init(params);
     }
     auto init(Init_Params const& params) -> bool
     {
@@ -129,12 +146,18 @@ public:
 
         m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_source_dt));
 
+        double* channels = m_channels;
         while (m_input_dt >= m_dt)
         {
             typename Stream_t::Sample s;
             s.value = m_input_samples.front().value;
             s.sample_idx = ++m_stream.sample_idx;
             s.dt = m_dt;
+
+            Stream_t::get_channels(channels, s.value);
+            m_dsp.process(1, &channels);
+            Stream_t::get_value(s.value, channels);
+
             m_stream.samples.push_back(s);
 
             m_input_dt -= m_dt;
@@ -146,20 +169,17 @@ public:
                 m_input_samples.pop_front();
             }
         }
-
-        double* channels = m_channels;
-        for (auto& sample: m_stream.samples)
-        {
-           Stream_t::get_channels(channels, sample.value);
-           m_dsp.process(1, &channels);
-           Stream_t::get_value(sample.value, channels);
-        }
     }
 
 private:
     auto init() -> bool
     {
         m_stream.source_stream = m_params.source_stream;
+        if (!m_stream.source_stream)
+        {
+            QLOGE("No source specified");
+            return false;
+        }
 
         m_params.output_rate = math::max<uint32_t>(m_params.output_rate, 1);
         m_stream.rate = m_params.output_rate;
@@ -167,13 +187,6 @@ private:
         m_source_dt = std::chrono::microseconds(1000000 / m_stream.source_stream->get_rate());
 
         m_dsp.setup(1, m_params.output_rate, m_stream.source_stream->get_rate() / 2);
-
-        if (!m_stream.source_stream)
-        {
-            QLOGE("No source specified");
-            return false;
-        }
-
 
         return true;
     }
