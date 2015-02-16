@@ -5,7 +5,7 @@
 #include "common/node/bus/ISPI.h"
 #include "common/node/source/IAccelerometer.h"
 #include "common/node/source/IGyroscope.h"
-#include "common/node/source/ICompass.h"
+#include "common/node/source/IMagnetometer.h"
 #include "common/node/source/IThermometer.h"
 
 namespace silk
@@ -26,7 +26,7 @@ public:
         std::string name;
         bus::IBus* bus = nullptr;
         uint32_t imu_rate = 1000;
-        uint32_t compass_rate = 100;
+        uint32_t magnetometer_rate = 100;
         uint32_t thermometer_rate = 10;
         uint32_t gyroscope_range = 500; //degrees per second
         uint32_t accelerometer_range = 4; //gees
@@ -39,7 +39,7 @@ public:
 
     auto get_accelerometer()    -> source::IAccelerometer&;
     auto get_gyroscope()        -> source::IGyroscope&;
-    auto get_compass()          -> source::ICompass&;
+    auto get_magnetometer()          -> source::IMagnetometer&;
     auto get_thermometer()      -> source::IThermometer&;
 
     void lock();
@@ -118,7 +118,7 @@ private:
         float scale_inv = 1.f;
     } m_gyroscope;
 
-    struct Compass : public source::ICompass
+    struct Compass : public source::IMagnetometer
     {
         struct Stream : public stream::IMagnetic_Field
         {
@@ -140,7 +140,7 @@ private:
         uint32_t sample_idx = 0;
         float magnetic_adj[3];
         std::string name;
-    } m_compass;
+    } m_magnetometer;
 
     struct Thermometer : public source::IThermometer
     {

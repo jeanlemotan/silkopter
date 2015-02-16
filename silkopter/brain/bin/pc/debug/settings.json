@@ -33,14 +33,14 @@
                 "name": "imu",
                 "bus": "i2c0",
                 "imu_rate": 1000,
-                "compass_rate": 100,
+                "magnetometer_rate": 100,
                 "thermometer_rate": 10,
                 "accelerometer_range": 4,
                 "gyroscope_range": 500
             },
             "Magnetic_Field_Resampler": {
                 "name": "imu-magnetic_field_resampler",
-                "source_stream": "imu-compass/stream",
+                "source_stream": "imu-magnetometer/stream",
                 "output_rate": 1000
             },
             "Acceleration_LPF": {

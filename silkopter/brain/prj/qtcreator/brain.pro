@@ -161,7 +161,6 @@ HEADERS += \
     ../../../libs/common/node/source/IAmmeter.h \
     ../../../libs/common/node/source/IBarometer.h \
     ../../../libs/common/node/source/ICamera.h \
-    ../../../libs/common/node/source/ICompass.h \
     ../../../libs/common/node/source/IGPS.h \
     ../../../libs/common/node/source/IGyroscope.h \
     ../../../libs/common/node/source/IInertial.h \
@@ -226,5 +225,10 @@ HEADERS += \
     ../../../libs/common/node/processor/IFilter.h \
     ../../src/processor/LPF.h \
     ../../../libs/common/node/stream/IPWM_Value.h \
-    ../../src/processor/Resampler.h
+    ../../src/processor/Resampler.h \
+    ../../../libs/common/node/source/IMagnetometer.h \
+    ../../../libs/common/node/processor/IBattery.h \
+    ../../../libs/common/node/processor/ICompass.h \
+    ../../../libs/common/node/stream/ICardinal_Points.h \
+    ../../../libs/common/node/stream/IBattery_State.h
 

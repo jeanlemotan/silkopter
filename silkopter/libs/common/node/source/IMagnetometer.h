@@ -10,10 +10,10 @@ namespace node
 namespace source
 {
 
-class ICompass : public ISource
+class IMagnetometer : public ISource
 {
 public:
-    virtual ~ICompass() {}
+    virtual ~IMagnetometer() {}
 
     struct Config
     {

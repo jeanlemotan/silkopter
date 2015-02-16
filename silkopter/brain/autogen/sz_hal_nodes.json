@@ -8,7 +8,7 @@
         ["std::string", "name", {"required": true}],
         ["std::string", "bus", {"required": true}],
         ["uint32_t", "imu_rate", {"required": false}],
-        ["uint32_t", "compass_rate", {"required": false}],
+        ["uint32_t", "magnetometer_rate", {"required": false}],
         ["uint32_t", "thermometer_rate", {"required": false}],
         ["uint32_t", "accelerometer_range", {"required": false}],
         ["uint32_t", "gyroscope_range", {"required": false}]

@@ -31,12 +31,12 @@ namespace sz { struct MPU9250 {
  std::string name;
 std::string bus;
 uint32_t imu_rate;
-uint32_t compass_rate;
+uint32_t magnetometer_rate;
 uint32_t thermometer_rate;
 uint32_t accelerometer_range;
 uint32_t gyroscope_range;
 
-explicit MPU9250():name(), bus(), imu_rate(), compass_rate(), thermometer_rate(), accelerometer_range(), gyroscope_range() {  }
+explicit MPU9250():name(), bus(), imu_rate(), magnetometer_rate(), thermometer_rate(), accelerometer_range(), gyroscope_range() {  }
 
 
  
@@ -129,7 +129,7 @@ public:
         , handler_0(&obj->name)
 , handler_1(&obj->bus)
 , handler_2(&obj->imu_rate)
-, handler_3(&obj->compass_rate)
+, handler_3(&obj->magnetometer_rate)
 , handler_4(&obj->thermometer_rate)
 , handler_5(&obj->accelerometer_range)
 , handler_6(&obj->gyroscope_range)
@@ -671,7 +671,7 @@ struct Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.bus);
 w.Key("\x69\x6d\x75\x5f\x72\x61\x74\x65", 8, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.imu_rate);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.compass_rate);
+w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.magnetometer_rate);
 w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 16, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.thermometer_rate);
 w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.accelerometer_range);
 w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.gyroscope_range);
