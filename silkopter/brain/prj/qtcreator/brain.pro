@@ -230,5 +230,6 @@ HEADERS += \
     ../../../libs/common/node/processor/IBattery.h \
     ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/stream/ICardinal_Points.h \
-    ../../../libs/common/node/stream/IBattery_State.h
+    ../../../libs/common/node/stream/IBattery_State.h \
+    ../../src/processor/Lipo_Battery.h
 

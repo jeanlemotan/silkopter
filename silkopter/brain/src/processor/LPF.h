@@ -25,7 +25,7 @@ public:
     struct Init_Params
     {
         std::string name;
-        Stream_t* source_stream = nullptr;
+        Stream_t* input_stream = nullptr;
         uint32_t poles = 1;
         uint32_t cutoff_frequency = 0;
     };
@@ -48,7 +48,7 @@ public:
         }
         Init_Params params;
         params.name = sz.name;
-        params.source_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.source_stream);
+        params.input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.input_stream);
         params.poles = sz.poles;
         params.cutoff_frequency = sz.cutoff_frequency;
 
@@ -82,8 +82,8 @@ public:
     auto get_input_stream(size_t idx) -> Stream_t&
     {
         QASSERT(idx == 0);
-        QASSERT(m_stream.source_stream);
-        return *m_stream.source_stream;
+        QASSERT(m_params.input_stream);
+        return *m_params.input_stream;
     }
     auto get_output_stream_count() const -> size_t
     {
@@ -123,15 +123,21 @@ public:
 private:
     auto init() -> bool
     {
-        m_stream.source_stream = m_params.source_stream;
-        if (!m_stream.source_stream)
+        m_stream.params = &m_params;
+        if (!m_params.input_stream)
         {
-            QLOGE("No source specified");
+            QLOGE("No input specified");
+            return false;
+        }
+        if (m_params.cutoff_frequency > m_params.input_stream->get_rate() / 2)
+        {
+            QLOGE("Cutoff frequency {}Hz is bigger than the niquist frequency of {}Hz",
+                  m_params.cutoff_frequency, m_params.input_stream->get_rate() / 2);
             return false;
         }
 
         m_params.poles = math::clamp<uint32_t>(m_params.poles, 1, MAX_POLES);
-        m_dsp.setup(m_params.poles, m_stream.source_stream->get_rate(), m_params.cutoff_frequency);
+        m_dsp.setup(m_params.poles, get_input_stream(0).get_rate(), m_params.cutoff_frequency);
 
         return true;
     }
@@ -146,10 +152,10 @@ private:
     struct Stream : public Stream_t
     {
         auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return source_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return params->input_stream->get_rate(); }
         auto get_name() const -> std::string const& { return name; }
 
-        Stream_t* source_stream = nullptr;
+        Init_Params* params = nullptr;
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;

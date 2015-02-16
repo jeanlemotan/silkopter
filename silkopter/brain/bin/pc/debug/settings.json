@@ -40,24 +40,24 @@
             },
             "Magnetic_Field_Resampler": {
                 "name": "imu-magnetic_field_resampler",
-                "source_stream": "imu-magnetometer/stream",
+                "input_stream": "imu-magnetometer/stream",
                 "output_rate": 1000
             },
             "Acceleration_LPF": {
                 "name": "imu-acceleration_lpf",
-                "source_stream": "imu-accelerometer/stream",
+                "input_stream": "imu-accelerometer/stream",
                 "poles": 2,
                 "cutoff_frequency": 30
             },
             "Angular_Velocity_LPF": {
                 "name": "imu-angular_velocity_lpf",
-                "source_stream": "imu-gyroscope/stream",
+                "input_stream": "imu-gyroscope/stream",
                 "poles": 2,
                 "cutoff_frequency": 30
             },
             "Magnetic_Field_LPF": {
                 "name": "imu-magnetic_field_lpf",
-                "source_stream": "imu-magnetic_field_resampler/stream",
+                "input_stream": "imu-magnetic_field_resampler/stream",
                 "poles": 2,
                 "cutoff_frequency": 30
             },

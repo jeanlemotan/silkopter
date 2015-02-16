@@ -28,6 +28,7 @@
 #include "processor/ADC_Ammeter.h"
 #include "processor/LPF.h"
 #include "processor/Resampler.h"
+#include "processor/Lipo_Battery.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -192,17 +193,13 @@ auto HAL::init() -> bool
     } stream;
 
     {
-        const size_t elements = 300;
+        const size_t elements = 1000;
         const float noise = 0.3f;
         std::vector<std::pair<float, float>> freq =
         {{
              { 10.f, 1.f },
-             { 30.f, 1.f/3.f },
-             { 50.f, 1.f/5.f },
              { 70.f, 1.f/7.f },
-             { 90.f, 1.f/9.f },
-             { 110.f, 1.f/11.f },
-             { 130.f, 1.f/13.f }
+             { 130.f, 1.f/5.f }
          }};
         stream.samples.resize(elements);
         std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
@@ -226,7 +223,7 @@ auto HAL::init() -> bool
     processor::LPF<Stream> lpf(*this);
     {
         processor::LPF<Stream>::Init_Params params;
-        params.source_stream = &stream;
+        params.input_stream = &stream;
         params.cutoff_frequency = 30;
         params.poles = 3;
         lpf.init(params);
@@ -238,7 +235,7 @@ auto HAL::init() -> bool
     {
         processor::Resampler<Stream>::Init_Params params;
         params.output_rate = 100;
-        params.source_stream = &stream;
+        params.input_stream = &stream;
         resampler.init(params);
     }
     resampler.process();
@@ -475,6 +472,15 @@ auto HAL::init() -> bool
             {
                 typedef processor::Resampler<stream::ICurrent> Processor;
                 auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+                if (!wrapper->node->init(it->value))
+                {
+                    return false;
+                }
+                m_hw->nodes.push_back(std::move(wrapper));
+            }
+            else if (type == "Lipo_Battery")
+            {
+                auto wrapper = std::make_unique<Node_Wrapper<processor::Lipo_Battery>>(*this);
                 if (!wrapper->node->init(it->value))
                 {
                     return false;

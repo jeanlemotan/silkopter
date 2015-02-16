@@ -25,7 +25,7 @@ public:
     struct Init_Params
     {
         std::string name;
-        Stream_t* source_stream = nullptr;
+        Stream_t* input_stream = nullptr;
         uint32_t output_rate = 0;
     };
 
@@ -47,7 +47,7 @@ public:
         }
         Init_Params params;
         params.name = sz.name;
-        params.source_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.source_stream);
+        params.input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.input_stream);
         params.output_rate = sz.output_rate;
 
         return init(params);
@@ -80,8 +80,8 @@ public:
     auto get_input_stream(size_t idx) -> Stream_t&
     {
         QASSERT(idx == 0);
-        QASSERT(m_stream.source_stream);
-        return *m_stream.source_stream;
+        QASSERT(m_params.input_stream);
+        return *m_params.input_stream;
     }
     auto get_output_stream_count() const -> size_t
     {
@@ -104,42 +104,39 @@ public:
         //first accumulate input samples
         auto const& is = get_input_stream(0).get_samples();
 
-        if (m_stream.rate == m_params.source_stream->get_rate())
+        if (m_params.output_rate == m_params.input_stream->get_rate())
         {
             m_stream.samples.reserve(is.size());
             std::copy(is.begin(), is.end(), std::back_inserter(m_stream.samples));
         }
-        else
+        else if (m_params.output_rate < m_params.input_stream->get_rate())
         {
-            if (m_stream.rate < m_params.source_stream->get_rate())
+            auto** channels = m_channels;
+            for (auto const& s: is)
             {
-                auto** channels = m_channels;
-                for (auto const& s: is)
-                {
-                    m_input_dt += s.dt;
-                    m_input_samples.push_back(s);
-                    Stream_t::setup_channels(channels, m_input_samples.back().value);
-                    m_dsp.process(1, channels);
-                }
-                downsample();
+                m_input_accumulated_dt += s.dt;
+                m_input_samples.push_back(s);
+                Stream_t::setup_channels(channels, m_input_samples.back().value);
+                m_dsp.process(1, channels);
             }
-            else if (m_stream.rate > m_params.source_stream->get_rate())
+            downsample();
+        }
+        else if (m_params.output_rate > m_params.input_stream->get_rate())
+        {
+            for (auto const& s: is)
             {
-                for (auto const& s: is)
-                {
-                    m_input_dt += s.dt;
-                    m_input_samples.push_back(s);
-                }
-                upsample();
+                m_input_accumulated_dt += s.dt;
+                m_input_samples.push_back(s);
             }
+            upsample();
         }
     }
 
     void downsample()
     {
-        m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_source_dt));
+        m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
-        while (m_input_dt >= m_dt)
+        while (m_input_accumulated_dt >= m_dt)
         {
             typename Stream_t::Sample s;
             s.value = m_input_samples.front().value;
@@ -148,16 +145,16 @@ public:
 
             m_stream.samples.push_back(s);
 
-            m_input_dt -= m_dt;
+            m_input_accumulated_dt -= m_dt;
 
             m_processed_dt += m_dt;
-            while (m_processed_dt >= m_source_dt)
+            while (m_processed_dt >= m_input_dt)
             {
-                m_processed_dt -= m_source_dt;
+                m_processed_dt -= m_input_dt;
                 m_input_samples.pop_front();
                 if (m_input_samples.empty())
                 {
-                    m_input_dt = q::Clock::duration(0);
+                    m_input_accumulated_dt = q::Clock::duration(0);
                     break;
                 }
             }
@@ -177,10 +174,10 @@ public:
 //            m_has_started = true;
 //        }
 
-        m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_source_dt));
+        m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
         auto** channels = m_channels;
-        while (m_input_dt >= m_dt)
+        while (m_input_accumulated_dt >= m_dt)
         {
             typename Stream_t::Sample s;
             s.value = m_input_samples.front().value;
@@ -192,16 +189,16 @@ public:
 
             m_stream.samples.push_back(s);
 
-            m_input_dt -= m_dt;
+            m_input_accumulated_dt -= m_dt;
 
             m_processed_dt += m_dt;
-            while (m_processed_dt >= m_source_dt)
+            while (m_processed_dt >= m_input_dt)
             {
-                m_processed_dt -= m_source_dt;
+                m_processed_dt -= m_input_dt;
                 m_input_samples.pop_front();
                 if (m_input_samples.empty())
                 {
-                    m_input_dt = q::Clock::duration(0);
+                    m_input_accumulated_dt = q::Clock::duration(0);
                     break;
                 }
             }
@@ -211,25 +208,26 @@ public:
 private:
     auto init() -> bool
     {
-        m_stream.source_stream = m_params.source_stream;
-        if (!m_stream.source_stream)
+        m_stream.params = &m_params;
+        if (!m_params.input_stream)
         {
-            QLOGE("No source specified");
+            QLOGE("No input specified");
             return false;
         }
 
-        m_params.output_rate = math::max<uint32_t>(m_params.output_rate, 1);
-        m_stream.rate = m_params.output_rate;
-        m_dt = std::chrono::microseconds(1000000 / m_params.output_rate);
-        m_source_dt = std::chrono::microseconds(1000000 / m_stream.source_stream->get_rate());
+        auto input_rate = m_params.input_stream->get_rate();
 
-        if (m_stream.rate < m_params.source_stream->get_rate())
+        m_params.output_rate = math::max<uint32_t>(m_params.output_rate, 1);
+        m_dt = std::chrono::microseconds(1000000 / m_params.output_rate);
+        m_input_dt = std::chrono::microseconds(1000000 / input_rate);
+
+        if (m_params.output_rate < input_rate)
         {
-            m_dsp.setup(1, m_stream.source_stream->get_rate(), m_params.output_rate / 2);
+            m_dsp.setup(1, input_rate, m_params.output_rate / 2);
         }
-        else if (m_stream.rate > m_params.source_stream->get_rate())
+        else if (m_params.output_rate > input_rate)
         {
-            m_dsp.setup(1, m_params.output_rate, m_stream.source_stream->get_rate() / 2);
+            m_dsp.setup(1, m_params.output_rate, input_rate / 2);
         }
 
         return true;
@@ -238,9 +236,9 @@ private:
     HAL& m_hal;
     Init_Params m_params;
 
-    q::Clock::duration m_source_dt;
+    q::Clock::duration m_input_dt;
     q::Clock::duration m_dt = q::Clock::duration(0);
-    q::Clock::duration m_input_dt = q::Clock::duration(0);
+    q::Clock::duration m_input_accumulated_dt = q::Clock::duration(0);
     q::Clock::duration m_processed_dt = q::Clock::duration(0);
 
     std::deque<typename Stream_t::Sample> m_input_samples;
@@ -251,11 +249,11 @@ private:
     struct Stream : public Stream_t
     {
         auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        auto get_rate() const -> uint32_t { return params->output_rate; }
         auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
-        Stream_t* source_stream = nullptr;
+        Init_Params* params = nullptr;
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;

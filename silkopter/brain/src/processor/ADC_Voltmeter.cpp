@@ -34,15 +34,13 @@ auto ADC_Voltmeter::init(rapidjson::Value const& json) -> bool
     }
     Init_Params params;
     params.name = sz.name;
-    params.source_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.source_stream);
+    params.input_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.input_stream);
     return init(params);
 }
 
 auto ADC_Voltmeter::init(Init_Params const& params) -> bool
 {
     m_params = params;
-
-    m_stream.source_stream = params.source_stream;
 
     if (!init())
     {
@@ -62,9 +60,10 @@ auto ADC_Voltmeter::init(Init_Params const& params) -> bool
 
 auto ADC_Voltmeter::init() -> bool
 {
-    if (!m_stream.source_stream)
+    m_stream.params = &m_params;
+    if (!m_params.input_stream)
     {
-        QLOGE("No source specified");
+        QLOGE("No input specified");
         return false;
     }
 }
@@ -76,8 +75,8 @@ auto ADC_Voltmeter::get_input_stream_count() const -> size_t
 auto ADC_Voltmeter::get_input_stream(size_t idx) -> stream::IADC_Value&
 {
     QASSERT(idx == 0);
-    QASSERT(m_stream.source_stream);
-    return *m_stream.source_stream;
+    QASSERT(m_params.input_stream);
+    return *m_params.input_stream;
 }
 auto ADC_Voltmeter::get_output_stream_count() const -> size_t
 {

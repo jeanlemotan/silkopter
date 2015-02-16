@@ -80,7 +80,7 @@ case 1:
 case 2:
     return "imu_rate";
 case 3:
-    return "compass_rate";
+    return "magnetometer_rate";
 case 4:
     return "thermometer_rate";
 case 5:
@@ -423,7 +423,7 @@ else if (utility::string_equal(str, length, "\x62\x75\x73", 3))
 						 { state=1; has_bus = true; }
 else if (utility::string_equal(str, length, "\x69\x6d\x75\x5f\x72\x61\x74\x65", 8))
 						 { state=2;  }
-else if (utility::string_equal(str, length, "\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12))
+else if (utility::string_equal(str, length, "\x6d\x61\x67\x6e\x65\x74\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 17))
 						 { state=3;  }
 else if (utility::string_equal(str, length, "\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 16))
 						 { state=4;  }
@@ -671,7 +671,7 @@ struct Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.name);
 w.Key("\x62\x75\x73", 3, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, std::string >()(w, value.bus);
 w.Key("\x69\x6d\x75\x5f\x72\x61\x74\x65", 8, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.imu_rate);
-w.Key("\x63\x6f\x6d\x70\x61\x73\x73\x5f\x72\x61\x74\x65", 12, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.magnetometer_rate);
+w.Key("\x6d\x61\x67\x6e\x65\x74\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 17, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.magnetometer_rate);
 w.Key("\x74\x68\x65\x72\x6d\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x74\x65", 16, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.thermometer_rate);
 w.Key("\x61\x63\x63\x65\x6c\x65\x72\x6f\x6d\x65\x74\x65\x72\x5f\x72\x61\x6e\x67\x65", 19, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.accelerometer_range);
 w.Key("\x67\x79\x72\x6f\x73\x63\x6f\x70\x65\x5f\x72\x61\x6e\x67\x65", 15, false); Serializer< Writerfec16adf261ef0dd4ac0943a546e2adcb7d24cc14557408c01b68e0368fdde31, uint32_t >()(w, value.gyroscope_range);
@@ -5078,9 +5078,9 @@ w.Key("\x70\x77\x6d\x5f\x63\x68\x61\x6e\x6e\x65\x6c\x73", 12, false); Serializer
 
 namespace sz { struct ADC_Ammeter {
  std::string name;
-std::string source_stream;
+std::string input_stream;
 
-explicit ADC_Ammeter():name(), source_stream() {  }
+explicit ADC_Ammeter():name(), input_stream() {  }
 
 
  
@@ -5098,7 +5098,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_source_stream;
+bool has_input_stream;
 
     bool check_depth(const char* type)
     {
@@ -5115,7 +5115,7 @@ bool has_source_stream;
             case 0:
     return "name";
 case 1:
-    return "source_stream";
+    return "input_stream";
         default:
             break;
         }
@@ -5143,7 +5143,7 @@ case 1:
     void reset_flags()
     {
         has_name = false;
-has_source_stream = false;
+has_input_stream = false;
     }
 
 public:
@@ -5151,7 +5151,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->source_stream)
+, handler_1(&obj->input_stream)
     {
         reset_flags();
     }
@@ -5318,8 +5318,8 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
-						 { state=1; has_source_stream = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12))
+						 { state=1; has_input_stream = true; }
             else {
                 state = -1;
                 return true;
@@ -5417,7 +5417,7 @@ case 1:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_source_stream) set_missing_required("source_stream");
+if (!has_input_stream) set_missing_required("input_stream");
         }
         return the_error.empty();
     }
@@ -5468,7 +5468,7 @@ struct Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.name);
-w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.source_stream);
+w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writerc7cbb63946e8a8febc3a18f33dc6c52d0d5a6ed61aadad1cc0147e9a4e7fe50a, std::string >()(w, value.input_stream);
 
         w.EndObject(2);
     }
@@ -5506,9 +5506,9 @@ w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serial
 
 namespace sz { struct ADC_Voltmeter {
  std::string name;
-std::string source_stream;
+std::string input_stream;
 
-explicit ADC_Voltmeter():name(), source_stream() {  }
+explicit ADC_Voltmeter():name(), input_stream() {  }
 
 
  
@@ -5526,7 +5526,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_source_stream;
+bool has_input_stream;
 
     bool check_depth(const char* type)
     {
@@ -5543,7 +5543,7 @@ bool has_source_stream;
             case 0:
     return "name";
 case 1:
-    return "source_stream";
+    return "input_stream";
         default:
             break;
         }
@@ -5571,7 +5571,7 @@ case 1:
     void reset_flags()
     {
         has_name = false;
-has_source_stream = false;
+has_input_stream = false;
     }
 
 public:
@@ -5579,7 +5579,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->source_stream)
+, handler_1(&obj->input_stream)
     {
         reset_flags();
     }
@@ -5746,8 +5746,8 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
-						 { state=1; has_source_stream = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12))
+						 { state=1; has_input_stream = true; }
             else {
                 state = -1;
                 return true;
@@ -5845,7 +5845,7 @@ case 1:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_source_stream) set_missing_required("source_stream");
+if (!has_input_stream) set_missing_required("input_stream");
         }
         return the_error.empty();
     }
@@ -5896,7 +5896,7 @@ struct Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e96
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.name);
-w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.source_stream);
+w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writer52606e2c15eb94a0534991df1fe358097cbdf5e0a0f7aa8f52f8e963722d2546, std::string >()(w, value.input_stream);
 
         w.EndObject(2);
     }
@@ -5934,11 +5934,11 @@ w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serial
 
 namespace sz { struct LPF {
  std::string name;
-std::string source_stream;
+std::string input_stream;
 uint32_t poles;
 uint32_t cutoff_frequency;
 
-explicit LPF():name(), source_stream(), poles(), cutoff_frequency() {  }
+explicit LPF():name(), input_stream(), poles(), cutoff_frequency() {  }
 
 
  
@@ -5958,7 +5958,7 @@ private:
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;
 SAXEventHandler< uint32_t > handler_3;bool has_name;
-bool has_source_stream;
+bool has_input_stream;
 bool has_poles;
 bool has_cutoff_frequency;
 
@@ -5977,7 +5977,7 @@ bool has_cutoff_frequency;
             case 0:
     return "name";
 case 1:
-    return "source_stream";
+    return "input_stream";
 case 2:
     return "poles";
 case 3:
@@ -6009,7 +6009,7 @@ case 3:
     void reset_flags()
     {
         has_name = false;
-has_source_stream = false;
+has_input_stream = false;
 has_poles = false;
 has_cutoff_frequency = false;
     }
@@ -6019,7 +6019,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->source_stream)
+, handler_1(&obj->input_stream)
 , handler_2(&obj->poles)
 , handler_3(&obj->cutoff_frequency)
     {
@@ -6236,8 +6236,8 @@ case 3:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
-						 { state=1; has_source_stream = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12))
+						 { state=1; has_input_stream = true; }
 else if (utility::string_equal(str, length, "\x70\x6f\x6c\x65\x73", 5))
 						 { state=2; has_poles = true; }
 else if (utility::string_equal(str, length, "\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16))
@@ -6369,7 +6369,7 @@ case 3:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_source_stream) set_missing_required("source_stream");
+if (!has_input_stream) set_missing_required("input_stream");
 if (!has_poles) set_missing_required("poles");
 if (!has_cutoff_frequency) set_missing_required("cutoff_frequency");
         }
@@ -6428,7 +6428,7 @@ struct Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, std::string >()(w, value.name);
-w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, std::string >()(w, value.source_stream);
+w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, std::string >()(w, value.input_stream);
 w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, uint32_t >()(w, value.poles);
 w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, uint32_t >()(w, value.cutoff_frequency);
 
@@ -6468,10 +6468,10 @@ w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, fa
 
 namespace sz { struct Resampler {
  std::string name;
-std::string source_stream;
+std::string input_stream;
 uint32_t output_rate;
 
-explicit Resampler():name(), source_stream(), output_rate() {  }
+explicit Resampler():name(), input_stream(), output_rate() {  }
 
 
  
@@ -6490,7 +6490,7 @@ private:
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;bool has_name;
-bool has_source_stream;
+bool has_input_stream;
 bool has_output_rate;
 
     bool check_depth(const char* type)
@@ -6508,7 +6508,7 @@ bool has_output_rate;
             case 0:
     return "name";
 case 1:
-    return "source_stream";
+    return "input_stream";
 case 2:
     return "output_rate";
         default:
@@ -6538,7 +6538,7 @@ case 2:
     void reset_flags()
     {
         has_name = false;
-has_source_stream = false;
+has_input_stream = false;
 has_output_rate = false;
     }
 
@@ -6547,7 +6547,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->source_stream)
+, handler_1(&obj->input_stream)
 , handler_2(&obj->output_rate)
     {
         reset_flags();
@@ -6739,8 +6739,8 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13))
-						 { state=1; has_source_stream = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12))
+						 { state=1; has_input_stream = true; }
 else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x5f\x72\x61\x74\x65", 11))
 						 { state=2; has_output_rate = true; }
             else {
@@ -6855,7 +6855,7 @@ case 2:
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_source_stream) set_missing_required("source_stream");
+if (!has_input_stream) set_missing_required("input_stream");
 if (!has_output_rate) set_missing_required("output_rate");
         }
         return the_error.empty();
@@ -6910,7 +6910,7 @@ struct Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766
         w.StartObject();
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, std::string >()(w, value.name);
-w.Key("\x73\x6f\x75\x72\x63\x65\x5f\x73\x74\x72\x65\x61\x6d", 13, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, std::string >()(w, value.source_stream);
+w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, std::string >()(w, value.input_stream);
 w.Key("\x6f\x75\x74\x70\x75\x74\x5f\x72\x61\x74\x65", 11, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, uint32_t >()(w, value.output_rate);
 
         w.EndObject(3);

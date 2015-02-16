@@ -39,7 +39,7 @@ public:
 
     auto get_accelerometer()    -> source::IAccelerometer&;
     auto get_gyroscope()        -> source::IGyroscope&;
-    auto get_magnetometer()          -> source::IMagnetometer&;
+    auto get_magnetometer()     -> source::IMagnetometer&;
     auto get_thermometer()      -> source::IThermometer&;
 
     void lock();

@@ -15,10 +15,10 @@ namespace processor
 class IBattery : public IProcessor
 {
 public:
-    virtual auto get_input_voltage_stream(size_t idx) -> stream::IVoltage& = 0;
-    virtual auto get_input_current_stream(size_t idx) -> stream::ICurrent& = 0;
+    virtual auto get_input_voltage_stream() -> stream::IVoltage& = 0;
+    virtual auto get_input_current_stream() -> stream::ICurrent& = 0;
 
-    virtual auto get_output_stream(size_t idx) -> stream::IBattery_State& = 0;
+    virtual auto get_output_battery_state_stream() -> stream::IBattery_State& = 0;
 };
 
 

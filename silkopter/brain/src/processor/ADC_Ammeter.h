@@ -15,14 +15,12 @@ namespace processor
 class ADC_Ammeter : public ITransform<stream::IADC_Value, stream::ICurrent>
 {
 public:
-    typedef ITransform<stream::IADC_Value, stream::ICurrent> Base;
-
     ADC_Ammeter(HAL& hal);
 
     struct Init_Params
     {
         std::string name;
-        stream::IADC_Value* source_stream = nullptr;
+        stream::IADC_Value* input_stream = nullptr;
     };
 
     auto init(rapidjson::Value const& json) -> bool;
@@ -45,10 +43,10 @@ private:
     struct Stream : public stream::ICurrent
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return source_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return params->input_stream->get_rate(); }
         auto get_name() const -> std::string const& { return name; }
 
-        stream::IADC_Value* source_stream = nullptr;
+        Init_Params* params = nullptr;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;
