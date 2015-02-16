@@ -183,71 +183,67 @@ auto HAL::init() -> bool
 {
     using namespace silk::node;
 
-//    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<3>, 1> f;
-//    math::vec3f *x = nullptr;
-//    f.process(8, &x);
+    struct Stream : public stream::IADC_Value
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return 1000; }
+        auto get_name() const -> std::string const& { return ""; }
+        std::vector<Sample> samples;
+    } stream;
 
-//    struct Stream : public stream::IADC_Value
-//    {
-//        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-//        auto get_rate() const -> uint32_t { return 1000; }
-//        auto get_name() const -> std::string const& { return ""; }
-//        std::vector<Sample> samples;
-//    } stream;
+    {
+        const size_t elements = 300;
+        const float noise = 0.3f;
+        std::vector<std::pair<float, float>> freq =
+        {{
+             { 10.f, 1.f },
+             { 30.f, 1.f/3.f },
+             { 50.f, 1.f/5.f },
+             { 70.f, 1.f/7.f },
+             { 90.f, 1.f/9.f },
+             { 110.f, 1.f/11.f },
+             { 130.f, 1.f/13.f }
+         }};
+        stream.samples.resize(elements);
+        std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
+        std::mt19937 engine; // Mersenne twister MT19937
+        auto generator = std::bind(distribution, engine);
+        for (size_t i = 0; i < stream.samples.size(); i++)
+        {
+            float a = float(i) * math::anglef::_2pi / float(stream.get_rate());
+            float output = 0.f;
+            for (auto& f: freq)
+            {
+                output += math::sin(a * f.first) * f.second;
+            }
+            stream.samples[i].value = output + generator();
+            stream.samples[i].dt = std::chrono::microseconds(1000000 / stream.get_rate());
+        }
+    }
 
-//    {
-//        const size_t elements = 30;
-//        const float noise = 0.3f;
-//        std::vector<std::pair<float, float>> freq =
-//        {{
-//             { 10.f, 1.f },
-//             { 30.f, 1.f/3.f },
-//             { 50.f, 1.f/5.f },
-//             { 70.f, 1.f/7.f },
-//             { 90.f, 1.f/9.f },
-//             { 110.f, 1.f/11.f },
-//             { 130.f, 1.f/13.f }
-//         }};
-//        stream.samples.resize(elements);
-//        std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
-//        std::mt19937 engine; // Mersenne twister MT19937
-//        auto generator = std::bind(distribution, engine);
-//        for (size_t i = 0; i < stream.samples.size(); i++)
-//        {
-//            float a = float(i) * math::anglef::_2pi / float(stream.get_rate());
-//            float output = 0.f;
-//            for (auto& f: freq)
-//            {
-//                output += math::sin(a * f.first) * f.second;
-//            }
-//            stream.samples[i].value = output + generator();
-//            stream.samples[i].dt = std::chrono::microseconds(1000000 / stream.get_rate());
-//        }
-//    }
+    write_gnu_plot("in.dat", stream.samples);
 
-//    write_gnu_plot("in.dat", stream.samples);
+    processor::LPF<Stream> lpf(*this);
+    {
+        processor::LPF<Stream>::Init_Params params;
+        params.source_stream = &stream;
+        params.cutoff_frequency = 30;
+        params.poles = 3;
+        lpf.init(params);
+    }
+    lpf.process();
+    write_gnu_plot("out.dat", lpf.get_output_stream(0).get_samples());
 
-//    processor::LPF<Stream> lpf(*this);
-//    {
-//        processor::LPF<Stream>::Init_Params params;
-//        params.source_stream = &stream;
-//        params.cutoff_frequency = 30;
-//        params.poles = 3;
-//        lpf.init(params);
-//    }
-//    lpf.process();
-//    write_gnu_plot("out.dat", lpf.get_output_stream(0).get_samples());
+    processor::Resampler<Stream> resampler(*this);
+    {
+        processor::Resampler<Stream>::Init_Params params;
+        params.output_rate = 100;
+        params.source_stream = &stream;
+        resampler.init(params);
+    }
+    resampler.process();
 
-//    processor::Resampler<Stream> resampler(*this);
-//    {
-//        processor::Resampler<Stream>::Init_Params params;
-//        params.output_rate = 100000;
-//        params.source_stream = &lpf.get_output_stream(0);
-//        resampler.init(params);
-//    }
-//    resampler.process();
-
-//    write_gnu_plot("rsout.dat", resampler.get_output_stream(0).get_samples());
+    write_gnu_plot("rsout.dat", resampler.get_output_stream(0).get_samples());
 
 
     {
@@ -488,14 +484,16 @@ auto HAL::init() -> bool
         }
     }
 
-    auto* stream = get_streams().find_by_name<stream::IAcceleration>("imu-accelerometer/stream");
-    auto* stream_lpf = get_streams().find_by_name<stream::IAcceleration>("imu-acceleration_lpf/stream");
-    while (1)
     {
-        process();
-        if (!stream->get_samples().empty())
+        auto* stream = get_streams().find_by_name<stream::IAcceleration>("imu-accelerometer/stream");
+        auto* stream_lpf = get_streams().find_by_name<stream::IAcceleration>("imu-acceleration_lpf/stream");
+        while (1)
         {
-            QLOGI("x: {} \t {}", stream->get_samples().back().value, stream_lpf->get_samples().back().value);
+            process();
+            if (!stream->get_samples().empty())
+            {
+                QLOGI("x: {} \t {}", stream->get_samples().back().value, stream_lpf->get_samples().back().value);
+            }
         }
     }
 

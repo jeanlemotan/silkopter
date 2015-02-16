@@ -111,17 +111,25 @@ public:
         }
         else
         {
-            for (auto& s: is)
-            {
-                m_input_dt += s.dt;
-                m_input_samples.push_back(s);
-            }
             if (m_stream.rate < m_params.source_stream->get_rate())
             {
+                auto** channels = m_channels;
+                for (auto const& s: is)
+                {
+                    m_input_dt += s.dt;
+                    m_input_samples.push_back(s);
+                    Stream_t::setup_channels(channels, m_input_samples.back().value);
+                    m_dsp.process(1, channels);
+                }
                 downsample();
             }
             else if (m_stream.rate > m_params.source_stream->get_rate())
             {
+                for (auto const& s: is)
+                {
+                    m_input_dt += s.dt;
+                    m_input_samples.push_back(s);
+                }
                 upsample();
             }
         }
@@ -129,7 +137,32 @@ public:
 
     void downsample()
     {
-        QASSERT(0);
+        m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_source_dt));
+
+        while (m_input_dt >= m_dt)
+        {
+            typename Stream_t::Sample s;
+            s.value = m_input_samples.front().value;
+            s.sample_idx = ++m_stream.sample_idx;
+            s.dt = m_dt;
+
+            m_stream.samples.push_back(s);
+
+            m_input_dt -= m_dt;
+
+            m_processed_dt += m_dt;
+            while (m_processed_dt >= m_source_dt)
+            {
+                m_processed_dt -= m_source_dt;
+                m_input_samples.pop_front();
+                if (m_input_samples.empty())
+                {
+                    m_input_dt = q::Clock::duration(0);
+                    break;
+                }
+            }
+        }
+
     }
     void upsample()
     {
@@ -190,7 +223,14 @@ private:
         m_dt = std::chrono::microseconds(1000000 / m_params.output_rate);
         m_source_dt = std::chrono::microseconds(1000000 / m_stream.source_stream->get_rate());
 
-        m_dsp.setup(1, m_params.output_rate, m_stream.source_stream->get_rate() / 2);
+        if (m_stream.rate < m_params.source_stream->get_rate())
+        {
+            m_dsp.setup(1, m_stream.source_stream->get_rate(), m_params.output_rate / 2);
+        }
+        else if (m_stream.rate > m_params.source_stream->get_rate())
+        {
+            m_dsp.setup(1, m_params.output_rate, m_stream.source_stream->get_rate() / 2);
+        }
 
         return true;
     }
