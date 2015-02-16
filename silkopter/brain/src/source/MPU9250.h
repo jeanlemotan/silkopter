@@ -51,14 +51,14 @@ private:
     auto mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
     auto mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool;
     auto mpu_read_u16(uint8_t reg, uint16_t& dst) -> bool;
-    auto mpu_write_u8(uint8_t reg, uint8_t const& t) -> bool;
-    auto mpu_write_u16(uint8_t reg, uint16_t const& t) -> bool;
+    auto mpu_write_u8(uint8_t reg, uint8_t t) -> bool;
+    auto mpu_write_u16(uint8_t reg, uint16_t t) -> bool;
 
     auto akm_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
     auto akm_read_u8(uint8_t reg, uint8_t& dst) -> bool;
     auto akm_read_u16(uint8_t reg, uint16_t& dst) -> bool;
-    auto akm_write_u8(uint8_t reg, uint8_t const& t) -> bool;
-    auto akm_write_u16(uint8_t reg, uint16_t const& t) -> bool;
+    auto akm_write_u8(uint8_t reg, uint8_t t) -> bool;
+    auto akm_write_u16(uint8_t reg, uint16_t t) -> bool;
 
     void reset_fifo();
 

@@ -20,7 +20,7 @@ public:
 
         math::quatf local_to_world;
     };
-    typedef Sample<Reference_Frame>     Sample;
+    typedef stream::Sample<Reference_Frame>     Sample;
 
     virtual ~IReference_Frame() {}
 

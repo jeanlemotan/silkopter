@@ -13,7 +13,7 @@ class IAngular_Velocity : public IStream
 {
 public:
     typedef math::vec3f       Value; //radians per second
-    typedef Sample<Value>     Sample;
+    typedef stream::Sample<Value>     Sample;
 
     virtual ~IAngular_Velocity() {}
 
@@ -21,17 +21,12 @@ public:
 
     //filter helpers
     static const size_t FILTER_CHANNELS = 3;
-    static void get_channels(double channels[FILTER_CHANNELS], Value const& value)
+    typedef float FILTER_CHANNEL_TYPE;
+    static void setup_channels(FILTER_CHANNEL_TYPE* channels[FILTER_CHANNELS], Value& value)
     {
-        channels[0] = value.x;
-        channels[1] = value.y;
-        channels[2] = value.z;
-    }
-    static void get_value(Value& value, double const channels[FILTER_CHANNELS])
-    {
-        value.x = channels[0];
-        value.y = channels[1];
-        value.z = channels[2];
+        channels[0] = &value.x;
+        channels[1] = &value.y;
+        channels[2] = &value.z;
     }
     static void lerp(Value& out, Value& a, Value& b, float mu)
     {

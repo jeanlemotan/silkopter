@@ -96,6 +96,8 @@ auto SRF02::init() -> bool
     m_params.rate = math::clamp<size_t>(m_params.rate, 1, 12);
     m_stream.rate = m_params.rate;
 
+    QLOGI("Probing SRF02 on {}", m_params.bus->get_name());
+
     uint8_t rev = 0;
     auto ret = m_params.bus->read_register_u8(ADDR, SW_REV_CMD, rev);
     if (!ret || rev == 255)

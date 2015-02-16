@@ -40,11 +40,11 @@ public:
     {
         return read_register(address, reg, &dst, 1);
     }
-    auto write_register_u8(uint8_t address, uint8_t reg, uint8_t const& t) -> bool
+    auto write_register_u8(uint8_t address, uint8_t reg, uint8_t t) -> bool
     {
         return write_register(address, reg, &t, 1);
     }
-    auto write_register_u16(uint8_t address, uint8_t reg, uint16_t const& t) -> bool
+    auto write_register_u16(uint8_t address, uint8_t reg, uint16_t t) -> bool
     {
         uint8_t val[2];
         val[0] = reinterpret_cast<uint8_t const*>(&t)[1];

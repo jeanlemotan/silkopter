@@ -165,6 +165,8 @@ auto MS5611::init() -> bool
 
     m_dt = std::chrono::milliseconds(1000 / m_params.rate);
 
+    QLOGI("Probing MS5611 on {}", m_params.bus->get_name());
+
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
     bus_write(CMD_MS5611_RESET, nullptr, 0);

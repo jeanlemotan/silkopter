@@ -99,7 +99,7 @@ void I2C_Linux::close()
 {
     QLOG_TOPIC("bus_i2c_linux::close");
 
-    if (m_fd)
+    if (m_fd >= 0)
     {
         std::lock_guard<I2C_Linux> lg(*this);
 

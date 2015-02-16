@@ -102,22 +102,22 @@ public:
     void process()
     {
         m_stream.samples.clear();
-        auto const& s = get_input_stream(0).get_samples();
-        m_stream.samples.resize(s.size());
+        auto const& is = get_input_stream(0).get_samples();
+        m_stream.samples.reserve(is.size());
 
-        double* channels = m_channels;
-        std::transform(s.begin(), s.end(), m_stream.samples.begin(), [this, channels](typename Stream_t::Sample const& sample)
+        auto** channels = m_channels;
+        for (auto& s: is)
         {
            typename Stream_t::Sample vs;
-           vs.dt = sample.dt;
-           vs.sample_idx = sample.sample_idx;
+           vs.dt = s.dt;
+           vs.sample_idx = s.sample_idx;
 
-           Stream_t::get_channels(channels, sample.value);
-           m_dsp.process(1, &channels);
-           Stream_t::get_value(vs.value, channels);
+           vs.value = s.value;
+           Stream_t::setup_channels(channels, vs.value);
+           m_dsp.process(1, channels);
 
-           return vs;
-        });
+           m_stream.samples.push_back(vs);
+        };
     }
 
 private:
@@ -140,7 +140,7 @@ private:
     Init_Params m_params;
 
     Dsp::SimpleFilter <Dsp::Butterworth::LowPass<MAX_POLES>, Stream_t::FILTER_CHANNELS> m_dsp;
-    double m_channels[Stream_t::FILTER_CHANNELS];
+    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
 
     struct Stream : public Stream_t

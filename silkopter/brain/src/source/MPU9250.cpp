@@ -332,11 +332,11 @@ auto MPU9250::mpu_read_u16(uint8_t reg, uint16_t& dst) -> bool
 {
     return m_i2c ? m_i2c->read_register_u16(ADDR_MPU9250, reg, dst) : m_spi->read_register_u16(reg, dst);
 }
-auto MPU9250::mpu_write_u8(uint8_t reg, uint8_t const& t) -> bool
+auto MPU9250::mpu_write_u8(uint8_t reg, uint8_t t) -> bool
 {
     return m_i2c ? m_i2c->write_register_u8(ADDR_MPU9250, reg, t) : m_spi->write_register_u8(reg, t);
 }
-auto MPU9250::mpu_write_u16(uint8_t reg, uint16_t const& t) -> bool
+auto MPU9250::mpu_write_u16(uint8_t reg, uint16_t t) -> bool
 {
     return m_i2c ? m_i2c->write_register_u16(ADDR_MPU9250, reg, t) : m_spi->write_register_u16(reg, t);
 }
@@ -352,11 +352,11 @@ auto MPU9250::akm_read_u16(uint8_t reg, uint16_t& dst) -> bool
 {
     return m_i2c ? m_i2c->read_register_u16(m_compass.akm_address, reg, dst) : m_spi->read_register_u16(reg, dst);
 }
-auto MPU9250::akm_write_u8(uint8_t reg, uint8_t const& t) -> bool
+auto MPU9250::akm_write_u8(uint8_t reg, uint8_t t) -> bool
 {
     return m_i2c ? m_i2c->write_register_u8(m_compass.akm_address, reg, t) : m_spi->write_register_u8(reg, t);
 }
-auto MPU9250::akm_write_u16(uint8_t reg, uint16_t const& t) -> bool
+auto MPU9250::akm_write_u16(uint8_t reg, uint16_t t) -> bool
 {
     return m_i2c ? m_i2c->write_register_u16(m_compass.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
 }
@@ -475,8 +475,9 @@ auto MPU9250::init() -> bool
     {
         return math::abs(a - m_params.imu_rate) < math::abs(b - m_params.imu_rate);
     });
-    m_params.imu_rate = a_ranges.front();
+    m_params.imu_rate = imu_rates.front();
 
+    QLOGI("Probing MPU9250 on {}", m_params.bus->get_name());
     QLOGI("Gyroscope range {} DPS (requested {} DPS)", m_params.gyroscope_range, params.gyroscope_range);
     QLOGI("Accelerometer range {}G (requested {}G)", m_params.accelerometer_range, params.accelerometer_range);
     QLOGI("Imu Rate {}Hz (requested {}Hz)", m_params.imu_rate, params.imu_rate);
@@ -531,6 +532,8 @@ auto MPU9250::init() -> bool
         return false;
     }
 
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+
     auto res = mpu_write_u8(MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
@@ -541,7 +544,7 @@ auto MPU9250::init() -> bool
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     uint8_t who_am_i;
-    res &= mpu_write_u8(MPU_REG_WHO_AM_I, who_am_i);
+    res &= mpu_read_u8(MPU_REG_WHO_AM_I, who_am_i);
     if (!res || who_am_i != 0x71)
     {
         QLOGE("Cannot find mpu9250");
@@ -609,7 +612,7 @@ auto MPU9250::setup_compass() -> bool
     for (m_compass.akm_address = 0x0C; m_compass.akm_address <= 0x0F; m_compass.akm_address++)
     {
         uint8_t data;
-        auto res = akm_write_u8(AKM_REG_WHOAMI, data);
+        auto res = akm_read_u8(AKM_REG_WHOAMI, data);
         if (res && data == AKM_WHOAMI)
         {
             break;
@@ -695,7 +698,7 @@ void MPU9250::set_bypass(bool on)
     if (on)
     {
         uint8_t tmp;
-        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
+        mpu_read_u8(MPU_REG_USER_CTRL, tmp);
         tmp &= ~MPU_BIT_I2C_MST;
         mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
@@ -706,7 +709,7 @@ void MPU9250::set_bypass(bool on)
     {
         // Enable I2C master mode if compass is being used.
         uint8_t tmp;
-        mpu_write_u8(MPU_REG_USER_CTRL, tmp);
+        mpu_read_u8(MPU_REG_USER_CTRL, tmp);
         tmp |= MPU_BIT_I2C_MST;
         mpu_write_u8(MPU_REG_USER_CTRL, tmp);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
@@ -747,7 +750,7 @@ void MPU9250::process()
    // last_timestamp = now;
 
     uint16_t fifo_count;
-    auto res = mpu_write_u16(MPU_REG_FIFO_COUNTH, fifo_count);
+    auto res = mpu_read_u16(MPU_REG_FIFO_COUNTH, fifo_count);
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // LOG_INFO("{.2}b/ms", xxx);

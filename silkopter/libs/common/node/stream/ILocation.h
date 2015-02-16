@@ -33,7 +33,7 @@ public:
         boost::optional<math::vec2f> direction; //normalized
     };
 
-    typedef Sample<Value>     Sample;
+    typedef stream::Sample<Value>     Sample;
 
     virtual ~ILocation() {}
 

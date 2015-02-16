@@ -3,14 +3,32 @@
         "buses": {
             "I2C_Linux": {
                 "name": "i2c0",
-                "dev": "./i2c0"
+                "dev": "/dev/i2c-0"
             },
             "I2C_Linux": {
                 "name": "i2c1",
-                "dev": "./i2c1"
+                "dev": "/dev/i2c-1"
             }
         },
         "nodes": {
+            "SRF02": {
+                "name": "sonar",
+                "bus": "i2c0",
+                "rate": 12,
+                "direction": {
+                    "x" : 0,
+                    "y" : 0,
+                    "z" : -1
+                    },
+                "min_distance": 0.1,
+                "max_distance": 4.0
+            },
+            "MS5611": {
+                "name": "ms5611",
+                "bus": "i2c0",
+                "barometer_rate": 100,
+                "thermometer_rate_ratio": 10
+            },
             "MPU9250": {
                 "name": "imu",
                 "bus": "i2c0",
@@ -48,12 +66,7 @@
                 "acceleration_stream": "imu-acceleration_lpf/stream",
                 "angular_velocity_stream": "imu-angular_velocity_lpf/stream",
                 "magnetic_field_stream": "imu-magnetic_field_lpf/stream"
-            },
-            "Inertial": {
-                "name": "inertial",
-                "reference_frame_stream": "ahrs/stream",
-                "acceleration_stream": "imu-acceleration_lpf/stream"
-            },
+            }
         }
     }
 }

@@ -146,7 +146,7 @@ public:
 
         m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_source_dt));
 
-        double* channels = m_channels;
+        auto** channels = m_channels;
         while (m_input_dt >= m_dt)
         {
             typename Stream_t::Sample s;
@@ -154,9 +154,8 @@ public:
             s.sample_idx = ++m_stream.sample_idx;
             s.dt = m_dt;
 
-            Stream_t::get_channels(channels, s.value);
-            m_dsp.process(1, &channels);
-            Stream_t::get_value(s.value, channels);
+            Stream_t::setup_channels(channels, s.value);
+            m_dsp.process(1, channels);
 
             m_stream.samples.push_back(s);
 
@@ -167,6 +166,11 @@ public:
             {
                 m_processed_dt -= m_source_dt;
                 m_input_samples.pop_front();
+                if (m_input_samples.empty())
+                {
+                    m_input_dt = q::Clock::duration(0);
+                    break;
+                }
             }
         }
     }
@@ -202,7 +206,7 @@ private:
     std::deque<typename Stream_t::Sample> m_input_samples;
 
     Dsp::SimpleFilter <Dsp::Butterworth::LowPass<1>, Stream_t::FILTER_CHANNELS> m_dsp;
-    double m_channels[Stream_t::FILTER_CHANNELS];
+    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
     struct Stream : public Stream_t
     {

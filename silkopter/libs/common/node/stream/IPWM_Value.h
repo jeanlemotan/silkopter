@@ -13,7 +13,7 @@ class IPWM_Value : public IStream
 {
 public:
     typedef float             Value; //0 .. 1 representing duty cycle
-    typedef Sample<Value>     Sample;
+    typedef stream::Sample<Value>     Sample;
 
     virtual ~IPWM_Value() {}
 
@@ -21,13 +21,10 @@ public:
 
     //filter helpers
     static const size_t FILTER_CHANNELS = 1;
-    static void get_channels(double channels[FILTER_CHANNELS], Value const& value)
+    typedef float FILTER_CHANNEL_TYPE;
+    static void setup_channels(FILTER_CHANNEL_TYPE* channels[FILTER_CHANNELS], Value& value)
     {
-        channels[0] = value;
-    }
-    static void get_value(Value& value, double const channels[FILTER_CHANNELS])
-    {
-        value = channels[0];
+        channels[0] = &value;
     }
 };
 
