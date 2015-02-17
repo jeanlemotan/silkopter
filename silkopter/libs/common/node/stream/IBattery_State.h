@@ -14,10 +14,10 @@ class IBattery_State : public IStream
 public:
     struct Value
     {
-        float ah_used = 0;
-        float voltage = 0;
-        float capacity_left = 0;
-        boost::optional<uint8_t> cells;
+        float charge_used = 0; //Amperes-Hour (Ah)
+        float voltage = 0; //Volts
+        float current = 0; //Amperes
+        float capacity_left = 0; //0 is Empty, 1 is Full
     };
     typedef stream::Sample<Value>     Sample;
 

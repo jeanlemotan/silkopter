@@ -28,7 +28,7 @@
 #include "processor/ADC_Ammeter.h"
 #include "processor/LPF.h"
 #include "processor/Resampler.h"
-#include "processor/Lipo_Battery.h"
+#include "processor/LiPo_Battery.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -480,7 +480,7 @@ auto HAL::init() -> bool
             }
             else if (type == "Lipo_Battery")
             {
-                auto wrapper = std::make_unique<Node_Wrapper<processor::Lipo_Battery>>(*this);
+                auto wrapper = std::make_unique<Node_Wrapper<processor::LiPo_Battery>>(*this);
                 if (!wrapper->node->init(it->value))
                 {
                     return false;

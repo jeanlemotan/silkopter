@@ -154,5 +154,17 @@
         ["std::string", "input_stream", {"required": true}],
         ["uint32_t", "output_rate", {"required": true}]
     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "LiPo_Battery",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "voltage_stream", {"required": true}],
+        ["std::string", "current_stream", {"required": true}],
+        ["float", "full_charge", {"required": true}]
+    ]
 }
 ]

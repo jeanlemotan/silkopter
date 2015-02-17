@@ -10,17 +10,17 @@ namespace node
 namespace processor
 {
 
-class Lipo_Battery : public IBattery
+class LiPo_Battery : public IBattery
 {
 public:
-    Lipo_Battery(HAL& hal);
+    LiPo_Battery(HAL& hal);
 
     struct Init_Params
     {
         std::string name;
         stream::IVoltage* voltage_stream = nullptr;
         stream::ICurrent* current_stream = nullptr;
-        float capacity_ah = 0;
+        float full_charge = 0; //When full, Ah
     };
 
     auto init(rapidjson::Value const& json) -> bool;
@@ -36,6 +36,8 @@ public:
     auto get_input_current_stream() -> stream::ICurrent&;
     auto get_output_battery_state_stream() -> stream::IBattery_State&;
 
+    auto get_cell_count() const -> boost::optional<uint8_t>;
+
     auto get_name() const -> std::string const&;
 
     void process();
@@ -45,6 +47,8 @@ private:
 
     HAL& m_hal;
     Init_Params m_params;
+
+    boost::optional<uint8_t> m_cells;
 
     struct Stream : public stream::IBattery_State
     {
