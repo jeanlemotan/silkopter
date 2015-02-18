@@ -22,6 +22,30 @@ constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
 constexpr std::chrono::seconds REINIT_WATCHGOD_TIMEOUT(3);
 
 
+
+enum Message : uint16_t
+{
+    MESSAGE_ACK_ACK     = (0x01 << 8) | 0x05,
+    MESSAGE_ACK_NACK    = (0x00 << 8) | 0x05,
+
+    MESSAGE_CFG_PRT     = (0x00 << 8) | 0x06,
+    MESSAGE_CFG_MSG     = (0x01 << 8) | 0x06,
+    MESSAGE_CFG_RATE    = (0x08 << 8) | 0x06,
+    MESSAGE_CFG_ANT     = (0x13 << 8) | 0x06,
+    MESSAGE_CFG_SBAS    = (0x16 << 8) | 0x06,
+
+    MESSAGE_NAV_POLLH   = (0x02 << 8) | 0x01,
+    MESSAGE_NAV_STATUS  = (0x03 << 8) | 0x01,
+    MESSAGE_NAV_SOL     = (0x06 << 8) | 0x01,
+    MESSAGE_NAV_VELNED  = (0x12 << 8) | 0x01,
+
+    MESSAGE_INF_NOTICE  = (0x02 << 8) | 0x04,
+
+    MESSAGE_MON_HW      = (0x09 << 8) | 0x0A,
+    MESSAGE_MON_VER     = (0x04 << 8) | 0x0A,
+};
+
+
 typedef uint8_t U1;
 typedef int8_t I1;
 typedef uint8_t X1;
@@ -36,6 +60,7 @@ typedef uint32_t X4;
 
 typedef float R4;
 typedef double R8;
+
 
 #pragma pack(push, 1)
 
@@ -284,7 +309,7 @@ auto UBLOX::setup() -> bool
         data.measRate = std::chrono::milliseconds(1000 / m_params.rate).count();
         data.timeRef = 0;//UTC time
         data.navRate = 1;
-        if (!send_packet_with_retry(Message::CFG_RATE, data, ACK_TIMEOUT, 3))
+        if (!send_packet_with_retry(MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 3))
         {
             QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
             return false;
@@ -292,9 +317,9 @@ auto UBLOX::setup() -> bool
     }
     {
         std::array<std::pair<Message, size_t>, 3> msgs = {{
-                                                              {Message::NAV_SOL, 1},
-                                                              {Message::NAV_STATUS, 1},
-                                                              {Message::MON_HW, 1},
+                                                              {MESSAGE_NAV_SOL, 1},
+                                                              {MESSAGE_NAV_STATUS, 1},
+                                                              {MESSAGE_MON_HW, 1},
                                                           }};
         for (auto m: msgs)
         {
@@ -307,7 +332,7 @@ auto UBLOX::setup() -> bool
             data.msgClass = static_cast<int>(m.first) & 255;
             data.msgID = static_cast<int>(m.first) >> 8;
             data.rate = m.second;
-            if (!send_packet_with_retry(Message::CFG_MSG, data, ACK_TIMEOUT, 3))
+            if (!send_packet_with_retry(MESSAGE_CFG_MSG, data, ACK_TIMEOUT, 3))
             {
                 QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
                 return false;
@@ -318,12 +343,12 @@ auto UBLOX::setup() -> bool
     QLOGI("Requesting configs");
     {
         //ask for configs
-        send_packet(Message::MON_VER, nullptr, 0);
-        send_packet(Message::CFG_PRT, nullptr, 0);
-        send_packet(Message::CFG_RATE, nullptr, 0);
-        send_packet(Message::CFG_SBAS, nullptr, 0);
-        send_packet(Message::CFG_ANT, nullptr, 0);
-        send_packet(Message::MON_HW, nullptr, 0);
+        send_packet(MESSAGE_MON_VER, nullptr, 0);
+        send_packet(MESSAGE_CFG_PRT, nullptr, 0);
+        send_packet(MESSAGE_CFG_RATE, nullptr, 0);
+        send_packet(MESSAGE_CFG_SBAS, nullptr, 0);
+        send_packet(MESSAGE_CFG_ANT, nullptr, 0);
+        send_packet(MESSAGE_MON_HW, nullptr, 0);
     }
 
     m_sample.last_complete_time_point = q::Clock::now();
@@ -536,23 +561,23 @@ void UBLOX::process_packet(Packet& packet)
 
     switch (packet.message)
     {
-    case Message::ACK_ACK: m_ack = true; break;
-    case Message::ACK_NACK: m_ack = false; break;
+    case MESSAGE_ACK_ACK: m_ack = true; break;
+    case MESSAGE_ACK_NACK: m_ack = false; break;
 
-    case Message::NAV_SOL: process_nav_sol_packet(packet); break;
-    case Message::NAV_STATUS: process_nav_status_packet(packet); break;
-    case Message::NAV_POLLH: process_nav_pollh_packet(packet); break;
+    case MESSAGE_NAV_SOL: process_nav_sol_packet(packet); break;
+    case MESSAGE_NAV_STATUS: process_nav_status_packet(packet); break;
+    case MESSAGE_NAV_POLLH: process_nav_pollh_packet(packet); break;
 
-    case Message::CFG_PRT: process_cfg_prt_packet(packet); break;
-    case Message::CFG_RATE: process_cfg_rate_packet(packet); break;
-    case Message::CFG_SBAS: process_cfg_sbas_packet(packet); break;
-    case Message::CFG_ANT: process_cfg_ant_packet(packet); break;
-    case Message::CFG_MSG: process_cfg_msg_packet(packet); break;
+    case MESSAGE_CFG_PRT: process_cfg_prt_packet(packet); break;
+    case MESSAGE_CFG_RATE: process_cfg_rate_packet(packet); break;
+    case MESSAGE_CFG_SBAS: process_cfg_sbas_packet(packet); break;
+    case MESSAGE_CFG_ANT: process_cfg_ant_packet(packet); break;
+    case MESSAGE_CFG_MSG: process_cfg_msg_packet(packet); break;
 
-    case Message::INF_NOTICE: process_inf_notice_packet(packet); break;
+    case MESSAGE_INF_NOTICE: process_inf_notice_packet(packet); break;
 
-    case Message::MON_VER: process_mon_ver_packet(packet); break;
-    case Message::MON_HW: process_mon_hw_packet(packet); break;
+    case MESSAGE_MON_VER: process_mon_ver_packet(packet); break;
+    case MESSAGE_MON_HW: process_mon_hw_packet(packet); break;
 
     //default: QLOGI("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
     }
@@ -699,7 +724,7 @@ void UBLOX::process_mon_hw_packet(Packet& packet)
 
     QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", data.jamInd, data.noisePerMS, data.agcCnt);
 
-    send_packet(Message::MON_HW, nullptr, 0);
+    send_packet(MESSAGE_MON_HW, nullptr, 0);
 }
 
 void UBLOX::process_mon_ver_packet(Packet& packet)
@@ -717,14 +742,14 @@ auto UBLOX::get_stream() -> stream::ILocation&
     return m_stream;
 }
 
-auto UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size) -> bool
+auto UBLOX::send_packet(uint16_t msg, uint8_t const* payload, size_t payload_size) -> bool
 {
     std::array<uint8_t, 256> buffer;
     size_t off = 0;
     buffer[off++] = PREAMBLE1;
     buffer[off++] = PREAMBLE2;
-    buffer[off++] = static_cast<uint16_t>(msg) & 255;
-    buffer[off++] = static_cast<uint16_t>(msg) >> 8;
+    buffer[off++] = msg & 255;
+    buffer[off++] = msg >> 8;
     buffer[off++] = payload_size & 255;
     buffer[off++] = payload_size >> 8;
 
@@ -763,8 +788,7 @@ auto UBLOX::send_packet(Message msg, uint8_t const* payload, size_t payload_size
     return true;
 }
 
-template<class T>
-auto UBLOX::send_packet(Message msg, T const& data) -> bool
+template<class T> auto UBLOX::send_packet(uint16_t msg, T const& data) -> bool
 {
     static_assert(sizeof(T) < 200, "Message too big");
 
@@ -773,8 +797,7 @@ auto UBLOX::send_packet(Message msg, T const& data) -> bool
     return res;
 }
 
-template<class T>
-auto UBLOX::send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
+template<class T> auto UBLOX::send_packet_with_retry(uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
 {
     for (size_t i = 0; i <= retries; i++)
     {

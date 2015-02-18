@@ -41,28 +41,6 @@ private:
     auto read(uint8_t* data, size_t max_size) -> size_t;
     auto write(uint8_t const* data, size_t size) -> bool;
 
-    enum class Message : uint16_t
-    {
-        ACK_ACK     = (0x01 << 8) | 0x05,
-        ACK_NACK    = (0x00 << 8) | 0x05,
-
-        CFG_PRT     = (0x00 << 8) | 0x06,
-        CFG_MSG     = (0x01 << 8) | 0x06,
-        CFG_RATE    = (0x08 << 8) | 0x06,
-        CFG_ANT     = (0x13 << 8) | 0x06,
-        CFG_SBAS    = (0x16 << 8) | 0x06,
-
-        NAV_POLLH   = (0x02 << 8) | 0x01,
-        NAV_STATUS  = (0x03 << 8) | 0x01,
-        NAV_SOL     = (0x06 << 8) | 0x01,
-        NAV_VELNED  = (0x12 << 8) | 0x01,
-
-        INF_NOTICE  = (0x02 << 8) | 0x04,
-
-        MON_HW      = (0x09 << 8) | 0x0A,
-        MON_VER     = (0x04 << 8) | 0x0A,
-    };
-
     HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
@@ -73,7 +51,7 @@ private:
     struct Packet
     {
         uint8_t cls;
-        Message message;
+        uint16_t message;
         std::vector<uint8_t> payload;
     } m_packet;
 
@@ -98,13 +76,9 @@ private:
     void process_mon_hw_packet(Packet& packet);
     void process_mon_ver_packet(Packet& packet);
 
-    template<class T>
-    auto send_packet(Message mgs, T const& payload) -> bool;
-
-    template<class T>
-    auto send_packet_with_retry(Message msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
-
-    auto send_packet(Message mgs, uint8_t const* payload, size_t payload_size) -> bool;
+    template<class T> auto send_packet(uint16_t mgs, T const& payload) -> bool;
+    template<class T> auto send_packet_with_retry(uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
+    auto send_packet(uint16_t mgs, uint8_t const* payload, size_t payload_size) -> bool;
 
     auto wait_for_ack(q::Clock::duration d) -> bool;
     boost::optional<bool> m_ack;
