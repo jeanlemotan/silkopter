@@ -122,7 +122,8 @@ SOURCES += \
     ../../../libs/DSPFilters/source/RBJ.cpp \
     ../../../libs/DSPFilters/source/RootFinder.cpp \
     ../../../libs/DSPFilters/source/State.cpp \
-    ../../src/processor/LiPo_Battery.cpp
+    ../../src/processor/LiPo_Battery.cpp \
+    ../../src/processor/AHRS_Complimentary.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
