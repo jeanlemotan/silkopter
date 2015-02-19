@@ -2,6 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/processor/IBattery.h"
+#include "DspFilters/Butterworth.h"
+
 
 namespace silk
 {
@@ -48,7 +50,16 @@ private:
     HAL& m_hal;
     Init_Params m_params;
 
-    boost::optional<uint8_t> m_cells;
+    std::vector<stream::IVoltage::Sample> m_input_voltage_samples;
+    std::vector<stream::ICurrent::Sample> m_input_current_samples;
+    q::Clock::duration m_dt = q::Clock::duration(0);
+
+    auto compute_cell_count() -> boost::optional<uint8_t>;
+    boost::optional<uint8_t> m_cell_count;
+
+    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<1>, stream::IVoltage::FILTER_CHANNELS> m_voltage_filter;
+    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<1>, stream::ICurrent::FILTER_CHANNELS> m_current_filter;
+//    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
     struct Stream : public stream::IBattery_State
     {
@@ -57,8 +68,8 @@ private:
         auto get_name() const -> std::string const& { return name; }
 
         Init_Params const* params = nullptr;
+        Sample last_sample;
         std::vector<Sample> samples;
-        uint32_t sample_idx = 0;
         std::string name;
     } m_stream;
 };

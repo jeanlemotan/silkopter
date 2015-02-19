@@ -11,8 +11,7 @@ namespace node
 namespace processor
 {
 
-constexpr std::chrono::milliseconds CURRENT_AVERAGE_LENGTH(500);
-constexpr std::chrono::seconds VOLTAGE_AVERAGE_LENGTH(5);
+constexpr uint32_t MIN_RATE = 50;
 
 constexpr size_t CELL_COUNT_DETECTION_MIN_SAMPLES = 5;
 constexpr float CELL_COUNT_DETECTION_MAX_CURRENT = 0.8f;
@@ -84,11 +83,25 @@ auto LiPo_Battery::init() -> bool
         QLOGE("No input current specified");
         return false;
     }
-    if (m_params.voltage_stream->get_rate() > m_params.current_stream->get_rate())
+    if (m_params.full_charge < 0.01f)
     {
-        QLOGE("Current stream has a bigger rate than the voltage stream: {} > {}", m_params.voltage_stream->get_rate(), m_params.current_stream->get_rate());
+        QLOGE("Full charge is too small - {}", m_params.full_charge);
         return false;
     }
+    if (m_params.voltage_stream->get_rate() != m_params.current_stream->get_rate())
+    {
+        QLOGE("Voltage stream and current stream have different rates: {} != {}", m_params.voltage_stream->get_rate(), m_params.current_stream->get_rate());
+        return false;
+    }
+    if (m_params.voltage_stream->get_rate() < MIN_RATE)
+    {
+        QLOGE("Input streams has to be at least {}Hz. Now it's {}Hz", MIN_RATE, m_params.voltage_stream->get_rate());
+        return false;
+    }
+
+    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+
+    m_stream.last_sample.sample_idx = 0;
 }
 
 auto LiPo_Battery::get_input_stream_count() const -> size_t
@@ -135,19 +148,107 @@ auto LiPo_Battery::get_output_battery_state_stream() -> stream::IBattery_State&
 void LiPo_Battery::process()
 {
     m_stream.samples.clear();
-    auto const& s = get_input_current_stream().get_samples();
-    m_stream.samples.resize(s.size());
 
-//    std::transform(s.begin(), s.end(), m_stream.samples.begin(), [](stream::IADC_Value::Sample const& sample)
-//    {
-//       Stream::Sample vs;
-//       vs.dt = sample.dt;
-//       vs.sample_idx = sample.sample_idx;
-//       vs.value = sample.value;
-//       return vs;
-//    });
+    //accumulate the input streams
+    {
+        auto const& samples = get_input_current_stream().get_samples();
+        m_input_current_samples.reserve(m_input_current_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_current_samples));
+    }
+    {
+        auto const& samples = get_input_voltage_stream().get_samples();
+        m_input_voltage_samples.reserve(m_input_voltage_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_voltage_samples));
+    }
 
-    //TODO - apply scale - bias
+    //TODO add some protecton for severely out-of-sync streams
+
+    size_t count = std::min(m_input_current_samples.size(), m_input_voltage_samples.size());
+    if (count == 0)
+    {
+        return;
+    }
+
+    m_stream.samples.resize(count);
+
+    stream::ICurrent::FILTER_CHANNEL_TYPE* c_channels[stream::ICurrent::FILTER_CHANNELS];
+    stream::IVoltage::FILTER_CHANNEL_TYPE* v_channels[stream::IVoltage::FILTER_CHANNELS];
+
+    for (size_t i = 0; i < count; i++)
+    {
+        m_stream.last_sample.dt = m_dt;
+        m_stream.last_sample.sample_idx++;
+
+        {
+            auto const& s = m_input_current_samples[i];
+            m_stream.last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
+            stream::ICurrent::Value current = s.value;
+            stream::ICurrent::setup_channels(c_channels, current);
+            m_current_filter.process(1, c_channels);
+            m_stream.last_sample.value.average_current = current;
+        }
+        {
+            auto const& s = m_input_voltage_samples[i];
+            stream::IVoltage::Value voltage = s.value;
+            stream::IVoltage::setup_channels(v_channels, voltage);
+            m_voltage_filter.process(1, v_channels);
+            m_stream.last_sample.value.average_voltage = voltage;
+        }
+        m_stream.last_sample.value.capacity_left = 1.f - math::clamp(m_stream.last_sample.value.charge_used / m_params.full_charge, 0.f, 1.f);
+        m_stream.samples[i] = m_stream.last_sample;
+    }
+
+    //consumed processed samples
+    m_input_current_samples.erase(m_input_current_samples.begin(), m_input_current_samples.begin() + count);
+    m_input_voltage_samples.erase(m_input_voltage_samples.begin(), m_input_voltage_samples.begin() + count);
+
+    //compute cell count
+    if (!m_cell_count)
+    {
+        m_cell_count = compute_cell_count();
+        if (m_cell_count)
+        {
+            QLOGI("Detected battery cell count: {} from voltage: {}V", m_cell_count, m_stream.last_sample.value.average_voltage);
+//            if (m_loaded_state.cell_count > 0 && m_loaded_state.cell_count != *m_cell_count)
+//            {
+//                m_capacity_used_mah = 0;
+//                QLOGI("Battery probably changed so ignoring saved state.");
+//            }
+        }
+    }
+}
+
+auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
+{
+    //wait to get a good voltage average
+    if (m_stream.last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
+    {
+        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples",
+              m_stream.last_sample.value.average_voltage,
+              m_stream.last_sample.sample_idx);
+        return boost::none;
+    }
+
+    //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
+    if (!m_stream.last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
+    {
+        QLOGW("Skipping cell count detection: the current is not healthy: {}", m_stream.last_sample.value.average_current);
+        return boost::none;
+    }
+
+    float v = m_stream.last_sample.value.average_voltage;
+
+    //probably the is a faster, analytical way to find this without counting, but i'm not a mathematician!
+    for (uint8_t i = 1; i < 30; i++)
+    {
+        float min_v = MIN_CELL_VOLTAGE * i;
+        float max_v = MAX_CELL_VOLTAGE * i;
+        if (v >= min_v && v <= max_v)
+        {
+            return i;
+        }
+    }
+    return boost::none;
 }
 
 

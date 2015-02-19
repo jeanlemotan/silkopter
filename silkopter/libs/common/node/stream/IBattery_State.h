@@ -1,6 +1,8 @@
 #pragma once
 
 #include "IStream.h"
+#include "ICurrent.h"
+#include "IVoltage.h"
 
 namespace silk
 {
@@ -15,8 +17,8 @@ public:
     struct Value
     {
         float charge_used = 0; //Amperes-Hour (Ah)
-        float voltage = 0; //Volts
-        float current = 0; //Amperes
+        IVoltage::Value average_voltage = 0; //Volts, averaged over one second
+        ICurrent::Value average_current = 0; //Amperes, averaged over one second
         float capacity_left = 0; //0 is Empty, 1 is Full
     };
     typedef stream::Sample<Value>     Sample;
