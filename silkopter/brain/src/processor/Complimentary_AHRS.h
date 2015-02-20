@@ -10,10 +10,10 @@ namespace node
 namespace processor
 {
 
-class AHRS_Complimentary : public IAHRS
+class Complimentary_AHRS : public IAHRS
 {
 public:
-    AHRS_Complimentary(HAL& hal);
+    Complimentary_AHRS(HAL& hal);
 
     struct Init_Params
     {
@@ -48,6 +48,14 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
+    std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
+    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
+    std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
+
+    math::vec3f m_noisy_front_w;
+    math::vec3f m_noisy_right_w;
+    math::vec3f m_noisy_up_w;
+
     struct Stream : public stream::IReference_Frame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
@@ -56,6 +64,7 @@ private:
 
         std::string name;
         Init_Params* params = nullptr;
+        Sample last_sample;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
     } m_stream;

@@ -16,9 +16,9 @@ namespace processor
 class IAHRS : public IProcessor
 {
 public:
-    virtual auto get_input_angular_velocity_stream(size_t idx) -> stream::IAngular_Velocity& = 0;
-    virtual auto get_input_acceleration_stream(size_t idx) -> stream::IAcceleration& = 0;
-    virtual auto get_input_magnetic_field_stream(size_t idx) -> stream::IMagnetic_Field& = 0;
+    virtual auto get_input_angular_velocity_stream() -> stream::IAngular_Velocity& = 0;
+    virtual auto get_input_acceleration_stream() -> stream::IAcceleration& = 0;
+    virtual auto get_input_magnetic_field_stream() -> stream::IMagnetic_Field& = 0;
     virtual auto get_output_reference_frame_stream() -> stream::IReference_Frame& = 0;
 
     //constants

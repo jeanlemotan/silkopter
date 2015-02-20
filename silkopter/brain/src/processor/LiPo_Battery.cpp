@@ -152,18 +152,18 @@ void LiPo_Battery::process()
     //accumulate the input streams
     {
         auto const& samples = get_input_current_stream().get_samples();
-        m_input_current_samples.reserve(m_input_current_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_current_samples));
+        m_current_samples.reserve(m_current_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_current_samples));
     }
     {
         auto const& samples = get_input_voltage_stream().get_samples();
-        m_input_voltage_samples.reserve(m_input_voltage_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_voltage_samples));
+        m_voltage_samples.reserve(m_voltage_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_voltage_samples));
     }
 
     //TODO add some protecton for severely out-of-sync streams
 
-    size_t count = std::min(m_input_current_samples.size(), m_input_voltage_samples.size());
+    size_t count = std::min(m_current_samples.size(), m_voltage_samples.size());
     if (count == 0)
     {
         return;
@@ -180,7 +180,7 @@ void LiPo_Battery::process()
         m_stream.last_sample.sample_idx++;
 
         {
-            auto const& s = m_input_current_samples[i];
+            auto const& s = m_current_samples[i];
             m_stream.last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
             stream::ICurrent::Value current = s.value;
             stream::ICurrent::setup_channels(c_channels, current);
@@ -188,7 +188,7 @@ void LiPo_Battery::process()
             m_stream.last_sample.value.average_current = current;
         }
         {
-            auto const& s = m_input_voltage_samples[i];
+            auto const& s = m_voltage_samples[i];
             stream::IVoltage::Value voltage = s.value;
             stream::IVoltage::setup_channels(v_channels, voltage);
             m_voltage_filter.process(1, v_channels);
@@ -198,9 +198,9 @@ void LiPo_Battery::process()
         m_stream.samples[i] = m_stream.last_sample;
     }
 
-    //consumed processed samples
-    m_input_current_samples.erase(m_input_current_samples.begin(), m_input_current_samples.begin() + count);
-    m_input_voltage_samples.erase(m_input_voltage_samples.begin(), m_input_voltage_samples.begin() + count);
+    //consume processed samples
+    m_current_samples.erase(m_current_samples.begin(), m_current_samples.begin() + count);
+    m_voltage_samples.erase(m_voltage_samples.begin(), m_voltage_samples.begin() + count);
 
     //compute cell count
     if (!m_cell_count)

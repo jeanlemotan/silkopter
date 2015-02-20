@@ -50,8 +50,8 @@ private:
     HAL& m_hal;
     Init_Params m_params;
 
-    std::vector<stream::IVoltage::Sample> m_input_voltage_samples;
-    std::vector<stream::ICurrent::Sample> m_input_current_samples;
+    std::vector<stream::IVoltage::Sample> m_voltage_samples;
+    std::vector<stream::ICurrent::Sample> m_current_samples;
     q::Clock::duration m_dt = q::Clock::duration(0);
 
     auto compute_cell_count() -> boost::optional<uint8_t>;

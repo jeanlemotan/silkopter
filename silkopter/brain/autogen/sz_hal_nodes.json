@@ -166,5 +166,17 @@
         ["std::string", "current_stream", {"required": true}],
         ["float", "full_charge", {"required": true}]
     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "Complimentary_AHRS",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "angular_velocity_stream", {"required": true}],
+        ["std::string", "acceleration_stream", {"required": true}],
+        ["std::string", "magnetic_field_stream", {"required": true}]
+    ]
 }
 ]

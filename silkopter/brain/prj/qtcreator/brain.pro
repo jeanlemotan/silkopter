@@ -123,7 +123,7 @@ SOURCES += \
     ../../../libs/DSPFilters/source/RootFinder.cpp \
     ../../../libs/DSPFilters/source/State.cpp \
     ../../src/processor/LiPo_Battery.cpp \
-    ../../src/processor/AHRS_Complimentary.cpp
+    ../../src/processor/Complimentary_AHRS.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -197,8 +197,6 @@ HEADERS += \
     ../../../libs/common/node/processor/IProcessor.h \
     ../../../libs/common/node/processor/ITransform.h \
     ../../src/processor/ADC_Voltmeter.h \
-    ../../src/processor/AHRS_Complimentary.h \
-    ../../src/processor/AHRS_EKF.h \
     ../../src/processor/Dead_Reckoning.h \
     ../../src/processor/ADC_Ammeter.h \
     ../../../libs/DSPFilters/include/DspFilters/Bessel.h \
@@ -233,5 +231,7 @@ HEADERS += \
     ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/stream/ICardinal_Points.h \
     ../../../libs/common/node/stream/IBattery_State.h \
-    ../../src/processor/LiPo_Battery.h
+    ../../src/processor/LiPo_Battery.h \
+    ../../src/processor/Complimentary_AHRS.h \
+    ../../src/processor/EKF_AHRS.h
 
