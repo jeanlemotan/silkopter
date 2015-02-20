@@ -1,6 +1,10 @@
 #pragma once
 
-#include "common/node/processor/IAHRS.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/IReference_Frame.h"
 #include "HAL.h"
 
 namespace silk
@@ -10,10 +14,10 @@ namespace node
 namespace processor
 {
 
-class Complimentary_AHRS : public IAHRS
+class Comp_AHRS : public IProcessor
 {
 public:
-    Complimentary_AHRS(HAL& hal);
+    Comp_AHRS(HAL& hal);
 
     struct Init_Params
     {
@@ -28,13 +32,9 @@ public:
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IStream&;
-    auto get_input_angular_velocity_stream() -> stream::IAngular_Velocity&;
-    auto get_input_acceleration_stream() -> stream::IAcceleration&;
-    auto get_input_magnetic_field_stream() -> stream::IMagnetic_Field&;
 
     auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
-    auto get_output_reference_frame_stream() -> stream::IReference_Frame&;
+    auto get_output_stream(size_t idx) -> stream::IReference_Frame&;
 
     auto get_name() const -> std::string const&;
 

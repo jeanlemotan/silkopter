@@ -113,37 +113,22 @@ auto LiPo_Battery::get_input_stream(size_t idx) -> stream::IStream&
     QASSERT(idx < get_input_stream_count());
     if (idx == 0)
     {
-        return get_input_current_stream();
+        return *m_params.current_stream;
     }
     else
     {
-        return get_input_voltage_stream();
+        return *m_params.voltage_stream;
     }
 }
 auto LiPo_Battery::get_output_stream_count() const -> size_t
 {
     return 1;
 }
-auto LiPo_Battery::get_output_stream(size_t idx) -> stream::IStream&
+auto LiPo_Battery::get_output_stream(size_t idx) -> stream::IBattery_State&
 {
     QASSERT(idx < get_output_stream_count());
-    return get_output_battery_state_stream();
-}
-auto LiPo_Battery::get_input_voltage_stream() -> stream::IVoltage&
-{
-    QASSERT(m_params.voltage_stream);
-    return *m_params.voltage_stream;
-}
-auto LiPo_Battery::get_input_current_stream() -> stream::ICurrent&
-{
-    QASSERT(m_params.current_stream);
-    return *m_params.current_stream;
-}
-auto LiPo_Battery::get_output_battery_state_stream() -> stream::IBattery_State&
-{
     return m_stream;
 }
-
 
 void LiPo_Battery::process()
 {
@@ -151,12 +136,12 @@ void LiPo_Battery::process()
 
     //accumulate the input streams
     {
-        auto const& samples = get_input_current_stream().get_samples();
+        auto const& samples = m_params.current_stream->get_samples();
         m_current_samples.reserve(m_current_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_current_samples));
     }
     {
-        auto const& samples = get_input_voltage_stream().get_samples();
+        auto const& samples = m_params.voltage_stream->get_samples();
         m_voltage_samples.reserve(m_voltage_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_voltage_samples));
     }

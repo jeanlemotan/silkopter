@@ -1,7 +1,11 @@
 #pragma once
 
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IVoltage.h"
+#include "common/node/stream/ICurrent.h"
+#include "common/node/stream/IBattery_State.h"
+
 #include "HAL.h"
-#include "common/node/processor/IBattery.h"
 #include "DspFilters/Butterworth.h"
 
 
@@ -12,7 +16,7 @@ namespace node
 namespace processor
 {
 
-class LiPo_Battery : public IBattery
+class LiPo_Battery : public IProcessor
 {
 public:
     LiPo_Battery(HAL& hal);
@@ -32,11 +36,7 @@ public:
     auto get_input_stream(size_t idx) -> stream::IStream&;
 
     auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
-
-    auto get_input_voltage_stream() -> stream::IVoltage&;
-    auto get_input_current_stream() -> stream::ICurrent&;
-    auto get_output_battery_state_stream() -> stream::IBattery_State&;
+    auto get_output_stream(size_t idx) -> stream::IBattery_State&;
 
     auto get_cell_count() const -> boost::optional<uint8_t>;
 

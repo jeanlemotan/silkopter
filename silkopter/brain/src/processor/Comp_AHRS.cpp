@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "Complimentary_AHRS.h"
+#include "Comp_AHRS.h"
 
 #include "sz_math.hpp"
 #include "sz_hal_nodes.hpp"
@@ -11,25 +11,25 @@ namespace node
 namespace processor
 {
 
-Complimentary_AHRS::Complimentary_AHRS(HAL& hal)
+Comp_AHRS::Comp_AHRS(HAL& hal)
     : m_hal(hal)
 {
 }
 
-auto Complimentary_AHRS::get_name() const -> std::string const&
+auto Comp_AHRS::get_name() const -> std::string const&
 {
     return m_params.name;
 }
 
-auto Complimentary_AHRS::init(rapidjson::Value const& json) -> bool
+auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
 {
-    sz::Complimentary_AHRS sz;
+    sz::Comp_AHRS sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize AHRS_Complimentary data: {}", ss.str());
+        QLOGE("Cannot deserialize Comp_AHRS data: {}", ss.str());
         return false;
     }
     Init_Params params;
@@ -39,7 +39,7 @@ auto Complimentary_AHRS::init(rapidjson::Value const& json) -> bool
     params.magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.magnetic_field_stream);
     return init(params);
 }
-auto Complimentary_AHRS::init(Init_Params const& params) -> bool
+auto Comp_AHRS::init(Init_Params const& params) -> bool
 {
     m_params = params;
 
@@ -59,7 +59,7 @@ auto Complimentary_AHRS::init(Init_Params const& params) -> bool
     return true;
 }
 
-auto Complimentary_AHRS::init() -> bool
+auto Comp_AHRS::init() -> bool
 {
     m_stream.params = &m_params;
     if (!m_params.angular_velocity_stream)
@@ -90,73 +90,53 @@ auto Complimentary_AHRS::init() -> bool
     m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
 }
 
-auto Complimentary_AHRS::get_input_stream_count() const -> size_t
+auto Comp_AHRS::get_input_stream_count() const -> size_t
 {
     return 3;
 }
-auto Complimentary_AHRS::get_input_stream(size_t idx) -> stream::IStream&
+auto Comp_AHRS::get_input_stream(size_t idx) -> stream::IStream&
 {
     QASSERT(idx < get_input_stream_count());
     if (idx == 0)
     {
-        return get_input_angular_velocity_stream();
+        return *m_params.angular_velocity_stream;
     }
     else if (idx == 1)
     {
-        return get_input_acceleration_stream();
+        return *m_params.acceleration_stream;
     }
     else
     {
-        return get_input_magnetic_field_stream();
+        return *m_params.magnetic_field_stream;
     }
 }
-auto Complimentary_AHRS::get_output_stream_count() const -> size_t
+auto Comp_AHRS::get_output_stream_count() const -> size_t
 {
     return 1;
 }
-auto Complimentary_AHRS::get_output_stream(size_t idx) -> stream::IStream&
+auto Comp_AHRS::get_output_stream(size_t idx) -> stream::IReference_Frame&
 {
     QASSERT(idx < get_output_stream_count());
-    return get_output_reference_frame_stream();
-}
-auto Complimentary_AHRS::get_input_acceleration_stream() -> stream::IAcceleration&
-{
-    QASSERT(m_params.acceleration_stream);
-    return *m_params.acceleration_stream;
-}
-auto Complimentary_AHRS::get_input_angular_velocity_stream() -> stream::IAngular_Velocity&
-{
-    QASSERT(m_params.angular_velocity_stream);
-    return *m_params.angular_velocity_stream;
-}
-auto Complimentary_AHRS::get_input_magnetic_field_stream() -> stream::IMagnetic_Field&
-{
-    QASSERT(m_params.magnetic_field_stream);
-    return *m_params.magnetic_field_stream;
-}
-auto Complimentary_AHRS::get_output_reference_frame_stream() -> stream::IReference_Frame&
-{
     return m_stream;
 }
 
-
-void Complimentary_AHRS::process()
+void Comp_AHRS::process()
 {
     m_stream.samples.clear();
 
     //accumulate the input streams
     {
-        auto const& samples = get_input_angular_velocity_stream().get_samples();
+        auto const& samples = m_params.angular_velocity_stream->get_samples();
         m_angular_velocity_samples.reserve(m_angular_velocity_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_angular_velocity_samples));
     }
     {
-        auto const& samples = get_input_acceleration_stream().get_samples();
+        auto const& samples = m_params.acceleration_stream->get_samples();
         m_acceleration_samples.reserve(m_acceleration_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_acceleration_samples));
     }
     {
-        auto const& samples = get_input_magnetic_field_stream().get_samples();
+        auto const& samples = m_params.magnetic_field_stream->get_samples();
         m_magnetic_field_samples.reserve(m_magnetic_field_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_magnetic_field_samples));
     }
@@ -237,6 +217,8 @@ void Complimentary_AHRS::process()
             }
             rot = math::normalized<float, math::safe>(rot);
         }
+
+        m_stream.samples[i] = m_stream.last_sample;
     }
 
 

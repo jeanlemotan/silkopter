@@ -123,7 +123,11 @@ SOURCES += \
     ../../../libs/DSPFilters/source/RootFinder.cpp \
     ../../../libs/DSPFilters/source/State.cpp \
     ../../src/processor/LiPo_Battery.cpp \
-    ../../src/processor/Complimentary_AHRS.cpp
+    ../../src/processor/Dead_Reckoning.cpp \
+    ../../src/processor/EKF_AHRS.cpp \
+    ../../src/processor/Inertial.cpp \
+    ../../src/processor/Comp_AHRS.cpp \
+    ../../src/processor/Comp_Location_Filter.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -193,7 +197,6 @@ HEADERS += \
     ../../../libs/common/node/source/ISource.h \
     ../../../libs/common/node/stream/IStream.h \
     ../../../libs/common/node/processor/IAHRS.h \
-    ../../../libs/common/node/processor/IInertial.h \
     ../../../libs/common/node/processor/IProcessor.h \
     ../../../libs/common/node/processor/ITransform.h \
     ../../src/processor/ADC_Voltmeter.h \
@@ -232,6 +235,10 @@ HEADERS += \
     ../../../libs/common/node/stream/ICardinal_Points.h \
     ../../../libs/common/node/stream/IBattery_State.h \
     ../../src/processor/LiPo_Battery.h \
-    ../../src/processor/Complimentary_AHRS.h \
-    ../../src/processor/EKF_AHRS.h
+    ../../src/processor/EKF_AHRS.h \
+    ../../src/processor/Inertial.h \
+    ../../src/processor/Compass.h \
+    ../../src/processor/Comp_AHRS.h \
+    ../../src/processor/Comp_Location_Filter.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration.h
 

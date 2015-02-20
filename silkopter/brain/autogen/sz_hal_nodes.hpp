@@ -7481,13 +7481,13 @@ w.Key("\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11, false); Serializer< Wr
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Complimentary_AHRS {
+namespace sz { struct Comp_AHRS {
  std::string name;
 std::string angular_velocity_stream;
 std::string acceleration_stream;
 std::string magnetic_field_stream;
 
-explicit Complimentary_AHRS():name(), angular_velocity_stream(), acceleration_stream(), magnetic_field_stream() {  }
+explicit Comp_AHRS():name(), angular_velocity_stream(), acceleration_stream(), magnetic_field_stream() {  }
 
 
  
@@ -7497,7 +7497,7 @@ explicit Complimentary_AHRS():name(), angular_velocity_stream(), acceleration_st
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Complimentary_AHRS > {
+class SAXEventHandler< ::sz::Comp_AHRS > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -7564,7 +7564,7 @@ has_magnetic_field_stream = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Complimentary_AHRS * obj)
+    explicit SAXEventHandler( ::sz::Comp_AHRS * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -7969,19 +7969,981 @@ handler_3.PrepareForReuse();
     }
 };
 
-template < class Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd >
-struct Serializer< Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd, ::sz::Complimentary_AHRS > {
+template < class Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17 >
+struct Serializer< Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17, ::sz::Comp_AHRS > {
 
-    void operator()( Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd& w, const ::sz::Complimentary_AHRS& value) const
+    void operator()( Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17& w, const ::sz::Comp_AHRS& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd, std::string >()(w, value.name);
-w.Key("\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79\x5f\x73\x74\x72\x65\x61\x6d", 23, false); Serializer< Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd, std::string >()(w, value.angular_velocity_stream);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19, false); Serializer< Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd, std::string >()(w, value.acceleration_stream);
-w.Key("\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64\x5f\x73\x74\x72\x65\x61\x6d", 21, false); Serializer< Writera7c58a2137001d2928c8340c9f020e90d37fd45215e6315d2697cf2fbbc43bfd, std::string >()(w, value.magnetic_field_stream);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17, std::string >()(w, value.name);
+w.Key("\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79\x5f\x73\x74\x72\x65\x61\x6d", 23, false); Serializer< Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17, std::string >()(w, value.angular_velocity_stream);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19, false); Serializer< Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17, std::string >()(w, value.acceleration_stream);
+w.Key("\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64\x5f\x73\x74\x72\x65\x61\x6d", 21, false); Serializer< Writerb06191511eb2872a83d1c82f7c9b158ed3df54fa37793bbeb3919b223d3bcd17, std::string >()(w, value.magnetic_field_stream);
 
         w.EndObject(4);
+    }
+
+};
+}
+
+
+// The MIT License (MIT)
+//
+// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <autojsoncxx/autojsoncxx.hpp>
+
+// The comments are reserved for replacement
+// such syntax is chosen so that the template file looks like valid C++
+
+namespace sz { struct Inertial {
+ std::string name;
+std::string reference_frame_stream;
+std::string acceleration_stream;
+
+explicit Inertial():name(), reference_frame_stream(), acceleration_stream() {  }
+
+
+ 
+}; }
+
+
+namespace autojsoncxx {
+
+template <>
+class SAXEventHandler< ::sz::Inertial > {
+private:
+    utility::scoped_ptr<error::ErrorBase> the_error;
+    int state;
+    int depth;
+
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;
+SAXEventHandler< std::string > handler_2;bool has_name;
+bool has_reference_frame_stream;
+bool has_acceleration_stream;
+
+    bool check_depth(const char* type)
+    {
+        if (depth <= 0) {
+            the_error.reset(new error::TypeMismatchError("object", type));
+            return false;
+        }
+        return true;
+    }
+
+    const char* current_member_name() const
+    {
+        switch (state) {
+            case 0:
+    return "name";
+case 1:
+    return "reference_frame_stream";
+case 2:
+    return "acceleration_stream";
+        default:
+            break;
+        }
+        return "<UNKNOWN>";
+    }
+
+    bool checked_event_forwarding(bool success)
+    {
+        if (!success)
+            the_error.reset(new error::ObjectMemberError(current_member_name()));
+        return success;
+    }
+
+    void set_missing_required(const char* name)
+    {
+        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
+            the_error.reset(new error::RequiredFieldMissingError());
+
+        std::vector<std::string>& missing =
+            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
+
+        missing.push_back(name);
+    }
+
+    void reset_flags()
+    {
+        has_name = false;
+has_reference_frame_stream = false;
+has_acceleration_stream = false;
+    }
+
+public:
+    explicit SAXEventHandler( ::sz::Inertial * obj)
+        : state(-1)
+        , depth(0)
+        , handler_0(&obj->name)
+, handler_1(&obj->reference_frame_stream)
+, handler_2(&obj->acceleration_stream)
+    {
+        reset_flags();
+    }
+
+    bool Null()
+    {
+        if (!check_depth("null"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Bool(bool b)
+    {
+        if (!check_depth("bool"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
+
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int(int i)
+    {
+        if (!check_depth("int"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        if (!check_depth("unsigned"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        if (!check_depth("int64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        if (!check_depth("uint64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        if (!check_depth("double"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool String(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("string"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Key(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("object"))
+            return false;
+
+        if (depth == 1) {
+            if (0) {
+            }
+            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
+						 { state=0; has_name = true; }
+else if (utility::string_equal(str, length, "\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x5f\x66\x72\x61\x6d\x65\x5f\x73\x74\x72\x65\x61\x6d", 22))
+						 { state=1; has_reference_frame_stream = true; }
+else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19))
+						 { state=2; has_acceleration_stream = true; }
+            else {
+                state = -1;
+                return true;
+            }
+
+        } else {
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool StartArray()
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool EndArray(SizeType length)
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool StartObject()
+    {
+        ++depth;
+        if (depth > 1) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool EndObject(SizeType length)
+    {
+        --depth;
+        if (depth > 0) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+            default:
+                break;
+            }
+        } else {
+            if (!has_name) set_missing_required("name");
+if (!has_reference_frame_stream) set_missing_required("reference_frame_stream");
+if (!has_acceleration_stream) set_missing_required("acceleration_stream");
+        }
+        return the_error.empty();
+    }
+
+    bool HasError() const
+    {
+        return !this->the_error.empty();
+    }
+
+    bool ReapError(error::ErrorStack& errs)
+    {
+        if (this->the_error.empty())
+            return false;
+
+        errs.push(this->the_error.release());
+
+        switch (state) {
+
+        case 0:
+     handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void PrepareForReuse()
+    {
+        depth = 0;
+        state = -1;
+        the_error.reset();
+        reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+
+    }
+};
+
+template < class Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0 >
+struct Serializer< Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0, ::sz::Inertial > {
+
+    void operator()( Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0& w, const ::sz::Inertial& value) const
+    {
+        w.StartObject();
+
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0, std::string >()(w, value.name);
+w.Key("\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x5f\x66\x72\x61\x6d\x65\x5f\x73\x74\x72\x65\x61\x6d", 22, false); Serializer< Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0, std::string >()(w, value.reference_frame_stream);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19, false); Serializer< Writer200d77500ac1d63585437a5c345b64c00e607a2ff3af28cbdacf65d371c174a0, std::string >()(w, value.acceleration_stream);
+
+        w.EndObject(3);
+    }
+
+};
+}
+
+
+// The MIT License (MIT)
+//
+// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <autojsoncxx/autojsoncxx.hpp>
+
+// The comments are reserved for replacement
+// such syntax is chosen so that the template file looks like valid C++
+
+namespace sz { struct Comp_Location_Filter {
+ std::string name;
+std::string location_stream;
+std::string linear_acceleration_stream;
+
+explicit Comp_Location_Filter():name(), location_stream(), linear_acceleration_stream() {  }
+
+
+ 
+}; }
+
+
+namespace autojsoncxx {
+
+template <>
+class SAXEventHandler< ::sz::Comp_Location_Filter > {
+private:
+    utility::scoped_ptr<error::ErrorBase> the_error;
+    int state;
+    int depth;
+
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;
+SAXEventHandler< std::string > handler_2;bool has_name;
+bool has_location_stream;
+bool has_linear_acceleration_stream;
+
+    bool check_depth(const char* type)
+    {
+        if (depth <= 0) {
+            the_error.reset(new error::TypeMismatchError("object", type));
+            return false;
+        }
+        return true;
+    }
+
+    const char* current_member_name() const
+    {
+        switch (state) {
+            case 0:
+    return "name";
+case 1:
+    return "location_stream";
+case 2:
+    return "linear_acceleration_stream";
+        default:
+            break;
+        }
+        return "<UNKNOWN>";
+    }
+
+    bool checked_event_forwarding(bool success)
+    {
+        if (!success)
+            the_error.reset(new error::ObjectMemberError(current_member_name()));
+        return success;
+    }
+
+    void set_missing_required(const char* name)
+    {
+        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
+            the_error.reset(new error::RequiredFieldMissingError());
+
+        std::vector<std::string>& missing =
+            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
+
+        missing.push_back(name);
+    }
+
+    void reset_flags()
+    {
+        has_name = false;
+has_location_stream = false;
+has_linear_acceleration_stream = false;
+    }
+
+public:
+    explicit SAXEventHandler( ::sz::Comp_Location_Filter * obj)
+        : state(-1)
+        , depth(0)
+        , handler_0(&obj->name)
+, handler_1(&obj->location_stream)
+, handler_2(&obj->linear_acceleration_stream)
+    {
+        reset_flags();
+    }
+
+    bool Null()
+    {
+        if (!check_depth("null"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Bool(bool b)
+    {
+        if (!check_depth("bool"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
+
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int(int i)
+    {
+        if (!check_depth("int"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        if (!check_depth("unsigned"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        if (!check_depth("int64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        if (!check_depth("uint64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        if (!check_depth("double"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool String(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("string"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Key(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("object"))
+            return false;
+
+        if (depth == 1) {
+            if (0) {
+            }
+            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
+						 { state=0; has_name = true; }
+else if (utility::string_equal(str, length, "\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 15))
+						 { state=1; has_location_stream = true; }
+else if (utility::string_equal(str, length, "\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 26))
+						 { state=2; has_linear_acceleration_stream = true; }
+            else {
+                state = -1;
+                return true;
+            }
+
+        } else {
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool StartArray()
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool EndArray(SizeType length)
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool StartObject()
+    {
+        ++depth;
+        if (depth > 1) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool EndObject(SizeType length)
+    {
+        --depth;
+        if (depth > 0) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+            default:
+                break;
+            }
+        } else {
+            if (!has_name) set_missing_required("name");
+if (!has_location_stream) set_missing_required("location_stream");
+if (!has_linear_acceleration_stream) set_missing_required("linear_acceleration_stream");
+        }
+        return the_error.empty();
+    }
+
+    bool HasError() const
+    {
+        return !this->the_error.empty();
+    }
+
+    bool ReapError(error::ErrorStack& errs)
+    {
+        if (this->the_error.empty())
+            return false;
+
+        errs.push(this->the_error.release());
+
+        switch (state) {
+
+        case 0:
+     handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void PrepareForReuse()
+    {
+        depth = 0;
+        state = -1;
+        the_error.reset();
+        reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+
+    }
+};
+
+template < class Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b >
+struct Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, ::sz::Comp_Location_Filter > {
+
+    void operator()( Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b& w, const ::sz::Comp_Location_Filter& value) const
+    {
+        w.StartObject();
+
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.name);
+w.Key("\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 15, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.location_stream);
+w.Key("\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 26, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.linear_acceleration_stream);
+
+        w.EndObject(3);
     }
 
 };
