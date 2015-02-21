@@ -223,13 +223,13 @@ auto Raspicam::init(Init_Params const& params) -> bool
                        false,
                        true);
 
-    if (!m_hal.get_sources().add<ICamera>(params.name, *this))// ||
+    if (!m_hal.get_sources().add<ICamera>(*this))// ||
 //        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
     {
         return false;
     }
 
-    return res;
+    return true;
 #else
     QLOGE("Raspicam is only supported on the Raspberry pi.");
     return false;
@@ -1030,12 +1030,12 @@ auto Raspicam::create_components() -> bool
         MMAL_PARAMETER_CAMERA_CONFIG_T cam_config;
         cam_config.hdr.id = MMAL_PARAMETER_CAMERA_CONFIG;
         cam_config.hdr.size = sizeof(cam_config);
-        cam_config.max_stills_w = m_impl->high.quality.resolution.x;
-        cam_config.max_stills_h = m_impl->high.quality.resolution.y;
+        cam_config.max_stills_w = m_params.high.resolution.x;
+        cam_config.max_stills_h = m_params.high.resolution.y;
         cam_config.stills_yuv422 = 0;
         cam_config.one_shot_stills = 0;
-        cam_config.max_preview_video_w = m_impl->high.quality.resolution.x;
-        cam_config.max_preview_video_h = m_impl->high.quality.resolution.y;
+        cam_config.max_preview_video_w = m_params.high.resolution.x;
+        cam_config.max_preview_video_h = m_params.high.resolution.y;
         cam_config.num_preview_video_frames = 3;
         cam_config.stills_capture_circular_buffer_height = 0;
         cam_config.fast_preview_resume = 0;
@@ -1054,7 +1054,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_preview_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        setup_video_format(format, m_impl->high.quality.resolution, true, m_fps);
+        setup_video_format(format, m_params.high.resolution, true, m_fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
@@ -1069,7 +1069,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_video_port->format;
         format->encoding = MMAL_ENCODING_OPAQUE;
         format->encoding_variant = MMAL_ENCODING_I420;
-        setup_video_format(format, m_impl->high.quality.resolution, true, m_fps);
+        setup_video_format(format, m_params.high.resolution, true, m_fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
@@ -1084,12 +1084,12 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_capture_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        format->es->video.width = VCOS_ALIGN_UP(m_impl->high.quality.resolution.x, 32);
-        format->es->video.height = VCOS_ALIGN_UP(m_impl->high.quality.resolution.y, 16);
+        format->es->video.width = VCOS_ALIGN_UP(m_params.high.resolution.x, 32);
+        format->es->video.height = VCOS_ALIGN_UP(m_params.high.resolution.y, 16);
         format->es->video.crop.x = 0;
         format->es->video.crop.y = 0;
-        format->es->video.crop.width = m_impl->high.quality.resolution.x;
-        format->es->video.crop.height = m_impl->high.quality.resolution.y;
+        format->es->video.crop.width = m_params.high.resolution.x;
+        format->es->video.crop.height = m_params.high.resolution.y;
         format->es->video.frame_rate.num = 0;
         format->es->video.frame_rate.den = 1;
         format->es->video.par.num = 1;
@@ -1129,7 +1129,7 @@ auto Raspicam::create_components() -> bool
 
 
     //high
-    m_impl->high.encoder = create_encoder_component_for_saving(camera_video_port, m_impl->high.quality.resolution, m_impl->high.quality.bitrate);
+    m_impl->high.encoder = create_encoder_component_for_saving(camera_video_port, m_params.high.resolution, m_params.high.bitrate);
     m_impl->high.encoder_connection = connect_ports(camera_video_port, m_impl->high.encoder->input[0]);
     if (!m_impl->high.encoder_connection || !set_connection_enabled(m_impl->high.encoder_connection, true))
     {
@@ -1145,14 +1145,14 @@ auto Raspicam::create_components() -> bool
     }
 
     //medium
-    m_impl->medium.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_impl->medium.quality.resolution, m_fps);
+    m_impl->medium.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_params.medium.resolution, m_fps);
     m_impl->medium.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], m_impl->medium.resizer->input[0]);
     if (!m_impl->medium.resizer_connection)
     {
         QLOGE("Cannot create medium bitrate resizer");
         return false;
     }
-    m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_impl->medium.quality.resolution, m_impl->medium.quality.bitrate);
+    m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_params.medium.resolution, m_params.medium.bitrate);
     m_impl->medium.encoder_connection = connect_ports(m_impl->medium.resizer->output[0], m_impl->medium.encoder->input[0]);
     if (!m_impl->medium.encoder_connection || !set_connection_enabled(m_impl->medium.encoder_connection, true))
     {
@@ -1167,14 +1167,14 @@ auto Raspicam::create_components() -> bool
     }
 
     //low
-    m_impl->low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_impl->low.quality.resolution, m_fps);
+    m_impl->low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_params.low.resolution, m_fps);
     m_impl->low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], m_impl->low.resizer->input[0]);
     if (!m_impl->low.resizer_connection)
     {
         QLOGE("Cannot create low bitrate resizer");
         return false;
     }
-    m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_impl->low.quality.resolution, m_impl->low.quality.bitrate);
+    m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_params.low.resolution, m_params.low.bitrate);
     m_impl->low.encoder_connection = connect_ports(m_impl->low.resizer->output[0], m_impl->low.encoder->input[0]);
     if (!m_impl->low.encoder_connection || !set_connection_enabled(m_impl->low.encoder_connection, true))
     {

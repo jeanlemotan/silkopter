@@ -18,6 +18,8 @@ namespace node
 namespace sink
 {
 
+const size_t PIGPIO::MAX_PWM_CHANNELS;
+
 
 PIGPIO::PIGPIO(HAL& hal)
     : m_hal(hal)
@@ -104,7 +106,7 @@ auto PIGPIO::init() -> bool
         return false;
     }
 
-    size_t rate = m_params.rate.count();
+    size_t rate = m_params.period.count();
 
     std::vector<size_t> rates = {1, 2, 4, 5, 8, 10};
     if (std::find(rates.begin(), rates.end(), rate) == rates.end())
@@ -146,7 +148,7 @@ auto PIGPIO::init() -> bool
         }
         if (ch.stream->get_rate() > ch.frequency)
         {
-            QLOGE("PIGPIO stream {} is too fast for the PWM channel {}: {}Hz > {}Hz", ch->stream->get_name(), i, ch->stream->get_rate(), ch.frequency);
+            QLOGE("PIGPIO stream {} is too fast for the PWM channel {}: {}Hz > {}Hz", ch.stream->get_name(), i, ch.stream->get_rate(), ch.frequency);
             return false;
         }
     }

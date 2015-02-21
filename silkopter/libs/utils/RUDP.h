@@ -1,9 +1,8 @@
 #pragma once
 
-//#include <algorithm>
+#include <deque>
 #include <zlib.h>
 #include <boost/asio.hpp>
-#include <boost/circular_buffer.hpp>
 #include <boost/intrusive_ptr.hpp>
 
 namespace util
@@ -239,7 +238,8 @@ namespace util
             uint16_t last_seq = 0;
             bool is_done = true;
 
-            boost::circular_buffer<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
+            static constexpr size_t MAX_RTTS = 20;
+            std::deque<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
             q::Clock::duration rtt = q::Clock::duration{0};
         } m_ping;
 
@@ -513,7 +513,7 @@ namespace util
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
         m_init_time_point = q::Clock::now();
-        m_ping.rtts.set_capacity(100);
+        //m_ping.rtts.set_capacity(100);
     }
 
     inline void RUDP::set_send_params(uint8_t channel_idx, Send_Params const& params)
@@ -852,16 +852,17 @@ namespace util
         {
             q::Clock::duration total_rtt{0};
             size_t total = 0;
-            for (auto it = m_ping.rtts.rbegin(); it != m_ping.rtts.rend(); ++it)
+            for (size_t i = 0, sz = m_ping.rtts.size(); i < sz; i++)
             {
-                auto sent_time_point = it->first;
-                auto rtt = it->second;
+                auto const& rtt = m_ping.rtts[sz - i - 1];
+                auto const& sent_time_point = rtt.first;
+                auto const& duration = rtt.second;
                 //we have a few samples of at most one second total?
                 if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_time_point > std::chrono::seconds(1))
                 {
                     break;
                 }
-                total_rtt += rtt;
+                total_rtt += duration;
                 total++;
             }
             m_ping.rtt = (total > 0) ? q::Clock::duration(total_rtt / total) : PING_TIMEOUT;
@@ -1320,6 +1321,10 @@ namespace util
             m_ping.is_done = false;
             //the time will get overwritten when the pack actually gets sent
             m_ping.rtts.push_back(std::make_pair(q::Clock::now(), std::chrono::milliseconds(0)));
+            if (m_ping.rtts.size() > Ping::MAX_RTTS)
+            {
+                m_ping.rtts.erase(m_ping.rtts.begin(), m_ping.rtts.begin() + m_ping.rtts.size() - Ping::MAX_RTTS);
+            }
         }
 
         send_datagram();

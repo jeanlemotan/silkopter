@@ -69,9 +69,6 @@ HAL::HAL()
     QLOG_TOPIC("hal");
 
     m_hw.reset(new Hardware);
-
-    load_settings();
-    save_settings();
 }
 
 HAL::~HAL()
@@ -183,6 +180,11 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 auto HAL::init() -> bool
 {
     using namespace silk::node;
+
+    if (!load_settings())
+    {
+        return false;
+    }
 
 //    struct Stream : public stream::IADC_Value
 //    {
@@ -517,8 +519,8 @@ void HAL::shutdown()
 {
 }
 
-static std::vector<double> s_samples;
-static std::vector<double> s_samples_lpf;
+//static std::vector<double> s_samples;
+//static std::vector<double> s_samples_lpf;
 
 void HAL::process()
 {
@@ -527,24 +529,24 @@ void HAL::process()
         n->process();
     }
 
-    auto* stream = get_streams().find_by_name<node::stream::ILocation>("gps0/stream");
-    auto* stream_lpf = get_streams().find_by_name<node::stream::ILocation>("gps0_resampler/stream");
-    for (auto& s: stream->get_samples())
-    {
-        QLOGI("{.8}", s.value.latitude);
-        s_samples.push_back(s.value.latitude);
-    }
-    for (auto& s: stream_lpf->get_samples())
-    {
-        QLOGI("\t\t{.8}", s.value.latitude);
-        s_samples_lpf.push_back(s.value.latitude);
-    }
+//    auto* stream = get_streams().find_by_name<node::stream::ILocation>("gps0/stream");
+//    auto* stream_lpf = get_streams().find_by_name<node::stream::ILocation>("gps0_resampler/stream");
+//    for (auto& s: stream->get_samples())
+//    {
+//        QLOGI("{.8}", s.value.latitude);
+//        s_samples.push_back(s.value.latitude);
+//    }
+//    for (auto& s: stream_lpf->get_samples())
+//    {
+//        QLOGI("\t\t{.8}", s.value.latitude);
+//        s_samples_lpf.push_back(s.value.latitude);
+//    }
 
-    if (s_samples.size() == 50)
-    {
-        write_gnu_plot("out.dat", s_samples);
-        write_gnu_plot("rsout.dat", s_samples_lpf);
-    }
+//    if (s_samples.size() == 50)
+//    {
+//        write_gnu_plot("out.dat", s_samples);
+//        write_gnu_plot("rsout.dat", s_samples_lpf);
+//    }
 }
 
 //auto HAL::init() -> bool

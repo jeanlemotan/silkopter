@@ -159,15 +159,18 @@ int main(int argc, char const* argv[])
         auto last = q::Clock::now();
         while (!s_exit)
         {
-            auto d = q::Clock::now() - last;
-            if (d >= PERIOD)
+            auto now = q::Clock::now();
+            if (now - last >= PERIOD)
             {
+                last = now;
+
                 comms.process();
 
                 hal.process();
                 uav.process();
             }
-            boost::this_thread::yield();
+            //boost::this_thread::yield();
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
         }
 
         QLOGI("Stopping everything");

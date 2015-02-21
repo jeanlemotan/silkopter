@@ -322,11 +322,10 @@ auto UBLOX::setup() -> bool
                                                               {MESSAGE_NAV_STATUS, 1},
                                                               {MESSAGE_MON_HW, 1},
                                                           }};
-        for (auto m: msgs)
+        for (auto const& m: msgs)
         {
-            QLOGI("Configuring GPS rate to {} for message idx {} (msg: {})...",
+            QLOGI("Configuring GPS rate to {} for meessage (msg: {})...",
                   m.second,
-                  std::distance(&m, msgs.data()),
                   static_cast<int>(m.first));
 
             CFG_MSG data;
@@ -439,6 +438,8 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
         uint8_t ck_b = 0;
         bool is_broken = false;
 
+        packet.payload.clear();
+
         for (auto it = buffer.begin(); it != buffer.end(); ++it)
         {
             auto const d = *it;
@@ -520,6 +521,10 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 // a valid UBlox packet
                 return true;
             }
+            if (is_broken)
+            {
+                break;
+            }
         }
 
         if (is_broken)
@@ -580,7 +585,16 @@ void UBLOX::process_packet(Packet& packet)
     case MESSAGE_MON_VER: process_mon_ver_packet(packet); break;
     case MESSAGE_MON_HW: process_mon_hw_packet(packet); break;
 
-    //default: QLOGI("Ignoring GPS packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message)); break;
+    default:
+    {
+        CFG_MSG data;
+        data.msgClass = packet.cls;
+        data.msgID = static_cast<int>(packet.message) >> 8;
+        data.rate = 0;
+        send_packet(MESSAGE_CFG_MSG, data);
+        QLOGI("Sending stop request for packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message));
+    }
+    break;
     }
 
 }
@@ -625,16 +639,16 @@ void UBLOX::process_nav_sol_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_SOL));
     NAV_SOL& data = reinterpret_cast<NAV_SOL&>(*packet.payload.data());
 
-//    if (data.numSV > 0)
-//    {
-//        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
-//                  data.flags,
-//                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
-//                  data.pAcc / 100.f,
-//                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
-//                  data.sAcc / 100.f,
-//                  data.numSV);
-//    }
+    if (data.numSV > 0)
+    {
+        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
+                  data.flags,
+                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
+                  data.pAcc / 100.f,
+                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
+                  data.sAcc / 100.f,
+                  data.numSV);
+    }
 
     //gpsfix
 //    0x00 = No Fix
