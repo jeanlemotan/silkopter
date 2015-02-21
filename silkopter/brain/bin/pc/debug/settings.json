@@ -1,71 +1,24 @@
 {
     "hal": {
         "buses": {
-            "I2C_Linux": {
-                "name": "i2c0",
-                "dev": "/dev/i2c-0"
-            },
-            "I2C_Linux": {
-                "name": "i2c1",
-                "dev": "/dev/i2c-1"
+            "UART_Linux": {
+                "name": "uart0",
+                "dev": "/dev/ttyUSB0",
+                "baud": 115200
             }
         },
         "nodes": {
-            "SRF02": {
-                "name": "sonar",
-                "bus": "i2c0",
-                "rate": 12,
-                "direction": {
-                    "x": 0,
-                    "y": 0,
-                    "z": -1
-                },
-                "min_distance": 0.1,
-                "max_distance": 4.0
+            "UBLOX": {
+                "name": "gps0",
+                "bus": "uart0",
+                "rate": 5
             },
-            "MS5611": {
-                "name": "ms5611",
-                "bus": "i2c0",
-                "barometer_rate": 100,
-                "thermometer_rate_ratio": 10
-            },
-            "MPU9250": {
-                "name": "imu",
-                "bus": "i2c0",
-                "imu_rate": 1000,
-                "magnetometer_rate": 100,
-                "thermometer_rate": 10,
-                "accelerometer_range": 4,
-                "gyroscope_range": 500
-            },
-            "Magnetic_Field_Resampler": {
-                "name": "imu-magnetic_field_resampler",
-                "input_stream": "imu-magnetometer/stream",
-                "output_rate": 1000
-            },
-            "Acceleration_LPF": {
-                "name": "imu-acceleration_lpf",
-                "input_stream": "imu-accelerometer/stream",
-                "poles": 2,
-                "cutoff_frequency": 30
-            },
-            "Angular_Velocity_LPF": {
-                "name": "imu-angular_velocity_lpf",
-                "input_stream": "imu-gyroscope/stream",
-                "poles": 2,
-                "cutoff_frequency": 30
-            },
-            "Magnetic_Field_LPF": {
-                "name": "imu-magnetic_field_lpf",
-                "input_stream": "imu-magnetic_field_resampler/stream",
-                "poles": 2,
-                "cutoff_frequency": 30
-            },
-            "AHRS_Complimentary": {
-                "name": "ahrs",
-                "acceleration_stream": "imu-acceleration_lpf/stream",
-                "angular_velocity_stream": "imu-angular_velocity_lpf/stream",
-                "magnetic_field_stream": "imu-magnetic_field_lpf/stream"
+            "Location_Resampler": {
+                "name": "gps0_resampler",
+                "input_stream": "gps0/stream",
+                "output_rate": 20,
+                "cutoff_frequency": 1,
+                "poles": 2
             }
         }
     }

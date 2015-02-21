@@ -21,14 +21,14 @@ public:
 
     //filter helpers
     static const size_t FILTER_CHANNELS = 1;
-    typedef float FILTER_CHANNEL_TYPE;
-    static void setup_channels(FILTER_CHANNEL_TYPE* channels[FILTER_CHANNELS], Value& value)
+    static auto get_channels_from_value(std::array<double, FILTER_CHANNELS>& channels, Value const& value) -> bool
     {
-        channels[0] = &value;
+        channels[0] = value;
+        return true;
     }
-    static void lerp(Value& out, Value& a, Value& b, float mu)
+    static void get_value_from_channels(Value& value, std::array<double, FILTER_CHANNELS> const& channels)
     {
-        out = math::lerp(a, b, mu);
+        value = channels[0];
     }
 };
 

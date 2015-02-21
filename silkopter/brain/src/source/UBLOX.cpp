@@ -316,7 +316,8 @@ auto UBLOX::setup() -> bool
         }
     }
     {
-        std::array<std::pair<Message, size_t>, 3> msgs = {{
+        std::array<std::pair<Message, size_t>, 4> msgs = {{
+                                                              {MESSAGE_NAV_POLLH, 1},
                                                               {MESSAGE_NAV_SOL, 1},
                                                               {MESSAGE_NAV_STATUS, 1},
                                                               {MESSAGE_MON_HW, 1},
@@ -624,16 +625,16 @@ void UBLOX::process_nav_sol_packet(Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_SOL));
     NAV_SOL& data = reinterpret_cast<NAV_SOL&>(*packet.payload.data());
 
-    if (data.numSV > 0)
-    {
-        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
-                  data.flags,
-                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
-                  data.pAcc / 100.f,
-                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
-                  data.sAcc / 100.f,
-                  data.numSV);
-    }
+//    if (data.numSV > 0)
+//    {
+//        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
+//                  data.flags,
+//                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
+//                  data.pAcc / 100.f,
+//                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
+//                  data.sAcc / 100.f,
+//                  data.numSV);
+//    }
 
     //gpsfix
 //    0x00 = No Fix

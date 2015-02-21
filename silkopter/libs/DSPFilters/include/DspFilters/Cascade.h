@@ -118,13 +118,9 @@ public:
 
   // Process a block of samples in the given form
   template <class StateType, typename Sample>
-  void process (int numSamples, Sample* dest, StateType& state) const
+  void process (Sample& dest, StateType& state) const
   {
-    while (--numSamples >= 0)
-    {
-        *dest = state.process (*dest, *this);
-        dest++;
-    }
+    dest = state.process(dest, *this);
   }
 
 protected:
@@ -155,14 +151,15 @@ public:
     State() : Cascade::StateBase <StateType> (m_states)
     {
       Cascade::StateBase <StateType>::m_stateArray = m_states;
-      reset ();
+      reset (0.0);
     }
 
-    void reset ()
+    template <typename Sample>
+    void reset (const Sample in)
     {
       StateType* state = m_states;
       for (int i = MaxStages; --i >= 0; ++state)
-        state->reset();
+        state->reset(in);
     }
 
   private:

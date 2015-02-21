@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/processor/IFilter.h"
-#include "DspFilters/Butterworth.h"
+#include "utils/Butterworth.h"
 
 #include "sz_math.hpp"
 #include "sz_hal_nodes.hpp"
@@ -19,7 +19,6 @@ template<class Stream_t>
 class LPF : public IFilter<Stream_t>
 {
 public:
-    typedef IFilter<Stream_t> Base;
     static const int MAX_POLES = 8;
 
     struct Init_Params
@@ -27,7 +26,7 @@ public:
         std::string name;
         Stream_t* input_stream = nullptr;
         uint32_t poles = 1;
-        uint32_t cutoff_frequency = 0;
+        double cutoff_frequency = 0;
     };
 
     LPF(HAL& hal)
@@ -105,18 +104,24 @@ public:
         auto const& is = get_input_stream(0).get_samples();
         m_stream.samples.reserve(is.size());
 
-        auto** channels = m_channels;
+        std::array<double, Stream_t::FILTER_CHANNELS> channels;
         for (auto& s: is)
         {
-           typename Stream_t::Sample vs;
-           vs.dt = s.dt;
-           vs.sample_idx = s.sample_idx;
+           if (Stream_t::get_channels_from_value(channels, s.value))
+           {
+               m_dsp.process(channels.data());
 
-           vs.value = s.value;
-           Stream_t::setup_channels(channels, vs.value);
-           m_dsp.process(1, channels);
-
-           m_stream.samples.push_back(vs);
+               typename Stream_t::Sample vs;
+               vs.dt = s.dt;
+               vs.sample_idx = s.sample_idx;
+               vs.value = s.value;
+               Stream_t::get_value_from_channels(vs.value, channels);
+               m_stream.samples.push_back(vs);
+           }
+           else
+           {
+               m_stream.samples.push_back(s);
+           }
         };
     }
 
@@ -126,18 +131,23 @@ private:
         m_stream.params = &m_params;
         if (!m_params.input_stream)
         {
-            QLOGE("No input specified");
+            QLOGE("{}: No input specified", get_name());
             return false;
         }
         if (m_params.cutoff_frequency > m_params.input_stream->get_rate() / 2)
         {
-            QLOGE("Cutoff frequency {}Hz is bigger than the niquist frequency of {}Hz",
+            QLOGE("{}: Cutoff frequency {}Hz is bigger than the niquist frequency of {}Hz",
+                  get_name(),
                   m_params.cutoff_frequency, m_params.input_stream->get_rate() / 2);
             return false;
         }
 
         m_params.poles = math::clamp<uint32_t>(m_params.poles, 1, MAX_POLES);
-        m_dsp.setup(m_params.poles, get_input_stream(0).get_rate(), m_params.cutoff_frequency);
+        if (!m_dsp.setup(m_params.poles, get_input_stream(0).get_rate(), m_params.cutoff_frequency))
+        {
+            QLOGE("{}: Cannot setup dsp filter.", get_name());
+            return false;
+        }
 
         return true;
     }
@@ -145,9 +155,7 @@ private:
     HAL& m_hal;
     Init_Params m_params;
 
-    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<MAX_POLES>, Stream_t::FILTER_CHANNELS> m_dsp;
-    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
-
+    util::Butterworth<MAX_POLES, Stream_t::FILTER_CHANNELS> m_dsp;
 
     struct Stream : public Stream_t
     {

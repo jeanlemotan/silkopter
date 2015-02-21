@@ -156,8 +156,8 @@ void LiPo_Battery::process()
 
     m_stream.samples.resize(count);
 
-    stream::ICurrent::FILTER_CHANNEL_TYPE* c_channels[stream::ICurrent::FILTER_CHANNELS];
-    stream::IVoltage::FILTER_CHANNEL_TYPE* v_channels[stream::IVoltage::FILTER_CHANNELS];
+    std::array<double, stream::ICurrent::FILTER_CHANNELS> c_channels;
+    std::array<double, stream::IVoltage::FILTER_CHANNELS> v_channels;
 
     for (size_t i = 0; i < count; i++)
     {
@@ -168,15 +168,21 @@ void LiPo_Battery::process()
             auto const& s = m_current_samples[i];
             m_stream.last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
             stream::ICurrent::Value current = s.value;
-            stream::ICurrent::setup_channels(c_channels, current);
-            m_current_filter.process(1, c_channels);
+            if (stream::ICurrent::get_channels_from_value(c_channels, current))
+            {
+                m_current_filter.process(c_channels.data());
+                stream::ICurrent::get_value_from_channels(current, c_channels);
+            }
             m_stream.last_sample.value.average_current = current;
         }
         {
             auto const& s = m_voltage_samples[i];
             stream::IVoltage::Value voltage = s.value;
-            stream::IVoltage::setup_channels(v_channels, voltage);
-            m_voltage_filter.process(1, v_channels);
+            if (stream::IVoltage::get_channels_from_value(v_channels, voltage))
+            {
+                m_voltage_filter.process(v_channels.data());
+                stream::IVoltage::get_value_from_channels(voltage, v_channels);
+            }
             m_stream.last_sample.value.average_voltage = voltage;
         }
         m_stream.last_sample.value.capacity_left = 1.f - math::clamp(m_stream.last_sample.value.charge_used / m_params.full_charge, 0.f, 1.f);

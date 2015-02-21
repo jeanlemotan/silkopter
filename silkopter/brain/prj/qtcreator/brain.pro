@@ -113,7 +113,6 @@ SOURCES += \
     ../../../libs/DSPFilters/source/ChebyshevII.cpp \
     ../../../libs/DSPFilters/source/Custom.cpp \
     ../../../libs/DSPFilters/source/Design.cpp \
-    ../../../libs/DSPFilters/source/Documentation.cpp \
     ../../../libs/DSPFilters/source/Elliptic.cpp \
     ../../../libs/DSPFilters/source/Filter.cpp \
     ../../../libs/DSPFilters/source/Legendre.cpp \
@@ -127,7 +126,8 @@ SOURCES += \
     ../../src/processor/EKF_AHRS.cpp \
     ../../src/processor/Inertial.cpp \
     ../../src/processor/Comp_AHRS.cpp \
-    ../../src/processor/Comp_Location_Filter.cpp
+    ../../src/processor/Comp_Location.cpp \
+    ../../src/processor/Multirotor_Pilot.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -239,6 +239,8 @@ HEADERS += \
     ../../src/processor/Inertial.h \
     ../../src/processor/Compass.h \
     ../../src/processor/Comp_AHRS.h \
-    ../../src/processor/Comp_Location_Filter.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h
+    ../../../libs/common/node/stream/ILinear_Acceleration.h \
+    ../../src/processor/Comp_Location.h \
+    ../../src/processor/Multirotor_Pilot.h \
+    ../../../libs/utils/Butterworth.h
 

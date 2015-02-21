@@ -248,15 +248,16 @@ public:
     return Channels;
   }
 
-  void reset ()
+  template <typename Sample>
+  void reset (const Sample* arrayOfChannels)
   {
-    m_state.reset();
+    m_state.reset(arrayOfChannels);
   }
 
   template <typename Sample>
-  void process (int numSamples, Sample* const* arrayOfChannels)
+  void process (Sample* arrayOfChannels)
   {
-    m_state.process (numSamples, arrayOfChannels, *((FilterClass*)this));
+    m_state.process (arrayOfChannels, *((FilterClass*)this));
   }
 
 protected:

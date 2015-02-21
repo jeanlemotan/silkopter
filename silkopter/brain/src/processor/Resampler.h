@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/processor/IFilter.h"
-#include "DspFilters/Butterworth.h"
+#include "utils/Butterworth.h"
 #include <deque>
 
 #include "sz_math.hpp"
@@ -20,13 +20,15 @@ template<class Stream_t>
 class Resampler : public IFilter<Stream_t>
 {
 public:
-    typedef IFilter<Stream_t> Base;
+    static const int MAX_POLES = 8;
 
     struct Init_Params
     {
         std::string name;
         Stream_t* input_stream = nullptr;
         uint32_t output_rate = 0;
+        uint32_t poles = 1;
+        double cutoff_frequency = 0;
     };
 
     Resampler(HAL& hal)
@@ -49,6 +51,8 @@ public:
         params.name = sz.name;
         params.input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.input_stream);
         params.output_rate = sz.output_rate;
+        params.poles = sz.poles;
+        params.cutoff_frequency = sz.cutoff_frequency;
 
         return init(params);
     }
@@ -111,13 +115,16 @@ public:
         }
         else if (m_params.output_rate < m_params.input_stream->get_rate())
         {
-            auto** channels = m_channels;
+            std::array<double, Stream_t::FILTER_CHANNELS> channels;
             for (auto const& s: is)
             {
                 m_input_accumulated_dt += s.dt;
                 m_input_samples.push_back(s);
-                Stream_t::setup_channels(channels, m_input_samples.back().value);
-                m_dsp.process(1, channels);
+                if (Stream_t::get_channels_from_value(channels, m_input_samples.back().value))
+                {
+                    m_dsp.process(channels.data());
+                    Stream_t::get_value_from_channels(m_input_samples.back().value, channels);
+                }
             }
             downsample();
         }
@@ -176,7 +183,7 @@ public:
 
         m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
-        auto** channels = m_channels;
+        std::array<double, Stream_t::FILTER_CHANNELS> channels;
         while (m_input_accumulated_dt >= m_dt)
         {
             typename Stream_t::Sample s;
@@ -184,8 +191,11 @@ public:
             s.sample_idx = ++m_stream.sample_idx;
             s.dt = m_dt;
 
-            Stream_t::setup_channels(channels, s.value);
-            m_dsp.process(1, channels);
+            if (Stream_t::get_channels_from_value(channels, s.value))
+            {
+                m_dsp.process(channels.data());
+                Stream_t::get_value_from_channels(s.value, channels);
+            }
 
             m_stream.samples.push_back(s);
 
@@ -211,7 +221,7 @@ private:
         m_stream.params = &m_params;
         if (!m_params.input_stream)
         {
-            QLOGE("No input specified");
+            QLOGE("{}: No input specified", get_name());
             return false;
         }
 
@@ -221,13 +231,19 @@ private:
         m_dt = std::chrono::microseconds(1000000 / m_params.output_rate);
         m_input_dt = std::chrono::microseconds(1000000 / input_rate);
 
-        if (m_params.output_rate < input_rate)
+        uint32_t filter_rate = math::max(m_params.output_rate, input_rate);
+        double max_cutoff = math::min(m_params.output_rate / 2.0, input_rate / 2.0);
+        m_params.cutoff_frequency = m_params.cutoff_frequency > 0 ? m_params.cutoff_frequency : max_cutoff;
+        if (m_params.cutoff_frequency > max_cutoff)
         {
-            m_dsp.setup(1, input_rate, m_params.output_rate / 2);
+            QLOGE("{}: Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", get_name(), m_params.cutoff_frequency, max_cutoff);
+            return false;
         }
-        else if (m_params.output_rate > input_rate)
+        m_params.poles = math::clamp<uint32_t>(m_params.poles, 1, MAX_POLES);
+        if (!m_dsp.setup(m_params.poles, filter_rate, m_params.cutoff_frequency))
         {
-            m_dsp.setup(1, m_params.output_rate, input_rate / 2);
+            QLOGE("{}: Cannot setup dsp filter.", get_name());
+            return false;
         }
 
         return true;
@@ -243,8 +259,7 @@ private:
 
     std::deque<typename Stream_t::Sample> m_input_samples;
 
-    Dsp::SimpleFilter <Dsp::Butterworth::LowPass<1>, Stream_t::FILTER_CHANNELS> m_dsp;
-    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
+    util::Butterworth<MAX_POLES, Stream_t::FILTER_CHANNELS> m_dsp;
 
     struct Stream : public Stream_t
     {

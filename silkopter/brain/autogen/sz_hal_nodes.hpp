@@ -5936,7 +5936,7 @@ namespace sz { struct LPF {
  std::string name;
 std::string input_stream;
 uint32_t poles;
-uint32_t cutoff_frequency;
+double cutoff_frequency;
 
 explicit LPF():name(), input_stream(), poles(), cutoff_frequency() {  }
 
@@ -5957,7 +5957,7 @@ private:
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;
-SAXEventHandler< uint32_t > handler_3;bool has_name;
+SAXEventHandler< double > handler_3;bool has_name;
 bool has_input_stream;
 bool has_poles;
 bool has_cutoff_frequency;
@@ -6430,7 +6430,7 @@ struct Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, std::string >()(w, value.name);
 w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, std::string >()(w, value.input_stream);
 w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, uint32_t >()(w, value.poles);
-w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, uint32_t >()(w, value.cutoff_frequency);
+w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writere44cacca6d411d7d3f5ebf2b9db6e5a765bdedb4f28d02baf94656b74ae396d8, double >()(w, value.cutoff_frequency);
 
         w.EndObject(4);
     }
@@ -6470,8 +6470,10 @@ namespace sz { struct Resampler {
  std::string name;
 std::string input_stream;
 uint32_t output_rate;
+uint32_t poles;
+double cutoff_frequency;
 
-explicit Resampler():name(), input_stream(), output_rate() {  }
+explicit Resampler():name(), input_stream(), output_rate(), poles(), cutoff_frequency() {  }
 
 
  
@@ -6489,9 +6491,12 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< uint32_t > handler_2;bool has_name;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;
+SAXEventHandler< double > handler_4;bool has_name;
 bool has_input_stream;
 bool has_output_rate;
+bool has_poles;
 
     bool check_depth(const char* type)
     {
@@ -6511,6 +6516,10 @@ case 1:
     return "input_stream";
 case 2:
     return "output_rate";
+case 3:
+    return "poles";
+case 4:
+    return "cutoff_frequency";
         default:
             break;
         }
@@ -6540,6 +6549,8 @@ case 2:
         has_name = false;
 has_input_stream = false;
 has_output_rate = false;
+has_poles = false;
+
     }
 
 public:
@@ -6549,6 +6560,8 @@ public:
         , handler_0(&obj->name)
 , handler_1(&obj->input_stream)
 , handler_2(&obj->output_rate)
+, handler_3(&obj->poles)
+, handler_4(&obj->cutoff_frequency)
     {
         reset_flags();
     }
@@ -6568,6 +6581,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
 
         default:
             break;
@@ -6591,6 +6610,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
         default:
             break;
         }
@@ -6612,6 +6637,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
 
         default:
             break;
@@ -6635,6 +6666,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
         default:
             break;
         }
@@ -6656,6 +6693,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
 
         default:
             break;
@@ -6679,6 +6722,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
         default:
             break;
         }
@@ -6700,6 +6749,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
 
         default:
             break;
@@ -6723,6 +6778,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
         default:
             break;
         }
@@ -6743,6 +6804,10 @@ else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x5f\x73\x74\x7
 						 { state=1; has_input_stream = true; }
 else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x5f\x72\x61\x74\x65", 11))
 						 { state=2; has_output_rate = true; }
+else if (utility::string_equal(str, length, "\x70\x6f\x6c\x65\x73", 5))
+						 { state=3; has_poles = true; }
+else if (utility::string_equal(str, length, "\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16))
+						 { state=4;  }
             else {
                 state = -1;
                 return true;
@@ -6759,6 +6824,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
 
             default:
                 break;
@@ -6783,6 +6854,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
         default:
             break;
         }
@@ -6805,6 +6882,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
         default:
             break;
         }
@@ -6826,6 +6909,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
 
             default:
                 break;
@@ -6850,6 +6939,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
             default:
                 break;
             }
@@ -6857,6 +6952,7 @@ case 2:
             if (!has_name) set_missing_required("name");
 if (!has_input_stream) set_missing_required("input_stream");
 if (!has_output_rate) set_missing_required("output_rate");
+if (!has_poles) set_missing_required("poles");
         }
         return the_error.empty();
     }
@@ -6881,6 +6977,10 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
 
         default:
             break;
@@ -6898,6 +6998,8 @@ case 2:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
 
     }
 };
@@ -6912,8 +7014,10 @@ struct Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, std::string >()(w, value.name);
 w.Key("\x69\x6e\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d", 12, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, std::string >()(w, value.input_stream);
 w.Key("\x6f\x75\x74\x70\x75\x74\x5f\x72\x61\x74\x65", 11, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, uint32_t >()(w, value.output_rate);
+w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, uint32_t >()(w, value.poles);
+w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writerf17d47d357203e9c98d62da71bcd988bc8854c442d4a168b1c32766a8692b6e8, double >()(w, value.cutoff_frequency);
 
-        w.EndObject(3);
+        w.EndObject(5);
     }
 
 };
@@ -8496,12 +8600,13 @@ w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { struct Comp_Location_Filter {
+namespace sz { struct Comp_Location {
  std::string name;
 std::string location_stream;
 std::string linear_acceleration_stream;
+std::string pressure_stream;
 
-explicit Comp_Location_Filter():name(), location_stream(), linear_acceleration_stream() {  }
+explicit Comp_Location():name(), location_stream(), linear_acceleration_stream(), pressure_stream() {  }
 
 
  
@@ -8511,7 +8616,7 @@ explicit Comp_Location_Filter():name(), location_stream(), linear_acceleration_s
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location_Filter > {
+class SAXEventHandler< ::sz::Comp_Location > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -8519,9 +8624,11 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< std::string > handler_2;bool has_name;
+SAXEventHandler< std::string > handler_2;
+SAXEventHandler< std::string > handler_3;bool has_name;
 bool has_location_stream;
 bool has_linear_acceleration_stream;
+bool has_pressure_stream;
 
     bool check_depth(const char* type)
     {
@@ -8541,6 +8648,8 @@ case 1:
     return "location_stream";
 case 2:
     return "linear_acceleration_stream";
+case 3:
+    return "pressure_stream";
         default:
             break;
         }
@@ -8570,15 +8679,17 @@ case 2:
         has_name = false;
 has_location_stream = false;
 has_linear_acceleration_stream = false;
+has_pressure_stream = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location_Filter * obj)
+    explicit SAXEventHandler( ::sz::Comp_Location * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
 , handler_1(&obj->location_stream)
 , handler_2(&obj->linear_acceleration_stream)
+, handler_3(&obj->pressure_stream)
     {
         reset_flags();
     }
@@ -8598,6 +8709,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -8621,6 +8735,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -8642,6 +8759,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -8665,6 +8785,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -8686,6 +8809,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -8709,6 +8835,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -8730,6 +8859,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -8753,6 +8885,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -8773,6 +8908,8 @@ else if (utility::string_equal(str, length, "\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x5
 						 { state=1; has_location_stream = true; }
 else if (utility::string_equal(str, length, "\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 26))
 						 { state=2; has_linear_acceleration_stream = true; }
+else if (utility::string_equal(str, length, "\x70\x72\x65\x73\x73\x75\x72\x65\x5f\x73\x74\x72\x65\x61\x6d", 15))
+						 { state=3; has_pressure_stream = true; }
             else {
                 state = -1;
                 return true;
@@ -8789,6 +8926,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -8813,6 +8953,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -8835,6 +8978,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
         default:
             break;
         }
@@ -8856,6 +9002,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -8880,6 +9029,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
             default:
                 break;
             }
@@ -8887,6 +9039,7 @@ case 2:
             if (!has_name) set_missing_required("name");
 if (!has_location_stream) set_missing_required("location_stream");
 if (!has_linear_acceleration_stream) set_missing_required("linear_acceleration_stream");
+if (!has_pressure_stream) set_missing_required("pressure_stream");
         }
         return the_error.empty();
     }
@@ -8911,6 +9064,8 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -8928,22 +9083,24 @@ case 2:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
 
     }
 };
 
-template < class Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b >
-struct Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, ::sz::Comp_Location_Filter > {
+template < class Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0 >
+struct Serializer< Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0, ::sz::Comp_Location > {
 
-    void operator()( Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b& w, const ::sz::Comp_Location_Filter& value) const
+    void operator()( Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0& w, const ::sz::Comp_Location& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.name);
-w.Key("\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 15, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.location_stream);
-w.Key("\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 26, false); Serializer< Writere192595b5323dbfd19cb74725a7116d480b22ef69e2bc6aa63544537a3509d2b, std::string >()(w, value.linear_acceleration_stream);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0, std::string >()(w, value.name);
+w.Key("\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 15, false); Serializer< Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0, std::string >()(w, value.location_stream);
+w.Key("\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 26, false); Serializer< Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0, std::string >()(w, value.linear_acceleration_stream);
+w.Key("\x70\x72\x65\x73\x73\x75\x72\x65\x5f\x73\x74\x72\x65\x61\x6d", 15, false); Serializer< Writer23a54ba9dbc12c838ff93b2e9fa92d0cca79fdd1b0d7c4eed56c29697c225da0, std::string >()(w, value.pressure_stream);
 
-        w.EndObject(3);
+        w.EndObject(4);
     }
 
 };

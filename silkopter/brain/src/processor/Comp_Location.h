@@ -1,9 +1,10 @@
 #pragma once
 
 #include "common/node/processor/IProcessor.h"
-#include "common/node/stream/IReference_Frame.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/ICardinal_Points.h"
+#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPressure.h"
+
 #include "HAL.h"
 
 namespace silk
@@ -13,16 +14,17 @@ namespace node
 namespace processor
 {
 
-class Compass : public IProcessor
+class Comp_Location : public IProcessor
 {
 public:
-    Compass(HAL& hal);
+    Comp_Location(HAL& hal);
 
     struct Init_Params
     {
         std::string name;
-        stream::IReference_Frame* reference_frame_stream = nullptr;
-        stream::IMagnetic_Field* magnetic_field_stream = nullptr;
+        stream::ILocation* location_stream = nullptr;
+        stream::ILinear_Acceleration* linear_acceleration_stream = nullptr;
+        stream::IPressure* pressure_stream = nullptr;
     };
 
     auto init(rapidjson::Value const& json) -> bool;
@@ -30,9 +32,8 @@ public:
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IStream&;
-
     auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::ICardinal_Points&;
+    auto get_output_stream(size_t idx) -> stream::ILocation&;
 
     auto get_name() const -> std::string const&;
 
@@ -46,13 +47,14 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    std::vector<stream::IReference_Frame::Sample> m_reference_frame_samples;
-    std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
+    std::vector<stream::ILocation::Sample> m_location_samples;
+    std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
+    std::vector<stream::IPressure::Sample> m_pressure_samples;
 
-    struct Stream : public stream::ICardinal_Points
+    struct Stream : public stream::ILocation
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return params->reference_frame_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return params->location_stream->get_rate(); }
         auto get_name() const -> std::string const& { return name; }
 
         std::string name;

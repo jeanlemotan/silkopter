@@ -141,7 +141,7 @@
         ["std::string", "name", {"required": true}],
         ["std::string", "input_stream", {"required": true}],
         ["uint32_t", "poles", {"required": true}],
-        ["uint32_t", "cutoff_frequency", {"required": true}]
+        ["double", "cutoff_frequency", {"required": true}]
     ]
 },
 {
@@ -152,7 +152,9 @@
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "input_stream", {"required": true}],
-        ["uint32_t", "output_rate", {"required": true}]
+        ["uint32_t", "output_rate", {"required": true}],
+        ["uint32_t", "poles", {"required": true}],
+        ["double", "cutoff_frequency", {"required": false}]
     ]
 },
 {
@@ -193,12 +195,13 @@
 {
     "definition" : true,
     "namespace" : "sz",
-    "name": "Comp_Location_Filter",
+    "name": "Comp_Location",
     "members":
     [
         ["std::string", "name", {"required": true}],
         ["std::string", "location_stream", {"required": true}],
-        ["std::string", "linear_acceleration_stream", {"required": true}]
+        ["std::string", "linear_acceleration_stream", {"required": true}],
+        ["std::string", "pressure_stream", {"required": true}]
     ]
 }
 ]

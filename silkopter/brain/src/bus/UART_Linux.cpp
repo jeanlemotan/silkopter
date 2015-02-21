@@ -66,7 +66,7 @@ auto UART_Linux::init(Init_Params const& params) -> bool
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    m_fd = ::open(params.dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    m_fd = ::open(params.dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if (m_fd < 0)
     {
         QLOGE("can't open {}: {}", params.dev, strerror(errno));
@@ -133,7 +133,13 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    return ::read(m_fd, data, max_size);
+    int res = ::read(m_fd, data, max_size);
+    if (res < 0)
+    {
+//        QLOGE("error reading {}: {}", m_params.dev, strerror(errno));
+        return 0;
+    }
+    return res;
 }
 auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 {

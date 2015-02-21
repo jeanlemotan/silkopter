@@ -114,13 +114,14 @@ class DirectFormII
 public:
   DirectFormII ()
   {
-    reset ();
+    reset (0.0);
   }
 
-  void reset ()
+  template <typename Sample>
+  void reset (const Sample in)
   {
-    m_v1 = 0;
-    m_v2 = 0;
+    m_v1 = in;
+    m_v2 = in;
   }
 
   template <typename Sample>
@@ -159,20 +160,21 @@ class TransposedDirectFormI
 public:
   TransposedDirectFormI ()
   {
-    reset ();
+    reset (0.0);
   }
 
-  void reset ()
+  template <typename Sample>
+  void reset (const Sample in)
   {
-    m_v = 0;
-    m_s1 = 0;
-    m_s1_1 = 0;
-    m_s2 = 0;
-    m_s2_1 = 0;
-    m_s3 = 0;
-    m_s3_1 = 0;
-    m_s4 = 0;
-    m_s4_1 = 0;
+    m_v = in;
+    m_s1 = in;
+    m_s1_1 = in;
+    m_s2 = in;
+    m_s2_1 = in;
+    m_s3 = in;
+    m_s3_1 = in;
+    m_s4 = in;
+    m_s4_1 = in;
   }
 
   template <typename Sample>
@@ -267,10 +269,11 @@ public:
     return Channels;
   }
 
-  void reset ()
+  template <typename Sample>
+  void reset (const Sample* arrayOfChannels)
   {
     for (int i = 0; i < Channels; ++i)
-      m_state[i].reset();
+      m_state[i].reset(arrayOfChannels[i]);
   }
 
   StateType& operator[] (int index)
@@ -280,12 +283,13 @@ public:
   }
 
   template <class Filter, typename Sample>
-  void process (int numSamples,
-                Sample* const* arrayOfChannels,
+  void process (Sample* arrayOfChannels,
                 Filter& filter)
   {
     for (int i = 0; i < Channels; ++i)
-      filter.process (numSamples, arrayOfChannels[i], m_state[i]);
+    {
+        filter.process (arrayOfChannels[i], m_state[i]);
+    }
   }
 
 private:
