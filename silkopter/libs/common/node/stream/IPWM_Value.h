@@ -11,6 +11,7 @@ namespace stream
 
 class IPWM_Value : public IStream
 {
+    DEFINE_RTTI_CLASS(IPWM_Value, IStream);
 public:
     typedef float             Value; //0 .. 1 representing duty cycle
     typedef stream::Sample<Value>     Sample;

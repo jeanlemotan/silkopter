@@ -11,6 +11,7 @@ namespace stream
 
 class IVoltage : public IStream
 {
+    DEFINE_RTTI_CLASS(IVoltage, IStream);
 public:
     typedef float             Value; //volts
     typedef stream::Sample<Value>     Sample;

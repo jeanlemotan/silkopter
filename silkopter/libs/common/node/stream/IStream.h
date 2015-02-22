@@ -11,6 +11,7 @@ namespace stream
 
 class IStream : q::util::Noncopyable
 {
+    DEFINE_RTTI_BASE_CLASS(IStream);
 public:
     virtual ~IStream() {}
 

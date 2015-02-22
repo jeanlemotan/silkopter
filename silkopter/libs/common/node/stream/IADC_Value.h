@@ -11,6 +11,7 @@ namespace stream
 
 class IADC_Value : public IStream
 {
+    DEFINE_RTTI_CLASS(IADC_Value, IStream);
 public:
     typedef float             Value; //0 .. 1
     typedef stream::Sample<Value>     Sample;

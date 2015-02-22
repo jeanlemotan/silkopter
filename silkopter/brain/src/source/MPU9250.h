@@ -136,6 +136,8 @@ private:
     } m_temperature;
 
     q::Clock::duration m_imu_dt;
+
+    rapidjson::Document m_config_json;
 };
 
 

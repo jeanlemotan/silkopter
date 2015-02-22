@@ -11,6 +11,7 @@ namespace stream
 
 class ILocation : public IStream
 {
+    DEFINE_RTTI_CLASS(ILocation, IStream);
 public:
     struct Value
     {

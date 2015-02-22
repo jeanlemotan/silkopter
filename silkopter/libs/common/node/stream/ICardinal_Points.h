@@ -11,6 +11,7 @@ namespace stream
 
 class ICardinal_Points : public IStream
 {
+    DEFINE_RTTI_CLASS(ICardinal_Points, IStream);
 public:
     struct Value
     {

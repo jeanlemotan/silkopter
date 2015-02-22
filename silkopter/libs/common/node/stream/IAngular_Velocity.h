@@ -11,6 +11,7 @@ namespace stream
 
 class IAngular_Velocity : public IStream
 {
+    DEFINE_RTTI_CLASS(IAngular_Velocity, IStream);
 public:
     typedef math::vec3f       Value; //radians per second
     typedef stream::Sample<Value>     Sample;

@@ -11,6 +11,7 @@ namespace stream
 
 class IPressure : public IStream
 {
+    DEFINE_RTTI_CLASS(IPressure, IStream);
 public:
     typedef float             Value; //??
     typedef stream::Sample<Value>     Sample;

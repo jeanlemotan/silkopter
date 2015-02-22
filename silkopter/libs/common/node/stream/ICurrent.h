@@ -11,6 +11,7 @@ namespace stream
 
 class ICurrent : public IStream
 {
+    DEFINE_RTTI_CLASS(ICurrent, IStream);
 public:
     typedef float             Value; //amperes
     typedef stream::Sample<Value>     Sample;

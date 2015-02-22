@@ -11,6 +11,7 @@ namespace stream
 
 class IReference_Frame : public IStream
 {
+    DEFINE_RTTI_CLASS(IReference_Frame, IStream);
 public:
     struct Reference_Frame
     {

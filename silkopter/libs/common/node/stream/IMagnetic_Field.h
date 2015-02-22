@@ -11,6 +11,7 @@ namespace stream
 
 class IMagnetic_Field : public IStream
 {
+    DEFINE_RTTI_CLASS(IMagnetic_Field, IStream);
 public:
     typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;

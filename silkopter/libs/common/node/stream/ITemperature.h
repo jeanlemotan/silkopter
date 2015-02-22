@@ -11,6 +11,7 @@ namespace stream
 
 class ITemperature : public IStream
 {
+    DEFINE_RTTI_CLASS(ITemperature, IStream);
 public:
     typedef float             Value; //degrees celsius
     typedef stream::Sample<Value>     Sample;

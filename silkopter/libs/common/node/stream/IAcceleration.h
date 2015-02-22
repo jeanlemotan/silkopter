@@ -11,6 +11,7 @@ namespace stream
 
 class IAcceleration : public IStream
 {
+    DEFINE_RTTI_CLASS(IAcceleration, IStream);
 public:
     typedef math::vec3f       Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;

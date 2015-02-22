@@ -13,6 +13,7 @@ namespace stream
 
 class IBattery_State : public IStream
 {
+    DEFINE_RTTI_CLASS(IBattery_State, IStream);
 public:
     struct Value
     {
