@@ -23,7 +23,7 @@ auto Comp_AHRS::get_name() const -> std::string const&
 
 auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
 {
-    sz::Comp_AHRS sz;
+    sz::Comp_AHRS_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

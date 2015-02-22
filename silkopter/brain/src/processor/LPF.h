@@ -36,7 +36,7 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool
     {
-        sz::LPF sz;
+        sz::LPF_Init_Params sz;
         autojsoncxx::error::ErrorStack result;
         if (!autojsoncxx::from_value(sz, json, result))
         {

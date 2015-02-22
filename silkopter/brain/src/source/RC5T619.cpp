@@ -147,7 +147,7 @@ auto RC5T619::get_output_stream(size_t idx) -> stream::IStream&
 
 auto RC5T619::init(rapidjson::Value const& json) -> bool
 {
-    sz::RC5T619 sz;
+    sz::RC5T619_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

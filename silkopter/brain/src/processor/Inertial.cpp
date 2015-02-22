@@ -24,7 +24,7 @@ auto Inertial::get_name() const -> std::string const&
 
 auto Inertial::init(rapidjson::Value const& json) -> bool
 {
-    sz::Inertial sz;
+    sz::Inertial_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

@@ -23,7 +23,7 @@ auto ADC_Ammeter::get_name() const -> std::string const&
 
 auto ADC_Ammeter::init(rapidjson::Value const& json) -> bool
 {
-    sz::ADC_Ammeter sz;
+    sz::ADC_Ammeter_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

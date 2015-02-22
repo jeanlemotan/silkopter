@@ -56,7 +56,7 @@ auto SRF02::get_output_stream(size_t idx) -> stream::IStream&
 
 auto SRF02::init(rapidjson::Value const& json) -> bool
 {
-    sz::SRF02 sz;
+    sz::SRF02_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

@@ -38,7 +38,7 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool
     {
-        sz::Resampler sz;
+        sz::Resampler_Init_Params sz;
         autojsoncxx::error::ErrorStack result;
         if (!autojsoncxx::from_value(sz, json, result))
         {

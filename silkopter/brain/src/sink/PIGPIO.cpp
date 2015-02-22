@@ -43,7 +43,7 @@ auto PIGPIO::init(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
-    sz::PIGPIO sz;
+    sz::PIGPIO_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

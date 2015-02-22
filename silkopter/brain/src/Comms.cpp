@@ -132,23 +132,18 @@ auto Comms::get_remote_address() const -> boost::asio::ip::address
     return m_rudp.get_send_endpoint().address();
 }
 
-auto Comms::get_error_count() const -> size_t
-{
-    return m_error_count;
-}
-
 auto Comms::get_remote_clock() const -> Manual_Clock const&
 {
     return m_remote_clock;
 }
 
-void Comms::recieve_camera_params()
-{
-    //comms::Camera_Params v;
-    //if (!m_setup_channel.unpack(v))
-    {
-        return;
-    }
+//void Comms::recieve_camera_params()
+//{
+//    //comms::Camera_Params v;
+//    //if (!m_setup_channel.unpack(v))
+//    {
+//        return;
+//    }
 
 //    if (m_hal.camera)
 //    {
@@ -165,47 +160,47 @@ void Comms::recieve_camera_params()
 //        }
 //    }
     
-    QLOGI("Camera params received");
-}
-void Comms::recieve_uav_input()
-{
+//    QLOGI("Camera params received");
+//}
+//void Comms::recieve_uav_input()
+//{
 //    comms::UAV_Input v;
 //    if (m_input_channel.unpack(v))
 //    {
 //        m_uav.set_uav_input(v);
 //    }
-}
-void Comms::recieve_camera_mount_input()
-{
+//}
+//void Comms::recieve_camera_mount_input()
+//{
 //    comms::Camera_Mount_Input v;
 //    if (m_input_channel.unpack(v))
 //    {
 //        m_uav.set_camera_mount_input(v);
 //    }
-}
-void Comms::recieve_motor_test_input()
-{
+//}
+//void Comms::recieve_motor_test_input()
+//{
 //    comms::Motor_Test_Input v;
 //    if (m_input_channel.unpack(v))
 //    {
 //        m_uav.set_motor_test_input(v);
 //    }
-}
+//}
 
-void Comms::recieve_request_uav_input()
-{
+//void Comms::recieve_request_uav_input()
+//{
 //    m_setup_channel.pack(comms::Setup_Message::REQUEST_UAV_INPUT, m_uav.get_uav_input());
-}
-void Comms::recieve_request_camera_mount_input()
-{
+//}
+//void Comms::recieve_request_camera_mount_input()
+//{
 //    m_setup_channel.pack(comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT, m_uav.get_camera_mount_input());
-}
-void Comms::recieve_request_motor_test_input()
-{
+//}
+//void Comms::recieve_request_motor_test_input()
+//{
 //    m_setup_channel.pack(comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT, m_uav.get_motor_test_input());
-}
-void Comms::recieve_operation_mode()
-{
+//}
+//void Comms::recieve_operation_mode()
+//{
 //    comms::Mode v;
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -218,10 +213,10 @@ void Comms::recieve_operation_mode()
 //        m_uav.set_mode(v);
 //        QLOGI("operation mode changed from {} to {}/{}", static_cast<int>(old), static_cast<int>(v), static_cast<int>(m_uav.get_operation_mode()));
 //    }
-}
+//}
 
-void Comms::recieve_yaw_rate_pid_params()
-{
+//void Comms::recieve_yaw_rate_pid_params()
+//{
 //    auto params = m_uav.get_yaw_rate_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -233,9 +228,9 @@ void Comms::recieve_yaw_rate_pid_params()
 //        QLOGI("yaw rate pid params changed");
 //        m_uav.set_yaw_rate_pid_params(params);
 //    }
-}
-void Comms::recieve_pitch_rate_pid_params()
-{
+//}
+//void Comms::recieve_pitch_rate_pid_params()
+//{
 //    auto params = m_uav.get_pitch_rate_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -247,9 +242,9 @@ void Comms::recieve_pitch_rate_pid_params()
 //        QLOGI("pitch rate pid params changed");
 //        m_uav.set_pitch_rate_pid_params(params);
 //    }
-}
-void Comms::recieve_roll_rate_pid_params()
-{
+//}
+//void Comms::recieve_roll_rate_pid_params()
+//{
 //    auto params = m_uav.get_roll_rate_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -261,9 +256,9 @@ void Comms::recieve_roll_rate_pid_params()
 //        QLOGI("roll rate pid params changed");
 //        m_uav.set_roll_rate_pid_params(params);
 //    }
-}
-void Comms::recieve_altitude_rate_pid_params()
-{
+//}
+//void Comms::recieve_altitude_rate_pid_params()
+//{
 //    auto params = m_uav.get_altitude_rate_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -275,9 +270,9 @@ void Comms::recieve_altitude_rate_pid_params()
 //        QLOGI("altitude rate pid params changed");
 //        m_uav.set_altitude_rate_pid_params(params);
 //    }
-}
-void Comms::recieve_yaw_pid_params()
-{
+//}
+//void Comms::recieve_yaw_pid_params()
+//{
 //    auto params = m_uav.get_yaw_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -289,9 +284,9 @@ void Comms::recieve_yaw_pid_params()
 //        QLOGI("yaw pid params changed");
 //        m_uav.set_yaw_pid_params(params);
 //    }
-}
-void Comms::recieve_pitch_pid_params()
-{
+//}
+//void Comms::recieve_pitch_pid_params()
+//{
 //    auto params = m_uav.get_pitch_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -303,9 +298,9 @@ void Comms::recieve_pitch_pid_params()
 //        QLOGI("pitch pid params changed");
 //        m_uav.set_pitch_pid_params(params);
 //    }
-}
-void Comms::recieve_roll_pid_params()
-{
+//}
+//void Comms::recieve_roll_pid_params()
+//{
 //    auto params = m_uav.get_roll_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -317,9 +312,9 @@ void Comms::recieve_roll_pid_params()
 //        QLOGI("roll pid params changed");
 //        m_uav.set_roll_pid_params(params);
 //    }
-}
-void Comms::recieve_altitude_pid_params()
-{
+//}
+//void Comms::recieve_altitude_pid_params()
+//{
 //    auto params = m_uav.get_altitude_pid_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -331,10 +326,10 @@ void Comms::recieve_altitude_pid_params()
 //        QLOGI("altitude pid params changed");
 //        m_uav.set_altitude_pid_params(params);
 //    }
-}
+//}
 
-void Comms::recieve_assist_params()
-{
+//void Comms::recieve_assist_params()
+//{
 //    auto params = m_uav.get_assist_params();
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -346,21 +341,21 @@ void Comms::recieve_assist_params()
 //        QLOGI("assist params changed");
 //        m_uav.set_assist_params(params);
 //    }
-}
+//}
 
-void Comms::recieve_raw_sensors()
-{
+//void Comms::recieve_raw_sensors()
+//{
 //    QASSERT(m_hal.sensors);
 //    comms::Sensors sensors;
 //    if (m_setup_channel.unpack(sensors))
 //    {
 //        send_raw_sensor_samples(sensors);
 //    }
-}
+//}
 
 
-void Comms::recieve_calibration_accelerometer()
-{
+//void Comms::recieve_calibration_accelerometer()
+//{
 //    QASSERT(m_hal.sensors);
 //    math::vec3f bias, scale;
 //    if (m_setup_channel.get_message_size() == 0)
@@ -375,9 +370,9 @@ void Comms::recieve_calibration_accelerometer()
 //        m_hal.sensors->set_accelerometer_calibration_data(bias, scale);
 //        m_setup_channel.pack(comms::Setup_Message::CALIBRATION_ACCELEROMETER, bias, scale);
 //    }
-}
-void Comms::recieve_calibration_gyroscope()
-{
+//}
+//void Comms::recieve_calibration_gyroscope()
+//{
 //    QASSERT(m_hal.sensors);
 //    math::vec3f bias;
 //    if (m_setup_channel.get_message_size() == 0)
@@ -392,9 +387,9 @@ void Comms::recieve_calibration_gyroscope()
 //        m_hal.sensors->set_gyroscope_calibration_data(bias);
 //        m_setup_channel.pack(comms::Setup_Message::CALIBRATION_GYROSCOPE, bias);
 //    }
-}
-void Comms::recieve_calibration_compass()
-{
+//}
+//void Comms::recieve_calibration_compass()
+//{
 //    math::vec3f bias;
 //    if (m_setup_channel.get_message_size() == 0)
 //    {
@@ -408,7 +403,7 @@ void Comms::recieve_calibration_compass()
 //        m_hal.sensors->set_compass_calibration_data(bias);
 //        m_setup_channel.pack(comms::Setup_Message::CALIBRATION_COMPASS, bias);
 //    }
-}
+//}
 
 //void Comms::send_raw_sensor_samples(comms::Sensors sensors)
 //{
@@ -474,8 +469,8 @@ void Comms::recieve_calibration_compass()
 //    clear_raw_sensor_samples();
 //}
 
-void Comms::clear_raw_sensor_samples()
-{
+//void Comms::clear_raw_sensor_samples()
+//{
 //    m_raw_sensor_samples.accelerometer.clear();
 //    m_raw_sensor_samples.gyroscope.clear();
 //    m_raw_sensor_samples.compass.clear();
@@ -485,10 +480,10 @@ void Comms::clear_raw_sensor_samples()
 //    m_raw_sensor_samples.voltage.clear();
 //    m_raw_sensor_samples.current.clear();
 //    m_raw_sensor_samples.gps.clear();
-}
+//}
 
-void Comms::store_raw_sensor_samples()
-{
+//void Comms::store_raw_sensor_samples()
+//{
 //    constexpr std::chrono::seconds MAX_DURATION{4};
 
 //    auto now = q::Clock::now();
@@ -535,11 +530,11 @@ void Comms::store_raw_sensor_samples()
 //        std::copy(samples.begin(), samples.end(), std::back_inserter(m_raw_sensor_samples.gps));
 //    }
 
-}
+//}
 
 
-void Comms::send_sensor_samples()
-{
+//void Comms::send_sensor_samples()
+//{
 //    QASSERT(m_hal.sensors);
 //    auto now = q::Clock::now();
 //    auto delay = std::chrono::milliseconds(30);
@@ -675,19 +670,19 @@ void Comms::send_sensor_samples()
 //    m_telemetry_channel.end_pack();
 
 //    m_sensor_samples.last_sent_timestamp = now;
-}
+//}
 
 
-void Comms::send_uav_data()
-{
-    auto now = q::Clock::now();
-    auto delay = std::chrono::milliseconds(30);
+//void Comms::send_uav_data()
+//{
+//    auto now = q::Clock::now();
+//    auto delay = std::chrono::milliseconds(30);
 
-    if (now - m_uav_sent_time_point < delay)
-    {
-        return;
-    }
-    m_uav_sent_time_point = now;
+//    if (now - m_uav_sent_time_point < delay)
+//    {
+//        return;
+//    }
+//    m_uav_sent_time_point = now;
 
 //    m_telemetry_channel.pack(comms::Telemetry_Message::UAV_AHRS_ROTATION_L2W, m_uav.get_ahrs().get_quat_l2w());
 //    m_telemetry_channel.pack(comms::Telemetry_Message::UAV_LINEAR_ACCELERATION_W, m_uav.get_linear_acceleration_w());
@@ -704,16 +699,134 @@ void Comms::send_uav_data()
 //        auto avg = m_uav.get_battery().get_average_voltage();
 //        m_telemetry_channel.pack(comms::Telemetry_Message::UAV_BATTERY_VOLTAGE, avg.is_initialized(), avg.get_value_or(0.f));
 //    }
+//}
+
+//auto Comms::send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool
+//{
+//    if (size == 0 || !data)
+//    {
+//        return true;
+//    }
+//    return m_rudp.try_sending(VIDEO_CHANNEL, data, size);
+//}
+
+void Comms::handle_enumerate_sources()
+{
+    if (m_setup_channel.get_message_size() == 0)
+    {
+        QLOGI("Enumerate sources");
+        auto const& all = m_hal.get_sources().get_all();
+
+        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SOURCES);
+        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+
+        for (auto const& n: all)
+        {
+            m_setup_channel.pack_param(n->get_name());
+            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
+            for (size_t i = 0; i < n->get_output_stream_count(); i++)
+            {
+                m_setup_channel.pack_param(n->get_output_stream(i).get_type());
+                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
+            }
+        }
+
+        m_setup_channel.end_pack();
+    }
+    else
+    {
+        QLOGE("Error in enumerating sources");
+    }
 }
 
-auto Comms::send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool
+void Comms::handle_enumerate_sinks()
 {
-    if (size == 0 || !data)
+    if (m_setup_channel.get_message_size() == 0)
     {
-        return true;
+        QLOGI("Enumerate sinks");
+        auto const& all = m_hal.get_sinks().get_all();
+
+        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SINKS);
+        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+
+        for (auto const& n: all)
+        {
+            m_setup_channel.pack_param(n->get_name());
+            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
+            for (size_t i = 0; i < n->get_input_stream_count(); i++)
+            {
+                m_setup_channel.pack_param(n->get_input_stream(i).get_type());
+                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
+            }
+        }
+
+        m_setup_channel.end_pack();
     }
-    return m_rudp.try_sending(VIDEO_CHANNEL, data, size);
+    else
+    {
+        QLOGE("Error in enumerating sinks");
+    }
 }
+
+void Comms::handle_enumerate_processors()
+{
+    if (m_setup_channel.get_message_size() == 0)
+    {
+        QLOGI("Enumerate processors");
+        auto const& all = m_hal.get_processors().get_all();
+
+        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_PROCESSORS);
+        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+
+        for (auto const& n: all)
+        {
+            m_setup_channel.pack_param(n->get_name());
+            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
+            for (size_t i = 0; i < n->get_input_stream_count(); i++)
+            {
+                m_setup_channel.pack_param(n->get_input_stream(i).get_type());
+                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
+            }
+            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
+            for (size_t i = 0; i < n->get_output_stream_count(); i++)
+            {
+                m_setup_channel.pack_param(n->get_output_stream(i).get_type());
+                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
+            }
+        }
+
+        m_setup_channel.end_pack();
+    }
+    else
+    {
+        QLOGE("Error in enumerating processors");
+    }
+}
+
+void Comms::handle_enumerate_streams()
+{
+    if (m_setup_channel.get_message_size() == 0)
+    {
+        QLOGI("Enumerate streams");
+        auto const& all = m_hal.get_streams().get_all();
+
+        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_STREAMS);
+        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+
+        for (auto const& n: all)
+        {
+            m_setup_channel.pack_param(n->get_type());
+            m_setup_channel.pack_param(n->get_name());
+        }
+
+        m_setup_channel.end_pack();
+    }
+    else
+    {
+        QLOGE("Error in enumerating streams");
+    }
+}
+
 
 void Comms::process()
 {
@@ -738,47 +851,27 @@ void Comms::process()
 //    }
 
 
-//    while (auto msg = m_setup_channel.get_next_message())
-//    {
-//        switch (msg.get())
-//        {
-//            case comms::Setup_Message::CAMERA_PARAMS: recieve_camera_params(); break;
+    while (auto msg = m_setup_channel.get_next_message())
+    {
+        switch (msg.get())
+        {
+        case comms::Setup_Message::ENUMERATE_SOURCES: handle_enumerate_sources(); break;
+        case comms::Setup_Message::ENUMERATE_SINKS: handle_enumerate_sinks(); break;
+        case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
+        case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
 
-//            case comms::Setup_Message::REQUEST_RAW_SENSORS: recieve_raw_sensors(); break;
-
-//            case comms::Setup_Message::CALIBRATION_ACCELEROMETER: recieve_calibration_accelerometer(); break;
-//            case comms::Setup_Message::CALIBRATION_GYROSCOPE: recieve_calibration_gyroscope(); break;
-//            case comms::Setup_Message::CALIBRATION_COMPASS: recieve_calibration_compass(); break;
-
-//            case comms::Setup_Message::YAW_RATE_PID_PARAMS: recieve_yaw_rate_pid_params(); break;
-//            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: recieve_pitch_rate_pid_params(); break;
-//            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: recieve_roll_rate_pid_params(); break;
-//            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: recieve_altitude_rate_pid_params(); break;
-//            case comms::Setup_Message::YAW_PID_PARAMS: recieve_yaw_pid_params(); break;
-//            case comms::Setup_Message::PITCH_PID_PARAMS: recieve_pitch_pid_params(); break;
-//            case comms::Setup_Message::ROLL_PID_PARAMS: recieve_roll_pid_params(); break;
-//            case comms::Setup_Message::ALTITUDE_PID_PARAMS: recieve_altitude_pid_params(); break;
-
-//            case comms::Setup_Message::ASSIST_PARAMS: recieve_assist_params(); break;
-
-//            case comms::Setup_Message::REQUEST_UAV_INPUT:           recieve_request_uav_input(); break;
-//            case comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT:    recieve_request_motor_test_input(); break;
-//            case comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT:  recieve_request_camera_mount_input(); break;
-
-//            case comms::Setup_Message::OPERATION_MODE:              recieve_operation_mode(); break;
-
-//            default:
-//                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
+            default:
+                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
 //                m_error_count++;
-//            break;
-//            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
-//        }
-//    }
+            break;
+            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
+        }
+    }
 
-    store_raw_sensor_samples();
+//    store_raw_sensor_samples();
 
-    send_sensor_samples();
-    send_uav_data();
+//    send_sensor_samples();
+//    send_uav_data();
 
     {
         if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())

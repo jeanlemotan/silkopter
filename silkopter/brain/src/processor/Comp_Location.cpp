@@ -23,7 +23,7 @@ auto Comp_Location::get_name() const -> std::string const&
 
 auto Comp_Location::init(rapidjson::Value const& json) -> bool
 {
-    sz::Comp_Location sz;
+    sz::Comp_Location_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

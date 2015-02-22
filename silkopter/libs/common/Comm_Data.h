@@ -44,39 +44,50 @@ enum class Setup_Message : uint8_t
     //returns all the sources in the system
     //REQ: - no arguments
     //RES:
-    //  string - source name
-    //  uint8_t output_count - array size
-    //  string[output_count] - name of all output streams
+    //  uint32_t source_count - array size
+    //      string - source name
+    //      uint32_t output_count - array size
+    //          type - type of output stream
+    //          string - name of output stream
     ENUMERATE_SOURCES,
 
     //returns all the streams in the system
     //REQ: - no arguments
     //RES:
-    //  string - stream name
+    //  uint32_t stream_count - array size
+    //      type - type of stream
+    //      string - name of stream
     ENUMERATE_STREAMS,
 
     //returns all the processors in the system
     //REQ: - no arguments
     //RES:
-    //  string - processor name
-    //  uint8_t input_count - array size
-    //  string[input_count] - name of all input streams
-    //  uint8_t output_count - array size
-    //  string[output_count] - name of all output streams
+    //  uint32_t processor_count - array size
+    //      string - processor name
+    //      uint32_t input_count - array size
+    //          type - type of input stream
+    //          string - name of input stream
+    //      uint32_t output_count - array size
+    //          type - type of output stream
+    //          string - name of output stream
     ENUMERATE_PROCESSORS,
 
     //returns all the sinks in the system
     //REQ: - no arguments
     //RES:
-    //  string - sink name
-    //  uint8_t input_count - array size
-    //  string[input_count] - name of all input streams
+    //  uint32_t sink_count - array size
+    //      string - processor name
+    //      uint32_t input_count - array size
+    //          type - type of input stream
+    //          string - name of input stream
     ENUMERATE_SINKS,
 
     //sets/gets a node config as a json string
     //REQ:
+    //  string - node name
     //  [optional] string - if present, the config to set. If not set - it's a request
     //RES:
+    //  string - node name
     //  string - the config
     SOURCE_CONFIG,
     STREAM_CONFIG,
@@ -85,10 +96,10 @@ enum class Setup_Message : uint8_t
 
     //start or stop telemetry streaming.
     //REQ:
-    //  uint8_t size - array size
+    //  uint32_t size - array size
     //  string[size] - names of the streams
     //RES:
-    //  uint8_t size - array size
+    //  uint32_t size - array size
     //  string[size] - names of the streams that will be sent as telemetry
     STREAM_TELEMETRY,
 

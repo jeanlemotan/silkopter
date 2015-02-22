@@ -34,7 +34,7 @@ auto LiPo_Battery::get_name() const -> std::string const&
 
 auto LiPo_Battery::init(rapidjson::Value const& json) -> bool
 {
-    sz::LiPo_Battery sz;
+    sz::LiPo_Battery_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

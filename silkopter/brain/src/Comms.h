@@ -50,39 +50,39 @@ private:
 
     void handle_accept(boost::system::error_code const& error);
 
-    void recieve_uav_input();
-    void recieve_camera_mount_input();
-    void recieve_motor_test_input();
+//    void recieve_uav_input();
+//    void recieve_camera_mount_input();
+//    void recieve_motor_test_input();
 
-    void recieve_request_uav_input();
-    void recieve_request_camera_mount_input();
-    void recieve_request_motor_test_input();
-    void recieve_operation_mode();
+//    void recieve_request_uav_input();
+//    void recieve_request_camera_mount_input();
+//    void recieve_request_motor_test_input();
+//    void recieve_operation_mode();
 
-    void recieve_camera_params();
+//    void recieve_camera_params();
 
-    void recieve_raw_sensors();
+//    void recieve_raw_sensors();
 
-    void recieve_assist_params();
+//    void recieve_assist_params();
 
-    void recieve_yaw_rate_pid_params();
-    void recieve_pitch_rate_pid_params();
-    void recieve_roll_rate_pid_params();
-    void recieve_altitude_rate_pid_params();
-    void recieve_yaw_pid_params();
-    void recieve_pitch_pid_params();
-    void recieve_roll_pid_params();
-    void recieve_altitude_pid_params();
+//    void recieve_yaw_rate_pid_params();
+//    void recieve_pitch_rate_pid_params();
+//    void recieve_roll_rate_pid_params();
+//    void recieve_altitude_rate_pid_params();
+//    void recieve_yaw_pid_params();
+//    void recieve_pitch_pid_params();
+//    void recieve_roll_pid_params();
+//    void recieve_altitude_pid_params();
 
-    void recieve_calibration_accelerometer();
-    void recieve_calibration_gyroscope();
-    void recieve_calibration_compass();
+//    void recieve_calibration_accelerometer();
+//    void recieve_calibration_gyroscope();
+//    void recieve_calibration_compass();
 
-    void send_sensor_samples();
-    //void send_raw_sensor_samples(comms::Sensors sensor);
+//    void send_sensor_samples();
+//    //void send_raw_sensor_samples(comms::Sensors sensor);
 
-    void store_raw_sensor_samples();
-    void clear_raw_sensor_samples();
+//    void store_raw_sensor_samples();
+//    void clear_raw_sensor_samples();
 
 //    struct Sensor_Samples
 //    {
@@ -111,10 +111,15 @@ private:
 //        std::vector<node::IGPS::Sample> gps;
 //    } m_raw_sensor_samples;
 
+    void handle_enumerate_sources();
+    void handle_enumerate_sinks();
+    void handle_enumerate_streams();
+    void handle_enumerate_processors();
+
     HAL& m_hal;
 //    UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
-    void send_uav_data();
+//    void send_uav_data();
 
     Manual_Clock m_remote_clock;
 
@@ -133,9 +138,6 @@ private:
     Telemetry_Channel m_telemetry_channel;
 
     bool m_is_connected = false;
-
-    size_t m_error_count = 0;
-
 
 };
 

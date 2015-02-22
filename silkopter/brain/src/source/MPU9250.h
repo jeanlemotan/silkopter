@@ -90,6 +90,8 @@ private:
         std::vector<Sample> samples;
         std::string name;
         float scale_inv = 1.f;
+        math::vec3f bias = math::vec3f::zero;
+        math::vec3f scale = math::vec3f::one;
     } m_acceleration;
 
     struct Angular_Velocity : public stream::IAngular_Velocity
@@ -103,6 +105,7 @@ private:
         Sample last_sample;
         std::string name;
         float scale_inv = 1.f;
+        math::vec3f bias = math::vec3f::zero;
     } m_angular_velocity;
 
     struct Magnetic_Field : public stream::IMagnetic_Field
@@ -120,6 +123,7 @@ private:
         q::Clock::duration dt;
         q::Clock::time_point last_time_point;
         float magnetic_adj[3];
+        math::vec3f bias = math::vec3f::zero;
     } m_magnetic_field;
 
     struct Temperature : public stream::ITemperature

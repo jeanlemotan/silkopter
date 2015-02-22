@@ -20,6 +20,11 @@ public:
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
+    virtual auto get_type() const -> std::string const&
+    {
+        return q::rtti::get_class_name<ICurrent>();
+    }
+
     //filter helpers
     static const size_t FILTER_CHANNELS = 1;
     static auto get_channels_from_value(std::array<double, FILTER_CHANNELS>& channels, Value const& value) -> bool

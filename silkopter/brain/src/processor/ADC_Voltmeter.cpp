@@ -23,7 +23,7 @@ auto ADC_Voltmeter::get_name() const -> std::string const&
 
 auto ADC_Voltmeter::init(rapidjson::Value const& json) -> bool
 {
-    sz::ADC_Voltmeter sz;
+    sz::ADC_Voltmeter_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

@@ -17,7 +17,7 @@ class Registry : q::util::Noncopyable
 {
     friend class HAL;
 public:
-    template<class T> auto get_all() const -> std::vector<T*> const&;
+    auto get_all() const -> std::vector<Base*> const&;
     template<class T> auto find_by_name(std::string const& name) const -> T*;
 
     template<class T> auto add(T& node) -> bool;
@@ -69,8 +69,7 @@ private:
 
 
 template<class Base>
-template<class T>
-auto Registry<Base>::get_all() const -> std::vector<T*> const&
+auto Registry<Base>::get_all() const -> std::vector<Base*> const&
 {
     return m_nodes;
 }

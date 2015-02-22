@@ -214,7 +214,7 @@ auto UBLOX::get_output_stream(size_t idx) -> stream::IStream&
 
 auto UBLOX::init(rapidjson::Value const& json) -> bool
 {
-    sz::UBLOX sz;
+    sz::UBLOX_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

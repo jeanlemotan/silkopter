@@ -189,7 +189,7 @@ auto Raspicam::get_output_stream(size_t idx) -> stream::IStream&
 
 auto Raspicam::init(rapidjson::Value const& json) -> bool
 {
-    sz::Raspicam sz;
+    sz::Raspicam_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {

@@ -15,6 +15,16 @@ namespace node
 namespace source
 {
 
+struct Config
+{
+    math::vec3f acceleration_bias = math::vec3f::zero;
+    math::vec3f acceleration_scale = math::vec3f::one;
+
+    math::vec3f angular_velocity_bias = math::vec3f::zero;
+
+    math::vec3f magnetic_field_bias = math::vec3f::zero;
+};
+
 constexpr uint8_t ADDR_MPU9250 = 0x68;
 
 
@@ -364,7 +374,7 @@ auto MPU9250::get_output_stream(size_t idx) -> stream::IStream&
 
 auto MPU9250::init(rapidjson::Value const& json) -> bool
 {
-    sz::MPU9250 sz;
+    sz::MPU9250_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -869,11 +879,33 @@ void MPU9250::process_compass()
 
 auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 {
-    return false;
+    sz::MPU9250_Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize MPU9250 config data: {}", ss.str());
+        return false;
+    }
+
+    m_acceleration.bias = sz.acceleration_bias;
+    m_acceleration.scale = sz.acceleration_scale;
+    m_angular_velocity.bias = sz.angular_velocity_bias;
+    m_magnetic_field.bias = sz.magnetic_field_bias;
+
+    return true;
 }
 auto MPU9250::get_config() -> boost::optional<rapidjson::Value const&>
 {
-    return boost::none;
+    sz::MPU9250_Config sz;
+    sz.acceleration_bias = m_acceleration.bias;
+    sz.acceleration_scale = m_acceleration.scale;
+    sz.angular_velocity_bias = m_angular_velocity.bias;
+    sz.magnetic_field_bias = m_magnetic_field.bias;
+
+    autojsoncxx::to_document(sz, m_config_json);
+    return m_config_json;
 }
 
 

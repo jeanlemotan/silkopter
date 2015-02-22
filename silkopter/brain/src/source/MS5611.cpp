@@ -111,7 +111,7 @@ auto MS5611::get_output_stream(size_t idx) -> stream::IStream&
 
 auto MS5611::init(rapidjson::Value const& json) -> bool
 {
-    sz::MS5611 sz;
+    sz::MS5611_Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
