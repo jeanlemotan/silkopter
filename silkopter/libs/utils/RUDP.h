@@ -854,12 +854,15 @@ namespace util
             size_t total = 0;
             for (size_t i = 0, sz = m_ping.rtts.size(); i < sz; i++)
             {
-                auto const& rtt = m_ping.rtts[sz - i - 1];
+                size_t idx = sz - i - 1;
+                auto const& rtt = m_ping.rtts[idx];
                 auto const& sent_time_point = rtt.first;
                 auto const& duration = rtt.second;
                 //we have a few samples of at most one second total?
                 if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_time_point > std::chrono::seconds(1))
                 {
+                    //erase the old ones
+                    m_ping.rtts.erase(m_ping.rtts.begin(), m_ping.rtts.begin() + idx);
                     break;
                 }
                 total_rtt += duration;

@@ -202,6 +202,15 @@ auto UBLOX::get_name() const -> std::string const&
 {
     return m_params.name;
 }
+auto UBLOX::get_output_stream_count() const -> size_t
+{
+    return 1;
+}
+auto UBLOX::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    return m_stream;
+}
 
 auto UBLOX::init(rapidjson::Value const& json) -> bool
 {
@@ -236,7 +245,7 @@ auto UBLOX::init(Init_Params const& params) -> bool
 
     if (!m_params.name.empty())
     {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        m_stream.name = q::util::format2<std::string>("{}-location", m_params.name);
         if (!m_hal.get_sources().add(*this) ||
             !m_hal.get_streams().add(m_stream))
         {
@@ -351,7 +360,7 @@ auto UBLOX::setup() -> bool
         send_packet(MESSAGE_MON_HW, nullptr, 0);
     }
 
-    m_sample.last_complete_time_point = q::Clock::now();
+    m_stream.last_complete_time_point = q::Clock::now();
     m_is_setup = true;
     return true;
 }
@@ -378,21 +387,20 @@ void UBLOX::process()
     read_data();
 
     auto now = q::Clock::now();
-    auto dt = now - m_sample.last_complete_time_point;
+    auto dt = now - m_stream.last_complete_time_point;
 
     //watchdog
-    if (m_sample.has_nav_status && m_sample.has_pollh && m_sample.has_sol)
+    if (m_stream.has_nav_status && m_stream.has_pollh && m_stream.has_sol)
     {
-        Stream::Sample sample;
-        sample.value = m_sample.data;
+        Stream::Sample& sample = m_stream.last_sample;
         sample.dt = dt;
-        sample.sample_idx = ++m_sample.sample_idx;
+        sample.sample_idx++;
         m_stream.samples.push_back(sample);
 
-        m_sample.last_complete_time_point = now;
+        m_stream.last_complete_time_point = now;
 
-        m_sample.has_nav_status = m_sample.has_pollh = m_sample.has_sol = false;
-        m_sample.data = Stream::Value();
+        m_stream.has_nav_status = m_stream.has_pollh = m_stream.has_sol = false;
+        m_stream.last_sample.value = Stream::Value();
     }
     else if (dt >= REINIT_WATCHGOD_TIMEOUT)
     {
@@ -607,9 +615,9 @@ void UBLOX::process_nav_pollh_packet(Packet& packet)
     //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
 
     {
-        m_sample.data.latitude = data.lat / 10000000.f;
-        m_sample.data.longitude = data.lon / 10000000.f;
-        m_sample.has_pollh = true;
+        m_stream.last_sample.value.latitude = data.lat / 10000000.f;
+        m_stream.last_sample.value.longitude = data.lon / 10000000.f;
+        m_stream.has_pollh = true;
     }
 }
 
@@ -630,7 +638,7 @@ void UBLOX::process_nav_status_packet(Packet& packet)
 //    - 0x06..0xff = reserved
 
     {
-        m_sample.has_nav_status = true;
+        m_stream.has_nav_status = true;
     }
 }
 
@@ -660,17 +668,17 @@ void UBLOX::process_nav_sol_packet(Packet& packet)
 
 
     {
-        m_sample.data.sattelite_count = data.numSV;
-        m_sample.data.velocity = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+        m_stream.last_sample.value.sattelite_count = data.numSV;
+        m_stream.last_sample.value.velocity = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
         if (data.gpsFix == 0x02)
         {
-            m_sample.data.fix = stream::ILocation::Value::Fix::FIX_2D;
+            m_stream.last_sample.value.fix = stream::ILocation::Value::Fix::FIX_2D;
         }
         else if (data.gpsFix == 0x03)
         {
-            m_sample.data.fix = stream::ILocation::Value::Fix::FIX_3D;
+            m_stream.last_sample.value.fix = stream::ILocation::Value::Fix::FIX_3D;
         }
-        m_sample.has_sol = true;
+        m_stream.has_sol = true;
     }
 }
 
@@ -751,11 +759,6 @@ void UBLOX::process_mon_ver_packet(Packet& packet)
 }
 
 ///////////////////////////////
-
-auto UBLOX::get_stream() -> stream::ILocation&
-{
-    return m_stream;
-}
 
 auto UBLOX::send_packet(uint16_t msg, uint8_t const* payload, size_t payload_size) -> bool
 {

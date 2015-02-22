@@ -1,12 +1,13 @@
 #pragma once
 
 #include "HAL.h"
+#include "common/node/source/ISource.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
-#include "common/node/source/IAccelerometer.h"
-#include "common/node/source/IGyroscope.h"
-#include "common/node/source/IMagnetometer.h"
-#include "common/node/source/IThermometer.h"
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/ITemperature.h"
 
 namespace silk
 {
@@ -15,7 +16,7 @@ namespace node
 namespace source
 {
 
-class MPU9250 : q::util::Noncopyable
+class MPU9250 : public ISource
 {
 public:
     MPU9250(HAL& hal);
@@ -37,10 +38,9 @@ public:
 
     void process();
 
-    auto get_accelerometer()    -> source::IAccelerometer&;
-    auto get_gyroscope()        -> source::IGyroscope&;
-    auto get_magnetometer()     -> source::IMagnetometer&;
-    auto get_thermometer()      -> source::IThermometer&;
+    auto get_name() const -> std::string const&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IStream&;
 
     void lock();
     void unlock();
@@ -76,92 +76,61 @@ private:
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;
 
-    struct Accelerometer : public source::IAccelerometer
+    struct Acceleraton : public stream::IAcceleration
     {
-        struct Stream : public stream::IAcceleration
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::IAcceleration& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
+        uint32_t rate = 0;
+        Sample last_sample;
+        std::vector<Sample> samples;
         std::string name;
-        uint32_t sample_idx = 0;
         float scale_inv = 1.f;
-    } m_accelerometer;
+    } m_acceleration;
 
-    struct Gyroscope : public source::IGyroscope
+    struct Angular_Velocity : public stream::IAngular_Velocity
     {
-        struct Stream : public stream::IAngular_Velocity
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::IAngular_Velocity& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
         std::string name;
-        uint32_t sample_idx = 0;
         float scale_inv = 1.f;
-    } m_gyroscope;
+    } m_angular_velocity;
 
-    struct Compass : public source::IMagnetometer
+    struct Magnetic_Field : public stream::IMagnetic_Field
     {
-        struct Stream : public stream::IMagnetic_Field
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::IMagnetic_Field& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
+
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
+        std::string name;
 
         uint8_t akm_address = 0;
         q::Clock::duration dt;
         q::Clock::time_point last_time_point;
-        uint32_t sample_idx = 0;
         float magnetic_adj[3];
-        std::string name;
-    } m_magnetometer;
+    } m_magnetic_field;
 
-    struct Thermometer : public source::IThermometer
+    struct Temperature : public stream::ITemperature
     {
-        struct Stream : public stream::ITemperature
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::ITemperature& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
         std::string name;
         q::Clock::duration dt;
-        uint32_t sample_idx = 0;
-    } m_thermometer;
+    } m_temperature;
 
     q::Clock::duration m_imu_dt;
 };

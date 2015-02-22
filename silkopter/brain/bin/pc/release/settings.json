@@ -15,7 +15,7 @@
             },
             "Location_Resampler": {
                 "name": "gps0_resampler",
-                "input_stream": "gps0-location",
+                "input_stream": "gps0/stream",
                 "output_rate": 20,
                 "cutoff_frequency": 1,
                 "poles": 2

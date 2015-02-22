@@ -1,7 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/source/ISonar.h"
+#include "common/node/source/ISource.h"
+#include "common/node/stream/IDistance.h"
 #include "common/node/bus/II2C.h"
 
 namespace silk
@@ -11,7 +12,7 @@ namespace node
 namespace source
 {
 
-class SRF02: public source::ISonar
+class SRF02 : public ISource
 {
 public:
     SRF02(HAL& hal);
@@ -29,10 +30,11 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
-    void process();
-
-    auto get_stream() -> stream::IDistance&;
     auto get_name() const -> std::string const&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IStream&;
+
+    void process();
 
 private:
     auto init() -> bool;
@@ -49,9 +51,9 @@ private:
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
+        Sample last_sample;
         q::Clock::duration dt;
         q::Clock::time_point last_time_point;
-        uint32_t sample_idx = 0;
         std::string name;
     } m_stream;
 

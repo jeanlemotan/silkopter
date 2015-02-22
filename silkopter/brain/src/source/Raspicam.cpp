@@ -176,6 +176,16 @@ auto Raspicam::get_name() const -> std::string const&
 {
     return m_params.name;
 }
+auto Raspicam::get_output_stream_count() const -> size_t
+{
+    return 0;
+}
+auto Raspicam::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    stream::IStream* ptr = nullptr;
+    return *ptr;
+}
 
 auto Raspicam::init(rapidjson::Value const& json) -> bool
 {

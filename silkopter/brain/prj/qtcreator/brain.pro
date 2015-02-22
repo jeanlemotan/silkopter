@@ -162,17 +162,7 @@ HEADERS += \
     ../../../libs/common/node/bus/ISPI.h \
     ../../../libs/common/node/bus/IUART.h \
     ../../../libs/common/node/sink/IPWM.h \
-    ../../../libs/common/node/source/IAccelerometer.h \
-    ../../../libs/common/node/source/IADC.h \
-    ../../../libs/common/node/source/IAmmeter.h \
-    ../../../libs/common/node/source/IBarometer.h \
-    ../../../libs/common/node/source/ICamera.h \
-    ../../../libs/common/node/source/IGPS.h \
-    ../../../libs/common/node/source/IGyroscope.h \
     ../../../libs/common/node/source/IInertial.h \
-    ../../../libs/common/node/source/ISonar.h \
-    ../../../libs/common/node/source/IThermometer.h \
-    ../../../libs/common/node/source/IVoltmeter.h \
     ../../src/sink/PIGPIO.h \
     ../../src/source/MPU9250.h \
     ../../src/source/MS5611.h \
@@ -229,7 +219,6 @@ HEADERS += \
     ../../src/processor/LPF.h \
     ../../../libs/common/node/stream/IPWM_Value.h \
     ../../src/processor/Resampler.h \
-    ../../../libs/common/node/source/IMagnetometer.h \
     ../../../libs/common/node/processor/IBattery.h \
     ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/stream/ICardinal_Points.h \

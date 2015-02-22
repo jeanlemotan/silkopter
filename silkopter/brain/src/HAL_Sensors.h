@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/node/source/IAccelerometer.h"
-#include "common/node/source/IGyroscope.h"
-#include "common/node/source/IMagnetometer.h"
-#include "common/node/source/IBarometer.h"
-#include "common/node/source/IThermometer.h"
-#include "common/node/source/ISonar.h"
-#include "common/node/source/IGPS.h"
-#include "common/node/source/IAmmeter.h"
-#include "common/node/source/IVoltmeter.h"
+//#include "common/node/source/IAccelerometer.h"
+//#include "common/node/source/IGyroscope.h"
+//#include "common/node/source/IMagnetometer.h"
+//#include "common/node/source/IBarometer.h"
+//#include "common/node/source/IThermometer.h"
+//#include "common/node/source/ISonar.h"
+//#include "common/node/source/IGPS.h"
+//#include "common/node/source/IAmmeter.h"
+//#include "common/node/source/IVoltmeter.h"
 
 //namespace silk
 //{

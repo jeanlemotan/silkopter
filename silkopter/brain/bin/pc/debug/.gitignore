@@ -5,3 +5,4 @@
 /out.plt
 /out.dat
 *.plt
+callgrind.*

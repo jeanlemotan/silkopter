@@ -1,7 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/source/IGPS.h"
+#include "common/node/source/ISource.h"
+#include "common/node/stream/ILocation.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
@@ -13,7 +14,7 @@ namespace node
 namespace source
 {
 
-class UBLOX : public source::IGPS
+class UBLOX : public ISource
 {
 public:
 
@@ -30,10 +31,11 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
-    void process();
-
-    auto get_stream() -> stream::ILocation&;
     auto get_name() const -> std::string const&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IStream&;
+
+    void process();
 
 private:
     auto init() -> bool;
@@ -91,17 +93,6 @@ private:
     std::array<uint8_t, 1024> m_temp_buffer;
     std::deque<uint8_t> m_buffer;
 
-    struct Sample
-    {
-        bool has_nav_status = false;
-        bool has_pollh = false;
-        bool has_sol = false;
-        stream::ILocation::Value data;
-        uint32_t sample_idx = 0;
-
-        q::Clock::time_point last_complete_time_point;
-    } m_sample;
-
     struct Stream : public stream::ILocation
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
@@ -110,7 +101,13 @@ private:
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
+        Sample last_sample;
         std::string name;
+
+        bool has_nav_status = false;
+        bool has_pollh = false;
+        bool has_sol = false;
+        q::Clock::time_point last_complete_time_point;
     } m_stream;
 };
 

@@ -279,24 +279,6 @@ MPU9250::~MPU9250()
 {
 }
 
-auto MPU9250::get_accelerometer() -> IAccelerometer&
-{
-    return m_accelerometer;
-}
-auto MPU9250::get_gyroscope() -> IGyroscope&
-{
-    return m_gyroscope;
-}
-auto MPU9250::get_magnetometer() -> IMagnetometer&
-{
-    return m_magnetometer;
-}
-auto MPU9250::get_thermometer() -> IThermometer&
-{
-    return m_thermometer;
-}
-
-
 void MPU9250::lock()
 {
     if (m_i2c)
@@ -342,23 +324,42 @@ auto MPU9250::mpu_write_u16(uint8_t reg, uint16_t t) -> bool
 }
 auto MPU9250::akm_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool
 {
-    return m_i2c ? m_i2c->read_register(m_magnetometer.akm_address, reg, data, size) : m_spi->read_register(reg, data, size);
+    return m_i2c ? m_i2c->read_register(m_magnetic_field.akm_address, reg, data, size) : m_spi->read_register(reg, data, size);
 }
 auto MPU9250::akm_read_u8(uint8_t reg, uint8_t& dst) -> bool
 {
-    return m_i2c ? m_i2c->read_register_u8(m_magnetometer.akm_address, reg, dst) : m_spi->read_register_u8(reg, dst);
+    return m_i2c ? m_i2c->read_register_u8(m_magnetic_field.akm_address, reg, dst) : m_spi->read_register_u8(reg, dst);
 }
 auto MPU9250::akm_read_u16(uint8_t reg, uint16_t& dst) -> bool
 {
-    return m_i2c ? m_i2c->read_register_u16(m_magnetometer.akm_address, reg, dst) : m_spi->read_register_u16(reg, dst);
+    return m_i2c ? m_i2c->read_register_u16(m_magnetic_field.akm_address, reg, dst) : m_spi->read_register_u16(reg, dst);
 }
 auto MPU9250::akm_write_u8(uint8_t reg, uint8_t t) -> bool
 {
-    return m_i2c ? m_i2c->write_register_u8(m_magnetometer.akm_address, reg, t) : m_spi->write_register_u8(reg, t);
+    return m_i2c ? m_i2c->write_register_u8(m_magnetic_field.akm_address, reg, t) : m_spi->write_register_u8(reg, t);
 }
 auto MPU9250::akm_write_u16(uint8_t reg, uint16_t t) -> bool
 {
-    return m_i2c ? m_i2c->write_register_u16(m_magnetometer.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
+    return m_i2c ? m_i2c->write_register_u16(m_magnetic_field.akm_address, reg, t) : m_spi->write_register_u16(reg, t);
+}
+
+auto MPU9250::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+auto MPU9250::get_output_stream_count() const -> size_t
+{
+    return 4;
+}
+auto MPU9250::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    std::array<stream::IStream*, 4> streams =
+    {{
+        &m_angular_velocity, &m_acceleration, &m_magnetic_field, &m_temperature
+    }};
+    QASSERT(streams.size() == get_output_stream_count());
+    return *streams[idx];
 }
 
 auto MPU9250::init(rapidjson::Value const& json) -> bool
@@ -400,27 +401,16 @@ auto MPU9250::init(Init_Params const& params) -> bool
 
     if (!m_params.name.empty())
     {
-        m_accelerometer.name = q::util::format2<std::string>("{}-accelerometer", params.name);
-        m_accelerometer.stream.name = q::util::format2<std::string>("{}/stream", m_accelerometer.name);
+        m_acceleration.name = q::util::format2<std::string>("{}-acceleration", params.name);
+        m_angular_velocity.name = q::util::format2<std::string>("{}-angular_velocity", params.name);
+        m_magnetic_field.name = q::util::format2<std::string>("{}-magnetic_field", params.name);
+        m_temperature.name = q::util::format2<std::string>("{}-temperature", params.name);
 
-        m_gyroscope.name = q::util::format2<std::string>("{}-gyroscope", params.name);
-        m_gyroscope.stream.name = q::util::format2<std::string>("{}/stream", m_gyroscope.name);
-
-        m_magnetometer.name = q::util::format2<std::string>("{}-magnetometer", params.name);
-        m_magnetometer.stream.name = q::util::format2<std::string>("{}/stream", m_magnetometer.name);
-
-        m_thermometer.name = q::util::format2<std::string>("{}-thermometer", params.name);
-        m_thermometer.stream.name = q::util::format2<std::string>("{}/stream", m_thermometer.name);
-
-        if (!m_hal.get_sources().add(m_accelerometer) ||
-            !m_hal.get_sources().add(m_gyroscope) ||
-            !m_hal.get_sources().add(m_magnetometer) ||
-            !m_hal.get_sources().add(m_thermometer) ||
-
-            !m_hal.get_streams().add(m_accelerometer.get_stream()) ||
-            !m_hal.get_streams().add(m_gyroscope.get_stream()) ||
-            !m_hal.get_streams().add(m_magnetometer.get_stream()) ||
-            !m_hal.get_streams().add(m_thermometer.get_stream()))
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_acceleration) ||
+            !m_hal.get_streams().add(m_angular_velocity) ||
+            !m_hal.get_streams().add(m_magnetic_field) ||
+            !m_hal.get_streams().add(m_temperature))
         {
             return false;
         }
@@ -453,10 +443,10 @@ auto MPU9250::init() -> bool
     m_params.magnetometer_rate = math::clamp<size_t>(m_params.magnetometer_rate, 10, 100);
     m_params.thermometer_rate = math::clamp<size_t>(m_params.thermometer_rate, 10, 50);
 
-    m_accelerometer.stream.rate = m_params.imu_rate;
-    m_gyroscope.stream.rate = m_params.imu_rate;
-    m_magnetometer.stream.rate = m_params.magnetometer_rate;
-    m_thermometer.stream.rate = m_params.thermometer_rate;
+    m_acceleration.rate = m_params.imu_rate;
+    m_angular_velocity.rate = m_params.imu_rate;
+    m_magnetic_field.rate = m_params.magnetometer_rate;
+    m_temperature.rate = m_params.thermometer_rate;
 
 
     std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
@@ -489,19 +479,19 @@ auto MPU9250::init() -> bool
     {
     case 250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_gyroscope.scale_inv = math::radians(1.f) / (131.f);
+        m_angular_velocity.scale_inv = math::radians(1.f) / (131.f);
         break;
     case 500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_gyroscope.scale_inv = math::radians(1.f) / (131.f / 2.f);
+        m_angular_velocity.scale_inv = math::radians(1.f) / (131.f / 2.f);
         break;
     case 1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_gyroscope.scale_inv = math::radians(1.f) / (131.f / 4.f);
+        m_angular_velocity.scale_inv = math::radians(1.f) / (131.f / 4.f);
         break;
     case 2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_gyroscope.scale_inv = math::radians(1.f) / (131.f / 8.f);
+        m_angular_velocity.scale_inv = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
         QLOGE("Invalid gyroscope range: {}", m_params.gyroscope_range);
@@ -513,19 +503,19 @@ auto MPU9250::init() -> bool
     {
     case 2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
-        m_accelerometer.scale_inv = physics::constants::g / 16384.f;
+        m_acceleration.scale_inv = physics::constants::g / 16384.f;
         break;
     case 4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
-        m_accelerometer.scale_inv = physics::constants::g / 8192.f;
+        m_acceleration.scale_inv = physics::constants::g / 8192.f;
         break;
     case 8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-        m_accelerometer.scale_inv = physics::constants::g / 4096.f;
+        m_acceleration.scale_inv = physics::constants::g / 4096.f;
         break;
     case 16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
-        m_accelerometer.scale_inv = physics::constants::g / 2048.f;
+        m_acceleration.scale_inv = physics::constants::g / 2048.f;
         break;
     default:
         QLOGE("Invalid accelerometer range: {}", m_params.accelerometer_range);
@@ -565,8 +555,8 @@ auto MPU9250::init() -> bool
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     m_imu_dt = std::chrono::milliseconds(1000 / m_params.imu_rate);
-    m_magnetometer.dt = std::chrono::milliseconds(1000 / m_params.magnetometer_rate);
-    m_thermometer.dt = std::chrono::milliseconds(1000 / m_params.thermometer_rate);
+    m_magnetic_field.dt = std::chrono::milliseconds(1000 / m_params.magnetometer_rate);
+    m_temperature.dt = std::chrono::milliseconds(1000 / m_params.thermometer_rate);
 
     res &= mpu_write_u8(MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -609,7 +599,7 @@ auto MPU9250::setup_compass() -> bool
     set_bypass(1);
 
     // Find compass. Possible addresses range from 0x0C to 0x0F.
-    for (m_magnetometer.akm_address = 0x0C; m_magnetometer.akm_address <= 0x0F; m_magnetometer.akm_address++)
+    for (m_magnetic_field.akm_address = 0x0C; m_magnetic_field.akm_address <= 0x0F; m_magnetic_field.akm_address++)
     {
         uint8_t data;
         auto res = akm_read_u8(AKM_REG_WHOAMI, data);
@@ -619,13 +609,13 @@ auto MPU9250::setup_compass() -> bool
         }
     }
 
-    if (m_magnetometer.akm_address > 0x0F)
+    if (m_magnetic_field.akm_address > 0x0F)
     {
         QLOGE("Compass not found.");
         return false;
     }
 
-    QLOGI("Compass found at 0x{X}", m_magnetometer.akm_address);
+    QLOGI("Compass found at 0x{X}", m_magnetic_field.akm_address);
 
     akm_write_u8(AKM_REG_CNTL, AKM_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -636,9 +626,9 @@ auto MPU9250::setup_compass() -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     akm_read(AKM_REG_ASAX, data, 3);
-    m_magnetometer.magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
-    m_magnetometer.magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
-    m_magnetometer.magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field.magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field.magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field.magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
     akm_write_u8(AKM_REG_CNTL, AKM_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -685,7 +675,7 @@ auto MPU9250::setup_compass() -> bool
 
 #endif
 
-    m_magnetometer.last_time_point = q::Clock::now();
+    m_magnetic_field.last_time_point = q::Clock::now();
     return true;
 }
 
@@ -739,10 +729,10 @@ void MPU9250::process()
 
     std::lock_guard<MPU9250> lg(*this);
 
-    m_accelerometer.stream.samples.clear();
-    m_gyroscope.stream.samples.clear();
-    m_magnetometer.stream.samples.clear();
-    m_thermometer.stream.samples.clear();
+    m_acceleration.samples.clear();
+    m_angular_velocity.samples.clear();
+    m_magnetic_field.samples.clear();
+    m_temperature.samples.clear();
 
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -773,26 +763,26 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             if (mpu_read(MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
-                m_gyroscope.stream.samples.resize(sample_count);
-                m_accelerometer.stream.samples.resize(sample_count);
+                m_angular_velocity.samples.resize(sample_count);
+                m_acceleration.samples.resize(sample_count);
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     short x = (data[0] << 8) | data[1]; data += 2;
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
-                    auto& asample = m_accelerometer.stream.samples[i];
-                    asample.value.set(x * m_accelerometer.scale_inv, y * m_accelerometer.scale_inv, z * m_accelerometer.scale_inv);
-                    asample.sample_idx = ++m_accelerometer.sample_idx;
+                    auto& asample = m_acceleration.samples[i];
+                    asample.value.set(x * m_acceleration.scale_inv, y * m_acceleration.scale_inv, z * m_acceleration.scale_inv);
+                    asample.sample_idx = ++m_acceleration.last_sample.sample_idx;
                     asample.dt = m_imu_dt;
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
 
-                    auto& gsample = m_gyroscope.stream.samples[i];
-                    gsample.value.set(x * m_gyroscope.scale_inv, y * m_gyroscope.scale_inv, z * m_gyroscope.scale_inv);
-                    gsample.sample_idx = ++m_gyroscope.sample_idx;
+                    auto& gsample = m_angular_velocity.samples[i];
+                    gsample.value.set(x * m_angular_velocity.scale_inv, y * m_angular_velocity.scale_inv, z * m_angular_velocity.scale_inv);
+                    gsample.sample_idx = ++m_angular_velocity.last_sample.sample_idx;
                     gsample.dt = m_imu_dt;
 
 //                    if (math::length(m_samples.gyroscope[i]) > 1.f)
@@ -800,6 +790,15 @@ void MPU9250::process()
 //                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
 //                    }
                 }
+            }
+
+            if (!m_acceleration.samples.empty())
+            {
+                m_acceleration.last_sample = m_acceleration.samples.back();
+            }
+            if (!m_angular_velocity.samples.empty())
+            {
+                m_angular_velocity.last_sample = m_angular_velocity.samples.back();
             }
         }
     }
@@ -817,7 +816,7 @@ void MPU9250::process_compass()
 
 #ifdef USE_AK8963
     auto now = q::Clock::now();
-    if (now - m_magnetometer.last_time_point < m_magnetometer.dt)
+    if (now - m_magnetic_field.last_time_point < m_magnetic_field.dt)
     {
         return;
     }
@@ -840,17 +839,17 @@ void MPU9250::process_compass()
         return;
     }
 
-    auto dt = now - m_magnetometer.last_time_point;
-    m_magnetometer.last_time_point = now;
+    auto dt = now - m_magnetic_field.last_time_point;
+    m_magnetic_field.last_time_point = now;
 
     short data[3];
     data[0] = (tmp[2] << 8) | tmp[1];
     data[1] = (tmp[4] << 8) | tmp[3];
     data[2] = (tmp[6] << 8) | tmp[5];
 
-    data[0] = data[0] * m_magnetometer.magnetic_adj[0];
-    data[1] = data[1] * m_magnetometer.magnetic_adj[1];
-    data[2] = data[2] * m_magnetometer.magnetic_adj[2];
+    data[0] = data[0] * m_magnetic_field.magnetic_adj[0];
+    data[1] = data[1] * m_magnetic_field.magnetic_adj[1];
+    data[2] = data[2] * m_magnetic_field.magnetic_adj[2];
 
     //change of axis according to the specs. By default the compass has front X, right Y and down Z
     static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
@@ -858,12 +857,12 @@ void MPU9250::process_compass()
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
 
-    Compass::Stream::Sample sample;
+    Magnetic_Field::Sample& sample = m_magnetic_field.last_sample;
     sample.value = math::rotate(rot, c);
-    sample.sample_idx = ++m_magnetometer.sample_idx;
+    sample.sample_idx++;
     sample.dt = dt;
 
-    m_magnetometer.stream.samples.push_back(sample);
+    m_magnetic_field.samples.push_back(sample);
 //    LOG_INFO("c: {}", *m_samples.compass);
 #endif
 }

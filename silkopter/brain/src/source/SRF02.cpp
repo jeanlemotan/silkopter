@@ -40,6 +40,20 @@ SRF02::SRF02(HAL& hal)
 
 }
 
+auto SRF02::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+auto SRF02::get_output_stream_count() const -> size_t
+{
+    return 1;
+}
+auto SRF02::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    return m_stream;
+}
+
 auto SRF02::init(rapidjson::Value const& json) -> bool
 {
     sz::SRF02 sz;
@@ -74,7 +88,7 @@ auto SRF02::init(Init_Params const& params) -> bool
 
     if (!m_params.name.empty())
     {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        m_stream.name = q::util::format2<std::string>("{}-distance", m_params.name);
         if (!m_hal.get_sources().add(*this) ||
             !m_hal.get_streams().add(m_stream))
         {
@@ -113,11 +127,6 @@ auto SRF02::init() -> bool
     m_state = 0;
 
     return true;
-}
-
-auto SRF02::get_name() const -> std::string const&
-{
-    return m_params.name;
 }
 
 void SRF02::process()
@@ -160,17 +169,12 @@ void SRF02::process()
 
     if (distance >= m_params.min_distance && distance <= m_params.max_distance)
     {
-        Stream::Sample sample;
+        Stream::Sample& sample = m_stream.last_sample;
         sample.value = distance;
-        sample.sample_idx = ++m_stream.sample_idx;
+        sample.sample_idx++;
         sample.dt = m_stream.dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
         m_stream.samples.push_back(sample);
     }
-}
-
-auto SRF02::get_stream() -> stream::IDistance&
-{
-    return m_stream;
 }
 
 

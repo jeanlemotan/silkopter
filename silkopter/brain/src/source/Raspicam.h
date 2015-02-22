@@ -1,7 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/source/ICamera.h"
+#include "common/node/source/ISource.h"
+#include "common/Comm_Data.h"
 #include "common/node/stream/IVideo.h"
 
 namespace silk
@@ -11,7 +12,7 @@ namespace node
 namespace source
 {
 
-class Raspicam : public source::ICamera
+class Raspicam : public ISource
 {
 public:
     Raspicam(HAL& hal);
@@ -38,9 +39,12 @@ public:
     void shutdown();
 
     auto get_name() const -> std::string const&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IStream&;
 
     //----------------------------------------------------------------------
 
+    typedef std::function<void(uint8_t const* data, size_t size)> Data_Available_Callback;
     void set_data_callback(Data_Available_Callback cb);
 
     auto start_recording() -> bool;

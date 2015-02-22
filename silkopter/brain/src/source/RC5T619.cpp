@@ -130,6 +130,21 @@ RC5T619::RC5T619(HAL& hal)
 {
 }
 
+auto RC5T619::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+auto RC5T619::get_output_stream_count() const -> size_t
+{
+    return 2;
+}
+auto RC5T619::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    return m_adc[idx];
+}
+
+
 auto RC5T619::init(rapidjson::Value const& json) -> bool
 {
     sz::RC5T619 sz;
@@ -163,16 +178,11 @@ auto RC5T619::init(Init_Params const& params) -> bool
     if (!m_params.name.empty())
     {
         m_adc[0].name = q::util::format2<std::string>("{}-adc0", params.name);
-        m_adc[0].stream.name = q::util::format2<std::string>("{}/stream", m_adc[0].name);
-
         m_adc[1].name = q::util::format2<std::string>("{}-adc1", params.name);
-        m_adc[1].stream.name = q::util::format2<std::string>("{}/stream", m_adc[1].name);
 
-        if (!m_hal.get_sources().add(m_adc[0]) ||
-            !m_hal.get_sources().add(m_adc[1]) ||
-
-            !m_hal.get_streams().add(m_adc[0].stream) ||
-            !m_hal.get_streams().add(m_adc[1].stream))
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_adc[0]) ||
+            !m_hal.get_streams().add(m_adc[1]))
         {
             return false;
         }
@@ -192,8 +202,8 @@ auto RC5T619::init() -> bool
     m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
     m_params.adc1_rate_ratio = math::clamp<size_t>(m_params.adc1_rate_ratio, 1, 100);
 
-    m_adc[0].stream.rate = m_params.adc0_rate;
-    m_adc[1].stream.rate = m_params.adc0_rate / m_params.adc1_rate_ratio;
+    m_adc[0].rate = m_params.adc0_rate;
+    m_adc[1].rate = m_params.adc0_rate / m_params.adc1_rate_ratio;
 
     m_dt = std::chrono::milliseconds(1000 / m_params.adc0_rate);
 
@@ -236,8 +246,8 @@ void RC5T619::process()
 {
     QLOG_TOPIC("rc5t619::process");
 
-    m_adc[0].stream.samples.clear();
-    m_adc[1].stream.samples.clear();
+    m_adc[0].samples.clear();
+    m_adc[1].samples.clear();
 
     auto now = q::Clock::now();
     if (now - m_last_time_point < m_dt)
@@ -264,13 +274,13 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            ADC::Stream::Sample sample;
+            ADC_Value::Sample& sample = m_adc[1].last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[1].stream.last_time_point;
-            sample.sample_idx = ++m_adc[1].stream.sample_idx;
-            m_adc[1].stream.samples.push_back(sample);
+            sample.dt = now - m_adc[1].last_time_point;
+            sample.sample_idx++;
+            m_adc[1].samples.push_back(sample);
 
-            m_adc[1].stream.last_time_point = now;
+            m_adc[1].last_time_point = now;
         }
 
         //next
@@ -288,13 +298,13 @@ void RC5T619::process()
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
-            ADC::Stream::Sample sample;
+            ADC_Value::Sample& sample = m_adc[0].last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[0].stream.last_time_point;
-            sample.sample_idx = ++m_adc[0].stream.sample_idx;
-            m_adc[0].stream.samples.push_back(sample);
+            sample.dt = now - m_adc[0].last_time_point;
+            sample.sample_idx++;
+            m_adc[0].samples.push_back(sample);
 
-            m_adc[0].stream.last_time_point = now;
+            m_adc[0].last_time_point = now;
         }
 
         //next
@@ -311,16 +321,6 @@ void RC5T619::process()
         }
     }
 }
-
-auto RC5T619::get_adc0() -> IADC&
-{
-    return m_adc[0];
-}
-auto RC5T619::get_adc1() -> IADC&
-{
-    return m_adc[1];
-}
-
 
 
 }

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/source/IBarometer.h"
-#include "common/node/source/IThermometer.h"
+#include "common/node/source/ISource.h"
+#include "common/node/stream/IPressure.h"
+#include "common/node/stream/ITemperature.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 
@@ -13,7 +14,7 @@ namespace node
 namespace source
 {
 
-class MS5611 : q::util::Noncopyable
+class MS5611 : public ISource
 {
 public:
     MS5611(HAL& hal);
@@ -29,10 +30,11 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
-    void process();
+    auto get_name() const -> std::string const&;
+    auto get_output_stream_count() const -> size_t;
+    auto get_output_stream(size_t idx) -> stream::IStream&;
 
-    auto get_barometer()    -> source::IBarometer&;
-    auto get_thermometer()  -> source::IThermometer&;
+    void process();
 
 private:
     auto init() -> bool;
@@ -52,47 +54,31 @@ private:
 
     Init_Params m_params;
 
-    struct Barometer : public source::IBarometer
+    struct Pressure : public stream::IPressure
     {
-        struct Stream : public stream::IPressure
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            uint32_t sample_idx = 0;
-            double      reading = 0;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::IPressure& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
+        double      reading = 0;
         std::string name;
-    } m_barometer;
+    } m_pressure;
 
-    struct Thermometer : public source::IThermometer
+    struct Temperature : public stream::ITemperature
     {
-        struct Stream : public stream::ITemperature
-        {
-            auto get_samples() const -> std::vector<Sample> const& { return samples; }
-            auto get_rate() const -> uint32_t { return rate; }
-            auto get_name() const -> std::string const& { return name; }
-
-            uint32_t rate = 0;
-            std::vector<Sample> samples;
-            uint32_t sample_idx = 0;
-            double      reading = 0;
-            std::string name;
-        } stream;
-
-        auto get_stream() -> stream::ITemperature& { return stream; }
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
+        double      reading = 0;
         std::string name;
-    } m_thermometer;
+    } m_temperature;
 
     double		m_c1 = 0;
     double		m_c2 = 0;

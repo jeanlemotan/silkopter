@@ -42,15 +42,6 @@ MS5611::MS5611(HAL& hal)
 {
 }
 
-auto MS5611::get_barometer() -> IBarometer&
-{
-    return m_barometer;
-}
-auto MS5611::get_thermometer() -> IThermometer&
-{
-    return m_thermometer;
-}
-
 void MS5611::lock()
 {
     if (m_i2c)
@@ -99,6 +90,25 @@ auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
     return m_i2c ? m_i2c->write_register_u16(ADDR_MS5611, reg, t) : m_spi->write_register_u16(reg, t);
 }
 
+auto MS5611::get_name() const -> std::string const&
+{
+    return m_params.name;
+}
+auto MS5611::get_output_stream_count() const -> size_t
+{
+    return 2;
+}
+auto MS5611::get_output_stream(size_t idx) -> stream::IStream&
+{
+    QASSERT(idx < get_output_stream_count());
+    std::array<stream::IStream*, 2> streams =
+    {{
+        &m_pressure, &m_temperature
+    }};
+    QASSERT(streams.size() == get_output_stream_count());
+    return *streams[idx];
+}
+
 auto MS5611::init(rapidjson::Value const& json) -> bool
 {
     sz::MS5611 sz;
@@ -132,17 +142,12 @@ auto MS5611::init(Init_Params const& params) -> bool
 
     if (!m_params.name.empty())
     {
-        m_barometer.name = q::util::format2<std::string>("{}-barometer", params.name);
-        m_barometer.stream.name = q::util::format2<std::string>("{}/stream", m_barometer.name);
+        m_pressure.name = q::util::format2<std::string>("{}-pressure", params.name);
+        m_temperature.name = q::util::format2<std::string>("{}-temperature", params.name);
 
-        m_thermometer.name = q::util::format2<std::string>("{}-thermometer", params.name);
-        m_thermometer.stream.name = q::util::format2<std::string>("{}/stream", m_thermometer.name);
-
-        if (!m_hal.get_sources().add(m_barometer) ||
-            !m_hal.get_sources().add(m_thermometer) ||
-
-            !m_hal.get_streams().add(m_barometer.get_stream()) ||
-            !m_hal.get_streams().add(m_thermometer.get_stream()))
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_pressure) ||
+            !m_hal.get_streams().add(m_temperature))
         {
             return false;
         }
@@ -160,8 +165,8 @@ auto MS5611::init() -> bool
 
     m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);
     m_params.temperature_rate_ratio = math::clamp<size_t>(m_params.temperature_rate_ratio, 1, 10);
-    m_barometer.stream.rate = m_params.rate;
-    m_thermometer.stream.rate = m_params.rate / m_params.temperature_rate_ratio;
+    m_pressure.rate = m_params.rate;
+    m_temperature.rate = m_params.rate / m_params.temperature_rate_ratio;
 
     m_dt = std::chrono::milliseconds(1000 / m_params.rate);
 
@@ -208,8 +213,8 @@ auto MS5611::init() -> bool
 
 void MS5611::process()
 {
-    m_barometer.stream.samples.clear();
-    m_thermometer.stream.samples.clear();
+    m_pressure.samples.clear();
+    m_temperature.samples.clear();
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
@@ -228,7 +233,7 @@ void MS5611::process()
         if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_thermometer.stream.reading = val;
+            m_temperature.reading = val;
 
         }
 
@@ -244,7 +249,7 @@ void MS5611::process()
         if (bus_read(0x00, buf.data(), buf.size()))
         {
             double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_barometer.stream.reading = val;
+            m_pressure.reading = val;
         }
 
         //next
@@ -287,7 +292,7 @@ void MS5611::calculate(q::Clock::duration dt)
     // Formulas from manufacturer datasheet
     // sub -20c temperature compensation is not included
 
-    double dT = m_thermometer.stream.reading - m_c5 * 256.0;
+    double dT = m_temperature.reading - m_c5 * 256.0;
     double TEMP = 2000.0 + (dT * m_c6)*0.00000011920928955078125;
     double OFF = m_c2 * 65536.0 + (m_c4 * dT) * 0.0078125;
     double SENS = m_c1 * 32768.0 + (m_c3 * dT) * 0.00390625;
@@ -305,20 +310,20 @@ void MS5611::calculate(q::Clock::duration dt)
     }
 
     auto t = static_cast<float>(TEMP) * 0.01;
-    auto p = static_cast<float>((m_barometer.stream.reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+    auto p = static_cast<float>((m_pressure.reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
-    Thermometer::Stream::Sample ts;
+    Temperature::Sample& ts = m_temperature.last_sample;
     ts.value = t;
-    ts.sample_idx = ++m_thermometer.stream.sample_idx;
+    ts.sample_idx++;
     ts.dt = dt;
-    m_thermometer.stream.samples.push_back(ts);
+    m_temperature.samples.push_back(ts);
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
 
-    Barometer::Stream::Sample bs;
-    bs.value = p;
-    bs.sample_idx = ++m_barometer.stream.sample_idx;
-    bs.dt = dt;
-    m_barometer.stream.samples.push_back(bs);
+    Pressure::Sample& ps = m_pressure.last_sample;
+    ps.value = p;
+    ps.sample_idx++;
+    ps.dt = dt;
+    m_pressure.samples.push_back(ps);
 
 //    static Butterworth xxx;
 //    m_pressure = xxx.process(m_pressure.get());

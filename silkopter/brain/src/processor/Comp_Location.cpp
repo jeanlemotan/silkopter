@@ -99,10 +99,11 @@ auto Comp_Location::get_input_stream_count() const -> size_t
 auto Comp_Location::get_input_stream(size_t idx) -> stream::IStream&
 {
     QASSERT(idx < get_input_stream_count());
-    std::array<stream::IStream*, 4> streams =
+    std::array<stream::IStream*, 3> streams =
     {{
         m_params.location_stream, m_params.linear_acceleration_stream, m_params.pressure_stream
     }};
+    QASSERT(streams.size() == get_input_stream_count());
     return *streams[idx];
 }
 auto Comp_Location::get_output_stream_count() const -> size_t
