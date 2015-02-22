@@ -5,6 +5,69 @@
 
 namespace util
 {
+    namespace detail
+    {
+        template<class Container, class T> T get_value_fixed(Container const& t, size_t off)
+        {
+            QASSERT(off + sizeof(T) <= t.size());
+            T val;
+            std::copy(t.begin() + off, t.begin() + off + sizeof(T), reinterpret_cast<uint8_t*>(&val));
+            return val;
+        }
+        template<class Container> std::string get_value_fixed(Container const& t, size_t off)
+        {
+            auto size = get_value_fixed<uint32_t>(t, off);
+            off += sizeof(uint32_t);
+            std::string str;
+            str.resize(size);
+            QASSERT(off + size <= t.size());
+            std::copy(t.begin() + off, t.begin() + off + size, str.begin());
+            return str;
+        }
+        template<class Container, class T> T get_value(Container const& t, size_t& off)
+        {
+            auto val = get_value_fixed<T>(t, off);
+            off += sizeof(T);
+            return val;
+        }
+        template<class Container> std::string get_value(Container const& t, size_t& off)
+        {
+            auto val = get_value_fixed<uint32_t>(t, off);
+            off += sizeof(uint32_t) + val.size();
+            return val;
+        }
+        template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
+        {
+            QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
+            auto const* src = reinterpret_cast<uint8_t const*>(&val);
+            std::copy(src, src + sizeof(T), t.data() + off);
+        }
+        template<class Container> void set_value_fixed(Container& t, std::string const& val, size_t off)
+        {
+            set_value_fixed(t, static_cast<uint32_t>(val.size()), off);
+            off += sizeof(uint32_t);
+            QASSERT_MSG(off + val.size() <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, val.size(), t.size(), t.capacity());
+            std::copy(val.begin(), val.end(), t.data() + off);
+        }
+        template<class Container, class T> void set_value(Container& t, T const& val, size_t& off)
+        {
+            if (off + sizeof(T) > t.size())
+            {
+                t.resize(off + sizeof(T));
+            }
+            set_value_fixed(t, val, off);
+            off += sizeof(T);
+        }
+        template<class Container> void set_value(Container& t, std::string const& val, size_t& off)
+        {
+            if (off + sizeof(uint32_t) + val.size() > t.size())
+            {
+                t.resize(off + sizeof(uint32_t) + val.size());
+            }
+            set_value_fixed(t, val, off);
+            off += val.size();
+        }
+    }
 
     template<class MESSAGE_T, class MESSAGE_SIZE_T>
     class Channel : q::util::Noncopyable
@@ -30,23 +93,23 @@ namespace util
         void begin_pack(Message_t message)
         {
             auto off = m_tx_buffer.size();
-            set_value(m_tx_buffer, message, off);
+            detail::set_value(m_tx_buffer, message, off);
             m_size_off = off;
-            set_value(m_tx_buffer, Message_Size_t(0), off);
+            detail::set_value(m_tx_buffer, Message_Size_t(0), off);
             m_data_start_off = off;
         }
         template<class Param> void pack_param_at(size_t off, Param const& p)
         {
             QASSERT(m_tx_buffer.size() >= m_data_start_off + off + sizeof(p));
             QASSERT(m_data_start_off > m_size_off);
-            set_value_fixed(m_tx_buffer, p, m_data_start_off + off);
+            detail::set_value_fixed(m_tx_buffer, p, m_data_start_off + off);
         }
         template<class Param> void pack_param(Param const& p)
         {
             QASSERT(m_tx_buffer.size() >= m_data_start_off);
             QASSERT(m_data_start_off > m_size_off);
             auto off = m_tx_buffer.size();
-            set_value(m_tx_buffer, p, off);
+            detail::set_value(m_tx_buffer, p, off);
         }
         void end_pack()
         {
@@ -54,7 +117,7 @@ namespace util
             QASSERT(m_data_start_off > m_size_off);
             size_t data_size = m_tx_buffer.size() - m_data_start_off;
             //header
-            set_value_fixed(m_tx_buffer, Message_Size_t(data_size), m_size_off);
+            detail::set_value_fixed(m_tx_buffer, Message_Size_t(data_size), m_size_off);
 
             //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", static_cast<int>(message), data_size, header_crc, data_crc);
             m_size_off = 0;
@@ -113,14 +176,14 @@ namespace util
         }
         template<class Param> auto unpack_param(Param& p) -> bool
         {
-            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-            //q::quick_logf("unpack_param: {}, {}", m_decoded.data_size, m_rx_buffer.size());
-            constexpr auto sz = sizeof(Param);
-            if (m_decoded.offset + sz > m_decoded.data_size || m_decoded.offset + sz > m_rx_buffer.size())
-            {
-                return false;
-            }
-            p = get_value<Param>(m_rx_buffer, m_decoded.offset);
+//            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+//            //q::quick_logf("unpack_param: {}, {}", m_decoded.data_size, m_rx_buffer.size());
+//            constexpr auto sz = sizeof(Param);
+//            if (m_decoded.offset + sz > m_decoded.data_size || m_decoded.offset + sz > m_rx_buffer.size())
+//            {
+//                return false;
+//            }
+            p = detail::get_value<RX_Buffer_t, Param>(m_rx_buffer, m_decoded.offset);
             return true;
         }
         void end_unpack()
@@ -153,34 +216,6 @@ namespace util
             size_t offset = 0;
         } m_decoded;
 
-        template<class T> T get_value_fixed(RX_Buffer_t const& t, size_t off)
-        {
-            QASSERT(off + sizeof(T) <= t.size());
-            T val;
-            std::copy(t.begin() + off, t.begin() + off + sizeof(T), reinterpret_cast<uint8_t*>(&val));
-            return val;
-        }
-        template<class T> T get_value(RX_Buffer_t const& t, size_t& off)
-        {
-            auto val = get_value_fixed<T>(t, off);
-            off += sizeof(T);
-            return val;
-        }
-        template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
-        {
-            QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
-            auto const* src = reinterpret_cast<uint8_t const*>(&val);
-            std::copy(src, src + sizeof(T), t.data() + off);
-        }
-        template<class Container, class T> void set_value(Container& t, T const& val, size_t& off)
-        {
-            if (off + sizeof(T) > t.size())
-            {
-                t.resize(off + sizeof(T));
-            }
-            set_value_fixed(t, val, off);
-            off += sizeof(T);
-        }
         void pop_front(size_t size)
         {
             QASSERT(size <= m_rx_buffer.size());
@@ -229,12 +264,12 @@ namespace util
 		template<typename Param, typename... Params>
         auto _unpack(size_t off, Param& p, Params&... params) -> bool
 		{
-            QASSERT(m_decoded.offset + sizeof(p) <= m_decoded.data_size && m_decoded.data_size <= m_rx_buffer.size());
-            if (m_decoded.offset + sizeof(p) > m_decoded.data_size || m_decoded.data_size > m_rx_buffer.size())
-            {
-                return false;
-            }
-            p = get_value<Param>(m_rx_buffer, m_decoded.offset);
+//            QASSERT(m_decoded.offset + sizeof(p) <= m_decoded.data_size && m_decoded.data_size <= m_rx_buffer.size());
+//            if (m_decoded.offset + sizeof(p) > m_decoded.data_size || m_decoded.data_size > m_rx_buffer.size())
+//            {
+//                return false;
+//            }
+            p = detail::get_value<RX_Buffer_t, Param>(m_rx_buffer, m_decoded.offset);
             return _unpack(off, params...);
 		}
 
@@ -251,8 +286,8 @@ namespace util
             }
 
             //try to decode a message HEADER
-            auto message = get_value_fixed<Message_t>(m_rx_buffer, MESSAGE_OFFSET);
-            auto size = get_value_fixed<Message_Size_t>(m_rx_buffer, SIZE_OFFSET);
+            auto message = detail::get_value_fixed<RX_Buffer_t, Message_t>(m_rx_buffer, MESSAGE_OFFSET);
+            auto size = detail::get_value_fixed<RX_Buffer_t, Message_Size_t>(m_rx_buffer, SIZE_OFFSET);
             if (m_rx_buffer.size() < HEADER_SIZE + size)
             {
                 return false;
@@ -291,6 +326,6 @@ namespace util
         TX_Buffer_t m_tx_buffer;
         size_t m_size_off = 0;
         size_t m_data_start_off = 0;
-	};
+    };
 
 }
