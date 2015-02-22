@@ -1,10 +1,13 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/processor/IMultirotor.h"
 #include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/ICardinal_Points.h"
 #include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IBattery_State.h"
+#include "Comms.h"
 #include "HAL.h"
 
 namespace silk
@@ -14,22 +17,27 @@ namespace node
 namespace processor
 {
 
-class Multirotor_Pilot : public IProcessor
+class Multirotor : public IMultirotor
 {
 public:
-    Multirotor_Pilot(HAL& hal);
+    Multirotor(HAL& hal, Comms& comms);
 
     struct Init_Params
     {
         std::string name;
+        stream::IReference_Frame* reference_frame_stream = nullptr;
         stream::IAngular_Velocity* angular_velocity_stream = nullptr;
         stream::ILinear_Acceleration* linear_acceleration_stream = nullptr;
         stream::ICardinal_Points* cardinal_points_stream = nullptr;
         stream::ILocation* location_stream = nullptr;
+        stream::IBattery_State* battery_state_stream = nullptr;
     };
 
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IStream&;
@@ -45,17 +53,18 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
+    Comms& m_comms;
+
     Init_Params m_params;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
+    std::vector<stream::IReference_Frame::Sample> m_reference_frame_samples;
     std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
-    std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
-
-    math::vec3f m_noisy_front_w;
-    math::vec3f m_noisy_right_w;
-    math::vec3f m_noisy_up_w;
+    std::vector<stream::ILinear_Acceleration::Sample> m_acceleration_samples;
+    std::vector<stream::ICardinal_Points::Sample> m_cardinal_points_samples;
+    std::vector<stream::ILocation::Sample> m_location_samples;
+    std::vector<stream::IBattery_State::Sample> m_battery_state_samples;
 
     struct Stream : public stream::IReference_Frame
     {

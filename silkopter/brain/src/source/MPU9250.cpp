@@ -867,6 +867,16 @@ void MPU9250::process_compass()
 #endif
 }
 
+auto MPU9250::set_config(rapidjson::Value const& json) -> bool
+{
+    return false;
+}
+auto MPU9250::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return boost::none;
+}
+
+
 }
 }
 }

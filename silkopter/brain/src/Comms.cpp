@@ -14,10 +14,9 @@ constexpr uint8_t SIMULATOR_CHANNEL = 30;
 
 constexpr q::Clock::duration RUDP_PERIOD = std::chrono::milliseconds(30);
 
-Comms::Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav)
+Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     : m_io_service(io_service)
     , m_hal(hal)
-    , m_uav(uav)
     , m_socket(io_service)
     , m_rudp(m_socket)
     , m_setup_channel(m_rudp, SETUP_CHANNEL)
@@ -145,8 +144,8 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
 
 void Comms::recieve_camera_params()
 {
-    comms::Camera_Params v;
-    if (!m_setup_channel.unpack(v))
+    //comms::Camera_Params v;
+    //if (!m_setup_channel.unpack(v))
     {
         return;
     }
@@ -170,183 +169,183 @@ void Comms::recieve_camera_params()
 }
 void Comms::recieve_uav_input()
 {
-    comms::UAV_Input v;
-    if (m_input_channel.unpack(v))
-    {
-        m_uav.set_uav_input(v);
-    }
+//    comms::UAV_Input v;
+//    if (m_input_channel.unpack(v))
+//    {
+//        m_uav.set_uav_input(v);
+//    }
 }
 void Comms::recieve_camera_mount_input()
 {
-    comms::Camera_Mount_Input v;
-    if (m_input_channel.unpack(v))
-    {
-        m_uav.set_camera_mount_input(v);
-    }
+//    comms::Camera_Mount_Input v;
+//    if (m_input_channel.unpack(v))
+//    {
+//        m_uav.set_camera_mount_input(v);
+//    }
 }
 void Comms::recieve_motor_test_input()
 {
-    comms::Motor_Test_Input v;
-    if (m_input_channel.unpack(v))
-    {
-        m_uav.set_motor_test_input(v);
-    }
+//    comms::Motor_Test_Input v;
+//    if (m_input_channel.unpack(v))
+//    {
+//        m_uav.set_motor_test_input(v);
+//    }
 }
 
 void Comms::recieve_request_uav_input()
 {
-    m_setup_channel.pack(comms::Setup_Message::REQUEST_UAV_INPUT, m_uav.get_uav_input());
+//    m_setup_channel.pack(comms::Setup_Message::REQUEST_UAV_INPUT, m_uav.get_uav_input());
 }
 void Comms::recieve_request_camera_mount_input()
 {
-    m_setup_channel.pack(comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT, m_uav.get_camera_mount_input());
+//    m_setup_channel.pack(comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT, m_uav.get_camera_mount_input());
 }
 void Comms::recieve_request_motor_test_input()
 {
-    m_setup_channel.pack(comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT, m_uav.get_motor_test_input());
+//    m_setup_channel.pack(comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT, m_uav.get_motor_test_input());
 }
 void Comms::recieve_operation_mode()
 {
-    comms::Mode v;
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("operation mode get");
-        m_setup_channel.pack(comms::Setup_Message::OPERATION_MODE, m_uav.get_operation_mode());
-    }
-    else if (m_setup_channel.unpack(v))
-    {
-        auto old = m_uav.get_operation_mode();
-        m_uav.set_mode(v);
-        QLOGI("operation mode changed from {} to {}/{}", static_cast<int>(old), static_cast<int>(v), static_cast<int>(m_uav.get_operation_mode()));
-    }
+//    comms::Mode v;
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("operation mode get");
+//        m_setup_channel.pack(comms::Setup_Message::OPERATION_MODE, m_uav.get_operation_mode());
+//    }
+//    else if (m_setup_channel.unpack(v))
+//    {
+//        auto old = m_uav.get_operation_mode();
+//        m_uav.set_mode(v);
+//        QLOGI("operation mode changed from {} to {}/{}", static_cast<int>(old), static_cast<int>(v), static_cast<int>(m_uav.get_operation_mode()));
+//    }
 }
 
 void Comms::recieve_yaw_rate_pid_params()
 {
-    auto params = m_uav.get_yaw_rate_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("yaw rate pid params get");
-        m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("yaw rate pid params changed");
-        m_uav.set_yaw_rate_pid_params(params);
-    }
+//    auto params = m_uav.get_yaw_rate_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("yaw rate pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::YAW_RATE_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("yaw rate pid params changed");
+//        m_uav.set_yaw_rate_pid_params(params);
+//    }
 }
 void Comms::recieve_pitch_rate_pid_params()
 {
-    auto params = m_uav.get_pitch_rate_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("pitch rate pid params get");
-        m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("pitch rate pid params changed");
-        m_uav.set_pitch_rate_pid_params(params);
-    }
+//    auto params = m_uav.get_pitch_rate_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("pitch rate pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::PITCH_RATE_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("pitch rate pid params changed");
+//        m_uav.set_pitch_rate_pid_params(params);
+//    }
 }
 void Comms::recieve_roll_rate_pid_params()
 {
-    auto params = m_uav.get_roll_rate_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("roll rate pid params get");
-        m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("roll rate pid params changed");
-        m_uav.set_roll_rate_pid_params(params);
-    }
+//    auto params = m_uav.get_roll_rate_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("roll rate pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::ROLL_RATE_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("roll rate pid params changed");
+//        m_uav.set_roll_rate_pid_params(params);
+//    }
 }
 void Comms::recieve_altitude_rate_pid_params()
 {
-    auto params = m_uav.get_altitude_rate_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("altitude rate pid params get");
-        m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("altitude rate pid params changed");
-        m_uav.set_altitude_rate_pid_params(params);
-    }
+//    auto params = m_uav.get_altitude_rate_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("altitude rate pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("altitude rate pid params changed");
+//        m_uav.set_altitude_rate_pid_params(params);
+//    }
 }
 void Comms::recieve_yaw_pid_params()
 {
-    auto params = m_uav.get_yaw_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("yaw pid params get");
-        m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("yaw pid params changed");
-        m_uav.set_yaw_pid_params(params);
-    }
+//    auto params = m_uav.get_yaw_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("yaw pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::YAW_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("yaw pid params changed");
+//        m_uav.set_yaw_pid_params(params);
+//    }
 }
 void Comms::recieve_pitch_pid_params()
 {
-    auto params = m_uav.get_pitch_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("pitch pid params get");
-        m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("pitch pid params changed");
-        m_uav.set_pitch_pid_params(params);
-    }
+//    auto params = m_uav.get_pitch_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("pitch pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::PITCH_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("pitch pid params changed");
+//        m_uav.set_pitch_pid_params(params);
+//    }
 }
 void Comms::recieve_roll_pid_params()
 {
-    auto params = m_uav.get_roll_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("roll pid params get");
-        m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("roll pid params changed");
-        m_uav.set_roll_pid_params(params);
-    }
+//    auto params = m_uav.get_roll_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("roll pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::ROLL_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("roll pid params changed");
+//        m_uav.set_roll_pid_params(params);
+//    }
 }
 void Comms::recieve_altitude_pid_params()
 {
-    auto params = m_uav.get_altitude_pid_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("altitude pid params get");
-        m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("altitude pid params changed");
-        m_uav.set_altitude_pid_params(params);
-    }
+//    auto params = m_uav.get_altitude_pid_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("altitude pid params get");
+//        m_setup_channel.pack(comms::Setup_Message::ALTITUDE_PID_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("altitude pid params changed");
+//        m_uav.set_altitude_pid_params(params);
+//    }
 }
 
 void Comms::recieve_assist_params()
 {
-    auto params = m_uav.get_assist_params();
-    if (m_setup_channel.get_message_size() == 0)
-    {
-        QLOGI("assist params get");
-        m_setup_channel.pack(comms::Setup_Message::ASSIST_PARAMS, params);
-    }
-    else if (m_setup_channel.unpack(params))
-    {
-        QLOGI("assist params changed");
-        m_uav.set_assist_params(params);
-    }
+//    auto params = m_uav.get_assist_params();
+//    if (m_setup_channel.get_message_size() == 0)
+//    {
+//        QLOGI("assist params get");
+//        m_setup_channel.pack(comms::Setup_Message::ASSIST_PARAMS, params);
+//    }
+//    else if (m_setup_channel.unpack(params))
+//    {
+//        QLOGI("assist params changed");
+//        m_uav.set_assist_params(params);
+//    }
 }
 
 void Comms::recieve_raw_sensors()
@@ -411,8 +410,8 @@ void Comms::recieve_calibration_compass()
 //    }
 }
 
-void Comms::send_raw_sensor_samples(comms::Sensors sensors)
-{
+//void Comms::send_raw_sensor_samples(comms::Sensors sensors)
+//{
 //    QASSERT(m_hal.sensors);
 //    if (!sensors.any())
 //    {
@@ -473,7 +472,7 @@ void Comms::send_raw_sensor_samples(comms::Sensors sensors)
 
 //    m_raw_sensor_samples.last_sent = q::Clock::now();
 //    clear_raw_sensor_samples();
-}
+//}
 
 void Comms::clear_raw_sensor_samples()
 {
@@ -723,58 +722,58 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_input_channel.get_next_message())
-    {
-        switch (msg.get())
-        {
-            case comms::Input_Message::UAV_INPUT: recieve_uav_input(); break;
-            case comms::Input_Message::CAMERA_MOUNT_INPUT: recieve_camera_mount_input(); break;
-            case comms::Input_Message::MOTOR_TEST_INPUT: recieve_motor_test_input(); break;
-            default:
-                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
-                m_error_count++;
-            break;
-            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
-        }
-    }
+//    while (auto msg = m_input_channel.get_next_message())
+//    {
+//        switch (msg.get())
+//        {
+//            case comms::Input_Message::UAV_INPUT: recieve_uav_input(); break;
+//            case comms::Input_Message::CAMERA_MOUNT_INPUT: recieve_camera_mount_input(); break;
+//            case comms::Input_Message::MOTOR_TEST_INPUT: recieve_motor_test_input(); break;
+//            default:
+//                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
+//                m_error_count++;
+//            break;
+//            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
+//        }
+//    }
 
 
-    while (auto msg = m_setup_channel.get_next_message())
-    {
-        switch (msg.get())
-        {
-            case comms::Setup_Message::CAMERA_PARAMS: recieve_camera_params(); break;
+//    while (auto msg = m_setup_channel.get_next_message())
+//    {
+//        switch (msg.get())
+//        {
+//            case comms::Setup_Message::CAMERA_PARAMS: recieve_camera_params(); break;
 
-            case comms::Setup_Message::REQUEST_RAW_SENSORS: recieve_raw_sensors(); break;
+//            case comms::Setup_Message::REQUEST_RAW_SENSORS: recieve_raw_sensors(); break;
 
-            case comms::Setup_Message::CALIBRATION_ACCELEROMETER: recieve_calibration_accelerometer(); break;
-            case comms::Setup_Message::CALIBRATION_GYROSCOPE: recieve_calibration_gyroscope(); break;
-            case comms::Setup_Message::CALIBRATION_COMPASS: recieve_calibration_compass(); break;
+//            case comms::Setup_Message::CALIBRATION_ACCELEROMETER: recieve_calibration_accelerometer(); break;
+//            case comms::Setup_Message::CALIBRATION_GYROSCOPE: recieve_calibration_gyroscope(); break;
+//            case comms::Setup_Message::CALIBRATION_COMPASS: recieve_calibration_compass(); break;
 
-            case comms::Setup_Message::YAW_RATE_PID_PARAMS: recieve_yaw_rate_pid_params(); break;
-            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: recieve_pitch_rate_pid_params(); break;
-            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: recieve_roll_rate_pid_params(); break;
-            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: recieve_altitude_rate_pid_params(); break;
-            case comms::Setup_Message::YAW_PID_PARAMS: recieve_yaw_pid_params(); break;
-            case comms::Setup_Message::PITCH_PID_PARAMS: recieve_pitch_pid_params(); break;
-            case comms::Setup_Message::ROLL_PID_PARAMS: recieve_roll_pid_params(); break;
-            case comms::Setup_Message::ALTITUDE_PID_PARAMS: recieve_altitude_pid_params(); break;
+//            case comms::Setup_Message::YAW_RATE_PID_PARAMS: recieve_yaw_rate_pid_params(); break;
+//            case comms::Setup_Message::PITCH_RATE_PID_PARAMS: recieve_pitch_rate_pid_params(); break;
+//            case comms::Setup_Message::ROLL_RATE_PID_PARAMS: recieve_roll_rate_pid_params(); break;
+//            case comms::Setup_Message::ALTITUDE_RATE_PID_PARAMS: recieve_altitude_rate_pid_params(); break;
+//            case comms::Setup_Message::YAW_PID_PARAMS: recieve_yaw_pid_params(); break;
+//            case comms::Setup_Message::PITCH_PID_PARAMS: recieve_pitch_pid_params(); break;
+//            case comms::Setup_Message::ROLL_PID_PARAMS: recieve_roll_pid_params(); break;
+//            case comms::Setup_Message::ALTITUDE_PID_PARAMS: recieve_altitude_pid_params(); break;
 
-            case comms::Setup_Message::ASSIST_PARAMS: recieve_assist_params(); break;
+//            case comms::Setup_Message::ASSIST_PARAMS: recieve_assist_params(); break;
 
-            case comms::Setup_Message::REQUEST_UAV_INPUT:           recieve_request_uav_input(); break;
-            case comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT:    recieve_request_motor_test_input(); break;
-            case comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT:  recieve_request_camera_mount_input(); break;
+//            case comms::Setup_Message::REQUEST_UAV_INPUT:           recieve_request_uav_input(); break;
+//            case comms::Setup_Message::REQUEST_MOTOR_TEST_INPUT:    recieve_request_motor_test_input(); break;
+//            case comms::Setup_Message::REQUEST_CAMERA_MOUNT_INPUT:  recieve_request_camera_mount_input(); break;
 
-            case comms::Setup_Message::OPERATION_MODE:              recieve_operation_mode(); break;
+//            case comms::Setup_Message::OPERATION_MODE:              recieve_operation_mode(); break;
 
-            default:
-                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
-                m_error_count++;
-            break;
-            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
-        }
-    }
+//            default:
+//                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
+//                m_error_count++;
+//            break;
+//            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
+//        }
+//    }
 
     store_raw_sensor_samples();
 

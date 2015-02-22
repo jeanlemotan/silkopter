@@ -36,6 +36,10 @@ public:
 
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
+
     void shutdown();
 
     auto get_name() const -> std::string const&;
@@ -52,7 +56,7 @@ public:
 
     void set_iso(uint32_t iso);
     void set_shutter_speed(q::Clock::duration ss);
-    void set_stream_quality(comms::Camera_Params::Stream_Quality sq);
+    //void set_stream_quality(comms::Camera_Params::Stream_Quality sq);
 
     //----------------------------------------------------------------------
     struct Impl;
@@ -75,7 +79,7 @@ private:
     std::shared_ptr<q::data::File_Sink> m_file_sink;
     uint32_t m_iso = 0;
     q::Clock::duration m_shutter_speed{0};
-    comms::Camera_Params::Stream_Quality m_stream_quality = comms::Camera_Params::Stream_Quality::MEDIUM;
+    //comms::Camera_Params::Stream_Quality m_stream_quality = comms::Camera_Params::Stream_Quality::MEDIUM;
 
     auto create_components() -> bool;
 };

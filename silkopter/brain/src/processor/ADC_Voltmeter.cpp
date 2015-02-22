@@ -68,6 +68,15 @@ auto ADC_Voltmeter::init() -> bool
     }
 }
 
+auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool
+{
+    return false;
+}
+auto ADC_Voltmeter::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return boost::none;
+}
+
 auto ADC_Voltmeter::get_input_stream_count() const -> size_t
 {
     return 1;

@@ -3958,14 +3958,14 @@ w.Key("\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct PIGPIO_PWM {
- int32_t gpio;
+ uint32_t gpio;
 std::string stream;
-uint32_t frequency;
+uint32_t rate;
 uint32_t range;
 uint32_t min;
 uint32_t max;
 
-explicit PIGPIO_PWM():gpio(), stream(), frequency(), range(), min(), max() {  }
+explicit PIGPIO_PWM():gpio(), stream(), rate(), range(), min(), max() {  }
 
 
  
@@ -3981,14 +3981,14 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< int32_t > handler_0;
+    SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< uint32_t > handler_2;
 SAXEventHandler< uint32_t > handler_3;
 SAXEventHandler< uint32_t > handler_4;
 SAXEventHandler< uint32_t > handler_5;bool has_gpio;
 bool has_stream;
-bool has_frequency;
+bool has_rate;
 bool has_range;
 bool has_min;
 bool has_max;
@@ -4010,7 +4010,7 @@ bool has_max;
 case 1:
     return "stream";
 case 2:
-    return "frequency";
+    return "rate";
 case 3:
     return "range";
 case 4:
@@ -4045,7 +4045,7 @@ case 5:
     {
         has_gpio = false;
 has_stream = false;
-has_frequency = false;
+has_rate = false;
 has_range = false;
 has_min = false;
 has_max = false;
@@ -4057,7 +4057,7 @@ public:
         , depth(0)
         , handler_0(&obj->gpio)
 , handler_1(&obj->stream)
-, handler_2(&obj->frequency)
+, handler_2(&obj->rate)
 , handler_3(&obj->range)
 , handler_4(&obj->min)
 , handler_5(&obj->max)
@@ -4325,8 +4325,8 @@ case 5:
 						 { state=0; has_gpio = true; }
 else if (utility::string_equal(str, length, "\x73\x74\x72\x65\x61\x6d", 6))
 						 { state=1; has_stream = true; }
-else if (utility::string_equal(str, length, "\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9))
-						 { state=2; has_frequency = true; }
+else if (utility::string_equal(str, length, "\x72\x61\x74\x65", 4))
+						 { state=2; has_rate = true; }
 else if (utility::string_equal(str, length, "\x72\x61\x6e\x67\x65", 5))
 						 { state=3; has_range = true; }
 else if (utility::string_equal(str, length, "\x6d\x69\x6e", 3))
@@ -4491,7 +4491,7 @@ case 5:
         } else {
             if (!has_gpio) set_missing_required("gpio");
 if (!has_stream) set_missing_required("stream");
-if (!has_frequency) set_missing_required("frequency");
+if (!has_rate) set_missing_required("rate");
 if (!has_range) set_missing_required("range");
 if (!has_min) set_missing_required("min");
 if (!has_max) set_missing_required("max");
@@ -4556,9 +4556,9 @@ struct Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1
     {
         w.StartObject();
 
-        w.Key("\x67\x70\x69\x6f", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, int32_t >()(w, value.gpio);
+        w.Key("\x67\x70\x69\x6f", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.gpio);
 w.Key("\x73\x74\x72\x65\x61\x6d", 6, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, std::string >()(w, value.stream);
-w.Key("\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 9, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.frequency);
+w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.rate);
 w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.range);
 w.Key("\x6d\x69\x6e", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.min);
 w.Key("\x6d\x61\x78", 3, false); Serializer< Writer29c766a14f1b8d4d3f4be3c49d61a53f38e315330a714fff8a46db1c912c2c1d, uint32_t >()(w, value.max);

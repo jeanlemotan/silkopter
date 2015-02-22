@@ -104,6 +104,15 @@ auto LiPo_Battery::init() -> bool
     m_stream.last_sample.sample_idx = 0;
 }
 
+auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
+{
+    return false;
+}
+auto LiPo_Battery::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return boost::none;
+}
+
 auto LiPo_Battery::get_input_stream_count() const -> size_t
 {
     return 2;

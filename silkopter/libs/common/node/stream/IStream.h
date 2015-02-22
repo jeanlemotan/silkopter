@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rapidjson/document.h"
+
 namespace silk
 {
 namespace node
@@ -14,6 +16,9 @@ public:
 
     virtual auto get_rate() const -> uint32_t = 0;
     virtual auto get_name() const -> std::string const& = 0;
+
+    virtual auto set_config(rapidjson::Value const&) -> bool { return false; }
+    virtual auto get_config() -> boost::optional<rapidjson::Value const&> { return boost::none; }
 };
 
 

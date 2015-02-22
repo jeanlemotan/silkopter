@@ -22,7 +22,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service, HAL& hal, UAV& uav);
+    Comms(boost::asio::io_service& io_service, HAL& hal);
 
     auto start(uint16_t send_port, uint16_t receive_port) -> bool;
 
@@ -79,7 +79,7 @@ private:
     void recieve_calibration_compass();
 
     void send_sensor_samples();
-    void send_raw_sensor_samples(comms::Sensors sensor);
+    //void send_raw_sensor_samples(comms::Sensors sensor);
 
     void store_raw_sensor_samples();
     void clear_raw_sensor_samples();
@@ -112,7 +112,7 @@ private:
 //    } m_raw_sensor_samples;
 
     HAL& m_hal;
-    UAV& m_uav;
+//    UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
     void send_uav_data();
 

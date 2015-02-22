@@ -161,7 +161,6 @@ HEADERS += \
     ../../../libs/common/node/bus/II2C.h \
     ../../../libs/common/node/bus/ISPI.h \
     ../../../libs/common/node/bus/IUART.h \
-    ../../../libs/common/node/sink/IPWM.h \
     ../../../libs/common/node/source/IInertial.h \
     ../../src/sink/PIGPIO.h \
     ../../src/source/MPU9250.h \
@@ -230,6 +229,8 @@ HEADERS += \
     ../../src/processor/Comp_AHRS.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
     ../../src/processor/Comp_Location.h \
-    ../../src/processor/Multirotor_Pilot.h \
-    ../../../libs/utils/Butterworth.h
+    ../../../libs/utils/Butterworth.h \
+    ../../../libs/common/node/processor/IMultirotor.h \
+    ../../src/processor/Multirotor.h \
+    ../../../libs/common/node/sink/IPWM.h
 

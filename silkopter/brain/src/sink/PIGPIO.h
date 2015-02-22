@@ -10,7 +10,7 @@ namespace node
 namespace sink
 {
 
-class PIGPIO : q::util::Noncopyable
+class PIGPIO : public ISink
 {
 public:
     PIGPIO(HAL& hal);
@@ -20,9 +20,9 @@ public:
     struct PWM_Params
     {
         stream::IPWM_Value* stream = nullptr;
-        int32_t gpio = -1;
-        uint32_t frequency = 50;
-        uint32_t range = 1000000 / frequency;
+        uint32_t gpio = 0;
+        uint32_t rate = 50;
+        uint32_t range = 1000000 / rate;
         uint32_t min = 1000;
         uint32_t max = 2000;
     };
@@ -37,9 +37,11 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
-    void process();
+    auto get_name() const -> std::string const&;
+    auto get_input_stream_count() const -> size_t;
+    auto get_input_stream(size_t idx) -> stream::IPWM_Value&;
 
-    auto get_pwm_channel(size_t idx) -> IPWM*;
+    void process();
 
 private:
     auto init() -> bool;
@@ -48,18 +50,6 @@ private:
     Init_Params m_params;
 
     void set_pwm_value(size_t idx, float value);
-
-    struct PWM : public IPWM
-    {
-        auto get_stream() -> stream::IPWM_Value& { return *pigpio->m_params.pwm_channels[idx].stream; }
-        auto get_name() const -> std::string const& { return name; }
-
-        PIGPIO* pigpio = nullptr;
-        size_t idx = 0;
-        std::string name;
-    };
-
-    std::array<PWM, MAX_PWM_CHANNELS> m_pwm_channels;
 };
 
 }

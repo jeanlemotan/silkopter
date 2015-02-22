@@ -233,7 +233,7 @@ auto Raspicam::init(Init_Params const& params) -> bool
                        false,
                        true);
 
-    if (!m_hal.get_sources().add<ICamera>(*this))// ||
+    if (!m_hal.get_sources().add(*this))// ||
 //        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
     {
         return false;
@@ -244,6 +244,15 @@ auto Raspicam::init(Init_Params const& params) -> bool
     QLOGE("Raspicam is only supported on the Raspberry pi.");
     return false;
 #endif
+}
+
+auto Raspicam::set_config(rapidjson::Value const& json) -> bool
+{
+    return false;
+}
+auto Raspicam::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return boost::none;
 }
 
 void Raspicam::shutdown()
@@ -1293,20 +1302,20 @@ void Raspicam::set_shutter_speed(q::Clock::duration ss)
     m_shutter_speed = ss;
 }
 
-void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
-{
-#if defined RASPBERRY_PI
-    m_stream_quality = sq;
+//void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
+//{
+//#if defined RASPBERRY_PI
+//    m_stream_quality = sq;
 
-    std::lock_guard<std::mutex> lg(m_impl->mutex);
-    if (m_impl->camera)
-    {
-//        set_active_streams(m_file_sink != nullptr,
-//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-//                           m_stream_quality == camera_input::Stream_Quality::LOW);
-    }
-#endif
-}
+//    std::lock_guard<std::mutex> lg(m_impl->mutex);
+//    if (m_impl->camera)
+//    {
+////        set_active_streams(m_file_sink != nullptr,
+////                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+////                           m_stream_quality == camera_input::Stream_Quality::LOW);
+//    }
+//#endif
+//}
 
 
 }

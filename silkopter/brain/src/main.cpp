@@ -114,8 +114,7 @@ int main(int argc, char const* argv[])
     try
     {
         silk::HAL hal;
-        silk::UAV uav(hal);
-        silk::Comms comms(io_service, hal, uav);
+        silk::Comms comms(io_service, hal);
 
         if (!hal.init())
         {
@@ -165,9 +164,7 @@ int main(int argc, char const* argv[])
                 last = now;
 
                 comms.process();
-
                 hal.process();
-                uav.process();
             }
             //boost::this_thread::yield();
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1));

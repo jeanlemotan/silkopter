@@ -36,6 +36,9 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
+
     void process();
 
     auto get_name() const -> std::string const&;

@@ -26,6 +26,9 @@ public:
     auto init(rapidjson::Value const& json) -> bool;
     auto init(Init_Params const& params) -> bool;
 
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
+
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IADC_Value&;
     auto get_output_stream_count() const -> size_t;

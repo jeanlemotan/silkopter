@@ -333,6 +333,15 @@ void MS5611::calculate(q::Clock::duration dt)
     //LOG_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
+auto MS5611::set_config(rapidjson::Value const& json) -> bool
+{
+    return false;
+}
+auto MS5611::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return boost::none;
+}
+
 }
 }
 }

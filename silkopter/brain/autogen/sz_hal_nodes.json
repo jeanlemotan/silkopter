@@ -93,9 +93,9 @@
     "name": "PIGPIO_PWM",
     "members":
     [
-        ["int32_t", "gpio", {"required": true}],
+        ["uint32_t", "gpio", {"required": true}],
         ["std::string", "stream", {"required": true}],
-        ["uint32_t", "frequency", {"required": true}],
+        ["uint32_t", "rate", {"required": true}],
         ["uint32_t", "range", {"required": true}],
         ["uint32_t", "min", {"required": true}],
         ["uint32_t", "max", {"required": true}]
