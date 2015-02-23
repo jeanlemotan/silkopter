@@ -2,6 +2,23 @@
 #include "Comms.h"
 #include "utils/Timed_Scope.h"
 
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IADC_Value.h"
+#include "common/node/stream/IBattery_State.h"
+#include "common/node/stream/ICardinal_Points.h"
+#include "common/node/stream/ICurrent.h"
+#include "common/node/stream/IDistance.h"
+#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/IPressure.h"
+#include "common/node/stream/IPWM_Value.h"
+#include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/ITemperature.h"
+#include "common/node/stream/IVideo.h"
+#include "common/node/stream/IVoltage.h"
+
 
 using namespace silk;
 using namespace boost::asio;
@@ -710,14 +727,73 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
 //    return m_rudp.try_sending(VIDEO_CHANNEL, data, size);
 //}
 
+template<class Stream> auto Comms::send_telemetry_stream(node::stream::IStream const& _stream) -> bool
+{
+    if (q::rtti::is_of_type<Stream>(_stream))
+    {
+        auto const& stream = static_cast<Stream const&>(_stream);
+        auto const& samples = stream.get_samples();
+        m_telemetry_channel.begin_pack(q::rtti::get_class_id(stream));
+        m_telemetry_channel.pack_param(static_cast<uint32_t>(samples.size()));
+        for (auto const& s: samples)
+        {
+            m_telemetry_channel.pack_param(s.value);
+            m_telemetry_channel.pack_param(s.sample_idx);
+            m_telemetry_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()));
+            m_telemetry_channel.pack_param(s.is_healthy);
+        }
+        m_telemetry_channel.end_pack();
+        return true;
+    }
+    return false;
+}
+
+void Comms::send_telemetry_streams()
+{
+    for (auto const& stream: m_telemetry_streams)
+    {
+        QASSERT(stream);
+        if (send_telemetry_stream<node::stream::IAcceleration>(*stream) ||
+            send_telemetry_stream<node::stream::IAngular_Velocity>(*stream) ||
+            send_telemetry_stream<node::stream::IMagnetic_Field>(*stream) ||
+            send_telemetry_stream<node::stream::IPressure>(*stream) ||
+            send_telemetry_stream<node::stream::IBattery_State>(*stream) ||
+            send_telemetry_stream<node::stream::ILinear_Acceleration>(*stream) ||
+            send_telemetry_stream<node::stream::ICardinal_Points>(*stream) ||
+            send_telemetry_stream<node::stream::ICurrent>(*stream) ||
+            send_telemetry_stream<node::stream::IVoltage>(*stream) ||
+            send_telemetry_stream<node::stream::IDistance>(*stream) ||
+            send_telemetry_stream<node::stream::ILocation>(*stream) ||
+            send_telemetry_stream<node::stream::IPWM_Value>(*stream) ||
+            send_telemetry_stream<node::stream::IReference_Frame>(*stream) ||
+            send_telemetry_stream<node::stream::ITemperature>(*stream) ||
+            send_telemetry_stream<node::stream::IADC_Value>(*stream)
+//          send_telemetry_stream<node::stream::IVideo>(*stream)
+                )
+        {
+            ;//nothing
+        }
+        else
+        {
+            QLOGW("Unrecognized stream type: {} / {}", stream->get_name(), q::rtti::get_class_name(*stream));
+        }
+    }
+}
+
+
+
+
+
 void Comms::handle_enumerate_sources()
 {
-    if (m_setup_channel.get_message_size() == 0)
+    uint32_t req_id = 0;
+    if (m_setup_channel.unpack(req_id))
     {
-        QLOGI("Enumerate sources");
+        QLOGI("Req Id: {} - enumerate sources", req_id);
         auto const& all = m_hal.get_sources().get_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SOURCES);
+        m_setup_channel.pack_param(req_id);
         m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
         for (auto const& n: all)
@@ -741,12 +817,14 @@ void Comms::handle_enumerate_sources()
 
 void Comms::handle_enumerate_sinks()
 {
-    if (m_setup_channel.get_message_size() == 0)
+    uint32_t req_id = 0;
+    if (m_setup_channel.unpack(req_id))
     {
-        QLOGI("Enumerate sinks");
+        QLOGI("Req Id: {} - enumerate sinks", req_id);
         auto const& all = m_hal.get_sinks().get_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SINKS);
+        m_setup_channel.pack_param(req_id);
         m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
         for (auto const& n: all)
@@ -770,12 +848,14 @@ void Comms::handle_enumerate_sinks()
 
 void Comms::handle_enumerate_processors()
 {
-    if (m_setup_channel.get_message_size() == 0)
+    uint32_t req_id = 0;
+    if (m_setup_channel.unpack(req_id))
     {
-        QLOGI("Enumerate processors");
+        QLOGI("Req Id: {} - enumerate processors", req_id);
         auto const& all = m_hal.get_processors().get_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_PROCESSORS);
+        m_setup_channel.pack_param(req_id);
         m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
         for (auto const& n: all)
@@ -805,12 +885,14 @@ void Comms::handle_enumerate_processors()
 
 void Comms::handle_enumerate_streams()
 {
-    if (m_setup_channel.get_message_size() == 0)
+    uint32_t req_id = 0;
+    if (m_setup_channel.unpack(req_id))
     {
-        QLOGI("Enumerate streams");
+        QLOGI("Req Id: {} - enumerate streams", req_id);
         auto const& all = m_hal.get_streams().get_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_STREAMS);
+        m_setup_channel.pack_param(req_id);
         m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
         for (auto const& n: all)
@@ -827,20 +909,24 @@ void Comms::handle_enumerate_streams()
     }
 }
 
-void Comms::handle_source_config()
+template<class Registry, class Node_Base>
+void Comms::handle_node_config(comms::Setup_Message message, Registry const& registry)
 {
     m_setup_channel.begin_unpack();
+    uint32_t req_id = 0;
     std::string name;
-    if (!m_setup_channel.unpack_param<std::string>(name))
+    if (!m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(name))
     {
-        QLOGE("Error in unpacking source config");
+        QLOGE("Error in unpacking config rquest");
         return;
     }
 
-    auto* source = m_hal.get_sources().find_by_name<node::source::ISource>(name);
-    if (!source)
+    QLOGI("Req Id: {} - node config", req_id);
+    auto* node = registry.template find_by_name<Node_Base>(name);
+    if (!node)
     {
-        QLOGE("Cannot find source '{}'", name);
+        QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
         return;
     }
 
@@ -852,14 +938,15 @@ void Comms::handle_source_config()
         rapidjson::Document config;
         if (config.Parse(config_str.c_str()).HasParseError())
         {
-            QLOGE("Failed to parse config for '{}': {}:{}", name, config.GetParseError(), config.GetErrorOffset());
+            QLOGE("Req Id: {} - failed to parse config for '{}': {}:{}", req_id, name, config.GetParseError(), config.GetErrorOffset());
             return;
         }
-        source->set_config(config);
+        node->set_config(config);
     }
 
     {
-        auto config = source->get_config();
+        config_str.clear();
+        auto config = node->get_config();
         if (config)
         {
             rapidjson::StringBuffer s;
@@ -867,8 +954,80 @@ void Comms::handle_source_config()
             config->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
             config_str = s.GetString();
         }
-        m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, name, config_str);
+        m_setup_channel.pack(message, req_id, name, config_str);
     }
+}
+
+void Comms::handle_source_config()
+{
+    handle_node_config<decltype(m_hal.get_sources()), node::source::ISource>(
+                comms::Setup_Message::SOURCE_CONFIG, m_hal.get_sources());
+}
+void Comms::handle_sink_config()
+{
+    handle_node_config<decltype(m_hal.get_sinks()), node::sink::ISink>(
+                comms::Setup_Message::SINK_CONFIG, m_hal.get_sinks());
+}
+void Comms::handle_processor_config()
+{
+    handle_node_config<decltype(m_hal.get_processors()), node::processor::IProcessor>(
+                comms::Setup_Message::PROCESSOR_CONFIG, m_hal.get_processors());
+}
+void Comms::handle_stream_config()
+{
+    handle_node_config<decltype(m_hal.get_streams()), node::stream::IStream>(
+                comms::Setup_Message::STREAM_CONFIG, m_hal.get_streams());
+}
+
+void Comms::handle_telemetry_streams()
+{
+    uint32_t req_id = 0;
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking telemetry streams");
+        return;
+    }
+    QLOGI("Req Id: {} - telemetry streams", req_id);
+
+    uint32_t size = 0;
+    if (m_setup_channel.unpack_param(size))
+    {
+        m_telemetry_streams.clear();
+        m_telemetry_streams.reserve(size);
+
+        std::string name;
+        for (uint32_t i = 0; i < size; i++)
+        {
+            if (!m_setup_channel.unpack_param(name))
+            {
+                m_telemetry_streams.clear();
+                QLOGE("Req Id: {} - error in unpacking telemetry streams", req_id);
+                return;
+            }
+            auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+            if (stream)
+            {
+                m_telemetry_streams.push_back(stream);
+            }
+            else
+            {
+                QLOGW("Req Id: {} - cannot find stream '{}' for telemetry", req_id, name);
+            }
+        }
+    }
+
+    m_setup_channel.end_unpack();
+
+    m_setup_channel.begin_pack(comms::Setup_Message::TELEMETRY_STREAMS);
+    m_setup_channel.pack_param(req_id);
+    m_setup_channel.pack_param(static_cast<uint32_t>(m_telemetry_streams.size()));
+    for (auto const& s: m_telemetry_streams)
+    {
+        QASSERT(s);
+        m_setup_channel.pack_param(s->get_name());
+    }
+    m_setup_channel.end_pack();
 }
 
 void Comms::process()
@@ -903,6 +1062,13 @@ void Comms::process()
         case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
         case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
 
+        case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
+        case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
+        case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
+        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
+
+        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
+
             default:
                 QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
 //                m_error_count++;
@@ -911,10 +1077,7 @@ void Comms::process()
         }
     }
 
-//    store_raw_sensor_samples();
-
-//    send_sensor_samples();
-//    send_uav_data();
+    send_telemetry_streams();
 
     {
         if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())

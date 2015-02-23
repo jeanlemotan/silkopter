@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/murmurhash.h"
+
 namespace q
 {
 namespace rtti
@@ -12,8 +14,8 @@ namespace rtti
 	template<class T, class U> T const* cast_to(U const* temp);
     template<class T> std::string const& get_class_name(T const& temp);
     template<class T> std::string const& get_class_name();
-	template<class T> size_t get_class_id(T const& temp);
-	template<class T> size_t get_class_id();
+    template<class T> uint32_t get_class_id(T const& temp);
+    template<class T> uint32_t get_class_id();
 
 	//details
 	namespace detail
@@ -24,11 +26,11 @@ namespace rtti
 
 #define DEFINE_RTTI_CLASS_COMMON_PART(CLASS) \
 	friend class q::util::Class_Factory;\
-	static size_t rtti_get_class_id() { static size_t id; return (size_t)&id; } \
+    static uint32_t rtti_get_class_id() { static uint32_t id = q::util::compute_murmur_hash32(#CLASS, 0xF123); return id; } \
     typedef q::rtti::detail::Type_Id_Checker<CLASS> type_tag;\
     static std::string const& rtti_get_class_name() { static std::string name(#CLASS); return name; }\
     virtual std::string const& rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
-	virtual size_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
+    virtual uint32_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
 	template<class U> friend bool q::rtti::is_of_type(U const& temp, std::string const& className);\
 	template<class T, class U> friend bool q::rtti::is_of_type(U const& temp);	\
 	template<class T, class U> std::shared_ptr<T> cast_to(std::shared_ptr<U> const& temp); \
@@ -36,16 +38,16 @@ namespace rtti
 	template<class T, class U> friend T const* q::rtti::cast_to(U const* temp); \
     template<class T> friend std::string const& q::rtti::get_class_name(T const& temp); \
     template<class T> friend std::string const& q::rtti::get_class_name(); \
-	template<class T> friend size_t q::rtti::get_class_id(T const& temp); \
-	template<class T> friend size_t q::rtti::get_class_id();
+    template<class T> friend uint32_t q::rtti::get_class_id(T const& temp); \
+    template<class T> friend uint32_t q::rtti::get_class_id();
 
 #define DEFINE_RTTI_CLASS_COMMON_TEMPLATE_PART(CLASS, CLASS_NAME) \
 	friend class q::util::Class_Factory;\
-	static size_t rtti_get_class_id() { static size_t id; return (size_t)&id; } \
+    static uint32_t rtti_get_class_id() { static uint32_t id = q::util::compute_murmur_hash32(CLASS_NAME, 0xF123); return id; } \
     typedef q::rtti::detail::Type_Id_Checker<CLASS> type_tag;\
     static std::string const& rtti_get_class_name() { static std::string name(CLASS_NAME); return name; }\
     virtual std::string const& rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
-	virtual size_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
+    virtual uint32_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
     template<class U> friend bool q::rtti::is_of_type(U const& temp, std::string const& className);\
 	template<class T, class U> friend bool q::rtti::is_of_type(U const& temp);	\
 	template<class T, class U> std::shared_ptr<T> cast_to(std::shared_ptr<U> const& temp); \
@@ -53,15 +55,15 @@ namespace rtti
 	template<class T, class U> friend T const* q::rtti::cast_to(U const* temp); \
     template<class T> friend std::string const& q::rtti::get_class_name(T const& temp); \
     template<class T> friend std::string const& q::rtti::get_class_name(); \
-	template<class T> friend size_t q::rtti::get_class_id(T const& temp); \
-	template<class T> friend size_t q::rtti::get_class_id();
+    template<class T> friend uint32_t q::rtti::get_class_id(T const& temp); \
+    template<class T> friend uint32_t q::rtti::get_class_id();
 
 #define DEFINE_RTTI_CLASS2_PART(CLASS, PARENT_1, PARENT_2)	\
     public:                                 \
         typedef PARENT_1 Parent_1;          \
         typedef PARENT_2 Parent_2;          \
     protected:							\
-        virtual bool rtti_is_of_type(size_t typeId) const { return (typeId == rtti_get_class_id()) || PARENT_1::rtti_is_of_type(typeId) || PARENT_2::rtti_is_of_type(typeId); } \
+        virtual bool rtti_is_of_type(uint32_t typeId) const { return (typeId == rtti_get_class_id()) || PARENT_1::rtti_is_of_type(typeId) || PARENT_2::rtti_is_of_type(typeId); } \
         virtual bool rtti_is_of_type(std::string const& typeId) const { return (typeId == rtti_get_class_name()) || PARENT_1::rtti_is_of_type(typeId) || PARENT_2::rtti_is_of_type(typeId); } \
 
 
@@ -69,12 +71,12 @@ namespace rtti
     public:                                 \
         typedef PARENT Parent;          \
     protected:							\
-        virtual bool rtti_is_of_type(size_t typeId) const { return (typeId == rtti_get_class_id()) || PARENT::rtti_is_of_type(typeId); } \
+        virtual bool rtti_is_of_type(uint32_t typeId) const { return (typeId == rtti_get_class_id()) || PARENT::rtti_is_of_type(typeId); } \
         virtual bool rtti_is_of_type(std::string const& typeId) const { return (typeId == rtti_get_class_name()) || PARENT::rtti_is_of_type(typeId); } \
 
 #define DEFINE_RTTI_BASE_CLASS_PART(CLASS)	\
 	protected:							\
-		virtual bool rtti_is_of_type(size_t typeId) const { return (typeId == rtti_get_class_id()); } \
+        virtual bool rtti_is_of_type(uint32_t typeId) const { return (typeId == rtti_get_class_id()); } \
 		virtual bool rtti_is_of_type(std::string const& typeId) const { return (typeId == rtti_get_class_name()); } \
 
 
@@ -146,12 +148,12 @@ namespace rtti
 		return T::rtti_get_class_name();
 	}
 	template<class T>
-	size_t get_class_id(T const& temp)
+    uint32_t get_class_id(T const& temp)
 	{
 		return temp.rtti_get_instance_class_id();
 	}
 	template<class T>
-	size_t get_class_id()
+    uint32_t get_class_id()
 	{
 		return T::rtti_get_class_id();
 	}

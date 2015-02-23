@@ -5,32 +5,6 @@ namespace silk
 namespace comms
 {
 
-enum class Telemetry_Message : uint8_t
-{
-    //------------------------
-    //streams
-    //These have to be enabled with a Setup_Message::STREAM_TELEMETRY request
-
-    //RES:
-    // uint32_t size - array size
-    // Stream::Sample[size] - the stream samples. The sample type depends on the message
-    ACCELERATION_STREAM,
-    ADC_VALUE_STREAM,
-    ANGULAR_VELOCITY_STREAM,
-    BATTERY_STATE_STREAM,
-    CARDINAL_POINTS_STREAM,
-    CURRENT_STREAM,
-    DISTANCE_STREAM,
-    LINEAR_ACCELERATION_STREAM,
-    LOCATION_STREAM,
-    MAGNETIC_FIELD_STREAM,
-    PRESSURE_STREAM,
-    PWM_VALUE_STREAM,
-    REFERENCE_FRAME_STREAM,
-    TEMPERATURE_STREAM,
-    VOLTAGE_STREAM,
-    VIDEO_STREAM,
-};
 
 enum class Sim_Message : uint8_t
 {
@@ -42,8 +16,10 @@ enum class Sim_Message : uint8_t
 enum class Setup_Message : uint8_t
 {
     //returns all the sources in the system
-    //REQ: - no arguments
+    //REQ:
+    //  uint32_t req_id
     //RES:
+    //  uint32_t req_id
     //  uint32_t source_count - array size
     //      string - source name
     //      uint32_t output_count - array size
@@ -52,16 +28,20 @@ enum class Setup_Message : uint8_t
     ENUMERATE_SOURCES,
 
     //returns all the streams in the system
-    //REQ: - no arguments
+    //REQ:
+    //  uint32_t req_id
     //RES:
+    //  uint32_t req_id
     //  uint32_t stream_count - array size
     //      type - type of stream
     //      string - name of stream
     ENUMERATE_STREAMS,
 
     //returns all the processors in the system
-    //REQ: - no arguments
+    //REQ:
+    //  uint32_t req_id
     //RES:
+    //  uint32_t req_id
     //  uint32_t processor_count - array size
     //      string - processor name
     //      uint32_t input_count - array size
@@ -73,8 +53,10 @@ enum class Setup_Message : uint8_t
     ENUMERATE_PROCESSORS,
 
     //returns all the sinks in the system
-    //REQ: - no arguments
+    //REQ:
+    //  uint32_t req_id
     //RES:
+    //  uint32_t req_id
     //  uint32_t sink_count - array size
     //      string - processor name
     //      uint32_t input_count - array size
@@ -84,9 +66,11 @@ enum class Setup_Message : uint8_t
 
     //sets/gets a node config as a json string
     //REQ:
+    //  uint32_t req_id
     //  string - node name
     //  [optional] string - if present, the config to set. If not set - it's a request
     //RES:
+    //  uint32_t req_id
     //  string - node name
     //  string - the config
     SOURCE_CONFIG,
@@ -96,26 +80,32 @@ enum class Setup_Message : uint8_t
 
     //start or stop telemetry streaming.
     //REQ:
-    //  uint32_t size - array size
-    //  string[size] - names of the streams
+    //  uint32_t req_id
+    //  [optional] uint32_t size - array size - if present it's a setter. If not, it's a request
+    //  [optional] string[size] - names of the streams
     //RES:
+    //  uint32_t req_id
     //  uint32_t size - array size
     //  string[size] - names of the streams that will be sent as telemetry
-    STREAM_TELEMETRY,
+    TELEMETRY_STREAMS,
 
     //-----------------------------
     // Multirotor
 
     //Set/Get the mode
     //REQ:
-    //  [optional] Multirotor::Mode - if present, the mode to change to. If not it's a getter
+    //  uint32_t req_id
+    //  [optional] Multirotor::Mode - if present, the mode to change to. If not, it's a getter
     //REQ:
+    //  uint32_t req_id
     //  Multirotor::Mode - the current mode
     MULTIROTOR_MODE,
 
     //Get the input
-    //REQ: - no arguments
     //REQ:
+    //  uint32_t req_id
+    //REQ:
+    //  uint32_t req_id
     //  Multirotor::Input - the current input values
     REQUEST_MULTIROTOR_INPUT,
 

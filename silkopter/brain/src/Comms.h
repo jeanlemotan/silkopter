@@ -111,12 +111,24 @@ private:
 //        std::vector<node::IGPS::Sample> gps;
 //    } m_raw_sensor_samples;
 
+    template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
+    void send_telemetry_streams();
+
     void handle_enumerate_sources();
     void handle_enumerate_sinks();
     void handle_enumerate_streams();
     void handle_enumerate_processors();
 
+    template<class Registry, class Node_Base> void handle_node_config(comms::Setup_Message msg, Registry const& registry);
+
     void handle_source_config();
+    void handle_sink_config();
+    void handle_processor_config();
+    void handle_stream_config();
+
+    void handle_telemetry_streams();
+
+    std::vector<node::stream::IStream*> m_telemetry_streams;
 
     HAL& m_hal;
 //    UAV& m_uav;
@@ -134,7 +146,7 @@ private:
 
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
     typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
-    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
+    typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;
