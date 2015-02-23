@@ -10,8 +10,8 @@ namespace rtti
 	template<class T, class U> std::shared_ptr<T> cast_to(std::shared_ptr<U> const& temp);
 	template<class T, class U> T* cast_to(U* temp);
 	template<class T, class U> T const* cast_to(U const* temp);
-	template<class T> std::string get_class_name(T const& temp);
-	template<class T> std::string get_class_name();
+    template<class T> std::string const& get_class_name(T const& temp);
+    template<class T> std::string const& get_class_name();
 	template<class T> size_t get_class_id(T const& temp);
 	template<class T> size_t get_class_id();
 
@@ -26,16 +26,16 @@ namespace rtti
 	friend class q::util::Class_Factory;\
 	static size_t rtti_get_class_id() { static size_t id; return (size_t)&id; } \
     typedef q::rtti::detail::Type_Id_Checker<CLASS> type_tag;\
-    static std::string rtti_get_class_name() { return std::string(#CLASS); }\
-	virtual std::string rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
+    static std::string const& rtti_get_class_name() { static std::string name(#CLASS); return name; }\
+    virtual std::string const& rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
 	virtual size_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
 	template<class U> friend bool q::rtti::is_of_type(U const& temp, std::string const& className);\
 	template<class T, class U> friend bool q::rtti::is_of_type(U const& temp);	\
 	template<class T, class U> std::shared_ptr<T> cast_to(std::shared_ptr<U> const& temp); \
 	template<class T, class U> friend T* q::rtti::cast_to(U* temp);			\
 	template<class T, class U> friend T const* q::rtti::cast_to(U const* temp); \
-	template<class T> friend std::string q::rtti::get_class_name(T const& temp); \
-	template<class T> friend std::string q::rtti::get_class_name(); \
+    template<class T> friend std::string const& q::rtti::get_class_name(T const& temp); \
+    template<class T> friend std::string const& q::rtti::get_class_name(); \
 	template<class T> friend size_t q::rtti::get_class_id(T const& temp); \
 	template<class T> friend size_t q::rtti::get_class_id();
 
@@ -43,16 +43,16 @@ namespace rtti
 	friend class q::util::Class_Factory;\
 	static size_t rtti_get_class_id() { static size_t id; return (size_t)&id; } \
     typedef q::rtti::detail::Type_Id_Checker<CLASS> type_tag;\
-    static std::string rtti_get_class_name() { return std::string(CLASS_NAME); }\
-	virtual std::string rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
+    static std::string const& rtti_get_class_name() { static std::string name(CLASS_NAME); return name; }\
+    virtual std::string const& rtti_get_instance_class_name() const { return rtti_get_class_name(); }\
 	virtual size_t rtti_get_instance_class_id() const { return rtti_get_class_id(); }\
     template<class U> friend bool q::rtti::is_of_type(U const& temp, std::string const& className);\
 	template<class T, class U> friend bool q::rtti::is_of_type(U const& temp);	\
 	template<class T, class U> std::shared_ptr<T> cast_to(std::shared_ptr<U> const& temp); \
 	template<class T, class U> friend T* q::rtti::cast_to(U* temp);			\
 	template<class T, class U> friend T const* q::rtti::cast_to(U const* temp); \
-	template<class T> friend std::string q::rtti::get_class_name(T const& temp); \
-	template<class T> friend std::string q::rtti::get_class_name(); \
+    template<class T> friend std::string const& q::rtti::get_class_name(T const& temp); \
+    template<class T> friend std::string const& q::rtti::get_class_name(); \
 	template<class T> friend size_t q::rtti::get_class_id(T const& temp); \
 	template<class T> friend size_t q::rtti::get_class_id();
 
@@ -136,12 +136,12 @@ namespace rtti
 		return (temp && is_of_type<T>(*temp)) ? static_cast<T const*>(temp) : 0;
 	}
 	template<class T>
-	std::string get_class_name(T const& temp)
+    std::string const& get_class_name(T const& temp)
 	{
 		return temp.rtti_get_instance_class_name();
 	}
 	template<class T>
-	std::string get_class_name()
+    std::string const& get_class_name()
 	{
 		return T::rtti_get_class_name();
 	}

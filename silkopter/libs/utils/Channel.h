@@ -26,13 +26,13 @@ namespace util
         }
         template<class Container, class T> T get_value(Container const& t, size_t& off)
         {
-            auto val = get_value_fixed<T>(t, off);
+            auto val = get_value_fixed<Container, T>(t, off);
             off += sizeof(T);
             return val;
         }
         template<class Container> std::string get_value(Container const& t, size_t& off)
         {
-            auto val = get_value_fixed<uint32_t>(t, off);
+            auto val = get_value_fixed<Container, uint32_t>(t, off);
             off += sizeof(uint32_t) + val.size();
             return val;
         }
@@ -313,7 +313,7 @@ namespace util
         void _pack(Param const& param, Params&&... params)
 		{
             auto off = m_tx_buffer.size();
-            set_value(m_tx_buffer, param, off);
+            detail::set_value(m_tx_buffer, param, off);
             return _pack(std::forward<Params>(params)...);
 		}
 

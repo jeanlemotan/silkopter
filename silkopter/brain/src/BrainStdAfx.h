@@ -15,6 +15,10 @@
 #include "QData.h"
 #include "qmath.h"
 
+#include "rapidjson/document.h"     // rapidjson's DOM-style API
+#include "rapidjson/prettywriter.h" // for stringify JSON
+#include "rapidjson/stringbuffer.h"
+
 namespace silk
 {
     constexpr size_t MAX_MOTOR_COUNT = 12;

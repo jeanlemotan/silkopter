@@ -116,6 +116,8 @@ private:
     void handle_enumerate_streams();
     void handle_enumerate_processors();
 
+    void handle_source_config();
+
     HAL& m_hal;
 //    UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();

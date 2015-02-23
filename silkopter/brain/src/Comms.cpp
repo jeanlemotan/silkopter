@@ -827,6 +827,49 @@ void Comms::handle_enumerate_streams()
     }
 }
 
+void Comms::handle_source_config()
+{
+    m_setup_channel.begin_unpack();
+    std::string name;
+    if (!m_setup_channel.unpack_param<std::string>(name))
+    {
+        QLOGE("Error in unpacking source config");
+        return;
+    }
+
+    auto* source = m_hal.get_sources().find_by_name<node::source::ISource>(name);
+    if (!source)
+    {
+        QLOGE("Cannot find source '{}'", name);
+        return;
+    }
+
+    std::string config_str;
+    m_setup_channel.unpack_param<std::string>(config_str);
+
+    if (!config_str.empty())
+    {
+        rapidjson::Document config;
+        if (config.Parse(config_str.c_str()).HasParseError())
+        {
+            QLOGE("Failed to parse config for '{}': {}:{}", name, config.GetParseError(), config.GetErrorOffset());
+            return;
+        }
+        source->set_config(config);
+    }
+
+    {
+        auto config = source->get_config();
+        if (config)
+        {
+            rapidjson::StringBuffer s;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+            config->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+            config_str = s.GetString();
+        }
+        m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, name, config_str);
+    }
+}
 
 void Comms::process()
 {
