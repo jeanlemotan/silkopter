@@ -79,13 +79,9 @@ public:
 
   // Process a block of samples in the given form
   template <class StateType, typename Sample>
-  void process (int numSamples, Sample* dest, StateType& state) const
+  void process (Sample* dest, StateType& state) const
   {
-    while (--numSamples >= 0)
-    {
-        *dest = state.process (*dest, *this);
-        dest++;
-    }
+    *dest = state.process(*dest, *this);
   }
 
 protected:

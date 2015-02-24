@@ -17,7 +17,7 @@ class IPWM : public ISink
 public:
     virtual ~IPWM() {}
 
-    virtual auto get_input_stream() -> stream::IPWM_Value& = 0;
+    virtual auto get_input_stream(size_t idx) -> stream::IPWM_Value& = 0;
 };
 
 }

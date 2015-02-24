@@ -285,6 +285,8 @@ auto UBLOX::read(uint8_t* data, size_t max_size) -> size_t
         QASSERT(0);
         return 0;
     }
+    QASSERT(0);
+    return 0;
 }
 auto UBLOX::write(uint8_t const* data, size_t size) -> bool
 {
@@ -302,6 +304,8 @@ auto UBLOX::write(uint8_t const* data, size_t size) -> bool
         QASSERT(0);
         return false;
     }
+    QASSERT(0);
+    return false;
 }
 
 auto UBLOX::setup() -> bool

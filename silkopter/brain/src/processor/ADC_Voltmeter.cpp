@@ -66,6 +66,7 @@ auto ADC_Voltmeter::init() -> bool
         QLOGE("No input specified");
         return false;
     }
+    return true;
 }
 
 auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool

@@ -73,11 +73,7 @@ auto PIGPIO::init(Init_Params const& params) -> bool
     QLOG_TOPIC("pigpio::init");
 
     m_params = params;
-
-    if (!init())
-    {
-        return false;
-    }
+    return init();
 }
 
 auto PIGPIO::init() -> bool
@@ -213,6 +209,8 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     int pulse = value * (ch.max - ch.min);
     gpioPWM(ch.gpio, ch.min + pulse);
 #else
+    QUNUSED(idx);
+    QUNUSED(value);
     QASSERT(0);
 #endif
 }

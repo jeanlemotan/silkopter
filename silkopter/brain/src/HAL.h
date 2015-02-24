@@ -53,7 +53,7 @@ private:
     Registry<node::processor::IProcessor> m_processors;
     Registry<node::stream::IStream> m_streams;
 
-    bool m_is_initialized = false;
+    //bool m_is_initialized = false;
 
     rapidjson::Value m_emptyValue;
     rapidjson::Document m_settings;

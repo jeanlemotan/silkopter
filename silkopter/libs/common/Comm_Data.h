@@ -35,6 +35,7 @@ enum class Setup_Message : uint8_t
     //  uint32_t stream_count - array size
     //      type - type of stream
     //      string - name of stream
+    //      rate - frequency of the stream samples
     ENUMERATE_STREAMS,
 
     //returns all the processors in the system

@@ -899,6 +899,7 @@ void Comms::handle_enumerate_streams()
         {
             m_setup_channel.pack_param(n->get_type());
             m_setup_channel.pack_param(n->get_name());
+            m_setup_channel.pack_param(n->get_rate());
         }
 
         m_setup_channel.end_pack();

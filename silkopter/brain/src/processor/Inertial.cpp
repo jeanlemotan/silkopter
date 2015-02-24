@@ -81,6 +81,8 @@ auto Inertial::init() -> bool
     }
 
     m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+
+    return true;
 }
 
 auto Inertial::get_input_stream_count() const -> size_t

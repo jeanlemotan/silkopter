@@ -468,6 +468,7 @@ class FSBAllocator
 
     pointer allocate(size_type count, const void* = 0)
     {
+        (void)(count);
         assert(count == 1);
         return static_cast<pointer>
             (FSBAllocator_ElemAllocator<sizeof(Ty)>::allocate());
@@ -523,6 +524,7 @@ class FSBAllocator2
 
     pointer allocate(size_type count, const void* = 0)
     {
+        (void)(count);
         assert(count == 1);
         return static_cast<pointer>
             (FSBAllocator2_ElemAllocator<sizeof(Ty)>::allocate());

@@ -50,67 +50,6 @@ private:
 
     void handle_accept(boost::system::error_code const& error);
 
-//    void recieve_uav_input();
-//    void recieve_camera_mount_input();
-//    void recieve_motor_test_input();
-
-//    void recieve_request_uav_input();
-//    void recieve_request_camera_mount_input();
-//    void recieve_request_motor_test_input();
-//    void recieve_operation_mode();
-
-//    void recieve_camera_params();
-
-//    void recieve_raw_sensors();
-
-//    void recieve_assist_params();
-
-//    void recieve_yaw_rate_pid_params();
-//    void recieve_pitch_rate_pid_params();
-//    void recieve_roll_rate_pid_params();
-//    void recieve_altitude_rate_pid_params();
-//    void recieve_yaw_pid_params();
-//    void recieve_pitch_pid_params();
-//    void recieve_roll_pid_params();
-//    void recieve_altitude_pid_params();
-
-//    void recieve_calibration_accelerometer();
-//    void recieve_calibration_gyroscope();
-//    void recieve_calibration_compass();
-
-//    void send_sensor_samples();
-//    //void send_raw_sensor_samples(comms::Sensors sensor);
-
-//    void store_raw_sensor_samples();
-//    void clear_raw_sensor_samples();
-
-//    struct Sensor_Samples
-//    {
-//        node::IAccelerometer::Sample accelerometer;
-//        node::IGyroscope::Sample gyroscope;
-//        node::ICompass::Sample compass;
-//        node::IBarometer::Sample barometer;
-//        node::IThermometer::Sample thermometer;
-//        node::ISonar::Sample sonar;
-//        node::IVoltmeter::Sample voltage;
-//        node::IAmmeter::Sample current;
-//        node::IGPS::Sample gps;
-//        q::Clock::time_point last_sent_timestamp;
-//    } m_sensor_samples;
-//    struct Raw_Sensor_Samples
-//    {
-//        q::Clock::time_point last_sent;
-//        std::vector<node::IAccelerometer::Sample> accelerometer;
-//        std::vector<node::IGyroscope::Sample> gyroscope;
-//        std::vector<node::ICompass::Sample> compass;
-//        std::vector<node::IBarometer::Sample> barometer;
-//        std::vector<node::IThermometer::Sample> thermometer;
-//        std::vector<node::ISonar::Sample> sonar;
-//        std::vector<node::IVoltmeter::Sample> voltage;
-//        std::vector<node::IAmmeter::Sample> current;
-//        std::vector<node::IGPS::Sample> gps;
-//    } m_raw_sensor_samples;
-
     template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
     void send_telemetry_streams();
 

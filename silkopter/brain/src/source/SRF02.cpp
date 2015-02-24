@@ -163,7 +163,7 @@ void SRF02::process()
     int min_d = (unsigned int)(buf[2] << 8) | buf[3];
 
     float distance = static_cast<float>(d) / 100.f; //meters
-    float min_distance = static_cast<float>(min_d) / 100.f; //meters
+    //float min_distance = static_cast<float>(min_d) / 100.f; //meters
 
     m_stream.samples.clear();
 

@@ -133,10 +133,10 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    int res = ::read(m_fd, data, max_size);
+    auto res = ::read(m_fd, data, max_size);
     if (res < 0)
     {
-//        QLOGE("error reading {}: {}", m_params.dev, strerror(errno));
+//        QLOGE("error reading from {}: {}", m_params.dev, strerror(errno));
         return 0;
     }
     return res;
@@ -148,7 +148,13 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    return ::write(m_fd, data, size) == size;
+    auto res = ::write(m_fd, data, size);
+    if (res < 0)
+    {
+        QLOGE("error writing to {}: {}", m_params.dev, strerror(errno));
+        return false;
+    }
+    return static_cast<size_t>(res) == size;
 }
 
 

@@ -106,8 +106,8 @@ public:
 
   virtual int getNumChannels() = 0;
   virtual void reset () = 0;
-  virtual void process (int numSamples, float* const* arrayOfChannels) = 0;
-  virtual void process (int numSamples, double* const* arrayOfChannels) = 0;
+  virtual void process (float* arrayOfChannels) = 0;
+  virtual void process (double* arrayOfChannels) = 0;
 
 protected:
   virtual void doSetParams (const Params& parameters) = 0;
@@ -211,15 +211,15 @@ public:
     m_state.reset();
   }
 
-  void process (int numSamples, float* const* arrayOfChannels)
+  void process (float* arrayOfChannels)
   {
-    m_state.process (numSamples, arrayOfChannels,
+    m_state.process (arrayOfChannels,
                      FilterDesignBase<DesignClass>::m_design);
   }
 
-  void process (int numSamples, double* const* arrayOfChannels)
+  void process (double* arrayOfChannels)
   {
-    m_state.process (numSamples, arrayOfChannels,
+    m_state.process (arrayOfChannels,
                      FilterDesignBase<DesignClass>::m_design);
   }
 

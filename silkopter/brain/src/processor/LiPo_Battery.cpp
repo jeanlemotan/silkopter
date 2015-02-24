@@ -102,6 +102,8 @@ auto LiPo_Battery::init() -> bool
     m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
 
     m_stream.last_sample.sample_idx = 0;
+
+    return true;
 }
 
 auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
@@ -230,7 +232,7 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
     }
 
     //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
-    if (!m_stream.last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
+    if (m_stream.last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
     {
         QLOGW("Skipping cell count detection: the current is not healthy: {}", m_stream.last_sample.value.average_current);
         return boost::none;
