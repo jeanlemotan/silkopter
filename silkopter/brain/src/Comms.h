@@ -1,20 +1,10 @@
 #pragma once
 
-//#include "common/node/source/IAccelerometer.h"
-//#include "common/node/source/IGyroscope.h"
-//#include "common/node/source/IMagnetometer.h"
-//#include "common/node/source/IBarometer.h"
-//#include "common/node/source/IThermometer.h"
-//#include "common/node/source/ISonar.h"
-//#include "common/node/source/IGPS.h"
-//#include "common/node/source/IAmmeter.h"
-//#include "common/node/source/IVoltmeter.h"
-
 #include "common/Comm_Data.h"
 #include "HAL.h"
-#include "UAV.h"
 #include "utils/Channel.h"
 #include "utils/RUDP.h"
+#include "common/Manual_Clock.h"
 
 namespace silk
 {
@@ -45,6 +35,15 @@ public:
     //The data needs to be alive only for the duration of this call.
     auto send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool;
 
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+
+    typedef std::function<void(Setup_Channel&)> Setup_Channel_Callback;
+    void set_setup_message_callback(comms::Setup_Message message, Setup_Channel_Callback);
+
+    typedef std::function<void(Input_Channel&)> Input_Channel_Callback;
+    void set_input_message_callback(comms::Input_Message message, Input_Channel_Callback);
+
 private:
     boost::asio::io_service& m_io_service;
 
@@ -69,10 +68,12 @@ private:
 
     std::vector<node::stream::IStream*> m_telemetry_streams;
 
+
+    std::vector<Setup_Channel_Callback> m_setup_channel_callbacks;
+    std::vector<Input_Channel_Callback> m_input_channel_callbacks;
+
     HAL& m_hal;
-//    UAV& m_uav;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
-//    void send_uav_data();
 
     Manual_Clock m_remote_clock;
 
@@ -83,8 +84,6 @@ private:
     boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
     typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;

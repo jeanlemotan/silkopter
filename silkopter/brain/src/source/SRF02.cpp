@@ -160,7 +160,7 @@ void SRF02::process()
     m_params.bus->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     int d = (unsigned int)(buf[0] << 8) | buf[1];
-    int min_d = (unsigned int)(buf[2] << 8) | buf[3];
+    //int min_d = (unsigned int)(buf[2] << 8) | buf[3];
 
     float distance = static_cast<float>(d) / 100.f; //meters
     //float min_distance = static_cast<float>(min_d) / 100.f; //meters

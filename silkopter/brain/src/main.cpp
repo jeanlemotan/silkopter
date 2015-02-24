@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "HAL.h"
 #include "Comms.h"
-#include "UAV.h"
 
 #include <sys/time.h>
 #include <sys/resource.h>

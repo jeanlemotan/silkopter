@@ -121,6 +121,8 @@ enum class Setup_Message : uint8_t
 //    // Boat
 //    BOAT_MODE,
 //    REQUEST_BOAT_INPUT,
+
+    COUNT //keep last
 };
 
 enum class Input_Message : uint8_t
@@ -129,6 +131,8 @@ enum class Input_Message : uint8_t
     AIRPLANE_INPUT,
     ROVER_INPUT,
     BOAT_INPUT,
+
+    COUNT //keep last
 };
 
 

@@ -80,19 +80,9 @@ SOURCES += \
     ../../src/BrainStdAfx.cpp \
     ../../src/storage/Storage_FS.cpp \
     ../../src/storage/Storage_MB85RC.cpp \
-    ../../src/AHRS.cpp \
-    ../../src/Battery.cpp \
     ../../src/Comms.cpp \
-    ../../src/Gimbal_Servo_PiGPIO.cpp \
-    ../../src/HAL_Motors_Sim.cpp \
-    ../../src/HAL_Sensors_Sim.cpp \
     ../../src/main.cpp \
-    ../../src/Motor_Mixer.cpp \
-    ../../src/Motors_PiGPIO.cpp \
-    ../../src/Sim_Comms.cpp \
-    ../../src/UAV.cpp \
     ../../src/HAL.cpp \
-    ../../src/HAL_old.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
     ../../src/bus/I2C_Linux.cpp \ 
@@ -136,10 +126,8 @@ HEADERS += \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Serial_Channel.h \
-    ../../src/UAV.h \
     ../../src/Comms.h \
     ../../../libs/utils/Json_Helpers.h \
-    ../../src/AHRS.h \
     ../../src/Motor_Mixer.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
@@ -147,13 +135,6 @@ HEADERS += \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
     ../../src/storage/Storage_MB85RC.h \
-    ../../src/Battery.h \
-    ../../src/Gimbal_Servo_PiGPIO.h \
-    ../../src/HAL_Motors_Sim.h \
-    ../../src/HAL_Sensors.h \
-    ../../src/HAL_Sensors_Sim.h \
-    ../../src/Motors_PiGPIO.h \
-    ../../src/Sim_Comms.h \
     ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
