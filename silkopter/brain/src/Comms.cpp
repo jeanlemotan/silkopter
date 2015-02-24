@@ -19,6 +19,8 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
+#include "common/node/processor/IMultirotor.h"
+
 
 using namespace silk;
 using namespace boost::asio;
@@ -464,6 +466,109 @@ void Comms::handle_telemetry_streams()
     m_setup_channel.end_pack();
 }
 
+void Comms::handle_multirotor_mode()
+{
+    uint32_t req_id = 0;
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking multirotor input request");
+        return;
+    }
+    QLOGI("Req Id: {} - multirotor input request", req_id);
+
+    std::string name;
+    if (!m_setup_channel.unpack_param(name))
+    {
+        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
+        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
+        return;
+    }
+
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    if (!multirotor)
+    {
+        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
+        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
+        return;
+    }
+
+    node::processor::IMultirotor::Mode mode;
+    if (m_setup_channel.unpack_param(mode))
+    {
+        multirotor->set_mode(mode);
+    }
+
+    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id, multirotor->get_input());
+}
+
+void Comms::handle_multirotor_input_request()
+{
+    uint32_t req_id = 0;
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking multirotor input request");
+        return;
+    }
+    QLOGI("Req Id: {} - multirotor input request", req_id);
+
+    std::string name;
+    if (!m_setup_channel.unpack_param(name))
+    {
+        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
+        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
+        return;
+    }
+
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    if (!multirotor)
+    {
+        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
+        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
+        return;
+    }
+
+    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id, multirotor->get_input());
+}
+
+void Comms::handle_multirotor_input()
+{
+    uint32_t req_id = 0;
+    if (!m_input_channel.begin_unpack() ||
+        !m_input_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking multirotor input request");
+        return;
+    }
+    QLOGI("Req Id: {} - multirotor input request", req_id);
+
+    std::string name;
+    if (!m_input_channel.unpack_param(name))
+    {
+        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
+        return;
+    }
+
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    if (!multirotor)
+    {
+        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
+        return;
+    }
+
+    node::processor::IMultirotor::Input input;
+    if (m_input_channel.unpack_param(input))
+    {
+        multirotor->set_input(input);
+    }
+    else
+    {
+        QLOGE("Req Id: {} - Cannot unpack input for multirotor '{}'", req_id, name);
+    }
+}
+
+
 void Comms::process()
 {
     if (!is_connected())
@@ -475,21 +580,9 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        default:
-        {
-            auto const& cb = m_input_channel_callbacks[static_cast<size_t>(msg.get())];
-            if (cb)
-            {
-                cb(m_input_channel);
-            }
-            else
-            {
-                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
-            }
-        }
-        break;
-            break;
-            //LOG_INFO("Received message: {}", static_cast<int>(msg.get()));
+        case comms::Input_Message::MULTIROTOR_INPUT: handle_multirotor_input(); break;
+
+        default: QLOGE("Received unrecognised input message: {}", static_cast<int>(msg.get())); break;
         }
     }
 
@@ -510,19 +603,10 @@ void Comms::process()
 
         case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
 
-        default:
-        {
-            auto const& cb = m_setup_channel_callbacks[static_cast<size_t>(msg.get())];
-            if (cb)
-            {
-                cb(m_setup_channel);
-            }
-            else
-            {
-                QLOGW("Received unhandled message: {}", static_cast<int>(msg.get()));
-            }
-        }
-        break;
+        case comms::Setup_Message::MULTIROTOR_MODE: handle_multirotor_mode(); break;
+        case comms::Setup_Message::MULTIROTOR_INPUT_REQUEST: handle_multirotor_input_request(); break;
+
+        default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }
     }
 

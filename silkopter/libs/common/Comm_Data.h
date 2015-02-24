@@ -96,6 +96,7 @@ enum class Setup_Message : uint8_t
     //Set/Get the mode
     //REQ:
     //  uint32_t req_id
+    //  string name - the multirotor name
     //  [optional] Multirotor::Mode - if present, the mode to change to. If not, it's a getter
     //REQ:
     //  uint32_t req_id
@@ -105,10 +106,11 @@ enum class Setup_Message : uint8_t
     //Get the input
     //REQ:
     //  uint32_t req_id
+    //  string name - the multirotor name
     //REQ:
     //  uint32_t req_id
     //  Multirotor::Input - the current input values
-    REQUEST_MULTIROTOR_INPUT,
+    MULTIROTOR_INPUT_REQUEST,
 
 //    // Plane
 //    AIRPLANE_MODE,

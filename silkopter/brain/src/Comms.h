@@ -65,6 +65,10 @@ private:
     void handle_stream_config();
 
     void handle_telemetry_streams();
+    void handle_multirotor_mode();
+    void handle_multirotor_input_request();
+
+    void handle_multirotor_input();
 
     std::vector<node::stream::IStream*> m_telemetry_streams;
 

@@ -99,6 +99,12 @@ public:
 
         math::vec3f camera_mount_rotation;
     };
+
+    virtual void set_mode(Mode mode) const = 0;
+    virtual auto get_mode() const -> Mode = 0;
+
+    virtual void set_input(Input const& input) = 0;
+    virtual auto get_input() const -> Input = 0;
 };
 
 

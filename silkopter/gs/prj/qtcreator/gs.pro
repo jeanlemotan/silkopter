@@ -21,6 +21,9 @@ INCLUDEPATH += ../../../../qinput/include
 INCLUDEPATH += ../../../../q/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
+INCLUDEPATH += ../../../../autojsoncxx/include
+INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
+
 
 PRECOMPILED_HEADER = ../../include/stdafx.h
 
@@ -47,3 +50,44 @@ DESTDIR = ../../bin
 
 RESOURCES += \
     ../../src/res.qrc
+
+HEADERS += \
+    ../../src/GS.h \
+    ../../src/qcustomplot.h \
+    ../../src/Comms.h \
+    ../../src/HAL.h \
+    ../../../libs/common/node/processor/IAHRS.h \
+    ../../../libs/common/node/processor/IBattery.h \
+    ../../../libs/common/node/processor/ICompass.h \
+    ../../../libs/common/node/processor/IFilter.h \
+    ../../../libs/common/node/processor/IMultirotor.h \
+    ../../../libs/common/node/processor/IProcessor.h \
+    ../../../libs/common/node/processor/ITransform.h \
+    ../../../libs/common/node/sink/IPWM.h \
+    ../../../libs/common/node/sink/ISink.h \
+    ../../../libs/common/node/source/ISource.h \
+    ../../../libs/common/node/stream/IAcceleration.h \
+    ../../../libs/common/node/stream/IADC_Value.h \
+    ../../../libs/common/node/stream/IAngular_Velocity.h \
+    ../../../libs/common/node/stream/IBattery_State.h \
+    ../../../libs/common/node/stream/ICardinal_Points.h \
+    ../../../libs/common/node/stream/ICurrent.h \
+    ../../../libs/common/node/stream/IDistance.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IMagnetic_Field.h \
+    ../../../libs/common/node/stream/IPressure.h \
+    ../../../libs/common/node/stream/IPWM_Value.h \
+    ../../../libs/common/node/stream/IReference_Frame.h \
+    ../../../libs/common/node/stream/IStream.h \
+    ../../../libs/common/node/stream/ITemperature.h \
+    ../../../libs/common/node/stream/IVideo.h \
+    ../../../libs/common/node/stream/IVoltage.h \
+    ../../src/stdafx.h
+
+SOURCES += \
+    ../../src/GS.cpp \
+    ../../src/main.cpp \
+    ../../src/qcustomplot.cpp \
+    ../../src/Comms.cpp \
+    ../../src/HAL.cpp
