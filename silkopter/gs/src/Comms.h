@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL.h"
 #include "common/Manual_Clock.h"
 #include "common/Comm_Data.h"
 #include "utils/PID.h"
@@ -29,7 +30,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service);
+    Comms(boost::asio::io_service& io_service, HAL& hal);
 
     auto start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
     void disconnect();
@@ -47,6 +48,8 @@ public:
     //----------------------------------------------------------------------
 
 private:
+    HAL& m_hal;
+
     boost::asio::io_service& m_io_service;
     boost::asio::ip::udp::socket m_socket;
     boost::asio::ip::udp::endpoint m_remote_endpoint;
@@ -61,6 +64,11 @@ private:
     mutable Telemetry_Channel m_telemetry_channel;
 
     Manual_Clock m_remote_clock;
+
+    void handle_enumerate_sources();
+    void handle_enumerate_sinks();
+    void handle_enumerate_processors();
+    void handle_enumerate_streams();
 };
 
 }

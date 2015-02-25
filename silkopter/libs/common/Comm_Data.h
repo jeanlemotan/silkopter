@@ -23,7 +23,6 @@ enum class Setup_Message : uint8_t
     //  uint32_t source_count - array size
     //      string - source name
     //      uint32_t output_count - array size
-    //          type - type of output stream
     //          string - name of output stream
     ENUMERATE_SOURCES,
 
@@ -46,10 +45,8 @@ enum class Setup_Message : uint8_t
     //  uint32_t processor_count - array size
     //      string - processor name
     //      uint32_t input_count - array size
-    //          type - type of input stream
     //          string - name of input stream
     //      uint32_t output_count - array size
-    //          type - type of output stream
     //          string - name of output stream
     ENUMERATE_PROCESSORS,
 
@@ -61,7 +58,6 @@ enum class Setup_Message : uint8_t
     //  uint32_t sink_count - array size
     //      string - processor name
     //      uint32_t input_count - array size
-    //          type - type of input stream
     //          string - name of input stream
     ENUMERATE_SINKS,
 

@@ -4,7 +4,7 @@
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
     //, m_gyro_calibrarion_samples(k_calibration_sample_count)
-    , m_comms(m_io_service)
+    , m_comms(m_io_service, m_hal)
 {
 //	m_ui.setupUi(this);
 

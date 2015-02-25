@@ -237,7 +237,6 @@ void Comms::handle_enumerate_sources()
             m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
             for (size_t i = 0; i < n->get_output_stream_count(); i++)
             {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_type());
                 m_setup_channel.pack_param(n->get_output_stream(i).get_name());
             }
         }
@@ -268,7 +267,6 @@ void Comms::handle_enumerate_sinks()
             m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
             for (size_t i = 0; i < n->get_input_stream_count(); i++)
             {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_type());
                 m_setup_channel.pack_param(n->get_input_stream(i).get_name());
             }
         }
@@ -299,13 +297,11 @@ void Comms::handle_enumerate_processors()
             m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
             for (size_t i = 0; i < n->get_input_stream_count(); i++)
             {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_type());
                 m_setup_channel.pack_param(n->get_input_stream(i).get_name());
             }
             m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
             for (size_t i = 0; i < n->get_output_stream_count(); i++)
             {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_type());
                 m_setup_channel.pack_param(n->get_output_stream(i).get_name());
             }
         }

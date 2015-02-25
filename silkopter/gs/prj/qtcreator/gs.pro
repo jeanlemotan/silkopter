@@ -83,7 +83,8 @@ HEADERS += \
     ../../../libs/common/node/stream/ITemperature.h \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
-    ../../src/stdafx.h
+    ../../src/stdafx.h \
+    ../../../libs/common/Comm_Data.h
 
 SOURCES += \
     ../../src/GS.cpp \

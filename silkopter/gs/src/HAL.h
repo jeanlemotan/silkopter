@@ -294,7 +294,7 @@ template<class Base>
 template<class T>
 auto Registry<Base>::find_by_name(std::string const& name) const -> T*
 {
-    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](Base* s) { return s->get_name() == name; });
+    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](std::unique_ptr<Base> const& s) { return s->get_name() == name; });
     return it != m_nodes.end() ? dynamic_cast<T*>(it->get()) : nullptr;
 }
 template<class Base>

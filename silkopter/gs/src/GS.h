@@ -24,6 +24,7 @@ private:
     q::Clock::time_point m_last_time;
     //q::Clock::duration m_duration;
 
+    silk::HAL m_hal;
     silk::Comms m_comms;
 
     void set_remote_address(std::string const& address);
