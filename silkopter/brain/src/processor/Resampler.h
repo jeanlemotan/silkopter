@@ -68,7 +68,8 @@ public:
         if (!m_params.name.empty())
         {
             m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
-            if (!m_hal.get_streams().add(m_stream))
+            if (!m_hal.get_processors().add(*this) ||
+                !m_hal.get_streams().add(m_stream))
             {
                 return false;
             }

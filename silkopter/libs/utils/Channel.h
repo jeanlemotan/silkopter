@@ -7,49 +7,66 @@ namespace util
 {
     namespace detail
     {
-        template<class Container, class T> T get_value_fixed(Container const& t, size_t off)
+        typedef std::vector<uint8_t> TX_Buffer_t;
+        typedef std::deque<uint8_t> RX_Buffer_t;
+
+        template<class T> auto get_value_fixed(T& val, RX_Buffer_t const& t, size_t off) -> bool
         {
-            QASSERT(off + sizeof(T) <= t.size());
-            T val;
+            if (off + sizeof(T) > t.size())
+            {
+                return false;
+            }
             std::copy(t.begin() + off, t.begin() + off + sizeof(T), reinterpret_cast<uint8_t*>(&val));
-            return val;
+            return true;
         }
-        template<class Container> std::string get_value_fixed(Container const& t, size_t off)
+        template<> inline auto get_value_fixed(std::string& val, RX_Buffer_t const& t, size_t off) -> bool
         {
-            auto size = get_value_fixed<uint32_t>(t, off);
+            uint32_t size;
+            if (!get_value_fixed(size, t, off))
+            {
+                return false;
+            }
+            if (off + sizeof(uint32_t) + size > t.size())
+            {
+                return false;
+            }
             off += sizeof(uint32_t);
-            std::string str;
-            str.resize(size);
-            QASSERT(off + size <= t.size());
-            std::copy(t.begin() + off, t.begin() + off + size, str.begin());
-            return str;
+            val.resize(size);
+            std::copy(t.begin() + off, t.begin() + off + size, val.begin());
+            return true;
         }
-        template<class Container, class T> T get_value(Container const& t, size_t& off)
+        template<class T> auto get_value(T& val, RX_Buffer_t const& t, size_t& off) -> bool
         {
-            auto val = get_value_fixed<Container, T>(t, off);
+            if (!get_value_fixed(val, t, off))
+            {
+                return false;
+            }
             off += sizeof(T);
-            return val;
+            return true;
         }
-        template<class Container> std::string get_value(Container const& t, size_t& off)
+        template<> inline auto get_value(std::string& val, RX_Buffer_t const& t, size_t& off) -> bool
         {
-            auto val = get_value_fixed<Container, uint32_t>(t, off);
+            if (!get_value_fixed(val, t, off))
+            {
+                return false;
+            }
             off += sizeof(uint32_t) + val.size();
-            return val;
+            return true;
         }
-        template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
+        template<class T> void set_value_fixed(TX_Buffer_t& t, T const& val, size_t off)
         {
             QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
             auto const* src = reinterpret_cast<uint8_t const*>(&val);
             std::copy(src, src + sizeof(T), t.data() + off);
         }
-        template<class Container> void set_value_fixed(Container& t, std::string const& val, size_t off)
+        template<> inline void set_value_fixed(TX_Buffer_t& t, std::string const& val, size_t off)
         {
             set_value_fixed(t, static_cast<uint32_t>(val.size()), off);
             off += sizeof(uint32_t);
             QASSERT_MSG(off + val.size() <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, val.size(), t.size(), t.capacity());
             std::copy(val.begin(), val.end(), t.data() + off);
         }
-        template<class Container, class T> void set_value(Container& t, T const& val, size_t& off)
+        template<class T> void set_value(TX_Buffer_t& t, T const& val, size_t& off)
         {
             if (off + sizeof(T) > t.size())
             {
@@ -58,7 +75,7 @@ namespace util
             set_value_fixed(t, val, off);
             off += sizeof(T);
         }
-        template<class Container> void set_value(Container& t, std::string const& val, size_t& off)
+        template<> inline void set_value(TX_Buffer_t& t, std::string const& val, size_t& off)
         {
             if (off + sizeof(uint32_t) + val.size() > t.size())
             {
@@ -183,8 +200,7 @@ namespace util
 //            {
 //                return false;
 //            }
-            p = detail::get_value<RX_Buffer_t, Param>(m_rx_buffer, m_decoded.offset);
-            return true;
+            return detail::get_value(p, m_rx_buffer, m_decoded.offset);
         }
         void end_unpack()
         {
@@ -201,9 +217,6 @@ namespace util
 		//////////////////////////////////////////////////////////////////////////
 
 	private:
-        typedef std::vector<uint8_t> TX_Buffer_t;
-        typedef std::deque<uint8_t> RX_Buffer_t;
-
         static const size_t MESSAGE_OFFSET = 0;
         static const size_t SIZE_OFFSET = MESSAGE_OFFSET + sizeof(Message_t);
         static const size_t HEADER_SIZE = SIZE_OFFSET + sizeof(Message_Size_t);
@@ -269,7 +282,10 @@ namespace util
 //            {
 //                return false;
 //            }
-            p = detail::get_value<RX_Buffer_t, Param>(m_rx_buffer, m_decoded.offset);
+            if (!detail::get_value(p, m_rx_buffer, m_decoded.offset))
+            {
+                return false;
+            }
             return _unpack(off, params...);
 		}
 
@@ -286,8 +302,13 @@ namespace util
             }
 
             //try to decode a message HEADER
-            auto message = detail::get_value_fixed<RX_Buffer_t, Message_t>(m_rx_buffer, MESSAGE_OFFSET);
-            auto size = detail::get_value_fixed<RX_Buffer_t, Message_Size_t>(m_rx_buffer, SIZE_OFFSET);
+            Message_t message;
+            Message_Size_t size;
+            if (!detail::get_value_fixed(message, m_rx_buffer, MESSAGE_OFFSET) ||
+                !detail::get_value_fixed(size, m_rx_buffer, SIZE_OFFSET))
+            {
+                return false;
+            }
             if (m_rx_buffer.size() < HEADER_SIZE + size)
             {
                 return false;
@@ -321,9 +342,9 @@ namespace util
 
         util::RUDP& m_rudp;
         uint8_t m_channel_idx = 0;
-        RX_Buffer_t m_rx_buffer;
+        detail::RX_Buffer_t m_rx_buffer;
         std::vector<uint8_t> m_temp_rx_buffer;
-        TX_Buffer_t m_tx_buffer;
+        detail::TX_Buffer_t m_tx_buffer;
         size_t m_size_off = 0;
         size_t m_data_start_off = 0;
     };

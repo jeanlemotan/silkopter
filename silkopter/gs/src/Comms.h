@@ -50,6 +50,7 @@ private:
     uint32_t m_last_req_id = 0;
 
     void reset();
+    void request_nodes();
 
     boost::asio::io_service& m_io_service;
     boost::asio::ip::udp::socket m_socket;

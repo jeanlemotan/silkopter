@@ -84,7 +84,14 @@ HEADERS += \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
     ../../src/stdafx.h \
-    ../../../libs/common/Comm_Data.h
+    ../../../libs/common/Comm_Data.h \
+    ../../../libs/utils/Butterworth.h \
+    ../../../libs/utils/Channel.h \
+    ../../../libs/utils/Json_Helpers.h \
+    ../../../libs/utils/PID.h \
+    ../../../libs/utils/RUDP.h \
+    ../../../libs/utils/Serial_Channel.h \
+    ../../../libs/utils/Timed_Scope.h
 
 SOURCES += \
     ../../src/GS.cpp \

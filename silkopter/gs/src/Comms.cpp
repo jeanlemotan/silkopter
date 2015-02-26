@@ -78,6 +78,8 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 
         m_rudp.start();
 
+        request_nodes();
+
         QLOGI("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
     catch(...)
@@ -119,6 +121,14 @@ void Comms::reset()
     m_hal.get_sources().remove_all();
     m_hal.get_processors().remove_all();
     m_hal.get_streams().remove_all();
+}
+
+void Comms::request_nodes()
+{
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_STREAMS, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_SOURCES, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_SINKS, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_PROCESSORS, ++m_last_req_id);
 }
 
 
@@ -163,29 +173,31 @@ void Comms::handle_enumerate_sources()
         m_setup_channel.unpack_param(req_id) &&
         m_setup_channel.unpack_param(count))
     {
-        QLOGI("Req Id: {} - enumerate sources", req_id);
+        QLOGI("Req Id: {}, enumerate {} sources", req_id, count);
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto source = std::make_shared<node::source::Source>();
+            auto node = std::make_shared<node::source::Source>();
             uint32_t ocount = 0;
-            m_setup_channel.unpack_param(source->name);
+            m_setup_channel.unpack_param(node->name);
             m_setup_channel.unpack_param(ocount);
+            QLOGI("\t{}", node->name, ocount);
             for (uint32_t j = 0; j < ocount; j++)
             {
                 m_setup_channel.unpack_param(name);
                 auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
-                    QLOGE("Req Id: {}, source '{}' - Cannot find stream '{}'", req_id, source->name, name);
+                    QLOGE("\t\tOUT: Cannot find stream '{}'", name);
                     return;
                 }
-                source->output_streams.push_back(stream);
+                QLOGI("\t\tOUT: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
+                node->output_streams.push_back(stream);
             }
-            m_hal.get_sources().add(source);
+            m_hal.get_sources().add(node);
 
             //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, ++m_last_req_id, source->name);
+            m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, ++m_last_req_id, node->name);
         }
 
         m_setup_channel.end_unpack();
@@ -205,29 +217,31 @@ void Comms::handle_enumerate_sinks()
         m_setup_channel.unpack_param(req_id) &&
         m_setup_channel.unpack_param(count))
     {
-        QLOGI("Req Id: {} - enumerate sinks", req_id);
+        QLOGI("Req Id: {}, enumerate {} sinks", req_id, count);
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto sink = std::make_shared<node::sink::Sink>();
+            auto node = std::make_shared<node::sink::Sink>();
             uint32_t icount = 0;
-            m_setup_channel.unpack_param(sink->name);
+            m_setup_channel.unpack_param(node->name);
             m_setup_channel.unpack_param(icount);
+            QLOGI("\t{}", node->name, icount);
             for (uint32_t j = 0; j < icount; j++)
             {
                 m_setup_channel.unpack_param(name);
                 auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
-                    QLOGE("Req Id: {}, sink '{}' - Cannot find stream '{}'", req_id, sink->name, name);
+                    QLOGE("\t\tIN: Cannot find stream '{}'", name);
                     return;
                 }
-                sink->input_streams.push_back(stream);
+                QLOGI("\t\tIN: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
+                node->input_streams.push_back(stream);
             }
-            m_hal.get_sinks().add(sink);
+            m_hal.get_sinks().add(node);
 
             //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::SINK_CONFIG, ++m_last_req_id, sink->name);
+            m_setup_channel.pack(comms::Setup_Message::SINK_CONFIG, ++m_last_req_id, node->name);
         }
 
         m_setup_channel.end_unpack();
@@ -247,28 +261,29 @@ void Comms::handle_enumerate_processors()
         m_setup_channel.unpack_param(req_id) &&
         m_setup_channel.unpack_param(count))
     {
-        QLOGI("Req Id: {} - enumerate processors", req_id);
+        QLOGI("Req Id: {}, enumerate {} processors", req_id, count);
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto processor = std::make_shared<node::processor::Processor>();
+            auto node = std::make_shared<node::processor::Processor>();
             uint32_t icount = 0;
-            m_setup_channel.unpack_param(processor->name);
+            m_setup_channel.unpack_param(node->name);
             m_setup_channel.unpack_param(icount);
+            QLOGI("\t{}", node->name, icount);
             for (uint32_t j = 0; j < icount; j++)
             {
                 m_setup_channel.unpack_param(name);
                 auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
-                    QLOGE("Req Id: {}, processor '{}' - Cannot find stream '{}'", req_id, processor->name, name);
+                    QLOGE("\t\tIN: Cannot find stream '{}'", name);
                     return;
                 }
-                processor->input_streams.push_back(stream);
+                QLOGI("\t\tIN: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
+                node->input_streams.push_back(stream);
             }
 
             uint32_t ocount = 0;
-            m_setup_channel.unpack_param(processor->name);
             m_setup_channel.unpack_param(ocount);
             for (uint32_t j = 0; j < ocount; j++)
             {
@@ -276,16 +291,17 @@ void Comms::handle_enumerate_processors()
                 auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
-                    QLOGE("Req Id: {}, processor '{}' - Cannot find stream '{}'", req_id, processor->name, name);
+                    QLOGE("\t\tOUT: Cannot find stream '{}'", name);
                     return;
                 }
-                processor->output_streams.push_back(stream);
+                QLOGI("\t\tOUT: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
+                node->output_streams.push_back(stream);
             }
 
-            m_hal.get_processors().add(processor);
+            m_hal.get_processors().add(node);
 
             //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::PROCESSOR_CONFIG, ++m_last_req_id, processor->name);
+            m_setup_channel.pack(comms::Setup_Message::PROCESSOR_CONFIG, ++m_last_req_id, node->name);
         }
 
         m_setup_channel.end_unpack();
@@ -320,7 +336,7 @@ void Comms::handle_enumerate_streams()
         m_setup_channel.unpack_param(req_id) &&
         m_setup_channel.unpack_param(count))
     {
-        QLOGI("Req Id: {} - enumerate streams", req_id);
+        QLOGI("Req Id: {}, enumerate {} streams", req_id, count);
 
         for (uint32_t i = 0; i < count; i++)
         {
@@ -347,9 +363,11 @@ void Comms::handle_enumerate_streams()
 
             if (!stream)
             {
-                QLOGE("Req Id: {}, stream '{}' type '{}' - Cannot create stream", req_id, name, type);
+                QLOGE("\tCannot create stream {}, type {}, rate {}Hz", name, type, rate);
                 return;
             }
+
+            QLOGI("\tstream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
 
             m_hal.get_streams().add(stream);
 
@@ -374,7 +392,7 @@ void Comms::handle_source_config()
                 m_setup_channel.unpack_param(req_id) &&
                 m_setup_channel.unpack_param(name) &&
                 m_setup_channel.unpack_param(config_str);
-    if (!!ok)
+    if (!ok)
     {
         QLOGE("Failed to unpack node config");
         return;
@@ -389,9 +407,11 @@ void Comms::handle_source_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    if (node->config.Parse(config_str.c_str()).HasParseError())
+    node->config.SetObject();
+    if (!config_str.empty() &&
+            node->config.Parse(config_str.c_str()).HasParseError())
     {
-        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
         return;
     }
 }
@@ -405,7 +425,7 @@ void Comms::handle_sink_config()
                 m_setup_channel.unpack_param(req_id) &&
                 m_setup_channel.unpack_param(name) &&
                 m_setup_channel.unpack_param(config_str);
-    if (!!ok)
+    if (!ok)
     {
         QLOGE("Failed to unpack node config");
         return;
@@ -420,9 +440,11 @@ void Comms::handle_sink_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    if (node->config.Parse(config_str.c_str()).HasParseError())
+    node->config.SetObject();
+    if (!config_str.empty() &&
+            node->config.Parse(config_str.c_str()).HasParseError())
     {
-        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
         return;
     }
 }
@@ -436,7 +458,7 @@ void Comms::handle_processor_config()
                 m_setup_channel.unpack_param(req_id) &&
                 m_setup_channel.unpack_param(name) &&
                 m_setup_channel.unpack_param(config_str);
-    if (!!ok)
+    if (!ok)
     {
         QLOGE("Failed to unpack node config");
         return;
@@ -451,9 +473,11 @@ void Comms::handle_processor_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    if (node->config.Parse(config_str.c_str()).HasParseError())
+    node->config.SetObject();
+    if (!config_str.empty() &&
+            node->config.Parse(config_str.c_str()).HasParseError())
     {
-        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
         return;
     }
 }
@@ -467,7 +491,7 @@ void Comms::handle_stream_config()
                 m_setup_channel.unpack_param(req_id) &&
                 m_setup_channel.unpack_param(name) &&
                 m_setup_channel.unpack_param(config_str);
-    if (!!ok)
+    if (!ok)
     {
         QLOGE("Failed to unpack node config");
         return;
@@ -482,9 +506,11 @@ void Comms::handle_stream_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    if (node->config.Parse(config_str.c_str()).HasParseError())
+    node->config.SetObject();
+    if (!config_str.empty() &&
+            node->config.Parse(config_str.c_str()).HasParseError())
     {
-        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
         return;
     }
 }
