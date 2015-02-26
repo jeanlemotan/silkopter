@@ -87,11 +87,14 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
         return false;
     }
 
+    reset();
+
     return true;
 }
 
 void Comms::disconnect()
 {
+    reset();
     m_socket.close();
 }
 
@@ -108,6 +111,14 @@ auto Comms::get_remote_address() const -> boost::asio::ip::address
 auto Comms::get_remote_clock() const -> Manual_Clock const&
 {
     return m_remote_clock;
+}
+
+void Comms::reset()
+{
+    m_hal.get_sinks().remove_all();
+    m_hal.get_sources().remove_all();
+    m_hal.get_processors().remove_all();
+    m_hal.get_streams().remove_all();
 }
 
 
@@ -156,14 +167,14 @@ void Comms::handle_enumerate_sources()
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto source = q::make_unique<node::source::Source>();
+            auto source = std::make_shared<node::source::Source>();
             uint32_t ocount = 0;
             m_setup_channel.unpack_param(source->name);
             m_setup_channel.unpack_param(ocount);
             for (uint32_t j = 0; j < ocount; j++)
             {
                 m_setup_channel.unpack_param(name);
-                auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
                     QLOGE("Req Id: {}, source '{}' - Cannot find stream '{}'", req_id, source->name, name);
@@ -171,7 +182,10 @@ void Comms::handle_enumerate_sources()
                 }
                 source->output_streams.push_back(stream);
             }
-            m_hal.get_sources().add(std::move(source));
+            m_hal.get_sources().add(source);
+
+            //send request to get config
+            m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, ++m_last_req_id, source->name);
         }
 
         m_setup_channel.end_unpack();
@@ -195,14 +209,14 @@ void Comms::handle_enumerate_sinks()
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto sink = q::make_unique<node::sink::Sink>();
+            auto sink = std::make_shared<node::sink::Sink>();
             uint32_t icount = 0;
             m_setup_channel.unpack_param(sink->name);
             m_setup_channel.unpack_param(icount);
             for (uint32_t j = 0; j < icount; j++)
             {
                 m_setup_channel.unpack_param(name);
-                auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
                     QLOGE("Req Id: {}, sink '{}' - Cannot find stream '{}'", req_id, sink->name, name);
@@ -210,7 +224,10 @@ void Comms::handle_enumerate_sinks()
                 }
                 sink->input_streams.push_back(stream);
             }
-            m_hal.get_sinks().add(std::move(sink));
+            m_hal.get_sinks().add(sink);
+
+            //send request to get config
+            m_setup_channel.pack(comms::Setup_Message::SINK_CONFIG, ++m_last_req_id, sink->name);
         }
 
         m_setup_channel.end_unpack();
@@ -234,14 +251,14 @@ void Comms::handle_enumerate_processors()
 
         for (uint32_t i = 0; i < count; i++)
         {
-            auto processor = q::make_unique<node::processor::Processor>();
+            auto processor = std::make_shared<node::processor::Processor>();
             uint32_t icount = 0;
             m_setup_channel.unpack_param(processor->name);
             m_setup_channel.unpack_param(icount);
             for (uint32_t j = 0; j < icount; j++)
             {
                 m_setup_channel.unpack_param(name);
-                auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
                     QLOGE("Req Id: {}, processor '{}' - Cannot find stream '{}'", req_id, processor->name, name);
@@ -256,7 +273,7 @@ void Comms::handle_enumerate_processors()
             for (uint32_t j = 0; j < ocount; j++)
             {
                 m_setup_channel.unpack_param(name);
-                auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
                 if (!stream)
                 {
                     QLOGE("Req Id: {}, processor '{}' - Cannot find stream '{}'", req_id, processor->name, name);
@@ -265,7 +282,10 @@ void Comms::handle_enumerate_processors()
                 processor->output_streams.push_back(stream);
             }
 
-            m_hal.get_processors().add(std::move(processor));
+            m_hal.get_processors().add(processor);
+
+            //send request to get config
+            m_setup_channel.pack(comms::Setup_Message::PROCESSOR_CONFIG, ++m_last_req_id, processor->name);
         }
 
         m_setup_channel.end_unpack();
@@ -277,16 +297,16 @@ void Comms::handle_enumerate_processors()
 }
 
 template<class T>
-auto create_stream_from_rtti(std::string const& rtti, std::string const& name, uint32_t rate) -> std::unique_ptr<silk::node::stream::IStream>
+auto create_stream_from_rtti(std::string const& rtti, std::string const& name, uint32_t rate) -> std::shared_ptr<silk::node::stream::IStream>
 {
     if (q::rtti::get_class_name<T>() == rtti)
     {
-        auto s = q::make_unique<T>();
+        auto s = std::make_shared<T>();
         s->name = name;
         s->rate = rate;
         return std::move(s);
     }
-    return std::unique_ptr<silk::node::stream::IStream>();
+    return std::shared_ptr<silk::node::stream::IStream>();
 }
 
 void Comms::handle_enumerate_streams()
@@ -309,20 +329,20 @@ void Comms::handle_enumerate_streams()
             m_setup_channel.unpack_param(rate);
 
             auto stream = create_stream_from_rtti<node::stream::Acceleration>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Angular_Velocity>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Magnetic_Field>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Pressure>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Battery_State>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Linear_Acceleration>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Cardinal_Points>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Current>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Voltage>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Distance>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Location>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::PWM_Value>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Reference_Frame>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::Temperature>(type, name, rate);
-            stream = stream ? std::move(stream) : create_stream_from_rtti<node::stream::ADC_Value>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Angular_Velocity>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Magnetic_Field>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Pressure>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Battery_State>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Linear_Acceleration>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Cardinal_Points>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Current>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Voltage>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Distance>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Location>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::PWM_Value>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Reference_Frame>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::Temperature>(type, name, rate);
+            stream = stream ? stream : create_stream_from_rtti<node::stream::ADC_Value>(type, name, rate);
     //      stream = stream ? stream : create_stream_from_rtti<node::stream::Video>(type);
 
             if (!stream)
@@ -331,7 +351,10 @@ void Comms::handle_enumerate_streams()
                 return;
             }
 
-            m_hal.get_streams().add(std::move(stream));
+            m_hal.get_streams().add(stream);
+
+            //send request to get config
+            m_setup_channel.pack(comms::Setup_Message::STREAM_CONFIG, ++m_last_req_id, name);
         }
 
         m_setup_channel.end_unpack();
@@ -342,228 +365,129 @@ void Comms::handle_enumerate_streams()
     }
 }
 
-//template<class Registry, class Node_Base>
-//void Comms::handle_node_config(comms::Setup_Message message, Registry const& registry)
-//{
-//    m_setup_channel.begin_unpack();
-//    uint32_t req_id = 0;
-//    std::string name;
-//    if (!m_setup_channel.unpack_param(req_id) ||
-//        !m_setup_channel.unpack_param(name))
-//    {
-//        QLOGE("Error in unpacking config rquest");
-//        return;
-//    }
+void Comms::handle_source_config()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    std::string config_str;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(name) &&
+                m_setup_channel.unpack_param(config_str);
+    if (!!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
 
-//    QLOGI("Req Id: {} - node config", req_id);
-//    auto* node = registry.template find_by_name<Node_Base>(name);
-//    if (!node)
-//    {
-//        QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
-//        return;
-//    }
+    auto node = m_hal.get_sources().find_by_name<node::source::Source>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
 
-//    std::string config_str;
-//    m_setup_channel.unpack_param<std::string>(config_str);
+    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-//    if (!config_str.empty())
-//    {
-//        rapidjson::Document config;
-//        if (config.Parse(config_str.c_str()).HasParseError())
-//        {
-//            QLOGE("Req Id: {} - failed to parse config for '{}': {}:{}", req_id, name, config.GetParseError(), config.GetErrorOffset());
-//            return;
-//        }
-//        node->set_config(config);
-//    }
+    if (node->config.Parse(config_str.c_str()).HasParseError())
+    {
+        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        return;
+    }
+}
 
-//    {
-//        config_str.clear();
-//        auto config = node->get_config();
-//        if (config)
-//        {
-//            rapidjson::StringBuffer s;
-//            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-//            config->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-//            config_str = s.GetString();
-//        }
-//        m_setup_channel.pack(message, req_id, name, config_str);
-//    }
-//}
+void Comms::handle_sink_config()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    std::string config_str;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(name) &&
+                m_setup_channel.unpack_param(config_str);
+    if (!!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
 
-//void Comms::handle_source_config()
-//{
-//    handle_node_config<decltype(m_hal.get_sources()), node::source::ISource>(
-//                comms::Setup_Message::SOURCE_CONFIG, m_hal.get_sources());
-//}
-//void Comms::handle_sink_config()
-//{
-//    handle_node_config<decltype(m_hal.get_sinks()), node::sink::ISink>(
-//                comms::Setup_Message::SINK_CONFIG, m_hal.get_sinks());
-//}
-//void Comms::handle_processor_config()
-//{
-//    handle_node_config<decltype(m_hal.get_processors()), node::processor::IProcessor>(
-//                comms::Setup_Message::PROCESSOR_CONFIG, m_hal.get_processors());
-//}
-//void Comms::handle_stream_config()
-//{
-//    handle_node_config<decltype(m_hal.get_streams()), node::stream::IStream>(
-//                comms::Setup_Message::STREAM_CONFIG, m_hal.get_streams());
-//}
+    auto node = m_hal.get_sinks().find_by_name<node::sink::Sink>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
 
-//void Comms::handle_telemetry_streams()
-//{
-//    uint32_t req_id = 0;
-//    if (!m_setup_channel.begin_unpack() ||
-//        !m_setup_channel.unpack_param(req_id))
-//    {
-//        QLOGE("Error in unpacking telemetry streams");
-//        return;
-//    }
-//    QLOGI("Req Id: {} - telemetry streams", req_id);
+    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-//    uint32_t size = 0;
-//    if (m_setup_channel.unpack_param(size))
-//    {
-//        m_telemetry_streams.clear();
-//        m_telemetry_streams.reserve(size);
+    if (node->config.Parse(config_str.c_str()).HasParseError())
+    {
+        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        return;
+    }
+}
 
-//        std::string name;
-//        for (uint32_t i = 0; i < size; i++)
-//        {
-//            if (!m_setup_channel.unpack_param(name))
-//            {
-//                m_telemetry_streams.clear();
-//                QLOGE("Req Id: {} - error in unpacking telemetry streams", req_id);
-//                return;
-//            }
-//            auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-//            if (stream)
-//            {
-//                m_telemetry_streams.push_back(stream);
-//            }
-//            else
-//            {
-//                QLOGW("Req Id: {} - cannot find stream '{}' for telemetry", req_id, name);
-//            }
-//        }
-//    }
+void Comms::handle_processor_config()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    std::string config_str;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(name) &&
+                m_setup_channel.unpack_param(config_str);
+    if (!!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
 
-//    m_setup_channel.end_unpack();
+    auto node = m_hal.get_processors().find_by_name<node::processor::Processor>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
 
-//    m_setup_channel.begin_pack(comms::Setup_Message::TELEMETRY_STREAMS);
-//    m_setup_channel.pack_param(req_id);
-//    m_setup_channel.pack_param(static_cast<uint32_t>(m_telemetry_streams.size()));
-//    for (auto const& s: m_telemetry_streams)
-//    {
-//        QASSERT(s);
-//        m_setup_channel.pack_param(s->get_name());
-//    }
-//    m_setup_channel.end_pack();
-//}
+    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-//void Comms::handle_multirotor_mode()
-//{
-//    uint32_t req_id = 0;
-//    if (!m_setup_channel.begin_unpack() ||
-//        !m_setup_channel.unpack_param(req_id))
-//    {
-//        QLOGE("Error in unpacking multirotor input request");
-//        return;
-//    }
-//    QLOGI("Req Id: {} - multirotor input request", req_id);
+    if (node->config.Parse(config_str.c_str()).HasParseError())
+    {
+        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        return;
+    }
+}
 
-//    std::string name;
-//    if (!m_setup_channel.unpack_param(name))
-//    {
-//        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-//        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
-//        return;
-//    }
+void Comms::handle_stream_config()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    std::string config_str;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(name) &&
+                m_setup_channel.unpack_param(config_str);
+    if (!!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
 
-//    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
-//    if (!multirotor)
-//    {
-//        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-//        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
-//        return;
-//    }
+    auto node = m_hal.get_streams().find_by_name<node::stream::Stream_Common>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
 
-//    node::processor::IMultirotor::Mode mode;
-//    if (m_setup_channel.unpack_param(mode))
-//    {
-//        multirotor->set_mode(mode);
-//    }
+    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-//    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id, multirotor->get_input());
-//}
-
-//void Comms::handle_multirotor_input_request()
-//{
-//    uint32_t req_id = 0;
-//    if (!m_setup_channel.begin_unpack() ||
-//        !m_setup_channel.unpack_param(req_id))
-//    {
-//        QLOGE("Error in unpacking multirotor input request");
-//        return;
-//    }
-//    QLOGI("Req Id: {} - multirotor input request", req_id);
-
-//    std::string name;
-//    if (!m_setup_channel.unpack_param(name))
-//    {
-//        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-//        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
-//        return;
-//    }
-
-//    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
-//    if (!multirotor)
-//    {
-//        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-//        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
-//        return;
-//    }
-
-//    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id, multirotor->get_input());
-//}
-
-//void Comms::handle_multirotor_input()
-//{
-//    uint32_t req_id = 0;
-//    if (!m_input_channel.begin_unpack() ||
-//        !m_input_channel.unpack_param(req_id))
-//    {
-//        QLOGE("Error in unpacking multirotor input request");
-//        return;
-//    }
-//    QLOGI("Req Id: {} - multirotor input request", req_id);
-
-//    std::string name;
-//    if (!m_input_channel.unpack_param(name))
-//    {
-//        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-//        return;
-//    }
-
-//    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
-//    if (!multirotor)
-//    {
-//        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-//        return;
-//    }
-
-//    node::processor::IMultirotor::Input input;
-//    if (m_input_channel.unpack_param(input))
-//    {
-//        multirotor->set_input(input);
-//    }
-//    else
-//    {
-//        QLOGE("Req Id: {} - Cannot unpack input for multirotor '{}'", req_id, name);
-//    }
-//}
+    if (node->config.Parse(config_str.c_str()).HasParseError())
+    {
+        QLOGE("Req Id: {} node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        return;
+    }
+}
 
 
 void Comms::process()
@@ -589,10 +513,10 @@ void Comms::process()
         case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
         case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
 
-//        case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
-//        case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
-//        case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
-//        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
+        case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
+        case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
+        case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
+        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
 

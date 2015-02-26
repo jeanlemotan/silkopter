@@ -43,12 +43,13 @@ public:
 
     void process();
 
-    q::util::Signal<void(node::stream::IAcceleration::Sample const&)> acceleration_received_signal;
-
     //----------------------------------------------------------------------
 
 private:
     HAL& m_hal;
+    uint32_t m_last_req_id = 0;
+
+    void reset();
 
     boost::asio::io_service& m_io_service;
     boost::asio::ip::udp::socket m_socket;
@@ -69,6 +70,11 @@ private:
     void handle_enumerate_sinks();
     void handle_enumerate_processors();
     void handle_enumerate_streams();
+
+    void handle_source_config();
+    void handle_sink_config();
+    void handle_processor_config();
+    void handle_stream_config();
 };
 
 }
