@@ -1,0 +1,49 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Inertial",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Inertial",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "reference_frame_stream", {"required": true}],
+        ["std::string", "acceleration_stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Inertial",
+    "name": "Location",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Inertial",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Inertial::Linear_Acceleration", "linear_acceleration", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Inertial",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Inertial::Inputs", "inputs", {"required": true}],
+        ["sz::Inertial::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

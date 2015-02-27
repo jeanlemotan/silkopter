@@ -1,0 +1,49 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::MS5611",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["uint32_t", "rate", {"required": false}],
+        ["uint32_t", "temperature_rate_ratio", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MS5611",
+    "name": "Pressure",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MS5611",
+    "name": "Temperature",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MS5611",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::MS5611::Pressure", "pressure", {"required": true}],
+        ["sz::MS5611::Temperature", "temperature", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MS5611",
+    "name": "Config",
+    "members":
+    [
+        ["sz::MS5611::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

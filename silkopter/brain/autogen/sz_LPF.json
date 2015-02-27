@@ -1,0 +1,50 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::LPF",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::LPF",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::LPF",
+    "name": "Output",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::LPF",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::LPF::Output", "output", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::LPF",
+    "name": "Config",
+    "members":
+    [
+        ["uint32_t", "poles", {"required": true}],
+        ["double", "cutoff_frequency", {"required": true}],
+        ["sz::LPF::Inputs", "inputs", {"required": true}],
+        ["sz::LPF::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

@@ -1,0 +1,40 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::UBLOX",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["uint32_t", "rate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::UBLOX",
+    "name": "Location",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::UBLOX",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::UBLOX::Location", "location", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::UBLOX",
+    "name": "Config",
+    "members":
+    [
+       ["sz::UBLOX::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

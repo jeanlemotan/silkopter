@@ -169,10 +169,14 @@ class ClassDefinitionCodeGenerator(object):
 		return '\n'.join(m.type_name + ' ' + m.variable_name + ';' for m in self.class_info.members)
 
 	def initializer_list(self):
-		return ', '.join('{0}({1})'.format(m.variable_name, m.constructor_args) for m in self.class_info.members)
+		initializers = ', '.join('{0}({1})'.format(m.variable_name, m.constructor_args) for m in self.class_info.members)
+		if not self.class_info.members:
+			return initializers
+		else:
+			return ':' + initializers
 
 	def constructor(self):
-		return 'explicit {name}():{init} {{ {code} }}\n'.format(name=self.class_info.name,
+		return 'explicit {name}(){init} {{ {code} }}\n'.format(name=self.class_info.name,
 																init=self.initializer_list(),
 																code=self.class_info.constructor_code)
 

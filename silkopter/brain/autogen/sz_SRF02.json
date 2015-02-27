@@ -1,0 +1,43 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::SRF02",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["uint32_t", "rate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::SRF02",
+    "name": "Distance",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::SRF02",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::SRF02::Distance", "distance", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::SRF02",
+    "name": "Config",
+    "members":
+    [
+       ["math::vec3f", "direction", {"required": true}],
+       ["float", "min_distance", {"required": false}],
+       ["float", "max_distance", {"required": false}],
+       ["sz::SRF02::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

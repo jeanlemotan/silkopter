@@ -55,17 +55,56 @@ auto PIGPIO::init(rapidjson::Value const& json) -> bool
     Init_Params params;
     params.name = sz.name;
     params.period = std::chrono::microseconds(sz.period_micro);
-    params.pwm_channels.resize(sz.pwm_channels.size());
-    for (size_t i = 0; i < sz.pwm_channels.size(); i++)
+
+    auto setup_pwm_gpio = [this](PWM_Params& dst, uint32_t gpio, sz::PIGPIO_PWM const& src) -> bool
     {
-        auto& ch = params.pwm_channels[i];
-        ch.stream = m_hal.get_streams().find_by_name<stream::IPWM_Value>(sz.pwm_channels[i].stream);
-        ch.gpio = sz.pwm_channels[i].gpio;
-        ch.rate = sz.pwm_channels[i].rate;
-        ch.range = sz.pwm_channels[i].range;
-        ch.min = sz.pwm_channels[i].min;
-        ch.max = sz.pwm_channels[i].max;
+        if (!src.stream.empty())
+        {
+            dst.stream = m_hal.get_streams().find_by_name<stream::IPWM_Value>(src.stream);
+            dst.gpio = gpio;
+            dst.rate = src.rate;
+            dst.range = src.range;
+            dst.min = src.min;
+            dst.max = src.max;
+            return true;
+        }
+        return false;
+    };
+
+    PWM_Params pwm;
+    if (setup_pwm_gpio(pwm, 4, sz.pwm_gpio_4))
+    {
+        params.pwm_channels.push_back(pwm);
     }
+    if (setup_pwm_gpio(params.pwm_channels[1], 17, sz.pwm_gpio_17))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[2], 18, sz.pwm_gpio_18))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[3], 22, sz.pwm_gpio_22))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[4], 23, sz.pwm_gpio_23))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[5], 24, sz.pwm_gpio_24))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[6], 25, sz.pwm_gpio_25))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+    if (setup_pwm_gpio(params.pwm_channels[7], 27, sz.pwm_gpio_27))
+    {
+        params.pwm_channels.push_back(pwm);
+    }
+
     return init(params);
 }
 auto PIGPIO::init(Init_Params const& params) -> bool
@@ -81,12 +120,6 @@ auto PIGPIO::init() -> bool
     QLOG_TOPIC("pigpio::init");
 
 #if defined (RASPBERRY_PI)
-    if (m_params.pwm_channels.size() > MAX_PWM_CHANNELS)
-    {
-        QLOGE("{}: Too many PWM channels. Max is {}", get_name(), MAX_PWM_CHANNELS);
-        return false;
-    }
-
     size_t period = m_params.period.count();
 
     std::vector<size_t> periods = {1, 2, 4, 5, 8, 10};
@@ -106,7 +139,7 @@ auto PIGPIO::init() -> bool
     std::vector<size_t> gpios = { 4, 17, 18, 21, 27, 22, 23, 24, 25 };
 
     //first validate
-    for (size_t i = 0; i < MAX_PWM_CHANNELS; i++)
+    for (size_t i = 0; i < m_params.pwm_channels.size(); i++)
     {
         auto& ch = m_params.pwm_channels[i];
         if (std::find(gpios.begin(), gpios.end(), ch.gpio) == gpios.end())

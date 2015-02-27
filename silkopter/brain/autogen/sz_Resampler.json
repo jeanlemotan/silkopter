@@ -1,0 +1,50 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Resampler",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Resampler",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Resampler",
+    "name": "Output",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Resampler",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Resampler::Output", "output", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Resampler",
+    "name": "Config",
+    "members":
+    [
+        ["uint32_t", "poles", {"required": true}],
+        ["double", "cutoff_frequency", {"required": false}],
+        ["sz::Resampler::Inputs", "inputs", {"required": true}],
+        ["sz::Resampler::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

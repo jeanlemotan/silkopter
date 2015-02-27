@@ -1,0 +1,50 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_AHRS",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_AHRS",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "angular_velocity_stream", {"required": true}],
+        ["std::string", "acceleration_stream", {"required": true}],
+        ["std::string", "magnetic_field_stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_AHRS",
+    "name": "Reference_Frame",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_AHRS",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Comp_AHRS::Reference_Frame", "reference_frame", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_AHRS",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Comp_AHRS::Inputs", "inputs", {"required": true}],
+        ["sz::Comp_AHRS::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

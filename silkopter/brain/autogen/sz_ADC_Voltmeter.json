@@ -1,0 +1,49 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Voltmeter",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Voltmeter",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "adc_stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Voltmeter",
+    "name": "Voltage",
+    "members":
+    [
+        ["float", "bias", {"required": true}],
+        ["float", "scale", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Voltmeter",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::ADC_Voltmeter::Voltage", "voltage", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Voltmeter",
+    "name": "Config",
+    "members":
+    [
+        ["sz::ADC_Voltmeter::Inputs", "inputs", {"required": true}],
+        ["sz::ADC_Voltmeter::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

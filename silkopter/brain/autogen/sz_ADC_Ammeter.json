@@ -1,0 +1,49 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Ammeter",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Ammeter",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "adc_stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Ammeter",
+    "name": "Current",
+    "members":
+    [
+        ["float", "bias", {"required": true}],
+        ["float", "scale", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Ammeter",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::ADC_Ammeter::Current", "current", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::ADC_Ammeter",
+    "name": "Config",
+    "members":
+    [
+        ["sz::ADC_Ammeter::Inputs", "inputs", {"required": true}],
+        ["sz::ADC_Ammeter::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

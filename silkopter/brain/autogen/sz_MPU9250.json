@@ -1,0 +1,74 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "bus", {"required": true}],
+        ["uint32_t", "acceleration_angular_velocity_rate", {"required": false}],
+        ["uint32_t", "magnetic_field_rate", {"required": false}],
+        ["uint32_t", "temperature_rate", {"required": false}],
+        ["uint32_t", "acceleration_range", {"required": false}],
+        ["uint32_t", "angular_velocity_range", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Accelerometer",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true}],
+        ["math::vec3f", "scale", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Angular_Velocity",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Magnetic_Field",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Temperature",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::MPU9250::Accelerometer", "accelerometer", {"required": true}],
+        ["sz::MPU9250::Angular_Velocity", "angular_velocity", {"required": true}],
+        ["sz::MPU9250::Magnetic_Field", "magnetic_field", {"required": true}],
+        ["sz::MPU9250::Temperature", "temperature", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::MPU9250",
+    "name": "Config",
+    "members":
+    [
+        ["sz::MPU9250::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

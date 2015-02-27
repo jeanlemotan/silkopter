@@ -1,0 +1,44 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Raspicam",
+    "name": "Quality",
+    "members":
+    [
+        ["math::vec2u32", "resolution", {"required": true}],
+        ["uint32_t", "bitrate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Raspicam",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["uint32_t", "fps", {"required": true}],
+        ["sz::Raspicam_Quality", "low", {"required": true}],
+        ["sz::Raspicam_Quality", "medium", {"required": true}],
+        ["sz::Raspicam_Quality", "high", {"required": true}],
+        ["sz::Raspicam_Quality", "recording", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Raspicam",
+    "name": "Outputs",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Raspicam",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Raspicam::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

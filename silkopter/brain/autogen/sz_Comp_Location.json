@@ -1,0 +1,50 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_Location",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_Location",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "location_stream", {"required": true}],
+        ["std::string", "linear_acceleration_stream", {"required": true}],
+        ["std::string", "pressure_stream", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_Location",
+    "name": "Location",
+    "members":
+    [
+        ["uint8_t", "__unused", {"required": false}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_Location",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Comp_Location::Location", "location", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_Location",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Comp_Location::Inputs", "inputs", {"required": true}],
+        ["sz::Comp_Location::Outputs", "outputs", {"required": true}]
+    ]
+}
+]

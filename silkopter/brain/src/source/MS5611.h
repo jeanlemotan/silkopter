@@ -7,6 +7,16 @@
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 
+namespace sz
+{
+namespace MS5611
+{
+class Init_Params;
+class Config;
+}
+}
+
+
 namespace silk
 {
 namespace node
@@ -19,16 +29,8 @@ class MS5611 : public ISource
 public:
     MS5611(HAL& hal);
 
-    struct Init_Params
-    {
-        std::string name;
-        bus::IBus* bus = nullptr;
-        uint32_t rate = 100;
-        uint32_t temperature_rate_ratio = 10;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> boost::optional<rapidjson::Value const&>;
@@ -55,32 +57,39 @@ private:
     bus::II2C* m_i2c = nullptr;
     bus::ISPI* m_spi = nullptr;
 
-    Init_Params m_params;
+    std::unique_ptr<sz::MS5611::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
 
-    struct Pressure : public stream::IPressure
+    std::unique_ptr<sz::MS5611::Config> m_config;
+    rapidjson::Document m_config_json;
+
+    struct Common
+    {
+        double      reading = 0;
+        uint32_t rate = 0;
+        std::string name;
+        sz::MS5611::Init_Params* m_init_params = nullptr;
+        sz::MS5611::Config* m_config = nullptr;
+    };
+
+    struct Pressure : public stream::IPressure, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
-        uint32_t rate = 0;
         std::vector<Sample> samples;
         Sample last_sample;
-        double      reading = 0;
-        std::string name;
     } m_pressure;
 
-    struct Temperature : public stream::ITemperature
+    struct Temperature : public stream::ITemperature, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
-        uint32_t rate = 0;
         std::vector<Sample> samples;
         Sample last_sample;
-        double      reading = 0;
-        std::string name;
     } m_temperature;
 
     double		m_c1 = 0;

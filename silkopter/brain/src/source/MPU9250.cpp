@@ -4,7 +4,7 @@
 #include "utils/Timed_Scope.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_MPU9250.hpp"
 
 #define USE_AK8963
 
@@ -282,6 +282,8 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 MPU9250::MPU9250(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::MPU9250::Init_Params())
+    , m_config(new sz::MPU9250::Config())
 {
 }
 
@@ -355,7 +357,7 @@ auto MPU9250::akm_write_u16(uint8_t reg, uint16_t t) -> bool
 
 auto MPU9250::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto MPU9250::get_output_stream_count() const -> size_t
 {
@@ -374,7 +376,9 @@ auto MPU9250::get_output_stream(size_t idx) -> stream::IStream&
 
 auto MPU9250::init(rapidjson::Value const& json) -> bool
 {
-    sz::MPU9250_Init_Params sz;
+    QLOG_TOPIC("mpu9250::init");
+
+    sz::MPU9250::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -383,61 +387,23 @@ auto MPU9250::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize MPU9250 data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
-    params.imu_rate = sz.imu_rate;
-    params.magnetometer_rate = sz.magnetometer_rate;
-    params.thermometer_rate = sz.thermometer_rate;
-    params.gyroscope_range = sz.gyroscope_range;
-    params.accelerometer_range = sz.accelerometer_range;
-    return init(params);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
+
+    return init();
 }
 
-
-auto MPU9250::init(Init_Params const& params) -> bool
-{
-    QLOG_TOPIC("mpu9250::init");
-
-    m_params = params;
-
-
-    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
-    m_spi = dynamic_cast<bus::ISPI*>(params.bus);
-    if (!init())
-    {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_acceleration.name = q::util::format2<std::string>("{}-acceleration", params.name);
-        m_angular_velocity.name = q::util::format2<std::string>("{}-angular_velocity", params.name);
-        m_magnetic_field.name = q::util::format2<std::string>("{}-magnetic_field", params.name);
-        m_temperature.name = q::util::format2<std::string>("{}-temperature", params.name);
-
-        if (!m_hal.get_sources().add(*this) ||
-            !m_hal.get_streams().add(m_acceleration) ||
-            !m_hal.get_streams().add(m_angular_velocity) ||
-            !m_hal.get_streams().add(m_magnetic_field) ||
-            !m_hal.get_streams().add(m_temperature))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 auto MPU9250::init() -> bool
 {
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+
     if (!m_i2c && !m_spi)
     {
         QLOGE("No bus configured");
         return false;
     }
-
-    auto params = m_params;
 
     std::lock_guard<MPU9250> lg(*this);
 
@@ -445,47 +411,48 @@ auto MPU9250::init() -> bool
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
     std::vector<size_t> imu_rates = { 250, 500, 1000 }; //, 2000, 4000, 8000 };
 
+    auto req_params = *m_init_params;
+
     if (m_i2c)
     {
         //max supported on a 400Khz i2c bus
-        m_params.imu_rate = math::min<size_t>(m_params.imu_rate, 1000);
+        m_init_params->acceleration_angular_velocity_rate = math::min<size_t>(m_init_params->acceleration_angular_velocity_rate, 1000);
     }
-    m_params.magnetometer_rate = math::clamp<size_t>(m_params.magnetometer_rate, 10, 100);
-    m_params.thermometer_rate = math::clamp<size_t>(m_params.thermometer_rate, 10, 50);
-
-    m_acceleration.rate = m_params.imu_rate;
-    m_angular_velocity.rate = m_params.imu_rate;
-    m_magnetic_field.rate = m_params.magnetometer_rate;
-    m_temperature.rate = m_params.thermometer_rate;
-
+    m_init_params->magnetic_field_rate = math::clamp<size_t>(m_init_params->magnetic_field_rate, 10, 100);
+    m_init_params->temperature_rate = math::clamp<size_t>(m_init_params->temperature_rate, 10, 50);
 
     std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
     {
-        return math::abs(a - m_params.gyroscope_range) < math::abs(b - m_params.gyroscope_range);
+        return math::abs(a - m_init_params->angular_velocity_range) < math::abs(b - m_init_params->angular_velocity_range);
     });
-    m_params.gyroscope_range = g_ranges.front();
+    m_init_params->angular_velocity_range = g_ranges.front();
 
     std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](size_t a, size_t b)
     {
-        return math::abs(a - m_params.accelerometer_range) < math::abs(b - m_params.accelerometer_range);
+        return math::abs(a - m_init_params->acceleration_range) < math::abs(b - m_init_params->acceleration_range);
     });
-    m_params.accelerometer_range = a_ranges.front();
+    m_init_params->acceleration_range = a_ranges.front();
 
     std::nth_element(imu_rates.begin(), imu_rates.begin(), imu_rates.end(), [&](size_t a, size_t b)
     {
-        return math::abs(a - m_params.imu_rate) < math::abs(b - m_params.imu_rate);
+        return math::abs(a - m_init_params->acceleration_angular_velocity_rate) < math::abs(b - m_init_params->acceleration_angular_velocity_rate);
     });
-    m_params.imu_rate = imu_rates.front();
+    m_init_params->acceleration_angular_velocity_rate = imu_rates.front();
 
-    QLOGI("Probing MPU9250 on {}", m_params.bus->get_name());
-    QLOGI("Gyroscope range {} DPS (requested {} DPS)", m_params.gyroscope_range, params.gyroscope_range);
-    QLOGI("Accelerometer range {}G (requested {}G)", m_params.accelerometer_range, params.accelerometer_range);
-    QLOGI("Imu Rate {}Hz (requested {}Hz)", m_params.imu_rate, params.imu_rate);
-    QLOGI("Compass Rate {}Hz (requested {}Hz)", m_params.magnetometer_rate, params.magnetometer_rate);
-    QLOGI("Thermometer Rate {}Hz (requested {}Hz)", m_params.thermometer_rate, params.thermometer_rate);
+    QLOGI("Probing MPU9250 on {}", m_init_params->bus);
+    QLOGI("Angular Velocity range {} DPS (requested {} DPS)", m_init_params->angular_velocity_range, req_params.angular_velocity_range);
+    QLOGI("Acceleration range {}G (requested {}G)", m_init_params->acceleration_range, req_params.acceleration_range);
+    QLOGI("Acceleration & Angular Velocity Rate {}Hz (requested {}Hz)", m_init_params->acceleration_angular_velocity_rate, req_params.acceleration_angular_velocity_rate);
+    QLOGI("Magnetic Field Rate {}Hz (requested {}Hz)", m_init_params->magnetic_field_rate, req_params.magnetic_field_rate);
+    QLOGI("Temperature Rate {}Hz (requested {}Hz)", m_init_params->temperature_rate, req_params.temperature_rate);
+
+    m_acceleration.rate = m_init_params->acceleration_angular_velocity_rate;
+    m_angular_velocity.rate = m_acceleration.rate;
+    m_magnetic_field.rate = m_init_params->magnetic_field_rate;
+    m_temperature.rate = m_init_params->temperature_rate;
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-    switch (m_params.gyroscope_range)
+    switch (m_init_params->angular_velocity_range)
     {
     case 250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
@@ -504,12 +471,12 @@ auto MPU9250::init() -> bool
         m_angular_velocity.scale_inv = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
-        QLOGE("Invalid gyroscope range: {}", m_params.gyroscope_range);
+        QLOGE("Invalid angular velocity range: {}", m_init_params->angular_velocity_range);
         return false;
     }
 
     uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-    switch (m_params.accelerometer_range)
+    switch (m_init_params->acceleration_range)
     {
     case 2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
@@ -528,7 +495,7 @@ auto MPU9250::init() -> bool
         m_acceleration.scale_inv = physics::constants::g / 2048.f;
         break;
     default:
-        QLOGE("Invalid accelerometer range: {}", m_params.accelerometer_range);
+        QLOGE("Invalid acceleration range: {}", m_init_params->acceleration_range);
         return false;
     }
 
@@ -560,13 +527,13 @@ auto MPU9250::init() -> bool
 
 
     //compute the rate
-    uint8_t div = 1000 / m_params.imu_rate - 1;
+    uint8_t div = 1000 / m_init_params->acceleration_angular_velocity_rate - 1;
     res &= mpu_write_u8(MPU_REG_SMPLRT_DIV, div);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    m_imu_dt = std::chrono::milliseconds(1000 / m_params.imu_rate);
-    m_magnetic_field.dt = std::chrono::milliseconds(1000 / m_params.magnetometer_rate);
-    m_temperature.dt = std::chrono::milliseconds(1000 / m_params.thermometer_rate);
+    m_acceleration.dt = m_angular_velocity.dt = std::chrono::milliseconds(1000 / m_init_params->acceleration_angular_velocity_rate);
+    m_magnetic_field.dt = std::chrono::milliseconds(1000 / m_init_params->magnetic_field_rate);
+    m_temperature.dt = std::chrono::milliseconds(1000 / m_init_params->temperature_rate);
 
     res &= mpu_write_u8(MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -590,11 +557,22 @@ auto MPU9250::init() -> bool
         return false;
     }
 
-//    while (true)
-//    {
-//        process();
-//        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-//    }
+    if (!m_init_params->name.empty())
+    {
+        m_acceleration.name = q::util::format2<std::string>("{}/acceleration", req_params.name);
+        m_angular_velocity.name = q::util::format2<std::string>("{}/angular_velocity", req_params.name);
+        m_magnetic_field.name = q::util::format2<std::string>("{}/magnetic_field", req_params.name);
+        m_temperature.name = q::util::format2<std::string>("{}/temperature", req_params.name);
+
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_acceleration) ||
+            !m_hal.get_streams().add(m_angular_velocity) ||
+            !m_hal.get_streams().add(m_magnetic_field) ||
+            !m_hal.get_streams().add(m_temperature))
+        {
+            return false;
+        }
+    }
 
     return true;
 }
@@ -784,7 +762,7 @@ void MPU9250::process()
                     auto& asample = m_acceleration.samples[i];
                     asample.value.set(x * m_acceleration.scale_inv, y * m_acceleration.scale_inv, z * m_acceleration.scale_inv);
                     asample.sample_idx = ++m_acceleration.last_sample.sample_idx;
-                    asample.dt = m_imu_dt;
+                    asample.dt = m_acceleration.dt;
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
@@ -793,11 +771,11 @@ void MPU9250::process()
                     auto& gsample = m_angular_velocity.samples[i];
                     gsample.value.set(x * m_angular_velocity.scale_inv, y * m_angular_velocity.scale_inv, z * m_angular_velocity.scale_inv);
                     gsample.sample_idx = ++m_angular_velocity.last_sample.sample_idx;
-                    gsample.dt = m_imu_dt;
+                    gsample.dt = m_angular_velocity.dt;
 
-//                    if (math::length(m_samples.gyroscope[i]) > 1.f)
+//                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
 //                    {
-//                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.gyroscope[i], m_samples.accelerometer[i]);
+//                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.angular_velocity[i], m_samples.acceleration[i]);
 //                    }
                 }
             }
@@ -879,7 +857,7 @@ void MPU9250::process_compass()
 
 auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 {
-    sz::MPU9250_Config sz;
+    sz::MPU9250::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -889,23 +867,18 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_acceleration.bias = sz.acceleration_bias;
-    m_acceleration.scale = sz.acceleration_scale;
-    m_angular_velocity.bias = sz.angular_velocity_bias;
-    m_magnetic_field.bias = sz.magnetic_field_bias;
-
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
     return true;
 }
 auto MPU9250::get_config() -> boost::optional<rapidjson::Value const&>
 {
-    sz::MPU9250_Config sz;
-    sz.acceleration_bias = m_acceleration.bias;
-    sz.acceleration_scale = m_acceleration.scale;
-    sz.angular_velocity_bias = m_angular_velocity.bias;
-    sz.magnetic_field_bias = m_magnetic_field.bias;
-
-    autojsoncxx::to_document(sz, m_config_json);
     return m_config_json;
+}
+
+auto MPU9250::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 

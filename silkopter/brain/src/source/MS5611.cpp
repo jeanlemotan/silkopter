@@ -2,7 +2,7 @@
 #include "MS5611.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_MS5611.hpp"
 
 namespace silk
 {
@@ -39,6 +39,8 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 MS5611::MS5611(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::MS5611::Init_Params())
+    , m_config(new sz::MS5611::Config())
 {
 }
 
@@ -92,7 +94,7 @@ auto MS5611::bus_write_u16(uint8_t reg, uint16_t const& t) -> bool
 
 auto MS5611::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto MS5611::get_output_stream_count() const -> size_t
 {
@@ -111,7 +113,9 @@ auto MS5611::get_output_stream(size_t idx) -> stream::IStream&
 
 auto MS5611::init(rapidjson::Value const& json) -> bool
 {
-    sz::MS5611_Init_Params sz;
+    QLOG_TOPIC("ms5611::init");
+
+    sz::MS5611::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -120,57 +124,30 @@ auto MS5611::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize MS5611 data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
-    params.rate = sz.rate;
-    params.temperature_rate_ratio = sz.temperature_rate_ratio;
-    return init(params);
-}
-auto MS5611::init(Init_Params const& params) -> bool
-{
-    QLOG_TOPIC("ms5611::init");
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
 
-    m_params = params;
-
-    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
-    m_spi = dynamic_cast<bus::ISPI*>(params.bus);
-    if (!init())
-    {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_pressure.name = q::util::format2<std::string>("{}-pressure", params.name);
-        m_temperature.name = q::util::format2<std::string>("{}-temperature", params.name);
-
-        if (!m_hal.get_sources().add(*this) ||
-            !m_hal.get_streams().add(m_pressure) ||
-            !m_hal.get_streams().add(m_temperature))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return init();
 }
 auto MS5611::init() -> bool
 {
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+
     if (!m_i2c && !m_spi)
     {
         QLOGE("No bus configured");
         return false;
     }
 
-    m_params.rate = math::clamp<size_t>(m_params.rate, 10, 100);
-    m_params.temperature_rate_ratio = math::clamp<size_t>(m_params.temperature_rate_ratio, 1, 10);
-    m_pressure.rate = m_params.rate;
-    m_temperature.rate = m_params.rate / m_params.temperature_rate_ratio;
+    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 10, 100);
+    m_init_params->temperature_rate_ratio = math::clamp<size_t>(m_init_params->temperature_rate_ratio, 1, 10);
+    m_pressure.rate = m_init_params->rate;
+    m_temperature.rate = m_init_params->rate / m_init_params->temperature_rate_ratio;
 
-    m_dt = std::chrono::milliseconds(1000 / m_params.rate);
+    m_dt = std::chrono::milliseconds(1000 / m_init_params->rate);
 
-    QLOGI("Probing MS5611 on {}", m_params.bus->get_name());
+    QLOGI("Probing MS5611 on {}", m_init_params->bus);
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
@@ -207,6 +184,19 @@ auto MS5611::init() -> bool
     }
 
     bus_write(CMD_CONVERT_D2_OSR256, nullptr, 0);
+
+    if (!m_init_params->name.empty())
+    {
+        m_pressure.name = q::util::format2<std::string>("{}-pressure", m_init_params->name);
+        m_temperature.name = q::util::format2<std::string>("{}-temperature", m_init_params->name);
+
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_pressure) ||
+            !m_hal.get_streams().add(m_temperature))
+        {
+            return false;
+        }
+    }
 
     return true;
 }
@@ -253,7 +243,7 @@ void MS5611::process()
         }
 
         //next
-        if (m_stage >= m_params.temperature_rate_ratio)
+        if (m_stage >= m_init_params->temperature_rate_ratio)
         {
             if (bus_write(CMD_CONVERT_D2_OSR256, nullptr, 0)) //read temp next
             {
@@ -340,6 +330,10 @@ auto MS5611::set_config(rapidjson::Value const& json) -> bool
 auto MS5611::get_config() -> boost::optional<rapidjson::Value const&>
 {
     return boost::none;
+}
+auto MS5611::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 }
