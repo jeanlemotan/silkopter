@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
 
-#include "sz_hal_buses.hpp"
+#include "sz_SPI_Linux.hpp"
 
 namespace silk
 {
@@ -12,6 +12,8 @@ namespace bus
 
 SPI_Linux::SPI_Linux(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::SPI_Linux::Init_Params())
+    , m_config(new sz::SPI_Linux::Config())
 {
 }
 
@@ -22,7 +24,9 @@ SPI_Linux::~SPI_Linux()
 
 auto SPI_Linux::init(rapidjson::Value const& json) -> bool
 {
-    sz::SPI_Linux sz;
+    QLOG_TOPIC("spi_linux::init");
+
+    sz::SPI_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -31,13 +35,10 @@ auto SPI_Linux::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize SPI_Linux data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.dev = sz.dev;
-    params.mode = sz.mode;
-    return init(params);
+    *m_init_params = sz;
+    return init();
 }
-auto SPI_Linux::init(Init_Params const& params) -> bool
+auto SPI_Linux::init() -> bool
 {
     close();
 
@@ -45,15 +46,14 @@ auto SPI_Linux::init(Init_Params const& params) -> bool
 
     std::lock_guard<SPI_Linux> lg(*this);
 
-    m_params = params;
-    m_fd = ::open(params.dev.c_str(), O_RDWR);
+    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", params.dev, strerror(errno));
+        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
         return false;
     }
 
-    if (!m_params.name.empty())
+    if (!m_init_params->name.empty())
     {
         if (!m_hal.get_buses().add(*this))
         {
@@ -66,7 +66,7 @@ auto SPI_Linux::init(Init_Params const& params) -> bool
 
 auto SPI_Linux::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 void SPI_Linux::close()
@@ -132,6 +132,35 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
     std::lock_guard<SPI_Linux> lg(*this);
 
     return false;
+}
+
+auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::SPI_Linux::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize SPI_Linux config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    return true;
+}
+auto SPI_Linux::get_config() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_config, json);
+    return std::move(json);
+}
+
+auto SPI_Linux::get_init_params() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 

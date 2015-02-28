@@ -29,6 +29,9 @@
 #include "processor/LPF.h"
 #include "processor/Resampler.h"
 #include "processor/LiPo_Battery.h"
+#include "processor/Inertial.h"
+#include "processor/Comp_AHRS.h"
+#include "processor/Comp_Location.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -66,9 +69,51 @@ struct HAL::Hardware
 
 HAL::HAL()
 {
+    using namespace node;
+
     QLOG_TOPIC("hal");
 
     m_hw.reset(new Hardware);
+
+    m_factory.register_node<bus::UART_Linux>(*this, "UART_Linux");
+    m_factory.register_node<bus::I2C_Linux>(*this, "I2C_Linux");
+    m_factory.register_node<bus::SPI_Linux>(*this, "SPI_Linux");
+
+    m_factory.register_node<source::MPU9250>(*this, "MPU9250");
+    m_factory.register_node<source::MS5611>(*this, "MS5611");
+    m_factory.register_node<source::SRF02>(*this, "SRF02");
+    m_factory.register_node<source::Raspicam>(*this, "Raspicam");
+    m_factory.register_node<source::RC5T619>(*this, "RC5T619");
+    m_factory.register_node<source::UBLOX>(*this, "UBLOX");
+
+    m_factory.register_node<sink::PIGPIO>(*this, "PIGPIO");
+
+    m_factory.register_node<processor::ADC_Ammeter>(*this, "ADC_Ammeter");
+    m_factory.register_node<processor::ADC_Voltmeter>(*this, "ADC_Voltmeter");
+    m_factory.register_node<processor::Comp_AHRS>(*this, "Comp_AHRS");
+    m_factory.register_node<processor::Comp_Location>(*this, "Comp_Location");
+    m_factory.register_node<processor::Inertial>(*this, "Inertial");
+    m_factory.register_node<processor::LiPo_Battery>(*this, "LiPo_Battery");
+    m_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "LPF_Acceleration");
+    m_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "LPF_Angular_Velocity");
+    m_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "LPF_ADC_Value");
+    m_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "LPF_Current");
+    m_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "LPF_Voltage");
+    m_factory.register_node<processor::LPF<stream::ILocation>>(*this, "LPF_Location");
+    m_factory.register_node<processor::LPF<stream::IDistance>>(*this, "LPF_Distance");
+    m_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "LPF_Magnetic_Field");
+    m_factory.register_node<processor::LPF<stream::IPressure>>(*this, "LPF_Pressure");
+    m_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "LPF_Temperature");
+    m_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Resampler_Acceleration");
+    m_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Resampler_Angular_Velocity");
+    m_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "Resampler_ADC_Value");
+    m_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Resampler_Current");
+    m_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Resampler_Voltage");
+    m_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Resampler_Location");
+    m_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Resampler_Distance");
+    m_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Resampler_Magnetic_Field");
+    m_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Resampler_Pressure");
+    m_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Resampler_Temperature");
 }
 
 HAL::~HAL()
@@ -248,268 +293,268 @@ auto HAL::init() -> bool
     {
         auto& settings = get_settings(q::Path("hal/buses"));
 
-        auto it = settings.MemberBegin();
-        for (; it != settings.MemberEnd(); ++it)
-        {
-            std::string type(it->name.GetString());
-            if (type == "I2C_Linux")
-            {
-                auto bus = std::make_unique<bus::I2C_Linux>(*this);
-                if (!bus->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->buses.push_back(std::move(bus));
-            }
-            else if (type == "SPI_Linux")
-            {
-                auto bus = std::make_unique<bus::SPI_Linux>(*this);
-                if (!bus->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->buses.push_back(std::move(bus));
-            }
-            else if (type == "UART_Linux")
-            {
-                auto bus = std::make_unique<bus::UART_Linux>(*this);
-                if (!bus->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->buses.push_back(std::move(bus));
-            }
-        }
+//        auto it = settings.MemberBegin();
+//        for (; it != settings.MemberEnd(); ++it)
+//        {
+//            std::string type(it->name.GetString());
+//            if (type == "I2C_Linux")
+//            {
+//                auto bus = std::make_unique<bus::I2C_Linux>(*this);
+//                if (!bus->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->buses.push_back(std::move(bus));
+//            }
+//            else if (type == "SPI_Linux")
+//            {
+//                auto bus = std::make_unique<bus::SPI_Linux>(*this);
+//                if (!bus->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->buses.push_back(std::move(bus));
+//            }
+//            else if (type == "UART_Linux")
+//            {
+//                auto bus = std::make_unique<bus::UART_Linux>(*this);
+//                if (!bus->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->buses.push_back(std::move(bus));
+//            }
+//        }
     }
 
     {
         auto& settings = get_settings(q::Path("hal/nodes"));
 
-        auto it = settings.MemberBegin();
-        for (; it != settings.MemberEnd(); ++it)
-        {
-            std::string type(it->name.GetString());
-            if (type == "PIGPIO")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<sink::PIGPIO>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "MPU9250")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::MPU9250>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "MS5611")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::MS5611>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Raspicam")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::Raspicam>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "SRF02")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::SRF02>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "UBLOX")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::UBLOX>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "RC5T619")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<source::RC5T619>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "ADC_Ammeter")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Ammeter>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "ADC_Voltmeter")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Voltmeter>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Acceleration_LPF")
-            {
-                typedef processor::LPF<stream::IAcceleration> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Angular_Velocity_LPF")
-            {
-                typedef processor::LPF<stream::IAngular_Velocity> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Magnetic_Field_LPF")
-            {
-                typedef processor::LPF<stream::IMagnetic_Field> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Voltage_LPF")
-            {
-                typedef processor::LPF<stream::IVoltage> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Current_LPF")
-            {
-                typedef processor::LPF<stream::ICurrent> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Location_LPF")
-            {
-                typedef processor::LPF<stream::ILocation> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Acceleration_Resampler")
-            {
-                typedef processor::Resampler<stream::IAcceleration> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Angular_Velocity_Resampler")
-            {
-                typedef processor::Resampler<stream::IAngular_Velocity> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Magnetic_Field_Resampler")
-            {
-                typedef processor::Resampler<stream::IMagnetic_Field> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Voltage_Resampler")
-            {
-                typedef processor::Resampler<stream::IVoltage> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Current_Resampler")
-            {
-                typedef processor::Resampler<stream::ICurrent> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Location_Resampler")
-            {
-                typedef processor::Resampler<stream::ILocation> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "AHRS_Complimentary")
-            {
-                typedef processor::Resampler<stream::ICurrent> Processor;
-                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-            else if (type == "Lipo_Battery")
-            {
-                auto wrapper = std::make_unique<Node_Wrapper<processor::LiPo_Battery>>(*this);
-                if (!wrapper->node->init(it->value))
-                {
-                    return false;
-                }
-                m_hw->nodes.push_back(std::move(wrapper));
-            }
-        }
+//        auto it = settings.MemberBegin();
+//        for (; it != settings.MemberEnd(); ++it)
+//        {
+//            std::string type(it->name.GetString());
+//            if (type == "PIGPIO")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<sink::PIGPIO>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "MPU9250")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::MPU9250>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "MS5611")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::MS5611>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Raspicam")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::Raspicam>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "SRF02")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::SRF02>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "UBLOX")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::UBLOX>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "RC5T619")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<source::RC5T619>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "ADC_Ammeter")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Ammeter>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "ADC_Voltmeter")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<processor::ADC_Voltmeter>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Acceleration_LPF")
+//            {
+//                typedef processor::LPF<stream::IAcceleration> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Angular_Velocity_LPF")
+//            {
+//                typedef processor::LPF<stream::IAngular_Velocity> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Magnetic_Field_LPF")
+//            {
+//                typedef processor::LPF<stream::IMagnetic_Field> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Voltage_LPF")
+//            {
+//                typedef processor::LPF<stream::IVoltage> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Current_LPF")
+//            {
+//                typedef processor::LPF<stream::ICurrent> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Location_LPF")
+//            {
+//                typedef processor::LPF<stream::ILocation> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Acceleration_Resampler")
+//            {
+//                typedef processor::Resampler<stream::IAcceleration> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Angular_Velocity_Resampler")
+//            {
+//                typedef processor::Resampler<stream::IAngular_Velocity> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Magnetic_Field_Resampler")
+//            {
+//                typedef processor::Resampler<stream::IMagnetic_Field> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Voltage_Resampler")
+//            {
+//                typedef processor::Resampler<stream::IVoltage> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Current_Resampler")
+//            {
+//                typedef processor::Resampler<stream::ICurrent> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Location_Resampler")
+//            {
+//                typedef processor::Resampler<stream::ILocation> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "AHRS_Complimentary")
+//            {
+//                typedef processor::Resampler<stream::ICurrent> Processor;
+//                auto wrapper = std::make_unique<Node_Wrapper<Processor>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//            else if (type == "Lipo_Battery")
+//            {
+//                auto wrapper = std::make_unique<Node_Wrapper<processor::LiPo_Battery>>(*this);
+//                if (!wrapper->node->init(it->value))
+//                {
+//                    return false;
+//                }
+//                m_hw->nodes.push_back(std::move(wrapper));
+//            }
+//        }
     }
 
     return true;

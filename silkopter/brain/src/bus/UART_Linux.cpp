@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
 
-#include "sz_hal_buses.hpp"
+#include "sz_UART_Linux.hpp"
 
 #include <termios.h>
 
@@ -14,6 +14,8 @@ namespace bus
 
 UART_Linux::UART_Linux(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::UART_Linux::Init_Params())
+    , m_config(new sz::UART_Linux::Config())
 {
 }
 
@@ -24,7 +26,9 @@ UART_Linux::~UART_Linux()
 
 auto UART_Linux::init(rapidjson::Value const& json) -> bool
 {
-    sz::UART_Linux sz;
+    QLOG_TOPIC("uart_linux::init");
+
+    sz::UART_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -33,22 +37,17 @@ auto UART_Linux::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize UART_Linux data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.dev = sz.dev;
-    params.baud = sz.baud;
-    return init(params);
+    *m_init_params = sz;
+    return init();
 }
-auto UART_Linux::init(Init_Params const& params) -> bool
+auto UART_Linux::init() -> bool
 {
     close();
 
     QLOG_TOPIC("bus_uart_linux::init");
 
-    m_params = params;
-
     int b = -1;
-    switch (params.baud)
+    switch (m_init_params->baud)
     {
     case 9600: b = B9600; break;
     case 19200: b = B19200; break;
@@ -60,16 +59,16 @@ auto UART_Linux::init(Init_Params const& params) -> bool
 
     if (b < 0)
     {
-        QLOGE("Invalid baud requested: {}", params.baud);
+        QLOGE("Invalid baud requested: {}", m_init_params->baud);
         return false;
     }
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    m_fd = ::open(params.dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", params.dev, strerror(errno));
+        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
         return false;
     }
 
@@ -83,7 +82,7 @@ auto UART_Linux::init(Init_Params const& params) -> bool
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
 
-    if (!m_params.name.empty())
+    if (!m_init_params->name.empty())
     {
         if (!m_hal.get_buses().add(*this))
         {
@@ -96,7 +95,7 @@ auto UART_Linux::init(Init_Params const& params) -> bool
 
 auto UART_Linux::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 void UART_Linux::close()
@@ -151,10 +150,39 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
     auto res = ::write(m_fd, data, size);
     if (res < 0)
     {
-        QLOGE("error writing to {}: {}", m_params.dev, strerror(errno));
+        QLOGE("error writing to {}: {}", m_init_params->dev, strerror(errno));
         return false;
     }
     return static_cast<size_t>(res) == size;
+}
+
+auto UART_Linux::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::UART_Linux::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize UART_Linux config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    return true;
+}
+auto UART_Linux::get_config() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_config, json);
+    return std::move(json);
+}
+
+auto UART_Linux::get_init_params() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 

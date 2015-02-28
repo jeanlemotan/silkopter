@@ -24,10 +24,10 @@ public:
     LPF(HAL& hal);
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> Stream_t&;
@@ -43,10 +43,7 @@ private:
     HAL& m_hal;
 
     sz::LPF::Init_Params m_init_params;
-    rapidjson::Document m_init_params_json;
-
     sz::LPF::Config m_config;
-    rapidjson::Document m_config_json;
 
     Stream_t* m_input_stream = nullptr;
 
@@ -87,14 +84,14 @@ auto LPF<Stream_t>::init(rapidjson::Value const& json) -> bool
         return false;
     }
     m_init_params = sz;
-    autojsoncxx::to_document(sz, m_init_params_json);
-
     return init();
 }
 template<class Stream_t>
-auto LPF<Stream_t>::get_init_params() -> boost::optional<rapidjson::Value const&>
+auto LPF<Stream_t>::get_init_params() -> rapidjson::Document
 {
-    return m_init_params_json;
+    rapidjson::Document json;
+    autojsoncxx::to_document(m_init_params, json);
+    return std::move(json);
 }
 
 template<class Stream_t>
@@ -143,13 +140,14 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     m_stream.rate = m_input_stream->get_rate();
 
     m_config = sz;
-    autojsoncxx::to_document(m_config, m_config_json);
     return true;
 }
 template<class Stream_t>
-auto LPF<Stream_t>::get_config() -> boost::optional<rapidjson::Value const&>
+auto LPF<Stream_t>::get_config() -> rapidjson::Document
 {
-    return m_config_json;
+    rapidjson::Document json;
+    autojsoncxx::to_document(m_config, json);
+    return std::move(json);
 }
 
 template<class Stream_t>

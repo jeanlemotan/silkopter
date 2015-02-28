@@ -33,11 +33,10 @@ public:
         stream::IBattery_State* battery_state_stream = nullptr;
     };
 
-    auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IStream&;

@@ -15,51 +15,84 @@ enum class Sim_Message : uint8_t
 
 enum class Setup_Message : uint8_t
 {
-    //returns all the sources in the system
+    //returns all the possible nodes in the system
     //REQ:
     //  uint32_t req_id
     //RES:
     //  uint32_t req_id
-    //  uint32_t source_count - array size
-    //      string - source name
-    //      uint32_t output_count - array size
-    //          string - name of output stream
-    ENUMERATE_SOURCES,
+    //  uint32_t bus_count
+    //  uint32_t stream_count
+    //  uint32_t source_count
+    //  uint32_t sink_count
+    //  uint32_t processor_count
+    //      busses[bus_count]
+    //          string - name
+    //          string - default init prams
+    //          string - default config
+    //      streams[stream_count]
+    //          string - name
+    //          string - default init prams
+    //          string - default config
+    //      sources[source_count]
+    //          string - name
+    //          string - default init prams
+    //          string - default config
+    //      sinks[sink_count]
+    //          string - name
+    //          string - default init prams
+    //          string - default config
+    //      processors[processor_count]
+    //          string - name
+    //          string - default init prams
+    //          string - default config
+    ENUMERATE_NODE_FACTORY,
 
-    //returns all the streams in the system
+    //returns all the nodes in the system
     //REQ:
     //  uint32_t req_id
     //RES:
     //  uint32_t req_id
-    //  uint32_t stream_count - array size
-    //      type - type of stream
-    //      string - name of stream
-    //      rate - frequency of the stream samples
-    ENUMERATE_STREAMS,
+    //  uint32_t bus_count
+    //  uint32_t stream_count
+    //  uint32_t source_count
+    //  uint32_t sink_count
+    //  uint32_t processor_count
+    //      busses[bus_count]
+    //          string - name
+    //          string - dev where the stream is attached
+    //      streams[stream_count]
+    //          string - type
+    //          string - name
+    //          uint32_t - sample rate
+    //      sources[source_count]
+    //          string - name
+    //          uint32_t output_count
+    //              string - name of output stream
+    //      sinks[sink_count]
+    //          string - name
+    //          uint32_t input_count - array size
+    //              string - name of input stream
+    //      processors[processor_count]
+    //          string - name
+    //          uint32_t input_count - array size
+    //              string - name of input stream
+    //          uint32_t output_count - array size
+    //              string - name of output stream
+    ENUMERATE_NODES,
 
-    //returns all the processors in the system
+    //sets/gets a node init params as a json string
     //REQ:
     //  uint32_t req_id
+    //  string - node name
+    //  [optional] string - if present, the init params to set. If not set - it's a request. NOTE - settinng this triggers a reboot
     //RES:
     //  uint32_t req_id
-    //  uint32_t processor_count - array size
-    //      string - processor name
-    //      uint32_t input_count - array size
-    //          string - name of input stream
-    //      uint32_t output_count - array size
-    //          string - name of output stream
-    ENUMERATE_PROCESSORS,
-
-    //returns all the sinks in the system
-    //REQ:
-    //  uint32_t req_id
-    //RES:
-    //  uint32_t req_id
-    //  uint32_t sink_count - array size
-    //      string - processor name
-    //      uint32_t input_count - array size
-    //          string - name of input stream
-    ENUMERATE_SINKS,
+    //  string - node name
+    //  string - the init params
+    SOURCE_INIT_PARAMS,
+    STREAM_INIT_PARAMS,
+    PROCESSOR_INIT_PARAMS,
+    SINK_INIT_PARAMS,
 
     //sets/gets a node config as a json string
     //REQ:

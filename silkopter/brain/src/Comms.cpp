@@ -221,124 +221,124 @@ void Comms::send_telemetry_streams()
 
 void Comms::handle_enumerate_sources()
 {
-    uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
-    {
-        QLOGI("Req Id: {} - enumerate sources", req_id);
-        auto const& all = m_hal.get_sources().get_all();
+//    uint32_t req_id = 0;
+//    if (m_setup_channel.unpack(req_id))
+//    {
+//        QLOGI("Req Id: {} - enumerate sources", req_id);
+//        auto const& all = m_hal.get_sources().get_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SOURCES);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+//        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SOURCES);
+//        m_setup_channel.pack_param(req_id);
+//        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
-        for (auto const& n: all)
-        {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
-            for (size_t i = 0; i < n->get_output_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
-            }
-        }
+//        for (auto const& n: all)
+//        {
+//            m_setup_channel.pack_param(n->get_name());
+//            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
+//            for (size_t i = 0; i < n->get_output_stream_count(); i++)
+//            {
+//                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
+//            }
+//        }
 
-        m_setup_channel.end_pack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating sources");
-    }
+//        m_setup_channel.end_pack();
+//    }
+//    else
+//    {
+//        QLOGE("Error in enumerating sources");
+//    }
 }
 
 void Comms::handle_enumerate_sinks()
 {
-    uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
-    {
-        QLOGI("Req Id: {} - enumerate sinks", req_id);
-        auto const& all = m_hal.get_sinks().get_all();
+//    uint32_t req_id = 0;
+//    if (m_setup_channel.unpack(req_id))
+//    {
+//        QLOGI("Req Id: {} - enumerate sinks", req_id);
+//        auto const& all = m_hal.get_sinks().get_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SINKS);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+//        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_SINKS);
+//        m_setup_channel.pack_param(req_id);
+//        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
-        for (auto const& n: all)
-        {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
-            for (size_t i = 0; i < n->get_input_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
-            }
-        }
+//        for (auto const& n: all)
+//        {
+//            m_setup_channel.pack_param(n->get_name());
+//            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
+//            for (size_t i = 0; i < n->get_input_stream_count(); i++)
+//            {
+//                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
+//            }
+//        }
 
-        m_setup_channel.end_pack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating sinks");
-    }
+//        m_setup_channel.end_pack();
+//    }
+//    else
+//    {
+//        QLOGE("Error in enumerating sinks");
+//    }
 }
 
 void Comms::handle_enumerate_processors()
 {
-    uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
-    {
-        QLOGI("Req Id: {} - enumerate processors", req_id);
-        auto const& all = m_hal.get_processors().get_all();
+//    uint32_t req_id = 0;
+//    if (m_setup_channel.unpack(req_id))
+//    {
+//        QLOGI("Req Id: {} - enumerate processors", req_id);
+//        auto const& all = m_hal.get_processors().get_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_PROCESSORS);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+//        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_PROCESSORS);
+//        m_setup_channel.pack_param(req_id);
+//        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
-        for (auto const& n: all)
-        {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
-            for (size_t i = 0; i < n->get_input_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
-            }
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
-            for (size_t i = 0; i < n->get_output_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
-            }
-        }
+//        for (auto const& n: all)
+//        {
+//            m_setup_channel.pack_param(n->get_name());
+//            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
+//            for (size_t i = 0; i < n->get_input_stream_count(); i++)
+//            {
+//                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
+//            }
+//            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
+//            for (size_t i = 0; i < n->get_output_stream_count(); i++)
+//            {
+//                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
+//            }
+//        }
 
-        m_setup_channel.end_pack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating processors");
-    }
+//        m_setup_channel.end_pack();
+//    }
+//    else
+//    {
+//        QLOGE("Error in enumerating processors");
+//    }
 }
 
 void Comms::handle_enumerate_streams()
 {
-    uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
-    {
-        QLOGI("Req Id: {} - enumerate streams", req_id);
-        auto const& all = m_hal.get_streams().get_all();
+//    uint32_t req_id = 0;
+//    if (m_setup_channel.unpack(req_id))
+//    {
+//        QLOGI("Req Id: {} - enumerate streams", req_id);
+//        auto const& all = m_hal.get_streams().get_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_STREAMS);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
+//        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_STREAMS);
+//        m_setup_channel.pack_param(req_id);
+//        m_setup_channel.pack_param(static_cast<uint32_t>(all.size()));
 
-        for (auto const& n: all)
-        {
-            m_setup_channel.pack_param(n->get_type());
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_rate());
-        }
+//        for (auto const& n: all)
+//        {
+//            m_setup_channel.pack_param(n->get_type());
+//            m_setup_channel.pack_param(n->get_name());
+//            m_setup_channel.pack_param(n->get_rate());
+//        }
 
-        m_setup_channel.end_pack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating streams");
-    }
+//        m_setup_channel.end_pack();
+//    }
+//    else
+//    {
+//        QLOGE("Error in enumerating streams");
+//    }
 }
 
 template<class Registry, class Node_Base>
@@ -379,13 +379,10 @@ void Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
     {
         config_str.clear();
         auto config = node->get_config();
-        if (config)
-        {
-            rapidjson::StringBuffer s;
-            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-            config->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-            config_str = s.GetString();
-        }
+        rapidjson::StringBuffer s;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+        config.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+        config_str = s.GetString();
         m_setup_channel.pack(message, req_id, name, config_str);
     }
 }
@@ -405,11 +402,11 @@ void Comms::handle_processor_config()
     handle_node_config<decltype(m_hal.get_processors()), node::processor::IProcessor>(
                 comms::Setup_Message::PROCESSOR_CONFIG, m_hal.get_processors());
 }
-void Comms::handle_stream_config()
-{
-    handle_node_config<decltype(m_hal.get_streams()), node::stream::IStream>(
-                comms::Setup_Message::STREAM_CONFIG, m_hal.get_streams());
-}
+//void Comms::handle_stream_config()
+//{
+//    handle_node_config<decltype(m_hal.get_streams()), node::stream::IStream>(
+//                comms::Setup_Message::STREAM_CONFIG, m_hal.get_streams());
+//}
 
 void Comms::handle_telemetry_streams()
 {
@@ -587,15 +584,15 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Setup_Message::ENUMERATE_SOURCES: handle_enumerate_sources(); break;
-        case comms::Setup_Message::ENUMERATE_SINKS: handle_enumerate_sinks(); break;
-        case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
-        case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
+//        case comms::Setup_Message::ENUMERATE_SOURCES: handle_enumerate_sources(); break;
+//        case comms::Setup_Message::ENUMERATE_SINKS: handle_enumerate_sinks(); break;
+//        case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
+//        case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
 
         case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
         case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
         case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
-        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
+//        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
         case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
 

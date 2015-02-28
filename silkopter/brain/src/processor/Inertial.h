@@ -29,10 +29,10 @@ public:
     Inertial(HAL& hal);
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     auto get_input_stream_count() const -> size_t;
     auto get_input_stream(size_t idx) -> stream::IStream&;
@@ -50,10 +50,7 @@ private:
     HAL& m_hal;
 
     std::shared_ptr<sz::Inertial::Init_Params> m_init_params;
-    rapidjson::Document m_init_params_json;
-
     std::shared_ptr<sz::Inertial::Config> m_config;
-    rapidjson::Document m_config_json;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 

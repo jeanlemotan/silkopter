@@ -31,10 +31,10 @@ public:
     ~Raspicam();
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     void shutdown();
 
@@ -66,10 +66,7 @@ private:
     auto init() -> bool;
 
     std::shared_ptr<sz::Raspicam::Init_Params> m_init_params;
-    rapidjson::Document m_init_params_json;
-
     std::shared_ptr<sz::Raspicam::Config> m_config;
-    rapidjson::Document m_config_json;
 
     void set_active_streams(bool high, bool medium, bool low);
 

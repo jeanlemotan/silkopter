@@ -1,0 +1,20 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::I2C_Linux",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "dev", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::I2C_Linux",
+    "name": "Config",
+    "members":
+    [
+    ]
+}
+]

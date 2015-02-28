@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_Linux.h"
 
-#include "sz_hal_buses.hpp"
+#include "sz_I2C_Linux.hpp"
 
 #include <errno.h>
 #include <unistd.h>
@@ -37,6 +37,8 @@ namespace bus
 
 I2C_Linux::I2C_Linux(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::I2C_Linux::Init_Params())
+    , m_config(new sz::I2C_Linux::Config())
 {
 }
 
@@ -48,7 +50,9 @@ I2C_Linux::~I2C_Linux()
 
 auto I2C_Linux::init(rapidjson::Value const& json) -> bool
 {
-    sz::I2C_Linux sz;
+    QLOG_TOPIC("i2c_linux::init");
+
+    sz::I2C_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -57,13 +61,11 @@ auto I2C_Linux::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize I2C_Linux data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.dev = sz.dev;
-    return init(params);
+    *m_init_params = sz;
+    return init();
 }
 
-auto I2C_Linux::init(Init_Params const& params) -> bool
+auto I2C_Linux::init() -> bool
 {
     close();
 
@@ -71,15 +73,14 @@ auto I2C_Linux::init(Init_Params const& params) -> bool
 
     std::lock_guard<I2C_Linux> lg(*this);
 
-    m_params = params;
-    m_fd = ::open(params.dev.c_str(), O_RDWR);
+    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", params.dev, strerror(errno));
+        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
         return false;
     }
 
-    if (!m_params.name.empty())
+    if (!m_init_params->name.empty())
     {
         if (!m_hal.get_buses().add(*this))
         {
@@ -92,7 +93,7 @@ auto I2C_Linux::init(Init_Params const& params) -> bool
 
 auto I2C_Linux::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 void I2C_Linux::close()
@@ -229,6 +230,35 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
         return false;
     }
     return true;
+}
+
+auto I2C_Linux::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::I2C_Linux::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize I2C_Linux config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    return true;
+}
+auto I2C_Linux::get_config() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_config, json);
+    return std::move(json);
+}
+
+auto I2C_Linux::get_init_params() -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 

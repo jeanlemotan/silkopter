@@ -6,3 +6,4 @@
 /out.dat
 *.plt
 callgrind.*
+/UBLOX_init_params

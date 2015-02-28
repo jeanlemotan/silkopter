@@ -3,6 +3,16 @@
 #include "HAL.h"
 #include "common/node/bus/II2C.h"
 
+namespace sz
+{
+namespace I2C_Linux
+{
+class Init_Params;
+class Config;
+}
+}
+
+
 namespace silk
 {
 namespace node
@@ -16,14 +26,12 @@ public:
     I2C_Linux(HAL& hal);
     ~I2C_Linux();
 
-    struct Init_Params
-    {
-        std::string name;
-        std::string dev;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> rapidjson::Document;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> rapidjson::Document;
+
     void close();
 
     auto get_name() const -> std::string const&;
@@ -39,8 +47,12 @@ public:
     auto write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool;
 
 private:
+    auto init() -> bool;
+
     HAL& m_hal;
-    Init_Params m_params;
+    std::shared_ptr<sz::I2C_Linux::Init_Params> m_init_params;
+    std::shared_ptr<sz::I2C_Linux::Config> m_config;
+
     int m_fd = -1;
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;

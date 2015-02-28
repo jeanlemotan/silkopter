@@ -1,0 +1,21 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::SPI_Linux",
+    "name": "Init_Params",
+    "members":
+    [
+        ["std::string", "name", {"required": true}],
+        ["std::string", "dev", {"required": true}],
+        ["uint32_t", "mode", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::SPI_Linux",
+    "name": "Config",
+    "members":
+    [
+    ]
+}
+]

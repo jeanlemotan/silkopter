@@ -34,10 +34,10 @@ public:
     ~MPU9250();
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     void process();
 
@@ -75,10 +75,7 @@ private:
     bus::ISPI* m_spi = nullptr;
 
     std::shared_ptr<sz::MPU9250::Init_Params> m_init_params;
-    rapidjson::Document m_init_params_json;
-
     std::shared_ptr<sz::MPU9250::Config> m_config;
-    rapidjson::Document m_config_json;
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;

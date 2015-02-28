@@ -29,10 +29,10 @@ public:
     SRF02(HAL& hal);
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+    auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> boost::optional<rapidjson::Value const&>;
+    auto get_config() -> rapidjson::Document;
 
     auto get_name() const -> std::string const&;
     auto get_output_stream_count() const -> size_t;
@@ -48,10 +48,7 @@ private:
     bus::II2C* m_i2c = nullptr;
 
     std::shared_ptr<sz::SRF02::Init_Params> m_init_params;
-    rapidjson::Document m_init_params_json;
-
     std::shared_ptr<sz::SRF02::Config> m_config;
-    rapidjson::Document m_config_json;
 
     struct Stream : public stream::IDistance
     {

@@ -37,8 +37,6 @@ auto Comp_Location::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    autojsoncxx::to_document(sz, m_init_params_json);
-
     return init();
 }
 auto Comp_Location::init() -> bool
@@ -195,16 +193,20 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
     m_stream.rate = m_location_stream->get_rate();
 
     *m_config = sz;
-    autojsoncxx::to_document(*m_config, m_config_json);
     return true;
 }
-auto Comp_Location::get_config() -> boost::optional<rapidjson::Value const&>
+auto Comp_Location::get_config() -> rapidjson::Document
 {
-    return m_config_json;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_config, json);
+    return std::move(json);
 }
-auto Comp_Location::get_init_params() -> boost::optional<rapidjson::Value const&>
+
+auto Comp_Location::get_init_params() -> rapidjson::Document
 {
-    return m_init_params_json;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 }
