@@ -12,15 +12,25 @@ namespace silk
 
 class HAL;
 
+template<class Base>
 class Factory : q::util::Noncopyable
 {
 public:
     template <class T> void register_node(HAL& hal, std::string const& class_name);
-    template <class Base> auto create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>;
+    auto create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>;
     auto get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
     auto get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
+
+    struct Node_Info
+    {
+        std::string name;
+        std::reference_wrapper<const rapidjson::Document> init_params;
+        std::reference_wrapper<const rapidjson::Document> config;
+    };
+
+    auto get_all() const -> std::vector<Node_Info>;
 private:
-    typedef void* (*create_node_function)(HAL& hal);
+    typedef Base* (*create_node_function)(HAL& hal);
     struct Data
     {
         create_node_function ctor;
@@ -28,7 +38,7 @@ private:
         rapidjson::Document config;
     };
     std::map<std::string, Data> m_name_registry;
-    template <class T> static auto create_node_func(HAL& hal) -> void*;
+    template <class T> static auto create_node_func(HAL& hal) -> Base*;
     void _register_node(std::string const& class_name, create_node_function ctor, rapidjson::Document&& init_params, rapidjson::Document&& config);
 };
 
@@ -75,7 +85,10 @@ private:
     Registry<node::processor::IProcessor> m_processors;
     Registry<node::stream::IStream> m_streams;
 
-    Factory m_factory;
+    Factory<node::bus::IBus> m_bus_factory;
+    Factory<node::source::ISource> m_source_factory;
+    Factory<node::sink::ISink> m_sink_factory;
+    Factory<node::processor::IProcessor> m_processor_factory;
 
     //bool m_is_initialized = false;
 
@@ -123,7 +136,9 @@ auto Registry<Base>::add(Base& node) -> bool
 
 
 
-template <class T> void Factory::register_node(HAL& hal, std::string const& class_name)
+template<class Base>
+template <class T>
+void Factory<Base>::register_node(HAL& hal, std::string const& class_name)
 {
     auto* ctor = &create_node_func<T>;
     T instance(hal);
@@ -149,12 +164,14 @@ template <class T> void Factory::register_node(HAL& hal, std::string const& clas
     _register_node(class_name, ctor, instance.get_init_params(), instance.get_config());
 }
 
-template <class Base> auto Factory::create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>
+template <class Base>
+auto Factory<Base>::create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
     return std::unique_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(hal)));
 }
-inline auto Factory::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+template<class Base>
+auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
 {
     auto it = m_name_registry.find(class_name);
     if (it != m_name_registry.end())
@@ -163,7 +180,8 @@ inline auto Factory::get_node_default_config(std::string const& class_name) -> b
     }
     return boost::none;
 }
-inline auto Factory::get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+template<class Base>
+auto Factory<Base>::get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
 {
     auto it = m_name_registry.find(class_name);
     if (it != m_name_registry.end())
@@ -172,11 +190,16 @@ inline auto Factory::get_node_default_init_params(std::string const& class_name)
     }
     return boost::none;
 }
-template <class T> auto Factory::create_node_func(HAL& hal) -> void*
+
+template<class Base>
+template <class T>
+auto Factory<Base>::create_node_func(HAL& hal) -> Base*
 {
-    return reinterpret_cast<void*>(new T(hal));
+    return new T(hal);
 }
-inline void Factory::_register_node(std::string const& class_name, create_node_function ctor, rapidjson::Document&& init_params, rapidjson::Document&& config)
+
+template<class Base>
+void Factory<Base>::_register_node(std::string const& class_name, create_node_function ctor, rapidjson::Document&& init_params, rapidjson::Document&& config)
 {
     if (class_name.empty())
     {
@@ -190,6 +213,20 @@ inline void Factory::_register_node(std::string const& class_name, create_node_f
     }
     m_name_registry[class_name] = { ctor, std::move(init_params), std::move(config) };
 }
+template<class Base>
+auto Factory<Base>::get_all() const -> std::vector<Node_Info>
+{
+    std::vector<Node_Info> info;
+    info.reserve(m_name_registry.size());
+    for (auto const& n: m_name_registry)
+    {
+        info.push_back({n.first,
+                        n.second.init_params,
+                        n.second.config});
+    }
+    return info;
+}
+
 
 
 }

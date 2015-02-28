@@ -75,45 +75,45 @@ HAL::HAL()
 
     m_hw.reset(new Hardware);
 
-    m_factory.register_node<bus::UART_Linux>(*this, "UART_Linux");
-    m_factory.register_node<bus::I2C_Linux>(*this, "I2C_Linux");
-    m_factory.register_node<bus::SPI_Linux>(*this, "SPI_Linux");
+    m_bus_factory.register_node<bus::UART_Linux>(*this, "UART_Linux");
+    m_bus_factory.register_node<bus::I2C_Linux>(*this, "I2C_Linux");
+    m_bus_factory.register_node<bus::SPI_Linux>(*this, "SPI_Linux");
 
-    m_factory.register_node<source::MPU9250>(*this, "MPU9250");
-    m_factory.register_node<source::MS5611>(*this, "MS5611");
-    m_factory.register_node<source::SRF02>(*this, "SRF02");
-    m_factory.register_node<source::Raspicam>(*this, "Raspicam");
-    m_factory.register_node<source::RC5T619>(*this, "RC5T619");
-    m_factory.register_node<source::UBLOX>(*this, "UBLOX");
+    m_source_factory.register_node<source::MPU9250>(*this, "MPU9250");
+    m_source_factory.register_node<source::MS5611>(*this, "MS5611");
+    m_source_factory.register_node<source::SRF02>(*this, "SRF02");
+    m_source_factory.register_node<source::Raspicam>(*this, "Raspicam");
+    m_source_factory.register_node<source::RC5T619>(*this, "RC5T619");
+    m_source_factory.register_node<source::UBLOX>(*this, "UBLOX");
 
-    m_factory.register_node<sink::PIGPIO>(*this, "PIGPIO");
+    m_sink_factory.register_node<sink::PIGPIO>(*this, "PIGPIO");
 
-    m_factory.register_node<processor::ADC_Ammeter>(*this, "ADC_Ammeter");
-    m_factory.register_node<processor::ADC_Voltmeter>(*this, "ADC_Voltmeter");
-    m_factory.register_node<processor::Comp_AHRS>(*this, "Comp_AHRS");
-    m_factory.register_node<processor::Comp_Location>(*this, "Comp_Location");
-    m_factory.register_node<processor::Inertial>(*this, "Inertial");
-    m_factory.register_node<processor::LiPo_Battery>(*this, "LiPo_Battery");
-    m_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "LPF_Acceleration");
-    m_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "LPF_Angular_Velocity");
-    m_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "LPF_ADC_Value");
-    m_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "LPF_Current");
-    m_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "LPF_Voltage");
-    m_factory.register_node<processor::LPF<stream::ILocation>>(*this, "LPF_Location");
-    m_factory.register_node<processor::LPF<stream::IDistance>>(*this, "LPF_Distance");
-    m_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "LPF_Magnetic_Field");
-    m_factory.register_node<processor::LPF<stream::IPressure>>(*this, "LPF_Pressure");
-    m_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "LPF_Temperature");
-    m_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Resampler_Acceleration");
-    m_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Resampler_Angular_Velocity");
-    m_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "Resampler_ADC_Value");
-    m_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Resampler_Current");
-    m_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Resampler_Voltage");
-    m_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Resampler_Location");
-    m_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Resampler_Distance");
-    m_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Resampler_Magnetic_Field");
-    m_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Resampler_Pressure");
-    m_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Resampler_Temperature");
+    m_processor_factory.register_node<processor::ADC_Ammeter>(*this, "ADC_Ammeter");
+    m_processor_factory.register_node<processor::ADC_Voltmeter>(*this, "ADC_Voltmeter");
+    m_processor_factory.register_node<processor::Comp_AHRS>(*this, "Comp_AHRS");
+    m_processor_factory.register_node<processor::Comp_Location>(*this, "Comp_Location");
+    m_processor_factory.register_node<processor::Inertial>(*this, "Inertial");
+    m_processor_factory.register_node<processor::LiPo_Battery>(*this, "LiPo_Battery");
+    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "LPF_Acceleration");
+    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "LPF_Angular_Velocity");
+    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "LPF_ADC_Value");
+    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "LPF_Current");
+    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "LPF_Voltage");
+    m_processor_factory.register_node<processor::LPF<stream::ILocation>>(*this, "LPF_Location");
+    m_processor_factory.register_node<processor::LPF<stream::IDistance>>(*this, "LPF_Distance");
+    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "LPF_Magnetic_Field");
+    m_processor_factory.register_node<processor::LPF<stream::IPressure>>(*this, "LPF_Pressure");
+    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "LPF_Temperature");
+    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Resampler_Acceleration");
+    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Resampler_Angular_Velocity");
+    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "Resampler_ADC_Value");
+    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Resampler_Current");
+    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Resampler_Voltage");
+    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Resampler_Location");
+    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Resampler_Distance");
+    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Resampler_Magnetic_Field");
+    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Resampler_Pressure");
+    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Resampler_Temperature");
 }
 
 HAL::~HAL()
@@ -306,6 +306,8 @@ auto HAL::init() -> bool
         return false;
     }
 
+    m_bus_factory.get_all();
+
     return true;
 }
 
@@ -334,24 +336,35 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         }
         if (!create_node<Base>(type, *init_params, *config))
         {
+            QLOGE("Failed to create node of type '{}'", type);
             return false;
         }
     }
     return true;
 }
-template<class Base>
-auto HAL::create_node(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+template<>
+auto HAL::create_node<node::bus::IBus>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
-    auto node = m_factory.create_node<Base>(*this, type);
-    if (!node)
-    {
-        QLOGE("Cannot create node of type '{}'", type);
-    }
-    if (!node->init(init_params, config))
-    {
-        return false;
-    }
-    return true;
+    auto node = m_bus_factory.create_node(*this, type);
+    return node && node->init(init_params, config);
+}
+template<>
+auto HAL::create_node<node::source::ISource>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+{
+    auto node = m_source_factory.create_node(*this, type);
+    return node && node->init(init_params, config);
+}
+template<>
+auto HAL::create_node<node::sink::ISink>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+{
+    auto node = m_sink_factory.create_node(*this, type);
+    return node && node->init(init_params, config);
+}
+template<>
+auto HAL::create_node<node::processor::IProcessor>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+{
+    auto node = m_processor_factory.create_node(*this, type);
+    return node && node->init(init_params, config);
 }
 
 //static std::vector<double> s_samples;
@@ -384,457 +397,6 @@ void HAL::process()
 //    }
 }
 
-//auto HAL::init() -> bool
-//{
-//    QLOG_TOPIC("sensors::init");
-//    TIMED_FUNCTION();
-
-//    QASSERT(!m_is_initialized);
-//    if (m_is_initialized)
-//    {
-//        return true;
-//    }
-
-
-//    //autojsoncxx::to_json()
-
-
-
-////    Bus_Selector<MPU9250_I2C, MPU9250_SPI, Null_Device> selector;
-
-////    {
-////        boost::algorithm::to_lower(cfg.gyroscope.sensor);
-////        if (cfg.gyroscope.sensor == "mpu9250")
-////        {
-////            m_sensordev.gyroscope.mpu9250 = selector.init(cfg.gyroscope);
-////            if (!m_sensors->gyroscope.mpu9250)
-////            {
-////                return false;
-////            }
-////        }
-////        else
-////        {
-////            QLOGE("Unknown sensor: {}", cfg.gyroscope.sensor);
-////            return false;
-////        }
-////    }
-////    {
-////        boost::algorithm::to_lower(cfg.accelerometer.sensor);
-////        if (cfg.accelerometer.sensor == "mpu9250")
-////        {
-////            m_sensors->accelerometer.mpu9250 = selector.init(cfg.accelerometer);
-////            if (!m_sensors->accelerometer.mpu9250)
-////            {
-////                return false;
-////            }
-////        }
-////        else
-////        {
-////            QLOGE("Unknown sensor: {}", cfg.gyroscope.sensor);
-////            return false;
-////        }
-////    }
-
-
-////#if defined USE_MS5611
-////    if (!m_sensors->baro.init(m_config.barometer_bus))
-////    {
-////        return false;
-////    }
-////#endif
-
-////#if defined USE_MPU9250
-////    {
-////        typedef MPU9250::Gyroscope_Range G_Range;
-////        typedef MPU9250::Accelerometer_Range A_Range;
-
-////        std::vector<G_Range> g_ranges = { G_Range::_250_DPS, G_Range::_500_DPS, G_Range::_1000_DPS, G_Range::_2000_DPS };
-////        std::vector<A_Range> a_ranges = { A_Range::_2_G, A_Range::_4_G, A_Range::_8_G, A_Range::_16_G };
-
-////        std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](G_Range a, G_Range b)
-////        {
-////            return math::abs(static_cast<int>(a) - m_config.gyroscope_range) < math::abs(static_cast<int>(b) - m_config.gyroscope_range);
-////        });
-////        G_Range g_range = g_ranges.front();
-
-////        std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](A_Range a, A_Range b)
-////        {
-////            return math::abs(static_cast<int>(a) - m_config.accelerometer_range) < math::abs(static_cast<int>(b) - m_config.accelerometer_range);
-////        });
-////        A_Range a_range = a_ranges.front();
-
-////        QLOGI("Gyroscope range {} DPS (requested {} DPS)", static_cast<size_t>(g_range), m_config.gyroscope_range);
-////        QLOGI("Accelerometer range {}G (requested {}G)", static_cast<size_t>(a_range), m_config.accelerometer_range);
-
-////        if (!m_sensors->mpu.open(m_config.mpu_bus) ||
-////            !m_sensors->mpu.init(g_range, a_range))
-////        {
-////            return false;
-////        }
-////    }
-////#endif
-
-////#if defined USE_ODROIDW_ADC
-////    if (!m_sensors->adc.init())
-////    {
-////        return false;
-////    }
-////#endif
-
-////#if defined USE_SRF02
-////    if (!m_sensors->sonar.init(std::chrono::milliseconds(0)))
-////    {
-////        return false;
-////    }
-////#endif
-
-////#if defined USE_GPS_DETECTOR_UART
-////    if (!m_sensors->gps_detector.init(m_config.gps_bus, m_config.gps_baud))
-////    {
-////        return false;
-////    }
-////#endif
-
-//    m_is_initialized = true;
-//    return true;
-//}
-
-//void HAL::shutdown()
-//{
-//    QASSERT(m_is_initialized);
-//    m_is_initialized = false;
-//}
-
-//void HAL::set_accelerometer_calibration_data(math::vec3f const& bias, math::vec3f const& scale)
-//{
-//    m_config.accelerometer.bias = bias;
-//    m_config.accelerometer.scale = scale;
-//    silk::async([=]()
-//    {
-//        save_settings(m_config);
-//    });
-//}
-//void HAL::get_accelerometer_calibration_data(math::vec3f &bias, math::vec3f &scale) const
-//{
-//    bias = m_config.accelerometer.bias;
-//    scale = m_config.accelerometer.scale;
-//}
-
-//void HAL::set_gyroscope_calibration_data(math::vec3f const& bias)
-//{
-//    m_config.gyroscope.bias = bias;
-//    silk::async([=]()
-//    {
-//        save_settings(m_config);
-//    });
-//}
-//void HAL::get_gyroscope_calibration_data(math::vec3f &bias) const
-//{
-//    bias = m_config.gyroscope.bias;
-//}
-
-//void HAL::set_compass_calibration_data(math::vec3f const& bias)
-//{
-//    m_config.compass.bias = bias;
-//    silk::async([=]()
-//    {
-//        save_settings(m_config);
-//    });
-//}
-//void HAL_PI::get_compass_calibration_data(math::vec3f &bias) const
-//{
-//    bias = m_config.compass.bias;
-//}
-
-//void HAL_PI::set_current_calibration_data(float scale)
-//{
-//    m_config.current.scale = scale;
-//    silk::async([=]()
-//    {
-//        save_settings(m_config);
-//    });
-//}
-
-//void HAL_PI::get_current_calibration_data(float& scale) const
-//{
-//    scale = m_config.current.scale;
-//}
-
-//void HAL_PI::set_voltage_calibration_data(float scale)
-//{
-//    m_config.voltage.scale = scale;
-//    silk::async([=]()
-//    {
-//        save_settings(m_config);
-//    });
-//}
-//void HAL_PI::get_voltage_calibration_data(float& scale) const
-//{
-//    scale = m_config.voltage.scale;
-//}
-
-
-
-
-//auto HAL_PI::get_accelerometer_samples() const -> std::vector<sensors::Accelerometer_Sample> const&
-//{
-//    return m_accelerometer_samples;
-//}
-//auto HAL_PI::get_gyroscope_samples() const -> std::vector<sensors::Gyroscope_Sample> const&
-//{
-//    return m_gyroscope_samples;
-//}
-//auto HAL_PI::get_compass_samples() const -> std::vector<sensors::Compass_Sample> const&
-//{
-//    return m_compass_samples;
-//}
-//auto HAL_PI::get_barometer_samples() const -> std::vector<sensors::Barometer_Sample> const&
-//{
-//    return m_barometer_samples;
-//}
-//auto HAL_PI::get_sonar_samples() const -> std::vector<sensors::Sonar_Sample> const&
-//{
-//    return m_sonar_samples;
-//}
-//auto HAL_PI::get_thermometer_samples() const -> std::vector<sensors::Thermometer_Sample> const&
-//{
-//    return m_thermometer_samples;
-//}
-//auto HAL_PI::get_voltmeter_samples() const -> std::vector<sensors::Voltmeter_Sample> const&
-//{
-//    return m_voltage_samples;
-//}
-//auto HAL_PI::get_ammeter_samples() const -> std::vector<sensors::Ammeter_Sample> const&
-//{
-//    return m_ammeter_samples;
-//}
-//auto HAL_PI::get_gps_samples() const -> std::vector<sensors::GPS_Sample> const&
-//{
-//    return m_gps_samples;
-//}
-//auto HAL_PI::get_last_accelerometer_sample() const  -> sensors::Accelerometer_TP_Sample const&
-//{
-//    return m_last_accelerometer_sample;
-//}
-//auto HAL_PI::get_last_gyroscope_sample() const      -> sensors::Gyroscope_TP_Sample const&
-//{
-//    return m_last_gyroscope_sample;
-//}
-//auto HAL_PI::get_last_compass_sample() const        -> sensors::Compass_TP_Sample const&
-//{
-//    return m_last_compass_sample;
-//}
-//auto HAL_PI::get_last_barometer_sample() const      -> sensors::Barometer_TP_Sample const&
-//{
-//    return m_last_barometer_sample;
-//}
-//auto HAL_PI::get_last_sonar_sample() const          -> sensors::Sonar_TP_Sample const&
-//{
-//    return m_last_sonar_sample;
-//}
-//auto HAL_PI::get_last_thermometer_sample() const    -> sensors::Thermometer_TP_Sample const&
-//{
-//    return m_last_thermometer_sample;
-//}
-//auto HAL_PI::get_last_voltage_sample() const        -> sensors::Voltmeter_TP_Sample const&
-//{
-//    return m_last_voltage_sample;
-//}
-//auto HAL_PI::get_last_current_sample() const        -> sensors::Ammeter_TP_Sample const&
-//{
-//    return m_last_current_sample;
-//}
-//auto HAL_PI::get_last_gps_sample() const            -> sensors::GPS_TP_Sample const&
-//{
-//    return m_last_gps_sample;
-//}
-
-//class Butterworth //10hz
-//{
-//public:
-//    static constexpr size_t NZEROS  = 2;
-//    static constexpr size_t NPOLES  = 2;
-//    static constexpr float GAIN    = 1.058546241e+03;
-//    math::vec3f xv[NZEROS+1], yv[NPOLES+1];
-//    math::vec3f process(math::vec3f const& t)
-//    {
-//        xv[0] = xv[1]; xv[1] = xv[2];
-//        xv[2] = t / GAIN;
-//        yv[0] = yv[1]; yv[1] = yv[2];
-//        yv[2] =   (xv[0] + xv[2]) + 2.f * xv[1]
-//                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
-//        return yv[2];
-//    }
-//};
-
-//Butterworth bg, ba, bc;
-
-//void HAL_PI::process()
-//{
-//    QLOG_TOPIC("sensors::process");
-
-//    QASSERT(m_is_initialized);
-//    if (!m_is_initialized)
-//    {
-//        return;
-//    }
-
-//    m_accelerometer_samples.clear();
-//    m_gyroscope_samples.clear();
-//    m_compass_samples.clear();
-//    m_barometer_samples.clear();
-//    m_sonar_samples.clear();
-//    m_thermometer_samples.clear();
-//    m_voltage_samples.clear();
-//    m_current_samples.clear();
-//    m_gps_samples.clear();
-
-//    auto now = q::Clock::now();
-
-//#if defined USE_GPS_DETECTOR
-//    m_sensors->gps_detector.process();
-//#endif
-
-//#if defined USE_MPU9250
-//    m_sensors->mpu.process();
-//    {
-//        auto const& g_samples = m_sensors->mpu.get_gyroscope_samples();
-//        auto const& a_samples = m_sensors->mpu.get_accelerometer_samples();
-//        QASSERT(a_samples.size() == g_samples.size());
-//        auto const& c_samples = m_sensors->mpu.get_compass_samples();
-
-//        {
-//            auto dt = m_sensors->mpu.get_gyroscope_sample_time();
-//            m_gyroscope_samples.resize(g_samples.size());
-//            for (size_t i = 0; i < g_samples.size(); i++)
-//            {
-//                auto& sample = m_gyroscope_samples[i];
-//                sample.value = bg.process(g_samples[i] - m_config.gyroscope_bias);
-//                sample.dt = dt;
-//                sample.sample_idx = ++m_last_gyroscope_sample.sample_idx;
-//            }
-//            if (!m_gyroscope_samples.empty())
-//            {
-//                static_cast<sensors::Gyroscope_Sample&>(m_last_gyroscope_sample) = m_gyroscope_samples.back();
-//                m_last_gyroscope_sample.time_point = now;
-//            }
-//        }
-
-//        {
-//            auto dt = m_sensors->mpu.get_accelerometer_sample_time();
-//            m_accelerometer_samples.resize(a_samples.size());
-//            for (size_t i = 0; i < a_samples.size(); i++)
-//            {
-//                auto& sample = m_accelerometer_samples[i];
-//                sample.value = ba.process((a_samples[i] - m_config.accelerometer_bias) * m_config.accelerometer_scale);
-//                sample.dt = dt;
-//                sample.sample_idx = ++m_last_accelerometer_sample.sample_idx;
-//            }
-//            if (!m_accelerometer_samples.empty())
-//            {
-//                static_cast<sensors::Accelerometer_Sample&>(m_last_accelerometer_sample) = m_accelerometer_samples.back();
-//                m_last_accelerometer_sample.time_point = now;
-//            }
-//        }
-
-//        {
-//            auto dt = m_sensors->mpu.get_compass_sample_time();
-//            m_compass_samples.resize(c_samples.size());
-//            for (size_t i = 0; i < c_samples.size(); i++)
-//            {
-//                auto& sample = m_compass_samples[i];
-//                sample.value = bc.process(c_samples[i] - m_config.compass_bias);
-//                sample.dt = dt;
-//                sample.sample_idx = ++m_last_compass_sample.sample_idx;
-//            }
-//            if (!m_compass_samples.empty())
-//            {
-//                static_cast<sensors::Compass_Sample&>(m_last_compass_sample) = m_compass_samples.back();
-//                m_last_compass_sample.time_point = now;
-//            }
-//        }
-//    }
-//#endif
-
-//#if defined USE_ODROIDW_ADC
-//    m_sensors->adc.process();
-//    {
-//        auto data = m_sensors->adc.get_current_data();
-//        if (data)
-//        {
-//            m_last_current_sample.time_point = now;
-//            m_last_current_sample.value = data->value * m_config.current_scale;
-//            m_last_current_sample.dt = data->dt;
-//            m_last_current_sample.sample_idx++;
-//            m_current_samples.push_back(m_last_current_sample);
-//        }
-
-//        data = m_sensors->adc.get_voltage_data();
-//        if (data)
-//        {
-//            m_last_voltage_sample.time_point = now;
-//            m_last_voltage_sample.value = data->value * m_config.voltage_scale;
-//            m_last_voltage_sample.dt = data->dt;
-//            m_last_voltage_sample.sample_idx++;
-//            m_voltage_samples.push_back(m_last_voltage_sample);
-//        }
-//    }
-//#endif
-
-//#if defined USE_SRF02
-//    m_sensors->sonar.process();
-//    {
-//        auto data = m_sensors->sonar.get_distance_data();
-//        if (data)
-//        {
-//            //LOG_INFO("DISTANCE: {}", *val);
-//            m_last_sonar_sample.time_point = now;
-//            m_last_sonar_sample.value = data->value;
-//            m_last_sonar_sample.dt = data->dt;
-//            m_last_sonar_sample.sample_idx++;
-//            m_sonar_samples.push_back(m_last_sonar_sample);
-//        }
-//    }
-//#endif
-
-//#if defined USE_MS5611
-//    //*******************************************************************//
-//    //KEEP BARO LAST to avoid i2c noise from talking to other sensors!!!!!!!!!
-//    //*******************************************************************//
-//    m_sensors->baro.process();
-//    {
-//        auto b_data = m_sensors->baro.get_barometer_data();
-//        if (b_data)
-//        {
-//            m_last_barometer_sample.time_point = now;
-//            m_last_barometer_sample.value = b_data->value;
-//            m_last_barometer_sample.sample_idx++;
-//            m_last_barometer_sample.dt = b_data->dt;
-//            m_barometer_samples.push_back(m_last_barometer_sample);
-//        }
-//        auto t_data = m_sensors->baro.get_thermometer_data();
-//        if (t_data)
-//        {
-//            m_last_thermometer_sample.time_point = now;
-//            m_last_thermometer_sample.value = t_data->value;
-//            m_last_thermometer_sample.sample_idx++;
-//            m_last_thermometer_sample.dt = t_data->dt;
-//            m_thermometer_samples.push_back(m_last_thermometer_sample);
-//        }
-//    }
-//#endif
-
-//    process_gps();
-
-////    auto d = q::Clock::now() - start;
-////    LOG_INFO("d = {}, {}", d, m_sensor_samples.size());
-//}
-
-//void HAL_PI::process_gps()
-//{
-
-
-//}
 
 
 }
