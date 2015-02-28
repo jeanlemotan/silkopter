@@ -16,7 +16,6 @@
     "name": "Location",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {

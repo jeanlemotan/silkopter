@@ -5,6 +5,18 @@
 #include "common/Comm_Data.h"
 #include "common/node/stream/IVideo.h"
 
+
+namespace sz
+{
+namespace Raspicam
+{
+class Init_Params;
+class Config;
+}
+}
+
+
+
 namespace silk
 {
 namespace node
@@ -18,24 +30,8 @@ public:
     Raspicam(HAL& hal);
     ~Raspicam();
 
-    struct Quality
-    {
-        math::vec2u32 resolution;
-        uint32_t bitrate = 0;
-    };
-
-    struct Init_Params
-    {
-        std::string name;
-        uint32_t fps = 30;
-        Quality low;
-        Quality medium;
-        Quality high;
-        Quality recording;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> boost::optional<rapidjson::Value const&>;
@@ -66,7 +62,14 @@ public:
 
 private:
     HAL& m_hal;
-    Init_Params m_params;
+
+    auto init() -> bool;
+
+    std::shared_ptr<sz::Raspicam::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::shared_ptr<sz::Raspicam::Config> m_config;
+    rapidjson::Document m_config_json;
 
     void set_active_streams(bool high, bool medium, bool low);
 

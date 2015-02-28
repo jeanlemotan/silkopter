@@ -2,7 +2,7 @@
 #include "Raspicam.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_Raspicam.hpp"
 
 //#undef RASPBERRY_PI
 
@@ -115,6 +115,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 Raspicam::Raspicam(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::Raspicam::Init_Params())
+    , m_config(new sz::Raspicam::Config())
 {
     QLOG_TOPIC("raspicam");
 #if defined RASPBERRY_PI
@@ -174,7 +176,7 @@ Raspicam::~Raspicam()
 
 auto Raspicam::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto Raspicam::get_output_stream_count() const -> size_t
 {
@@ -189,7 +191,9 @@ auto Raspicam::get_output_stream(size_t idx) -> stream::IStream&
 
 auto Raspicam::init(rapidjson::Value const& json) -> bool
 {
-    sz::Raspicam_Init_Params sz;
+    QLOG_TOPIC("raspicam::init");
+
+    sz::Raspicam::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -198,20 +202,12 @@ auto Raspicam::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize Raspicam data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.fps = sz.fps;
-    params.recording.bitrate = sz.recording.bitrate;
-    params.recording.resolution = sz.recording.resolution;
-    params.high.bitrate = sz.high.bitrate;
-    params.high.resolution = sz.high.resolution;
-    params.medium.bitrate = sz.medium.bitrate;
-    params.medium.resolution = sz.medium.resolution;
-    params.low.bitrate = sz.low.bitrate;
-    params.low.resolution = sz.low.resolution;
-    return init(params);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
+
+    return init();
 }
-auto Raspicam::init(Init_Params const& params) -> bool
+auto Raspicam::init() -> bool
 {
 #if defined RASPBERRY_PI
     QLOG_TOPIC("raspicam::init");
@@ -220,8 +216,7 @@ auto Raspicam::init(Init_Params const& params) -> bool
         return true;
     }
 
-    m_params = params;
-    m_params.fps = math::clamp<size_t>(params.fps, 10, 30);
+    m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 30);
 
     if (!create_components())
     {
@@ -248,11 +243,27 @@ auto Raspicam::init(Init_Params const& params) -> bool
 
 auto Raspicam::set_config(rapidjson::Value const& json) -> bool
 {
-    return false;
+    sz::Raspicam::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize Raspicam config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
 }
 auto Raspicam::get_config() -> boost::optional<rapidjson::Value const&>
 {
-    return boost::none;
+    return m_config_json;
+}
+auto Raspicam::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 void Raspicam::shutdown()

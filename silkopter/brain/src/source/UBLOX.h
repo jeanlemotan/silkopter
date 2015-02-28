@@ -7,6 +7,17 @@
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
 
+
+namespace sz
+{
+namespace UBLOX
+{
+class Init_Params;
+class Config;
+}
+}
+
+
 namespace silk
 {
 namespace node
@@ -21,15 +32,11 @@ public:
     UBLOX(HAL& hal);
     ~UBLOX();
 
-    struct Init_Params
-    {
-        std::string name;
-        bus::IBus* bus = nullptr;
-        uint32_t rate = 5;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
 
     auto get_name() const -> std::string const&;
     auto get_output_stream_count() const -> size_t;
@@ -48,7 +55,11 @@ private:
     bus::ISPI* m_spi = nullptr;
     bus::IUART* m_uart = nullptr;
 
-    Init_Params m_params;
+    std::shared_ptr<sz::UBLOX::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::shared_ptr<sz::UBLOX::Config> m_config;
+    rapidjson::Document m_config_json;
 
     struct Packet
     {

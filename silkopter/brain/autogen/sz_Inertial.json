@@ -14,17 +14,16 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "reference_frame_stream", {"required": true}],
-        ["std::string", "acceleration_stream", {"required": true}]
+        ["std::string", "reference_frame", {"required": true}],
+        ["std::string", "acceleration", {"required": true}]
     ]
 },
 {
     "definition" : true,
     "namespace" : "sz::Inertial",
-    "name": "Location",
+    "name": "Linear_Acceleration",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {

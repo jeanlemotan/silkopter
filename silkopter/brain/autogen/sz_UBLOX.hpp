@@ -510,9 +510,9 @@ w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer819c8b7f87c0d7337ae2fe372
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace UBLOX { struct Location {
- uint8_t __unused;
+ 
 
-explicit Location():__unused() {  }
+explicit Location() {  }
 
 
  
@@ -529,7 +529,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< uint8_t > handler_0;
+    
 
     bool check_depth(const char* type)
     {
@@ -543,8 +543,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "__unused";
+            
         default:
             break;
         }
@@ -578,7 +577,7 @@ public:
     explicit SAXEventHandler( ::sz::UBLOX::Location * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->__unused)
+        
     {
         reset_flags();
     }
@@ -590,8 +589,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -606,8 +604,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -622,8 +619,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -638,8 +634,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -654,8 +649,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -670,8 +664,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -686,8 +679,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -702,8 +694,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -719,8 +710,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8))
-						 { state=0;  }
+            
             else {
                 state = -1;
                 return true;
@@ -729,8 +719,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -746,8 +735,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -762,8 +750,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -778,8 +765,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -795,8 +781,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
@@ -821,8 +806,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -837,8 +821,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -849,9 +832,9 @@ struct Serializer< Writer26caabb81a5d52d6f53bb60e0b9717843157eb07467332a8b54fd14
     {
         w.StartObject();
 
-        w.Key("\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8, false); Serializer< Writer26caabb81a5d52d6f53bb60e0b9717843157eb07467332a8b54fd14da8d65647, uint8_t >()(w, value.__unused);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };

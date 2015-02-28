@@ -459,10 +459,10 @@ w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writeraac53a350c7b4
 namespace sz { namespace Raspicam { struct Init_Params {
  std::string name;
 uint32_t fps;
-sz::Raspicam_Quality low;
-sz::Raspicam_Quality medium;
-sz::Raspicam_Quality high;
-sz::Raspicam_Quality recording;
+sz::Raspicam::Quality low;
+sz::Raspicam::Quality medium;
+sz::Raspicam::Quality high;
+sz::Raspicam::Quality recording;
 
 explicit Init_Params():name(), fps(), low(), medium(), high(), recording() {  }
 
@@ -483,10 +483,10 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< uint32_t > handler_1;
-SAXEventHandler< sz::Raspicam_Quality > handler_2;
-SAXEventHandler< sz::Raspicam_Quality > handler_3;
-SAXEventHandler< sz::Raspicam_Quality > handler_4;
-SAXEventHandler< sz::Raspicam_Quality > handler_5;bool has_name;
+SAXEventHandler< sz::Raspicam::Quality > handler_2;
+SAXEventHandler< sz::Raspicam::Quality > handler_3;
+SAXEventHandler< sz::Raspicam::Quality > handler_4;
+SAXEventHandler< sz::Raspicam::Quality > handler_5;bool has_name;
 bool has_fps;
 bool has_low;
 bool has_medium;
@@ -1058,10 +1058,10 @@ struct Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8
 
         w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, std::string >()(w, value.name);
 w.Key("\x66\x70\x73", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, uint32_t >()(w, value.fps);
-w.Key("\x6c\x6f\x77", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam_Quality >()(w, value.low);
-w.Key("\x6d\x65\x64\x69\x75\x6d", 6, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam_Quality >()(w, value.medium);
-w.Key("\x68\x69\x67\x68", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam_Quality >()(w, value.high);
-w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam_Quality >()(w, value.recording);
+w.Key("\x6c\x6f\x77", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.low);
+w.Key("\x6d\x65\x64\x69\x75\x6d", 6, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.medium);
+w.Key("\x68\x69\x67\x68", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.high);
+w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.recording);
 
         w.EndObject(6);
     }
@@ -1098,9 +1098,9 @@ w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f74
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Raspicam { struct Outputs {
- uint8_t __unused;
+ 
 
-explicit Outputs():__unused() {  }
+explicit Outputs() {  }
 
 
  
@@ -1117,7 +1117,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< uint8_t > handler_0;
+    
 
     bool check_depth(const char* type)
     {
@@ -1131,8 +1131,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "__unused";
+            
         default:
             break;
         }
@@ -1166,7 +1165,7 @@ public:
     explicit SAXEventHandler( ::sz::Raspicam::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->__unused)
+        
     {
         reset_flags();
     }
@@ -1178,8 +1177,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -1194,8 +1192,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -1210,8 +1207,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -1226,8 +1222,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -1242,8 +1237,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -1258,8 +1252,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -1274,8 +1267,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -1290,8 +1282,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -1307,8 +1298,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8))
-						 { state=0;  }
+            
             else {
                 state = -1;
                 return true;
@@ -1317,8 +1307,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -1334,8 +1323,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -1350,8 +1338,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -1366,8 +1353,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -1383,8 +1369,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
@@ -1409,8 +1394,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -1425,8 +1409,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -1437,9 +1420,9 @@ struct Serializer< Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd
     {
         w.StartObject();
 
-        w.Key("\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8, false); Serializer< Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd42678a622, uint8_t >()(w, value.__unused);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };

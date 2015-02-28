@@ -2,7 +2,7 @@
 #include "UBLOX.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_UBLOX.hpp"
 
 namespace silk
 {
@@ -191,6 +191,8 @@ struct MON_VER
 
 UBLOX::UBLOX(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::UBLOX::Init_Params())
+    , m_config(new sz::UBLOX::Config())
 {
 }
 
@@ -200,7 +202,7 @@ UBLOX::~UBLOX()
 
 auto UBLOX::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto UBLOX::get_output_stream_count() const -> size_t
 {
@@ -214,7 +216,9 @@ auto UBLOX::get_output_stream(size_t idx) -> stream::IStream&
 
 auto UBLOX::init(rapidjson::Value const& json) -> bool
 {
-    sz::UBLOX_Init_Params sz;
+    QLOG_TOPIC("ublox::init");
+
+    sz::UBLOX::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -223,48 +227,35 @@ auto UBLOX::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize UBLOX data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
-    params.rate = sz.rate;
-    return init(params);
-}
-auto UBLOX::init(Init_Params const& params) -> bool
-{
-    QLOG_TOPIC("ublox::init");
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
 
-    m_params = params;
-
-    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
-    m_spi = dynamic_cast<bus::ISPI*>(params.bus);
-    m_uart = dynamic_cast<bus::IUART*>(params.bus);
-    if (!init())
-    {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}-location", m_params.name);
-        if (!m_hal.get_sources().add(*this) ||
-            !m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return init();
 }
 auto UBLOX::init() -> bool
 {
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_uart = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+
     if (!m_i2c && !m_spi && !m_uart)
     {
         QLOGE("No bus configured");
         return false;
     }
 
-    m_params.rate = math::clamp<size_t>(m_params.rate, 1, 5);
-    m_stream.rate = m_params.rate;
+    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 5);
+    m_stream.rate = m_init_params->rate;
+
+    if (!m_init_params->name.empty())
+    {
+        m_stream.name = q::util::format2<std::string>("{}-location", m_init_params->name);
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_stream))
+        {
+            return false;
+        }
+    }
 
     return true;
 }
@@ -317,9 +308,9 @@ auto UBLOX::setup() -> bool
 //    tcflush(m_fd, TCIOFLUSH);
 
     {
-        QLOGI("Configuring GPS rate to {}...", m_params.rate);
+        QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
         CFG_RATE data;
-        data.measRate = std::chrono::milliseconds(1000 / m_params.rate).count();
+        data.measRate = std::chrono::milliseconds(1000 / m_init_params->rate).count();
         data.timeRef = 0;//UTC time
         data.navRate = 1;
         if (!send_packet_with_retry(MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 3))
@@ -833,6 +824,30 @@ template<class T> auto UBLOX::send_packet_with_retry(uint16_t msg, T const& data
 }
 
 
+auto UBLOX::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::UBLOX::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize UBLOX config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto UBLOX::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto UBLOX::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
+}
 
 
 

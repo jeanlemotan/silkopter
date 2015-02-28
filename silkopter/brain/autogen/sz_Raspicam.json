@@ -17,10 +17,10 @@
     [
         ["std::string", "name", {"required": true}],
         ["uint32_t", "fps", {"required": true}],
-        ["sz::Raspicam_Quality", "low", {"required": true}],
-        ["sz::Raspicam_Quality", "medium", {"required": true}],
-        ["sz::Raspicam_Quality", "high", {"required": true}],
-        ["sz::Raspicam_Quality", "recording", {"required": true}]
+        ["sz::Raspicam::Quality", "low", {"required": true}],
+        ["sz::Raspicam::Quality", "medium", {"required": true}],
+        ["sz::Raspicam::Quality", "high", {"required": true}],
+        ["sz::Raspicam::Quality", "recording", {"required": true}]
     ]
 },
 {
@@ -29,7 +29,6 @@
     "name": "Outputs",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {
