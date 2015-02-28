@@ -5,6 +5,16 @@
 #include "common/node/stream/ICurrent.h"
 #include "common/node/processor/ITransform.h"
 
+
+namespace sz
+{
+namespace ADC_Ammeter
+{
+class Init_Params;
+class Config;
+}
+}
+
 namespace silk
 {
 namespace node
@@ -24,7 +34,7 @@ public:
     };
 
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> boost::optional<rapidjson::Value const&>;
@@ -41,15 +51,22 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
-    Init_Params m_params;
+
+    std::unique_ptr<sz::ADC_Ammeter::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::unique_ptr<sz::ADC_Ammeter::Config> m_config;
+    rapidjson::Document m_config_json;
+
+    stream::IADC_Value* m_adc_stream = nullptr;
 
     struct Stream : public stream::ICurrent
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return params->input_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
-        Init_Params* params = nullptr;
+        uint32_t rate = 0;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;

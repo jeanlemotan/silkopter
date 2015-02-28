@@ -404,9 +404,9 @@ struct Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Voltmeter { struct Inputs {
- std::string adc_stream;
+ std::string adc;
 
-explicit Inputs():adc_stream() {  }
+explicit Inputs():adc() {  }
 
 
  
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_adc_stream;
+    SAXEventHandler< std::string > handler_0;bool has_adc;
 
     bool check_depth(const char* type)
     {
@@ -438,7 +438,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "adc_stream";
+    return "adc";
         default:
             break;
         }
@@ -465,14 +465,14 @@ private:
 
     void reset_flags()
     {
-        has_adc_stream = false;
+        has_adc = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Voltmeter::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->adc_stream)
+        , handler_0(&obj->adc)
     {
         reset_flags();
     }
@@ -613,8 +613,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x61\x64\x63\x5f\x73\x74\x72\x65\x61\x6d", 10))
-						 { state=0; has_adc_stream = true; }
+            else if (utility::string_equal(str, length, "\x61\x64\x63", 3))
+						 { state=0; has_adc = true; }
             else {
                 state = -1;
                 return true;
@@ -696,7 +696,7 @@ public:
                 break;
             }
         } else {
-            if (!has_adc_stream) set_missing_required("adc_stream");
+            if (!has_adc) set_missing_required("adc");
         }
         return the_error.empty();
     }
@@ -743,7 +743,7 @@ struct Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d
     {
         w.StartObject();
 
-        w.Key("\x61\x64\x63\x5f\x73\x74\x72\x65\x61\x6d", 10, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc_stream);
+        w.Key("\x61\x64\x63", 3, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc);
 
         w.EndObject(1);
     }

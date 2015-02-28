@@ -2,7 +2,7 @@
 #include "ADC_Ammeter.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_ADC_Ammeter.hpp"
 
 namespace silk
 {
@@ -13,17 +13,21 @@ namespace processor
 
 ADC_Ammeter::ADC_Ammeter(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::ADC_Ammeter::Init_Params())
+    , m_config(new sz::ADC_Ammeter::Config())
 {
 }
 
 auto ADC_Ammeter::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 auto ADC_Ammeter::init(rapidjson::Value const& json) -> bool
 {
-    sz::ADC_Ammeter_Init_Params sz;
+    QLOG_TOPIC("adc_ammeter::init");
+
+    sz::ADC_Ammeter::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -32,23 +36,16 @@ auto ADC_Ammeter::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize ADC_Ammeter data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.input_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.input_stream);
-    return init(params);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
+
+    return init();
 }
-auto ADC_Ammeter::init(Init_Params const& params) -> bool
+auto ADC_Ammeter::init() -> bool
 {
-    m_params = params;
-
-    if (!init())
+    if (!m_init_params->name.empty())
     {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
         if (!m_hal.get_streams().add(m_stream))
         {
             return false;
@@ -57,35 +54,15 @@ auto ADC_Ammeter::init(Init_Params const& params) -> bool
     return true;
 }
 
-auto ADC_Ammeter::init() -> bool
-{
-    m_stream.params = &m_params;
-    if (!m_params.input_stream)
-    {
-        QLOGE("No input specified");
-        return false;
-    }
-    return true;
-}
-
-auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
-{
-    return false;
-}
-auto ADC_Ammeter::get_config() -> boost::optional<rapidjson::Value const&>
-{
-    return boost::none;
-}
-
 auto ADC_Ammeter::get_input_stream_count() const -> size_t
 {
-    return 1;
+    return m_adc_stream ? 1 : 0;
 }
 auto ADC_Ammeter::get_input_stream(size_t idx) -> stream::IADC_Value&
 {
     QASSERT(idx == 0);
-    QASSERT(m_params.input_stream);
-    return *m_params.input_stream;
+    QASSERT(m_adc_stream);
+    return *m_adc_stream;
 }
 auto ADC_Ammeter::get_output_stream_count() const -> size_t
 {
@@ -101,19 +78,67 @@ auto ADC_Ammeter::get_output_stream(size_t idx) -> stream::ICurrent&
 void ADC_Ammeter::process()
 {
     m_stream.samples.clear();
+
+    if (get_input_stream_count() == 0)
+    {
+        return;
+    }
+
     auto const& s = get_input_stream(0).get_samples();
     m_stream.samples.resize(s.size());
 
-    std::transform(s.begin(), s.end(), m_stream.samples.begin(), [](stream::IADC_Value::Sample const& sample)
+    std::transform(s.begin(), s.end(), m_stream.samples.begin(), [this](stream::IADC_Value::Sample const& sample)
     {
        Stream::Sample vs;
        vs.dt = sample.dt;
        vs.sample_idx = sample.sample_idx;
-       vs.value = sample.value;
+       vs.value = sample.value * m_config->outputs.current.scale + m_config->outputs.current.bias;
        return vs;
     });
 
     //TODO - apply scale - bias
+}
+
+auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::ADC_Ammeter::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize ADC_Ammeter config data: {}", ss.str());
+        return false;
+    }
+
+    auto* adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc);
+    if (!adc_stream || adc_stream->get_rate() == 0)
+    {
+        QLOGE("No input angular velocity stream specified");
+        return false;
+    }
+    if (m_stream.rate != 0 && m_stream.rate != adc_stream->get_rate())
+    {
+        QLOGE("Input streams rate has changed: {} != {}",
+              adc_stream->get_rate(),
+              m_stream.rate);
+        return false;
+    }
+
+    m_adc_stream = adc_stream;
+    m_stream.rate = m_adc_stream->get_rate();
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto ADC_Ammeter::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto ADC_Ammeter::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 

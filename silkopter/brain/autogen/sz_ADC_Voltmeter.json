@@ -14,7 +14,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "adc_stream", {"required": true}]
+        ["std::string", "adc", {"required": true}]
     ]
 },
 {
