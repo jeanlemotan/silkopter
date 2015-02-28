@@ -14,9 +14,9 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "angular_velocity_stream", {"required": true}],
-        ["std::string", "acceleration_stream", {"required": true}],
-        ["std::string", "magnetic_field_stream", {"required": true}]
+        ["std::string", "angular_velocity", {"required": true}],
+        ["std::string", "acceleration", {"required": true}],
+        ["std::string", "magnetic_field", {"required": true}]
     ]
 },
 {
@@ -25,7 +25,6 @@
     "name": "Reference_Frame",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {

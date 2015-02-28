@@ -325,11 +325,23 @@ void MS5611::calculate(q::Clock::duration dt)
 
 auto MS5611::set_config(rapidjson::Value const& json) -> bool
 {
-    return false;
+    sz::MS5611::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize MS5611 config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
 }
 auto MS5611::get_config() -> boost::optional<rapidjson::Value const&>
 {
-    return boost::none;
+    return m_config_json;
 }
 auto MS5611::get_init_params() -> boost::optional<rapidjson::Value const&>
 {

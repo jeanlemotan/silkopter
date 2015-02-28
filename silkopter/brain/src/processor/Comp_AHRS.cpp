@@ -2,7 +2,7 @@
 #include "Comp_AHRS.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_Comp_AHRS.hpp"
 
 namespace silk
 {
@@ -13,17 +13,21 @@ namespace processor
 
 Comp_AHRS::Comp_AHRS(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::Comp_AHRS::Init_Params())
+    , m_config(new sz::Comp_AHRS::Config())
 {
 }
 
 auto Comp_AHRS::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
 {
-    sz::Comp_AHRS_Init_Params sz;
+    QLOG_TOPIC("comp_ahrs::init");
+
+    sz::Comp_AHRS::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -32,85 +36,43 @@ auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize Comp_AHRS data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.angular_velocity_stream);
-    params.acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.acceleration_stream);
-    params.magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.magnetic_field_stream);
-    return init(params);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
+
+    return init();
 }
-auto Comp_AHRS::init(Init_Params const& params) -> bool
+
+auto Comp_AHRS::init() -> bool
 {
-    m_params = params;
-
-    if (!init())
+    if (!m_init_params->name.empty())
     {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
         if (!m_hal.get_streams().add(m_stream))
         {
             return false;
         }
     }
-    return true;
-}
-
-auto Comp_AHRS::init() -> bool
-{
-    m_stream.params = &m_params;
-    if (!m_params.angular_velocity_stream)
-    {
-        QLOGE("No input angular velocity stream specified");
-        return false;
-    }
-    if (!m_params.acceleration_stream)
-    {
-        QLOGE("No input acceleration stream specified");
-        return false;
-    }
-    if (!m_params.magnetic_field_stream)
-    {
-        QLOGE("No input magnetic field stream specified");
-        return false;
-    }
-    if (m_params.acceleration_stream->get_rate() != m_params.magnetic_field_stream->get_rate() ||
-        m_params.acceleration_stream->get_rate() != m_params.angular_velocity_stream->get_rate())
-    {
-        QLOGE("Angular velocity, Acceleration and Magnetic field streams have different rates: {} != {} != {}",
-              m_params.angular_velocity_stream->get_rate(),
-              m_params.acceleration_stream->get_rate(),
-              m_params.magnetic_field_stream->get_rate());
-        return false;
-    }
-
-    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
 
     return true;
 }
 
 auto Comp_AHRS::get_input_stream_count() const -> size_t
 {
-    return 3;
+    if (m_angular_velocity_stream && m_acceleration_stream && m_magnetic_field_stream)
+    {
+        return 3;
+    }
+    return 0;
 }
 auto Comp_AHRS::get_input_stream(size_t idx) -> stream::IStream&
 {
     QASSERT(idx < get_input_stream_count());
-    if (idx == 0)
-    {
-        return *m_params.angular_velocity_stream;
-    }
-    else if (idx == 1)
-    {
-        return *m_params.acceleration_stream;
-    }
-    else
-    {
-        return *m_params.magnetic_field_stream;
-    }
+    std::array<stream::IStream*, 3> streams =
+    {{
+        m_angular_velocity_stream, m_acceleration_stream, m_magnetic_field_stream
+    }};
+    QASSERT(streams.size() == get_input_stream_count());
+    return *streams[idx];
 }
 auto Comp_AHRS::get_output_stream_count() const -> size_t
 {
@@ -126,19 +88,24 @@ void Comp_AHRS::process()
 {
     m_stream.samples.clear();
 
+    if (get_input_stream_count() == 0)
+    {
+        return;
+    }
+
     //accumulate the input streams
     {
-        auto const& samples = m_params.angular_velocity_stream->get_samples();
+        auto const& samples = m_angular_velocity_stream->get_samples();
         m_angular_velocity_samples.reserve(m_angular_velocity_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_angular_velocity_samples));
     }
     {
-        auto const& samples = m_params.acceleration_stream->get_samples();
+        auto const& samples = m_acceleration_stream->get_samples();
         m_acceleration_samples.reserve(m_acceleration_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_acceleration_samples));
     }
     {
-        auto const& samples = m_params.magnetic_field_stream->get_samples();
+        auto const& samples = m_magnetic_field_stream->get_samples();
         m_magnetic_field_samples.reserve(m_magnetic_field_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_magnetic_field_samples));
     }
@@ -228,6 +195,74 @@ void Comp_AHRS::process()
     m_angular_velocity_samples.erase(m_angular_velocity_samples.begin(), m_angular_velocity_samples.begin() + count);
     m_acceleration_samples.erase(m_acceleration_samples.begin(), m_acceleration_samples.begin() + count);
     m_magnetic_field_samples.erase(m_magnetic_field_samples.begin(), m_magnetic_field_samples.begin() + count);
+}
+
+auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::Comp_AHRS::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize Comp_AHRS config data: {}", ss.str());
+        return false;
+    }
+
+    auto* angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
+    auto* acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
+    auto* magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
+    if (!angular_velocity_stream || angular_velocity_stream->get_rate() == 0)
+    {
+        QLOGE("No input angular velocity stream specified");
+        return false;
+    }
+    if (!acceleration_stream || acceleration_stream->get_rate() == 0)
+    {
+        QLOGE("No input acceleration stream specified");
+        return false;
+    }
+    if (!magnetic_field_stream || magnetic_field_stream->get_rate() == 0)
+    {
+        QLOGE("No input magnetic field stream specified");
+        return false;
+    }
+    if (acceleration_stream->get_rate() != magnetic_field_stream->get_rate() ||
+        acceleration_stream->get_rate() != angular_velocity_stream->get_rate())
+    {
+        QLOGE("Angular velocity, Acceleration and Magnetic field streams have different rates: {} != {} != {}",
+              angular_velocity_stream->get_rate(),
+              acceleration_stream->get_rate(),
+              magnetic_field_stream->get_rate());
+        return false;
+    }
+
+    if (m_stream.rate != 0 && m_stream.rate != acceleration_stream->get_rate())
+    {
+        QLOGE("Input streams rate has changed: {} != {}",
+              angular_velocity_stream->get_rate(),
+              m_stream.rate);
+        return false;
+    }
+
+    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+
+    m_angular_velocity_stream = angular_velocity_stream;
+    m_acceleration_stream = acceleration_stream;
+    m_magnetic_field_stream = magnetic_field_stream;
+    m_stream.rate = m_angular_velocity_stream->get_rate();
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto Comp_AHRS::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto Comp_AHRS::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 

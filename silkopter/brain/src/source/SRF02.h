@@ -5,6 +5,17 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/bus/II2C.h"
 
+
+namespace sz
+{
+namespace SRF02
+{
+class Init_Params;
+class Config;
+}
+}
+
+
 namespace silk
 {
 namespace node
@@ -17,18 +28,11 @@ class SRF02 : public ISource
 public:
     SRF02(HAL& hal);
 
-    struct Init_Params
-    {
-        std::string name;
-        bus::II2C* bus = nullptr;
-        uint32_t rate = 10;
-        math::vec3f direction = math::vec3f(0, 0, -1);
-        float min_distance = 0.2f;
-        float max_distance = 5.f;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
 
     auto get_name() const -> std::string const&;
     auto get_output_stream_count() const -> size_t;
@@ -41,7 +45,13 @@ private:
 
     HAL& m_hal;
 
-    Init_Params m_params;
+    bus::II2C* m_i2c = nullptr;
+
+    std::unique_ptr<sz::SRF02::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::unique_ptr<sz::SRF02::Config> m_config;
+    rapidjson::Document m_config_json;
 
     struct Stream : public stream::IDistance
     {

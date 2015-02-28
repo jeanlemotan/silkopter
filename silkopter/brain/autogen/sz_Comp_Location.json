@@ -14,9 +14,9 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "location_stream", {"required": true}],
-        ["std::string", "linear_acceleration_stream", {"required": true}],
-        ["std::string", "pressure_stream", {"required": true}]
+        ["std::string", "location", {"required": true}],
+        ["std::string", "linear_acceleration", {"required": true}],
+        ["std::string", "pressure", {"required": true}]
     ]
 },
 {
@@ -25,7 +25,6 @@
     "name": "Location",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {

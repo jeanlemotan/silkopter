@@ -2,7 +2,7 @@
 #include "LiPo_Battery.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_LiPo_Battery.hpp"
 
 namespace silk
 {
@@ -24,17 +24,21 @@ constexpr float MAX_CELL_VOLTAGE = 4.1f;
 
 LiPo_Battery::LiPo_Battery(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::LiPo_Battery::Init_Params())
+    , m_config(new sz::LiPo_Battery::Config())
 {
 }
 
 auto LiPo_Battery::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 
 auto LiPo_Battery::init(rapidjson::Value const& json) -> bool
 {
-    sz::LiPo_Battery_Init_Params sz;
+    QLOG_TOPIC("lipo_battery::init");
+
+    sz::LiPo_Battery::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -43,25 +47,16 @@ auto LiPo_Battery::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize LiPo_Battery data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.voltage_stream);
-    params.current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.current_stream);
-    params.full_charge = sz.full_charge;
-    return init(params);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
+
+    return init();
 }
-auto LiPo_Battery::init(Init_Params const& params) -> bool
+auto LiPo_Battery::init() -> bool
 {
-    m_params = params;
-
-    if (!init())
+    if (!m_init_params->name.empty())
     {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_params.name);
+        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
         if (!m_hal.get_streams().add(m_stream))
         {
             return false;
@@ -70,66 +65,23 @@ auto LiPo_Battery::init(Init_Params const& params) -> bool
     return true;
 }
 
-auto LiPo_Battery::init() -> bool
-{
-    m_stream.params = &m_params;
-    if (!m_params.voltage_stream)
-    {
-        QLOGE("No input voltage specified");
-        return false;
-    }
-    if (!m_params.current_stream)
-    {
-        QLOGE("No input current specified");
-        return false;
-    }
-    if (m_params.full_charge < 0.01f)
-    {
-        QLOGE("Full charge is too small - {}", m_params.full_charge);
-        return false;
-    }
-    if (m_params.voltage_stream->get_rate() != m_params.current_stream->get_rate())
-    {
-        QLOGE("Voltage stream and current stream have different rates: {} != {}", m_params.voltage_stream->get_rate(), m_params.current_stream->get_rate());
-        return false;
-    }
-    if (m_params.voltage_stream->get_rate() < MIN_RATE)
-    {
-        QLOGE("Input streams has to be at least {}Hz. Now it's {}Hz", MIN_RATE, m_params.voltage_stream->get_rate());
-        return false;
-    }
-
-    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
-
-    m_stream.last_sample.sample_idx = 0;
-
-    return true;
-}
-
-auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
-{
-    return false;
-}
-auto LiPo_Battery::get_config() -> boost::optional<rapidjson::Value const&>
-{
-    return boost::none;
-}
-
 auto LiPo_Battery::get_input_stream_count() const -> size_t
 {
-    return 2;
+    if (m_voltage_stream && m_current_stream)
+    {
+        return 3;
+    }
+    return 0;
 }
 auto LiPo_Battery::get_input_stream(size_t idx) -> stream::IStream&
 {
     QASSERT(idx < get_input_stream_count());
-    if (idx == 0)
-    {
-        return *m_params.current_stream;
-    }
-    else
-    {
-        return *m_params.voltage_stream;
-    }
+    std::array<stream::IStream*, 2> streams =
+    {{
+        m_voltage_stream, m_current_stream
+    }};
+    QASSERT(streams.size() == get_input_stream_count());
+    return *streams[idx];
 }
 auto LiPo_Battery::get_output_stream_count() const -> size_t
 {
@@ -145,14 +97,19 @@ void LiPo_Battery::process()
 {
     m_stream.samples.clear();
 
+    if (get_input_stream_count() == 0)
+    {
+        return;
+    }
+
     //accumulate the input streams
     {
-        auto const& samples = m_params.current_stream->get_samples();
+        auto const& samples = m_current_stream->get_samples();
         m_current_samples.reserve(m_current_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_current_samples));
     }
     {
-        auto const& samples = m_params.voltage_stream->get_samples();
+        auto const& samples = m_voltage_stream->get_samples();
         m_voltage_samples.reserve(m_voltage_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_voltage_samples));
     }
@@ -196,7 +153,7 @@ void LiPo_Battery::process()
             }
             m_stream.last_sample.value.average_voltage = voltage;
         }
-        m_stream.last_sample.value.capacity_left = 1.f - math::clamp(m_stream.last_sample.value.charge_used / m_params.full_charge, 0.f, 1.f);
+        m_stream.last_sample.value.capacity_left = 1.f - math::clamp(m_stream.last_sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
         m_stream.samples[i] = m_stream.last_sample;
     }
 
@@ -251,6 +208,70 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
         }
     }
     return boost::none;
+}
+
+auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::LiPo_Battery::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize LiPo_Battery config data: {}", ss.str());
+        return false;
+    }
+
+    auto* voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
+    auto* current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
+    if (!voltage_stream || voltage_stream->get_rate() == 0)
+    {
+        QLOGE("No input angular velocity stream specified");
+        return false;
+    }
+    if (!current_stream || current_stream->get_rate() == 0)
+    {
+        QLOGE("No input current stream specified");
+        return false;
+    }
+    if (current_stream->get_rate() != voltage_stream->get_rate())
+    {
+        QLOGE("Voltage and current streams have different rates: {} != {}",
+              voltage_stream->get_rate(),
+              current_stream->get_rate());
+        return false;
+    }
+
+    if (m_stream.rate != 0 && m_stream.rate != current_stream->get_rate())
+    {
+        QLOGE("Input streams rate has changed: {} != {}",
+              current_stream->get_rate(),
+              m_stream.rate);
+        return false;
+    }
+    if (sz.full_charge < 0.1f)
+    {
+        QLOGE("Full charge is too small: {}", sz.full_charge);
+        return false;
+    }
+
+    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+
+    m_voltage_stream = voltage_stream;
+    m_current_stream = current_stream;
+    m_stream.rate = m_voltage_stream->get_rate();
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto LiPo_Battery::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto LiPo_Battery::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 

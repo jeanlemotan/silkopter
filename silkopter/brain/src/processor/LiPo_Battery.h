@@ -8,6 +8,15 @@
 #include "HAL.h"
 #include "utils/Butterworth.h"
 
+namespace sz
+{
+namespace LiPo_Battery
+{
+class Init_Params;
+class Config;
+}
+}
+
 
 namespace silk
 {
@@ -21,16 +30,8 @@ class LiPo_Battery : public IProcessor
 public:
     LiPo_Battery(HAL& hal);
 
-    struct Init_Params
-    {
-        std::string name;
-        stream::IVoltage* voltage_stream = nullptr;
-        stream::ICurrent* current_stream = nullptr;
-        float full_charge = 0; //When full, Ah
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> boost::optional<rapidjson::Value const&>;
@@ -51,7 +52,15 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
-    Init_Params m_params;
+
+    std::unique_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::unique_ptr<sz::LiPo_Battery::Config> m_config;
+    rapidjson::Document m_config_json;
+
+    stream::IVoltage* m_voltage_stream = nullptr;
+    stream::ICurrent* m_current_stream = nullptr;
 
     std::vector<stream::IVoltage::Sample> m_voltage_samples;
     std::vector<stream::ICurrent::Sample> m_current_samples;
@@ -67,10 +76,10 @@ private:
     struct Stream : public stream::IBattery_State
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return params->current_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return rate; }
         auto get_name() const -> std::string const& { return name; }
 
-        Init_Params const* params = nullptr;
+        uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
         std::string name;

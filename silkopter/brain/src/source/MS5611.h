@@ -68,8 +68,6 @@ private:
         double      reading = 0;
         uint32_t rate = 0;
         std::string name;
-        sz::MS5611::Init_Params* m_init_params = nullptr;
-        sz::MS5611::Config* m_config = nullptr;
     };
 
     struct Pressure : public stream::IPressure, public Common

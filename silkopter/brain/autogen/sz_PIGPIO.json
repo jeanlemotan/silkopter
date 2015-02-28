@@ -2,6 +2,18 @@
 {
     "definition" : true,
     "namespace" : "sz::PIGPIO",
+    "name": "PWM_Channel",
+    "members":
+    [
+        ["uint32_t", "min", {"required": true}],
+        ["uint32_t", "max", {"required": true}],
+        ["uint32_t", "range", {"required": true}],
+        ["uint32_t", "rate", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::PIGPIO",
     "name": "Init_Params",
     "members":
     [

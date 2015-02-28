@@ -404,11 +404,11 @@ struct Serializer< Writer30fc2fe5847330908e60ae4e416207ec2a5ccb47e130ab1c2896568
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Comp_AHRS { struct Inputs {
- std::string angular_velocity_stream;
-std::string acceleration_stream;
-std::string magnetic_field_stream;
+ std::string angular_velocity;
+std::string acceleration;
+std::string magnetic_field;
 
-explicit Inputs():angular_velocity_stream(), acceleration_stream(), magnetic_field_stream() {  }
+explicit Inputs():angular_velocity(), acceleration(), magnetic_field() {  }
 
 
  
@@ -427,9 +427,9 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< std::string > handler_2;bool has_angular_velocity_stream;
-bool has_acceleration_stream;
-bool has_magnetic_field_stream;
+SAXEventHandler< std::string > handler_2;bool has_angular_velocity;
+bool has_acceleration;
+bool has_magnetic_field;
 
     bool check_depth(const char* type)
     {
@@ -444,11 +444,11 @@ bool has_magnetic_field_stream;
     {
         switch (state) {
             case 0:
-    return "angular_velocity_stream";
+    return "angular_velocity";
 case 1:
-    return "acceleration_stream";
+    return "acceleration";
 case 2:
-    return "magnetic_field_stream";
+    return "magnetic_field";
         default:
             break;
         }
@@ -475,18 +475,18 @@ case 2:
 
     void reset_flags()
     {
-        has_angular_velocity_stream = false;
-has_acceleration_stream = false;
-has_magnetic_field_stream = false;
+        has_angular_velocity = false;
+has_acceleration = false;
+has_magnetic_field = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Comp_AHRS::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->angular_velocity_stream)
-, handler_1(&obj->acceleration_stream)
-, handler_2(&obj->magnetic_field_stream)
+        , handler_0(&obj->angular_velocity)
+, handler_1(&obj->acceleration)
+, handler_2(&obj->magnetic_field)
     {
         reset_flags();
     }
@@ -675,12 +675,12 @@ case 2:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79\x5f\x73\x74\x72\x65\x61\x6d", 23))
-						 { state=0; has_angular_velocity_stream = true; }
-else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19))
-						 { state=1; has_acceleration_stream = true; }
-else if (utility::string_equal(str, length, "\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64\x5f\x73\x74\x72\x65\x61\x6d", 21))
-						 { state=2; has_magnetic_field_stream = true; }
+            else if (utility::string_equal(str, length, "\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79", 16))
+						 { state=0; has_angular_velocity = true; }
+else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
+						 { state=1; has_acceleration = true; }
+else if (utility::string_equal(str, length, "\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64", 14))
+						 { state=2; has_magnetic_field = true; }
             else {
                 state = -1;
                 return true;
@@ -792,9 +792,9 @@ case 2:
                 break;
             }
         } else {
-            if (!has_angular_velocity_stream) set_missing_required("angular_velocity_stream");
-if (!has_acceleration_stream) set_missing_required("acceleration_stream");
-if (!has_magnetic_field_stream) set_missing_required("magnetic_field_stream");
+            if (!has_angular_velocity) set_missing_required("angular_velocity");
+if (!has_acceleration) set_missing_required("acceleration");
+if (!has_magnetic_field) set_missing_required("magnetic_field");
         }
         return the_error.empty();
     }
@@ -847,9 +847,9 @@ struct Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c
     {
         w.StartObject();
 
-        w.Key("\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79\x5f\x73\x74\x72\x65\x61\x6d", 23, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.angular_velocity_stream);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x5f\x73\x74\x72\x65\x61\x6d", 19, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.acceleration_stream);
-w.Key("\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64\x5f\x73\x74\x72\x65\x61\x6d", 21, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.magnetic_field_stream);
+        w.Key("\x61\x6e\x67\x75\x6c\x61\x72\x5f\x76\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.angular_velocity);
+w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.acceleration);
+w.Key("\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64", 14, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.magnetic_field);
 
         w.EndObject(3);
     }
@@ -886,9 +886,9 @@ w.Key("\x6d\x61\x67\x6e\x65\x74\x69\x63\x5f\x66\x69\x65\x6c\x64\x5f\x73\x74\x72\
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Comp_AHRS { struct Reference_Frame {
- uint8_t __unused;
+ 
 
-explicit Reference_Frame():__unused() {  }
+explicit Reference_Frame() {  }
 
 
  
@@ -905,7 +905,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< uint8_t > handler_0;
+    
 
     bool check_depth(const char* type)
     {
@@ -919,8 +919,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "__unused";
+            
         default:
             break;
         }
@@ -954,7 +953,7 @@ public:
     explicit SAXEventHandler( ::sz::Comp_AHRS::Reference_Frame * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->__unused)
+        
     {
         reset_flags();
     }
@@ -966,8 +965,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -982,8 +980,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -998,8 +995,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -1014,8 +1010,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -1030,8 +1025,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -1046,8 +1040,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -1062,8 +1055,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -1078,8 +1070,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -1095,8 +1086,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8))
-						 { state=0;  }
+            
             else {
                 state = -1;
                 return true;
@@ -1105,8 +1095,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -1122,8 +1111,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -1138,8 +1126,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -1154,8 +1141,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -1171,8 +1157,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
@@ -1197,8 +1182,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -1213,8 +1197,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -1225,9 +1208,9 @@ struct Serializer< Writer8550e9c971711d18515a9a2efcf62f9ac239cf95dc90a10d2d3e2fa
     {
         w.StartObject();
 
-        w.Key("\x5f\x5f\x75\x6e\x75\x73\x65\x64", 8, false); Serializer< Writer8550e9c971711d18515a9a2efcf62f9ac239cf95dc90a10d2d3e2fa6ee98887d, uint8_t >()(w, value.__unused);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };

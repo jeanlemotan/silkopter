@@ -27,12 +27,10 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SRF02 { struct Init_Params {
+namespace sz { namespace LiPo_Battery { struct Init_Params {
  std::string name;
-std::string bus;
-uint32_t rate;
 
-explicit Init_Params():name(), bus(), rate() {  }
+explicit Init_Params():name() {  }
 
 
  
@@ -43,17 +41,13 @@ explicit Init_Params():name(), bus(), rate() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SRF02::Init_Params > {
+class SAXEventHandler< ::sz::LiPo_Battery::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;
-SAXEventHandler< uint32_t > handler_2;bool has_name;
-bool has_bus;
-bool has_rate;
+    SAXEventHandler< std::string > handler_0;bool has_name;
 
     bool check_depth(const char* type)
     {
@@ -69,10 +63,6 @@ bool has_rate;
         switch (state) {
             case 0:
     return "name";
-case 1:
-    return "bus";
-case 2:
-    return "rate";
         default:
             break;
         }
@@ -100,17 +90,13 @@ case 2:
     void reset_flags()
     {
         has_name = false;
-has_bus = false;
-has_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SRF02::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
-, handler_1(&obj->bus)
-, handler_2(&obj->rate)
     {
         reset_flags();
     }
@@ -124,12 +110,6 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
-
-case 2:
-    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -147,12 +127,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
-case 2:
-    return checked_event_forwarding(handler_2.Bool(b));
-
         default:
             break;
         }
@@ -168,12 +142,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -191,12 +159,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint(i));
-
         default:
             break;
         }
@@ -212,12 +174,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -235,12 +191,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint64(i));
-
         default:
             break;
         }
@@ -256,12 +206,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
-
-case 2:
-    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -279,12 +223,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.String(str, length, copy));
-
         default:
             break;
         }
@@ -301,10 +239,6 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x62\x75\x73", 3))
-						 { state=1; has_bus = true; }
-else if (utility::string_equal(str, length, "\x72\x61\x74\x65", 4))
-						 { state=2; has_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -315,12 +249,6 @@ else if (utility::string_equal(str, length, "\x72\x61\x74\x65", 4))
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -339,12 +267,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartArray());
-
         default:
             break;
         }
@@ -361,12 +283,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndArray(length));
-
         default:
             break;
         }
@@ -382,12 +298,6 @@ case 2:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -406,19 +316,11 @@ case 2:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndObject(length));
-
             default:
                 break;
             }
         } else {
             if (!has_name) set_missing_required("name");
-if (!has_bus) set_missing_required("bus");
-if (!has_rate) set_missing_required("rate");
         }
         return the_error.empty();
     }
@@ -439,10 +341,6 @@ if (!has_rate) set_missing_required("rate");
 
         case 0:
      handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
-case 2:
-     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -458,24 +356,20 @@ case 2:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
-handler_2.PrepareForReuse();
 
     }
 };
 
-template < class Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140 >
-struct Serializer< Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140, ::sz::SRF02::Init_Params > {
+template < class Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc >
+struct Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc, ::sz::LiPo_Battery::Init_Params > {
 
-    void operator()( Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140& w, const ::sz::SRF02::Init_Params& value) const
+    void operator()( Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc& w, const ::sz::LiPo_Battery::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140, std::string >()(w, value.name);
-w.Key("\x62\x75\x73", 3, false); Serializer< Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140, std::string >()(w, value.bus);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer507b26078f629e870b55605ece79b82b04065a5f5d71b47dbbae967b53101140, uint32_t >()(w, value.rate);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc, std::string >()(w, value.name);
 
-        w.EndObject(3);
+        w.EndObject(1);
     }
 
 };
@@ -509,10 +403,11 @@ w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer507b26078f629e870b55605ec
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SRF02 { struct Distance {
- 
+namespace sz { namespace LiPo_Battery { struct Inputs {
+ std::string voltage;
+std::string current;
 
-explicit Distance() {  }
+explicit Inputs():voltage(), current() {  }
 
 
  
@@ -523,7 +418,435 @@ explicit Distance() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SRF02::Distance > {
+class SAXEventHandler< ::sz::LiPo_Battery::Inputs > {
+private:
+    utility::scoped_ptr<error::ErrorBase> the_error;
+    int state;
+    int depth;
+
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;bool has_voltage;
+bool has_current;
+
+    bool check_depth(const char* type)
+    {
+        if (depth <= 0) {
+            the_error.reset(new error::TypeMismatchError("object", type));
+            return false;
+        }
+        return true;
+    }
+
+    const char* current_member_name() const
+    {
+        switch (state) {
+            case 0:
+    return "voltage";
+case 1:
+    return "current";
+        default:
+            break;
+        }
+        return "<UNKNOWN>";
+    }
+
+    bool checked_event_forwarding(bool success)
+    {
+        if (!success)
+            the_error.reset(new error::ObjectMemberError(current_member_name()));
+        return success;
+    }
+
+    void set_missing_required(const char* name)
+    {
+        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
+            the_error.reset(new error::RequiredFieldMissingError());
+
+        std::vector<std::string>& missing =
+            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
+
+        missing.push_back(name);
+    }
+
+    void reset_flags()
+    {
+        has_voltage = false;
+has_current = false;
+    }
+
+public:
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Inputs * obj)
+        : state(-1)
+        , depth(0)
+        , handler_0(&obj->voltage)
+, handler_1(&obj->current)
+    {
+        reset_flags();
+    }
+
+    bool Null()
+    {
+        if (!check_depth("null"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Bool(bool b)
+    {
+        if (!check_depth("bool"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
+
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int(int i)
+    {
+        if (!check_depth("int"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        if (!check_depth("unsigned"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        if (!check_depth("int64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        if (!check_depth("uint64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        if (!check_depth("double"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool String(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("string"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Key(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("object"))
+            return false;
+
+        if (depth == 1) {
+            if (0) {
+            }
+            else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65", 7))
+						 { state=0; has_voltage = true; }
+else if (utility::string_equal(str, length, "\x63\x75\x72\x72\x65\x6e\x74", 7))
+						 { state=1; has_current = true; }
+            else {
+                state = -1;
+                return true;
+            }
+
+        } else {
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool StartArray()
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool EndArray(SizeType length)
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool StartObject()
+    {
+        ++depth;
+        if (depth > 1) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool EndObject(SizeType length)
+    {
+        --depth;
+        if (depth > 0) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+            default:
+                break;
+            }
+        } else {
+            if (!has_voltage) set_missing_required("voltage");
+if (!has_current) set_missing_required("current");
+        }
+        return the_error.empty();
+    }
+
+    bool HasError() const
+    {
+        return !this->the_error.empty();
+    }
+
+    bool ReapError(error::ErrorStack& errs)
+    {
+        if (this->the_error.empty())
+            return false;
+
+        errs.push(this->the_error.release());
+
+        switch (state) {
+
+        case 0:
+     handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void PrepareForReuse()
+    {
+        depth = 0;
+        state = -1;
+        the_error.reset();
+        reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+
+    }
+};
+
+template < class Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408 >
+struct Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, ::sz::LiPo_Battery::Inputs > {
+
+    void operator()( Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408& w, const ::sz::LiPo_Battery::Inputs& value) const
+    {
+        w.StartObject();
+
+        w.Key("\x76\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.voltage);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.current);
+
+        w.EndObject(2);
+    }
+
+};
+}
+
+
+// The MIT License (MIT)
+//
+// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <autojsoncxx/autojsoncxx.hpp>
+
+// The comments are reserved for replacement
+// such syntax is chosen so that the template file looks like valid C++
+
+namespace sz { namespace LiPo_Battery { struct Battery_State {
+ 
+
+explicit Battery_State() {  }
+
+
+ 
+}; }
+ }
+
+
+namespace autojsoncxx {
+
+template <>
+class SAXEventHandler< ::sz::LiPo_Battery::Battery_State > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -574,7 +897,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SRF02::Distance * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Battery_State * obj)
         : state(-1)
         , depth(0)
         
@@ -825,10 +1148,10 @@ public:
     }
 };
 
-template < class Writerb3900d4db9ddf5bb55c3b8f54f2d57ade036eef94172d32d30c78badf8c9a5e8 >
-struct Serializer< Writerb3900d4db9ddf5bb55c3b8f54f2d57ade036eef94172d32d30c78badf8c9a5e8, ::sz::SRF02::Distance > {
+template < class Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7 >
+struct Serializer< Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7, ::sz::LiPo_Battery::Battery_State > {
 
-    void operator()( Writerb3900d4db9ddf5bb55c3b8f54f2d57ade036eef94172d32d30c78badf8c9a5e8& w, const ::sz::SRF02::Distance& value) const
+    void operator()( Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7& w, const ::sz::LiPo_Battery::Battery_State& value) const
     {
         w.StartObject();
 
@@ -868,10 +1191,10 @@ struct Serializer< Writerb3900d4db9ddf5bb55c3b8f54f2d57ade036eef94172d32d30c78ba
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SRF02 { struct Outputs {
- sz::SRF02::Distance distance;
+namespace sz { namespace LiPo_Battery { struct Outputs {
+ sz::LiPo_Battery::Battery_State battery_state;
 
-explicit Outputs():distance() {  }
+explicit Outputs():battery_state() {  }
 
 
  
@@ -882,13 +1205,13 @@ explicit Outputs():distance() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SRF02::Outputs > {
+class SAXEventHandler< ::sz::LiPo_Battery::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::SRF02::Distance > handler_0;bool has_distance;
+    SAXEventHandler< sz::LiPo_Battery::Battery_State > handler_0;bool has_battery_state;
 
     bool check_depth(const char* type)
     {
@@ -903,7 +1226,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "distance";
+    return "battery_state";
         default:
             break;
         }
@@ -930,14 +1253,14 @@ private:
 
     void reset_flags()
     {
-        has_distance = false;
+        has_battery_state = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SRF02::Outputs * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->distance)
+        , handler_0(&obj->battery_state)
     {
         reset_flags();
     }
@@ -1078,8 +1401,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x64\x69\x73\x74\x61\x6e\x63\x65", 8))
-						 { state=0; has_distance = true; }
+            else if (utility::string_equal(str, length, "\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13))
+						 { state=0; has_battery_state = true; }
             else {
                 state = -1;
                 return true;
@@ -1161,7 +1484,7 @@ public:
                 break;
             }
         } else {
-            if (!has_distance) set_missing_required("distance");
+            if (!has_battery_state) set_missing_required("battery_state");
         }
         return the_error.empty();
     }
@@ -1201,14 +1524,14 @@ public:
     }
 };
 
-template < class Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177 >
-struct Serializer< Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177, ::sz::SRF02::Outputs > {
+template < class Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e >
+struct Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, ::sz::LiPo_Battery::Outputs > {
 
-    void operator()( Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177& w, const ::sz::SRF02::Outputs& value) const
+    void operator()( Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e& w, const ::sz::LiPo_Battery::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x64\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177, sz::SRF02::Distance >()(w, value.distance);
+        w.Key("\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13, false); Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
 
         w.EndObject(1);
     }
@@ -1244,13 +1567,12 @@ struct Serializer< Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SRF02 { struct Config {
- math::vec3f direction;
-float min_distance;
-float max_distance;
-sz::SRF02::Outputs outputs;
+namespace sz { namespace LiPo_Battery { struct Config {
+ float full_charge;
+sz::LiPo_Battery::Inputs inputs;
+sz::LiPo_Battery::Outputs outputs;
 
-explicit Config():direction(), min_distance(), max_distance(), outputs() {  }
+explicit Config():full_charge(), inputs(), outputs() {  }
 
 
  
@@ -1261,16 +1583,16 @@ explicit Config():direction(), min_distance(), max_distance(), outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SRF02::Config > {
+class SAXEventHandler< ::sz::LiPo_Battery::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< math::vec3f > handler_0;
-SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;
-SAXEventHandler< sz::SRF02::Outputs > handler_3;bool has_direction;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< sz::LiPo_Battery::Inputs > handler_1;
+SAXEventHandler< sz::LiPo_Battery::Outputs > handler_2;bool has_full_charge;
+bool has_inputs;
 bool has_outputs;
 
     bool check_depth(const char* type)
@@ -1286,12 +1608,10 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "direction";
+    return "full_charge";
 case 1:
-    return "min_distance";
+    return "inputs";
 case 2:
-    return "max_distance";
-case 3:
     return "outputs";
         default:
             break;
@@ -1319,20 +1639,18 @@ case 3:
 
     void reset_flags()
     {
-        has_direction = false;
-
-
+        has_full_charge = false;
+has_inputs = false;
 has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SRF02::Config * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->direction)
-, handler_1(&obj->min_distance)
-, handler_2(&obj->max_distance)
-, handler_3(&obj->outputs)
+        , handler_0(&obj->full_charge)
+, handler_1(&obj->inputs)
+, handler_2(&obj->outputs)
     {
         reset_flags();
     }
@@ -1352,9 +1670,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -1378,9 +1693,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
         default:
             break;
         }
@@ -1402,9 +1714,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -1428,9 +1737,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
         default:
             break;
         }
@@ -1452,9 +1758,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -1478,9 +1781,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
         default:
             break;
         }
@@ -1502,9 +1802,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -1528,9 +1825,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
         default:
             break;
         }
@@ -1545,14 +1839,12 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x64\x69\x72\x65\x63\x74\x69\x6f\x6e", 9))
-						 { state=0; has_direction = true; }
-else if (utility::string_equal(str, length, "\x6d\x69\x6e\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12))
-						 { state=1;  }
-else if (utility::string_equal(str, length, "\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12))
-						 { state=2;  }
+            else if (utility::string_equal(str, length, "\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11))
+						 { state=0; has_full_charge = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
+						 { state=1; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+						 { state=2; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -1569,9 +1861,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -1596,9 +1885,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
         default:
             break;
         }
@@ -1621,9 +1907,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
         default:
             break;
         }
@@ -1645,9 +1928,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -1672,14 +1952,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_direction) set_missing_required("direction");
+            if (!has_full_charge) set_missing_required("full_charge");
+if (!has_inputs) set_missing_required("inputs");
 if (!has_outputs) set_missing_required("outputs");
         }
         return the_error.empty();
@@ -1705,8 +1983,6 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -1724,24 +2000,22 @@ case 3:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
 
     }
 };
 
-template < class Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9 >
-struct Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, ::sz::SRF02::Config > {
+template < class Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6 >
+struct Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, ::sz::LiPo_Battery::Config > {
 
-    void operator()( Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9& w, const ::sz::SRF02::Config& value) const
+    void operator()( Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6& w, const ::sz::LiPo_Battery::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x64\x69\x72\x65\x63\x74\x69\x6f\x6e", 9, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, math::vec3f >()(w, value.direction);
-w.Key("\x6d\x69\x6e\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.min_distance);
-w.Key("\x6d\x61\x78\x5f\x64\x69\x73\x74\x61\x6e\x63\x65", 12, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.max_distance);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, sz::SRF02::Outputs >()(w, value.outputs);
+        w.Key("\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
+w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Inputs >()(w, value.inputs);
+w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Outputs >()(w, value.outputs);
 
-        w.EndObject(4);
+        w.EndObject(3);
     }
 
 };

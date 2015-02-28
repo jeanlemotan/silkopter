@@ -87,8 +87,6 @@ private:
     {
         uint32_t rate = 0;
         std::string name;
-        sz::MPU9250::Init_Params* m_init_params = nullptr;
-        sz::MPU9250::Config* m_config = nullptr;
         q::Clock::duration dt;
     };
 

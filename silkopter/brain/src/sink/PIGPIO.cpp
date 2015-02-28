@@ -2,7 +2,7 @@
 #include "PIGPIO.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_PIGPIO.hpp"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -23,27 +23,29 @@ const size_t PIGPIO::MAX_PWM_CHANNELS;
 
 PIGPIO::PIGPIO(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::PIGPIO::Init_Params())
+    , m_config(new sz::PIGPIO::Config())
 {
 }
 
 auto PIGPIO::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto PIGPIO::get_input_stream_count() const -> size_t
 {
-    return m_params.pwm_channels.size();
+    return m_pwm_channels.size();
 }
 auto PIGPIO::get_input_stream(size_t idx) -> stream::IPWM_Value&
 {
-    return *m_params.pwm_channels[idx].stream;
+    return *m_pwm_channels[idx].stream;
 }
 
 auto PIGPIO::init(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
-    sz::PIGPIO_Init_Params sz;
+    sz::PIGPIO::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -52,66 +54,9 @@ auto PIGPIO::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize PIGPIO data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.period = std::chrono::microseconds(sz.period_micro);
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
 
-    auto setup_pwm_gpio = [this](PWM_Params& dst, uint32_t gpio, sz::PIGPIO_PWM const& src) -> bool
-    {
-        if (!src.stream.empty())
-        {
-            dst.stream = m_hal.get_streams().find_by_name<stream::IPWM_Value>(src.stream);
-            dst.gpio = gpio;
-            dst.rate = src.rate;
-            dst.range = src.range;
-            dst.min = src.min;
-            dst.max = src.max;
-            return true;
-        }
-        return false;
-    };
-
-    PWM_Params pwm;
-    if (setup_pwm_gpio(pwm, 4, sz.pwm_gpio_4))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[1], 17, sz.pwm_gpio_17))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[2], 18, sz.pwm_gpio_18))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[3], 22, sz.pwm_gpio_22))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[4], 23, sz.pwm_gpio_23))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[5], 24, sz.pwm_gpio_24))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[6], 25, sz.pwm_gpio_25))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-    if (setup_pwm_gpio(params.pwm_channels[7], 27, sz.pwm_gpio_27))
-    {
-        params.pwm_channels.push_back(pwm);
-    }
-
-    return init(params);
-}
-auto PIGPIO::init(Init_Params const& params) -> bool
-{
-    QLOG_TOPIC("pigpio::init");
-
-    m_params = params;
     return init();
 }
 
@@ -252,9 +197,9 @@ void PIGPIO::process()
 {
     QLOG_TOPIC("pigpio::process");
 
-    for (size_t i = 0; i < m_params.pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        auto& ch = m_params.pwm_channels[i];
+        auto& ch = m_pwm_channels[i];
         QASSERT(ch.stream);
         auto const& samples = ch.stream->get_samples();
         if (!samples.empty())
@@ -267,6 +212,31 @@ void PIGPIO::process()
             set_pwm_value(i, samples.back().value);
         }
     }
+}
+
+auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::PIGPIO::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize PIGPIO config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto PIGPIO::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto PIGPIO::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 }
