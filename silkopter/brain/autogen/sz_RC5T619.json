@@ -17,7 +17,6 @@
     "name": "ADC",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {

@@ -259,24 +259,6 @@ void MS5611::process()
     calculate(dt);
 }
 
-class Butterworth //10hz
-{
-public:
-    static constexpr size_t NZEROS  = 2;
-    static constexpr size_t NPOLES  = 2;
-    static constexpr float GAIN    = 1.058546241e+03;
-    float xv[NZEROS+1], yv[NPOLES+1];
-    float process(float t)
-    {
-        xv[0] = xv[1]; xv[1] = xv[2];
-        xv[2] = t / GAIN;
-        yv[0] = yv[1]; yv[1] = yv[2];
-        yv[2] =   (xv[0] + xv[2]) + 2 * xv[1]
-                   + ( -0.9149758348f * yv[0]) + (  1.9111970674f * yv[1]);
-        return yv[2];
-    }
-};
-
 void MS5611::calculate(q::Clock::duration dt)
 {
     // Formulas from manufacturer datasheet

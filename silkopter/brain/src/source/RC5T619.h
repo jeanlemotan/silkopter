@@ -5,6 +5,18 @@
 #include "common/node/stream/IADC_Value.h"
 #include "common/node/bus/II2C.h"
 
+
+namespace sz
+{
+namespace RC5T619
+{
+class Init_Params;
+class Config;
+}
+}
+
+
+
 namespace silk
 {
 namespace node
@@ -17,16 +29,11 @@ class RC5T619 : public ISource
 public:
     RC5T619(HAL& hal);
 
-    struct Init_Params
-    {
-        std::string name;
-        bus::IBus* bus = nullptr;
-        uint32_t adc0_rate = 50;
-        uint32_t adc1_rate_ratio = 10;
-    };
-
     auto init(rapidjson::Value const& json) -> bool;
-    auto init(Init_Params const& params) -> bool;
+    auto get_init_params() -> boost::optional<rapidjson::Value const&>;
+
+    auto set_config(rapidjson::Value const& json) -> bool;
+    auto get_config() -> boost::optional<rapidjson::Value const&>;
 
     auto get_name() const -> std::string const&;
     auto get_output_stream_count() const -> size_t;
@@ -40,7 +47,11 @@ private:
     HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
 
-    Init_Params m_params;
+    std::unique_ptr<sz::RC5T619::Init_Params> m_init_params;
+    rapidjson::Document m_init_params_json;
+
+    std::unique_ptr<sz::RC5T619::Config> m_config;
+    rapidjson::Document m_config_json;
 
     q::Clock::time_point m_last_time_point = q::Clock::now();
     q::Clock::duration m_dt;

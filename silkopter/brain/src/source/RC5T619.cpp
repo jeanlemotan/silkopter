@@ -4,7 +4,7 @@
 #include "utils/Timed_Scope.h"
 
 #include "sz_math.hpp"
-#include "sz_hal_nodes.hpp"
+#include "sz_RC5T619.hpp"
 
 #if defined RASPBERRY_PI
 
@@ -127,12 +127,14 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 
 RC5T619::RC5T619(HAL& hal)
     : m_hal(hal)
+    , m_init_params(new sz::RC5T619::Init_Params())
+    , m_config(new sz::RC5T619::Config())
 {
 }
 
 auto RC5T619::get_name() const -> std::string const&
 {
-    return m_params.name;
+    return m_init_params->name;
 }
 auto RC5T619::get_output_stream_count() const -> size_t
 {
@@ -147,7 +149,9 @@ auto RC5T619::get_output_stream(size_t idx) -> stream::IStream&
 
 auto RC5T619::init(rapidjson::Value const& json) -> bool
 {
-    sz::RC5T619_Init_Params sz;
+    QLOG_TOPIC("rc5t619::init");
+
+    sz::RC5T619::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -156,56 +160,28 @@ auto RC5T619::init(rapidjson::Value const& json) -> bool
         QLOGE("Cannot deserialize RC5T619 data: {}", ss.str());
         return false;
     }
-    Init_Params params;
-    params.name = sz.name;
-    params.bus = m_hal.get_buses().find_by_name<bus::IBus>(sz.bus);
-    params.adc0_rate = sz.adc0_rate;
-    params.adc1_rate_ratio = sz.adc1_rate_ratio;
-    return init(params);
-}
-auto RC5T619::init(Init_Params const& params) -> bool
-{
-    QLOG_TOPIC("rc5t619::init");
+    *m_init_params = sz;
+    autojsoncxx::to_document(sz, m_init_params_json);
 
-    m_params = params;
-
-    m_i2c = dynamic_cast<bus::II2C*>(params.bus);
-    if (!init())
-    {
-        return false;
-    }
-
-    if (!m_params.name.empty())
-    {
-        m_adc[0].name = q::util::format2<std::string>("{}-adc0", params.name);
-        m_adc[1].name = q::util::format2<std::string>("{}-adc1", params.name);
-
-        if (!m_hal.get_sources().add(*this) ||
-            !m_hal.get_streams().add(m_adc[0]) ||
-            !m_hal.get_streams().add(m_adc[1]))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return init();
 }
 
 auto RC5T619::init() -> bool
 {
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
     if (!m_i2c)
     {
         QLOGE("No bus configured");
         return false;
     }
 
-    m_params.adc0_rate = math::clamp<size_t>(m_params.adc0_rate, 1, 50);
-    m_params.adc1_rate_ratio = math::clamp<size_t>(m_params.adc1_rate_ratio, 1, 100);
+    m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 50);
+    m_init_params->adc1_rate_ratio = math::clamp<size_t>(m_init_params->adc1_rate_ratio, 1, 100);
 
-    m_adc[0].rate = m_params.adc0_rate;
-    m_adc[1].rate = m_params.adc0_rate / m_params.adc1_rate_ratio;
+    m_adc[0].rate = m_init_params->adc0_rate;
+    m_adc[1].rate = m_init_params->adc0_rate / m_init_params->adc1_rate_ratio;
 
-    m_dt = std::chrono::milliseconds(1000 / m_params.adc0_rate);
+    m_dt = std::chrono::milliseconds(1000 / m_init_params->adc0_rate);
 
     Mode_Guard mg;
 
@@ -236,6 +212,19 @@ auto RC5T619::init() -> bool
     {
         QLOGI("Failed to init rc5t619");
         return false;
+    }
+
+    if (!m_init_params->name.empty())
+    {
+        m_adc[0].name = q::util::format2<std::string>("{}-adc0", m_init_params->name);
+        m_adc[1].name = q::util::format2<std::string>("{}-adc1", m_init_params->name);
+
+        if (!m_hal.get_sources().add(*this) ||
+            !m_hal.get_streams().add(m_adc[0]) ||
+            !m_hal.get_streams().add(m_adc[1]))
+        {
+            return false;
+        }
     }
 
     return true;
@@ -308,7 +297,7 @@ void RC5T619::process()
         }
 
         //next
-        if (m_stage >= m_params.adc1_rate_ratio)
+        if (m_stage >= m_init_params->adc1_rate_ratio)
         {
             if (m_i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
             {
@@ -320,6 +309,31 @@ void RC5T619::process()
             m_stage++;
         }
     }
+}
+
+auto RC5T619::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::RC5T619::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize RC5T619 config data: {}", ss.str());
+        return false;
+    }
+
+    *m_config = sz;
+    autojsoncxx::to_document(*m_config, m_config_json);
+    return true;
+}
+auto RC5T619::get_config() -> boost::optional<rapidjson::Value const&>
+{
+    return m_config_json;
+}
+auto RC5T619::get_init_params() -> boost::optional<rapidjson::Value const&>
+{
+    return m_init_params_json;
 }
 
 
