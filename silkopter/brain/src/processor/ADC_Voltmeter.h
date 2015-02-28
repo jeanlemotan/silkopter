@@ -52,10 +52,10 @@ private:
 
     HAL& m_hal;
 
-    std::unique_ptr<sz::ADC_Voltmeter::Init_Params> m_init_params;
+    std::shared_ptr<sz::ADC_Voltmeter::Init_Params> m_init_params;
     rapidjson::Document m_init_params_json;
 
-    std::unique_ptr<sz::ADC_Voltmeter::Config> m_config;
+    std::shared_ptr<sz::ADC_Voltmeter::Config> m_config;
     rapidjson::Document m_config_json;
 
     stream::IADC_Value* m_adc_stream = nullptr;

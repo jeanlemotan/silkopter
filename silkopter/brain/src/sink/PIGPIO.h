@@ -44,10 +44,10 @@ private:
 
     HAL& m_hal;
 
-    std::unique_ptr<sz::PIGPIO::Init_Params> m_init_params;
+    std::shared_ptr<sz::PIGPIO::Init_Params> m_init_params;
     rapidjson::Document m_init_params_json;
 
-    std::unique_ptr<sz::PIGPIO::Config> m_config;
+    std::shared_ptr<sz::PIGPIO::Config> m_config;
     rapidjson::Document m_config_json;
 
     struct PWM_Channel

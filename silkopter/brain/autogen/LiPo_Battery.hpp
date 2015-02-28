@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Init_Params {
+namespace sz { namespace LiPo_Battery { struct Init_Params {
  std::string name;
 
 explicit Init_Params():name() {  }
@@ -41,7 +41,7 @@ explicit Init_Params():name() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Init_Params > {
+class SAXEventHandler< ::sz::LiPo_Battery::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->name)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906cac4fa1305 >
-struct Serializer< Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906cac4fa1305, ::sz::LPF::Init_Params > {
+template < class Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc >
+struct Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc, ::sz::LiPo_Battery::Init_Params > {
 
-    void operator()( Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906cac4fa1305& w, const ::sz::LPF::Init_Params& value) const
+    void operator()( Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc& w, const ::sz::LiPo_Battery::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906cac4fa1305, std::string >()(w, value.name);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc, std::string >()(w, value.name);
 
         w.EndObject(1);
     }
@@ -403,10 +403,11 @@ struct Serializer< Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Inputs {
- std::string stream;
+namespace sz { namespace LiPo_Battery { struct Inputs {
+ std::string voltage;
+std::string current;
 
-explicit Inputs():stream() {  }
+explicit Inputs():voltage(), current() {  }
 
 
  
@@ -417,13 +418,15 @@ explicit Inputs():stream() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Inputs > {
+class SAXEventHandler< ::sz::LiPo_Battery::Inputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_stream;
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;bool has_voltage;
+bool has_current;
 
     bool check_depth(const char* type)
     {
@@ -438,7 +441,9 @@ private:
     {
         switch (state) {
             case 0:
-    return "stream";
+    return "voltage";
+case 1:
+    return "current";
         default:
             break;
         }
@@ -465,14 +470,16 @@ private:
 
     void reset_flags()
     {
-        has_stream = false;
+        has_voltage = false;
+has_current = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Inputs * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->stream)
+        , handler_0(&obj->voltage)
+, handler_1(&obj->current)
     {
         reset_flags();
     }
@@ -486,6 +493,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -503,6 +513,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -518,6 +531,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -535,6 +551,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -550,6 +569,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -567,6 +589,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -582,6 +607,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -599,6 +627,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -613,8 +644,10 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x73\x74\x72\x65\x61\x6d", 6))
-						 { state=0; has_stream = true; }
+            else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65", 7))
+						 { state=0; has_voltage = true; }
+else if (utility::string_equal(str, length, "\x63\x75\x72\x72\x65\x6e\x74", 7))
+						 { state=1; has_current = true; }
             else {
                 state = -1;
                 return true;
@@ -625,6 +658,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -643,6 +679,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -659,6 +698,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
         default:
             break;
         }
@@ -674,6 +716,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -692,11 +737,15 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_stream) set_missing_required("stream");
+            if (!has_voltage) set_missing_required("voltage");
+if (!has_current) set_missing_required("current");
         }
         return the_error.empty();
     }
@@ -717,6 +766,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -732,20 +783,22 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
 
-template < class Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1 >
-struct Serializer< Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1, ::sz::LPF::Inputs > {
+template < class Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408 >
+struct Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, ::sz::LiPo_Battery::Inputs > {
 
-    void operator()( Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1& w, const ::sz::LPF::Inputs& value) const
+    void operator()( Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408& w, const ::sz::LiPo_Battery::Inputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x73\x74\x72\x65\x61\x6d", 6, false); Serializer< Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1, std::string >()(w, value.stream);
+        w.Key("\x76\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.voltage);
+w.Key("\x63\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.current);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };
@@ -779,10 +832,10 @@ struct Serializer< Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c992
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Output {
+namespace sz { namespace LiPo_Battery { struct Battery_State {
  
 
-explicit Output() {  }
+explicit Battery_State() {  }
 
 
  
@@ -793,7 +846,7 @@ explicit Output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Output > {
+class SAXEventHandler< ::sz::LiPo_Battery::Battery_State > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -844,7 +897,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Output * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Battery_State * obj)
         : state(-1)
         , depth(0)
         
@@ -1095,10 +1148,10 @@ public:
     }
 };
 
-template < class Writera01eb46252df6bc5d8391a873af63d4cddcd56aeaabd8b9559926f580df9146d >
-struct Serializer< Writera01eb46252df6bc5d8391a873af63d4cddcd56aeaabd8b9559926f580df9146d, ::sz::LPF::Output > {
+template < class Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7 >
+struct Serializer< Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7, ::sz::LiPo_Battery::Battery_State > {
 
-    void operator()( Writera01eb46252df6bc5d8391a873af63d4cddcd56aeaabd8b9559926f580df9146d& w, const ::sz::LPF::Output& value) const
+    void operator()( Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a41053841a7& w, const ::sz::LiPo_Battery::Battery_State& value) const
     {
         w.StartObject();
 
@@ -1138,10 +1191,10 @@ struct Serializer< Writera01eb46252df6bc5d8391a873af63d4cddcd56aeaabd8b9559926f5
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Outputs {
- sz::LPF::Output output;
+namespace sz { namespace LiPo_Battery { struct Outputs {
+ sz::LiPo_Battery::Battery_State battery_state;
 
-explicit Outputs():output() {  }
+explicit Outputs():battery_state() {  }
 
 
  
@@ -1152,13 +1205,13 @@ explicit Outputs():output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Outputs > {
+class SAXEventHandler< ::sz::LiPo_Battery::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::LPF::Output > handler_0;bool has_output;
+    SAXEventHandler< sz::LiPo_Battery::Battery_State > handler_0;bool has_battery_state;
 
     bool check_depth(const char* type)
     {
@@ -1173,7 +1226,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "output";
+    return "battery_state";
         default:
             break;
         }
@@ -1200,14 +1253,14 @@ private:
 
     void reset_flags()
     {
-        has_output = false;
+        has_battery_state = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Outputs * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->output)
+        , handler_0(&obj->battery_state)
     {
         reset_flags();
     }
@@ -1348,8 +1401,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74", 6))
-						 { state=0; has_output = true; }
+            else if (utility::string_equal(str, length, "\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13))
+						 { state=0; has_battery_state = true; }
             else {
                 state = -1;
                 return true;
@@ -1431,7 +1484,7 @@ public:
                 break;
             }
         } else {
-            if (!has_output) set_missing_required("output");
+            if (!has_battery_state) set_missing_required("battery_state");
         }
         return the_error.empty();
     }
@@ -1471,14 +1524,14 @@ public:
     }
 };
 
-template < class Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47 >
-struct Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47, ::sz::LPF::Outputs > {
+template < class Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e >
+struct Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, ::sz::LiPo_Battery::Outputs > {
 
-    void operator()( Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47& w, const ::sz::LPF::Outputs& value) const
+    void operator()( Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e& w, const ::sz::LiPo_Battery::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x6f\x75\x74\x70\x75\x74", 6, false); Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47, sz::LPF::Output >()(w, value.output);
+        w.Key("\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13, false); Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
 
         w.EndObject(1);
     }
@@ -1514,13 +1567,12 @@ struct Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887e
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Config {
- uint32_t poles;
-double cutoff_frequency;
-sz::LPF::Inputs inputs;
-sz::LPF::Outputs outputs;
+namespace sz { namespace LiPo_Battery { struct Config {
+ float full_charge;
+sz::LiPo_Battery::Inputs inputs;
+sz::LiPo_Battery::Outputs outputs;
 
-explicit Config():poles(), cutoff_frequency(), inputs(), outputs() {  }
+explicit Config():full_charge(), inputs(), outputs() {  }
 
 
  
@@ -1531,17 +1583,15 @@ explicit Config():poles(), cutoff_frequency(), inputs(), outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Config > {
+class SAXEventHandler< ::sz::LiPo_Battery::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< sz::LPF::Inputs > handler_2;
-SAXEventHandler< sz::LPF::Outputs > handler_3;bool has_poles;
-bool has_cutoff_frequency;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< sz::LiPo_Battery::Inputs > handler_1;
+SAXEventHandler< sz::LiPo_Battery::Outputs > handler_2;bool has_full_charge;
 bool has_inputs;
 bool has_outputs;
 
@@ -1558,12 +1608,10 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "poles";
+    return "full_charge";
 case 1:
-    return "cutoff_frequency";
-case 2:
     return "inputs";
-case 3:
+case 2:
     return "outputs";
         default:
             break;
@@ -1591,20 +1639,18 @@ case 3:
 
     void reset_flags()
     {
-        has_poles = false;
-has_cutoff_frequency = false;
+        has_full_charge = false;
 has_inputs = false;
 has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Config * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->poles)
-, handler_1(&obj->cutoff_frequency)
-, handler_2(&obj->inputs)
-, handler_3(&obj->outputs)
+        , handler_0(&obj->full_charge)
+, handler_1(&obj->inputs)
+, handler_2(&obj->outputs)
     {
         reset_flags();
     }
@@ -1624,9 +1670,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -1650,9 +1693,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
         default:
             break;
         }
@@ -1674,9 +1714,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -1700,9 +1737,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
         default:
             break;
         }
@@ -1724,9 +1758,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -1750,9 +1781,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
         default:
             break;
         }
@@ -1774,9 +1802,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -1800,9 +1825,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
         default:
             break;
         }
@@ -1817,14 +1839,12 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x70\x6f\x6c\x65\x73", 5))
-						 { state=0; has_poles = true; }
-else if (utility::string_equal(str, length, "\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16))
-						 { state=1; has_cutoff_frequency = true; }
+            else if (utility::string_equal(str, length, "\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11))
+						 { state=0; has_full_charge = true; }
 else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
-						 { state=2; has_inputs = true; }
+						 { state=1; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+						 { state=2; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -1841,9 +1861,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -1868,9 +1885,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
         default:
             break;
         }
@@ -1893,9 +1907,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
         default:
             break;
         }
@@ -1917,9 +1928,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -1944,15 +1952,11 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_poles) set_missing_required("poles");
-if (!has_cutoff_frequency) set_missing_required("cutoff_frequency");
+            if (!has_full_charge) set_missing_required("full_charge");
 if (!has_inputs) set_missing_required("inputs");
 if (!has_outputs) set_missing_required("outputs");
         }
@@ -1979,8 +1983,6 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -1998,24 +2000,22 @@ case 3:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
 
     }
 };
 
-template < class Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2 >
-struct Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, ::sz::LPF::Config > {
+template < class Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6 >
+struct Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, ::sz::LiPo_Battery::Config > {
 
-    void operator()( Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2& w, const ::sz::LPF::Config& value) const
+    void operator()( Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6& w, const ::sz::LiPo_Battery::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x70\x6f\x6c\x65\x73", 5, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, uint32_t >()(w, value.poles);
-w.Key("\x63\x75\x74\x6f\x66\x66\x5f\x66\x72\x65\x71\x75\x65\x6e\x63\x79", 16, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, double >()(w, value.cutoff_frequency);
-w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Inputs >()(w, value.inputs);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Outputs >()(w, value.outputs);
+        w.Key("\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
+w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Inputs >()(w, value.inputs);
+w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Outputs >()(w, value.outputs);
 
-        w.EndObject(4);
+        w.EndObject(3);
     }
 
 };

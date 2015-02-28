@@ -47,10 +47,10 @@ private:
     HAL& m_hal;
     bus::II2C* m_i2c = nullptr;
 
-    std::unique_ptr<sz::RC5T619::Init_Params> m_init_params;
+    std::shared_ptr<sz::RC5T619::Init_Params> m_init_params;
     rapidjson::Document m_init_params_json;
 
-    std::unique_ptr<sz::RC5T619::Config> m_config;
+    std::shared_ptr<sz::RC5T619::Config> m_config;
     rapidjson::Document m_config_json;
 
     q::Clock::time_point m_last_time_point = q::Clock::now();

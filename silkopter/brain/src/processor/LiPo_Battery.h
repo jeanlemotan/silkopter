@@ -53,10 +53,10 @@ private:
 
     HAL& m_hal;
 
-    std::unique_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
+    std::shared_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
     rapidjson::Document m_init_params_json;
 
-    std::unique_ptr<sz::LiPo_Battery::Config> m_config;
+    std::shared_ptr<sz::LiPo_Battery::Config> m_config;
     rapidjson::Document m_config_json;
 
     stream::IVoltage* m_voltage_stream = nullptr;

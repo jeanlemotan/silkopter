@@ -23,7 +23,6 @@
     "name": "Output",
     "members":
     [
-        ["uint8_t", "__unused", {"required": false}]
     ]
 },
 {
