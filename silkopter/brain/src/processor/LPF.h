@@ -23,7 +23,7 @@ public:
 
     LPF(HAL& hal);
 
-    auto init(rapidjson::Value const& json) -> bool;
+    auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
     auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
@@ -70,13 +70,13 @@ LPF<Stream_t>::LPF(HAL& hal)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::init(rapidjson::Value const& json) -> bool
+auto LPF<Stream_t>::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("lpf::init");
 
     sz::LPF::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -84,7 +84,7 @@ auto LPF<Stream_t>::init(rapidjson::Value const& json) -> bool
         return false;
     }
     m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 template<class Stream_t>
 auto LPF<Stream_t>::get_init_params() -> rapidjson::Document

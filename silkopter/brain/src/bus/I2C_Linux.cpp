@@ -48,13 +48,13 @@ I2C_Linux::~I2C_Linux()
 }
 
 
-auto I2C_Linux::init(rapidjson::Value const& json) -> bool
+auto I2C_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("i2c_linux::init");
 
     sz::I2C_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -62,7 +62,7 @@ auto I2C_Linux::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 
 auto I2C_Linux::init() -> bool

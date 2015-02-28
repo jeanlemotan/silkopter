@@ -347,8 +347,7 @@ auto HAL::create_node(std::string const& type, rapidjson::Value const& init_para
     {
         QLOGE("Cannot create node of type '{}'", type);
     }
-    if (!node->init(init_params) ||
-        !node->set_config(config))
+    if (!node->init(init_params, config))
     {
         return false;
     }

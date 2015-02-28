@@ -24,13 +24,13 @@ auto Inertial::get_name() const -> std::string const&
     return m_init_params->name;
 }
 
-auto Inertial::init(rapidjson::Value const& json) -> bool
+auto Inertial::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("inertial::init");
 
     sz::Inertial::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -38,7 +38,7 @@ auto Inertial::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 auto Inertial::init() -> bool
 {

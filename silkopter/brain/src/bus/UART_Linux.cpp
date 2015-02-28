@@ -24,13 +24,13 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-auto UART_Linux::init(rapidjson::Value const& json) -> bool
+auto UART_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("uart_linux::init");
 
     sz::UART_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -38,7 +38,7 @@ auto UART_Linux::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 auto UART_Linux::init() -> bool
 {

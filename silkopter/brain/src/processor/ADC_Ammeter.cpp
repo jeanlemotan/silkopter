@@ -23,13 +23,13 @@ auto ADC_Ammeter::get_name() const -> std::string const&
     return m_init_params->name;
 }
 
-auto ADC_Ammeter::init(rapidjson::Value const& json) -> bool
+auto ADC_Ammeter::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
 
     sz::ADC_Ammeter::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -37,7 +37,7 @@ auto ADC_Ammeter::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 auto ADC_Ammeter::init() -> bool
 {

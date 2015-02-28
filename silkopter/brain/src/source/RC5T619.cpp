@@ -147,13 +147,13 @@ auto RC5T619::get_output_stream(size_t idx) -> stream::IStream&
 }
 
 
-auto RC5T619::init(rapidjson::Value const& json) -> bool
+auto RC5T619::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
     sz::RC5T619::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -161,7 +161,7 @@ auto RC5T619::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 
 auto RC5T619::init() -> bool

@@ -212,6 +212,5 @@ HEADERS += \
     ../../src/processor/Comp_Location.h \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/common/node/processor/IMultirotor.h \
-    ../../src/processor/Multirotor.h \
-    ../../../libs/common/node/sink/IPWM.h
+    ../../src/processor/Multirotor.h
 

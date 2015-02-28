@@ -23,13 +23,13 @@ auto Comp_AHRS::get_name() const -> std::string const&
     return m_init_params->name;
 }
 
-auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
+auto Comp_AHRS::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
 
     sz::Comp_AHRS::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -37,7 +37,7 @@ auto Comp_AHRS::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 
 auto Comp_AHRS::init() -> bool

@@ -22,13 +22,13 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-auto SPI_Linux::init(rapidjson::Value const& json) -> bool
+auto SPI_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("spi_linux::init");
 
     sz::SPI_Linux::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -36,7 +36,7 @@ auto SPI_Linux::init(rapidjson::Value const& json) -> bool
         return false;
     }
     *m_init_params = sz;
-    return init();
+    return init() && set_config(config);
 }
 auto SPI_Linux::init() -> bool
 {
