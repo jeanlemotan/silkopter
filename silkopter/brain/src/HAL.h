@@ -38,6 +38,7 @@ class Registry : q::util::Noncopyable
 {
 public:
     auto get_all() const -> std::vector<Base*> const&;
+    void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> T*;
     auto add(Base& node) -> bool;
 private:
@@ -65,6 +66,9 @@ public:
     auto get_streams()      -> Registry<node::stream::IStream>&;
 
 private:
+    template<class Base> auto create_nodes(rapidjson::Value& json) -> bool;
+    template<class Base> auto create_node(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
+
     Registry<node::bus::IBus> m_buses;
     Registry<node::source::ISource> m_sources;
     Registry<node::sink::ISink> m_sinks;
@@ -92,6 +96,11 @@ template<class Base>
 auto Registry<Base>::get_all() const -> std::vector<Base*> const&
 {
     return m_nodes;
+}
+template<class Base>
+void Registry<Base>::remove_all()
+{
+    m_nodes.clear();
 }
 template<class Base>
 template<class T>
@@ -124,7 +133,7 @@ template <class T> void Factory::register_node(HAL& hal, std::string const& clas
         rapidjson::StringBuffer s;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
         instance.get_init_params().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-        q::data::File_Sink fs((q::Path(class_name + "_init_params")));
+        q::data::File_Sink fs((q::Path(class_name + "_init_params.json")));
         std::string data = s.GetString();
         fs.write((uint8_t const* )data.data(), data.size());
     }
@@ -132,7 +141,7 @@ template <class T> void Factory::register_node(HAL& hal, std::string const& clas
         rapidjson::StringBuffer s;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
         instance.get_config().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-        q::data::File_Sink fs((q::Path(class_name + "_config")));
+        q::data::File_Sink fs((q::Path(class_name + "_config.json")));
         std::string data = s.GetString();
         fs.write((uint8_t const* )data.data(), data.size());
     }
