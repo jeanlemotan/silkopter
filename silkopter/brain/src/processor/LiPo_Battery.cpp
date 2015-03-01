@@ -67,15 +67,18 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
+    inputs[0].name = "voltage";
     inputs[0].stream = m_voltage_stream;
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
-    inputs[2].stream = m_current_stream;
+    inputs[1].name = "current";
+    inputs[1].stream = m_current_stream;
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IBattery_State>();
+    outputs[0].name = "battery_state";
     outputs[0].stream = &m_stream;
     return outputs;
 }

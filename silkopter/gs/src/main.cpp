@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "GS.h"
 #include <QtWidgets/QApplication>
-
+#include "HAL_Window.h"
 
 int main(int argc, char *argv[])
 {

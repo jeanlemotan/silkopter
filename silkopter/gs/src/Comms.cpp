@@ -337,6 +337,8 @@ void Comms::handle_enumerate_node_factory()
     {
         QLOGE("Error in enumerating node factory");
     }
+
+    m_hal.node_factories_refreshed_signal.execute();
 }
 
 auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::GS_IStream>
@@ -573,6 +575,8 @@ void Comms::handle_enumerate_nodes()
     {
         QLOGE("Error in enumerating node factory");
     }
+
+    m_hal.nodes_refreshed_signal.execute();
 }
 
 

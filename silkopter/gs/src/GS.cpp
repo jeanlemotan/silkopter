@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "GS.h"
 
+#include "HAL_Window.h"
+
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
     //, m_gyro_calibrarion_samples(k_calibration_sample_count)
@@ -51,6 +53,9 @@ GS::GS(QWidget *parent)
 //    connect(m_ui.action_setup_motors, &QAction::triggered, [this](bool) { setup_motors(); });
 
     read_settings();
+
+    HAL_Window* editor = new HAL_Window(m_hal, this);
+    editor->show();
 }
 
 GS::~GS()

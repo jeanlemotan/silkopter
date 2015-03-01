@@ -50,6 +50,7 @@ auto SRF02::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IDistance>();
+    outputs[0].name = "distance";
     outputs[0].stream = &m_stream;
     return outputs;
 }

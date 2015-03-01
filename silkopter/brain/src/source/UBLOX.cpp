@@ -208,6 +208,7 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
+    outputs[0].name = "locations";
     outputs[0].stream = &m_stream;
     return outputs;
 }

@@ -58,15 +58,18 @@ auto Inertial::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
+    inputs[0].name = "reference_frame";
     inputs[0].stream = m_reference_frame_stream;
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
-    inputs[2].stream = m_acceleration_stream;
+    inputs[1].name = "acceleration";
+    inputs[1].stream = m_acceleration_stream;
     return inputs;
 }
 auto Inertial::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
+    outputs[0].name = "linear_acceleration";
     outputs[0].stream = &m_stream;
     return outputs;
 }

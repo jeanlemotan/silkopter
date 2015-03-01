@@ -14,6 +14,7 @@ TEMPLATE = app
 CONFIG += c++11
 
 INCLUDEPATH += ../../src
+INCLUDEPATH += ../../src/qnodeseditor
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -95,11 +96,22 @@ HEADERS += \
     ../../../libs/common/node/bus/IBus.h \
     ../../../libs/common/node/bus/II2C.h \
     ../../../libs/common/node/bus/ISPI.h \
-    ../../../libs/common/node/bus/IUART.h
+    ../../../libs/common/node/bus/IUART.h \
+    ../../src/qnodeseditor/qneblock.h \
+    ../../src/qnodeseditor/qneconnection.h \
+    ../../src/qnodeseditor/qneport.h \
+    ../../src/qnodeseditor/qnodeseditor.h \
+    ../../src/qnodeseditor/ui_qnemainwindow.h \
+    ../../src/HAL_Window.h
 
 SOURCES += \
     ../../src/GS.cpp \
     ../../src/main.cpp \
     ../../src/qcustomplot.cpp \
     ../../src/Comms.cpp \
-    ../../src/HAL.cpp
+    ../../src/HAL.cpp \
+    ../../src/qnodeseditor/qneblock.cpp \
+    ../../src/qnodeseditor/qneconnection.cpp \
+    ../../src/qnodeseditor/qneport.cpp \
+    ../../src/qnodeseditor/qnodeseditor.cpp \
+    ../../src/HAL_Window.cpp

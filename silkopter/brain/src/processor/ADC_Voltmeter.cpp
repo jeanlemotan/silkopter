@@ -56,6 +56,7 @@ auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    inputs[0].name = "adc";
     inputs[0].stream = m_adc_stream;
     return inputs;
 }
@@ -63,6 +64,7 @@ auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
+    outputs[0].name = "voltage";
     outputs[0].stream = &m_stream;
     return outputs;
 }

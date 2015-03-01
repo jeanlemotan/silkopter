@@ -182,6 +182,7 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IVideo>();
+    outputs[0].name = "video";
 //    outputs[0].stream = &m_angular_velocity;
     return outputs;
 }

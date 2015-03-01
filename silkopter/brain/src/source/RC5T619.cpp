@@ -140,8 +140,10 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
     outputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    outputs[0].name = "adc0";
     outputs[0].stream = &m_adc[0];
     outputs[1].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    outputs[1].name = "adc1";
     outputs[1].stream = &m_adc[1];
     return outputs;
 }

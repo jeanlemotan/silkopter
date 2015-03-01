@@ -363,12 +363,16 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(4);
     outputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    outputs[0].name = "angular_velocity";
     outputs[0].stream = &m_angular_velocity;
     outputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    outputs[1].name = "acceleration";
     outputs[1].stream = &m_acceleration;
     outputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    outputs[2].name = "magnetic_field";
     outputs[2].stream = &m_magnetic_field;
     outputs[3].class_id = q::rtti::get_class_id<stream::ITemperature>();
+    outputs[3].name = "temperature";
     outputs[3].stream = &m_temperature;
     return outputs;
 }

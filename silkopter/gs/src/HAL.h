@@ -290,6 +290,9 @@ public:
     auto get_processors()   -> Registry<node::processor::GS_IProcessor>&;
     auto get_streams()      -> Registry<node::stream::GS_IStream>&;
 
+    q::util::Signal<void()> node_factories_refreshed_signal;
+    q::util::Signal<void()> nodes_refreshed_signal;
+
 private:
     Registry<node::bus::GS_IBus> m_bus_factory;
     Registry<node::source::GS_ISource> m_source_factory;
