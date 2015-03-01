@@ -15,10 +15,7 @@ class II2C: public IBus
 public:
     virtual ~II2C() {}
 
-    virtual auto get_type() const -> std::string const&
-    {
-        return q::rtti::get_class_name<II2C>();
-    }
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<II2C>(); }
 
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;

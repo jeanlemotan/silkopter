@@ -783,7 +783,7 @@ namespace sz { namespace ADC_Ammeter { struct Current {
  float bias;
 float scale;
 
-explicit Current():bias(), scale() {  }
+explicit Current():bias(0.0), scale(1.0) {  }
 
 
  

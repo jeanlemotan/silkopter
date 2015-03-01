@@ -42,8 +42,8 @@ public:
     void process();
 
     auto get_name() const -> std::string const&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
+
+    auto get_outputs() const -> std::vector<Output>;
 
     void lock();
     void unlock();
@@ -96,7 +96,8 @@ private:
         Sample last_sample;
         std::vector<Sample> samples;
         float scale_inv = 1.f;
-    } m_acceleration;
+    };
+    mutable Acceleraton m_acceleration;
 
     struct Angular_Velocity : public stream::IAngular_Velocity, public Common
     {
@@ -108,7 +109,8 @@ private:
         Sample last_sample;
         std::string name;
         float scale_inv = 1.f;
-    } m_angular_velocity;
+    };
+    mutable Angular_Velocity m_angular_velocity;
 
     struct Magnetic_Field : public stream::IMagnetic_Field, public Common
     {
@@ -121,7 +123,8 @@ private:
         uint8_t akm_address = 0;
         q::Clock::time_point last_time_point;
         float magnetic_adj[3];
-    } m_magnetic_field;
+    };
+    mutable Magnetic_Field m_magnetic_field;
 
     struct Temperature : public stream::ITemperature, public Common
     {
@@ -131,7 +134,8 @@ private:
 
         std::vector<Sample> samples;
         Sample last_sample;
-    } m_temperature;
+    };
+    mutable Temperature m_temperature;
 };
 
 

@@ -54,39 +54,29 @@ auto Inertial::init() -> bool
     return true;
 }
 
-auto Inertial::get_input_stream_count() const -> size_t
+auto Inertial::get_inputs() const -> std::vector<Input>
 {
-    if (m_reference_frame_stream && m_acceleration_stream)
-    {
-        return 2;
-    }
-    return 0;
+    std::vector<Input> inputs(2);
+    inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
+    inputs[0].stream = m_reference_frame_stream;
+    inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[2].stream = m_acceleration_stream;
+    return inputs;
 }
-auto Inertial::get_input_stream(size_t idx) -> stream::IStream&
+auto Inertial::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx < get_input_stream_count());
-    std::array<stream::IStream*, 2> streams =
-    {{
-        m_reference_frame_stream, m_acceleration_stream
-    }};
-    QASSERT(streams.size() == get_input_stream_count());
-    return *streams[idx];
-}
-auto Inertial::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-auto Inertial::get_output_stream(size_t idx) -> stream::ILinear_Acceleration&
-{
-    QASSERT(idx < get_output_stream_count());
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 void Inertial::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_reference_frame_stream ||
+        !m_acceleration_stream)
     {
         return;
     }

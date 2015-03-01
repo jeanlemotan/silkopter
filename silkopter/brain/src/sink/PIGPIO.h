@@ -34,8 +34,7 @@ public:
     auto get_config() -> rapidjson::Document;
 
     auto get_name() const -> std::string const&;
-    auto get_input_stream_count() const -> size_t;
-    auto get_input_stream(size_t idx) -> stream::IPWM_Value&;
+    auto get_inputs() const -> std::vector<Input>;
 
     void process();
 

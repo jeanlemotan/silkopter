@@ -32,13 +32,17 @@ auto PIGPIO::get_name() const -> std::string const&
 {
     return m_init_params->name;
 }
-auto PIGPIO::get_input_stream_count() const -> size_t
+auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
-    return m_pwm_channels.size();
-}
-auto PIGPIO::get_input_stream(size_t idx) -> stream::IPWM_Value&
-{
-    return *m_pwm_channels[idx].stream;
+    std::vector<Input> inputs((m_pwm_channels.size()));
+    std::transform(m_pwm_channels.begin(), m_pwm_channels.end(), inputs.begin(), [](PWM_Channel const& c)
+    {
+        Input i;
+        i.class_id = q::rtti::get_class_id<stream::IPWM_Value>();
+        i.stream = c.stream;
+        return i;
+    });
+    return inputs;
 }
 
 auto PIGPIO::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool

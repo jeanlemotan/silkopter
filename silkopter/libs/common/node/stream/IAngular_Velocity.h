@@ -18,10 +18,7 @@ public:
 
     virtual ~IAngular_Velocity() {}
 
-    virtual auto get_type() const -> std::string const&
-    {
-        return q::rtti::get_class_name<IAngular_Velocity>();
-    }
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IAngular_Velocity>(); }
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 

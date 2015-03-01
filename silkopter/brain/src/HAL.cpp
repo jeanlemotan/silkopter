@@ -68,6 +68,10 @@ struct HAL::Hardware
 ///////////////////////////////////////////////////////////////
 
 HAL::HAL()
+    : m_bus_factory(*this)
+    , m_source_factory(*this)
+    , m_sink_factory(*this)
+    , m_processor_factory(*this)
 {
     using namespace node;
 
@@ -75,45 +79,45 @@ HAL::HAL()
 
     m_hw.reset(new Hardware);
 
-    m_bus_factory.register_node<bus::UART_Linux>(*this, "UART_Linux");
-    m_bus_factory.register_node<bus::I2C_Linux>(*this, "I2C_Linux");
-    m_bus_factory.register_node<bus::SPI_Linux>(*this, "SPI_Linux");
+    m_bus_factory.register_node<bus::UART_Linux>("UART_Linux");
+    m_bus_factory.register_node<bus::I2C_Linux>("I2C_Linux");
+    m_bus_factory.register_node<bus::SPI_Linux>("SPI_Linux");
 
-    m_source_factory.register_node<source::MPU9250>(*this, "MPU9250");
-    m_source_factory.register_node<source::MS5611>(*this, "MS5611");
-    m_source_factory.register_node<source::SRF02>(*this, "SRF02");
-    m_source_factory.register_node<source::Raspicam>(*this, "Raspicam");
-    m_source_factory.register_node<source::RC5T619>(*this, "RC5T619");
-    m_source_factory.register_node<source::UBLOX>(*this, "UBLOX");
+    m_source_factory.register_node<source::MPU9250>("MPU9250");
+    m_source_factory.register_node<source::MS5611>("MS5611");
+    m_source_factory.register_node<source::SRF02>("SRF02");
+    m_source_factory.register_node<source::Raspicam>("Raspicam");
+    m_source_factory.register_node<source::RC5T619>("RC5T619");
+    m_source_factory.register_node<source::UBLOX>("UBLOX");
 
-    m_sink_factory.register_node<sink::PIGPIO>(*this, "PIGPIO");
+    m_sink_factory.register_node<sink::PIGPIO>("PIGPIO");
 
-    m_processor_factory.register_node<processor::ADC_Ammeter>(*this, "ADC_Ammeter");
-    m_processor_factory.register_node<processor::ADC_Voltmeter>(*this, "ADC_Voltmeter");
-    m_processor_factory.register_node<processor::Comp_AHRS>(*this, "Comp_AHRS");
-    m_processor_factory.register_node<processor::Comp_Location>(*this, "Comp_Location");
-    m_processor_factory.register_node<processor::Inertial>(*this, "Inertial");
-    m_processor_factory.register_node<processor::LiPo_Battery>(*this, "LiPo_Battery");
-    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "Acceleration_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "Angular_Velocity_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "ADC_Value_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "Current_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "Voltage_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ILocation>>(*this, "Location_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IDistance>>(*this, "Distance_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "Magnetic_Field_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IPressure>>(*this, "Pressure_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "Temperature_LPF");
-    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Acceleration_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Angular_Velocity_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "ADC_Value_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Current_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Voltage_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Location_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Distance_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Magnetic_Field_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Pressure_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Temperature_Resampler");
+    m_processor_factory.register_node<processor::ADC_Ammeter>("ADC_Ammeter");
+    m_processor_factory.register_node<processor::ADC_Voltmeter>("ADC_Voltmeter");
+    m_processor_factory.register_node<processor::Comp_AHRS>("Comp_AHRS");
+    m_processor_factory.register_node<processor::Comp_Location>("Comp_Location");
+    m_processor_factory.register_node<processor::Inertial>("Inertial");
+    m_processor_factory.register_node<processor::LiPo_Battery>("LiPo_Battery");
+    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>("Acceleration_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>("Angular_Velocity_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>("ADC_Value_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>("Current_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>("Voltage_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ILocation>>("Location_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IDistance>>("Distance_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>("Magnetic_Field_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IPressure>>("Pressure_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>("Temperature_LPF");
+    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>("Acceleration_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>("Angular_Velocity_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>("ADC_Value_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>("Current_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>("Voltage_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>("Location_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>("Distance_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>("Magnetic_Field_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>("Pressure_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>("Temperature_Resampler");
 }
 
 HAL::~HAL()
@@ -323,7 +327,7 @@ auto HAL::init() -> bool
         return false;
     }
 
-    m_bus_factory.get_all();
+    m_bus_factory.create_all();
 
     return true;
 }
@@ -362,25 +366,25 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
 template<>
 auto HAL::create_node<node::bus::IBus>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
-    auto node = m_bus_factory.create_node(*this, type);
+    auto node = m_bus_factory.create_node(type);
     return node && node->init(init_params, config);
 }
 template<>
 auto HAL::create_node<node::source::ISource>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
-    auto node = m_source_factory.create_node(*this, type);
+    auto node = m_source_factory.create_node(type);
     return node && node->init(init_params, config);
 }
 template<>
 auto HAL::create_node<node::sink::ISink>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
-    auto node = m_sink_factory.create_node(*this, type);
+    auto node = m_sink_factory.create_node(type);
     return node && node->init(init_params, config);
 }
 template<>
 auto HAL::create_node<node::processor::IProcessor>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
-    auto node = m_processor_factory.create_node(*this, type);
+    auto node = m_processor_factory.create_node(type);
     return node && node->init(init_params, config);
 }
 

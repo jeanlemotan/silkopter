@@ -7,3 +7,4 @@
 *.plt
 callgrind.*
 /UBLOX_init_params
+*.json

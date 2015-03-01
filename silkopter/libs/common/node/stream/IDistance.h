@@ -20,10 +20,7 @@ public:
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
-    virtual auto get_type() const -> std::string const&
-    {
-        return q::rtti::get_class_name<IDistance>();
-    }
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IDistance>(); }
 
     //filter helpers
     static const size_t FILTER_CHANNELS = 1;

@@ -40,7 +40,7 @@
     "name": "Config",
     "members":
     [
-        ["uint32_t", "poles", {"required": true}],
+        ["uint32_t", "poles", {"required": true, "default" : 2}],
         ["double", "cutoff_frequency", {"required": true}],
         ["sz::LPF::Inputs", "inputs", {"required": true}],
         ["sz::LPF::Outputs", "outputs", {"required": true}]

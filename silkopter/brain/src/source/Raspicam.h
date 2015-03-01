@@ -39,8 +39,7 @@ public:
     void shutdown();
 
     auto get_name() const -> std::string const&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
+    auto get_outputs() const -> std::vector<Output>;
 
     //----------------------------------------------------------------------
 

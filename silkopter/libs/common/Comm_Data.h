@@ -26,18 +26,34 @@ enum class Setup_Message : uint8_t
     //  uint32_t processor_count
     //      busses[bus_count]
     //          string - name
+    //          class_id - type
     //          string - default init prams
     //          string - default config
     //      sources[source_count]
     //          string - name
+    //          class_id - type
+    //          uint32_t - output count
+    //              class_id - output type
+    //              string - name
     //          string - default init prams
     //          string - default config
     //      sinks[sink_count]
     //          string - name
+    //          class_id - type
+    //          uint32_t - input count
+    //              class_id - input type
+    //              string - name
     //          string - default init prams
     //          string - default config
     //      processors[processor_count]
     //          string - name
+    //          class_id - type
+    //          uint32_t - input count
+    //              class_id - input type
+    //              string - name
+    //          uint32_t - output count
+    //              class_id - output type
+    //              string - name
     //          string - default init prams
     //          string - default config
     ENUMERATE_NODE_FACTORY,
@@ -54,34 +70,36 @@ enum class Setup_Message : uint8_t
     //  uint32_t processor_count
     //      busses[bus_count]
     //          string - name
+    //          class_id - type
     //          string - init prams
     //          string - config
     //      streams[stream_count]
-    //          string - type
     //          string - name
+    //          class_id - type
     //          uint32_t - sample rate
     //      sources[source_count]
     //          string - name
-    //          string - init prams
-    //          string - config
+    //          class_id - type
     //          uint32_t output_count
     //              string - name of output stream
+    //          string - init prams
+    //          string - config
     //      sinks[sink_count]
     //          string - name
-    //          string - init prams
-    //          string - config
+    //          class_id - type
     //          uint32_t input_count - array size
     //              string - name of input stream
-    //      processors[processor_count]
-    //          string - name
     //          string - init prams
     //          string - config
+    //      processors[processor_count]
+    //          string - name
+    //          class_id - type
     //          uint32_t input_count - array size
+    //              string[input_count] - name of the stream
     //          uint32_t output_count - array size
-    //          inputs[input_count]
-    //              string - name of the stream
-    //          outputs[output_count]
-    //              string - name of the stream
+    //              string[output_count] - name of the stream
+    //          string - init prams
+    //          string - config
     ENUMERATE_NODES,
 
     //sets/gets a node init params as a json string

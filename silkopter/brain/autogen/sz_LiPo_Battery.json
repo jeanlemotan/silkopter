@@ -41,7 +41,7 @@
     "name": "Config",
     "members":
     [
-        ["float", "full_charge", {"required": true}],
+        ["float", "full_charge", {"required": true, "default" : 2.2}],
         ["sz::LiPo_Battery::Inputs", "inputs", {"required": true}],
         ["sz::LiPo_Battery::Outputs", "outputs", {"required": true}]
     ]

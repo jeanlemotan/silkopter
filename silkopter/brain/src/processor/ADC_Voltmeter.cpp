@@ -52,24 +52,19 @@ auto ADC_Voltmeter::init() -> bool
     return true;
 }
 
-auto ADC_Voltmeter::get_input_stream_count() const -> size_t
+auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 {
-    return m_adc_stream ? 1 : 0;
+    std::vector<Input> inputs(1);
+    inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    inputs[0].stream = m_adc_stream;
+    return inputs;
 }
-auto ADC_Voltmeter::get_input_stream(size_t idx) -> stream::IADC_Value&
+auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx == 0);
-    QASSERT(m_adc_stream);
-    return *m_adc_stream;
-}
-auto ADC_Voltmeter::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-auto ADC_Voltmeter::get_output_stream(size_t idx) -> stream::IVoltage&
-{
-    QASSERT(idx == 0);
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 
@@ -77,12 +72,12 @@ void ADC_Voltmeter::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_adc_stream)
     {
         return;
     }
 
-    auto const& s = get_input_stream(0).get_samples();
+    auto const& s = m_adc_stream->get_samples();
     m_stream.samples.resize(s.size());
 
     std::transform(s.begin(), s.end(), m_stream.samples.begin(), [this](stream::IADC_Value::Sample const& sample)

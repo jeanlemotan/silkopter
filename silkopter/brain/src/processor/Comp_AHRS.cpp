@@ -54,39 +54,32 @@ auto Comp_AHRS::init() -> bool
     return true;
 }
 
-auto Comp_AHRS::get_input_stream_count() const -> size_t
+auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
-    if (m_angular_velocity_stream && m_acceleration_stream && m_magnetic_field_stream)
-    {
-        return 3;
-    }
-    return 0;
+    std::vector<Input> inputs(3);
+    inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    inputs[0].stream = m_angular_velocity_stream;
+    inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[1].stream = m_acceleration_stream;
+    inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    inputs[2].stream = m_magnetic_field_stream;
+    return inputs;
 }
-auto Comp_AHRS::get_input_stream(size_t idx) -> stream::IStream&
+auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx < get_input_stream_count());
-    std::array<stream::IStream*, 3> streams =
-    {{
-        m_angular_velocity_stream, m_acceleration_stream, m_magnetic_field_stream
-    }};
-    QASSERT(streams.size() == get_input_stream_count());
-    return *streams[idx];
-}
-auto Comp_AHRS::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-auto Comp_AHRS::get_output_stream(size_t idx) -> stream::IReference_Frame&
-{
-    QASSERT(idx < get_output_stream_count());
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 void Comp_AHRS::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_angular_velocity_stream ||
+        !m_acceleration_stream ||
+        !m_magnetic_field_stream)
     {
         return;
     }

@@ -23,6 +23,12 @@
 #include "common/node/stream/IVoltage.h"
 
 #include "common/node/processor/IMultirotor.h"
+#include "common/node/processor/IProcessor.h"
+
+#include "common/node/bus/IBus.h"
+#include "common/node/bus/II2C.h"
+#include "common/node/bus/ISPI.h"
+#include "common/node/bus/IUART.h"
 
 namespace silk
 {
@@ -45,6 +51,10 @@ public:
 
     //----------------------------------------------------------------------
 
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+    typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
+
 private:
     HAL& m_hal;
     uint32_t m_last_req_id = 0;
@@ -58,9 +68,6 @@ private:
 
     util::RUDP m_rudp;
 
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
-    typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
     mutable Setup_Channel m_setup_channel;
     mutable Input_Channel m_input_channel;
     mutable Telemetry_Channel m_telemetry_channel;

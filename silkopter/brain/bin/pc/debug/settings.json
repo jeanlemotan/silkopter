@@ -1,25 +1,3 @@
 {
-    "hal": {
-        "buses": {
-            "UART_Linux": {
-                "name": "uart0",
-                "dev": "/dev/ttyUSB0",
-                "baud": 115200
-            }
-        },
-        "nodes": {
-            "UBLOX": {
-                "name": "gps0",
-                "bus": "uart0",
-                "rate": 5
-            },
-            "Location_Resampler": {
-                "name": "gps0_resampler",
-                "input_stream": "gps0-location",
-                "output_rate": 20,
-                "cutoff_frequency": 1,
-                "poles": 2
-            }
-        }
-    }
+   
 }

@@ -63,39 +63,29 @@ auto LiPo_Battery::init() -> bool
     return true;
 }
 
-auto LiPo_Battery::get_input_stream_count() const -> size_t
+auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
-    if (m_voltage_stream && m_current_stream)
-    {
-        return 3;
-    }
-    return 0;
+    std::vector<Input> inputs(2);
+    inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
+    inputs[0].stream = m_voltage_stream;
+    inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
+    inputs[2].stream = m_current_stream;
+    return inputs;
 }
-auto LiPo_Battery::get_input_stream(size_t idx) -> stream::IStream&
+auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx < get_input_stream_count());
-    std::array<stream::IStream*, 2> streams =
-    {{
-        m_voltage_stream, m_current_stream
-    }};
-    QASSERT(streams.size() == get_input_stream_count());
-    return *streams[idx];
-}
-auto LiPo_Battery::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-auto LiPo_Battery::get_output_stream(size_t idx) -> stream::IBattery_State&
-{
-    QASSERT(idx < get_output_stream_count());
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IBattery_State>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 void LiPo_Battery::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_current_stream ||
+        !m_voltage_stream)
     {
         return;
     }

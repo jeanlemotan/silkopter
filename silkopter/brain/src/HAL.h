@@ -16,30 +16,29 @@ template<class Base>
 class Factory : q::util::Noncopyable
 {
 public:
-    template <class T> void register_node(HAL& hal, std::string const& class_name);
-    auto create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>;
+    Factory(HAL& hal) : m_hal(hal) {}
+    template <class T> void register_node(std::string const& class_name);
+    auto create_node(std::string const& class_name) -> std::unique_ptr<Base>;
     auto get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
     auto get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
 
     struct Node_Info
     {
         std::string name;
-        std::reference_wrapper<const rapidjson::Document> init_params;
-        std::reference_wrapper<const rapidjson::Document> config;
+        std::unique_ptr<Base> node;
     };
 
-    auto get_all() const -> std::vector<Node_Info>;
+    auto create_all() const -> std::vector<Node_Info>;
 private:
     typedef Base* (*create_node_function)(HAL& hal);
     struct Data
     {
         create_node_function ctor;
-        rapidjson::Document init_params;
-        rapidjson::Document config;
     };
     std::map<std::string, Data> m_name_registry;
+    HAL& m_hal;
     template <class T> static auto create_node_func(HAL& hal) -> Base*;
-    void _register_node(std::string const& class_name, create_node_function ctor, rapidjson::Document&& init_params, rapidjson::Document&& config);
+    void _register_node(std::string const& class_name, create_node_function ctor);
 };
 
 
@@ -143,37 +142,37 @@ auto Registry<Base>::add(Base& node) -> bool
 
 template<class Base>
 template <class T>
-void Factory<Base>::register_node(HAL& hal, std::string const& class_name)
+void Factory<Base>::register_node(std::string const& class_name)
 {
     auto* ctor = &create_node_func<T>;
-    T instance(hal);
+//    T instance(hal);
 
-    //write the jsons for testing - to see the structure
-    {
-        rapidjson::StringBuffer s;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-        instance.get_init_params().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-        q::data::File_Sink fs((q::Path(class_name + "_init_params.json")));
-        std::string data = s.GetString();
-        fs.write((uint8_t const* )data.data(), data.size());
-    }
-    {
-        rapidjson::StringBuffer s;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-        instance.get_config().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-        q::data::File_Sink fs((q::Path(class_name + "_config.json")));
-        std::string data = s.GetString();
-        fs.write((uint8_t const* )data.data(), data.size());
-    }
+//    //write the jsons for testing - to see the structure
+//    {
+//        rapidjson::StringBuffer s;
+//        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+//        instance.get_init_params().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+//        q::data::File_Sink fs((q::Path(class_name + "_init_params.json")));
+//        std::string data = s.GetString();
+//        fs.write((uint8_t const* )data.data(), data.size());
+//    }
+//    {
+//        rapidjson::StringBuffer s;
+//        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+//        instance.get_config().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+//        q::data::File_Sink fs((q::Path(class_name + "_config.json")));
+//        std::string data = s.GetString();
+//        fs.write((uint8_t const* )data.data(), data.size());
+//    }
 
-    _register_node(class_name, ctor, instance.get_init_params(), instance.get_config());
+    _register_node(class_name, ctor);
 }
 
 template <class Base>
-auto Factory<Base>::create_node(HAL& hal, std::string const& class_name) -> std::unique_ptr<Base>
+auto Factory<Base>::create_node(std::string const& class_name) -> std::unique_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
-    return std::unique_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(hal)));
+    return std::unique_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(m_hal)));
 }
 template<class Base>
 auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
@@ -204,7 +203,7 @@ auto Factory<Base>::create_node_func(HAL& hal) -> Base*
 }
 
 template<class Base>
-void Factory<Base>::_register_node(std::string const& class_name, create_node_function ctor, rapidjson::Document&& init_params, rapidjson::Document&& config)
+void Factory<Base>::_register_node(std::string const& class_name, create_node_function ctor)
 {
     if (class_name.empty())
     {
@@ -216,18 +215,16 @@ void Factory<Base>::_register_node(std::string const& class_name, create_node_fu
         QLOGE("Error: class '{}' already defined.", class_name);
         return;
     }
-    m_name_registry[class_name] = { ctor, std::move(init_params), std::move(config) };
+    m_name_registry[class_name] = { ctor };
 }
 template<class Base>
-auto Factory<Base>::get_all() const -> std::vector<Node_Info>
+auto Factory<Base>::create_all() const -> std::vector<Node_Info>
 {
     std::vector<Node_Info> info;
     info.reserve(m_name_registry.size());
     for (auto const& n: m_name_registry)
     {
-        info.push_back({n.first,
-                        n.second.init_params,
-                        n.second.config});
+        info.push_back({n.first, std::unique_ptr<Base>((n.second.ctor)(m_hal))});
     }
     return info;
 }

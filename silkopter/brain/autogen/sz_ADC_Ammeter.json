@@ -23,8 +23,8 @@
     "name": "Current",
     "members":
     [
-        ["float", "bias", {"required": true}],
-        ["float", "scale", {"required": true}]
+        ["float", "bias", {"required": true, "default" : 0.0}],
+        ["float", "scale", {"required": true, "default" : 1.0}]
     ]
 },
 {

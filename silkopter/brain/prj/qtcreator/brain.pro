@@ -166,9 +166,7 @@ HEADERS += \
     ../../../libs/common/node/sink/ISink.h \
     ../../../libs/common/node/source/ISource.h \
     ../../../libs/common/node/stream/IStream.h \
-    ../../../libs/common/node/processor/IAHRS.h \
     ../../../libs/common/node/processor/IProcessor.h \
-    ../../../libs/common/node/processor/ITransform.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/Dead_Reckoning.h \
     ../../src/processor/ADC_Ammeter.h \
@@ -195,12 +193,9 @@ HEADERS += \
     ../../../libs/DSPFilters/include/DspFilters/State.h \
     ../../../libs/DSPFilters/include/DspFilters/Types.h \
     ../../../libs/DSPFilters/include/DspFilters/Utilities.h \
-    ../../../libs/common/node/processor/IFilter.h \
     ../../src/processor/LPF.h \
     ../../../libs/common/node/stream/IPWM_Value.h \
     ../../src/processor/Resampler.h \
-    ../../../libs/common/node/processor/IBattery.h \
-    ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/stream/ICardinal_Points.h \
     ../../../libs/common/node/stream/IBattery_State.h \
     ../../src/processor/LiPo_Battery.h \

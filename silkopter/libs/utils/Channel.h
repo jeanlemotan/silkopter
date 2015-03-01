@@ -53,6 +53,29 @@ namespace util
             off += sizeof(uint32_t) + val.size();
             return true;
         }
+        template<class T> inline auto get_value(std::vector<T>& val, RX_Buffer_t const& t, size_t& off) -> bool
+        {
+            val.clear();
+            uint32_t size = 0;
+            if (!get_value(size, t, off))
+            {
+                return false;
+            }
+            //sanity check
+            if (off + size > t.size())
+            {
+                return false;
+            }
+            val.resize(size);
+            for (auto& i: val)
+            {
+                if (!get_value(i, t, off))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         template<class T> void set_value_fixed(TX_Buffer_t& t, T const& val, size_t off)
         {
             QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
@@ -83,6 +106,14 @@ namespace util
             }
             set_value_fixed(t, val, off);
             off += val.size();
+        }
+        template<class T> inline void set_value(TX_Buffer_t& t, std::vector<T> const& val, size_t& off)
+        {
+            set_value(t, static_cast<uint32_t>(val.size()), off);
+            for (auto const& i: val)
+            {
+                set_value(t, i, off);
+            }
         }
     }
 

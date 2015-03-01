@@ -34,11 +34,8 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_input_stream_count() const -> size_t;
-    auto get_input_stream(size_t idx) -> stream::IStream&;
-
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::ILinear_Acceleration&;
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     auto get_name() const -> std::string const&;
 
@@ -70,7 +67,8 @@ private:
         std::string name;
         Sample last_sample;
         std::vector<Sample> samples;
-    } m_stream;
+    };
+    mutable Stream m_stream;
 };
 
 

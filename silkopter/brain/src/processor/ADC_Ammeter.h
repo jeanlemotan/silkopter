@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IADC_Value.h"
 #include "common/node/stream/ICurrent.h"
-#include "common/node/processor/ITransform.h"
+#include "common/node/processor/IProcessor.h"
 
 
 namespace sz
@@ -22,7 +22,7 @@ namespace node
 namespace processor
 {
 
-class ADC_Ammeter : public ITransform<stream::IADC_Value, stream::ICurrent>
+class ADC_Ammeter : public IProcessor
 {
 public:
     ADC_Ammeter(HAL& hal);
@@ -39,10 +39,9 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_input_stream_count() const -> size_t;
-    auto get_input_stream(size_t idx) -> stream::IADC_Value&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::ICurrent&;
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
+
     auto get_name() const -> std::string const&;
 
     void process();
@@ -67,7 +66,8 @@ private:
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;
-    } m_stream;
+    };
+    mutable Stream m_stream;
 };
 
 

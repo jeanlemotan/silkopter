@@ -1572,7 +1572,7 @@ namespace sz { namespace LiPo_Battery { struct Config {
 sz::LiPo_Battery::Inputs inputs;
 sz::LiPo_Battery::Outputs outputs;
 
-explicit Config():full_charge(), inputs(), outputs() {  }
+explicit Config():full_charge(2.2), inputs(), outputs() {  }
 
 
  

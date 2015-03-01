@@ -96,21 +96,15 @@ auto MS5611::get_name() const -> std::string const&
 {
     return m_init_params->name;
 }
-auto MS5611::get_output_stream_count() const -> size_t
+auto MS5611::get_outputs() const -> std::vector<Output>
 {
-    return 2;
+    std::vector<Output> outputs(2);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IPressure>();
+    outputs[0].stream = &m_pressure;
+    outputs[1].class_id = q::rtti::get_class_id<stream::ITemperature>();
+    outputs[1].stream = &m_temperature;
+    return outputs;
 }
-auto MS5611::get_output_stream(size_t idx) -> stream::IStream&
-{
-    QASSERT(idx < get_output_stream_count());
-    std::array<stream::IStream*, 2> streams =
-    {{
-        &m_pressure, &m_temperature
-    }};
-    QASSERT(streams.size() == get_output_stream_count());
-    return *streams[idx];
-}
-
 auto MS5611::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("ms5611::init");

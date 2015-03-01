@@ -178,15 +178,12 @@ auto Raspicam::get_name() const -> std::string const&
 {
     return m_init_params->name;
 }
-auto Raspicam::get_output_stream_count() const -> size_t
+auto Raspicam::get_outputs() const -> std::vector<Output>
 {
-    return 0;
-}
-auto Raspicam::get_output_stream(size_t idx) -> stream::IStream&
-{
-    QASSERT(idx < get_output_stream_count());
-    stream::IStream* ptr = nullptr;
-    return *ptr;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IVideo>();
+//    outputs[0].stream = &m_angular_velocity;
+    return outputs;
 }
 
 auto Raspicam::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool

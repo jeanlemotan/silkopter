@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/IFilter.h"
+#include "common/node/processor/IProcessor.h"
 #include "utils/Butterworth.h"
 #include <deque>
 
@@ -17,7 +17,7 @@ namespace processor
 
 
 template<class Stream_t>
-class Resampler : public IFilter<Stream_t>
+class Resampler : public IProcessor
 {
 public:
     static const int MAX_POLES = 8;
@@ -30,10 +30,9 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_input_stream_count() const -> size_t;
-    auto get_input_stream(size_t idx) -> Stream_t&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> Stream_t&;
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
+
     auto get_name() const -> std::string const&;
 
     void process();
@@ -70,7 +69,8 @@ private:
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
         std::string name;
-    } m_stream;
+    };
+    mutable Stream m_stream;
 };
 
 
@@ -159,27 +159,20 @@ auto Resampler<Stream_t>::get_config() -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_input_stream_count() const -> size_t
+auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    return m_input_stream ? 1 : 0;
+    std::vector<Input> inputs(1);
+    inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
+    inputs[0].stream = m_input_stream;
+    return inputs;
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_input_stream(size_t idx) -> Stream_t&
+auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx == 0);
-    QASSERT(m_input_stream);
-    return *m_input_stream;
-}
-template<class Stream_t>
-auto Resampler<Stream_t>::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-template<class Stream_t>
-auto Resampler<Stream_t>::get_output_stream(size_t idx) -> Stream_t&
-{
-    QASSERT(idx == 0);
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<Stream_t>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 template<class Stream_t>
 auto Resampler<Stream_t>::get_name() const -> std::string const&
@@ -192,13 +185,13 @@ void Resampler<Stream_t>::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_input_stream)
     {
         return;
     }
 
     //first accumulate input samples
-    auto const& is = get_input_stream(0).get_samples();
+    auto const& is = m_input_stream->get_samples();
 
     if (m_stream.rate == m_input_stream->get_rate())
     {

@@ -11,7 +11,10 @@ namespace processor
 
 class IMultirotor : public IProcessor
 {
+    DEFINE_RTTI_CLASS(IMultirotor, IProcessor);
 public:
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IMultirotor>(); }
+
     enum class Mode : uint8_t
     {
         IDLE,

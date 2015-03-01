@@ -359,21 +359,19 @@ auto MPU9250::get_name() const -> std::string const&
 {
     return m_init_params->name;
 }
-auto MPU9250::get_output_stream_count() const -> size_t
+auto MPU9250::get_outputs() const -> std::vector<Output>
 {
-    return 4;
+    std::vector<Output> outputs(4);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    outputs[0].stream = &m_angular_velocity;
+    outputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    outputs[1].stream = &m_acceleration;
+    outputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    outputs[2].stream = &m_magnetic_field;
+    outputs[3].class_id = q::rtti::get_class_id<stream::ITemperature>();
+    outputs[3].stream = &m_temperature;
+    return outputs;
 }
-auto MPU9250::get_output_stream(size_t idx) -> stream::IStream&
-{
-    QASSERT(idx < get_output_stream_count());
-    std::array<stream::IStream*, 4> streams =
-    {{
-        &m_angular_velocity, &m_acceleration, &m_magnetic_field, &m_temperature
-    }};
-    QASSERT(streams.size() == get_output_stream_count());
-    return *streams[idx];
-}
-
 auto MPU9250::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("mpu9250::init");

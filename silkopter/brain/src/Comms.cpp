@@ -219,26 +219,46 @@ void Comms::send_telemetry_streams()
     }
 }
 
+template<class T>
+void pack_io_info(Comms::Setup_Channel& channel, std::vector<T> const& io)
+{
+    channel.pack_param(static_cast<uint32_t>(io.size()));
+    for (auto const& i: io)
+    {
+        channel.pack_param(i.class_id);
+        channel.pack_param(i.name);
+    }
+}
+template<class T>
+void pack_io_stream_name(Comms::Setup_Channel& channel, std::vector<T> const& io)
+{
+    channel.pack_param(static_cast<uint32_t>(io.size()));
+    for (auto const& i: io)
+    {
+        channel.pack_param(i.stream ? i.stream->get_name() : std::string());
+    }
+}
+
+static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string str(buffer.GetString(), buffer.GetSize());
+    channel.pack_param(str);
+}
+
+
 void Comms::handle_enumerate_node_factory()
 {
-    auto pack_json = [this](rapidjson::Document const& json)
-    {
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        json.Accept(writer);
-        std::string str(buffer.GetString(), buffer.GetSize());
-        m_setup_channel.pack_param(str);
-    };
-
-
     uint32_t req_id = 0;
     if (m_setup_channel.unpack(req_id))
     {
         QLOGI("Req Id: {} - enumerate node facrory", req_id);
-        auto buses = m_hal.get_bus_factory().get_all();
-        auto source = m_hal.get_source_factory().get_all();
-        auto sinks = m_hal.get_sink_factory().get_all();
-        auto processors = m_hal.get_processor_factory().get_all();
+        auto buses = m_hal.get_bus_factory().create_all();
+        auto source = m_hal.get_source_factory().create_all();
+        auto sinks = m_hal.get_sink_factory().create_all();
+        auto processors = m_hal.get_processor_factory().create_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_FACTORY);
         m_setup_channel.pack_param(req_id);
@@ -250,26 +270,34 @@ void Comms::handle_enumerate_node_factory()
         for (auto const& n: buses)
         {
             m_setup_channel.pack_param(n.name);
-            pack_json(n.init_params);
-            pack_json(n.config);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
         for (auto const& n: source)
         {
             m_setup_channel.pack_param(n.name);
-            pack_json(n.init_params);
-            pack_json(n.config);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_io_info(m_setup_channel, n.node->get_outputs());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
         for (auto const& n: sinks)
         {
             m_setup_channel.pack_param(n.name);
-            pack_json(n.init_params);
-            pack_json(n.config);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_io_info(m_setup_channel, n.node->get_inputs());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
         for (auto const& n: processors)
         {
             m_setup_channel.pack_param(n.name);
-            pack_json(n.init_params);
-            pack_json(n.config);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_io_info(m_setup_channel, n.node->get_inputs());
+            pack_io_info(m_setup_channel, n.node->get_outputs());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
 
         m_setup_channel.end_pack();
@@ -282,15 +310,6 @@ void Comms::handle_enumerate_node_factory()
 
 void Comms::handle_enumerate_nodes()
 {
-    auto pack_json = [this](rapidjson::Document const& json)
-    {
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        json.Accept(writer);
-        std::string str(buffer.GetString(), buffer.GetSize());
-        m_setup_channel.pack_param(str);
-    };
-
     uint32_t req_id = 0;
     if (m_setup_channel.unpack(req_id))
     {
@@ -313,8 +332,8 @@ void Comms::handle_enumerate_nodes()
         {
             m_setup_channel.pack_param(n->get_name());
             m_setup_channel.pack_param(n->get_type());
-            pack_json(n->get_init_params());
-            pack_json(n->get_config());
+            pack_json(m_setup_channel, n->get_init_params());
+            pack_json(m_setup_channel, n->get_config());
         }
         for (auto const& n: streams)
         {
@@ -325,40 +344,27 @@ void Comms::handle_enumerate_nodes()
         for (auto const& n: sources)
         {
             m_setup_channel.pack_param(n->get_name());
-            pack_json(n->get_init_params());
-            pack_json(n->get_config());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
-            for (size_t i = 0; i < n->get_output_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
-            }
+            m_setup_channel.pack_param(n->get_type());
+            pack_io_stream_name(m_setup_channel, n->get_outputs());
+            pack_json(m_setup_channel, n->get_init_params());
+            pack_json(m_setup_channel, n->get_config());
         }
         for (auto const& n: sinks)
         {
             m_setup_channel.pack_param(n->get_name());
-            pack_json(n->get_init_params());
-            pack_json(n->get_config());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
-            for (size_t i = 0; i < n->get_input_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
-            }
+            m_setup_channel.pack_param(n->get_type());
+            pack_io_stream_name(m_setup_channel, n->get_inputs());
+            pack_json(m_setup_channel, n->get_init_params());
+            pack_json(m_setup_channel, n->get_config());
         }
         for (auto const& n: processors)
         {
             m_setup_channel.pack_param(n->get_name());
-            pack_json(n->get_init_params());
-            pack_json(n->get_config());
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_input_stream_count()));
-            m_setup_channel.pack_param(static_cast<uint32_t>(n->get_output_stream_count()));
-            for (size_t i = 0; i < n->get_input_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_input_stream(i).get_name());
-            }
-            for (size_t i = 0; i < n->get_output_stream_count(); i++)
-            {
-                m_setup_channel.pack_param(n->get_output_stream(i).get_name());
-            }
+            m_setup_channel.pack_param(n->get_type());
+            pack_io_stream_name(m_setup_channel, n->get_inputs());
+            pack_io_stream_name(m_setup_channel, n->get_outputs());
+            pack_json(m_setup_channel, n->get_init_params());
+            pack_json(m_setup_channel, n->get_config());
         }
 
         m_setup_channel.end_pack();

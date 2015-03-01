@@ -36,8 +36,7 @@ public:
     auto get_config() -> rapidjson::Document;
 
     auto get_name() const -> std::string const&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -66,7 +65,8 @@ private:
         Sample last_sample;
         uint32_t rate = 0;
         std::string name;
-    } m_adc[0];
+    };
+    mutable ADC_Value m_adc[2];
 };
 
 

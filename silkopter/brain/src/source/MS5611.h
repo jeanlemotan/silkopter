@@ -36,8 +36,7 @@ public:
     auto get_config() -> rapidjson::Document;
 
     auto get_name() const -> std::string const&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -75,7 +74,8 @@ private:
 
         std::vector<Sample> samples;
         Sample last_sample;
-    } m_pressure;
+    };
+    mutable Pressure m_pressure;
 
     struct Temperature : public stream::ITemperature, public Common
     {
@@ -85,7 +85,8 @@ private:
 
         std::vector<Sample> samples;
         Sample last_sample;
-    } m_temperature;
+    };
+    mutable Temperature m_temperature;
 
     double		m_c1 = 0;
     double		m_c2 = 0;

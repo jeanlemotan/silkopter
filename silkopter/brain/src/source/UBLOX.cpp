@@ -204,14 +204,12 @@ auto UBLOX::get_name() const -> std::string const&
 {
     return m_init_params->name;
 }
-auto UBLOX::get_output_stream_count() const -> size_t
+auto UBLOX::get_outputs() const -> std::vector<Output>
 {
-    return 1;
-}
-auto UBLOX::get_output_stream(size_t idx) -> stream::IStream&
-{
-    QASSERT(idx < get_output_stream_count());
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 auto UBLOX::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool

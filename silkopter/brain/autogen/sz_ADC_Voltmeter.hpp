@@ -783,7 +783,7 @@ namespace sz { namespace ADC_Voltmeter { struct Voltage {
  float bias;
 float scale;
 
-explicit Voltage():bias(), scale() {  }
+explicit Voltage():bias(0.0), scale(1.0) {  }
 
 
  

@@ -15,6 +15,8 @@ class IProcessor : q::util::Noncopyable
 public:
     virtual ~IProcessor() {}
 
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IProcessor>(); }
+
     virtual auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool = 0;
     virtual auto get_init_params() -> rapidjson::Document = 0;
 
@@ -23,12 +25,21 @@ public:
 
     virtual auto get_name() const -> std::string const& = 0;
 
-    virtual auto get_input_stream_count() const -> size_t = 0;
-    virtual auto get_input_stream(size_t idx) -> stream::IStream& = 0;
+    struct Input
+    {
+        q::rtti::class_id class_id = 0;
+        std::string name;
+        stream::IStream* stream = nullptr;
+    };
+    virtual auto get_inputs() const -> std::vector<Input> = 0;
 
-    virtual auto get_output_stream_count() const -> size_t = 0;
-    virtual auto get_output_stream(size_t idx) -> stream::IStream& = 0;
-
+    struct Output
+    {
+        q::rtti::class_id class_id = 0;
+        std::string name;
+        stream::IStream* stream = nullptr;
+    };
+    virtual auto get_outputs() const -> std::vector<Output> = 0;
 };
 
 

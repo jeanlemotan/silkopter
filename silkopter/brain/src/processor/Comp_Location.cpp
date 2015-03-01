@@ -52,39 +52,32 @@ auto Comp_Location::init() -> bool
     return true;
 }
 
-auto Comp_Location::get_input_stream_count() const -> size_t
+auto Comp_Location::get_inputs() const -> std::vector<Input>
 {
-    if (m_location_stream && m_linear_acceleration_stream && m_pressure_stream)
-    {
-        return 3;
-    }
-    return 0;
+    std::vector<Input> inputs(3);
+    inputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
+    inputs[0].stream = m_location_stream;
+    inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
+    inputs[1].stream = m_linear_acceleration_stream;
+    inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
+    inputs[2].stream = m_pressure_stream;
+    return inputs;
 }
-auto Comp_Location::get_input_stream(size_t idx) -> stream::IStream&
+auto Comp_Location::get_outputs() const -> std::vector<Output>
 {
-    QASSERT(idx < get_input_stream_count());
-    std::array<stream::IStream*, 3> streams =
-    {{
-        m_location_stream, m_linear_acceleration_stream, m_pressure_stream
-    }};
-    QASSERT(streams.size() == get_input_stream_count());
-    return *streams[idx];
-}
-auto Comp_Location::get_output_stream_count() const -> size_t
-{
-    return 1;
-}
-auto Comp_Location::get_output_stream(size_t idx) -> stream::ILocation&
-{
-    QASSERT(idx < get_output_stream_count());
-    return m_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
+    outputs[0].stream = &m_stream;
+    return outputs;
 }
 
 void Comp_Location::process()
 {
     m_stream.samples.clear();
 
-    if (get_input_stream_count() == 0)
+    if (!m_location_stream ||
+        !m_linear_acceleration_stream ||
+        !m_pressure_stream)
     {
         return;
     }

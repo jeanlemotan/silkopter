@@ -39,8 +39,7 @@ public:
     auto get_config() -> rapidjson::Document;
 
     auto get_name() const -> std::string const&;
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IStream&;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -116,7 +115,8 @@ private:
         bool has_pollh = false;
         bool has_sol = false;
         q::Clock::time_point last_complete_time_point;
-    } m_stream;
+    };
+    mutable Stream m_stream;
 };
 
 

@@ -36,11 +36,8 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_input_stream_count() const -> size_t;
-    auto get_input_stream(size_t idx) -> stream::IStream&;
-
-    auto get_output_stream_count() const -> size_t;
-    auto get_output_stream(size_t idx) -> stream::IBattery_State&;
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     auto get_cell_count() const -> boost::optional<uint8_t>;
 
@@ -80,7 +77,8 @@ private:
         Sample last_sample;
         std::vector<Sample> samples;
         std::string name;
-    } m_stream;
+    };
+    mutable Stream m_stream;
 };
 
 

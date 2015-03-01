@@ -19,13 +19,15 @@ public:
     virtual ~ISink() {}
 
     virtual auto get_name() const -> std::string const& = 0;
-    virtual auto get_type() const -> std::string const&
-    {
-        return q::rtti::get_class_name<ISink>();
-    }
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<ISink>(); }
 
-    virtual auto get_input_stream_count() const -> size_t = 0;
-    virtual auto get_input_stream(size_t idx) -> stream::IStream& = 0;
+    struct Input
+    {
+        q::rtti::class_id class_id = 0;
+        std::string name;
+        stream::IStream* stream = nullptr;
+    };
+    virtual auto get_inputs() const -> std::vector<Input> = 0;
 
     virtual auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool = 0;
     virtual auto get_init_params() -> rapidjson::Document = 0;
