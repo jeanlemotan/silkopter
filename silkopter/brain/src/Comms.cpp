@@ -224,7 +224,7 @@ void Comms::handle_enumerate_node_factory()
     auto pack_json = [this](rapidjson::Document const& json)
     {
         rapidjson::StringBuffer buffer;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
         std::string str(buffer.GetString(), buffer.GetSize());
         m_setup_channel.pack_param(str);
@@ -285,7 +285,7 @@ void Comms::handle_enumerate_nodes()
     auto pack_json = [this](rapidjson::Document const& json)
     {
         rapidjson::StringBuffer buffer;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
         std::string str(buffer.GetString(), buffer.GetSize());
         m_setup_channel.pack_param(str);
@@ -408,7 +408,7 @@ void Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
         config_str.clear();
         auto config = node->get_config();
         rapidjson::StringBuffer s;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
         config.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
         config_str = s.GetString();
         m_setup_channel.pack(message, req_id, name, config_str);

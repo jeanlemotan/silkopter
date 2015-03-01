@@ -205,7 +205,7 @@ void Comms::handle_enumerate_node_factory()
             m_setup_channel.unpack_param(name);
             m_setup_channel.unpack_param(init_params_str);
             m_setup_channel.unpack_param(config_str);
-            QLOGI("\tBus: {}", name, init_params_str, config_str);
+            QLOGI("\tBus: {}, init_params {}, config {}", name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!init_params || !config)
@@ -221,7 +221,7 @@ void Comms::handle_enumerate_node_factory()
             m_setup_channel.unpack_param(name);
             m_setup_channel.unpack_param(init_params_str);
             m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSource: {}", name, init_params_str, config_str);
+            QLOGI("\tSource: {}, init_params {}, config {}", name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!init_params || !config)
@@ -237,7 +237,7 @@ void Comms::handle_enumerate_node_factory()
             m_setup_channel.unpack_param(name);
             m_setup_channel.unpack_param(init_params_str);
             m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSink: {}", name, init_params_str, config_str);
+            QLOGI("\tSink: {}, init_params {}, config {}", name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!init_params || !config)
@@ -253,7 +253,7 @@ void Comms::handle_enumerate_node_factory()
             m_setup_channel.unpack_param(name);
             m_setup_channel.unpack_param(init_params_str);
             m_setup_channel.unpack_param(config_str);
-            QLOGI("\tProcessor: {}", name, init_params_str, config_str);
+            QLOGI("\tProcessor: {}, init_params {}, config {}", name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!init_params || !config)

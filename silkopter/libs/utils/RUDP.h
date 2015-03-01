@@ -602,7 +602,7 @@ namespace util
 
         auto& channel_data = m_tx.channel_data[channel_idx];
 
-        bool is_compressed = false;//params.is_compressed;
+        bool is_compressed = params.is_compressed;
         size_t uncompressed_size = size;
         if (is_compressed)
         {
