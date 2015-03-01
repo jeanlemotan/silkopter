@@ -94,26 +94,26 @@ HAL::HAL()
     m_processor_factory.register_node<processor::Comp_Location>(*this, "Comp_Location");
     m_processor_factory.register_node<processor::Inertial>(*this, "Inertial");
     m_processor_factory.register_node<processor::LiPo_Battery>(*this, "LiPo_Battery");
-    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "LPF_Acceleration");
-    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "LPF_Angular_Velocity");
-    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "LPF_ADC_Value");
-    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "LPF_Current");
-    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "LPF_Voltage");
-    m_processor_factory.register_node<processor::LPF<stream::ILocation>>(*this, "LPF_Location");
-    m_processor_factory.register_node<processor::LPF<stream::IDistance>>(*this, "LPF_Distance");
-    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "LPF_Magnetic_Field");
-    m_processor_factory.register_node<processor::LPF<stream::IPressure>>(*this, "LPF_Pressure");
-    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "LPF_Temperature");
-    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Resampler_Acceleration");
-    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Resampler_Angular_Velocity");
-    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "Resampler_ADC_Value");
-    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Resampler_Current");
-    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Resampler_Voltage");
-    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Resampler_Location");
-    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Resampler_Distance");
-    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Resampler_Magnetic_Field");
-    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Resampler_Pressure");
-    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Resampler_Temperature");
+    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>(*this, "Acceleration_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>(*this, "Angular_Velocity_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>(*this, "ADC_Value_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>(*this, "Current_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>(*this, "Voltage_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ILocation>>(*this, "Location_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IDistance>>(*this, "Distance_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>(*this, "Magnetic_Field_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::IPressure>>(*this, "Pressure_LPF");
+    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>(*this, "Temperature_LPF");
+    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>(*this, "Acceleration_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>(*this, "Angular_Velocity_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>(*this, "ADC_Value_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>(*this, "Current_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>(*this, "Voltage_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>(*this, "Location_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>(*this, "Distance_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>(*this, "Magnetic_Field_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>(*this, "Pressure_Resampler");
+    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>(*this, "Temperature_Resampler");
 }
 
 HAL::~HAL()
@@ -185,6 +185,23 @@ auto HAL::get_settings(q::Path const& path) -> rapidjson::Value&
         return m_emptyValue;
     }
     return *v;
+}
+
+auto HAL::get_bus_factory()    -> Factory<node::bus::IBus>&
+{
+    return m_bus_factory;
+}
+auto HAL::get_source_factory()  -> Factory<node::source::ISource>&
+{
+    return m_source_factory;
+}
+auto HAL::get_sink_factory()    -> Factory<node::sink::ISink>&
+{
+    return m_sink_factory;
+}
+auto HAL::get_processor_factory()  -> Factory<node::processor::IProcessor>&
+{
+    return m_processor_factory;
 }
 
 auto HAL::get_buses()    -> Registry<node::bus::IBus>&
@@ -331,7 +348,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         auto* config = jsonutil::find_value(it->value, std::string("config"));
         if (!init_params || !config)
         {
-            QLOGE("Bus {} is missing the {}", init_params ? "config" : "init_params");
+            QLOGE("Bus {} is missing the {}", type, init_params ? "config" : "init_params");
             return false;
         }
         if (!create_node<Base>(type, *init_params, *config))

@@ -10,8 +10,8 @@ namespace sz
 {
 namespace RC5T619
 {
-class Init_Params;
-class Config;
+struct Init_Params;
+struct Config;
 }
 }
 

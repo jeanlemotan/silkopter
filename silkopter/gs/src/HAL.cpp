@@ -24,6 +24,29 @@ HAL::~HAL()
 {
 }
 
+auto HAL::get_bus_factory()  -> Factory<node::bus::IBus>&
+{
+    return m_bus_factory;
+}
+auto HAL::get_source_factory()  -> Factory<node::source::ISource>&
+{
+    return m_source_factory;
+}
+auto HAL::get_sink_factory()    -> Factory<node::sink::ISink>&
+{
+    return m_sink_factory;
+}
+auto HAL::get_processor_factory()  -> Factory<node::processor::IProcessor>&
+{
+    return m_processor_factory;
+}
+
+
+
+auto HAL::get_buses()  -> Registry<node::bus::IBus>&
+{
+    return m_buses;
+}
 auto HAL::get_sources()  -> Registry<node::source::ISource>&
 {
     return m_sources;
@@ -40,7 +63,6 @@ auto HAL::get_streams()  -> Registry<node::stream::IStream>&
 {
     return m_streams;
 }
-
 
 }
 

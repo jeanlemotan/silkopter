@@ -7,8 +7,8 @@ namespace sz
 {
 namespace I2C_Linux
 {
-class Init_Params;
-class Config;
+struct Init_Params;
+struct Config;
 }
 }
 

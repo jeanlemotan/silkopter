@@ -52,10 +52,8 @@ private:
     template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
     void send_telemetry_streams();
 
-    void handle_enumerate_sources();
-    void handle_enumerate_sinks();
-    void handle_enumerate_streams();
-    void handle_enumerate_processors();
+    void handle_enumerate_node_factory();
+    void handle_enumerate_nodes();
 
     template<class Registry, class Node_Base> void handle_node_config(comms::Setup_Message msg, Registry const& registry);
 

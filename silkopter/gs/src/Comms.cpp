@@ -125,10 +125,8 @@ void Comms::reset()
 
 void Comms::request_nodes()
 {
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_STREAMS, ++m_last_req_id);
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_SOURCES, ++m_last_req_id);
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_SINKS, ++m_last_req_id);
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_PROCESSORS, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODE_FACTORY, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
 }
 
 
@@ -164,151 +162,113 @@ void Comms::request_nodes()
 //    }
 //}
 
-void Comms::handle_enumerate_sources()
+void Comms::handle_enumerate_node_factory()
 {
-    uint32_t req_id = 0;
-    uint32_t count = 0;
-    std::string name;
-    if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id) &&
-        m_setup_channel.unpack_param(count))
+    auto parse_json = [](std::string const& str) -> std::unique_ptr<rapidjson::Document>
     {
-        QLOGI("Req Id: {}, enumerate {} sources", req_id, count);
-
-        for (uint32_t i = 0; i < count; i++)
+        std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
+        json->SetObject();
+        if (!str.empty() && json->Parse(str.c_str()).HasParseError())
         {
-            auto node = std::make_shared<node::source::Source>();
-            uint32_t ocount = 0;
-            m_setup_channel.unpack_param(node->name);
-            m_setup_channel.unpack_param(ocount);
-            QLOGI("\t{}", node->name, ocount);
-            for (uint32_t j = 0; j < ocount; j++)
-            {
-                m_setup_channel.unpack_param(name);
-                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-                if (!stream)
-                {
-                    QLOGE("\t\tOUT: Cannot find stream '{}'", name);
-                    return;
-                }
-                QLOGI("\t\tOUT: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
-                node->output_streams.push_back(stream);
-            }
-            m_hal.get_sources().add(node);
+//            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+            return nullptr;
+        }
+        return std::move(json);
+    };
 
-            //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::SOURCE_CONFIG, ++m_last_req_id, node->name);
+    uint32_t req_id = 0;
+    if (m_setup_channel.begin_unpack() &&
+        m_setup_channel.unpack_param(req_id))
+    {
+        uint32_t bus_count = 0;
+        uint32_t source_count = 0;
+        uint32_t sink_count = 0;
+        uint32_t processor_count = 0;
+        std::string name;
+        std::string init_params_str;
+        std::string config_str;
+
+        bool ok = m_setup_channel.unpack_param(bus_count);
+        ok &= m_setup_channel.unpack_param(source_count);
+        ok &= m_setup_channel.unpack_param(sink_count);
+        ok &= m_setup_channel.unpack_param(processor_count);
+        if (!ok)
+        {
+            QLOGE("Error in unpacking enumerate node factory message");
+            return;
+        }
+
+        QLOGI("Req Id: {}, Factory has {} buses, {} sources, {} sinks and {} processors", req_id, bus_count, source_count, sink_count, processor_count);
+
+        for (uint32_t i = 0; i < bus_count; i++)
+        {
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            QLOGI("\tBus: {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            m_hal.get_bus_factory().register_node(name, std::move(*init_params), std::move(*config));
+        }
+
+        for (uint32_t i = 0; i < source_count; i++)
+        {
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            QLOGI("\tSource: {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            m_hal.get_source_factory().register_node(name, std::move(*init_params), std::move(*config));
+        }
+
+        for (uint32_t i = 0; i < sink_count; i++)
+        {
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            QLOGI("\tSink: {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            m_hal.get_sink_factory().register_node(name, std::move(*init_params), std::move(*config));
+        }
+
+        for (uint32_t i = 0; i < processor_count; i++)
+        {
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            QLOGI("\tProcessor: {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            m_hal.get_processor_factory().register_node(name, std::move(*init_params), std::move(*config));
         }
 
         m_setup_channel.end_unpack();
     }
     else
     {
-        QLOGE("Error in enumerating sources");
-    }
-}
-
-void Comms::handle_enumerate_sinks()
-{
-    uint32_t req_id = 0;
-    uint32_t count = 0;
-    std::string name;
-    if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id) &&
-        m_setup_channel.unpack_param(count))
-    {
-        QLOGI("Req Id: {}, enumerate {} sinks", req_id, count);
-
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto node = std::make_shared<node::sink::Sink>();
-            uint32_t icount = 0;
-            m_setup_channel.unpack_param(node->name);
-            m_setup_channel.unpack_param(icount);
-            QLOGI("\t{}", node->name, icount);
-            for (uint32_t j = 0; j < icount; j++)
-            {
-                m_setup_channel.unpack_param(name);
-                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-                if (!stream)
-                {
-                    QLOGE("\t\tIN: Cannot find stream '{}'", name);
-                    return;
-                }
-                QLOGI("\t\tIN: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
-                node->input_streams.push_back(stream);
-            }
-            m_hal.get_sinks().add(node);
-
-            //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::SINK_CONFIG, ++m_last_req_id, node->name);
-        }
-
-        m_setup_channel.end_unpack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating sinks");
-    }
-}
-
-void Comms::handle_enumerate_processors()
-{
-    uint32_t req_id = 0;
-    uint32_t count = 0;
-    std::string name;
-    if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id) &&
-        m_setup_channel.unpack_param(count))
-    {
-        QLOGI("Req Id: {}, enumerate {} processors", req_id, count);
-
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto node = std::make_shared<node::processor::Processor>();
-            uint32_t icount = 0;
-            m_setup_channel.unpack_param(node->name);
-            m_setup_channel.unpack_param(icount);
-            QLOGI("\t{}", node->name, icount);
-            for (uint32_t j = 0; j < icount; j++)
-            {
-                m_setup_channel.unpack_param(name);
-                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-                if (!stream)
-                {
-                    QLOGE("\t\tIN: Cannot find stream '{}'", name);
-                    return;
-                }
-                QLOGI("\t\tIN: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
-                node->input_streams.push_back(stream);
-            }
-
-            uint32_t ocount = 0;
-            m_setup_channel.unpack_param(ocount);
-            for (uint32_t j = 0; j < ocount; j++)
-            {
-                m_setup_channel.unpack_param(name);
-                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-                if (!stream)
-                {
-                    QLOGE("\t\tOUT: Cannot find stream '{}'", name);
-                    return;
-                }
-                QLOGI("\t\tOUT: stream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
-                node->output_streams.push_back(stream);
-            }
-
-            m_hal.get_processors().add(node);
-
-            //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::PROCESSOR_CONFIG, ++m_last_req_id, node->name);
-        }
-
-        m_setup_channel.end_unpack();
-    }
-    else
-    {
-        QLOGE("Error in enumerating processors");
+        QLOGE("Error in enumerating node factory");
     }
 }
 
@@ -325,63 +285,238 @@ auto create_stream_from_rtti(std::string const& rtti, std::string const& name, u
     return std::shared_ptr<silk::node::stream::IStream>();
 }
 
-void Comms::handle_enumerate_streams()
+void Comms::handle_enumerate_nodes()
 {
-    uint32_t req_id = 0;
-    uint32_t count = 0;
-    std::string type;
-    std::string name;
-    uint32_t rate = 0;
-    if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id) &&
-        m_setup_channel.unpack_param(count))
+    auto parse_json = [](std::string const& str) -> std::unique_ptr<rapidjson::Document>
     {
-        QLOGI("Req Id: {}, enumerate {} streams", req_id, count);
-
-        for (uint32_t i = 0; i < count; i++)
+        std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
+        json->SetObject();
+        if (!str.empty() && json->Parse(str.c_str()).HasParseError())
         {
+//            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+            return nullptr;
+        }
+        return std::move(json);
+    };
+
+
+    uint32_t req_id = 0;
+    if (m_setup_channel.begin_unpack() &&
+        m_setup_channel.unpack_param(req_id))
+    {
+        uint32_t bus_count = 0;
+        uint32_t source_count = 0;
+        uint32_t sink_count = 0;
+        uint32_t processor_count = 0;
+        uint32_t stream_count = 0;
+        std::string name;
+        std::string type;
+        std::string init_params_str;
+        std::string config_str;
+
+        bool ok = m_setup_channel.unpack_param(bus_count);
+        ok &= m_setup_channel.unpack_param(source_count);
+        ok &= m_setup_channel.unpack_param(sink_count);
+        ok &= m_setup_channel.unpack_param(processor_count);
+        ok &= m_setup_channel.unpack_param(stream_count);
+        if (!ok)
+        {
+            QLOGE("Error in unpacking enumerate nodes message");
+            return;
+        }
+
+        QLOGI("Req Id: {}, Factory has {} buses, {} sources, {} sinks, {} processors and {} streams", req_id, bus_count, source_count, sink_count, processor_count, stream_count);
+
+        for (uint32_t i = 0; i < bus_count; i++)
+        {
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(type);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            QLOGI("\tBus: {}, type {}, init_params {}, config {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            auto node = std::make_shared<node::bus::Bus>();
+            node->type = type;
+            node->name = name;
+            node->init_params = std::move(*init_params);
+            node->config = std::move(*config);
+            m_hal.get_buses().add(node);
+        }
+
+        for (uint32_t i = 0; i < stream_count; i++)
+        {
+            uint32_t rate = 0;
             m_setup_channel.unpack_param(type);
             m_setup_channel.unpack_param(name);
             m_setup_channel.unpack_param(rate);
+            QLOGI("\tStream: {}, type {}, rate {}Hz", name, type, rate);
 
-            auto stream = create_stream_from_rtti<node::stream::Acceleration>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Angular_Velocity>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Magnetic_Field>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Pressure>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Battery_State>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Linear_Acceleration>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Cardinal_Points>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Current>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Voltage>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Distance>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Location>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::PWM_Value>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Reference_Frame>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::Temperature>(type, name, rate);
-            stream = stream ? stream : create_stream_from_rtti<node::stream::ADC_Value>(type, name, rate);
-    //      stream = stream ? stream : create_stream_from_rtti<node::stream::Video>(type);
+            auto node = create_stream_from_rtti<node::stream::Acceleration>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Angular_Velocity>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Magnetic_Field>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Pressure>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Battery_State>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Linear_Acceleration>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Cardinal_Points>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Current>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Voltage>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Distance>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Location>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::PWM_Value>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Reference_Frame>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::Temperature>(type, name, rate);
+            node = node ? node : create_stream_from_rtti<node::stream::ADC_Value>(type, name, rate);
+    //      node = node ? node : create_stream_from_rtti<node::stream::Video>(type);
 
-            if (!stream)
+            if (!node)
             {
                 QLOGE("\tCannot create stream {}, type {}, rate {}Hz", name, type, rate);
                 return;
             }
 
-            QLOGI("\tstream {}, type {}, rate {}Hz", stream->get_name(), stream->get_type(), stream->get_rate());
-
-            m_hal.get_streams().add(stream);
-
-            //send request to get config
-            m_setup_channel.pack(comms::Setup_Message::STREAM_CONFIG, ++m_last_req_id, name);
+            m_hal.get_streams().add(node);
         }
+
+        for (uint32_t i = 0; i < source_count; i++)
+        {
+            uint32_t output_count = 0;
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(type);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            m_setup_channel.unpack_param(output_count);
+            QLOGI("\tSource: {}, type {}, init_params {}, config {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            auto node = std::make_shared<node::source::Source>();
+            node->name = name;
+            node->init_params = std::move(*init_params);
+            node->config = std::move(*config);
+
+            for (uint32_t i = 0; i < output_count; i++)
+            {
+                m_setup_channel.unpack_param(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                if (!stream)
+                {
+                    QLOGE("\t\tCannot find output stream {}", name);
+                    return;
+                }
+                QLOGI("\t\tOutput stream {}", name);
+                node->output_streams.push_back(stream);
+            }
+
+            m_hal.get_sources().add(node);
+        }
+
+        for (uint32_t i = 0; i < sink_count; i++)
+        {
+            uint32_t input_count = 0;
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(type);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            m_setup_channel.unpack_param(input_count);
+            QLOGI("\tSink: {}, type {}, init_params {}, config {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            auto node = std::make_shared<node::sink::Sink>();
+            node->name = name;
+            node->init_params = std::move(*init_params);
+            node->config = std::move(*config);
+
+            for (uint32_t i = 0; i < input_count; i++)
+            {
+                m_setup_channel.unpack_param(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                if (!stream)
+                {
+                    QLOGE("\t\tCannot find input stream {}", name);
+                    return;
+                }
+                QLOGI("\t\tInput stream {}", name);
+                node->input_streams.push_back(stream);
+            }
+
+            m_hal.get_sinks().add(node);
+        }
+
+        for (uint32_t i = 0; i < processor_count; i++)
+        {
+            uint32_t input_count = 0;
+            uint32_t output_count = 0;
+            m_setup_channel.unpack_param(name);
+            m_setup_channel.unpack_param(type);
+            m_setup_channel.unpack_param(init_params_str);
+            m_setup_channel.unpack_param(config_str);
+            m_setup_channel.unpack_param(input_count);
+            m_setup_channel.unpack_param(output_count);
+            QLOGI("\tProcessor: {}, type {}, init_params {}, config {}", name, init_params_str, config_str);
+            auto init_params = parse_json(init_params_str);
+            auto config = parse_json(config_str);
+            if (!init_params || !config)
+            {
+                QLOGE("\t\tBad init_params or config jsons");
+                return;
+            }
+            auto node = std::make_shared<node::processor::Processor>();
+            node->name = name;
+            node->init_params = std::move(*init_params);
+            node->config = std::move(*config);
+
+            for (uint32_t i = 0; i < input_count; i++)
+            {
+                m_setup_channel.unpack_param(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                if (!stream)
+                {
+                    QLOGE("\t\tCannot find input stream {}", name);
+                    return;
+                }
+                QLOGI("\t\tOutput stream {}", name);
+                node->input_streams.push_back(stream);
+            }
+            for (uint32_t i = 0; i < output_count; i++)
+            {
+                m_setup_channel.unpack_param(name);
+                auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+                if (!stream)
+                {
+                    QLOGE("\t\tCannot find output stream {}", name);
+                    return;
+                }
+                QLOGI("\t\tInput stream {}", name);
+                node->output_streams.push_back(stream);
+            }
+
+           m_hal.get_processors().add(node);
+        }
+
 
         m_setup_channel.end_unpack();
     }
     else
     {
-        QLOGE("Error in enumerating streams");
+        QLOGE("Error in enumerating node factory");
     }
 }
+
 
 void Comms::handle_source_config()
 {
@@ -482,38 +617,38 @@ void Comms::handle_processor_config()
     }
 }
 
-void Comms::handle_stream_config()
-{
-    uint32_t req_id = 0;
-    std::string name;
-    std::string config_str;
-    bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name) &&
-                m_setup_channel.unpack_param(config_str);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack node config");
-        return;
-    }
+//void Comms::handle_stream_config()
+//{
+//    uint32_t req_id = 0;
+//    std::string name;
+//    std::string config_str;
+//    bool ok = m_setup_channel.begin_unpack() &&
+//                m_setup_channel.unpack_param(req_id) &&
+//                m_setup_channel.unpack_param(name) &&
+//                m_setup_channel.unpack_param(config_str);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack node config");
+//        return;
+//    }
 
-    auto node = m_hal.get_streams().find_by_name<node::stream::Stream_Common>(name);
-    if (!node)
-    {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
-        return;
-    }
+//    auto node = m_hal.get_streams().find_by_name<node::stream::Stream_Common>(name);
+//    if (!node)
+//    {
+//        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+//        return;
+//    }
 
-    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
+//    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    node->config.SetObject();
-    if (!config_str.empty() &&
-            node->config.Parse(config_str.c_str()).HasParseError())
-    {
-        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return;
-    }
-}
+//    node->config.SetObject();
+//    if (!config_str.empty() &&
+//            node->config.Parse(config_str.c_str()).HasParseError())
+//    {
+//        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+//        return;
+//    }
+//}
 
 
 void Comms::process()
@@ -534,15 +669,13 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Setup_Message::ENUMERATE_SOURCES: handle_enumerate_sources(); break;
-        case comms::Setup_Message::ENUMERATE_SINKS: handle_enumerate_sinks(); break;
-        case comms::Setup_Message::ENUMERATE_STREAMS: handle_enumerate_streams(); break;
-        case comms::Setup_Message::ENUMERATE_PROCESSORS: handle_enumerate_processors(); break;
+        case comms::Setup_Message::ENUMERATE_NODE_FACTORY: handle_enumerate_node_factory(); break;
+        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
         case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
         case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
         case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
-        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
+//        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
 

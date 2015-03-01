@@ -21,15 +21,10 @@ enum class Setup_Message : uint8_t
     //RES:
     //  uint32_t req_id
     //  uint32_t bus_count
-    //  uint32_t stream_count
     //  uint32_t source_count
     //  uint32_t sink_count
     //  uint32_t processor_count
     //      busses[bus_count]
-    //          string - name
-    //          string - default init prams
-    //          string - default config
-    //      streams[stream_count]
     //          string - name
     //          string - default init prams
     //          string - default config
@@ -59,25 +54,34 @@ enum class Setup_Message : uint8_t
     //  uint32_t processor_count
     //      busses[bus_count]
     //          string - name
-    //          string - dev where the stream is attached
+    //          string - init prams
+    //          string - config
     //      streams[stream_count]
     //          string - type
     //          string - name
     //          uint32_t - sample rate
     //      sources[source_count]
     //          string - name
+    //          string - init prams
+    //          string - config
     //          uint32_t output_count
     //              string - name of output stream
     //      sinks[sink_count]
     //          string - name
+    //          string - init prams
+    //          string - config
     //          uint32_t input_count - array size
     //              string - name of input stream
     //      processors[processor_count]
     //          string - name
+    //          string - init prams
+    //          string - config
     //          uint32_t input_count - array size
-    //              string - name of input stream
     //          uint32_t output_count - array size
-    //              string - name of output stream
+    //          inputs[input_count]
+    //              string - name of the stream
+    //          outputs[output_count]
+    //              string - name of the stream
     ENUMERATE_NODES,
 
     //sets/gets a node init params as a json string

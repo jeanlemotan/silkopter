@@ -13,8 +13,8 @@ namespace sz
 {
 namespace MPU9250
 {
-class Init_Params;
-class Config;
+struct Init_Params;
+struct Config;
 }
 }
 

@@ -67,15 +67,13 @@ private:
 
     Manual_Clock m_remote_clock;
 
-    void handle_enumerate_sources();
-    void handle_enumerate_sinks();
-    void handle_enumerate_processors();
-    void handle_enumerate_streams();
+    void handle_enumerate_nodes();
+    void handle_enumerate_node_factory();
 
     void handle_source_config();
     void handle_sink_config();
     void handle_processor_config();
-    void handle_stream_config();
+//    void handle_stream_config();
 };
 
 }

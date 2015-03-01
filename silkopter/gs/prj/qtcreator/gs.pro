@@ -91,7 +91,11 @@ HEADERS += \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/RUDP.h \
     ../../../libs/utils/Serial_Channel.h \
-    ../../../libs/utils/Timed_Scope.h
+    ../../../libs/utils/Timed_Scope.h \
+    ../../../libs/common/node/bus/IBus.h \
+    ../../../libs/common/node/bus/II2C.h \
+    ../../../libs/common/node/bus/ISPI.h \
+    ../../../libs/common/node/bus/IUART.h
 
 SOURCES += \
     ../../src/GS.cpp \

@@ -69,6 +69,11 @@ public:
     auto get_settings(q::Path const& path) -> rapidjson::Value&;
     void save_settings();
 
+    auto get_bus_factory()         -> Factory<node::bus::IBus>&;
+    auto get_source_factory()      -> Factory<node::source::ISource>&;
+    auto get_sink_factory()        -> Factory<node::sink::ISink>&;
+    auto get_processor_factory()   -> Factory<node::processor::IProcessor>&;
+
     auto get_buses()        -> Registry<node::bus::IBus>&;
     auto get_sources()      -> Registry<node::source::ISource>&;
     auto get_sinks()        -> Registry<node::sink::ISink>&;

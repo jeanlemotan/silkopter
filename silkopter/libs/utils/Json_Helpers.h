@@ -213,6 +213,13 @@ namespace jsonutil
         }
     }
 
+    inline rapidjson::Document clone_value(rapidjson::Value const& json)
+    {
+        rapidjson::Document dst;
+        clone_value(dst, json, dst.GetAllocator());
+        return std::move(dst);
+    }
+
 //    inline bool remove_all_members(rapidjson::Value& json, std::string const& name)
 //	{
 //        QASSERT(json.IsObject());

@@ -10,8 +10,8 @@ namespace sz
 {
 namespace ADC_Voltmeter
 {
-class Init_Params;
-class Config;
+struct Init_Params;
+struct Config;
 }
 }
 
