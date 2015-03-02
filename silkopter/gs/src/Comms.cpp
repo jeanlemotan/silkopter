@@ -228,15 +228,13 @@ void Comms::handle_enumerate_node_factory()
     if (m_setup_channel.begin_unpack() &&
         m_setup_channel.unpack_param(req_id))
     {
-        uint32_t bus_count = 0;
         uint32_t source_count = 0;
         uint32_t sink_count = 0;
         uint32_t processor_count = 0;
         std::string init_params_str;
         std::string config_str;
 
-        bool ok = m_setup_channel.unpack_param(bus_count);
-        ok &= m_setup_channel.unpack_param(source_count);
+        bool ok = m_setup_channel.unpack_param(source_count);
         ok &= m_setup_channel.unpack_param(sink_count);
         ok &= m_setup_channel.unpack_param(processor_count);
         if (!ok)
@@ -245,27 +243,7 @@ void Comms::handle_enumerate_node_factory()
             return;
         }
 
-        QLOGI("Req Id: {}, Factory has {} buses, {} sources, {} sinks and {} processors", req_id, bus_count, source_count, sink_count, processor_count);
-
-        for (uint32_t i = 0; i < bus_count; i++)
-        {
-            auto node = std::make_shared<node::bus::GS_IBus>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tBus: {}, init_params {}, config {}", node->name, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
-            {
-                QLOGE("\t\tBad bus");
-                return;
-            }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
-            m_hal.get_bus_factory().add(std::move(node));
-        }
+        QLOGI("Req Id: {}, Factory has {} sources, {} sinks and {} processors", req_id, source_count, sink_count, processor_count);
 
         for (uint32_t i = 0; i < source_count; i++)
         {
@@ -408,31 +386,12 @@ auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<
     return std::shared_ptr<node::stream::GS_IStream>();
 }
 
-auto create_bus_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::bus::GS_IBus>
-{
-    if (class_id == q::rtti::get_class_id<node::bus::II2C>())
-    {
-        return std::make_shared<node::bus::I2C>();
-    }
-    else if (class_id == q::rtti::get_class_id<node::bus::ISPI>())
-    {
-        return std::make_shared<node::bus::SPI>();
-    }
-    else if (class_id == q::rtti::get_class_id<node::bus::IUART>())
-    {
-        return std::make_shared<node::bus::UART>();
-    }
-    return std::shared_ptr<node::bus::GS_IBus>();
-}
-
-
 void Comms::handle_enumerate_nodes()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.begin_unpack() &&
         m_setup_channel.unpack_param(req_id))
     {
-        uint32_t bus_count = 0;
         uint32_t source_count = 0;
         uint32_t sink_count = 0;
         uint32_t processor_count = 0;
@@ -440,8 +399,7 @@ void Comms::handle_enumerate_nodes()
         std::string init_params_str;
         std::string config_str;
 
-        bool ok = m_setup_channel.unpack_param(bus_count);
-        ok &= m_setup_channel.unpack_param(source_count);
+        bool ok = m_setup_channel.unpack_param(source_count);
         ok &= m_setup_channel.unpack_param(sink_count);
         ok &= m_setup_channel.unpack_param(processor_count);
         ok &= m_setup_channel.unpack_param(stream_count);
@@ -451,36 +409,7 @@ void Comms::handle_enumerate_nodes()
             return;
         }
 
-        QLOGI("Req Id: {}, Factory has {} buses, {} sources, {} sinks, {} processors and {} streams", req_id, bus_count, source_count, sink_count, processor_count, stream_count);
-
-        for (uint32_t i = 0; i < bus_count; i++)
-        {
-            std::string name;
-            q::rtti::class_id class_id;
-            m_setup_channel.unpack_param(name);
-            m_setup_channel.unpack_param(class_id);
-            m_setup_channel.unpack_param(init_params_str);
-            m_setup_channel.unpack_param(config_str);
-            QLOGI("\tBus: {}, type {}, init_params {}, config {}", name, class_id, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!init_params || !config)
-            {
-                QLOGE("\t\tBad init_params or config jsons");
-                return;
-            }
-            auto node = create_bus_from_class_id(class_id);
-            if (!node)
-            {
-                QLOGE("\t\tCannot create node of type: {}", class_id);
-                return;
-            }
-            node->class_id = class_id;
-            node->name = name;
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
-            m_hal.get_buses().add(node);
-        }
+        QLOGI("Req Id: {}, Factory has {} sources, {} sinks, {} processors and {} streams", req_id, source_count, sink_count, processor_count, stream_count);
 
         for (uint32_t i = 0; i < stream_count; i++)
         {

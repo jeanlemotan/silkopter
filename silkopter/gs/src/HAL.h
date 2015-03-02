@@ -17,7 +17,6 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/bus/IBus.h"
 #include "common/node/source/ISource.h"
 #include "common/node/sink/ISink.h"
 #include "common/node/processor/IMultirotor.h"
@@ -34,37 +33,6 @@ class HAL;
 
 namespace node
 {
-
-namespace bus
-{
-
-struct GS_IBus
-{
-    virtual ~GS_IBus() {}
-    GS_IBus() = default;
-    GS_IBus(GS_IBus&&) = default;
-    auto operator=(GS_IBus&&) -> GS_IBus& = default;
-
-    std::string name;
-    q::rtti::class_id class_id;
-    rapidjson::Document init_params;
-    rapidjson::Document config;
-};
-
-struct I2C : public GS_IBus
-{
-};
-
-struct UART : public GS_IBus
-{
-};
-
-struct SPI : public GS_IBus
-{
-};
-
-}
-
 
 
 namespace stream
@@ -279,12 +247,10 @@ public:
     HAL();
     ~HAL();
 
-    auto get_bus_factory()          -> Registry<node::bus::GS_IBus>&;
     auto get_source_factory()       -> Registry<node::source::GS_ISource>&;
     auto get_sink_factory()         -> Registry<node::sink::GS_ISink>&;
     auto get_processor_factory()    -> Registry<node::processor::GS_IProcessor>&;
 
-    auto get_buses()        -> Registry<node::bus::GS_IBus>&;
     auto get_sources()      -> Registry<node::source::GS_ISource>&;
     auto get_sinks()        -> Registry<node::sink::GS_ISink>&;
     auto get_processors()   -> Registry<node::processor::GS_IProcessor>&;
@@ -294,12 +260,10 @@ public:
     q::util::Signal<void()> nodes_refreshed_signal;
 
 private:
-    Registry<node::bus::GS_IBus> m_bus_factory;
     Registry<node::source::GS_ISource> m_source_factory;
     Registry<node::sink::GS_ISink> m_sink_factory;
     Registry<node::processor::GS_IProcessor> m_processor_factory;
 
-    Registry<node::bus::GS_IBus> m_buses;
     Registry<node::source::GS_ISource> m_sources;
     Registry<node::sink::GS_ISink> m_sinks;
     Registry<node::processor::GS_IProcessor> m_processors;

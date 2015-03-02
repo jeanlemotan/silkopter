@@ -9,6 +9,8 @@
 
 #include "qneport.h"
 
+#include "boost/algorithm/string.hpp"
+
 HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
@@ -58,6 +60,29 @@ HAL_Window::~HAL_Window()
 
 }
 
+std::string prettify_name(std::string const& name)
+{
+    std::string out = name;
+    boost::trim(out);
+    for (size_t i = 0; i < out.size(); i++)
+    {
+        if (out[i] == '_')
+        {
+            out[i] = ' ';
+        }
+        else if (std::isalpha(out[i]) && i > 0 && out[i - 1] == ' ')
+        {
+            out[i] = toupper(out[i]);
+        }
+    }
+    if (!out.empty())
+    {
+        out[0] = toupper(out[0]);
+    }
+
+    return out;
+}
+
 void HAL_Window::on_node_factories_refreshed()
 {
 //    auto buses = m_hal.get_bus_factory().get_all();
@@ -73,69 +98,101 @@ void HAL_Window::on_node_factories_refreshed()
         auto nodes = m_hal.get_source_factory().get_all();
         for (auto const& n: nodes)
         {
-            QNEBlock *b = new QNEBlock(0);
-            m_scene->addItem(b);
-            b->addPort(n->name.c_str(), 0, QNEPort::NamePort);
-            //b->addPort(, 0, QNEPort::TypePort);
-            b->setPos(150, 150);
-
-            for (auto const& o: n->outputs)
-            {
-                b->addPort(o.name.c_str(), true, 0, 0);
-                b->setPos(m_view->sceneRect().center().toPoint());
-            }
         }
     }
     {
         auto nodes = m_hal.get_sink_factory().get_all();
         for (auto const& n: nodes)
         {
-            QNEBlock *b = new QNEBlock(0);
-            m_scene->addItem(b);
-            b->addPort(n->name.c_str(), 0, QNEPort::NamePort);
-            //b->addPort(, 0, QNEPort::TypePort);
-            b->setPos(150, 150);
-
-            for (auto const& i: n->inputs)
-            {
-                b->addPort(i.name.c_str(), false, 0, 0);
-                b->setPos(m_view->sceneRect().center().toPoint());
-            }
         }
     }
     {
-        auto nodes = m_hal.get_processor_factory().get_all();
-        for (auto const& n: nodes)
-        {
-            QNEBlock *b = new QNEBlock(0);
-            m_scene->addItem(b);
-            b->addPort(n->name.c_str(), 0, QNEPort::NamePort);
-            //b->addPort(, 0, QNEPort::TypePort);
-            b->setPos(150, 150);
-
-            for (auto const& i: n->inputs)
-            {
-                b->addPort(i.name.c_str(), false, 0, 0);
-                b->setPos(m_view->sceneRect().center().toPoint());
-            }
-            for (auto const& o: n->outputs)
-            {
-                b->addPort(o.name.c_str(), true, 0, 0);
-                b->setPos(m_view->sceneRect().center().toPoint());
-            }
-        }
     }
 }
 
-//void HAL_Window::addBlock()
-//{
-//    QNEBlock *b = new QNEBlock(0);
+void HAL_Window::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu menu(this);
 
-//    m_scene->addItem(b);
-//	static const char* names[] = {"Vin", "Voutsadfasdf", "Imin", "Imax", "mul", "add", "sub", "div", "Conv", "FFT"};
-//	for (int i = 0; i < 4 + rand() % 3; i++)
-//	{
-//		b->addPort(names[rand() % 10], rand() % 2, 0, 0);
-//        b->setPos(m_view->sceneRect().center().toPoint());
-//	}
-//}
+    {
+        QMenu* submenu = menu.addMenu(QIcon(), "Sources");
+        auto nodes = m_hal.get_source_factory().get_all();
+        for (auto const& n: nodes)
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_source(n); });
+        }
+    }
+
+    {
+        QMenu* submenu = menu.addMenu(QIcon(), "Sinks");
+        auto nodes = m_hal.get_sink_factory().get_all();
+        for (auto const& n: nodes)
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_sink(n); });
+        }
+    }
+
+    {
+        QMenu* submenu = menu.addMenu(QIcon(), "Processors");
+        auto nodes = m_hal.get_processor_factory().get_all();
+        for (auto const& n: nodes)
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_processor(n); });
+        }
+    }
+
+    menu.exec(event->globalPos());
+}
+
+void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> def)
+{
+    QNEBlock *b = new QNEBlock(0);
+    m_scene->addItem(b);
+    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    //b->addPort(, 0, QNEPort::TypePort);
+    b->setPos(150, 150);
+
+    for (auto const& o: def->outputs)
+    {
+        b->addPort(prettify_name(o.name).c_str(), true, 0, 0);
+        b->setPos(m_view->sceneRect().center().toPoint());
+    }
+}
+
+void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def)
+{
+    QNEBlock *b = new QNEBlock(0);
+    m_scene->addItem(b);
+    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    //b->addPort(, 0, QNEPort::TypePort);
+    b->setPos(150, 150);
+
+    for (auto const& i: def->inputs)
+    {
+        b->addPort(prettify_name(i.name).c_str(), false, 0, 0);
+        b->setPos(m_view->sceneRect().center().toPoint());
+    }
+}
+
+void HAL_Window::create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def)
+{
+    QNEBlock *b = new QNEBlock(0);
+    m_scene->addItem(b);
+    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    //b->addPort(, 0, QNEPort::TypePort);
+    b->setPos(150, 150);
+
+    for (auto const& i: def->inputs)
+    {
+        b->addPort(prettify_name(i.name).c_str(), false, 0, 0);
+        b->setPos(m_view->sceneRect().center().toPoint());
+    }
+    for (auto const& o: def->outputs)
+    {
+        b->addPort(prettify_name(o.name).c_str(), true, 0, 0);
+        b->setPos(m_view->sceneRect().center().toPoint());
+    }
+}

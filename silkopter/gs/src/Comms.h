@@ -25,11 +25,6 @@
 #include "common/node/processor/IMultirotor.h"
 #include "common/node/processor/IProcessor.h"
 
-#include "common/node/bus/IBus.h"
-#include "common/node/bus/II2C.h"
-#include "common/node/bus/ISPI.h"
-#include "common/node/bus/IUART.h"
-
 namespace silk
 {
 

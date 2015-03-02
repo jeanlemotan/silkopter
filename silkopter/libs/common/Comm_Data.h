@@ -20,15 +20,9 @@ enum class Setup_Message : uint8_t
     //  uint32_t req_id
     //RES:
     //  uint32_t req_id
-    //  uint32_t bus_count
     //  uint32_t source_count
     //  uint32_t sink_count
     //  uint32_t processor_count
-    //      busses[bus_count]
-    //          string - name
-    //          class_id - type
-    //          string - default init prams
-    //          string - default config
     //      sources[source_count]
     //          string - name
     //          class_id - type
@@ -63,16 +57,10 @@ enum class Setup_Message : uint8_t
     //  uint32_t req_id
     //RES:
     //  uint32_t req_id
-    //  uint32_t bus_count
     //  uint32_t stream_count
     //  uint32_t source_count
     //  uint32_t sink_count
     //  uint32_t processor_count
-    //      busses[bus_count]
-    //          string - name
-    //          class_id - type
-    //          string - init prams
-    //          string - config
     //      streams[stream_count]
     //          string - name
     //          class_id - type

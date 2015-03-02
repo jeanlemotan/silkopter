@@ -24,10 +24,6 @@ HAL::~HAL()
 {
 }
 
-auto HAL::get_bus_factory()  -> Registry<node::bus::GS_IBus>&
-{
-    return m_bus_factory;
-}
 auto HAL::get_source_factory()  -> Registry<node::source::GS_ISource>&
 {
     return m_source_factory;
@@ -41,12 +37,6 @@ auto HAL::get_processor_factory()  -> Registry<node::processor::GS_IProcessor>&
     return m_processor_factory;
 }
 
-
-
-auto HAL::get_buses()  -> Registry<node::bus::GS_IBus>&
-{
-    return m_buses;
-}
 auto HAL::get_sources()  -> Registry<node::source::GS_ISource>&
 {
     return m_sources;

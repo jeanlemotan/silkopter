@@ -255,25 +255,16 @@ void Comms::handle_enumerate_node_factory()
     if (m_setup_channel.unpack(req_id))
     {
         QLOGI("Req Id: {} - enumerate node facrory", req_id);
-        auto buses = m_hal.get_bus_factory().create_all();
         auto source = m_hal.get_source_factory().create_all();
         auto sinks = m_hal.get_sink_factory().create_all();
         auto processors = m_hal.get_processor_factory().create_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_FACTORY);
         m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(buses.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(source.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(sinks.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(processors.size()));
 
-        for (auto const& n: buses)
-        {
-            m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(n.node->get_type());
-            pack_json(m_setup_channel, n.node->get_init_params());
-            pack_json(m_setup_channel, n.node->get_config());
-        }
         for (auto const& n: source)
         {
             m_setup_channel.pack_param(n.name);
@@ -314,7 +305,6 @@ void Comms::handle_enumerate_nodes()
     if (m_setup_channel.unpack(req_id))
     {
         QLOGI("Req Id: {} - enumerate nodes", req_id);
-        auto const& buses = m_hal.get_buses().get_all();
         auto const& sources = m_hal.get_sources().get_all();
         auto const& sinks = m_hal.get_sinks().get_all();
         auto const& streams = m_hal.get_streams().get_all();
@@ -322,19 +312,11 @@ void Comms::handle_enumerate_nodes()
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
         m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(buses.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(streams.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(sources.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(sinks.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(processors.size()));
 
-        for (auto const& n: buses)
-        {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_type());
-            pack_json(m_setup_channel, n->get_init_params());
-            pack_json(m_setup_channel, n->get_config());
-        }
         for (auto const& n: streams)
         {
             m_setup_channel.pack_param(n->get_name());
