@@ -37,7 +37,7 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	QPainterPath p;
 	p.addRoundedRect(-50, -15, 100, 30, 5, 5);
 	setPath(p);
-	setPen(QPen(Qt::darkGreen));
+    setPen(QPen(Qt::black));
 	setBrush(Qt::green);
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
@@ -45,116 +45,77 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	vertMargin = 5;
 	width = horzMargin;
 	height = vertMargin;
+    label = new QGraphicsTextItem(this);
 }
 
-QNEPort* QNEBlock::addPort(const QString &name, bool isOutput, int flags, int ptr)
+void QNEBlock::setName(const QString &n)
+{
+    label->setPlainText(n);
+    QFont font(scene()->font());
+    font.setBold(true);
+    label->setFont(font);
+
+    QFontMetrics fm(scene()->font());
+    int w = fm.width(n);
+    int h = fm.height();
+    // port->setPos(0, height + h/2);
+    if (w > width - horzMargin)
+    {
+        width = w + horzMargin;
+    }
+
+    height = vertMargin + h * 2;
+    QPainterPath p;
+    p.addRoundedRect(0, 0, width, height, 5, 5);
+    setPath(p);
+}
+
+QNEPort* QNEBlock::addPort(const QString &name, bool isOutput)
 {
 	QNEPort *port = new QNEPort(this);
 	port->setName(name);
-	port->setIsOutput(isOutput);
+    port->setIsOutput(isOutput);
 	port->setNEBlock(this);
-	port->setPortFlags(flags);
-	port->setPtr(ptr);
 
 	QFontMetrics fm(scene()->font());
 	int w = fm.width(name);
 	int h = fm.height();
 	// port->setPos(0, height + h/2);
 	if (w > width - horzMargin)
-		width = w + horzMargin;
-	height += h;
+        width = w + horzMargin;
 
-	QPainterPath p;
-	p.addRoundedRect(-width/2, -height/2, width, height, 5, 5);
-	setPath(p);
+    label->setPos(0, 0);
+    int y = vertMargin;
+    y += h * 2;
 
-	int y = -height / 2 + vertMargin + port->radius();
     foreach(QGraphicsItem *port_, childItems()) {
 		if (port_->type() != QNEPort::Type)
 			continue;
 
 		QNEPort *port = (QNEPort*) port_;
 		if (port->isOutput())
-			port->setPos(width/2 + port->radius(), y);
+            port->setPos(width + port->radius(), y);
 		else
-			port->setPos(-width/2 - port->radius(), y);
+            port->setPos(-port->radius(), y);
 		y += h;
 	}
+    height = y;
+
+    QPainterPath p;
+    p.addRoundedRect(0, 0, width, height, 5, 5);
+    setPath(p);
 
 	return port;
 }
 
-void QNEBlock::addInputPort(const QString &name)
+QNEPort* QNEBlock::addInputPort(const QString &name)
 {
-	addPort(name, false);
+    return addPort(name, false);
 }
 
-void QNEBlock::addOutputPort(const QString &name)
+QNEPort* QNEBlock::addOutputPort(const QString &name)
 {
-	addPort(name, true);
-}
-
-void QNEBlock::addInputPorts(const QStringList &names)
-{
-	foreach(QString n, names)
-		addInputPort(n);
-}
-
-void QNEBlock::addOutputPorts(const QStringList &names)
-{
-	foreach(QString n, names)
-		addOutputPort(n);
-}
-
-void QNEBlock::save(QDataStream &ds)
-{
-	ds << pos();
-
-	int count(0);
-
-    foreach(QGraphicsItem *port_, childItems())
-	{
-		if (port_->type() != QNEPort::Type)
-			continue;
-
-		count++;
-	}
-
-	ds << count;
-
-    foreach(QGraphicsItem *port_, childItems())
-	{
-		if (port_->type() != QNEPort::Type)
-			continue;
-
-		QNEPort *port = (QNEPort*) port_;
-		ds << (quint64) port;
-		ds << port->portName();
-		ds << port->isOutput();
-		ds << port->portFlags();
-	}
-}
-
-void QNEBlock::load(QDataStream &ds, QMap<quint64, QNEPort*> &portMap)
-{
-	QPointF p;
-	ds >> p;
-	setPos(p);
-	int count;
-	ds >> count;
-	for (int i = 0; i < count; i++)
-	{
-		QString name;
-		bool output;
-		int flags;
-		quint64 ptr;
-
-		ds >> ptr;
-		ds >> name;
-		ds >> output;
-		ds >> flags;
-		portMap[ptr] = addPort(name, output, flags, ptr);
-	}
+    return addPort(name, true);
 }
 
 #include <QStyleOptionGraphicsItem>
@@ -164,32 +125,22 @@ void QNEBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 	Q_UNUSED(option)
 	Q_UNUSED(widget)
 
-	if (isSelected()) {
-		painter->setPen(QPen(Qt::darkYellow));
-		painter->setBrush(Qt::yellow);
-	} else {
-		painter->setPen(QPen(Qt::darkGreen));
-		painter->setBrush(Qt::green);
+    if (isSelected())
+    {
+        auto p = pen();
+        p.setColor(p.color().lighter());
+        painter->setPen(p);
+        auto b = brush();
+        b.setColor(b.color().lighter());
+        painter->setBrush(b);
+    }
+    else
+    {
+        painter->setPen(pen());
+        painter->setBrush(brush());
 	}
 
 	painter->drawPath(path());
-}
-
-QNEBlock* QNEBlock::clone()
-{
-    QNEBlock *b = new QNEBlock(0);
-    this->scene()->addItem(b);
-
-	foreach(QGraphicsItem *port_, childItems())
-	{
-		if (port_->type() == QNEPort::Type)
-		{
-			QNEPort *port = (QNEPort*) port_;
-			b->addPort(port->portName(), port->isOutput(), port->portFlags(), port->ptr());
-		}
-	}
-
-	return b;
 }
 
 QVector<QNEPort*> QNEBlock::ports()

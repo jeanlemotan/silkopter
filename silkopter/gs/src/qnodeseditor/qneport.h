@@ -35,7 +35,6 @@ class QNEPort : public QGraphicsPathItem
 {
 public:
 	enum { Type = QGraphicsItem::UserType + 1 };
-	enum { NamePort = 1, TypePort = 2 };
 
     QNEPort(QGraphicsItem *parent = 0);
 	~QNEPort();
@@ -46,10 +45,10 @@ public:
 	int radius();
 	bool isOutput();
 	QVector<QNEConnection*>& connections();
-	void setPortFlags(int);
+    void setPortType(int);
 
-	const QString& portName() const { return name; }
-	int portFlags() const { return m_portFlags; }
+    const QString& portName() const { return m_name; }
+    int portType() const { return m_portType; }
 
 	int type() const { return Type; }
 
@@ -65,14 +64,13 @@ protected:
 
 private:
 	QNEBlock *m_block;
-	QString name;
-	bool isOutput_;
-	QGraphicsTextItem *label;
-	int radius_;
-	int margin;
+    QString m_name;
+    bool m_isOutput;
+    QGraphicsTextItem *m_label;
+    int m_radius;
+    int m_margin;
 	QVector<QNEConnection*> m_connections;
-	int m_portFlags;
-	quint64 m_ptr;
+    int m_portType;
 };
 
 #endif // QNEPORT_H

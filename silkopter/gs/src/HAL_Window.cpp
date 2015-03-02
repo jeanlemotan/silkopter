@@ -151,14 +151,16 @@ void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> d
 {
     QNEBlock *b = new QNEBlock(0);
     m_scene->addItem(b);
-    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    b->setName(prettify_name(def->name).c_str());
     //b->addPort(, 0, QNEPort::TypePort);
-    b->setPos(150, 150);
+    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setBrush(QBrush(QColor(QRgb(0xf1c40f))));
 
     for (auto const& o: def->outputs)
     {
-        b->addPort(prettify_name(o.name).c_str(), true, 0, 0);
-        b->setPos(m_view->sceneRect().center().toPoint());
+        auto port = b->addOutputPort(prettify_name(o.name).c_str());
+        port->setPortType(o.class_id);
+        port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
     }
 }
 
@@ -166,14 +168,16 @@ void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def)
 {
     QNEBlock *b = new QNEBlock(0);
     m_scene->addItem(b);
-    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    b->setName(prettify_name(def->name).c_str());
     //b->addPort(, 0, QNEPort::TypePort);
-    b->setPos(150, 150);
+    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setBrush(QBrush(QColor(QRgb(0x1abc9c))));
 
     for (auto const& i: def->inputs)
     {
-        b->addPort(prettify_name(i.name).c_str(), false, 0, 0);
-        b->setPos(m_view->sceneRect().center().toPoint());
+        auto port = b->addInputPort(prettify_name(i.name).c_str());
+        port->setPortType(i.class_id);
+        port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
     }
 }
 
@@ -181,18 +185,21 @@ void HAL_Window::create_processor(std::shared_ptr<silk::node::processor::GS_IPro
 {
     QNEBlock *b = new QNEBlock(0);
     m_scene->addItem(b);
-    b->addPort(prettify_name(def->name).c_str(), 0, QNEPort::NamePort);
+    b->setName(prettify_name(def->name).c_str());
     //b->addPort(, 0, QNEPort::TypePort);
-    b->setPos(150, 150);
+    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setBrush(QBrush(QColor(QRgb(0x3498db))));
 
     for (auto const& i: def->inputs)
     {
-        b->addPort(prettify_name(i.name).c_str(), false, 0, 0);
-        b->setPos(m_view->sceneRect().center().toPoint());
+        auto port = b->addInputPort(prettify_name(i.name).c_str());
+        port->setPortType(i.class_id);
+        port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
     }
     for (auto const& o: def->outputs)
     {
-        b->addPort(prettify_name(o.name).c_str(), true, 0, 0);
-        b->setPos(m_view->sceneRect().center().toPoint());
+        auto port = b->addOutputPort(prettify_name(o.name).c_str());
+        port->setPortType(o.class_id);
+        port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
     }
 }

@@ -35,21 +35,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 QNEPort::QNEPort(QGraphicsItem *parent):
     QGraphicsPathItem(parent)
 {
-	label = new QGraphicsTextItem(this);
+    m_label = new QGraphicsTextItem(this);
 
-	radius_ = 5;
-	margin = 2;
+    m_radius = 5;
+    m_margin = 2;
 
 	QPainterPath p;
-	p.addEllipse(-radius_, -radius_, 2*radius_, 2*radius_);
+    p.addEllipse(-m_radius, -m_radius, 2*m_radius, 2*m_radius);
 	setPath(p);
 
-	setPen(QPen(Qt::darkRed));
+    setPen(QPen(Qt::black));
 	setBrush(Qt::red);
 
 	setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 
-	m_portFlags = 0;
+    m_portType = 0;
 }
 
 QNEPort::~QNEPort()
@@ -65,31 +65,31 @@ void QNEPort::setNEBlock(QNEBlock *b)
 
 void QNEPort::setName(const QString &n)
 {
-	name = n;
-	label->setPlainText(n);
+    m_name = n;
+    m_label->setPlainText(n);
 }
 
 void QNEPort::setIsOutput(bool o)
 {
-	isOutput_ = o;
+    m_isOutput = o;
 
 	QFontMetrics fm(scene()->font());
-	QRect r = fm.boundingRect(name);
+    QRect r = fm.boundingRect(m_name);
 
-	if (isOutput_)
-		label->setPos(-radius_ - margin - label->boundingRect().width(), -label->boundingRect().height()/2);
+    if (m_isOutput)
+        m_label->setPos(-m_radius - m_margin - m_label->boundingRect().width(), -m_label->boundingRect().height()/2);
 	else
-		label->setPos(radius_ + margin, -label->boundingRect().height()/2);
+        m_label->setPos(m_radius + m_margin, -m_label->boundingRect().height()/2);
 }
 
 int QNEPort::radius()
 {
-	return radius_;
+    return m_radius;
 }
 
 bool QNEPort::isOutput()
 {
-	return isOutput_;
+    return m_isOutput;
 }
 
 QVector<QNEConnection*>& QNEPort::connections()
@@ -97,38 +97,14 @@ QVector<QNEConnection*>& QNEPort::connections()
 	return m_connections;
 }
 
-void QNEPort::setPortFlags(int f)
+void QNEPort::setPortType(int type)
 {
-	m_portFlags = f;
-
-	if (m_portFlags & TypePort)
-	{
-		QFont font(scene()->font());
-		font.setItalic(true);
-		label->setFont(font);
-		setPath(QPainterPath());
-	} else if (m_portFlags & NamePort)
-	{
-		QFont font(scene()->font());
-		font.setBold(true);
-		label->setFont(font);
-		setPath(QPainterPath());
-	}
+    m_portType = type;
 }
 
 QNEBlock* QNEPort::block() const
 {
 	return m_block;
-}
-
-quint64 QNEPort::ptr()
-{
-	return m_ptr;
-}
-
-void QNEPort::setPtr(quint64 p)
-{
-	m_ptr = p;
 }
 
 bool QNEPort::isConnected(QNEPort *other)

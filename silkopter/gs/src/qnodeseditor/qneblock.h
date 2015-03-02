@@ -37,15 +37,11 @@ public:
 
     QNEBlock(QGraphicsItem *parent = 0);
 
-	QNEPort* addPort(const QString &name, bool isOutput, int flags = 0, int ptr = 0);
-	void addInputPort(const QString &name);
-	void addOutputPort(const QString &name);
-	void addInputPorts(const QStringList &names);
-	void addOutputPorts(const QStringList &names);
-	void save(QDataStream&);
-	void load(QDataStream&, QMap<quint64, QNEPort*> &portMap);
+    void setName(const QString &name);
+
+    QNEPort* addInputPort(const QString &name);
+    QNEPort* addOutputPort(const QString &name);
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-	QNEBlock* clone();
 	QVector<QNEPort*> ports();
 
 	int type() const { return Type; }
@@ -54,10 +50,13 @@ protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
+    QNEPort* addPort(const QString &name, bool isOutput);
+
 	int horzMargin;
 	int vertMargin;
 	int width;
 	int height;
+    QGraphicsTextItem* label = nullptr;
 };
 
 #endif // QNEBLOCK_H
