@@ -57,6 +57,8 @@ private:
     void reset();
     void request_nodes();
 
+    void send_hal_requests();
+
     boost::asio::io_service& m_io_service;
     boost::asio::ip::udp::socket m_socket;
     boost::asio::ip::udp::endpoint m_remote_endpoint;
@@ -76,6 +78,8 @@ private:
     void handle_sink_config();
     void handle_processor_config();
 //    void handle_stream_config();
+
+    void handle_add_source();
 };
 
 }

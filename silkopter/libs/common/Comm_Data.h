@@ -90,6 +90,14 @@ enum class Setup_Message : uint8_t
     //          string - config
     ENUMERATE_NODES,
 
+    ADD_SOURCE,
+    ADD_PROCESSOR,
+    ADD_SINK,
+
+    REMOVE_SOURCE,
+    REMOVE_PROCESSOR,
+    REMOVE_SINK,
+
     //sets/gets a node init params as a json string
     //REQ:
     //  uint32_t req_id

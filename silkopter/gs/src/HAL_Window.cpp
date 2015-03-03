@@ -113,7 +113,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
     menu.exec(event->globalPos());
 }
 
-void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> def, QPointF pos)
+void HAL_Window::create_source(silk::node::source::Source_ptr def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
@@ -127,9 +127,20 @@ void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> d
         port->setPortType(o.class_id);
         port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
     }
+
+    Item_Key item;
+    item.class_id = def->class_id;
+    item.name = def->name;
+    m_ui_items[item] = Item_Data({pos});
+
+    auto source = std::make_shared<silk::node::source::Source>(*def);
+    m_hal.add_source(def, source, [](silk::HAL::Result result, silk::node::source::Source_ptr source)
+    {
+
+    });
 }
 
-void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def, QPointF pos)
+void HAL_Window::create_sink(silk::node::sink::Sink_ptr def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
@@ -145,7 +156,7 @@ void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def, QP
     }
 }
 
-void HAL_Window::create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def, QPointF pos)
+void HAL_Window::create_processor(silk::node::processor::Processor_ptr def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);

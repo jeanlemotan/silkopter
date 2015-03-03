@@ -46,90 +46,118 @@ struct GS_IStream
     q::rtti::class_id class_id;
     uint32_t rate = 0;
 };
+DECLARE_CLASS_PTR(GS_IStream);
 
 struct Acceleration : public GS_IStream
 {
     typedef IAcceleration::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Acceleration);
 struct Angular_Velocity : public GS_IStream
 {
     typedef IAngular_Velocity::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Angular_Velocity);
 struct ADC_Value : public GS_IStream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(ADC_Value);
 struct Battery_State : public GS_IStream
 {
     typedef IBattery_State::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Battery_State);
 struct Cardinal_Points : public GS_IStream
 {
     typedef ICardinal_Points::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Cardinal_Points);
 struct Current : public GS_IStream
 {
     typedef ICurrent::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Current);
 struct Distance : public GS_IStream
 {
     typedef IDistance::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Distance);
 struct Linear_Acceleration : public GS_IStream
 {
     typedef ILinear_Acceleration::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Linear_Acceleration);
 struct Location : public GS_IStream
 {
     typedef ILocation::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Location);
 struct Magnetic_Field : public GS_IStream
 {
     typedef IMagnetic_Field::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Magnetic_Field);
 struct Pressure : public GS_IStream
 {
     typedef IPressure::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Pressure);
 struct PWM_Value : public GS_IStream
 {
     typedef IPWM_Value::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(PWM_Value);
 struct Reference_Frame : public GS_IStream
 {
     typedef IReference_Frame::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Reference_Frame);
 struct Temperature : public GS_IStream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Temperature);
 struct Voltage : public GS_IStream
 {
     typedef IVoltage::Sample Sample;
     std::vector<Sample> samples;
 };
+DECLARE_CLASS_PTR(Voltage);
+
 }
 
 
 namespace source
 {
-struct GS_ISource
+struct Source
 {
-    virtual ~GS_ISource() {}
+    virtual ~Source() {}
+
+    Source() = default;
+    Source(Source&& other) = default;
+    Source(Source const& other)
+        : name(other.name)
+        , class_id(other.class_id)
+        , init_params(jsonutil::clone_value(other.init_params))
+        , config(jsonutil::clone_value(other.config))
+        , outputs(other.outputs)
+    {
+    }
 
     std::string name;
     q::rtti::class_id class_id;
@@ -139,22 +167,20 @@ struct GS_ISource
     {
         q::rtti::class_id class_id;
         std::string name;
-        std::shared_ptr<stream::GS_IStream> stream;
+        stream::GS_IStream_ptr stream;
     };
     std::vector<Output> outputs;
 };
+DECLARE_CLASS_PTR(Source);
 
-struct Source : public GS_ISource
-{
-};
 }
 
 namespace sink
 {
 
-struct GS_ISink
+struct Sink
 {
-    virtual ~GS_ISink() {}
+    virtual ~Sink() {}
 
     std::string name;
     q::rtti::class_id class_id;
@@ -164,22 +190,20 @@ struct GS_ISink
     {
         q::rtti::class_id class_id;
         std::string name;
-        std::shared_ptr<stream::GS_IStream> stream;
+        stream::GS_IStream_ptr stream;
     };
     std::vector<Input> inputs;
 };
+DECLARE_CLASS_PTR(Sink);
 
-struct Sink : public GS_ISink
-{
-};
 }
 
 namespace processor
 {
 
-struct GS_IProcessor
+struct Processor
 {
-    virtual ~GS_IProcessor() {}
+    virtual ~Processor() {}
 
     std::string name;
     q::rtti::class_id class_id;
@@ -189,7 +213,7 @@ struct GS_IProcessor
     {
         q::rtti::class_id class_id;
         std::string name;
-        std::shared_ptr<stream::GS_IStream> stream;
+        stream::GS_IStream_ptr stream;
     };
     std::vector<Input> inputs;
 
@@ -197,14 +221,12 @@ struct GS_IProcessor
     {
         q::rtti::class_id class_id;
         std::string name;
-        std::shared_ptr<stream::GS_IStream> stream;
+        stream::GS_IStream_ptr stream;
     };
     std::vector<Output> outputs;
 };
+DECLARE_CLASS_PTR(Processor);
 
-struct Processor : public GS_IProcessor
-{
-};
 }
 
 
@@ -231,31 +253,56 @@ private:
 
 class HAL : q::util::Noncopyable
 {
+    friend class Comms;
 public:
     HAL();
     ~HAL();
 
-    auto get_source_defs()       -> Registry<node::source::GS_ISource>&;
-    auto get_sink_defs()         -> Registry<node::sink::GS_ISink>&;
-    auto get_processor_defs()    -> Registry<node::processor::GS_IProcessor>&;
+    auto get_source_defs() const    -> Registry<node::source::Source> const&;
+    auto get_sink_defs() const      -> Registry<node::sink::Sink> const&;
+    auto get_processor_defs() const -> Registry<node::processor::Processor> const&;
 
-    auto get_sources()      -> Registry<node::source::GS_ISource>&;
-    auto get_sinks()        -> Registry<node::sink::GS_ISink>&;
-    auto get_processors()   -> Registry<node::processor::GS_IProcessor>&;
-    auto get_streams()      -> Registry<node::stream::GS_IStream>&;
+    auto get_sources() const        -> Registry<node::source::Source> const&;
+    auto get_sinks() const          -> Registry<node::sink::Sink> const&;
+    auto get_processors() const     -> Registry<node::processor::Processor> const&;
+    auto get_streams() const        -> Registry<node::stream::GS_IStream> const&;
+
+    enum class Result
+    {
+        OK,
+        FAILED,
+        TIMEOUT
+    };
+
+    typedef std::function<void(Result, node::source::Source_ptr)> Add_Source_Callback;
+    void add_source(node::source::Source_ptr def, node::source::Source_ptr source, Add_Source_Callback callback);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
-private:
-    Registry<node::source::GS_ISource> m_source_defs;
-    Registry<node::sink::GS_ISink> m_sink_defs;
-    Registry<node::processor::GS_IProcessor> m_processor_defs;
+protected:
+    Registry<node::source::Source> m_source_defs;
+    Registry<node::sink::Sink> m_sink_defs;
+    Registry<node::processor::Processor> m_processor_defs;
 
-    Registry<node::source::GS_ISource> m_sources;
-    Registry<node::sink::GS_ISink> m_sinks;
-    Registry<node::processor::GS_IProcessor> m_processors;
+    Registry<node::source::Source> m_sources;
+    Registry<node::sink::Sink> m_sinks;
+    Registry<node::processor::Processor> m_processors;
     Registry<node::stream::GS_IStream> m_streams;
+
+    struct Add_Source_Queue_Item
+    {
+        bool was_sent = false;
+        q::Clock::time_point sent_time_point;
+        uint32_t req_id = 0;
+        node::source::Source_ptr def;
+        node::source::Source_ptr source;
+        Add_Source_Callback callback;
+    };
+    std::vector<Add_Source_Queue_Item> m_add_source_queue;
+
+private:
+
 };
 
 

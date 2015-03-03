@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include <deque>
+#include <unordered_map>
 
 #include "boost/asio.hpp"
 #include "boost/noncopyable.hpp"
@@ -72,4 +73,9 @@ extern "C"
 #include "q.h"
 
 #include "utils/Channel.h"
+
+#include "rapidjson/document.h"     // rapidjson's DOM-style API
+#include "rapidjson/prettywriter.h" // for stringify JSON
+#include "rapidjson/stringbuffer.h"
+
 

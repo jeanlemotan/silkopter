@@ -117,10 +117,10 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
 
 void Comms::reset()
 {
-    m_hal.get_sinks().remove_all();
-    m_hal.get_sources().remove_all();
-    m_hal.get_processors().remove_all();
-    m_hal.get_streams().remove_all();
+    m_hal.m_sinks.remove_all();
+    m_hal.m_sources.remove_all();
+    m_hal.m_processors.remove_all();
+    m_hal.m_streams.remove_all();
 }
 
 void Comms::request_nodes()
@@ -222,6 +222,16 @@ auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& i
     return true;
 }
 
+static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string str(buffer.GetString(), buffer.GetSize());
+    channel.pack_param(str);
+}
+
+
 void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
@@ -247,7 +257,7 @@ void Comms::handle_enumerate_node_defs()
 
         for (uint32_t i = 0; i < source_count; i++)
         {
-            auto node = std::make_shared<node::source::GS_ISource>();
+            auto node = std::make_shared<node::source::Source>();
             bool ok = m_setup_channel.unpack_param(node->name);
             ok &= m_setup_channel.unpack_param(node->class_id);
             ok &= unpack_io_info(m_setup_channel, node->outputs);
@@ -263,12 +273,12 @@ void Comms::handle_enumerate_node_defs()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_source_defs().add(std::move(node));
+            m_hal.m_source_defs.add(std::move(node));
         }
 
         for (uint32_t i = 0; i < sink_count; i++)
         {
-            auto node = std::make_shared<node::sink::GS_ISink>();
+            auto node = std::make_shared<node::sink::Sink>();
             bool ok = m_setup_channel.unpack_param(node->name);
             ok &= m_setup_channel.unpack_param(node->class_id);
             ok &= unpack_io_info(m_setup_channel, node->inputs);
@@ -284,12 +294,12 @@ void Comms::handle_enumerate_node_defs()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_sink_defs().add(std::move(node));
+            m_hal.m_sink_defs.add(std::move(node));
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
         {
-            auto node = std::make_shared<node::processor::GS_IProcessor>();
+            auto node = std::make_shared<node::processor::Processor>();
             bool ok = m_setup_channel.unpack_param(node->name);
             ok &= m_setup_channel.unpack_param(node->class_id);
             ok &= unpack_io_info(m_setup_channel, node->inputs);
@@ -306,7 +316,7 @@ void Comms::handle_enumerate_node_defs()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_processor_defs().add(std::move(node));
+            m_hal.m_processor_defs.add(std::move(node));
         }
 
         m_setup_channel.end_unpack();
@@ -430,7 +440,7 @@ void Comms::handle_enumerate_nodes()
             node->class_id = class_id;
             node->name = name;
             node->rate = rate;
-            m_hal.get_streams().add(node);
+            m_hal.m_streams.add(node);
         }
 
         for (uint32_t i = 0; i < source_count; i++)
@@ -451,7 +461,7 @@ void Comms::handle_enumerate_nodes()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_sources().add(node);
+            m_hal.m_sources.add(node);
         }
 
         for (uint32_t i = 0; i < sink_count; i++)
@@ -472,7 +482,7 @@ void Comms::handle_enumerate_nodes()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_sinks().add(node);
+            m_hal.m_sinks.add(node);
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
@@ -494,7 +504,7 @@ void Comms::handle_enumerate_nodes()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_processors().add(node);
+            m_hal.m_processors.add(node);
         }
 
 
@@ -641,6 +651,96 @@ void Comms::handle_processor_config()
 //    }
 //}
 
+void Comms::handle_add_source()
+{
+    uint32_t req_id = 0;
+    bool result = false;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(result);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
+
+    auto it = std::find_if(m_hal.m_add_source_queue.begin(), m_hal.m_add_source_queue.end(), [&](HAL::Add_Source_Queue_Item const& item)
+    {
+        return item.req_id == req_id;
+    });
+
+    if (result == false)
+    {
+        if (it != m_hal.m_add_source_queue.end())
+        {
+            it->callback(HAL::Result::FAILED, node::source::Source_ptr());
+        }
+        return;
+    }
+
+    std::string init_params_str;
+    std::string config_str;
+
+    auto node = std::make_shared<node::source::Source>();
+    ok &= m_setup_channel.unpack_param(node->name);
+    ok &= m_setup_channel.unpack_param(node->class_id);
+    ok &= unpack_io_stream(m_hal, m_setup_channel, node->outputs);
+    ok &= m_setup_channel.unpack_param(init_params_str);
+    ok &= m_setup_channel.unpack_param(config_str);
+    QLOGI("\tSource: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params_str, config_str);
+    auto init_params = parse_json(init_params_str);
+    auto config = parse_json(config_str);
+    if (!ok || !init_params || !config)
+    {
+        QLOGE("\t\tBad source");
+        if (it != m_hal.m_add_source_queue.end())
+        {
+            it->callback(HAL::Result::FAILED, node::source::Source_ptr());
+        }
+        return;
+    }
+    node->init_params = std::move(*init_params);
+    node->config = std::move(*config);
+    m_hal.m_sources.add(node);
+
+    if (it != m_hal.m_add_source_queue.end())
+    {
+        it->callback(HAL::Result::OK, node);
+    }
+}
+
+void Comms::send_hal_requests()
+{
+    static const std::chrono::seconds REQUEST_TIMEOUT(3);
+
+    auto now = q::Clock::now();
+
+    for (auto it = m_hal.m_add_source_queue.begin(); it != m_hal.m_add_source_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.def->name);
+            pack_json(m_setup_channel, req.source->init_params);
+            pack_json(m_setup_channel, req.source->config);
+        }
+        else if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT, node::source::Source_ptr());
+            m_hal.m_add_source_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 
 void Comms::process()
 {
@@ -648,6 +748,8 @@ void Comms::process()
     {
         return;
     }
+
+    send_hal_requests();
 
     while (auto msg = m_telemetry_channel.get_next_message())
     {
@@ -666,6 +768,8 @@ void Comms::process()
         case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
         case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
         case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
+
+        case comms::Setup_Message::ADD_SOURCE: handle_add_source(); break;
 //        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
