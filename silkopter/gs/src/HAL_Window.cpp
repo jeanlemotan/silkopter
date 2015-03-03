@@ -58,6 +58,7 @@ std::string prettify_name(std::string const& name)
         {
             c = toupper(c);
         }
+        old_c = c;
     }
     if (!out.empty())
     {
