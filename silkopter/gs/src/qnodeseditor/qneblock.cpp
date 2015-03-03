@@ -159,8 +159,10 @@ QVector<QNEPort*> QNEBlock::ports()
 	foreach(QGraphicsItem *port_, childItems())
 	{
 		if (port_->type() == QNEPort::Type)
-			res.append((QNEPort*) port_);
-	}
+        {
+            res.append((QNEPort*) port_);
+        }
+    }
 	return res;
 }
 

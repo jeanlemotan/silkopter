@@ -20,9 +20,9 @@ private:
 private:
     void contextMenuEvent(QContextMenuEvent* event);
 
-    void create_source(std::shared_ptr<silk::node::source::GS_ISource> def);
-    void create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def);
-    void create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def);
+    void create_source(std::shared_ptr<silk::node::source::GS_ISource> def, QPointF pos);
+    void create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def, QPointF pos);
+    void create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def, QPointF pos);
 
     silk::HAL& m_hal;
     QNodesEditor* m_nodesEditor;

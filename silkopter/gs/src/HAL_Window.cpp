@@ -26,6 +26,7 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     m_view->setScene(m_scene);
 
     m_view->setRenderHint(QPainter::Antialiasing, true);
+//    m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
 
     dock->setWidget(m_view);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
@@ -72,9 +73,12 @@ void HAL_Window::on_node_factories_refreshed()
 {
 }
 
-void HAL_Window::contextMenuEvent(QContextMenuEvent *event)
+void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
+
+    auto pos = QPointF(m_view->mapToScene(event->pos()));
+
 
     {
         QMenu* submenu = menu.addMenu(QIcon(), "Sources");
@@ -82,7 +86,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent *event)
         for (auto const& n: nodes)
         {
             auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_source(n); });
+            connect(action, &QAction::triggered, [=](bool) { create_source(n, pos); });
         }
     }
 
@@ -92,7 +96,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent *event)
         for (auto const& n: nodes)
         {
             auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_sink(n); });
+            connect(action, &QAction::triggered, [=](bool) { create_sink(n, pos); });
         }
     }
 
@@ -102,19 +106,19 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent *event)
         for (auto const& n: nodes)
         {
             auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_processor(n); });
+            connect(action, &QAction::triggered, [=](bool) { create_processor(n, pos); });
         }
     }
 
     menu.exec(event->globalPos());
 }
 
-void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> def)
+void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
     b->setName(prettify_name(def->name).c_str());
-    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setPos(pos);
     b->setBrush(QBrush(QColor(QRgb(0xf1c40f))));
 
     for (auto const& o: def->outputs)
@@ -125,12 +129,12 @@ void HAL_Window::create_source(std::shared_ptr<silk::node::source::GS_ISource> d
     }
 }
 
-void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def)
+void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
     b->setName(prettify_name(def->name).c_str());
-    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setPos(pos);
     b->setBrush(QBrush(QColor(QRgb(0xF9690E))));
 
     for (auto const& i: def->inputs)
@@ -141,12 +145,12 @@ void HAL_Window::create_sink(std::shared_ptr<silk::node::sink::GS_ISink> def)
     }
 }
 
-void HAL_Window::create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def)
+void HAL_Window::create_processor(std::shared_ptr<silk::node::processor::GS_IProcessor> def, QPointF pos)
 {
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
     b->setName(prettify_name(def->name).c_str());
-    b->setPos(m_view->sceneRect().center().toPoint());
+    b->setPos(pos);
     b->setBrush(QBrush(QColor(QRgb(0x26C281))));
 
     for (auto const& i: def->inputs)

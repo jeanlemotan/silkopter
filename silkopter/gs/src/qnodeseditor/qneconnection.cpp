@@ -87,16 +87,15 @@ void QNEConnection::updatePath()
 
     p.moveTo(m_pos1);
 
-    qreal dx = m_pos2.x() - m_pos1.x();
-    qreal dy = m_pos2.y() - m_pos1.y();
+    QPointF ctrl1, ctrl2;
 
-    qreal dx1 = m_port1 ? m_port1->dir().x() : 0;
-    qreal dx2 = m_port2 ? m_port2->dir().x() : 0;
+    ctrl1.setX(m_pos1.x() + (m_port1 ? m_port1->dir().x() : -m_port2->dir().x()) * 50.f);
+    ctrl1.setY(m_pos1.y());
 
-    QPointF ctr1(m_pos1.x() + dx1*50, m_pos1.y());
-    QPointF ctr2(m_pos2.x() + dx2*50, m_pos2.y());
+    ctrl2.setX(m_pos2.x() + (m_port2 ? m_port2->dir().x() : -m_port1->dir().x()) * 50.f);
+    ctrl2.setY(m_pos2.y());
 
-    p.cubicTo(ctr1, ctr2, m_pos2);
+    p.cubicTo(ctrl1, ctrl2, m_pos2);
 
 	setPath(p);
 }

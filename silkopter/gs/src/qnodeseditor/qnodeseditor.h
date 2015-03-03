@@ -40,7 +40,7 @@ class QNodesEditor : public QObject
 public:
 	explicit QNodesEditor(QObject *parent = 0);
 
-	void install(QGraphicsScene *scene);
+    void install(QGraphicsScene *m_scene);
 
 	bool eventFilter(QObject *, QEvent *);
 
@@ -48,8 +48,8 @@ private:
 	QGraphicsItem *itemAt(const QPointF&);
 
 private:
-	QGraphicsScene *scene;
-	QNEConnection *conn;
+    QGraphicsScene* m_scene;
+    QNEConnection* m_connection;
 	// QNEBlock *selBlock;
 };
 

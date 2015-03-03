@@ -36,29 +36,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 QNodesEditor::QNodesEditor(QObject *parent) :
     QObject(parent)
 {
-	conn = 0;
+    m_connection = 0;
 }
 
 void QNodesEditor::install(QGraphicsScene *s)
 {
 	s->installEventFilter(this);
-	scene = s;
+    m_scene = s;
 }
 
 QGraphicsItem* QNodesEditor::itemAt(const QPointF &pos)
 {
-	QList<QGraphicsItem*> items = scene->items(QRectF(pos - QPointF(1,1), QSize(3,3)));
+    QList<QGraphicsItem*> items = m_scene->items(QRectF(pos - QPointF(1,1), QSize(3,3)));
 
 	foreach(QGraphicsItem *item, items)
-		if (item->type() > QGraphicsItem::UserType)
-			return item;
+    {
+        if (item->type() > QGraphicsItem::UserType)
+        {
+            return item;
+        }
+    }
 
 	return 0;
 }
 
 bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
 {
-	QGraphicsSceneMouseEvent *me = (QGraphicsSceneMouseEvent*) e;
+    QGraphicsSceneMouseEvent* me = (QGraphicsSceneMouseEvent*)e;
+
+    const QPen unconnectedPen(QColor(0x3498db), 3);
+    const QPen errorPen(QColor(0xe74c3c), 3);
+    const QPen connectedPen(QColor(0x2c3e50), 3);
 
 	switch ((int) e->type())
 	{
@@ -72,15 +80,17 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
 			QGraphicsItem *item = itemAt(me->scenePos());
 			if (item && item->type() == QNEPort::Type)
 			{
-                conn = new QNEConnection(0);
-                scene->addItem(conn);
-				conn->setPort1((QNEPort*) item);
-				conn->setPos1(item->scenePos());
-				conn->setPos2(me->scenePos());
-				conn->updatePath();
+                m_connection = new QNEConnection(0);
+                m_scene->addItem(m_connection);
+                m_connection->setPort1((QNEPort*) item);
+                m_connection->setPos1(item->scenePos());
+                m_connection->setPos2(me->scenePos());
+                m_connection->updatePath();
+                m_connection->setPen(unconnectedPen);
 
 				return true;
-			} else if (item && item->type() == QNEBlock::Type)
+            }
+            else if (item && item->type() == QNEBlock::Type)
 			{
 				/* if (selBlock)
 					selBlock->setSelected(); */
@@ -92,31 +102,55 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
 		{
 			QGraphicsItem *item = itemAt(me->scenePos());
 			if (item && (item->type() == QNEConnection::Type || item->type() == QNEBlock::Type))
-				delete item;
-			// if (selBlock == (QNEBlock*) item)
-				// selBlock = 0;
-			break;
+            {
+                delete item;
+                return true;
+            }
+            break;
 		}
 		}
 	}
 	case QEvent::GraphicsSceneMouseMove:
 	{
-		if (conn)
+        if (m_connection)
 		{
-			conn->setPos2(me->scenePos());
-			conn->updatePath();
+            m_connection->setPos2(me->scenePos());
+            m_connection->updatePath();
+
+            QGraphicsItem *item = itemAt(me->scenePos());
+            if (item && item->type() == QNEPort::Type)
+            {
+                QNEPort *port1 = m_connection->port1();
+                QNEPort *port2 = (QNEPort*) item;
+                if (port1->block() != port2->block() &&
+                    port1->isOutput() != port2->isOutput() &&
+                    port1->portType() == port2->portType() &&
+                    !port1->isConnected(port2))
+                {
+                    m_connection->setPen(connectedPen);
+                }
+                else
+                {
+                    m_connection->setPen(errorPen);
+                }
+            }
+            else
+            {
+                m_connection->setPen(unconnectedPen);
+            }
+
 			return true;
 		}
 		break;
 	}
 	case QEvent::GraphicsSceneMouseRelease:
 	{
-		if (conn && me->button() == Qt::LeftButton)
+        if (m_connection && me->button() == Qt::LeftButton)
 		{
 			QGraphicsItem *item = itemAt(me->scenePos());
 			if (item && item->type() == QNEPort::Type)
 			{
-				QNEPort *port1 = conn->port1();
+                QNEPort *port1 = m_connection->port1();
 				QNEPort *port2 = (QNEPort*) item;
 
                 if (port1->block() != port2->block() &&
@@ -124,16 +158,17 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
                         port1->portType() == port2->portType() &&
                         !port1->isConnected(port2))
 				{
-					conn->setPos2(port2->scenePos());
-					conn->setPort2(port2);
-					conn->updatePath();
-					conn = 0;
+                    m_connection->setPos2(port2->scenePos());
+                    m_connection->setPort2(port2);
+                    m_connection->updatePath();
+                    m_connection->setPen(connectedPen);
+                    m_connection = 0;
 					return true;
 				}
 			}
 
-			delete conn;
-			conn = 0;
+            delete m_connection;
+            m_connection = 0;
 			return true;
 		}
 		break;
