@@ -77,9 +77,23 @@ void QNEPort::setIsOutput(bool o)
     QRect r = fm.boundingRect(m_name);
 
     if (m_isOutput)
+    {
         m_label->setPos(-m_radius - m_margin - m_label->boundingRect().width(), -m_label->boundingRect().height()/2);
-	else
+    }
+    else
+    {
         m_label->setPos(m_radius + m_margin, -m_label->boundingRect().height()/2);
+    }
+}
+
+void QNEPort::setDir(QVector2D dir)
+{
+    m_dir = dir;
+}
+
+QVector2D QNEPort::dir() const
+{
+    return m_dir;
 }
 
 int QNEPort::radius()
@@ -110,8 +124,12 @@ QNEBlock* QNEPort::block() const
 bool QNEPort::isConnected(QNEPort *other)
 {
 	foreach(QNEConnection *conn, m_connections)
-		if (conn->port1() == other || conn->port2() == other)
-			return true;
+    {
+        if (conn->port1() == other || conn->port2() == other)
+        {
+            return true;
+        }
+    }
 
 	return false;
 }

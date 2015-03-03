@@ -50,7 +50,7 @@ enum class Setup_Message : uint8_t
     //              string - name
     //          string - default init prams
     //          string - default config
-    ENUMERATE_NODE_FACTORY,
+    ENUMERATE_NODE_DEFS,
 
     //returns all the nodes in the system
     //REQ:

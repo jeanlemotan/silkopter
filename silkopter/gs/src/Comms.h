@@ -70,7 +70,7 @@ private:
     Manual_Clock m_remote_clock;
 
     void handle_enumerate_nodes();
-    void handle_enumerate_node_factory();
+    void handle_enumerate_node_defs();
 
     void handle_source_config();
     void handle_sink_config();

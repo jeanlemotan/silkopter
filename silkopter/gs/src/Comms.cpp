@@ -125,7 +125,7 @@ void Comms::reset()
 
 void Comms::request_nodes()
 {
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODE_FACTORY, ++m_last_req_id);
+    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
     m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
 }
 
@@ -222,7 +222,7 @@ auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& i
     return true;
 }
 
-void Comms::handle_enumerate_node_factory()
+void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.begin_unpack() &&
@@ -239,11 +239,11 @@ void Comms::handle_enumerate_node_factory()
         ok &= m_setup_channel.unpack_param(processor_count);
         if (!ok)
         {
-            QLOGE("Error in unpacking enumerate node factory message");
+            QLOGE("Error in unpacking enumerate node defs message");
             return;
         }
 
-        QLOGI("Req Id: {}, Factory has {} sources, {} sinks and {} processors", req_id, source_count, sink_count, processor_count);
+        QLOGI("Req Id: {}, Received defs for {} sources, {} sinks and {} processors", req_id, source_count, sink_count, processor_count);
 
         for (uint32_t i = 0; i < source_count; i++)
         {
@@ -263,7 +263,7 @@ void Comms::handle_enumerate_node_factory()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_source_factory().add(std::move(node));
+            m_hal.get_source_defs().add(std::move(node));
         }
 
         for (uint32_t i = 0; i < sink_count; i++)
@@ -284,7 +284,7 @@ void Comms::handle_enumerate_node_factory()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_sink_factory().add(std::move(node));
+            m_hal.get_sink_defs().add(std::move(node));
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
@@ -306,17 +306,17 @@ void Comms::handle_enumerate_node_factory()
             }
             node->init_params = std::move(*init_params);
             node->config = std::move(*config);
-            m_hal.get_processor_factory().add(std::move(node));
+            m_hal.get_processor_defs().add(std::move(node));
         }
 
         m_setup_channel.end_unpack();
     }
     else
     {
-        QLOGE("Error in enumerating node factory");
+        QLOGE("Error in enumerating node defs");
     }
 
-    m_hal.node_factories_refreshed_signal.execute();
+    m_hal.node_defs_refreshed_signal.execute();
 }
 
 auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::GS_IStream>
@@ -409,7 +409,7 @@ void Comms::handle_enumerate_nodes()
             return;
         }
 
-        QLOGI("Req Id: {}, Factory has {} sources, {} sinks, {} processors and {} streams", req_id, source_count, sink_count, processor_count, stream_count);
+        QLOGI("Req Id: {}, Received {} sources, {} sinks, {} processors and {} streams", req_id, source_count, sink_count, processor_count, stream_count);
 
         for (uint32_t i = 0; i < stream_count; i++)
         {
@@ -502,7 +502,7 @@ void Comms::handle_enumerate_nodes()
     }
     else
     {
-        QLOGE("Error in enumerating node factory");
+        QLOGE("Error in enumerating nodes");
     }
 
     m_hal.nodes_refreshed_signal.execute();
@@ -660,7 +660,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Setup_Message::ENUMERATE_NODE_FACTORY: handle_enumerate_node_factory(); break;
+        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
         case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;

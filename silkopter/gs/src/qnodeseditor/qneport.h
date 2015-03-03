@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #define QNEPORT_H
 
 #include <QGraphicsPathItem>
+#include <QVector2D>
 
 class QNEBlock;
 class QNEConnection;
@@ -50,12 +51,12 @@ public:
     const QString& portName() const { return m_name; }
     int portType() const { return m_portType; }
 
-	int type() const { return Type; }
+    int type() const { return Type; }
 
 	QNEBlock* block() const;
 
-	quint64 ptr();
-	void setPtr(quint64);
+    void setDir(QVector2D dir);
+    QVector2D dir() const;
 
 	bool isConnected(QNEPort*);
 
@@ -71,6 +72,7 @@ private:
     int m_margin;
 	QVector<QNEConnection*> m_connections;
     int m_portType;
+    QVector2D m_dir;
 };
 
 #endif // QNEPORT_H

@@ -24,17 +24,17 @@ HAL::~HAL()
 {
 }
 
-auto HAL::get_source_factory()  -> Registry<node::source::GS_ISource>&
+auto HAL::get_source_defs()  -> Registry<node::source::GS_ISource>&
 {
-    return m_source_factory;
+    return m_source_defs;
 }
-auto HAL::get_sink_factory()    -> Registry<node::sink::GS_ISink>&
+auto HAL::get_sink_defs()    -> Registry<node::sink::GS_ISink>&
 {
-    return m_sink_factory;
+    return m_sink_defs;
 }
-auto HAL::get_processor_factory()  -> Registry<node::processor::GS_IProcessor>&
+auto HAL::get_processor_defs()  -> Registry<node::processor::GS_IProcessor>&
 {
-    return m_processor_factory;
+    return m_processor_defs;
 }
 
 auto HAL::get_sources()  -> Registry<node::source::GS_ISource>&

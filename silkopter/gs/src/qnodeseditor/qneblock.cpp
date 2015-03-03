@@ -76,28 +76,38 @@ QNEPort* QNEBlock::addPort(const QString &name, bool isOutput)
 	port->setName(name);
     port->setIsOutput(isOutput);
 	port->setNEBlock(this);
+    port->setDir(isOutput ? QVector2D(1, 0) : QVector2D(-1, 0));
 
 	QFontMetrics fm(scene()->font());
 	int w = fm.width(name);
 	int h = fm.height();
 	// port->setPos(0, height + h/2);
 	if (w > width - horzMargin)
+    {
         width = w + horzMargin;
+    }
 
     label->setPos(0, 0);
     int y = vertMargin;
     y += h * 2;
 
-    foreach(QGraphicsItem *port_, childItems()) {
+    foreach(QGraphicsItem *port_, childItems())
+    {
 		if (port_->type() != QNEPort::Type)
-			continue;
+        {
+            continue;
+        }
 
 		QNEPort *port = (QNEPort*) port_;
 		if (port->isOutput())
+        {
             port->setPos(width + port->radius(), y);
-		else
+        }
+        else
+        {
             port->setPos(-port->radius(), y);
-		y += h;
+        }
+        y += h;
 	}
     height = y;
 

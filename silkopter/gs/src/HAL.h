@@ -41,9 +41,6 @@ namespace stream
 struct GS_IStream
 {
     virtual ~GS_IStream() {}
-    GS_IStream() = default;
-    GS_IStream(GS_IStream&&) = default;
-    auto operator=(GS_IStream&&) -> GS_IStream& = default;
 
     std::string name;
     q::rtti::class_id class_id;
@@ -133,9 +130,6 @@ namespace source
 struct GS_ISource
 {
     virtual ~GS_ISource() {}
-    GS_ISource() = default;
-    GS_ISource(GS_ISource&&) = default;
-    auto operator=(GS_ISource&&) -> GS_ISource& = default;
 
     std::string name;
     q::rtti::class_id class_id;
@@ -161,9 +155,6 @@ namespace sink
 struct GS_ISink
 {
     virtual ~GS_ISink() {}
-    GS_ISink() = default;
-    GS_ISink(GS_ISink&&) = default;
-    auto operator=(GS_ISink&&) -> GS_ISink& = default;
 
     std::string name;
     q::rtti::class_id class_id;
@@ -189,9 +180,6 @@ namespace processor
 struct GS_IProcessor
 {
     virtual ~GS_IProcessor() {}
-    GS_IProcessor() = default;
-    GS_IProcessor(GS_IProcessor&&) = default;
-    auto operator=(GS_IProcessor&&) -> GS_IProcessor& = default;
 
     std::string name;
     q::rtti::class_id class_id;
@@ -247,22 +235,22 @@ public:
     HAL();
     ~HAL();
 
-    auto get_source_factory()       -> Registry<node::source::GS_ISource>&;
-    auto get_sink_factory()         -> Registry<node::sink::GS_ISink>&;
-    auto get_processor_factory()    -> Registry<node::processor::GS_IProcessor>&;
+    auto get_source_defs()       -> Registry<node::source::GS_ISource>&;
+    auto get_sink_defs()         -> Registry<node::sink::GS_ISink>&;
+    auto get_processor_defs()    -> Registry<node::processor::GS_IProcessor>&;
 
     auto get_sources()      -> Registry<node::source::GS_ISource>&;
     auto get_sinks()        -> Registry<node::sink::GS_ISink>&;
     auto get_processors()   -> Registry<node::processor::GS_IProcessor>&;
     auto get_streams()      -> Registry<node::stream::GS_IStream>&;
 
-    q::util::Signal<void()> node_factories_refreshed_signal;
+    q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
 private:
-    Registry<node::source::GS_ISource> m_source_factory;
-    Registry<node::sink::GS_ISink> m_sink_factory;
-    Registry<node::processor::GS_IProcessor> m_processor_factory;
+    Registry<node::source::GS_ISource> m_source_defs;
+    Registry<node::sink::GS_ISink> m_sink_defs;
+    Registry<node::processor::GS_IProcessor> m_processor_defs;
 
     Registry<node::source::GS_ISource> m_sources;
     Registry<node::sink::GS_ISink> m_sinks;

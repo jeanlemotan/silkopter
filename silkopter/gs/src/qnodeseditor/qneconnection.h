@@ -47,16 +47,13 @@ public:
 	QNEPort* port1() const;
 	QNEPort* port2() const;
 
-	void save(QDataStream&);
-	void load(QDataStream&, const QMap<quint64, QNEPort*> &portMap);
-
 	int type() const { return Type; }
 
 private:
-	QPointF pos1;
-	QPointF pos2;
-	QNEPort *m_port1;
-	QNEPort *m_port2;
+	QPointF m_pos1;
+	QPointF m_pos2;
+    QNEPort* m_port1 = nullptr;
+    QNEPort* m_port2 = nullptr;
 };
 
 #endif // QNECONNECTION_H
