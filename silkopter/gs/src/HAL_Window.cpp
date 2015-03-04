@@ -188,6 +188,33 @@ void HAL_Window::create_sink(silk::node::sink::Sink_ptr def, QPointF pos)
 
 void HAL_Window::create_processor(silk::node::processor::Processor_ptr def, QPointF pos)
 {
+    auto node = std::make_shared<silk::node::processor::Processor>(*def);
+
+    QDialog* dialog = new QDialog(this);
+    dialog->setLayout(new QVBoxLayout(dialog));
+
+    Ui::New_Node ui;
+    QWidget* widget = new QWidget(dialog);
+    ui.setupUi(widget);
+    dialog->layout()->addWidget(widget);
+
+    {
+        JSON_Model* model = new JSON_Model(ui.init_params);
+        model->set_document("Init Params", &node->init_params);
+
+        ModelTest test(model);
+
+        ui.init_params->setModel(model);
+    }
+    {
+        JSON_Model* model = new JSON_Model(ui.config);
+        model->set_document("Config", &node->config);
+        ModelTest test(model);
+        ui.config->setModel(model);
+    }
+
+    dialog->exec();
+
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
     b->setName(prettify_name(def->name).c_str());

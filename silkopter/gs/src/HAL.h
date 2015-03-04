@@ -181,6 +181,16 @@ namespace sink
 struct Sink
 {
     virtual ~Sink() {}
+    Sink() = default;
+    Sink(Sink&& other) = default;
+    Sink(Sink const& other)
+        : name(other.name)
+        , class_id(other.class_id)
+        , init_params(jsonutil::clone_value(other.init_params))
+        , config(jsonutil::clone_value(other.config))
+        , inputs(other.inputs)
+    {
+    }
 
     std::string name;
     q::rtti::class_id class_id;
@@ -204,6 +214,17 @@ namespace processor
 struct Processor
 {
     virtual ~Processor() {}
+    Processor() = default;
+    Processor(Processor&& other) = default;
+    Processor(Processor const& other)
+        : name(other.name)
+        , class_id(other.class_id)
+        , init_params(jsonutil::clone_value(other.init_params))
+        , config(jsonutil::clone_value(other.config))
+        , inputs(other.inputs)
+        , outputs(other.outputs)
+    {
+    }
 
     std::string name;
     q::rtti::class_id class_id;
