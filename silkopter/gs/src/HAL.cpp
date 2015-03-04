@@ -28,7 +28,7 @@ auto HAL::get_source_defs() const  -> Registry<node::source::Source_Def> const&
 {
     return m_source_defs;
 }
-auto HAL::get_sink_defs() const    -> Registry<node::sink::Sink> const&
+auto HAL::get_sink_defs() const    -> Registry<node::sink::Sink_Def> const&
 {
     return m_sink_defs;
 }
@@ -54,30 +54,58 @@ auto HAL::get_streams() const  -> Registry<node::stream::GS_IStream> const&
     return m_streams;
 }
 
-void HAL::add_source(node::source::Source_ptr node, Add_Source_Callback callback)
+void HAL::add_source(std::string const& def_name,
+                     std::string const& name,
+                     rapidjson::Document&& init_params,
+                     Add_Source_Callback callback)
 {
-    QASSERT(callback && node && node->def);
-    if (!callback || !node || !node->def)
+    QASSERT(callback);
+    if (!callback)
     {
         return;
     }
-    Add_Source_Queue_Item item;
-    item.node = node;
-    item.callback = callback;
-    m_add_source_queue.push_back(item);
+    Add_Queue_Item item;
+    item.def_name = def_name;
+    item.name = name;
+    item.init_params = std::move(init_params);
+    item.source_callback = callback;
+    m_add_queue.push_back(std::move(item));
 }
 
-void HAL::add_processor(node::processor::Processor_ptr node, Add_Processor_Callback callback)
+void HAL::add_sink(std::string const& def_name,
+                     std::string const& name,
+                     rapidjson::Document&& init_params,
+                     Add_Sink_Callback callback)
 {
-    QASSERT(callback && node && node->def);
-    if (!callback || !node || !node->def)
+    QASSERT(callback);
+    if (!callback)
     {
         return;
     }
-    Add_Processor_Queue_Item item;
-    item.node = node;
-    item.callback = callback;
-    m_add_processor_queue.push_back(item);
+    Add_Queue_Item item;
+    item.def_name = def_name;
+    item.name = name;
+    item.init_params = std::move(init_params);
+    item.sink_callback = callback;
+    m_add_queue.push_back(std::move(item));
+}
+
+void HAL::add_processor(std::string const& def_name,
+                     std::string const& name,
+                     rapidjson::Document&& init_params,
+                     Add_Processor_Callback callback)
+{
+    QASSERT(callback);
+    if (!callback)
+    {
+        return;
+    }
+    Add_Queue_Item item;
+    item.def_name = def_name;
+    item.name = name;
+    item.init_params = std::move(init_params);
+    item.processor_callback = callback;
+    m_add_queue.push_back(std::move(item));
 }
 
 

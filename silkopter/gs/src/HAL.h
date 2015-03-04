@@ -178,22 +178,23 @@ DECLARE_CLASS_PTR(Source);
 namespace sink
 {
 
-struct Sink
+struct Sink_Def
 {
-    virtual ~Sink() {}
-    Sink() = default;
-    Sink(Sink&& other) = default;
-    Sink(Sink const& other)
-        : name(other.name)
-        , class_id(other.class_id)
-        , init_params(jsonutil::clone_value(other.init_params))
-        , config(jsonutil::clone_value(other.config))
-        , inputs(other.inputs)
-    {
-    }
+    virtual ~Sink_Def() {}
 
     std::string name;
     q::rtti::class_id class_id;
+    rapidjson::Document default_init_params;
+    rapidjson::Document default_config;
+};
+DECLARE_CLASS_PTR(Sink_Def);
+
+
+struct Sink
+{
+    virtual ~Sink() {}
+    std::string name;
+    Sink_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input
@@ -280,7 +281,7 @@ public:
     ~HAL();
 
     auto get_source_defs() const    -> Registry<node::source::Source_Def> const&;
-    auto get_sink_defs() const      -> Registry<node::sink::Sink> const&;
+    auto get_sink_defs() const      -> Registry<node::sink::Sink_Def> const&;
     auto get_processor_defs() const -> Registry<node::processor::Processor_Def> const&;
 
     auto get_sources() const        -> Registry<node::source::Source> const&;
@@ -296,17 +297,20 @@ public:
     };
 
     typedef std::function<void(Result, node::source::Source_ptr)> Add_Source_Callback;
-    void add_source(node::source::Source_ptr node, Add_Source_Callback callback);
+    void add_source(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Source_Callback callback);
 
     typedef std::function<void(Result, node::processor::Processor_ptr)> Add_Processor_Callback;
-    void add_processor(node::processor::Processor_ptr node, Add_Processor_Callback callback);
+    void add_processor(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Processor_Callback callback);
+
+    typedef std::function<void(Result, node::sink::Sink_ptr)> Add_Sink_Callback;
+    void add_sink(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Sink_Callback callback);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
 protected:
     Registry<node::source::Source_Def> m_source_defs;
-    Registry<node::sink::Sink> m_sink_defs;
+    Registry<node::sink::Sink_Def> m_sink_defs;
     Registry<node::processor::Processor_Def> m_processor_defs;
 
     Registry<node::source::Source> m_sources;
@@ -314,25 +318,21 @@ protected:
     Registry<node::processor::Processor> m_processors;
     Registry<node::stream::GS_IStream> m_streams;
 
-    struct Add_Source_Queue_Item
+    struct Add_Queue_Item
     {
         bool was_sent = false;
         q::Clock::time_point sent_time_point;
         uint32_t req_id = 0;
-        node::source::Source_ptr node;
-        Add_Source_Callback callback;
-    };
-    std::vector<Add_Source_Queue_Item> m_add_source_queue;
 
-    struct Add_Processor_Queue_Item
-    {
-        bool was_sent = false;
-        q::Clock::time_point sent_time_point;
-        uint32_t req_id = 0;
-        node::processor::Processor_ptr node;
-        Add_Processor_Callback callback;
+        std::string def_name;
+        std::string name;
+        rapidjson::Document init_params;
+
+        Add_Source_Callback source_callback;
+        Add_Processor_Callback processor_callback;
+        Add_Sink_Callback sink_callback;
     };
-    std::vector<Add_Processor_Queue_Item> m_add_processor_queue;
+    std::vector<Add_Queue_Item> m_add_queue;
 
 private:
 

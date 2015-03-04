@@ -299,12 +299,12 @@ void Comms::handle_enumerate_node_defs()
 
         for (uint32_t i = 0; i < sink_count; i++)
         {
-            auto node = std::make_shared<node::sink::Sink>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
+            auto def = std::make_shared<node::sink::Sink_Def>();
+            bool ok = m_setup_channel.unpack_param(def->name);
+            ok &= m_setup_channel.unpack_param(def->class_id);
             ok &= m_setup_channel.unpack_param(init_params_str);
             ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSink: {}, init_params {}, config {}", node->name, init_params_str, config_str);
+            QLOGI("\tSink: {}, init_params {}, config {}", def->name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!ok || !init_params || !config)
@@ -312,9 +312,9 @@ void Comms::handle_enumerate_node_defs()
                 QLOGE("\t\tBad sink");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
-            m_hal.m_sink_defs.add(std::move(node));
+            def->default_init_params = std::move(*init_params);
+            def->default_config = std::move(*config);
+            m_hal.m_sink_defs.add(std::move(def));
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
@@ -463,15 +463,16 @@ void Comms::handle_enumerate_nodes()
         for (uint32_t i = 0; i < sink_count; i++)
         {
             auto node = std::make_shared<node::sink::Sink>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
+            bool ok = m_setup_channel.unpack_param(def_name);
+            ok &= m_setup_channel.unpack_param(node->name);
             ok &= unpack_inputs(m_setup_channel, node->inputs);
             ok &= m_setup_channel.unpack_param(init_params);
             ok &= m_setup_channel.unpack_param(config);
-            QLOGI("\tSink: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params, config);
+            QLOGI("\tSink: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
             auto init_paramsj = parse_json(init_params);
             auto configj = parse_json(config);
-            if (!ok || !init_paramsj || !configj)
+            node->def = m_hal.get_sink_defs().find_by_name(def_name);
+            if (!ok || !init_paramsj || !configj || !node->def)
             {
                 QLOGE("\t\tBad sink");
                 return;
@@ -661,17 +662,16 @@ void Comms::handle_add_source()
         return;
     }
 
-    auto it = std::find_if(m_hal.m_add_source_queue.begin(), m_hal.m_add_source_queue.end(), [&](HAL::Add_Source_Queue_Item const& item)
+    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
     {
         return item.req_id == req_id;
     });
 
+    auto callback = it != m_hal.m_add_queue.end() ? it->source_callback : [](HAL::Result, node::source::Source_ptr) {};
+
     if (result == false)
     {
-        if (it != m_hal.m_add_source_queue.end())
-        {
-            it->callback(HAL::Result::FAILED, node::source::Source_ptr());
-        }
+        callback(HAL::Result::FAILED, node::source::Source_ptr());
         return;
     }
 
@@ -692,20 +692,13 @@ void Comms::handle_add_source()
     if (!ok || !init_paramsj || !configj || !node->def)
     {
         QLOGE("\t\tBad source");
-        if (it != m_hal.m_add_source_queue.end())
-        {
-            it->callback(HAL::Result::FAILED, node::source::Source_ptr());
-        }
+        callback(HAL::Result::FAILED, node::source::Source_ptr());
         return;
     }
     node->init_params = std::move(*init_paramsj);
     node->config = std::move(*configj);
     m_hal.m_sources.add(node);
-
-    if (it != m_hal.m_add_source_queue.end())
-    {
-        it->callback(HAL::Result::OK, node);
-    }
+    callback(HAL::Result::OK, node);
 }
 
 void Comms::handle_add_processor()
@@ -721,17 +714,16 @@ void Comms::handle_add_processor()
         return;
     }
 
-    auto it = std::find_if(m_hal.m_add_processor_queue.begin(), m_hal.m_add_processor_queue.end(), [&](HAL::Add_Processor_Queue_Item const& item)
+    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
     {
         return item.req_id == req_id;
     });
 
+    auto callback = it != m_hal.m_add_queue.end() ? it->processor_callback : [](HAL::Result, node::processor::Processor_ptr) {};
+
     if (result == false)
     {
-        if (it != m_hal.m_add_processor_queue.end())
-        {
-            it->callback(HAL::Result::FAILED, node::processor::Processor_ptr());
-        }
+        callback(HAL::Result::FAILED, node::processor::Processor_ptr());
         return;
     }
 
@@ -753,20 +745,65 @@ void Comms::handle_add_processor()
     if (!ok || !init_paramsj || !configj || !node->def)
     {
         QLOGE("\t\tBad processor");
-        if (it != m_hal.m_add_processor_queue.end())
-        {
-            it->callback(HAL::Result::FAILED, node::processor::Processor_ptr());
-        }
+        callback(HAL::Result::FAILED, node::processor::Processor_ptr());
         return;
     }
     node->init_params = std::move(*init_paramsj);
     node->config = std::move(*configj);
     m_hal.m_processors.add(node);
+    callback(HAL::Result::OK, node);
+}
 
-    if (it != m_hal.m_add_processor_queue.end())
+void Comms::handle_add_sink()
+{
+    uint32_t req_id = 0;
+    bool result = false;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(result);
+    if (!ok)
     {
-        it->callback(HAL::Result::OK, node);
+        QLOGE("Failed to unpack node config");
+        return;
     }
+
+    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
+    {
+        return item.req_id == req_id;
+    });
+
+    auto callback = it != m_hal.m_add_queue.end() ? it->sink_callback : [](HAL::Result, node::sink::Sink_ptr) {};
+
+    if (result == false)
+    {
+        callback(HAL::Result::FAILED, node::sink::Sink_ptr());
+        return;
+    }
+
+    std::string init_params;
+    std::string config;
+    std::string def_name;
+
+    auto node = std::make_shared<node::sink::Sink>();
+    ok &= m_setup_channel.unpack_param(def_name);
+    ok &= m_setup_channel.unpack_param(node->name);
+    ok &= unpack_inputs(m_setup_channel, node->inputs);
+    ok &= m_setup_channel.unpack_param(init_params);
+    ok &= m_setup_channel.unpack_param(config);
+    QLOGI("\tSink: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
+    auto init_paramsj = parse_json(init_params);
+    auto configj = parse_json(config);
+    node->def = m_hal.get_sink_defs().find_by_name(def_name);
+    if (!ok || !init_paramsj || !configj || !node->def)
+    {
+        QLOGE("\t\tBad sink");
+        callback(HAL::Result::FAILED, node::sink::Sink_ptr());
+        return;
+    }
+    node->init_params = std::move(*init_paramsj);
+    node->config = std::move(*configj);
+    m_hal.m_sinks.add(node);
+    callback(HAL::Result::OK, node);
 }
 
 
@@ -780,7 +817,7 @@ void Comms::send_hal_requests()
 
     auto now = q::Clock::now();
 
-    for (auto it = m_hal.m_add_source_queue.begin(); it != m_hal.m_add_source_queue.end();)
+    for (auto it = m_hal.m_add_queue.begin(); it != m_hal.m_add_queue.end();)
     {
         auto& req = *it;
         if (!req.was_sent)
@@ -788,44 +825,39 @@ void Comms::send_hal_requests()
             req.was_sent = true;
             req.sent_time_point = now;
             req.req_id = ++m_last_req_id;
-            m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
+            if (req.source_callback)
+            {
+                m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
+            }
+            else if (req.sink_callback)
+            {
+                m_setup_channel.begin_pack(comms::Setup_Message::ADD_SINK);
+            }
+            else if (req.processor_callback)
+            {
+                m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
+            }
             m_setup_channel.pack_param(req.req_id);
-            m_setup_channel.pack_param(req.node->def->name);
-            m_setup_channel.pack_param(req.node->name); //name!!!!
-            pack_json(m_setup_channel, req.node->init_params);
-            pack_json(m_setup_channel, req.node->config);
+            m_setup_channel.pack_param(req.def_name);
+            m_setup_channel.pack_param(req.name);
+            pack_json(m_setup_channel, req.init_params);
             m_setup_channel.end_pack();
         }
         if (now - req.sent_time_point > REQUEST_TIMEOUT)
         {
-            req.callback(HAL::Result::TIMEOUT, node::source::Source_ptr());
-            m_hal.m_add_source_queue.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-    for (auto it = m_hal.m_add_processor_queue.begin(); it != m_hal.m_add_processor_queue.end();)
-    {
-        auto& req = *it;
-        if (!req.was_sent)
-        {
-            req.was_sent = true;
-            req.sent_time_point = now;
-            req.req_id = ++m_last_req_id;
-            m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
-            m_setup_channel.pack_param(req.req_id);
-            m_setup_channel.pack_param(req.node->def->name);
-            m_setup_channel.pack_param(req.node->name); //name!!!!
-            pack_json(m_setup_channel, req.node->init_params);
-            pack_json(m_setup_channel, req.node->config);
-            m_setup_channel.end_pack();
-        }
-        if (now - req.sent_time_point > REQUEST_TIMEOUT)
-        {
-            req.callback(HAL::Result::TIMEOUT, node::processor::Processor_ptr());
-            m_hal.m_add_processor_queue.erase(it);
+            if (req.source_callback)
+            {
+                req.source_callback(HAL::Result::TIMEOUT, node::source::Source_ptr());
+            }
+            else if (req.sink_callback)
+            {
+                req.sink_callback(HAL::Result::TIMEOUT, node::sink::Sink_ptr());
+            }
+            else if (req.processor_callback)
+            {
+                req.processor_callback(HAL::Result::TIMEOUT, node::processor::Processor_ptr());
+            }
+            m_hal.m_add_queue.erase(it);
         }
         else
         {
@@ -864,6 +896,7 @@ void Comms::process()
 
         case comms::Setup_Message::ADD_SOURCE: handle_add_source(); break;
         case comms::Setup_Message::ADD_PROCESSOR: handle_add_processor(); break;
+        case comms::Setup_Message::ADD_SINK: handle_add_sink(); break;
 //        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
