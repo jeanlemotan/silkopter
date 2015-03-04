@@ -18,7 +18,7 @@ Comp_AHRS::Comp_AHRS(HAL& hal)
 {
 }
 
-auto Comp_AHRS::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
 
@@ -32,7 +32,7 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params, rapidjson::Value const
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 
 auto Comp_AHRS::init() -> bool
@@ -45,21 +45,21 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
-    inputs[0].name = "angular_velocity";
-    inputs[0].stream = m_angular_velocity_stream.lock();
+    inputs[0].name = "Angular Velocity";
+    inputs[0].stream = m_config->inputs.angular_velocity;
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
-    inputs[1].name = "acceleration";
-    inputs[1].stream = m_acceleration_stream.lock();
+    inputs[1].name = m_config->inputs.acceleration;
+    inputs[1].stream = m_config->inputs.acceleration;
     inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
-    inputs[2].name = "magnetic_field";
-    inputs[2].stream = m_magnetic_field_stream.lock();
+    inputs[2].name = m_config->inputs.magnetic_field;
+    inputs[2].stream = m_config->inputs.magnetic_field;
     return inputs;
 }
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
-    outputs[0].name = "reference_frame";
+    outputs[0].name = "Reference Frame";
     outputs[0].stream = m_stream;
     return outputs;
 }

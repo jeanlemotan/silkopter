@@ -79,6 +79,7 @@ private:
     void handle_processor_config();
 //    void handle_stream_config();
 
+    void handle_add_processor();
     void handle_add_source();
 };
 

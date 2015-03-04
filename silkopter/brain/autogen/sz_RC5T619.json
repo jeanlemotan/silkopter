@@ -13,7 +13,7 @@
 {
     "definition" : true,
     "namespace" : "sz::RC5T619",
-    "name": "ADC",
+    "name": "ADC_Value",
     "members":
     [
     ]
@@ -24,8 +24,8 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::RC5T619::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
-        ["sz::RC5T619::ADC", "adc1", {"required": true, "json_key" : "ADC1"}]
+        ["sz::RC5T619::ADC_Value", "adc0_value", {"required": true, "json_key" : "ADC0 Value"}],
+        ["sz::RC5T619::ADC_Value", "adc1_value", {"required": true, "json_key" : "ADC1 Value"}]
     ]
 },
 {

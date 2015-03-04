@@ -176,7 +176,7 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 }
 
 template<class T>
-auto unpack_io_info(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 {
     io.clear();
     uint32_t size = 0;
@@ -187,8 +187,9 @@ auto unpack_io_info(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     io.resize(size);
     for (auto& i: io)
     {
-        if (!channel.unpack_param(i.class_id) ||
-            !channel.unpack_param(i.name))
+        if (!channel.unpack_param(i.name) ||
+            !channel.unpack_param(i.class_id) ||
+            !channel.unpack_param(i.stream))
         {
             return false;
         }
@@ -196,7 +197,7 @@ auto unpack_io_info(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     return true;
 }
 template<class T>
-auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 {
     io.clear();
     uint32_t size = 0;
@@ -205,22 +206,43 @@ auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& i
         return false;
     }
     io.resize(size);
-    std::string name;
     for (auto& i: io)
     {
-        if (!channel.unpack_param(name))
+        if (!channel.unpack_param(i.name) ||
+            !channel.unpack_param(i.class_id) ||
+            !channel.unpack_param(i.rate))
         {
-            return false;
-        }
-        i.stream = hal.get_streams().find_by_name<node::stream::GS_IStream>(name);
-        if (!i.stream)
-        {
-            QLOGE("Cannot find stream name {}", i.name);
             return false;
         }
     }
     return true;
 }
+//template<class T>
+//auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+//{
+//    io.clear();
+//    uint32_t size = 0;
+//    if (!channel.unpack_param(size))
+//    {
+//        return false;
+//    }
+//    io.resize(size);
+//    std::string name;
+//    for (auto& i: io)
+//    {
+//        if (!channel.unpack_param(name))
+//        {
+//            return false;
+//        }
+//        i.stream = hal.get_streams().find_by_name<node::stream::GS_IStream>(name);
+//        if (!i.stream)
+//        {
+//            QLOGE("Cannot find stream name {}", i.name);
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
 static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
 {
@@ -257,13 +279,12 @@ void Comms::handle_enumerate_node_defs()
 
         for (uint32_t i = 0; i < source_count; i++)
         {
-            auto node = std::make_shared<node::source::Source>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_info(m_setup_channel, node->outputs);
+            auto def = std::make_shared<node::source::Source_Def>();
+            bool ok = m_setup_channel.unpack_param(def->name);
+            ok &= m_setup_channel.unpack_param(def->class_id);
             ok &= m_setup_channel.unpack_param(init_params_str);
             ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSource: {}, init_params {}, config {}", node->name, init_params_str, config_str);
+            QLOGI("\tSource: {}, init_params {}, config {}", def->name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!ok || !init_params || !config)
@@ -271,9 +292,9 @@ void Comms::handle_enumerate_node_defs()
                 QLOGE("\t\tBad source");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
-            m_hal.m_source_defs.add(std::move(node));
+            def->default_init_params = std::move(*init_params);
+            def->default_config = std::move(*config);
+            m_hal.m_source_defs.add(std::move(def));
         }
 
         for (uint32_t i = 0; i < sink_count; i++)
@@ -281,7 +302,6 @@ void Comms::handle_enumerate_node_defs()
             auto node = std::make_shared<node::sink::Sink>();
             bool ok = m_setup_channel.unpack_param(node->name);
             ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_info(m_setup_channel, node->inputs);
             ok &= m_setup_channel.unpack_param(init_params_str);
             ok &= m_setup_channel.unpack_param(config_str);
             QLOGI("\tSink: {}, init_params {}, config {}", node->name, init_params_str, config_str);
@@ -299,14 +319,12 @@ void Comms::handle_enumerate_node_defs()
 
         for (uint32_t i = 0; i < processor_count; i++)
         {
-            auto node = std::make_shared<node::processor::Processor>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_info(m_setup_channel, node->inputs);
-            ok &= unpack_io_info(m_setup_channel, node->outputs);
+            auto def = std::make_shared<node::processor::Processor_Def>();
+            bool ok = m_setup_channel.unpack_param(def->name);
+            ok &= m_setup_channel.unpack_param(def->class_id);
             ok &= m_setup_channel.unpack_param(init_params_str);
             ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tProcessor: {}, init_params {}, config {}", node->name, init_params_str, config_str);
+            QLOGI("\tProcessor: {}, init_params {}, config {}", def->name, init_params_str, config_str);
             auto init_params = parse_json(init_params_str);
             auto config = parse_json(config_str);
             if (!ok || !init_params || !config)
@@ -314,9 +332,9 @@ void Comms::handle_enumerate_node_defs()
                 QLOGE("\t\tBad processor");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
-            m_hal.m_processor_defs.add(std::move(node));
+            def->default_init_params = std::move(*init_params);
+            def->default_config = std::move(*config);
+            m_hal.m_processor_defs.add(std::move(def));
         }
 
         m_setup_channel.end_unpack();
@@ -329,72 +347,72 @@ void Comms::handle_enumerate_node_defs()
     m_hal.node_defs_refreshed_signal.execute();
 }
 
-auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::GS_IStream>
-{
-    if (class_id == q::rtti::get_class_id<node::stream::IAcceleration>())
-    {
-        return std::make_shared<node::stream::Acceleration>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IAngular_Velocity>())
-    {
-        return std::make_shared<node::stream::Angular_Velocity>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IMagnetic_Field>())
-    {
-        return std::make_shared<node::stream::Magnetic_Field>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IPressure>())
-    {
-        return std::make_shared<node::stream::Pressure>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IBattery_State>())
-    {
-        return std::make_shared<node::stream::Battery_State>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ILinear_Acceleration>())
-    {
-        return std::make_shared<node::stream::Linear_Acceleration>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ICardinal_Points>())
-    {
-        return std::make_shared<node::stream::Cardinal_Points>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ICurrent>())
-    {
-        return std::make_shared<node::stream::Current>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IVoltage>())
-    {
-        return std::make_shared<node::stream::Voltage>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IDistance>())
-    {
-        return std::make_shared<node::stream::Distance>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ILocation>())
-    {
-        return std::make_shared<node::stream::Location>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
-    {
-        return std::make_shared<node::stream::PWM_Value>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IReference_Frame>())
-    {
-        return std::make_shared<node::stream::Reference_Frame>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ITemperature>())
-    {
-        return std::make_shared<node::stream::Temperature>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IADC_Value>())
-    {
-        return std::make_shared<node::stream::ADC_Value>();
-    }
-//  create_stream_from_rtti<node::stream::Video>(type);
+//auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::GS_IStream>
+//{
+//    if (class_id == q::rtti::get_class_id<node::stream::IAcceleration>())
+//    {
+//        return std::make_shared<node::stream::Acceleration>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IAngular_Velocity>())
+//    {
+//        return std::make_shared<node::stream::Angular_Velocity>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IMagnetic_Field>())
+//    {
+//        return std::make_shared<node::stream::Magnetic_Field>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IPressure>())
+//    {
+//        return std::make_shared<node::stream::Pressure>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IBattery_State>())
+//    {
+//        return std::make_shared<node::stream::Battery_State>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::ILinear_Acceleration>())
+//    {
+//        return std::make_shared<node::stream::Linear_Acceleration>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::ICardinal_Points>())
+//    {
+//        return std::make_shared<node::stream::Cardinal_Points>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::ICurrent>())
+//    {
+//        return std::make_shared<node::stream::Current>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IVoltage>())
+//    {
+//        return std::make_shared<node::stream::Voltage>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IDistance>())
+//    {
+//        return std::make_shared<node::stream::Distance>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::ILocation>())
+//    {
+//        return std::make_shared<node::stream::Location>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
+//    {
+//        return std::make_shared<node::stream::PWM_Value>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IReference_Frame>())
+//    {
+//        return std::make_shared<node::stream::Reference_Frame>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::ITemperature>())
+//    {
+//        return std::make_shared<node::stream::Temperature>();
+//    }
+//    if (class_id == q::rtti::get_class_id<node::stream::IADC_Value>())
+//    {
+//        return std::make_shared<node::stream::ADC_Value>();
+//    }
+////  create_stream_from_rtti<node::stream::Video>(type);
 
-    return std::shared_ptr<node::stream::GS_IStream>();
-}
+//    return std::shared_ptr<node::stream::GS_IStream>();
+//}
 
 void Comms::handle_enumerate_nodes()
 {
@@ -405,62 +423,40 @@ void Comms::handle_enumerate_nodes()
         uint32_t source_count = 0;
         uint32_t sink_count = 0;
         uint32_t processor_count = 0;
-        uint32_t stream_count = 0;
-        std::string init_params_str;
-        std::string config_str;
+        std::string def_name;
+        std::string init_params;
+        std::string config;
 
         bool ok = m_setup_channel.unpack_param(source_count);
         ok &= m_setup_channel.unpack_param(sink_count);
         ok &= m_setup_channel.unpack_param(processor_count);
-        ok &= m_setup_channel.unpack_param(stream_count);
         if (!ok)
         {
             QLOGE("Error in unpacking enumerate nodes message");
             return;
         }
 
-        QLOGI("Req Id: {}, Received {} sources, {} sinks, {} processors and {} streams", req_id, source_count, sink_count, processor_count, stream_count);
-
-        for (uint32_t i = 0; i < stream_count; i++)
-        {
-            std::string name;
-            q::rtti::class_id class_id;
-            uint32_t rate = 0;
-            m_setup_channel.unpack_param(name);
-            m_setup_channel.unpack_param(class_id);
-            m_setup_channel.unpack_param(rate);
-            QLOGI("\tStream: {}, type {}, rate {}Hz", name, class_id, rate);
-
-            auto node = create_stream_from_class_id(class_id);
-            if (!node)
-            {
-                QLOGE("\t\tCannot create node of type: {}", class_id);
-                return;
-            }
-            node->class_id = class_id;
-            node->name = name;
-            node->rate = rate;
-            m_hal.m_streams.add(node);
-        }
+        QLOGI("Req Id: {}, Received {} sources, {} sinks, {} processors", req_id, source_count, sink_count, processor_count);
 
         for (uint32_t i = 0; i < source_count; i++)
         {
             auto node = std::make_shared<node::source::Source>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_stream(m_hal, m_setup_channel, node->outputs);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSource: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            bool ok = m_setup_channel.unpack_param(def_name);
+            ok &= m_setup_channel.unpack_param(node->name);
+            ok &= unpack_outputs(m_setup_channel, node->outputs);
+            ok &= m_setup_channel.unpack_param(init_params);
+            ok &= m_setup_channel.unpack_param(config);
+            QLOGI("\tSource: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
+            auto init_paramsj = parse_json(init_params);
+            auto configj = parse_json(config);
+            node->def = m_hal.get_source_defs().find_by_name(def_name);
+            if (!ok || !init_paramsj || !configj || !node->def)
             {
                 QLOGE("\t\tBad source");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
+            node->init_params = std::move(*init_paramsj);
+            node->config = std::move(*configj);
             m_hal.m_sources.add(node);
         }
 
@@ -469,41 +465,42 @@ void Comms::handle_enumerate_nodes()
             auto node = std::make_shared<node::sink::Sink>();
             bool ok = m_setup_channel.unpack_param(node->name);
             ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_stream(m_hal, m_setup_channel, node->inputs);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSink: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            ok &= unpack_inputs(m_setup_channel, node->inputs);
+            ok &= m_setup_channel.unpack_param(init_params);
+            ok &= m_setup_channel.unpack_param(config);
+            QLOGI("\tSink: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params, config);
+            auto init_paramsj = parse_json(init_params);
+            auto configj = parse_json(config);
+            if (!ok || !init_paramsj || !configj)
             {
                 QLOGE("\t\tBad sink");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
+            node->init_params = std::move(*init_paramsj);
+            node->config = std::move(*configj);
             m_hal.m_sinks.add(node);
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
         {
             auto node = std::make_shared<node::processor::Processor>();
-            bool ok = m_setup_channel.unpack_param(node->name);
-            ok &= m_setup_channel.unpack_param(node->class_id);
-            ok &= unpack_io_stream(m_hal, m_setup_channel, node->inputs);
-            ok &= unpack_io_stream(m_hal, m_setup_channel, node->outputs);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tProcessor: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            bool ok = m_setup_channel.unpack_param(def_name);
+            ok &= m_setup_channel.unpack_param(node->name);
+            ok &= unpack_inputs(m_setup_channel, node->inputs);
+            ok &= unpack_outputs(m_setup_channel, node->outputs);
+            ok &= m_setup_channel.unpack_param(init_params);
+            ok &= m_setup_channel.unpack_param(config);
+            QLOGI("\tProcessor: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
+            auto init_paramsj = parse_json(init_params);
+            auto configj = parse_json(config);
+            node->def = m_hal.get_processor_defs().find_by_name(def_name);
+            if (!ok || !init_paramsj || !configj || !node->def)
             {
                 QLOGE("\t\tBad processor");
                 return;
             }
-            node->init_params = std::move(*init_params);
-            node->config = std::move(*config);
+            node->init_params = std::move(*init_paramsj);
+            node->config = std::move(*configj);
             m_hal.m_processors.add(node);
         }
 
@@ -534,7 +531,7 @@ void Comms::handle_source_config()
         return;
     }
 
-    auto node = m_hal.get_sources().find_by_name<node::source::Source>(name);
+    auto node = m_hal.get_sources().find_by_name(name);
     if (!node)
     {
         QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
@@ -567,7 +564,7 @@ void Comms::handle_sink_config()
         return;
     }
 
-    auto node = m_hal.get_sinks().find_by_name<node::sink::Sink>(name);
+    auto node = m_hal.get_sinks().find_by_name(name);
     if (!node)
     {
         QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
@@ -600,7 +597,7 @@ void Comms::handle_processor_config()
         return;
     }
 
-    auto node = m_hal.get_processors().find_by_name<node::processor::Processor>(name);
+    auto node = m_hal.get_processors().find_by_name(name);
     if (!node)
     {
         QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
@@ -678,19 +675,21 @@ void Comms::handle_add_source()
         return;
     }
 
-    std::string init_params_str;
-    std::string config_str;
+    std::string init_params;
+    std::string config;
+    std::string def_name;
 
     auto node = std::make_shared<node::source::Source>();
+    ok &= m_setup_channel.unpack_param(def_name);
     ok &= m_setup_channel.unpack_param(node->name);
-    ok &= m_setup_channel.unpack_param(node->class_id);
-    ok &= unpack_io_stream(m_hal, m_setup_channel, node->outputs);
-    ok &= m_setup_channel.unpack_param(init_params_str);
-    ok &= m_setup_channel.unpack_param(config_str);
-    QLOGI("\tSource: {}, type {}, init_params {}, config {}", node->name, node->class_id, init_params_str, config_str);
-    auto init_params = parse_json(init_params_str);
-    auto config = parse_json(config_str);
-    if (!ok || !init_params || !config)
+    ok &= unpack_outputs(m_setup_channel, node->outputs);
+    ok &= m_setup_channel.unpack_param(init_params);
+    ok &= m_setup_channel.unpack_param(config);
+    QLOGI("\tSource: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
+    auto init_paramsj = parse_json(init_params);
+    auto configj = parse_json(config);
+    node->def = m_hal.get_source_defs().find_by_name(def_name);
+    if (!ok || !init_paramsj || !configj || !node->def)
     {
         QLOGE("\t\tBad source");
         if (it != m_hal.m_add_source_queue.end())
@@ -699,8 +698,8 @@ void Comms::handle_add_source()
         }
         return;
     }
-    node->init_params = std::move(*init_params);
-    node->config = std::move(*config);
+    node->init_params = std::move(*init_paramsj);
+    node->config = std::move(*configj);
     m_hal.m_sources.add(node);
 
     if (it != m_hal.m_add_source_queue.end())
@@ -708,6 +707,68 @@ void Comms::handle_add_source()
         it->callback(HAL::Result::OK, node);
     }
 }
+
+void Comms::handle_add_processor()
+{
+    uint32_t req_id = 0;
+    bool result = false;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(result);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack node config");
+        return;
+    }
+
+    auto it = std::find_if(m_hal.m_add_processor_queue.begin(), m_hal.m_add_processor_queue.end(), [&](HAL::Add_Processor_Queue_Item const& item)
+    {
+        return item.req_id == req_id;
+    });
+
+    if (result == false)
+    {
+        if (it != m_hal.m_add_processor_queue.end())
+        {
+            it->callback(HAL::Result::FAILED, node::processor::Processor_ptr());
+        }
+        return;
+    }
+
+    std::string init_params;
+    std::string config;
+    std::string def_name;
+
+    auto node = std::make_shared<node::processor::Processor>();
+    ok &= m_setup_channel.unpack_param(def_name);
+    ok &= m_setup_channel.unpack_param(node->name);
+    ok &= unpack_inputs(m_setup_channel, node->inputs);
+    ok &= unpack_outputs(m_setup_channel, node->outputs);
+    ok &= m_setup_channel.unpack_param(init_params);
+    ok &= m_setup_channel.unpack_param(config);
+    QLOGI("\tProcessor: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
+    auto init_paramsj = parse_json(init_params);
+    auto configj = parse_json(config);
+    node->def = m_hal.get_processor_defs().find_by_name(def_name);
+    if (!ok || !init_paramsj || !configj || !node->def)
+    {
+        QLOGE("\t\tBad processor");
+        if (it != m_hal.m_add_processor_queue.end())
+        {
+            it->callback(HAL::Result::FAILED, node::processor::Processor_ptr());
+        }
+        return;
+    }
+    node->init_params = std::move(*init_paramsj);
+    node->config = std::move(*configj);
+    m_hal.m_processors.add(node);
+
+    if (it != m_hal.m_add_processor_queue.end())
+    {
+        it->callback(HAL::Result::OK, node);
+    }
+}
+
 
 void Comms::send_hal_requests()
 {
@@ -729,17 +790,42 @@ void Comms::send_hal_requests()
             req.req_id = ++m_last_req_id;
             m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
             m_setup_channel.pack_param(req.req_id);
-            m_setup_channel.pack_param(req.def->name);
-            m_setup_channel.pack_param(req.def->name); //name!!!!
-            pack_json(m_setup_channel, req.source->init_params);
-            pack_json(m_setup_channel, req.source->config);
+            m_setup_channel.pack_param(req.node->def->name);
+            m_setup_channel.pack_param(req.node->name); //name!!!!
+            pack_json(m_setup_channel, req.node->init_params);
+            pack_json(m_setup_channel, req.node->config);
             m_setup_channel.end_pack();
         }
-
         if (now - req.sent_time_point > REQUEST_TIMEOUT)
         {
             req.callback(HAL::Result::TIMEOUT, node::source::Source_ptr());
             m_hal.m_add_source_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    for (auto it = m_hal.m_add_processor_queue.begin(); it != m_hal.m_add_processor_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.node->def->name);
+            m_setup_channel.pack_param(req.node->name); //name!!!!
+            pack_json(m_setup_channel, req.node->init_params);
+            pack_json(m_setup_channel, req.node->config);
+            m_setup_channel.end_pack();
+        }
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT, node::processor::Processor_ptr());
+            m_hal.m_add_processor_queue.erase(it);
         }
         else
         {
@@ -777,6 +863,7 @@ void Comms::process()
         case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
 
         case comms::Setup_Message::ADD_SOURCE: handle_add_source(); break;
+        case comms::Setup_Message::ADD_PROCESSOR: handle_add_processor(); break;
 //        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;

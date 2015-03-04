@@ -24,7 +24,7 @@ public:
 
     Resampler(HAL& hal);
 
-    auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
+    auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
@@ -77,7 +77,7 @@ Resampler<Stream_t>::Resampler(HAL& hal)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto Resampler<Stream_t>::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("resampler::init");
 
@@ -91,7 +91,7 @@ auto Resampler<Stream_t>::init(rapidjson::Value const& init_params, rapidjson::V
         return false;
     }
     m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 template<class Stream_t>
 auto Resampler<Stream_t>::init() -> bool
@@ -170,7 +170,8 @@ auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
-    inputs[0].stream = m_input_stream.lock();
+    inputs[0].name = "Input";
+    inputs[0].stream = m_config.inputs.input;
     return inputs;
 }
 template<class Stream_t>
@@ -178,6 +179,7 @@ auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<Stream_t>();
+    outputs[0].name = "Output";
     outputs[0].stream = m_stream;
     return outputs;
 }

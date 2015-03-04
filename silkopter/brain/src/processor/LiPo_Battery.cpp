@@ -29,7 +29,7 @@ LiPo_Battery::LiPo_Battery(HAL& hal)
 {
 }
 
-auto LiPo_Battery::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("lipo_battery::init");
 
@@ -43,7 +43,7 @@ auto LiPo_Battery::init(rapidjson::Value const& init_params, rapidjson::Value co
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto LiPo_Battery::init() -> bool
 {
@@ -55,18 +55,18 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
-    inputs[0].name = "voltage";
-    inputs[0].stream = m_voltage_stream.lock();
+    inputs[0].name = "Voltage";
+    inputs[0].stream = m_config->inputs.voltage;
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
-    inputs[1].name = "current";
-    inputs[1].stream = m_current_stream.lock();
+    inputs[1].name = "Current";
+    inputs[1].stream = m_config->inputs.current;
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IBattery_State>();
-    outputs[0].name = "battery_state";
+    outputs[0].name = "Battery State";
     outputs[0].stream = m_stream;
     return outputs;
 }

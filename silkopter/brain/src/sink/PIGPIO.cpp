@@ -35,13 +35,14 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     {
         Input i;
         i.class_id = q::rtti::get_class_id<stream::IPWM_Value>();
-        i.stream = c.stream.lock();
+        i.name = "PWMx Value";
+        //i.stream = c.stream.lock();
         return i;
     });
     return inputs;
 }
 
-auto PIGPIO::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
@@ -55,7 +56,7 @@ auto PIGPIO::init(rapidjson::Value const& init_params, rapidjson::Value const& c
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 
 auto PIGPIO::init() -> bool

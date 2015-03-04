@@ -387,9 +387,9 @@ struct Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Voltmeter { struct Inputs {
- std::string adc;
+ std::string adc_value;
 
-explicit Inputs():adc() {  }
+explicit Inputs():adc_value() {  }
 
 
  
@@ -406,7 +406,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_adc;
+    SAXEventHandler< std::string > handler_0;bool has_adc_value;
 
     bool check_depth(const char* type)
     {
@@ -421,7 +421,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "adc";
+    return "adc_value";
         default:
             break;
         }
@@ -448,14 +448,14 @@ private:
 
     void reset_flags()
     {
-        has_adc = false;
+        has_adc_value = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Voltmeter::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->adc)
+        , handler_0(&obj->adc_value)
     {
         reset_flags();
     }
@@ -596,8 +596,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x41\x44\x43", 3))
-						 { state=0; has_adc = true; }
+            else if (utility::string_equal(str, length, "\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9))
+						 { state=0; has_adc_value = true; }
             else {
                 state = -1;
                 return true;
@@ -679,7 +679,7 @@ public:
                 break;
             }
         } else {
-            if (!has_adc) set_missing_required("adc");
+            if (!has_adc_value) set_missing_required("adc_value");
         }
         return the_error.empty();
     }
@@ -726,7 +726,7 @@ struct Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43", 3, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc);
+        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc_value);
 
         w.EndObject(1);
     }

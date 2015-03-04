@@ -48,7 +48,7 @@ I2C_Linux::~I2C_Linux()
 }
 
 
-auto I2C_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto I2C_Linux::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("i2c_linux::init");
 
@@ -62,7 +62,7 @@ auto I2C_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 
 auto I2C_Linux::init() -> bool

@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}],
         ["std::string", "dev", {"required": true}]
     ]
 },

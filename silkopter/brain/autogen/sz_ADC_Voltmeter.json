@@ -13,7 +13,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "adc", {"required": true, "json_key" : "ADC"}]
+        ["std::string", "adc_value", {"required": true, "json_key" : "ADC Value"}]
     ]
 },
 {

@@ -24,7 +24,7 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-auto UART_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto UART_Linux::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("uart_linux::init");
 
@@ -38,7 +38,7 @@ auto UART_Linux::init(rapidjson::Value const& init_params, rapidjson::Value cons
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto UART_Linux::init() -> bool
 {

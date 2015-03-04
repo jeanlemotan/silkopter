@@ -117,57 +117,59 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
     menu.exec(event->globalPos());
 }
 
-void HAL_Window::create_source(silk::node::source::Source_ptr def, QPointF pos)
+void HAL_Window::create_source(silk::node::source::Source_Def_ptr def, QPointF pos)
 {
-    auto source = std::make_shared<silk::node::source::Source>(*def);
+    auto node = std::make_shared<silk::node::source::Source>();
+    node->name = def->name;
+    node->def = def;
+    node->init_params = jsonutil::clone_value(def->default_init_params);
+    node->config = jsonutil::clone_value(def->default_config);
 
-    QDialog* dialog = new QDialog(this);
-    dialog->setLayout(new QVBoxLayout(dialog));
+    QDialog dialog;
+    dialog.setLayout(new QVBoxLayout(&dialog));
 
     Ui::New_Node ui;
-    QWidget* widget = new QWidget(dialog);
+    QWidget* widget = new QWidget(&dialog);
     ui.setupUi(widget);
-    dialog->layout()->addWidget(widget);
+    widget->setMinimumSize(600, 400);
+    dialog.layout()->addWidget(widget);
 
+    JSON_Model* model = new JSON_Model(ui.init_params);
+    model->set_document("Init Params", &node->init_params);
+    ui.init_params->setModel(model);
+    ui.init_params->expandAll();
+    ui.init_params->header()->resizeSections(QHeaderView::ResizeToContents);
+
+    connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
+    connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Rejected)
     {
-        JSON_Model* model = new JSON_Model(ui.init_params);
-        model->set_document("Init Params", &source->init_params);
-
-        ModelTest test(model);
-
-        ui.init_params->setModel(model);
+        return;
     }
-    {
-        JSON_Model* model = new JSON_Model(ui.config);
-        model->set_document("Config", &source->config);
-        ModelTest test(model);
-        ui.config->setModel(model);
-    }
-
-    dialog->exec();
-
-//    QNEBlock *b = new QNEBlock();
-//    m_scene->addItem(b);
-//    b->setName(prettify_name(def->name).c_str());
-//    b->setPos(pos);
-//    b->setBrush(QBrush(QColor(QRgb(0xf1c40f))));
-
-//    for (auto const& o: def->outputs)
-//    {
-//        auto port = b->addOutputPort(prettify_name(o.name).c_str());
-//        port->setPortType(o.class_id);
-//        port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
-//    }
 
 //    Item_Key item;
-//    item.class_id = def->class_id;
-//    item.name = def->name;
+//    item.class_id = node->class_id;
+//    item.name = node->name;
 //    m_ui_items[item] = Item_Data({pos});
 
-//    m_hal.add_source(def, source, [](silk::HAL::Result result, silk::node::source::Source_ptr source)
-//    {
-//        int a = 0;
-//    });
+    m_hal.add_source(node, [this, pos](silk::HAL::Result result, silk::node::source::Source_ptr node)
+    {
+        if (result == silk::HAL::Result::OK)
+        {
+            QNEBlock *b = new QNEBlock();
+            m_scene->addItem(b);
+            b->setName(prettify_name(node->name).c_str());
+            b->setPos(pos);
+            b->setBrush(QBrush(QColor(0xf1c40f)));
+            for (auto const& o: node->outputs)
+            {
+                auto port = b->addOutputPort(prettify_name(o.name).c_str());
+                port->setPortType(o.class_id);
+                port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
+            }
+        }
+    });
 }
 
 void HAL_Window::create_sink(silk::node::sink::Sink_ptr def, QPointF pos)
@@ -186,51 +188,63 @@ void HAL_Window::create_sink(silk::node::sink::Sink_ptr def, QPointF pos)
     }
 }
 
-void HAL_Window::create_processor(silk::node::processor::Processor_ptr def, QPointF pos)
+void HAL_Window::create_processor(silk::node::processor::Processor_Def_ptr def, QPointF pos)
 {
-    auto node = std::make_shared<silk::node::processor::Processor>(*def);
+    auto node = std::make_shared<silk::node::processor::Processor>();
+    node->name = def->name;
+    node->def = def;
+    node->init_params = jsonutil::clone_value(def->default_init_params);
+    node->config = jsonutil::clone_value(def->default_config);
 
-    QDialog* dialog = new QDialog(this);
-    dialog->setLayout(new QVBoxLayout(dialog));
+    QDialog dialog;
+    dialog.setLayout(new QVBoxLayout(&dialog));
 
     Ui::New_Node ui;
-    QWidget* widget = new QWidget(dialog);
+    QWidget* widget = new QWidget(&dialog);
     ui.setupUi(widget);
-    dialog->layout()->addWidget(widget);
+    widget->setMinimumSize(600, 400);
+    dialog.layout()->addWidget(widget);
 
+    JSON_Model* model = new JSON_Model(ui.init_params);
+    model->set_document("Init Params", &node->init_params);
+    ui.init_params->setModel(model);
+    ui.init_params->expandAll();
+    ui.init_params->header()->resizeSections(QHeaderView::ResizeToContents);
+
+    connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
+    connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Rejected)
     {
-        JSON_Model* model = new JSON_Model(ui.init_params);
-        model->set_document("Init Params", &node->init_params);
-
-        ModelTest test(model);
-
-        ui.init_params->setModel(model);
+        return;
     }
+
+//    Item_Key item;
+//    item.class_id = node->class_id;
+//    item.name = node->name;
+//    m_ui_items[item] = Item_Data({pos});
+
+    m_hal.add_processor(node, [this, pos](silk::HAL::Result result, silk::node::processor::Processor_ptr node)
     {
-        JSON_Model* model = new JSON_Model(ui.config);
-        model->set_document("Config", &node->config);
-        ModelTest test(model);
-        ui.config->setModel(model);
-    }
-
-    dialog->exec();
-
-    QNEBlock *b = new QNEBlock();
-    m_scene->addItem(b);
-    b->setName(prettify_name(def->name).c_str());
-    b->setPos(pos);
-    b->setBrush(QBrush(QColor(QRgb(0x26C281))));
-
-    for (auto const& i: def->inputs)
-    {
-        auto port = b->addInputPort(prettify_name(i.name).c_str());
-        port->setPortType(i.class_id);
-        port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
-    }
-    for (auto const& o: def->outputs)
-    {
-        auto port = b->addOutputPort(prettify_name(o.name).c_str());
-        port->setPortType(o.class_id);
-        port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
-    }
+        if (result == silk::HAL::Result::OK)
+        {
+            QNEBlock *b = new QNEBlock();
+            m_scene->addItem(b);
+            b->setName(prettify_name(node->name).c_str());
+            b->setPos(pos);
+            b->setBrush(QBrush(QColor(0x26C281)));
+            for (auto const& i: node->inputs)
+            {
+                auto port = b->addInputPort(prettify_name(i.name).c_str());
+                port->setPortType(i.class_id);
+                port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
+            }
+            for (auto const& o: node->outputs)
+            {
+                auto port = b->addOutputPort(prettify_name(o.name).c_str());
+                port->setPortType(o.class_id);
+                port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
+            }
+        }
+    });
 }

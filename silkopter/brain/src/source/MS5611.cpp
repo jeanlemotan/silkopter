@@ -112,14 +112,14 @@ auto MS5611::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
     outputs[0].class_id = q::rtti::get_class_id<stream::IPressure>();
-    outputs[0].name = "pressure";
+    outputs[0].name = "Pressure";
     outputs[0].stream = m_pressure;
     outputs[1].class_id = q::rtti::get_class_id<stream::ITemperature>();
-    outputs[1].name = "temperature";
+    outputs[1].name = "Temperature";
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto MS5611::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("ms5611::init");
 
@@ -133,7 +133,7 @@ auto MS5611::init(rapidjson::Value const& init_params, rapidjson::Value const& c
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto MS5611::init() -> bool
 {

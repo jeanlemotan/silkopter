@@ -63,6 +63,7 @@ private:
     void handle_stream_config();
 
     void handle_add_source();
+    void handle_add_processor();
 
     void handle_telemetry_streams();
     void handle_multirotor_mode();

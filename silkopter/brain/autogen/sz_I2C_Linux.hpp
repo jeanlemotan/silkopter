@@ -28,10 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace I2C_Linux { struct Init_Params {
- std::string name;
-std::string dev;
+ std::string dev;
 
-explicit Init_Params():name(), dev() {  }
+explicit Init_Params():dev() {  }
 
 
  
@@ -48,9 +47,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;bool has_name;
-bool has_dev;
+    SAXEventHandler< std::string > handler_0;bool has_dev;
 
     bool check_depth(const char* type)
     {
@@ -65,8 +62,6 @@ bool has_dev;
     {
         switch (state) {
             case 0:
-    return "name";
-case 1:
     return "dev";
         default:
             break;
@@ -94,16 +89,14 @@ case 1:
 
     void reset_flags()
     {
-        has_name = false;
-has_dev = false;
+        has_dev = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::I2C_Linux::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
-, handler_1(&obj->dev)
+        , handler_0(&obj->dev)
     {
         reset_flags();
     }
@@ -117,9 +110,6 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -137,9 +127,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
         default:
             break;
         }
@@ -155,9 +142,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -175,9 +159,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
         default:
             break;
         }
@@ -193,9 +174,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -213,9 +191,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
         default:
             break;
         }
@@ -231,9 +206,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -251,9 +223,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
         default:
             break;
         }
@@ -268,10 +237,8 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
-						 { state=1; has_dev = true; }
+            else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
+						 { state=0; has_dev = true; }
             else {
                 state = -1;
                 return true;
@@ -282,9 +249,6 @@ else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -303,9 +267,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
         default:
             break;
         }
@@ -322,9 +283,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
         default:
             break;
         }
@@ -340,9 +298,6 @@ case 1:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -361,15 +316,11 @@ case 1:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
-if (!has_dev) set_missing_required("dev");
+            if (!has_dev) set_missing_required("dev");
         }
         return the_error.empty();
     }
@@ -390,8 +341,6 @@ if (!has_dev) set_missing_required("dev");
 
         case 0:
      handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -407,7 +356,6 @@ case 1:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
 
     }
 };
@@ -419,10 +367,9 @@ struct Serializer< Writera18a7feb83f035476ded2113159fc09d71149e71c3282ddf3367edc
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writera18a7feb83f035476ded2113159fc09d71149e71c3282ddf3367edc27785f928, std::string >()(w, value.name);
-w.Key("\x64\x65\x76", 3, false); Serializer< Writera18a7feb83f035476ded2113159fc09d71149e71c3282ddf3367edc27785f928, std::string >()(w, value.dev);
+        w.Key("\x64\x65\x76", 3, false); Serializer< Writera18a7feb83f035476ded2113159fc09d71149e71c3282ddf3367edc27785f928, std::string >()(w, value.dev);
 
-        w.EndObject(2);
+        w.EndObject(1);
     }
 
 };

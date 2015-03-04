@@ -19,7 +19,7 @@ Inertial::Inertial(HAL& hal)
 {
 }
 
-auto Inertial::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto Inertial::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("inertial::init");
 
@@ -33,7 +33,7 @@ auto Inertial::init(rapidjson::Value const& init_params, rapidjson::Value const&
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto Inertial::init() -> bool
 {
@@ -45,18 +45,18 @@ auto Inertial::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
-    inputs[0].name = "reference_frame";
-    inputs[0].stream = m_reference_frame_stream.lock();
+    inputs[0].name = "Reference_ Frame";
+    inputs[0].stream = m_config->inputs.reference_frame;
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
-    inputs[1].name = "acceleration";
-    inputs[1].stream = m_acceleration_stream.lock();
+    inputs[1].name = "Acceleration";
+    inputs[1].stream = m_config->inputs.acceleration;
     return inputs;
 }
 auto Inertial::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
-    outputs[0].name = "linear_acceleration";
+    outputs[0].name = "Linear Acceleration";
     outputs[0].stream = m_stream;
     return outputs;
 }

@@ -86,7 +86,7 @@ public:
     auto get_streams()      -> Registry<node::stream::IStream>&;
 
     template<class Base>
-    auto create_node(std::string const& type, std::string const& name, rapidjson::Value const& init_params, rapidjson::Value const& config) -> std::shared_ptr<Base>;
+    auto create_node(std::string const& type, std::string const& name, rapidjson::Value const& init_params) -> std::shared_ptr<Base>;
 
 private:
     template<class Base> auto create_nodes(rapidjson::Value& json) -> bool;
@@ -114,8 +114,7 @@ template<>
 inline auto HAL::create_node<node::bus::IBus>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params,
-        rapidjson::Value const& config) -> node::bus::IBus_ptr
+        rapidjson::Value const& init_params) -> node::bus::IBus_ptr
 {
     if (m_buses.find_by_name<node::bus::IBus>(name))
     {
@@ -123,7 +122,7 @@ inline auto HAL::create_node<node::bus::IBus>(
         return node::bus::IBus_ptr();
     }
     auto node = m_bus_factory.create_node(type);
-    if (node && node->init(init_params, config))
+    if (node && node->init(init_params))
     {
         auto res = m_buses.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -135,8 +134,7 @@ template<>
 inline auto HAL::create_node<node::source::ISource>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params,
-        rapidjson::Value const& config) -> node::source::ISource_ptr
+        rapidjson::Value const& init_params) -> node::source::ISource_ptr
 {
     if (m_sources.find_by_name<node::source::ISource>(name))
     {
@@ -144,7 +142,7 @@ inline auto HAL::create_node<node::source::ISource>(
         return node::source::ISource_ptr();
     }
     auto node = m_source_factory.create_node(type);
-    if (node && node->init(init_params, config))
+    if (node && node->init(init_params))
     {
         auto res = m_sources.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -152,7 +150,7 @@ inline auto HAL::create_node<node::source::ISource>(
         for (auto const& x: outputs)
         {
             std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (m_streams.add(stream_name, x.stream))
+            if (!m_streams.add(stream_name, x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
                 return node::source::ISource_ptr();
@@ -166,8 +164,7 @@ template<>
 inline auto HAL::create_node<node::sink::ISink>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params,
-        rapidjson::Value const& config) -> node::sink::ISink_ptr
+        rapidjson::Value const& init_params) -> node::sink::ISink_ptr
 {
     if (m_sinks.find_by_name<node::sink::ISink>(name))
     {
@@ -175,7 +172,7 @@ inline auto HAL::create_node<node::sink::ISink>(
         return node::sink::ISink_ptr();
     }
     auto node = m_sink_factory.create_node(type);
-    if (node && node->init(init_params, config))
+    if (node && node->init(init_params))
     {
         auto res = m_sinks.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -187,8 +184,7 @@ template<>
 inline auto HAL::create_node<node::processor::IProcessor>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params,
-        rapidjson::Value const& config) -> node::processor::IProcessor_ptr
+        rapidjson::Value const& init_params) -> node::processor::IProcessor_ptr
 {
     if (m_processors.find_by_name<node::processor::IProcessor>(name))
     {
@@ -196,7 +192,7 @@ inline auto HAL::create_node<node::processor::IProcessor>(
         return node::processor::IProcessor_ptr();
     }
     auto node = m_processor_factory.create_node(type);
-    if (node && node->init(init_params, config))
+    if (node && node->init(init_params))
     {
         auto res = m_processors.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -204,7 +200,7 @@ inline auto HAL::create_node<node::processor::IProcessor>(
         for (auto const& x: outputs)
         {
             std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (m_streams.add(stream_name, x.stream))
+            if (!m_streams.add(stream_name, x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
                 return node::processor::IProcessor_ptr();

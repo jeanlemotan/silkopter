@@ -18,7 +18,7 @@ ADC_Ammeter::ADC_Ammeter(HAL& hal)
 {
 }
 
-auto ADC_Ammeter::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto ADC_Ammeter::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
 
@@ -32,7 +32,7 @@ auto ADC_Ammeter::init(rapidjson::Value const& init_params, rapidjson::Value con
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto ADC_Ammeter::init() -> bool
 {
@@ -44,15 +44,15 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
-    inputs[0].name = "adc";
-    inputs[0].stream = m_adc_stream.lock();
+    inputs[0].name = "ADC Value";
+    inputs[0].stream = m_config->inputs.adc_value;
     return inputs;
 }
 auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ICurrent>();
-    outputs[0].name = "current";
+    outputs[0].name = "Current";
     outputs[0].stream = m_stream;
     return outputs;
 }
@@ -94,7 +94,7 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc);
+    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc_value);
     if (!adc_stream || adc_stream->get_rate() == 0)
     {
         QLOGE("No input angular velocity stream specified");

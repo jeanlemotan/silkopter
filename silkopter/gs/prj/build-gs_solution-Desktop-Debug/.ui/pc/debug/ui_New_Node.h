@@ -27,7 +27,6 @@ class Ui_New_Node
 public:
     QVBoxLayout *verticalLayout;
     QTreeView *init_params;
-    QTreeView *config;
     QWidget *widget;
     QHBoxLayout *horizontalLayout;
     QPushButton *ok;
@@ -46,11 +45,6 @@ public:
         init_params->setObjectName(QStringLiteral("init_params"));
 
         verticalLayout->addWidget(init_params);
-
-        config = new QTreeView(New_Node);
-        config->setObjectName(QStringLiteral("config"));
-
-        verticalLayout->addWidget(config);
 
         widget = new QWidget(New_Node);
         widget->setObjectName(QStringLiteral("widget"));

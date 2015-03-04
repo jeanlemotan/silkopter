@@ -144,30 +144,30 @@ DECLARE_CLASS_PTR(Voltage);
 
 namespace source
 {
+struct Source_Def
+{
+    virtual ~Source_Def() {}
+
+    std::string name;
+    q::rtti::class_id class_id;
+    rapidjson::Document default_init_params;
+    rapidjson::Document default_config;
+};
+DECLARE_CLASS_PTR(Source_Def);
+
 struct Source
 {
     virtual ~Source() {}
 
-    Source() = default;
-    Source(Source&& other) = default;
-    Source(Source const& other)
-        : name(other.name)
-        , class_id(other.class_id)
-        , init_params(jsonutil::clone_value(other.init_params))
-        , config(jsonutil::clone_value(other.config))
-        , outputs(other.outputs)
-    {
-    }
-
     std::string name;
-    q::rtti::class_id class_id;
+    Source_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Output
     {
         q::rtti::class_id class_id;
         std::string name;
-        stream::GS_IStream_ptr stream;
+        uint32_t rate = 0;
     };
     std::vector<Output> outputs;
 };
@@ -199,8 +199,8 @@ struct Sink
     struct Input
     {
         q::rtti::class_id class_id;
+        std::string stream;
         std::string name;
-        stream::GS_IStream_ptr stream;
     };
     std::vector<Input> inputs;
 };
@@ -211,30 +211,30 @@ DECLARE_CLASS_PTR(Sink);
 namespace processor
 {
 
-struct Processor
+struct Processor_Def
 {
-    virtual ~Processor() {}
-    Processor() = default;
-    Processor(Processor&& other) = default;
-    Processor(Processor const& other)
-        : name(other.name)
-        , class_id(other.class_id)
-        , init_params(jsonutil::clone_value(other.init_params))
-        , config(jsonutil::clone_value(other.config))
-        , inputs(other.inputs)
-        , outputs(other.outputs)
-    {
-    }
+    virtual ~Processor_Def() {}
 
     std::string name;
     q::rtti::class_id class_id;
+    rapidjson::Document default_init_params;
+    rapidjson::Document default_config;
+};
+DECLARE_CLASS_PTR(Processor_Def);
+
+struct Processor
+{
+    virtual ~Processor() {}
+
+    std::string name;
+    Processor_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input
     {
         q::rtti::class_id class_id;
         std::string name;
-        stream::GS_IStream_ptr stream;
+        std::string stream;
     };
     std::vector<Input> inputs;
 
@@ -242,7 +242,7 @@ struct Processor
     {
         q::rtti::class_id class_id;
         std::string name;
-        stream::GS_IStream_ptr stream;
+        uint32_t rate = 0;
     };
     std::vector<Output> outputs;
 };
@@ -264,7 +264,7 @@ class Registry : q::util::Noncopyable
 {
 public:
     auto get_all() const -> std::vector<std::shared_ptr<Base>> const&;
-    template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
+    auto find_by_name(std::string const& name) const -> std::shared_ptr<Base>;
     template<class T> auto add(std::shared_ptr<T> node) -> bool;
     void remove_all();
 private:
@@ -279,9 +279,9 @@ public:
     HAL();
     ~HAL();
 
-    auto get_source_defs() const    -> Registry<node::source::Source> const&;
+    auto get_source_defs() const    -> Registry<node::source::Source_Def> const&;
     auto get_sink_defs() const      -> Registry<node::sink::Sink> const&;
-    auto get_processor_defs() const -> Registry<node::processor::Processor> const&;
+    auto get_processor_defs() const -> Registry<node::processor::Processor_Def> const&;
 
     auto get_sources() const        -> Registry<node::source::Source> const&;
     auto get_sinks() const          -> Registry<node::sink::Sink> const&;
@@ -296,15 +296,18 @@ public:
     };
 
     typedef std::function<void(Result, node::source::Source_ptr)> Add_Source_Callback;
-    void add_source(node::source::Source_ptr def, node::source::Source_ptr source, Add_Source_Callback callback);
+    void add_source(node::source::Source_ptr node, Add_Source_Callback callback);
+
+    typedef std::function<void(Result, node::processor::Processor_ptr)> Add_Processor_Callback;
+    void add_processor(node::processor::Processor_ptr node, Add_Processor_Callback callback);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
 protected:
-    Registry<node::source::Source> m_source_defs;
+    Registry<node::source::Source_Def> m_source_defs;
     Registry<node::sink::Sink> m_sink_defs;
-    Registry<node::processor::Processor> m_processor_defs;
+    Registry<node::processor::Processor_Def> m_processor_defs;
 
     Registry<node::source::Source> m_sources;
     Registry<node::sink::Sink> m_sinks;
@@ -316,11 +319,20 @@ protected:
         bool was_sent = false;
         q::Clock::time_point sent_time_point;
         uint32_t req_id = 0;
-        node::source::Source_ptr def;
-        node::source::Source_ptr source;
+        node::source::Source_ptr node;
         Add_Source_Callback callback;
     };
     std::vector<Add_Source_Queue_Item> m_add_source_queue;
+
+    struct Add_Processor_Queue_Item
+    {
+        bool was_sent = false;
+        q::Clock::time_point sent_time_point;
+        uint32_t req_id = 0;
+        node::processor::Processor_ptr node;
+        Add_Processor_Callback callback;
+    };
+    std::vector<Add_Processor_Queue_Item> m_add_processor_queue;
 
 private:
 
@@ -336,18 +348,17 @@ auto Registry<Base>::get_all() const -> std::vector<std::shared_ptr<Base>> const
     return m_nodes;
 }
 template<class Base>
-template<class T>
-auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<T>
+auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<Base>
 {
     auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](std::shared_ptr<Base> const& s) { return s->name == name; });
-    return it != m_nodes.end() ? std::dynamic_pointer_cast<T>(*it) : std::shared_ptr<T>();
+    return it != m_nodes.end() ? *it : std::shared_ptr<Base>();
 }
 template<class Base>
 template<class T>
 auto Registry<Base>::add(std::shared_ptr<T> node) -> bool
 {
     QASSERT(node);
-    if (find_by_name<Base>(node->name))
+    if (find_by_name(node->name))
     {
         QLOGE("Duplicated name in node {}", node->name);
         return false;

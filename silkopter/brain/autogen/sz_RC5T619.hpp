@@ -509,10 +509,10 @@ w.Key("\x41\x44\x43\x31\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 15, false)
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct ADC {
+namespace sz { namespace RC5T619 { struct ADC_Value {
  
 
-explicit ADC() {  }
+explicit ADC_Value() {  }
 
 
  
@@ -523,7 +523,7 @@ explicit ADC() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::ADC > {
+class SAXEventHandler< ::sz::RC5T619::ADC_Value > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -574,7 +574,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::ADC * obj)
+    explicit SAXEventHandler( ::sz::RC5T619::ADC_Value * obj)
         : state(-1)
         , depth(0)
         
@@ -825,10 +825,10 @@ public:
     }
 };
 
-template < class Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8 >
-struct Serializer< Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8, ::sz::RC5T619::ADC > {
+template < class Writer8e04f9dc2b2b04dd50d0b92b4ce63ecd7448edf338a39dcc6f8c58e9ab5d2798 >
+struct Serializer< Writer8e04f9dc2b2b04dd50d0b92b4ce63ecd7448edf338a39dcc6f8c58e9ab5d2798, ::sz::RC5T619::ADC_Value > {
 
-    void operator()( Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8& w, const ::sz::RC5T619::ADC& value) const
+    void operator()( Writer8e04f9dc2b2b04dd50d0b92b4ce63ecd7448edf338a39dcc6f8c58e9ab5d2798& w, const ::sz::RC5T619::ADC_Value& value) const
     {
         w.StartObject();
 
@@ -869,10 +869,10 @@ struct Serializer< Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf9984
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace RC5T619 { struct Outputs {
- sz::RC5T619::ADC adc0;
-sz::RC5T619::ADC adc1;
+ sz::RC5T619::ADC_Value adc0_value;
+sz::RC5T619::ADC_Value adc1_value;
 
-explicit Outputs():adc0(), adc1() {  }
+explicit Outputs():adc0_value(), adc1_value() {  }
 
 
  
@@ -889,9 +889,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::RC5T619::ADC > handler_0;
-SAXEventHandler< sz::RC5T619::ADC > handler_1;bool has_adc0;
-bool has_adc1;
+    SAXEventHandler< sz::RC5T619::ADC_Value > handler_0;
+SAXEventHandler< sz::RC5T619::ADC_Value > handler_1;bool has_adc0_value;
+bool has_adc1_value;
 
     bool check_depth(const char* type)
     {
@@ -906,9 +906,9 @@ bool has_adc1;
     {
         switch (state) {
             case 0:
-    return "adc0";
+    return "adc0_value";
 case 1:
-    return "adc1";
+    return "adc1_value";
         default:
             break;
         }
@@ -935,16 +935,16 @@ case 1:
 
     void reset_flags()
     {
-        has_adc0 = false;
-has_adc1 = false;
+        has_adc0_value = false;
+has_adc1_value = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::RC5T619::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->adc0)
-, handler_1(&obj->adc1)
+        , handler_0(&obj->adc0_value)
+, handler_1(&obj->adc1_value)
     {
         reset_flags();
     }
@@ -1109,10 +1109,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x41\x44\x43\x30", 4))
-						 { state=0; has_adc0 = true; }
-else if (utility::string_equal(str, length, "\x41\x44\x43\x31", 4))
-						 { state=1; has_adc1 = true; }
+            else if (utility::string_equal(str, length, "\x41\x44\x43\x30\x20\x56\x61\x6c\x75\x65", 10))
+						 { state=0; has_adc0_value = true; }
+else if (utility::string_equal(str, length, "\x41\x44\x43\x31\x20\x56\x61\x6c\x75\x65", 10))
+						 { state=1; has_adc1_value = true; }
             else {
                 state = -1;
                 return true;
@@ -1209,8 +1209,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_adc0) set_missing_required("adc0");
-if (!has_adc1) set_missing_required("adc1");
+            if (!has_adc0_value) set_missing_required("adc0_value");
+if (!has_adc1_value) set_missing_required("adc1_value");
         }
         return the_error.empty();
     }
@@ -1260,8 +1260,8 @@ struct Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x30", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc0);
-w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc1);
+        w.Key("\x41\x44\x43\x30\x20\x56\x61\x6c\x75\x65", 10, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC_Value >()(w, value.adc0_value);
+w.Key("\x41\x44\x43\x31\x20\x56\x61\x6c\x75\x65", 10, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC_Value >()(w, value.adc1_value);
 
         w.EndObject(2);
     }

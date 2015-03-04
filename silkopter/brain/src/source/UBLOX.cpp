@@ -242,12 +242,12 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
-    outputs[0].name = "locations";
+    outputs[0].name = "Location";
     outputs[0].stream = m_stream;
     return outputs;
 }
 
-auto UBLOX::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto UBLOX::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
@@ -261,7 +261,7 @@ auto UBLOX::init(rapidjson::Value const& init_params, rapidjson::Value const& co
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto UBLOX::init() -> bool
 {

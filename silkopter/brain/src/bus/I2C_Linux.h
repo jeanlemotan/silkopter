@@ -26,7 +26,7 @@ public:
     I2C_Linux(HAL& hal);
     ~I2C_Linux();
 
-    auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
+    auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;

@@ -30,7 +30,7 @@ public:
     Raspicam(HAL& hal);
     ~Raspicam();
 
-    auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
+    auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;

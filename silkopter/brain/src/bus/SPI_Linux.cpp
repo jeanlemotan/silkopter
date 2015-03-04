@@ -22,7 +22,7 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-auto SPI_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto SPI_Linux::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("spi_linux::init");
 
@@ -36,7 +36,7 @@ auto SPI_Linux::init(rapidjson::Value const& init_params, rapidjson::Value const
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 auto SPI_Linux::init() -> bool
 {

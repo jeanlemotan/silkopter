@@ -46,11 +46,11 @@ auto SRF02::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IDistance>();
-    outputs[0].name = "distance";
+    outputs[0].name = "Distance";
     outputs[0].stream = m_stream;
     return outputs;
 }
-auto SRF02::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
+auto SRF02::init(rapidjson::Value const& init_params) -> bool
 {
     QLOG_TOPIC("srf02::init");
 
@@ -64,7 +64,7 @@ auto SRF02::init(rapidjson::Value const& init_params, rapidjson::Value const& co
         return false;
     }
     *m_init_params = sz;
-    return init() && set_config(config);
+    return init();
 }
 
 auto SRF02::init() -> bool
