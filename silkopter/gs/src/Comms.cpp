@@ -651,22 +651,20 @@ void Comms::handle_processor_config()
 
 void Comms::handle_add_source()
 {
+    std::string init_params;
+    std::string config;
+    std::string def_name;
     uint32_t req_id = 0;
     bool result = false;
-    bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(result);
-    if (!ok)
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(result))
     {
         QLOGE("Failed to unpack node config");
         return;
     }
 
-    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
-    {
-        return item.req_id == req_id;
-    });
-
+    auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
     auto callback = it != m_hal.m_add_queue.end() ? it->source_callback : [](HAL::Result, node::source::Source_ptr) {};
 
     if (result == false)
@@ -675,12 +673,8 @@ void Comms::handle_add_source()
         return;
     }
 
-    std::string init_params;
-    std::string config;
-    std::string def_name;
-
     auto node = std::make_shared<node::source::Source>();
-    ok &= m_setup_channel.unpack_param(def_name);
+    bool ok = m_setup_channel.unpack_param(def_name);
     ok &= m_setup_channel.unpack_param(node->name);
     ok &= unpack_outputs(m_setup_channel, node->outputs);
     ok &= m_setup_channel.unpack_param(init_params);
@@ -703,22 +697,20 @@ void Comms::handle_add_source()
 
 void Comms::handle_add_processor()
 {
+    std::string init_params;
+    std::string config;
+    std::string def_name;
     uint32_t req_id = 0;
     bool result = false;
-    bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(result);
-    if (!ok)
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(result))
     {
         QLOGE("Failed to unpack node config");
         return;
     }
 
-    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
-    {
-        return item.req_id == req_id;
-    });
-
+    auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
     auto callback = it != m_hal.m_add_queue.end() ? it->processor_callback : [](HAL::Result, node::processor::Processor_ptr) {};
 
     if (result == false)
@@ -727,12 +719,8 @@ void Comms::handle_add_processor()
         return;
     }
 
-    std::string init_params;
-    std::string config;
-    std::string def_name;
-
     auto node = std::make_shared<node::processor::Processor>();
-    ok &= m_setup_channel.unpack_param(def_name);
+    bool ok = m_setup_channel.unpack_param(def_name);
     ok &= m_setup_channel.unpack_param(node->name);
     ok &= unpack_inputs(m_setup_channel, node->inputs);
     ok &= unpack_outputs(m_setup_channel, node->outputs);
@@ -756,22 +744,20 @@ void Comms::handle_add_processor()
 
 void Comms::handle_add_sink()
 {
+    std::string init_params;
+    std::string config;
+    std::string def_name;
     uint32_t req_id = 0;
     bool result = false;
-    bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(result);
-    if (!ok)
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(result))
     {
         QLOGE("Failed to unpack node config");
         return;
     }
 
-    auto it = std::find_if(m_hal.m_add_queue.begin(), m_hal.m_add_queue.end(), [&](HAL::Add_Queue_Item const& item)
-    {
-        return item.req_id == req_id;
-    });
-
+    auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
     auto callback = it != m_hal.m_add_queue.end() ? it->sink_callback : [](HAL::Result, node::sink::Sink_ptr) {};
 
     if (result == false)
@@ -780,12 +766,8 @@ void Comms::handle_add_sink()
         return;
     }
 
-    std::string init_params;
-    std::string config;
-    std::string def_name;
-
     auto node = std::make_shared<node::sink::Sink>();
-    ok &= m_setup_channel.unpack_param(def_name);
+    bool ok = m_setup_channel.unpack_param(def_name);
     ok &= m_setup_channel.unpack_param(node->name);
     ok &= unpack_inputs(m_setup_channel, node->inputs);
     ok &= m_setup_channel.unpack_param(init_params);
