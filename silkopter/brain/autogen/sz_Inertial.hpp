@@ -28,9 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Inertial { struct Init_Params {
- std::string name;
+ 
 
-explicit Init_Params():name() {  }
+explicit Init_Params() {  }
 
 
  
@@ -47,7 +47,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_name;
+    
 
     bool check_depth(const char* type)
     {
@@ -61,8 +61,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "name";
+            
         default:
             break;
         }
@@ -89,14 +88,14 @@ private:
 
     void reset_flags()
     {
-        has_name = false;
+        
     }
 
 public:
     explicit SAXEventHandler( ::sz::Inertial::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
+        
     {
         reset_flags();
     }
@@ -108,8 +107,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -124,8 +122,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -140,8 +137,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -156,8 +152,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -172,8 +167,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -188,8 +182,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -204,8 +197,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -220,8 +212,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -237,8 +228,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
+            
             else {
                 state = -1;
                 return true;
@@ -247,8 +237,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -264,8 +253,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -280,8 +268,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -296,8 +283,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -313,14 +299,13 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
+            
         }
         return the_error.empty();
     }
@@ -339,8 +324,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -355,8 +339,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -367,9 +350,9 @@ struct Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d789
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63, std::string >()(w, value.name);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };
@@ -644,9 +627,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x5f\x66\x72\x61\x6d\x65", 15))
+            else if (utility::string_equal(str, length, "\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x20\x46\x72\x61\x6d\x65", 15))
 						 { state=0; has_reference_frame = true; }
-else if (utility::string_equal(str, length, "\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
+else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
 						 { state=1; has_acceleration = true; }
             else {
                 state = -1;
@@ -795,8 +778,8 @@ struct Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e
     {
         w.StartObject();
 
-        w.Key("\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x5f\x66\x72\x61\x6d\x65", 15, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.reference_frame);
-w.Key("\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.acceleration);
+        w.Key("\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x20\x46\x72\x61\x6d\x65", 15, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.reference_frame);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.acceleration);
 
         w.EndObject(2);
     }
@@ -1401,7 +1384,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19))
+            else if (utility::string_equal(str, length, "\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19))
 						 { state=0; has_linear_acceleration = true; }
             else {
                 state = -1;
@@ -1531,7 +1514,7 @@ struct Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7
     {
         w.StartObject();
 
-        w.Key("\x6c\x69\x6e\x65\x61\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587, sz::Inertial::Linear_Acceleration >()(w, value.linear_acceleration);
+        w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587, sz::Inertial::Linear_Acceleration >()(w, value.linear_acceleration);
 
         w.EndObject(1);
     }
@@ -1808,9 +1791,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
 						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
 						 { state=1; has_outputs = true; }
             else {
                 state = -1;
@@ -1959,8 +1942,8 @@ struct Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6ef
     {
         w.StartObject();
 
-        w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Inputs >()(w, value.inputs);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Outputs >()(w, value.outputs);
 
         w.EndObject(2);
     }

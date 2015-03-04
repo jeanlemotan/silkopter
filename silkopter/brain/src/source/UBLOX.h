@@ -38,7 +38,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_name() const -> std::string const&;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
@@ -46,13 +45,24 @@ public:
 private:
     auto init() -> bool;
 
-    auto read(uint8_t* data, size_t max_size) -> size_t;
-    auto write(uint8_t const* data, size_t size) -> bool;
-
     HAL& m_hal;
-    bus::II2C* m_i2c = nullptr;
-    bus::ISPI* m_spi = nullptr;
-    bus::IUART* m_uart = nullptr;
+
+    bus::II2C_wptr m_i2c;
+    bus::ISPI_wptr m_spi;
+    bus::IUART_wptr m_uart;
+
+    struct Buses
+    {
+        bus::II2C_ptr i2c;
+        bus::ISPI_ptr spi;
+        bus::IUART_ptr uart;
+    };
+
+    auto lock(Buses& buses) -> bool;
+    void unlock(Buses& buses);
+
+    auto read(Buses& buses, uint8_t* data, size_t max_size) -> size_t;
+    auto write(Buses& buses, uint8_t const* data, size_t size) -> bool;
 
     std::shared_ptr<sz::UBLOX::Init_Params> m_init_params;
     std::shared_ptr<sz::UBLOX::Config> m_config;
@@ -65,31 +75,31 @@ private:
     } m_packet;
 
     auto setup() -> bool;
-    void read_data();
+    void read_data(Buses& buses);
 
     auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool;
-    void process_packet(Packet& packet);
+    void process_packet(Buses& buses, Packet& packet);
 
-    void process_nav_sol_packet(Packet& packet);
-    void process_nav_pollh_packet(Packet& packet);
-    void process_nav_status_packet(Packet& packet);
+    void process_nav_sol_packet(Buses& buses, Packet& packet);
+    void process_nav_pollh_packet(Buses& buses, Packet& packet);
+    void process_nav_status_packet(Buses& buses, Packet& packet);
 
-    void process_cfg_prt_packet(Packet& packet);
-    void process_cfg_rate_packet(Packet& packet);
-    void process_cfg_sbas_packet(Packet& packet);
-    void process_cfg_ant_packet(Packet& packet);
-    void process_cfg_msg_packet(Packet& packet);
+    void process_cfg_prt_packet(Buses& buses, Packet& packet);
+    void process_cfg_rate_packet(Buses& buses, Packet& packet);
+    void process_cfg_sbas_packet(Buses& buses, Packet& packet);
+    void process_cfg_ant_packet(Buses& buses, Packet& packet);
+    void process_cfg_msg_packet(Buses& buses, Packet& packet);
 
-    void process_inf_notice_packet(Packet& packet);
+    void process_inf_notice_packet(Buses& buses, Packet& packet);
 
-    void process_mon_hw_packet(Packet& packet);
-    void process_mon_ver_packet(Packet& packet);
+    void process_mon_hw_packet(Buses& buses, Packet& packet);
+    void process_mon_ver_packet(Buses& buses, Packet& packet);
 
-    template<class T> auto send_packet(uint16_t mgs, T const& payload) -> bool;
-    template<class T> auto send_packet_with_retry(uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
-    auto send_packet(uint16_t mgs, uint8_t const* payload, size_t payload_size) -> bool;
+    template<class T> auto send_packet(Buses& buses, uint16_t mgs, T const& payload) -> bool;
+    template<class T> auto send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
+    auto send_packet(Buses& buses, uint16_t mgs, uint8_t const* payload, size_t payload_size) -> bool;
 
-    auto wait_for_ack(q::Clock::duration d) -> bool;
+    auto wait_for_ack(Buses& buses, q::Clock::duration d) -> bool;
     boost::optional<bool> m_ack;
 
 
@@ -104,19 +114,17 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
         Sample last_sample;
-        std::string name;
 
         bool has_nav_status = false;
         bool has_pollh = false;
         bool has_sol = false;
         q::Clock::time_point last_complete_time_point;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 

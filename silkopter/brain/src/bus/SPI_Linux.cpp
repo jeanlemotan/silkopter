@@ -53,22 +53,8 @@ auto SPI_Linux::init() -> bool
         return false;
     }
 
-    if (!m_init_params->name.empty())
-    {
-        if (!m_hal.get_buses().add(*this))
-        {
-            return false;
-        }
-    }
-
     return true;
 }
-
-auto SPI_Linux::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
-
 void SPI_Linux::close()
 {
     QLOG_TOPIC("bus_spi_linux::close");

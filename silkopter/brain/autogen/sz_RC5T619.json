@@ -5,10 +5,9 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}],
-        ["std::string", "bus", {"required": true}],
-        ["uint32_t", "adc0_rate", {"required": true}],
-        ["uint32_t", "adc1_rate_ratio", {"required": true}]
+        ["std::string", "bus", {"required": true, "json_key" : "Bus"}],
+        ["uint32_t", "adc0_rate", {"required": true, "json_key" : "ADC0 Rate (Hz)", "default" : 50}],
+        ["uint32_t", "adc1_rate_ratio", {"required": true, "json_key" : "ADC1 Rate Ratio", "default" : 10}]
     ]
 },
 {
@@ -25,8 +24,8 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::RC5T619::ADC", "adc0", {"required": true}],
-        ["sz::RC5T619::ADC", "adc1", {"required": true}]
+        ["sz::RC5T619::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
+        ["sz::RC5T619::ADC", "adc1", {"required": true, "json_key" : "ADC1"}]
     ]
 },
 {
@@ -35,7 +34,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::RC5T619::Outputs", "outputs", {"required": true}]
+        ["sz::RC5T619::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

@@ -29,11 +29,6 @@ LiPo_Battery::LiPo_Battery(HAL& hal)
 {
 }
 
-auto LiPo_Battery::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
-
 auto LiPo_Battery::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("lipo_battery::init");
@@ -52,14 +47,7 @@ auto LiPo_Battery::init(rapidjson::Value const& init_params, rapidjson::Value co
 }
 auto LiPo_Battery::init() -> bool
 {
-    if (!m_init_params->name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
-        if (!m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
+    m_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -68,10 +56,10 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
     inputs[0].name = "voltage";
-    inputs[0].stream = m_voltage_stream;
+    inputs[0].stream = m_voltage_stream.lock();
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
     inputs[1].name = "current";
-    inputs[1].stream = m_current_stream;
+    inputs[1].stream = m_current_stream.lock();
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>
@@ -79,28 +67,29 @@ auto LiPo_Battery::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IBattery_State>();
     outputs[0].name = "battery_state";
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 
 void LiPo_Battery::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_current_stream ||
-        !m_voltage_stream)
+    auto current_stream = m_current_stream.lock();
+    auto voltage_stream = m_voltage_stream.lock();
+    if (!current_stream || !voltage_stream)
     {
         return;
     }
 
     //accumulate the input streams
     {
-        auto const& samples = m_current_stream->get_samples();
+        auto const& samples = current_stream->get_samples();
         m_current_samples.reserve(m_current_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_current_samples));
     }
     {
-        auto const& samples = m_voltage_stream->get_samples();
+        auto const& samples = voltage_stream->get_samples();
         m_voltage_samples.reserve(m_voltage_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_voltage_samples));
     }
@@ -113,26 +102,26 @@ void LiPo_Battery::process()
         return;
     }
 
-    m_stream.samples.resize(count);
+    m_stream->samples.resize(count);
 
     std::array<double, stream::ICurrent::FILTER_CHANNELS> c_channels;
     std::array<double, stream::IVoltage::FILTER_CHANNELS> v_channels;
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream.last_sample.dt = m_dt;
-        m_stream.last_sample.sample_idx++;
+        m_stream->last_sample.dt = m_dt;
+        m_stream->last_sample.sample_idx++;
 
         {
             auto const& s = m_current_samples[i];
-            m_stream.last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
+            m_stream->last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
             stream::ICurrent::Value current = s.value;
             if (stream::ICurrent::get_channels_from_value(c_channels, current))
             {
                 m_current_filter.process(c_channels.data());
                 stream::ICurrent::get_value_from_channels(current, c_channels);
             }
-            m_stream.last_sample.value.average_current = current;
+            m_stream->last_sample.value.average_current = current;
         }
         {
             auto const& s = m_voltage_samples[i];
@@ -142,10 +131,10 @@ void LiPo_Battery::process()
                 m_voltage_filter.process(v_channels.data());
                 stream::IVoltage::get_value_from_channels(voltage, v_channels);
             }
-            m_stream.last_sample.value.average_voltage = voltage;
+            m_stream->last_sample.value.average_voltage = voltage;
         }
-        m_stream.last_sample.value.capacity_left = 1.f - math::clamp(m_stream.last_sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
-        m_stream.samples[i] = m_stream.last_sample;
+        m_stream->last_sample.value.capacity_left = 1.f - math::clamp(m_stream->last_sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
+        m_stream->samples[i] = m_stream->last_sample;
     }
 
     //consume processed samples
@@ -158,7 +147,7 @@ void LiPo_Battery::process()
         m_cell_count = compute_cell_count();
         if (m_cell_count)
         {
-            QLOGI("Detected battery cell count: {} from voltage: {}V", m_cell_count, m_stream.last_sample.value.average_voltage);
+            QLOGI("Detected battery cell count: {} from voltage: {}V", m_cell_count, m_stream->last_sample.value.average_voltage);
 //            if (m_loaded_state.cell_count > 0 && m_loaded_state.cell_count != *m_cell_count)
 //            {
 //                m_capacity_used_mah = 0;
@@ -171,22 +160,22 @@ void LiPo_Battery::process()
 auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
 {
     //wait to get a good voltage average
-    if (m_stream.last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
+    if (m_stream->last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
     {
         QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples",
-              m_stream.last_sample.value.average_voltage,
-              m_stream.last_sample.sample_idx);
+              m_stream->last_sample.value.average_voltage,
+              m_stream->last_sample.sample_idx);
         return boost::none;
     }
 
     //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
-    if (m_stream.last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
+    if (m_stream->last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)
     {
-        QLOGW("Skipping cell count detection: the current is not healthy: {}", m_stream.last_sample.value.average_current);
+        QLOGW("Skipping cell count detection: the current is not healthy: {}", m_stream->last_sample.value.average_current);
         return boost::none;
     }
 
-    float v = m_stream.last_sample.value.average_voltage;
+    float v = m_stream->last_sample.value.average_voltage;
 
     //probably the is a faster, analytical way to find this without counting, but i'm not a mathematician!
     for (uint8_t i = 1; i < 30; i++)
@@ -213,8 +202,8 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
-    auto* current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
+    auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
+    auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
     if (!voltage_stream || voltage_stream->get_rate() == 0)
     {
         QLOGE("No input angular velocity stream specified");
@@ -233,11 +222,11 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    if (m_stream.rate != 0 && m_stream.rate != current_stream->get_rate())
+    if (m_stream->rate != 0 && m_stream->rate != current_stream->get_rate())
     {
         QLOGE("Input streams rate has changed: {} != {}",
               current_stream->get_rate(),
-              m_stream.rate);
+              m_stream->rate);
         return false;
     }
     if (sz.full_charge < 0.1f)
@@ -246,11 +235,11 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_voltage_stream = voltage_stream;
     m_current_stream = current_stream;
-    m_stream.rate = m_voltage_stream->get_rate();
+    m_stream->rate = voltage_stream->get_rate();
 
     *m_config = sz;
     return true;

@@ -39,6 +39,7 @@ public:
         value.z = channels[2];
     }
 };
+DECLARE_CLASS_PTR(IAcceleration);
 
 
 }

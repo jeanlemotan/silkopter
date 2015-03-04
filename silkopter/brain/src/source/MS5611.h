@@ -35,7 +35,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_name() const -> std::string const&;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
@@ -43,18 +42,24 @@ public:
 private:
     auto init() -> bool;
 
-    void lock();
-    void unlock();
-    auto bus_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
-    auto bus_read_u8(uint8_t reg, uint8_t& dst) -> bool;
-    auto bus_read_u16(uint8_t reg, uint16_t& dst) -> bool;
-    auto bus_write(uint8_t reg, uint8_t const* data, uint32_t size) -> bool;
-    auto bus_write_u8(uint8_t reg, uint8_t const& t) -> bool;
-    auto bus_write_u16(uint8_t reg, uint16_t const& t) -> bool;
-
     HAL& m_hal;
-    bus::II2C* m_i2c = nullptr;
-    bus::ISPI* m_spi = nullptr;
+    bus::II2C_wptr m_i2c;
+    bus::ISPI_wptr m_spi;
+
+    struct Buses
+    {
+        bus::II2C_ptr i2c;
+        bus::ISPI_ptr spi;
+    };
+
+    auto lock(Buses& buses) -> bool;
+    void unlock(Buses& buses);
+    auto bus_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool;
+    auto bus_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
+    auto bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
+    auto bus_write(Buses& buses, uint8_t reg, uint8_t const* data, uint32_t size) -> bool;
+    auto bus_write_u8(Buses& buses, uint8_t reg, uint8_t const& t) -> bool;
+    auto bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& t) -> bool;
 
     std::shared_ptr<sz::MS5611::Init_Params> m_init_params;
     std::shared_ptr<sz::MS5611::Config> m_config;
@@ -63,30 +68,27 @@ private:
     {
         double      reading = 0;
         uint32_t rate = 0;
-        std::string name;
     };
 
     struct Pressure : public stream::IPressure, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         std::vector<Sample> samples;
         Sample last_sample;
     };
-    mutable Pressure m_pressure;
+    mutable std::shared_ptr<Pressure> m_pressure;
 
     struct Temperature : public stream::ITemperature, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         std::vector<Sample> samples;
         Sample last_sample;
     };
-    mutable Temperature m_temperature;
+    mutable std::shared_ptr<Temperature> m_temperature;
 
     double		m_c1 = 0;
     double		m_c2 = 0;

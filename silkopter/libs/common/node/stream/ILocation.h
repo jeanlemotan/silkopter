@@ -77,6 +77,7 @@ public:
         value.direction.y    = channels[9];
     }
 };
+DECLARE_CLASS_PTR(ILocation);
 
 
 }

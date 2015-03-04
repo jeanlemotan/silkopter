@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,9 +13,9 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "angular_velocity", {"required": true}],
-        ["std::string", "acceleration", {"required": true}],
-        ["std::string", "magnetic_field", {"required": true}]
+        ["std::string", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["std::string", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["std::string", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}]
     ]
 },
 {
@@ -33,7 +32,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::Comp_AHRS::Reference_Frame", "reference_frame", {"required": true}]
+        ["sz::Comp_AHRS::Reference_Frame", "reference_frame", {"required": true, "json_key" : "Reference Frame"}]
     ]
 },
 {
@@ -42,8 +41,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Comp_AHRS::Inputs", "inputs", {"required": true}],
-        ["sz::Comp_AHRS::Outputs", "outputs", {"required": true}]
+        ["sz::Comp_AHRS::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Comp_AHRS::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

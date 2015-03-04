@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,8 +13,8 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "voltage", {"required": true}],
-        ["std::string", "current", {"required": true}]
+        ["std::string", "voltage", {"required": true, "json_key" : "Voltage"}],
+        ["std::string", "current", {"required": true, "json_key" : "Current"}]
     ]
 },
 {
@@ -32,7 +31,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::LiPo_Battery::Battery_State", "battery_state", {"required": true}]
+        ["sz::LiPo_Battery::Battery_State", "battery_state", {"required": true, "json_key" : "Battery State"}]
     ]
 },
 {
@@ -41,9 +40,9 @@
     "name": "Config",
     "members":
     [
-        ["float", "full_charge", {"required": true, "default" : 2.2}],
-        ["sz::LiPo_Battery::Inputs", "inputs", {"required": true}],
-        ["sz::LiPo_Battery::Outputs", "outputs", {"required": true}]
+        ["float", "full_charge", {"required": true, "json_key" : "Full Charge (Ah)", "default" : 2.2}],
+        ["sz::LiPo_Battery::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::LiPo_Battery::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

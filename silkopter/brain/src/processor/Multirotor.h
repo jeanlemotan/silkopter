@@ -41,8 +41,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -66,9 +64,7 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return params->angular_velocity_stream->get_rate(); }
-        auto get_name() const -> std::string const& { return name; }
 
-        std::string name;
         Init_Params* params = nullptr;
         Sample last_sample;
         std::vector<Sample> samples;

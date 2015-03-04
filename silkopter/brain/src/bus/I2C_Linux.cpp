@@ -80,20 +80,15 @@ auto I2C_Linux::init() -> bool
         return false;
     }
 
-    if (!m_init_params->name.empty())
-    {
-        if (!m_hal.get_buses().add(*this))
-        {
-            return false;
-        }
-    }
+//    if (!m_init_params->name.empty())
+//    {
+//        if (!m_hal.get_buses().add(*this))
+//        {
+//            return false;
+//        }
+//    }
 
     return true;
-}
-
-auto I2C_Linux::get_name() const -> std::string const&
-{
-    return m_init_params->name;
 }
 
 void I2C_Linux::close()

@@ -41,8 +41,6 @@ public:
 
     auto get_cell_count() const -> boost::optional<uint8_t>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -53,8 +51,8 @@ private:
     std::shared_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
     std::shared_ptr<sz::LiPo_Battery::Config> m_config;
 
-    stream::IVoltage* m_voltage_stream = nullptr;
-    stream::ICurrent* m_current_stream = nullptr;
+    stream::IVoltage_wptr m_voltage_stream;
+    stream::ICurrent_wptr m_current_stream;
 
     std::vector<stream::IVoltage::Sample> m_voltage_samples;
     std::vector<stream::ICurrent::Sample> m_current_samples;
@@ -71,14 +69,12 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
-        std::string name;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 

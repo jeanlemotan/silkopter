@@ -40,8 +40,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -54,9 +52,9 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IAngular_Velocity* m_angular_velocity_stream = nullptr;
-    stream::IAcceleration* m_acceleration_stream = nullptr;
-    stream::IMagnetic_Field* m_magnetic_field_stream = nullptr;
+    stream::IAngular_Velocity_wptr m_angular_velocity_stream;
+    stream::IAcceleration_wptr m_acceleration_stream;
+    stream::IMagnetic_Field_wptr m_magnetic_field_stream;
 
     std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
     std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
@@ -70,14 +68,12 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
-        std::string name;
         Sample last_sample;
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 

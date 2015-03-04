@@ -28,9 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace LiPo_Battery { struct Init_Params {
- std::string name;
+ 
 
-explicit Init_Params():name() {  }
+explicit Init_Params() {  }
 
 
  
@@ -47,7 +47,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_name;
+    
 
     bool check_depth(const char* type)
     {
@@ -61,8 +61,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "name";
+            
         default:
             break;
         }
@@ -89,14 +88,14 @@ private:
 
     void reset_flags()
     {
-        has_name = false;
+        
     }
 
 public:
     explicit SAXEventHandler( ::sz::LiPo_Battery::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
+        
     {
         reset_flags();
     }
@@ -108,8 +107,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -124,8 +122,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -140,8 +137,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -156,8 +152,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -172,8 +167,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -188,8 +182,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -204,8 +197,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -220,8 +212,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -237,8 +228,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
+            
             else {
                 state = -1;
                 return true;
@@ -247,8 +237,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -264,8 +253,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -280,8 +268,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -296,8 +283,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -313,14 +299,13 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
+            
         }
         return the_error.empty();
     }
@@ -339,8 +324,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -355,8 +339,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -367,9 +350,9 @@ struct Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47d
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47dd470900dc, std::string >()(w, value.name);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };
@@ -644,9 +627,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65", 7))
+            else if (utility::string_equal(str, length, "\x56\x6f\x6c\x74\x61\x67\x65", 7))
 						 { state=0; has_voltage = true; }
-else if (utility::string_equal(str, length, "\x63\x75\x72\x72\x65\x6e\x74", 7))
+else if (utility::string_equal(str, length, "\x43\x75\x72\x72\x65\x6e\x74", 7))
 						 { state=1; has_current = true; }
             else {
                 state = -1;
@@ -795,8 +778,8 @@ struct Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab6938
     {
         w.StartObject();
 
-        w.Key("\x76\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.voltage);
-w.Key("\x63\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.current);
+        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.voltage);
+w.Key("\x43\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.current);
 
         w.EndObject(2);
     }
@@ -1401,7 +1384,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13))
+            else if (utility::string_equal(str, length, "\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13))
 						 { state=0; has_battery_state = true; }
             else {
                 state = -1;
@@ -1531,7 +1514,7 @@ struct Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38
     {
         w.StartObject();
 
-        w.Key("\x62\x61\x74\x74\x65\x72\x79\x5f\x73\x74\x61\x74\x65", 13, false); Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
+        w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
 
         w.EndObject(1);
     }
@@ -1839,11 +1822,11 @@ case 2:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11))
+            else if (utility::string_equal(str, length, "\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16))
 						 { state=0; has_full_charge = true; }
-else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
 						 { state=1; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
 						 { state=2; has_outputs = true; }
             else {
                 state = -1;
@@ -2011,9 +1994,9 @@ struct Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b
     {
         w.StartObject();
 
-        w.Key("\x66\x75\x6c\x6c\x5f\x63\x68\x61\x72\x67\x65", 11, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
-w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Inputs >()(w, value.inputs);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Outputs >()(w, value.outputs);
+        w.Key("\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
+w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Outputs >()(w, value.outputs);
 
         w.EndObject(3);
     }

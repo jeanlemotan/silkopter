@@ -18,11 +18,6 @@ Comp_Location::Comp_Location(HAL& hal)
 {
 }
 
-auto Comp_Location::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
-
 auto Comp_Location::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("comp_location::init");
@@ -41,14 +36,7 @@ auto Comp_Location::init(rapidjson::Value const& init_params, rapidjson::Value c
 }
 auto Comp_Location::init() -> bool
 {
-    if (!m_init_params->name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
-        if (!m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
+    m_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -57,13 +45,13 @@ auto Comp_Location::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
     inputs[0].name = "location";
-    inputs[0].stream = m_location_stream;
+    inputs[0].stream = m_location_stream.lock();
     inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
     inputs[1].name = "linear_acceleration";
-    inputs[1].stream = m_linear_acceleration_stream;
+    inputs[1].stream = m_linear_acceleration_stream.lock();
     inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
     inputs[2].name = "pressure";
-    inputs[2].stream = m_pressure_stream;
+    inputs[2].stream = m_pressure_stream.lock();
     return inputs;
 }
 auto Comp_Location::get_outputs() const -> std::vector<Output>
@@ -71,34 +59,37 @@ auto Comp_Location::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
     outputs[0].name = "location";
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 
 void Comp_Location::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_location_stream ||
-        !m_linear_acceleration_stream ||
-        !m_pressure_stream)
+    auto location_stream = m_location_stream.lock();
+    auto linear_acceleration_stream = m_linear_acceleration_stream.lock();
+    auto pressure_stream = m_pressure_stream.lock();
+    if (!location_stream ||
+        !linear_acceleration_stream ||
+        !pressure_stream)
     {
         return;
     }
 
     //accumulate the input streams
     {
-        auto const& samples = m_location_stream->get_samples();
+        auto const& samples = location_stream->get_samples();
         m_location_samples.reserve(m_location_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_location_samples));
     }
     {
-        auto const& samples = m_linear_acceleration_stream->get_samples();
+        auto const& samples = linear_acceleration_stream->get_samples();
         m_linear_acceleration_samples.reserve(m_linear_acceleration_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_linear_acceleration_samples));
     }
     {
-        auto const& samples = m_pressure_stream->get_samples();
+        auto const& samples = pressure_stream->get_samples();
         m_pressure_samples.reserve(m_pressure_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_pressure_samples));
     }
@@ -114,16 +105,16 @@ void Comp_Location::process()
         return;
     }
 
-    m_stream.samples.resize(count);
+    m_stream->samples.resize(count);
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream.last_sample.dt = m_dt;
-        m_stream.last_sample.sample_idx++;
+        m_stream->last_sample.dt = m_dt;
+        m_stream->last_sample.sample_idx++;
 
-        m_stream.last_sample.value = m_location_samples[i].value;
+        m_stream->last_sample.value = m_location_samples[i].value;
 
-        m_stream.samples[i] = m_stream.last_sample;
+        m_stream->samples[i] = m_stream->last_sample;
     }
 
 
@@ -146,9 +137,9 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
-    auto* linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.inputs.linear_acceleration);
-    auto* pressure_stream = m_hal.get_streams().find_by_name<stream::IPressure>(sz.inputs.pressure);
+    auto location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
+    auto linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.inputs.linear_acceleration);
+    auto pressure_stream = m_hal.get_streams().find_by_name<stream::IPressure>(sz.inputs.pressure);
     if (!location_stream || location_stream->get_rate() == 0)
     {
         QLOGE("No input angular velocity stream specified");
@@ -174,20 +165,20 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    if (m_stream.rate != 0 && m_stream.rate != linear_acceleration_stream->get_rate())
+    if (m_stream->rate != 0 && m_stream->rate != linear_acceleration_stream->get_rate())
     {
         QLOGE("Input streams rate has changed: {} != {}",
               location_stream->get_rate(),
-              m_stream.rate);
+              m_stream->rate);
         return false;
     }
 
-    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_location_stream = location_stream;
     m_linear_acceleration_stream = linear_acceleration_stream;
     m_pressure_stream = pressure_stream;
-    m_stream.rate = m_location_stream->get_rate();
+    m_stream->rate = location_stream->get_rate();
 
     *m_config = sz;
     return true;

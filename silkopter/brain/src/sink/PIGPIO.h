@@ -33,7 +33,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_name() const -> std::string const&;
     auto get_inputs() const -> std::vector<Input>;
 
     void process();
@@ -48,7 +47,7 @@ private:
 
     struct PWM_Channel
     {
-        stream::IPWM_Value* stream = nullptr;
+        stream::IPWM_Value_wptr stream;
         uint32_t gpio = 0;
     };
 

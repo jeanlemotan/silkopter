@@ -59,12 +59,6 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 };
 
 
-struct HAL::Hardware
-{
-    std::vector<std::unique_ptr<node::bus::IBus>> buses;
-    std::vector<std::unique_ptr<INode_Wrapper>> nodes;
-};
-
 ///////////////////////////////////////////////////////////////
 
 HAL::HAL()
@@ -76,8 +70,6 @@ HAL::HAL()
     using namespace node;
 
     QLOG_TOPIC("hal");
-
-    m_hw.reset(new Hardware);
 
     m_bus_factory.register_node<bus::UART_Linux>("UART_Linux");
     m_bus_factory.register_node<bus::I2C_Linux>("I2C_Linux");
@@ -252,9 +244,6 @@ auto HAL::init() -> bool
     get_sources().remove_all();
     get_streams().remove_all();
 
-    m_hw->nodes.clear();
-    m_hw->buses.clear();
-
     if (!load_settings())
     {
         return false;
@@ -348,44 +337,27 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     for (; it != json.MemberEnd(); ++it)
     {
         std::string type(it->name.GetString());
-        auto* init_params = jsonutil::find_value(it->value, std::string("init_params"));
-        auto* config = jsonutil::find_value(it->value, std::string("config"));
-        if (!init_params || !config)
+        auto* namej = jsonutil::find_value(it->value, std::string("name"));
+        if (!namej || namej->GetType() != rapidjson::kStringType)
         {
-            QLOGE("Bus {} is missing the {}", type, init_params ? "config" : "init_params");
+            QLOGE("Node type {} is missing the name", type);
             return false;
         }
-        if (!create_node<Base>(type, *init_params, *config))
+        std::string name(namej->GetString());
+        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
+        auto* configj = jsonutil::find_value(it->value, std::string("config"));
+        if (!init_paramsj || !configj)
         {
-            QLOGE("Failed to create node of type '{}'", type);
+            QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
+            return false;
+        }
+        if (!create_node<Base>(type, name, *init_paramsj, *configj))
+        {
+            QLOGE("Failed to create node {} of type '{}'", name, type);
             return false;
         }
     }
     return true;
-}
-template<>
-auto HAL::create_node<node::bus::IBus>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
-{
-    auto node = m_bus_factory.create_node(type);
-    return node && node->init(init_params, config);
-}
-template<>
-auto HAL::create_node<node::source::ISource>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
-{
-    auto node = m_source_factory.create_node(type);
-    return node && node->init(init_params, config);
-}
-template<>
-auto HAL::create_node<node::sink::ISink>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
-{
-    auto node = m_sink_factory.create_node(type);
-    return node && node->init(init_params, config);
-}
-template<>
-auto HAL::create_node<node::processor::IProcessor>(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
-{
-    auto node = m_processor_factory.create_node(type);
-    return node && node->init(init_params, config);
 }
 
 //static std::vector<double> s_samples;
@@ -393,9 +365,21 @@ auto HAL::create_node<node::processor::IProcessor>(std::string const& type, rapi
 
 void HAL::process()
 {
-    for (auto& n: m_hw->nodes)
+//    for (auto const& n: m_buses.get_all())
+//    {
+//        n->process();
+//    }
+    for (auto const& n: m_sources.get_all())
     {
-        n->process();
+        n.node->process();
+    }
+    for (auto const& n: m_processors.get_all())
+    {
+        n.node->process();
+    }
+    for (auto const& n: m_sinks.get_all())
+    {
+        n.node->process();
     }
 
 //    auto* stream = get_streams().find_by_name<node::stream::ILocation>("gps0/stream");

@@ -41,38 +41,42 @@ public:
 
     void process();
 
-    auto get_name() const -> std::string const&;
-
     auto get_outputs() const -> std::vector<Output>;
-
-    void lock();
-    void unlock();
 
 private:
     auto init() -> bool;
 
-    auto mpu_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
-    auto mpu_read_u8(uint8_t reg, uint8_t& dst) -> bool;
-    auto mpu_read_u16(uint8_t reg, uint16_t& dst) -> bool;
-    auto mpu_write_u8(uint8_t reg, uint8_t t) -> bool;
-    auto mpu_write_u16(uint8_t reg, uint16_t t) -> bool;
-
-    auto akm_read(uint8_t reg, uint8_t* data, uint32_t size) -> bool;
-    auto akm_read_u8(uint8_t reg, uint8_t& dst) -> bool;
-    auto akm_read_u16(uint8_t reg, uint16_t& dst) -> bool;
-    auto akm_write_u8(uint8_t reg, uint8_t t) -> bool;
-    auto akm_write_u16(uint8_t reg, uint16_t t) -> bool;
-
-    void reset_fifo();
-
-    auto setup_compass() -> bool;
-    void set_bypass(bool on);
-    void process_compass();
-
 private:
     HAL& m_hal;
-    bus::II2C* m_i2c = nullptr;
-    bus::ISPI* m_spi = nullptr;
+    bus::II2C_wptr m_i2c;
+    bus::ISPI_wptr m_spi;
+
+    struct Buses
+    {
+        bus::II2C_ptr i2c;
+        bus::ISPI_ptr spi;
+    };
+
+    auto mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool;
+    auto mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
+    auto mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
+    auto mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool;
+    auto mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool;
+
+    auto akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool;
+    auto akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
+    auto akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
+    auto akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool;
+    auto akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool;
+
+    auto lock(Buses& buses) -> bool;
+    void unlock(Buses& buses);
+
+    void reset_fifo(Buses& buses);
+
+    auto setup_compass(Buses& buses) -> bool;
+    void set_bypass(Buses& buses, bool on);
+    void process_compass(Buses& buses);
 
     std::shared_ptr<sz::MPU9250::Init_Params> m_init_params;
     std::shared_ptr<sz::MPU9250::Config> m_config;
@@ -83,40 +87,36 @@ private:
     struct Common
     {
         uint32_t rate = 0;
-        std::string name;
         q::Clock::duration dt;
     };
 
-    struct Acceleraton : public stream::IAcceleration, public Common
+    struct Acceleration : public stream::IAcceleration, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         Sample last_sample;
         std::vector<Sample> samples;
         float scale_inv = 1.f;
     };
-    mutable Acceleraton m_acceleration;
+    mutable std::shared_ptr<Acceleration> m_acceleration;
 
     struct Angular_Velocity : public stream::IAngular_Velocity, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         std::vector<Sample> samples;
         Sample last_sample;
         std::string name;
         float scale_inv = 1.f;
     };
-    mutable Angular_Velocity m_angular_velocity;
+    mutable std::shared_ptr<Angular_Velocity> m_angular_velocity;
 
     struct Magnetic_Field : public stream::IMagnetic_Field, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         std::vector<Sample> samples;
         Sample last_sample;
@@ -124,18 +124,17 @@ private:
         q::Clock::time_point last_time_point;
         float magnetic_adj[3];
     };
-    mutable Magnetic_Field m_magnetic_field;
+    mutable std::shared_ptr<Magnetic_Field> m_magnetic_field;
 
     struct Temperature : public stream::ITemperature, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         std::vector<Sample> samples;
         Sample last_sample;
     };
-    mutable Temperature m_temperature;
+    mutable std::shared_ptr<Temperature> m_temperature;
 };
 
 

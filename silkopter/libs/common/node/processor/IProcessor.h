@@ -23,13 +23,11 @@ public:
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() -> rapidjson::Document = 0;
 
-    virtual auto get_name() const -> std::string const& = 0;
-
     struct Input
     {
         q::rtti::class_id class_id = 0;
         std::string name;
-        stream::IStream* stream = nullptr;
+        stream::IStream_ptr stream;
     };
     virtual auto get_inputs() const -> std::vector<Input> = 0;
 
@@ -37,10 +35,13 @@ public:
     {
         q::rtti::class_id class_id = 0;
         std::string name;
-        stream::IStream* stream = nullptr;
+        stream::IStream_ptr stream;
     };
     virtual auto get_outputs() const -> std::vector<Output> = 0;
+
+    virtual void process() = 0;
 };
+DECLARE_CLASS_PTR(IProcessor);
 
 
 }

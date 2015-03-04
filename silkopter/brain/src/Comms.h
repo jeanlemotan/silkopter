@@ -52,7 +52,7 @@ private:
     template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
     void send_telemetry_streams();
 
-    void handle_enumerate_node_factory();
+    void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
 
     template<class Registry, class Node_Base> void handle_node_config(comms::Setup_Message msg, Registry const& registry);
@@ -62,13 +62,15 @@ private:
     void handle_processor_config();
     void handle_stream_config();
 
+    void handle_add_source();
+
     void handle_telemetry_streams();
     void handle_multirotor_mode();
     void handle_multirotor_input_request();
 
     void handle_multirotor_input();
 
-    std::vector<node::stream::IStream*> m_telemetry_streams;
+    std::vector<node::stream::IStream_ptr> m_telemetry_streams;
 
 
     std::vector<Setup_Channel_Callback> m_setup_channel_callbacks;

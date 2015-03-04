@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,7 +13,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "stream", {"required": true}]
+        ["std::string", "input", {"required": true, "json_key" : "Input"}]
     ]
 },
 {
@@ -31,7 +30,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::LPF::Output", "output", {"required": true}]
+        ["sz::LPF::Output", "output", {"required": true, "json_key" : "Output"}]
     ]
 },
 {
@@ -40,10 +39,10 @@
     "name": "Config",
     "members":
     [
-        ["uint32_t", "poles", {"required": true, "default" : 2}],
-        ["double", "cutoff_frequency", {"required": true}],
-        ["sz::LPF::Inputs", "inputs", {"required": true}],
-        ["sz::LPF::Outputs", "outputs", {"required": true}]
+        ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 2}],
+        ["double", "cutoff_frequency", {"required": true, "json_key" : "Cutoff Frequency (Hz)"}],
+        ["sz::LPF::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::LPF::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

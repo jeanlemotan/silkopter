@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,9 +13,9 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "location", {"required": true}],
-        ["std::string", "linear_acceleration", {"required": true}],
-        ["std::string", "pressure", {"required": true}]
+        ["std::string", "location", {"required": true, "json_key" : "Location"}],
+        ["std::string", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}],
+        ["std::string", "pressure", {"required": true, "json_key" : "Pressure"}]
     ]
 },
 {
@@ -33,7 +32,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::Comp_Location::Location", "location", {"required": true}]
+        ["sz::Comp_Location::Location", "location", {"required": true, "json_key" : "Location"}]
     ]
 },
 {
@@ -42,8 +41,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Comp_Location::Inputs", "inputs", {"required": true}],
-        ["sz::Comp_Location::Outputs", "outputs", {"required": true}]
+        ["sz::Comp_Location::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Comp_Location::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,8 +13,8 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "reference_frame", {"required": true}],
-        ["std::string", "acceleration", {"required": true}]
+        ["std::string", "reference_frame", {"required": true, "json_key" : "Reference Frame"}],
+        ["std::string", "acceleration", {"required": true, "json_key" : "Acceleration"}]
     ]
 },
 {
@@ -32,7 +31,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::Inertial::Linear_Acceleration", "linear_acceleration", {"required": true}]
+        ["sz::Inertial::Linear_Acceleration", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}]
     ]
 },
 {
@@ -41,8 +40,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Inertial::Inputs", "inputs", {"required": true}],
-        ["sz::Inertial::Outputs", "outputs", {"required": true}]
+        ["sz::Inertial::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Inertial::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

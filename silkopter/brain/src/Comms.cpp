@@ -214,7 +214,7 @@ void Comms::send_telemetry_streams()
         }
         else
         {
-            QLOGW("Unrecognized stream type: {} / {}", stream->get_name(), q::rtti::get_class_name(*stream));
+            QLOGW("Unrecognized stream type: {} / {}", stream->get_type(), q::rtti::get_class_name(*stream));
         }
     }
 }
@@ -229,15 +229,15 @@ void pack_io_info(Comms::Setup_Channel& channel, std::vector<T> const& io)
         channel.pack_param(i.name);
     }
 }
-template<class T>
-void pack_io_stream_name(Comms::Setup_Channel& channel, std::vector<T> const& io)
-{
-    channel.pack_param(static_cast<uint32_t>(io.size()));
-    for (auto const& i: io)
-    {
-        channel.pack_param(i.stream ? i.stream->get_name() : std::string());
-    }
-}
+//template<class T>
+//void pack_io_stream_name(Comms::Setup_Channel& channel, std::vector<T> const& io)
+//{
+//    channel.pack_param(static_cast<uint32_t>(io.size()));
+//    for (auto const& i: io)
+//    {
+//        channel.pack_param(i.stream ? i.stream->get_name() : std::string());
+//    }
+//}
 
 static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
 {
@@ -247,9 +247,21 @@ static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& 
     std::string str(buffer.GetString(), buffer.GetSize());
     channel.pack_param(str);
 }
+auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
+{
+    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
+    json->SetObject();
+    if (!str.empty() && json->Parse(str.c_str()).HasParseError())
+    {
+//            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        return nullptr;
+    }
+    return std::move(json);
+}
 
 
-void Comms::handle_enumerate_node_factory()
+
+void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.unpack(req_id))
@@ -259,7 +271,7 @@ void Comms::handle_enumerate_node_factory()
         auto sinks = m_hal.get_sink_factory().create_all();
         auto processors = m_hal.get_processor_factory().create_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_FACTORY);
+        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
         m_setup_channel.pack_param(req_id);
         m_setup_channel.pack_param(static_cast<uint32_t>(source.size()));
         m_setup_channel.pack_param(static_cast<uint32_t>(sinks.size()));
@@ -319,34 +331,30 @@ void Comms::handle_enumerate_nodes()
 
         for (auto const& n: streams)
         {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_type());
-            m_setup_channel.pack_param(n->get_rate());
+            m_setup_channel.pack_param(n.name);
+            m_setup_channel.pack_param(n.node->get_type());
+            m_setup_channel.pack_param(n.node->get_rate());
         }
         for (auto const& n: sources)
         {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_type());
-            pack_io_stream_name(m_setup_channel, n->get_outputs());
-            pack_json(m_setup_channel, n->get_init_params());
-            pack_json(m_setup_channel, n->get_config());
+            m_setup_channel.pack_param(n.name);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
         for (auto const& n: sinks)
         {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_type());
-            pack_io_stream_name(m_setup_channel, n->get_inputs());
-            pack_json(m_setup_channel, n->get_init_params());
-            pack_json(m_setup_channel, n->get_config());
+            m_setup_channel.pack_param(n.name);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
         for (auto const& n: processors)
         {
-            m_setup_channel.pack_param(n->get_name());
-            m_setup_channel.pack_param(n->get_type());
-            pack_io_stream_name(m_setup_channel, n->get_inputs());
-            pack_io_stream_name(m_setup_channel, n->get_outputs());
-            pack_json(m_setup_channel, n->get_init_params());
-            pack_json(m_setup_channel, n->get_config());
+            m_setup_channel.pack_param(n.name);
+            m_setup_channel.pack_param(n.node->get_type());
+            pack_json(m_setup_channel, n.node->get_init_params());
+            pack_json(m_setup_channel, n.node->get_config());
         }
 
         m_setup_channel.end_pack();
@@ -371,7 +379,7 @@ void Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
     }
 
     QLOGI("Req Id: {} - node config", req_id);
-    auto* node = registry.template find_by_name<Node_Base>(name);
+    auto node = registry.template find_by_name<Node_Base>(name);
     if (!node)
     {
         QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
@@ -424,6 +432,54 @@ void Comms::handle_processor_config()
 //                comms::Setup_Message::STREAM_CONFIG, m_hal.get_streams());
 //}
 
+void Comms::handle_add_source()
+{
+    uint32_t req_id = 0;
+    if (m_setup_channel.begin_unpack() &&
+        m_setup_channel.unpack_param(req_id))
+    {
+        QLOGI("Req Id: {} - add node", req_id);
+
+        std::string def_name;
+        std::string name;
+        std::string init_params;
+        std::string config;
+
+        bool ok = m_setup_channel.unpack_param(def_name);
+        ok &= m_setup_channel.unpack_param(name);
+        ok &= m_setup_channel.unpack_param(init_params);
+        ok &= m_setup_channel.unpack_param(config);
+        QLOGI("\tAdd source {} of type {}, init_params {}, config {}", name, def_name, init_params, config);
+        auto init_paramsj = parse_json(init_params);
+        auto configj = parse_json(config);
+        if (!ok || !init_paramsj || !configj)
+        {
+            QLOGE("\t\tBad source");
+            m_setup_channel.pack(comms::Setup_Message::ADD_SOURCE, req_id, false);
+            return;
+        }
+
+        auto node = m_hal.create_node<node::source::ISource>(def_name, name, std::move(*init_paramsj), std::move(*configj));
+        if (!node)
+        {
+            m_setup_channel.pack(comms::Setup_Message::ADD_SOURCE, req_id, false);
+            return;
+        }
+
+        m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
+        m_setup_channel.pack_param(req_id);
+        m_setup_channel.pack_param(true);
+        pack_json(m_setup_channel, node->get_init_params());
+        pack_json(m_setup_channel, node->get_config());
+        m_setup_channel.end_pack();
+    }
+    else
+    {
+        QLOGE("Error in enumerating nodes");
+    }
+}
+
+
 void Comms::handle_telemetry_streams()
 {
     uint32_t req_id = 0;
@@ -450,7 +506,7 @@ void Comms::handle_telemetry_streams()
                 QLOGE("Req Id: {} - error in unpacking telemetry streams", req_id);
                 return;
             }
-            auto* stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
+            auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
             if (stream)
             {
                 m_telemetry_streams.push_back(stream);
@@ -470,7 +526,7 @@ void Comms::handle_telemetry_streams()
     for (auto const& s: m_telemetry_streams)
     {
         QASSERT(s);
-        m_setup_channel.pack_param(s->get_name());
+        //m_setup_channel.pack_param(s->get_name());
     }
     m_setup_channel.end_pack();
 }
@@ -600,8 +656,10 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Setup_Message::ENUMERATE_NODE_FACTORY: handle_enumerate_node_factory(); break;
+        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
+
+        case comms::Setup_Message::ADD_SOURCE: handle_add_source(); break;
 
         case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
         case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;

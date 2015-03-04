@@ -42,16 +42,12 @@ SRF02::SRF02(HAL& hal)
 
 }
 
-auto SRF02::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
 auto SRF02::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IDistance>();
     outputs[0].name = "distance";
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 auto SRF02::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
@@ -74,20 +70,22 @@ auto SRF02::init(rapidjson::Value const& init_params, rapidjson::Value const& co
 auto SRF02::init() -> bool
 {
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-
-    if (!m_i2c)
+    auto i2c = m_i2c.lock();
+    if (!i2c)
     {
         QLOGE("No bus configured");
         return false;
     }
 
+    m_stream = std::make_shared<Stream>();
+
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 12);
-    m_stream.rate = m_init_params->rate;
+    m_stream->rate = m_init_params->rate;
 
     QLOGI("Probing SRF02 on {}", m_init_params->bus);
 
     uint8_t rev = 0;
-    auto ret = m_i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
+    auto ret = i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
     if (!ret || rev == 255)
     {
         QLOGE("Failed to initialize SRF02");
@@ -96,19 +94,19 @@ auto SRF02::init() -> bool
 
     QLOGI("SRF02 Revision: {}", rev);
 
-    m_stream.dt = std::chrono::milliseconds(1000 / m_init_params->rate);
-    m_stream.last_time_point = q::Clock::now();
+    m_stream->dt = std::chrono::milliseconds(1000 / m_init_params->rate);
+    m_stream->last_time_point = q::Clock::now();
     m_state = 0;
 
-    if (!m_init_params->name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}-distance", m_init_params->name);
-        if (!m_hal.get_sources().add(*this) ||
-            !m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
+//    if (!m_init_params->name.empty())
+//    {
+//        m_stream->name = q::util::format2<std::string>("{}-distance", m_init_params->name);
+//        if (!m_hal.get_sources().add(*this) ||
+//            !m_hal.get_streams().add(m_stream))
+//        {
+//            return false;
+//        }
+//    }
 
     return true;
 }
@@ -118,22 +116,30 @@ void SRF02::process()
     QLOG_TOPIC("srf02::process");
     auto now = q::Clock::now();
 
+    m_stream->samples.clear();
+
+    auto i2c = m_i2c.lock();
+    if (!i2c)
+    {
+        return;
+    }
+
     //begin?
     if (m_state == 0)
     {
-        if (now - m_stream.last_time_point < m_stream.dt)
+        if (now - m_stream->last_time_point < m_stream->dt)
         {
             return;
         }
 
         m_state = 1;
-        m_stream.last_time_point = now;
-        m_i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+        m_stream->last_time_point = now;
+        i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
         return; //we have to wait first
     }
 
     //wait for echo
-    if (now - m_stream.last_time_point < m_stream.dt)
+    if (now - m_stream->last_time_point < m_stream->dt)
     {
         return;
     }
@@ -141,7 +147,7 @@ void SRF02::process()
     m_state = 0;
 
     std::array<uint8_t, 4> buf;
-    m_i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
+    i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     int d = (unsigned int)(buf[0] << 8) | buf[1];
     //int min_d = (unsigned int)(buf[2] << 8) | buf[3];
@@ -149,15 +155,15 @@ void SRF02::process()
     float distance = static_cast<float>(d) / 100.f; //meters
     //float min_distance = static_cast<float>(min_d) / 100.f; //meters
 
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
     if (distance >= m_config->min_distance && distance <= m_config->max_distance)
     {
-        Stream::Sample& sample = m_stream.last_sample;
+        Stream::Sample& sample = m_stream->last_sample;
         sample.value = distance;
         sample.sample_idx++;
-        sample.dt = m_stream.dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
-        m_stream.samples.push_back(sample);
+        sample.dt = m_stream->dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
+        m_stream->samples.push_back(sample);
     }
 }
 

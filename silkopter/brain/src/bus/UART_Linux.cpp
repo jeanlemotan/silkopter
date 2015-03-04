@@ -82,20 +82,7 @@ auto UART_Linux::init() -> bool
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
 
-    if (!m_init_params->name.empty())
-    {
-        if (!m_hal.get_buses().add(*this))
-        {
-            return false;
-        }
-    }
-
     return true;
-}
-
-auto UART_Linux::get_name() const -> std::string const&
-{
-    return m_init_params->name;
 }
 
 void UART_Linux::close()

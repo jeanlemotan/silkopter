@@ -174,10 +174,6 @@ Raspicam::~Raspicam()
 #endif
 }
 
-auto Raspicam::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);

@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}]
     ]
 },
 {
@@ -14,7 +13,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "adc", {"required": true}]
+        ["std::string", "adc", {"required": true, "json_key" : "ADC"}]
     ]
 },
 {
@@ -23,8 +22,8 @@
     "name": "Voltage",
     "members":
     [
-        ["float", "bias", {"required": true, "default" : 0.0}],
-        ["float", "scale", {"required": true, "default" : 1.0}]
+        ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
+        ["float", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
     ]
 },
 {
@@ -33,7 +32,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::ADC_Voltmeter::Voltage", "voltage", {"required": true}]
+        ["sz::ADC_Voltmeter::Voltage", "voltage", {"required": true, "json_key" : "Voltage"}]
     ]
 },
 {
@@ -42,8 +41,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::ADC_Voltmeter::Inputs", "inputs", {"required": true}],
-        ["sz::ADC_Voltmeter::Outputs", "outputs", {"required": true}]
+        ["sz::ADC_Voltmeter::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::ADC_Voltmeter::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

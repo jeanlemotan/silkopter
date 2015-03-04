@@ -42,8 +42,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -54,20 +52,18 @@ private:
     std::shared_ptr<sz::ADC_Ammeter::Init_Params> m_init_params;
     std::shared_ptr<sz::ADC_Ammeter::Config> m_config;
 
-    stream::IADC_Value* m_adc_stream = nullptr;
+    stream::IADC_Value_wptr m_adc_stream;
 
     struct Stream : public stream::ICurrent
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
-        std::string name;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 

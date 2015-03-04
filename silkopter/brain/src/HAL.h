@@ -18,7 +18,7 @@ class Factory : q::util::Noncopyable
 public:
     Factory(HAL& hal) : m_hal(hal) {}
     template <class T> void register_node(std::string const& class_name);
-    auto create_node(std::string const& class_name) -> std::unique_ptr<Base>;
+    auto create_node(std::string const& class_name) -> std::shared_ptr<Base>;
     auto get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
     auto get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
 
@@ -46,12 +46,18 @@ template<class Base>
 class Registry : q::util::Noncopyable
 {
 public:
-    auto get_all() const -> std::vector<Base*> const&;
+    struct Item
+    {
+        std::string name;
+        std::shared_ptr<Base> node;
+    };
+
+    auto get_all() const -> std::vector<Item> const&;
     void remove_all();
-    template<class T> auto find_by_name(std::string const& name) const -> T*;
-    auto add(Base& node) -> bool;
+    template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
+    auto add(std::string const& name, std::shared_ptr<Base> const& node) -> bool;
 private:
-    std::vector<Base*> m_nodes;
+    std::vector<Item> m_nodes;
 };
 
 
@@ -79,9 +85,11 @@ public:
     auto get_processors()   -> Registry<node::processor::IProcessor>&;
     auto get_streams()      -> Registry<node::stream::IStream>&;
 
+    template<class Base>
+    auto create_node(std::string const& type, std::string const& name, rapidjson::Value const& init_params, rapidjson::Value const& config) -> std::shared_ptr<Base>;
+
 private:
     template<class Base> auto create_nodes(rapidjson::Value& json) -> bool;
-    template<class Base> auto create_node(std::string const& type, rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool;
 
     Registry<node::bus::IBus> m_buses;
     Registry<node::source::ISource> m_sources;
@@ -99,18 +107,120 @@ private:
     rapidjson::Value m_emptyValue;
     rapidjson::Document m_settings;
 
-    struct Hardware;
-    std::shared_ptr<Hardware> m_hw;
-
     auto load_settings() -> bool;
 };
+
+template<>
+inline auto HAL::create_node<node::bus::IBus>(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::bus::IBus_ptr
+{
+    if (m_buses.find_by_name<node::bus::IBus>(name))
+    {
+        QLOGE("Bus '{}' already exist", name);
+        return node::bus::IBus_ptr();
+    }
+    auto node = m_bus_factory.create_node(type);
+    if (node && node->init(init_params, config))
+    {
+        auto res = m_buses.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        return node;
+    }
+    return node::bus::IBus_ptr();
+}
+template<>
+inline auto HAL::create_node<node::source::ISource>(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::source::ISource_ptr
+{
+    if (m_sources.find_by_name<node::source::ISource>(name))
+    {
+        QLOGE("Source '{}' already exist", name);
+        return node::source::ISource_ptr();
+    }
+    auto node = m_source_factory.create_node(type);
+    if (node && node->init(init_params, config))
+    {
+        auto res = m_sources.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        auto outputs = node->get_outputs();
+        for (auto const& x: outputs)
+        {
+            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
+            if (m_streams.add(stream_name, x.stream))
+            {
+                QLOGE("Cannot add stream '{}'", stream_name);
+                return node::source::ISource_ptr();
+            }
+        }
+        return node;
+    }
+    return node::source::ISource_ptr();
+}
+template<>
+inline auto HAL::create_node<node::sink::ISink>(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::sink::ISink_ptr
+{
+    if (m_sinks.find_by_name<node::sink::ISink>(name))
+    {
+        QLOGE("Sink '{}' already exist", name);
+        return node::sink::ISink_ptr();
+    }
+    auto node = m_sink_factory.create_node(type);
+    if (node && node->init(init_params, config))
+    {
+        auto res = m_sinks.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        return node;
+    }
+    return node::sink::ISink_ptr();
+}
+template<>
+inline auto HAL::create_node<node::processor::IProcessor>(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::processor::IProcessor_ptr
+{
+    if (m_processors.find_by_name<node::processor::IProcessor>(name))
+    {
+        QLOGE("Processor '{}' already exist", name);
+        return node::processor::IProcessor_ptr();
+    }
+    auto node = m_processor_factory.create_node(type);
+    if (node && node->init(init_params, config))
+    {
+        auto res = m_processors.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        auto outputs = node->get_outputs();
+        for (auto const& x: outputs)
+        {
+            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
+            if (m_streams.add(stream_name, x.stream))
+            {
+                QLOGE("Cannot add stream '{}'", stream_name);
+                return node::processor::IProcessor_ptr();
+            }
+        }
+        return node;
+    }
+    return node::processor::IProcessor_ptr();
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template<class Base>
-auto Registry<Base>::get_all() const -> std::vector<Base*> const&
+auto Registry<Base>::get_all() const -> std::vector<Item> const&
 {
     return m_nodes;
 }
@@ -121,20 +231,20 @@ void Registry<Base>::remove_all()
 }
 template<class Base>
 template<class T>
-auto Registry<Base>::find_by_name(std::string const& name) const -> T*
+auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<T>
 {
-    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](Base* s) { return s->get_name() == name; });
-    return it != m_nodes.end() ? dynamic_cast<T*>(*it) : nullptr;
+    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](Item const& s) { return s.name == name; });
+    return it != m_nodes.end() ? std::dynamic_pointer_cast<T>(it->node) : nullptr;
 }
 template<class Base>
-auto Registry<Base>::add(Base& node) -> bool
+auto Registry<Base>::add(std::string const& name, std::shared_ptr<Base> const& node) -> bool
 {
-    if (find_by_name<Base>(node.get_name()))
+    if (find_by_name<Base>(name))
     {
-        QLOGE("Duplicated name in node {}", node.get_name());
+        QLOGE("Duplicated name in node {}", name);
         return false;
     }
-    m_nodes.push_back(static_cast<Base*>(&node));
+    m_nodes.push_back({name, node});
     return true;
 }
 
@@ -169,10 +279,10 @@ void Factory<Base>::register_node(std::string const& class_name)
 }
 
 template <class Base>
-auto Factory<Base>::create_node(std::string const& class_name) -> std::unique_ptr<Base>
+auto Factory<Base>::create_node(std::string const& class_name) -> std::shared_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
-    return std::unique_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(m_hal)));
+    return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(m_hal)));
 }
 template<class Base>
 auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>

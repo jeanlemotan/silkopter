@@ -32,8 +32,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -44,7 +42,7 @@ private:
     sz::LPF::Init_Params m_init_params;
     sz::LPF::Config m_config;
 
-    Stream_t* m_input_stream = nullptr;
+    std::weak_ptr<Stream_t> m_input_stream;
 
     util::Butterworth<MAX_POLES, Stream_t::FILTER_CHANNELS> m_dsp;
 
@@ -52,14 +50,12 @@ private:
     {
         auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
-        std::string name;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 
@@ -86,6 +82,14 @@ auto LPF<Stream_t>::init(rapidjson::Value const& init_params, rapidjson::Value c
     m_init_params = sz;
     return init() && set_config(config);
 }
+
+template<class Stream_t>
+auto LPF<Stream_t>::init() -> bool
+{
+    m_stream = std::make_shared<Stream>();
+    return true;
+}
+
 template<class Stream_t>
 auto LPF<Stream_t>::get_init_params() -> rapidjson::Document
 {
@@ -107,24 +111,23 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.stream);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
     if (!input_stream || input_stream->get_rate() == 0)
     {
         QLOGE("No input input stream specified");
         return false;
     }
-    if (m_stream.rate != 0 && m_stream.rate != input_stream->get_rate())
+    if (m_stream->rate != 0 && m_stream->rate != input_stream->get_rate())
     {
         QLOGE("Input streams rate has changed: {} != {}",
               input_stream->get_rate(),
-              m_stream.rate);
+              m_stream->rate);
         return false;
     }
 
     if (sz.cutoff_frequency > input_stream->get_rate() / 2)
     {
-        QLOGE("{}: Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",
-              get_name(),
+        QLOGE("Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",
               sz.cutoff_frequency, input_stream->get_rate() / 2);
         return false;
     }
@@ -132,12 +135,12 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     sz.poles = math::clamp<uint32_t>(sz.poles, 1, MAX_POLES);
     if (!m_dsp.setup(sz.poles, input_stream->get_rate(), sz.cutoff_frequency))
     {
-        QLOGE("{}: Cannot setup dsp filter.", get_name());
+        QLOGE("Cannot setup dsp filter.");
         return false;
     }
 
     m_input_stream = input_stream;
-    m_stream.rate = m_input_stream->get_rate();
+    m_stream->rate = input_stream->get_rate();
 
     m_config = sz;
     return true;
@@ -155,7 +158,7 @@ auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
-    inputs[0].stream = m_input_stream;
+    inputs[0].stream = m_input_stream.lock();
     return inputs;
 }
 template<class Stream_t>
@@ -163,28 +166,23 @@ auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<Stream_t>();
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
-}
-
-template<class Stream_t>
-auto LPF<Stream_t>::get_name() const -> std::string const&
-{
-    return m_init_params.name;
 }
 
 template<class Stream_t>
 void LPF<Stream_t>::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_input_stream)
+    auto input_stream = m_input_stream.lock();
+    if (!input_stream)
     {
         return;
     }
 
-    auto const& is = m_input_stream->get_samples();
-    m_stream.samples.reserve(is.size());
+    auto const& is = input_stream->get_samples();
+    m_stream->samples.reserve(is.size());
 
     std::array<double, Stream_t::FILTER_CHANNELS> channels;
     for (auto& s: is)
@@ -198,29 +196,13 @@ void LPF<Stream_t>::process()
            vs.sample_idx = s.sample_idx;
            vs.value = s.value;
            Stream_t::get_value_from_channels(vs.value, channels);
-           m_stream.samples.push_back(vs);
+           m_stream->samples.push_back(vs);
        }
        else
        {
-           m_stream.samples.push_back(s);
+           m_stream->samples.push_back(s);
        }
     };
-}
-
-template<class Stream_t>
-auto LPF<Stream_t>::init() -> bool
-{
-    if (!m_init_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params.name);
-        if (!m_hal.get_processors().add(*this) ||
-            !m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 

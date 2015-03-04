@@ -37,8 +37,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -51,8 +49,8 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IReference_Frame* m_reference_frame_stream = nullptr;
-    stream::IAcceleration* m_acceleration_stream = nullptr;
+    stream::IReference_Frame_wptr m_reference_frame_stream;
+    stream::IAcceleration_wptr m_acceleration_stream;
 
     std::vector<stream::IReference_Frame::Sample> m_reference_frame_samples;
     std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
@@ -61,14 +59,12 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
-        std::string name;
         Sample last_sample;
         std::vector<Sample> samples;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 

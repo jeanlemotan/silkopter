@@ -34,7 +34,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() -> rapidjson::Document;
 
-    auto get_name() const -> std::string const&;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
@@ -44,7 +43,7 @@ private:
 
     HAL& m_hal;
 
-    bus::II2C* m_i2c = nullptr;
+    std::weak_ptr<bus::II2C> m_i2c;
 
     std::shared_ptr<sz::SRF02::Init_Params> m_init_params;
     std::shared_ptr<sz::SRF02::Config> m_config;
@@ -53,16 +52,14 @@ private:
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<Sample> samples;
         Sample last_sample;
         q::Clock::duration dt;
         q::Clock::time_point last_time_point;
-        std::string name;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 
     int m_state = 0;
 };

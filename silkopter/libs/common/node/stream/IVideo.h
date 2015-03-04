@@ -15,6 +15,7 @@ class IVideo : public IStream
 public:
     virtual ~IVideo() {}
 };
+DECLARE_CLASS_PTR(IVideo);
 
 
 }

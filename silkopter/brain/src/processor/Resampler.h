@@ -33,8 +33,6 @@ public:
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
-    auto get_name() const -> std::string const&;
-
     void process();
 
 private:
@@ -48,7 +46,7 @@ private:
     sz::Resampler::Init_Params m_init_params;
     sz::Resampler::Config m_config;
 
-    Stream_t* m_input_stream = nullptr;
+    std::weak_ptr<Stream_t> m_input_stream;
 
     q::Clock::duration m_input_dt;
     q::Clock::duration m_dt = q::Clock::duration(0);
@@ -63,14 +61,12 @@ private:
     {
         auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
-        auto get_name() const -> std::string const& { return name; }
 
         uint32_t rate = 0;
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
-        std::string name;
     };
-    mutable Stream m_stream;
+    mutable std::shared_ptr<Stream> m_stream;
 };
 
 
@@ -98,6 +94,17 @@ auto Resampler<Stream_t>::init(rapidjson::Value const& init_params, rapidjson::V
     return init() && set_config(config);
 }
 template<class Stream_t>
+auto Resampler<Stream_t>::init() -> bool
+{
+    m_stream = std::make_shared<Stream>();
+
+    m_stream->rate = math::max<uint32_t>(m_config.outputs.output.rate, 1);
+    m_dt = std::chrono::microseconds(1000000 / m_stream->rate);
+
+    return true;
+}
+
+template<class Stream_t>
 auto Resampler<Stream_t>::get_init_params() -> rapidjson::Document
 {
     rapidjson::Document json;
@@ -118,7 +125,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.stream);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
     if (!input_stream || input_stream->get_rate() == 0)
     {
         QLOGE("No input input stream specified");
@@ -127,25 +134,25 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 
     auto input_rate = input_stream->get_rate();
 
-    uint32_t filter_rate = math::max(m_stream.rate, input_rate);
-    double max_cutoff = math::min(m_stream.rate / 2.0, input_rate / 2.0);
+    uint32_t filter_rate = math::max(m_stream->rate, input_rate);
+    double max_cutoff = math::min(m_stream->rate / 2.0, input_rate / 2.0);
     sz.cutoff_frequency = sz.cutoff_frequency > 0 ? sz.cutoff_frequency : max_cutoff;
     if (sz.cutoff_frequency > max_cutoff)
     {
-        QLOGE("{}: Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", get_name(), sz.cutoff_frequency, max_cutoff);
+        QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", sz.cutoff_frequency, max_cutoff);
         return false;
     }
     sz.poles = math::clamp<uint32_t>(sz.poles, 1, MAX_POLES);
     if (!m_dsp.setup(sz.poles, filter_rate, sz.cutoff_frequency))
     {
-        QLOGE("{}: Cannot setup dsp filter.", get_name());
+        QLOGE("Cannot setup dsp filter.");
         return false;
     }
 
 
     m_input_stream = input_stream;
     m_input_dt = std::chrono::microseconds(1000000 / input_rate);
-    m_stream.rate = m_input_stream->get_rate();
+    m_stream->rate = input_stream->get_rate();
 
     m_config = sz;
     return true;
@@ -163,7 +170,7 @@ auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
-    inputs[0].stream = m_input_stream;
+    inputs[0].stream = m_input_stream.lock();
     return inputs;
 }
 template<class Stream_t>
@@ -171,34 +178,29 @@ auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<Stream_t>();
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_name() const -> std::string const&
-{
-    return m_init_params.name;
-}
-
-template<class Stream_t>
 void Resampler<Stream_t>::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_input_stream)
+    auto input_stream = m_input_stream.lock();
+    if (!input_stream)
     {
         return;
     }
 
     //first accumulate input samples
-    auto const& is = m_input_stream->get_samples();
+    auto const& is = input_stream->get_samples();
 
-    if (m_stream.rate == m_input_stream->get_rate())
+    if (m_stream->rate == input_stream->get_rate())
     {
-        m_stream.samples.reserve(is.size());
-        std::copy(is.begin(), is.end(), std::back_inserter(m_stream.samples));
+        m_stream->samples.reserve(is.size());
+        std::copy(is.begin(), is.end(), std::back_inserter(m_stream->samples));
     }
-    else if (m_stream.rate < m_input_stream->get_rate())
+    else if (m_stream->rate < input_stream->get_rate())
     {
         std::array<double, Stream_t::FILTER_CHANNELS> channels;
         for (auto const& s: is)
@@ -213,7 +215,7 @@ void Resampler<Stream_t>::process()
         }
         downsample();
     }
-    else if (m_stream.rate > m_input_stream->get_rate())
+    else if (m_stream->rate > input_stream->get_rate())
     {
         for (auto const& s: is)
         {
@@ -227,16 +229,16 @@ void Resampler<Stream_t>::process()
 template<class Stream_t>
 void Resampler<Stream_t>::downsample()
 {
-    m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
+    m_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
     while (m_input_accumulated_dt >= m_dt)
     {
         typename Stream_t::Sample s;
         s.value = m_input_samples.front().value;
-        s.sample_idx = ++m_stream.sample_idx;
+        s.sample_idx = ++m_stream->sample_idx;
         s.dt = m_dt;
 
-        m_stream.samples.push_back(s);
+        m_stream->samples.push_back(s);
 
         m_input_accumulated_dt -= m_dt;
 
@@ -268,14 +270,14 @@ void Resampler<Stream_t>::upsample()
 //            m_has_started = true;
 //        }
 
-    m_stream.samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
+    m_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
     std::array<double, Stream_t::FILTER_CHANNELS> channels;
     while (m_input_accumulated_dt >= m_dt)
     {
         typename Stream_t::Sample s;
         s.value = m_input_samples.front().value;
-        s.sample_idx = ++m_stream.sample_idx;
+        s.sample_idx = ++m_stream->sample_idx;
         s.dt = m_dt;
 
         if (Stream_t::get_channels_from_value(channels, s.value))
@@ -284,7 +286,7 @@ void Resampler<Stream_t>::upsample()
             Stream_t::get_value_from_channels(s.value, channels);
         }
 
-        m_stream.samples.push_back(s);
+        m_stream->samples.push_back(s);
 
         m_input_accumulated_dt -= m_dt;
 
@@ -300,25 +302,6 @@ void Resampler<Stream_t>::upsample()
             }
         }
     }
-}
-
-template<class Stream_t>
-auto Resampler<Stream_t>::init() -> bool
-{
-    if (!m_init_params.name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params.name);
-        if (!m_hal.get_processors().add(*this) ||
-            !m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
-
-    m_stream.rate = math::max<uint32_t>(m_config.outputs.output.rate, 1);
-    m_dt = std::chrono::microseconds(1000000 / m_stream.rate);
-
-    return true;
 }
 
 

@@ -24,6 +24,8 @@ public:
     virtual auto read(uint8_t* data, size_t max_size) -> size_t = 0;
     virtual auto write(uint8_t const* data, size_t size) -> bool = 0;
 };
+DECLARE_CLASS_PTR(IUART);
+
 
 }
 }

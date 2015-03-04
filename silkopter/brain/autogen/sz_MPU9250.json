@@ -5,23 +5,22 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}],
-        ["std::string", "bus", {"required": true}],
-        ["uint32_t", "acceleration_angular_velocity_rate", {"required": false}],
-        ["uint32_t", "magnetic_field_rate", {"required": false}],
-        ["uint32_t", "temperature_rate", {"required": false}],
-        ["uint32_t", "acceleration_range", {"required": false}],
-        ["uint32_t", "angular_velocity_range", {"required": false}]
+        ["std::string", "bus", {"required": true, "json_key" : "Bus"}],
+        ["uint32_t", "acceleration_angular_velocity_rate", {"required": true, "json_key" : "Acceleration & Angular Velocity Rate (Hz)", "default" : 1000}],
+        ["uint32_t", "magnetic_field_rate", {"required": true, "json_key" : "Magnetic Field Rate (Hz)", "default" : 100}],
+        ["uint32_t", "temperature_rate", {"required": true, "json_key" : "Temperature Rate (Hz)", "default" : 10}],
+        ["uint32_t", "acceleration_range", {"required": true, "json_key" : "Acceleration Range (G)", "default" : 8}],
+        ["uint32_t", "angular_velocity_range", {"required": true, "json_key" : "Angular Velocity Range (DPS)", "default" : 500}]
     ]
 },
 {
     "definition" : true,
     "namespace" : "sz::MPU9250",
-    "name": "Accelerometer",
+    "name": "Acceleration",
     "members":
     [
-        ["math::vec3f", "bias", {"required": true}],
-        ["math::vec3f", "scale", {"required": true}]
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
+        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
     ]
 },
 {
@@ -30,7 +29,7 @@
     "name": "Angular_Velocity",
     "members":
     [
-        ["math::vec3f", "bias", {"required": true}]
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
     ]
 },
 {
@@ -39,7 +38,7 @@
     "name": "Magnetic_Field",
     "members":
     [
-        ["math::vec3f", "bias", {"required": true}]
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
     ]
 },
 {
@@ -56,10 +55,10 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::MPU9250::Accelerometer", "accelerometer", {"required": true}],
-        ["sz::MPU9250::Angular_Velocity", "angular_velocity", {"required": true}],
-        ["sz::MPU9250::Magnetic_Field", "magnetic_field", {"required": true}],
-        ["sz::MPU9250::Temperature", "temperature", {"required": true}]
+        ["sz::MPU9250::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["sz::MPU9250::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["sz::MPU9250::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
+        ["sz::MPU9250::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}]
     ]
 },
 {
@@ -68,7 +67,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::MPU9250::Outputs", "outputs", {"required": true}]
+        ["sz::MPU9250::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

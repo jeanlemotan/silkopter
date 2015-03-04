@@ -116,7 +116,9 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/rapidjson.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/reader.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
+    ../../../libs/json_editor/JSON_Model.h \
+    ../../src/ModelTest.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -128,4 +130,9 @@ SOURCES += \
     ../../src/qnodeseditor/qneconnection.cpp \
     ../../src/qnodeseditor/qneport.cpp \
     ../../src/qnodeseditor/qnodeseditor.cpp \
-    ../../src/HAL_Window.cpp
+    ../../src/HAL_Window.cpp \
+    ../../../libs/json_editor/JSON_Model.cpp \
+    ../../src/ModelTest.cpp
+
+FORMS += \
+    ../../src/New_Node.ui

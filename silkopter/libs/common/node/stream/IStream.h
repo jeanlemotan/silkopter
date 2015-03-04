@@ -16,9 +16,9 @@ public:
     virtual ~IStream() {}
 
     virtual auto get_type() const -> q::rtti::class_id = 0;
-    virtual auto get_name() const -> std::string const& = 0;
     virtual auto get_rate() const -> uint32_t = 0;
 };
+DECLARE_CLASS_PTR(IStream);
 
 
 template<class T> struct Sample
@@ -29,6 +29,7 @@ template<class T> struct Sample
     q::Clock::duration dt{0}; //the duration of this sample.
     bool is_healthy = true;
 };
+
 
 
 }

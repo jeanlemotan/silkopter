@@ -18,11 +18,6 @@ ADC_Ammeter::ADC_Ammeter(HAL& hal)
 {
 }
 
-auto ADC_Ammeter::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
-
 auto ADC_Ammeter::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
@@ -41,14 +36,7 @@ auto ADC_Ammeter::init(rapidjson::Value const& init_params, rapidjson::Value con
 }
 auto ADC_Ammeter::init() -> bool
 {
-    if (!m_init_params->name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
-        if (!m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
+    m_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -57,7 +45,7 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
     inputs[0].name = "adc";
-    inputs[0].stream = m_adc_stream;
+    inputs[0].stream = m_adc_stream.lock();
     return inputs;
 }
 auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
@@ -65,23 +53,24 @@ auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ICurrent>();
     outputs[0].name = "current";
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 
 void ADC_Ammeter::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_adc_stream)
+    auto adc_stream = m_adc_stream.lock();
+    if (!adc_stream)
     {
         return;
     }
 
-    auto const& s = m_adc_stream->get_samples();
-    m_stream.samples.resize(s.size());
+    auto const& s = adc_stream->get_samples();
+    m_stream->samples.resize(s.size());
 
-    std::transform(s.begin(), s.end(), m_stream.samples.begin(), [this](stream::IADC_Value::Sample const& sample)
+    std::transform(s.begin(), s.end(), m_stream->samples.begin(), [this](stream::IADC_Value::Sample const& sample)
     {
        Stream::Sample vs;
        vs.dt = sample.dt;
@@ -105,22 +94,22 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc);
+    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc);
     if (!adc_stream || adc_stream->get_rate() == 0)
     {
         QLOGE("No input angular velocity stream specified");
         return false;
     }
-    if (m_stream.rate != 0 && m_stream.rate != adc_stream->get_rate())
+    if (m_stream->rate != 0 && m_stream->rate != adc_stream->get_rate())
     {
         QLOGE("Input streams rate has changed: {} != {}",
               adc_stream->get_rate(),
-              m_stream.rate);
+              m_stream->rate);
         return false;
     }
 
     m_adc_stream = adc_stream;
-    m_stream.rate = m_adc_stream->get_rate();
+    m_stream->rate = adc_stream->get_rate();
 
     *m_config = sz;
     return true;

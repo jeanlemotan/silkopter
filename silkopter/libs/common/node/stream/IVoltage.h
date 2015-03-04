@@ -34,6 +34,7 @@ public:
         value = channels[0];
     }
 };
+DECLARE_CLASS_PTR(IVoltage);
 
 
 }

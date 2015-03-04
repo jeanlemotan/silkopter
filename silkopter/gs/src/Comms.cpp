@@ -711,7 +711,11 @@ void Comms::handle_add_source()
 
 void Comms::send_hal_requests()
 {
+#ifdef NDEBUG
     static const std::chrono::seconds REQUEST_TIMEOUT(3);
+#else
+    static const std::chrono::seconds REQUEST_TIMEOUT(300);
+#endif
 
     auto now = q::Clock::now();
 
@@ -726,10 +730,13 @@ void Comms::send_hal_requests()
             m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
             m_setup_channel.pack_param(req.req_id);
             m_setup_channel.pack_param(req.def->name);
+            m_setup_channel.pack_param(req.def->name); //name!!!!
             pack_json(m_setup_channel, req.source->init_params);
             pack_json(m_setup_channel, req.source->config);
+            m_setup_channel.end_pack();
         }
-        else if (now - req.sent_time_point > REQUEST_TIMEOUT)
+
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
         {
             req.callback(HAL::Result::TIMEOUT, node::source::Source_ptr());
             m_hal.m_add_source_queue.erase(it);

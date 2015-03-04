@@ -34,8 +34,6 @@ public:
 
     void close();
 
-    auto get_name() const -> std::string const&;
-
     void lock();
     auto try_lock() -> bool;
     void unlock();

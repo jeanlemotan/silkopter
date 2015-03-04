@@ -28,12 +28,11 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace MS5611 { struct Init_Params {
- std::string name;
-std::string bus;
-uint32_t rate;
+ std::string bus;
+uint32_t pressure_rate;
 uint32_t temperature_rate_ratio;
 
-explicit Init_Params():name(), bus(), rate(), temperature_rate_ratio() {  }
+explicit Init_Params():bus(), pressure_rate(100), temperature_rate_ratio(10) {  }
 
 
  
@@ -51,10 +50,10 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;
-SAXEventHandler< uint32_t > handler_2;
-SAXEventHandler< uint32_t > handler_3;bool has_name;
-bool has_bus;
+SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< uint32_t > handler_2;bool has_bus;
+bool has_pressure_rate;
+bool has_temperature_rate_ratio;
 
     bool check_depth(const char* type)
     {
@@ -69,12 +68,10 @@ bool has_bus;
     {
         switch (state) {
             case 0:
-    return "name";
-case 1:
     return "bus";
+case 1:
+    return "pressure_rate";
 case 2:
-    return "rate";
-case 3:
     return "temperature_rate_ratio";
         default:
             break;
@@ -102,20 +99,18 @@ case 3:
 
     void reset_flags()
     {
-        has_name = false;
-has_bus = false;
-
-
+        has_bus = false;
+has_pressure_rate = false;
+has_temperature_rate_ratio = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::MS5611::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
-, handler_1(&obj->bus)
-, handler_2(&obj->rate)
-, handler_3(&obj->temperature_rate_ratio)
+        , handler_0(&obj->bus)
+, handler_1(&obj->pressure_rate)
+, handler_2(&obj->temperature_rate_ratio)
     {
         reset_flags();
     }
@@ -135,9 +130,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -161,9 +153,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
         default:
             break;
         }
@@ -185,9 +174,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -211,9 +197,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
         default:
             break;
         }
@@ -235,9 +218,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -261,9 +241,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
         default:
             break;
         }
@@ -285,9 +262,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -311,9 +285,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
         default:
             break;
         }
@@ -328,14 +299,12 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x62\x75\x73", 3))
-						 { state=1; has_bus = true; }
-else if (utility::string_equal(str, length, "\x72\x61\x74\x65", 4))
-						 { state=2;  }
-else if (utility::string_equal(str, length, "\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x5f\x72\x61\x74\x65\x5f\x72\x61\x74\x69\x6f", 22))
-						 { state=3;  }
+            else if (utility::string_equal(str, length, "\x42\x75\x73", 3))
+						 { state=0; has_bus = true; }
+else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
+						 { state=1; has_pressure_rate = true; }
+else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 22))
+						 { state=2; has_temperature_rate_ratio = true; }
             else {
                 state = -1;
                 return true;
@@ -352,9 +321,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -379,9 +345,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
         default:
             break;
         }
@@ -404,9 +367,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
         default:
             break;
         }
@@ -428,9 +388,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -455,15 +412,13 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
-if (!has_bus) set_missing_required("bus");
+            if (!has_bus) set_missing_required("bus");
+if (!has_pressure_rate) set_missing_required("pressure_rate");
+if (!has_temperature_rate_ratio) set_missing_required("temperature_rate_ratio");
         }
         return the_error.empty();
     }
@@ -488,8 +443,6 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -507,7 +460,6 @@ case 3:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
 
     }
 };
@@ -519,12 +471,11 @@ struct Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, std::string >()(w, value.name);
-w.Key("\x62\x75\x73", 3, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, std::string >()(w, value.bus);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, uint32_t >()(w, value.rate);
-w.Key("\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x5f\x72\x61\x74\x65\x5f\x72\x61\x74\x69\x6f", 22, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, uint32_t >()(w, value.temperature_rate_ratio);
+        w.Key("\x42\x75\x73", 3, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, std::string >()(w, value.bus);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, uint32_t >()(w, value.pressure_rate);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 22, false); Serializer< Writer309ff5a8bcd9c2af51c01e1e314fe8b16970e06a3daaaceb24ba60e1d2039a40, uint32_t >()(w, value.temperature_rate_ratio);
 
-        w.EndObject(4);
+        w.EndObject(3);
     }
 
 };
@@ -1517,9 +1468,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x70\x72\x65\x73\x73\x75\x72\x65", 8))
+            else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65", 8))
 						 { state=0; has_pressure = true; }
-else if (utility::string_equal(str, length, "\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11))
+else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11))
 						 { state=1; has_temperature = true; }
             else {
                 state = -1;
@@ -1668,8 +1619,8 @@ struct Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25
     {
         w.StartObject();
 
-        w.Key("\x70\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Pressure >()(w, value.pressure);
-w.Key("\x74\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Temperature >()(w, value.temperature);
+        w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Pressure >()(w, value.pressure);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Temperature >()(w, value.temperature);
 
         w.EndObject(2);
     }
@@ -1915,7 +1866,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
+            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
 						 { state=0; has_outputs = true; }
             else {
                 state = -1;
@@ -2045,7 +1996,7 @@ struct Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9
     {
         w.StartObject();
 
-        w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9faca9a4c1, sz::MS5611::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9faca9a4c1, sz::MS5611::Outputs >()(w, value.outputs);
 
         w.EndObject(1);
     }

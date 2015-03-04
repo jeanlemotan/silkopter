@@ -38,7 +38,6 @@ public:
 
     void shutdown();
 
-    auto get_name() const -> std::string const&;
     auto get_outputs() const -> std::vector<Output>;
 
     //----------------------------------------------------------------------

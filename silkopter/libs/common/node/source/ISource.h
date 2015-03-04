@@ -1,13 +1,12 @@
 #pragma once
 
+#include "common/node/stream/IStream.h"
+
+
 namespace silk
 {
 namespace node
 {
-namespace stream
-{
-    class IStream;
-}
 
 namespace source
 {
@@ -18,14 +17,13 @@ class ISource : q::util::Noncopyable
 public:
     virtual ~ISource() {}
 
-    virtual auto get_name() const -> std::string const& = 0;
     virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<ISource>(); }
 
     struct Output
     {
         q::rtti::class_id class_id = 0;
         std::string name;
-        stream::IStream* stream = nullptr;
+        stream::IStream_ptr stream;
     };
     virtual auto get_outputs() const -> std::vector<Output> = 0;
 
@@ -34,7 +32,10 @@ public:
 
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() -> rapidjson::Document = 0;
+
+    virtual void process() = 0;
 };
+DECLARE_CLASS_PTR(ISource);
 
 
 }

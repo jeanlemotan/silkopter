@@ -28,10 +28,6 @@ PIGPIO::PIGPIO(HAL& hal)
 {
 }
 
-auto PIGPIO::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs((m_pwm_channels.size()));
@@ -39,7 +35,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     {
         Input i;
         i.class_id = q::rtti::get_class_id<stream::IPWM_Value>();
-        i.stream = c.stream;
+        i.stream = c.stream.lock();
         return i;
     });
     return inputs;
@@ -72,7 +68,7 @@ auto PIGPIO::init() -> bool
     std::vector<size_t> periods = {1, 2, 4, 5, 8, 10};
     if (std::find(periods.begin(), periods.end(), period) == periods.end())
     {
-        QLOGE("{}: Invalid period {}. Supported are: {}", get_name(), period, periods);
+        QLOGE("Invalid period {}. Supported are: {}", period, periods);
         return false;
     }
 
@@ -91,48 +87,48 @@ auto PIGPIO::init() -> bool
         auto& ch = m_params.pwm_channels[i];
         if (std::find(gpios.begin(), gpios.end(), ch.gpio) == gpios.end())
         {
-            QLOGE("{}: channel {}: cannot use GPIO {}. Valid GPIOS are {}", get_name(), i, ch.gpio, gpios);
+            QLOGE("channel {}: cannot use GPIO {}. Valid GPIOS are {}", i, ch.gpio, gpios);
             return false;
         }
         if (ch.min >= ch.max)
         {
-            QLOGE("{}: channel {} on GPIO {}: min ({}) is bigger than max ({})", get_name(), i, ch.gpio, ch.min, ch.max);
+            QLOGE("channel {} on GPIO {}: min ({}) is bigger than max ({})", i, ch.gpio, ch.min, ch.max);
             return false;
         }
         if (ch.max > ch.range)
         {
-            QLOGE("{}: channel {} on GPIO {}: max ({}) is bigger than the range ({})", get_name(), i, ch.gpio, ch.max, ch.range);
+            QLOGE("channel {} on GPIO {}: max ({}) is bigger than the range ({})", i, ch.gpio, ch.max, ch.range);
             return false;
         }
         if (std::find(rates.begin(), rates.end(), ch.rate) == rates.end())
         {
-            QLOGE("{}: channel {} on GPIO {}: invalid rate {}. Supported are: {}", get_name(), i, ch.gpio, ch.rate, rates);
+            QLOGE("channel {} on GPIO {}: invalid rate {}. Supported are: {}", i, ch.gpio, ch.rate, rates);
             return false;
         }
         if (!ch.stream)
         {
-            QLOGE("{}: channel {} on GPIO {}: no valid stream", get_name(), i, ch.gpio);
+            QLOGE("channel {} on GPIO {}: no valid stream", i, ch.gpio);
             return false;
         }
         if (ch.stream->get_rate() > ch.rate)
         {
-            QLOGE("{}: stream {} is too fast for the channel {} on GPIO {}: {}Hz > {}Hz",
-                  get_name(), ch.stream->get_name(), i, ch.gpio, ch.stream->get_rate(), ch.rate);
+            QLOGE("stream is too fast for the channel {} on GPIO {}: {}Hz > {}Hz",
+                  i, ch.gpio, ch.stream->get_rate(), ch.rate);
             return false;
         }
     }
 
-    QLOGI("{}: Initializing pigpio", get_name());
+    QLOGI("Initializing pigpio");
     if (gpioCfgClock(period, 1, 0) < 0 ||
         gpioCfgPermissions(static_cast<uint64_t>(-1)) ||
         gpioCfgInterfaces(PI_DISABLE_SOCK_IF | PI_DISABLE_FIFO_IF))
     {
-        QLOGE("{}: Cannot configure pigpio", get_name());
+        QLOGE("Cannot configure pigpio");
         return false;
     }
     if (gpioInitialise() < 0)
     {
-        QLOGE("{}: Cannot initialize pigpio", get_name());
+        QLOGE("Cannot initialize pigpio");
         return false;
     }
 
@@ -143,12 +139,12 @@ auto PIGPIO::init() -> bool
         auto gpio = m_params.pwm_channels[i].gpio;
         if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
         {
-            QLOGE("{}: channel {} on GPIO {}: Cannot set pull down mode", get_name(), i, ch.gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, ch.gpio);
             return false;
         }
         if (gpioSetMode(gpio, PI_OUTPUT) < 0)
         {
-            QLOGE("{}: channel {} on GPIO {}: Cannot set GPIO mode to output", get_name(), i, ch.gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, ch.gpio);
             return false;
         }
      }
@@ -161,20 +157,20 @@ auto PIGPIO::init() -> bool
         auto f = gpioSetPWMfrequency(gpio, ch.rate);
         if (f < 0)
         {
-            QLOGE("{}: channel {} on GPIO {}: Cannot set pwm rate {}", get_name(), i, ch.gpio, ch.rate);
+            QLOGE("channel {} on GPIO {}: Cannot set pwm rate {}", i, ch.gpio, ch.rate);
             return false;
         }
         if (gpioSetPWMrange(gpio, ch.range) < 0)
         {
-            QLOGE("{}: channel {} on GPIO {}: Cannot set pwm range {} on gpio {}", get_name(), i, ch.gpio, ch.range);
+            QLOGE("channel {} on GPIO {}: Cannot set pwm range {} on gpio {}", i, ch.gpio, ch.range);
             return false;
         }
-        QLOGI("{}: channel {} on GPIO {}: rate {} range {}", get_name(), i, ch.gpio, ch.rate, ch.range);
+        QLOGI("channel {} on GPIO {}: rate {} range {}", i, ch.gpio, ch.rate, ch.range);
     }
 
     return true;
 #else
-    QLOGE("{}: PIGPIO only supported on the raspberry pi", get_name());
+    QLOGE("PIGPIO only supported on the raspberry pi");
     return false;
 #endif
 }
@@ -202,16 +198,19 @@ void PIGPIO::process()
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
         auto& ch = m_pwm_channels[i];
-        QASSERT(ch.stream);
-        auto const& samples = ch.stream->get_samples();
-        if (!samples.empty())
+        auto stream = ch.stream.lock();
+        if (stream)
         {
-            if (samples.size() > 2)
+            auto const& samples = stream->get_samples();
+            if (!samples.empty())
             {
-                QLOGW("{}: channel {} on GPIO {} is too slow. {} samples are queued", get_name(), i, ch.gpio, samples.size());
-            }
+                if (samples.size() > 2)
+                {
+                    QLOGW("channel {} on GPIO {} is too slow. {} samples are queued", i, ch.gpio, samples.size());
+                }
 
-            set_pwm_value(i, samples.back().value);
+                set_pwm_value(i, samples.back().value);
+            }
         }
     }
 }

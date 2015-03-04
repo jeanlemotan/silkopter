@@ -18,11 +18,6 @@ Comp_AHRS::Comp_AHRS(HAL& hal)
 {
 }
 
-auto Comp_AHRS::get_name() const -> std::string const&
-{
-    return m_init_params->name;
-}
-
 auto Comp_AHRS::init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
@@ -42,15 +37,7 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params, rapidjson::Value const
 
 auto Comp_AHRS::init() -> bool
 {
-    if (!m_init_params->name.empty())
-    {
-        m_stream.name = q::util::format2<std::string>("{}/stream", m_init_params->name);
-        if (!m_hal.get_streams().add(m_stream))
-        {
-            return false;
-        }
-    }
-
+    m_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -59,13 +46,13 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
     inputs[0].name = "angular_velocity";
-    inputs[0].stream = m_angular_velocity_stream;
+    inputs[0].stream = m_angular_velocity_stream.lock();
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
     inputs[1].name = "acceleration";
-    inputs[1].stream = m_acceleration_stream;
+    inputs[1].stream = m_acceleration_stream.lock();
     inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
     inputs[2].name = "magnetic_field";
-    inputs[2].stream = m_magnetic_field_stream;
+    inputs[2].stream = m_magnetic_field_stream.lock();
     return inputs;
 }
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
@@ -73,34 +60,37 @@ auto Comp_AHRS::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
     outputs[0].name = "reference_frame";
-    outputs[0].stream = &m_stream;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 
 void Comp_AHRS::process()
 {
-    m_stream.samples.clear();
+    m_stream->samples.clear();
 
-    if (!m_angular_velocity_stream ||
-        !m_acceleration_stream ||
-        !m_magnetic_field_stream)
+    auto angular_velocity_stream = m_angular_velocity_stream.lock();
+    auto acceleration_stream     = m_acceleration_stream.lock();
+    auto magnetic_field_stream   = m_magnetic_field_stream.lock();
+    if (!angular_velocity_stream ||
+        !acceleration_stream ||
+        !magnetic_field_stream)
     {
         return;
     }
 
     //accumulate the input streams
     {
-        auto const& samples = m_angular_velocity_stream->get_samples();
+        auto const& samples = angular_velocity_stream->get_samples();
         m_angular_velocity_samples.reserve(m_angular_velocity_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_angular_velocity_samples));
     }
     {
-        auto const& samples = m_acceleration_stream->get_samples();
+        auto const& samples = acceleration_stream->get_samples();
         m_acceleration_samples.reserve(m_acceleration_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_acceleration_samples));
     }
     {
-        auto const& samples = m_magnetic_field_stream->get_samples();
+        auto const& samples = magnetic_field_stream->get_samples();
         m_magnetic_field_samples.reserve(m_magnetic_field_samples.size() + samples.size());
         std::copy(samples.begin(), samples.end(), std::back_inserter(m_magnetic_field_samples));
     }
@@ -113,14 +103,14 @@ void Comp_AHRS::process()
         return;
     }
 
-    m_stream.samples.resize(count);
+    m_stream->samples.resize(count);
 
     float av_length = 0;
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream.last_sample.dt = m_dt;
-        m_stream.last_sample.sample_idx++;
+        m_stream->last_sample.dt = m_dt;
+        m_stream->last_sample.sample_idx++;
 
         {
             auto const& s = m_angular_velocity_samples[i];
@@ -133,7 +123,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = m_stream.last_sample.value.local_to_world;
+                auto& a = m_stream->last_sample.value.local_to_world;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -163,7 +153,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = m_stream.last_sample.value.local_to_world;
+            auto& rot = m_stream->last_sample.value.local_to_world;
 
             //cancel drift
             static int xxx = 50;
@@ -182,7 +172,7 @@ void Comp_AHRS::process()
             rot = math::normalized<float, math::safe>(rot);
         }
 
-        m_stream.samples[i] = m_stream.last_sample;
+        m_stream->samples[i] = m_stream->last_sample;
     }
 
 
@@ -204,9 +194,9 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto* angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
-    auto* acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
-    auto* magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
+    auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
+    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
+    auto magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
     if (!angular_velocity_stream || angular_velocity_stream->get_rate() == 0)
     {
         QLOGE("No input angular velocity stream specified");
@@ -232,20 +222,20 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    if (m_stream.rate != 0 && m_stream.rate != acceleration_stream->get_rate())
+    if (m_stream->rate != 0 && m_stream->rate != acceleration_stream->get_rate())
     {
         QLOGE("Input streams rate has changed: {} != {}",
               angular_velocity_stream->get_rate(),
-              m_stream.rate);
+              m_stream->rate);
         return false;
     }
 
-    m_dt = std::chrono::microseconds(1000000 / m_stream.get_rate());
+    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_angular_velocity_stream = angular_velocity_stream;
     m_acceleration_stream = acceleration_stream;
     m_magnetic_field_stream = magnetic_field_stream;
-    m_stream.rate = m_angular_velocity_stream->get_rate();
+    m_stream->rate = angular_velocity_stream->get_rate();
 
     *m_config = sz;
     return true;

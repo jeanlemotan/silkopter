@@ -13,7 +13,6 @@ class IBus : q::util::Noncopyable
 public:
     virtual ~IBus() {}
 
-    virtual auto get_name() const -> std::string const& = 0;
     virtual auto get_type() const -> q::rtti::class_id = 0;
 
     virtual auto init(rapidjson::Value const& init_params, rapidjson::Value const& config) -> bool = 0;
@@ -22,7 +21,7 @@ public:
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() -> rapidjson::Document = 0;
 };
-
+DECLARE_CLASS_PTR(IBus);
 
 }
 }

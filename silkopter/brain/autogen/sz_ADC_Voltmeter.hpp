@@ -28,9 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Voltmeter { struct Init_Params {
- std::string name;
+ 
 
-explicit Init_Params():name() {  }
+explicit Init_Params() {  }
 
 
  
@@ -47,7 +47,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_name;
+    
 
     bool check_depth(const char* type)
     {
@@ -61,8 +61,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "name";
+            
         default:
             break;
         }
@@ -89,14 +88,14 @@ private:
 
     void reset_flags()
     {
-        has_name = false;
+        
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Voltmeter::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
+        
     {
         reset_flags();
     }
@@ -108,8 +107,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -124,8 +122,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -140,8 +137,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -156,8 +152,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -172,8 +167,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -188,8 +182,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -204,8 +197,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -220,8 +212,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -237,8 +228,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
+            
             else {
                 state = -1;
                 return true;
@@ -247,8 +237,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -264,8 +253,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -280,8 +268,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -296,8 +283,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -313,14 +299,13 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
+            
         }
         return the_error.empty();
     }
@@ -339,8 +324,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -355,8 +339,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -367,9 +350,9 @@ struct Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520731f804fc, std::string >()(w, value.name);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };
@@ -613,7 +596,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x61\x64\x63", 3))
+            else if (utility::string_equal(str, length, "\x41\x44\x43", 3))
 						 { state=0; has_adc = true; }
             else {
                 state = -1;
@@ -743,7 +726,7 @@ struct Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d
     {
         w.StartObject();
 
-        w.Key("\x61\x64\x63", 3, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc);
+        w.Key("\x41\x44\x43", 3, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc);
 
         w.EndObject(1);
     }
@@ -1020,9 +1003,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x62\x69\x61\x73", 4))
+            else if (utility::string_equal(str, length, "\x42\x69\x61\x73", 4))
 						 { state=0; has_bias = true; }
-else if (utility::string_equal(str, length, "\x73\x63\x61\x6c\x65", 5))
+else if (utility::string_equal(str, length, "\x53\x63\x61\x6c\x65", 5))
 						 { state=1; has_scale = true; }
             else {
                 state = -1;
@@ -1171,8 +1154,8 @@ struct Serializer< Writer9e9f6cee21d97564537fb73202435e7f1d57c3b0c3bc2cddfbb6d4a
     {
         w.StartObject();
 
-        w.Key("\x62\x69\x61\x73", 4, false); Serializer< Writer9e9f6cee21d97564537fb73202435e7f1d57c3b0c3bc2cddfbb6d4a59090a5b2, float >()(w, value.bias);
-w.Key("\x73\x63\x61\x6c\x65", 5, false); Serializer< Writer9e9f6cee21d97564537fb73202435e7f1d57c3b0c3bc2cddfbb6d4a59090a5b2, float >()(w, value.scale);
+        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer9e9f6cee21d97564537fb73202435e7f1d57c3b0c3bc2cddfbb6d4a59090a5b2, float >()(w, value.bias);
+w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer9e9f6cee21d97564537fb73202435e7f1d57c3b0c3bc2cddfbb6d4a59090a5b2, float >()(w, value.scale);
 
         w.EndObject(2);
     }
@@ -1418,7 +1401,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x76\x6f\x6c\x74\x61\x67\x65", 7))
+            else if (utility::string_equal(str, length, "\x56\x6f\x6c\x74\x61\x67\x65", 7))
 						 { state=0; has_voltage = true; }
             else {
                 state = -1;
@@ -1548,7 +1531,7 @@ struct Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab
     {
         w.StartObject();
 
-        w.Key("\x76\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55, sz::ADC_Voltmeter::Voltage >()(w, value.voltage);
+        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55, sz::ADC_Voltmeter::Voltage >()(w, value.voltage);
 
         w.EndObject(1);
     }
@@ -1825,9 +1808,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
 						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
 						 { state=1; has_outputs = true; }
             else {
                 state = -1;
@@ -1976,8 +1959,8 @@ struct Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9
     {
         w.StartObject();
 
-        w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Inputs >()(w, value.inputs);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Outputs >()(w, value.outputs);
 
         w.EndObject(2);
     }
