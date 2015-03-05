@@ -55,7 +55,8 @@ private:
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
 
-    template<class Registry, class Node_Base> void handle_node_config(comms::Setup_Message msg, Registry const& registry);
+    template<class Registry, class Node_Base>
+    auto handle_node_config(comms::Setup_Message message, Registry const& registry) -> std::shared_ptr<Node_Base>;
 
     void handle_source_config();
     void handle_sink_config();
