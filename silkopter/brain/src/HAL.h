@@ -86,7 +86,14 @@ public:
     auto get_streams()      -> Registry<node::stream::IStream>&;
 
     template<class Base>
-    auto create_node(std::string const& type, std::string const& name, rapidjson::Value const& init_params) -> std::shared_ptr<Base>;
+    auto create_node(std::string const& type,
+                     std::string const& name,
+                     rapidjson::Value const& init_params,
+                     rapidjson::Value const& config) -> std::shared_ptr<Base>;
+
+    auto create_bus(std::string const& type,
+                    std::string const& name,
+                    rapidjson::Value const& init_params) -> std::shared_ptr<node::bus::IBus>;
 
 private:
     template<class Base> auto create_nodes(rapidjson::Value& json) -> bool;
@@ -110,8 +117,7 @@ private:
     auto load_settings() -> bool;
 };
 
-template<>
-inline auto HAL::create_node<node::bus::IBus>(
+inline auto HAL::create_bus(
         std::string const& type,
         std::string const& name,
         rapidjson::Value const& init_params) -> node::bus::IBus_ptr
@@ -134,7 +140,8 @@ template<>
 inline auto HAL::create_node<node::source::ISource>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> node::source::ISource_ptr
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::source::ISource_ptr
 {
     if (m_sources.find_by_name<node::source::ISource>(name))
     {
@@ -142,7 +149,7 @@ inline auto HAL::create_node<node::source::ISource>(
         return node::source::ISource_ptr();
     }
     auto node = m_source_factory.create_node(type);
-    if (node && node->init(init_params))
+    if (node && node->init(init_params) && node->set_config(config))
     {
         auto res = m_sources.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -164,7 +171,8 @@ template<>
 inline auto HAL::create_node<node::sink::ISink>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> node::sink::ISink_ptr
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::sink::ISink_ptr
 {
     if (m_sinks.find_by_name<node::sink::ISink>(name))
     {
@@ -172,7 +180,7 @@ inline auto HAL::create_node<node::sink::ISink>(
         return node::sink::ISink_ptr();
     }
     auto node = m_sink_factory.create_node(type);
-    if (node && node->init(init_params))
+    if (node && node->init(init_params) && node->set_config(config))
     {
         auto res = m_sinks.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
@@ -184,7 +192,8 @@ template<>
 inline auto HAL::create_node<node::processor::IProcessor>(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> node::processor::IProcessor_ptr
+        rapidjson::Value const& init_params,
+        rapidjson::Value const& config) -> node::processor::IProcessor_ptr
 {
     if (m_processors.find_by_name<node::processor::IProcessor>(name))
     {
@@ -192,7 +201,7 @@ inline auto HAL::create_node<node::processor::IProcessor>(
         return node::processor::IProcessor_ptr();
     }
     auto node = m_processor_factory.create_node(type);
-    if (node && node->init(init_params))
+    if (node && node->init(init_params) && node->set_config(config))
     {
         auto res = m_processors.add(name, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);

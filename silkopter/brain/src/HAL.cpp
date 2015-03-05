@@ -235,6 +235,78 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
+template<>
+auto HAL::create_nodes<node::bus::IBus>(rapidjson::Value& json) -> bool
+{
+    if (!json.IsObject())
+    {
+        QLOGE("Wrong json type: {}", json.GetType());
+        return false;
+    }
+    auto it = json.MemberBegin();
+    for (; it != json.MemberEnd(); ++it)
+    {
+        std::string type(it->name.GetString());
+        auto* namej = jsonutil::find_value(it->value, std::string("name"));
+        if (!namej || namej->GetType() != rapidjson::kStringType)
+        {
+            QLOGE("Node type {} is missing the name", type);
+            return false;
+        }
+        std::string name(namej->GetString());
+        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
+        if (!init_paramsj)
+        {
+            QLOGE("Node {} of type {} is missing the init_params", name, type);
+            return false;
+        }
+        auto node = create_bus(type, name, *init_paramsj);
+        if (!node)
+        {
+            QLOGE("Failed to create node {} of type '{}'", name, type);
+            return false;
+        }
+    }
+    return true;
+}
+
+template<class Base>
+auto HAL::create_nodes(rapidjson::Value& json) -> bool
+{
+    if (!json.IsObject())
+    {
+        QLOGE("Wrong json type: {}", json.GetType());
+        return false;
+    }
+    auto it = json.MemberBegin();
+    for (; it != json.MemberEnd(); ++it)
+    {
+        std::string type(it->name.GetString());
+        auto* namej = jsonutil::find_value(it->value, std::string("name"));
+        if (!namej || namej->GetType() != rapidjson::kStringType)
+        {
+            QLOGE("Node type {} is missing the name", type);
+            return false;
+        }
+        std::string name(namej->GetString());
+        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
+        auto* configj = jsonutil::find_value(it->value, std::string("config"));
+        if (!init_paramsj || !configj)
+        {
+            QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
+            return false;
+        }
+        auto node = create_node<Base>(type, name, *init_paramsj, *configj);
+        if (!node)
+        {
+            QLOGE("Failed to create node {} of type '{}'", name, type);
+            return false;
+        }
+    }
+    return true;
+}
+
+
 auto HAL::init() -> bool
 {
     using namespace silk::node;
@@ -325,41 +397,6 @@ void HAL::shutdown()
 {
 }
 
-template<class Base>
-auto HAL::create_nodes(rapidjson::Value& json) -> bool
-{
-    if (!json.IsObject())
-    {
-        QLOGE("Wrong json type: {}", json.GetType());
-        return false;
-    }
-    auto it = json.MemberBegin();
-    for (; it != json.MemberEnd(); ++it)
-    {
-        std::string type(it->name.GetString());
-        auto* namej = jsonutil::find_value(it->value, std::string("name"));
-        if (!namej || namej->GetType() != rapidjson::kStringType)
-        {
-            QLOGE("Node type {} is missing the name", type);
-            return false;
-        }
-        std::string name(namej->GetString());
-        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
-        auto* configj = jsonutil::find_value(it->value, std::string("config"));
-        if (!init_paramsj || !configj)
-        {
-            QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
-            return false;
-        }
-        auto node = create_node<Base>(type, name, *init_paramsj);
-        if (!node || !node->set_config(*configj))
-        {
-            QLOGE("Failed to create node {} of type '{}'", name, type);
-            return false;
-        }
-    }
-    return true;
-}
 
 //static std::vector<double> s_samples;
 //static std::vector<double> s_samples_lpf;
