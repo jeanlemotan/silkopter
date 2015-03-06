@@ -20,8 +20,13 @@ private:
 private:
     void contextMenuEvent(QContextMenuEvent* event);
 
+    void add_source(silk::node::source::Source_ptr node, QPointF pos);
     void create_source(silk::node::source::Source_Def_ptr def, QPointF pos);
+
+    void add_sink(silk::node::sink::Sink_ptr node, QPointF pos);
     void create_sink(silk::node::sink::Sink_Def_ptr def, QPointF pos);
+
+    void add_processor(silk::node::processor::Processor_ptr node, QPointF pos);
     void create_processor(silk::node::processor::Processor_Def_ptr def, QPointF pos);
 
     silk::HAL& m_hal;

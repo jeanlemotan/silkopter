@@ -48,31 +48,6 @@ HAL_Window::~HAL_Window()
 
 }
 
-std::string prettify_name(std::string const& name)
-{
-    std::string out = name;
-    boost::trim(out);
-    char old_c = 0;
-    for (char& c: out)
-    {
-        if (c == '_')
-        {
-            c = ' ';
-        }
-        else if (std::isalpha(c) && old_c == ' ')
-        {
-            c = toupper(c);
-        }
-        old_c = c;
-    }
-    if (!out.empty())
-    {
-        out[0] = toupper(out[0]);
-    }
-
-    return out;
-}
-
 void HAL_Window::on_node_factories_refreshed()
 {
 }
@@ -89,7 +64,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         auto nodes = m_hal.get_source_defs().get_all();
         for (auto const& n: nodes)
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            auto* action = submenu->addAction(QIcon(), n->name.c_str());
             connect(action, &QAction::triggered, [=](bool) { create_source(n, pos); });
         }
     }
@@ -99,7 +74,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         auto nodes = m_hal.get_sink_defs().get_all();
         for (auto const& n: nodes)
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            auto* action = submenu->addAction(QIcon(), n->name.c_str());
             connect(action, &QAction::triggered, [=](bool) { create_sink(n, pos); });
         }
     }
@@ -109,12 +84,27 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         auto nodes = m_hal.get_processor_defs().get_all();
         for (auto const& n: nodes)
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            auto* action = submenu->addAction(QIcon(), n->name.c_str());
             connect(action, &QAction::triggered, [=](bool) { create_processor(n, pos); });
         }
     }
 
     menu.exec(event->globalPos());
+}
+
+void HAL_Window::add_source(silk::node::source::Source_ptr node, QPointF pos)
+{
+    QNEBlock *b = new QNEBlock();
+    m_scene->addItem(b);
+    b->setName(node->name.c_str());
+    b->setPos(pos);
+    b->setBrush(QBrush(QColor(0xf1c40f)));
+    for (auto const& o: node->outputs)
+    {
+        auto port = b->addOutputPort(o.name.c_str());
+        port->setPortType(o.class_id);
+        port->setBrush(QBrush(QColor(0x9b59b6)));
+    }
 }
 
 void HAL_Window::create_source(silk::node::source::Source_Def_ptr def, QPointF pos)
@@ -139,33 +129,31 @@ void HAL_Window::create_source(silk::node::source::Source_Def_ptr def, QPointF p
     connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
     connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
 
-    if (dialog.exec() == QDialog::Rejected)
+    if (dialog.exec() == QDialog::Accepted)
     {
-        return;
-    }
-
-//    Item_Key item;
-//    item.class_id = node->class_id;
-//    item.name = node->name;
-//    m_ui_items[item] = Item_Data({pos});
-
-    m_hal.add_source(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::source::Source_ptr node)
-    {
-        if (result == silk::HAL::Result::OK)
+        m_hal.add_source(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::source::Source_ptr node)
         {
-            QNEBlock *b = new QNEBlock();
-            m_scene->addItem(b);
-            b->setName(prettify_name(node->name).c_str());
-            b->setPos(pos);
-            b->setBrush(QBrush(QColor(0xf1c40f)));
-            for (auto const& o: node->outputs)
+            if (result == silk::HAL::Result::OK)
             {
-                auto port = b->addOutputPort(prettify_name(o.name).c_str());
-                port->setPortType(o.class_id);
-                port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
+                add_source(node, pos);
             }
-        }
-    });
+        });
+    }
+}
+
+void HAL_Window::add_sink(silk::node::sink::Sink_ptr node, QPointF pos)
+{
+    QNEBlock *b = new QNEBlock();
+    m_scene->addItem(b);
+    b->setName(node->name.c_str());
+    b->setPos(pos);
+    b->setBrush(QBrush(QColor(0x26C281)));
+    for (auto const& i: node->inputs)
+    {
+        auto port = b->addInputPort(i.name.c_str());
+        port->setPortType(i.class_id);
+        port->setBrush(QBrush(QColor(0xe67e22)));
+    }
 }
 
 void HAL_Window::create_sink(silk::node::sink::Sink_Def_ptr def, QPointF pos)
@@ -190,33 +178,45 @@ void HAL_Window::create_sink(silk::node::sink::Sink_Def_ptr def, QPointF pos)
     connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
     connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
 
-    if (dialog.exec() == QDialog::Rejected)
+    if (dialog.exec() == QDialog::Accepted)
     {
-        return;
-    }
-
-//    Item_Key item;
-//    item.class_id = node->class_id;
-//    item.name = node->name;
-//    m_ui_items[item] = Item_Data({pos});
-
-    m_hal.add_sink(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::sink::Sink_ptr node)
-    {
-        if (result == silk::HAL::Result::OK)
+        m_hal.add_sink(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::sink::Sink_ptr node)
         {
-            QNEBlock *b = new QNEBlock();
-            m_scene->addItem(b);
-            b->setName(prettify_name(node->name).c_str());
-            b->setPos(pos);
-            b->setBrush(QBrush(QColor(0x26C281)));
-            for (auto const& i: node->inputs)
+            if (result == silk::HAL::Result::OK)
             {
-                auto port = b->addInputPort(prettify_name(i.name).c_str());
-                port->setPortType(i.class_id);
-                port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
+                add_sink(node, pos);
             }
-        }
-    });
+        });
+    }
+}
+
+void HAL_Window::add_processor(silk::node::processor::Processor_ptr node, QPointF pos)
+{
+    QNEBlock *b = new QNEBlock();
+    m_scene->addItem(b);
+    b->setName(node->name.c_str());
+    b->setPos(pos);
+    b->setBrush(QBrush(QColor(0x26C281)));
+    for (auto const& i: node->inputs)
+    {
+        auto port = b->addInputPort(i.name.c_str());
+        port->setPortType(i.class_id);
+        port->setBrush(QBrush(QColor(0xe67e22)));
+        port->connectedSignal.connect([port, node, this](QNEPort* output_port)
+        {
+            std::string input_name = port->name().toLatin1().data();
+            auto* block = output_port->block();
+            std::string node_name = block->name().toLatin1().data();
+            std::string stream_name = node_name + "/" + output_port->name().toLatin1().data();
+            m_hal.connect_input(node, input_name, stream_name, [](silk::HAL::Result) {});
+        });
+    }
+    for (auto const& o: node->outputs)
+    {
+        auto port = b->addOutputPort(o.name.c_str());
+        port->setPortType(o.class_id);
+        port->setBrush(QBrush(QColor(0x9b59b6)));
+    }
 }
 
 void HAL_Window::create_processor(silk::node::processor::Processor_Def_ptr def, QPointF pos)
@@ -241,37 +241,14 @@ void HAL_Window::create_processor(silk::node::processor::Processor_Def_ptr def, 
     connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
     connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
 
-    if (dialog.exec() == QDialog::Rejected)
+    if (dialog.exec() == QDialog::Accepted)
     {
-        return;
-    }
-
-//    Item_Key item;
-//    item.class_id = node->class_id;
-//    item.name = node->name;
-//    m_ui_items[item] = Item_Data({pos});
-
-    m_hal.add_processor(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::processor::Processor_ptr node)
-    {
-        if (result == silk::HAL::Result::OK)
+        m_hal.add_processor(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::processor::Processor_ptr node)
         {
-            QNEBlock *b = new QNEBlock();
-            m_scene->addItem(b);
-            b->setName(prettify_name(node->name).c_str());
-            b->setPos(pos);
-            b->setBrush(QBrush(QColor(0x26C281)));
-            for (auto const& i: node->inputs)
+            if (result == silk::HAL::Result::OK)
             {
-                auto port = b->addInputPort(prettify_name(i.name).c_str());
-                port->setPortType(i.class_id);
-                port->setBrush(QBrush(QColor(QRgb(0xe67e22))));
+                add_processor(node, pos);
             }
-            for (auto const& o: node->outputs)
-            {
-                auto port = b->addOutputPort(prettify_name(o.name).c_str());
-                port->setPortType(o.class_id);
-                port->setBrush(QBrush(QColor(QRgb(0x9b59b6))));
-            }
-        }
-    });
+        });
+    }
 }

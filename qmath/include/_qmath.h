@@ -9,7 +9,9 @@
 
 namespace math
 {
-	//standard precision
+    static struct ZUninitialized {} uninitialized;
+
+    //standard precision
 	struct standard {};
 	//fast but less precise
 	struct fast {};
@@ -42,8 +44,6 @@ namespace math
 
 namespace math
 {
-	static struct ZUninitialized {} uninitialized;
-
 	typedef angle<float>		anglef;
     typedef angle<double>		angled;
 

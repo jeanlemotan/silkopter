@@ -50,6 +50,7 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 
 void QNEBlock::setName(const QString &n)
 {
+    m_name = n;
     label->setPlainText(n);
     QFont font(scene()->font());
     font.setBold(true);
@@ -69,6 +70,12 @@ void QNEBlock::setName(const QString &n)
     p.addRoundedRect(0, 0, width, height, 5, 5);
     setPath(p);
 }
+
+const QString& QNEBlock::name() const
+{
+    return m_name;
+}
+
 
 QNEPort* QNEBlock::addPort(const QString &name, bool isOutput)
 {

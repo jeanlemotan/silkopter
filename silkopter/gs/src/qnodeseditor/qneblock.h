@@ -38,6 +38,7 @@ public:
     QNEBlock(QGraphicsItem *parent = 0);
 
     void setName(const QString &name);
+    const QString& name() const;
 
     QNEPort* addInputPort(const QString &name);
     QNEPort* addOutputPort(const QString &name);
@@ -52,6 +53,7 @@ protected:
 private:
     QNEPort* addPort(const QString &name, bool isOutput);
 
+    QString m_name;
 	int horzMargin;
 	int vertMargin;
 	int width;

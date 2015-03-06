@@ -149,7 +149,7 @@ void Skeleton::_update_node_transform(size_t idx) const
 	auto const& node = m_nodes[idx];
 	node.transform_version = node.version;
 	
-	math::mat3f rot(math::mat3f::uninitialized);
+    math::mat3f rot(math::uninitialized);
 	node.rotation.get_as_mat3(rot);
 	node.transform.set_rotation(rot);
 	node.transform.post_scale(node.scale);

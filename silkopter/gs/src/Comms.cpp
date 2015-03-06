@@ -705,6 +705,7 @@ void Comms::handle_add_processor()
         callback(HAL::Result::FAILED, node::processor::Processor_ptr());
         return;
     }
+    node->name = it->name;
     m_hal.m_processors.add(node);
     callback(HAL::Result::OK, node);
 }
@@ -733,6 +734,7 @@ void Comms::handle_add_sink()
         callback(HAL::Result::FAILED, node::sink::Sink_ptr());
         return;
     }
+    node->name = it->name;
     m_hal.m_sinks.add(node);
     callback(HAL::Result::OK, node);
 }
@@ -789,6 +791,33 @@ void Comms::send_hal_requests()
                 req.processor_callback(HAL::Result::TIMEOUT, node::processor::Processor_ptr());
             }
             m_hal.m_add_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+
+
+    for (auto it = m_hal.m_connect_queue.begin(); it != m_hal.m_connect_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(req.message);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.name);
+            pack_json(m_setup_channel, req.config);
+            m_setup_channel.end_pack();
+        }
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT);
+            m_hal.m_connect_queue.erase(it);
         }
         else
         {

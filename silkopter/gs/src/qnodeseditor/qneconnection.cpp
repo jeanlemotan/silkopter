@@ -64,12 +64,22 @@ void QNEConnection::setPort1(QNEPort *p)
 {
 	m_port1 = p;
 	m_port1->connections().append(this);
+    if (m_port2)
+    {
+        m_port1->connectedSignal.execute(m_port2);
+        m_port2->connectedSignal.execute(m_port1);
+    }
 }
 
 void QNEConnection::setPort2(QNEPort *p)
 {
 	m_port2 = p;
 	m_port2->connections().append(this);
+    if (m_port1)
+    {
+        m_port1->connectedSignal.execute(m_port2);
+        m_port2->connectedSignal.execute(m_port1);
+    }
 }
 
 void QNEConnection::updatePosFromPorts()

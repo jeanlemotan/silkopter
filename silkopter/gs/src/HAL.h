@@ -21,6 +21,8 @@
 #include "common/node/sink/ISink.h"
 #include "common/node/processor/IMultirotor_Pilot.h"
 
+#include "common/Comm_Data.h"
+
 #include "utils/Json_Helpers.h"
 
 namespace silk
@@ -292,6 +294,10 @@ public:
     typedef std::function<void(Result, node::sink::Sink_ptr)> Add_Sink_Callback;
     void add_sink(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Sink_Callback callback);
 
+    typedef std::function<void(Result)> Connect_Callback;
+    void connect_input(node::sink::Sink_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
+    void connect_input(node::processor::Processor_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
+
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
@@ -305,12 +311,15 @@ protected:
     Registry<node::processor::Processor> m_processors;
     Registry<node::stream::GS_IStream> m_streams;
 
-    struct Add_Queue_Item
+    struct Queue_Item
     {
         bool was_sent = false;
         q::Clock::time_point sent_time_point;
         uint32_t req_id = 0;
+    };
 
+    struct Add_Queue_Item : public Queue_Item
+    {
         std::string def_name;
         std::string name;
         rapidjson::Document init_params;
@@ -320,6 +329,15 @@ protected:
         Add_Sink_Callback sink_callback;
     };
     std::vector<Add_Queue_Item> m_add_queue;
+
+    struct Connect_Queue_Item : public Queue_Item
+    {
+        silk::comms::Setup_Message message;
+        std::string name;
+        rapidjson::Document config;
+        Connect_Callback callback;
+    };
+    std::vector<Connect_Queue_Item> m_connect_queue;
 
 private:
 

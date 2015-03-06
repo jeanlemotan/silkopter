@@ -108,6 +108,37 @@ void HAL::add_processor(std::string const& def_name,
     m_add_queue.push_back(std::move(item));
 }
 
+void HAL::connect_input(node::processor::Processor_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback)
+{
+    QASSERT(callback);
+    if (!callback)
+    {
+        return;
+    }
+
+    auto document = jsonutil::clone_value(node->config);
+
+    q::Path path("inputs");
+    path += input_name;
+
+    auto* value = jsonutil::find_value(document, path);
+    if (!value)
+    {
+        callback(Result::FAILED);
+        return;
+    }
+
+    value->SetString(stream_name.c_str(), document.GetAllocator());
+
+    Connect_Queue_Item item;
+    item.message = silk::comms::Setup_Message::PROCESSOR_CONFIG;
+    item.name = node->name;
+    item.config = std::move(document);
+    item.callback = callback;
+    m_connect_queue.push_back(std::move(item));
+}
+
+
 
 }
 
