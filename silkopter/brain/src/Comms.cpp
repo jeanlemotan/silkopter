@@ -243,6 +243,21 @@ void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     }
 }
 
+static auto unpack_json(Comms::Setup_Channel& channel, rapidjson::Document& json) -> bool
+{
+    std::string str;
+    if (!channel.unpack_param(str))
+    {
+        return false;
+    }
+    json.SetObject();
+    if (!str.empty() && json.Parse(str.c_str()).HasParseError())
+    {
+        QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
+        return false;
+    }
+    return true;
+}
 static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
 {
     rapidjson::StringBuffer buffer;
@@ -290,7 +305,7 @@ static void pack_processor_data(Comms::Setup_Channel& channel, node::processor::
 void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
+    if (m_setup_channel.unpack_all(req_id))
     {
         QLOGI("Req Id: {} - enumerate node facrory", req_id);
         auto source = m_hal.get_source_factory().create_all();
@@ -336,7 +351,7 @@ void Comms::handle_enumerate_node_defs()
 void Comms::handle_enumerate_nodes()
 {
     uint32_t req_id = 0;
-    if (m_setup_channel.unpack(req_id))
+    if (m_setup_channel.unpack_all(req_id))
     {
         QLOGI("Req Id: {} - enumerate nodes", req_id);
         auto const& sources = m_hal.get_sources().get_all();
@@ -397,12 +412,10 @@ auto Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
         return std::shared_ptr<Node_Base>();
     }
 
-    std::string config;
-    m_setup_channel.unpack_param<std::string>(config);
-    auto configj = parse_json(config);
-    if (configj)
+    rapidjson::Document config;
+    if (unpack_json(m_setup_channel, config))
     {
-        node->set_config(*configj);
+        node->set_config(config);
     }
 
     return node;
@@ -452,24 +465,24 @@ void Comms::handle_add_source()
         m_setup_channel.unpack_param(req_id))
     {
         QLOGI("Req Id: {} - add source", req_id);
-        std::string def_name, name, init_params;
+        std::string def_name, name;
+        rapidjson::Document init_params;
 
         m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
         m_setup_channel.pack_param(req_id);
 
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
-        ok &= m_setup_channel.unpack_param(init_params);
-        QLOGI("\tAdd source {} of type {}, init_params {}", name, def_name, init_params);
-        auto init_paramsj = parse_json(init_params);
-        if (!ok || !init_paramsj)
+        ok &= unpack_json(m_setup_channel, init_params);
+        QLOGI("\tAdd source {} of type {}", name, def_name);
+        if (!ok)
         {
             QLOGE("\t\tBad source");
             m_setup_channel.end_pack();
             return;
         }
 
-        auto node = m_hal.create_node<node::source::ISource>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
+        auto node = m_hal.create_node<node::source::ISource>(def_name, name, std::move(init_params));
         if (!node)
         {
             m_setup_channel.end_pack();
@@ -493,24 +506,24 @@ void Comms::handle_add_sink()
         m_setup_channel.unpack_param(req_id))
     {
         QLOGI("Req Id: {} - add sink", req_id);
-        std::string def_name, name, init_params;
+        std::string def_name, name;
+        rapidjson::Document init_params;
 
         m_setup_channel.begin_pack(comms::Setup_Message::ADD_SINK);
         m_setup_channel.pack_param(req_id);
 
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
-        ok &= m_setup_channel.unpack_param(init_params);
-        QLOGI("\tAdd sink {} of type {}, init_params {}", name, def_name, init_params);
-        auto init_paramsj = parse_json(init_params);
-        if (!ok || !init_paramsj)
+        ok &= unpack_json(m_setup_channel, init_params);
+        QLOGI("\tAdd sink {} of type {}", name, def_name);
+        if (!ok)
         {
             QLOGE("\t\tBad sink");
             m_setup_channel.end_pack();
             return;
         }
 
-        auto node = m_hal.create_node<node::sink::ISink>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
+        auto node = m_hal.create_node<node::sink::ISink>(def_name, name, std::move(init_params));
         if (!node)
         {
             m_setup_channel.end_pack();
@@ -534,24 +547,24 @@ void Comms::handle_add_processor()
         m_setup_channel.unpack_param(req_id))
     {
         QLOGI("Req Id: {} - add processor", req_id);
-        std::string def_name, name, init_params;
+        std::string def_name, name;
+        rapidjson::Document init_params;
 
         m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
         m_setup_channel.pack_param(req_id);
 
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
-        ok &= m_setup_channel.unpack_param(init_params);
-        QLOGI("\tAdd processor {} of type {}, init_params {}", name, def_name, init_params);
-        auto init_paramsj = parse_json(init_params);
-        if (!ok || !init_paramsj)
+        ok &= unpack_json(m_setup_channel, init_params);
+        QLOGI("\tAdd processor {} of type {}", name, def_name);
+        if (!ok)
         {
             QLOGE("\t\tBad processor");
             m_setup_channel.end_pack();
             return;
         }
 
-        auto node = m_hal.create_node<node::processor::IProcessor>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
+        auto node = m_hal.create_node<node::processor::IProcessor>(def_name, name, std::move(init_params));
         if (!node)
         {
             m_setup_channel.end_pack();

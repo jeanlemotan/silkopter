@@ -296,10 +296,15 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
             QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
             return false;
         }
-        auto node = create_node<Base>(type, name, *init_paramsj, *configj);
+        auto node = create_node<Base>(type, name, *init_paramsj);
         if (!node)
         {
             QLOGE("Failed to create node {} of type '{}'", name, type);
+            return false;
+        }
+        if (!node->set_config(*configj))
+        {
+            QLOGE("Failed to set config for node '{}'", name);
             return false;
         }
     }

@@ -117,7 +117,6 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../../libs/json_editor/JSON_Model.h \
-    ../../src/ModelTest.h \
     ../../../libs/common/node/processor/IMultirotor_Pilot.h
 
 SOURCES += \
@@ -131,8 +130,7 @@ SOURCES += \
     ../../src/qnodeseditor/qneport.cpp \
     ../../src/qnodeseditor/qnodeseditor.cpp \
     ../../src/HAL_Window.cpp \
-    ../../../libs/json_editor/JSON_Model.cpp \
-    ../../src/ModelTest.cpp
+    ../../../libs/json_editor/JSON_Model.cpp
 
 FORMS += \
     ../../src/New_Node.ui

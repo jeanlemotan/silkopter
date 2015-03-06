@@ -190,6 +190,14 @@ static auto unpack_json(Comms::Setup_Channel& channel, rapidjson::Document& json
     }
     return true;
 }
+static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string str(buffer.GetString(), buffer.GetSize());
+    channel.pack_param(str);
+}
 
 template<class T>
 auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
@@ -287,15 +295,6 @@ static auto unpack_processor_data(Comms::Setup_Channel& channel, node::processor
 //    return true;
 //}
 
-static void pack_json(Comms::Setup_Channel& channel, rapidjson::Document const& json)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-    std::string str(buffer.GetString(), buffer.GetSize());
-    channel.pack_param(str);
-}
-
 
 void Comms::handle_enumerate_node_defs()
 {
@@ -323,8 +322,8 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::source::Source_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(def->default_init_params);
-            ok &= m_setup_channel.unpack_param(def->default_config);
+            ok &= unpack_json(m_setup_channel, def->default_init_params);
+            ok &= unpack_json(m_setup_channel, def->default_config);
             if (!ok)
             {
                 QLOGE("\t\tBad source");
@@ -339,8 +338,8 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::sink::Sink_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(def->default_init_params);
-            ok &= m_setup_channel.unpack_param(def->default_config);
+            ok &= unpack_json(m_setup_channel, def->default_init_params);
+            ok &= unpack_json(m_setup_channel, def->default_config);
             if (!ok)
             {
                 QLOGE("\t\tBad sink");
@@ -355,8 +354,8 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::processor::Processor_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(def->default_init_params);
-            ok &= m_setup_channel.unpack_param(def->default_config);
+            ok &= unpack_json(m_setup_channel, def->default_init_params);
+            ok &= unpack_json(m_setup_channel, def->default_config);
             if (!ok)
             {
                 QLOGE("\t\tBad processor");
@@ -677,6 +676,7 @@ void Comms::handle_add_source()
         callback(HAL::Result::FAILED, node::source::Source_ptr());
         return;
     }
+    node->name = it->name;
     m_hal.m_sources.add(node);
     callback(HAL::Result::OK, node);
 }

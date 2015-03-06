@@ -40,8 +40,6 @@ namespace stream
 
 struct GS_IStream
 {
-    virtual ~GS_IStream() {}
-
     std::string name;
     q::rtti::class_id class_id;
     uint32_t rate = 0;
@@ -146,8 +144,6 @@ namespace source
 {
 struct Source_Def
 {
-    virtual ~Source_Def() {}
-
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document default_init_params;
@@ -157,8 +153,6 @@ DECLARE_CLASS_PTR(Source_Def);
 
 struct Source
 {
-    virtual ~Source() {}
-
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document init_params;
@@ -180,8 +174,6 @@ namespace sink
 
 struct Sink_Def
 {
-    virtual ~Sink_Def() {}
-
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document default_init_params;
@@ -192,7 +184,6 @@ DECLARE_CLASS_PTR(Sink_Def);
 
 struct Sink
 {
-    virtual ~Sink() {}
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document init_params;
@@ -214,8 +205,6 @@ namespace processor
 
 struct Processor_Def
 {
-    virtual ~Processor_Def() {}
-
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document default_init_params;
@@ -225,8 +214,6 @@ DECLARE_CLASS_PTR(Processor_Def);
 
 struct Processor
 {
-    virtual ~Processor() {}
-
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document init_params;
