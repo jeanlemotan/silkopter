@@ -4,7 +4,7 @@ namespace math
 	template<typename T> vec4<T> const vec4<T>::one(1);																		   \
 
     template<typename T> inline constexpr vec4<T>::vec4() : x(T(0)), y(T(0)), z(T(0)), w(T(0)) {}
-    template<typename T> inline constexpr vec4<T>::vec4(ZUninitialized) {}
+    template<typename T> inline constexpr vec4<T>::vec4(math::ZUninitialized) {}
     template<typename T> inline constexpr vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
     template<typename T> inline constexpr vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
     template<typename T> inline constexpr vec4<T>::vec4(vec4<T> const& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}

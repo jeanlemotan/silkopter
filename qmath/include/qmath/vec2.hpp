@@ -4,7 +4,7 @@ template<typename T> vec2<T> const vec2<T>::zero(0);																		   \
 template<typename T> vec2<T> const vec2<T>::one(1);																		   \
 
 template<typename T> inline constexpr vec2<T>::vec2() : x(T(0)), y(T(0)) {}
-template<typename T> inline constexpr vec2<T>::vec2(ZUninitialized) {}
+template<typename T> inline constexpr vec2<T>::vec2(math::ZUninitialized) {}
 template<typename T> inline constexpr vec2<T>::vec2(T _x, T _y) : x(_x), y(_y) {}
 template<typename T> inline constexpr vec2<T>::vec2(T v) : x(v), y(v) {}
 template<typename T> inline constexpr vec2<T>::vec2(vec2<T> const& v) : x(v.x), y(v.y) {}

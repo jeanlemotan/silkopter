@@ -42,6 +42,8 @@ namespace math
 
 namespace math
 {
+	static struct ZUninitialized {} uninitialized;
+
 	typedef angle<float>		anglef;
     typedef angle<double>		angled;
 

@@ -63,7 +63,7 @@ namespace math
 
 	//////////////////////////////////////////////////////////////////////////
 
-	namespace cwise
+	namespace horiz
 	{
 		template<typename T> inline T min(vec2<T> const& a)
 		{

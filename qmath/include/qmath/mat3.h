@@ -23,7 +23,6 @@ template <typename T>
 struct mat3
 {
 	typedef T value_t;
-	static struct ZUninitialized {} uninitialized;
 	static mat3<T> const zero;
 	static mat3<T> const one;
 	static mat3<T> const identity;
@@ -36,7 +35,7 @@ struct mat3
 	// constructors
 	///////////////////////////////////////////////////////////////////////////////
 	mat3();
-	mat3(ZUninitialized);
+	mat3(math::ZUninitialized);
 	explicit mat3(T value);
 	mat3(mat3<T> const& other);
 	template<typename U> explicit mat3(mat3<U> const& v);
@@ -141,9 +140,5 @@ public:
 // Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-typename mat3<T>::ZUninitialized mat3<T>::uninitialized;
-
-///////////////////////////////////////////////////////////////////////////////
 
 }//namespace math

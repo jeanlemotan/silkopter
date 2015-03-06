@@ -206,9 +206,14 @@ namespace math
 		bool all(vec2<bool> const& v);
 		bool all(vec3<bool> const& v);
 		bool all(vec4<bool> const& v);
+		
 		bool any(vec2<bool> const& v);
 		bool any(vec3<bool> const& v);
 		bool any(vec4<bool> const& v);
+
+		bool none(vec2<bool> const& v);
+		bool none(vec3<bool> const& v);
+		bool none(vec4<bool> const& v);
 	}
 	
 	

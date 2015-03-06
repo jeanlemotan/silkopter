@@ -27,7 +27,6 @@ template <typename T>
 struct trans3d
 {
 	typedef T value_t;
-	static struct ZUninitialized {} uninitialized;
 	static trans3d<T> const identity;
 
 
@@ -35,7 +34,7 @@ struct trans3d
 	// constructors
 	///////////////////////////////////////////////////////////////////////////////
 	trans3d();
-	trans3d(ZUninitialized);
+	trans3d(math::ZUninitialized);
 	trans3d(trans3d<T> const& other);
 	template<typename U> explicit trans3d(trans3d<U> const& v);
 
@@ -105,9 +104,5 @@ public:
 // Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-typename trans3d<T>::ZUninitialized trans3d<T>::uninitialized;
-
-///////////////////////////////////////////////////////////////////////////////
 
 }//namespace math

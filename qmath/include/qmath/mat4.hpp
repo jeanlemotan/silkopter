@@ -13,7 +13,7 @@ inline mat4<T>::mat4()
 }
 
 template <typename T>
-inline mat4<T>::mat4(ZUninitialized)
+inline mat4<T>::mat4(math::ZUninitialized)
 {
 }
 

@@ -4,7 +4,7 @@ template<typename T> vec3<T> const vec3<T>::zero(T(0));																		   \
 template<typename T> vec3<T> const vec3<T>::one(T(1));																		   \
 
     template<typename T> inline constexpr vec3<T>::vec3() : x(T(0)), y(T(0)), z(T(0)) {}
-    template<typename T> inline constexpr vec3<T>::vec3(ZUninitialized) {}
+    template<typename T> inline constexpr vec3<T>::vec3(math::ZUninitialized) {}
     template<typename T> inline constexpr vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
     template<typename T> inline constexpr vec3<T>::vec3(T v) : x(v), y(v), z(v) {}
     template<typename T> inline constexpr vec3<T>::vec3(vec3<T> const& v) : x(v.x), y(v.y), z(v.z) {}

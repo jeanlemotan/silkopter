@@ -22,7 +22,6 @@ template <typename T>
 struct trans2d
 {
 	typedef T value_t;
-	static struct ZUninitialized {} uninitialized;
 	static trans2d<T> const identity;
 
 
@@ -30,7 +29,7 @@ struct trans2d
 	// constructors
 	///////////////////////////////////////////////////////////////////////////////
 	trans2d();
-	trans2d(ZUninitialized);
+	trans2d(math::ZUninitialized);
 	trans2d(trans2d<T> const& other);
 	template<typename U> explicit trans2d(trans2d<U> const& v);
 
@@ -95,11 +94,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation
-///////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-typename trans2d<T>::ZUninitialized trans2d<T>::uninitialized;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }//namespace math

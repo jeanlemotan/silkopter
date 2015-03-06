@@ -12,7 +12,6 @@ struct vec3
 
 	T x, y, z;
 
-	static struct ZUninitialized {} uninitialized;
     static vec3<T> const zero;
     static vec3<T> const one;
 
@@ -25,7 +24,7 @@ struct vec3
     constexpr vec3();
 
 	//constructs the vector uninitialized
-    constexpr vec3(ZUninitialized);
+    constexpr vec3(math::ZUninitialized);
 
 	//constructs from direct x, y, z values
     constexpr vec3(T x, T y, T z);
@@ -107,8 +106,6 @@ template<typename T> vec3<T> operator/(T s, vec3<T> const&);
 template<typename T> vec3<T> operator/(vec3<T> const& v0, vec3<T> const& v1);   
 
 //////////////////////////////////////////////////////////////////////////
-
-template<typename T> typename vec3<T>::ZUninitialized vec3<T>::uninitialized;
 
 } //math
 

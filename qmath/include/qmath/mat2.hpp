@@ -11,23 +11,23 @@ template<typename T> mat2<T> const mat2<T>::identity;																		   \
 
 template <typename T>
 inline mat2<T>::mat2()
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	set_identity();
 }
 
 template <typename T>
-inline mat2<T>::mat2(ZUninitialized)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+inline mat2<T>::mat2(math::ZUninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 }
 
 template <typename T>
 inline mat2<T>::mat2(angle<T> const& rotation)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	T s, c;
     sin_cos(rotation, s, c);
@@ -40,8 +40,8 @@ inline mat2<T>::mat2(angle<T> const& rotation)
 
 template <typename T>
 inline mat2<T>::mat2(T value)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	m[0] = m[1] = value;
 	m[2] = m[3] = value;
@@ -49,8 +49,8 @@ inline mat2<T>::mat2(T value)
 
 template <typename T>
 inline mat2<T>::mat2(mat2<T> const& other)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	*this = other;
 }
@@ -58,8 +58,8 @@ inline mat2<T>::mat2(mat2<T> const& other)
 template<typename T>
 template<typename U>
 inline mat2<T>::mat2(mat2<U> const& other)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	m[0] = (T)other.m[0];
 	m[1] = (T)other.m[1];
@@ -69,8 +69,8 @@ inline mat2<T>::mat2(mat2<U> const& other)
 
 template<typename T>
 inline mat2<T>::mat2(T const v0, T const v1, T const v2, T const v3)
-: column0(vec2<T>::uninitialized)
-, column1(vec2<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
 {
 	m[0] = v0;
 	m[1] = v1;

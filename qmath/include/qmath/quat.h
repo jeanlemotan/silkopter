@@ -10,8 +10,6 @@ struct quat
 
 	T x, y, z, w;
 
-	static struct ZUninitialized {} uninitialized;
-
 	static quat<T> const zero;
 	static quat<T> const one;
 	static quat<T> const identity;
@@ -21,7 +19,7 @@ struct quat
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     constexpr quat();
-    constexpr quat(ZUninitialized);
+    constexpr quat(math::ZUninitialized);
     constexpr quat(T x, T y, T z, T w);
     constexpr quat(quat const&);
     template<typename U> explicit constexpr quat(quat<U> const&);
@@ -139,7 +137,5 @@ template <typename T> T dot(quat<T> const& q1, quat<T> const& q2);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // implementation
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <typename T> typename quat<T>::ZUninitialized quat<T>::uninitialized;
 
 }//math

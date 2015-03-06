@@ -12,7 +12,6 @@ struct vec4
 
 	T x, y, z, w;
 
-	static struct ZUninitialized {} uninitialized;
 	static vec4<T> const zero;
 	static vec4<T> const one;
 
@@ -25,7 +24,7 @@ struct vec4
     constexpr vec4();
 
 	//constructs the vector uninitialized
-    constexpr vec4(ZUninitialized);
+    constexpr vec4(math::ZUninitialized);
 
 	//constructs from direct x, y, z values
     constexpr vec4(T x, T y, T z, T w);
@@ -108,9 +107,6 @@ template <typename T> math::vec4<T> operator*(math::vec4<T> const&, math::vec4<T
 template <typename T> math::vec4<T> operator/(math::vec4<T> const&, math::vec4<T> const&);
 
 //////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-typename vec4<T>::ZUninitialized vec4<T>::uninitialized;
 
 } //math
 

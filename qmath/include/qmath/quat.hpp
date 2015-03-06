@@ -10,7 +10,7 @@ template<typename T> quat<T> const quat<T>::identity;																		   \
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T> inline constexpr quat<T>::quat() : x(0), y(0), z(0), w(1) {}
-template <typename T> inline constexpr quat<T>::quat(ZUninitialized) {}
+template <typename T> inline constexpr quat<T>::quat(math::ZUninitialized) {}
 template <typename T> inline constexpr quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
 template <typename T> inline constexpr quat<T>::quat(quat<T> const& q) : x(q.x), y(q.y), z(q.z), w(q.w) {}
 template <typename T> template <typename U>
@@ -30,7 +30,7 @@ template<typename T>
 template<class Policy>
 inline quat<T> quat<T>::from_axis_x(T const& a)
 {
-    quat<T> q(quat<T>::uninitialized);
+    quat<T> q(math::uninitialized);
     q.template set_from_euler_xyz<Policy>(a, T(), T());
     return q;
 }
@@ -39,7 +39,7 @@ template<typename T>
 template<class Policy>
 inline quat<T> quat<T>::from_axis_y(T const& a)
 {
-    quat<T> q(quat<T>::uninitialized);
+    quat<T> q(math::uninitialized);
     q.template set_from_euler_xyz<Policy>(T(), a, T());
     return q;
 }
@@ -48,7 +48,7 @@ template<typename T>
 template<class Policy>
 inline quat<T> quat<T>::from_axis_z(T const& a)
 {
-    quat<T> q(quat<T>::uninitialized);
+    quat<T> q(math::uninitialized);
     q.template set_from_euler_xyz<Policy>(T(), T(), a);
     return q;
 }
@@ -201,7 +201,7 @@ inline void quat<T>::get_as_mat3(mat3<T>& ret) const
 template <typename T> template <class Policy>
 inline mat3<T> quat<T>::get_as_mat3() const
 {
-	mat3<T> m(mat3<T>::uninitialized);
+	mat3<T> m(math::uninitialized);
 	get_as_mat3<Policy>(m);
 	return m;
 }
@@ -255,7 +255,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_xyz(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-	vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+	vec3<T> s(math::uninitialized), c(math::uninitialized);
 	sin_cos<T, Policy>(a, s, c);
 	x = c.z*s.x*c.y + s.z*c.x*s.y;
 	y = c.z*c.x*s.y - s.z*s.x*c.y;
@@ -266,7 +266,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_xzy(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    vec3<T> s(math::uninitialized), c(math::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
     y = c.z*c.x*s.y - s.z*s.x*c.y;
@@ -277,7 +277,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_yxz(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    vec3<T> s(math::uninitialized), c(math::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y + s.z*c.x*s.y;
     y = c.z*c.x*s.y - s.z*s.x*c.y;
@@ -288,7 +288,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_yzx(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    vec3<T> s(math::uninitialized), c(math::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y + s.z*c.x*s.y;
     y = c.z*c.x*s.y + s.z*s.x*c.y;
@@ -299,7 +299,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_zxy(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    vec3<T> s(math::uninitialized), c(math::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
     y = c.z*c.x*s.y + s.z*s.x*c.y;
@@ -310,7 +310,7 @@ template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_zyx(T const& ax, T const& ay, T const& az)
 {
     vec3<T> a(ax*T(0.5), ay*T(0.5), az*T(0.5));
-    vec3<T> s(vec3<T>::uninitialized), c(vec3<T>::uninitialized);
+    vec3<T> s(math::uninitialized), c(math::uninitialized);
     sin_cos<T, Policy>(a, s, c);
     x = c.z*s.x*c.y - s.z*c.x*s.y;
     y = c.z*c.x*s.y + s.z*s.x*c.y;
@@ -632,7 +632,7 @@ template<typename T> inline quat<T>& quat<T>::operator-=(quat<T> const& b)
 
 template <typename T> inline quat<T> quat<T>::operator*(quat<T> const& other) const
 {
-	quat<T> tmp(uninitialized);
+	quat<T> tmp(math::uninitialized);
 	tmp.w = (other.w * w) - (other.x * x) - (other.y * y) - (other.z * z);
 	tmp.x = (other.x * w) + (other.w * x) + (other.z * y) - (other.y * z);
 	tmp.y = (other.y * w) + (other.w * y) + (other.x * z) - (other.z * x);

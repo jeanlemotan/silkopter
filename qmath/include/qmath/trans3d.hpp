@@ -11,8 +11,8 @@ template<typename T> inline trans3d<T>::trans3d()
 	set_identity();
     QASSERT(is_valid());
 }
-template<typename T> inline trans3d<T>::trans3d(ZUninitialized)
-	: mat(mat4<T>::uninitialized)
+template<typename T> inline trans3d<T>::trans3d(math::ZUninitialized)
+	: mat(math::uninitialized)
 {
 }
 template<typename T> inline trans3d<T>::trans3d(trans3d<T> const& other)
@@ -28,7 +28,7 @@ template<typename T> template<typename U> inline trans3d<T>::trans3d(trans3d<U> 
 template<typename T> inline trans3d<T>::trans3d(vec3<T> const& translation, quat<T> const& rotation, vec3<T> const& scale)
 {
 	set_translation(translation);
-	math::mat3f rot(math::mat3f::uninitialized);
+	math::mat3f rot(math::uninitialized);
 	rotation.get_as_mat3(rot);
 	set_rotation(rot);
 	post_scale(scale);

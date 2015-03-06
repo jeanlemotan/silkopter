@@ -26,7 +26,6 @@ struct mat4
 {
 	typedef T value_t;
 
-	static struct ZUninitialized {} uninitialized;
 	static mat4<T> const zero;
 	static mat4<T> const one;
 	static mat4<T> const identity;
@@ -39,7 +38,7 @@ struct mat4
 	// constructors
 	///////////////////////////////////////////////////////////////////////////////
 	mat4();
-	mat4(ZUninitialized);
+	mat4(math::ZUninitialized);
 	explicit mat4(T value);
 	mat4(mat4<T> const& other);
 	template<typename U> explicit mat4(mat4<U> const& v);
@@ -132,18 +131,13 @@ public:
 		T m[element_count];
 		struct 
 		{
-            vec4<T> columns[4] = { vec4<T>::uninitialized };
+            vec4<T> columns[4] = { math::uninitialized };
 		};
 	};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation
-///////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-typename mat4<T>::ZUninitialized mat4<T>::uninitialized;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }//namespace math

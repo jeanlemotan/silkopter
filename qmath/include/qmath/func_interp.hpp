@@ -81,7 +81,7 @@ namespace math
     template<typename T, class Policy> quat<T> nlerp(quat<T> const& a, quat<T> const& b, float t)
 	{
 		t = detail::lerp_check_mu<Policy>(t);
-		quat<T> result(quat<T>::uninitialized);
+		quat<T> result(math::uninitialized);
 		T angle = dot(a, b);
 		if (angle >= 0)
 		{

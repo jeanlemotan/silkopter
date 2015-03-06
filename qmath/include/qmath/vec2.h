@@ -15,7 +15,6 @@ struct vec2
 // constructors
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static struct ZUninitialized {} uninitialized;
 	static vec2<T> const zero;
 	static vec2<T> const one;
 
@@ -24,7 +23,7 @@ struct vec2
     constexpr vec2();
 
 	//constructs the vector uninitialized
-    constexpr vec2(ZUninitialized);
+    constexpr vec2(math::ZUninitialized);
 
 	//constructs from direct x, y values
     constexpr vec2(T x, T y);
@@ -101,9 +100,6 @@ template<typename T> vec2<T> operator*(vec2<T> const& v0, vec2<T> const& v1);
 template<typename T> vec2<T> operator/(vec2<T> const& v0, vec2<T> const& v2);
 
 //////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-typename vec2<T>::ZUninitialized vec2<T>::uninitialized;
 
 } //math
 

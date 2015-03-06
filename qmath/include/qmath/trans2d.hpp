@@ -11,8 +11,8 @@ template<typename T> inline trans2d<T>::trans2d()
 	set_identity();
     QASSERT(is_valid());
 }
-template<typename T> inline trans2d<T>::trans2d(ZUninitialized)
-	: mat(mat3<T>::uninitialized)
+template<typename T> inline trans2d<T>::trans2d(math::ZUninitialized)
+	: mat(math::uninitialized)
 {
 }
 template<typename T> inline trans2d<T>::trans2d(trans2d<T> const& other)

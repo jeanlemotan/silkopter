@@ -20,8 +20,8 @@ namespace math
 	template<typename T> vec4<T> clamp(vec4<T> const& x, vec4<T> const& min, vec4<T> const& max);
 	template<typename T> T clamp(T x, T min, T max);
 
-	//component wise min
-	namespace cwise
+	//horizontal tests
+	namespace horiz
 	{
 		template<typename T> T min(vec2<T> const& a);
 		template<typename T> T max(vec2<T> const& a);

@@ -11,26 +11,26 @@ template<typename T> mat3<T> const mat3<T>::identity;																		   \
 
 template <typename T>
 inline mat3<T>::mat3()
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 	set_identity();
 }
 
 template <typename T>
 inline mat3<T>::mat3(ZUninitialized)
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 }
 
 template <typename T>
 inline mat3<T>::mat3(T value)
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 	m[0] = m[1] = m[2] = value;
 	m[3] = m[4] = m[5] = value;
@@ -39,9 +39,9 @@ inline mat3<T>::mat3(T value)
 
 template <typename T>
 inline mat3<T>::mat3(mat3<T> const& other)
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 	*this = other;
 }
@@ -49,9 +49,9 @@ inline mat3<T>::mat3(mat3<T> const& other)
 template<typename T>
 template<typename U>
 inline mat3<T>::mat3(mat3<U> const& other)
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 	m[0] = (T)other.m[0];
 	m[1] = (T)other.m[1];
@@ -66,9 +66,9 @@ inline mat3<T>::mat3(mat3<U> const& other)
 
 template<typename T>
 inline mat3<T>::mat3(T const v0, T const v1, T const v2, T const v3, T const v4, T const v5, T const v6, T const v7, T const v8)
-: column0(vec3<T>::uninitialized)
-, column1(vec3<T>::uninitialized)
-, column2(vec3<T>::uninitialized)
+: column0(math::uninitialized)
+, column1(math::uninitialized)
+, column2(math::uninitialized)
 {
 	m[0] = v0;
 	m[1] = v1;
@@ -347,19 +347,19 @@ inline mat3<T>& mat3<T>::operator=(mat3<T> const& m)
 template <typename T>
 inline mat3<T> mat3<T>::operator*(mat3<T> const& other) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return multiply(ret, *this, other);
 }
 template <typename T>
 inline mat3<T> mat3<T>::operator+(mat3<T> const& other) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return cwise::add(ret, *this, other);
 }
 template <typename T>
 inline mat3<T> mat3<T>::operator-(mat3<T> const& other) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return cwise::substract(ret, *this, other);
 }
 template <typename T>
@@ -382,19 +382,19 @@ inline mat3<T>& mat3<T>::operator-=(mat3<T> const& other)
 template <typename T>
 inline mat3<T> mat3<T>::operator*(T scalar) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return cwise::multiply(ret, *this, scalar);
 }
 template <typename T>
 inline mat3<T> mat3<T>::operator+(T scalar) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return cwise::add(ret, *this, scalar);
 }
 template <typename T>
 inline mat3<T> mat3<T>::operator-(T scalar) const
 {
-	mat3<T> ret(mat3<T>::uninitialized);
+	mat3<T> ret(math::uninitialized);
 	return cwise::substract(ret, *this, scalar);
 }
 template <typename T>

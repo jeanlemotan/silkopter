@@ -690,25 +690,25 @@ namespace math
 
 		template<> inline vec2<bool> equals(vec2<float> const& v1, vec2<float> const& v2, float tolerance)
 		{
-			vec2<float> dif(vec2<float>::uninitialized);
+			vec2<float> dif(math::uninitialized);
 			dif = abs(v1 - v2);
-			vec2<float> e(vec2<float>::uninitialized);
+			vec2<float> e(math::uninitialized);
 			e = vec2<float>(tolerance) * max(max(vec2<float>(1.0f), abs(v1)), abs(v2));
 			return vec2<bool>(dif.x <= e.x, dif.y <= e.y);
 		}
 		template<> inline vec3<bool> equals(vec3<float> const& v1, vec3<float> const& v2, float tolerance)
 		{
-			vec3<float> dif(vec3<float>::uninitialized);
+			vec3<float> dif(math::uninitialized);
 			dif = abs(v1 - v2);
-			vec3<float> e(vec3<float>::uninitialized);
+			vec3<float> e(math::uninitialized);
 			e = vec3<float>(tolerance) * max(max(vec3<float>(1.0f), abs(v1)), abs(v2));
 			return vec3<bool>(dif.x <= e.x, dif.y <= e.y, dif.z <= e.z);
 		}
 		template<> inline vec4<bool> equals(vec4<float> const& v1, vec4<float> const& v2, float tolerance)
 		{
-			vec4<float> dif(vec4<float>::uninitialized);
+			vec4<float> dif(math::uninitialized);
 			dif = abs(v1 - v2);
-			vec4<float> e(vec4<float>::uninitialized);
+			vec4<float> e(math::uninitialized);
 			e = vec4<float>(tolerance) * max(max(vec4<float>(1.0f), abs(v1)), abs(v2));
 			return vec4<bool>(dif.x <= e.x, dif.y <= e.y, dif.z <= e.z, dif.w <= e.w);
 		}
@@ -852,6 +852,18 @@ namespace math
 		inline bool any(vec4<bool> const& v)
 		{
 			return v.x || v.y || v.z || v.w;
+		}
+		inline bool none(vec2<bool> const& v)
+		{
+			return !v.x && !v.y;
+		}
+		inline bool none(vec3<bool> const& v)
+		{
+			return !v.x && !v.y && !v.z;
+		}
+		inline bool none(vec4<bool> const& v)
+		{
+			return !v.x && !v.y && !v.z && !v.w;
 		}
 
 	}
@@ -1156,10 +1168,10 @@ namespace math
 		// 4d Cross product (GPG6, section 2.2)
 #define DOT(AX,AY,AZ,BX,BY,BZ) AX*BX+AY*BY+AZ*BZ
 #define CROSS(AX,AY,AZ,BX,BY,BZ,CX,CY,CZ) CX = AY*BZ - AZ*BY; CY = AZ*BX - AX*BZ; CZ = AX*BY - AY*BX;
-		vec4<T> c1(vec4<T>::uninitialized);
-		vec4<T> c2(vec4<T>::uninitialized);
-		vec4<T> c3(vec4<T>::uninitialized);
-		vec4<T> c4(vec4<T>::uninitialized);
+		vec4<T> c1(math::uninitialized);
+		vec4<T> c2(math::uninitialized);
+		vec4<T> c3(math::uninitialized);
+		vec4<T> c4(math::uninitialized);
 		CROSS(x2.y,x2.z,x2.w,x3.y,x3.z,x3.w,c1.x,c1.y,c1.z);
 		CROSS(x2.x,x2.z,x2.w,x3.x,x3.z,x3.w,c2.x,c2.y,c2.z);
 		CROSS(x2.x,x2.y,x2.w,x3.x,x3.y,x3.w,c3.x,c3.y,c3.z);
