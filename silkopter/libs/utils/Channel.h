@@ -131,7 +131,7 @@ namespace util
 
 		//sends a message with confirmation
 		template<typename... Params>
-        void pack(Message_t message, Params&&... params)
+        void pack_all(Message_t message, Params&&... params)
         {
             begin_pack(message);
             _pack(std::forward<Params>(params)...);
@@ -209,7 +209,7 @@ namespace util
 
 		//decodes the next message
 		template<typename... Params>
-        auto unpack(Params&... params) -> bool
+        auto unpack_all(Params&... params) -> bool
         {
             return _unpack(size_t(0), params...);
         }

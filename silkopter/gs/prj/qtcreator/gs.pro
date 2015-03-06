@@ -61,7 +61,6 @@ HEADERS += \
     ../../../libs/common/node/processor/IBattery.h \
     ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/processor/IFilter.h \
-    ../../../libs/common/node/processor/IMultirotor.h \
     ../../../libs/common/node/processor/IProcessor.h \
     ../../../libs/common/node/processor/ITransform.h \
     ../../../libs/common/node/sink/IPWM.h \
@@ -118,7 +117,8 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../../libs/json_editor/JSON_Model.h \
-    ../../src/ModelTest.h
+    ../../src/ModelTest.h \
+    ../../../libs/common/node/processor/IMultirotor_Pilot.h
 
 SOURCES += \
     ../../src/GS.cpp \

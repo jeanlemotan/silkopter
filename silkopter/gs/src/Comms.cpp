@@ -125,8 +125,8 @@ void Comms::reset()
 
 void Comms::request_nodes()
 {
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
-    m_setup_channel.pack(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
+    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
+    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
 }
 
 
@@ -175,6 +175,22 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
     return std::move(json);
 }
 
+static auto unpack_json(Comms::Setup_Channel& channel, rapidjson::Document& json) -> bool
+{
+    std::string str;
+    if (!channel.unpack_param(str))
+    {
+        return false;
+    }
+    json.SetObject();
+    if (!str.empty() && json.Parse(str.c_str()).HasParseError())
+    {
+        QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
+        return false;
+    }
+    return true;
+}
+
 template<class T>
 auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 {
@@ -217,6 +233,33 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     }
     return true;
 }
+
+static auto unpack_source_data(Comms::Setup_Channel& channel, node::source::Source& node) -> bool
+{
+    bool ok = channel.unpack_param(node.class_id);
+    ok &= unpack_outputs(channel, node.outputs);
+    ok &= unpack_json(channel, node.init_params);
+    ok &= unpack_json(channel, node.config);
+    return ok;
+}
+static auto unpack_sink_data(Comms::Setup_Channel& channel, node::sink::Sink& node) -> bool
+{
+    bool ok = channel.unpack_param(node.class_id);
+    ok &= unpack_inputs(channel, node.inputs);
+    ok &= unpack_json(channel, node.init_params);
+    ok &= unpack_json(channel, node.config);
+    return ok;
+}
+static auto unpack_processor_data(Comms::Setup_Channel& channel, node::processor::Processor& node) -> bool
+{
+    bool ok = channel.unpack_param(node.class_id);
+    ok &= unpack_inputs(channel, node.inputs);
+    ok &= unpack_outputs(channel, node.outputs);
+    ok &= unpack_json(channel, node.init_params);
+    ok &= unpack_json(channel, node.config);
+    return ok;
+}
+
 //template<class T>
 //auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 //{
@@ -263,8 +306,6 @@ void Comms::handle_enumerate_node_defs()
         uint32_t source_count = 0;
         uint32_t sink_count = 0;
         uint32_t processor_count = 0;
-        std::string init_params_str;
-        std::string config_str;
 
         bool ok = m_setup_channel.unpack_param(source_count);
         ok &= m_setup_channel.unpack_param(sink_count);
@@ -282,18 +323,14 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::source::Source_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSource: {}, init_params {}, config {}", def->name, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            ok &= m_setup_channel.unpack_param(def->default_init_params);
+            ok &= m_setup_channel.unpack_param(def->default_config);
+            if (!ok)
             {
                 QLOGE("\t\tBad source");
                 return;
             }
-            def->default_init_params = std::move(*init_params);
-            def->default_config = std::move(*config);
+            QLOGI("\tSource: {}", def->name);
             m_hal.m_source_defs.add(std::move(def));
         }
 
@@ -302,18 +339,14 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::sink::Sink_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tSink: {}, init_params {}, config {}", def->name, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            ok &= m_setup_channel.unpack_param(def->default_init_params);
+            ok &= m_setup_channel.unpack_param(def->default_config);
+            if (!ok)
             {
                 QLOGE("\t\tBad sink");
                 return;
             }
-            def->default_init_params = std::move(*init_params);
-            def->default_config = std::move(*config);
+            QLOGI("\tSink: {}", def->name);
             m_hal.m_sink_defs.add(std::move(def));
         }
 
@@ -322,18 +355,14 @@ void Comms::handle_enumerate_node_defs()
             auto def = std::make_shared<node::processor::Processor_Def>();
             bool ok = m_setup_channel.unpack_param(def->name);
             ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= m_setup_channel.unpack_param(init_params_str);
-            ok &= m_setup_channel.unpack_param(config_str);
-            QLOGI("\tProcessor: {}, init_params {}, config {}", def->name, init_params_str, config_str);
-            auto init_params = parse_json(init_params_str);
-            auto config = parse_json(config_str);
-            if (!ok || !init_params || !config)
+            ok &= m_setup_channel.unpack_param(def->default_init_params);
+            ok &= m_setup_channel.unpack_param(def->default_config);
+            if (!ok)
             {
                 QLOGE("\t\tBad processor");
                 return;
             }
-            def->default_init_params = std::move(*init_params);
-            def->default_config = std::move(*config);
+            QLOGI("\tProcessor: {}", def->name);
             m_hal.m_processor_defs.add(std::move(def));
         }
 
@@ -441,67 +470,42 @@ void Comms::handle_enumerate_nodes()
         for (uint32_t i = 0; i < source_count; i++)
         {
             auto node = std::make_shared<node::source::Source>();
-            bool ok = m_setup_channel.unpack_param(def_name);
-            ok &= m_setup_channel.unpack_param(node->name);
-            ok &= unpack_outputs(m_setup_channel, node->outputs);
-            ok &= m_setup_channel.unpack_param(init_params);
-            ok &= m_setup_channel.unpack_param(config);
-            QLOGI("\tSource: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
-            auto init_paramsj = parse_json(init_params);
-            auto configj = parse_json(config);
-            node->def = m_hal.get_source_defs().find_by_name(def_name);
-            if (!ok || !init_paramsj || !configj || !node->def)
+            bool ok = m_setup_channel.unpack_param(node->name);
+            ok &= unpack_source_data(m_setup_channel, *node);
+            if (!ok)
             {
                 QLOGE("\t\tBad source");
                 return;
             }
-            node->init_params = std::move(*init_paramsj);
-            node->config = std::move(*configj);
+            QLOGI("\tSource: {}", node->name);
             m_hal.m_sources.add(node);
         }
 
         for (uint32_t i = 0; i < sink_count; i++)
         {
             auto node = std::make_shared<node::sink::Sink>();
-            bool ok = m_setup_channel.unpack_param(def_name);
-            ok &= m_setup_channel.unpack_param(node->name);
-            ok &= unpack_inputs(m_setup_channel, node->inputs);
-            ok &= m_setup_channel.unpack_param(init_params);
-            ok &= m_setup_channel.unpack_param(config);
-            QLOGI("\tSink: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
-            auto init_paramsj = parse_json(init_params);
-            auto configj = parse_json(config);
-            node->def = m_hal.get_sink_defs().find_by_name(def_name);
-            if (!ok || !init_paramsj || !configj || !node->def)
+            bool ok = m_setup_channel.unpack_param(node->name);
+            ok &= unpack_sink_data(m_setup_channel, *node);
+            if (!ok)
             {
                 QLOGE("\t\tBad sink");
                 return;
             }
-            node->init_params = std::move(*init_paramsj);
-            node->config = std::move(*configj);
+            QLOGI("\tSink: {}", node->name);
             m_hal.m_sinks.add(node);
         }
 
         for (uint32_t i = 0; i < processor_count; i++)
         {
             auto node = std::make_shared<node::processor::Processor>();
-            bool ok = m_setup_channel.unpack_param(def_name);
-            ok &= m_setup_channel.unpack_param(node->name);
-            ok &= unpack_inputs(m_setup_channel, node->inputs);
-            ok &= unpack_outputs(m_setup_channel, node->outputs);
-            ok &= m_setup_channel.unpack_param(init_params);
-            ok &= m_setup_channel.unpack_param(config);
-            QLOGI("\tProcessor: {}, def {}, init_params {}, config {}", node->name, def_name, init_params, config);
-            auto init_paramsj = parse_json(init_params);
-            auto configj = parse_json(config);
-            node->def = m_hal.get_processor_defs().find_by_name(def_name);
-            if (!ok || !init_paramsj || !configj || !node->def)
+            bool ok = m_setup_channel.unpack_param(node->name);
+            ok &= unpack_processor_data(m_setup_channel, *node);
+            if (!ok)
             {
                 QLOGE("\t\tBad processor");
                 return;
             }
-            node->init_params = std::move(*init_paramsj);
-            node->config = std::move(*configj);
+            QLOGI("\tProcessor: {}", node->name);
             m_hal.m_processors.add(node);
         }
 
@@ -651,139 +655,84 @@ void Comms::handle_processor_config()
 
 void Comms::handle_add_source()
 {
-    std::string init_params;
-    std::string config;
-    std::string def_name;
     uint32_t req_id = 0;
-    bool result = false;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(result))
+    if (!m_setup_channel.begin_unpack() || !m_setup_channel.unpack_param(req_id))
     {
-        QLOGE("Failed to unpack node config");
+        QLOGE("Failed to unpack source config");
         return;
     }
-
     auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
-    auto callback = it != m_hal.m_add_queue.end() ? it->source_callback : [](HAL::Result, node::source::Source_ptr) {};
-
-    if (result == false)
+    QASSERT(it != m_hal.m_add_queue.end());
+    if (it == m_hal.m_add_queue.end())
     {
-        callback(HAL::Result::FAILED, node::source::Source_ptr());
+        QLOGE("Cannot find add source request {}", req_id);
         return;
     }
+    auto callback = it->source_callback;
 
     auto node = std::make_shared<node::source::Source>();
-    bool ok = m_setup_channel.unpack_param(def_name);
-    ok &= m_setup_channel.unpack_param(node->name);
-    ok &= unpack_outputs(m_setup_channel, node->outputs);
-    ok &= m_setup_channel.unpack_param(init_params);
-    ok &= m_setup_channel.unpack_param(config);
-    QLOGI("\tSource: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
-    auto init_paramsj = parse_json(init_params);
-    auto configj = parse_json(config);
-    node->def = m_hal.get_source_defs().find_by_name(def_name);
-    if (!ok || !init_paramsj || !configj || !node->def)
+    bool ok = unpack_source_data(m_setup_channel, *node);
+    if (!ok)
     {
-        QLOGE("\t\tBad source");
         callback(HAL::Result::FAILED, node::source::Source_ptr());
         return;
     }
-    node->init_params = std::move(*init_paramsj);
-    node->config = std::move(*configj);
     m_hal.m_sources.add(node);
     callback(HAL::Result::OK, node);
 }
 
 void Comms::handle_add_processor()
 {
-    std::string init_params;
-    std::string config;
-    std::string def_name;
     uint32_t req_id = 0;
-    bool result = false;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(result))
+    if (!m_setup_channel.begin_unpack() || !m_setup_channel.unpack_param(req_id))
     {
-        QLOGE("Failed to unpack node config");
+        QLOGE("Failed to unpack processor config");
         return;
     }
-
     auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
-    auto callback = it != m_hal.m_add_queue.end() ? it->processor_callback : [](HAL::Result, node::processor::Processor_ptr) {};
-
-    if (result == false)
+    QASSERT(it != m_hal.m_add_queue.end());
+    if (it == m_hal.m_add_queue.end())
     {
-        callback(HAL::Result::FAILED, node::processor::Processor_ptr());
+        QLOGE("Cannot find add processor request {}", req_id);
         return;
     }
+    auto callback = it->processor_callback;
 
     auto node = std::make_shared<node::processor::Processor>();
-    bool ok = m_setup_channel.unpack_param(def_name);
-    ok &= m_setup_channel.unpack_param(node->name);
-    ok &= unpack_inputs(m_setup_channel, node->inputs);
-    ok &= unpack_outputs(m_setup_channel, node->outputs);
-    ok &= m_setup_channel.unpack_param(init_params);
-    ok &= m_setup_channel.unpack_param(config);
-    QLOGI("\tProcessor: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
-    auto init_paramsj = parse_json(init_params);
-    auto configj = parse_json(config);
-    node->def = m_hal.get_processor_defs().find_by_name(def_name);
-    if (!ok || !init_paramsj || !configj || !node->def)
+    bool ok = unpack_processor_data(m_setup_channel, *node);
+    if (!ok)
     {
-        QLOGE("\t\tBad processor");
         callback(HAL::Result::FAILED, node::processor::Processor_ptr());
         return;
     }
-    node->init_params = std::move(*init_paramsj);
-    node->config = std::move(*configj);
     m_hal.m_processors.add(node);
     callback(HAL::Result::OK, node);
 }
 
 void Comms::handle_add_sink()
 {
-    std::string init_params;
-    std::string config;
-    std::string def_name;
     uint32_t req_id = 0;
-    bool result = false;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(result))
+    if (!m_setup_channel.begin_unpack() || !m_setup_channel.unpack_param(req_id))
     {
-        QLOGE("Failed to unpack node config");
+        QLOGE("Failed to unpack sink config");
         return;
     }
-
     auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
-    auto callback = it != m_hal.m_add_queue.end() ? it->sink_callback : [](HAL::Result, node::sink::Sink_ptr) {};
-
-    if (result == false)
+    QASSERT(it != m_hal.m_add_queue.end());
+    if (it == m_hal.m_add_queue.end())
     {
-        callback(HAL::Result::FAILED, node::sink::Sink_ptr());
+        QLOGE("Cannot find add sink request {}", req_id);
         return;
     }
+    auto callback = it->sink_callback;
 
     auto node = std::make_shared<node::sink::Sink>();
-    bool ok = m_setup_channel.unpack_param(def_name);
-    ok &= m_setup_channel.unpack_param(node->name);
-    ok &= unpack_inputs(m_setup_channel, node->inputs);
-    ok &= m_setup_channel.unpack_param(init_params);
-    ok &= m_setup_channel.unpack_param(config);
-    QLOGI("\tSink: {}, type {}, init_params {}, config {}", node->name, def_name, init_params, config);
-    auto init_paramsj = parse_json(init_params);
-    auto configj = parse_json(config);
-    node->def = m_hal.get_sink_defs().find_by_name(def_name);
-    if (!ok || !init_paramsj || !configj || !node->def)
+    bool ok = unpack_sink_data(m_setup_channel, *node);
+    if (!ok)
     {
-        QLOGE("\t\tBad sink");
         callback(HAL::Result::FAILED, node::sink::Sink_ptr());
         return;
     }
-    node->init_params = std::move(*init_paramsj);
-    node->config = std::move(*configj);
     m_hal.m_sinks.add(node);
     callback(HAL::Result::OK, node);
 }

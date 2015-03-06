@@ -19,7 +19,7 @@
 
 #include "common/node/source/ISource.h"
 #include "common/node/sink/ISink.h"
-#include "common/node/processor/IMultirotor.h"
+#include "common/node/processor/IMultirotor_Pilot.h"
 
 #include "utils/Json_Helpers.h"
 
@@ -160,6 +160,7 @@ struct Source
     virtual ~Source() {}
 
     std::string name;
+    q::rtti::class_id class_id;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Output
@@ -193,6 +194,7 @@ struct Sink
 {
     virtual ~Sink() {}
     std::string name;
+    q::rtti::class_id class_id;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input
@@ -226,6 +228,7 @@ struct Processor
     virtual ~Processor() {}
 
     std::string name;
+    q::rtti::class_id class_id;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input

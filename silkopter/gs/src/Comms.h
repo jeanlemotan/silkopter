@@ -22,7 +22,7 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/processor/IMultirotor.h"
+#include "common/node/processor/IMultirotor_Pilot.h"
 #include "common/node/processor/IProcessor.h"
 
 namespace silk
