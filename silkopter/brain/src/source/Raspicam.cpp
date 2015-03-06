@@ -248,14 +248,14 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto Raspicam::get_config() -> rapidjson::Document
+auto Raspicam::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Raspicam::get_init_params() -> rapidjson::Document
+auto Raspicam::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

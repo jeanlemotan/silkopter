@@ -206,6 +206,6 @@ HEADERS += \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
     ../../src/processor/Comp_Location.h \
     ../../../libs/utils/Butterworth.h \
-    ../../../libs/common/node/processor/IMultirotor.h \
-    ../../src/processor/Multirotor.h
+    ../../src/processor/Multirotor_Pilot.h \
+    ../../../libs/common/node/processor/IMultirotor_Pilot.h
 

@@ -56,10 +56,10 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
     inputs[0].name = "Voltage";
-    inputs[0].stream = m_config->inputs.voltage;
+    inputs[0].stream_name = m_config->inputs.voltage;
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
     inputs[1].name = "Current";
-    inputs[1].stream = m_config->inputs.current;
+    inputs[1].stream_name = m_config->inputs.current;
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>
@@ -244,14 +244,14 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto LiPo_Battery::get_config() -> rapidjson::Document
+auto LiPo_Battery::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto LiPo_Battery::get_init_params() -> rapidjson::Document
+auto LiPo_Battery::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

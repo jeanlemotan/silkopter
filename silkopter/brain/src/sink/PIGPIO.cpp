@@ -231,14 +231,14 @@ auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto PIGPIO::get_config() -> rapidjson::Document
+auto PIGPIO::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto PIGPIO::get_init_params() -> rapidjson::Document
+auto PIGPIO::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

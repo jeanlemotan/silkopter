@@ -19,7 +19,7 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/processor/IMultirotor.h"
+#include "common/node/processor/IMultirotor_Pilot.h"
 
 
 using namespace silk;
@@ -239,7 +239,7 @@ void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     {
         channel.pack_param(i.name);
         channel.pack_param(i.class_id);
-        channel.pack_param(i.stream);
+        channel.pack_param(i.stream_name);
     }
 }
 
@@ -263,6 +263,28 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
     return std::move(json);
 }
 
+static void pack_source_data(Comms::Setup_Channel& channel, node::source::ISource const& node)
+{
+    channel.pack_param(node.get_type());
+    pack_outputs(channel, node.get_outputs());
+    pack_json(channel, node.get_init_params());
+    pack_json(channel, node.get_config());
+}
+static void pack_sink_data(Comms::Setup_Channel& channel, node::sink::ISink const& node)
+{
+    channel.pack_param(node.get_type());
+    pack_inputs(channel, node.get_inputs());
+    pack_json(channel, node.get_init_params());
+    pack_json(channel, node.get_config());
+}
+static void pack_processor_data(Comms::Setup_Channel& channel, node::processor::IProcessor const& node)
+{
+    channel.pack_param(node.get_type());
+    pack_inputs(channel, node.get_inputs());
+    pack_outputs(channel, node.get_outputs());
+    pack_json(channel, node.get_init_params());
+    pack_json(channel, node.get_config());
+}
 
 
 void Comms::handle_enumerate_node_defs()
@@ -330,27 +352,17 @@ void Comms::handle_enumerate_nodes()
         for (auto const& n: sources)
         {
             m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(n.node->get_type());
-            pack_outputs(m_setup_channel, n.node->get_outputs());
-            pack_json(m_setup_channel, n.node->get_init_params());
-            pack_json(m_setup_channel, n.node->get_config());
+            pack_source_data(m_setup_channel, *n.node);
         }
         for (auto const& n: sinks)
         {
             m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(n.node->get_type());
-            pack_inputs(m_setup_channel, n.node->get_inputs());
-            pack_json(m_setup_channel, n.node->get_init_params());
-            pack_json(m_setup_channel, n.node->get_config());
+            pack_sink_data(m_setup_channel, *n.node);
         }
         for (auto const& n: processors)
         {
             m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(n.node->get_type());
-            pack_inputs(m_setup_channel, n.node->get_inputs());
-            pack_outputs(m_setup_channel, n.node->get_outputs());
-            pack_json(m_setup_channel, n.node->get_init_params());
-            pack_json(m_setup_channel, n.node->get_config());
+            pack_processor_data(m_setup_channel, *n.node);
         }
 
         m_setup_channel.end_pack();
@@ -374,6 +386,9 @@ auto Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
         return std::shared_ptr<Node_Base>();
     }
 
+    m_setup_channel.begin_pack(message);
+    m_setup_channel.pack_param(req_id);
+
     QLOGI("Req Id: {} - node config", req_id);
     auto node = registry.template find_by_name<Node_Base>(name);
     if (!node)
@@ -390,9 +405,6 @@ auto Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
         node->set_config(*configj);
     }
 
-    m_setup_channel.begin_pack(message);
-    m_setup_channel.pack_param(req_id);
-
     return node;
 }
 
@@ -403,10 +415,9 @@ void Comms::handle_source_config()
 
     if (node)
     {
-        pack_outputs(m_setup_channel, node->get_outputs());
-        pack_json(m_setup_channel, node->get_config());
-        m_setup_channel.end_pack();
+        pack_source_data(m_setup_channel, *node);
     }
+    m_setup_channel.end_pack();
 }
 void Comms::handle_sink_config()
 {
@@ -414,10 +425,9 @@ void Comms::handle_sink_config()
                     comms::Setup_Message::SINK_CONFIG, m_hal.get_sinks());
     if (node)
     {
-        pack_inputs(m_setup_channel, node->get_inputs());
-        pack_json(m_setup_channel, node->get_config());
-        m_setup_channel.end_pack();
+        pack_sink_data(m_setup_channel, *node);
     }
+    m_setup_channel.end_pack();
 }
 void Comms::handle_processor_config()
 {
@@ -425,11 +435,9 @@ void Comms::handle_processor_config()
                     comms::Setup_Message::PROCESSOR_CONFIG, m_hal.get_processors());
     if (node)
     {
-        pack_inputs(m_setup_channel, node->get_inputs());
-        pack_outputs(m_setup_channel, node->get_outputs());
-        pack_json(m_setup_channel, node->get_config());
-        m_setup_channel.end_pack();
+        pack_processor_data(m_setup_channel, *node);
     }
+    m_setup_channel.end_pack();
 }
 //void Comms::handle_stream_config()
 //{
@@ -446,6 +454,9 @@ void Comms::handle_add_source()
         QLOGI("Req Id: {} - add source", req_id);
         std::string def_name, name, init_params;
 
+        m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
+        m_setup_channel.pack_param(req_id);
+
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
         ok &= m_setup_channel.unpack_param(init_params);
@@ -454,24 +465,19 @@ void Comms::handle_add_source()
         if (!ok || !init_paramsj)
         {
             QLOGE("\t\tBad source");
-            m_setup_channel.pack(comms::Setup_Message::ADD_SOURCE, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         auto node = m_hal.create_node<node::source::ISource>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
         if (!node)
         {
-            m_setup_channel.pack(comms::Setup_Message::ADD_SOURCE, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         //reply
-        m_setup_channel.begin_pack(comms::Setup_Message::ADD_SOURCE);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(def_name);
-        m_setup_channel.pack_param(name);
-        pack_json(m_setup_channel, node->get_init_params());
-        pack_json(m_setup_channel, node->get_config());
+        pack_source_data(m_setup_channel, *node);
         m_setup_channel.end_pack();
     }
     else
@@ -489,6 +495,9 @@ void Comms::handle_add_sink()
         QLOGI("Req Id: {} - add sink", req_id);
         std::string def_name, name, init_params;
 
+        m_setup_channel.begin_pack(comms::Setup_Message::ADD_SINK);
+        m_setup_channel.pack_param(req_id);
+
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
         ok &= m_setup_channel.unpack_param(init_params);
@@ -497,24 +506,19 @@ void Comms::handle_add_sink()
         if (!ok || !init_paramsj)
         {
             QLOGE("\t\tBad sink");
-            m_setup_channel.pack(comms::Setup_Message::ADD_SINK, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         auto node = m_hal.create_node<node::sink::ISink>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
         if (!node)
         {
-            m_setup_channel.pack(comms::Setup_Message::ADD_SINK, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         //reply
-        m_setup_channel.begin_pack(comms::Setup_Message::ADD_SINK);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(def_name);
-        m_setup_channel.pack_param(name);
-        pack_json(m_setup_channel, node->get_init_params());
-        pack_json(m_setup_channel, node->get_config());
+        pack_sink_data(m_setup_channel, *node);
         m_setup_channel.end_pack();
     }
     else
@@ -532,6 +536,9 @@ void Comms::handle_add_processor()
         QLOGI("Req Id: {} - add processor", req_id);
         std::string def_name, name, init_params;
 
+        m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
+        m_setup_channel.pack_param(req_id);
+
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
         ok &= m_setup_channel.unpack_param(init_params);
@@ -540,24 +547,19 @@ void Comms::handle_add_processor()
         if (!ok || !init_paramsj)
         {
             QLOGE("\t\tBad processor");
-            m_setup_channel.pack(comms::Setup_Message::ADD_PROCESSOR, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         auto node = m_hal.create_node<node::processor::IProcessor>(def_name, name, std::move(*init_paramsj), rapidjson::Document());
         if (!node)
         {
-            m_setup_channel.pack(comms::Setup_Message::ADD_PROCESSOR, req_id);
+            m_setup_channel.end_pack();
             return;
         }
 
         //reply
-        m_setup_channel.begin_pack(comms::Setup_Message::ADD_PROCESSOR);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(def_name);
-        m_setup_channel.pack_param(name);
-        pack_json(m_setup_channel, node->get_init_params());
-        pack_json(m_setup_channel, node->get_config());
+        pack_processor_data(m_setup_channel, *node);
         m_setup_channel.end_pack();
     }
     else
@@ -629,29 +631,32 @@ void Comms::handle_multirotor_mode()
     }
     QLOGI("Req Id: {} - multirotor input request", req_id);
 
+    m_setup_channel.begin_pack(comms::Setup_Message::MULTIROTOR_MODE);
+    m_setup_channel.pack_param(req_id);
+
     std::string name;
     if (!m_setup_channel.unpack_param(name))
     {
         QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
+        m_setup_channel.end_pack();
         return;
     }
 
-    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor_Pilot>(name);
     if (!multirotor)
     {
         QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id);
+        m_setup_channel.end_pack();
         return;
     }
 
-    node::processor::IMultirotor::Mode mode;
+    node::processor::IMultirotor_Pilot::Mode mode;
     if (m_setup_channel.unpack_param(mode))
     {
         multirotor->set_mode(mode);
     }
 
-    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_MODE, req_id, multirotor->get_input());
+    m_setup_channel.pack_param(multirotor->get_mode());
 }
 
 void Comms::handle_multirotor_input_request()
@@ -665,23 +670,27 @@ void Comms::handle_multirotor_input_request()
     }
     QLOGI("Req Id: {} - multirotor input request", req_id);
 
+    m_setup_channel.begin_pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST);
+    m_setup_channel.pack_param(req_id);
+
     std::string name;
     if (!m_setup_channel.unpack_param(name))
     {
         QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
+        m_setup_channel.end_pack();
         return;
     }
 
-    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor_Pilot>(name);
     if (!multirotor)
     {
         QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-        m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id);
+        m_setup_channel.end_pack();
         return;
     }
 
-    m_setup_channel.pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST, req_id, multirotor->get_input());
+    m_setup_channel.pack_param(multirotor->get_input());
+    m_setup_channel.end_pack();
 }
 
 void Comms::handle_multirotor_input()
@@ -702,14 +711,14 @@ void Comms::handle_multirotor_input()
         return;
     }
 
-    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor>(name);
+    auto multirotor = m_hal.get_processors().find_by_name<node::processor::IMultirotor_Pilot>(name);
     if (!multirotor)
     {
         QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
         return;
     }
 
-    node::processor::IMultirotor::Input input;
+    node::processor::IMultirotor_Pilot::Input input;
     if (m_input_channel.unpack_param(input))
     {
         multirotor->set_input(input);

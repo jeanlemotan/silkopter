@@ -30,10 +30,10 @@ public:
     RC5T619(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() -> rapidjson::Document;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> rapidjson::Document;
+    auto get_config() const -> rapidjson::Document;
 
     auto get_outputs() const -> std::vector<Output>;
 

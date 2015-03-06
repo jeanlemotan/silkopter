@@ -160,7 +160,6 @@ struct Source
     virtual ~Source() {}
 
     std::string name;
-    Source_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Output
@@ -194,7 +193,6 @@ struct Sink
 {
     virtual ~Sink() {}
     std::string name;
-    Sink_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input
@@ -228,7 +226,6 @@ struct Processor
     virtual ~Processor() {}
 
     std::string name;
-    Processor_Def_ptr def;
     rapidjson::Document init_params;
     rapidjson::Document config;
     struct Input

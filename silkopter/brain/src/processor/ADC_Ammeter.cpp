@@ -45,7 +45,7 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
     inputs[0].name = "ADC Value";
-    inputs[0].stream = m_config->inputs.adc_value;
+    inputs[0].stream_name = m_config->inputs.adc_value;
     return inputs;
 }
 auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
@@ -114,14 +114,14 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto ADC_Ammeter::get_config() -> rapidjson::Document
+auto ADC_Ammeter::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto ADC_Ammeter::get_init_params() -> rapidjson::Document
+auto ADC_Ammeter::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

@@ -25,10 +25,10 @@ public:
     Resampler(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() -> rapidjson::Document;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() -> rapidjson::Document;
+    auto get_config() const -> rapidjson::Document;
 
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
@@ -105,7 +105,7 @@ auto Resampler<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_init_params() -> rapidjson::Document
+auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_init_params, json);
@@ -158,7 +158,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     return true;
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_config() -> rapidjson::Document
+auto Resampler<Stream_t>::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -171,7 +171,7 @@ auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
     inputs[0].name = "Input";
-    inputs[0].stream = m_config.inputs.input;
+    inputs[0].stream_name = m_config.inputs.input;
     return inputs;
 }
 template<class Stream_t>

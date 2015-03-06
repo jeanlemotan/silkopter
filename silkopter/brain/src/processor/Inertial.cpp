@@ -46,10 +46,10 @@ auto Inertial::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
     inputs[0].name = "Reference_ Frame";
-    inputs[0].stream = m_config->inputs.reference_frame;
+    inputs[0].stream_name = m_config->inputs.reference_frame;
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
     inputs[1].name = "Acceleration";
-    inputs[1].stream = m_config->inputs.acceleration;
+    inputs[1].stream_name = m_config->inputs.acceleration;
     return inputs;
 }
 auto Inertial::get_outputs() const -> std::vector<Output>
@@ -159,14 +159,14 @@ auto Inertial::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto Inertial::get_config() -> rapidjson::Document
+auto Inertial::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Inertial::get_init_params() -> rapidjson::Document
+auto Inertial::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

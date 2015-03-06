@@ -45,13 +45,13 @@ auto Comp_Location::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
     inputs[0].name = "Location";
-    inputs[0].stream = m_config->inputs.location;
+    inputs[0].stream_name = m_config->inputs.location;
     inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
     inputs[1].name = "Linear Acceleration";
-    inputs[1].stream = m_config->inputs.linear_acceleration;
+    inputs[1].stream_name = m_config->inputs.linear_acceleration;
     inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
     inputs[2].name = "Pressure";
-    inputs[2].stream = m_config->inputs.pressure;
+    inputs[2].stream_name = m_config->inputs.pressure;
     return inputs;
 }
 auto Comp_Location::get_outputs() const -> std::vector<Output>
@@ -183,14 +183,14 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     return true;
 }
-auto Comp_Location::get_config() -> rapidjson::Document
+auto Comp_Location::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Comp_Location::get_init_params() -> rapidjson::Document
+auto Comp_Location::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

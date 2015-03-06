@@ -9,11 +9,11 @@ namespace node
 namespace processor
 {
 
-class IMultirotor : public IProcessor
+class IMultirotor_Pilot : public IProcessor
 {
-    DEFINE_RTTI_CLASS(IMultirotor, IProcessor);
+    DEFINE_RTTI_CLASS(IMultirotor_Pilot, IProcessor);
 public:
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IMultirotor>(); }
+    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IMultirotor_Pilot>(); }
 
     enum class Mode : uint8_t
     {
