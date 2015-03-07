@@ -98,20 +98,6 @@ enum class Setup_Message : uint8_t
     REMOVE_PROCESSOR,
     REMOVE_SINK,
 
-    //sets/gets a node init params as a json string
-    //REQ:
-    //  uint32_t req_id
-    //  string - node name
-    //  [optional] string - if present, the init params to set. If not set - it's a request. NOTE - settinng this triggers a reboot
-    //RES:
-    //  uint32_t req_id
-    //  string - node name
-    //  string - the init params
-    SOURCE_INIT_PARAMS,
-    STREAM_INIT_PARAMS,
-    PROCESSOR_INIT_PARAMS,
-    SINK_INIT_PARAMS,
-
     //sets/gets a node config as a json string
     //REQ:
     //  uint32_t req_id
@@ -125,6 +111,11 @@ enum class Setup_Message : uint8_t
     STREAM_CONFIG,
     PROCESSOR_CONFIG,
     SINK_CONFIG,
+
+    SOURCE_DATA,
+    STREAM_DATA,
+    PROCESSOR_DATA,
+    SINK_DATA,
 
     //start or stop telemetry streaming.
     //REQ:

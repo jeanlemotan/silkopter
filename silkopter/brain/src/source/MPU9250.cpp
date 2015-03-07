@@ -530,7 +530,9 @@ auto MPU9250::init() -> bool
     if (!res || who_am_i != 0x71)
     {
         QLOGE("Cannot find mpu9250");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
     QLOGI("Found MPU9250 id: {x}", who_am_i);
 
@@ -569,7 +571,9 @@ auto MPU9250::init() -> bool
     if (!res)
     {
         QLOGE("Failed to setup mpu9250");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
 
     return true;

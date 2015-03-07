@@ -166,6 +166,8 @@ struct Source
         uint32_t rate = 0;
     };
     std::vector<Output> outputs;
+
+    q::util::Signal<void(Source&)> changed_signal;
 };
 DECLARE_CLASS_PTR(Source);
 
@@ -193,10 +195,11 @@ struct Sink
     struct Input
     {
         q::rtti::class_id class_id;
-        std::string stream;
         std::string name;
     };
     std::vector<Input> inputs;
+
+    q::util::Signal<void(Sink&)> changed_signal;
 };
 DECLARE_CLASS_PTR(Sink);
 
@@ -218,13 +221,14 @@ struct Processor
 {
     std::string name;
     q::rtti::class_id class_id;
+
     rapidjson::Document init_params;
     rapidjson::Document config;
+
     struct Input
     {
         q::rtti::class_id class_id;
         std::string name;
-        std::string stream;
     };
     std::vector<Input> inputs;
 
@@ -235,6 +239,8 @@ struct Processor
         uint32_t rate = 0;
     };
     std::vector<Output> outputs;
+
+    q::util::Signal<void(Processor&)> changed_signal;
 };
 DECLARE_CLASS_PTR(Processor);
 

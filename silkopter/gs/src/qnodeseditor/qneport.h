@@ -42,17 +42,21 @@ public:
     QNEPort(QGraphicsItem *parent = 0);
 	~QNEPort();
 
+    void disconnectAll();
+
 	void setNEBlock(QNEBlock*);
-	void setName(const QString &n);
-	void setIsOutput(bool o);
-	int radius();
-	bool isOutput();
-	QVector<QNEConnection*>& connections();
-    void setPortType(int);
+    void setIsOutput(bool o);
+    bool isOutput();
 
+    int radius();
+
+    void setPortType(const QString& type);
+    const QString& portType() const { return m_portType; }
+
+    void setName(const QString &n);
     const QString& name() const { return m_name; }
-    int portType() const { return m_portType; }
 
+    QVector<QNEConnection*>& connections();
     int type() const { return Type; }
 
 	QNEBlock* block() const;
@@ -75,7 +79,7 @@ private:
     int m_radius;
     int m_margin;
 	QVector<QNEConnection*> m_connections;
-    int m_portType;
+    QString m_portType;
     QVector2D m_dir;
 };
 

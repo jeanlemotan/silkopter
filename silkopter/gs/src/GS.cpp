@@ -10,6 +10,8 @@ GS::GS(QWidget *parent)
 {
 //	m_ui.setupUi(this);
 
+    std::string xxx("cucu");
+
     m_last_time = q::Clock::now();
 
 	auto* timer = new QTimer(this);

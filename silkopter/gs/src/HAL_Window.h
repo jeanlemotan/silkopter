@@ -3,6 +3,10 @@
 #include <QMainWindow>
 #include <QtWidgets>
 
+#include "qneblock.h"
+#include "qnodeseditor.h"
+#include "qneport.h"
+
 #include "HAL.h"
 
 class QNodesEditor;
@@ -20,12 +24,14 @@ private:
 private:
     void contextMenuEvent(QContextMenuEvent* event);
 
+    void refresh_source(silk::node::source::Source& node);
     void add_source(silk::node::source::Source_ptr node, QPointF pos);
     void create_source(silk::node::source::Source_Def_ptr def, QPointF pos);
 
     void add_sink(silk::node::sink::Sink_ptr node, QPointF pos);
     void create_sink(silk::node::sink::Sink_Def_ptr def, QPointF pos);
 
+    void refresh_processor(silk::node::processor::Processor& node);
     void add_processor(silk::node::processor::Processor_ptr node, QPointF pos);
     void create_processor(silk::node::processor::Processor_Def_ptr def, QPointF pos);
 
@@ -34,33 +40,23 @@ private:
     QGraphicsView* m_view;
     QGraphicsScene* m_scene;
 
-    struct Item_Key
+    struct Node_Data
     {
-        q::rtti::class_id class_id;
-        std::string name;
-
-        bool operator==(Item_Key const& other) const
+        std::shared_ptr<QNEBlock> block;
+        struct Input_Data
         {
-            return class_id == other.class_id && name == other.name;
-        }
-    };
-
-    struct Item_Hasher
-    {
-        auto operator()(Item_Key const& key) const -> size_t
+            uint32_t rate = 0;
+            std::shared_ptr<QNEPort> port;
+        };
+        struct Output_Data
         {
-            size_t hash = std::hash<q::rtti::class_id>()(key.class_id);
-            q::util::hash_combine(hash, std::hash<std::string>()(key.name));
-            return hash;
-        }
+            uint32_t rate = 0;
+            std::shared_ptr<QNEPort> port;
+        };
+        std::map<std::string, Input_Data> inputs;
+        std::map<std::string, Output_Data> outputs;
     };
 
-    struct Item_Data
-    {
-        QPointF position;
-    };
-
-    std::unordered_map<Item_Key, Item_Data, Item_Hasher> m_ui_items;
-
+    std::map<std::string, Node_Data> m_nodes;
 };
 

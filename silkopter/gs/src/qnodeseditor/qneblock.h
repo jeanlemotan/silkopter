@@ -40,6 +40,8 @@ public:
     void setName(const QString &name);
     const QString& name() const;
 
+    void refreshGeometry();
+
     QNEPort* addInputPort(const QString &name);
     QNEPort* addOutputPort(const QString &name);
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

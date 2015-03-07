@@ -74,9 +74,9 @@ private:
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();
 
-    void handle_source_config();
-    void handle_sink_config();
-    void handle_processor_config();
+    void handle_source_data();
+    void handle_sink_data();
+    void handle_processor_data();
 //    void handle_stream_config();
 
     void handle_add_source();

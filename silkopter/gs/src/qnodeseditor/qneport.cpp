@@ -48,14 +48,20 @@ QNEPort::QNEPort(QGraphicsItem *parent):
 	setBrush(Qt::red);
 
 	setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
-
-    m_portType = 0;
 }
 
 QNEPort::~QNEPort()
 {
-	foreach(QNEConnection *conn, m_connections)
-		delete conn;
+    disconnectAll();
+}
+
+void QNEPort::disconnectAll()
+{
+    foreach(QNEConnection *conn, m_connections)
+    {
+        delete conn;
+    }
+    m_connections.clear();
 }
 
 void QNEPort::setNEBlock(QNEBlock *b)
@@ -67,14 +73,6 @@ void QNEPort::setName(const QString &n)
 {
     m_name = n;
     m_label->setPlainText(n);
-}
-
-void QNEPort::setIsOutput(bool o)
-{
-    m_isOutput = o;
-
-	QFontMetrics fm(scene()->font());
-    QRect r = fm.boundingRect(m_name);
 
     if (m_isOutput)
     {
@@ -84,6 +82,11 @@ void QNEPort::setIsOutput(bool o)
     {
         m_label->setPos(m_radius + m_margin, -m_label->boundingRect().height()/2);
     }
+}
+
+void QNEPort::setIsOutput(bool o)
+{
+    m_isOutput = o;
 }
 
 void QNEPort::setDir(QVector2D dir)
@@ -111,7 +114,7 @@ QVector<QNEConnection*>& QNEPort::connections()
 	return m_connections;
 }
 
-void QNEPort::setPortType(int type)
+void QNEPort::setPortType(const QString& type)
 {
     m_portType = type;
 }

@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 QNEConnection::QNEConnection(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 {
     setPen(QPen(QColor(QRgb(0x2c3e50)), 3));
-	setBrush(Qt::NoBrush);
+    setBrush(Qt::NoBrush);
 	setZValue(-1);
 }
 
@@ -53,33 +53,27 @@ QNEConnection::~QNEConnection()
 void QNEConnection::setPos1(const QPointF &p)
 {
     m_pos1 = p;
+    updatePath();
 }
 
 void QNEConnection::setPos2(const QPointF &p)
 {
     m_pos2 = p;
+    updatePath();
 }
 
 void QNEConnection::setPort1(QNEPort *p)
 {
 	m_port1 = p;
 	m_port1->connections().append(this);
-    if (m_port2)
-    {
-        m_port1->connectedSignal.execute(m_port2);
-        m_port2->connectedSignal.execute(m_port1);
-    }
+    setPos1(p->scenePos());
 }
 
 void QNEConnection::setPort2(QNEPort *p)
 {
 	m_port2 = p;
 	m_port2->connections().append(this);
-    if (m_port1)
-    {
-        m_port1->connectedSignal.execute(m_port2);
-        m_port2->connectedSignal.execute(m_port1);
-    }
+    setPos2(p->scenePos());
 }
 
 void QNEConnection::updatePosFromPorts()

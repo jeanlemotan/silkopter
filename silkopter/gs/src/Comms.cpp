@@ -212,8 +212,7 @@ auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& i: io)
     {
         if (!channel.unpack_param(i.name) ||
-            !channel.unpack_param(i.class_id) ||
-            !channel.unpack_param(i.stream))
+            !channel.unpack_param(i.class_id))
         {
             return false;
         }
@@ -241,6 +240,29 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     }
     return true;
 }
+
+//template<class T>
+//auto process_config(rapidjson::Document const& config, T& node)
+//{
+//    for (auto const& i: node.inputs)
+//    {
+//        i.stream_name = std::string();
+//        q::Path path("inputs");
+//        path += i.name;
+//        auto* value = jsonutil::find_value(document, path);
+//        if (!value)
+//        {
+//            QLOGE("Node {}, cannot find input named {} in the config json.", node.name, i.name);
+//            continue;
+//        }
+//        if (value)
+//        {
+//            QLOGE("Node {}, cannot find input named {} in the config json.", node.name, i.name);
+//            continue;
+//        }
+//        i.stream_name = value->GetString();
+//    }
+//}
 
 static auto unpack_source_data(Comms::Setup_Channel& channel, node::source::Source& node) -> bool
 {
@@ -520,15 +542,13 @@ void Comms::handle_enumerate_nodes()
 }
 
 
-void Comms::handle_source_config()
+void Comms::handle_source_data()
 {
     uint32_t req_id = 0;
     std::string name;
-    std::string config_str;
     bool ok = m_setup_channel.begin_unpack() &&
                 m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name) &&
-                m_setup_channel.unpack_param(config_str);
+                m_setup_channel.unpack_param(name);
     if (!ok)
     {
         QLOGE("Failed to unpack node config");
@@ -544,24 +564,20 @@ void Comms::handle_source_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    node->config.SetObject();
-    if (!config_str.empty() &&
-            node->config.Parse(config_str.c_str()).HasParseError())
+    if (!unpack_source_data(m_setup_channel, *node))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return;
+        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
+    node->changed_signal.execute(*node);
 }
 
-void Comms::handle_sink_config()
+void Comms::handle_sink_data()
 {
     uint32_t req_id = 0;
     std::string name;
-    std::string config_str;
     bool ok = m_setup_channel.begin_unpack() &&
                 m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name) &&
-                m_setup_channel.unpack_param(config_str);
+                m_setup_channel.unpack_param(name);
     if (!ok)
     {
         QLOGE("Failed to unpack node config");
@@ -577,24 +593,20 @@ void Comms::handle_sink_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    node->config.SetObject();
-    if (!config_str.empty() &&
-            node->config.Parse(config_str.c_str()).HasParseError())
+    if (!unpack_sink_data(m_setup_channel, *node))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return;
+        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
+    node->changed_signal.execute(*node);
 }
 
-void Comms::handle_processor_config()
+void Comms::handle_processor_data()
 {
     uint32_t req_id = 0;
     std::string name;
-    std::string config_str;
     bool ok = m_setup_channel.begin_unpack() &&
                 m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name) &&
-                m_setup_channel.unpack_param(config_str);
+                m_setup_channel.unpack_param(name);
     if (!ok)
     {
         QLOGE("Failed to unpack node config");
@@ -610,13 +622,11 @@ void Comms::handle_processor_config()
 
     QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
 
-    node->config.SetObject();
-    if (!config_str.empty() &&
-            node->config.Parse(config_str.c_str()).HasParseError())
+    if (!unpack_processor_data(m_setup_channel, *node))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return;
+        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
+    node->changed_signal.execute(*node);
 }
 
 //void Comms::handle_stream_config()
@@ -850,9 +860,9 @@ void Comms::process()
         case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
-        case comms::Setup_Message::SOURCE_CONFIG: handle_source_config(); break;
-        case comms::Setup_Message::SINK_CONFIG: handle_sink_config(); break;
-        case comms::Setup_Message::PROCESSOR_CONFIG: handle_processor_config(); break;
+        case comms::Setup_Message::SOURCE_DATA: handle_source_data(); break;
+        case comms::Setup_Message::SINK_DATA: handle_sink_data(); break;
+        case comms::Setup_Message::PROCESSOR_DATA: handle_processor_data(); break;
 
         case comms::Setup_Message::ADD_SOURCE: handle_add_source(); break;
         case comms::Setup_Message::ADD_PROCESSOR: handle_add_processor(); break;

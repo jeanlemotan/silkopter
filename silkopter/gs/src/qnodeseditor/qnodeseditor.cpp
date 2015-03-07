@@ -83,9 +83,7 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
                 m_connection = new QNEConnection(0);
                 m_scene->addItem(m_connection);
                 m_connection->setPort1((QNEPort*) item);
-                m_connection->setPos1(item->scenePos());
                 m_connection->setPos2(me->scenePos());
-                m_connection->updatePath();
                 m_connection->setPen(unconnectedPen);
 
 				return true;
@@ -115,7 +113,6 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
         if (m_connection)
 		{
             m_connection->setPos2(me->scenePos());
-            m_connection->updatePath();
 
             QGraphicsItem *item = itemAt(me->scenePos());
             if (item && item->type() == QNEPort::Type)
@@ -158,9 +155,10 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
                         port1->portType() == port2->portType() &&
                         !port1->isConnected(port2))
 				{
-                    m_connection->setPos2(port2->scenePos());
+                    port1->connectedSignal.execute(port2);
+                    port2->connectedSignal.execute(port1);
+
                     m_connection->setPort2(port2);
-                    m_connection->updatePath();
                     m_connection->setPen(connectedPen);
                     m_connection = 0;
 					return true;

@@ -36,7 +36,7 @@ auto Comp_Location::init(rapidjson::Value const& init_params) -> bool
 }
 auto Comp_Location::init() -> bool
 {
-    m_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -45,13 +45,10 @@ auto Comp_Location::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
     inputs[0].name = "Location";
-    inputs[0].stream_name = m_config->inputs.location;
     inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
     inputs[1].name = "Linear Acceleration";
-    inputs[1].stream_name = m_config->inputs.linear_acceleration;
     inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
     inputs[2].name = "Pressure";
-    inputs[2].stream_name = m_config->inputs.pressure;
     return inputs;
 }
 auto Comp_Location::get_outputs() const -> std::vector<Output>
@@ -59,13 +56,13 @@ auto Comp_Location::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
     outputs[0].name = "Location";
-    outputs[0].stream = m_stream;
+    outputs[0].stream = m_output_stream;
     return outputs;
 }
 
 void Comp_Location::process()
 {
-    m_stream->samples.clear();
+    m_output_stream->samples.clear();
 
     auto location_stream = m_location_stream.lock();
     auto linear_acceleration_stream = m_linear_acceleration_stream.lock();
@@ -105,16 +102,16 @@ void Comp_Location::process()
         return;
     }
 
-    m_stream->samples.resize(count);
+    m_output_stream->samples.resize(count);
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream->last_sample.dt = m_dt;
-        m_stream->last_sample.sample_idx++;
+        m_output_stream->last_sample.dt = m_dt;
+        m_output_stream->last_sample.sample_idx++;
 
-        m_stream->last_sample.value = m_location_samples[i].value;
+        m_output_stream->last_sample.value = m_location_samples[i].value;
 
-        m_stream->samples[i] = m_stream->last_sample;
+        m_output_stream->samples[i] = m_output_stream->last_sample;
     }
 
 
@@ -137,50 +134,46 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
+    *m_config = sz;
+    m_output_stream->rate = 0;
+
     auto location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
     auto linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.inputs.linear_acceleration);
     auto pressure_stream = m_hal.get_streams().find_by_name<stream::IPressure>(sz.inputs.pressure);
-    if (!location_stream || location_stream->get_rate() == 0)
-    {
-        QLOGE("No input angular velocity stream specified");
-        return false;
-    }
-    if (!linear_acceleration_stream || linear_acceleration_stream->get_rate() == 0)
-    {
-        QLOGE("No input acceleration stream specified");
-        return false;
-    }
-    if (!pressure_stream || pressure_stream->get_rate() == 0)
-    {
-        QLOGE("No input magnetic field stream specified");
-        return false;
-    }
-    if (linear_acceleration_stream->get_rate() != pressure_stream->get_rate() ||
-        linear_acceleration_stream->get_rate() != location_stream->get_rate())
-    {
-        QLOGE("Angular velocity, Acceleration and Magnetic field streams have different rates: {} != {} != {}",
-              location_stream->get_rate(),
-              linear_acceleration_stream->get_rate(),
-              pressure_stream->get_rate());
-        return false;
-    }
-
-    if (m_stream->rate != 0 && m_stream->rate != linear_acceleration_stream->get_rate())
-    {
-        QLOGE("Input streams rate has changed: {} != {}",
-              location_stream->get_rate(),
-              m_stream->rate);
-        return false;
-    }
-
-    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_location_stream = location_stream;
     m_linear_acceleration_stream = linear_acceleration_stream;
     m_pressure_stream = pressure_stream;
-    m_stream->rate = location_stream->get_rate();
 
-    *m_config = sz;
+    uint32_t output_stream_rate = 0;
+
+    auto rate = location_stream ? location_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.location, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    rate = linear_acceleration_stream ? linear_acceleration_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.linear_acceleration, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    rate = pressure_stream ? pressure_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.pressure, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    m_output_stream->rate = rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+
     return true;
 }
 auto Comp_Location::get_config() const -> rapidjson::Document

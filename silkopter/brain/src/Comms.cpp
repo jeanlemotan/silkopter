@@ -239,7 +239,6 @@ void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     {
         channel.pack_param(i.name);
         channel.pack_param(i.class_id);
-        channel.pack_param(i.stream_name);
     }
 }
 
@@ -403,6 +402,7 @@ auto Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
 
     m_setup_channel.begin_pack(message);
     m_setup_channel.pack_param(req_id);
+    m_setup_channel.pack_param(name);
 
     QLOGI("Req Id: {} - node config", req_id);
     auto node = registry.template find_by_name<Node_Base>(name);
@@ -424,7 +424,7 @@ auto Comms::handle_node_config(comms::Setup_Message message, Registry const& reg
 void Comms::handle_source_config()
 {
     auto node = handle_node_config<decltype(m_hal.get_sources()), node::source::ISource>(
-                    comms::Setup_Message::SOURCE_CONFIG, m_hal.get_sources());
+                    comms::Setup_Message::SOURCE_DATA, m_hal.get_sources());
 
     if (node)
     {
@@ -435,7 +435,7 @@ void Comms::handle_source_config()
 void Comms::handle_sink_config()
 {
     auto node = handle_node_config<decltype(m_hal.get_sinks()), node::sink::ISink>(
-                    comms::Setup_Message::SINK_CONFIG, m_hal.get_sinks());
+                    comms::Setup_Message::SINK_DATA, m_hal.get_sinks());
     if (node)
     {
         pack_sink_data(m_setup_channel, *node);
@@ -445,7 +445,7 @@ void Comms::handle_sink_config()
 void Comms::handle_processor_config()
 {
     auto node = handle_node_config<decltype(m_hal.get_processors()), node::processor::IProcessor>(
-                    comms::Setup_Message::PROCESSOR_CONFIG, m_hal.get_processors());
+                    comms::Setup_Message::PROCESSOR_DATA, m_hal.get_processors());
     if (node)
     {
         pack_processor_data(m_setup_channel, *node);

@@ -56,10 +56,8 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
     inputs[0].name = "Voltage";
-    inputs[0].stream_name = m_config->inputs.voltage;
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
     inputs[1].name = "Current";
-    inputs[1].stream_name = m_config->inputs.current;
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>

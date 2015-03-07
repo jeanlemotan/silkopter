@@ -27,7 +27,6 @@ public:
     {
         q::rtti::class_id class_id = 0;
         std::string name;
-        std::string stream_name;
     };
     virtual auto get_inputs() const -> std::vector<Input> = 0;
 

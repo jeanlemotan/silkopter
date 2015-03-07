@@ -46,13 +46,10 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
     inputs[0].name = "Angular Velocity";
-    inputs[0].stream_name = m_config->inputs.angular_velocity;
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
-    inputs[1].name = m_config->inputs.acceleration;
-    inputs[1].stream_name = m_config->inputs.acceleration;
+    inputs[1].name = "Acceleration";
     inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
-    inputs[2].name = m_config->inputs.magnetic_field;
-    inputs[2].stream_name = m_config->inputs.magnetic_field;
+    inputs[2].name = "Magnetic Field";
     return inputs;
 }
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>

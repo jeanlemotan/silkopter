@@ -45,7 +45,6 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
     inputs[0].name = "ADC Value";
-    inputs[0].stream_name = m_config->inputs.adc_value;
     return inputs;
 }
 auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
