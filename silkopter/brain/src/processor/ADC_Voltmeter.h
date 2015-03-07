@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IADC_Value.h"
 #include "common/node/stream/IVoltage.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 
 
 namespace sz
@@ -19,10 +19,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class ADC_Voltmeter : public IProcessor
+class ADC_Voltmeter : public INode
 {
 public:
     ADC_Voltmeter(HAL& hal);
@@ -67,6 +65,5 @@ private:
 };
 
 
-}
 }
 }

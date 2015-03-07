@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "utils/Butterworth.h"
 
 #include "sz_math.hpp"
@@ -11,12 +11,9 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
-
 
 template<class Stream_t>
-class LPF : public IProcessor
+class LPF : public INode
 {
 public:
     static const int MAX_POLES = 8;
@@ -207,6 +204,5 @@ void LPF<Stream_t>::process()
 
 
 
-}
 }
 }

@@ -10,8 +10,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 
 constexpr uint8_t ADDR = 0x70;
@@ -40,6 +38,11 @@ SRF02::SRF02(HAL& hal)
     , m_config(new sz::SRF02::Config())
 {
 
+}
+
+auto SRF02::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
 }
 
 auto SRF02::get_outputs() const -> std::vector<Output>
@@ -202,5 +205,3 @@ auto SRF02::get_init_params() const -> rapidjson::Document
 
 }
 }
-}
-

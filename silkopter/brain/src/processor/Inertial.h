@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/IReference_Frame.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/ILinear_Acceleration.h"
@@ -20,10 +20,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class Inertial : public IProcessor
+class Inertial : public INode
 {
 public:
     Inertial(HAL& hal);
@@ -69,6 +67,5 @@ private:
 
 
 
-}
 }
 }

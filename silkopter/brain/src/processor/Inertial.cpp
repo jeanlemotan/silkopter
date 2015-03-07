@@ -9,8 +9,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 Inertial::Inertial(HAL& hal)
     : m_hal(hal)
@@ -172,6 +170,5 @@ auto Inertial::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

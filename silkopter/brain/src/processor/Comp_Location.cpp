@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 Comp_Location::Comp_Location(HAL& hal)
     : m_hal(hal)
@@ -190,6 +188,5 @@ auto Comp_Location::get_init_params() const -> rapidjson::Document
     return std::move(json);
 }
 
-}
 }
 }

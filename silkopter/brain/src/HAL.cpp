@@ -63,9 +63,7 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 
 HAL::HAL()
     : m_bus_factory(*this)
-    , m_source_factory(*this)
-    , m_sink_factory(*this)
-    , m_processor_factory(*this)
+    , m_node_factory(*this)
 {
     using namespace node;
 
@@ -75,41 +73,41 @@ HAL::HAL()
     m_bus_factory.register_node<bus::I2C_Linux>("I2C_Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI_Linux");
 
-    m_source_factory.register_node<source::MPU9250>("MPU9250");
-    m_source_factory.register_node<source::MS5611>("MS5611");
-    m_source_factory.register_node<source::SRF02>("SRF02");
-    m_source_factory.register_node<source::Raspicam>("Raspicam");
-    m_source_factory.register_node<source::RC5T619>("RC5T619");
-    m_source_factory.register_node<source::UBLOX>("UBLOX");
+    m_node_factory.register_node<MPU9250>("MPU9250");
+    m_node_factory.register_node<MS5611>("MS5611");
+    m_node_factory.register_node<SRF02>("SRF02");
+    m_node_factory.register_node<Raspicam>("Raspicam");
+    m_node_factory.register_node<RC5T619>("RC5T619");
+    m_node_factory.register_node<UBLOX>("UBLOX");
 
-    m_sink_factory.register_node<sink::PIGPIO>("PIGPIO");
+    m_node_factory.register_node<PIGPIO>("PIGPIO");
 
-    m_processor_factory.register_node<processor::ADC_Ammeter>("ADC_Ammeter");
-    m_processor_factory.register_node<processor::ADC_Voltmeter>("ADC_Voltmeter");
-    m_processor_factory.register_node<processor::Comp_AHRS>("Comp_AHRS");
-    m_processor_factory.register_node<processor::Comp_Location>("Comp_Location");
-    m_processor_factory.register_node<processor::Inertial>("Inertial");
-    m_processor_factory.register_node<processor::LiPo_Battery>("LiPo_Battery");
-    m_processor_factory.register_node<processor::LPF<stream::IAcceleration>>("Acceleration_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IAngular_Velocity>>("Angular_Velocity_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IADC_Value>>("ADC_Value_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ICurrent>>("Current_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IVoltage>>("Voltage_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ILocation>>("Location_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IDistance>>("Distance_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IMagnetic_Field>>("Magnetic_Field_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::IPressure>>("Pressure_LPF");
-    m_processor_factory.register_node<processor::LPF<stream::ITemperature>>("Temperature_LPF");
-    m_processor_factory.register_node<processor::Resampler<stream::IAcceleration>>("Acceleration_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IAngular_Velocity>>("Angular_Velocity_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IADC_Value>>("ADC_Value_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ICurrent>>("Current_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IVoltage>>("Voltage_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ILocation>>("Location_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IDistance>>("Distance_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IMagnetic_Field>>("Magnetic_Field_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::IPressure>>("Pressure_Resampler");
-    m_processor_factory.register_node<processor::Resampler<stream::ITemperature>>("Temperature_Resampler");
+    m_node_factory.register_node<ADC_Ammeter>("ADC_Ammeter");
+    m_node_factory.register_node<ADC_Voltmeter>("ADC_Voltmeter");
+    m_node_factory.register_node<Comp_AHRS>("Comp_AHRS");
+    m_node_factory.register_node<Comp_Location>("Comp_Location");
+    m_node_factory.register_node<Inertial>("Inertial");
+    m_node_factory.register_node<LiPo_Battery>("LiPo_Battery");
+    m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration_LPF");
+    m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular_Velocity_LPF");
+    m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC_Value_LPF");
+    m_node_factory.register_node<LPF<stream::ICurrent>>("Current_LPF");
+    m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage_LPF");
+    m_node_factory.register_node<LPF<stream::ILocation>>("Location_LPF");
+    m_node_factory.register_node<LPF<stream::IDistance>>("Distance_LPF");
+    m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic_Field_LPF");
+    m_node_factory.register_node<LPF<stream::IPressure>>("Pressure_LPF");
+    m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature_LPF");
+    m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration_Resampler");
+    m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular_Velocity_Resampler");
+    m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC_Value_Resampler");
+    m_node_factory.register_node<Resampler<stream::ICurrent>>("Current_Resampler");
+    m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage_Resampler");
+    m_node_factory.register_node<Resampler<stream::ILocation>>("Location_Resampler");
+    m_node_factory.register_node<Resampler<stream::IDistance>>("Distance_Resampler");
+    m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic_Field_Resampler");
+    m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure_Resampler");
+    m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature_Resampler");
 }
 
 HAL::~HAL()
@@ -187,34 +185,17 @@ auto HAL::get_bus_factory()    -> Factory<node::bus::IBus>&
 {
     return m_bus_factory;
 }
-auto HAL::get_source_factory()  -> Factory<node::source::ISource>&
+auto HAL::get_node_factory()  -> Factory<node::INode>&
 {
-    return m_source_factory;
+    return m_node_factory;
 }
-auto HAL::get_sink_factory()    -> Factory<node::sink::ISink>&
-{
-    return m_sink_factory;
-}
-auto HAL::get_processor_factory()  -> Factory<node::processor::IProcessor>&
-{
-    return m_processor_factory;
-}
-
 auto HAL::get_buses()    -> Registry<node::bus::IBus>&
 {
     return m_buses;
 }
-auto HAL::get_sources()  -> Registry<node::source::ISource>&
+auto HAL::get_nodes()  -> Registry<node::INode>&
 {
-    return m_sources;
-}
-auto HAL::get_sinks()    -> Registry<node::sink::ISink>&
-{
-    return m_sinks;
-}
-auto HAL::get_processors()  -> Registry<node::processor::IProcessor>&
-{
-    return m_processors;
+    return m_nodes;
 }
 auto HAL::get_streams()  -> Registry<node::stream::IStream>&
 {
@@ -235,8 +216,56 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-template<>
-auto HAL::create_nodes<node::bus::IBus>(rapidjson::Value& json) -> bool
+auto HAL::create_bus(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params) -> node::bus::IBus_ptr
+{
+    if (m_buses.find_by_name<node::bus::IBus>(name))
+    {
+        QLOGE("Bus '{}' already exist", name);
+        return node::bus::IBus_ptr();
+    }
+    auto node = m_bus_factory.create_node(type);
+    if (node && node->init(init_params))
+    {
+        auto res = m_buses.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        return node;
+    }
+    return node::bus::IBus_ptr();
+}
+auto HAL::create_node(
+        std::string const& type,
+        std::string const& name,
+        rapidjson::Value const& init_params) -> node::INode_ptr
+{
+    if (m_nodes.find_by_name<node::INode>(name))
+    {
+        QLOGE("Node '{}' already exist", name);
+        return node::INode_ptr();
+    }
+    auto node = m_node_factory.create_node(type);
+    if (node && node->init(init_params))
+    {
+        auto res = m_nodes.add(name, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        auto outputs = node->get_outputs();
+        for (auto const& x: outputs)
+        {
+            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
+            if (!m_streams.add(stream_name, x.stream))
+            {
+                QLOGE("Cannot add stream '{}'", stream_name);
+                return node::INode_ptr();
+            }
+        }
+        return node;
+    }
+    return node::INode_ptr();
+}
+
+auto HAL::create_buses(rapidjson::Value& json) -> bool
 {
     if (!json.IsObject())
     {
@@ -270,7 +299,6 @@ auto HAL::create_nodes<node::bus::IBus>(rapidjson::Value& json) -> bool
     return true;
 }
 
-template<class Base>
 auto HAL::create_nodes(rapidjson::Value& json) -> bool
 {
     if (!json.IsObject())
@@ -296,7 +324,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
             QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
             return false;
         }
-        auto node = create_node<Base>(type, name, *init_paramsj);
+        auto node = create_node(type, name, *init_paramsj);
         if (!node)
         {
             QLOGE("Failed to create node {} of type '{}'", name, type);
@@ -316,10 +344,8 @@ auto HAL::init() -> bool
 {
     using namespace silk::node;
 
-    get_sinks().remove_all();
-    get_processors().remove_all();
-    get_sources().remove_all();
     get_streams().remove_all();
+    get_nodes().remove_all();
 
     if (!load_settings())
     {
@@ -385,10 +411,8 @@ auto HAL::init() -> bool
 //    write_gnu_plot("rsout.dat", resampler.get_output_stream(0).get_samples());
 
 
-    if (!create_nodes<bus::IBus>(get_settings(q::Path("hal/buses"))) ||
-        !create_nodes<source::ISource>(get_settings(q::Path("hal/sources"))) ||
-        !create_nodes<processor::IProcessor>(get_settings(q::Path("hal/processors"))) ||
-        !create_nodes<sink::ISink>(get_settings(q::Path("hal/sinks"))))
+    if (!create_buses(get_settings(q::Path("hal/buses"))) ||
+        !create_nodes(get_settings(q::Path("hal/nodes"))))
     {
         return false;
     }
@@ -412,15 +436,7 @@ void HAL::process()
 //    {
 //        n->process();
 //    }
-    for (auto const& n: m_sources.get_all())
-    {
-        n.node->process();
-    }
-    for (auto const& n: m_processors.get_all())
-    {
-        n.node->process();
-    }
-    for (auto const& n: m_sinks.get_all())
+    for (auto const& n: m_nodes.get_all())
     {
         n.node->process();
     }

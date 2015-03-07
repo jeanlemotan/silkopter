@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 Comp_AHRS::Comp_AHRS(HAL& hal)
     : m_hal(hal)
@@ -251,6 +249,5 @@ auto Comp_AHRS::get_init_params() const -> rapidjson::Document
     return std::move(json);
 }
 
-}
 }
 }

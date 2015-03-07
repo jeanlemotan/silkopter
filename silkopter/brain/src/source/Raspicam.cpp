@@ -36,8 +36,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 
 #if defined RASPBERRY_PI
@@ -172,6 +170,11 @@ Raspicam::~Raspicam()
     m_impl->camera.reset();
 
 #endif
+}
+
+auto Raspicam::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
 }
 
 auto Raspicam::get_outputs() const -> std::vector<Output>
@@ -1327,5 +1330,3 @@ void Raspicam::set_shutter_speed(q::Clock::duration ss)
 
 }
 }
-}
-

@@ -90,32 +90,10 @@ enum class Setup_Message : uint8_t
     //          string - config
     ENUMERATE_NODES,
 
-    ADD_SOURCE,
-    ADD_PROCESSOR,
-    ADD_SINK,
-
-    REMOVE_SOURCE,
-    REMOVE_PROCESSOR,
-    REMOVE_SINK,
-
-    //sets/gets a node config as a json string
-    //REQ:
-    //  uint32_t req_id
-    //  string - node name
-    //  [optional] string - if present, the config to set. If not set - it's a request
-    //RES:
-    //  uint32_t req_id
-    //  string - node name
-    //  string - the config
-    SOURCE_CONFIG,
-    STREAM_CONFIG,
-    PROCESSOR_CONFIG,
-    SINK_CONFIG,
-
-    SOURCE_DATA,
-    STREAM_DATA,
-    PROCESSOR_DATA,
-    SINK_DATA,
+    ADD_NODE,
+    REMOVE_NODE,
+    NODE_CONFIG,
+    NODE_DATA,
 
     //start or stop telemetry streaming.
     //REQ:

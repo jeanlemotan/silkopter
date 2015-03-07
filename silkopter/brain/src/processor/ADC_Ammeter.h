@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IADC_Value.h"
 #include "common/node/stream/ICurrent.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 
 
 namespace sz
@@ -19,19 +19,11 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class ADC_Ammeter : public IProcessor
+class ADC_Ammeter : public INode
 {
 public:
     ADC_Ammeter(HAL& hal);
-
-    struct Init_Params
-    {
-        std::string name;
-        stream::IADC_Value* input_stream = nullptr;
-    };
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -69,4 +61,4 @@ private:
 
 }
 }
-}
+

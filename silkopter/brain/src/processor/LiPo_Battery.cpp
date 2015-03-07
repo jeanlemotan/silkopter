@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 constexpr uint32_t MIN_RATE = 50;
 
@@ -257,6 +255,5 @@ auto LiPo_Battery::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

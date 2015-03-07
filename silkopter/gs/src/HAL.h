@@ -17,8 +17,7 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/source/ISource.h"
-#include "common/node/sink/ISink.h"
+#include "common/node/INode.h"
 #include "common/node/processor/IMultirotor_Pilot.h"
 
 #include "common/Comm_Data.h"
@@ -142,82 +141,16 @@ DECLARE_CLASS_PTR(Voltage);
 }
 
 
-namespace source
-{
-struct Source_Def
+struct Node_Def
 {
     std::string name;
     q::rtti::class_id class_id;
     rapidjson::Document default_init_params;
     rapidjson::Document default_config;
 };
-DECLARE_CLASS_PTR(Source_Def);
+DECLARE_CLASS_PTR(Node_Def);
 
-struct Source
-{
-    std::string name;
-    q::rtti::class_id class_id;
-    rapidjson::Document init_params;
-    rapidjson::Document config;
-    struct Output
-    {
-        q::rtti::class_id class_id;
-        std::string name;
-        uint32_t rate = 0;
-    };
-    std::vector<Output> outputs;
-
-    q::util::Signal<void(Source&)> changed_signal;
-};
-DECLARE_CLASS_PTR(Source);
-
-}
-
-namespace sink
-{
-
-struct Sink_Def
-{
-    std::string name;
-    q::rtti::class_id class_id;
-    rapidjson::Document default_init_params;
-    rapidjson::Document default_config;
-};
-DECLARE_CLASS_PTR(Sink_Def);
-
-
-struct Sink
-{
-    std::string name;
-    q::rtti::class_id class_id;
-    rapidjson::Document init_params;
-    rapidjson::Document config;
-    struct Input
-    {
-        q::rtti::class_id class_id;
-        std::string name;
-    };
-    std::vector<Input> inputs;
-
-    q::util::Signal<void(Sink&)> changed_signal;
-};
-DECLARE_CLASS_PTR(Sink);
-
-}
-
-namespace processor
-{
-
-struct Processor_Def
-{
-    std::string name;
-    q::rtti::class_id class_id;
-    rapidjson::Document default_init_params;
-    rapidjson::Document default_config;
-};
-DECLARE_CLASS_PTR(Processor_Def);
-
-struct Processor
+struct Node
 {
     std::string name;
     q::rtti::class_id class_id;
@@ -240,18 +173,11 @@ struct Processor
     };
     std::vector<Output> outputs;
 
-    q::util::Signal<void(Processor&)> changed_signal;
+    q::util::Signal<void(Node&)> changed_signal;
 };
-DECLARE_CLASS_PTR(Processor);
+DECLARE_CLASS_PTR(Node);
 
 }
-
-
-}
-
-
-
-
 
 
 
@@ -275,13 +201,8 @@ public:
     HAL();
     ~HAL();
 
-    auto get_source_defs() const    -> Registry<node::source::Source_Def> const&;
-    auto get_sink_defs() const      -> Registry<node::sink::Sink_Def> const&;
-    auto get_processor_defs() const -> Registry<node::processor::Processor_Def> const&;
-
-    auto get_sources() const        -> Registry<node::source::Source> const&;
-    auto get_sinks() const          -> Registry<node::sink::Sink> const&;
-    auto get_processors() const     -> Registry<node::processor::Processor> const&;
+    auto get_node_defs() const      -> Registry<node::Node_Def> const&;
+    auto get_nodes() const          -> Registry<node::Node> const&;
     auto get_streams() const        -> Registry<node::stream::GS_IStream> const&;
 
     enum class Result
@@ -291,30 +212,18 @@ public:
         TIMEOUT
     };
 
-    typedef std::function<void(Result, node::source::Source_ptr)> Add_Source_Callback;
-    void add_source(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Source_Callback callback);
-
-    typedef std::function<void(Result, node::processor::Processor_ptr)> Add_Processor_Callback;
-    void add_processor(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Processor_Callback callback);
-
-    typedef std::function<void(Result, node::sink::Sink_ptr)> Add_Sink_Callback;
-    void add_sink(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Sink_Callback callback);
+    typedef std::function<void(Result, node::Node_ptr)> Add_Node_Callback;
+    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Node_Callback callback);
 
     typedef std::function<void(Result)> Connect_Callback;
-    void connect_input(node::sink::Sink_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
-    void connect_input(node::processor::Processor_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
+    void connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
 protected:
-    Registry<node::source::Source_Def> m_source_defs;
-    Registry<node::sink::Sink_Def> m_sink_defs;
-    Registry<node::processor::Processor_Def> m_processor_defs;
-
-    Registry<node::source::Source> m_sources;
-    Registry<node::sink::Sink> m_sinks;
-    Registry<node::processor::Processor> m_processors;
+    Registry<node::Node_Def> m_node_defs;
+    Registry<node::Node> m_nodes;
     Registry<node::stream::GS_IStream> m_streams;
 
     struct Queue_Item
@@ -329,10 +238,7 @@ protected:
         std::string def_name;
         std::string name;
         rapidjson::Document init_params;
-
-        Add_Source_Callback source_callback;
-        Add_Processor_Callback processor_callback;
-        Add_Sink_Callback sink_callback;
+        Add_Node_Callback callback;
     };
     std::vector<Add_Queue_Item> m_add_queue;
 

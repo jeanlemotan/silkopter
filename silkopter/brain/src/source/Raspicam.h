@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/source/ISource.h"
+#include "common/node/INode.h"
 #include "common/Comm_Data.h"
 #include "common/node/stream/IVideo.h"
 
@@ -21,10 +21,8 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
-class Raspicam : public ISource
+class Raspicam : public INode
 {
 public:
     Raspicam(HAL& hal);
@@ -38,6 +36,7 @@ public:
 
     void shutdown();
 
+    auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     //----------------------------------------------------------------------
@@ -83,6 +82,5 @@ private:
 };
 
 
-}
 }
 }

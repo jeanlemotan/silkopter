@@ -6,16 +6,12 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class IProcessor : q::util::Noncopyable
+class INode : q::util::Noncopyable
 {
-    DEFINE_RTTI_BASE_CLASS(IProcessor);
+    DEFINE_RTTI_BASE_CLASS(INode);
 public:
-    virtual ~IProcessor() {}
-
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IProcessor>(); }
+    virtual ~INode() {}
 
     virtual auto init(rapidjson::Value const& init_params) -> bool = 0;
     virtual auto get_init_params() const -> rapidjson::Document = 0;
@@ -40,9 +36,9 @@ public:
 
     virtual void process() = 0;
 };
-DECLARE_CLASS_PTR(IProcessor);
+DECLARE_CLASS_PTR(INode);
 
 
 }
 }
-}
+

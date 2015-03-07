@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"
@@ -23,10 +23,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class Comp_AHRS : public IProcessor
+class Comp_AHRS : public INode
 {
 public:
     Comp_AHRS(HAL& hal);
@@ -78,6 +76,5 @@ private:
 
 
 
-}
 }
 }

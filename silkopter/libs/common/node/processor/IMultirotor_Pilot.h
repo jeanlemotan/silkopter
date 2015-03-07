@@ -1,19 +1,16 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 
 namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class IMultirotor_Pilot : public IProcessor
+class IMultirotor_Pilot : public INode
 {
-    DEFINE_RTTI_CLASS(IMultirotor_Pilot, IProcessor);
+    DEFINE_RTTI_CLASS(IMultirotor_Pilot, INode);
 public:
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IMultirotor_Pilot>(); }
 
     enum class Mode : uint8_t
     {
@@ -114,4 +111,4 @@ public:
 
 }
 }
-}
+

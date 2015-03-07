@@ -23,7 +23,7 @@
 #include "common/node/stream/IVoltage.h"
 
 #include "common/node/processor/IMultirotor_Pilot.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 
 namespace silk
 {
@@ -74,14 +74,8 @@ private:
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();
 
-    void handle_source_data();
-    void handle_sink_data();
-    void handle_processor_data();
-//    void handle_stream_config();
-
-    void handle_add_source();
-    void handle_add_sink();
-    void handle_add_processor();
+    void handle_node_data();
+    void handle_add_node();
 };
 
 }

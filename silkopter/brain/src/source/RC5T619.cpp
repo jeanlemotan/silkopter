@@ -19,8 +19,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 
 
@@ -130,6 +128,11 @@ RC5T619::RC5T619(HAL& hal)
     , m_init_params(new sz::RC5T619::Init_Params())
     , m_config(new sz::RC5T619::Config())
 {
+}
+
+auto RC5T619::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
 }
 
 auto RC5T619::get_outputs() const -> std::vector<Output>
@@ -336,5 +339,3 @@ auto RC5T619::get_init_params() const -> rapidjson::Document
 
 }
 }
-}
-

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "utils/Butterworth.h"
 #include <deque>
 
@@ -12,12 +12,9 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
-
 
 template<class Stream_t>
-class Resampler : public IProcessor
+class Resampler : public INode
 {
 public:
     static const int MAX_POLES = 8;
@@ -306,6 +303,5 @@ void Resampler<Stream_t>::upsample()
 }
 
 
-}
 }
 }

@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 
 //registers
@@ -108,6 +106,11 @@ auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& t) -> bool
          : buses.spi ? buses.spi->write_register_u16(reg, t)
          : false;
 }
+auto MS5611::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
+}
+
 auto MS5611::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
@@ -339,5 +342,3 @@ auto MS5611::get_init_params() const -> rapidjson::Document
 
 }
 }
-}
-

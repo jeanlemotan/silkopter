@@ -15,8 +15,6 @@ namespace silk
 {
 namespace node
 {
-namespace sink
-{
 
 const size_t PIGPIO::MAX_PWM_CHANNELS;
 
@@ -41,6 +39,12 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     });
     return inputs;
 }
+
+auto PIGPIO::get_outputs() const -> std::vector<Output>
+{
+    return std::vector<Output>();
+}
+
 
 auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 {
@@ -245,6 +249,5 @@ auto PIGPIO::get_init_params() const -> rapidjson::Document
     return std::move(json);
 }
 
-}
 }
 }

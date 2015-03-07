@@ -12,8 +12,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 constexpr uint8_t ADDR_MPU9250 = 0x68;
 
@@ -368,6 +366,11 @@ auto MPU9250::akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
     return buses.i2c ? buses.i2c->write_register_u16(m_magnetic_field->akm_address, reg, t)
          : buses.spi ? buses.spi->write_register_u16(reg, t)
          : false;
+}
+
+auto MPU9250::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
 }
 
 auto MPU9250::get_outputs() const -> std::vector<Output>
@@ -885,5 +888,3 @@ auto MPU9250::get_init_params() const -> rapidjson::Document
 
 }
 }
-}
-

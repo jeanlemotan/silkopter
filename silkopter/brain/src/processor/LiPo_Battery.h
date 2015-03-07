@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/IVoltage.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IBattery_State.h"
@@ -22,10 +22,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class LiPo_Battery : public IProcessor
+class LiPo_Battery : public INode
 {
 public:
     LiPo_Battery(HAL& hal);
@@ -78,6 +76,5 @@ private:
 };
 
 
-}
 }
 }

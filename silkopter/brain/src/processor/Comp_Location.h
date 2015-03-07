@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "common/node/stream/ILocation.h"
 #include "common/node/stream/IPressure.h"
@@ -22,10 +22,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class Comp_Location : public IProcessor
+class Comp_Location : public INode
 {
 public:
     Comp_Location(HAL& hal);
@@ -75,4 +73,4 @@ private:
 
 }
 }
-}
+

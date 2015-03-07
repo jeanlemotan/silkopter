@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/IReference_Frame.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/ICardinal_Points.h"
@@ -10,10 +10,8 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
-class Compass : public IProcessor
+class Compass : public INode
 {
 public:
     Compass(HAL& hal);
@@ -59,6 +57,5 @@ private:
 
 
 
-}
 }
 }

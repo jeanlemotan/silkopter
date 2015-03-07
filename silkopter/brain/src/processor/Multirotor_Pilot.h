@@ -13,8 +13,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 class Multirotor_Pilot : public IMultirotor_Pilot
 {
@@ -69,6 +67,5 @@ private:
 
 
 
-}
 }
 }

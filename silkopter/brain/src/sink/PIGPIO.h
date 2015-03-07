@@ -17,10 +17,8 @@ namespace silk
 {
 namespace node
 {
-namespace sink
-{
 
-class PIGPIO : public ISink
+class PIGPIO : public INode
 {
 public:
     PIGPIO(HAL& hal);
@@ -34,6 +32,7 @@ public:
     auto get_config() const -> rapidjson::Document;
 
     auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -56,6 +55,5 @@ private:
     void set_pwm_value(size_t idx, float value);
 };
 
-}
 }
 }

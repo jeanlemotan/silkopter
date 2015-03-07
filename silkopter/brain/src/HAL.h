@@ -2,9 +2,7 @@
 
 #include "rapidjson/document.h"
 #include "common/node/bus/IBus.h"
-#include "common/node/source/ISource.h"
-#include "common/node/sink/ISink.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/INode.h"
 #include "common/node/stream/IStream.h"
 
 namespace silk
@@ -60,9 +58,12 @@ private:
     std::vector<Item> m_nodes;
 };
 
+class Comms;
+
 
 class HAL : q::util::Noncopyable
 {
+    friend class Comms;
 public:
     HAL();
     ~HAL();
@@ -74,39 +75,30 @@ public:
     auto get_settings(q::Path const& path) -> rapidjson::Value&;
     void save_settings();
 
-    auto get_bus_factory()         -> Factory<node::bus::IBus>&;
-    auto get_source_factory()      -> Factory<node::source::ISource>&;
-    auto get_sink_factory()        -> Factory<node::sink::ISink>&;
-    auto get_processor_factory()   -> Factory<node::processor::IProcessor>&;
+    auto get_bus_factory()          -> Factory<node::bus::IBus>&;
+    auto get_node_factory()         -> Factory<node::INode>&;
 
     auto get_buses()        -> Registry<node::bus::IBus>&;
-    auto get_sources()      -> Registry<node::source::ISource>&;
-    auto get_sinks()        -> Registry<node::sink::ISink>&;
-    auto get_processors()   -> Registry<node::processor::IProcessor>&;
+    auto get_nodes()        -> Registry<node::INode>&;
     auto get_streams()      -> Registry<node::stream::IStream>&;
 
-    template<class Base>
-    auto create_node(std::string const& type,
-                     std::string const& name,
-                     rapidjson::Value const& init_params) -> std::shared_ptr<Base>;
-
+private:
     auto create_bus(std::string const& type,
                     std::string const& name,
-                    rapidjson::Value const& init_params) -> std::shared_ptr<node::bus::IBus>;
+                    rapidjson::Value const& init_params) -> node::bus::IBus_ptr;
+    auto create_buses(rapidjson::Value& json) -> bool;
 
-private:
-    template<class Base> auto create_nodes(rapidjson::Value& json) -> bool;
+    auto create_node(std::string const& type,
+                     std::string const& name,
+                     rapidjson::Value const& init_params) -> node::INode_ptr;
+    auto create_nodes(rapidjson::Value& json) -> bool;
 
     Registry<node::bus::IBus> m_buses;
-    Registry<node::source::ISource> m_sources;
-    Registry<node::sink::ISink> m_sinks;
-    Registry<node::processor::IProcessor> m_processors;
+    Registry<node::INode> m_nodes;
     Registry<node::stream::IStream> m_streams;
 
     Factory<node::bus::IBus> m_bus_factory;
-    Factory<node::source::ISource> m_source_factory;
-    Factory<node::sink::ISink> m_sink_factory;
-    Factory<node::processor::IProcessor> m_processor_factory;
+    Factory<node::INode> m_node_factory;
 
     //bool m_is_initialized = false;
 
@@ -115,106 +107,6 @@ private:
 
     auto load_settings() -> bool;
 };
-
-inline auto HAL::create_bus(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> node::bus::IBus_ptr
-{
-    if (m_buses.find_by_name<node::bus::IBus>(name))
-    {
-        QLOGE("Bus '{}' already exist", name);
-        return node::bus::IBus_ptr();
-    }
-    auto node = m_bus_factory.create_node(type);
-    if (node && node->init(init_params))
-    {
-        auto res = m_buses.add(name, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        return node;
-    }
-    return node::bus::IBus_ptr();
-}
-template<>
-inline auto HAL::create_node<node::source::ISource>(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> node::source::ISource_ptr
-{
-    if (m_sources.find_by_name<node::source::ISource>(name))
-    {
-        QLOGE("Source '{}' already exist", name);
-        return node::source::ISource_ptr();
-    }
-    auto node = m_source_factory.create_node(type);
-    if (node && node->init(init_params))
-    {
-        auto res = m_sources.add(name, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        auto outputs = node->get_outputs();
-        for (auto const& x: outputs)
-        {
-            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (!m_streams.add(stream_name, x.stream))
-            {
-                QLOGE("Cannot add stream '{}'", stream_name);
-                return node::source::ISource_ptr();
-            }
-        }
-        return node;
-    }
-    return node::source::ISource_ptr();
-}
-template<>
-inline auto HAL::create_node<node::sink::ISink>(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> node::sink::ISink_ptr
-{
-    if (m_sinks.find_by_name<node::sink::ISink>(name))
-    {
-        QLOGE("Sink '{}' already exist", name);
-        return node::sink::ISink_ptr();
-    }
-    auto node = m_sink_factory.create_node(type);
-    if (node && node->init(init_params))
-    {
-        auto res = m_sinks.add(name, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        return node;
-    }
-    return node::sink::ISink_ptr();
-}
-template<>
-inline auto HAL::create_node<node::processor::IProcessor>(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> node::processor::IProcessor_ptr
-{
-    if (m_processors.find_by_name<node::processor::IProcessor>(name))
-    {
-        QLOGE("Processor '{}' already exist", name);
-        return node::processor::IProcessor_ptr();
-    }
-    auto node = m_processor_factory.create_node(type);
-    if (node && node->init(init_params))
-    {
-        auto res = m_processors.add(name, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        auto outputs = node->get_outputs();
-        for (auto const& x: outputs)
-        {
-            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (!m_streams.add(stream_name, x.stream))
-            {
-                QLOGE("Cannot add stream '{}'", stream_name);
-                return node::processor::IProcessor_ptr();
-            }
-        }
-        return node;
-    }
-    return node::processor::IProcessor_ptr();
-}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

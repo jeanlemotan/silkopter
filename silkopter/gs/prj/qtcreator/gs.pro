@@ -61,11 +61,8 @@ HEADERS += \
     ../../../libs/common/node/processor/IBattery.h \
     ../../../libs/common/node/processor/ICompass.h \
     ../../../libs/common/node/processor/IFilter.h \
-    ../../../libs/common/node/processor/IProcessor.h \
     ../../../libs/common/node/processor/ITransform.h \
     ../../../libs/common/node/sink/IPWM.h \
-    ../../../libs/common/node/sink/ISink.h \
-    ../../../libs/common/node/source/ISource.h \
     ../../../libs/common/node/stream/IAcceleration.h \
     ../../../libs/common/node/stream/IADC_Value.h \
     ../../../libs/common/node/stream/IAngular_Velocity.h \

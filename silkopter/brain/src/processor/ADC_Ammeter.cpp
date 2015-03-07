@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 ADC_Ammeter::ADC_Ammeter(HAL& hal)
     : m_hal(hal)
@@ -128,6 +126,5 @@ auto ADC_Ammeter::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

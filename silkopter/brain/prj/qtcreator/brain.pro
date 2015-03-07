@@ -163,10 +163,7 @@ HEADERS += \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
     ../../../libs/common/node/bus/IBus.h \
-    ../../../libs/common/node/sink/ISink.h \
-    ../../../libs/common/node/source/ISource.h \
     ../../../libs/common/node/stream/IStream.h \
-    ../../../libs/common/node/processor/IProcessor.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/Dead_Reckoning.h \
     ../../src/processor/ADC_Ammeter.h \
@@ -207,5 +204,6 @@ HEADERS += \
     ../../src/processor/Comp_Location.h \
     ../../../libs/utils/Butterworth.h \
     ../../src/processor/Multirotor_Pilot.h \
-    ../../../libs/common/node/processor/IMultirotor_Pilot.h
+    ../../../libs/common/node/processor/IMultirotor_Pilot.h \
+    ../../../libs/common/node/INode.h
 

@@ -55,8 +55,7 @@ private:
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
 
-    template<class Registry, class Node_Base>
-    auto handle_node_config(comms::Setup_Message message, Registry const& registry) -> std::shared_ptr<Node_Base>;
+    void handle_node_config();
 
     void handle_source_config();
     void handle_sink_config();
@@ -65,7 +64,7 @@ private:
 
     void handle_add_source();
     void handle_add_sink();
-    void handle_add_processor();
+    void handle_add_node();
 
     void handle_telemetry_streams();
     void handle_multirotor_mode();

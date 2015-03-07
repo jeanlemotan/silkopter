@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace source
-{
 
 constexpr uint8_t PREAMBLE1 = 0xB5;
 constexpr uint8_t PREAMBLE2 = 0x62;
@@ -236,6 +234,11 @@ void UBLOX::unlock(Buses& buses)
         buses.uart->unlock(); //lock the bus
         return;
     }
+}
+
+auto UBLOX::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>();
 }
 
 auto UBLOX::get_outputs() const -> std::vector<Output>
@@ -892,6 +895,5 @@ auto UBLOX::get_init_params() const -> rapidjson::Document
 
 
 
-}
 }
 }

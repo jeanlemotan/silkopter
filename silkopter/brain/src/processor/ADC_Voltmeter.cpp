@@ -8,8 +8,6 @@ namespace silk
 {
 namespace node
 {
-namespace processor
-{
 
 ADC_Voltmeter::ADC_Voltmeter(HAL& hal)
     : m_hal(hal)
@@ -129,6 +127,5 @@ auto ADC_Voltmeter::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }
