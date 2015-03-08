@@ -13,8 +13,6 @@ class IBus : q::util::Noncopyable
 public:
     virtual ~IBus() {}
 
-    virtual auto get_type() const -> q::rtti::class_id = 0;
-
     virtual auto init(rapidjson::Value const& init_params) -> bool = 0;
     virtual auto get_init_params() const -> rapidjson::Document = 0;
 

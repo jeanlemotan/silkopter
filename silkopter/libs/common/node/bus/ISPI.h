@@ -15,8 +15,6 @@ class ISPI: public IBus
 public:
     virtual ~ISPI() {}
 
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<ISPI>(); }
-
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;
     virtual void unlock() = 0;

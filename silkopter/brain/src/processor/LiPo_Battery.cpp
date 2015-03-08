@@ -109,9 +109,6 @@ void LiPo_Battery::process()
 
     m_output_stream->samples.resize(count);
 
-    std::array<double, stream::ICurrent::FILTER_CHANNELS> c_channels;
-    std::array<double, stream::IVoltage::FILTER_CHANNELS> v_channels;
-
     for (size_t i = 0; i < count; i++)
     {
         m_output_stream->last_sample.dt = m_dt;

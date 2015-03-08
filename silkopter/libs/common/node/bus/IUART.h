@@ -15,8 +15,6 @@ class IUART: public IBus
 public:
     virtual ~IUART() {}
 
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<IUART>(); }
-
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;
     virtual void unlock() = 0;

@@ -27,8 +27,6 @@ public:
 
     virtual ~ICardinal_Points() {}
 
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<ICardinal_Points>(); }
-
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
 DECLARE_CLASS_PTR(ICardinal_Points);

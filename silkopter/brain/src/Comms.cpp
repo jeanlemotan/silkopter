@@ -214,7 +214,7 @@ void Comms::send_telemetry_streams()
         }
         else
         {
-            QLOGW("Unrecognized stream type: {} / {}", stream->get_type(), q::rtti::get_class_name(*stream));
+            QLOGW("Unrecognized stream type: {} / {}", q::rtti::get_class_id(*stream), q::rtti::get_class_name(*stream));
         }
     }
 }

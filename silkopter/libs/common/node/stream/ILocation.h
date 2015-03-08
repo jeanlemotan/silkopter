@@ -42,8 +42,6 @@ public:
 
     virtual ~ILocation() {}
 
-    virtual auto get_type() const -> q::rtti::class_id { return q::rtti::get_class_id<ILocation>(); }
-
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
 };
