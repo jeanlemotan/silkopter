@@ -14,8 +14,7 @@ template<class Base>
 class Factory : q::util::Noncopyable
 {
 public:
-    Factory(HAL& hal) : m_hal(hal) {}
-    template <class T> void register_node(std::string const& class_name);
+    template <class T, typename... Params> void register_node(std::string const& class_name, Params&&... params);
     auto create_node(std::string const& class_name) -> std::shared_ptr<Base>;
     auto get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
     auto get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
@@ -28,15 +27,11 @@ public:
 
     auto create_all() const -> std::vector<Node_Info>;
 private:
-    typedef Base* (*create_node_function)(HAL& hal);
     struct Data
     {
-        create_node_function ctor;
+        std::function<Base*()> ctor;
     };
     std::map<std::string, Data> m_name_registry;
-    HAL& m_hal;
-    template <class T> static auto create_node_func(HAL& hal) -> Base*;
-    void _register_node(std::string const& class_name, create_node_function ctor);
 };
 
 
@@ -68,7 +63,7 @@ public:
     HAL();
     ~HAL();
 
-    auto init() -> bool;
+    auto init(Comms& comms) -> bool;
     void process();
     void shutdown();
 
@@ -144,10 +139,9 @@ auto Registry<Base>::add(std::string const& name, std::shared_ptr<Base> const& n
 
 
 template<class Base>
-template <class T>
-void Factory<Base>::register_node(std::string const& class_name)
+template <class T, typename... Params>
+void Factory<Base>::register_node(std::string const& class_name, Params&&... params)
 {
-    auto* ctor = &create_node_func<T>;
 //    T instance(hal);
 
 //    //write the jsons for testing - to see the structure
@@ -168,14 +162,25 @@ void Factory<Base>::register_node(std::string const& class_name)
 //        fs.write((uint8_t const* )data.data(), data.size());
 //    }
 
-    _register_node(class_name, ctor);
+    if (class_name.empty())
+    {
+        return;
+    }
+    auto it = m_name_registry.find(class_name);
+    if (it != m_name_registry.end())
+    {
+        QLOGE("Error: class '{}' already defined.", class_name);
+        return;
+    }
+    auto ctor = [&]() { return new T(params...); };
+    m_name_registry[class_name] = { ctor };
 }
 
 template <class Base>
 auto Factory<Base>::create_node(std::string const& class_name) -> std::shared_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
-    return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>((*it->second.ctor)(m_hal)));
+    return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>(it->second.ctor()));
 }
 template<class Base>
 auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
@@ -199,35 +204,13 @@ auto Factory<Base>::get_node_default_init_params(std::string const& class_name) 
 }
 
 template<class Base>
-template <class T>
-auto Factory<Base>::create_node_func(HAL& hal) -> Base*
-{
-    return new T(hal);
-}
-
-template<class Base>
-void Factory<Base>::_register_node(std::string const& class_name, create_node_function ctor)
-{
-    if (class_name.empty())
-    {
-        return;
-    }
-    auto it = m_name_registry.find(class_name);
-    if (it != m_name_registry.end())
-    {
-        QLOGE("Error: class '{}' already defined.", class_name);
-        return;
-    }
-    m_name_registry[class_name] = { ctor };
-}
-template<class Base>
 auto Factory<Base>::create_all() const -> std::vector<Node_Info>
 {
     std::vector<Node_Info> info;
     info.reserve(m_name_registry.size());
     for (auto const& n: m_name_registry)
     {
-        info.push_back({n.first, std::unique_ptr<Base>((n.second.ctor)(m_hal))});
+        info.push_back({n.first, std::unique_ptr<Base>((n.second.ctor)())});
     }
     return info;
 }

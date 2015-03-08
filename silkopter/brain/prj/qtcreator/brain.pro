@@ -173,5 +173,6 @@ HEADERS += \
     ../../../libs/common/node/ISink.h \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
-    ../../../libs/common/node/processor/IResampler.h
+    ../../../libs/common/node/processor/IResampler.h \
+    ../../../libs/common/node/stream/IMultirotor_Input.h
 

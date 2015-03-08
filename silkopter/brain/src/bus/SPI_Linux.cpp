@@ -10,9 +10,8 @@ namespace node
 namespace bus
 {
 
-SPI_Linux::SPI_Linux(HAL& hal)
-    : m_hal(hal)
-    , m_init_params(new sz::SPI_Linux::Init_Params())
+SPI_Linux::SPI_Linux()
+    : m_init_params(new sz::SPI_Linux::Init_Params())
     , m_config(new sz::SPI_Linux::Config())
 {
 }

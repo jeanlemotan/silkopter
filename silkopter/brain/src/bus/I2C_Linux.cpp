@@ -35,9 +35,8 @@ namespace node
 namespace bus
 {
 
-I2C_Linux::I2C_Linux(HAL& hal)
-    : m_hal(hal)
-    , m_init_params(new sz::I2C_Linux::Init_Params())
+I2C_Linux::I2C_Linux()
+    : m_init_params(new sz::I2C_Linux::Init_Params())
     , m_config(new sz::I2C_Linux::Config())
 {
 }
@@ -79,14 +78,6 @@ auto I2C_Linux::init() -> bool
         QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
         return false;
     }
-
-//    if (!m_init_params->name.empty())
-//    {
-//        if (!m_hal.get_buses().add(*this))
-//        {
-//            return false;
-//        }
-//    }
 
     return true;
 }

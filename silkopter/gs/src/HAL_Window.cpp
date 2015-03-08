@@ -19,6 +19,7 @@
 #include "common/node/IProcessor.h"
 #include "common/node/processor/ILPF.h"
 #include "common/node/processor/IResampler.h"
+#include "common/node/processor/IMultirotor_Pilot.h"
 
 #include "ui_New_Node.h"
 
@@ -30,6 +31,7 @@ static std::map<q::rtti::class_id, QColor> s_node_colors =
     { q::rtti::get_class_id<silk::node::IProcessor>(), QColor(0xFDE3A7) },
     { q::rtti::get_class_id<silk::node::ILPF>(), QColor(0xF7CA18) },
     { q::rtti::get_class_id<silk::node::IResampler>(), QColor(0xEB974E) },
+    { q::rtti::get_class_id<silk::node::IMultirotor_Pilot>(), QColor(0xBE90D4) },
 }};
 
 HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
@@ -75,10 +77,57 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 
     auto pos = QPointF(m_view->mapToScene(event->pos()));
 
+    auto nodes = m_hal.get_node_defs().get_all();
+
+    QMenu* submenu = menu.addMenu(QIcon(), "Sources");
+    for (auto const& n: nodes)
     {
-        QMenu* submenu = menu.addMenu(QIcon(), "Nodes");
-        auto nodes = m_hal.get_node_defs().get_all();
-        for (auto const& n: nodes)
+        if (n->class_id == q::rtti::get_class_id<silk::node::ISource>())
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+        }
+    }
+    submenu = menu.addMenu(QIcon(), "Sinks");
+    for (auto const& n: nodes)
+    {
+        if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+        }
+    }
+    submenu = menu.addMenu(QIcon(), "Processors");
+    for (auto const& n: nodes)
+    {
+        if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+        }
+    }
+    submenu = menu.addMenu(QIcon(), "Low Pass Filters");
+    for (auto const& n: nodes)
+    {
+        if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+        }
+    }
+    submenu = menu.addMenu(QIcon(), "Resamplers");
+    for (auto const& n: nodes)
+    {
+        if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
+        {
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+        }
+    }
+    submenu = menu.addMenu(QIcon(), "Pilots");
+    for (auto const& n: nodes)
+    {
+        if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
         {
             auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
             connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
@@ -131,8 +180,8 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
     {
         number = atoi(&new_name.c_str()[start]);
         new_name = new_name.substr(0, start);
-        boost::trim(new_name);
     }
+    boost::trim(new_name);
 
     std::string result = new_name;
     char nstr[32];

@@ -21,6 +21,8 @@
 
 #include "common/node/processor/IMultirotor_Pilot.h"
 
+#include "sz_math.hpp"
+#include "sz_Comms_Source.hpp"
 
 using namespace silk;
 using namespace boost::asio;
@@ -112,6 +114,9 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
         params.max_receive_time = std::chrono::milliseconds(500);
         m_rudp.set_receive_params(TELEMETRY_CHANNEL, params);
     }
+
+    m_source.reset(new Source(*this));
+    m_multirotor_input.reset(new Multirotor_Input);
 }
 
 auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
@@ -468,116 +473,6 @@ void Comms::handle_telemetry_streams()
     m_setup_channel.end_pack();
 }
 
-void Comms::handle_multirotor_mode()
-{
-    uint32_t req_id = 0;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id))
-    {
-        QLOGE("Error in unpacking multirotor input request");
-        return;
-    }
-    QLOGI("Req Id: {} - multirotor input request", req_id);
-
-    m_setup_channel.begin_pack(comms::Setup_Message::MULTIROTOR_MODE);
-    m_setup_channel.pack_param(req_id);
-
-    std::string name;
-    if (!m_setup_channel.unpack_param(name))
-    {
-        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-        m_setup_channel.end_pack();
-        return;
-    }
-
-    auto multirotor = m_hal.get_nodes().find_by_name<node::IMultirotor_Pilot>(name);
-    if (!multirotor)
-    {
-        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-        m_setup_channel.end_pack();
-        return;
-    }
-
-    node::IMultirotor_Pilot::Mode mode;
-    if (m_setup_channel.unpack_param(mode))
-    {
-        multirotor->set_mode(mode);
-    }
-
-    m_setup_channel.pack_param(multirotor->get_mode());
-}
-
-void Comms::handle_multirotor_input_request()
-{
-    uint32_t req_id = 0;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id))
-    {
-        QLOGE("Error in unpacking multirotor input request");
-        return;
-    }
-    QLOGI("Req Id: {} - multirotor input request", req_id);
-
-    m_setup_channel.begin_pack(comms::Setup_Message::MULTIROTOR_INPUT_REQUEST);
-    m_setup_channel.pack_param(req_id);
-
-    std::string name;
-    if (!m_setup_channel.unpack_param(name))
-    {
-        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-        m_setup_channel.end_pack();
-        return;
-    }
-
-    auto multirotor = m_hal.get_nodes().find_by_name<node::IMultirotor_Pilot>(name);
-    if (!multirotor)
-    {
-        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-        m_setup_channel.end_pack();
-        return;
-    }
-
-    m_setup_channel.pack_param(multirotor->get_input());
-    m_setup_channel.end_pack();
-}
-
-void Comms::handle_multirotor_input()
-{
-    uint32_t req_id = 0;
-    if (!m_input_channel.begin_unpack() ||
-        !m_input_channel.unpack_param(req_id))
-    {
-        QLOGE("Error in unpacking multirotor input request");
-        return;
-    }
-    QLOGI("Req Id: {} - multirotor input request", req_id);
-
-    std::string name;
-    if (!m_input_channel.unpack_param(name))
-    {
-        QLOGE("Req Id: {} - Error in unpacking multirotor input request", req_id);
-        return;
-    }
-
-    auto multirotor = m_hal.get_nodes().find_by_name<node::IMultirotor_Pilot>(name);
-    if (!multirotor)
-    {
-        QLOGE("Req Id: {} - Cannot find multirotor '{}'", req_id, name);
-        return;
-    }
-
-    node::IMultirotor_Pilot::Input input;
-    if (m_input_channel.unpack_param(input))
-    {
-        multirotor->set_input(input);
-    }
-    else
-    {
-        QLOGE("Req Id: {} - Cannot unpack input for multirotor '{}'", req_id, name);
-    }
-}
-
-
 void Comms::process()
 {
     if (!is_connected())
@@ -589,7 +484,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Input_Message::MULTIROTOR_INPUT: handle_multirotor_input(); break;
+        //case comms::Input_Message::MULTIROTOR_INPUT: handle_multirotor_input(); break;
 
         default: QLOGE("Received unrecognised input message: {}", static_cast<int>(msg.get())); break;
         }
@@ -607,9 +502,6 @@ void Comms::process()
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
 
         case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
-
-        case comms::Setup_Message::MULTIROTOR_MODE: handle_multirotor_mode(); break;
-        case comms::Setup_Message::MULTIROTOR_INPUT_REQUEST: handle_multirotor_input_request(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }
@@ -663,3 +555,62 @@ auto Comms::get_rudp() -> util::RUDP&
     return m_rudp;
 }
 
+
+
+auto Comms::Source::init(rapidjson::Value const& init_params) -> bool
+{
+    QLOG_TOPIC("comms::source::init");
+
+    sz::Comms::Source::Init_Params sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, init_params, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize Comms::Source data: {}", ss.str());
+        return false;
+    }
+    *m_comms.m_init_params = sz;
+    m_comms.m_multirotor_input->rate = 50;
+    return true;
+}
+auto Comms::Source::get_init_params() const -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_comms.m_init_params, json);
+    return std::move(json);
+}
+auto Comms::Source::set_config(rapidjson::Value const& json) -> bool
+{
+    sz::Comms::Source::Config sz;
+    autojsoncxx::error::ErrorStack result;
+    if (!autojsoncxx::from_value(sz, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Cannot deserialize Comms::Source config data: {}", ss.str());
+        return false;
+    }
+
+    *m_comms.m_config = sz;
+    return true;
+}
+auto Comms::Source::get_config() const -> rapidjson::Document
+{
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_comms.m_config, json);
+    return std::move(json);
+}
+auto Comms::Source::get_outputs() const -> std::vector<Output>
+{
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<node::stream::IMultirotor_Input>();
+    outputs[0].name = "Multirotor Input";
+    outputs[0].stream = m_comms.m_multirotor_input;
+    return outputs;
+}
+
+void Comms::Source::process()
+{
+
+}

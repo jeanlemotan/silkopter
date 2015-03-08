@@ -1,6 +1,5 @@
 #pragma once
 
-#include "HAL.h"
 #include "common/node/bus/ISPI.h"
 
 namespace sz
@@ -23,7 +22,7 @@ namespace bus
 class SPI_Linux : public ISPI
 {
 public:
-    SPI_Linux(HAL& hal);
+    SPI_Linux();
     ~SPI_Linux();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -47,7 +46,6 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
     std::shared_ptr<sz::SPI_Linux::Init_Params> m_init_params;
     std::shared_ptr<sz::SPI_Linux::Config> m_config;
 

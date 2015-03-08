@@ -1,0 +1,43 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Multirotor_Pilot",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multirotor_Pilot",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "reference_frame", {"required": true, "json_key" : "Reference Frame"}],
+        ["std::string", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["std::string", "cardinal_points", {"required": true, "json_key" : "Cardinal Points"}],
+        ["std::string", "location", {"required": true, "json_key" : "Location"}],
+        ["std::string", "battery_state", {"required": true, "json_key" : "Battery State"}],
+        ["std::string", "multirotor_input", {"required": true, "json_key" : "Multirotor Input"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multirotor_Pilot",
+    "name": "Outputs",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multirotor_Pilot",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Multirotor_Pilot::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Multirotor_Pilot::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

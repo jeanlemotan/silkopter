@@ -1,14 +1,9 @@
 ﻿#include "BrainStdAfx.h"
 
 #include "HAL.h"
+#include "Comms.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"
-
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
-#include "rapidjson/prettywriter.h" // for stringify JSON
-#include "rapidjson/stringbuffer.h"
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +27,7 @@
 #include "processor/Inertial.h"
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_Location.h"
+#include "processor/Multirotor_Pilot.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -62,58 +58,7 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 ///////////////////////////////////////////////////////////////
 
 HAL::HAL()
-    : m_bus_factory(*this)
-    , m_node_factory(*this)
 {
-    using namespace node;
-
-    QLOG_TOPIC("hal");
-
-    m_bus_factory.register_node<bus::UART_Linux>("UART_Linux");
-    m_bus_factory.register_node<bus::I2C_Linux>("I2C_Linux");
-    m_bus_factory.register_node<bus::SPI_Linux>("SPI_Linux");
-
-    m_node_factory.register_node<MPU9250>("MPU9250");
-    m_node_factory.register_node<MS5611>("MS5611");
-    m_node_factory.register_node<SRF02>("SRF02");
-    m_node_factory.register_node<Raspicam>("Raspicam");
-    m_node_factory.register_node<RC5T619>("RC5T619");
-    m_node_factory.register_node<UBLOX>("UBLOX");
-
-    m_node_factory.register_node<PIGPIO>("PIGPIO");
-
-    m_node_factory.register_node<ADC_Ammeter>("ADC_Ammeter");
-    m_node_factory.register_node<ADC_Voltmeter>("ADC_Voltmeter");
-    m_node_factory.register_node<Comp_AHRS>("Comp_AHRS");
-    m_node_factory.register_node<Comp_Location>("Comp_Location");
-    m_node_factory.register_node<Inertial>("Inertial");
-    m_node_factory.register_node<LiPo_Battery>("LiPo_Battery");
-    m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration_LPF");
-    m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear_Acceleration_LPF");
-    m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular_Velocity_LPF");
-    m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC_Value_LPF");
-    m_node_factory.register_node<LPF<stream::ICurrent>>("Current_LPF");
-    m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage_LPF");
-    m_node_factory.register_node<LPF<stream::ILocation>>("Location_LPF");
-    m_node_factory.register_node<LPF<stream::IDistance>>("Distance_LPF");
-    m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic_Field_LPF");
-    m_node_factory.register_node<LPF<stream::IPressure>>("Pressure_LPF");
-    m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature_LPF");
-    m_node_factory.register_node<LPF<stream::IReference_Frame>>("Reference_Frame_LPF");
-    m_node_factory.register_node<LPF<stream::IPWM_Value>>("PWM_Value_LPF");
-    m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration_Resampler");
-    m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear_Acceleration_Resampler");
-    m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular_Velocity_Resampler");
-    m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC_Value_Resampler");
-    m_node_factory.register_node<Resampler<stream::ICurrent>>("Current_Resampler");
-    m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage_Resampler");
-    m_node_factory.register_node<Resampler<stream::ILocation>>("Location_Resampler");
-    m_node_factory.register_node<Resampler<stream::IDistance>>("Distance_Resampler");
-    m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic_Field_Resampler");
-    m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure_Resampler");
-    m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature_Resampler");
-    m_node_factory.register_node<Resampler<stream::IReference_Frame>>("Reference_Frame_Resampler");
-    m_node_factory.register_node<Resampler<stream::IPWM_Value>>("PWM_Value_Resampler");
 }
 
 HAL::~HAL()
@@ -346,9 +291,62 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
 }
 
 
-auto HAL::init() -> bool
+auto HAL::init(Comms& comms) -> bool
 {
     using namespace silk::node;
+
+    QLOG_TOPIC("hal::init");
+
+    m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
+    m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
+    m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
+
+    m_node_factory.register_node<MPU9250>("MPU9250", *this);
+    m_node_factory.register_node<MS5611>("MS5611", *this);
+    m_node_factory.register_node<SRF02>("SRF02", *this);
+    m_node_factory.register_node<Raspicam>("Raspicam", *this);
+    m_node_factory.register_node<RC5T619>("RC5T619", *this);
+    m_node_factory.register_node<UBLOX>("UBLOX", *this);
+    m_node_factory.register_node<Comms::Source>("Comms Source", comms);
+
+    m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
+
+    m_node_factory.register_node<Multirotor_Pilot>("Multirotor Pilot", *this);
+    m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
+    m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
+    m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
+    m_node_factory.register_node<Comp_Location>("Comp Location", *this);
+    m_node_factory.register_node<Inertial>("Inertial", *this);
+    m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
+    m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular Velocity LPF", *this);
+    m_node_factory.register_node<LPF<stream::IBattery_State>>("Battery State LPF", *this);
+    m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC Value LPF", *this);
+    m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
+    m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
+    m_node_factory.register_node<LPF<stream::ILocation>>("Location LPF", *this);
+    m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
+    m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
+    m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
+    m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature LPF", *this);
+    m_node_factory.register_node<LPF<stream::IReference_Frame>>("Reference Frame LPF", *this);
+    m_node_factory.register_node<LPF<stream::IPWM_Value>>("PWM Value LPF", *this);
+    m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular Velocity RS", *this);
+    m_node_factory.register_node<Resampler<stream::IBattery_State>>("Battery State RS", *this);
+    m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC Value RS", *this);
+    m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
+    m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
+    m_node_factory.register_node<Resampler<stream::ILocation>>("Location RS", *this);
+    m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
+    m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
+    m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);
+    m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature RS", *this);
+    m_node_factory.register_node<Resampler<stream::IReference_Frame>>("Reference Frame RS", *this);
+    m_node_factory.register_node<Resampler<stream::IPWM_Value>>("PWM Value RS", *this);
+
 
     get_streams().remove_all();
     get_nodes().remove_all();

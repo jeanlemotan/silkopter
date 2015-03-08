@@ -5,6 +5,20 @@
 #include "utils/Channel.h"
 #include "utils/RUDP.h"
 #include "common/Manual_Clock.h"
+#include "common/node/ISource.h"
+#include "common/node/stream/IMultirotor_Input.h"
+
+namespace sz
+{
+namespace Comms
+{
+namespace Source
+{
+struct Init_Params;
+struct Config;
+}
+}
+}
 
 namespace silk
 {
@@ -44,10 +58,41 @@ public:
     typedef std::function<void(Input_Channel&)> Input_Channel_Callback;
     void set_input_message_callback(comms::Input_Message message, Input_Channel_Callback);
 
+    struct Source : public node::ISource
+    {
+        Source(Comms& comms) : m_comms(comms) {}
+        auto init(rapidjson::Value const& init_params) -> bool;
+        auto get_init_params() const -> rapidjson::Document;
+        auto set_config(rapidjson::Value const& json) -> bool;
+        auto get_config() const -> rapidjson::Document;
+        auto get_outputs() const -> std::vector<Output>;
+        void process();
+    private:
+        Comms& m_comms;
+    };
+
+    auto get_source() -> std::shared_ptr<Source>;
+
 private:
     boost::asio::io_service& m_io_service;
 
+    struct Multirotor_Input : public node::stream::IMultirotor_Input
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
+
+        Sample last_sample;
+        std::vector<Sample> samples;
+        uint32_t rate = 0;
+    };
+    mutable std::shared_ptr<Multirotor_Input> m_multirotor_input;
+
+    std::shared_ptr<sz::Comms::Source::Init_Params> m_init_params;
+    std::shared_ptr<sz::Comms::Source::Config> m_config;
+
     void handle_accept(boost::system::error_code const& error);
+
+    std::shared_ptr<Source> m_source;
 
     template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
     void send_telemetry_streams();
@@ -67,10 +112,6 @@ private:
     void handle_add_node();
 
     void handle_telemetry_streams();
-    void handle_multirotor_mode();
-    void handle_multirotor_input_request();
-
-    void handle_multirotor_input();
 
     std::vector<node::stream::IStream_ptr> m_telemetry_streams;
 

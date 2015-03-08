@@ -1,6 +1,5 @@
 #pragma once
 
-#include "HAL.h"
 #include "common/node/bus/II2C.h"
 
 namespace sz
@@ -23,7 +22,7 @@ namespace bus
 class I2C_Linux : public II2C
 {
 public:
-    I2C_Linux(HAL& hal);
+    I2C_Linux();
     ~I2C_Linux();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -47,7 +46,6 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
     std::shared_ptr<sz::I2C_Linux::Init_Params> m_init_params;
     std::shared_ptr<sz::I2C_Linux::Config> m_config;
 

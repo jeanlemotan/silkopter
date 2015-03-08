@@ -115,7 +115,7 @@ int main(int argc, char const* argv[])
         silk::HAL hal;
         silk::Comms comms(io_service, hal);
 
-        if (!hal.init())
+        if (!hal.init(comms))
         {
             QLOGE("Hardware failure! Aborting");
             abort();

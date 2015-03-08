@@ -12,9 +12,8 @@ namespace node
 namespace bus
 {
 
-UART_Linux::UART_Linux(HAL& hal)
-    : m_hal(hal)
-    , m_init_params(new sz::UART_Linux::Init_Params())
+UART_Linux::UART_Linux()
+    : m_init_params(new sz::UART_Linux::Init_Params())
     , m_config(new sz::UART_Linux::Config())
 {
 }

@@ -176,7 +176,9 @@ auto MS5611::init() -> bool
     if (!res)
     {
         QLOGE("MS5611 not found!");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
     QLOGI("PROM: {} {} {} {} {} {}", C1, C2, C3, C4, C5, C6);
 
@@ -189,7 +191,9 @@ auto MS5611::init() -> bool
     if (m_c1 == 0 || m_c2 == 0 || m_c3 == 0 || m_c4 == 0 || m_c5 == 0 || m_c6 == 0)
     {
         QLOGE("MS5611 seems broken!");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
 
     bus_write(buses, CMD_CONVERT_D2_OSR256, nullptr, 0);

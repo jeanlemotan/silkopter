@@ -188,7 +188,9 @@ auto RC5T619::init() -> bool
     if (!res || control == 0xff)
     {
         QLOGE("rc5t619 not found");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
     QLOGI("rc5t619 found: {}", control);
 
@@ -209,7 +211,9 @@ auto RC5T619::init() -> bool
     if (!res)
     {
         QLOGI("Failed to init rc5t619");
+#ifdef RASPBERRY_PI
         return false;
+#endif
     }
 
     return true;

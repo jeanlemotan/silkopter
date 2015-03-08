@@ -1,0 +1,36 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Comms::Source",
+    "name": "Init_Params",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comms::Source",
+    "name": "Multirotor_Input",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comms::Source",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Comms::Source::Multirotor_Input", "multirotor_input", {"required": true, "json_key" : "Multirotor Input"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comms::Source",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Comms::Source::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

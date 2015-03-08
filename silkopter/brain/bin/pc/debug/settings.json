@@ -1,14 +1,14 @@
 {
 	"hal" : {
 		"buses" : {
-			"I2C_Linux" : {
+			"I2C Linux" : {
 				"name" : "i2c0",
 				"init_params" : {
 					"dev" : "i2c0"
 				},
 				"config" : {}
 			},
-			"UART_Linux" : {
+			"UART Linux" : {
 				"name" : "uart0",
 				"init_params" : {
 					"dev" : "/dev/ttyUSB0",
