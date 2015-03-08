@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/INode.h"
+#include "common/node/processor/ILPF.h"
 #include "utils/Butterworth.h"
 
 #include "sz_math.hpp"
@@ -13,7 +13,7 @@ namespace node
 {
 
 template<class Stream_t>
-class LPF : public INode
+class LPF : public ILPF
 {
 public:
     static const int MAX_POLES = 8;
@@ -52,7 +52,7 @@ private:
         std::vector<typename Stream_t::Sample> samples;
         uint32_t sample_idx = 0;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 
@@ -83,7 +83,7 @@ auto LPF<Stream_t>::init(rapidjson::Value const& init_params) -> bool
 template<class Stream_t>
 auto LPF<Stream_t>::init() -> bool
 {
-    m_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -108,17 +108,16 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
+    m_config = sz;
+    m_output_stream->rate = 0;
+
     auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
-    if (!input_stream || input_stream->get_rate() == 0)
+    m_input_stream = input_stream;
+
+    auto rate = input_stream ? input_stream->get_rate() : 0u;
+    if (rate == 0)
     {
-        QLOGE("No input input stream specified");
-        return false;
-    }
-    if (m_stream->rate != 0 && m_stream->rate != input_stream->get_rate())
-    {
-        QLOGE("Input streams rate has changed: {} != {}",
-              input_stream->get_rate(),
-              m_stream->rate);
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.input, rate);
         return false;
     }
 
@@ -136,10 +135,8 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_input_stream = input_stream;
-    m_stream->rate = input_stream->get_rate();
+    m_output_stream->rate = rate;
 
-    m_config = sz;
     return true;
 }
 template<class Stream_t>
@@ -170,7 +167,7 @@ auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
 template<class Stream_t>
 void LPF<Stream_t>::process()
 {
-    m_stream->samples.clear();
+    m_output_stream->samples.clear();
 
     auto input_stream = m_input_stream.lock();
     if (!input_stream)
@@ -179,7 +176,7 @@ void LPF<Stream_t>::process()
     }
 
     auto const& is = input_stream->get_samples();
-    m_stream->samples.reserve(is.size());
+    m_output_stream->samples.reserve(is.size());
 
     std::array<double, Stream_t::FILTER_CHANNELS> channels;
     for (auto& s: is)
@@ -193,11 +190,11 @@ void LPF<Stream_t>::process()
            vs.sample_idx = s.sample_idx;
            vs.value = s.value;
            Stream_t::get_value_from_channels(vs.value, channels);
-           m_stream->samples.push_back(vs);
+           m_output_stream->samples.push_back(vs);
        }
        else
        {
-           m_stream->samples.push_back(s);
+           m_output_stream->samples.push_back(s);
        }
     };
 }

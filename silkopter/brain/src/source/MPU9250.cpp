@@ -368,11 +368,6 @@ auto MPU9250::akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
          : false;
 }
 
-auto MPU9250::get_inputs() const -> std::vector<Input>
-{
-    return std::vector<Input>();
-}
-
 auto MPU9250::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(4);

@@ -130,11 +130,6 @@ RC5T619::RC5T619(HAL& hal)
 {
 }
 
-auto RC5T619::get_inputs() const -> std::vector<Input>
-{
-    return std::vector<Input>();
-}
-
 auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);

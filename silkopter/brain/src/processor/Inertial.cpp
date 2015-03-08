@@ -35,7 +35,7 @@ auto Inertial::init(rapidjson::Value const& init_params) -> bool
 }
 auto Inertial::init() -> bool
 {
-    m_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -53,13 +53,13 @@ auto Inertial::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
     outputs[0].name = "Linear Acceleration";
-    outputs[0].stream = m_stream;
+    outputs[0].stream = m_output_stream;
     return outputs;
 }
 
 void Inertial::process()
 {
-    m_stream->samples.clear();
+    m_output_stream->samples.clear();
 
     auto reference_frame_stream = m_reference_frame_stream.lock();
     auto acceleration_stream = m_acceleration_stream.lock();
@@ -88,17 +88,17 @@ void Inertial::process()
         return;
     }
 
-    m_stream->samples.resize(count);
+    m_output_stream->samples.resize(count);
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream->last_sample.dt = m_dt;
-        m_stream->last_sample.sample_idx++;
+        m_output_stream->last_sample.dt = m_dt;
+        m_output_stream->last_sample.sample_idx++;
 
         auto w2l = math::inverse(m_reference_frame_samples[i].value.local_to_world);
         auto gravity_local = math::rotate(w2l, physics::constants::world_gravity);
-        m_stream->last_sample.value = m_acceleration_samples[i].value - gravity_local;
-        m_stream->samples[i] = m_stream->last_sample;
+        m_output_stream->last_sample.value = m_acceleration_samples[i].value - gravity_local;
+        m_output_stream->samples[i] = m_output_stream->last_sample;
     }
 
     //consume processed samples
@@ -118,41 +118,36 @@ auto Inertial::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
+    *m_config = sz;
+    m_output_stream->rate = 0;
+
     auto reference_frame_stream = m_hal.get_streams().find_by_name<stream::IReference_Frame>(sz.inputs.reference_frame);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
-    if (!reference_frame_stream || reference_frame_stream->get_rate() == 0)
-    {
-        QLOGE("No input angular velocity stream specified");
-        return false;
-    }
-    if (!acceleration_stream || acceleration_stream->get_rate() == 0)
-    {
-        QLOGE("No input acceleration stream specified");
-        return false;
-    }
-    if (acceleration_stream->get_rate() != reference_frame_stream->get_rate())
-    {
-        QLOGE("Reference Frame and Acceleration streams have different rates: {} != {}",
-              reference_frame_stream->get_rate(),
-              acceleration_stream->get_rate());
-        return false;
-    }
-
-    if (m_stream->rate != 0 && m_stream->rate != acceleration_stream->get_rate())
-    {
-        QLOGE("Input streams rate has changed: {} != {}",
-              acceleration_stream->get_rate(),
-              m_stream->rate);
-        return false;
-    }
-
-    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_reference_frame_stream = reference_frame_stream;
     m_acceleration_stream = acceleration_stream;
-    m_stream->rate = reference_frame_stream->get_rate();
 
-    *m_config = sz;
+    uint32_t output_stream_rate = 0;
+
+    auto rate = reference_frame_stream ? reference_frame_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.reference_frame, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.acceleration, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    m_output_stream->rate = rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+
     return true;
 }
 auto Inertial::get_config() const -> rapidjson::Document

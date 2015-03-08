@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/INode.h"
+#include "common/node/ISource.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/ITemperature.h"
 #include "common/node/bus/II2C.h"
@@ -22,7 +22,7 @@ namespace silk
 namespace node
 {
 
-class MS5611 : public INode
+class MS5611 : public ISource
 {
 public:
     MS5611(HAL& hal);
@@ -33,7 +33,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();

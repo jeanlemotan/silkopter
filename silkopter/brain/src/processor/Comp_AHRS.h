@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/INode.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"
@@ -24,7 +24,7 @@ namespace silk
 namespace node
 {
 
-class Comp_AHRS : public INode
+class Comp_AHRS : public IProcessor
 {
 public:
     Comp_AHRS(HAL& hal);
@@ -71,7 +71,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 

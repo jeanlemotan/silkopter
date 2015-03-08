@@ -69,6 +69,11 @@ void QNEPort::setNEBlock(QNEBlock *b)
 	m_block = b;
 }
 
+void QNEPort::setId(const QString &n)
+{
+    m_id = n;
+}
+
 void QNEPort::setName(const QString &n)
 {
     m_name = n;

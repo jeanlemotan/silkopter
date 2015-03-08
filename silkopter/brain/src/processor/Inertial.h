@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/INode.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/IReference_Frame.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/ILinear_Acceleration.h"
@@ -21,7 +21,7 @@ namespace silk
 namespace node
 {
 
-class Inertial : public INode
+class Inertial : public IProcessor
 {
 public:
     Inertial(HAL& hal);
@@ -62,7 +62,7 @@ private:
         Sample last_sample;
         std::vector<Sample> samples;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 

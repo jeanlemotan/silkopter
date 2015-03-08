@@ -56,6 +56,9 @@ public:
     void setName(const QString &n);
     const QString& name() const { return m_name; }
 
+    void setId(const QString &n);
+    const QString& id() const { return m_id; }
+
     QVector<QNEConnection*>& connections();
     int type() const { return Type; }
 
@@ -74,6 +77,7 @@ protected:
 private:
 	QNEBlock *m_block;
     QString m_name;
+    QString m_id;
     bool m_isOutput;
     QGraphicsTextItem *m_label;
     int m_radius;

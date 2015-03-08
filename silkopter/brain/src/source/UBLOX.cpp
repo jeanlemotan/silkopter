@@ -236,11 +236,6 @@ void UBLOX::unlock(Buses& buses)
     }
 }
 
-auto UBLOX::get_inputs() const -> std::vector<Input>
-{
-    return std::vector<Input>();
-}
-
 auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);

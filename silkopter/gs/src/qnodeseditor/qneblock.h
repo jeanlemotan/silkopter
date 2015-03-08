@@ -38,7 +38,10 @@ public:
     QNEBlock(QGraphicsItem *parent = 0);
 
     void setName(const QString &name);
-    const QString& name() const;
+    const QString& name() const { return m_name; }
+
+    void setId(const QString &id);
+    const QString& id() const { return m_id; }
 
     void refreshGeometry();
 
@@ -56,7 +59,8 @@ private:
     QNEPort* addPort(const QString &name, bool isOutput);
 
     QString m_name;
-	int horzMargin;
+    QString m_id;
+    int horzMargin;
 	int vertMargin;
 	int width;
 	int height;

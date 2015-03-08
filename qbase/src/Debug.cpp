@@ -53,7 +53,7 @@ namespace detail
 		//freeze
 		while (true);
 #else
-        quick_logf("Assert in {}:{} :: {}", file, line, msg ? String(msg) : String::null);
+        quick_logf("Assert '{}' in {}:{} :: {}", condition ? condition : "N/A", file, line, msg ? msg : "N/A");
         dump_stacktrace();
 		QBREAK();
 #endif

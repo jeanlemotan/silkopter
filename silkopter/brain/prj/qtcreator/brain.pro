@@ -40,6 +40,9 @@ UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin/$${DEST_FOLDER}
 
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
+
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../autogen
@@ -205,5 +208,10 @@ HEADERS += \
     ../../../libs/utils/Butterworth.h \
     ../../src/processor/Multirotor_Pilot.h \
     ../../../libs/common/node/processor/IMultirotor_Pilot.h \
-    ../../../libs/common/node/INode.h
+    ../../../libs/common/node/INode.h \
+    ../../../libs/common/node/IProcessor.h \
+    ../../../libs/common/node/ISink.h \
+    ../../../libs/common/node/ISource.h \
+    ../../../libs/common/node/processor/ILPF.h \
+    ../../../libs/common/node/processor/IResampler.h
 

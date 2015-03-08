@@ -172,11 +172,6 @@ Raspicam::~Raspicam()
 #endif
 }
 
-auto Raspicam::get_inputs() const -> std::vector<Input>
-{
-    return std::vector<Input>();
-}
-
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);

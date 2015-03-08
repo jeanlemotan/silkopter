@@ -40,11 +40,6 @@ SRF02::SRF02(HAL& hal)
 
 }
 
-auto SRF02::get_inputs() const -> std::vector<Input>
-{
-    return std::vector<Input>();
-}
-
 auto SRF02::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);

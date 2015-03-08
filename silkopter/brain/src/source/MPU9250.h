@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/INode.h"
+#include "common/node/ISource.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/stream/IAcceleration.h"
@@ -25,7 +25,7 @@ namespace silk
 namespace node
 {
 
-class MPU9250 : public INode
+class MPU9250 : public ISource
 {
 public:
     MPU9250(HAL& hal);
@@ -39,7 +39,6 @@ public:
 
     void process();
 
-    auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
 private:

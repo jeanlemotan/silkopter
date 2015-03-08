@@ -37,7 +37,7 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	QPainterPath p;
 	p.addRoundedRect(-50, -15, 100, 30, 5, 5);
 	setPath(p);
-    setPen(QPen(Qt::black));
+    setPen(QPen(Qt::black, 2));
 	setBrush(Qt::green);
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
@@ -46,6 +46,11 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	width = horzMargin;
 	height = vertMargin;
     label = new QGraphicsTextItem(this);
+}
+
+void QNEBlock::setId(const QString &n)
+{
+    m_id = n;
 }
 
 void QNEBlock::setName(const QString &n)
@@ -69,11 +74,6 @@ void QNEBlock::setName(const QString &n)
     QPainterPath p;
     p.addRoundedRect(0, 0, width, height, 5, 5);
     setPath(p);
-}
-
-const QString& QNEBlock::name() const
-{
-    return m_name;
 }
 
 

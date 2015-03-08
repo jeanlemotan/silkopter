@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/INode.h"
+#include "common/node/ISource.h"
 #include "common/node/stream/ILocation.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
@@ -23,7 +23,7 @@ namespace silk
 namespace node
 {
 
-class UBLOX : public INode
+class UBLOX : public ISource
 {
 public:
 
@@ -36,7 +36,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();

@@ -35,7 +35,7 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
 
 auto Comp_AHRS::init() -> bool
 {
-    m_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Stream>();
     return true;
 }
 
@@ -55,13 +55,13 @@ auto Comp_AHRS::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
     outputs[0].name = "Reference Frame";
-    outputs[0].stream = m_stream;
+    outputs[0].stream = m_output_stream;
     return outputs;
 }
 
 void Comp_AHRS::process()
 {
-    m_stream->samples.clear();
+    m_output_stream->samples.clear();
 
     auto angular_velocity_stream = m_angular_velocity_stream.lock();
     auto acceleration_stream     = m_acceleration_stream.lock();
@@ -98,14 +98,14 @@ void Comp_AHRS::process()
         return;
     }
 
-    m_stream->samples.resize(count);
+    m_output_stream->samples.resize(count);
 
     float av_length = 0;
 
     for (size_t i = 0; i < count; i++)
     {
-        m_stream->last_sample.dt = m_dt;
-        m_stream->last_sample.sample_idx++;
+        m_output_stream->last_sample.dt = m_dt;
+        m_output_stream->last_sample.sample_idx++;
 
         {
             auto const& s = m_angular_velocity_samples[i];
@@ -118,7 +118,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = m_stream->last_sample.value.local_to_world;
+                auto& a = m_output_stream->last_sample.value.local_to_world;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -148,7 +148,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = m_stream->last_sample.value.local_to_world;
+            auto& rot = m_output_stream->last_sample.value.local_to_world;
 
             //cancel drift
             static int xxx = 50;
@@ -167,7 +167,7 @@ void Comp_AHRS::process()
             rot = math::normalized<float, math::safe>(rot);
         }
 
-        m_stream->samples[i] = m_stream->last_sample;
+        m_output_stream->samples[i] = m_output_stream->last_sample;
     }
 
 
@@ -189,50 +189,46 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
+    *m_config = sz;
+    m_output_stream->rate = 0;
+
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
     auto magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
-    if (!angular_velocity_stream || angular_velocity_stream->get_rate() == 0)
-    {
-        QLOGE("No input angular velocity stream specified");
-        return false;
-    }
-    if (!acceleration_stream || acceleration_stream->get_rate() == 0)
-    {
-        QLOGE("No input acceleration stream specified");
-        return false;
-    }
-    if (!magnetic_field_stream || magnetic_field_stream->get_rate() == 0)
-    {
-        QLOGE("No input magnetic field stream specified");
-        return false;
-    }
-    if (acceleration_stream->get_rate() != magnetic_field_stream->get_rate() ||
-        acceleration_stream->get_rate() != angular_velocity_stream->get_rate())
-    {
-        QLOGE("Angular velocity, Acceleration and Magnetic field streams have different rates: {} != {} != {}",
-              angular_velocity_stream->get_rate(),
-              acceleration_stream->get_rate(),
-              magnetic_field_stream->get_rate());
-        return false;
-    }
-
-    if (m_stream->rate != 0 && m_stream->rate != acceleration_stream->get_rate())
-    {
-        QLOGE("Input streams rate has changed: {} != {}",
-              angular_velocity_stream->get_rate(),
-              m_stream->rate);
-        return false;
-    }
-
-    m_dt = std::chrono::microseconds(1000000 / m_stream->get_rate());
 
     m_angular_velocity_stream = angular_velocity_stream;
     m_acceleration_stream = acceleration_stream;
     m_magnetic_field_stream = magnetic_field_stream;
-    m_stream->rate = angular_velocity_stream->get_rate();
 
-    *m_config = sz;
+    uint32_t output_stream_rate = 0;
+
+    auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.angular_velocity, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.acceleration, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    rate = magnetic_field_stream ? magnetic_field_stream->get_rate() : 0u;
+    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    {
+        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.magnetic_field, rate);
+        return false;
+    }
+    output_stream_rate = rate;
+
+    m_output_stream->rate = rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+
     return true;
 }
 auto Comp_AHRS::get_config() const -> rapidjson::Document

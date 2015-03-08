@@ -1,15 +1,15 @@
 #pragma once
 
-#include "common/node/INode.h"
+#include "common/node/IProcessor.h"
 
 namespace silk
 {
 namespace node
 {
 
-class IMultirotor_Pilot : public INode
+class IMultirotor_Pilot : public IProcessor
 {
-    DEFINE_RTTI_CLASS(IMultirotor_Pilot, INode);
+    DEFINE_RTTI_CLASS(IMultirotor_Pilot, IProcessor);
 public:
 
     enum class Mode : uint8_t

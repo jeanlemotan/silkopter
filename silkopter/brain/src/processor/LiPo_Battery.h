@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/INode.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/IVoltage.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IBattery_State.h"
@@ -23,7 +23,7 @@ namespace silk
 namespace node
 {
 
-class LiPo_Battery : public INode
+class LiPo_Battery : public IProcessor
 {
 public:
     LiPo_Battery(HAL& hal);
@@ -72,7 +72,7 @@ private:
         Sample last_sample;
         std::vector<Sample> samples;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 

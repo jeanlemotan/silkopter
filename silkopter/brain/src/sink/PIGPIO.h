@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HAL.h"
+#include "common/node/ISink.h"
 #include "common/node/stream/IPWM_Value.h"
 
 namespace sz
@@ -18,7 +19,7 @@ namespace silk
 namespace node
 {
 
-class PIGPIO : public INode
+class PIGPIO : public ISink
 {
 public:
     PIGPIO(HAL& hal);
@@ -32,7 +33,6 @@ public:
     auto get_config() const -> rapidjson::Document;
 
     auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 

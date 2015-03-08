@@ -40,11 +40,6 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     return inputs;
 }
 
-auto PIGPIO::get_outputs() const -> std::vector<Output>
-{
-    return std::vector<Output>();
-}
-
 
 auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 {

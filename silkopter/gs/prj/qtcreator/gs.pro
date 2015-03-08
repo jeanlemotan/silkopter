@@ -25,6 +25,8 @@ INCLUDEPATH += /usr/include/freetype2
 INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
 
 PRECOMPILED_HEADER = ../../include/stdafx.h
 
@@ -114,7 +116,12 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../../libs/json_editor/JSON_Model.h \
-    ../../../libs/common/node/processor/IMultirotor_Pilot.h
+    ../../../libs/common/node/processor/IMultirotor_Pilot.h \
+    ../../../libs/common/node/IProcessor.h \
+    ../../../libs/common/node/ISink.h \
+    ../../../libs/common/node/ISource.h \
+    ../../../libs/common/node/processor/ILPF.h \
+    ../../../libs/common/node/processor/IResampler.h
 
 SOURCES += \
     ../../src/GS.cpp \

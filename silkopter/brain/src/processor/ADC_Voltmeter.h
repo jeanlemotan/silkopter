@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IADC_Value.h"
 #include "common/node/stream/IVoltage.h"
-#include "common/node/INode.h"
+#include "common/node/IProcessor.h"
 
 
 namespace sz
@@ -20,7 +20,7 @@ namespace silk
 namespace node
 {
 
-class ADC_Voltmeter : public INode
+class ADC_Voltmeter : public IProcessor
 {
 public:
     ADC_Voltmeter(HAL& hal);
@@ -61,7 +61,7 @@ private:
         std::vector<Sample> samples;
         uint32_t sample_idx = 0;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 

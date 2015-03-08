@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/INode.h"
+#include "common/node/ISource.h"
 #include "common/node/stream/IDistance.h"
 #include "common/node/bus/II2C.h"
 
@@ -21,7 +21,7 @@ namespace silk
 namespace node
 {
 
-class SRF02 : public INode
+class SRF02 : public ISource
 {
 public:
     SRF02(HAL& hal);
@@ -32,7 +32,6 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();

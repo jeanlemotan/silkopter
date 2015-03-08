@@ -13,7 +13,24 @@
 
 #include "boost/algorithm/string.hpp"
 
+#include "common/node/INode.h"
+#include "common/node/ISink.h"
+#include "common/node/ISource.h"
+#include "common/node/IProcessor.h"
+#include "common/node/processor/ILPF.h"
+#include "common/node/processor/IResampler.h"
+
 #include "ui_New_Node.h"
+
+static std::map<q::rtti::class_id, QColor> s_node_colors =
+{{
+    { q::rtti::get_class_id<silk::node::INode>(), QColor(0xF4D03F) },
+    { q::rtti::get_class_id<silk::node::ISource>(), QColor(0x86E2D5) },
+    { q::rtti::get_class_id<silk::node::ISink>(), QColor(0xF1A9A0) },
+    { q::rtti::get_class_id<silk::node::IProcessor>(), QColor(0xFDE3A7) },
+    { q::rtti::get_class_id<silk::node::ILPF>(), QColor(0xF7CA18) },
+    { q::rtti::get_class_id<silk::node::IResampler>(), QColor(0xEB974E) },
+}};
 
 HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     : QMainWindow(parent)
@@ -133,39 +150,36 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
     b->setName(node->name.c_str());
+    b->setId(node->name.c_str());
     b->setPos(pos);
-    if (node->inputs.empty()) //source
-    {
-        b->setBrush(QBrush(QColor(0x87D37C)));
-    }
-    else if (node->outputs.empty()) //sink
-    {
-        b->setBrush(QBrush(QColor(0xF1A9A0)));
-    }
-    else //node
-    {
-        b->setBrush(QBrush(QColor(0xC5EFF7)));
-    }
+    b->setBrush(QBrush(s_node_colors[node->class_id]));
 
     for (auto const& i: node->inputs)
     {
         auto port = b->addInputPort(QString());
         port->setBrush(QBrush(QColor(0xe67e22)));
-        port->connectedSignal.connect([port, node, this](QNEPort* output_port)
+        port->setId(i.name.c_str());
+
+        auto input_name = i.name;
+        port->connectedSignal.connect([node, input_name, this](QNEPort* output_port)
         {
-            std::string input_name = port->name().toLatin1().data();
             auto* block = output_port->block();
-            std::string node_name = block->name().toLatin1().data();
-            std::string stream_name = node_name + "/" + output_port->name().toLatin1().data();
+            std::string node_name = block->id().toLatin1().data();
+            std::string stream_name = node_name + "/" + output_port->id().toLatin1().data();
             m_hal.connect_input(node, input_name, stream_name, [](silk::HAL::Result) {});
         });
-        data.inputs[i.name].port.reset(port);
+
+        auto& port_data = data.inputs[i.name];
+        port_data.port.reset(port);
     }
     for (auto const& o: node->outputs)
     {
         auto port = b->addOutputPort(QString());
         port->setBrush(QBrush(QColor(0x9b59b6)));
-        data.outputs[o.name].port.reset(port);
+        port->setId(o.name.c_str());
+
+        auto& port_data = data.outputs[o.name];
+        port_data.port.reset(port);
     }
 
     data.block.reset(b);
