@@ -121,20 +121,18 @@ void LiPo_Battery::process()
             auto const& s = m_current_samples[i];
             m_output_stream->last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
             stream::ICurrent::Value current = s.value;
-            if (stream::ICurrent::get_channels_from_value(c_channels, current))
+            if (s.is_healthy)
             {
-                m_current_filter.process(c_channels.data());
-                stream::ICurrent::get_value_from_channels(current, c_channels);
+                m_current_filter.process(current);
             }
             m_output_stream->last_sample.value.average_current = current;
         }
         {
             auto const& s = m_voltage_samples[i];
             stream::IVoltage::Value voltage = s.value;
-            if (stream::IVoltage::get_channels_from_value(v_channels, voltage))
+            if (s.is_healthy)
             {
-                m_voltage_filter.process(v_channels.data());
-                stream::IVoltage::get_value_from_channels(voltage, v_channels);
+                m_voltage_filter.process(voltage);
             }
             m_output_stream->last_sample.value.average_voltage = voltage;
         }

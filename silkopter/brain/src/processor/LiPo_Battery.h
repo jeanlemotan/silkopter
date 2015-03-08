@@ -59,8 +59,8 @@ private:
     auto compute_cell_count() -> boost::optional<uint8_t>;
     boost::optional<uint8_t> m_cell_count;
 
-    util::Butterworth<1, stream::IVoltage::FILTER_CHANNELS> m_voltage_filter;
-    util::Butterworth<1, stream::ICurrent::FILTER_CHANNELS> m_current_filter;
+    util::Butterworth<stream::IVoltage::Value> m_voltage_filter;
+    util::Butterworth<stream::ICurrent::Value> m_current_filter;
 //    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
     struct Stream : public stream::IBattery_State

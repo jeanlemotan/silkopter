@@ -89,6 +89,7 @@ HAL::HAL()
     m_node_factory.register_node<Inertial>("Inertial");
     m_node_factory.register_node<LiPo_Battery>("LiPo_Battery");
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration_LPF");
+    m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear_Acceleration_LPF");
     m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular_Velocity_LPF");
     m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC_Value_LPF");
     m_node_factory.register_node<LPF<stream::ICurrent>>("Current_LPF");
@@ -98,7 +99,10 @@ HAL::HAL()
     m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic_Field_LPF");
     m_node_factory.register_node<LPF<stream::IPressure>>("Pressure_LPF");
     m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature_LPF");
+    m_node_factory.register_node<LPF<stream::IReference_Frame>>("Reference_Frame_LPF");
+    m_node_factory.register_node<LPF<stream::IPWM_Value>>("PWM_Value_LPF");
     m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration_Resampler");
+    m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear_Acceleration_Resampler");
     m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular_Velocity_Resampler");
     m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC_Value_Resampler");
     m_node_factory.register_node<Resampler<stream::ICurrent>>("Current_Resampler");
@@ -108,6 +112,8 @@ HAL::HAL()
     m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic_Field_Resampler");
     m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure_Resampler");
     m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature_Resampler");
+    m_node_factory.register_node<Resampler<stream::IReference_Frame>>("Reference_Frame_Resampler");
+    m_node_factory.register_node<Resampler<stream::IPWM_Value>>("PWM_Value_Resampler");
 }
 
 HAL::~HAL()
@@ -352,13 +358,8 @@ auto HAL::init() -> bool
         return false;
     }
 
-//    struct Stream : public stream::IADC_Value
-//    {
-//        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-//        auto get_rate() const -> uint32_t { return 1000; }
-//        auto get_name() const -> std::string const& { return ""; }
-//        std::vector<Sample> samples;
-//    } stream;
+//    uint32_t rate = 1000;
+//    std::vector<float> samples;
 
 //    {
 //        const size_t elements = 1000;
@@ -369,46 +370,47 @@ auto HAL::init() -> bool
 //             { 70.f, 1.f/7.f },
 //             { 130.f, 1.f/5.f }
 //         }};
-//        stream.samples.resize(elements);
+//        samples.resize(elements);
 //        std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
 //        std::mt19937 engine; // Mersenne twister MT19937
 //        auto generator = std::bind(distribution, engine);
-//        for (size_t i = 0; i < stream.samples.size(); i++)
+//        for (size_t i = 0; i < samples.size(); i++)
 //        {
-//            float a = float(i) * math::anglef::_2pi / float(stream.get_rate());
+//            float a = float(i) * math::anglef::_2pi / float(rate);
 //            float output = 0.f;
 //            for (auto& f: freq)
 //            {
 //                output += math::sin(a * f.first) * f.second;
 //            }
-//            stream.samples[i].value = output + generator();
-//            stream.samples[i].dt = std::chrono::microseconds(1000000 / stream.get_rate());
+//            samples[i] = output + generator();
+//        }
+//        for (size_t i = 0; i < samples.size(); i++)
+//        {
+//            samples[i] = i < (rate / 2) ? 1 : 0;
 //        }
 //    }
 
-//    write_gnu_plot("in.dat", stream.samples);
+//    write_gnu_plot("in.dat", samples);
 
-//    processor::LPF<Stream> lpf(*this);
+//    std::vector<float> out_samples;
+//    for (size_t f = 1; f < rate / 2; f++)
 //    {
-//        processor::LPF<Stream>::Init_Params params;
-//        params.input_stream = &stream;
-//        params.cutoff_frequency = 30;
-//        params.poles = 3;
-//        lpf.init(params);
+//        util::Butterworth<double> lpf;
+//        lpf.setup(4, rate, 100);
+//        lpf.reset(0);
+//        double inputs = 0;
+//        double outputs = 0;
+//        for (size_t x = 0; x < rate * 10; x++)
+//        {
+//            double a = x <= rate * 2 ? double(x) * math::angled::_2pi / double(rate) : 0.0;
+//            double v = math::sin(a * f);
+//            inputs += math::sqrt(math::abs(v));
+//            lpf.process(v);
+//            outputs += math::sqrt(math::abs(v));
+//        }
+//        out_samples.push_back(outputs / inputs);
 //    }
-//    lpf.process();
-//    write_gnu_plot("out.dat", lpf.get_output_stream(0).get_samples());
-
-//    processor::Resampler<Stream> resampler(*this);
-//    {
-//        processor::Resampler<Stream>::Init_Params params;
-//        params.output_rate = 100;
-//        params.input_stream = &stream;
-//        resampler.init(params);
-//    }
-//    resampler.process();
-
-//    write_gnu_plot("rsout.dat", resampler.get_output_stream(0).get_samples());
+//    write_gnu_plot("out.dat", out_samples);
 
 
     if (!create_buses(get_settings(q::Path("hal/buses"))) ||
@@ -417,7 +419,7 @@ auto HAL::init() -> bool
         return false;
     }
 
-    m_bus_factory.create_all();
+//    m_bus_factory.create_all();
 
     return true;
 }

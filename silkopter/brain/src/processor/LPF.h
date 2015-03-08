@@ -16,8 +16,6 @@ template<class Stream_t>
 class LPF : public ILPF
 {
 public:
-    static const int MAX_POLES = 8;
-
     LPF(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -41,7 +39,7 @@ private:
 
     std::weak_ptr<Stream_t> m_input_stream;
 
-    util::Butterworth<MAX_POLES, Stream_t::FILTER_CHANNELS> m_dsp;
+    util::Butterworth<typename Stream_t::Value> m_dsp;
 
     struct Stream : public Stream_t
     {
@@ -130,7 +128,7 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    sz.poles = math::clamp<uint32_t>(sz.poles, 1, MAX_POLES);
+    sz.poles = math::max<uint32_t>(sz.poles, 2);
     if (!m_dsp.setup(sz.poles, m_output_stream->rate, sz.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
@@ -182,19 +180,12 @@ void LPF<Stream_t>::process()
     auto const& is = input_stream->get_samples();
     m_output_stream->samples.reserve(is.size());
 
-    std::array<double, Stream_t::FILTER_CHANNELS> channels;
     for (auto& s: is)
     {
-       if (Stream_t::get_channels_from_value(channels, s.value))
+       if (s.is_healthy)
        {
-           m_dsp.process(channels.data());
-
-           typename Stream_t::Sample vs;
-           vs.dt = s.dt;
-           vs.sample_idx = s.sample_idx;
-           vs.value = s.value;
-           Stream_t::get_value_from_channels(vs.value, channels);
-           m_output_stream->samples.push_back(vs);
+           m_output_stream->samples.push_back(s);
+           m_dsp.process(m_output_stream->samples.back().value);
        }
        else
        {

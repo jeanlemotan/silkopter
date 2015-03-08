@@ -91,6 +91,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 std::string HAL_Window::prettify_name(std::string const& name) const
 {
     std::string new_name = name;
+    boost::trim(new_name);
     char old_c = 0;
     for (auto& c: new_name)
     {
@@ -130,6 +131,7 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
     {
         number = atoi(&new_name.c_str()[start]);
         new_name = new_name.substr(0, start);
+        boost::trim(new_name);
     }
 
     std::string result = new_name;
@@ -137,7 +139,7 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
     int count = 0;
     while (true)
     {
-        sprintf(nstr, "%03d", number);
+        sprintf(nstr, " %d", number);
         result = new_name + nstr;
         if (m_nodes.find(result) == m_nodes.end())
         {

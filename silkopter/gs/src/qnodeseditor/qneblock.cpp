@@ -61,19 +61,7 @@ void QNEBlock::setName(const QString &n)
     font.setBold(true);
     label->setFont(font);
 
-    QFontMetrics fm(scene()->font());
-    int w = fm.width(n);
-    int h = fm.height();
-    // port->setPos(0, height + h/2);
-    if (w > width - horzMargin)
-    {
-        width = w + horzMargin;
-    }
-
-    height = vertMargin + h * 2;
-    QPainterPath p;
-    p.addRoundedRect(0, 0, width, height, 5, 5);
-    setPath(p);
+    refreshGeometry();
 }
 
 
@@ -95,6 +83,16 @@ void QNEBlock::refreshGeometry()
     QFontMetrics fm(scene()->font());
 
     width = 0;
+
+    {
+        int w = fm.width(m_name);
+        // port->setPos(0, height + h/2);
+        if (w > width - horzMargin)
+        {
+            width = w + horzMargin;
+        }
+    }
+
     foreach(QGraphicsItem *port_, childItems())
     {
         if (port_->type() != QNEPort::Type)

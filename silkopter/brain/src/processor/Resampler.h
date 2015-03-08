@@ -52,7 +52,7 @@ private:
 
     std::deque<typename Stream_t::Sample> m_input_samples;
 
-    util::Butterworth<MAX_POLES, Stream_t::FILTER_CHANNELS> m_dsp;
+    util::Butterworth<typename Stream_t::Value> m_dsp;
 
     struct Stream : public Stream_t
     {
@@ -145,7 +145,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", sz.cutoff_frequency, max_cutoff);
         return false;
     }
-    sz.poles = math::clamp<uint32_t>(sz.poles, 1, MAX_POLES);
+    sz.poles = math::max<uint32_t>(sz.poles, 2);
     if (!m_dsp.setup(sz.poles, filter_rate, sz.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
@@ -205,15 +205,13 @@ void Resampler<Stream_t>::process()
     }
     else if (m_output_stream->rate < input_stream->get_rate())
     {
-        std::array<double, Stream_t::FILTER_CHANNELS> channels;
         for (auto const& s: is)
         {
             m_input_accumulated_dt += s.dt;
             m_input_samples.push_back(s);
-            if (Stream_t::get_channels_from_value(channels, m_input_samples.back().value))
+            if (s.is_healthy)
             {
-                m_dsp.process(channels.data());
-                Stream_t::get_value_from_channels(m_input_samples.back().value, channels);
+                m_dsp.process(m_input_samples.back().value);
             }
         }
         downsample();
@@ -275,7 +273,6 @@ void Resampler<Stream_t>::upsample()
 
     m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_dt));
 
-    std::array<double, Stream_t::FILTER_CHANNELS> channels;
     while (m_input_accumulated_dt >= m_dt)
     {
         typename Stream_t::Sample s;
@@ -283,10 +280,9 @@ void Resampler<Stream_t>::upsample()
         s.sample_idx = ++m_output_stream->sample_idx;
         s.dt = m_dt;
 
-        if (Stream_t::get_channels_from_value(channels, s.value))
+        if (s.is_healthy)
         {
-            m_dsp.process(channels.data());
-            Stream_t::get_value_from_channels(s.value, channels);
+            m_dsp.process(s.value);
         }
 
         m_output_stream->samples.push_back(s);

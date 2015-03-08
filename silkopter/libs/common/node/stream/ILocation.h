@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IStream.h"
+#include "utils/Butterworth.h"
 
 namespace silk
 {
@@ -45,37 +46,6 @@ public:
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
-    //filter helpers
-    static const size_t FILTER_CHANNELS = 10;
-    static auto get_channels_from_value(std::array<double, FILTER_CHANNELS>& channels, Value const& value) -> bool
-    {
-        channels[0] = value.longitude;
-        channels[1] = value.latitude;
-        channels[2] = value.altitude;
-        channels[3] = value.velocity_2d.x;
-        channels[4] = value.velocity_2d.y;
-        channels[5] = value.velocity.x;
-        channels[6] = value.velocity.y;
-        channels[7] = value.velocity.z;
-        channels[8] = value.direction.x;
-        channels[9] = value.direction.y;
-        return true;/*value.fix != Value::Fix::NONE &&
-                value.precision < 100.f &&
-                value.altitude_precision < 100.f;*/
-    }
-    static void get_value_from_channels(Value& value, std::array<double, FILTER_CHANNELS> const& channels)
-    {
-        value.longitude      = channels[0];
-        value.latitude       = channels[1];
-        value.altitude       = channels[2];
-        value.velocity_2d.x  = channels[3];
-        value.velocity_2d.y  = channels[4];
-        value.velocity.x     = channels[5];
-        value.velocity.y     = channels[6];
-        value.velocity.z     = channels[7];
-        value.direction.x    = channels[8];
-        value.direction.y    = channels[9];
-    }
 };
 DECLARE_CLASS_PTR(ILocation);
 
@@ -83,3 +53,44 @@ DECLARE_CLASS_PTR(ILocation);
 }
 }
 }
+
+
+
+namespace util
+{
+namespace dsp
+{
+template<> inline bool equals(silk::node::stream::ILocation::Value const& a, silk::node::stream::ILocation::Value const& b)
+{
+    return math::equals(a.longitude, b.longitude) ||
+           math::equals(a.latitude, b.latitude) ||
+           math::equals(a.altitude, b.altitude) ||
+           math::equals(a.velocity_2d, b.velocity_2d) ||
+           math::equals(a.velocity, b.velocity) ||
+           math::equals(a.direction, b.direction);
+}
+template<> inline silk::node::stream::ILocation::Value add(silk::node::stream::ILocation::Value const& a, silk::node::stream::ILocation::Value const& b)
+{
+    silk::node::stream::ILocation::Value r = a;
+    r.longitude += b.longitude;
+    r.latitude += b.latitude;
+    r.altitude += b.altitude;
+    r.velocity_2d += b.velocity_2d;
+    r.velocity += b.velocity;
+    r.direction += b.direction;
+    return r;
+}
+template<> inline silk::node::stream::ILocation::Value scale(silk::node::stream::ILocation::Value const& a, double scale)
+{
+    silk::node::stream::ILocation::Value r = a;
+    r.longitude *= scale;
+    r.latitude *= scale;
+    r.altitude *= scale;
+    r.velocity_2d *= scale;
+    r.velocity *= scale;
+    r.direction *= scale;
+    return r;
+}
+}
+}
+
