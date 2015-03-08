@@ -36,6 +36,13 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
 auto Comp_AHRS::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
+    if (m_init_params->rate == 0)
+    {
+        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        return false;
+    }
+    m_output_stream->rate = m_init_params->rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
     return true;
 }
 
@@ -43,10 +50,13 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    inputs[0].rate = m_output_stream->rate;
     inputs[0].name = "Angular Velocity";
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[1].rate = m_output_stream->rate;
     inputs[1].name = "Acceleration";
     inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    inputs[2].rate = m_output_stream->rate;
     inputs[2].name = "Magnetic Field";
     return inputs;
 }
@@ -190,44 +200,37 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_output_stream->rate = 0;
 
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
     auto magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
 
-    m_angular_velocity_stream = angular_velocity_stream;
-    m_acceleration_stream = acceleration_stream;
-    m_magnetic_field_stream = magnetic_field_stream;
-
-    uint32_t output_stream_rate = 0;
-
     auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.angular_velocity, rate);
+        m_config->inputs.angular_velocity.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
+    m_angular_velocity_stream = angular_velocity_stream;
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.acceleration, rate);
+        m_config->inputs.acceleration.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
+    m_acceleration_stream = acceleration_stream;
 
     rate = magnetic_field_stream ? magnetic_field_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.magnetic_field, rate);
+        m_config->inputs.magnetic_field.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.magnetic_field, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
-
-    m_output_stream->rate = rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_magnetic_field_stream = magnetic_field_stream;
 
     return true;
 }

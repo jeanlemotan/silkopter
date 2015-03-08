@@ -51,5 +51,8 @@ private:
     };
 
     std::map<std::string, Node_Data> m_nodes;
+
+    std::string prettify_name(std::string const& name) const;
+    std::string compute_unique_name(std::string const& name) const;
 };
 

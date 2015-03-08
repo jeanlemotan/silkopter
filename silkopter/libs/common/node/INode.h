@@ -22,6 +22,7 @@ public:
     struct Input
     {
         q::rtti::class_id class_id = 0;
+        uint32_t rate = 0;
         std::string name;
     };
     virtual auto get_inputs() const -> std::vector<Input> = 0;

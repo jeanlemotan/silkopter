@@ -15,6 +15,8 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
@@ -26,6 +28,10 @@ class Ui_New_Node
 {
 public:
     QVBoxLayout *verticalLayout;
+    QWidget *widget_2;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label;
+    QLineEdit *name;
     QTreeView *init_params;
     QWidget *widget;
     QHBoxLayout *horizontalLayout;
@@ -41,6 +47,23 @@ public:
         verticalLayout->setSpacing(6);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(4, 4, 4, 4);
+        widget_2 = new QWidget(New_Node);
+        widget_2->setObjectName(QStringLiteral("widget_2"));
+        horizontalLayout_2 = new QHBoxLayout(widget_2);
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        label = new QLabel(widget_2);
+        label->setObjectName(QStringLiteral("label"));
+
+        horizontalLayout_2->addWidget(label);
+
+        name = new QLineEdit(widget_2);
+        name->setObjectName(QStringLiteral("name"));
+
+        horizontalLayout_2->addWidget(name);
+
+
+        verticalLayout->addWidget(widget_2);
+
         init_params = new QTreeView(New_Node);
         init_params->setObjectName(QStringLiteral("init_params"));
 
@@ -74,6 +97,7 @@ public:
     void retranslateUi(QWidget *New_Node)
     {
         New_Node->setWindowTitle(QApplication::translate("New_Node", "Form", 0));
+        label->setText(QApplication::translate("New_Node", "Name", 0));
         ok->setText(QApplication::translate("New_Node", "Ok", 0));
         cancel->setText(QApplication::translate("New_Node", "Cancel", 0));
     } // retranslateUi

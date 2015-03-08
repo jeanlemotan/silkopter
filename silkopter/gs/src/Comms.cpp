@@ -210,7 +210,8 @@ auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& i: io)
     {
         if (!channel.unpack_param(i.name) ||
-            !channel.unpack_param(i.class_id))
+            !channel.unpack_param(i.class_id) ||
+            !channel.unpack_param(i.rate))
         {
             return false;
         }
@@ -227,11 +228,11 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
         return false;
     }
     io.resize(size);
-    for (auto& i: io)
+    for (auto& o: io)
     {
-        if (!channel.unpack_param(i.name) ||
-            !channel.unpack_param(i.class_id) ||
-            !channel.unpack_param(i.rate))
+        if (!channel.unpack_param(o.name) ||
+            !channel.unpack_param(o.class_id) ||
+            !channel.unpack_param(o.rate))
         {
             return false;
         }

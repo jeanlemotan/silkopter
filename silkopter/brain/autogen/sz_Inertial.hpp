@@ -28,9 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Inertial { struct Init_Params {
- 
+ uint32_t rate;
 
-explicit Init_Params() {  }
+explicit Init_Params():rate(0) {  }
 
 
  
@@ -47,7 +47,7 @@ private:
     int state;
     int depth;
 
-    
+    SAXEventHandler< uint32_t > handler_0;bool has_rate;
 
     bool check_depth(const char* type)
     {
@@ -61,7 +61,8 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            
+            case 0:
+    return "rate";
         default:
             break;
         }
@@ -88,14 +89,14 @@ private:
 
     void reset_flags()
     {
-        
+        has_rate = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Inertial::Init_Params * obj)
         : state(-1)
         , depth(0)
-        
+        , handler_0(&obj->rate)
     {
         reset_flags();
     }
@@ -107,7 +108,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
 
         default:
             break;
@@ -122,7 +124,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
 
         default:
             break;
@@ -137,7 +140,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
 
         default:
             break;
@@ -152,7 +156,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
 
         default:
             break;
@@ -167,7 +172,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
 
         default:
             break;
@@ -182,7 +188,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
 
         default:
             break;
@@ -197,7 +204,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
 
         default:
             break;
@@ -212,7 +220,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
 
         default:
             break;
@@ -228,7 +237,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            
+            else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
+						 { state=0; has_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -237,7 +247,8 @@ public:
         } else {
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
 
             default:
                 break;
@@ -253,7 +264,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
 
         default:
             break;
@@ -268,7 +280,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
 
         default:
             break;
@@ -283,7 +296,8 @@ public:
 
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
 
             default:
                 break;
@@ -299,13 +313,14 @@ public:
 
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
 
             default:
                 break;
             }
         } else {
-            
+            if (!has_rate) set_missing_required("rate");
         }
         return the_error.empty();
     }
@@ -324,7 +339,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+     handler_0.ReapError(errs); break;
 
         default:
             break;
@@ -339,7 +355,8 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        
+        handler_0.PrepareForReuse();
+
     }
 };
 
@@ -350,9 +367,9 @@ struct Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d789
     {
         w.StartObject();
 
-        
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63, uint32_t >()(w, value.rate);
 
-        w.EndObject(0);
+        w.EndObject(1);
     }
 
 };

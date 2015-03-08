@@ -35,6 +35,12 @@ auto ADC_Ammeter::init(rapidjson::Value const& init_params) -> bool
 auto ADC_Ammeter::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
+    if (m_init_params->rate == 0)
+    {
+        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        return false;
+    }
+    m_output_stream->rate = m_init_params->rate;
     return true;
 }
 
@@ -42,6 +48,7 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    inputs[0].rate = m_output_stream->rate;
     inputs[0].name = "ADC Value";
     return inputs;
 }
@@ -91,20 +98,17 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    *m_config = sz;
-    m_output_stream->rate = 0;
-
     auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc_value);
-    m_adc_stream = adc_stream;
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
-    if (rate == 0)
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.adc_value, rate);
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
         return false;
     }
 
-    m_output_stream->rate = rate;
+    m_adc_stream = adc_stream;
+    *m_config = sz;
 
     return true;
 }

@@ -46,6 +46,13 @@ auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
 auto LiPo_Battery::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
+    if (m_init_params->rate == 0)
+    {
+        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        return false;
+    }
+    m_output_stream->rate = m_init_params->rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
     return true;
 }
 
@@ -53,8 +60,10 @@ auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IVoltage>();
+    inputs[0].rate = m_output_stream->rate;
     inputs[0].name = "Voltage";
     inputs[1].class_id = q::rtti::get_class_id<stream::ICurrent>();
+    inputs[1].rate = m_output_stream->rate;
     inputs[1].name = "Current";
     return inputs;
 }
@@ -201,40 +210,27 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_output_stream->rate = 0;
 
     auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
     auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
 
-    m_voltage_stream = voltage_stream;
-    m_current_stream = current_stream;
-
-    uint32_t output_stream_rate = 0;
-
     auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.voltage, rate);
+        m_config->inputs.voltage.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.voltage, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
+    m_voltage_stream = voltage_stream;
 
     rate = current_stream ? current_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.current, rate);
+        m_config->inputs.current.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.current, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
-
-    if (sz.full_charge < 0.1f)
-    {
-        QLOGE("Full charge is too small: {}", sz.full_charge);
-        return false;
-    }
-
-    m_output_stream->rate = rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_current_stream = current_stream;
 
     return true;
 }

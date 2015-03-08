@@ -80,13 +80,75 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         auto nodes = m_hal.get_node_defs().get_all();
         for (auto const& n: nodes)
         {
-            auto* action = submenu->addAction(QIcon(), n->name.c_str());
+            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
             connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
         }
     }
 
     menu.exec(event->globalPos());
 }
+
+std::string HAL_Window::prettify_name(std::string const& name) const
+{
+    std::string new_name = name;
+    char old_c = 0;
+    for (auto& c: new_name)
+    {
+        if (c == '_')
+        {
+            c = ' ';
+        }
+        if (::isalnum(c) && old_c == ' ')
+        {
+            c = ::toupper(c);
+        }
+        old_c = c;
+    }
+    return new_name;
+}
+std::string HAL_Window::compute_unique_name(std::string const& name) const
+{
+    std::string new_name = name.empty() ? "Node" : name;
+    if (m_nodes.find(new_name) == m_nodes.end())
+    {
+        return new_name;
+    }
+
+    //find the ending number
+    int start = -1;
+    for (int i = new_name.length() - 1; i >= 0; i--)
+    {
+        if (!isdigit(new_name[i]))
+        {
+            break;
+        }
+        start = i;
+    }
+
+    uint32_t number = 0;
+    if (start >= 0)
+    {
+        number = atoi(&new_name.c_str()[start]);
+        new_name = new_name.substr(0, start);
+    }
+
+    std::string result = new_name;
+    char nstr[32];
+    int count = 0;
+    while (true)
+    {
+        sprintf(nstr, "%03d", number);
+        result = new_name + nstr;
+        if (m_nodes.find(result) == m_nodes.end())
+        {
+            return result;
+        }
+        number++;
+        count++;
+    }
+    return name;
+}
+
 
 void HAL_Window::refresh_node(silk::node::Node& node)
 {
@@ -96,7 +158,14 @@ void HAL_Window::refresh_node(silk::node::Node& node)
     {
         auto& id = data.inputs[i.name];
         QASSERT(id.port);
-        id.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
+        if (i.rate > 0)
+        {
+            id.port->setName(q::util::format2<std::string>("{} {}Hz", i.name, i.rate).c_str());
+        }
+        else
+        {
+            id.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
+        }
         id.port->setPortType(q::util::format2<std::string>("{}", i.class_id).c_str());
         id.port->disconnectAll();
 
@@ -209,13 +278,14 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
     ui.init_params->setModel(model);
     ui.init_params->expandAll();
     ui.init_params->header()->resizeSections(QHeaderView::ResizeToContents);
+    ui.name->setText(compute_unique_name(prettify_name(def->name)).c_str());
 
     connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
     connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
 
     if (dialog.exec() == QDialog::Accepted)
     {
-        m_hal.add_node(def->name, def->name, std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
+        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
         {
             if (result == silk::HAL::Result::OK)
             {

@@ -36,6 +36,13 @@ auto Inertial::init(rapidjson::Value const& init_params) -> bool
 auto Inertial::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
+    if (m_init_params->rate == 0)
+    {
+        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        return false;
+    }
+    m_output_stream->rate = m_init_params->rate;
+    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
     return true;
 }
 
@@ -43,8 +50,10 @@ auto Inertial::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
+    inputs[0].rate = m_output_stream->rate;
     inputs[0].name = "Reference Frame";
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[1].rate = m_output_stream->rate;
     inputs[1].name = "Acceleration";
     return inputs;
 }
@@ -119,34 +128,27 @@ auto Inertial::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_output_stream->rate = 0;
 
     auto reference_frame_stream = m_hal.get_streams().find_by_name<stream::IReference_Frame>(sz.inputs.reference_frame);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
 
-    m_reference_frame_stream = reference_frame_stream;
-    m_acceleration_stream = acceleration_stream;
-
-    uint32_t output_stream_rate = 0;
-
     auto rate = reference_frame_stream ? reference_frame_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.reference_frame, rate);
+        m_config->inputs.reference_frame.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.reference_frame, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
+    m_reference_frame_stream = reference_frame_stream;
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
-    if (rate == 0 || (output_stream_rate > 0 && rate != output_stream_rate))
+    if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Rate {}Hz", sz.inputs.acceleration, rate);
+        m_config->inputs.acceleration.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
         return false;
     }
-    output_stream_rate = rate;
-
-    m_output_stream->rate = rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_acceleration_stream = acceleration_stream;
 
     return true;
 }

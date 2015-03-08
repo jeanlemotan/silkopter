@@ -239,6 +239,7 @@ void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     {
         channel.pack_param(i.name);
         channel.pack_param(i.class_id);
+        channel.pack_param(i.rate);
     }
 }
 

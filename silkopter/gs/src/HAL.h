@@ -162,6 +162,7 @@ struct Node
     {
         q::rtti::class_id class_id;
         std::string name;
+        uint32_t rate = 0;
     };
     std::vector<Input> inputs;
 
