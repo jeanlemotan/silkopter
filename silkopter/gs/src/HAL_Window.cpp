@@ -54,9 +54,20 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     dock->setWidget(m_view);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
+    m_nodes_editor = new QNodesEditor(this);
+    m_nodes_editor->install(m_scene);
 
-    m_nodesEditor = new QNodesEditor(this);
-    m_nodesEditor->install(m_scene);
+    m_selection.config_dock = new QDockWidget(this);
+    m_selection.config_view = new QTreeView(m_selection.config_dock);
+    m_selection.config_model = new JSON_Model(m_selection.config_view);
+
+    m_selection.config_dock->setWidget(m_selection.config_view);
+    m_selection.config_view->setModel(m_selection.config_model);
+
+    addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
+
+
+    connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
     //m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::on_nodes_refreshed, this));
@@ -135,6 +146,31 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
     }
 
     menu.exec(event->globalPos());
+}
+
+void HAL_Window::selection_changed()
+{
+    m_selection.config_model->set_document(std::string(), nullptr);
+
+    auto items = m_scene->selectedItems();
+    if (items.empty())
+    {
+        return;
+    }
+    auto* item = items.at(0);
+    if (!item || item->type() != QNEBlock::Type)
+    {
+        return;
+    }
+    QNEBlock* block = reinterpret_cast<QNEBlock*>(item);
+    auto node = m_hal.get_nodes().find_by_name(block->id().toLatin1().data());
+    if (!node)
+    {
+        return;
+    }
+    m_selection.config_json = jsonutil::clone_value(node->config);
+    m_selection.config_model->set_document(std::string("Config"), &m_selection.config_json);
+    m_selection.config_view->expandAll();
 }
 
 std::string HAL_Window::prettify_name(std::string const& name) const

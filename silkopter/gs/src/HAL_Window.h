@@ -10,6 +10,7 @@
 #include "HAL.h"
 
 class QNodesEditor;
+class JSON_Model;
 
 class HAL_Window : public QMainWindow
 {
@@ -24,14 +25,24 @@ private:
 private:
     void contextMenuEvent(QContextMenuEvent* event);
 
+    void selection_changed();
+
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node, QPointF pos);
     void create_node(silk::node::Node_Def_ptr def, QPointF pos);
 
     silk::HAL& m_hal;
-    QNodesEditor* m_nodesEditor;
+    QNodesEditor* m_nodes_editor;
     QGraphicsView* m_view;
     QGraphicsScene* m_scene;
+
+    struct Selection
+    {
+        QDockWidget* config_dock = nullptr;
+        QTreeView* config_view = nullptr;
+        rapidjson::Document config_json;
+        JSON_Model* config_model = nullptr;
+    } m_selection;
 
     struct Node_Data
     {
