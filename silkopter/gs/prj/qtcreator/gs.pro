@@ -138,3 +138,12 @@ SOURCES += \
 
 FORMS += \
     ../../src/New_Node.ui
+
+DISTFILES += \
+    ../../src/node.png \
+    ../../src/pilot.png \
+    ../../src/processor.png \
+    ../../src/resampler.png \
+    ../../src/sink.png \
+    ../../src/source.png \
+    ../../src/lpf.png

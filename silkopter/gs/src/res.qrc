@@ -1,4 +1,11 @@
 <RCC>
     <qresource prefix="/icons">
+        <file>lpf.png</file>
+        <file>node.png</file>
+        <file>pilot.png</file>
+        <file>processor.png</file>
+        <file>resampler.png</file>
+        <file>sink.png</file>
+        <file>source.png</file>
     </qresource>
 </RCC>

@@ -90,57 +90,47 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 
     auto nodes = m_hal.get_node_defs().get_all();
 
-    QMenu* submenu = menu.addMenu(QIcon(), "Sources");
+    QMenu* sources = menu.addMenu(QIcon(), "Sources");
+    QMenu* sinks = menu.addMenu(QIcon(), "Sinks");
+    QMenu* processors = menu.addMenu(QIcon(), "Processors");
+    QMenu* lpfs = menu.addMenu(QIcon(), "Low Pass Filters");
+    QMenu* resamplers = menu.addMenu(QIcon(), "Resamplers");
+    QMenu* pilots = menu.addMenu(QIcon(), "Pilots");
+    QMenu* misc = menu.addMenu(QIcon(), "Misc");
+
     for (auto const& n: nodes)
     {
+        QAction* action = nullptr;
         if (n->class_id == q::rtti::get_class_id<silk::node::ISource>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            action = sources->addAction(QIcon(":/icons/source.png"), prettify_name(n->name).c_str());
         }
-    }
-    submenu = menu.addMenu(QIcon(), "Sinks");
-    for (auto const& n: nodes)
-    {
         if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            action = sinks->addAction(QIcon(":/icons/sink.png"), prettify_name(n->name).c_str());
         }
-    }
-    submenu = menu.addMenu(QIcon(), "Processors");
-    for (auto const& n: nodes)
-    {
         if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            action = processors->addAction(QIcon(":/icons/processor.png"), prettify_name(n->name).c_str());
         }
-    }
-    submenu = menu.addMenu(QIcon(), "Low Pass Filters");
-    for (auto const& n: nodes)
-    {
         if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            action = lpfs->addAction(QIcon(":/icons/lpf.png"), prettify_name(n->name).c_str());
         }
-    }
-    submenu = menu.addMenu(QIcon(), "Resamplers");
-    for (auto const& n: nodes)
-    {
         if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            action = resamplers->addAction(QIcon(":/icons/resampler.png"), prettify_name(n->name).c_str());
         }
-    }
-    submenu = menu.addMenu(QIcon(), "Pilots");
-    for (auto const& n: nodes)
-    {
         if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
         {
-            auto* action = submenu->addAction(QIcon(), prettify_name(n->name).c_str());
+            action = pilots->addAction(QIcon(":/icons/pilot.png"), prettify_name(n->name).c_str());
+        }
+        else
+        {
+            action = misc->addAction(QIcon(":/icons/node.png"), prettify_name(n->name).c_str());
+        }
+        if (action)
+        {
             connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
         }
     }
