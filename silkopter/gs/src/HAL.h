@@ -147,6 +147,22 @@ struct Node_Def
     q::rtti::class_id class_id;
     rapidjson::Document default_init_params;
     rapidjson::Document default_config;
+
+    struct Input
+    {
+        q::rtti::class_id class_id;
+        std::string name;
+        uint32_t rate = 0;
+    };
+    std::vector<Input> inputs;
+
+    struct Output
+    {
+        q::rtti::class_id class_id;
+        std::string name;
+        uint32_t rate = 0;
+    };
+    std::vector<Output> outputs;
 };
 DECLARE_CLASS_PTR(Node_Def);
 

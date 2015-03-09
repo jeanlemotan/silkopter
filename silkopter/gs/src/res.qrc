@@ -1,11 +1,26 @@
 <RCC>
-    <qresource prefix="/icons">
-        <file>lpf.png</file>
-        <file>node.png</file>
-        <file>pilot.png</file>
-        <file>processor.png</file>
-        <file>resampler.png</file>
-        <file>sink.png</file>
-        <file>source.png</file>
+    <qresource prefix="/">
+        <file>icons/Acceleration.png</file>
+        <file>icons/ADC Value.png</file>
+        <file>icons/Angular Velocity.png</file>
+        <file>icons/Battery State.png</file>
+        <file>icons/Cardinal Points.png</file>
+        <file>icons/Current.png</file>
+        <file>icons/Distance.png</file>
+        <file>icons/Linear Acceleration.png</file>
+        <file>icons/Location.png</file>
+        <file>icons/LPF.png</file>
+        <file>icons/Magnetic Field.png</file>
+        <file>icons/Node.png</file>
+        <file>icons/Pilot.png</file>
+        <file>icons/Pressure.png</file>
+        <file>icons/Processor.png</file>
+        <file>icons/PWM Value.png</file>
+        <file>icons/Reference Frame.png</file>
+        <file>icons/Resampler.png</file>
+        <file>icons/Sink.png</file>
+        <file>icons/Source.png</file>
+        <file>icons/Temperature.png</file>
+        <file>icons/Voltage.png</file>
     </qresource>
 </RCC>

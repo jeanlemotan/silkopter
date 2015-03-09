@@ -263,6 +263,17 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 //    }
 //}
 
+static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& node_def) -> bool
+{
+    bool ok = channel.unpack_param(node_def.name);
+    ok &= channel.unpack_param(node_def.class_id);
+    ok &= unpack_inputs(channel, node_def.inputs);
+    ok &= unpack_outputs(channel, node_def.outputs);
+    ok &= unpack_json(channel, node_def.default_init_params);
+    ok &= unpack_json(channel, node_def.default_config);
+    return ok;
+}
+
 static auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool
 {
     bool ok = channel.unpack_param(node.class_id);
@@ -320,11 +331,7 @@ void Comms::handle_enumerate_node_defs()
         for (uint32_t i = 0; i < node_count; i++)
         {
             auto def = std::make_shared<node::Node_Def>();
-            bool ok = m_setup_channel.unpack_param(def->name);
-            ok &= m_setup_channel.unpack_param(def->class_id);
-            ok &= unpack_json(m_setup_channel, def->default_init_params);
-            ok &= unpack_json(m_setup_channel, def->default_config);
-            if (!ok)
+            if (!unpack_node_def_data(m_setup_channel, *def))
             {
                 QLOGE("\t\tBad node");
                 return;

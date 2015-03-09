@@ -50,10 +50,10 @@ auto Inertial::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
-    inputs[0].rate = m_output_stream->rate;
+    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Reference Frame";
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
-    inputs[1].rate = m_output_stream->rate;
+    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Acceleration";
     return inputs;
 }

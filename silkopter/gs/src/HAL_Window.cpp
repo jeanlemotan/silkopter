@@ -82,6 +82,52 @@ void HAL_Window::on_node_factories_refreshed()
 {
 }
 
+static auto prettify_name(std::string const& name) -> std::string
+{
+    std::string new_name = name;
+    boost::trim(new_name);
+    char old_c = 0;
+    for (auto& c: new_name)
+    {
+        if (c == '_')
+        {
+            c = ' ';
+        }
+        if (::isalnum(c) && old_c == ' ')
+        {
+            c = ::toupper(c);
+        }
+        old_c = c;
+    }
+    return new_name;
+}
+
+static auto get_icon(std::string const& node_icon_name, silk::node::Node_Def& node_def) -> QIcon
+{
+    auto name = prettify_name(node_def.name);
+    QString icon_name(q::util::format2<std::string>(":/icons/{}.png", name).c_str());
+    if (QFile::exists(icon_name))
+    {
+        return QIcon(icon_name);
+    }
+
+    //load based on the name and subparts of it
+    auto tokens = q::util::tokenize(name, std::string(" "));
+    name.clear();
+    for (auto const& t: tokens)
+    {
+        name += t;
+        icon_name = q::util::format2<std::string>(":/icons/{}.png", name).c_str();
+        if (QFile::exists(icon_name))
+        {
+            return QIcon(icon_name);
+        }
+        name += " ";
+    }
+
+    return QIcon(node_icon_name.c_str());
+}
+
 void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
@@ -90,49 +136,79 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 
     auto nodes = m_hal.get_node_defs().get_all();
 
-    QMenu* sources = menu.addMenu(QIcon(), "Sources");
-    QMenu* sinks = menu.addMenu(QIcon(), "Sinks");
-    QMenu* processors = menu.addMenu(QIcon(), "Processors");
-    QMenu* lpfs = menu.addMenu(QIcon(), "Low Pass Filters");
-    QMenu* resamplers = menu.addMenu(QIcon(), "Resamplers");
-    QMenu* pilots = menu.addMenu(QIcon(), "Pilots");
-    QMenu* misc = menu.addMenu(QIcon(), "Misc");
+    QMenu* sources = menu.addMenu(QIcon(":/icons/Source.png"), "Sources");
+    QMenu* sinks = menu.addMenu(QIcon(":/icons/Sink.png"), "Sinks");
+    QMenu* processors = menu.addMenu(QIcon(":/icons/Processor.png"), "Processors");
+    QMenu* lpfs = menu.addMenu(QIcon(":/icons/LPF.png"), "Low Pass Filters");
+    QMenu* resamplers = menu.addMenu(QIcon(":/icons/Resampler.png"), "Resamplers");
+    QMenu* pilots = menu.addMenu(QIcon(":/icons/Pilot.png"), "Pilots");
+    QMenu* misc = menu.addMenu(QIcon(":/icons/Node.png"), "Misc");
 
     for (auto const& n: nodes)
     {
         QAction* action = nullptr;
         if (n->class_id == q::rtti::get_class_id<silk::node::ISource>())
         {
-            action = sources->addAction(QIcon(":/icons/source.png"), prettify_name(n->name).c_str());
+            action = sources->addAction(get_icon(":/icons/Source.png", *n), prettify_name(n->name).c_str());
         }
-        if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
+        else if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
         {
-            action = sinks->addAction(QIcon(":/icons/sink.png"), prettify_name(n->name).c_str());
+            action = sinks->addAction(get_icon(":/icons/Sink.png", *n), prettify_name(n->name).c_str());
         }
-        if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
+        else if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
         {
-            action = processors->addAction(QIcon(":/icons/processor.png"), prettify_name(n->name).c_str());
+            action = processors->addAction(get_icon(":/icons/Processor.png", *n), prettify_name(n->name).c_str());
         }
-        if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
+        else if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
         {
-            action = lpfs->addAction(QIcon(":/icons/lpf.png"), prettify_name(n->name).c_str());
+            action = lpfs->addAction(get_icon(":/icons/LPF.png", *n), prettify_name(n->name).c_str());
         }
-        if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
+        else if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
         {
-            action = resamplers->addAction(QIcon(":/icons/resampler.png"), prettify_name(n->name).c_str());
+            action = resamplers->addAction(get_icon(":/icons/Resampler.png", *n), prettify_name(n->name).c_str());
         }
-        if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
+        else if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
         {
-            action = pilots->addAction(QIcon(":/icons/pilot.png"), prettify_name(n->name).c_str());
+            action = pilots->addAction(get_icon(":/icons/Pilot.png", *n), prettify_name(n->name).c_str());
         }
         else
         {
-            action = misc->addAction(QIcon(":/icons/node.png"), prettify_name(n->name).c_str());
+            action = misc->addAction(get_icon(":/icons/Node.png", *n), prettify_name(n->name).c_str());
         }
+
         if (action)
         {
             connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
         }
+    }
+
+    if (sources->actions().empty())
+    {
+        sources->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (sinks->actions().empty())
+    {
+        sinks->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (processors->actions().empty())
+    {
+        processors->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (lpfs->actions().empty())
+    {
+        lpfs->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (resamplers->actions().empty())
+    {
+        resamplers->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (pilots->actions().empty())
+    {
+        pilots->addAction(QIcon(), "none")->setEnabled(false);
+    }
+    if (misc->actions().empty())
+    {
+        misc->addAction(QIcon(), "none")->setEnabled(false);
     }
 
     menu.exec(event->globalPos());
@@ -163,25 +239,6 @@ void HAL_Window::selection_changed()
     m_selection.config_view->expandAll();
 }
 
-std::string HAL_Window::prettify_name(std::string const& name) const
-{
-    std::string new_name = name;
-    boost::trim(new_name);
-    char old_c = 0;
-    for (auto& c: new_name)
-    {
-        if (c == '_')
-        {
-            c = ' ';
-        }
-        if (::isalnum(c) && old_c == ' ')
-        {
-            c = ::toupper(c);
-        }
-        old_c = c;
-    }
-    return new_name;
-}
 std::string HAL_Window::compute_unique_name(std::string const& name) const
 {
     std::string new_name = name.empty() ? "Node" : name;

@@ -50,22 +50,22 @@ auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(6);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
-    inputs[0].rate = m_output_stream->rate;
+    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Reference Frame";
     inputs[1].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
-    inputs[1].rate = m_output_stream->rate;
+    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Angular Velocity";
     inputs[2].class_id = q::rtti::get_class_id<stream::ICardinal_Points>();
-    inputs[2].rate = m_output_stream->rate;
+    inputs[2].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[2].name = "Cardinal Points";
     inputs[3].class_id = q::rtti::get_class_id<stream::ILocation>();
-    inputs[3].rate = m_output_stream->rate;
+    inputs[3].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[3].name = "Location";
     inputs[4].class_id = q::rtti::get_class_id<stream::IBattery_State>();
-    inputs[4].rate = m_output_stream->rate;
+    inputs[4].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[4].name = "Battery State";
     inputs[5].class_id = q::rtti::get_class_id<stream::IMultirotor_Input>();
-    inputs[5].rate = m_output_stream->rate;
+    inputs[5].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[5].name = "Multirotor Input";
     return inputs;
 }

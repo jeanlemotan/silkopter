@@ -48,7 +48,7 @@ auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
     inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
-    inputs[0].rate = m_output_stream->rate;
+    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "ADC Value";
     return inputs;
 }

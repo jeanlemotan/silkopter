@@ -49,13 +49,13 @@ auto Comp_Location::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
     inputs[0].class_id = q::rtti::get_class_id<stream::ILocation>();
-    inputs[0].rate = m_output_stream->rate;
+    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Location";
     inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
-    inputs[1].rate = m_output_stream->rate;
+    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Linear Acceleration";
     inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
-    inputs[2].rate = m_output_stream->rate;
+    inputs[2].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[2].name = "Pressure";
     return inputs;
 }

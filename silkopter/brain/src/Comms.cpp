@@ -309,6 +309,8 @@ void Comms::handle_enumerate_node_defs()
         {
             m_setup_channel.pack_param(n.name);
             m_setup_channel.pack_param(q::rtti::get_class_id(*n.node));
+            pack_inputs(m_setup_channel, n.node->get_inputs());
+            pack_outputs(m_setup_channel, n.node->get_outputs());
             pack_json(m_setup_channel, n.node->get_init_params());
             pack_json(m_setup_channel, n.node->get_config());
         }
