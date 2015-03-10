@@ -55,14 +55,8 @@ void HAL::add_node(std::string const& def_name,
     m_add_queue.push_back(std::move(item));
 }
 
-void HAL::connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback)
+void HAL::connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
 {
-    QASSERT(callback);
-    if (!callback)
-    {
-        return;
-    }
-
     auto document = jsonutil::clone_value(node->config);
 
     q::Path path("inputs");
@@ -71,18 +65,26 @@ void HAL::connect_input(node::Node_ptr node, std::string const& input_name, std:
     auto* value = jsonutil::find_value(document, path);
     if (!value)
     {
-        callback(Result::FAILED);
+        QASSERT(0);
         return;
     }
 
     value->SetString(stream_name.c_str(), document.GetAllocator());
 
-    Connect_Queue_Item item;
+    Set_Config_Queue_Item item;
     item.message = silk::comms::Setup_Message::NODE_CONFIG;
     item.name = node->name;
     item.config = std::move(document);
-    item.callback = callback;
-    m_connect_queue.push_back(std::move(item));
+    m_set_config_queue.push_back(std::move(item));
+}
+
+void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config)
+{
+    Set_Config_Queue_Item item;
+    item.message = silk::comms::Setup_Message::NODE_CONFIG;
+    item.name = node->name;
+    item.config = jsonutil::clone_value(config);
+    m_set_config_queue.push_back(std::move(item));
 }
 
 

@@ -299,6 +299,7 @@ bool JSON_Model::setData(QModelIndex const& index, QVariant const& value, int ro
         return false;
     }
 
+    bool modified = false;
     auto* json = ti->m_json;
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
@@ -307,42 +308,47 @@ bool JSON_Model::setData(QModelIndex const& index, QVariant const& value, int ro
             if (json->IsBool())
             {
                 json->SetBool(value.toBool());
-                return true;
+                modified = true;
             }
-            if (json->IsInt())
+            else if (json->IsInt())
             {
                 json->SetInt(value.toInt());
-                return true;
+                modified = true;
             }
-            if (json->IsUint())
+            else if (json->IsUint())
             {
                 json->SetUint(value.toUInt());
-                return true;
+                modified = true;
             }
-            if (json->IsInt64())
+            else if (json->IsInt64())
             {
                 json->SetInt64(value.toLongLong());
-                return true;
+                modified = true;
             }
-            if (json->IsUint64())
+            else if (json->IsUint64())
             {
                 json->SetUint64(value.toULongLong());
-                return true;
+                modified = true;
             }
-            if (json->IsDouble() || json->IsNumber())
+            else if (json->IsDouble() || json->IsNumber())
             {
                 json->SetDouble(value.toDouble());
-                return true;
+                modified = true;
             }
-            if (json->IsString())
+            else if (json->IsString())
             {
                 json->SetString(value.toString().toLatin1().data(), m_document->GetAllocator());
-                return true;
+                modified = true;
             }
         }
     }
 
-    return false;
+    if (modified)
+    {
+        emit dataChanged(createIndex(index.row(), 0, index.internalPointer()), createIndex(index.row(), columnCount(), index.internalPointer()));
+    }
+
+    return modified;
 }
 bool JSON_Model::setHeaderData(int section, Qt::Orientation orientation, QVariant const& value, int role)
 {

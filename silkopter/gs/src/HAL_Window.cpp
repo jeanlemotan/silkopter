@@ -60,6 +60,7 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     m_selection.config_dock = new QDockWidget(this);
     m_selection.config_view = new QTreeView(m_selection.config_dock);
     m_selection.config_model = new JSON_Model(m_selection.config_view);
+    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &HAL_Window::on_config_changed);
 
     m_selection.config_dock->setWidget(m_selection.config_view);
     m_selection.config_view->setModel(m_selection.config_model);
@@ -82,6 +83,11 @@ void HAL_Window::on_node_factories_refreshed()
 {
 }
 
+void HAL_Window::on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
+{
+    m_hal.set_node_config(m_selection.node, m_selection.config_json);
+}
+
 static auto prettify_name(std::string const& name) -> std::string
 {
     std::string new_name = name;
@@ -89,10 +95,7 @@ static auto prettify_name(std::string const& name) -> std::string
     char old_c = 0;
     for (auto& c: new_name)
     {
-        if (c == '_')
-        {
-            c = ' ';
-        }
+        c == '_' ? ' ' : c;
         if (::isalnum(c) && old_c == ' ')
         {
             c = ::toupper(c);
@@ -216,7 +219,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
 
 void HAL_Window::selection_changed()
 {
-    m_selection.config_model->set_document(std::string(), nullptr);
+    set_config_editor_node(silk::node::Node_ptr());
 
     auto items = m_scene->selectedItems();
     if (items.empty())
@@ -234,9 +237,22 @@ void HAL_Window::selection_changed()
     {
         return;
     }
-    m_selection.config_json = jsonutil::clone_value(node->config);
-    m_selection.config_model->set_document(std::string("Config"), &m_selection.config_json);
-    m_selection.config_view->expandAll();
+    set_config_editor_node(node);
+}
+
+void HAL_Window::set_config_editor_node(silk::node::Node_ptr node)
+{
+    if (node)
+    {
+        m_selection.config_json = jsonutil::clone_value(node->config);
+        m_selection.config_model->set_document(std::string("Config"), &m_selection.config_json);
+        m_selection.config_view->expandAll();
+    }
+    else
+    {
+        m_selection.config_model->set_document(std::string(), nullptr);
+    }
+    m_selection.node = node;
 }
 
 std::string HAL_Window::compute_unique_name(std::string const& name) const
@@ -343,6 +359,12 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         od.port->setPortType(q::util::format2<std::string>("{}", o.class_id).c_str());
     }
     data.block->refreshGeometry();
+
+    //refresh the config
+    if (m_selection.node.get() == &node)
+    {
+        set_config_editor_node(m_selection.node);
+    }
 }
 
 void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
@@ -369,7 +391,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
             auto* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
             std::string stream_name = node_name + "/" + output_port->id().toLatin1().data();
-            m_hal.connect_input(node, input_name, stream_name, [](silk::HAL::Result) {});
+            m_hal.connect_input(node, input_name, stream_name);
         });
 
         auto& port_data = data.inputs[i.name];

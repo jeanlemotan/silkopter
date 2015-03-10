@@ -21,11 +21,13 @@ public:
 private:
     void on_node_factories_refreshed();
     void on_nodes_refreshed();
+    void on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
 
 private:
     void contextMenuEvent(QContextMenuEvent* event);
 
     void selection_changed();
+    void set_config_editor_node(silk::node::Node_ptr node);
 
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node, QPointF pos);
@@ -38,6 +40,7 @@ private:
 
     struct Selection
     {
+        silk::node::Node_ptr node;
         QDockWidget* config_dock = nullptr;
         QTreeView* config_view = nullptr;
         rapidjson::Document config_json;

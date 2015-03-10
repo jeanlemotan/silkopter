@@ -232,8 +232,8 @@ public:
     typedef std::function<void(Result, node::Node_ptr)> Add_Node_Callback;
     void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Node_Callback callback);
 
-    typedef std::function<void(Result)> Connect_Callback;
-    void connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name, Connect_Callback callback);
+    void connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
+    void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
@@ -259,14 +259,13 @@ protected:
     };
     std::vector<Add_Queue_Item> m_add_queue;
 
-    struct Connect_Queue_Item : public Queue_Item
+    struct Set_Config_Queue_Item : public Queue_Item
     {
         silk::comms::Setup_Message message;
         std::string name;
         rapidjson::Document config;
-        Connect_Callback callback;
     };
-    std::vector<Connect_Queue_Item> m_connect_queue;
+    std::vector<Set_Config_Queue_Item> m_set_config_queue;
 
 private:
 

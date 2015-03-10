@@ -583,7 +583,7 @@ void Comms::send_hal_requests()
     }
 
 
-    for (auto it = m_hal.m_connect_queue.begin(); it != m_hal.m_connect_queue.end();)
+    for (auto it = m_hal.m_set_config_queue.begin(); it != m_hal.m_set_config_queue.end();)
     {
         auto& req = *it;
         if (!req.was_sent)
@@ -599,8 +599,7 @@ void Comms::send_hal_requests()
         }
         if (now - req.sent_time_point > REQUEST_TIMEOUT)
         {
-            req.callback(HAL::Result::TIMEOUT);
-            m_hal.m_connect_queue.erase(it);
+            m_hal.m_set_config_queue.erase(it);
         }
         else
         {
