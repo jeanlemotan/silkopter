@@ -52,7 +52,7 @@ namespace jsonutil
         {
             rapidjson::Value n(name.c_str(), name.size(), allocator);
             rapidjson::Value value(type);
-            json.AddMember(n, value, allocator);
+            json.AddMember(std::move(n), std::move(value), allocator);
             return find_value(json, name);
         }
         else if (type == v->GetType())
@@ -99,6 +99,49 @@ namespace jsonutil
         return nullptr;
     }
 
+    template <class STRING>
+    inline auto add_value(rapidjson::Value& json, STRING const& name, rapidjson::Value&& value, typename rapidjson::Value::AllocatorType& allocator) -> bool
+    {
+        auto v = find_value(json, name);
+        if (v != nullptr)
+        {
+            return false;
+        }
+
+        rapidjson::Value n(name.c_str(), name.size(), allocator);
+        json.AddMember(std::move(n), std::move(value), allocator);
+        return true;
+    }
+
+    inline auto add_value(rapidjson::Value& json, q::Path const& path, rapidjson::Value&& value, typename rapidjson::Value::AllocatorType& allocator) -> bool
+    {
+        if (!json.IsObject())
+        {
+            return false;
+        }
+
+        //now walk the path and create missing elements
+        auto p = path;
+        rapidjson::Value* parent = &json;
+        while (!p.is_empty())
+        {
+            if (p.size() == 1)
+            {
+                //last element?
+                return add_value(*parent, p[0], std::move(value), allocator);
+            }
+            else
+            {
+                parent = get_or_add_value(*parent, p[0], rapidjson::kObjectType, allocator);
+                if (!parent)
+                {
+                    return false;
+                }
+                p.pop_front();
+            }
+        }
+        return false;
+    }
 
 //    template <class VALUE = rapidjson::Value>
 //    const typename VALUE::ConstMemberIterator find_member(VALUE const& value, std::string const& name)
@@ -169,6 +212,7 @@ namespace jsonutil
 //    typedef Abstract_Member_Finder<const rapidjson::Value, rapidjson::Value::ConstMemberIterator> Const_Member_Finder;
 
 
+    rapidjson::Value clone_value(rapidjson::Value const& json, rapidjson::Document::AllocatorType& allocator);
 
     inline void clone_value(rapidjson::Value& dst, rapidjson::Value const& json, rapidjson::Document::AllocatorType& allocator)
     {
@@ -182,23 +226,19 @@ namespace jsonutil
             dst.SetObject();
             for (auto m = json.MemberBegin(); m != json.MemberEnd(); ++m)
             {
-                rapidjson::Value nval(m->name.GetString(), allocator);
-                rapidjson::Value mval;
-                clone_value(mval, m->value, allocator);
-                dst.AddMember(nval, mval, allocator);
+                rapidjson::Value nval(m->name.GetString(), m->name.GetStringLength(), allocator);
+                dst.AddMember(std::move(nval), clone_value(m->value, allocator), allocator);
             }
             break;
         case kArrayType:
             dst.SetArray();
             for (size_t i = 0; i < dst.Size(); i++)
             {
-                rapidjson::Value mval;
-                clone_value(mval, json[(uint32_t)(i)], allocator);
-                dst.PushBack(mval, allocator);
+                dst.PushBack(clone_value(json[(uint32_t)(i)], allocator), allocator);
             }
             break;
         case kStringType:
-            dst.SetString(json.GetString(), allocator);
+            dst.SetString(json.GetString(), json.GetStringLength(), allocator);
             break;
         case kNumberType:
             if (json.IsInt())			dst.SetInt(json.GetInt());
@@ -217,6 +257,12 @@ namespace jsonutil
     {
         rapidjson::Document dst;
         clone_value(dst, json, dst.GetAllocator());
+        return std::move(dst);
+    }
+    inline rapidjson::Value clone_value(rapidjson::Value const& json, rapidjson::Document::AllocatorType& allocator)
+    {
+        rapidjson::Value dst;
+        clone_value(dst, json, allocator);
         return std::move(dst);
     }
 

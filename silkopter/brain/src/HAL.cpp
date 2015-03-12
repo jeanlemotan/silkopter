@@ -65,39 +65,53 @@ HAL::~HAL()
 {
 }
 
-auto HAL::load_settings() -> bool
-{
-    TIMED_FUNCTION();
-
-    q::data::File_Source fs(k_settings_path);
-    if (!fs.is_open())
-    {
-        QLOGE("Failed to load '{}'", k_settings_path);
-        return false;
-    }
-
-    auto data = q::data::read_whole_source_as_string<std::string>(fs);
-    if (m_settings.Parse(data.c_str()).HasParseError())
-    {
-        QLOGE("Failed to load '{}': {}:{}", k_settings_path, m_settings.GetParseError(), m_settings.GetErrorOffset());
-        return false;
-    }
-
-    return true;
-}
 void HAL::save_settings()
 {
     TIMED_FUNCTION();
 
-    if (!m_settings.IsObject())
-    {
-        m_settings.SetObject();
-        get_settings(q::Path("hal/buses"));
-        get_settings(q::Path("hal/nodes"));
-    }
+    auto settingsj = std::make_shared<rapidjson::Document>();
+    settingsj->SetObject();
 
-    auto copy = std::make_shared<rapidjson::Document>();
-    jsonutil::clone_value(*copy, m_settings, copy->GetAllocator());
+    auto& allocator = settingsj->GetAllocator();
+
+    {
+        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/buses"), rapidjson::kObjectType, allocator);
+        if (!busesj)
+        {
+            QLOGE("Cannot open create buses settings node.");
+            return;
+        }
+        auto const& nodes = get_buses().get_all();
+        for (auto const& n: nodes)
+        {
+            if (!jsonutil::add_value(*busesj, q::Path(n.type + "/name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
+                !jsonutil::add_value(*busesj, q::Path(n.type + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(*busesj, q::Path(n.type + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+            {
+                QLOGE("Cannot open create settings node.");
+                return;
+            }
+        }
+    }
+    {
+        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/nodes"), rapidjson::kObjectType, allocator);
+        if (!nodesj)
+        {
+            QLOGE("Cannot open create nodes settings node.");
+            return;
+        }
+        auto const& nodes = get_nodes().get_all();
+        for (auto const& n: nodes)
+        {
+            if (!jsonutil::add_value(*nodesj, q::Path(n.type + "/name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
+                !jsonutil::add_value(*nodesj, q::Path(n.type + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(*nodesj, q::Path(n.type + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+            {
+                QLOGE("Cannot open create settings node.");
+                return;
+            }
+        }
+    }
 
     silk::async([=]()
     {
@@ -105,7 +119,7 @@ void HAL::save_settings()
 
         rapidjson::StringBuffer s;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-        copy->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+        settingsj->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
         q::data::File_Sink fs(k_settings_path);
         if (fs.is_open())
         {
@@ -118,18 +132,6 @@ void HAL::save_settings()
     });
 
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
-}
-
-auto HAL::get_settings(q::Path const& path) -> rapidjson::Value&
-{
-    auto v = jsonutil::get_or_add_value(m_settings, path, rapidjson::kObjectType, m_settings.GetAllocator());
-    if (v == nullptr)
-    {
-        QLOGE("Wrong json type for settings '{}'. Settings will be lost!!!!", path);
-        m_emptyValue.SetObject();
-        return m_emptyValue;
-    }
-    return *v;
 }
 
 auto HAL::get_bus_factory()    -> Factory<node::bus::IBus>&
@@ -180,7 +182,7 @@ auto HAL::create_bus(
     auto node = m_bus_factory.create_node(type);
     if (node && node->init(init_params))
     {
-        auto res = m_buses.add(name, node); //this has to succeed since we already tested for duplicate names
+        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
         return node;
     }
@@ -199,13 +201,13 @@ auto HAL::create_node(
     auto node = m_node_factory.create_node(type);
     if (node && node->init(init_params))
     {
-        auto res = m_nodes.add(name, node); //this has to succeed since we already tested for duplicate names
+        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
         auto outputs = node->get_outputs();
         for (auto const& x: outputs)
         {
             std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (!m_streams.add(stream_name, x.stream))
+            if (!m_streams.add(stream_name, std::string(), x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
                 return node::INode_ptr();
@@ -269,10 +271,9 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         }
         std::string name(namej->GetString());
         auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
-        auto* configj = jsonutil::find_value(it->value, std::string("config"));
-        if (!init_paramsj || !configj)
+        if (!init_paramsj)
         {
-            QLOGE("Node {} of type {} is missing the {}", name, type, init_paramsj ? "config" : "init_params");
+            QLOGE("Node {} of type {} is missing the init_params", name, type);
             return false;
         }
         auto node = create_node(type, name, *init_paramsj);
@@ -281,6 +282,19 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
             QLOGE("Failed to create node {} of type '{}'", name, type);
             return false;
         }
+    }
+    for (; it != json.MemberEnd(); ++it)
+    {
+        auto* namej = jsonutil::find_value(it->value, std::string("name"));
+        std::string name(namej->GetString());
+        auto* configj = jsonutil::find_value(it->value, std::string("config"));
+        if (!configj)
+        {
+            QLOGE("Node {} is missing the config", name);
+            return false;
+        }
+        auto node = get_nodes().find_by_name<node::INode>(name);
+        QASSERT(node);
         if (!node->set_config(*configj))
         {
             QLOGE("Failed to set config for node '{}'", name);
@@ -351,8 +365,18 @@ auto HAL::init(Comms& comms) -> bool
     get_streams().remove_all();
     get_nodes().remove_all();
 
-    if (!load_settings())
+    q::data::File_Source fs(k_settings_path);
+    if (!fs.is_open())
     {
+        QLOGE("Failed to load '{}'", k_settings_path);
+        return false;
+    }
+
+    auto data = q::data::read_whole_source_as_string<std::string>(fs);
+    rapidjson::Document settingsj;
+    if (settingsj.Parse(data.c_str()).HasParseError())
+    {
+        QLOGE("Failed to load '{}': {}:{}", k_settings_path, settingsj.GetParseError(), settingsj.GetErrorOffset());
         return false;
     }
 
@@ -410,14 +434,16 @@ auto HAL::init(Comms& comms) -> bool
 //    }
 //    write_gnu_plot("out.dat", out_samples);
 
+    auto* busesj = jsonutil::find_value(settingsj, q::Path("hal/buses"));
+    auto* nodesj = jsonutil::find_value(settingsj, q::Path("hal/nodes"));
 
-    if (!create_buses(get_settings(q::Path("hal/buses"))) ||
-        !create_nodes(get_settings(q::Path("hal/nodes"))))
+    if ((busesj && !create_buses(*busesj)) ||
+        (nodesj && !create_nodes(*nodesj)))
     {
         return false;
     }
 
-//    m_bus_factory.create_all();
+    save_settings();
 
     return true;
 }

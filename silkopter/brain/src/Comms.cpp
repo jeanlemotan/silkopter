@@ -381,6 +381,8 @@ void Comms::handle_node_config()
 
     pack_node_data(m_setup_channel, *node);
     m_setup_channel.end_pack();
+
+    m_hal.save_settings();
 }
 
 void Comms::handle_add_node()
@@ -413,6 +415,7 @@ void Comms::handle_add_node()
             m_setup_channel.end_pack();
             return;
         }
+        m_hal.save_settings();
 
         //reply
         pack_node_data(m_setup_channel, *node);

@@ -108,54 +108,72 @@ auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->inputs.reference_frame.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.reference_frame, m_output_stream->rate, rate);
-        return false;
+        m_reference_frame_stream.reset();
     }
-    m_reference_frame_stream = reference_frame_stream;
+    else
+    {
+        m_reference_frame_stream = reference_frame_stream;
+    }
 
     rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.angular_velocity.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
-        return false;
+        m_angular_velocity_stream.reset();
     }
-    m_angular_velocity_stream = angular_velocity_stream;
+    else
+    {
+        m_angular_velocity_stream = angular_velocity_stream;
+    }
 
     rate = cardinal_points_stream ? cardinal_points_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.cardinal_points.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.cardinal_points, m_output_stream->rate, rate);
-        return false;
+        m_cardinal_points_stream.reset();
     }
-    m_cardinal_points_stream = cardinal_points_stream;
+    else
+    {
+        m_cardinal_points_stream = cardinal_points_stream;
+    }
 
     rate = location_stream ? location_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.location.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
-        return false;
+        m_location_stream.reset();
     }
-    m_location_stream = location_stream;
+    else
+    {
+        m_location_stream = location_stream;
+    }
 
     rate = battery_state_stream ? battery_state_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.battery_state.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.battery_state, m_output_stream->rate, rate);
-        return false;
+        m_battery_state_stream.reset();
     }
-    m_battery_state_stream = battery_state_stream;
+    else
+    {
+        m_battery_state_stream = battery_state_stream;
+    }
 
     rate = multirotor_input_stream ? multirotor_input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.multirotor_input.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.multirotor_input, m_output_stream->rate, rate);
-        return false;
+        m_multirotor_input_stream.reset();
     }
-    m_multirotor_input_stream = multirotor_input_stream;
+    else
+    {
+        m_multirotor_input_stream = multirotor_input_stream;
+    }
 
     return true;
 }

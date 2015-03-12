@@ -42,13 +42,14 @@ public:
     struct Item
     {
         std::string name;
+        std::string type;
         std::shared_ptr<Base> node;
     };
 
     auto get_all() const -> std::vector<Item> const&;
     void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
-    auto add(std::string const& name, std::shared_ptr<Base> const& node) -> bool;
+    auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool;
 private:
     std::vector<Item> m_nodes;
 };
@@ -67,7 +68,6 @@ public:
     void process();
     void shutdown();
 
-    auto get_settings(q::Path const& path) -> rapidjson::Value&;
     void save_settings();
 
     auto get_bus_factory()          -> Factory<node::bus::IBus>&;
@@ -94,13 +94,6 @@ private:
 
     Factory<node::bus::IBus> m_bus_factory;
     Factory<node::INode> m_node_factory;
-
-    //bool m_is_initialized = false;
-
-    rapidjson::Value m_emptyValue;
-    rapidjson::Document m_settings;
-
-    auto load_settings() -> bool;
 };
 
 
@@ -125,14 +118,14 @@ auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_
     return it != m_nodes.end() ? std::dynamic_pointer_cast<T>(it->node) : nullptr;
 }
 template<class Base>
-auto Registry<Base>::add(std::string const& name, std::shared_ptr<Base> const& node) -> bool
+auto Registry<Base>::add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool
 {
     if (find_by_name<Base>(name))
     {
         QLOGE("Duplicated name in node {}", name);
         return false;
     }
-    m_nodes.push_back({name, node});
+    m_nodes.push_back({name, type, node});
     return true;
 }
 
