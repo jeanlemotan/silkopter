@@ -71,7 +71,9 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
-    //m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::on_nodes_refreshed, this));
+    m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::refresh_nodes, this));
+
+    refresh_nodes();
 }
 
 HAL_Window::~HAL_Window()
@@ -81,6 +83,16 @@ HAL_Window::~HAL_Window()
 
 void HAL_Window::on_node_factories_refreshed()
 {
+}
+
+void HAL_Window::refresh_nodes()
+{
+    auto nodes = m_hal.get_nodes().get_all();
+
+    for (auto const& n: nodes)
+    {
+        add_node(n, QPointF());
+    }
 }
 
 void HAL_Window::on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)

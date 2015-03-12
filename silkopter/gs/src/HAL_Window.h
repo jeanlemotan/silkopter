@@ -24,6 +24,8 @@ private:
     void on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
 
 private:
+    void refresh_nodes();
+
     void contextMenuEvent(QContextMenuEvent* event);
 
     void selection_changed();
