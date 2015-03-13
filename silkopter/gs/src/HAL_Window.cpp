@@ -8,6 +8,8 @@
 #include "qneconnection.h"
 #include "qneport.h"
 
+#include "sz_math.hpp"
+
 #include <QGraphicsScene>
 #include <QFileDialog>
 
@@ -91,7 +93,23 @@ void HAL_Window::refresh_nodes()
 
     for (auto const& n: nodes)
     {
-        add_node(n, QPointF());
+        QPointF pos;
+        auto* positionj = jsonutil::find_value(n->init_params, q::Path("__gs/position"));
+        if (positionj)
+        {
+            math::vec2f position;
+            autojsoncxx::error::ErrorStack result;
+            if (!autojsoncxx::from_value(position, *positionj, result))
+            {
+                std::ostringstream ss;
+                ss << result;
+                QLOGE("Cannot deserialize position data: {}", ss.str());
+            }
+            pos.setX(position.x);
+            pos.setY(position.y);
+        }
+
+        add_node(n, pos);
     }
     for (auto const& n: nodes)
     {
@@ -441,6 +459,14 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
 
     if (dialog.exec() == QDialog::Accepted)
     {
+        auto* positionj = jsonutil::get_or_add_value(init_params, q::Path("__gs/position"), rapidjson::kObjectType, init_params.GetAllocator());
+        if (positionj)
+        {
+            rapidjson::Document doc;
+            autojsoncxx::to_document(math::vec2f(pos.x(), pos.y()), doc);
+            jsonutil::clone_value(*positionj, doc, init_params.GetAllocator());
+        }
+
         m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
         {
             if (result == silk::HAL::Result::OK)

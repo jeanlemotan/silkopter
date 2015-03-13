@@ -24,6 +24,7 @@ INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
 INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
+INCLUDEPATH += ../../../brain/autogen
 
 QMAKE_CXXFLAGS += -Wno-unused-variable
 QMAKE_CFLAGS += -Wno-unused-variable
