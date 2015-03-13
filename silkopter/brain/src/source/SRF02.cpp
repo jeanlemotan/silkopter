@@ -37,7 +37,7 @@ SRF02::SRF02(HAL& hal)
     , m_init_params(new sz::SRF02::Init_Params())
     , m_config(new sz::SRF02::Config())
 {
-
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto SRF02::get_outputs() const -> std::vector<Output>

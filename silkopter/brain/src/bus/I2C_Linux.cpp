@@ -39,6 +39,7 @@ I2C_Linux::I2C_Linux()
     : m_init_params(new sz::I2C_Linux::Init_Params())
     , m_config(new sz::I2C_Linux::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 I2C_Linux::~I2C_Linux()

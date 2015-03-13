@@ -40,6 +40,7 @@ MS5611::MS5611(HAL& hal)
     , m_init_params(new sz::MS5611::Init_Params())
     , m_config(new sz::MS5611::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto MS5611::lock(Buses& buses) -> bool

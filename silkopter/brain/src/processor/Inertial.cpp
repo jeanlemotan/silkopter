@@ -15,6 +15,7 @@ Inertial::Inertial(HAL& hal)
     , m_init_params(new sz::Inertial::Init_Params())
     , m_config(new sz::Inertial::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Inertial::init(rapidjson::Value const& init_params) -> bool

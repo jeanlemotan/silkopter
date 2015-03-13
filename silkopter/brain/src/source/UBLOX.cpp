@@ -192,6 +192,7 @@ UBLOX::UBLOX(HAL& hal)
     , m_init_params(new sz::UBLOX::Init_Params())
     , m_config(new sz::UBLOX::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 UBLOX::~UBLOX()

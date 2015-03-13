@@ -259,8 +259,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         QLOGE("Wrong json type: {}", json.GetType());
         return false;
     }
-    auto it = json.MemberBegin();
-    for (; it != json.MemberEnd(); ++it)
+    for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
     {
         std::string type(it->name.GetString());
         auto* namej = jsonutil::find_value(it->value, std::string("name"));
@@ -283,7 +282,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
             return false;
         }
     }
-    for (; it != json.MemberEnd(); ++it)
+    for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
     {
         auto* namej = jsonutil::find_value(it->value, std::string("name"));
         std::string name(namej->GetString());

@@ -127,6 +127,7 @@ Raspicam::Raspicam(HAL& hal)
 
     m_impl->file_callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
 #endif
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 Raspicam::~Raspicam()
 {

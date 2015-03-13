@@ -128,6 +128,7 @@ RC5T619::RC5T619(HAL& hal)
     , m_init_params(new sz::RC5T619::Init_Params())
     , m_config(new sz::RC5T619::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto RC5T619::get_outputs() const -> std::vector<Output>

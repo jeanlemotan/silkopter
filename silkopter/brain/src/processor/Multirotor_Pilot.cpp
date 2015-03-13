@@ -14,6 +14,7 @@ Multirotor_Pilot::Multirotor_Pilot(HAL& hal)
     , m_init_params(new sz::Multirotor_Pilot::Init_Params())
     , m_config(new sz::Multirotor_Pilot::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Multirotor_Pilot::init(rapidjson::Value const& init_params) -> bool

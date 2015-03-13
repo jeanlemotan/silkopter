@@ -14,6 +14,7 @@ SPI_Linux::SPI_Linux()
     : m_init_params(new sz::SPI_Linux::Init_Params())
     , m_config(new sz::SPI_Linux::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 SPI_Linux::~SPI_Linux()

@@ -72,6 +72,7 @@ template<class Stream_t>
 Resampler<Stream_t>::Resampler(HAL& hal)
     : m_hal(hal)
 {
+    autojsoncxx::to_document(m_init_params, m_init_paramsj);
 }
 
 template<class Stream_t>
@@ -132,7 +133,13 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     if (input_rate == 0)
     {
         QLOGE("Bad input stream '{}' @ {}Hz", sz.inputs.input, input_rate);
-        return false;
+        m_input_stream.reset();
+        m_input_dt = std::chrono::microseconds(0);
+    }
+    else
+    {
+        m_input_stream = input_stream;
+        m_input_dt = std::chrono::microseconds(1000000 / input_rate);
     }
 
     auto output_rate = m_output_stream->rate;
@@ -152,8 +159,6 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_input_stream = input_stream;
-    m_input_dt = std::chrono::microseconds(1000000 / input_rate);
     m_config = sz;
 
     return true;

@@ -14,6 +14,7 @@ ADC_Ammeter::ADC_Ammeter(HAL& hal)
     , m_init_params(new sz::ADC_Ammeter::Init_Params())
     , m_config(new sz::ADC_Ammeter::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto ADC_Ammeter::init(rapidjson::Value const& init_params) -> bool
@@ -89,6 +90,8 @@ void ADC_Ammeter::process()
 
 auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("adc_ammeter::set_config");
+
     sz::ADC_Ammeter::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -105,10 +108,13 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
-        return false;
+        m_adc_stream.reset();
+    }
+    else
+    {
+        m_adc_stream = adc_stream;
     }
 
-    m_adc_stream = adc_stream;
     *m_config = sz;
 
     return true;

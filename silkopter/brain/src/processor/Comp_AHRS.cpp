@@ -14,6 +14,7 @@ Comp_AHRS::Comp_AHRS(HAL& hal)
     , m_init_params(new sz::Comp_AHRS::Init_Params())
     , m_config(new sz::Comp_AHRS::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool

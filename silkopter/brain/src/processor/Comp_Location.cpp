@@ -14,6 +14,7 @@ Comp_Location::Comp_Location(HAL& hal)
     , m_init_params(new sz::Comp_Location::Init_Params())
     , m_config(new sz::Comp_Location::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comp_Location::init(rapidjson::Value const& init_params) -> bool

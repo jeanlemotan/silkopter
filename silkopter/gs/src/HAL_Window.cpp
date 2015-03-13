@@ -93,6 +93,10 @@ void HAL_Window::refresh_nodes()
     {
         add_node(n, QPointF());
     }
+    for (auto const& n: nodes)
+    {
+        refresh_node(*n);
+    }
 }
 
 void HAL_Window::on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
@@ -158,6 +162,13 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
     QMenu* resamplers = menu.addMenu(QIcon(":/icons/Resampler.png"), "Resamplers");
     QMenu* pilots = menu.addMenu(QIcon(":/icons/Pilot.png"), "Pilots");
     QMenu* misc = menu.addMenu(QIcon(":/icons/Node.png"), "Misc");
+    sources->setEnabled(false);
+    sinks->setEnabled(false);
+    processors->setEnabled(false);
+    lpfs->setEnabled(false);
+    resamplers->setEnabled(false);
+    pilots->setEnabled(false);
+    misc->setEnabled(false);
 
     for (auto const& n: nodes)
     {
@@ -165,65 +176,43 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         if (n->class_id == q::rtti::get_class_id<silk::node::ISource>())
         {
             action = sources->addAction(get_icon(":/icons/Source.png", *n), prettify_name(n->name).c_str());
+            sources->setEnabled(true);
         }
         else if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
         {
             action = sinks->addAction(get_icon(":/icons/Sink.png", *n), prettify_name(n->name).c_str());
+            sinks->setEnabled(true);
         }
         else if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
         {
             action = processors->addAction(get_icon(":/icons/Processor.png", *n), prettify_name(n->name).c_str());
+            processors->setEnabled(true);
         }
         else if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
         {
             action = lpfs->addAction(get_icon(":/icons/LPF.png", *n), prettify_name(n->name).c_str());
+            lpfs->setEnabled(true);
         }
         else if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
         {
             action = resamplers->addAction(get_icon(":/icons/Resampler.png", *n), prettify_name(n->name).c_str());
+            resamplers->setEnabled(true);
         }
         else if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
         {
             action = pilots->addAction(get_icon(":/icons/Pilot.png", *n), prettify_name(n->name).c_str());
+            pilots->setEnabled(true);
         }
         else
         {
             action = misc->addAction(get_icon(":/icons/Node.png", *n), prettify_name(n->name).c_str());
+            misc->setEnabled(true);
         }
 
         if (action)
         {
             connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
         }
-    }
-
-    if (sources->actions().empty())
-    {
-        sources->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (sinks->actions().empty())
-    {
-        sinks->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (processors->actions().empty())
-    {
-        processors->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (lpfs->actions().empty())
-    {
-        lpfs->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (resamplers->actions().empty())
-    {
-        resamplers->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (pilots->actions().empty())
-    {
-        pilots->addAction(QIcon(), "none")->setEnabled(false);
-    }
-    if (misc->actions().empty())
-    {
-        misc->addAction(QIcon(), "none")->setEnabled(false);
     }
 
     menu.exec(event->globalPos());
@@ -421,7 +410,6 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
 
     data.block.reset(b);
 
-    refresh_node(*node);
     node->changed_signal.connect([this](silk::node::Node& node)
     {
         refresh_node(node);
@@ -458,6 +446,7 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
             if (result == silk::HAL::Result::OK)
             {
                 add_node(node, pos);
+                refresh_node(*node);
             }
         });
     }

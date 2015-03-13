@@ -59,6 +59,7 @@ template<class Stream_t>
 LPF<Stream_t>::LPF(HAL& hal)
     : m_hal(hal)
 {
+    autojsoncxx::to_document(m_init_params, m_init_paramsj);
 }
 
 template<class Stream_t>
@@ -102,6 +103,7 @@ auto LPF<Stream_t>::get_init_params() const -> rapidjson::Document const&
 template<class Stream_t>
 auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("lpf::set_config");
     sz::LPF::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -118,7 +120,11 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
-        return false;
+        m_input_stream.reset();
+    }
+    else
+    {
+        m_input_stream = input_stream;
     }
 
     if (sz.cutoff_frequency > m_output_stream->rate / 2)
@@ -135,7 +141,6 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_input_stream = input_stream;
     m_config = sz;
 
     return true;

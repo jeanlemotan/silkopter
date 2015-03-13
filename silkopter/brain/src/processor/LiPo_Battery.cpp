@@ -25,6 +25,7 @@ LiPo_Battery::LiPo_Battery(HAL& hal)
     , m_init_params(new sz::LiPo_Battery::Init_Params())
     , m_config(new sz::LiPo_Battery::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool

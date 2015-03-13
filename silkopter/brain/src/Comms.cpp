@@ -118,6 +118,10 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
 
     m_source.reset(new Source(*this));
     m_multirotor_input.reset(new Multirotor_Input);
+
+    m_config.reset(new sz::Comms::Source::Config);
+    m_init_params.reset(new sz::Comms::Source::Init_Params);
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool

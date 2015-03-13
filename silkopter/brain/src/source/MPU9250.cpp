@@ -273,6 +273,7 @@ MPU9250::MPU9250(HAL& hal)
     , m_init_params(new sz::MPU9250::Init_Params())
     , m_config(new sz::MPU9250::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 MPU9250::~MPU9250()

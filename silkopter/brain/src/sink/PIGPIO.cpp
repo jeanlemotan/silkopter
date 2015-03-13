@@ -24,6 +24,7 @@ PIGPIO::PIGPIO(HAL& hal)
     , m_init_params(new sz::PIGPIO::Init_Params())
     , m_config(new sz::PIGPIO::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto PIGPIO::get_inputs() const -> std::vector<Input>

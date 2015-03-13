@@ -16,6 +16,7 @@ UART_Linux::UART_Linux()
     : m_init_params(new sz::UART_Linux::Init_Params())
     , m_config(new sz::UART_Linux::Config())
 {
+    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 UART_Linux::~UART_Linux()
