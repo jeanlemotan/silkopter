@@ -194,6 +194,7 @@ auto Raspicam::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Raspicam data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -253,11 +254,9 @@ auto Raspicam::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Raspicam::get_init_params() const -> rapidjson::Document
+auto Raspicam::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 void Raspicam::shutdown()

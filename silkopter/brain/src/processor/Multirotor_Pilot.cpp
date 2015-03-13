@@ -29,6 +29,7 @@ auto Multirotor_Pilot::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Multirotor_Pilot data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -184,11 +185,9 @@ auto Multirotor_Pilot::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Multirotor_Pilot::get_init_params() const -> rapidjson::Document
+auto Multirotor_Pilot::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 }

@@ -29,6 +29,7 @@ auto Comp_Location::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Comp_Location data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -184,11 +185,9 @@ auto Comp_Location::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Comp_Location::get_init_params() const -> rapidjson::Document
+auto Comp_Location::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 }

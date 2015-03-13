@@ -30,7 +30,7 @@ public:
     Comp_AHRS(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    auto get_init_params() const -> rapidjson::Document const&;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -45,6 +45,7 @@ private:
 
     HAL& m_hal;
 
+    rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::Comp_AHRS::Init_Params> m_init_params;
     std::shared_ptr<sz::Comp_AHRS::Config> m_config;
 

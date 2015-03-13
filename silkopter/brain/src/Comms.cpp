@@ -1,6 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
 #include "utils/Timed_Scope.h"
+#include "utils/Json_Helpers.h"
 
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IAngular_Velocity.h"
@@ -575,15 +576,14 @@ auto Comms::Source::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Comms::Source data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_comms.m_init_paramsj, init_params, m_comms.m_init_paramsj.GetAllocator());
     *m_comms.m_init_params = sz;
     m_comms.m_multirotor_input->rate = 50;
     return true;
 }
-auto Comms::Source::get_init_params() const -> rapidjson::Document
+auto Comms::Source::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_comms.m_init_params, json);
-    return std::move(json);
+    return m_comms.m_init_paramsj;
 }
 auto Comms::Source::set_config(rapidjson::Value const& json) -> bool
 {

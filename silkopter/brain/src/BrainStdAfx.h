@@ -18,6 +18,7 @@
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "rapidjson/stringbuffer.h"
+#include "utils/Json_Helpers.h"
 
 namespace silk
 {

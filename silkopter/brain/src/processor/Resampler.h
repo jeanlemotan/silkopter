@@ -22,7 +22,7 @@ public:
     Resampler(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    auto get_init_params() const -> rapidjson::Document const&;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -40,6 +40,7 @@ private:
 
     HAL& m_hal;
 
+    rapidjson::Document m_init_paramsj;
     sz::Resampler::Init_Params m_init_params;
     sz::Resampler::Config m_config;
 
@@ -87,6 +88,7 @@ auto Resampler<Stream_t>::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Resampler data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     m_init_params = sz;
     return init();
 }
@@ -107,11 +109,9 @@ auto Resampler<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document
+auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 template<class Stream_t>

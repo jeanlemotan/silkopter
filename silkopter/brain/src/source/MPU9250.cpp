@@ -398,6 +398,7 @@ auto MPU9250::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize MPU9250 data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -873,11 +874,9 @@ auto MPU9250::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto MPU9250::get_init_params() const -> rapidjson::Document
+auto MPU9250::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 

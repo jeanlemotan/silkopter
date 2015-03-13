@@ -29,6 +29,7 @@ auto ADC_Voltmeter::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize ADC_Voltmeter data: {}", ss.str());
         return false;
     }
+    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -120,11 +121,9 @@ auto ADC_Voltmeter::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto ADC_Voltmeter::get_init_params() const -> rapidjson::Document
+auto ADC_Voltmeter::get_init_params() const -> rapidjson::Document const&
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_init_paramsj;
 }
 
 

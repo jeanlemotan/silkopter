@@ -62,7 +62,7 @@ public:
     {
         Source(Comms& comms) : m_comms(comms) {}
         auto init(rapidjson::Value const& init_params) -> bool;
-        auto get_init_params() const -> rapidjson::Document;
+        auto get_init_params() const -> rapidjson::Document const&;
         auto set_config(rapidjson::Value const& json) -> bool;
         auto get_config() const -> rapidjson::Document;
         auto get_outputs() const -> std::vector<Output>;
@@ -87,6 +87,7 @@ private:
     };
     mutable std::shared_ptr<Multirotor_Input> m_multirotor_input;
 
+    rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::Comms::Source::Init_Params> m_init_params;
     std::shared_ptr<sz::Comms::Source::Config> m_config;
 
