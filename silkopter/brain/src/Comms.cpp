@@ -432,7 +432,7 @@ void Comms::handle_add_node()
     }
 }
 
-void Comms::handle_telemetry_streams()
+void Comms::handle_streams_telemetry_active()
 {
     uint32_t req_id = 0;
     if (!m_setup_channel.begin_unpack() ||
@@ -472,7 +472,7 @@ void Comms::handle_telemetry_streams()
 
     m_setup_channel.end_unpack();
 
-    m_setup_channel.begin_pack(comms::Setup_Message::TELEMETRY_STREAMS);
+    m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
     m_setup_channel.pack_param(req_id);
     m_setup_channel.pack_param(static_cast<uint32_t>(m_telemetry_streams.size()));
     for (auto const& s: m_telemetry_streams)
@@ -511,7 +511,7 @@ void Comms::process()
         case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
 
-        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
+        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }

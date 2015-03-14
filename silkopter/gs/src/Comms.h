@@ -75,8 +75,13 @@ private:
 
     Manual_Clock m_remote_clock;
 
+    auto link_input_streams(node::Node_ptr node) -> bool;
+    auto publish_output_streams(node::Node_ptr node) -> bool;
+
+
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();
+    void handle_streams_telemetry_active();
 
     void handle_node_data();
     void handle_add_node();

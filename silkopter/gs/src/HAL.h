@@ -34,109 +34,120 @@ class HAL;
 
 namespace node
 {
+struct Node;
+DECLARE_CLASS_PTR(Node);
 
 
 namespace stream
 {
 
-struct GS_IStream
+struct Stream
 {
+    Node_wptr node;
     std::string name;
     q::rtti::class_id class_id;
     uint32_t rate = 0;
+    int telemetry_active_req = 0;
+    bool is_telemetry_active = false;
 };
-DECLARE_CLASS_PTR(GS_IStream);
+DECLARE_CLASS_PTR(Stream);
 
-struct Acceleration : public GS_IStream
+struct Acceleration : public Stream
 {
     typedef IAcceleration::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Acceleration);
-struct Angular_Velocity : public GS_IStream
+struct Angular_Velocity : public Stream
 {
     typedef IAngular_Velocity::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Angular_Velocity);
-struct ADC_Value : public GS_IStream
+struct ADC_Value : public Stream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(ADC_Value);
-struct Battery_State : public GS_IStream
+struct Battery_State : public Stream
 {
     typedef IBattery_State::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Battery_State);
-struct Cardinal_Points : public GS_IStream
+struct Cardinal_Points : public Stream
 {
     typedef ICardinal_Points::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Cardinal_Points);
-struct Current : public GS_IStream
+struct Current : public Stream
 {
     typedef ICurrent::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Current);
-struct Distance : public GS_IStream
+struct Distance : public Stream
 {
     typedef IDistance::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Distance);
-struct Linear_Acceleration : public GS_IStream
+struct Linear_Acceleration : public Stream
 {
     typedef ILinear_Acceleration::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Linear_Acceleration);
-struct Location : public GS_IStream
+struct Location : public Stream
 {
     typedef ILocation::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Location);
-struct Magnetic_Field : public GS_IStream
+struct Magnetic_Field : public Stream
 {
     typedef IMagnetic_Field::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Magnetic_Field);
-struct Pressure : public GS_IStream
+struct Pressure : public Stream
 {
     typedef IPressure::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Pressure);
-struct PWM_Value : public GS_IStream
+struct PWM_Value : public Stream
 {
     typedef IPWM_Value::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(PWM_Value);
-struct Reference_Frame : public GS_IStream
+struct Reference_Frame : public Stream
 {
     typedef IReference_Frame::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Reference_Frame);
-struct Temperature : public GS_IStream
+struct Temperature : public Stream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Temperature);
-struct Voltage : public GS_IStream
+struct Voltage : public Stream
 {
     typedef IVoltage::Sample Sample;
     std::vector<Sample> samples;
 };
 DECLARE_CLASS_PTR(Voltage);
+struct Video : public Stream
+{
+    typedef IVideo::Sample Sample;
+    std::vector<Sample> samples;
+};
+DECLARE_CLASS_PTR(Video);
 
 }
 
@@ -176,6 +187,7 @@ struct Node
 
     struct Input
     {
+        stream::Stream_wptr stream;
         q::rtti::class_id class_id;
         std::string name;
         uint32_t rate = 0;
@@ -184,6 +196,7 @@ struct Node
 
     struct Output
     {
+        stream::Stream_ptr stream;
         q::rtti::class_id class_id;
         std::string name;
         uint32_t rate = 0;
@@ -221,7 +234,7 @@ public:
 
     auto get_node_defs() const      -> Registry<node::Node_Def> const&;
     auto get_nodes() const          -> Registry<node::Node> const&;
-    auto get_streams() const        -> Registry<node::stream::GS_IStream> const&;
+    auto get_streams() const        -> Registry<node::stream::Stream> const&;
 
     enum class Result
     {
@@ -239,13 +252,16 @@ public:
     void connect_node_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
 
+    typedef std::function<void(Result)> Stream_Telemetry_Callback;
+    void set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback);
+
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
 protected:
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
-    Registry<node::stream::GS_IStream> m_streams;
+    Registry<node::stream::Stream> m_streams;
 
     struct Queue_Item
     {
@@ -277,6 +293,14 @@ protected:
         rapidjson::Document config;
     };
     std::vector<Set_Config_Queue_Item> m_set_config_queue;
+
+    struct Stream_Telemetry_Queue_Item : public Queue_Item
+    {
+        std::string stream_name;
+        bool is_active = false;
+        Stream_Telemetry_Callback callback;
+    };
+    std::vector<Stream_Telemetry_Queue_Item> m_stream_telemetry_queue;
 
 private:
 

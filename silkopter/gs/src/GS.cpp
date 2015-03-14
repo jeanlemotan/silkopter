@@ -56,7 +56,7 @@ GS::GS(QWidget *parent)
 
     read_settings();
 
-    m_hal_window = new HAL_Window(m_hal, this);
+    m_hal_window = new HAL_Window(m_hal, m_comms, this);
     m_hal_window->show();
 }
 

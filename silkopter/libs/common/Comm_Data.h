@@ -23,7 +23,7 @@ enum class Setup_Message : uint8_t
     NODE_CONFIG,
     NODE_DATA,
 
-    TELEMETRY_STREAMS,
+    STREAM_TELEMETRY_ACTIVE,
 
     COUNT //keep last
 };

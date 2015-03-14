@@ -137,8 +137,8 @@ void Comms::request_all_node_configs()
 }
 
 
-//void Comms::send_telemetry_streams()
-//{
+void Comms::handle_streams_telemetry_active()
+{
 //    for (auto const& stream: m_telemetry_streams)
 //    {
 //        QASSERT(stream);
@@ -167,7 +167,7 @@ void Comms::request_all_node_configs()
 //            QLOGW("Unrecognized stream type: {} / {}", stream->get_name(), q::rtti::get_class_name(*stream));
 //        }
 //    }
-//}
+}
 
 
 auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
@@ -176,7 +176,7 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
     json->SetObject();
     if (!str.empty() && json->Parse(str.c_str()).HasParseError())
     {
-//            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        //            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
         return nullptr;
     }
     return std::move(json);
@@ -219,8 +219,8 @@ auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& i: io)
     {
         if (!channel.unpack_param(i.name) ||
-            !channel.unpack_param(i.class_id) ||
-            !channel.unpack_param(i.rate))
+                !channel.unpack_param(i.class_id) ||
+                !channel.unpack_param(i.rate))
         {
             return false;
         }
@@ -240,8 +240,8 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& o: io)
     {
         if (!channel.unpack_param(o.name) ||
-            !channel.unpack_param(o.class_id) ||
-            !channel.unpack_param(o.rate))
+                !channel.unpack_param(o.class_id) ||
+                !channel.unpack_param(o.rate))
         {
             return false;
         }
@@ -310,7 +310,7 @@ static auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) ->
 //        {
 //            return false;
 //        }
-//        i.stream = hal.get_streams().find_by_name<node::stream::GS_IStream>(name);
+//        i.stream = hal.get_streams().find_by_name<node::stream::Stream>(name);
 //        if (!i.stream)
 //        {
 //            QLOGE("Cannot find stream name {}", i.name);
@@ -325,7 +325,7 @@ void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id))
+            m_setup_channel.unpack_param(req_id))
     {
         uint32_t node_count = 0;
 
@@ -359,78 +359,137 @@ void Comms::handle_enumerate_node_defs()
     m_hal.node_defs_refreshed_signal.execute();
 }
 
-//auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::GS_IStream>
-//{
-//    if (class_id == q::rtti::get_class_id<node::stream::IAcceleration>())
-//    {
-//        return std::make_shared<node::stream::Acceleration>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IAngular_Velocity>())
-//    {
-//        return std::make_shared<node::stream::Angular_Velocity>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IMagnetic_Field>())
-//    {
-//        return std::make_shared<node::stream::Magnetic_Field>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IPressure>())
-//    {
-//        return std::make_shared<node::stream::Pressure>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IBattery_State>())
-//    {
-//        return std::make_shared<node::stream::Battery_State>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::ILinear_Acceleration>())
-//    {
-//        return std::make_shared<node::stream::Linear_Acceleration>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::ICardinal_Points>())
-//    {
-//        return std::make_shared<node::stream::Cardinal_Points>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::ICurrent>())
-//    {
-//        return std::make_shared<node::stream::Current>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IVoltage>())
-//    {
-//        return std::make_shared<node::stream::Voltage>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IDistance>())
-//    {
-//        return std::make_shared<node::stream::Distance>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::ILocation>())
-//    {
-//        return std::make_shared<node::stream::Location>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
-//    {
-//        return std::make_shared<node::stream::PWM_Value>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IReference_Frame>())
-//    {
-//        return std::make_shared<node::stream::Reference_Frame>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::ITemperature>())
-//    {
-//        return std::make_shared<node::stream::Temperature>();
-//    }
-//    if (class_id == q::rtti::get_class_id<node::stream::IADC_Value>())
-//    {
-//        return std::make_shared<node::stream::ADC_Value>();
-//    }
-////  create_stream_from_rtti<node::stream::Video>(type);
+auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::Stream>
+{
+    if (class_id == q::rtti::get_class_id<node::stream::IAcceleration>())
+    {
+        return std::make_shared<node::stream::Acceleration>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IAngular_Velocity>())
+    {
+        return std::make_shared<node::stream::Angular_Velocity>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IMagnetic_Field>())
+    {
+        return std::make_shared<node::stream::Magnetic_Field>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IPressure>())
+    {
+        return std::make_shared<node::stream::Pressure>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IBattery_State>())
+    {
+        return std::make_shared<node::stream::Battery_State>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::ILinear_Acceleration>())
+    {
+        return std::make_shared<node::stream::Linear_Acceleration>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::ICardinal_Points>())
+    {
+        return std::make_shared<node::stream::Cardinal_Points>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::ICurrent>())
+    {
+        return std::make_shared<node::stream::Current>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IVoltage>())
+    {
+        return std::make_shared<node::stream::Voltage>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IDistance>())
+    {
+        return std::make_shared<node::stream::Distance>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::ILocation>())
+    {
+        return std::make_shared<node::stream::Location>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
+    {
+        return std::make_shared<node::stream::PWM_Value>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IReference_Frame>())
+    {
+        return std::make_shared<node::stream::Reference_Frame>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::ITemperature>())
+    {
+        return std::make_shared<node::stream::Temperature>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IADC_Value>())
+    {
+        return std::make_shared<node::stream::ADC_Value>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IVideo>())
+    {
+        return std::make_shared<node::stream::Video>();
+    }
 
-//    return std::shared_ptr<node::stream::GS_IStream>();
-//}
+    return std::shared_ptr<node::stream::Stream>();
+}
+
+auto Comms::publish_output_streams(node::Node_ptr node) -> bool
+{
+    for (auto& os: node->outputs)
+    {
+        auto stream = create_stream_from_class_id(os.class_id);
+        if (!stream)
+        {
+            QLOGE("\t\tCannot create output stream '{}/{}', type {}", node->name, os.name, os.class_id);
+            return false;
+        }
+        os.stream = stream;
+
+        stream->node = node;
+        stream->name = node->name + "/" + os.name;
+        stream->class_id = os.class_id;
+        stream->rate = os.rate;
+        m_hal.m_streams.add(stream);
+    }
+    return true;
+}
+
+auto Comms::link_input_streams(node::Node_ptr node) -> bool
+{
+    for (auto& i: node->inputs)
+    {
+        //find the connection in the config
+        q::Path input_path("inputs/" + i.name);
+        auto* input_streamj = jsonutil::find_value(node->config, input_path);
+        if (!input_streamj || !input_streamj->IsString())
+        {
+            QLOGE("Cannot find config for input stream '{}'", input_path);
+            return false;
+        }
+        q::Path stream_path(input_streamj->GetString());
+        if (stream_path.empty())
+        {
+            i.stream.reset();
+            continue;
+        }
+        if (stream_path.size() != 2)
+        {
+            QLOGE("Wrong value for input stream '{}' - {}", input_path, stream_path);
+            return false;
+        }
+        std::string stream_name = stream_path.get_as<std::string>();
+        auto stream = m_hal.m_streams.find_by_name(stream_name);
+        if (!stream)
+        {
+            QLOGE("Cannot find input stream '{}' - {}", input_path, stream_path);
+            return false;
+        }
+        i.stream = stream;
+    }
+    return true;
+}
 
 void Comms::handle_enumerate_nodes()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id))
+            m_setup_channel.unpack_param(req_id))
     {
         uint32_t node_count = 0;
         if (!m_setup_channel.unpack_param(node_count))
@@ -455,6 +514,22 @@ void Comms::handle_enumerate_nodes()
             m_hal.m_nodes.add(node);
         }
 
+        auto nodes = m_hal.get_nodes().get_all();
+        for (auto& n: nodes)
+        {
+            if (!publish_output_streams(n))
+            {
+                return;
+            }
+        }
+        for (auto& n: nodes)
+        {
+            if (!link_input_streams(n))
+            {
+                return;
+            }
+        }
+
         m_setup_channel.end_unpack();
     }
     else
@@ -471,8 +546,8 @@ void Comms::handle_node_data()
     uint32_t req_id = 0;
     std::string name;
     bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name);
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(name);
     if (!ok)
     {
         QLOGE("Failed to unpack node data");
@@ -492,6 +567,8 @@ void Comms::handle_node_data()
     {
         QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
+    link_input_streams(node);
+
     node->changed_signal.execute(*node);
 }
 
@@ -517,8 +594,18 @@ void Comms::handle_add_node()
         it->callback(HAL::Result::FAILED, node::Node_ptr());
         return;
     }
+    if (!link_input_streams(node))
+    {
+        it->callback(HAL::Result::FAILED, node::Node_ptr());
+        return;
+    }
+
     node->name = it->name;
     m_hal.m_nodes.add(node);
+
+    publish_output_streams(node);
+    link_input_streams(node);
+
     it->callback(HAL::Result::OK, node);
 }
 
@@ -527,8 +614,8 @@ void Comms::handle_remove_node()
     uint32_t req_id = 0;
     std::string name;
     bool ok = m_setup_channel.begin_unpack() &&
-                m_setup_channel.unpack_param(req_id) &&
-                m_setup_channel.unpack_param(name);
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(name);
     if (!ok)
     {
         QLOGE("Failed to unpack remove node request");
@@ -623,6 +710,31 @@ void Comms::send_hal_requests()
             ++it;
         }
     }
+
+    for (auto it = m_hal.m_stream_telemetry_queue.begin(); it != m_hal.m_stream_telemetry_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.stream_name);
+            m_setup_channel.pack_param(req.is_active);
+            m_setup_channel.end_pack();
+        }
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT);
+            m_hal.m_stream_telemetry_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 
@@ -646,21 +758,17 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
-        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
+            case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
+            case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
-        case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
-        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
-        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
-//        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
+            case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
+            case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+            case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
 
-//        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;
-
-//        case comms::Setup_Message::MULTIROTOR_MODE: handle_multirotor_mode(); break;
-//        case comms::Setup_Message::MULTIROTOR_INPUT_REQUEST: handle_multirotor_input_request(); break;
+            case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
         }
     }
-//    QLOGI("*********** LOOP: {}", xxx);
+    //    QLOGI("*********** LOOP: {}", xxx);
 
     m_rudp.process();
     m_setup_channel.send();

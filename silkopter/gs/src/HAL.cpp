@@ -32,7 +32,7 @@ auto HAL::get_nodes() const  -> Registry<node::Node> const&
 {
     return m_nodes;
 }
-auto HAL::get_streams() const  -> Registry<node::stream::GS_IStream> const&
+auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
 {
     return m_streams;
 }
@@ -101,6 +101,44 @@ void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config
     m_set_config_queue.push_back(std::move(item));
 }
 
+void HAL::set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback)
+{
+    QASSERT(callback);
+    if (!callback)
+    {
+        return;
+    }
+    auto stream = m_streams.find_by_name(stream_name);
+    if (!stream)
+    {
+        QLOGE("Cannot find stream '{}'", stream_name);
+        callback(Result::FAILED);
+        return;
+    }
+    if (stream->telemetry_active_req == 0 && !active)
+    {
+        QASSERT(0);
+        QLOGE("Trying to disable stream '{}' but it's already disabled", stream_name);
+        callback(Result::FAILED);
+        return;
+    }
+
+    stream->telemetry_active_req += active ? 1 : -1;
+
+    //if the status will not change, it's ok. No need to do the request
+    bool new_active = stream->telemetry_active_req > 0;
+    if (new_active == stream->is_telemetry_active)
+    {
+        callback(Result::OK);
+        return;
+    }
+
+    Stream_Telemetry_Queue_Item item;
+    item.stream_name = stream_name;
+    item.callback = callback;
+    item.is_active = new_active;
+    m_stream_telemetry_queue.push_back(std::move(item));
+}
 
 
 

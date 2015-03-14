@@ -37,9 +37,10 @@ static std::map<q::rtti::class_id, QColor> s_node_colors =
     { q::rtti::get_class_id<silk::node::IMultirotor_Pilot>(), QColor(0xBE90D4) },
 }};
 
-HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
+HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
+    , m_comms(comms)
 {
     m_scene = new QGraphicsScene();
 
@@ -47,9 +48,7 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     setMouseTracking(true);
 
 
-    QDockWidget *dock = new QDockWidget(tr("Nodes"), this);
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    m_view = new QGraphicsView(dock);
+    m_view = new QGraphicsView(this);
     m_view->setScene(m_scene);
     m_view->setCacheMode(QGraphicsView::CacheNone);
     m_view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -58,8 +57,7 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     m_view->setMouseTracking(true);
 //    m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
 
-    dock->setWidget(m_view);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    setCentralWidget(m_view);
 
     m_nodes_editor = new QNodesEditor(this);
     m_nodes_editor->install(m_scene);
@@ -181,7 +179,9 @@ void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
 
     QMenu menu(this);
 
-    menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
+    QAction* view_stream_action = menu.addAction(QIcon(":/icons/view.png"), "View Stream");
+    QNEPort* output_port = port->isOutput() ? port : nullptr;
+
     menu.addSeparator();
 
     auto& conn = port->connections();
@@ -195,7 +195,21 @@ void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
                            q::util::format2<std::string>("Disconnect from {}/{}",
                                                          other->block()->id().toLatin1().data(),
                                                          other->id().toLatin1().data()).c_str());
+            if (!output_port && other->isOutput())
+            {
+                output_port = other;
+            }
         }
+    }
+
+    if (output_port)
+    {
+        std::string stream_name = (output_port->block()->id() + "/" + output_port->id()).toLatin1().data();
+        connect(view_stream_action, &QAction::triggered, [=](bool) { open_stream_viewer(stream_name); });
+    }
+    else
+    {
+        view_stream_action->setEnabled(false);
     }
 
     menu.exec(event->screenPos());
@@ -207,9 +221,9 @@ void HAL_Window::connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConne
 
     QMenu menu(this);
 
-    menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
+    QAction* action = menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
     menu.addSeparator();
-    menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
+    action = menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
 
     menu.exec(event->screenPos());
 }
@@ -378,6 +392,16 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
     return name;
 }
 
+void HAL_Window::open_stream_viewer(std::string const& stream_name)
+{
+    QDockWidget* dock = new QDockWidget(q::util::format2<std::string>("Stream: {}", stream_name).c_str(), this);
+//    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+//    Stream_Viewer_Widget* viewer = new Stream_Viewer_Widget(dock, m_hal, m_comms);
+//    viewer->set_stream_name(stream_name);
+
+//    dock->setWidget(viewer);
+    dock->show();
+}
 
 void HAL_Window::refresh_node(silk::node::Node& node)
 {
@@ -399,35 +423,20 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         id.port->setPortRate(i.rate);
         id.port->disconnectAll();
 
-        //find the connection in the config
-        q::Path path("inputs/" + i.name);
-        auto* input_streamj = jsonutil::find_value(node.config, path);
-        QASSERT(input_streamj && input_streamj->IsString());
-        if (input_streamj && input_streamj->IsString())
+        auto stream = i.stream.lock();
+        if (!stream)
         {
-            std::string input_stream(input_streamj->GetString());
-            auto tokens = q::util::tokenize(input_stream, std::string("/"));
-            if (tokens.size() == 2)
-            {
-                auto const& node_name = tokens[0];
-                auto const& output_name = tokens[1];
-                auto it_node = m_nodes.find(node_name);
-                QASSERT(it_node != m_nodes.end());
-                if (it_node != m_nodes.end())
-                {
-                    auto const& outputs = it_node->second.outputs;
-                    auto it_output = outputs.find(output_name);
-                    QASSERT(it_output != outputs.end());
-                    if (it_output != outputs.end())
-                    {
-                        auto connection = new QNEConnection(0);
-                        m_scene->addItem(connection);
-                        connection->setPort1((QNEPort*)id.port.get());
-                        connection->setPort2(it_output->second.port.get());
-                        connection->updatePath();
-                    }
-                }
-            }
+            continue;
+        }
+        auto it_stream = m_streams.find(stream->name);
+        QASSERT(it_stream != m_streams.end());
+        if (it_stream != m_streams.end())
+        {
+            auto connection = new QNEConnection(0);
+            m_scene->addItem(connection);
+            connection->setPort1((QNEPort*)id.port.get());
+            connection->setPort2(it_stream->second.port.get());
+            connection->updatePath();
         }
     }
 
@@ -460,6 +469,9 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
     b->setPos(pos);
     b->setBrush(QBrush(s_node_colors[node->class_id]));
 
+    data.node = node;
+    data.block.reset(b);
+
     for (auto const& i: node->inputs)
     {
         auto port = b->addInputPort(QString());
@@ -486,9 +498,12 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
 
         auto& port_data = data.outputs[o.name];
         port_data.port.reset(port);
-    }
 
-    data.block.reset(b);
+        auto& stream_data = m_streams[o.stream->name];
+        stream_data.stream = o.stream;
+        stream_data.port = port_data.port;
+        stream_data.block = data.block;
+    }
 
     node->changed_signal.connect([this](silk::node::Node& node)
     {

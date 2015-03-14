@@ -51,7 +51,7 @@ public:
     int radius();
 
     void setPortType(uint32_t type);
-    uint32_t portType() const { return m_portRate; }
+    uint32_t portType() const { return m_portType; }
 
     void setPortRate(uint32_t rate);
     uint32_t portRate() const { return m_portRate; }

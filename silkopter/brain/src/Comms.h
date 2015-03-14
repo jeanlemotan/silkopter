@@ -112,7 +112,7 @@ private:
     void handle_add_sink();
     void handle_add_node();
 
-    void handle_telemetry_streams();
+    void handle_streams_telemetry_active();
 
     std::vector<node::stream::IStream_ptr> m_telemetry_streams;
 

@@ -122,7 +122,8 @@ HEADERS += \
     ../../../libs/common/node/ISink.h \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
-    ../../../libs/common/node/processor/IResampler.h
+    ../../../libs/common/node/processor/IResampler.h \
+    ../../src/Stream_Viewer_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -135,7 +136,8 @@ SOURCES += \
     ../../src/qnodeseditor/qneport.cpp \
     ../../src/qnodeseditor/qnodeseditor.cpp \
     ../../src/HAL_Window.cpp \
-    ../../../libs/json_editor/JSON_Model.cpp
+    ../../../libs/json_editor/JSON_Model.cpp \
+    ../../src/Stream_Viewer_Widget.cpp
 
 FORMS += \
     ../../src/New_Node.ui

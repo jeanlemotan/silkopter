@@ -8,6 +8,7 @@
 #include "qneport.h"
 
 #include "HAL.h"
+#include "Comms.h"
 
 class QNodesEditor;
 class JSON_Model;
@@ -15,7 +16,7 @@ class JSON_Model;
 class HAL_Window : public QMainWindow
 {
 public:
-    explicit HAL_Window(silk::HAL& hal, QWidget* parent = 0);
+    explicit HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget* parent = 0);
     ~HAL_Window();
 
 private:
@@ -34,11 +35,14 @@ private:
     void selection_changed();
     void set_config_editor_node(silk::node::Node_ptr node);
 
+    void open_stream_viewer(std::string const& stream_name);
+
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node, QPointF pos);
     void create_node(silk::node::Node_Def_ptr def, QPointF pos);
 
     silk::HAL& m_hal;
+    silk::Comms& m_comms;
     QNodesEditor* m_nodes_editor;
     QGraphicsView* m_view;
     QGraphicsScene* m_scene;
@@ -52,23 +56,31 @@ private:
         JSON_Model* config_model = nullptr;
     } m_selection;
 
+    struct Stream_Data
+    {
+        silk::node::stream::Stream_wptr stream;
+        std::shared_ptr<QNEPort> port;
+        std::shared_ptr<QNEBlock> block;
+    };
+
     struct Node_Data
     {
+        silk::node::Node_wptr node;
+
         std::shared_ptr<QNEBlock> block;
         struct Input_Data
         {
-            uint32_t rate = 0;
             std::shared_ptr<QNEPort> port;
         };
         struct Output_Data
         {
-            uint32_t rate = 0;
             std::shared_ptr<QNEPort> port;
         };
         std::map<std::string, Input_Data> inputs;
         std::map<std::string, Output_Data> outputs;
     };
 
+    std::map<std::string, Stream_Data> m_streams;
     std::map<std::string, Node_Data> m_nodes;
 
     auto compute_unique_name(std::string const& name) const -> std::string;
