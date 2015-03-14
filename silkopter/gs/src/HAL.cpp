@@ -55,7 +55,21 @@ void HAL::add_node(std::string const& def_name,
     m_add_queue.push_back(std::move(item));
 }
 
-void HAL::connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
+void HAL::remove_node(node::Node_ptr node,
+                     Remove_Node_Callback callback)
+{
+    QASSERT(callback);
+    if (!callback)
+    {
+        return;
+    }
+    Remove_Queue_Item item;
+    item.node = std::move(node);
+    item.callback = callback;
+    m_remove_queue.push_back(std::move(item));
+}
+
+void HAL::connect_node_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
 {
     auto document = jsonutil::clone_value(node->config);
 
@@ -86,6 +100,8 @@ void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config
     item.config = jsonutil::clone_value(config);
     m_set_config_queue.push_back(std::move(item));
 }
+
+
 
 
 

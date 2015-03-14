@@ -168,6 +168,8 @@ void SRF02::process()
 
 auto SRF02::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("srf02::set_config");
+
     sz::SRF02::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

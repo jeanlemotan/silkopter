@@ -118,6 +118,8 @@ auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document const&
 template<class Stream_t>
 auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("resampler::set_config");
+
     sz::Resampler::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -192,6 +194,8 @@ auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 template<class Stream_t>
 void Resampler<Stream_t>::process()
 {
+    QLOG_TOPIC("resampler::process");
+
     m_output_stream->samples.clear();
 
     auto input_stream = m_input_stream.lock();

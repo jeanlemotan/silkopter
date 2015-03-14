@@ -45,8 +45,6 @@ auto UART_Linux::init() -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_uart_linux::init");
-
     int b = -1;
     switch (m_init_params->baud)
     {
@@ -88,7 +86,7 @@ auto UART_Linux::init() -> bool
 
 void UART_Linux::close()
 {
-    QLOG_TOPIC("bus_uart_linux::clone");
+    QLOG_TOPIC("uart_linux::clone");
 
     if (m_fd)
     {
@@ -115,7 +113,7 @@ void UART_Linux::unlock()
 
 auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 {
-    QLOG_TOPIC("bus_uart_linux::read");
+    QLOG_TOPIC("uart_linux::read");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<UART_Linux> lg(*this);
@@ -130,7 +128,7 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
 }
 auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_uart_linux::write");
+    QLOG_TOPIC("uart_linux::write");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<UART_Linux> lg(*this);
@@ -146,6 +144,8 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
 
 auto UART_Linux::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("uart_linux::set_config");
+
     sz::UART_Linux::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

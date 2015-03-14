@@ -70,6 +70,8 @@ auto Inertial::get_outputs() const -> std::vector<Output>
 
 void Inertial::process()
 {
+    QLOG_TOPIC("inertial::process");
+
     m_output_stream->samples.clear();
 
     auto reference_frame_stream = m_reference_frame_stream.lock();
@@ -119,6 +121,8 @@ void Inertial::process()
 
 auto Inertial::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("inertial::set_config");
+
     sz::Inertial::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -139,18 +143,24 @@ auto Inertial::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->inputs.reference_frame.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.reference_frame, m_output_stream->rate, rate);
-        return false;
+        m_reference_frame_stream.reset();
     }
-    m_reference_frame_stream = reference_frame_stream;
+    else
+    {
+        m_reference_frame_stream = reference_frame_stream;
+    }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.acceleration.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
-        return false;
+        m_acceleration_stream.reset();
     }
-    m_acceleration_stream = acceleration_stream;
+    else
+    {
+        m_acceleration_stream = acceleration_stream;
+    }
 
     return true;
 }

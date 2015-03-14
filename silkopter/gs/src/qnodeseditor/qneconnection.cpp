@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include <QBrush>
 #include <QPen>
+#include <QPainter>
 #include <QGraphicsScene>
 
 QNEConnection::QNEConnection(QGraphicsItem *parent) : QGraphicsPathItem(parent)
@@ -36,6 +37,9 @@ QNEConnection::QNEConnection(QGraphicsItem *parent) : QGraphicsPathItem(parent)
     setPen(QPen(QColor(QRgb(0x2c3e50)), 3));
     setBrush(Qt::NoBrush);
 	setZValue(-1);
+
+    setAcceptHoverEvents(true);
+    setAcceptTouchEvents(true);
 }
 
 QNEConnection::~QNEConnection()
@@ -112,4 +116,28 @@ QNEPort* QNEConnection::port1() const
 QNEPort* QNEConnection::port2() const
 {
 	return m_port2;
+}
+
+void QNEConnection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
+    QPen p = pen();
+    QBrush b = brush();
+
+    if (isSelected() ||
+            (m_port1 && m_port1->isSelected()) ||
+            (m_port2 && m_port2->isSelected()))
+    {
+        p.setColor(p.color().lighter(150));
+    }
+    if (isUnderMouse())
+    {
+        p.setColor(p.color().lighter(130));
+    }
+
+    painter->setPen(p);
+    painter->setBrush(b);
+    painter->drawPath(path());
 }

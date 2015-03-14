@@ -26,7 +26,10 @@ private:
 private:
     void refresh_nodes();
 
-    void contextMenuEvent(QContextMenuEvent* event);
+    void contextMenu(QGraphicsSceneMouseEvent* event);
+    void portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port);
+    void blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
+    void connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
 
     void selection_changed();
     void set_config_editor_node(silk::node::Node_ptr node);

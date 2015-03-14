@@ -72,6 +72,8 @@ auto Comp_Location::get_outputs() const -> std::vector<Output>
 
 void Comp_Location::process()
 {
+    QLOG_TOPIC("comp_location::process");
+
     m_output_stream->samples.clear();
 
     auto location_stream = m_location_stream.lock();
@@ -134,6 +136,8 @@ void Comp_Location::process()
 
 auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("comp_location::set_config");
+
     sz::Comp_Location::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -155,27 +159,36 @@ auto Comp_Location::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->inputs.location.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
-        return false;
+        m_location_stream.reset();
     }
-    m_location_stream = location_stream;
+    else
+    {
+        m_location_stream = location_stream;
+    }
 
     rate = linear_acceleration_stream ? linear_acceleration_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.linear_acceleration.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.linear_acceleration, m_output_stream->rate, rate);
-        return false;
+        m_linear_acceleration_stream.reset();
     }
-    m_linear_acceleration_stream = linear_acceleration_stream;
+    else
+    {
+        m_linear_acceleration_stream = linear_acceleration_stream;
+    }
 
     rate = pressure_stream ? pressure_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.pressure.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.pressure, m_output_stream->rate, rate);
-        return false;
+        m_pressure_stream.reset();
     }
-    m_pressure_stream = pressure_stream;
+    else
+    {
+        m_pressure_stream = pressure_stream;
+    }
 
     return true;
 }

@@ -50,7 +50,9 @@ public:
 	int type() const { return Type; }
 
 private:
-	QPointF m_pos1;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    QPointF m_pos1;
 	QPointF m_pos2;
     QNEPort* m_port1 = nullptr;
     QNEPort* m_port2 = nullptr;

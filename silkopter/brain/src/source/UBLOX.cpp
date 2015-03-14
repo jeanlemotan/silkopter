@@ -393,6 +393,8 @@ auto UBLOX::setup() -> bool
 
 void UBLOX::process()
 {
+    QLOG_TOPIC("ublox::process");
+
     m_stream->samples.clear();
 
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
@@ -401,7 +403,6 @@ void UBLOX::process()
         return;
     }
 
-    QLOG_TOPIC("ublox::process");
     if (!m_is_setup)
     {
         if (!m_setup_future.valid() || //first time we're starting this
@@ -863,6 +864,8 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 
 auto UBLOX::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("ublox::set_config");
+
     sz::UBLOX::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

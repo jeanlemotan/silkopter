@@ -12,6 +12,7 @@
 
 #include <QGraphicsScene>
 #include <QFileDialog>
+#include <QGraphicsSceneMouseEvent>
 
 #include "boost/algorithm/string.hpp"
 
@@ -43,14 +44,18 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
     m_scene = new QGraphicsScene();
 
     setWindowTitle("HAL Editor");
+    setMouseTracking(true);
 
 
     QDockWidget *dock = new QDockWidget(tr("Nodes"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_view = new QGraphicsView(dock);
     m_view->setScene(m_scene);
+    m_view->setCacheMode(QGraphicsView::CacheNone);
+    m_view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-    m_view->setRenderHint(QPainter::Antialiasing, true);
+    m_view->setRenderHints(QPainter::RenderHints({QPainter::Antialiasing, QPainter::TextAntialiasing, QPainter::SmoothPixmapTransform, QPainter::HighQualityAntialiasing}));
+    m_view->setMouseTracking(true);
 //    m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
 
     dock->setWidget(m_view);
@@ -71,6 +76,11 @@ HAL_Window::HAL_Window(silk::HAL& hal, QWidget *parent)
 
 
     connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
+
+    connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &HAL_Window::contextMenu);
+    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::portContextMenu);
+    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::blockContextMenu);
+    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connectionContextMenu);
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
     m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::refresh_nodes, this));
@@ -129,7 +139,7 @@ static auto prettify_name(std::string const& name) -> std::string
     char old_c = 0;
     for (auto& c: new_name)
     {
-        c == '_' ? ' ' : c;
+        c = c == '_' ? ' ' : c;
         if (::isalnum(c) && old_c == ' ')
         {
             c = ::toupper(c);
@@ -165,11 +175,61 @@ static auto get_icon(std::string const& node_icon_name, silk::node::Node_Def& no
     return QIcon(node_icon_name.c_str());
 }
 
-void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
+void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
+{
+    QASSERT(port);
+
+    QMenu menu(this);
+
+    menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
+    menu.addSeparator();
+
+    auto& conn = port->connections();
+    for (auto const& c: conn)
+    {
+        QNEPort* other = c->port1() == port ? c->port2() : c->port1();
+        QASSERT(other);
+        if (other)
+        {
+            menu.addAction(QIcon(":/icons/remove.png"),
+                           q::util::format2<std::string>("Disconnect from {}/{}",
+                                                         other->block()->id().toLatin1().data(),
+                                                         other->id().toLatin1().data()).c_str());
+        }
+    }
+
+    menu.exec(event->screenPos());
+}
+
+void HAL_Window::connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConnection* connection)
+{
+    QASSERT(connection);
+
+    QMenu menu(this);
+
+    menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
+    menu.addSeparator();
+    menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
+
+    menu.exec(event->screenPos());
+}
+
+void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
+{
+    QASSERT(block);
+
+    QMenu menu(this);
+
+    menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
+
+    menu.exec(event->screenPos());
+}
+
+void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
 {
     QMenu menu(this);
 
-    auto pos = QPointF(m_view->mapToScene(event->pos()));
+    auto pos = event->scenePos();
 
     auto nodes = m_hal.get_node_defs().get_all();
 
@@ -233,7 +293,7 @@ void HAL_Window::contextMenuEvent(QContextMenuEvent* event)
         }
     }
 
-    menu.exec(event->globalPos());
+    menu.exec(event->screenPos());
 }
 
 void HAL_Window::selection_changed()
@@ -335,7 +395,8 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         {
             id.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
         }
-        id.port->setPortType(q::util::format2<std::string>("{}", i.class_id).c_str());
+        id.port->setPortType(i.class_id);
+        id.port->setPortRate(i.rate);
         id.port->disconnectAll();
 
         //find the connection in the config
@@ -375,7 +436,8 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         auto& od = data.outputs[o.name];
         QASSERT(od.port);
         od.port->setName(q::util::format2<std::string>("{} {}Hz", o.name, o.rate).c_str());
-        od.port->setPortType(q::util::format2<std::string>("{}", o.class_id).c_str());
+        od.port->setPortType(o.class_id);
+        od.port->setPortRate(o.rate);
     }
     data.block->refreshGeometry();
 
@@ -410,7 +472,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
             auto* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
             std::string stream_name = node_name + "/" + output_port->id().toLatin1().data();
-            m_hal.connect_input(node, input_name, stream_name);
+            m_hal.connect_node_input(node, input_name, stream_name);
         });
 
         auto& port_data = data.inputs[i.name];

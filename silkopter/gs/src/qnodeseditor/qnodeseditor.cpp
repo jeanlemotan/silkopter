@@ -41,7 +41,7 @@ QNodesEditor::QNodesEditor(QObject *parent) :
 
 void QNodesEditor::install(QGraphicsScene *s)
 {
-	s->installEventFilter(this);
+    s->installEventFilter(this);
     m_scene = s;
 }
 
@@ -49,7 +49,7 @@ QGraphicsItem* QNodesEditor::itemAt(const QPointF &pos)
 {
     QList<QGraphicsItem*> items = m_scene->items(QRectF(pos - QPointF(1,1), QSize(3,3)));
 
-	foreach(QGraphicsItem *item, items)
+    foreach(QGraphicsItem *item, items)
     {
         if (item->type() > QGraphicsItem::UserType)
         {
@@ -57,7 +57,7 @@ QGraphicsItem* QNodesEditor::itemAt(const QPointF &pos)
         }
     }
 
-	return 0;
+    return 0;
 }
 
 bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
@@ -68,110 +68,136 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
     const QPen errorPen(QColor(0xe74c3c), 3);
     const QPen connectedPen(QColor(0x2c3e50), 3);
 
-	switch ((int) e->type())
-	{
-	case QEvent::GraphicsSceneMousePress:
-	{
-
-		switch ((int) me->button())
-		{
-		case Qt::LeftButton:
-		{
-			QGraphicsItem *item = itemAt(me->scenePos());
-			if (item && item->type() == QNEPort::Type)
-			{
-                m_connection = new QNEConnection(0);
-                m_scene->addItem(m_connection);
-                m_connection->setPort1((QNEPort*) item);
-                m_connection->setPos2(me->scenePos());
-                m_connection->setPen(unconnectedPen);
-
-				return true;
-            }
-            else if (item && item->type() == QNEBlock::Type)
-			{
-				/* if (selBlock)
-					selBlock->setSelected(); */
-				// selBlock = (QNEBlock*) item;
-			}
-			break;
-		}
-		case Qt::RightButton:
-		{
-			QGraphicsItem *item = itemAt(me->scenePos());
-			if (item && (item->type() == QNEConnection::Type || item->type() == QNEBlock::Type))
-            {
-                delete item;
-                return true;
-            }
-            break;
-		}
-		}
-	}
-	case QEvent::GraphicsSceneMouseMove:
-	{
-        if (m_connection)
-		{
-            m_connection->setPos2(me->scenePos());
-
+    switch ((int) e->type())
+    {
+        case QEvent::GraphicsSceneContextMenu:
+        {
             QGraphicsItem *item = itemAt(me->scenePos());
-            if (item && item->type() == QNEPort::Type)
+            if (!item)
             {
-                QNEPort *port1 = m_connection->port1();
-                QNEPort *port2 = (QNEPort*) item;
-                if (port1->block() != port2->block() &&
-                    port1->isOutput() != port2->isOutput() &&
-                    port1->portType() == port2->portType() &&
-                    !port1->isConnected(port2))
-                {
-                    m_connection->setPen(connectedPen);
-                }
-                else
-                {
-                    m_connection->setPen(errorPen);
-                }
+                emit contextMenu(me);
+            }
+            else if (item->type() == QNEPort::Type)
+            {
+                emit portContextMenu(me, (QNEPort*)item);
+            }
+            else if (item->type() == QNEBlock::Type)
+            {
+                emit blockContextMenu(me, (QNEBlock*)item);
+            }
+            else if (item->type() == QNEConnection::Type)
+            {
+                emit connectionContextMenu(me, (QNEConnection*)item);
             }
             else
             {
-                m_connection->setPen(unconnectedPen);
+                emit itemContextMenu(me, item);
             }
+        }
+        break;
+        case QEvent::GraphicsSceneMousePress:
+        {
 
-			return true;
-		}
-		break;
-	}
-	case QEvent::GraphicsSceneMouseRelease:
-	{
-        if (m_connection && me->button() == Qt::LeftButton)
-		{
-			QGraphicsItem *item = itemAt(me->scenePos());
-			if (item && item->type() == QNEPort::Type)
-			{
-                QNEPort *port1 = m_connection->port1();
-				QNEPort *port2 = (QNEPort*) item;
+            switch ((int) me->button())
+            {
+                case Qt::LeftButton:
+                {
+                    QGraphicsItem *item = itemAt(me->scenePos());
+                    if (item && item->type() == QNEPort::Type)
+                    {
+                        m_connection = new QNEConnection(0);
+                        m_scene->addItem(m_connection);
+                        m_connection->setPort1((QNEPort*) item);
+                        m_connection->setPos2(me->scenePos());
+                        m_connection->setPen(unconnectedPen);
 
-                if (port1->block() != port2->block() &&
-                        port1->isOutput() != port2->isOutput() &&
-                        port1->portType() == port2->portType() &&
-                        !port1->isConnected(port2))
-				{
-                    port1->connectedSignal.execute(port2);
-                    port2->connectedSignal.execute(port1);
+                        return true;
+                    }
+                    else if (item && item->type() == QNEBlock::Type)
+                    {
+                        /* if (selBlock)
+                    selBlock->setSelected(); */
+                        // selBlock = (QNEBlock*) item;
+                    }
+                    break;
+                }
+//                case Qt::RightButton:
+//                {
+//                    QGraphicsItem *item = itemAt(me->scenePos());
+//                    if (item && (item->type() == QNEConnection::Type || item->type() == QNEBlock::Type))
+//                    {
+//                        delete item;
+//                        return true;
+//                    }
+//                    break;
+//                }
+            }
+        }
+        case QEvent::GraphicsSceneMouseMove:
+        {
+            if (m_connection)
+            {
+                m_connection->setPos2(me->scenePos());
 
-                    m_connection->setPort2(port2);
-                    m_connection->setPen(connectedPen);
-                    m_connection = 0;
-					return true;
-				}
-			}
+                QGraphicsItem *item = itemAt(me->scenePos());
+                if (item && item->type() == QNEPort::Type)
+                {
+                    QNEPort *port1 = m_connection->port1();
+                    QNEPort *port2 = (QNEPort*) item;
+                    if (port1->block() != port2->block() &&
+                            port1->isOutput() != port2->isOutput() &&
+                            port1->portType() == port2->portType() &&
+                            (port1->portRate() == port2->portRate() || port1->portRate() == 0 || port2->portRate() == 0) &&
+                            !port1->isConnected(port2))
+                    {
+                        m_connection->setPen(connectedPen);
+                    }
+                    else
+                    {
+                        m_connection->setPen(errorPen);
+                    }
+                }
+                else
+                {
+                    m_connection->setPen(unconnectedPen);
+                }
 
-            delete m_connection;
-            m_connection = 0;
-			return true;
-		}
-		break;
-	}
-	}
-	return QObject::eventFilter(o, e);
+                return true;
+            }
+            break;
+        }
+        case QEvent::GraphicsSceneMouseRelease:
+        {
+            if (m_connection && me->button() == Qt::LeftButton)
+            {
+                QGraphicsItem *item = itemAt(me->scenePos());
+                if (item && item->type() == QNEPort::Type)
+                {
+                    QNEPort *port1 = m_connection->port1();
+                    QNEPort *port2 = (QNEPort*) item;
+
+                    if (port1->block() != port2->block() &&
+                            port1->isOutput() != port2->isOutput() &&
+                            port1->portType() == port2->portType() &&
+                            !port1->isConnected(port2))
+                    {
+                        port1->connectedSignal.execute(port2);
+                        port2->connectedSignal.execute(port1);
+
+                        m_connection->setPort2(port2);
+                        m_connection->setPen(connectedPen);
+                        m_connection = 0;
+                        return true;
+                    }
+                }
+
+                delete m_connection;
+                m_connection = 0;
+                return true;
+            }
+            break;
+        }
+    }
+    return QObject::eventFilter(o, e);
 }
 

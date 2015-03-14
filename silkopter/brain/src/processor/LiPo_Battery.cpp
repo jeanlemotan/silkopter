@@ -80,6 +80,8 @@ auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 
 void LiPo_Battery::process()
 {
+    QLOG_TOPIC("lipo_battery::process");
+
     m_output_stream->samples.clear();
 
     auto current_stream = m_current_stream.lock();
@@ -163,6 +165,8 @@ void LiPo_Battery::process()
 
 auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
 {
+    QLOG_TOPIC("lipo_battery::compute_cell_count");
+
     //wait to get a good voltage average
     if (m_output_stream->last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
     {
@@ -196,6 +200,8 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
 
 auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("lipo_battery::set_config");
+
     sz::LiPo_Battery::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -216,18 +222,24 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->inputs.voltage.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.voltage, m_output_stream->rate, rate);
-        return false;
+        m_voltage_stream.reset();
     }
-    m_voltage_stream = voltage_stream;
+    else
+    {
+        m_voltage_stream = voltage_stream;
+    }
 
     rate = current_stream ? current_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.current.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.current, m_output_stream->rate, rate);
-        return false;
+        m_current_stream.reset();
     }
-    m_current_stream = current_stream;
+    else
+    {
+        m_current_stream = current_stream;
+    }
 
     return true;
 }

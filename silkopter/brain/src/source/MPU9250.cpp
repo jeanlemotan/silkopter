@@ -855,6 +855,8 @@ void MPU9250::process_compass(Buses& buses)
 
 auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("mpu9250::set_config");
+
     sz::MPU9250::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

@@ -43,8 +43,6 @@ auto SPI_Linux::init() -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_spi_linux::init");
-
     std::lock_guard<SPI_Linux> lg(*this);
 
     m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
@@ -58,7 +56,7 @@ auto SPI_Linux::init() -> bool
 }
 void SPI_Linux::close()
 {
-    QLOG_TOPIC("bus_spi_linux::close");
+    QLOG_TOPIC("spi_linux::close");
 
     if (m_fd)
     {
@@ -85,7 +83,7 @@ void SPI_Linux::unlock()
 
 auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_spi_linux::read");
+    QLOG_TOPIC("spi_linux::read");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
@@ -94,7 +92,7 @@ auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
 }
 auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_spi_linux::write");
+    QLOG_TOPIC("spi_linux::write");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
@@ -104,7 +102,7 @@ auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
 
 auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_spi_linux::read_register");
+    QLOG_TOPIC("spi_linux::read_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
@@ -113,7 +111,7 @@ auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
 }
 auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_spi_linux::write_register");
+    QLOG_TOPIC("spi_linux::write_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
@@ -123,6 +121,8 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
 
 auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("spi_linux::set_config");
+
     sz::SPI_Linux::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

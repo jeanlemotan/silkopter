@@ -70,8 +70,6 @@ auto I2C_Linux::init() -> bool
 {
     close();
 
-    QLOG_TOPIC("bus_i2c_linux::init");
-
     std::lock_guard<I2C_Linux> lg(*this);
 
     m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
@@ -86,7 +84,7 @@ auto I2C_Linux::init() -> bool
 
 void I2C_Linux::close()
 {
-    QLOG_TOPIC("bus_i2c_linux::close");
+    QLOG_TOPIC("i2c_linux::close");
 
     if (m_fd >= 0)
     {
@@ -113,7 +111,7 @@ void I2C_Linux::unlock()
 
 auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_linux::read");
+    QLOG_TOPIC("i2c_linux::read");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -137,7 +135,7 @@ auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
 }
 auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_linux::write");
+    QLOG_TOPIC("i2c_linux::write");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -161,7 +159,7 @@ auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 
 auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_linux::read_register");
+    QLOG_TOPIC("i2c_linux::read_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -190,7 +188,7 @@ auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_
 }
 auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("bus_i2c_linux::write_register");
+    QLOG_TOPIC("i2c_linux::write_register");
     QASSERT(m_fd >= 0);
 
     std::lock_guard<I2C_Linux> lg(*this);
@@ -222,6 +220,8 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
 
 auto I2C_Linux::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("i2c_linux::set_config");
+
     sz::I2C_Linux::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

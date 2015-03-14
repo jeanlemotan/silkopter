@@ -310,6 +310,8 @@ void RC5T619::process()
 
 auto RC5T619::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("rc5t619::set_config");
+
     sz::RC5T619::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

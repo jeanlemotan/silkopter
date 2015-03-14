@@ -127,6 +127,15 @@ void Comms::request_nodes()
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
 }
 
+void Comms::request_all_node_configs()
+{
+    auto nodes = m_hal.get_nodes().get_all();
+    for (auto const& n: nodes)
+    {
+        m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, ++m_last_req_id, n->name);
+    }
+}
+
 
 //void Comms::send_telemetry_streams()
 //{
@@ -466,7 +475,7 @@ void Comms::handle_node_data()
                 m_setup_channel.unpack_param(name);
     if (!ok)
     {
-        QLOGE("Failed to unpack node config");
+        QLOGE("Failed to unpack node data");
         return;
     }
 
@@ -486,45 +495,12 @@ void Comms::handle_node_data()
     node->changed_signal.execute(*node);
 }
 
-//void Comms::handle_stream_config()
-//{
-//    uint32_t req_id = 0;
-//    std::string name;
-//    std::string config_str;
-//    bool ok = m_setup_channel.begin_unpack() &&
-//                m_setup_channel.unpack_param(req_id) &&
-//                m_setup_channel.unpack_param(name) &&
-//                m_setup_channel.unpack_param(config_str);
-//    if (!ok)
-//    {
-//        QLOGE("Failed to unpack node config");
-//        return;
-//    }
-
-//    auto node = m_hal.get_streams().find_by_name<node::stream::Stream_Common>(name);
-//    if (!node)
-//    {
-//        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
-//        return;
-//    }
-
-//    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
-
-//    node->config.SetObject();
-//    if (!config_str.empty() &&
-//            node->config.Parse(config_str.c_str()).HasParseError())
-//    {
-//        QLOGE("Req Id: {}, node '{}' - failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
-//        return;
-//    }
-//}
-
 void Comms::handle_add_node()
 {
     uint32_t req_id = 0;
     if (!m_setup_channel.begin_unpack() || !m_setup_channel.unpack_param(req_id))
     {
-        QLOGE("Failed to unpack node config");
+        QLOGE("Failed to unpack add node request");
         return;
     }
     auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
@@ -544,6 +520,47 @@ void Comms::handle_add_node()
     node->name = it->name;
     m_hal.m_nodes.add(node);
     it->callback(HAL::Result::OK, node);
+}
+
+void Comms::handle_remove_node()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    bool ok = m_setup_channel.begin_unpack() &&
+                m_setup_channel.unpack_param(req_id) &&
+                m_setup_channel.unpack_param(name);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack remove node request");
+        return;
+    }
+    auto it = std::find_if(begin(m_hal.m_remove_queue), end(m_hal.m_remove_queue), [&](HAL::Remove_Queue_Item const& i) { return i.req_id == req_id; });
+    QASSERT(it != m_hal.m_remove_queue.end());
+    if (it == m_hal.m_remove_queue.end())
+    {
+        QLOGE("Cannot find remove node request {}", req_id);
+        return;
+    }
+    auto node = m_hal.get_nodes().find_by_name(name);
+    if (!node)
+    {
+        it->callback(HAL::Result::FAILED);
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
+
+    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
+
+    if (!unpack_node_data(m_setup_channel, *node))
+    {
+        it->callback(HAL::Result::FAILED);
+        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
+        return;
+    }
+    m_hal.m_nodes.remove(node);
+    it->callback(HAL::Result::OK);
+
+    request_all_node_configs();
 }
 
 void Comms::send_hal_requests()
@@ -634,6 +651,7 @@ void Comms::process()
 
         case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
         case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
 //        case comms::Setup_Message::STREAM_CONFIG: handle_stream_config(); break;
 
 //        case comms::Setup_Message::TELEMETRY_STREAMS: handle_telemetry_streams(); break;

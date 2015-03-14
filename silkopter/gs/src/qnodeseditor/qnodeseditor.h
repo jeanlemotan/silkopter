@@ -33,6 +33,8 @@ class QNEConnection;
 class QGraphicsItem;
 class QPointF;
 class QNEBlock;
+class QNEPort;
+class QGraphicsSceneMouseEvent;
 
 class QNodesEditor : public QObject
 {
@@ -44,13 +46,19 @@ public:
 
 	bool eventFilter(QObject *, QEvent *);
 
+signals:
+    void contextMenu(QGraphicsSceneMouseEvent*);
+    void portContextMenu(QGraphicsSceneMouseEvent*, QNEPort*);
+    void blockContextMenu(QGraphicsSceneMouseEvent*, QNEBlock*);
+    void connectionContextMenu(QGraphicsSceneMouseEvent*, QNEConnection*);
+    void itemContextMenu(QGraphicsSceneMouseEvent*, QGraphicsItem*);
+
 private:
 	QGraphicsItem *itemAt(const QPointF&);
 
 private:
-    QGraphicsScene* m_scene;
-    QNEConnection* m_connection;
-	// QNEBlock *selBlock;
+    QGraphicsScene* m_scene = nullptr;
+    QNEConnection* m_connection = nullptr;
 };
 
 #endif // QNODESEDITOR_H

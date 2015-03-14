@@ -27,9 +27,11 @@
 
 namespace silk
 {
+class HAL;
 
 class Comms : q::util::Noncopyable
 {
+    friend class HAL;
 public:
     Comms(boost::asio::io_service& io_service, HAL& hal);
 
@@ -41,6 +43,8 @@ public:
 
     auto get_remote_clock() const -> Manual_Clock const&;
     auto get_rudp() -> util::RUDP&;
+
+    void request_all_node_configs();
 
     void process();
 
@@ -76,6 +80,7 @@ private:
 
     void handle_node_data();
     void handle_add_node();
+    void handle_remove_node();
 };
 
 }

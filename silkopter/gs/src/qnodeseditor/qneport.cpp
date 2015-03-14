@@ -24,11 +24,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include "qneport.h"
+#include "qneblock.h"
 
 #include <QGraphicsScene>
 #include <QFontMetrics>
 
 #include <QPen>
+#include <QPainter>
 
 #include "qneconnection.h"
 
@@ -48,6 +50,9 @@ QNEPort::QNEPort(QGraphicsItem *parent):
 	setBrush(Qt::red);
 
 	setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+
+    setAcceptHoverEvents(true);
+    setAcceptTouchEvents(true);
 }
 
 QNEPort::~QNEPort()
@@ -119,9 +124,14 @@ QVector<QNEConnection*>& QNEPort::connections()
 	return m_connections;
 }
 
-void QNEPort::setPortType(const QString& type)
+void QNEPort::setPortType(uint32_t type)
 {
     m_portType = type;
+}
+
+void QNEPort::setPortRate(uint32_t rate)
+{
+    m_portRate = rate;
 }
 
 QNEBlock* QNEPort::block() const
@@ -154,3 +164,28 @@ QVariant QNEPort::itemChange(GraphicsItemChange change, const QVariant &value)
 	}
 	return value;
 }
+
+void QNEPort::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
+    QPen p = pen();
+    QBrush b = brush();
+
+    if (isSelected() || m_block->isSelected())
+    {
+        p.setColor(p.color().lighter(150));
+        b.setColor(b.color().lighter(150));
+    }
+    if (isUnderMouse())
+    {
+        p.setColor(p.color().lighter(130));
+        b.setColor(b.color().lighter(130));
+    }
+
+    painter->setPen(p);
+    painter->setBrush(b);
+    painter->drawPath(path());
+}
+

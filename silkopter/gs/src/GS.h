@@ -5,6 +5,8 @@
 #include "qcustomplot.h"
 #include "Comms.h"
 
+class HAL_Window;
+
 class GS : public QMainWindow
 {
 public:
@@ -26,6 +28,8 @@ private:
 
     silk::HAL m_hal;
     silk::Comms m_comms;
+
+    HAL_Window* m_hal_window = nullptr;
 
     void set_remote_address(std::string const& address);
     std::string m_remote_address;

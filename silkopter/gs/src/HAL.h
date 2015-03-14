@@ -205,6 +205,7 @@ public:
     auto get_all() const -> std::vector<std::shared_ptr<Base>> const&;
     auto find_by_name(std::string const& name) const -> std::shared_ptr<Base>;
     template<class T> auto add(std::shared_ptr<T> node) -> bool;
+    void remove(std::shared_ptr<Base> node);
     void remove_all();
 private:
     std::vector<std::shared_ptr<Base>> m_nodes;
@@ -232,7 +233,10 @@ public:
     typedef std::function<void(Result, node::Node_ptr)> Add_Node_Callback;
     void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Node_Callback callback);
 
-    void connect_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
+    typedef std::function<void(Result)> Remove_Node_Callback;
+    void remove_node(node::Node_ptr node, Remove_Node_Callback callback);
+
+    void connect_node_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
@@ -258,6 +262,13 @@ protected:
         Add_Node_Callback callback;
     };
     std::vector<Add_Queue_Item> m_add_queue;
+
+    struct Remove_Queue_Item : public Queue_Item
+    {
+        node::Node_ptr node;
+        Remove_Node_Callback callback;
+    };
+    std::vector<Remove_Queue_Item> m_remove_queue;
 
     struct Set_Config_Queue_Item : public Queue_Item
     {
@@ -298,6 +309,17 @@ auto Registry<Base>::add(std::shared_ptr<T> node) -> bool
     }
     m_nodes.push_back(std::move(node));
     return true;
+}
+template<class Base>
+void Registry<Base>::remove(std::shared_ptr<Base> node)
+{
+    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](std::shared_ptr<Base> const& s) { return s == node; });
+    if (it == m_nodes.end())
+    {
+        QLOGE("Cannot find node {}", node->name);
+        return;
+    }
+    m_nodes.erase(it);
 }
 template<class Base>
 void Registry<Base>::remove_all()

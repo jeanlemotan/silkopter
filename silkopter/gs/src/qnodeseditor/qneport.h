@@ -50,8 +50,11 @@ public:
 
     int radius();
 
-    void setPortType(const QString& type);
-    const QString& portType() const { return m_portType; }
+    void setPortType(uint32_t type);
+    uint32_t portType() const { return m_portRate; }
+
+    void setPortRate(uint32_t rate);
+    uint32_t portRate() const { return m_portRate; }
 
     void setName(const QString &n);
     const QString& name() const { return m_name; }
@@ -74,6 +77,8 @@ public:
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
 private:
 	QNEBlock *m_block;
     QString m_name;
@@ -83,7 +88,8 @@ private:
     int m_radius;
     int m_margin;
 	QVector<QNEConnection*> m_connections;
-    QString m_portType;
+    uint32_t m_portType = 0;
+    uint32_t m_portRate = 0;
     QVector2D m_dir;
 };
 

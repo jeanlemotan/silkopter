@@ -46,6 +46,9 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	width = horzMargin;
 	height = vertMargin;
     label = new QGraphicsTextItem(this);
+
+    setAcceptHoverEvents(true);
+    setAcceptTouchEvents(true);
 }
 
 void QNEBlock::setId(const QString &n)
@@ -156,22 +159,23 @@ void QNEBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 	Q_UNUSED(option)
 	Q_UNUSED(widget)
 
+    QPen p = pen();
+    QBrush b = brush();
+
     if (isSelected())
     {
-        auto p = pen();
-        p.setColor(p.color().lighter());
-        painter->setPen(p);
-        auto b = brush();
-        b.setColor(b.color().lighter());
-        painter->setBrush(b);
+        p.setColor(p.color().lighter(140));
+        b.setColor(b.color().lighter(140));
     }
-    else
+    if (isUnderMouse())
     {
-        painter->setPen(pen());
-        painter->setBrush(brush());
-	}
+        p.setColor(p.color().lighter(120));
+        b.setColor(b.color().lighter(120));
+    }
 
-	painter->drawPath(path());
+    painter->setPen(p);
+    painter->setBrush(b);
+    painter->drawPath(path());
 }
 
 QVector<QNEPort*> QNEBlock::ports()

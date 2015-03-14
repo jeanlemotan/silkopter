@@ -66,6 +66,8 @@ auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
 
 void ADC_Voltmeter::process()
 {
+    QLOG_TOPIC("adc_voltmeter::process");
+
     m_output_stream->samples.clear();
 
     auto adc_stream = m_adc_stream.lock();

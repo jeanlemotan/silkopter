@@ -62,8 +62,6 @@ auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 
 auto PIGPIO::init() -> bool
 {
-    QLOG_TOPIC("pigpio::init");
-
 #if defined (RASPBERRY_PI)
     size_t period = m_params.period.count();
 
@@ -219,6 +217,8 @@ void PIGPIO::process()
 
 auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("pigpio::set_config");
+
     sz::PIGPIO::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

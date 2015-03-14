@@ -82,10 +82,13 @@ auto Multirotor_Pilot::get_outputs() const -> std::vector<Output>
 
 void Multirotor_Pilot::process()
 {
+    QLOG_TOPIC("multirotor_pilot::process");
 }
 
 auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("multirotor_pilot::set_config");
+
     sz::Multirotor_Pilot::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

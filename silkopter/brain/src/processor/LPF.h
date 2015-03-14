@@ -175,6 +175,8 @@ auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
 template<class Stream_t>
 void LPF<Stream_t>::process()
 {
+    QLOG_TOPIC("lpf::process");
+
     m_output_stream->samples.clear();
 
     auto input_stream = m_input_stream.lock();

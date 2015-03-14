@@ -73,6 +73,8 @@ auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 
 void Comp_AHRS::process()
 {
+    QLOG_TOPIC("comp_ahrs::process");
+
     m_output_stream->samples.clear();
 
     auto angular_velocity_stream = m_angular_velocity_stream.lock();
@@ -191,6 +193,8 @@ void Comp_AHRS::process()
 
 auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("comp_ahrs::set_config");
+
     sz::Comp_AHRS::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -212,27 +216,36 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->inputs.angular_velocity.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
-        return false;
+        m_angular_velocity_stream.reset();
     }
-    m_angular_velocity_stream = angular_velocity_stream;
+    else
+    {
+        m_angular_velocity_stream = angular_velocity_stream;
+    }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.acceleration.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
-        return false;
+        m_acceleration_stream.reset();
     }
-    m_acceleration_stream = acceleration_stream;
+    else
+    {
+        m_acceleration_stream = acceleration_stream;
+    }
 
     rate = magnetic_field_stream ? magnetic_field_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.magnetic_field.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.magnetic_field, m_output_stream->rate, rate);
-        return false;
+        m_magnetic_field_stream.reset();
     }
-    m_magnetic_field_stream = magnetic_field_stream;
+    else
+    {
+        m_magnetic_field_stream = magnetic_field_stream;
+    }
 
     return true;
 }

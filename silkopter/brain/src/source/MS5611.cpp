@@ -315,6 +315,8 @@ void MS5611::calculate(q::Clock::duration dt)
 
 auto MS5611::set_config(rapidjson::Value const& json) -> bool
 {
+    QLOG_TOPIC("ms5611::set_config");
+
     sz::MS5611::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))

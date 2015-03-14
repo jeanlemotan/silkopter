@@ -22,5 +22,7 @@
         <file>icons/Source.png</file>
         <file>icons/Temperature.png</file>
         <file>icons/Voltage.png</file>
+        <file>icons/remove.png</file>
+        <file>icons/view.png</file>
     </qresource>
 </RCC>
