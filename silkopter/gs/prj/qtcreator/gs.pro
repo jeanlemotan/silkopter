@@ -123,7 +123,8 @@ HEADERS += \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
-    ../../src/Stream_Viewer_Widget.h
+    ../../src/Stream_Viewer_Widget.h \
+    ../../src/Float_Stream_Viewer.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -137,10 +138,12 @@ SOURCES += \
     ../../src/qnodeseditor/qnodeseditor.cpp \
     ../../src/HAL_Window.cpp \
     ../../../libs/json_editor/JSON_Model.cpp \
-    ../../src/Stream_Viewer_Widget.cpp
+    ../../src/Stream_Viewer_Widget.cpp \
+    ../../src/Float_Stream_Viewer.cpp
 
 FORMS += \
-    ../../src/New_Node.ui
+    ../../src/New_Node.ui \
+    ../../src/Float_Stream_Viewer.ui
 
 DISTFILES += \
     ../../src/node.png \

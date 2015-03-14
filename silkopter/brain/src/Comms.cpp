@@ -435,50 +435,33 @@ void Comms::handle_add_node()
 void Comms::handle_streams_telemetry_active()
 {
     uint32_t req_id = 0;
+    std::string stream_name;
+    bool is_active = false;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id))
+        !m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(stream_name) ||
+        !m_setup_channel.unpack_param(is_active))
     {
-        QLOGE("Error in unpacking telemetry streams");
+        QLOGE("Error in unpacking stream telemetry");
         return;
     }
-    QLOGI("Req Id: {} - telemetry streams", req_id);
-
-    uint32_t size = 0;
-    if (m_setup_channel.unpack_param(size))
-    {
-        m_telemetry_streams.clear();
-        m_telemetry_streams.reserve(size);
-
-        std::string name;
-        for (uint32_t i = 0; i < size; i++)
-        {
-            if (!m_setup_channel.unpack_param(name))
-            {
-                m_telemetry_streams.clear();
-                QLOGE("Req Id: {} - error in unpacking telemetry streams", req_id);
-                return;
-            }
-            auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(name);
-            if (stream)
-            {
-                m_telemetry_streams.push_back(stream);
-            }
-            else
-            {
-                QLOGW("Req Id: {} - cannot find stream '{}' for telemetry", req_id, name);
-            }
-        }
-    }
-
     m_setup_channel.end_unpack();
+
+    QLOGI("Req Id: {} - stream '{}' telemetry: {}", req_id, stream_name, is_active ? "ON" : "OFF");
 
     m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
     m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(static_cast<uint32_t>(m_telemetry_streams.size()));
-    for (auto const& s: m_telemetry_streams)
+
+    auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
+    if (stream)
     {
-        QASSERT(s);
-        //m_setup_channel.pack_param(s->get_name());
+        m_telemetry_streams.push_back(stream);
+        m_setup_channel.pack_param(true);
+    }
+    else
+    {
+        m_setup_channel.pack_param(false);
+        QLOGE("Req Id: {} - cannot find stream '{}' for telemetry", req_id, stream_name);
     }
     m_setup_channel.end_pack();
 }

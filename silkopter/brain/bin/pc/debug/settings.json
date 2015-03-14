@@ -1,22 +1,119 @@
 {
-	"hal" : {
-		"buses" : {
-			"I2C Linux" : {
-				"name" : "i2c0",
-				"init_params" : {
-					"dev" : "i2c0"
-				},
-				"config" : {}
-			},
-			"UART Linux" : {
-				"name" : "uart0",
-				"init_params" : {
-					"dev" : "/dev/ttyUSB0",
-					"baud" : 115200
-				},
-				"config" : {}
-			}
-
-		}
-	}
+    "hal": {
+        "buses": {
+            "I2C Linux": {
+                "name": "i2c0",
+                "init_params": {
+                    "dev": "i2c0"
+                },
+                "config": {}
+            },
+            "UART Linux": {
+                "name": "uart0",
+                "init_params": {
+                    "dev": "/dev/ttyUSB0",
+                    "baud": 115200
+                },
+                "config": {}
+            }
+        },
+        "nodes": {
+            "ADC Value LPF": {
+                "name": "ADC Value LPF",
+                "init_params": {
+                    "Rate (Hz)": 1
+                },
+                "config": {
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 0.0,
+                    "Inputs": {
+                        "Input": "ADC Value RS/Output"
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "ADC Value RS": {
+                "name": "ADC Value RS",
+                "init_params": {
+                    "Rate (Hz)": 1
+                },
+                "config": {
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 0.0,
+                    "Inputs": {
+                        "Input": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "MS5611": {
+                "name": "MS5611",
+                "init_params": {
+                    "Bus": "i2c0",
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate Ratio": 10,
+                    "__gs": {
+                        "position": {
+                            "x": 281.0,
+                            "y": -9.0
+                        }
+                    }
+                },
+                "config": {
+                    "Outputs": {
+                        "Pressure": {},
+                        "Temperature": {}
+                    }
+                }
+            },
+            "Comp Location": {
+                "name": "Comp Location",
+                "init_params": {
+                    "Rate (Hz)": 10,
+                    "__gs": {
+                        "position": {
+                            "x": 227.0,
+                            "y": -227.0
+                        }
+                    }
+                },
+                "config": {
+                    "Inputs": {
+                        "Location": "",
+                        "Linear Acceleration": "",
+                        "Pressure": "Pressure RS/Output"
+                    },
+                    "Outputs": {
+                        "Location": {}
+                    }
+                }
+            },
+            "Pressure RS": {
+                "name": "Pressure RS",
+                "init_params": {
+                    "Rate (Hz)": 10,
+                    "__gs": {
+                        "position": {
+                            "x": 142.0,
+                            "y": -398.0
+                        }
+                    }
+                },
+                "config": {
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 5.0,
+                    "Inputs": {
+                        "Input": "MS5611/Pressure"
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            }
+        }
+    }
 }

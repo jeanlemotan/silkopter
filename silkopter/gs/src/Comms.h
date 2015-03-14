@@ -52,7 +52,7 @@ public:
 
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
     typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
-    typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
 
 private:
     HAL& m_hal;
@@ -78,6 +78,7 @@ private:
     auto link_input_streams(node::Node_ptr node) -> bool;
     auto publish_output_streams(node::Node_ptr node) -> bool;
 
+    void handle_stream_data();
 
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();

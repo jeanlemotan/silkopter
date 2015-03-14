@@ -15,6 +15,7 @@ public:
 private:
     void create_viewer();
 
+    silk::node::stream::Stream_wptr m_stream;
     std::string m_stream_name;
     silk::HAL& m_hal;
     silk::Comms& m_comms;

@@ -56,96 +56,112 @@ struct Acceleration : public Stream
 {
     typedef IAcceleration::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Acceleration&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Acceleration);
 struct Angular_Velocity : public Stream
 {
     typedef IAngular_Velocity::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Angular_Velocity&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Angular_Velocity);
 struct ADC_Value : public Stream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(ADC_Value&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(ADC_Value);
 struct Battery_State : public Stream
 {
     typedef IBattery_State::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Battery_State&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Battery_State);
 struct Cardinal_Points : public Stream
 {
     typedef ICardinal_Points::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Cardinal_Points&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Cardinal_Points);
 struct Current : public Stream
 {
     typedef ICurrent::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Current&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Current);
 struct Distance : public Stream
 {
     typedef IDistance::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Distance&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Distance);
 struct Linear_Acceleration : public Stream
 {
     typedef ILinear_Acceleration::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Linear_Acceleration&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Linear_Acceleration);
 struct Location : public Stream
 {
     typedef ILocation::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Location&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Location);
 struct Magnetic_Field : public Stream
 {
     typedef IMagnetic_Field::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Magnetic_Field&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Magnetic_Field);
 struct Pressure : public Stream
 {
     typedef IPressure::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Pressure&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Pressure);
 struct PWM_Value : public Stream
 {
     typedef IPWM_Value::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(PWM_Value&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(PWM_Value);
 struct Reference_Frame : public Stream
 {
     typedef IReference_Frame::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Reference_Frame&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Reference_Frame);
 struct Temperature : public Stream
 {
     typedef IADC_Value::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Temperature&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Temperature);
 struct Voltage : public Stream
 {
     typedef IVoltage::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Voltage&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Voltage);
 struct Video : public Stream
 {
     typedef IVideo::Sample Sample;
     std::vector<Sample> samples;
+    q::util::Signal<void(Video&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Video);
 

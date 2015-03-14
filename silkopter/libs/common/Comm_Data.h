@@ -12,6 +12,12 @@ enum class Sim_Message : uint8_t
     MOTORS,
 };
 
+enum class Telemetry_Message : uint8_t
+{
+    STREAM_DATA,
+
+    COUNT //keep last
+};
 
 enum class Setup_Message : uint8_t
 {

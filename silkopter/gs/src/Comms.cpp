@@ -137,39 +137,6 @@ void Comms::request_all_node_configs()
 }
 
 
-void Comms::handle_streams_telemetry_active()
-{
-//    for (auto const& stream: m_telemetry_streams)
-//    {
-//        QASSERT(stream);
-//        if (send_telemetry_stream<node::stream::IAcceleration>(*stream) ||
-//            send_telemetry_stream<node::stream::IAngular_Velocity>(*stream) ||
-//            send_telemetry_stream<node::stream::IMagnetic_Field>(*stream) ||
-//            send_telemetry_stream<node::stream::IPressure>(*stream) ||
-//            send_telemetry_stream<node::stream::IBattery_State>(*stream) ||
-//            send_telemetry_stream<node::stream::ILinear_Acceleration>(*stream) ||
-//            send_telemetry_stream<node::stream::ICardinal_Points>(*stream) ||
-//            send_telemetry_stream<node::stream::ICurrent>(*stream) ||
-//            send_telemetry_stream<node::stream::IVoltage>(*stream) ||
-//            send_telemetry_stream<node::stream::IDistance>(*stream) ||
-//            send_telemetry_stream<node::stream::ILocation>(*stream) ||
-//            send_telemetry_stream<node::stream::IPWM_Value>(*stream) ||
-//            send_telemetry_stream<node::stream::IReference_Frame>(*stream) ||
-//            send_telemetry_stream<node::stream::ITemperature>(*stream) ||
-//            send_telemetry_stream<node::stream::IADC_Value>(*stream)
-////          send_telemetry_stream<node::stream::IVideo>(*stream)
-//                )
-//        {
-//            ;//nothing
-//        }
-//        else
-//        {
-//            QLOGW("Unrecognized stream type: {} / {}", stream->get_name(), q::rtti::get_class_name(*stream));
-//        }
-//    }
-}
-
-
 auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 {
     std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
@@ -650,12 +617,109 @@ void Comms::handle_remove_node()
     request_all_node_configs();
 }
 
+void Comms::handle_streams_telemetry_active()
+{
+    bool is_active = false;
+    uint32_t req_id = 0;
+    bool ok = m_setup_channel.begin_unpack() &&
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(is_active);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack remove node request");
+        return;
+    }
+    auto it = std::find_if(begin(m_hal.m_stream_telemetry_queue), end(m_hal.m_stream_telemetry_queue),
+                           [&](HAL::Stream_Telemetry_Queue_Item const& i) { return i.req_id == req_id; });
+    QASSERT(it != m_hal.m_stream_telemetry_queue.end());
+    if (it == m_hal.m_stream_telemetry_queue.end())
+    {
+        QLOGE("Cannot find telemetry node request {}", req_id);
+        return;
+    }
+    it->callback(is_active ? HAL::Result::OK : HAL::Result::FAILED);
+}
+
+template<class IStream, class Stream>
+auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
+{
+    if (_stream.class_id == q::rtti::get_class_id<IStream>())
+    {
+        auto& stream = static_cast<Stream&>(_stream);
+        typename Stream::Sample sample;
+        for (uint32_t i = 0; i < sample_count; i++)
+        {
+            uint32_t dt = 0;
+            bool ok = channel.unpack_param(sample.value);
+            ok &= channel.unpack_param(sample.sample_idx);
+            ok &= channel.unpack_param(dt);
+            ok &= channel.unpack_param(sample.is_healthy);
+            sample.dt = std::chrono::microseconds(dt);
+            if (!dt)
+            {
+                QLOGE("Error unpacking samples!!!");
+                return false;
+            }
+            stream.samples.push_back(sample);
+        }
+        stream.samples_available_signal.execute(stream);
+        stream.samples.clear();
+        return true;
+    }
+    return false;
+}
+
+void Comms::handle_stream_data()
+{
+    uint32_t req_id = 0;
+    std::string stream_name;
+    uint32_t sample_count = 0;
+    bool ok = m_setup_channel.begin_unpack() &&
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(stream_name) &&
+              m_setup_channel.unpack_param(sample_count);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack stream telemetry");
+        return;
+    }
+    auto stream = m_hal.get_streams().find_by_name(stream_name);
+    if (!stream)
+    {
+        QLOGE("Req Id: {} - Cannot find stream '{}'", req_id, stream_name);
+        return;
+    }
+
+    using namespace silk::node::stream;
+
+    if (!unpack_stream_samples<IAcceleration, Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IAngular_Velocity, Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IMagnetic_Field, Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IPressure, Pressure>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ICardinal_Points, Cardinal_Points>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ILocation, Location>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IPWM_Value, PWM_Value>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IReference_Frame, Reference_Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ITemperature, Temperature>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IADC_Value, ADC_Value>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
+    {
+        QLOGE("Req Id: {} - Cannot unpack stream '{}'", req_id, stream_name);
+        return;
+    }
+}
+
 void Comms::send_hal_requests()
 {
 #ifdef NDEBUG
     static const std::chrono::seconds REQUEST_TIMEOUT(3);
 #else
-    static const std::chrono::seconds REQUEST_TIMEOUT(3);
+    static const std::chrono::seconds REQUEST_TIMEOUT(300);
 #endif
 
     auto now = q::Clock::now();
@@ -751,6 +815,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
+            case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
         }
     }
 
