@@ -13,6 +13,7 @@
 #include <QGraphicsScene>
 #include <QFileDialog>
 #include <QGraphicsSceneMouseEvent>
+#include "Stream_Viewer_Widget.h"
 
 #include "boost/algorithm/string.hpp"
 
@@ -88,7 +89,8 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget *parent)
 
 HAL_Window::~HAL_Window()
 {
-
+    m_streams.clear();
+    m_nodes.clear();
 }
 
 void HAL_Window::on_node_factories_refreshed()
@@ -395,12 +397,13 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
 void HAL_Window::open_stream_viewer(std::string const& stream_name)
 {
     QDockWidget* dock = new QDockWidget(q::util::format2<std::string>("Stream: {}", stream_name).c_str(), this);
-//    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-//    Stream_Viewer_Widget* viewer = new Stream_Viewer_Widget(dock, m_hal, m_comms);
-//    viewer->set_stream_name(stream_name);
+    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    Stream_Viewer_Widget* viewer = new Stream_Viewer_Widget(m_hal, m_comms, dock);
+    viewer->set_stream_name(stream_name);
 
-//    dock->setWidget(viewer);
-    dock->show();
+    dock->setWidget(viewer);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    //dock->show();
 }
 
 void HAL_Window::refresh_node(silk::node::Node& node)

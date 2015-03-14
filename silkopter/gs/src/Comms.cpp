@@ -655,7 +655,7 @@ void Comms::send_hal_requests()
 #ifdef NDEBUG
     static const std::chrono::seconds REQUEST_TIMEOUT(3);
 #else
-    static const std::chrono::seconds REQUEST_TIMEOUT(300);
+    static const std::chrono::seconds REQUEST_TIMEOUT(3);
 #endif
 
     auto now = q::Clock::now();
