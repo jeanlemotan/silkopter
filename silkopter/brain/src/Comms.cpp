@@ -176,13 +176,14 @@ void Comms::set_input_message_callback(comms::Input_Message message, Input_Chann
     m_input_channel_callbacks[static_cast<size_t>(message)] = callback;
 }
 
-template<class Stream> auto Comms::send_telemetry_stream(node::stream::IStream const& _stream) -> bool
+template<class Stream> auto Comms::send_telemetry_stream(std::string const& stream_name, node::stream::IStream const& _stream) -> bool
 {
     if (q::rtti::is_of_type<Stream>(_stream))
     {
         auto const& stream = static_cast<Stream const&>(_stream);
         auto const& samples = stream.get_samples();
-        m_telemetry_channel.begin_pack(q::rtti::get_class_id(stream));
+        m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+        m_telemetry_channel.pack_param(stream_name);
         m_telemetry_channel.pack_param(static_cast<uint32_t>(samples.size()));
         for (auto const& s: samples)
         {
@@ -199,32 +200,35 @@ template<class Stream> auto Comms::send_telemetry_stream(node::stream::IStream c
 
 void Comms::send_telemetry_streams()
 {
-    for (auto const& stream: m_telemetry_streams)
+    for (auto const& sd: m_telemetry_streams)
     {
-        QASSERT(stream);
-        if (send_telemetry_stream<node::stream::IAcceleration>(*stream) ||
-            send_telemetry_stream<node::stream::IAngular_Velocity>(*stream) ||
-            send_telemetry_stream<node::stream::IMagnetic_Field>(*stream) ||
-            send_telemetry_stream<node::stream::IPressure>(*stream) ||
-            send_telemetry_stream<node::stream::IBattery_State>(*stream) ||
-            send_telemetry_stream<node::stream::ILinear_Acceleration>(*stream) ||
-            send_telemetry_stream<node::stream::ICardinal_Points>(*stream) ||
-            send_telemetry_stream<node::stream::ICurrent>(*stream) ||
-            send_telemetry_stream<node::stream::IVoltage>(*stream) ||
-            send_telemetry_stream<node::stream::IDistance>(*stream) ||
-            send_telemetry_stream<node::stream::ILocation>(*stream) ||
-            send_telemetry_stream<node::stream::IPWM_Value>(*stream) ||
-            send_telemetry_stream<node::stream::IReference_Frame>(*stream) ||
-            send_telemetry_stream<node::stream::ITemperature>(*stream) ||
-            send_telemetry_stream<node::stream::IADC_Value>(*stream)
-//          send_telemetry_stream<node::stream::IVideo>(*stream)
-                )
+        auto stream = sd.second.lock();
+        if (stream)
         {
-            ;//nothing
-        }
-        else
-        {
-            QLOGW("Unrecognized stream type: {} / {}", q::rtti::get_class_id(*stream), q::rtti::get_class_name(*stream));
+            if (send_telemetry_stream<node::stream::IAcceleration>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IAngular_Velocity>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IMagnetic_Field>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IPressure>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IBattery_State>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::ILinear_Acceleration>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::ICardinal_Points>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::ICurrent>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IVoltage>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IDistance>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::ILocation>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IPWM_Value>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IReference_Frame>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::ITemperature>(sd.first, *stream) ||
+                    send_telemetry_stream<node::stream::IADC_Value>(sd.first, *stream)
+                    //          send_telemetry_stream<node::stream::IVideo>(sd.first, *stream)
+                    )
+            {
+                ;//nothing
+            }
+            else
+            {
+                QLOGW("Unrecognized stream type: {} / {}", sd.first, q::rtti::get_class_id(*stream));
+            }
         }
     }
 }
@@ -455,7 +459,7 @@ void Comms::handle_streams_telemetry_active()
     auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
     if (stream)
     {
-        m_telemetry_streams.push_back(stream);
+        m_telemetry_streams.push_back({stream_name, stream});
         m_setup_channel.pack_param(true);
     }
     else

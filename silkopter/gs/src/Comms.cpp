@@ -671,13 +671,11 @@ auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_co
 
 void Comms::handle_stream_data()
 {
-    uint32_t req_id = 0;
     std::string stream_name;
     uint32_t sample_count = 0;
-    bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(req_id) &&
-              m_setup_channel.unpack_param(stream_name) &&
-              m_setup_channel.unpack_param(sample_count);
+    bool ok = m_telemetry_channel.begin_unpack() &&
+              m_telemetry_channel.unpack_param(stream_name) &&
+              m_telemetry_channel.unpack_param(sample_count);
     if (!ok)
     {
         QLOGE("Failed to unpack stream telemetry");
@@ -686,7 +684,7 @@ void Comms::handle_stream_data()
     auto stream = m_hal.get_streams().find_by_name(stream_name);
     if (!stream)
     {
-        QLOGE("Req Id: {} - Cannot find stream '{}'", req_id, stream_name);
+        QLOGE("Cannot find stream '{}'", stream_name);
         return;
     }
 
@@ -709,7 +707,7 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<IADC_Value, ADC_Value>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
     {
-        QLOGE("Req Id: {} - Cannot unpack stream '{}'", req_id, stream_name);
+        QLOGE("Cannot unpack stream '{}'", stream_name);
         return;
     }
 }

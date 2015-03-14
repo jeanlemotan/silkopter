@@ -95,7 +95,7 @@ private:
 
     std::shared_ptr<Source> m_source;
 
-    template<class Stream> auto send_telemetry_stream(node::stream::IStream const& _stream) -> bool;
+    template<class Stream> auto send_telemetry_stream(std::string const& stream_name, node::stream::IStream const& _stream) -> bool;
     void send_telemetry_streams();
 
     void handle_enumerate_node_defs();
@@ -114,7 +114,7 @@ private:
 
     void handle_streams_telemetry_active();
 
-    std::vector<node::stream::IStream_ptr> m_telemetry_streams;
+    std::vector<std::pair<std::string, node::stream::IStream_wptr>> m_telemetry_streams;
 
 
     std::vector<Setup_Channel_Callback> m_setup_channel_callbacks;
@@ -132,7 +132,7 @@ private:
     boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
-    typedef util::Channel<uint32_t, uint16_t> Telemetry_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;

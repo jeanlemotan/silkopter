@@ -66,6 +66,7 @@ void Stream_Viewer_Widget::set_stream_name(std::string const& stream_name)
         }
         else
         {
+            delete label;
             create_viewer();
         }
     });
