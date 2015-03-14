@@ -16,14 +16,21 @@ public:
         m_ui.setupUi(this);
 
         m_ui.plot->addGraph();
-        m_ui.plot->graph(0)->setPen(QPen(Qt::blue));
+        m_ui.plot->graph(0)->setPen(QColor(0x2c3e50));
         m_ui.plot->xAxis->setLabel("Time (s)");
         m_ui.plot->yAxis->setLabel(unit.c_str());
 
-        m_ui.spectogram->addGraph();
-        m_ui.spectogram->graph(0)->setPen(QPen(Qt::blue));
+        m_spectogram_plottable = new QCPGraph(m_ui.spectogram->xAxis, m_ui.spectogram->yAxis);
+        m_ui.spectogram->addPlottable(m_spectogram_plottable);
+        m_spectogram_plottable->setPen(QColor(0x2980b9));
+        m_spectogram_plottable->setBrush(QColor(0x2980b9));
         m_ui.spectogram->xAxis->setLabel("Frequency (Hz)");
         m_ui.spectogram->yAxis->setLabel(unit.c_str());
+
+        connect(m_ui.logarithmic, &QCheckBox::toggled, [this](bool yes)
+        {
+            m_ui.spectogram->xAxis->setScaleType(yes ? QCPAxis::stLogarithmic : QCPAxis::stLinear);
+        });
 
         m_fft.temp_input.reset(static_cast<double*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(double))), fftw_free);
         m_fft.temp_output.reset(static_cast<fftw_complex*>(fftw_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(fftw_complex))), fftw_free);
@@ -40,6 +47,7 @@ public:
 
 private:
     Ui::Float_Stream_Viewer m_ui;
+    QCPGraph* m_spectogram_plottable = nullptr;
     silk::node::stream::Stream_wptr m_stream;
     std::string m_unit;
     q::util::Scoped_Connection m_connection;
@@ -49,9 +57,7 @@ private:
     struct FFT_Data
     {
         size_t sample_rate = 0;
-
         std::vector<double> input;
-        std::vector<double> output;
 
         static const size_t MAX_INPUT_SIZE = 65536;
         std::shared_ptr<double> temp_input;
@@ -63,9 +69,9 @@ private:
     void process_fft(FFT_Data& fft)
     {
         //clear plot
-        m_ui.spectogram->graph(0)->clearData();
         for (int i = 0; i < m_ui.spectogram->plottableCount(); i++)
         {
+            m_ui.spectogram->plottable(i)->clearData();
             m_ui.spectogram->plottable(i)->rescaleAxes();
         }
         if (fft.sample_rate == 0)
@@ -78,14 +84,18 @@ private:
         double min_time = math::max(max_time - m_ui.window->value(), 0.0);
         size_t needed_samples = static_cast<size_t>((max_time - min_time) * fft.sample_rate);
         fft.input.clear();
-        fft.output.clear();
         double median = 0.0; //to remove DC
         double min = std::numeric_limits<double>::max();
         double max = std::numeric_limits<double>::lowest();
         {
             QCPDataMap* data = m_ui.plot->graph(0)->data();
             auto it = data->lowerBound(max_time);
-            while (it != data->begin() && fft.input.size() < needed_samples)
+            if (it == data->end())
+            {
+                it = data->end();
+                --it;
+            }
+            while (it != data->begin() && it != data->end() && fft.input.size() < needed_samples)
             {
                 auto value = it.value().value;
                 median += value;
@@ -114,28 +124,24 @@ private:
         median *= div;
 
         size_t output_size = fft.input.size() / 2 + 1;
-        fft.output.resize(output_size);
 
         //compute fft per component
         auto* temp_input = fft.temp_input.get();
         std::transform(fft.input.begin(), fft.input.end(), temp_input, [median](double v) { return v - median; });
 
         fftw_execute(fft.plan);
-        auto& output = fft.output;
-        auto* temp_output = fft.temp_output.get();
-        for (size_t i = 0; i < output_size; i++)
-        {
-            output[i] = math::sqrt(temp_output[i][0]*temp_output[i][0] + temp_output[i][1]*temp_output[i][1]) * div;
-        }
 
-        for (size_t i = 1; i < output.size(); i++)
+        auto* temp_output = fft.temp_output.get();
+        auto freq_div = (fft.sample_rate / 2) / double(output_size);
+        for (size_t i = 1; i < output_size; i++)
         {
-            auto const& s = output[i];
-            auto freq = (fft.sample_rate / 2) * i / output.size();
-            m_ui.spectogram->graph(0)->addData(freq, s);
+            auto x = temp_output[i][0];
+            auto y = temp_output[i][1];
+            auto s = math::sqrt(x*x + y*y) * div;
+            m_spectogram_plottable->addData(i * freq_div, s);
         }
-        m_ui.spectogram->yAxis->setRange(0, range);
-        m_ui.spectogram->graph(0)->rescaleAxes(true, true);
+        m_ui.spectogram->xAxis->setRange(0.5, fft.sample_rate / 2);
+        m_ui.spectogram->yAxis->setRange(0, math::sqrt(range));
         m_ui.spectogram->replot();
     }
 
@@ -150,7 +156,7 @@ private:
         }
 
         auto now = q::Clock::now();
-        if (now - m_last_time_point > std::chrono::milliseconds(30))
+        if (now - m_last_time_point > std::chrono::milliseconds(20))
         {
             m_last_time_point = now;
 
