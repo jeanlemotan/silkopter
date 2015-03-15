@@ -103,7 +103,16 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IPressure>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<Pressure>("P", std::static_pointer_cast<Pressure>(stream), this));
+        auto viewer = new Float_Stream_Viewer("Pascals", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Pressure>(stream)->samples_available_signal.connect([this, viewer](Pressure& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IBattery_State>())
     {
@@ -119,15 +128,42 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ICurrent>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<Current>("A", std::static_pointer_cast<Current>(stream), this));
+        auto viewer = new Float_Stream_Viewer("A", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Current>(stream)->samples_available_signal.connect([this, viewer](Current& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IVoltage>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<Voltage>("V", std::static_pointer_cast<Voltage>(stream), this));
+        auto viewer = new Float_Stream_Viewer("Volts", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Voltage>(stream)->samples_available_signal.connect([this, viewer](Voltage& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IDistance>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<Distance>("m", std::static_pointer_cast<Distance>(stream), this));
+        auto viewer = new Float_Stream_Viewer("meters", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Distance>(stream)->samples_available_signal.connect([this, viewer](Distance& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<ILocation>())
     {
@@ -135,7 +171,16 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IPWM_Value>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<PWM_Value>("PWM", std::static_pointer_cast<PWM_Value>(stream), this));
+        auto viewer = new Float_Stream_Viewer("PWM", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<PWM_Value>(stream)->samples_available_signal.connect([this, viewer](PWM_Value& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IReference_Frame>())
     {
@@ -143,11 +188,29 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ITemperature>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<Temperature>("°C", std::static_pointer_cast<Temperature>(stream), this));
+        auto viewer = new Float_Stream_Viewer("°C", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Temperature>(stream)->samples_available_signal.connect([this, viewer](Temperature& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IADC_Value>())
     {
-        layout()->addWidget(new Float_Stream_Viewer<ADC_Value>("ADC", std::static_pointer_cast<ADC_Value>(stream), this));
+        auto viewer = new Float_Stream_Viewer("ADC", stream->rate, this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<ADC_Value>(stream)->samples_available_signal.connect([this, viewer](ADC_Value& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, s.value);
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IVideo>())
     {
