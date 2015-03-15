@@ -2555,6 +2555,9 @@ public:
   
 protected:
   // property members:
+  mutable QVector<QCPData> mLineData;
+  mutable QVector<QPointF> mLinePointData;
+  mutable QVector<QCPData> mScatterData;
   QCPDataMap *mData;
   QPen mErrorPen;
   LineStyle mLineStyle;

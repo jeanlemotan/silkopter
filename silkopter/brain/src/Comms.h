@@ -49,15 +49,6 @@ public:
     //The data needs to be alive only for the duration of this call.
     auto send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool;
 
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
-
-    typedef std::function<void(Setup_Channel&)> Setup_Channel_Callback;
-    void set_setup_message_callback(comms::Setup_Message message, Setup_Channel_Callback);
-
-    typedef std::function<void(Input_Channel&)> Input_Channel_Callback;
-    void set_input_message_callback(comms::Input_Message message, Input_Channel_Callback);
-
     struct Source : public node::ISource
     {
         Source(Comms& comms) : m_comms(comms) {}
@@ -70,6 +61,10 @@ public:
     private:
         Comms& m_comms;
     };
+
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
 
     auto get_source() -> std::shared_ptr<Source>;
 
@@ -95,8 +90,18 @@ private:
 
     std::shared_ptr<Source> m_source;
 
-    template<class Stream> auto send_telemetry_stream(std::string const& stream_name, node::stream::IStream const& _stream) -> bool;
-    void send_telemetry_streams();
+    struct Telemetry_Stream
+    {
+        std::string stream_name;
+        node::stream::IStream_wptr stream;
+        uint32_t sample_count = 0;
+        std::vector<uint8_t> data;
+    };
+    std::vector<Telemetry_Stream> m_telemetry_streams;
+
+    template<class Stream> auto gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
+    void gather_telemetry_streams();
+    void pack_telemetry_streams();
 
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
@@ -114,12 +119,6 @@ private:
 
     void handle_streams_telemetry_active();
 
-    std::vector<std::pair<std::string, node::stream::IStream_wptr>> m_telemetry_streams;
-
-
-    std::vector<Setup_Channel_Callback> m_setup_channel_callbacks;
-    std::vector<Input_Channel_Callback> m_input_channel_callbacks;
-
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
 
@@ -132,7 +131,6 @@ private:
     boost::asio::ip::udp::socket m_socket;
     util::RUDP m_rudp;
 
-    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;

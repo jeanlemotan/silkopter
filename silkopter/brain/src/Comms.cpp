@@ -166,70 +166,77 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
-void Comms::set_setup_message_callback(comms::Setup_Message message, Setup_Channel_Callback callback)
-{
-    m_setup_channel_callbacks[static_cast<size_t>(message)] = callback;
-}
-
-void Comms::set_input_message_callback(comms::Input_Message message, Input_Channel_Callback callback)
-{
-    m_input_channel_callbacks[static_cast<size_t>(message)] = callback;
-}
-
-template<class Stream> auto Comms::send_telemetry_stream(std::string const& stream_name, node::stream::IStream const& _stream) -> bool
+template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
 {
     if (q::rtti::is_of_type<Stream>(_stream))
     {
         auto const& stream = static_cast<Stream const&>(_stream);
         auto const& samples = stream.get_samples();
-        m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-        m_telemetry_channel.pack_param(stream_name);
-        m_telemetry_channel.pack_param(static_cast<uint32_t>(samples.size()));
+
+        ts.sample_count += static_cast<uint32_t>(samples.size());
+        size_t off = ts.data.size();
+
         for (auto const& s: samples)
         {
-            m_telemetry_channel.pack_param(s.value);
-            m_telemetry_channel.pack_param(s.sample_idx);
-            m_telemetry_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()));
-            m_telemetry_channel.pack_param(s.is_healthy);
+            util::detail::set_value(ts.data, s.value, off);
+            util::detail::set_value(ts.data, s.sample_idx, off);
+            util::detail::set_value(ts.data, static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()), off);
+            util::detail::set_value(ts.data, s.is_healthy, off);
         }
-        m_telemetry_channel.end_pack();
         return true;
     }
     return false;
 }
 
-void Comms::send_telemetry_streams()
+void Comms::gather_telemetry_streams()
 {
-    for (auto const& sd: m_telemetry_streams)
+    for (auto& ts: m_telemetry_streams)
     {
-        auto stream = sd.second.lock();
+        auto stream = ts.stream.lock();
         if (stream)
         {
-            if (send_telemetry_stream<node::stream::IAcceleration>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IAngular_Velocity>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IMagnetic_Field>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IPressure>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IBattery_State>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::ILinear_Acceleration>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::ICardinal_Points>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::ICurrent>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IVoltage>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IDistance>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::ILocation>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IPWM_Value>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IReference_Frame>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::ITemperature>(sd.first, *stream) ||
-                    send_telemetry_stream<node::stream::IADC_Value>(sd.first, *stream)
-                    //          send_telemetry_stream<node::stream::IVideo>(sd.first, *stream)
-                    )
+            if (gather_telemetry_stream<node::stream::IAcceleration>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IAngular_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IMagnetic_Field>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IPressure>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IBattery_State>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ILinear_Acceleration>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ICardinal_Points>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ILocation>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IPWM_Value>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IReference_Frame>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IADC_Value>(ts, *stream)
+                //          send_telemetry_stream<node::stream::IVideo>(sd, *stream)
+                )
             {
                 ;//nothing
             }
             else
             {
-                QLOGW("Unrecognized stream type: {} / {}", sd.first, q::rtti::get_class_id(*stream));
+                QLOGW("Unrecognized stream type: {} / {}", ts.stream_name, q::rtti::get_class_id(*stream));
             }
         }
+    }
+}
+
+void Comms::pack_telemetry_streams()
+{
+    for (auto& ts: m_telemetry_streams)
+    {
+        if (!ts.data.empty() && ts.sample_count > 0)
+        {
+            m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+            m_telemetry_channel.pack_param(ts.stream_name);
+            m_telemetry_channel.pack_param(ts.sample_count);
+            m_telemetry_channel.pack_data(ts.data.data(), ts.data.size());
+            m_telemetry_channel.end_pack();
+        }
+        ts.data.clear();
+        ts.sample_count = 0;
     }
 }
 
@@ -459,7 +466,11 @@ void Comms::handle_streams_telemetry_active()
     auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
     if (stream)
     {
-        m_telemetry_streams.push_back({stream_name, stream});
+        Telemetry_Stream ts;
+        ts.stream_name = stream_name;
+        ts.stream = stream;
+        m_telemetry_streams.push_back(ts);
+
         m_setup_channel.pack_param(true);
     }
     else
@@ -504,7 +515,7 @@ void Comms::process()
         }
     }
 
-    send_telemetry_streams();
+    gather_telemetry_streams();
 
     {
         if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())
@@ -521,6 +532,8 @@ void Comms::process()
     if (now - m_last_rudp_time_stamp >= RUDP_PERIOD)
     {
         m_last_rudp_time_stamp = now;
+
+        pack_telemetry_streams();
 
         m_setup_channel.send();
         m_input_channel.send();

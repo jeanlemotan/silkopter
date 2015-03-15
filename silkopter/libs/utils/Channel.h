@@ -159,6 +159,15 @@ namespace util
             auto off = m_tx_buffer.size();
             detail::set_value(m_tx_buffer, p, off);
         }
+        void pack_data(uint8_t const* src, size_t size)
+        {
+            QASSERT(src);
+            QASSERT(m_tx_buffer.size() >= m_data_start_off);
+            QASSERT(m_data_start_off > m_size_off);
+            auto off = m_tx_buffer.size();
+            m_tx_buffer.resize(off + size);
+            std::copy(src, src + size, m_tx_buffer.begin() + off);
+        }
         void end_pack()
         {
             QASSERT(m_tx_buffer.size() >= m_data_start_off);

@@ -14561,7 +14561,7 @@ void QCPGraph::setData(const QVector<double> &key, const QVector<double> &value)
   {
     newData.key = key[i];
     newData.value = value[i];
-    mData->insertMulti(newData.key, newData);
+    mData->insert(newData.key, newData);
   }
 }
 
@@ -14587,7 +14587,7 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
     newData.value = value[i];
     newData.valueErrorMinus = valueError[i];
     newData.valueErrorPlus = valueError[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14614,7 +14614,7 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
     newData.value = value[i];
     newData.valueErrorMinus = valueErrorMinus[i];
     newData.valueErrorPlus = valueErrorPlus[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14640,7 +14640,7 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
     newData.value = value[i];
     newData.keyErrorMinus = keyError[i];
     newData.keyErrorPlus = keyError[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14667,7 +14667,7 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
     newData.value = value[i];
     newData.keyErrorMinus = keyErrorMinus[i];
     newData.keyErrorPlus = keyErrorPlus[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14696,7 +14696,7 @@ void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double
     newData.keyErrorPlus = keyError[i];
     newData.valueErrorMinus = valueError[i];
     newData.valueErrorPlus = valueError[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14727,7 +14727,7 @@ void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double
     newData.keyErrorPlus = keyErrorPlus[i];
     newData.valueErrorMinus = valueErrorMinus[i];
     newData.valueErrorPlus = valueErrorPlus[i];
-    mData->insertMulti(key[i], newData);
+    mData->insert(key[i], newData);
   }
 }
 
@@ -14888,7 +14888,7 @@ void QCPGraph::addData(const QCPDataMap &dataMap)
 */
 void QCPGraph::addData(const QCPData &data)
 {
-  mData->insertMulti(data.key, data);
+  mData->insert(data.key, data);
 }
 
 /*! \overload
@@ -14904,7 +14904,7 @@ void QCPGraph::addData(double key, double value)
   QCPData newData;
   newData.key = key;
   newData.value = value;
-  mData->insertMulti(newData.key, newData);
+  mData->insert(newData.key, newData);
 }
 
 /*! \overload
@@ -14923,7 +14923,7 @@ void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &value
   {
     newData.key = keys[i];
     newData.value = values[i];
-    mData->insertMulti(newData.key, newData);
+    mData->insert(newData.key, newData);
   }
 }
 
@@ -15234,25 +15234,26 @@ void QCPGraph::getLinePlotData(QVector<QPointF> *linePixelData, QVector<QCPData>
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   if (!linePixelData) { qDebug() << Q_FUNC_INFO << "null pointer passed as linePixelData"; return; }
   
-  QVector<QCPData> lineData;
-  getPreparedData(&lineData, scatterData);
-  linePixelData->reserve(lineData.size()+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
-  linePixelData->resize(lineData.size());
+//  QVector<QCPData> lineData;
+  mLineData.resize(0);
+  getPreparedData(&mLineData, scatterData);
+  linePixelData->reserve(mLineData.size()+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
+  linePixelData->resize(mLineData.size());
   
   // transform lineData points to pixels:
   if (keyAxis->orientation() == Qt::Vertical)
   {
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      (*linePixelData)[i].setX(valueAxis->coordToPixel(lineData.at(i).value));
-      (*linePixelData)[i].setY(keyAxis->coordToPixel(lineData.at(i).key));
+      (*linePixelData)[i].setX(valueAxis->coordToPixel(mLineData.at(i).value));
+      (*linePixelData)[i].setY(keyAxis->coordToPixel(mLineData.at(i).key));
     }
   } else // key axis is horizontal
   {
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      (*linePixelData)[i].setX(keyAxis->coordToPixel(lineData.at(i).key));
-      (*linePixelData)[i].setY(valueAxis->coordToPixel(lineData.at(i).value));
+      (*linePixelData)[i].setX(keyAxis->coordToPixel(mLineData.at(i).key));
+      (*linePixelData)[i].setY(valueAxis->coordToPixel(mLineData.at(i).value));
     }
   }
 }
@@ -15275,35 +15276,36 @@ void QCPGraph::getStepLeftPlotData(QVector<QPointF> *linePixelData, QVector<QCPD
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   if (!linePixelData) { qDebug() << Q_FUNC_INFO << "null pointer passed as lineData"; return; }
   
-  QVector<QCPData> lineData;
-  getPreparedData(&lineData, scatterData);
-  linePixelData->reserve(lineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
-  linePixelData->resize(lineData.size()*2);
+  //QVector<QCPData> lineData;
+  mLineData.resize(0);
+  getPreparedData(&mLineData, scatterData);
+  linePixelData->reserve(mLineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
+  linePixelData->resize(mLineData.size()*2);
   
-  // calculate steps from lineData and transform to pixel coordinates:
+  // calculate steps from mLineData and transform to pixel coordinates:
   if (keyAxis->orientation() == Qt::Vertical)
   {
-    double lastValue = valueAxis->coordToPixel(lineData.first().value);
+    double lastValue = valueAxis->coordToPixel(mLineData.first().value);
     double key;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      key = keyAxis->coordToPixel(lineData.at(i).key);
+      key = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(lastValue);
       (*linePixelData)[i*2+0].setY(key);
-      lastValue = valueAxis->coordToPixel(lineData.at(i).value);
+      lastValue = valueAxis->coordToPixel(mLineData.at(i).value);
       (*linePixelData)[i*2+1].setX(lastValue);
       (*linePixelData)[i*2+1].setY(key);
     }
   } else // key axis is horizontal
   {
-    double lastValue = valueAxis->coordToPixel(lineData.first().value);
+    double lastValue = valueAxis->coordToPixel(mLineData.first().value);
     double key;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      key = keyAxis->coordToPixel(lineData.at(i).key);
+      key = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(key);
       (*linePixelData)[i*2+0].setY(lastValue);
-      lastValue = valueAxis->coordToPixel(lineData.at(i).value);
+      lastValue = valueAxis->coordToPixel(mLineData.at(i).value);
       (*linePixelData)[i*2+1].setX(key);
       (*linePixelData)[i*2+1].setY(lastValue);
     }
@@ -15328,35 +15330,36 @@ void QCPGraph::getStepRightPlotData(QVector<QPointF> *linePixelData, QVector<QCP
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   if (!linePixelData) { qDebug() << Q_FUNC_INFO << "null pointer passed as lineData"; return; }
   
-  QVector<QCPData> lineData;
-  getPreparedData(&lineData, scatterData);
-  linePixelData->reserve(lineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
-  linePixelData->resize(lineData.size()*2);
+  //QVector<QCPData> lineData;
+  mLineData.resize(0);
+  getPreparedData(&mLineData, scatterData);
+  linePixelData->reserve(mLineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
+  linePixelData->resize(mLineData.size()*2);
   
-  // calculate steps from lineData and transform to pixel coordinates:
+  // calculate steps from mLineData and transform to pixel coordinates:
   if (keyAxis->orientation() == Qt::Vertical)
   {
-    double lastKey = keyAxis->coordToPixel(lineData.first().key);
+    double lastKey = keyAxis->coordToPixel(mLineData.first().key);
     double value;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      value = valueAxis->coordToPixel(lineData.at(i).value);
+      value = valueAxis->coordToPixel(mLineData.at(i).value);
       (*linePixelData)[i*2+0].setX(value);
       (*linePixelData)[i*2+0].setY(lastKey);
-      lastKey = keyAxis->coordToPixel(lineData.at(i).key);
+      lastKey = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+1].setX(value);
       (*linePixelData)[i*2+1].setY(lastKey);
     }
   } else // key axis is horizontal
   {
-    double lastKey = keyAxis->coordToPixel(lineData.first().key);
+    double lastKey = keyAxis->coordToPixel(mLineData.first().key);
     double value;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      value = valueAxis->coordToPixel(lineData.at(i).value);
+      value = valueAxis->coordToPixel(mLineData.at(i).value);
       (*linePixelData)[i*2+0].setX(lastKey);
       (*linePixelData)[i*2+0].setY(value);
-      lastKey = keyAxis->coordToPixel(lineData.at(i).key);
+      lastKey = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+1].setX(lastKey);
       (*linePixelData)[i*2+1].setY(value);
     }
@@ -15381,49 +15384,50 @@ void QCPGraph::getStepCenterPlotData(QVector<QPointF> *linePixelData, QVector<QC
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   if (!linePixelData) { qDebug() << Q_FUNC_INFO << "null pointer passed as lineData"; return; }
   
-  QVector<QCPData> lineData;
-  getPreparedData(&lineData, scatterData);
-  linePixelData->reserve(lineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
-  linePixelData->resize(lineData.size()*2);
-  // calculate steps from lineData and transform to pixel coordinates:
+  //QVector<QCPData> lineData;
+  mLineData.resize(0);
+  getPreparedData(&mLineData, scatterData);
+  linePixelData->reserve(mLineData.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
+  linePixelData->resize(mLineData.size()*2);
+  // calculate steps from mLineData and transform to pixel coordinates:
   if (keyAxis->orientation() == Qt::Vertical)
   {
-    double lastKey = keyAxis->coordToPixel(lineData.first().key);
-    double lastValue = valueAxis->coordToPixel(lineData.first().value);
+    double lastKey = keyAxis->coordToPixel(mLineData.first().key);
+    double lastValue = valueAxis->coordToPixel(mLineData.first().value);
     double key;
     (*linePixelData)[0].setX(lastValue);
     (*linePixelData)[0].setY(lastKey);
-    for (int i=1; i<lineData.size(); ++i)
+    for (int i=1; i<mLineData.size(); ++i)
     {
-      key = (keyAxis->coordToPixel(lineData.at(i).key)+lastKey)*0.5;
+      key = (keyAxis->coordToPixel(mLineData.at(i).key)+lastKey)*0.5;
       (*linePixelData)[i*2-1].setX(lastValue);
       (*linePixelData)[i*2-1].setY(key);
-      lastValue = valueAxis->coordToPixel(lineData.at(i).value);
-      lastKey = keyAxis->coordToPixel(lineData.at(i).key);
+      lastValue = valueAxis->coordToPixel(mLineData.at(i).value);
+      lastKey = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(lastValue);
       (*linePixelData)[i*2+0].setY(key);
     }
-    (*linePixelData)[lineData.size()*2-1].setX(lastValue);
-    (*linePixelData)[lineData.size()*2-1].setY(lastKey);
+    (*linePixelData)[mLineData.size()*2-1].setX(lastValue);
+    (*linePixelData)[mLineData.size()*2-1].setY(lastKey);
   } else // key axis is horizontal
   {
-    double lastKey = keyAxis->coordToPixel(lineData.first().key);
-    double lastValue = valueAxis->coordToPixel(lineData.first().value);
+    double lastKey = keyAxis->coordToPixel(mLineData.first().key);
+    double lastValue = valueAxis->coordToPixel(mLineData.first().value);
     double key;
     (*linePixelData)[0].setX(lastKey);
     (*linePixelData)[0].setY(lastValue);
-    for (int i=1; i<lineData.size(); ++i)
+    for (int i=1; i<mLineData.size(); ++i)
     {
-      key = (keyAxis->coordToPixel(lineData.at(i).key)+lastKey)*0.5;
+      key = (keyAxis->coordToPixel(mLineData.at(i).key)+lastKey)*0.5;
       (*linePixelData)[i*2-1].setX(key);
       (*linePixelData)[i*2-1].setY(lastValue);
-      lastValue = valueAxis->coordToPixel(lineData.at(i).value);
-      lastKey = keyAxis->coordToPixel(lineData.at(i).key);
+      lastValue = valueAxis->coordToPixel(mLineData.at(i).value);
+      lastKey = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(key);
       (*linePixelData)[i*2+0].setY(lastValue);
     }
-    (*linePixelData)[lineData.size()*2-1].setX(lastKey);
-    (*linePixelData)[lineData.size()*2-1].setY(lastValue);
+    (*linePixelData)[mLineData.size()*2-1].setX(lastKey);
+    (*linePixelData)[mLineData.size()*2-1].setY(lastValue);
   }
 
 }
@@ -15446,34 +15450,35 @@ void QCPGraph::getImpulsePlotData(QVector<QPointF> *linePixelData, QVector<QCPDa
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   if (!linePixelData) { qDebug() << Q_FUNC_INFO << "null pointer passed as linePixelData"; return; }
   
-  QVector<QCPData> lineData;
-  getPreparedData(&lineData, scatterData);
-  linePixelData->resize(lineData.size()*2); // no need to reserve 2 extra points because impulse plot has no fill
+  //QVector<QCPData> lineData;
+  mLineData.resize(0);
+  getPreparedData(&mLineData, scatterData);
+  linePixelData->resize(mLineData.size()*2); // no need to reserve 2 extra points because impulse plot has no fill
   
-  // transform lineData points to pixels:
+  // transform mLineData points to pixels:
   if (keyAxis->orientation() == Qt::Vertical)
   {
     double zeroPointX = valueAxis->coordToPixel(0);
     double key;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      key = keyAxis->coordToPixel(lineData.at(i).key);
+      key = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(zeroPointX);
       (*linePixelData)[i*2+0].setY(key);
-      (*linePixelData)[i*2+1].setX(valueAxis->coordToPixel(lineData.at(i).value));
+      (*linePixelData)[i*2+1].setX(valueAxis->coordToPixel(mLineData.at(i).value));
       (*linePixelData)[i*2+1].setY(key);
     }
   } else // key axis is horizontal
   {
     double zeroPointY = valueAxis->coordToPixel(0);
     double key;
-    for (int i=0; i<lineData.size(); ++i)
+    for (int i=0; i<mLineData.size(); ++i)
     {
-      key = keyAxis->coordToPixel(lineData.at(i).key);
+      key = keyAxis->coordToPixel(mLineData.at(i).key);
       (*linePixelData)[i*2+0].setX(key);
       (*linePixelData)[i*2+0].setY(zeroPointY);
       (*linePixelData)[i*2+1].setX(key);
-      (*linePixelData)[i*2+1].setY(valueAxis->coordToPixel(lineData.at(i).value));
+      (*linePixelData)[i*2+1].setY(valueAxis->coordToPixel(mLineData.at(i).value));
     }
   }
 }
@@ -16393,47 +16398,47 @@ double QCPGraph::pointDistance(const QPointF &pixelPoint) const
   if (mLineStyle == lsNone)
   {
     // no line displayed, only calculate distance to scatter points:
-    QVector<QCPData> *scatterData = new QVector<QCPData>;
-    getScatterPlotData(scatterData);
+    //QVector<QCPData> *scatterData = new QVector<QCPData>;
+    mScatterData.resize(0);
+    getScatterPlotData(&mScatterData);
     double minDistSqr = std::numeric_limits<double>::max();
     QPointF ptA;
-    QPointF ptB = coordsToPixels(scatterData->at(0).key, scatterData->at(0).value); // getScatterPlotData returns in plot coordinates, so transform to pixels
-    for (int i=1; i<scatterData->size(); ++i)
+    QPointF ptB = coordsToPixels(mScatterData.at(0).key, mScatterData.at(0).value); // getScatterPlotData returns in plot coordinates, so transform to pixels
+    for (int i=1; i<mScatterData.size(); ++i)
     {
       ptA = ptB;
-      ptB = coordsToPixels(scatterData->at(i).key, scatterData->at(i).value);
+      ptB = coordsToPixels(mScatterData.at(i).key, mScatterData.at(i).value);
       double currentDistSqr = distSqrToLine(ptA, ptB, pixelPoint);
       if (currentDistSqr < minDistSqr)
         minDistSqr = currentDistSqr;
     }
-    delete scatterData;
     return sqrt(minDistSqr);
   } else
   {
     // line displayed calculate distance to line segments:
-    QVector<QPointF> *lineData = new QVector<QPointF>;
-    getPlotData(lineData, 0); // unlike with getScatterPlotData we get pixel coordinates here
+    //QVector<QPointF> *lineData = new QVector<QPointF>;
+    mLinePointData.resize(0);
+    getPlotData(&mLinePointData, 0); // unlike with getScatterPlotData we get pixel coordinates here
     double minDistSqr = std::numeric_limits<double>::max();
     if (mLineStyle == lsImpulse)
     {
       // impulse plot differs from other line styles in that the lineData points are only pairwise connected:
-      for (int i=0; i<lineData->size()-1; i+=2) // iterate pairs
+      for (int i=0; i<mLinePointData.size()-1; i+=2) // iterate pairs
       {
-        double currentDistSqr = distSqrToLine(lineData->at(i), lineData->at(i+1), pixelPoint);
+        double currentDistSqr = distSqrToLine(mLinePointData.at(i), mLinePointData.at(i+1), pixelPoint);
         if (currentDistSqr < minDistSqr)
           minDistSqr = currentDistSqr;
       }
     } else
     {
       // all other line plots (line and step) connect points directly:
-      for (int i=0; i<lineData->size()-1; ++i)
+      for (int i=0; i<mLinePointData.size()-1; ++i)
       {
-        double currentDistSqr = distSqrToLine(lineData->at(i), lineData->at(i+1), pixelPoint);
+        double currentDistSqr = distSqrToLine(mLinePointData.at(i), mLinePointData.at(i+1), pixelPoint);
         if (currentDistSqr < minDistSqr)
           minDistSqr = currentDistSqr;
       }
     }
-    delete lineData;
     return sqrt(minDistSqr);
   }
 }
@@ -16832,7 +16837,7 @@ void QCPCurve::setData(const QVector<double> &t, const QVector<double> &key, con
     newData.t = t[i];
     newData.key = key[i];
     newData.value = value[i];
-    mData->insertMulti(newData.t, newData);
+    mData->insert(newData.t, newData);
   }
 }
 
@@ -16852,7 +16857,7 @@ void QCPCurve::setData(const QVector<double> &key, const QVector<double> &value)
     newData.t = i; // no t vector given, so we assign t the index of the key/value pair
     newData.key = key[i];
     newData.value = value[i];
-    mData->insertMulti(newData.t, newData);
+    mData->insert(newData.t, newData);
   }
 }
 
@@ -16895,7 +16900,7 @@ void QCPCurve::addData(const QCPCurveDataMap &dataMap)
 */
 void QCPCurve::addData(const QCPCurveData &data)
 {
-  mData->insertMulti(data.t, data);
+  mData->insert(data.t, data);
 }
 
 /*! \overload
@@ -16908,7 +16913,7 @@ void QCPCurve::addData(double t, double key, double value)
   newData.t = t;
   newData.key = key;
   newData.value = value;
-  mData->insertMulti(newData.t, newData);
+  mData->insert(newData.t, newData);
 }
 
 /*! \overload
@@ -16928,7 +16933,7 @@ void QCPCurve::addData(double key, double value)
     newData.t = 0;
   newData.key = key;
   newData.value = value;
-  mData->insertMulti(newData.t, newData);
+  mData->insert(newData.t, newData);
 }
 
 /*! \overload
@@ -16946,7 +16951,7 @@ void QCPCurve::addData(const QVector<double> &ts, const QVector<double> &keys, c
     newData.t = ts[i];
     newData.key = keys[i];
     newData.value = values[i];
-    mData->insertMulti(newData.t, newData);
+    mData->insert(newData.t, newData);
   }
 }
 
@@ -17548,7 +17553,7 @@ void QCPBars::setData(const QVector<double> &key, const QVector<double> &value)
   {
     newData.key = key[i];
     newData.value = value[i];
-    mData->insertMulti(newData.key, newData);
+    mData->insert(newData.key, newData);
   }
 }
 
@@ -17633,7 +17638,7 @@ void QCPBars::addData(const QCPBarDataMap &dataMap)
 */
 void QCPBars::addData(const QCPBarData &data)
 {
-  mData->insertMulti(data.key, data);
+  mData->insert(data.key, data);
 }
 
 /*! \overload
@@ -17645,7 +17650,7 @@ void QCPBars::addData(double key, double value)
   QCPBarData newData;
   newData.key = key;
   newData.value = value;
-  mData->insertMulti(newData.key, newData);
+  mData->insert(newData.key, newData);
 }
 
 /*! \overload
@@ -17661,7 +17666,7 @@ void QCPBars::addData(const QVector<double> &keys, const QVector<double> &values
   {
     newData.key = keys[i];
     newData.value = values[i];
-    mData->insertMulti(newData.key, newData);
+    mData->insert(newData.key, newData);
   }
 }
 
