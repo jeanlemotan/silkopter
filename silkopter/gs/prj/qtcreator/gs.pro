@@ -45,6 +45,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3f -lz
+LIBS += -lboost_thread
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}
@@ -124,8 +125,7 @@ HEADERS += \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
     ../../src/Stream_Viewer_Widget.h \
-    ../../src/Float_Viewer.h \
-    ../../src/Vec_Viewer.h
+    ../../src/Numeric_Viewer.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -140,13 +140,11 @@ SOURCES += \
     ../../src/HAL_Window.cpp \
     ../../../libs/json_editor/JSON_Model.cpp \
     ../../src/Stream_Viewer_Widget.cpp \
-    ../../src/Float_Viewer.cpp \
-    ../../src/Vec_Viewer.cpp
+    ../../src/Numeric_Viewer.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
-    ../../src/Float_Viewer.ui \
-    ../../src/Vec_Viewer.ui
+    ../../src/Numeric_Viewer.ui
 
 DISTFILES += \
     ../../src/node.png \

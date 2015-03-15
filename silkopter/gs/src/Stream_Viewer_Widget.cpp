@@ -9,8 +9,7 @@
 #include "common/node/processor/IResampler.h"
 #include "common/node/processor/IMultirotor_Pilot.h"
 
-#include "Vec_Viewer.h"
-#include "Float_Viewer.h"
+#include "Numeric_Viewer.h"
 //#include "Battery_State_Viewer.h"
 //#include "Cardinal_Points_Viewer.h"
 //#include "Location_Stream_Viewer.h"
@@ -91,45 +90,62 @@ void Stream_Viewer_Widget::create_viewer()
     auto class_id = stream->class_id;
     if (class_id == q::rtti::get_class_id<IAcceleration>())
     {
-        auto viewer = new Vec_Viewer("m/s^2", stream->rate, this);
-        viewer->set_components(math::vec4<bool>(true, true, true, false));
+        auto viewer = new Numeric_Viewer("m/s^2", stream->rate, this);
+        viewer->add_graph("X", "m/s^2", QColor(0xe74c3c));
+        viewer->add_graph("Y", "m/s^2", QColor(0x2ecc71));
+        viewer->add_graph("Z", "m/s^2", QColor(0x3498db));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Acceleration>(stream)->samples_available_signal.connect([this, viewer](Acceleration& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, math::vec4f(s.value));
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<IAngular_Velocity>())
     {
-//        layout()->addWidget(new Vec_Stream_Viewer("°/s", stream, this));
+        auto viewer = new Numeric_Viewer("°/s", stream->rate, this);
+        viewer->add_graph("X", "°/s", QColor(0xe74c3c));
+        viewer->add_graph("Y", "°/s", QColor(0x2ecc71));
+        viewer->add_graph("Z", "°/s", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Angular_Velocity>(stream)->samples_available_signal.connect([this, viewer](Angular_Velocity& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IMagnetic_Field>())
     {
-        auto viewer = new Vec_Viewer("Teslas", stream->rate, this);
-        viewer->set_components(math::vec4<bool>(true, true, true, false));
+        auto viewer = new Numeric_Viewer("Teslas", stream->rate, this);
+        viewer->add_graph("X", "Teslas", QColor(0xe74c3c));
+        viewer->add_graph("Y", "Teslas", QColor(0x2ecc71));
+        viewer->add_graph("Z", "Teslas", QColor(0x3498db));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](Magnetic_Field& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, math::vec4f(s.value));
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<IPressure>())
     {
-        auto viewer = new Float_Viewer("Pascals", stream->rate, this);
+        auto viewer = new Numeric_Viewer("Pascals", stream->rate, this);
+        viewer->add_graph("Pressure", "Pascals", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Pressure>(stream)->samples_available_signal.connect([this, viewer](Pressure& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
@@ -148,39 +164,42 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ICurrent>())
     {
-        auto viewer = new Float_Viewer("A", stream->rate, this);
+        auto viewer = new Numeric_Viewer("A", stream->rate, this);
+        viewer->add_graph("Current", "A", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Current>(stream)->samples_available_signal.connect([this, viewer](Current& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<IVoltage>())
     {
-        auto viewer = new Float_Viewer("Volts", stream->rate, this);
+        auto viewer = new Numeric_Viewer("V", stream->rate, this);
+        viewer->add_graph("Voltage", "V", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Voltage>(stream)->samples_available_signal.connect([this, viewer](Voltage& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<IDistance>())
     {
-        auto viewer = new Float_Viewer("meters", stream->rate, this);
+        auto viewer = new Numeric_Viewer("m", stream->rate, this);
+        viewer->add_graph("Distance", "m", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Distance>(stream)->samples_available_signal.connect([this, viewer](Distance& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
@@ -191,13 +210,14 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IPWM_Value>())
     {
-        auto viewer = new Float_Viewer("PWM", stream->rate, this);
+        auto viewer = new Numeric_Viewer("pwm", stream->rate, this);
+        viewer->add_graph("PWM", "pwm", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<PWM_Value>(stream)->samples_available_signal.connect([this, viewer](PWM_Value& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
@@ -208,26 +228,28 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ITemperature>())
     {
-        auto viewer = new Float_Viewer("°C", stream->rate, this);
+        auto viewer = new Numeric_Viewer("°C", stream->rate, this);
+        viewer->add_graph("Temperature", "°C", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Temperature>(stream)->samples_available_signal.connect([this, viewer](Temperature& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<IADC_Value>())
     {
-        auto viewer = new Float_Viewer("ADC", stream->rate, this);
+        auto viewer = new Numeric_Viewer("adc", stream->rate, this);
+        viewer->add_graph("ADC", "adc", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<ADC_Value>(stream)->samples_available_signal.connect([this, viewer](ADC_Value& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.dt, s.value);
+                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
             }
             viewer->process();
         });

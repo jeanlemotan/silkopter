@@ -17,7 +17,7 @@ GS::GS(QWidget *parent)
 	auto* timer = new QTimer(this);
 	timer->setSingleShot(false);
     timer->start(10);
-	connect(timer, &QTimer::timeout, this, &GS::process);
+    connect(timer, &QTimer::timeout, this, &GS::process, Qt::QueuedConnection);
 
 	show();
 

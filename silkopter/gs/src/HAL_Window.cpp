@@ -397,10 +397,15 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
 void HAL_Window::open_stream_viewer(std::string const& stream_name)
 {
     QDockWidget* dock = new QDockWidget(q::util::format2<std::string>("Stream: {}", stream_name).c_str(), this);
+    QFont font;
+    font.setPointSize(8);
+    dock->setFont(font);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
     Stream_Viewer_Widget* viewer = new Stream_Viewer_Widget(m_hal, m_comms, dock);
     viewer->set_stream_name(stream_name);
 
+    dock->layout()->setMargin(0);
+    dock->layout()->setContentsMargins(0, 0, 0, 0);
     dock->setWidget(viewer);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     //dock->show();

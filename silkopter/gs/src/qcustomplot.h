@@ -1840,7 +1840,7 @@ protected:
   Qt::KeyboardModifier mMultiSelectModifier;
   
   // non-property members:
-  QPixmap mPaintBuffer;
+  QImage mPaintBuffer;
   QPoint mMousePressPos;
   QPointer<QCPLayoutElement> mMouseEventElement;
   bool mReplotting;
@@ -2458,9 +2458,9 @@ Q_DECLARE_TYPEINFO(QCPData, Q_MOVABLE_TYPE);
   This is the container in which QCPGraph holds its data.
   \see QCPData, QCPGraph::setData
 */
-typedef QMap<double, QCPData> QCPDataMap;
-typedef QMapIterator<double, QCPData> QCPDataMapIterator;
-typedef QMutableMapIterator<double, QCPData> QCPDataMutableMapIterator;
+typedef QVector<QCPData> QCPDataMap;
+typedef QVectorIterator<QCPData> QCPDataMapIterator;
+typedef QMutableVectorIterator<QCPData> QCPDataMutableMapIterator;
 
 
 class QCP_LIB_DECL QCPGraph : public QCPAbstractPlottable
