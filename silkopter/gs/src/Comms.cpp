@@ -638,6 +638,7 @@ void Comms::handle_streams_telemetry_active()
         return;
     }
     it->callback(is_active ? HAL::Result::OK : HAL::Result::FAILED);
+    m_hal.m_stream_telemetry_queue.erase(it);
 }
 
 template<class IStream, class Stream>

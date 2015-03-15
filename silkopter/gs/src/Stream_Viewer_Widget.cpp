@@ -9,8 +9,8 @@
 #include "common/node/processor/IResampler.h"
 #include "common/node/processor/IMultirotor_Pilot.h"
 
-//#include "Vec3_Stream_Viewer.h"
-#include "Float_Stream_Viewer.h"
+#include "Vec_Viewer.h"
+#include "Float_Viewer.h"
 //#include "Battery_State_Viewer.h"
 //#include "Cardinal_Points_Viewer.h"
 //#include "Location_Stream_Viewer.h"
@@ -91,19 +91,39 @@ void Stream_Viewer_Widget::create_viewer()
     auto class_id = stream->class_id;
     if (class_id == q::rtti::get_class_id<IAcceleration>())
     {
-//        layout()->addWidget(new Vec3_Stream_Viewer("m/s^2", stream, this));
+        auto viewer = new Vec_Viewer("m/s^2", stream->rate, this);
+        viewer->set_components(math::vec4<bool>(true, true, true, false));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Acceleration>(stream)->samples_available_signal.connect([this, viewer](Acceleration& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, math::vec4f(s.value));
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IAngular_Velocity>())
     {
-//        layout()->addWidget(new Vec3_Stream_Viewer("°/s", stream, this));
+//        layout()->addWidget(new Vec_Stream_Viewer("°/s", stream, this));
     }
     else if (class_id == q::rtti::get_class_id<IMagnetic_Field>())
     {
-//        layout()->addWidget(new Vec3_Stream_Viewer("T", stream, this));
+        auto viewer = new Vec_Viewer("Teslas", stream->rate, this);
+        viewer->set_components(math::vec4<bool>(true, true, true, false));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](Magnetic_Field& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.dt, math::vec4f(s.value));
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IPressure>())
     {
-        auto viewer = new Float_Stream_Viewer("Pascals", stream->rate, this);
+        auto viewer = new Float_Viewer("Pascals", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Pressure>(stream)->samples_available_signal.connect([this, viewer](Pressure& stream)
         {
@@ -120,7 +140,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ILinear_Acceleration>())
     {
-//        layout()->addWidget(new Vec3_Stream_Viewer("m/s^2", stream, this));
+//        layout()->addWidget(new Vec_Stream_Viewer("m/s^2", stream, this));
     }
     else if (class_id == q::rtti::get_class_id<ICardinal_Points>())
     {
@@ -128,7 +148,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ICurrent>())
     {
-        auto viewer = new Float_Stream_Viewer("A", stream->rate, this);
+        auto viewer = new Float_Viewer("A", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Current>(stream)->samples_available_signal.connect([this, viewer](Current& stream)
         {
@@ -141,7 +161,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IVoltage>())
     {
-        auto viewer = new Float_Stream_Viewer("Volts", stream->rate, this);
+        auto viewer = new Float_Viewer("Volts", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Voltage>(stream)->samples_available_signal.connect([this, viewer](Voltage& stream)
         {
@@ -154,7 +174,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IDistance>())
     {
-        auto viewer = new Float_Stream_Viewer("meters", stream->rate, this);
+        auto viewer = new Float_Viewer("meters", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Distance>(stream)->samples_available_signal.connect([this, viewer](Distance& stream)
         {
@@ -171,7 +191,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IPWM_Value>())
     {
-        auto viewer = new Float_Stream_Viewer("PWM", stream->rate, this);
+        auto viewer = new Float_Viewer("PWM", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<PWM_Value>(stream)->samples_available_signal.connect([this, viewer](PWM_Value& stream)
         {
@@ -188,7 +208,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ITemperature>())
     {
-        auto viewer = new Float_Stream_Viewer("°C", stream->rate, this);
+        auto viewer = new Float_Viewer("°C", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Temperature>(stream)->samples_available_signal.connect([this, viewer](Temperature& stream)
         {
@@ -201,7 +221,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<IADC_Value>())
     {
-        auto viewer = new Float_Stream_Viewer("ADC", stream->rate, this);
+        auto viewer = new Float_Viewer("ADC", stream->rate, this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<ADC_Value>(stream)->samples_available_signal.connect([this, viewer](ADC_Value& stream)
         {

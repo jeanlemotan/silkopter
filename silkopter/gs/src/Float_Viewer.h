@@ -2,19 +2,18 @@
 
 #include "HAL.h"
 #include "Comms.h"
-#include "ui_Float_Stream_Viewer.h"
+#include "ui_Float_Viewer.h"
 
-class Float_Stream_Viewer : public QWidget
+class Float_Viewer : public QWidget
 {
 public:
-    Float_Stream_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent);
-    ~Float_Stream_Viewer();
+    Float_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent);
+    ~Float_Viewer();
     void add_sample(q::Clock::duration dt, float value);
     void process();
 
 private:
-    Ui::Float_Stream_Viewer m_ui;
-    QCPGraph* m_fft_plottable = nullptr;
+    Ui::Float_Viewer m_ui;
     std::string m_unit;
     q::Clock::duration m_time = q::Clock::duration(0);
     q::Clock::time_point m_last_time_point = q::Clock::now();

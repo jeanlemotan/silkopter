@@ -124,7 +124,8 @@ HEADERS += \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
     ../../src/Stream_Viewer_Widget.h \
-    ../../src/Float_Stream_Viewer.h
+    ../../src/Float_Viewer.h \
+    ../../src/Vec_Viewer.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -139,11 +140,13 @@ SOURCES += \
     ../../src/HAL_Window.cpp \
     ../../../libs/json_editor/JSON_Model.cpp \
     ../../src/Stream_Viewer_Widget.cpp \
-    ../../src/Float_Stream_Viewer.cpp
+    ../../src/Float_Viewer.cpp \
+    ../../src/Vec_Viewer.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
-    ../../src/Float_Stream_Viewer.ui
+    ../../src/Float_Viewer.ui \
+    ../../src/Vec_Viewer.ui
 
 DISTFILES += \
     ../../src/node.png \

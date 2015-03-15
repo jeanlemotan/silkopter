@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "Float_Stream_Viewer.h"
+#include "Float_Viewer.h"
 #include "HAL.h"
 #include "Comms.h"
 #include "ui_Float_Stream_Viewer.h"
 
-Float_Stream_Viewer::Float_Stream_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent)
+Float_Viewer::Float_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent)
     : QWidget(parent)
     , m_unit(unit)
 {
@@ -14,15 +14,14 @@ Float_Stream_Viewer::Float_Stream_Viewer(std::string const& unit, uint32_t sampl
 
     m_ui.plot->addGraph();
     m_ui.plot->graph(0)->setPen(QColor(0x2c3e50));
+    m_ui.plot->graph(0)->setAdaptiveSampling(false);
     m_ui.plot->xAxis->setLabel("Time (s)");
     m_ui.plot->yAxis->setLabel(unit.c_str());
-    m_ui.plot->graph(0)->setAdaptiveSampling(false);
 
-    m_fft_plottable = new QCPGraph(m_ui.fft->xAxis, m_ui.fft->yAxis);
-    m_fft_plottable->setAdaptiveSampling(false);
-    m_ui.fft->addPlottable(m_fft_plottable);
-    m_fft_plottable->setPen(QColor(0x2980b9));
-    m_fft_plottable->setBrush(QColor(0x2980b9));
+    m_ui.fft->addGraph();
+    m_ui.fft->graph(0)->setPen(QColor(0x2c3e50));
+    m_ui.fft->graph(0)->setBrush(QColor(0x2c3e50));
+    m_ui.fft->graph(0)->setAdaptiveSampling(false);
     m_ui.fft->xAxis->setLabel("Frequency (Hz)");
     m_ui.fft->yAxis->setLabel(unit.c_str());
 
@@ -59,11 +58,11 @@ Float_Stream_Viewer::Float_Stream_Viewer(std::string const& unit, uint32_t sampl
     m_fft.temp_output.reset(static_cast<fftwf_complex*>(fftwf_malloc(FFT_Data::MAX_INPUT_SIZE * sizeof(fftwf_complex))), fftwf_free);
 }
 
-Float_Stream_Viewer::~Float_Stream_Viewer()
+Float_Viewer::~Float_Viewer()
 {
 }
 
-void Float_Stream_Viewer::add_sample(q::Clock::duration dt, float value)
+void Float_Viewer::add_sample(q::Clock::duration dt, float value)
 {
     Sample sample;
     sample.time = m_time;
@@ -72,7 +71,7 @@ void Float_Stream_Viewer::add_sample(q::Clock::duration dt, float value)
     m_time += dt;
 }
 
-void Float_Stream_Viewer::process()
+void Float_Viewer::process()
 {
     auto time = std::chrono::duration_cast<q::Clock::duration>(q::Seconds(m_ui.window->value()));
 
@@ -106,7 +105,7 @@ void Float_Stream_Viewer::process()
     }
 }
 
-void Float_Stream_Viewer::process_fft(FFT_Data& fft)
+void Float_Viewer::process_fft(FFT_Data& fft)
 {
     if (fft.sample_rate == 0 || m_samples.empty())
     {
@@ -132,6 +131,10 @@ void Float_Stream_Viewer::process_fft(FFT_Data& fft)
         }
     }
 
+    float range = m_range.max_value - m_range.min_value;
+    float div = 1.f / float(sample_count);
+    size_t output_size = sample_count / 2 + 1;
+
     //remove DC
     {
         auto* temp_input = fft.temp_input.get();
@@ -141,14 +144,9 @@ void Float_Stream_Viewer::process_fft(FFT_Data& fft)
             *temp_input++ = s.value - m_range.average_value;
         }
     }
-
-    float range = m_range.max_value - m_range.min_value;
-    float div = 1.f / float(sample_count);
-
-    size_t output_size = sample_count / 2 + 1;
-
     fftwf_execute(fft.plan);
 
+    auto* plottable = m_ui.fft->graph(0);
     auto* temp_output = fft.temp_output.get();
     auto freq_div = (fft.sample_rate / 2) / float(output_size);
     for (size_t i = 1; i < output_size; i++)
@@ -156,14 +154,14 @@ void Float_Stream_Viewer::process_fft(FFT_Data& fft)
         float x = temp_output[i][0];
         float y = temp_output[i][1];
         float s = math::sqrt(x*x + y*y) * div;
-        m_fft_plottable->addData(i * freq_div, s);
+        plottable->addData(i * freq_div, s);
     }
     m_ui.fft->xAxis->setRange(0.5, fft.sample_rate / 2);
     m_ui.fft->yAxis->setRange(0, math::sqrt(range));
     m_ui.fft->replot();
 }
 
-void Float_Stream_Viewer::process_plot()
+void Float_Viewer::process_plot()
 {
     m_range.average_value = 0.f;
     m_range.min_value = std::numeric_limits<float>::max();
