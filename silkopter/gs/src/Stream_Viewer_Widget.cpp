@@ -97,9 +97,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Acceleration>(stream)->samples_available_signal.connect([this, viewer](Acceleration& stream)
         {
+            std::array<double, 3> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -113,9 +115,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Angular_Velocity>(stream)->samples_available_signal.connect([this, viewer](Angular_Velocity& stream)
         {
+            std::array<double, 3> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -129,9 +133,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](Magnetic_Field& stream)
         {
+            std::array<double, 3> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -143,9 +149,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Pressure>(stream)->samples_available_signal.connect([this, viewer](Pressure& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -169,9 +177,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Current>(stream)->samples_available_signal.connect([this, viewer](Current& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -183,9 +193,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Voltage>(stream)->samples_available_signal.connect([this, viewer](Voltage& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -197,16 +209,33 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Distance>(stream)->samples_available_signal.connect([this, viewer](Distance& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
     }
     else if (class_id == q::rtti::get_class_id<ILocation>())
     {
-//        layout()->addWidget(new Location_Stream_Viewer(stream, this));
+        auto viewer = new Numeric_Viewer("coords", stream->rate, this);
+        viewer->add_graph("Lat", "°", QColor(0xe74c3c));
+        viewer->add_graph("Lon", "°", QColor(0x2ecc71));
+        viewer->add_graph("Alt", "m", QColor(0x3498db));
+        viewer->add_graph("Precision", "m", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Location>(stream)->samples_available_signal.connect([this, viewer](Location& stream)
+        {
+            std::array<double, 4> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.latitude, s.value.longitude, s.value.altitude, s.value.precision };
+                viewer->add_samples(s.dt, data.data());
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<IPWM_Value>())
     {
@@ -215,9 +244,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<PWM_Value>(stream)->samples_available_signal.connect([this, viewer](PWM_Value& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -233,9 +264,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Temperature>(stream)->samples_available_signal.connect([this, viewer](Temperature& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });
@@ -247,9 +280,11 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<ADC_Value>(stream)->samples_available_signal.connect([this, viewer](ADC_Value& stream)
         {
+            std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.dt, reinterpret_cast<float const*>(&s.value));
+                data = { s.value };
+                viewer->add_samples(s.dt, data.data());
             }
             viewer->process();
         });

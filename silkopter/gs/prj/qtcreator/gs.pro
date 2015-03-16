@@ -44,7 +44,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
-LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3f -lz
+LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3 -lz
 LIBS += -lboost_thread
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}

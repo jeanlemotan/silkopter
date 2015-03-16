@@ -648,8 +648,11 @@ void UBLOX::process_nav_pollh_packet(Buses& buses, Packet& packet)
     //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
 
     {
-        m_stream->last_sample.value.latitude = data.lat / 10000000.f;
-        m_stream->last_sample.value.longitude = data.lon / 10000000.f;
+        m_stream->last_sample.value.latitude = data.lat / 10000000.0;
+        m_stream->last_sample.value.longitude = data.lon / 10000000.0;
+        m_stream->last_sample.value.precision = data.hAcc / 100.f;
+        m_stream->last_sample.value.altitude = data.height / 100.f;
+        m_stream->last_sample.value.altitude_precision = data.vAcc / 100.f;
         m_stream->has_pollh = true;
     }
 }

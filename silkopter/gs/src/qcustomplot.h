@@ -1196,6 +1196,26 @@ public:
   void setScaleRatio(const QCPAxis *otherAxis, double ratio=1.0);
   void rescale(bool onlyVisiblePlottables=false);
   double pixelToCoord(double value) const;
+  struct Cache
+  {
+      int branch = 0;
+      double rangeSize_axisRectWidth_Inv = 0;
+      double rangeSize_axisRectHeight_Inv = 0;
+      double axisRectLeft = 0;
+      double axisRectRight = 0;
+      double axisRectBottom = 0;
+      double axisRectTop = 0;
+      double axisRectWidth = 0;
+      double axisRectHeight = 0;
+
+      double rangeLower_Inv = 0;
+      double baseLog_rangeUpperLower_axisRectWidth_Inv = 0;
+      double baseLog_rangeUpperLower_axisRectHeight_Inv = 0;
+  };
+
+  Cache coordToPixel_buildCache() const;
+  double coordToPixel_Cache(double value, const Cache& cache) const;
+
   double coordToPixel(double value) const;
   SelectablePart getPartAt(const QPointF &pos) const;
   QList<QCPAbstractPlottable*> plottables() const;

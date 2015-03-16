@@ -10,10 +10,12 @@ public:
     Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent);
     ~Numeric_Viewer();
     void add_graph(std::string const& name, std::string const& unit, QColor color);
-    void add_samples(q::Clock::duration dt, float const* src);
+    void add_samples(q::Clock::duration dt, double const* src);
     void process();
 
 private:
+    void show_context_menu(QPoint const& point);
+
     Ui::Numeric_Viewer m_ui;
     size_t m_sample_rate = 0;
     q::Clock::duration m_time = q::Clock::duration(0);
@@ -31,21 +33,20 @@ private:
     {
         double time;
     };
-    std::vector<float> m_values;
+    std::vector<double> m_values;
 
     struct Stats
     {
-        float min_value = 0;
-        float max_value = 0;
-        float average_value = 0;
+        double min_value = 0;
+        double max_value = 0;
+        double average_value = 0;
     };
 
     struct FFT
     {
-        static const size_t MAX_INPUT_SIZE = 2000000;
-        std::shared_ptr<float> temp_input;
-        std::shared_ptr<fftwf_complex> temp_output;
-        fftwf_plan plan;
+        std::shared_ptr<double> temp_input;
+        std::shared_ptr<fftw_complex> temp_output;
+        fftw_plan plan;
         size_t plan_sample_count = 0;
     };
 
@@ -54,6 +55,7 @@ private:
         bool is_visible = true;
         std::string name;
         std::string unit;
+        QColor color;
 
         boost::unique_future<void> future;
 

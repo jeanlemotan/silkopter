@@ -24,5 +24,7 @@
         <file>icons/Voltage.png</file>
         <file>icons/remove.png</file>
         <file>icons/view.png</file>
+        <file>icons/graph.png</file>
+        <file>icons/fft.png</file>
     </qresource>
 </RCC>

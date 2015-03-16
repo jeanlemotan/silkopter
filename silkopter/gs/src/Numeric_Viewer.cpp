@@ -43,25 +43,6 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
 
 //    m_ui.fft->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
-    connect(m_ui.logarithmic, &QCheckBox::toggled, [this](bool yes)
-    {
-        if (yes)
-        {
-            m_ui.fft->xAxis->setScaleType(QCPAxis::stLogarithmic);
-            m_ui.fft->xAxis->setScaleLogBase(10);
-            m_ui.fft->xAxis->setNumberFormat("fb");
-            m_ui.fft->xAxis->setNumberPrecision(0);
-            m_ui.fft->xAxis->setSubTickCount(10);
-        }
-        else
-        {
-            m_ui.fft->xAxis->setScaleType(QCPAxis::stLinear);
-            m_ui.fft->xAxis->setNumberFormat(m_ui.fft->yAxis->numberFormat());
-            m_ui.fft->xAxis->setNumberPrecision(m_ui.fft->yAxis->numberPrecision());
-            m_ui.fft->xAxis->setSubTickCount(m_ui.fft->yAxis->subTickCount());
-        }
-    });
-
     m_ui.progress->setValue(m_ui.progress->maximum());
     connect(m_ui.progress, &QScrollBar::valueChanged, [this](int pos)
     {
@@ -80,11 +61,78 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
         }
     });
 
+    // myWidget is any QWidget-derived class
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, [this](QPoint const& pos)
+    {
+        show_context_menu(mapToGlobal(pos));
+    });
+
+    m_ui.plot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_ui.plot, &QWidget::customContextMenuRequested, [this](QPoint const& pos)
+    {
+        show_context_menu(m_ui.plot->mapToGlobal(pos));
+    });
+
+    m_ui.fft->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_ui.fft, &QWidget::customContextMenuRequested, [this](QPoint const& pos)
+    {
+        show_context_menu(m_ui.fft->mapToGlobal(pos));
+    });
+
     //m_ui.window->setSingleStep(1.0 / double(m_sample_rate));
 }
 
 Numeric_Viewer::~Numeric_Viewer()
 {
+}
+
+void Numeric_Viewer::show_context_menu(QPoint const& pos)
+{
+    QMenu menu;
+    for (auto& g: m_graphs)
+    {
+        QImage image(10, 10, QImage::Format_ARGB32_Premultiplied);
+        image.fill(g->color);
+        QImage pressed_image(8, 8, QImage::Format_ARGB32_Premultiplied);
+        pressed_image.fill(g->color);
+
+        QIcon icon;
+        icon.addPixmap(QPixmap::fromImage(pressed_image), QIcon::Normal, QIcon::On);
+        icon.addPixmap(QPixmap::fromImage(image), QIcon::Normal, QIcon::Off);
+
+        auto* action = menu.addAction(icon, g->name.c_str());
+        action->setCheckable(true);
+        action->setChecked(g->is_visible);
+        auto& graph = *g;
+        connect(action, &QAction::toggled, [&graph](bool yes) { graph.is_visible = yes; });
+    }
+
+    menu.addSeparator();
+
+    auto* action = menu.addAction(QIcon(":/icons/fft.png"), "Logarithmic FFT");
+    action->setCheckable(true);
+    action->setChecked(m_ui.fft->xAxis->scaleType() == QCPAxis::stLogarithmic);
+    connect(action, &QAction::toggled, [this](bool yes)
+    {
+        if (yes)
+        {
+            m_ui.fft->xAxis->setScaleType(QCPAxis::stLogarithmic);
+            m_ui.fft->xAxis->setScaleLogBase(10);
+            m_ui.fft->xAxis->setNumberFormat("fb");
+            m_ui.fft->xAxis->setNumberPrecision(0);
+            m_ui.fft->xAxis->setSubTickCount(10);
+        }
+        else
+        {
+            m_ui.fft->xAxis->setScaleType(QCPAxis::stLinear);
+            m_ui.fft->xAxis->setNumberFormat(m_ui.fft->yAxis->numberFormat());
+            m_ui.fft->xAxis->setNumberPrecision(m_ui.fft->yAxis->numberPrecision());
+            m_ui.fft->xAxis->setSubTickCount(m_ui.fft->yAxis->subTickCount());
+        }
+    });
+
+    menu.exec(pos);
 }
 
 void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit, QColor color)
@@ -110,23 +158,12 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
     Graph& graph = *m_graphs.back();
     graph.name = name;
     graph.unit = unit;
-    graph.fft.temp_input.reset(static_cast<float*>(fftwf_malloc(FFT::MAX_INPUT_SIZE * sizeof(float))), fftwf_free);
-    graph.fft.temp_output.reset(static_cast<fftwf_complex*>(fftwf_malloc(FFT::MAX_INPUT_SIZE * sizeof(fftwf_complex))), fftwf_free);
+    graph.color = color;
     graph.plot = plot;
     graph.fft_plot = fft_plot;
-
-    auto checkbox = new QCheckBox(name.c_str(), m_ui.filters);
-    checkbox->setChecked(true);
-    checkbox->setMaximumSize(QSize(16777215, 16));
-    QFont font;
-    font.setPointSize(8);
-    checkbox->setFont(font);
-    checkbox->setIconSize(QSize(12, 12));
-    m_ui.filters->layout()->addWidget(checkbox);
-    connect(checkbox, &QCheckBox::toggled, [&graph](bool yes) { graph.is_visible = yes; });
 }
 
-void Numeric_Viewer::add_samples(q::Clock::duration dt, float const* src)
+void Numeric_Viewer::add_samples(q::Clock::duration dt, double const* src)
 {
     Sample sample;
     sample.time = std::chrono::duration<double>(m_time).count();
@@ -143,7 +180,6 @@ void Numeric_Viewer::process()
     if (!m_is_started)
     {
         start_tasks();
-        m_is_started = true;
         return;
     }
 
@@ -199,13 +235,13 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
 {
     Graph& graph = *m_graphs[graph_idx];
     graph.stats.average_value = 0;
-    graph.stats.min_value = std::numeric_limits<float>::max();
-    graph.stats.max_value = std::numeric_limits<float>::lowest();
+    graph.stats.min_value = std::numeric_limits<double>::max();
+    graph.stats.max_value = std::numeric_limits<double>::lowest();
 
     graph.plot_data_map.resize(0);
     graph.plot_data_map.reserve(100000);
 
-    double pixels_per_second = static_cast<float>(m_ui.plot->width()) / view.time;
+    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.time;
     size_t offset = view.start_idx * m_graphs.size();
     if (pixels_per_second < m_sample_rate)
     {
@@ -246,9 +282,9 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
 {
     Graph& graph = *m_graphs[graph_idx];
 
-    auto sample_count = math::min(view.end_idx - view.start_idx, FFT::MAX_INPUT_SIZE);
+    auto sample_count = view.end_idx - view.start_idx;
 
-    float div = 1.f / float(sample_count);
+    double div = 1.f / double(sample_count);
     size_t output_size = sample_count / 2 + 1;
 
     double freq_div = (m_sample_rate / 2) / double(output_size);
@@ -260,21 +296,21 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
         temp_input[i] = m_values[offset + graph_idx] - graph.stats.average_value;
         offset += m_graphs.size();
     }
-    fftwf_execute(graph.fft.plan);
+    fftw_execute(graph.fft.plan);
     auto* temp_output = graph.fft.temp_output.get();
     graph.fft_data_map.resize(0);
     graph.fft_data_map.reserve(100000);
 
-    double pixels_per_second = static_cast<float>(m_ui.plot->width()) / view.time;
+    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.time;
     if (pixels_per_second < m_sample_rate)
     {
         double last_key = 0;
-        float max_value = std::numeric_limits<float>::lowest();
+        double max_value = std::numeric_limits<double>::lowest();
         for (size_t i = 1; i < output_size; i++)
         {
-            float x = temp_output[i][0];
-            float y = temp_output[i][1];
-            float v = math::sqrt(x*x + y*y) * div;
+            double x = temp_output[i][0];
+            double y = temp_output[i][1];
+            double v = math::sqrt(x*x + y*y) * div;
             max_value = math::max(max_value, v);
 
             double key = i * freq_div;
@@ -283,7 +319,7 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
             {
                 last_key = key;
                 graph.fft_data_map.push_back(QCPData(key, max_value));
-                max_value = std::numeric_limits<float>::lowest();
+                max_value = std::numeric_limits<double>::lowest();
             }
         }
     }
@@ -291,9 +327,9 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
     {
         for (size_t i = 1; i < output_size; i++)
         {
-            float x = temp_output[i][0];
-            float y = temp_output[i][1];
-            float v = math::sqrt(x*x + y*y) * div;
+            double x = temp_output[i][0];
+            double y = temp_output[i][1];
+            double v = math::sqrt(x*x + y*y) * div;
             graph.fft_data_map.push_back(QCPData(i * freq_div, v));
         }
     }
@@ -308,7 +344,7 @@ void Numeric_Viewer::start_tasks()
     {
         return;
     }
-    auto sample_count = math::min(m_view.end_idx - m_view.start_idx, FFT::MAX_INPUT_SIZE);
+    auto sample_count = m_view.end_idx - m_view.start_idx;
     if (sample_count < 2)
     {
         return;
@@ -320,9 +356,13 @@ void Numeric_Viewer::start_tasks()
         auto& graph = *m_graphs[i];
         if (graph.is_visible)
         {
+            m_is_started = true;
+
             if (sample_count != graph.fft.plan_sample_count)
             {
-                graph.fft.plan = fftwf_plan_dft_r2c_1d(sample_count, graph.fft.temp_input.get(), graph.fft.temp_output.get(), FFTW_ESTIMATE);
+                graph.fft.temp_input.reset(static_cast<double*>(fftw_malloc(sample_count * sizeof(double))), fftw_free);
+                graph.fft.temp_output.reset(static_cast<fftw_complex*>(fftw_malloc(sample_count * sizeof(fftw_complex))), fftw_free);
+                graph.fft.plan = fftw_plan_dft_r2c_1d(sample_count, graph.fft.temp_input.get(), graph.fft.temp_output.get(), FFTW_ESTIMATE);
                 graph.fft.plan_sample_count = sample_count;
             }
 
@@ -342,8 +382,9 @@ void Numeric_Viewer::start_tasks()
 
 void Numeric_Viewer::finish_tasks()
 {
-    float min_value = std::numeric_limits<float>::max();
-    float max_value = std::numeric_limits<float>::lowest();
+    double min_value = std::numeric_limits<double>::max();
+    double max_value = std::numeric_limits<double>::lowest();
+    bool has_range = false;
 
     for (size_t i = 0; i < m_graphs.size(); i++)
     {
@@ -351,11 +392,21 @@ void Numeric_Viewer::finish_tasks()
         graph.plot->data()->swap(graph.plot_data_map);
         graph.fft_plot->data()->swap(graph.fft_data_map);
 
-        min_value = math::min(min_value, graph.stats.min_value);
-        max_value = math::max(max_value, graph.stats.max_value);
+        if (graph.is_visible)
+        {
+            has_range = true;
+            min_value = math::min(min_value, graph.stats.min_value);
+            max_value = math::max(max_value, graph.stats.max_value);
+        }
     }
 
-    float average_value = (max_value + min_value) * 0.5f;
+    if (!has_range)
+    {
+        min_value = 0;
+        max_value = 0;
+    }
+
+    double average_value = (max_value + min_value) * 0.5f;
     m_ui.data_range->setValue(max_value - min_value);
     m_ui.average->setValue(average_value);
     m_ui.plot->xAxis->setRange(m_samples[m_view.start_idx].time, m_samples[m_view.start_idx].time + m_view.time);
@@ -372,6 +423,6 @@ void Numeric_Viewer::finish_tasks()
         m_ui.fft->yAxis->setRange(0, math::sqrt(display_range));
     }
 
-    m_ui.plot->replot();
+    m_ui.plot->replot(QCustomPlot::rpImmediate);
     m_ui.fft->replot();
 }

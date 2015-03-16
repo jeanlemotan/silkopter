@@ -5419,6 +5419,140 @@ double QCPAxis::pixelToCoord(double value) const
   }
 }
 
+QCPAxis::Cache QCPAxis::coordToPixel_buildCache() const
+{
+    Cache cache;
+
+    if (orientation() == Qt::Horizontal)
+    {
+      if (mScaleType == stLinear)
+      {
+        if (!mRangeReversed)
+            cache.branch = 0;
+        else
+            cache.branch = 1;
+      } else // mScaleType == stLogarithmic
+      {
+        if (mRange.upper < 0) // invalid value for logarithmic scale, just draw it outside visible range
+            cache.branch = 2;
+        else if (mRange.upper > 0) // invalid value for logarithmic scale, just draw it outside visible range
+            cache.branch = 3;
+        else
+        {
+          if (!mRangeReversed)
+              cache.branch = 4;
+          else
+              cache.branch = 5;
+        }
+      }
+    } else // orientation() == Qt::Vertical
+    {
+      if (mScaleType == stLinear)
+      {
+        if (!mRangeReversed)
+            cache.branch = 6;
+        else
+            cache.branch = 7;
+      } else // mScaleType == stLogarithmic
+      {
+        if (mRange.upper < 0) // invalid value for logarithmic scale, just draw it outside visible range
+            cache.branch = 8;
+        else if (mRange.upper > 0) // invalid value for logarithmic scale, just draw it outside visible range
+            cache.branch = 9;
+        else
+        {
+          if (!mRangeReversed)
+              cache.branch = 10;
+          else
+              cache.branch = 11;
+        }
+      }
+    }
+
+    cache.rangeSize_axisRectWidth_Inv = 1.0/mRange.size()*mAxisRect->width();
+    cache.rangeSize_axisRectHeight_Inv = 1.0/mRange.size()*mAxisRect->height();
+    cache.axisRectLeft = mAxisRect->left();
+    cache.axisRectRight = mAxisRect->right();
+    cache.axisRectBottom = mAxisRect->bottom();
+    cache.axisRectTop = mAxisRect->top();
+    cache.axisRectWidth = mAxisRect->width();
+    cache.axisRectHeight = mAxisRect->height();
+    cache.rangeLower_Inv = 1.0/mRange.lower;
+    cache.baseLog_rangeUpperLower_axisRectWidth_Inv = 1.0/baseLog(mRange.upper/mRange.lower)*mAxisRect->width();
+    cache.baseLog_rangeUpperLower_axisRectHeight_Inv = 1.0/baseLog(mRange.upper/mRange.lower)*mAxisRect->height();
+    return cache;
+}
+double QCPAxis::coordToPixel_Cache(double value, const Cache& cache) const
+{
+    switch (cache.branch)
+    {
+        case 0:
+            return (value-mRange.lower)*cache.rangeSize_axisRectWidth_Inv+cache.axisRectLeft;
+        case 1:
+            return (mRange.upper-value)*cache.rangeSize_axisRectWidth_Inv+cache.axisRectLeft;
+        case 2:
+        {
+            if (value >= 0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? cache.axisRectRight+200 : cache.axisRectLeft-200;
+            else
+            {
+                if (!mRangeReversed)
+                    return baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+                else
+                    return baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+            }
+        }
+        case 3:
+        {
+            if (value <= 0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? cache.axisRectLeft-200 : cache.axisRectRight+200;
+            else
+            {
+                if (!mRangeReversed)
+                    return baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+                else
+                    return baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+            }
+        }
+        case 4:
+            return baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+        case 5:
+            return baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectWidth_Inv+cache.axisRectLeft;
+        case 6:
+            return cache.axisRectBottom-(value-mRange.lower)*cache.rangeSize_axisRectHeight_Inv;
+        case 7:
+            return cache.axisRectBottom-(mRange.upper-value)*cache.rangeSize_axisRectHeight_Inv;
+        case 8:
+        {
+            if (value >= 0)
+                return !mRangeReversed ? cache.axisRectTop-200 : cache.axisRectBottom+200;
+            else
+            {
+                if (!mRangeReversed)
+                    return cache.axisRectBottom-baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+                else
+                    return cache.axisRectBottom-baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+            }
+        }
+        case 9:
+        {
+            if (value <= 0)
+                return !mRangeReversed ? cache.axisRectBottom+200 : cache.axisRectTop-200;
+            else
+            {
+                if (!mRangeReversed)
+                    return cache.axisRectBottom-baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+                else
+                    return cache.axisRectBottom-baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+            }
+        }
+        case 10:
+            return cache.axisRectBottom-baseLog(value*cache.rangeLower_Inv)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+        case 11:
+            return cache.axisRectBottom-baseLog(mRange.upper/value)*cache.baseLog_rangeUpperLower_axisRectHeight_Inv;
+    }
+}
+
 /*!
   Transforms \a value, in coordinates of the axis, to pixel coordinates of the QCustomPlot widget.
 */
@@ -5629,7 +5763,7 @@ void QCPAxis::setupTickVectors()
   visibleTickBounds(mLowestVisibleTick, mHighestVisibleTick);
   if (mTickVector.isEmpty())
   {
-    mSubTickVector.clear();
+    mSubTickVector.resize(0);
     return;
   }
   
@@ -5742,7 +5876,7 @@ void QCPAxis::generateAutoTicks()
     {
       double lowerMag = basePow((int)floor(baseLog(mRange.lower)));
       double currentMag = lowerMag;
-      mTickVector.clear();
+      mTickVector.resize(0);
       mTickVector.append(currentMag);
       while (currentMag < mRange.upper && currentMag > 0) // currentMag might be zero for ranges ~1e-300, just cancel in that case
       {
@@ -5753,7 +5887,7 @@ void QCPAxis::generateAutoTicks()
     {
       double lowerMag = -basePow((int)ceil(baseLog(-mRange.lower)));
       double currentMag = lowerMag;
-      mTickVector.clear();
+      mTickVector.resize(0);
       mTickVector.append(currentMag);
       while (currentMag < mRange.upper && currentMag < 0) // currentMag might be zero for ranges ~1e-300, just cancel in that case
       {
@@ -5762,7 +5896,7 @@ void QCPAxis::generateAutoTicks()
       }
     } else // invalid range for logarithmic scale, because lower and upper have different sign
     {
-      mTickVector.clear();
+      mTickVector.resize(0);
       qDebug() << Q_FUNC_INFO << "Invalid range for logarithmic plot: " << mRange.lower << "-" << mRange.upper;
     }
   }
@@ -14553,7 +14687,7 @@ void QCPGraph::setData(QCPDataMap *data, bool copy)
 */
 void QCPGraph::setData(const QVector<double> &key, const QVector<double> &value)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   QCPData newData;
@@ -14576,7 +14710,7 @@ void QCPGraph::setData(const QVector<double> &key, const QVector<double> &value)
 */
 void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueError)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, valueError.size());
@@ -14602,7 +14736,7 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
 */
 void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, valueErrorMinus.size());
@@ -14629,7 +14763,7 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
 */
 void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, keyError.size());
@@ -14655,7 +14789,7 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
 */
 void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, keyErrorMinus.size());
@@ -14682,7 +14816,7 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
 */
 void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError, const QVector<double> &valueError)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, valueError.size());
@@ -14711,7 +14845,7 @@ void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double
 */
 void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
 {
-  mData->clear();
+  mData->resize(0);
   int n = key.size();
   n = qMin(n, value.size());
   n = qMin(n, valueErrorMinus.size());
@@ -14985,7 +15119,7 @@ void QCPGraph::removeData(double key)
 */
 void QCPGraph::clearData()
 {
-  mData->clear();
+  mData->resize(0);
 }
 
 /* inherits documentation from base class */
@@ -15095,13 +15229,15 @@ void QCPGraph::draw(QCPPainter *painter)
   if (mLineStyle == lsNone && mScatterStyle.isNone()) return;
   
   // allocate line and (if necessary) point vectors:
-  QVector<QPointF> *lineData = new QVector<QPointF>;
+  QVector<QPointF> lineData;
   QVector<QCPData> *scatterData = 0;
   if (!mScatterStyle.isNone())
-    scatterData = new QVector<QCPData>;
-  
+  {
+      scatterData = new QVector<QCPData>;
+  }
+
   // fill vectors with data appropriate to plot style:
-  getPlotData(lineData, scatterData);
+  getPlotData(&lineData, scatterData);
   
   // check data validity if flag set:
 #ifdef QCUSTOMPLOT_CHECK_DATA
@@ -15116,20 +15252,19 @@ void QCPGraph::draw(QCPPainter *painter)
 #endif
 
   // draw fill of graph:
-  drawFill(painter, lineData);
+  drawFill(painter, &lineData);
   
   // draw line:
   if (mLineStyle == lsImpulse)
-    drawImpulsePlot(painter, lineData);
+    drawImpulsePlot(painter, &lineData);
   else if (mLineStyle != lsNone)
-    drawLinePlot(painter, lineData); // also step plots can be drawn as a line plot
+    drawLinePlot(painter, &lineData); // also step plots can be drawn as a line plot
   
   // draw scatters:
   if (scatterData)
     drawScatterPlot(painter, scatterData);
   
   // free allocated line and point vectors:
-  delete lineData;
   if (scatterData)
     delete scatterData;
 }
@@ -15241,19 +15376,25 @@ void QCPGraph::getLinePlotData(QVector<QPointF> *linePixelData, QVector<QCPData>
   linePixelData->resize(mLineData.size());
   
   // transform lineData points to pixels:
+  auto v_cache = valueAxis->coordToPixel_buildCache();
+  auto k_cache = keyAxis->coordToPixel_buildCache();
   if (keyAxis->orientation() == Qt::Vertical)
   {
-    for (int i=0; i<mLineData.size(); ++i)
+    for (int i=0, sz = mLineData.size(); i < sz; ++i)
     {
-      (*linePixelData)[i].setX(valueAxis->coordToPixel(mLineData.at(i).value));
-      (*linePixelData)[i].setY(keyAxis->coordToPixel(mLineData.at(i).key));
+        auto const& ld = mLineData.at(i);
+        auto& lpd = (*linePixelData)[i];
+      lpd.setX(valueAxis->coordToPixel_Cache(ld.value, v_cache));
+      lpd.setY(keyAxis->coordToPixel_Cache(ld.key, k_cache));
     }
   } else // key axis is horizontal
   {
-    for (int i=0; i<mLineData.size(); ++i)
+    for (int i=0, sz = mLineData.size(); i < sz; ++i)
     {
-      (*linePixelData)[i].setX(keyAxis->coordToPixel(mLineData.at(i).key));
-      (*linePixelData)[i].setY(valueAxis->coordToPixel(mLineData.at(i).value));
+        auto const& ld = mLineData.at(i);
+        auto& lpd = (*linePixelData)[i];
+      lpd.setX(keyAxis->coordToPixel_Cache(ld.key, k_cache));
+      lpd.setY(valueAxis->coordToPixel_Cache(ld.value, v_cache));
     }
   }
 }
@@ -15982,14 +16123,7 @@ int QCPGraph::countDataInBounds(const QCPDataMap::const_iterator &lower, const Q
 {
   if (upper == mData->constEnd() && lower == mData->constEnd())
     return 0;
-  QCPDataMap::const_iterator it = lower;
-  int count = 1;
-  while (it != upper && count < maxCount)
-  {
-    ++it;
-    ++count;
-  }
-  return count;
+  return std::distance(lower, upper);
 }
 
 /*! \internal
