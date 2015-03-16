@@ -71,7 +71,7 @@
                 },
                 "config": {
                     "Poles": 2,
-                    "Cutoff Frequency (Hz)": 1.0,
+                    "Cutoff Frequency (Hz)": 2.0,
                     "Inputs": {
                         "Input": "UBLOX/Location"
                     },

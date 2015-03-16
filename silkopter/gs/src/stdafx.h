@@ -52,7 +52,9 @@
 
 #include <mapcontrol.h>
 #include <osmmapadapter.h>
+#include <googlemapadapter.h>
 #include <maplayer.h>
+#include <circlepoint.h>
 
 extern "C"
 {

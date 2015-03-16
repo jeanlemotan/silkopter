@@ -15,7 +15,7 @@ CONFIG += c++11
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../src/qnodeseditor
-INCLUDEPATH += ../../src/QMapControl/src
+INCLUDEPATH += ../../../../QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -44,6 +44,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
+LIBS += -L$${ROOT_LIBS_PATH}/QMapControl/lib/$${DEST_FOLDER} -lqmapcontrol
 
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3 -lz
 LIBS += -lboost_thread

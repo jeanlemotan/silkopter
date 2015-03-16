@@ -15,6 +15,8 @@ public:
 private:
     void show_context_menu(QPoint const& point);
 
+    qmapcontrol::MapControl* m_map_control = nullptr;
+
     //Ui::Map_Viewer m_ui;
     bool m_is_started = false;
 
