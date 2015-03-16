@@ -386,7 +386,7 @@ auto UBLOX::setup() -> bool
         send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
     }
 
-    m_stream->last_complete_time_point = q::Clock::now();
+    m_stream->last_complete_tp = q::Clock::now();
     m_is_setup = true;
     return true;
 }
@@ -420,17 +420,18 @@ void UBLOX::process()
     read_data(buses);
 
     auto now = q::Clock::now();
-    auto dt = now - m_stream->last_complete_time_point;
+    auto dt = now - m_stream->last_complete_tp;
 
     //watchdog
     if (m_stream->has_nav_status && m_stream->has_pollh && m_stream->has_sol)
     {
         Stream::Sample& sample = m_stream->last_sample;
         sample.dt = dt;
+        sample.tp = now;
         sample.sample_idx++;
         m_stream->samples.push_back(sample);
 
-        m_stream->last_complete_time_point = now;
+        m_stream->last_complete_tp = now;
 
         m_stream->has_nav_status = m_stream->has_pollh = m_stream->has_sol = false;
         m_stream->last_sample.value = Stream::Value();
@@ -648,11 +649,10 @@ void UBLOX::process_nav_pollh_packet(Buses& buses, Packet& packet)
     //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
 
     {
-        m_stream->last_sample.value.latitude = data.lat / 10000000.0;
-        m_stream->last_sample.value.longitude = data.lon / 10000000.0;
-        m_stream->last_sample.value.precision = data.hAcc / 100.f;
-        m_stream->last_sample.value.altitude = data.height / 100.f;
-        m_stream->last_sample.value.altitude_precision = data.vAcc / 100.f;
+        m_stream->last_sample.value.wgs84.lat_lon.set(data.lat / 10000000.0, data.lon / 10000000.0);
+        m_stream->last_sample.value.wgs84.lat_lon_accuracy = data.hAcc / 100.f;
+        m_stream->last_sample.value.wgs84.altitude = data.height / 100.f;
+        m_stream->last_sample.value.wgs84.altitude_accuracy = data.vAcc / 100.f;
         m_stream->has_pollh = true;
     }
 }
@@ -705,7 +705,10 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 
     {
         m_stream->last_sample.value.sattelite_count = data.numSV;
-        m_stream->last_sample.value.velocity = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+        m_stream->last_sample.value.ecef.position = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
+        m_stream->last_sample.value.ecef.position_accuracy = data.pAcc / 100.0;
+        m_stream->last_sample.value.ecef.velocity = math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0;
+        m_stream->last_sample.value.ecef.velocity_accuracy = data.sAcc / 100.0;
         if (data.gpsFix == 0x02)
         {
             m_stream->last_sample.value.fix = stream::ILocation::Value::Fix::FIX_2D;

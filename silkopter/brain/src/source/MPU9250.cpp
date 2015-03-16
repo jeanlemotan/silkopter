@@ -567,6 +567,8 @@ auto MPU9250::init() -> bool
     res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
+    m_last_fifo_tp = q::Clock::now();
+
     res &= setup_compass(buses);
     if (!res)
     {
@@ -663,7 +665,7 @@ auto MPU9250::setup_compass(Buses& buses) -> bool
 
 #endif
 
-    m_magnetic_field->last_time_point = q::Clock::now();
+    m_magnetic_field->last_tp = q::Clock::now();
     return true;
 }
 
@@ -751,6 +753,12 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             if (mpu_read(buses, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
+                auto now = q::Clock::now();
+                auto total_dt = now - m_last_fifo_tp;
+                auto dt = total_dt / sample_count;
+                auto tp = m_last_fifo_tp + dt;
+                m_last_fifo_tp = now;
+
                 m_angular_velocity->samples.resize(sample_count);
                 m_acceleration->samples.resize(sample_count);
                 auto* data = m_fifo_buffer.data();
@@ -762,7 +770,8 @@ void MPU9250::process()
                     auto& asample = m_acceleration->samples[i];
                     asample.value.set(x * m_acceleration->scale_inv, y * m_acceleration->scale_inv, z * m_acceleration->scale_inv);
                     asample.sample_idx = ++m_acceleration->last_sample.sample_idx;
-                    asample.dt = m_acceleration->dt;
+                    asample.tp = tp;
+                    asample.dt = dt;
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
@@ -771,7 +780,10 @@ void MPU9250::process()
                     auto& gsample = m_angular_velocity->samples[i];
                     gsample.value.set(x * m_angular_velocity->scale_inv, y * m_angular_velocity->scale_inv, z * m_angular_velocity->scale_inv);
                     gsample.sample_idx = ++m_angular_velocity->last_sample.sample_idx;
-                    gsample.dt = m_angular_velocity->dt;
+                    asample.tp = tp;
+                    gsample.dt = dt;
+
+                    tp += dt;
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
 //                    {
@@ -802,9 +814,42 @@ void MPU9250::process_compass(Buses& buses)
 
 #ifdef USE_AK8963
     auto now = q::Clock::now();
-    if (now - m_magnetic_field->last_time_point < m_magnetic_field->dt)
+    if (now - m_magnetic_field->last_tp < m_magnetic_field->dt)
     {
         return;
+    }
+
+    {
+        math::vec3f xxx_output = math::vec3f::zero;
+        {
+            static q::Clock::duration s_dt(0);
+            s_dt += m_magnetic_field->dt;
+            static const float noise = 0.1f;
+            std::vector<std::pair<float, float>> freq =
+            {{
+                 { 10.f, 1.f },
+                 { 17.f, 0.7f },
+                 { 33.f, 0.5f }
+             }};
+            static std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
+            static std::mt19937 engine; // Mersenne twister MT19937
+            auto generator = std::bind(distribution, engine);
+            {
+                xxx_output = math::vec3f::zero;
+                float a = q::Seconds(s_dt).count() * math::anglef::_2pi;
+                xxx_output.x += math::sin(a * freq[0].first) * freq[0].second + generator();
+                xxx_output.y += math::sin(a * freq[1].first) * freq[1].second + generator();
+                xxx_output.z += math::sin(a * freq[2].first) * freq[2].second + generator();
+            }
+        }
+
+        Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
+        sample.value = xxx_output; //REMOVE ME
+        sample.sample_idx++;
+        sample.tp = now;
+        sample.dt = m_magnetic_field->dt;
+
+        m_magnetic_field->samples.push_back(sample);
     }
 
     std::array<uint8_t, 8> tmp;
@@ -825,8 +870,8 @@ void MPU9250::process_compass(Buses& buses)
         return;
     }
 
-    auto dt = now - m_magnetic_field->last_time_point;
-    m_magnetic_field->last_time_point = now;
+    auto dt = now - m_magnetic_field->last_tp;
+    m_magnetic_field->last_tp = now;
 
     short data[3];
     data[0] = (tmp[2] << 8) | tmp[1];
@@ -846,6 +891,7 @@ void MPU9250::process_compass(Buses& buses)
     Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
     sample.value = math::rotate(rot, c);
     sample.sample_idx++;
+    sample.tp = now;
     sample.dt = dt;
 
     m_magnetic_field->samples.push_back(sample);

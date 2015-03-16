@@ -26,16 +26,29 @@ public:
         Fix fix;
         uint8_t sattelite_count = 0;
 
-        double longitude; //radians
-        double latitude; //radians
-        float precision = std::numeric_limits<float>::max();
+        struct WGS84
+        {
+            static constexpr double MAX_VALID_ACCURACY = 999999.0;
 
-        float altitude; //meters
-        float altitude_precision = std::numeric_limits<float>::max();
+            math::vec2d lat_lon; //radians
+            double lat_lon_accuracy = MAX_VALID_ACCURACY * 2.0; //meters
 
-        math::vec2f velocity_2d; //meters/second but x/y only
-        math::vec3f velocity; //meters/second
-        math::vec2f direction; //normalized
+            double altitude; //meters
+            double altitude_accuracy = MAX_VALID_ACCURACY * 2.0; //meters
+        } wgs84;
+
+        struct ECEF
+        {
+            static constexpr double MAX_VALID_ACCURACY = 999999.0;
+
+            math::vec3d position; //meters
+            double position_accuracy = MAX_VALID_ACCURACY * 2.0; //meters
+
+            math::vec3d velocity; //meters/second
+            double velocity_accuracy = MAX_VALID_ACCURACY * 2.0; //meters
+
+            math::vec2d direction; //normalized
+        } ecef;
     };
 
     typedef stream::Sample<Value>     Sample;
@@ -60,35 +73,49 @@ namespace dsp
 {
 template<> inline bool equals(silk::node::stream::ILocation::Value const& a, silk::node::stream::ILocation::Value const& b)
 {
-    return math::equals(a.longitude, b.longitude) ||
-           math::equals(a.latitude, b.latitude) ||
-           math::equals(a.altitude, b.altitude) ||
-           math::equals(a.velocity_2d, b.velocity_2d) ||
-           math::equals(a.velocity, b.velocity) ||
-           math::equals(a.direction, b.direction);
+    return math::equals(a.wgs84.lat_lon, b.wgs84.lat_lon) &&
+           math::equals(a.wgs84.altitude, b.wgs84.altitude) &&
+           math::equals(a.ecef.position, b.ecef.position) &&
+           math::equals(a.ecef.velocity, b.ecef.velocity) &&
+           math::equals(a.ecef.direction, b.ecef.direction);
 }
 template<> inline silk::node::stream::ILocation::Value add(silk::node::stream::ILocation::Value const& a, silk::node::stream::ILocation::Value const& b)
 {
     silk::node::stream::ILocation::Value r = a;
-    r.longitude += b.longitude;
-    r.latitude += b.latitude;
-    r.altitude += b.altitude;
-    r.velocity_2d += b.velocity_2d;
-    r.velocity += b.velocity;
-    r.direction += b.direction;
+    r.wgs84.lat_lon  += b.wgs84.lat_lon;
+    r.wgs84.lat_lon_accuracy += b.wgs84.lat_lon_accuracy;
+    r.wgs84.altitude += b.wgs84.altitude;
+    r.wgs84.altitude_accuracy += b.wgs84.altitude_accuracy;
+    r.ecef.position  += b.ecef.position;
+    r.ecef.position_accuracy  += b.ecef.position_accuracy;
+    r.ecef.velocity  += b.ecef.velocity;
+    r.ecef.velocity_accuracy  += b.ecef.velocity_accuracy;
+    r.ecef.direction += b.ecef.direction;
     return r;
 }
 template<> inline silk::node::stream::ILocation::Value scale(silk::node::stream::ILocation::Value const& a, double scale)
 {
     silk::node::stream::ILocation::Value r = a;
-    r.longitude *= scale;
-    r.latitude *= scale;
-    r.altitude *= scale;
-    r.velocity_2d *= scale;
-    r.velocity *= scale;
-    r.direction *= scale;
+    r.wgs84.lat_lon  *= scale;
+    r.wgs84.lat_lon_accuracy  *= scale;
+    r.wgs84.altitude *= scale;
+    r.wgs84.altitude_accuracy *= scale;
+    r.ecef.position  *= scale;
+    r.ecef.position_accuracy  *= scale;
+    r.ecef.velocity  *= scale;
+    r.ecef.velocity_accuracy  *= scale;
+    r.ecef.direction *= scale;
     return r;
 }
+template<> inline void fix(silk::node::stream::ILocation::Value& a)
+{
+    a.ecef.direction.normalize<math::safe>();
+    a.wgs84.lat_lon_accuracy = math::clamp(a.wgs84.lat_lon_accuracy, 0.0, silk::node::stream::ILocation::Value::WGS84::MAX_VALID_ACCURACY * 2.0);
+    a.wgs84.altitude_accuracy = math::clamp(a.wgs84.altitude_accuracy, 0.0, silk::node::stream::ILocation::Value::WGS84::MAX_VALID_ACCURACY * 2.0);
+    a.ecef.position_accuracy = math::clamp(a.ecef.position_accuracy, 0.0, silk::node::stream::ILocation::Value::ECEF::MAX_VALID_ACCURACY * 2.0);
+    a.ecef.velocity_accuracy = math::clamp(a.ecef.velocity_accuracy, 0.0, silk::node::stream::ILocation::Value::ECEF::MAX_VALID_ACCURACY * 2.0);
+}
+
 }
 }
 

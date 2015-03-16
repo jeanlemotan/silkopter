@@ -121,7 +121,7 @@ private:
         bool has_nav_status = false;
         bool has_pollh = false;
         bool has_sol = false;
-        q::Clock::time_point last_complete_time_point;
+        q::Clock::time_point last_complete_tp;
     };
     mutable std::shared_ptr<Stream> m_stream;
 };

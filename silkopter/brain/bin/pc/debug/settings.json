@@ -18,96 +18,62 @@
             }
         },
         "nodes": {
-            "ADC Value LPF": {
-                "name": "ADC Value LPF",
+            "UBLOX": {
+                "name": "UBLOX",
                 "init_params": {
-                    "Rate (Hz)": 1
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 0.0,
-                    "Inputs": {
-                        "Input": "ADC Value RS/Output"
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "ADC Value RS": {
-                "name": "ADC Value RS",
-                "init_params": {
-                    "Rate (Hz)": 1
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 0.0,
-                    "Inputs": {
-                        "Input": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "MS5611": {
-                "name": "MS5611",
-                "init_params": {
-                    "Bus": "i2c0",
-                    "Pressure Rate (Hz)": 100,
-                    "Temperature Rate Ratio": 10,
+                    "Bus": "uart0",
+                    "Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": 281.0,
-                            "y": -9.0
+                            "x": -156.0,
+                            "y": -159.0
                         }
                     }
                 },
                 "config": {
-                    "Outputs": {
-                        "Pressure": {},
-                        "Temperature": {}
-                    }
-                }
-            },
-            "Comp Location": {
-                "name": "Comp Location",
-                "init_params": {
-                    "Rate (Hz)": 10,
-                    "__gs": {
-                        "position": {
-                            "x": 227.0,
-                            "y": -227.0
-                        }
-                    }
-                },
-                "config": {
-                    "Inputs": {
-                        "Location": "",
-                        "Linear Acceleration": "",
-                        "Pressure": "Pressure RS/Output"
-                    },
                     "Outputs": {
                         "Location": {}
                     }
                 }
             },
-            "Pressure RS": {
-                "name": "Pressure RS",
+            "Location RS": {
+                "name": "Location RS",
                 "init_params": {
-                    "Rate (Hz)": 10,
+                    "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": 142.0,
-                            "y": -398.0
+                            "x": -333.0,
+                            "y": -160.0
+                        }
+                    }
+                },
+                "config": {
+                    "Poles": 4,
+                    "Cutoff Frequency (Hz)": 1.0,
+                    "Inputs": {
+                        "Input": "UBLOX/Location"
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Location LPF": {
+                "name": "Location LPF",
+                "init_params": {
+                    "Rate (Hz)": 5,
+                    "__gs": {
+                        "position": {
+                            "x": -256.0,
+                            "y": -305.0
                         }
                     }
                 },
                 "config": {
                     "Poles": 2,
-                    "Cutoff Frequency (Hz)": 5.0,
+                    "Cutoff Frequency (Hz)": 1.0,
                     "Inputs": {
-                        "Input": "MS5611/Pressure"
+                        "Input": "UBLOX/Location"
                     },
                     "Outputs": {
                         "Output": {}

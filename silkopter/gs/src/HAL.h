@@ -21,6 +21,7 @@
 #include "common/node/processor/IMultirotor_Pilot.h"
 
 #include "common/Comm_Data.h"
+#include "common/Manual_Clock.h"
 
 #include "utils/Json_Helpers.h"
 
@@ -274,7 +275,11 @@ public:
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
+    auto get_remote_clock() const -> Manual_Clock const&;
+
 protected:
+    Manual_Clock m_remote_clock;
+
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
     Registry<node::stream::Stream> m_streams;

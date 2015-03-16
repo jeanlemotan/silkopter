@@ -78,7 +78,7 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 
         m_rudp.start();
 
-        request_nodes();
+        request_data();
 
         QLOGI("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
@@ -110,19 +110,15 @@ auto Comms::get_remote_address() const -> boost::asio::ip::address
     return m_remote_endpoint.address();
 }
 
-auto Comms::get_remote_clock() const -> Manual_Clock const&
-{
-    return m_remote_clock;
-}
-
 void Comms::reset()
 {
     m_hal.m_nodes.remove_all();
     m_hal.m_streams.remove_all();
 }
 
-void Comms::request_nodes()
+void Comms::request_data()
 {
+    m_setup_channel.pack_all(comms::Setup_Message::CLOCK, ++m_last_req_id);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
 }
@@ -286,6 +282,24 @@ static auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) ->
 //    }
 //    return true;
 //}
+
+void Comms::handle_clock()
+{
+    uint64_t us;
+    uint32_t req_id = 0;
+    if (m_setup_channel.begin_unpack() &&
+        m_setup_channel.unpack_param(req_id) &&
+        m_setup_channel.unpack_param(us))
+    {
+        m_setup_channel.end_unpack();
+
+        m_hal.m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
+    }
+    else
+    {
+        QLOGE("Error in enumerating node defs");
+    }
+}
 
 
 void Comms::handle_enumerate_node_defs()
@@ -641,6 +655,16 @@ void Comms::handle_streams_telemetry_active()
     m_hal.m_stream_telemetry_queue.erase(it);
 }
 
+#pragma pack(push, 1)
+struct Sample_Data
+{
+    uint64_t dt : 24; //10us
+    uint64_t tp : 40; //1us
+    uint16_t sample_idx : 15;
+    uint16_t is_healthy : 1;
+};
+#pragma pack(pop)
+
 template<class IStream, class Stream>
 auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
 {
@@ -648,19 +672,22 @@ auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_co
     {
         auto& stream = static_cast<Stream&>(_stream);
         typename Stream::Sample sample;
+        Sample_Data data;
         for (uint32_t i = 0; i < sample_count; i++)
         {
             uint32_t dt = 0;
             bool ok = channel.unpack_param(sample.value);
-            ok &= channel.unpack_param(sample.sample_idx);
-            ok &= channel.unpack_param(dt);
-            ok &= channel.unpack_param(sample.is_healthy);
-            sample.dt = std::chrono::microseconds(dt);
-            if (!dt)
+            ok &= channel.unpack_param(data);
+            if (!ok)
             {
                 QLOGE("Error unpacking samples!!!");
                 return false;
             }
+
+            sample.sample_idx = data.sample_idx;
+            sample.dt = std::chrono::microseconds(data.dt << 3);
+            sample.tp = Manual_Clock::time_point(std::chrono::microseconds(data.tp));
+            sample.is_healthy = data.is_healthy ? true : false;
             stream.samples.push_back(sample);
         }
         stream.samples_available_signal.execute(stream);
@@ -822,6 +849,8 @@ void Comms::process()
     {
         switch (msg.get())
         {
+            case comms::Setup_Message::CLOCK: handle_clock(); break;
+
             case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
             case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 

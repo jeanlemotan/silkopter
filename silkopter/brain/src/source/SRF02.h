@@ -56,7 +56,7 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
         q::Clock::duration dt;
-        q::Clock::time_point last_time_point;
+        q::Clock::time_point last_tp;
     };
     mutable std::shared_ptr<Stream> m_stream;
 

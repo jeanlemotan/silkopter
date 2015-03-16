@@ -47,7 +47,7 @@ private:
     std::shared_ptr<sz::RC5T619::Init_Params> m_init_params;
     std::shared_ptr<sz::RC5T619::Config> m_config;
 
-    q::Clock::time_point m_last_time_point = q::Clock::now();
+    q::Clock::time_point m_last_tp = q::Clock::now();
     q::Clock::duration m_dt;
 
     size_t m_stage = 0;
@@ -58,7 +58,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
 
         std::vector<Sample> samples;
-        q::Clock::time_point last_time_point = q::Clock::now();
+        q::Clock::time_point last_tp = q::Clock::now();
         Sample last_sample;
         uint32_t rate = 0;
     };

@@ -35,6 +35,7 @@ namespace util
 {
 namespace dsp
 {
+
 template<> inline bool equals(silk::node::stream::IReference_Frame::Value const& a, silk::node::stream::IReference_Frame::Value const& b)
 {
     return math::equals(a.local_to_world, b.local_to_world);
@@ -51,5 +52,10 @@ template<> inline silk::node::stream::IReference_Frame::Value scale(silk::node::
     r.local_to_world = math::slerp(math::quatf(), a.local_to_world, scale);
     return r;
 }
+template<> inline void fix(silk::node::stream::IReference_Frame::Value& a)
+{
+    a.local_to_world.normalize();
+}
+
 }
 }

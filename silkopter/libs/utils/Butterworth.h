@@ -24,6 +24,11 @@ template<class T> T scale(T const& a, double scale)
     return a * scale;
 }
 
+template<class T> void fix(T& a)
+{
+    ; //nothing
+}
+
 
 }
 
@@ -74,7 +79,7 @@ public:
 
     void reset(T const& t)
     {
-        for(size_t i=0; i < m_poles / 2; ++i)
+        for(size_t i = 0; i < m_poles / 2; ++i)
         {
             w0[i] = t;
             w1[i] = t;
@@ -99,6 +104,12 @@ public:
             }
         }
     }
+    void reset()
+    {
+        auto t = m_last; //need to make a copy as reset will change it
+        reset(t);
+    }
+
     void process(T& t)
     {
         if (m_needs_reset)
@@ -114,6 +125,8 @@ public:
             w2[i] = w1[i];
             w1[i] = w0[i];
         }
+        dsp::fix(t);
+        m_last = t;
     }
 
 private:
@@ -126,6 +139,7 @@ private:
     std::vector<T> w0;
     std::vector<T> w1;
     std::vector<T> w2;
+    T m_last;
 };
 
 

@@ -82,6 +82,7 @@ private:
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;
+    q::Clock::time_point m_last_fifo_tp = q::Clock::now();
 
     struct Common
     {
@@ -120,7 +121,7 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
         uint8_t akm_address = 0;
-        q::Clock::time_point last_time_point;
+        q::Clock::time_point last_tp = q::Clock::now();
         float magnetic_adj[3];
     };
     mutable std::shared_ptr<Magnetic_Field> m_magnetic_field;

@@ -50,6 +50,10 @@
 #include <QtCore/QSettings>
 #include <QFileDialog>
 
+#include <mapcontrol.h>
+#include <osmmapadapter.h>
+#include <maplayer.h>
+
 extern "C"
 {
 #include <libavutil/opt.h>

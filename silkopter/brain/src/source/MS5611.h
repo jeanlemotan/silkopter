@@ -100,7 +100,7 @@ private:
 
     uint8_t         m_stage = 0;
 
-    q::Clock::time_point m_last_timestamp;
+    q::Clock::time_point m_last_tp;
     q::Clock::duration m_dt;
 };
 

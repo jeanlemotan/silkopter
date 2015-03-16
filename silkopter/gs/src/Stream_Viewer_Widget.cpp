@@ -24,6 +24,7 @@ Stream_Viewer_Widget::Stream_Viewer_Widget(silk::HAL& hal, silk::Comms& comms, Q
     , m_comms(comms)
 {
     setLayout(new QVBoxLayout(this));
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 Stream_Viewer_Widget::~Stream_Viewer_Widget()
@@ -101,7 +102,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -119,7 +120,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -137,7 +138,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -153,7 +154,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -181,7 +182,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -197,7 +198,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -213,7 +214,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -224,15 +225,19 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Lat", "°", QColor(0xe74c3c));
         viewer->add_graph("Lon", "°", QColor(0x2ecc71));
         viewer->add_graph("Alt", "m", QColor(0x3498db));
-        viewer->add_graph("Precision", "m", QColor(0x3498db));
+        viewer->add_graph("ECEF.X", "m", QColor(0x3498db));
+        viewer->add_graph("ECEF.Y", "m", QColor(0x3498db));
+        viewer->add_graph("ECEF.Z", "m", QColor(0x3498db));
+        viewer->add_graph("ECEF.Acc", "m", QColor(0x3498db));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Location>(stream)->samples_available_signal.connect([this, viewer](Location& stream)
         {
-            std::array<double, 4> data;
+            std::array<double, 7> data;
             for (auto const& s: stream.samples)
             {
-                data = { s.value.latitude, s.value.longitude, s.value.altitude, s.value.precision };
-                viewer->add_samples(s.dt, data.data());
+                data = { s.value.wgs84.lat_lon.x, s.value.wgs84.lat_lon.y, s.value.wgs84.altitude, s.value.ecef.position.x,
+                       s.value.ecef.position.y, s.value.ecef.position.z, s.value.ecef.position_accuracy };
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -248,7 +253,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -268,7 +273,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
@@ -284,7 +289,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.dt, data.data());
+                viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });

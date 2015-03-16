@@ -236,12 +236,12 @@ void RC5T619::process()
     }
 
     auto now = q::Clock::now();
-    if (now - m_last_time_point < m_dt)
+    if (now - m_last_tp < m_dt)
     {
         return;
     }
 
-    m_last_time_point = now;
+    m_last_tp = now;
 
 //    LOG_INFO("ADC{} : {}:{} -> {}", idx, buf[0], buf[1], result);
 
@@ -262,11 +262,12 @@ void RC5T619::process()
 
             Stream::Sample& sample = m_adc[1]->last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[1]->last_time_point;
+            sample.dt = now - m_adc[1]->last_tp;
+            sample.tp = now;
             sample.sample_idx++;
             m_adc[1]->samples.push_back(sample);
 
-            m_adc[1]->last_time_point = now;
+            m_adc[1]->last_tp = now;
         }
 
         //next
@@ -286,11 +287,12 @@ void RC5T619::process()
 
             Stream::Sample& sample = m_adc[0]->last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[0]->last_time_point;
+            sample.dt = now - m_adc[0]->last_tp;
+            sample.tp = now;
             sample.sample_idx++;
             m_adc[0]->samples.push_back(sample);
 
-            m_adc[0]->last_time_point = now;
+            m_adc[0]->last_tp = now;
         }
 
         //next

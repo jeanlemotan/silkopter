@@ -83,6 +83,7 @@ void ADC_Voltmeter::process()
     {
        Stream::Sample vs;
        vs.dt = sample.dt;
+       vs.tp = sample.tp;
        vs.sample_idx = sample.sample_idx;
        vs.value = sample.value * m_config->outputs.voltage.scale + m_config->outputs.voltage.bias;
        return vs;

@@ -608,9 +608,9 @@ namespace formatting
 	}
 
 	template<class Dst_String, class Placeholder, class clock>
-	void format_string(Dst_String& dst, Placeholder const& ph, std::chrono::time_point<clock> const& time_point)
+    void format_string(Dst_String& dst, Placeholder const& ph, std::chrono::time_point<clock> const& tp)
 	{
-		format_string(dst, ph, time_point.time_since_epoch());
+        format_string(dst, ph, tp.time_since_epoch());
 	}
 
 	template<class Dst_String, class Placeholder, class T>

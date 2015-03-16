@@ -21,6 +21,8 @@ enum class Telemetry_Message : uint8_t
 
 enum class Setup_Message : uint8_t
 {
+    CLOCK,
+
     ENUMERATE_NODE_DEFS,
     ENUMERATE_NODES,
 

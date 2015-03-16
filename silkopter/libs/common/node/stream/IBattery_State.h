@@ -42,9 +42,9 @@ namespace dsp
 {
 template<> inline bool equals(silk::node::stream::IBattery_State::Value const& a, silk::node::stream::IBattery_State::Value const& b)
 {
-    return math::equals(a.charge_used, b.charge_used) ||
-           math::equals(a.average_voltage, b.average_voltage) ||
-           math::equals(a.average_current, b.average_current) ||
+    return math::equals(a.charge_used, b.charge_used) &&
+           math::equals(a.average_voltage, b.average_voltage) &&
+           math::equals(a.average_current, b.average_current) &&
            math::equals(a.capacity_left, b.capacity_left);
 }
 template<> inline silk::node::stream::IBattery_State::Value add(silk::node::stream::IBattery_State::Value const& a, silk::node::stream::IBattery_State::Value const& b)

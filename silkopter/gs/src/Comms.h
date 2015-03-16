@@ -1,7 +1,6 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/Manual_Clock.h"
 #include "common/Comm_Data.h"
 #include "utils/PID.h"
 
@@ -41,7 +40,6 @@ public:
     auto is_connected() const -> bool;
     auto get_remote_address() const -> boost::asio::ip::address;
 
-    auto get_remote_clock() const -> Manual_Clock const&;
     auto get_rudp() -> util::RUDP&;
 
     void request_all_node_configs();
@@ -59,7 +57,7 @@ private:
     uint32_t m_last_req_id = 0;
 
     void reset();
-    void request_nodes();
+    void request_data();
 
     void send_hal_requests();
 
@@ -73,13 +71,12 @@ private:
     mutable Input_Channel m_input_channel;
     mutable Telemetry_Channel m_telemetry_channel;
 
-    Manual_Clock m_remote_clock;
-
     auto link_input_streams(node::Node_ptr node) -> bool;
     auto publish_output_streams(node::Node_ptr node) -> bool;
 
     void handle_stream_data();
 
+    void handle_clock();
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();
     void handle_streams_telemetry_active();

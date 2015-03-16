@@ -44,6 +44,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     , m_setup_channel(m_rudp, SETUP_CHANNEL)
     , m_input_channel(m_rudp, INPUT_CHANNEL)
     , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
+    , m_comms_start_tp(q::Clock::now())
 {
     {
         util::RUDP::Send_Params params;
@@ -166,6 +167,16 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
+#pragma pack(push, 1)
+struct Sample_Data
+{
+    uint64_t dt : 24; //10us
+    uint64_t tp : 40; //1us
+    uint16_t sample_idx : 15;
+    uint16_t is_healthy : 1;
+};
+#pragma pack(pop)
+
 template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
 {
     if (q::rtti::is_of_type<Stream>(_stream))
@@ -176,12 +187,29 @@ template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts,
         ts.sample_count += static_cast<uint32_t>(samples.size());
         size_t off = ts.data.size();
 
+        Sample_Data data;
         for (auto const& s: samples)
         {
             util::detail::set_value(ts.data, s.value, off);
-            util::detail::set_value(ts.data, s.sample_idx, off);
-            util::detail::set_value(ts.data, static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()), off);
-            util::detail::set_value(ts.data, s.is_healthy, off);
+
+            auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
+            if (dt >= (1 << 24))
+            {
+                QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
+                dt = (1 << 24) - 1;
+            }
+            auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
+            if (tp >= (uint64_t(1) << 40))
+            {
+                QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
+                tp = (uint64_t(1) << 40) - 1;
+            }
+
+            data.sample_idx = s.sample_idx;
+            data.is_healthy = s.is_healthy;
+            data.dt = dt;
+            data.tp = tp;
+            util::detail::set_value(ts.data, data, off);
         }
         return true;
     }
@@ -308,13 +336,24 @@ static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& nod
     pack_json(channel, node.get_config());
 }
 
+void Comms::handle_clock()
+{
+    uint32_t req_id = 0;
+    if (m_setup_channel.unpack_all(req_id))
+    {
+        QLOGI("Req Id: {} - clock", req_id);
+
+        auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now() - m_comms_start_tp).count());
+        m_setup_channel.pack_all(comms::Setup_Message::CLOCK, req_id, tp);
+    }
+}
 
 void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
     if (m_setup_channel.unpack_all(req_id))
     {
-        QLOGI("Req Id: {} - enumerate node facrory", req_id);
+        QLOGI("Req Id: {} - enumerate node factory", req_id);
         auto nodes = m_hal.get_node_factory().create_all();
 
         m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
@@ -503,6 +542,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
+        case comms::Setup_Message::CLOCK: handle_clock(); break;
         case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
@@ -529,9 +569,9 @@ void Comms::process()
     m_rudp.process();
 
     auto now = q::Clock::now();
-    if (now - m_last_rudp_time_stamp >= RUDP_PERIOD)
+    if (now - m_last_rudp_tp >= RUDP_PERIOD)
     {
-        m_last_rudp_time_stamp = now;
+        m_last_rudp_tp = now;
 
         pack_telemetry_streams();
 

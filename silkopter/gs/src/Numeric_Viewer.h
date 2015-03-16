@@ -10,7 +10,7 @@ public:
     Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent);
     ~Numeric_Viewer();
     void add_graph(std::string const& name, std::string const& unit, QColor color);
-    void add_samples(q::Clock::duration dt, double const* src);
+    void add_samples(q::Clock::time_point tp, double const* src);
     void process();
 
 private:
@@ -18,7 +18,7 @@ private:
 
     Ui::Numeric_Viewer m_ui;
     size_t m_sample_rate = 0;
-    q::Clock::duration m_time = q::Clock::duration(0);
+    double m_tp = 0.0;
     bool m_is_started = false;
 
     struct View
@@ -26,12 +26,12 @@ private:
         size_t start_idx = 0;
         size_t end_idx = 0;
         bool is_at_end = true;
-        double time;
+        double duration;
     } m_view;
 
     struct Sample
     {
-        double time;
+        double tp;
     };
     std::vector<double> m_values;
 

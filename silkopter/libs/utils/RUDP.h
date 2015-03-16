@@ -267,7 +267,7 @@ namespace util
             size_t rx_pongs = 0;
         };
 
-        q::Clock::time_point m_init_time_point = q::Clock::time_point(q::Clock::duration{0});
+        q::Clock::time_point m_init_tp = q::Clock::time_point(q::Clock::duration{0});
         std::array<uint32_t, MAX_CHANNELS> m_last_id;
         Stats m_global_stats;
 
@@ -512,7 +512,7 @@ namespace util
 
         m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
-        m_init_time_point = q::Clock::now();
+        m_init_tp = q::Clock::now();
         //m_ping.rtts.set_capacity(100);
     }
 
@@ -856,10 +856,10 @@ namespace util
             {
                 size_t idx = sz - i - 1;
                 auto const& rtt = m_ping.rtts[idx];
-                auto const& sent_time_point = rtt.first;
+                auto const& sent_tp = rtt.first;
                 auto const& duration = rtt.second;
                 //we have a few samples of at most one second total?
-                if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_time_point > std::chrono::seconds(1))
+                if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_tp > std::chrono::seconds(1))
                 {
                     //erase the old ones
                     m_ping.rtts.erase(m_ping.rtts.begin(), m_ping.rtts.begin() + idx);

@@ -82,6 +82,7 @@ void ADC_Ammeter::process()
     {
        Stream::Sample vs;
        vs.dt = sample.dt;
+       vs.tp = sample.tp;
        vs.sample_idx = sample.sample_idx;
        vs.value = sample.value * m_config->outputs.current.scale + m_config->outputs.current.bias;
        return vs;

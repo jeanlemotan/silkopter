@@ -24,6 +24,11 @@ HAL::~HAL()
 {
 }
 
+auto HAL::get_remote_clock() const -> Manual_Clock const&
+{
+    return m_remote_clock;
+}
+
 auto HAL::get_node_defs() const  -> Registry<node::Node_Def> const&
 {
     return m_node_defs;

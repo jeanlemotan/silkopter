@@ -30,7 +30,6 @@ void signal_handler(int signum)
     QLOGI("Exitting due to signal {}", signum);
 }
 
-
 int main(int argc, char const* argv[])
 {
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)

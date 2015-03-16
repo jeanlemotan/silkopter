@@ -94,7 +94,7 @@ auto SRF02::init() -> bool
     QLOGI("SRF02 Revision: {}", rev);
 
     m_stream->dt = std::chrono::milliseconds(1000 / m_init_params->rate);
-    m_stream->last_time_point = q::Clock::now();
+    m_stream->last_tp = q::Clock::now();
     m_state = 0;
 
 //    if (!m_init_params->name.empty())
@@ -126,19 +126,19 @@ void SRF02::process()
     //begin?
     if (m_state == 0)
     {
-        if (now - m_stream->last_time_point < m_stream->dt)
+        if (now - m_stream->last_tp < m_stream->dt)
         {
             return;
         }
 
         m_state = 1;
-        m_stream->last_time_point = now;
+        m_stream->last_tp = now;
         i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
         return; //we have to wait first
     }
 
     //wait for echo
-    if (now - m_stream->last_time_point < m_stream->dt)
+    if (now - m_stream->last_tp < m_stream->dt)
     {
         return;
     }
@@ -162,6 +162,7 @@ void SRF02::process()
         sample.value = distance;
         sample.sample_idx++;
         sample.dt = m_stream->dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
+        sample.tp = now;
         m_stream->samples.push_back(sample);
     }
 }

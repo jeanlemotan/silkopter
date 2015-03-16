@@ -22,6 +22,8 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
     m_ui.plot->yAxis->setLabel(unit.c_str());
     m_ui.plot->yAxis->setLabelFont(font);
     m_ui.plot->yAxis->setTickLabelFont(font);
+    m_ui.plot->yAxis->setSelectedLabelFont(font);
+    m_ui.plot->yAxis->setSelectedTickLabelFont(font);
     m_ui.plot->yAxis->grid()->setSubGridVisible(true);
 
     //m_ui.fft->setNotAntialiasedElements(QCP::AntialiasedElements(QCP::aeAll));
@@ -35,6 +37,8 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
     m_ui.fft->yAxis->setLabel(unit.c_str());
     m_ui.fft->yAxis->setLabelFont(font);
     m_ui.fft->yAxis->setTickLabelFont(font);
+    m_ui.fft->yAxis->setSelectedLabelFont(font);
+    m_ui.fft->yAxis->setSelectedTickLabelFont(font);
     m_ui.fft->yAxis->grid()->setSubGridVisible(true);
     //m_ui.fft->yAxis->setRange(0, 5.f);
 
@@ -163,15 +167,22 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
     graph.fft_plot = fft_plot;
 }
 
-void Numeric_Viewer::add_samples(q::Clock::duration dt, double const* src)
+void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src)
 {
+    double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
+    if (tpd < m_tp)
+    {
+        QLOGE("Sample from the past!!");
+        return;
+    }
+
     Sample sample;
-    sample.time = std::chrono::duration<double>(m_time).count();
+    sample.tp = tpd;
     size_t off = m_values.size();
     m_values.resize(m_values.size() + m_graphs.size());
     std::copy(src, src + m_graphs.size(), m_values.begin() + off);
     m_temp_samples.emplace_back(std::move(sample));
-    m_time += dt;
+    m_tp = tpd;
 }
 
 void Numeric_Viewer::process()
@@ -223,11 +234,11 @@ void Numeric_Viewer::update_view()
 
     if (!m_samples.empty())
     {
-        m_view.time = m_samples[m_view.end_idx - 1].time - m_samples[m_view.start_idx].time;
+        m_view.duration = m_samples[m_view.end_idx - 1].tp - m_samples[m_view.start_idx].tp;
     }
     else
     {
-        m_view.time = 0.0;
+        m_view.duration = 0.0;
     }
 }
 
@@ -241,7 +252,7 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
     graph.plot_data_map.resize(0);
     graph.plot_data_map.reserve(100000);
 
-    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.time;
+    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.duration;
     size_t offset = view.start_idx * m_graphs.size();
     if (pixels_per_second < m_sample_rate)
     {
@@ -254,7 +265,7 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
             graph.stats.max_value = math::max(graph.stats.max_value, v);
             graph.stats.min_value = math::min(graph.stats.min_value, v);
 
-            auto key = s.time;
+            auto key = s.tp;
             auto dt = key - last_key;
             if (dt * pixels_per_second >= 1.0)
             {
@@ -272,7 +283,7 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
             offset += m_graphs.size();
             graph.stats.min_value = math::min(graph.stats.min_value, v);
             graph.stats.max_value = math::max(graph.stats.max_value, v);
-            graph.plot_data_map.push_back(QCPData(s.time, v));
+            graph.plot_data_map.push_back(QCPData(s.tp, v));
         }
     }
     graph.stats.average_value = (graph.stats.max_value + graph.stats.min_value) * 0.5f;
@@ -301,7 +312,7 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
     graph.fft_data_map.resize(0);
     graph.fft_data_map.reserve(100000);
 
-    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.time;
+    double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.duration;
     if (pixels_per_second < m_sample_rate)
     {
         double last_key = 0;
@@ -409,7 +420,7 @@ void Numeric_Viewer::finish_tasks()
     double average_value = (max_value + min_value) * 0.5f;
     m_ui.data_range->setValue(max_value - min_value);
     m_ui.average->setValue(average_value);
-    m_ui.plot->xAxis->setRange(m_samples[m_view.start_idx].time, m_samples[m_view.start_idx].time + m_view.time);
+    m_ui.plot->xAxis->setRange(m_samples[m_view.start_idx].tp, m_samples[m_view.start_idx].tp + m_view.duration);
 
     auto display_range = m_ui.display_range->value();
     if (display_range == 0)

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,6 +15,7 @@ CONFIG += c++11
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../src/qnodeseditor
+INCLUDEPATH += ../../src/QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -125,7 +126,8 @@ HEADERS += \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
     ../../src/Stream_Viewer_Widget.h \
-    ../../src/Numeric_Viewer.h
+    ../../src/Numeric_Viewer.h \
+    ../../src/Map_Viewer.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -140,7 +142,8 @@ SOURCES += \
     ../../src/HAL_Window.cpp \
     ../../../libs/json_editor/JSON_Model.cpp \
     ../../src/Stream_Viewer_Widget.cpp \
-    ../../src/Numeric_Viewer.cpp
+    ../../src/Numeric_Viewer.cpp \
+    ../../src/Map_Viewer.cpp
 
 FORMS += \
     ../../src/New_Node.ui \

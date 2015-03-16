@@ -49,7 +49,6 @@ private:
 
         uint32_t rate = 0;
         std::vector<typename Stream_t::Sample> samples;
-        uint32_t sample_idx = 0;
     };
     mutable std::shared_ptr<Stream> m_output_stream;
 };
@@ -140,6 +139,7 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         QLOGE("Cannot setup dsp filter.");
         return false;
     }
+    m_dsp.reset();
 
     m_config = sz;
 
@@ -188,7 +188,7 @@ void LPF<Stream_t>::process()
     auto const& is = input_stream->get_samples();
     m_output_stream->samples.reserve(is.size());
 
-    for (auto& s: is)
+    for (auto const& s: is)
     {
        if (s.is_healthy)
        {

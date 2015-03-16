@@ -103,6 +103,8 @@ private:
     void gather_telemetry_streams();
     void pack_telemetry_streams();
 
+    void handle_clock();
+
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
 
@@ -120,11 +122,11 @@ private:
     void handle_streams_telemetry_active();
 
     HAL& m_hal;
-    q::Clock::time_point m_uav_sent_time_point = q::Clock::now();
+    q::Clock::time_point m_uav_sent_tp = q::Clock::now();
 
     Manual_Clock m_remote_clock;
 
-    q::Clock::time_point m_last_rudp_time_stamp = q::Clock::now();
+    q::Clock::time_point m_last_rudp_tp = q::Clock::now();
 
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
@@ -134,6 +136,8 @@ private:
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;
+
+    q::Clock::time_point m_comms_start_tp;
 
     bool m_is_connected = false;
 
