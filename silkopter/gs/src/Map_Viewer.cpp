@@ -46,6 +46,9 @@ Map_Viewer::Map_Viewer(QWidget *parent)
     m_map_control->setZoom(2);
 
     setLayout(new QVBoxLayout(this));
+    layout()->setMargin(0);
+    layout()->setSpacing(0);
+    layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(m_map_control);
 
     // myWidget is any QWidget-derived class
@@ -124,19 +127,19 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
     auto* action = sm->addAction("Google Maps");
     action->setCheckable(true);
     action->setChecked(m_map_type == Map_Type::GOOGLE_MAPS);
-    connect(action, &QAction::toggled, [this](bool yes) { set_map_type(Map_Type::GOOGLE_MAPS); });
+    connect(action, &QAction::toggled, [this](bool) { set_map_type(Map_Type::GOOGLE_MAPS); });
     action = sm->addAction("Google Satellite");
     action->setCheckable(true);
     action->setChecked(m_map_type == Map_Type::GOOGLE_SATELLITE);
-    connect(action, &QAction::toggled, [this](bool yes) { set_map_type(Map_Type::GOOGLE_SATELLITE); });
+    connect(action, &QAction::toggled, [this](bool) { set_map_type(Map_Type::GOOGLE_SATELLITE); });
     action = sm->addAction("Google Terrain");
     action->setCheckable(true);
     action->setChecked(m_map_type == Map_Type::GOOGLE_TERRAIN);
-    connect(action, &QAction::toggled, [this](bool yes) { set_map_type(Map_Type::GOOGLE_TERRAIN); });
+    connect(action, &QAction::toggled, [this](bool) { set_map_type(Map_Type::GOOGLE_TERRAIN); });
     action = sm->addAction("Open Street Maps");
     action->setCheckable(true);
     action->setChecked(m_map_type == Map_Type::OSM);
-    connect(action, &QAction::toggled, [this](bool yes) { set_map_type(Map_Type::OSM); });
+    connect(action, &QAction::toggled, [this](bool) { set_map_type(Map_Type::OSM); });
 
     menu.exec(pos);
 }

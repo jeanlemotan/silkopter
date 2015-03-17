@@ -165,7 +165,21 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ILinear_Acceleration>())
     {
-//        layout()->addWidget(new Vec_Stream_Viewer("m/s^2", stream, this));
+        auto viewer = new Numeric_Viewer("m/s^2", stream->rate, this);
+        viewer->add_graph("X", "m/s^2", QColor(0xe74c3c));
+        viewer->add_graph("Y", "m/s^2", QColor(0x2ecc71));
+        viewer->add_graph("Z", "m/s^2", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Linear_Acceleration>(stream)->samples_available_signal.connect([this, viewer](Linear_Acceleration& stream)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.tp, data.data());
+            }
+            viewer->process();
+        });
     }
     else if (class_id == q::rtti::get_class_id<ICardinal_Points>())
     {
@@ -221,26 +235,6 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (class_id == q::rtti::get_class_id<ILocation>())
     {
-//        auto viewer = new Numeric_Viewer("coords", stream->rate, this);
-//        viewer->add_graph("Lat", "°", QColor(0xe74c3c));
-//        viewer->add_graph("Lon", "°", QColor(0x2ecc71));
-//        viewer->add_graph("Alt", "m", QColor(0x3498db));
-//        viewer->add_graph("ECEF.X", "m", QColor(0x3498db));
-//        viewer->add_graph("ECEF.Y", "m", QColor(0x3498db));
-//        viewer->add_graph("ECEF.Z", "m", QColor(0x3498db));
-//        viewer->add_graph("ECEF.Acc", "m", QColor(0x3498db));
-//        layout()->addWidget(viewer);
-//        m_connection = std::static_pointer_cast<Location>(stream)->samples_available_signal.connect([this, viewer](Location& stream)
-//        {
-//            std::array<double, 7> data;
-//            for (auto const& s: stream.samples)
-//            {
-//                data = { s.value.wgs84.lat_lon.x, s.value.wgs84.lat_lon.y, s.value.wgs84.altitude, s.value.ecef.position.x,
-//                       s.value.ecef.position.y, s.value.ecef.position.z, s.value.ecef.position_accuracy };
-//                viewer->add_samples(s.tp, data.data());
-//            }
-//            viewer->process();
-//        });
         auto viewer = new Map_Viewer(this);
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<Location>(stream)->samples_available_signal.connect([this, viewer](Location& stream)
