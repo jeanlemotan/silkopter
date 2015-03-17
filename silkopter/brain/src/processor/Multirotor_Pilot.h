@@ -4,7 +4,7 @@
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/ICardinal_Points.h"
 #include "common/node/stream/IReference_Frame.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/ILocationxxx.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/IMultirotor_Input.h"
 #include "Comms.h"
@@ -54,14 +54,14 @@ private:
     stream::IReference_Frame_wptr m_reference_frame_stream;
     stream::IAngular_Velocity_wptr m_angular_velocity_stream;
     stream::ICardinal_Points_wptr m_cardinal_points_stream;
-    stream::ILocation_wptr m_location_stream;
+    //stream::ILocation_wptr m_location_stream;
     stream::IBattery_State_wptr m_battery_state_stream;
     stream::IMultirotor_Input_wptr m_multirotor_input_stream;
 
     std::vector<stream::IReference_Frame::Sample> m_reference_frame_samples;
     std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
     std::vector<stream::ICardinal_Points::Sample> m_cardinal_points_samples;
-    std::vector<stream::ILocation::Sample> m_location_samples;
+    //std::vector<stream::ILocation::Sample> m_location_samples;
     std::vector<stream::IBattery_State::Sample> m_battery_state_samples;
     std::vector<stream::IBattery_State::Sample> m_multirotor_input_samples;
 

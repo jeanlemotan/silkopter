@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Inertial { struct Init_Params {
+namespace sz { namespace Gravity_Filter { struct Init_Params {
  uint32_t rate;
 
 explicit Init_Params():rate(0) {  }
@@ -41,7 +41,7 @@ explicit Init_Params():rate(0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Inertial::Init_Params > {
+class SAXEventHandler< ::sz::Gravity_Filter::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Inertial::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63 >
-struct Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63, ::sz::Inertial::Init_Params > {
+template < class Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162ab88a7ebe >
+struct Serializer< Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162ab88a7ebe, ::sz::Gravity_Filter::Init_Params > {
 
-    void operator()( Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63& w, const ::sz::Inertial::Init_Params& value) const
+    void operator()( Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162ab88a7ebe& w, const ::sz::Gravity_Filter::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d7893bcb1bd63, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162ab88a7ebe, uint32_t >()(w, value.rate);
 
         w.EndObject(1);
     }
@@ -403,7 +403,7 @@ struct Serializer< Writer1ad9e081ed4f2537406d7cec8bd789e9cbc8e5bd22293c06d01d789
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Inertial { struct Inputs {
+namespace sz { namespace Gravity_Filter { struct Inputs {
  std::string reference_frame;
 std::string acceleration;
 
@@ -418,7 +418,7 @@ explicit Inputs():reference_frame(), acceleration() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Inertial::Inputs > {
+class SAXEventHandler< ::sz::Gravity_Filter::Inputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_acceleration = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Inertial::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Inputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->reference_frame)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66 >
-struct Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, ::sz::Inertial::Inputs > {
+template < class Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94 >
+struct Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, ::sz::Gravity_Filter::Inputs > {
 
-    void operator()( Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66& w, const ::sz::Inertial::Inputs& value) const
+    void operator()( Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94& w, const ::sz::Gravity_Filter::Inputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x20\x46\x72\x61\x6d\x65", 15, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.reference_frame);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerae999912d725d9c165a4f345af4445e87da662b0d93aad8f2f5436e96d9d9c66, std::string >()(w, value.acceleration);
+        w.Key("\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x20\x46\x72\x61\x6d\x65", 15, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.reference_frame);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.acceleration);
 
         w.EndObject(2);
     }
@@ -832,7 +832,7 @@ w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Inertial { struct Linear_Acceleration {
+namespace sz { namespace Gravity_Filter { struct Linear_Acceleration {
  
 
 explicit Linear_Acceleration() {  }
@@ -846,7 +846,7 @@ explicit Linear_Acceleration() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Inertial::Linear_Acceleration > {
+class SAXEventHandler< ::sz::Gravity_Filter::Linear_Acceleration > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -897,7 +897,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Inertial::Linear_Acceleration * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Linear_Acceleration * obj)
         : state(-1)
         , depth(0)
         
@@ -1148,10 +1148,10 @@ public:
     }
 };
 
-template < class Writer880242f39e09ea1f2aa865f8cbf64b39fae91f51b86e8774a860a14f1667958c >
-struct Serializer< Writer880242f39e09ea1f2aa865f8cbf64b39fae91f51b86e8774a860a14f1667958c, ::sz::Inertial::Linear_Acceleration > {
+template < class Writer86b1c62a533ca5726187139826adfd52fca913da570b26066478d07890fc0073 >
+struct Serializer< Writer86b1c62a533ca5726187139826adfd52fca913da570b26066478d07890fc0073, ::sz::Gravity_Filter::Linear_Acceleration > {
 
-    void operator()( Writer880242f39e09ea1f2aa865f8cbf64b39fae91f51b86e8774a860a14f1667958c& w, const ::sz::Inertial::Linear_Acceleration& value) const
+    void operator()( Writer86b1c62a533ca5726187139826adfd52fca913da570b26066478d07890fc0073& w, const ::sz::Gravity_Filter::Linear_Acceleration& value) const
     {
         w.StartObject();
 
@@ -1191,8 +1191,8 @@ struct Serializer< Writer880242f39e09ea1f2aa865f8cbf64b39fae91f51b86e8774a860a14
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Inertial { struct Outputs {
- sz::Inertial::Linear_Acceleration linear_acceleration;
+namespace sz { namespace Gravity_Filter { struct Outputs {
+ sz::Gravity_Filter::Linear_Acceleration linear_acceleration;
 
 explicit Outputs():linear_acceleration() {  }
 
@@ -1205,13 +1205,13 @@ explicit Outputs():linear_acceleration() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Inertial::Outputs > {
+class SAXEventHandler< ::sz::Gravity_Filter::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Inertial::Linear_Acceleration > handler_0;bool has_linear_acceleration;
+    SAXEventHandler< sz::Gravity_Filter::Linear_Acceleration > handler_0;bool has_linear_acceleration;
 
     bool check_depth(const char* type)
     {
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Inertial::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Outputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->linear_acceleration)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587 >
-struct Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587, ::sz::Inertial::Outputs > {
+template < class Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930 >
+struct Serializer< Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930, ::sz::Gravity_Filter::Outputs > {
 
-    void operator()( Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587& w, const ::sz::Inertial::Outputs& value) const
+    void operator()( Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930& w, const ::sz::Gravity_Filter::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7befe30587, sz::Inertial::Linear_Acceleration >()(w, value.linear_acceleration);
+        w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930, sz::Gravity_Filter::Linear_Acceleration >()(w, value.linear_acceleration);
 
         w.EndObject(1);
     }
@@ -1567,9 +1567,9 @@ struct Serializer< Writerdb55f89f0780036b19d06f1b1eb6d32a72aef1ed20089e34c7807e7
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Inertial { struct Config {
- sz::Inertial::Inputs inputs;
-sz::Inertial::Outputs outputs;
+namespace sz { namespace Gravity_Filter { struct Config {
+ sz::Gravity_Filter::Inputs inputs;
+sz::Gravity_Filter::Outputs outputs;
 
 explicit Config():inputs(), outputs() {  }
 
@@ -1582,14 +1582,14 @@ explicit Config():inputs(), outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Inertial::Config > {
+class SAXEventHandler< ::sz::Gravity_Filter::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Inertial::Inputs > handler_0;
-SAXEventHandler< sz::Inertial::Outputs > handler_1;bool has_inputs;
+    SAXEventHandler< sz::Gravity_Filter::Inputs > handler_0;
+SAXEventHandler< sz::Gravity_Filter::Outputs > handler_1;bool has_inputs;
 bool has_outputs;
 
     bool check_depth(const char* type)
@@ -1639,7 +1639,7 @@ has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Inertial::Config * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->inputs)
@@ -1952,15 +1952,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580 >
-struct Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, ::sz::Inertial::Config > {
+template < class Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a >
+struct Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, ::sz::Gravity_Filter::Config > {
 
-    void operator()( Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580& w, const ::sz::Inertial::Config& value) const
+    void operator()( Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a& w, const ::sz::Gravity_Filter::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5e539cacc9b343e333722c5d646f847973c0b7b3a814a06c2f2a6efcf7dc2580, sz::Inertial::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Outputs >()(w, value.outputs);
 
         w.EndObject(2);
     }

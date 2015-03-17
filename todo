@@ -28,11 +28,19 @@
 * odroid-w support
 	* ADC for current/voltage sensors
 
-- statibility tests
+* calibration code for streams of type Acceleration, Magnrtic Field and Angular Velocity if the config has bias/scale for them
+* motor mixer processor
+	inputs:
+		torque in N/m
+		collective thrust in N
+	outputs
+		per motor thrust in N
+* motor model processor
+	inputs
+		per motor thrust in N
+	outputs
+		per motor throttle factors in 0..1 range
 
-- basic flight modes
-	- idle
-	- armed
-	- flying
-	- auto take off
-	- auto land
+
+* motor mixer specialized configurator
+* 

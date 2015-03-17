@@ -60,9 +60,9 @@ auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
     inputs[2].class_id = q::rtti::get_class_id<stream::ICardinal_Points>();
     inputs[2].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[2].name = "Cardinal Points";
-    inputs[3].class_id = q::rtti::get_class_id<stream::ILocation>();
-    inputs[3].rate = m_output_stream ? m_output_stream->rate : 0;
-    inputs[3].name = "Location";
+//    inputs[3].class_id = q::rtti::get_class_id<stream::ILocation>();
+//    inputs[3].rate = m_output_stream ? m_output_stream->rate : 0;
+//    inputs[3].name = "Location";
     inputs[4].class_id = q::rtti::get_class_id<stream::IBattery_State>();
     inputs[4].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[4].name = "Battery State";
@@ -104,7 +104,7 @@ auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
     auto reference_frame_stream = m_hal.get_streams().find_by_name<stream::IReference_Frame>(sz.inputs.reference_frame);
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
     auto cardinal_points_stream = m_hal.get_streams().find_by_name<stream::ICardinal_Points>(sz.inputs.cardinal_points);
-    auto location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
+    //auto location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
     auto battery_state_stream = m_hal.get_streams().find_by_name<stream::IBattery_State>(sz.inputs.battery_state);
     auto multirotor_input_stream = m_hal.get_streams().find_by_name<stream::IMultirotor_Input>(sz.inputs.multirotor_input);
 
@@ -144,17 +144,17 @@ auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
         m_cardinal_points_stream = cardinal_points_stream;
     }
 
-    rate = location_stream ? location_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
-    {
-        m_config->inputs.location.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
-        m_location_stream.reset();
-    }
-    else
-    {
-        m_location_stream = location_stream;
-    }
+//    rate = location_stream ? location_stream->get_rate() : 0u;
+//    if (rate != m_output_stream->rate)
+//    {
+//        m_config->inputs.location.clear();
+//        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
+//        m_location_stream.reset();
+//    }
+//    else
+//    {
+//        m_location_stream = location_stream;
+//    }
 
     rate = battery_state_stream ? battery_state_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

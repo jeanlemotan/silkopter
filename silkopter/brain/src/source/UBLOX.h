@@ -2,7 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IECEF.h"
+#include "common/node/stream/IWGS84.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
@@ -109,7 +110,12 @@ private:
     std::array<uint8_t, 1024> m_temp_buffer;
     std::deque<uint8_t> m_buffer;
 
-    struct Stream : public stream::ILocation
+    bool m_has_nav_status = false;
+    bool m_has_pollh = false;
+    bool m_has_sol = false;
+    q::Clock::time_point m_last_complete_tp;
+
+    struct ECEF_Stream : public stream::IECEF
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -117,13 +123,19 @@ private:
         uint32_t rate = 0;
         std::vector<Sample> samples;
         Sample last_sample;
-
-        bool has_nav_status = false;
-        bool has_pollh = false;
-        bool has_sol = false;
-        q::Clock::time_point last_complete_tp;
     };
-    mutable std::shared_ptr<Stream> m_stream;
+    mutable std::shared_ptr<ECEF_Stream> m_ecef_stream;
+
+    struct WGS84_Stream : public stream::IWGS84
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
+
+        uint32_t rate = 0;
+        std::vector<Sample> samples;
+        Sample last_sample;
+    };
+    mutable std::shared_ptr<WGS84_Stream> m_wgs84_stream;
 };
 
 

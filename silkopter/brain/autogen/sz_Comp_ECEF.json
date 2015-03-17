@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Comp_Location",
+    "namespace" : "sz::Comp_ECEF",
     "name": "Init_Params",
     "members":
     [
@@ -10,40 +10,40 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Comp_Location",
+    "namespace" : "sz::Comp_ECEF",
     "name": "Inputs",
     "members":
     [
-        ["std::string", "location", {"required": true, "json_key" : "Location"}],
+        ["std::string", "ecef", {"required": true, "json_key" : "ECEF"}],
         ["std::string", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}],
         ["std::string", "pressure", {"required": true, "json_key" : "Pressure"}]
     ]
 },
 {
     "definition" : true,
-    "namespace" : "sz::Comp_Location",
-    "name": "Location",
+    "namespace" : "sz::Comp_ECEF",
+    "name": "ECEF",
     "members":
     [
     ]
 },
 {
     "definition" : true,
-    "namespace" : "sz::Comp_Location",
+    "namespace" : "sz::Comp_ECEF",
     "name": "Outputs",
     "members":
     [
-        ["sz::Comp_Location::Location", "location", {"required": true, "json_key" : "Location"}]
+        ["sz::Comp_ECEF::ECEF", "ecef", {"required": true, "json_key" : "ECEF"}]
     ]
 },
 {
     "definition" : true,
-    "namespace" : "sz::Comp_Location",
+    "namespace" : "sz::Comp_ECEF",
     "name": "Config",
     "members":
     [
-        ["sz::Comp_Location::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Comp_Location::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Comp_ECEF::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Comp_ECEF::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

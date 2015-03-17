@@ -24,9 +24,9 @@
 #include "processor/LPF.h"
 #include "processor/Resampler.h"
 #include "processor/LiPo_Battery.h"
-#include "processor/Inertial.h"
+#include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
-#include "processor/Comp_Location.h"
+#include "processor/Comp_ECEF.h"
 #include "processor/Multirotor_Pilot.h"
 
 //#include "common/node/IAHRS.h"
@@ -328,8 +328,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
-    m_node_factory.register_node<Comp_Location>("Comp Location", *this);
-    m_node_factory.register_node<Inertial>("Inertial", *this);
+    m_node_factory.register_node<Comp_ECEF>("Comp ECEF", *this);
+    m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
@@ -338,7 +338,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC Value LPF", *this);
     m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
     m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
-    m_node_factory.register_node<LPF<stream::ILocation>>("Location LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF>>("ECEF LPF", *this);
+    m_node_factory.register_node<LPF<stream::IWGS84>>("WGS84 LPF", *this);
     m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
     m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
     m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
@@ -352,7 +353,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC Value RS", *this);
     m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
     m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
-    m_node_factory.register_node<Resampler<stream::ILocation>>("Location RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF>>("ECEF RS", *this);
+    m_node_factory.register_node<Resampler<stream::IWGS84>>("WGS84 RS", *this);
     m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
     m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
     m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);

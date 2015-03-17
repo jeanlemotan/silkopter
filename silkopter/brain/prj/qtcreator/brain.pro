@@ -100,10 +100,10 @@ SOURCES += \
     ../../src/processor/LiPo_Battery.cpp \
     ../../src/processor/Dead_Reckoning.cpp \
     ../../src/processor/EKF_AHRS.cpp \
-    ../../src/processor/Inertial.cpp \
     ../../src/processor/Comp_AHRS.cpp \
-    ../../src/processor/Comp_Location.cpp \
-    ../../src/processor/Multirotor_Pilot.cpp
+    ../../src/processor/Multirotor_Pilot.cpp \
+    ../../src/processor/Gravity_Filter.cpp \
+    ../../src/processor/Comp_ECEF.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -141,7 +141,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IAngular_Velocity.h \
     ../../../libs/common/node/stream/ICurrent.h \
     ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/ILocation.h \
     ../../../libs/common/node/stream/IMagnetic_Field.h \
     ../../../libs/common/node/stream/IPressure.h \
     ../../../libs/common/node/stream/IReference_Frame.h \
@@ -160,11 +159,9 @@ HEADERS += \
     ../../../libs/common/node/stream/IBattery_State.h \
     ../../src/processor/LiPo_Battery.h \
     ../../src/processor/EKF_AHRS.h \
-    ../../src/processor/Inertial.h \
     ../../src/processor/Compass.h \
     ../../src/processor/Comp_AHRS.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../src/processor/Comp_Location.h \
     ../../../libs/utils/Butterworth.h \
     ../../src/processor/Multirotor_Pilot.h \
     ../../../libs/common/node/processor/IMultirotor_Pilot.h \
@@ -174,5 +171,10 @@ HEADERS += \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
-    ../../../libs/common/node/stream/IMultirotor_Input.h
+    ../../../libs/common/node/stream/IMultirotor_Input.h \
+    ../../src/processor/Gravity_Filter.h \
+    ../../../libs/common/node/stream/IECEF.h \
+    ../../../libs/common/node/stream/IWGS84.h \
+    ../../../libs/common/node/stream/ILocationxxx.h \
+    ../../src/processor/Comp_ECEF.h
 

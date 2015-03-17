@@ -1,16 +1,14 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
+#include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
-#include "common/node/stream/IPressure.h"
-
 #include "HAL.h"
-
 
 namespace sz
 {
-namespace Comp_Location
+namespace Gravity_Filter
 {
 struct Init_Params;
 struct Config;
@@ -23,10 +21,10 @@ namespace silk
 namespace node
 {
 
-class Comp_Location : public IProcessor
+class Gravity_Filter : public IProcessor
 {
 public:
-    Comp_Location(HAL& hal);
+    Gravity_Filter(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -45,27 +43,25 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Comp_Location::Init_Params> m_init_params;
-    std::shared_ptr<sz::Comp_Location::Config> m_config;
+    std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
+    std::shared_ptr<sz::Gravity_Filter::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocation_wptr m_location_stream;
-    stream::ILinear_Acceleration_wptr m_linear_acceleration_stream;
-    stream::IPressure_wptr m_pressure_stream;
+    stream::IReference_Frame_wptr m_reference_frame_stream;
+    stream::IAcceleration_wptr m_acceleration_stream;
 
-    std::vector<stream::ILocation::Sample> m_location_samples;
-    std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
-    std::vector<stream::IPressure::Sample> m_pressure_samples;
+    std::vector<stream::IReference_Frame::Sample> m_reference_frame_samples;
+    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
 
-    struct Stream : public stream::ILocation
+    struct Stream : public stream::ILinear_Acceleration
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
 
+        uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
-        uint32_t rate = 0;
     };
     mutable std::shared_ptr<Stream> m_output_stream;
 };
@@ -74,4 +70,3 @@ private:
 
 }
 }
-

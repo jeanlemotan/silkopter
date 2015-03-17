@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_Location { struct Init_Params {
+namespace sz { namespace Comp_ECEF { struct Init_Params {
  uint32_t rate;
 
 explicit Init_Params():rate(0) {  }
@@ -41,7 +41,7 @@ explicit Init_Params():rate(0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location::Init_Params > {
+class SAXEventHandler< ::sz::Comp_ECEF::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writer97f88f858917600b4d0ed4d954da0b083e30d859fd72e2b5482fd62b1ffbb6cb >
-struct Serializer< Writer97f88f858917600b4d0ed4d954da0b083e30d859fd72e2b5482fd62b1ffbb6cb, ::sz::Comp_Location::Init_Params > {
+template < class Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85 >
+struct Serializer< Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85, ::sz::Comp_ECEF::Init_Params > {
 
-    void operator()( Writer97f88f858917600b4d0ed4d954da0b083e30d859fd72e2b5482fd62b1ffbb6cb& w, const ::sz::Comp_Location::Init_Params& value) const
+    void operator()( Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85& w, const ::sz::Comp_ECEF::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer97f88f858917600b4d0ed4d954da0b083e30d859fd72e2b5482fd62b1ffbb6cb, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85, uint32_t >()(w, value.rate);
 
         w.EndObject(1);
     }
@@ -403,12 +403,12 @@ struct Serializer< Writer97f88f858917600b4d0ed4d954da0b083e30d859fd72e2b5482fd62
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_Location { struct Inputs {
- std::string location;
+namespace sz { namespace Comp_ECEF { struct Inputs {
+ std::string ecef;
 std::string linear_acceleration;
 std::string pressure;
 
-explicit Inputs():location(), linear_acceleration(), pressure() {  }
+explicit Inputs():ecef(), linear_acceleration(), pressure() {  }
 
 
  
@@ -419,7 +419,7 @@ explicit Inputs():location(), linear_acceleration(), pressure() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location::Inputs > {
+class SAXEventHandler< ::sz::Comp_ECEF::Inputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -427,7 +427,7 @@ private:
 
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
-SAXEventHandler< std::string > handler_2;bool has_location;
+SAXEventHandler< std::string > handler_2;bool has_ecef;
 bool has_linear_acceleration;
 bool has_pressure;
 
@@ -444,7 +444,7 @@ bool has_pressure;
     {
         switch (state) {
             case 0:
-    return "location";
+    return "ecef";
 case 1:
     return "linear_acceleration";
 case 2:
@@ -475,16 +475,16 @@ case 2:
 
     void reset_flags()
     {
-        has_location = false;
+        has_ecef = false;
 has_linear_acceleration = false;
 has_pressure = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->location)
+        , handler_0(&obj->ecef)
 , handler_1(&obj->linear_acceleration)
 , handler_2(&obj->pressure)
     {
@@ -675,8 +675,8 @@ case 2:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8))
-						 { state=0; has_location = true; }
+            else if (utility::string_equal(str, length, "\x45\x43\x45\x46", 4))
+						 { state=0; has_ecef = true; }
 else if (utility::string_equal(str, length, "\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19))
 						 { state=1; has_linear_acceleration = true; }
 else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65", 8))
@@ -792,7 +792,7 @@ case 2:
                 break;
             }
         } else {
-            if (!has_location) set_missing_required("location");
+            if (!has_ecef) set_missing_required("ecef");
 if (!has_linear_acceleration) set_missing_required("linear_acceleration");
 if (!has_pressure) set_missing_required("pressure");
         }
@@ -840,16 +840,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5 >
-struct Serializer< Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5, ::sz::Comp_Location::Inputs > {
+template < class Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24 >
+struct Serializer< Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24, ::sz::Comp_ECEF::Inputs > {
 
-    void operator()( Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5& w, const ::sz::Comp_Location::Inputs& value) const
+    void operator()( Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24& w, const ::sz::Comp_ECEF::Inputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8, false); Serializer< Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5, std::string >()(w, value.location);
-w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5, std::string >()(w, value.linear_acceleration);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer81320acd99eb43c6ad87d124586d06b8bc524e5718a9cf78be51bb07e563f2d5, std::string >()(w, value.pressure);
+        w.Key("\x45\x43\x45\x46", 4, false); Serializer< Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24, std::string >()(w, value.ecef);
+w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24, std::string >()(w, value.linear_acceleration);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writerc579bdfe3950b10beda6db644bc46f61586ab58abf33d6c3935d2c2515616a24, std::string >()(w, value.pressure);
 
         w.EndObject(3);
     }
@@ -885,10 +885,10 @@ w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer81320acd9
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_Location { struct Location {
+namespace sz { namespace Comp_ECEF { struct ECEF {
  
 
-explicit Location() {  }
+explicit ECEF() {  }
 
 
  
@@ -899,7 +899,7 @@ explicit Location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location::Location > {
+class SAXEventHandler< ::sz::Comp_ECEF::ECEF > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -950,7 +950,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location::Location * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::ECEF * obj)
         : state(-1)
         , depth(0)
         
@@ -1201,10 +1201,10 @@ public:
     }
 };
 
-template < class Writer81bf294bf5ef10acb26c96037fc303ad7c9560f8d3110ad44f9a802b9c42a511 >
-struct Serializer< Writer81bf294bf5ef10acb26c96037fc303ad7c9560f8d3110ad44f9a802b9c42a511, ::sz::Comp_Location::Location > {
+template < class Writere6063e4d4aeb1702d9595fe189ff53e783a8f05f013647143ec38daef6ecd974 >
+struct Serializer< Writere6063e4d4aeb1702d9595fe189ff53e783a8f05f013647143ec38daef6ecd974, ::sz::Comp_ECEF::ECEF > {
 
-    void operator()( Writer81bf294bf5ef10acb26c96037fc303ad7c9560f8d3110ad44f9a802b9c42a511& w, const ::sz::Comp_Location::Location& value) const
+    void operator()( Writere6063e4d4aeb1702d9595fe189ff53e783a8f05f013647143ec38daef6ecd974& w, const ::sz::Comp_ECEF::ECEF& value) const
     {
         w.StartObject();
 
@@ -1244,10 +1244,10 @@ struct Serializer< Writer81bf294bf5ef10acb26c96037fc303ad7c9560f8d3110ad44f9a802
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_Location { struct Outputs {
- sz::Comp_Location::Location location;
+namespace sz { namespace Comp_ECEF { struct Outputs {
+ sz::Comp_ECEF::ECEF ecef;
 
-explicit Outputs():location() {  }
+explicit Outputs():ecef() {  }
 
 
  
@@ -1258,13 +1258,13 @@ explicit Outputs():location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location::Outputs > {
+class SAXEventHandler< ::sz::Comp_ECEF::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Comp_Location::Location > handler_0;bool has_location;
+    SAXEventHandler< sz::Comp_ECEF::ECEF > handler_0;bool has_ecef;
 
     bool check_depth(const char* type)
     {
@@ -1279,7 +1279,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "location";
+    return "ecef";
         default:
             break;
         }
@@ -1306,14 +1306,14 @@ private:
 
     void reset_flags()
     {
-        has_location = false;
+        has_ecef = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->location)
+        , handler_0(&obj->ecef)
     {
         reset_flags();
     }
@@ -1454,8 +1454,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8))
-						 { state=0; has_location = true; }
+            else if (utility::string_equal(str, length, "\x45\x43\x45\x46", 4))
+						 { state=0; has_ecef = true; }
             else {
                 state = -1;
                 return true;
@@ -1537,7 +1537,7 @@ public:
                 break;
             }
         } else {
-            if (!has_location) set_missing_required("location");
+            if (!has_ecef) set_missing_required("ecef");
         }
         return the_error.empty();
     }
@@ -1577,14 +1577,14 @@ public:
     }
 };
 
-template < class Writer8357d23a7a1de22ac4305d25b6ee2090f3b3196daa51b4be54a2988f2f6e865e >
-struct Serializer< Writer8357d23a7a1de22ac4305d25b6ee2090f3b3196daa51b4be54a2988f2f6e865e, ::sz::Comp_Location::Outputs > {
+template < class Writer54b9856f8567dfcaa71d78fc325dbe7743f37c9c36e00c944201ec8977143e53 >
+struct Serializer< Writer54b9856f8567dfcaa71d78fc325dbe7743f37c9c36e00c944201ec8977143e53, ::sz::Comp_ECEF::Outputs > {
 
-    void operator()( Writer8357d23a7a1de22ac4305d25b6ee2090f3b3196daa51b4be54a2988f2f6e865e& w, const ::sz::Comp_Location::Outputs& value) const
+    void operator()( Writer54b9856f8567dfcaa71d78fc325dbe7743f37c9c36e00c944201ec8977143e53& w, const ::sz::Comp_ECEF::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8, false); Serializer< Writer8357d23a7a1de22ac4305d25b6ee2090f3b3196daa51b4be54a2988f2f6e865e, sz::Comp_Location::Location >()(w, value.location);
+        w.Key("\x45\x43\x45\x46", 4, false); Serializer< Writer54b9856f8567dfcaa71d78fc325dbe7743f37c9c36e00c944201ec8977143e53, sz::Comp_ECEF::ECEF >()(w, value.ecef);
 
         w.EndObject(1);
     }
@@ -1620,9 +1620,9 @@ struct Serializer< Writer8357d23a7a1de22ac4305d25b6ee2090f3b3196daa51b4be54a2988
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_Location { struct Config {
- sz::Comp_Location::Inputs inputs;
-sz::Comp_Location::Outputs outputs;
+namespace sz { namespace Comp_ECEF { struct Config {
+ sz::Comp_ECEF::Inputs inputs;
+sz::Comp_ECEF::Outputs outputs;
 
 explicit Config():inputs(), outputs() {  }
 
@@ -1635,14 +1635,14 @@ explicit Config():inputs(), outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_Location::Config > {
+class SAXEventHandler< ::sz::Comp_ECEF::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Comp_Location::Inputs > handler_0;
-SAXEventHandler< sz::Comp_Location::Outputs > handler_1;bool has_inputs;
+    SAXEventHandler< sz::Comp_ECEF::Inputs > handler_0;
+SAXEventHandler< sz::Comp_ECEF::Outputs > handler_1;bool has_inputs;
 bool has_outputs;
 
     bool check_depth(const char* type)
@@ -1692,7 +1692,7 @@ has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_Location::Config * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->inputs)
@@ -2005,15 +2005,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer760da03103d857cc44dddc097982aea3bad8ff878fdd142e251c97c197d47448 >
-struct Serializer< Writer760da03103d857cc44dddc097982aea3bad8ff878fdd142e251c97c197d47448, ::sz::Comp_Location::Config > {
+template < class Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df >
+struct Serializer< Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df, ::sz::Comp_ECEF::Config > {
 
-    void operator()( Writer760da03103d857cc44dddc097982aea3bad8ff878fdd142e251c97c197d47448& w, const ::sz::Comp_Location::Config& value) const
+    void operator()( Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df& w, const ::sz::Comp_ECEF::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer760da03103d857cc44dddc097982aea3bad8ff878fdd142e251c97c197d47448, sz::Comp_Location::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer760da03103d857cc44dddc097982aea3bad8ff878fdd142e251c97c197d47448, sz::Comp_Location::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df, sz::Comp_ECEF::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df, sz::Comp_ECEF::Outputs >()(w, value.outputs);
 
         w.EndObject(2);
     }

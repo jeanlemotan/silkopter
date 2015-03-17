@@ -1,41 +1,41 @@
 #include "BrainStdAfx.h"
-#include "Inertial.h"
+#include "Gravity_Filter.h"
 #include "physics/constants.h"
 
 #include "sz_math.hpp"
-#include "sz_Inertial.hpp"
+#include "sz_Gravity_Filter.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Inertial::Inertial(HAL& hal)
+Gravity_Filter::Gravity_Filter(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Inertial::Init_Params())
-    , m_config(new sz::Inertial::Config())
+    , m_init_params(new sz::Gravity_Filter::Init_Params())
+    , m_config(new sz::Gravity_Filter::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto Inertial::init(rapidjson::Value const& init_params) -> bool
+auto Gravity_Filter::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("inertial::init");
+    QLOG_TOPIC("gravity_filter::init");
 
-    sz::Inertial::Init_Params sz;
+    sz::Gravity_Filter::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Inertial data: {}", ss.str());
+        QLOGE("Cannot deserialize Gravity_Filter data: {}", ss.str());
         return false;
     }
     jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
-auto Inertial::init() -> bool
+auto Gravity_Filter::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
     if (m_init_params->rate == 0)
@@ -48,7 +48,7 @@ auto Inertial::init() -> bool
     return true;
 }
 
-auto Inertial::get_inputs() const -> std::vector<Input>
+auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
     inputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
@@ -59,7 +59,7 @@ auto Inertial::get_inputs() const -> std::vector<Input>
     inputs[1].name = "Acceleration";
     return inputs;
 }
-auto Inertial::get_outputs() const -> std::vector<Output>
+auto Gravity_Filter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
@@ -68,9 +68,9 @@ auto Inertial::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Inertial::process()
+void Gravity_Filter::process()
 {
-    QLOG_TOPIC("inertial::process");
+    QLOG_TOPIC("gravity_filter::process");
 
     m_output_stream->samples.clear();
 
@@ -119,17 +119,17 @@ void Inertial::process()
     m_acceleration_samples.erase(m_acceleration_samples.begin(), m_acceleration_samples.begin() + count);
 }
 
-auto Inertial::set_config(rapidjson::Value const& json) -> bool
+auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("inertial::set_config");
+    QLOG_TOPIC("gravity_filter::set_config");
 
-    sz::Inertial::Config sz;
+    sz::Gravity_Filter::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Inertial config data: {}", ss.str());
+        QLOGE("Cannot deserialize Gravity_Filter config data: {}", ss.str());
         return false;
     }
 
@@ -164,14 +164,14 @@ auto Inertial::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Inertial::get_config() const -> rapidjson::Document
+auto Gravity_Filter::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Inertial::get_init_params() const -> rapidjson::Document const&
+auto Gravity_Filter::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }

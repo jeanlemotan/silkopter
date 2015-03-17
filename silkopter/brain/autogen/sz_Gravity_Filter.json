@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Inertial",
+    "namespace" : "sz::Gravity_Filter",
     "name": "Init_Params",
     "members":
     [
@@ -10,7 +10,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Inertial",
+    "namespace" : "sz::Gravity_Filter",
     "name": "Inputs",
     "members":
     [
@@ -20,7 +20,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Inertial",
+    "namespace" : "sz::Gravity_Filter",
     "name": "Linear_Acceleration",
     "members":
     [
@@ -28,21 +28,21 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Inertial",
+    "namespace" : "sz::Gravity_Filter",
     "name": "Outputs",
     "members":
     [
-        ["sz::Inertial::Linear_Acceleration", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}]
+        ["sz::Gravity_Filter::Linear_Acceleration", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}]
     ]
 },
 {
     "definition" : true,
-    "namespace" : "sz::Inertial",
+    "namespace" : "sz::Gravity_Filter",
     "name": "Config",
     "members":
     [
-        ["sz::Inertial::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Inertial::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Gravity_Filter::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Gravity_Filter::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

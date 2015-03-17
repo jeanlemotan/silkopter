@@ -10,8 +10,8 @@
 #include "common/node/stream/ICardinal_Points.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
+#include "common/node/stream/IECEF.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IPWM_Value.h"
@@ -233,7 +233,7 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ILocation>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IECEF>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IPWM_Value>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IReference_Frame>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
