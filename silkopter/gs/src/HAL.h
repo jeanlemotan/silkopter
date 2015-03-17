@@ -8,7 +8,8 @@
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IWGS84.h"
+#include "common/node/stream/IECEF.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IPWM_Value.h"
@@ -109,13 +110,20 @@ struct Linear_Acceleration : public Stream
     q::util::Signal<void(Linear_Acceleration&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Linear_Acceleration);
-struct Location : public Stream
+struct WGS84 : public Stream
 {
-    typedef ILocation::Sample Sample;
+    typedef IWGS84::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(Location&)> samples_available_signal;
+    q::util::Signal<void(WGS84&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(Location);
+DECLARE_CLASS_PTR(WGS84);
+struct ECEF : public Stream
+{
+    typedef IECEF::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF);
 struct Magnetic_Field : public Stream
 {
     typedef IMagnetic_Field::Sample Sample;

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "scene/Camera.h"
+#include "video/Material.h"
+#include "video/Uniform.h"
+
 
 namespace q
 {

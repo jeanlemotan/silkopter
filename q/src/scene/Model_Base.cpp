@@ -1,5 +1,6 @@
 #include "QStdAfx.h"
 #include "scene/Model_Base.h"
+#include "scene/Model.h"
 
 using namespace q;
 using namespace scene;

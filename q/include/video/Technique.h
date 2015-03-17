@@ -1,5 +1,8 @@
 #pragma once
 
+#include "res/Resource.h"
+#include "video/Pass.h"
+
 namespace q
 {
 namespace video

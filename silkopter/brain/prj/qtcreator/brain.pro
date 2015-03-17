@@ -8,6 +8,10 @@ TARGET = brain
 target.path = /home/pi
 INSTALLS = target
 
+PRECOMPILED_HEADER = ../../src/BrainStdAfx.h
+CONFIG *= precompile_header
+
+
 
 #QMAKE_CXXFLAGS_RELEASE += -g
 #QMAKE_CFLAGS_RELEASE += -g
@@ -176,5 +180,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IECEF.h \
     ../../../libs/common/node/stream/IWGS84.h \
     ../../../libs/common/node/stream/ILocationxxx.h \
-    ../../src/processor/Comp_ECEF.h
+    ../../src/processor/Comp_ECEF.h \
+    ../../src/Globals.h
 

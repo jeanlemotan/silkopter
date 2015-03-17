@@ -1,4 +1,5 @@
 #include "QStdAfx.h"
+#include "video/Render_Job.h"
 
 using namespace q;
 using namespace video;

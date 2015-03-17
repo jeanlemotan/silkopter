@@ -1,5 +1,8 @@
 #include "QStdAfx.h"
 #include "util/Preprocessor.h"
+#include "video/Uber_Shader.h"
+#include "system/System.h"
+#include "video/Renderer.h"
 
 using namespace q;
 using namespace video;

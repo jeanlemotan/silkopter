@@ -1,7 +1,8 @@
 #include "QStdAfx.h"
 #include "video/Index_Buffer.h"
 #include "video/Renderer.h"
-
+#include "system/System.h"
+#include "video/Renderer.h"
 
 using namespace q;
 using namespace video;

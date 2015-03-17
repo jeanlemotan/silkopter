@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Ptr_Fw_Declaration.h"
+#include "scene/Skeleton.h"
+#include "video/Vertex_Declaration.h"
+#include "video/Material.h"
+
 namespace q
 {
 namespace scene

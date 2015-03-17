@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Comms.h"
 
 
@@ -382,9 +381,13 @@ auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<
     {
         return std::make_shared<node::stream::Distance>();
     }
-    if (class_id == q::rtti::get_class_id<node::stream::ILocation>())
+    if (class_id == q::rtti::get_class_id<node::stream::IECEF>())
     {
-        return std::make_shared<node::stream::Location>();
+        return std::make_shared<node::stream::ECEF>();
+    }
+    if (class_id == q::rtti::get_class_id<node::stream::IWGS84>())
+    {
+        return std::make_shared<node::stream::WGS84>();
     }
     if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
     {
@@ -728,7 +731,8 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ILocation, Location>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IWGS84, WGS84>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IECEF, ECEF>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IPWM_Value, PWM_Value>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IReference_Frame, Reference_Frame>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ITemperature, Temperature>(m_telemetry_channel, sample_count, *stream) &&

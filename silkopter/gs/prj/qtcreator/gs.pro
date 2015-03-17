@@ -30,7 +30,8 @@ INCLUDEPATH += ../../../brain/autogen
 QMAKE_CXXFLAGS += -Wno-unused-variable
 QMAKE_CFLAGS += -Wno-unused-variable
 
-PRECOMPILED_HEADER = ../../include/stdafx.h
+PRECOMPILED_HEADER = ../../src/stdafx.h
+CONFIG *= precompile_header
 
 ROOT_LIBS_PATH = ../../../..
 CONFIG(debug, debug|release) {
@@ -77,7 +78,6 @@ HEADERS += \
     ../../../libs/common/node/stream/ICurrent.h \
     ../../../libs/common/node/stream/IDistance.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/ILocation.h \
     ../../../libs/common/node/stream/IMagnetic_Field.h \
     ../../../libs/common/node/stream/IPressure.h \
     ../../../libs/common/node/stream/IPWM_Value.h \
@@ -128,7 +128,9 @@ HEADERS += \
     ../../../libs/common/node/processor/IResampler.h \
     ../../src/Stream_Viewer_Widget.h \
     ../../src/Numeric_Viewer.h \
-    ../../src/Map_Viewer.h
+    ../../src/Map_Viewer.h \
+    ../../../libs/common/node/stream/IECEF.h \
+    ../../../libs/common/node/stream/IWGS84.h
 
 SOURCES += \
     ../../src/GS.cpp \

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "res/Loader.h"
+#include "draw/Sprite_Base.h"
 
 namespace q
 {

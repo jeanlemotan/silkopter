@@ -1,5 +1,9 @@
 #pragma once
 
+#include "video/Shader.h"
+#include "video/GLES/GLES_Interface.h"
+#include "video/GLES/GLES_Command_Stream.h"
+
 namespace q
 {
 namespace video

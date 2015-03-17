@@ -10,6 +10,7 @@ INCLUDEPATH += ../../../qmath/include
 INCLUDEPATH += /usr/include/freetype2
 
 PRECOMPILED_HEADER = ../../include/QStdAfx.h
+CONFIG *= precompile_header
 
 rpi {
     DEFINES+=RASPBERRY_PI

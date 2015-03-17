@@ -1,9 +1,7 @@
-//#include <QtWidgets>
 #include <memory>
 #include <chrono>
 #include <thread>
 #include <mutex>
-#include <iostream>
 #include <algorithm>
 #include <numeric>
 #include <deque>
@@ -11,7 +9,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/circular_buffer.hpp>
 #include <boost/thread.hpp>
 
 #include <QtCore>

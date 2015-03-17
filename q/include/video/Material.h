@@ -1,5 +1,11 @@
 #pragma once
 
+#include "video/Uniform.h"
+#include "video/Uniform_Def.h"
+#include "video/Render_State.h"
+#include "video/Sampler.h"
+#include "Ptr_Fw_Declaration.h"
+#include "Technique.h"
 
 namespace q
 {

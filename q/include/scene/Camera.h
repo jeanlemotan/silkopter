@@ -1,5 +1,8 @@
 #pragma once
 
+#include "video/Viewport.h"
+#include "scene/Frustum.h"
+
 namespace q
 {
 namespace scene

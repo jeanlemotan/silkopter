@@ -2,6 +2,10 @@
 
 #include "video/Material.h"
 #include "video/Renderer.h"
+#include "video/Render_Job.h"
+#include "video/Buffer_Pool.h"
+#include "video/Vertex_Buffer.h"
+#include "video/Index_Buffer.h"
 
 namespace q
 {

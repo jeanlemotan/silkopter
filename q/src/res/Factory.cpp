@@ -1,5 +1,5 @@
 #include "QStdAfx.h"
-#include "res/Factory.h"
+#include "q.h"
 
 #include "Impl/Soil_Loader.h"
 #include "Impl/PVR_Loader.h"

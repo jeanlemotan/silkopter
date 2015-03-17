@@ -1,4 +1,6 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
+#include "text/Font.h"
 #include "Free_Type_Font_Loader.h"
 
 

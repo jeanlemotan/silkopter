@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLES_Buffer_Impl.h"
+#include "video/Vertex_Buffer.h"
 
 namespace q
 {

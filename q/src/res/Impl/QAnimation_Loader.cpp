@@ -1,4 +1,7 @@
 #include "QStdAfx.h"
+#include "res/Loader.h"
+#include "res/Resource.h"
+#include "anim/Animation.h"
 #include "QAnimation_Loader.h"
 
 using namespace q;
@@ -6,7 +9,6 @@ using namespace res;
 using namespace impl;
 using namespace data;
 using namespace anim;
-using namespace video;
 
 bool QAnimation_Loader::can_load_from_source(data::Source& source) const
 {

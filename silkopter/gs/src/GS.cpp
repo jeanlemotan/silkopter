@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GS.h"
 
 #include "HAL_Window.h"

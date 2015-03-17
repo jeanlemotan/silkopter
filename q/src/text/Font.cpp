@@ -1,4 +1,7 @@
 #include "QStdAfx.h"
+#include "text/Font.h"
+#include "text/utf8/utf8.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #undef __FTERRORS_H__

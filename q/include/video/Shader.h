@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Shader_Source.h"
+#include "Uniform_Def.h"
+#include "Sampler_Def.h"
+#include "Attribute_Def.h"
+
 namespace q
 {
 namespace video

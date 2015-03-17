@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Bounds.h"
+
 namespace q
 {
 

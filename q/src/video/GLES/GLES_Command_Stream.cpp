@@ -5,6 +5,9 @@
 #include "video/GLES/GLES_Shader.h"
 #include "video/GLES/GLES_Index_Buffer.h"
 #include "video/GLES/GLES_Vertex_Buffer.h"
+#include "video/GLES/GLES_Renderer.h"
+#include "video/Render_Job.h"
+#include "system/System.h"
 #include "Profiler.h"
 
 using namespace q;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../res/Resource.h"
+#include "res/Resource.h"
+#include "Ptr_Fw_Declaration.h"
 
 namespace q
 {

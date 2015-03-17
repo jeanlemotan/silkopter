@@ -1,6 +1,10 @@
 #include "QStdAfx.h"
 #include "video/GLES/GLES_Texture.h"
 #include "video/GLES/GLES_Interface.h"
+#include "video/Capabilities.h"
+#include "video/Sampler.h"
+#include "system/System.h"
+#include "video/Renderer.h"
 
 using namespace q;
 using namespace video;

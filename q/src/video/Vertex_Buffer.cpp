@@ -1,7 +1,7 @@
 #include "QStdAfx.h"
 #include "video/Vertex_Buffer.h"
 #include "video/Renderer.h"
-
+#include "system/System.h"
 
 using namespace q;
 using namespace video;

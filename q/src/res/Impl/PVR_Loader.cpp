@@ -1,5 +1,6 @@
 #include "QStdAfx.h"
 #include "PVR_Loader.h"
+#include "q.h"
 
 using namespace q;
 using namespace res;

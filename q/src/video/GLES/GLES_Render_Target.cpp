@@ -2,6 +2,9 @@
 #include "video/GLES/GLES_Render_Target.h"
 #include "video/GLES/GLES_Texture.h"
 #include "video/GLES/GLES_Interface.h"
+#include "system/System.h"
+#include "video/Capabilities.h"
+#include "video/Renderer.h"
 
 using namespace q;
 using namespace video;

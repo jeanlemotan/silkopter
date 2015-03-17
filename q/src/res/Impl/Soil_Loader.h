@@ -1,5 +1,9 @@
 #pragma once
 
+#include "res/Loader.h"
+#include "video/Texture.h"
+#include "video/Dynamic_Image.h"
+
 namespace q
 {
 namespace res

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Ptr_Fw_Declaration.h"
+
 namespace q
 {
 namespace video

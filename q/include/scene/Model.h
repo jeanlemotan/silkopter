@@ -1,5 +1,10 @@
 #pragma once
 
+#include "scene/Scene_Node.h"
+#include "scene/Skeleton.h"
+#include "Ptr_Fw_Declaration.h"
+#include "anim/Pose.h"
+
 namespace q
 {
 namespace scene

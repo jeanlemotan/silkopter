@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GS.h"
 #include <QtWidgets/QApplication>
 #include "HAL_Window.h"

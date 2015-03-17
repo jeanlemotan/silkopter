@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Ptr_Fw_Declaration.h"
+#include "res/Factory.h"
+
 namespace q
 {
 	class System : public util::Singleton<System>

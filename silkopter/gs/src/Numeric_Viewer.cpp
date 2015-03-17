@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Numeric_Viewer.h"
 #include "HAL.h"
 #include "Comms.h"

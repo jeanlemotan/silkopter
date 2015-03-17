@@ -1,4 +1,8 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
+#include "anim/Pose.h"
+#include "anim/Animation_Node.h"
+#include "anim/Animation.h"
 
 using namespace q;
 using namespace anim;

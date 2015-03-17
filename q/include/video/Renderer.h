@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Render_Target.h"
+#include "Capabilities.h"
+#include "video/Uniform_Def.h"
+#include "video/Sampler_Def.h"
+#include "video/Shader.h"
 
 namespace q
 {

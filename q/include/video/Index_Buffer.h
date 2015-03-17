@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Buffer.h"
+#include "Ptr_Fw_Declaration.h"
+
 namespace q
 {
 namespace video

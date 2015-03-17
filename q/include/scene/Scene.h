@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Ptr_Fw_Declaration.h"
+#include "Camera.h"
+
 namespace q
 {
 namespace scene

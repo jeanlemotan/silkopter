@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "HAL_Window.h"
 
 #include "ModelTest.h"

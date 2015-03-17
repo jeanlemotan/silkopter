@@ -1,11 +1,13 @@
 #pragma once
 
+#include "res/Resource.h"
+#include "Pose.h"
+#include "Animation_Node.h"
+
 namespace q
 {
 namespace anim
 {
-
-
 	class Animation : public res::Resource, public Animation_Node
 	{
 		DEFINE_RTTI_CLASS2(q::anim::Animation, Animation_Node, res::Resource);

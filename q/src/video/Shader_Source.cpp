@@ -1,5 +1,6 @@
 #include "QStdAfx.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>
+#include "video/Shader_Source.h"
 
 #include <regex>
 

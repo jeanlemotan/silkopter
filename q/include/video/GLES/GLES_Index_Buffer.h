@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GLES_Buffer_Impl.h"
+#include "video/Index_Buffer.h"
+
 
 namespace q
 {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "res/Resource.h"
+#include "draw/Painter.h"
+
 namespace q
 {
 namespace draw
@@ -39,36 +42,36 @@ namespace draw
 		uint32_t		addMarker(math::vec2f const& size);
 
 		uint32_t		addAnimation(String const& name);
-		void	addAnimationData(uint32_t animationIdx, math::mat3f const& transform, uint32_t frameIdx);
+        void            addAnimationData(uint32_t animationIdx, math::mat3f const& transform, uint32_t frameIdx);
 		
 		uint32_t		addFrame(String const& name);
-		void	addFrameData(uint32_t frameIdx, math::mat3f const& transform, DataType type, uint32_t dataIdx);
+        void            addFrameData(uint32_t frameIdx, math::mat3f const& transform, DataType type, uint32_t dataIdx);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Getters
 
 		video::Texture_cptr getTexture(uint32_t idx) const;
-		String getTextureName(uint32_t idx) const;
+        String          getTextureName(uint32_t idx) const;
 
-		int		findAnimationIdxByName(String const& name) const;
-		String  getAnimationName(uint32_t idx) const;
+        int             findAnimationIdxByName(String const& name) const;
+        String          getAnimationName(uint32_t idx) const;
 
 		uint32_t		getAnimationCount() const;
 		uint32_t		getFrameCount(uint32_t animationIdx) const;
 		uint32_t		getFrameDataCount(uint32_t animationIdx, uint32_t frameIdx) const;
 
 		math::mat3f const& getFrameDataTransform(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
-		DataType getFrameDataType(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
+        DataType        getFrameDataType(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
 		uint32_t		getFrameDataIdx(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
 
-		math::vec2f& getFrameDataSize(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
+        math::vec2f&    getFrameDataSize(uint32_t animationIdx, uint32_t frameIdx, uint32_t frameDataIdx) const;
 
 		//////////////////////////////////////////////////////////////////////////
 
-		Sprite_ptr createInstance() const;	 
+        Sprite_ptr      createInstance() const;
 
 	protected:
-		void render(Painter& painter, math::vec2f const& pos, float rot, math::vec2f const& scale, uint32_t animIdx, uint32_t frameIdx) const;
+        void            render(Painter& painter, math::vec2f const& pos, float rot, math::vec2f const& scale, uint32_t animIdx, uint32_t frameIdx) const;
 
 	private:
 		struct Texture

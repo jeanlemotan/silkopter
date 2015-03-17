@@ -1,5 +1,7 @@
 #include "QStdAfx.h"
 #include "Default_Technique_Loader.h"
+#include "system/System.h"
+#include "video/Renderer.h"
 
 #include "../../pugixml/src/pugixml.hpp"
 #define PUGIXML_HEADER_ONLY

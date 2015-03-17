@@ -1,6 +1,8 @@
 #pragma once
 
+#include "video/Renderer.h"
 #include "GLES_Command_Stream.h"
+#include "video/Post_FX.h"
 
 namespace q
 {

@@ -1,4 +1,5 @@
 #include "QStdAfx.h"
+#include "video/Atlaser.h"
 
 using namespace q;
 using namespace video;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "draw/Painter.h"
+
 namespace q
 {
 

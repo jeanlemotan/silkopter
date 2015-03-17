@@ -1,4 +1,5 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
 
 using namespace q;
 using namespace res;

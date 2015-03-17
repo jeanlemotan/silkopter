@@ -1,5 +1,15 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
+#include "scene/Model_Base.h"
+#include "res/Loader.h"
+#include "video/Uniform_Def.h"
+#include "video/Pass.h"
+#include "video/Technique.h"
+#include "video/Material.h"
 #include "QModel_Base_Loader.h"
+#include "system/System.h"
+#include "video/Vertex_Buffer.h"
+#include "video/Index_Buffer.h"
 
 using namespace q;
 using namespace res;

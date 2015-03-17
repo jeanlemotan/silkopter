@@ -1,5 +1,10 @@
 #pragma once
 
+#include "scene/Camera.h"
+#include "video/Renderer.h"
+#include "scene/Scene.h"
+#include "video/Render_Job.h"
+
 namespace q
 {
 namespace scene

@@ -8,6 +8,8 @@ INCLUDEPATH += ../../../qbase/include
 INCLUDEPATH += ../../../qmath/include
 
 PRECOMPILED_HEADER = ../../include/QInputStdAfx.h
+CONFIG *= precompile_header
+
 
 
 rpi {

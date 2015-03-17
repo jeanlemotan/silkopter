@@ -1,4 +1,8 @@
 #include "QStdAfx.h"
+#include "video/Vertex_Declaration.h"
+#include "video/Index_Buffer.h"
+#include "video/Vertex_Buffer.h"
+#include "Ptr_Fw_Declaration.h"
 
 using namespace q;
 using namespace video;

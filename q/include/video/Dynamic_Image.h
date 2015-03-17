@@ -1,5 +1,9 @@
 #pragma once
 
+#include "res/Resource.h"
+#include "video/Color.h"
+#include "Ptr_Fw_Declaration.h"
+
 namespace q
 {
 namespace video

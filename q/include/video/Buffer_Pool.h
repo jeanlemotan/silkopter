@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system/System.h"
+
 //NOT THREAD SAFE
 
 namespace q

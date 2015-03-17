@@ -1,5 +1,8 @@
 #pragma once
 
+#include "video/Texture.h"
+#include "Factory.h"
+
 namespace q
 {
 namespace res

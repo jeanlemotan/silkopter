@@ -1,4 +1,10 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
+#include "Ptr_Fw_Declaration.h"
+#include "draw/Sprite_Base.h"
+#include "draw/Sprite.h"
+#include "draw/Painter.h"
+
 
 using namespace q;
 using namespace draw;

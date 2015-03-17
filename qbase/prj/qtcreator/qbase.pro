@@ -6,6 +6,7 @@ CONFIG += c++11
 INCLUDEPATH += ../../include
 
 PRECOMPILED_HEADER = ../../include/QBaseStdAfx.h
+CONFIG *= precompile_header
 
 #QMAKE_CXXFLAGS_RELEASE += -g
 #QMAKE_CFLAGS_RELEASE += -g

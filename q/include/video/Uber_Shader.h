@@ -1,5 +1,9 @@
 #pragma once
 
+#include "video/Shader.h"
+#include "video/Shader_Source.h"
+#include "Ptr_Fw_Declaration.h"
+
 namespace q
 {
 namespace video

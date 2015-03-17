@@ -1,5 +1,7 @@
 #pragma once
 
+#include "video/Vertex_Declaration.h"
+
 namespace q
 {
 namespace video

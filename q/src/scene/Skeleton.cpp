@@ -1,4 +1,5 @@
 #include "QStdAfx.h"
+#include "scene/Skeleton.h"
 
 using namespace q;
 using namespace scene;

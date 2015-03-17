@@ -1,5 +1,11 @@
 #include "QStdAfx.h"
+#include "res/Resource.h"
+#include "video/Uniform_Def.h"
+#include "video/Pass.h"
+#include "video/Technique.h"
+#include "video/Material.h"
 #include "draw/Painter.h"
+#include "scene/Camera.h"
 
 using namespace q;
 using namespace draw;

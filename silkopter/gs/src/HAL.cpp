@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "HAL.h"
 #include "utils/Json_Helpers.h"
 #include "utils/Timed_Scope.h"

@@ -1,4 +1,5 @@
 #include "QStdAfx.h"
+#include "video/Dynamic_Image.h"
 
 using namespace q;
 using namespace video;

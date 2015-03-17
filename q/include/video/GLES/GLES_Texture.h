@@ -1,5 +1,7 @@
 #pragma once
 
+#include "video/Texture.h"
+
 namespace q
 {
 namespace video

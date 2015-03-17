@@ -1,4 +1,8 @@
 #include "QStdAfx.h"
+#include "scene/Scene.h"
+#include "system/System.h"
+#include "video/Renderer.h"
+#include "scene/Scene_Node.h"
 
 using namespace q;
 using namespace scene;

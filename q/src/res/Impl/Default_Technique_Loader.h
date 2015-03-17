@@ -1,6 +1,14 @@
 #pragma once
 
 #include "res/Loader.h"
+#include "video/Technique.h"
+#include "video/Uniform.h"
+#include "video/Render_State.h"
+#include "video/Sampler_Def.h"
+#include "video/Attribute_Def.h"
+#include "video/Pass.h"
+#include "video/Render_State_Def.h"
+#include "video/Uniform_Def.h"
 
 namespace pugi
 {

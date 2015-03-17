@@ -7,6 +7,11 @@
 #include "video/GLES/GLES_Texture.h"
 #include "video/GLES/GLES_Shader.h"
 #include "video/GLES/GLES_Command_Stream.h"
+#include "video/Dynamic_Image.h"
+#include "video/Render_Job.h"
+#include "video/Technique.h"
+#include "system/System.h"
+
 
 #include "video/GLES/GLES_Interface.h"
 #include "Profiler.h"

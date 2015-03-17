@@ -2,27 +2,6 @@
 
 #include "HAL.h"
 #include "common/Comm_Data.h"
-#include "utils/PID.h"
-
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IADC_Value.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICardinal_Points.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/IPWM_Value.h"
-#include "common/node/stream/IReference_Frame.h"
-#include "common/node/stream/ITemperature.h"
-#include "common/node/stream/IVideo.h"
-#include "common/node/stream/IVoltage.h"
-
-#include "common/node/processor/IMultirotor_Pilot.h"
-#include "common/node/INode.h"
 
 namespace silk
 {

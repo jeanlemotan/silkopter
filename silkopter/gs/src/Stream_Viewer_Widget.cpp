@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Stream_Viewer_Widget.h"
 
 #include "common/node/INode.h"
@@ -233,19 +232,32 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<ILocation>())
+    else if (class_id == q::rtti::get_class_id<IWGS84>())
     {
         auto viewer = new Map_Viewer(this);
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Location>(stream)->samples_available_signal.connect([this, viewer](Location& stream)
+        m_connection = std::static_pointer_cast<WGS84>(stream)->samples_available_signal.connect([this, viewer](WGS84& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.tp, s.value.wgs84.lat_lon);
+                viewer->add_sample(s.tp, s.value.lat_lon);
             }
             viewer->process();
         });
     }
+//    else if (class_id == q::rtti::get_class_id<IECEF>())
+//    {
+//        auto viewer = new Map_Viewer(this);
+//        layout()->addWidget(viewer);
+//        m_connection = std::static_pointer_cast<ECEF>(stream)->samples_available_signal.connect([this, viewer](ECEF& stream)
+//        {
+//            for (auto const& s: stream.samples)
+//            {
+//                viewer->add_sample(s.tp, s.value.lat_lon);
+//            }
+//            viewer->process();
+//        });
+//    }
     else if (class_id == q::rtti::get_class_id<IPWM_Value>())
     {
         auto viewer = new Numeric_Viewer("pwm", stream->rate, this);

@@ -3,6 +3,8 @@
 #include "video/GLES/GLES_Texture.h"
 #include "video/GLES/GLES_Interface.h"
 #include "video/GLES/GLES_Command_Stream.h"
+#include "video/GLES/GLES_Renderer.h"
+#include "system/System.h"
 
 using namespace q;
 using namespace video;

@@ -1,5 +1,7 @@
 #include "QStdAfx.h"
 #include "video/Render_Target.h"
+#include "system/System.h"
+#include "video/Renderer.h"
 
 using namespace q;
 using namespace video;

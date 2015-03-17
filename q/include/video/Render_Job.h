@@ -1,5 +1,8 @@
 #pragma once
 
+#include "video/Material.h"
+#include "util/Bounds.h"
+
 namespace q
 {
 namespace video

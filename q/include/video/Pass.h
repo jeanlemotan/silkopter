@@ -1,5 +1,13 @@
 #pragma once
 
+#include "video/Uniform_Def.h"
+#include "video/Sampler_Def.h"
+#include "video/Attribute_Def.h"
+#include "video/Render_State.h"
+#include "video/Uber_Shader.h"
+#include "video/Render_State_Def.h"
+#include "video/Render_Target.h"
+
 namespace q
 {
 namespace video

@@ -2,7 +2,7 @@
 #include "video/GLES/GLES_Buffer_Impl.h"
 #include "video/GLES/GLES_Interface.h"
 #include "video/Renderer.h"
-
+#include "system/System.h"
 
 using namespace q;
 using namespace video;

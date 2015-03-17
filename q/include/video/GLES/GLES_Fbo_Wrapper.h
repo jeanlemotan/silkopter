@@ -1,5 +1,8 @@
 #pragma once
 
+#include "video/Render_Target.h"
+#include "video/GLES/GLES_Interface.h"
+
 namespace q
 {
 namespace video

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "res/Resource.h"
+#include "video/Texture.h"
+#include "video/Atlaser.h"
 
 namespace q
 {

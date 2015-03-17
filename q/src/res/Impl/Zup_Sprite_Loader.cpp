@@ -1,5 +1,6 @@
 #include "QStdAfx.h"
 #include "Zup_Sprite_Loader.h"
+#include "video/Texture.h"
 
 #include "../../pugixml/src/pugixml.hpp"
 #define PUGIXML_HEADER_ONLY
