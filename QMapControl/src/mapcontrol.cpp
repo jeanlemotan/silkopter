@@ -268,18 +268,18 @@ namespace qmapcontrol
                 mousepressed = true;
                 pre_click_px = QPoint(evnt->x(), evnt->y());
             }
-            else if ( evnt->button() == 2  &&
-                      mouseWheelEventsEnabled() &&
-                      mymousemode != None) // zoom in
-            {
-                zoomIn();
-            }
-            else if  ( evnt->button() == 4 &&
-                         mouseWheelEventsEnabled() &&
-                         mymousemode != None) // zoom out
-            {
-                zoomOut();
-            }
+//            else if ( evnt->button() == 2  &&
+//                      mouseWheelEventsEnabled() &&
+//                      mymousemode != None) // zoom in
+//            {
+//                zoomIn();
+//            }
+//            else if  ( evnt->button() == 4 &&
+//                         mouseWheelEventsEnabled() &&
+//                         mymousemode != None) // zoom out
+//            {
+//                zoomOut();
+//            }
         }
 
         // emit(mouseEvent(evnt));
@@ -486,6 +486,11 @@ namespace qmapcontrol
     MapControl::MouseMode MapControl::mouseMode()
     {
         return mymousemode;
+    }
+
+    bool MapControl::isPanning() const
+    {
+        return mousepressed && mymousemode == Panning;
     }
 
     void MapControl::stopFollowing(const Geometry* geom) const

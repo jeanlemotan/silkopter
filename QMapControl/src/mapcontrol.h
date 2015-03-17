@@ -220,6 +220,8 @@ namespace qmapcontrol
          */
         MapControl::MouseMode mouseMode();
 
+        bool isPanning() const;
+
         //! Enable persistent caching of map tiles
         /*!
          * Call this method to allow the QMapControl widget to save map tiles

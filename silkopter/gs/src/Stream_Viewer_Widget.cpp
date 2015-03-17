@@ -247,7 +247,7 @@ void Stream_Viewer_Widget::create_viewer()
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_samples(s.tp, s.value.wgs84.lat_lon);
+                viewer->add_sample(s.tp, s.value.wgs84.lat_lon);
             }
             viewer->process();
         });
