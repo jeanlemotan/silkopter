@@ -5,6 +5,8 @@
 #include "common/node/INode.h"
 #include "common/node/stream/IStream.h"
 
+#include "Ctor_Helper.h"
+
 namespace silk
 {
 
@@ -29,7 +31,7 @@ public:
 private:
     struct Data
     {
-        std::function<Base*()> ctor;
+        std::unique_ptr<detail::Ctor_Helper_Base<Base>> ctor;
     };
     std::map<std::string, Data> m_name_registry;
 };
@@ -129,8 +131,6 @@ auto Registry<Base>::add(std::string const& name, std::string const& type, std::
     return true;
 }
 
-
-
 template<class Base>
 template <class T, typename... Params>
 void Factory<Base>::register_node(std::string const& class_name, Params&&... params)
@@ -165,15 +165,14 @@ void Factory<Base>::register_node(std::string const& class_name, Params&&... par
         QLOGE("Error: class '{}' already defined.", class_name);
         return;
     }
-    auto ctor = [&]() { return new T(params...); };
-    m_name_registry[class_name] = { ctor };
+    m_name_registry[class_name].ctor.reset(new detail::Ctor_Helper<Base, T, Params...>(params...));
 }
 
 template <class Base>
 auto Factory<Base>::create_node(std::string const& class_name) -> std::shared_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
-    return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>(it->second.ctor()));
+    return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>(it->second.ctor->create()));
 }
 template<class Base>
 auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
@@ -203,7 +202,7 @@ auto Factory<Base>::create_all() const -> std::vector<Node_Info>
     info.reserve(m_name_registry.size());
     for (auto const& n: m_name_registry)
     {
-        info.push_back({n.first, std::unique_ptr<Base>((n.second.ctor)())});
+        info.push_back({n.first, std::unique_ptr<Base>(n.second.ctor->create())});
     }
     return info;
 }

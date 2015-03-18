@@ -181,5 +181,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IWGS84.h \
     ../../../libs/common/node/stream/ILocationxxx.h \
     ../../src/processor/Comp_ECEF.h \
-    ../../src/Globals.h
+    ../../src/Globals.h \
+    ../../src/Ctor_Helper.h
 

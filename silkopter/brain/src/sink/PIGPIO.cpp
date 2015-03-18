@@ -63,7 +63,7 @@ auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 auto PIGPIO::init() -> bool
 {
 #if defined (RASPBERRY_PI)
-    size_t period = m_params.period.count();
+    size_t period = m_init_params->period_micro;
 
     std::vector<size_t> periods = {1, 2, 4, 5, 8, 10};
     if (std::find(periods.begin(), periods.end(), period) == periods.end())
@@ -82,9 +82,9 @@ auto PIGPIO::init() -> bool
     std::vector<size_t> gpios = { 4, 17, 18, 21, 27, 22, 23, 24, 25 };
 
     //first validate
-    for (size_t i = 0; i < m_params.pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_init_params->pwm_channels.size(); i++)
     {
-        auto& ch = m_params.pwm_channels[i];
+        auto& ch = m_init_params->pwm_channels[i];
         if (std::find(gpios.begin(), gpios.end(), ch.gpio) == gpios.end())
         {
             QLOGE("channel {}: cannot use GPIO {}. Valid GPIOS are {}", i, ch.gpio, gpios);
@@ -134,25 +134,25 @@ auto PIGPIO::init() -> bool
 
     //first of all turn on the pull-down to that if the board is reset of powerred off the motors don't start spinning
     //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
-    for (size_t i = 0; i < m_params.pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_init_params->pwm_channels.size(); i++)
     {
-        auto gpio = m_params.pwm_channels[i].gpio;
+        auto gpio = m_init_params->pwm_channels[i].gpio;
         if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, ch.gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, gpio);
             return false;
         }
         if (gpioSetMode(gpio, PI_OUTPUT) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, ch.gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, gpio);
             return false;
         }
      }
 
     //now configure the pin for PWM or servo
-    for (size_t i = 0; i < m_params.pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_init_params->pwm_channels.size(); i++)
     {
-        auto& ch = m_params.pwm_channels[i];
+        auto& ch = m_init_params->pwm_channels[i];
         int gpio = ch.gpio;
         auto f = gpioSetPWMfrequency(gpio, ch.rate);
         if (f < 0)
@@ -180,7 +180,7 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     QLOG_TOPIC("pigpio::set_pwm_value");
 
 #if defined RASPBERRY_PI
-    auto& ch = m_params.pwm_channels[idx];
+    auto& ch = m_init_params->pwm_channels[idx];
     value = math::clamp(value, 0.f, 1.f);
     int pulse = value * (ch.max - ch.min);
     gpioPWM(ch.gpio, ch.min + pulse);
