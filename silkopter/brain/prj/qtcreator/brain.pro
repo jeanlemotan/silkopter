@@ -105,9 +105,9 @@ SOURCES += \
     ../../src/processor/Dead_Reckoning.cpp \
     ../../src/processor/EKF_AHRS.cpp \
     ../../src/processor/Comp_AHRS.cpp \
-    ../../src/processor/Multirotor_Pilot.cpp \
     ../../src/processor/Gravity_Filter.cpp \
-    ../../src/processor/Comp_ECEF.cpp
+    ../../src/processor/Pilot.cpp \
+    ../../src/processor/Comp_ECEF_Location.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -154,7 +154,6 @@ HEADERS += \
     ../../../libs/common/node/bus/IBus.h \
     ../../../libs/common/node/stream/IStream.h \
     ../../src/processor/ADC_Voltmeter.h \
-    ../../src/processor/Dead_Reckoning.h \
     ../../src/processor/ADC_Ammeter.h \
     ../../src/processor/LPF.h \
     ../../../libs/common/node/stream/IPWM_Value.h \
@@ -167,20 +166,28 @@ HEADERS += \
     ../../src/processor/Comp_AHRS.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
     ../../../libs/utils/Butterworth.h \
-    ../../src/processor/Multirotor_Pilot.h \
-    ../../../libs/common/node/processor/IMultirotor_Pilot.h \
     ../../../libs/common/node/INode.h \
     ../../../libs/common/node/IProcessor.h \
     ../../../libs/common/node/ISink.h \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
     ../../../libs/common/node/processor/IResampler.h \
-    ../../../libs/common/node/stream/IMultirotor_Input.h \
     ../../src/processor/Gravity_Filter.h \
-    ../../../libs/common/node/stream/IECEF.h \
-    ../../../libs/common/node/stream/IWGS84.h \
-    ../../../libs/common/node/stream/ILocationxxx.h \
-    ../../src/processor/Comp_ECEF.h \
     ../../src/Globals.h \
-    ../../src/Ctor_Helper.h
+    ../../src/Ctor_Helper.h \
+    ../../../libs/common/node/stream/IForce.h \
+    ../../../libs/common/node/stream/ITorque.h \
+    ../../src/processor/Assisted_Model.h \
+    ../../src/processor/Motor_Mixer.h \
+    ../../src/processor/Rate_Model.h \
+    ../../src/processor/Stability_Model.h \
+    ../../src/processor/Pilot.h \
+    ../../../libs/common/node/processor/IPilot.h \
+    ../../../libs/common/node/stream/ICommands.h \
+    ../../src/processor/Throttle_PWM.h \
+    ../../../libs/common/node/stream/IECEF_Location.h \
+    ../../../libs/common/node/stream/IWGS84_Location.h \
+    ../../src/processor/Comp_ECEF_Location.h \
+    ../../../libs/common/node/stream/IENU_Frame.h \
+    ../../../libs/common/node/stream/ILocal_Frame.h
 

@@ -1,16 +1,14 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IECEF.h"
-#include "common/node/stream/IPressure.h"
-
+#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
 
 namespace sz
 {
-namespace Comp_ECEF
+namespace Stability_Model
 {
 struct Init_Params;
 struct Config;
@@ -18,15 +16,16 @@ struct Config;
 }
 
 
+
 namespace silk
 {
 namespace node
 {
 
-class Comp_ECEF : public IProcessor
+class Stability_Model : public IProcessor
 {
 public:
-    Comp_ECEF(HAL& hal);
+    Stability_Model(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -45,20 +44,18 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Comp_ECEF::Init_Params> m_init_params;
-    std::shared_ptr<sz::Comp_ECEF::Config> m_config;
+    std::shared_ptr<sz::Stability_Model::Init_Params> m_init_params;
+    std::shared_ptr<sz::Stability_Model::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IECEF_wptr m_ecef_stream;
-    stream::ILinear_Acceleration_wptr m_linear_acceleration_stream;
-    stream::IPressure_wptr m_pressure_stream;
+    stream::ILocal_Frame_wptr m_input_stream;
+    stream::ILocal_Frame_wptr m_target_stream;
 
-    std::vector<stream::IECEF::Sample> m_ecef_samples;
-    std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
-    std::vector<stream::IPressure::Sample> m_pressure_samples;
+    std::vector<stream::ILocal_Frame::Sample> m_input_samples;
+    std::vector<stream::ILocal_Frame::Sample> m_target_samples;
 
-    struct Stream : public stream::IECEF
+    struct Stream : public stream::IAngular_Velocity
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -74,4 +71,3 @@ private:
 
 }
 }
-

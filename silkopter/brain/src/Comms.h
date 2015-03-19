@@ -6,7 +6,7 @@
 #include "utils/RUDP.h"
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IMultirotor_Input.h"
+#include "common/node/stream/ICommands.h"
 
 namespace sz
 {
@@ -71,7 +71,7 @@ public:
 private:
     boost::asio::io_service& m_io_service;
 
-    struct Multirotor_Input : public node::stream::IMultirotor_Input
+    struct Commands : public node::stream::ICommands
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -80,15 +80,15 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Multirotor_Input> m_multirotor_input;
+    mutable std::shared_ptr<Commands> m_commands_stream;
 
     rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::Comms::Source::Init_Params> m_init_params;
     std::shared_ptr<sz::Comms::Source::Config> m_config;
+    std::shared_ptr<Source> m_source;
 
     void handle_accept(boost::system::error_code const& error);
 
-    std::shared_ptr<Source> m_source;
 
     struct Telemetry_Stream
     {

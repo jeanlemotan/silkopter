@@ -4,7 +4,7 @@
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/ILocal_Frame.h"
 #include "HAL.h"
 
 
@@ -63,7 +63,7 @@ private:
     math::vec3f m_noisy_right_w;
     math::vec3f m_noisy_up_w;
 
-    struct Stream : public stream::IReference_Frame
+    struct Stream : public stream::ILocal_Frame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

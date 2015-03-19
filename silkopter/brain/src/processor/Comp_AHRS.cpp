@@ -65,8 +65,8 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IReference_Frame>();
-    outputs[0].name = "Reference Frame";
+    outputs[0].class_id = q::rtti::get_class_id<stream::ILocal_Frame>();
+    outputs[0].name = "Local Frame";
     outputs[0].stream = m_output_stream;
     return outputs;
 }
@@ -132,7 +132,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = m_output_stream->last_sample.value.local_to_world;
+                auto& a = m_output_stream->last_sample.value.local_to_enu;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -162,7 +162,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = m_output_stream->last_sample.value.local_to_world;
+            auto& rot = m_output_stream->last_sample.value.local_to_enu;
 
             //cancel drift
             static int xxx = 50;
@@ -179,6 +179,8 @@ void Comp_AHRS::process()
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);
+
+            m_output_stream->last_sample.value.enu_to_local = math::inverse(rot);
         }
 
         m_output_stream->samples[i] = m_output_stream->last_sample;

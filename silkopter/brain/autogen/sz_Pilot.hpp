@@ -27,11 +27,10 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace UBLOX { struct Init_Params {
- std::string bus;
-uint32_t rate;
+namespace sz { namespace Pilot { struct Init_Params {
+ uint32_t rate;
 
-explicit Init_Params():bus(), rate(5) {  }
+explicit Init_Params():rate(0) {  }
 
 
  
@@ -42,15 +41,13 @@ explicit Init_Params():bus(), rate(5) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::UBLOX::Init_Params > {
+class SAXEventHandler< ::sz::Pilot::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< uint32_t > handler_1;bool has_bus;
-bool has_rate;
+    SAXEventHandler< uint32_t > handler_0;bool has_rate;
 
     bool check_depth(const char* type)
     {
@@ -65,8 +62,6 @@ bool has_rate;
     {
         switch (state) {
             case 0:
-    return "bus";
-case 1:
     return "rate";
         default:
             break;
@@ -94,16 +89,14 @@ case 1:
 
     void reset_flags()
     {
-        has_bus = false;
-has_rate = false;
+        has_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::UBLOX::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Pilot::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->bus)
-, handler_1(&obj->rate)
+        , handler_0(&obj->rate)
     {
         reset_flags();
     }
@@ -117,9 +110,6 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -137,9 +127,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
         default:
             break;
         }
@@ -155,9 +142,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -175,9 +159,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
         default:
             break;
         }
@@ -193,9 +174,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -213,9 +191,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
         default:
             break;
         }
@@ -231,9 +206,6 @@ case 1:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -251,9 +223,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
         default:
             break;
         }
@@ -268,10 +237,8 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x42\x75\x73", 3))
-						 { state=0; has_bus = true; }
-else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
-						 { state=1; has_rate = true; }
+            else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
+						 { state=0; has_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -282,9 +249,6 @@ else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x2
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -303,9 +267,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
         default:
             break;
         }
@@ -322,9 +283,6 @@ case 1:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
         default:
             break;
         }
@@ -340,9 +298,6 @@ case 1:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -361,15 +316,11 @@ case 1:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_bus) set_missing_required("bus");
-if (!has_rate) set_missing_required("rate");
+            if (!has_rate) set_missing_required("rate");
         }
         return the_error.empty();
     }
@@ -390,8 +341,6 @@ if (!has_rate) set_missing_required("rate");
 
         case 0:
      handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -407,22 +356,20 @@ case 1:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
 
     }
 };
 
-template < class Writer819c8b7f87c0d7337ae2fe372c36d1d35e78d554e7bf3d29d155e1e1749df83c >
-struct Serializer< Writer819c8b7f87c0d7337ae2fe372c36d1d35e78d554e7bf3d29d155e1e1749df83c, ::sz::UBLOX::Init_Params > {
+template < class Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67 >
+struct Serializer< Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67, ::sz::Pilot::Init_Params > {
 
-    void operator()( Writer819c8b7f87c0d7337ae2fe372c36d1d35e78d554e7bf3d29d155e1e1749df83c& w, const ::sz::UBLOX::Init_Params& value) const
+    void operator()( Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67& w, const ::sz::Pilot::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x75\x73", 3, false); Serializer< Writer819c8b7f87c0d7337ae2fe372c36d1d35e78d554e7bf3d29d155e1e1749df83c, std::string >()(w, value.bus);
-w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer819c8b7f87c0d7337ae2fe372c36d1d35e78d554e7bf3d29d155e1e1749df83c, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67, uint32_t >()(w, value.rate);
 
-        w.EndObject(2);
+        w.EndObject(1);
     }
 
 };
@@ -456,10 +403,15 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer819c8
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace UBLOX { struct ECEF_Location {
- 
+namespace sz { namespace Pilot { struct Inputs {
+ std::string local_frame;
+std::string angular_velocity;
+std::string cardinal_points;
+std::string location;
+std::string battery_state;
+std::string commands;
 
-explicit ECEF_Location() {  }
+explicit Inputs():local_frame(), angular_velocity(), cardinal_points(), location(), battery_state(), commands() {  }
 
 
  
@@ -470,7 +422,643 @@ explicit ECEF_Location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::UBLOX::ECEF_Location > {
+class SAXEventHandler< ::sz::Pilot::Inputs > {
+private:
+    utility::scoped_ptr<error::ErrorBase> the_error;
+    int state;
+    int depth;
+
+    SAXEventHandler< std::string > handler_0;
+SAXEventHandler< std::string > handler_1;
+SAXEventHandler< std::string > handler_2;
+SAXEventHandler< std::string > handler_3;
+SAXEventHandler< std::string > handler_4;
+SAXEventHandler< std::string > handler_5;bool has_local_frame;
+bool has_angular_velocity;
+bool has_cardinal_points;
+bool has_location;
+bool has_battery_state;
+bool has_commands;
+
+    bool check_depth(const char* type)
+    {
+        if (depth <= 0) {
+            the_error.reset(new error::TypeMismatchError("object", type));
+            return false;
+        }
+        return true;
+    }
+
+    const char* current_member_name() const
+    {
+        switch (state) {
+            case 0:
+    return "local_frame";
+case 1:
+    return "angular_velocity";
+case 2:
+    return "cardinal_points";
+case 3:
+    return "location";
+case 4:
+    return "battery_state";
+case 5:
+    return "commands";
+        default:
+            break;
+        }
+        return "<UNKNOWN>";
+    }
+
+    bool checked_event_forwarding(bool success)
+    {
+        if (!success)
+            the_error.reset(new error::ObjectMemberError(current_member_name()));
+        return success;
+    }
+
+    void set_missing_required(const char* name)
+    {
+        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
+            the_error.reset(new error::RequiredFieldMissingError());
+
+        std::vector<std::string>& missing =
+            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
+
+        missing.push_back(name);
+    }
+
+    void reset_flags()
+    {
+        has_local_frame = false;
+has_angular_velocity = false;
+has_cardinal_points = false;
+has_location = false;
+has_battery_state = false;
+has_commands = false;
+    }
+
+public:
+    explicit SAXEventHandler( ::sz::Pilot::Inputs * obj)
+        : state(-1)
+        , depth(0)
+        , handler_0(&obj->local_frame)
+, handler_1(&obj->angular_velocity)
+, handler_2(&obj->cardinal_points)
+, handler_3(&obj->location)
+, handler_4(&obj->battery_state)
+, handler_5(&obj->commands)
+    {
+        reset_flags();
+    }
+
+    bool Null()
+    {
+        if (!check_depth("null"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Bool(bool b)
+    {
+        if (!check_depth("bool"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
+
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int(int i)
+    {
+        if (!check_depth("int"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        if (!check_depth("unsigned"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        if (!check_depth("int64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        if (!check_depth("uint64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        if (!check_depth("double"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool String(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("string"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Key(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("object"))
+            return false;
+
+        if (depth == 1) {
+            if (0) {
+            }
+            else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11))
+						 { state=0; has_local_frame = true; }
+else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16))
+						 { state=1; has_angular_velocity = true; }
+else if (utility::string_equal(str, length, "\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15))
+						 { state=2; has_cardinal_points = true; }
+else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8))
+						 { state=3; has_location = true; }
+else if (utility::string_equal(str, length, "\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13))
+						 { state=4; has_battery_state = true; }
+else if (utility::string_equal(str, length, "\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8))
+						 { state=5; has_commands = true; }
+            else {
+                state = -1;
+                return true;
+            }
+
+        } else {
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool StartArray()
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool EndArray(SizeType length)
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool StartObject()
+    {
+        ++depth;
+        if (depth > 1) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool EndObject(SizeType length)
+    {
+        --depth;
+        if (depth > 0) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
+            default:
+                break;
+            }
+        } else {
+            if (!has_local_frame) set_missing_required("local_frame");
+if (!has_angular_velocity) set_missing_required("angular_velocity");
+if (!has_cardinal_points) set_missing_required("cardinal_points");
+if (!has_location) set_missing_required("location");
+if (!has_battery_state) set_missing_required("battery_state");
+if (!has_commands) set_missing_required("commands");
+        }
+        return the_error.empty();
+    }
+
+    bool HasError() const
+    {
+        return !this->the_error.empty();
+    }
+
+    bool ReapError(error::ErrorStack& errs)
+    {
+        if (this->the_error.empty())
+            return false;
+
+        errs.push(this->the_error.release());
+
+        switch (state) {
+
+        case 0:
+     handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
+
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void PrepareForReuse()
+    {
+        depth = 0;
+        state = -1;
+        the_error.reset();
+        reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+
+    }
+};
+
+template < class Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49 >
+struct Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, ::sz::Pilot::Inputs > {
+
+    void operator()( Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49& w, const ::sz::Pilot::Inputs& value) const
+    {
+        w.StartObject();
+
+        w.Key("\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.local_frame);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.angular_velocity);
+w.Key("\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.cardinal_points);
+w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 8, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.location);
+w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.battery_state);
+w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.commands);
+
+        w.EndObject(6);
+    }
+
+};
+}
+
+
+// The MIT License (MIT)
+//
+// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <autojsoncxx/autojsoncxx.hpp>
+
+// The comments are reserved for replacement
+// such syntax is chosen so that the template file looks like valid C++
+
+namespace sz { namespace Pilot { struct Outputs {
+ 
+
+explicit Outputs() {  }
+
+
+ 
+}; }
+ }
+
+
+namespace autojsoncxx {
+
+template <>
+class SAXEventHandler< ::sz::Pilot::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -521,7 +1109,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::UBLOX::ECEF_Location * obj)
+    explicit SAXEventHandler( ::sz::Pilot::Outputs * obj)
         : state(-1)
         , depth(0)
         
@@ -772,10 +1360,10 @@ public:
     }
 };
 
-template < class Writeraef4b9a622364f51af90e53c5bb07fbae7377cd8ed4b87a38293a1cb872776fa >
-struct Serializer< Writeraef4b9a622364f51af90e53c5bb07fbae7377cd8ed4b87a38293a1cb872776fa, ::sz::UBLOX::ECEF_Location > {
+template < class Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d >
+struct Serializer< Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d, ::sz::Pilot::Outputs > {
 
-    void operator()( Writeraef4b9a622364f51af90e53c5bb07fbae7377cd8ed4b87a38293a1cb872776fa& w, const ::sz::UBLOX::ECEF_Location& value) const
+    void operator()( Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d& w, const ::sz::Pilot::Outputs& value) const
     {
         w.StartObject();
 
@@ -815,370 +1403,11 @@ struct Serializer< Writeraef4b9a622364f51af90e53c5bb07fbae7377cd8ed4b87a38293a1c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace UBLOX { struct WGS84_Location {
- 
-
-explicit WGS84_Location() {  }
-
-
- 
-}; }
- }
-
-
-namespace autojsoncxx {
-
-template <>
-class SAXEventHandler< ::sz::UBLOX::WGS84_Location > {
-private:
-    utility::scoped_ptr<error::ErrorBase> the_error;
-    int state;
-    int depth;
-
-    
-
-    bool check_depth(const char* type)
-    {
-        if (depth <= 0) {
-            the_error.reset(new error::TypeMismatchError("object", type));
-            return false;
-        }
-        return true;
-    }
-
-    const char* current_member_name() const
-    {
-        switch (state) {
-            
-        default:
-            break;
-        }
-        return "<UNKNOWN>";
-    }
-
-    bool checked_event_forwarding(bool success)
-    {
-        if (!success)
-            the_error.reset(new error::ObjectMemberError(current_member_name()));
-        return success;
-    }
-
-    void set_missing_required(const char* name)
-    {
-        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
-            the_error.reset(new error::RequiredFieldMissingError());
-
-        std::vector<std::string>& missing =
-            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
-
-        missing.push_back(name);
-    }
-
-    void reset_flags()
-    {
-        
-    }
-
-public:
-    explicit SAXEventHandler( ::sz::UBLOX::WGS84_Location * obj)
-        : state(-1)
-        , depth(0)
-        
-    {
-        reset_flags();
-    }
-
-    bool Null()
-    {
-        if (!check_depth("null"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Bool(bool b)
-    {
-        if (!check_depth("bool"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int(int i)
-    {
-        if (!check_depth("int"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint(unsigned i)
-    {
-        if (!check_depth("unsigned"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int64(utility::int64_t i)
-    {
-        if (!check_depth("int64_t"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint64(utility::uint64_t i)
-    {
-        if (!check_depth("uint64_t"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Double(double d)
-    {
-        if (!check_depth("double"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool String(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("string"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Key(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("object"))
-            return false;
-
-        if (depth == 1) {
-            if (0) {
-            }
-            
-            else {
-                state = -1;
-                return true;
-            }
-
-        } else {
-            switch (state) {
-
-            
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool StartArray()
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool EndArray(SizeType length)
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool StartObject()
-    {
-        ++depth;
-        if (depth > 1) {
-
-            switch (state) {
-
-            
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool EndObject(SizeType length)
-    {
-        --depth;
-        if (depth > 0) {
-
-            switch (state) {
-
-            
-
-            default:
-                break;
-            }
-        } else {
-            
-        }
-        return the_error.empty();
-    }
-
-    bool HasError() const
-    {
-        return !this->the_error.empty();
-    }
-
-    bool ReapError(error::ErrorStack& errs)
-    {
-        if (this->the_error.empty())
-            return false;
-
-        errs.push(this->the_error.release());
-
-        switch (state) {
-
-        
-
-        default:
-            break;
-        }
-
-        return true;
-    }
-
-    void PrepareForReuse()
-    {
-        depth = 0;
-        state = -1;
-        the_error.reset();
-        reset_flags();
-        
-    }
-};
-
-template < class Writer7f5164f6288e9543a3574b6a5e3f39b2dd32601b93a0213a5462562711d1e997 >
-struct Serializer< Writer7f5164f6288e9543a3574b6a5e3f39b2dd32601b93a0213a5462562711d1e997, ::sz::UBLOX::WGS84_Location > {
-
-    void operator()( Writer7f5164f6288e9543a3574b6a5e3f39b2dd32601b93a0213a5462562711d1e997& w, const ::sz::UBLOX::WGS84_Location& value) const
-    {
-        w.StartObject();
-
-        
-
-        w.EndObject(0);
-    }
-
-};
-}
-
-
-// The MIT License (MIT)
-//
-// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-#include <autojsoncxx/autojsoncxx.hpp>
-
-// The comments are reserved for replacement
-// such syntax is chosen so that the template file looks like valid C++
-
-namespace sz { namespace UBLOX { struct Outputs {
- sz::UBLOX::ECEF_Location ecef_location;
-sz::UBLOX::WGS84_Location wgs84_location;
-
-explicit Outputs():ecef_location(), wgs84_location() {  }
+namespace sz { namespace Pilot { struct Config {
+ sz::Pilot::Inputs inputs;
+sz::Pilot::Outputs outputs;
+
+explicit Config():inputs(), outputs() {  }
 
 
  
@@ -1189,15 +1418,15 @@ explicit Outputs():ecef_location(), wgs84_location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::UBLOX::Outputs > {
+class SAXEventHandler< ::sz::Pilot::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::UBLOX::ECEF_Location > handler_0;
-SAXEventHandler< sz::UBLOX::WGS84_Location > handler_1;bool has_ecef_location;
-bool has_wgs84_location;
+    SAXEventHandler< sz::Pilot::Inputs > handler_0;
+SAXEventHandler< sz::Pilot::Outputs > handler_1;bool has_inputs;
+bool has_outputs;
 
     bool check_depth(const char* type)
     {
@@ -1212,432 +1441,8 @@ bool has_wgs84_location;
     {
         switch (state) {
             case 0:
-    return "ecef_location";
+    return "inputs";
 case 1:
-    return "wgs84_location";
-        default:
-            break;
-        }
-        return "<UNKNOWN>";
-    }
-
-    bool checked_event_forwarding(bool success)
-    {
-        if (!success)
-            the_error.reset(new error::ObjectMemberError(current_member_name()));
-        return success;
-    }
-
-    void set_missing_required(const char* name)
-    {
-        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
-            the_error.reset(new error::RequiredFieldMissingError());
-
-        std::vector<std::string>& missing =
-            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
-
-        missing.push_back(name);
-    }
-
-    void reset_flags()
-    {
-        has_ecef_location = false;
-has_wgs84_location = false;
-    }
-
-public:
-    explicit SAXEventHandler( ::sz::UBLOX::Outputs * obj)
-        : state(-1)
-        , depth(0)
-        , handler_0(&obj->ecef_location)
-, handler_1(&obj->wgs84_location)
-    {
-        reset_flags();
-    }
-
-    bool Null()
-    {
-        if (!check_depth("null"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Bool(bool b)
-    {
-        if (!check_depth("bool"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
-
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int(int i)
-    {
-        if (!check_depth("int"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint(unsigned i)
-    {
-        if (!check_depth("unsigned"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int64(utility::int64_t i)
-    {
-        if (!check_depth("int64_t"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint64(utility::uint64_t i)
-    {
-        if (!check_depth("uint64_t"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Double(double d)
-    {
-        if (!check_depth("double"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool String(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("string"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Key(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("object"))
-            return false;
-
-        if (depth == 1) {
-            if (0) {
-            }
-            else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13))
-						 { state=0; has_ecef_location = true; }
-else if (utility::string_equal(str, length, "\x57\x47\x53\x38\x34\x5f\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 14))
-						 { state=1; has_wgs84_location = true; }
-            else {
-                state = -1;
-                return true;
-            }
-
-        } else {
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool StartArray()
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool EndArray(SizeType length)
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
-
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool StartObject()
-    {
-        ++depth;
-        if (depth > 1) {
-
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool EndObject(SizeType length)
-    {
-        --depth;
-        if (depth > 0) {
-
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
-
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
-            default:
-                break;
-            }
-        } else {
-            if (!has_ecef_location) set_missing_required("ecef_location");
-if (!has_wgs84_location) set_missing_required("wgs84_location");
-        }
-        return the_error.empty();
-    }
-
-    bool HasError() const
-    {
-        return !this->the_error.empty();
-    }
-
-    bool ReapError(error::ErrorStack& errs)
-    {
-        if (this->the_error.empty())
-            return false;
-
-        errs.push(this->the_error.release());
-
-        switch (state) {
-
-        case 0:
-     handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
-
-        default:
-            break;
-        }
-
-        return true;
-    }
-
-    void PrepareForReuse()
-    {
-        depth = 0;
-        state = -1;
-        the_error.reset();
-        reset_flags();
-        handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
-
-    }
-};
-
-template < class Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174 >
-struct Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174, ::sz::UBLOX::Outputs > {
-
-    void operator()( Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174& w, const ::sz::UBLOX::Outputs& value) const
-    {
-        w.StartObject();
-
-        w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174, sz::UBLOX::ECEF_Location >()(w, value.ecef_location);
-w.Key("\x57\x47\x53\x38\x34\x5f\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 14, false); Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174, sz::UBLOX::WGS84_Location >()(w, value.wgs84_location);
-
-        w.EndObject(2);
-    }
-
-};
-}
-
-
-// The MIT License (MIT)
-//
-// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-#include <autojsoncxx/autojsoncxx.hpp>
-
-// The comments are reserved for replacement
-// such syntax is chosen so that the template file looks like valid C++
-
-namespace sz { namespace UBLOX { struct Config {
- sz::UBLOX::Outputs outputs;
-
-explicit Config():outputs() {  }
-
-
- 
-}; }
- }
-
-
-namespace autojsoncxx {
-
-template <>
-class SAXEventHandler< ::sz::UBLOX::Config > {
-private:
-    utility::scoped_ptr<error::ErrorBase> the_error;
-    int state;
-    int depth;
-
-    SAXEventHandler< sz::UBLOX::Outputs > handler_0;bool has_outputs;
-
-    bool check_depth(const char* type)
-    {
-        if (depth <= 0) {
-            the_error.reset(new error::TypeMismatchError("object", type));
-            return false;
-        }
-        return true;
-    }
-
-    const char* current_member_name() const
-    {
-        switch (state) {
-            case 0:
     return "outputs";
         default:
             break;
@@ -1665,14 +1470,16 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_inputs = false;
+has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::UBLOX::Config * obj)
+    explicit SAXEventHandler( ::sz::Pilot::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->inputs)
+, handler_1(&obj->outputs)
     {
         reset_flags();
     }
@@ -1686,6 +1493,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -1703,6 +1513,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -1718,6 +1531,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -1735,6 +1551,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -1750,6 +1569,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -1767,6 +1589,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -1782,6 +1607,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -1799,6 +1627,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -1813,8 +1644,10 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
+						 { state=0; has_inputs = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
+						 { state=1; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -1825,6 +1658,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -1843,6 +1679,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -1859,6 +1698,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
         default:
             break;
         }
@@ -1874,6 +1716,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -1892,11 +1737,15 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_inputs) set_missing_required("inputs");
+if (!has_outputs) set_missing_required("outputs");
         }
         return the_error.empty();
     }
@@ -1917,6 +1766,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -1932,20 +1783,22 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
 
-template < class Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f >
-struct Serializer< Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f, ::sz::UBLOX::Config > {
+template < class Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748 >
+struct Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, ::sz::Pilot::Config > {
 
-    void operator()( Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f& w, const ::sz::UBLOX::Config& value) const
+    void operator()( Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748& w, const ::sz::Pilot::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f, sz::UBLOX::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, sz::Pilot::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, sz::Pilot::Outputs >()(w, value.outputs);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };

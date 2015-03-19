@@ -9,9 +9,9 @@ namespace node
 namespace stream
 {
 
-class IMultirotor_Input : public IStream
+class ICommands : public IStream
 {
-    DEFINE_RTTI_CLASS(IMultirotor_Input, IStream);
+    DEFINE_RTTI_CLASS(ICommands, IStream);
 public:
     struct Value
     {
@@ -101,11 +101,11 @@ public:
 
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~IMultirotor_Input() {}
+    virtual ~ICommands() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IMultirotor_Input);
+DECLARE_CLASS_PTR(ICommands);
 
 
 }

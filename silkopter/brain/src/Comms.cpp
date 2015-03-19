@@ -10,17 +10,18 @@
 #include "common/node/stream/ICardinal_Points.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
-#include "common/node/stream/IECEF.h"
+#include "common/node/stream/IECEF_Location.h"
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IPWM_Value.h"
-#include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IENU_Frame.h"
 #include "common/node/stream/ITemperature.h"
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/processor/IMultirotor_Pilot.h"
+#include "common/node/processor/IPilot.h"
 
 #include "sz_math.hpp"
 #include "sz_Comms_Source.hpp"
@@ -118,7 +119,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     }
 
     m_source.reset(new Source(*this));
-    m_multirotor_input.reset(new Multirotor_Input);
+    m_commands_stream.reset(new Commands);
 
     m_config.reset(new sz::Comms::Source::Config);
     m_init_params.reset(new sz::Comms::Source::Init_Params);
@@ -233,9 +234,10 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IECEF>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IECEF_Location>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IPWM_Value>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IReference_Frame>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ILocal_Frame>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IENU_Frame>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IADC_Value>(ts, *stream)
                 //          send_telemetry_stream<node::stream::IVideo>(sd, *stream)
@@ -622,7 +624,7 @@ auto Comms::Source::init(rapidjson::Value const& init_params) -> bool
     }
     jsonutil::clone_value(m_comms.m_init_paramsj, init_params, m_comms.m_init_paramsj.GetAllocator());
     *m_comms.m_init_params = sz;
-    m_comms.m_multirotor_input->rate = 50;
+    m_comms.m_commands_stream->rate = 50;
     return true;
 }
 auto Comms::Source::get_init_params() const -> rapidjson::Document const&
@@ -653,9 +655,9 @@ auto Comms::Source::get_config() const -> rapidjson::Document
 auto Comms::Source::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<node::stream::IMultirotor_Input>();
+    outputs[0].class_id = q::rtti::get_class_id<node::stream::ICommands>();
     outputs[0].name = "Multirotor Input";
-    outputs[0].stream = m_comms.m_multirotor_input;
+    outputs[0].stream = m_comms.m_commands_stream;
     return outputs;
 }
 

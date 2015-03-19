@@ -1,14 +1,14 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILocal_Frame.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/ITorque.h"
 #include "HAL.h"
+
 
 namespace sz
 {
-namespace Gravity_Filter
+namespace Rate_Model
 {
 struct Init_Params;
 struct Config;
@@ -16,15 +16,16 @@ struct Config;
 }
 
 
+
 namespace silk
 {
 namespace node
 {
 
-class Gravity_Filter : public IProcessor
+class Rate_Model : public IProcessor
 {
 public:
-    Gravity_Filter(HAL& hal);
+    Rate_Model(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -43,25 +44,25 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
-    std::shared_ptr<sz::Gravity_Filter::Config> m_config;
+    std::shared_ptr<sz::Rate_Model::Init_Params> m_init_params;
+    std::shared_ptr<sz::Rate_Model::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocal_Frame_wptr m_local_frame_stream;
-    stream::IAcceleration_wptr m_acceleration_stream;
+    stream::IAngular_Velocity_wptr m_input_stream;
+    stream::IAngular_Velocity_wptr m_target_stream;
 
-    std::vector<stream::ILocal_Frame::Sample> m_local_frame_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
+    std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
+    std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
 
-    struct Stream : public stream::ILinear_Acceleration
+    struct Stream : public stream::ITorque
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
 
-        uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
+        uint32_t rate = 0;
     };
     mutable std::shared_ptr<Stream> m_output_stream;
 };

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
+#include "common/node/stream/IVelocity.h"
 #include "common/node/stream/ILocal_Frame.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/IForce.h"
 #include "HAL.h"
+
 
 namespace sz
 {
-namespace Gravity_Filter
+namespace Assisted_Model
 {
 struct Init_Params;
 struct Config;
@@ -16,15 +17,16 @@ struct Config;
 }
 
 
+
 namespace silk
 {
 namespace node
 {
 
-class Gravity_Filter : public IProcessor
+class Assisted_Model : public IProcessor
 {
 public:
-    Gravity_Filter(HAL& hal);
+    Assisted_Model(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -43,27 +45,37 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
-    std::shared_ptr<sz::Gravity_Filter::Config> m_config;
+    std::shared_ptr<sz::Assisted_Model::Init_Params> m_init_params;
+    std::shared_ptr<sz::Assisted_Model::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocal_Frame_wptr m_local_frame_stream;
-    stream::IAcceleration_wptr m_acceleration_stream;
+    stream::IVelocity_wptr m_input_stream;
+    stream::IVelocity_wptr m_target_stream;
 
-    std::vector<stream::ILocal_Frame::Sample> m_local_frame_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
+    std::vector<stream::IVelocity::Sample> m_input_samples;
+    std::vector<stream::IVelocity::Sample> m_target_samples;
 
-    struct Stream : public stream::ILinear_Acceleration
+    struct Local_Frame : public stream::ILocal_Frame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
 
-        uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
+        uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    mutable std::shared_ptr<Stream> m_local_frame_stream;
+    struct Force : public stream::IForce
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
+
+        Sample last_sample;
+        std::vector<Sample> samples;
+        uint32_t rate = 0;
+    };
+    mutable std::shared_ptr<Stream> m_force_stream;
 };
 
 

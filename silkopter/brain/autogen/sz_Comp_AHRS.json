@@ -22,7 +22,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_AHRS",
-    "name": "Reference_Frame",
+    "name": "Local_Frame",
     "members":
     [
     ]
@@ -33,7 +33,7 @@
     "name": "Outputs",
     "members":
     [
-        ["sz::Comp_AHRS::Reference_Frame", "reference_frame", {"required": true, "json_key" : "Reference Frame"}]
+        ["sz::Comp_AHRS::Local_Frame", "local_frame", {"required": true, "json_key" : "Local Frame"}]
     ]
 },
 {
