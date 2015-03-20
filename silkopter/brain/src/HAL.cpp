@@ -28,6 +28,9 @@
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_ECEF_Location.h"
 #include "processor/Pilot.h"
+#include "processor/Rate_Processor.h"
+#include "processor/Stability_Processor.h"
+#include "processor/Velocity_Processor.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -331,34 +334,76 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Comp_ECEF_Location>("Comp ECEF Location", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
+
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("ENU Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Acceleration>>("ECEF Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Linear_Acceleration>>("ENU Linear Acceleration LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Linear_Acceleration>>("ECEF Linear Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular Velocity LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Angular_Velocity>>("ENU Angular Velocity LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Angular_Velocity>>("ECEF Angular Velocity LPF", *this);
     m_node_factory.register_node<LPF<stream::IBattery_State>>("Battery State LPF", *this);
     m_node_factory.register_node<LPF<stream::IADC_Value>>("ADC Value LPF", *this);
     m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
     m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Location>>("ECEF Location LPF", *this);
     m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Distance>>("ENU Distance LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Distance>>("ECEF Distance LPF", *this);
     m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Magnetic_Field>>("ENU Magnetic Field LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Magnetic_Field>>("ECEF Magnetic Field LPF", *this);
     m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
     m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature LPF", *this);
     m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Frame>>("ENU Frame LPF", *this);
     m_node_factory.register_node<LPF<stream::IPWM_Value>>("PWM Value LPF", *this);
+    m_node_factory.register_node<LPF<stream::IForce>>("Force LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Force>>("ENU Force LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Force>>("ECEF Force LPF", *this);
+    m_node_factory.register_node<LPF<stream::ITorque>>("Torque LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Torque>>("ENU Torque LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Torque>>("ECEF Torque LPF", *this);
+    m_node_factory.register_node<LPF<stream::IVelocity>>("Velocity LPF", *this);
+    m_node_factory.register_node<LPF<stream::IENU_Velocity>>("ENU Velocity LPF", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Velocity>>("ECEF Velocity LPF", *this);
+
     m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Acceleration>>("ENU Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Acceleration>>("ECEF Acceleration RS", *this);
     m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Linear_Acceleration>>("ENU Linear Acceleration RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Linear_Acceleration>>("ECEF Linear Acceleration RS", *this);
     m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular Velocity RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Angular_Velocity>>("ENU Angular Velocity RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Angular_Velocity>>("ECEF Angular Velocity RS", *this);
     m_node_factory.register_node<Resampler<stream::IBattery_State>>("Battery State RS", *this);
     m_node_factory.register_node<Resampler<stream::IADC_Value>>("ADC Value RS", *this);
     m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
     m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Location>>("ECEF Location RS", *this);
     m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Distance>>("ENU Distance RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Distance>>("ECEF Distance RS", *this);
     m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Magnetic_Field>>("ENU Magnetic Field RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Magnetic_Field>>("ECEF Magnetic Field RS", *this);
     m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);
     m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature RS", *this);
     m_node_factory.register_node<Resampler<stream::IFrame>>("Frame RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Frame>>("ENU Frame RS", *this);
     m_node_factory.register_node<Resampler<stream::IPWM_Value>>("PWM Value RS", *this);
+    m_node_factory.register_node<Resampler<stream::IForce>>("Force RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Force>>("ENU Force RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Force>>("ECEF Force RS", *this);
+    m_node_factory.register_node<Resampler<stream::ITorque>>("Torque RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Torque>>("ENU Torque RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Torque>>("ECEF Torque RS", *this);
+    m_node_factory.register_node<Resampler<stream::IVelocity>>("Velocity RS", *this);
+    m_node_factory.register_node<Resampler<stream::IENU_Velocity>>("ENU Velocity RS", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Velocity>>("ECEF Velocity RS", *this);
 
 
     get_streams().remove_all();

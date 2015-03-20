@@ -186,5 +186,6 @@ HEADERS += \
     ../../src/processor/Comp_ECEF_Location.h \
     ../../src/processor/Velocity_Processor.h \
     ../../src/processor/Stability_Processor.h \
-    ../../src/processor/Rate_Processor.h
+    ../../src/processor/Rate_Processor.h \
+    ../../../libs/common/node/stream/IVelocity.h
 

@@ -65,7 +65,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_frame_stream;
+    mutable std::shared_ptr<Frame> m_frame_stream;
     struct Force : public stream::IForce
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
@@ -75,7 +75,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_force_stream;
+    mutable std::shared_ptr<Force> m_force_stream;
 };
 
 
