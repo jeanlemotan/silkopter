@@ -1,14 +1,14 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
 
 namespace sz
 {
-namespace Stability_Model
+namespace Stability_Processor
 {
 struct Init_Params;
 struct Config;
@@ -22,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class Stability_Model : public IProcessor
+class Stability_Processor : public IProcessor
 {
 public:
-    Stability_Model(HAL& hal);
+    Stability_Processor(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -44,16 +44,16 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Stability_Model::Init_Params> m_init_params;
-    std::shared_ptr<sz::Stability_Model::Config> m_config;
+    std::shared_ptr<sz::Stability_Processor::Init_Params> m_init_params;
+    std::shared_ptr<sz::Stability_Processor::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocal_Frame_wptr m_input_stream;
-    stream::ILocal_Frame_wptr m_target_stream;
+    stream::IFrame_wptr m_input_stream;
+    stream::IFrame_wptr m_target_stream;
 
-    std::vector<stream::ILocal_Frame::Sample> m_input_samples;
-    std::vector<stream::ILocal_Frame::Sample> m_target_samples;
+    std::vector<stream::IFrame::Sample> m_input_samples;
+    std::vector<stream::IFrame::Sample> m_target_samples;
 
     struct Stream : public stream::IAngular_Velocity
     {

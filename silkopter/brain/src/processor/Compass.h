@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/ICardinal_Points.h"
 #include "HAL.h"
@@ -19,7 +19,7 @@ public:
     struct Init_Params
     {
         std::string name;
-        stream::ILocal_Frame* local_frame_stream = nullptr;
+        stream::IFrame* frame_stream = nullptr;
         stream::IMagnetic_Field* magnetic_field_stream = nullptr;
     };
 
@@ -41,13 +41,13 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    std::vector<stream::ILocal_Frame::Sample> m_local_frame_samples;
+    std::vector<stream::IFrame::Sample> m_frame_samples;
     std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
 
     struct Stream : public stream::ICardinal_Points
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return params->local_frame_stream->get_rate(); }
+        auto get_rate() const -> uint32_t { return params->frame_stream->get_rate(); }
 
         Init_Params* params = nullptr;
         Sample last_sample;

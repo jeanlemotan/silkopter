@@ -2,9 +2,9 @@
 
 #include "common/node/IProcessor.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IECEF_Location.h"
+#include "common/node/stream/ILocation.h"
 #include "common/node/stream/IPressure.h"
-#include "common/node/stream/IENU_Frame.h"
+#include "common/node/stream/IFrame.h"
 
 #include "HAL.h"
 
@@ -51,11 +51,11 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IECEF_Location_wptr m_ecef_location_stream;
+    stream::IECEF_Location_wptr m_location_stream;
     stream::ILinear_Acceleration_wptr m_linear_acceleration_stream;
     stream::IPressure_wptr m_pressure_stream;
 
-    std::vector<stream::IECEF_Location::Sample> m_ecef_location_samples;
+    std::vector<stream::IECEF_Location::Sample> m_location_samples;
     std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
     std::vector<stream::IPressure::Sample> m_pressure_samples;
 
@@ -68,7 +68,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<ECEF_Location_Stream> m_ecef_location_output_stream;
+    mutable std::shared_ptr<ECEF_Location_Stream> m_location_output_stream;
 
     struct ENU_Frame_Stream : public stream::IENU_Frame
     {

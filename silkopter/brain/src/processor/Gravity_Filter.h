@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "HAL.h"
@@ -48,10 +48,10 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocal_Frame_wptr m_local_frame_stream;
+    stream::IFrame_wptr m_frame_stream;
     stream::IAcceleration_wptr m_acceleration_stream;
 
-    std::vector<stream::ILocal_Frame::Sample> m_local_frame_samples;
+    std::vector<stream::IFrame::Sample> m_frame_samples;
     std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
 
     struct Stream : public stream::ILinear_Acceleration

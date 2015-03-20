@@ -22,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class Rate_Model : public IProcessor
+class Rate_Processor : public IProcessor
 {
 public:
-    Rate_Model(HAL& hal);
+    Rate_Processor(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;

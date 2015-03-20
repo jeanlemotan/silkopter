@@ -140,14 +140,9 @@ HEADERS += \
     ../../src/source/RC5T619.h \
     ../../src/source/SRF02.h \
     ../../src/source/UBLOX.h \
-    ../../../libs/common/node/stream/IAcceleration.h \
     ../../../libs/common/node/stream/IADC_Value.h \
-    ../../../libs/common/node/stream/IAngular_Velocity.h \
     ../../../libs/common/node/stream/ICurrent.h \
-    ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/IMagnetic_Field.h \
     ../../../libs/common/node/stream/IPressure.h \
-    ../../../libs/common/node/stream/IReference_Frame.h \
     ../../../libs/common/node/stream/ITemperature.h \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
@@ -164,7 +159,6 @@ HEADERS += \
     ../../src/processor/EKF_AHRS.h \
     ../../src/processor/Compass.h \
     ../../src/processor/Comp_AHRS.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/common/node/INode.h \
     ../../../libs/common/node/IProcessor.h \
@@ -175,19 +169,22 @@ HEADERS += \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
     ../../src/Ctor_Helper.h \
-    ../../../libs/common/node/stream/IForce.h \
-    ../../../libs/common/node/stream/ITorque.h \
-    ../../src/processor/Assisted_Model.h \
     ../../src/processor/Motor_Mixer.h \
-    ../../src/processor/Rate_Model.h \
-    ../../src/processor/Stability_Model.h \
     ../../src/processor/Pilot.h \
     ../../../libs/common/node/processor/IPilot.h \
     ../../../libs/common/node/stream/ICommands.h \
     ../../src/processor/Throttle_PWM.h \
-    ../../../libs/common/node/stream/IECEF_Location.h \
-    ../../../libs/common/node/stream/IWGS84_Location.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IAcceleration.h \
+    ../../../libs/common/node/stream/IAngular_Velocity.h \
+    ../../../libs/common/node/stream/IDistance.h \
+    ../../../libs/common/node/stream/IForce.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration.h \
+    ../../../libs/common/node/stream/IMagnetic_Field.h \
+    ../../../libs/common/node/stream/ITorque.h \
+    ../../../libs/common/node/stream/IFrame.h \
     ../../src/processor/Comp_ECEF_Location.h \
-    ../../../libs/common/node/stream/IENU_Frame.h \
-    ../../../libs/common/node/stream/ILocal_Frame.h
+    ../../src/processor/Velocity_Processor.h \
+    ../../src/processor/Stability_Processor.h \
+    ../../src/processor/Rate_Processor.h
 

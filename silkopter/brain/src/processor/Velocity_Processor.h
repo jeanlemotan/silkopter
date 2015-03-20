@@ -2,14 +2,14 @@
 
 #include "common/node/IProcessor.h"
 #include "common/node/stream/IVelocity.h"
-#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/IForce.h"
 #include "HAL.h"
 
 
 namespace sz
 {
-namespace Assisted_Model
+namespace Velocity_Processor
 {
 struct Init_Params;
 struct Config;
@@ -23,10 +23,10 @@ namespace silk
 namespace node
 {
 
-class Assisted_Model : public IProcessor
+class Velocity_Processor : public IProcessor
 {
 public:
-    Assisted_Model(HAL& hal);
+    Velocity_Processor(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -45,8 +45,8 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Assisted_Model::Init_Params> m_init_params;
-    std::shared_ptr<sz::Assisted_Model::Config> m_config;
+    std::shared_ptr<sz::Velocity_Processor::Init_Params> m_init_params;
+    std::shared_ptr<sz::Velocity_Processor::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
@@ -56,7 +56,7 @@ private:
     std::vector<stream::IVelocity::Sample> m_input_samples;
     std::vector<stream::IVelocity::Sample> m_target_samples;
 
-    struct Local_Frame : public stream::ILocal_Frame
+    struct Frame : public stream::IFrame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -65,7 +65,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_local_frame_stream;
+    mutable std::shared_ptr<Stream> m_frame_stream;
     struct Force : public stream::IForce
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }

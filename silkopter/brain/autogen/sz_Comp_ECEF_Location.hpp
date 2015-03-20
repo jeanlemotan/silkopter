@@ -405,10 +405,10 @@ struct Serializer< Writerca6a39056527b0f1deb9fe3d11b0dbf8c74df67c1a4daa52fd55fd2
 
 namespace sz { namespace Comp_ECEF_Location { struct Inputs {
  std::string ecef_location;
-std::string linear_acceleration;
+std::string ecef_linear_acceleration;
 std::string pressure;
 
-explicit Inputs():ecef_location(), linear_acceleration(), pressure() {  }
+explicit Inputs():ecef_location(), ecef_linear_acceleration(), pressure() {  }
 
 
  
@@ -428,7 +428,7 @@ private:
     SAXEventHandler< std::string > handler_0;
 SAXEventHandler< std::string > handler_1;
 SAXEventHandler< std::string > handler_2;bool has_ecef_location;
-bool has_linear_acceleration;
+bool has_ecef_linear_acceleration;
 bool has_pressure;
 
     bool check_depth(const char* type)
@@ -446,7 +446,7 @@ bool has_pressure;
             case 0:
     return "ecef_location";
 case 1:
-    return "linear_acceleration";
+    return "ecef_linear_acceleration";
 case 2:
     return "pressure";
         default:
@@ -476,7 +476,7 @@ case 2:
     void reset_flags()
     {
         has_ecef_location = false;
-has_linear_acceleration = false;
+has_ecef_linear_acceleration = false;
 has_pressure = false;
     }
 
@@ -485,7 +485,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->ecef_location)
-, handler_1(&obj->linear_acceleration)
+, handler_1(&obj->ecef_linear_acceleration)
 , handler_2(&obj->pressure)
     {
         reset_flags();
@@ -677,8 +677,8 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13))
 						 { state=0; has_ecef_location = true; }
-else if (utility::string_equal(str, length, "\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19))
-						 { state=1; has_linear_acceleration = true; }
+else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 24))
+						 { state=1; has_ecef_linear_acceleration = true; }
 else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65", 8))
 						 { state=2; has_pressure = true; }
             else {
@@ -793,7 +793,7 @@ case 2:
             }
         } else {
             if (!has_ecef_location) set_missing_required("ecef_location");
-if (!has_linear_acceleration) set_missing_required("linear_acceleration");
+if (!has_ecef_linear_acceleration) set_missing_required("ecef_linear_acceleration");
 if (!has_pressure) set_missing_required("pressure");
         }
         return the_error.empty();
@@ -848,7 +848,7 @@ struct Serializer< Writer2abdce6bd1b5bfa270138fd573614e5bdbebb6bcd1e12adf6225dd8
         w.StartObject();
 
         w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer2abdce6bd1b5bfa270138fd573614e5bdbebb6bcd1e12adf6225dd8786b30a85, std::string >()(w, value.ecef_location);
-w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writer2abdce6bd1b5bfa270138fd573614e5bdbebb6bcd1e12adf6225dd8786b30a85, std::string >()(w, value.linear_acceleration);
+w.Key("\x45\x43\x45\x46\x20\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 24, false); Serializer< Writer2abdce6bd1b5bfa270138fd573614e5bdbebb6bcd1e12adf6225dd8786b30a85, std::string >()(w, value.ecef_linear_acceleration);
 w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer2abdce6bd1b5bfa270138fd573614e5bdbebb6bcd1e12adf6225dd8786b30a85, std::string >()(w, value.pressure);
 
         w.EndObject(3);

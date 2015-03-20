@@ -20,19 +20,10 @@
 {
     "definition" : true,
     "namespace" : "sz::UBLOX",
-    "name": "WGS84_Location",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::UBLOX",
     "name": "Outputs",
     "members":
     [
-        ["sz::UBLOX::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}],
-        ["sz::UBLOX::WGS84_Location", "wgs84_location", {"required": true, "json_key" : "WGS84_Location"}]
+        ["sz::UBLOX::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
     ]
 },
 {

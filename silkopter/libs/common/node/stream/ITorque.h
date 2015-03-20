@@ -15,13 +15,29 @@ class ITorque : public IStream
 public:
     typedef float             Value; //Nm
     typedef stream::Sample<Value>     Sample;
-
-    virtual ~ITorque() {}
-
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
 DECLARE_CLASS_PTR(ITorque);
 
+class IENU_Torque : public IStream
+{
+    DEFINE_RTTI_CLASS(IENU_Torque, IStream);
+public:
+    typedef float             Value; //Nm
+    typedef stream::Sample<Value>     Sample;
+    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+};
+DECLARE_CLASS_PTR(IENU_Torque);
+
+class IECEF_Torque : public IStream
+{
+    DEFINE_RTTI_CLASS(IECEF_Torque, IStream);
+public:
+    typedef float             Value; //Nm
+    typedef stream::Sample<Value>     Sample;
+    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+};
+DECLARE_CLASS_PTR(IECEF_Torque);
 
 }
 }

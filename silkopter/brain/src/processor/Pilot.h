@@ -3,7 +3,7 @@
 #include "common/node/processor/IPilot.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/ICardinal_Points.h"
-#include "common/node/stream/ILocal_Frame.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/ICommands.h"
 #include "Comms.h"
@@ -50,24 +50,23 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::ILocal_Frame_wptr m_local_frame_stream;
     stream::IAngular_Velocity_wptr m_angular_velocity_stream;
     stream::ICardinal_Points_wptr m_cardinal_points_stream;
     //stream::ILocation_wptr m_location_stream;
     stream::IBattery_State_wptr m_battery_state_stream;
     stream::ICommands_wptr m_commands_stream;
 
-    std::vector<stream::ILocal_Frame::Sample> m_local_frame_samples;
     std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
     std::vector<stream::ICardinal_Points::Sample> m_cardinal_points_samples;
     //std::vector<stream::ILocation::Sample> m_location_samples;
     std::vector<stream::IBattery_State::Sample> m_battery_state_samples;
     std::vector<stream::ICommands::Sample> m_commands_samples;
 
-    struct Stream : public stream::ILocal_Frame
+    struct Stream : public stream::IFrame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
+
 
         Sample last_sample;
         std::vector<Sample> samples;

@@ -339,13 +339,11 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
     m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Location>>("ECEF Location LPF", *this);
-    m_node_factory.register_node<LPF<stream::IWGS84_Location>>("WGS84 Location LPF", *this);
     m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
     m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
     m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
     m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature LPF", *this);
-    m_node_factory.register_node<LPF<stream::ILocal_Frame>>("Local Frame LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Frame>>("ENU Frame LPF", *this);
+    m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
     m_node_factory.register_node<LPF<stream::IPWM_Value>>("PWM Value LPF", *this);
     m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
     m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
@@ -355,13 +353,11 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
     m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Location>>("ECEF Location RS", *this);
-    m_node_factory.register_node<Resampler<stream::IWGS84_Location>>("WGS84 Location RS", *this);
     m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
     m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
     m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);
     m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature RS", *this);
-    m_node_factory.register_node<Resampler<stream::ILocal_Frame>>("Local Frame RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Frame>>("ENU Frame RS", *this);
+    m_node_factory.register_node<Resampler<stream::IFrame>>("Frame RS", *this);
     m_node_factory.register_node<Resampler<stream::IPWM_Value>>("PWM Value RS", *this);
 
 

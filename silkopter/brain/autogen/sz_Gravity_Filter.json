@@ -14,7 +14,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "local_frame", {"required": true, "json_key" : "Local Frame"}],
+        ["std::string", "frame", {"required": true, "json_key" : "Frame"}],
         ["std::string", "acceleration", {"required": true, "json_key" : "Acceleration"}]
     ]
 },

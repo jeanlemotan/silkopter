@@ -404,10 +404,10 @@ struct Serializer< Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Gravity_Filter { struct Inputs {
- std::string local_frame;
+ std::string frame;
 std::string acceleration;
 
-explicit Inputs():local_frame(), acceleration() {  }
+explicit Inputs():frame(), acceleration() {  }
 
 
  
@@ -425,7 +425,7 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;bool has_local_frame;
+SAXEventHandler< std::string > handler_1;bool has_frame;
 bool has_acceleration;
 
     bool check_depth(const char* type)
@@ -441,7 +441,7 @@ bool has_acceleration;
     {
         switch (state) {
             case 0:
-    return "local_frame";
+    return "frame";
 case 1:
     return "acceleration";
         default:
@@ -470,7 +470,7 @@ case 1:
 
     void reset_flags()
     {
-        has_local_frame = false;
+        has_frame = false;
 has_acceleration = false;
     }
 
@@ -478,7 +478,7 @@ public:
     explicit SAXEventHandler( ::sz::Gravity_Filter::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->local_frame)
+        , handler_0(&obj->frame)
 , handler_1(&obj->acceleration)
     {
         reset_flags();
@@ -644,8 +644,8 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11))
-						 { state=0; has_local_frame = true; }
+            else if (utility::string_equal(str, length, "\x46\x72\x61\x6d\x65", 5))
+						 { state=0; has_frame = true; }
 else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
 						 { state=1; has_acceleration = true; }
             else {
@@ -744,7 +744,7 @@ case 1:
                 break;
             }
         } else {
-            if (!has_local_frame) set_missing_required("local_frame");
+            if (!has_frame) set_missing_required("frame");
 if (!has_acceleration) set_missing_required("acceleration");
         }
         return the_error.empty();
@@ -795,7 +795,7 @@ struct Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a64
     {
         w.StartObject();
 
-        w.Key("\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.local_frame);
+        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.frame);
 w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.acceleration);
 
         w.EndObject(2);

@@ -2,8 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IECEF_Location.h"
-#include "common/node/stream/IWGS84_Location.h"
+#include "common/node/stream/ILocation.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
@@ -115,7 +114,7 @@ private:
     bool m_has_sol = false;
     q::Clock::time_point m_last_complete_tp;
 
-    struct ECEF_Location_Stream : public stream::IECEF_Location
+    struct Location_Stream : public stream::IECEF_Location
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -124,18 +123,7 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
     };
-    mutable std::shared_ptr<ECEF_Location_Stream> m_ecef_location_stream;
-
-    struct WGS84_Location_Stream : public stream::IWGS84_Location
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        Sample last_sample;
-    };
-    mutable std::shared_ptr<WGS84_Location_Stream> m_wgs84_location_stream;
+    mutable std::shared_ptr<Location_Stream> m_location_stream;
 };
 
 

@@ -50,10 +50,7 @@ auto Pilot::init() -> bool
 
 auto Pilot::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(6);
-    inputs[0].class_id = q::rtti::get_class_id<stream::ILocal_Frame>();
-    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
-    inputs[0].name = "Local Frame";
+    std::vector<Input> inputs(5);
     inputs[1].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
     inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Angular Velocity";
@@ -73,10 +70,7 @@ auto Pilot::get_inputs() const -> std::vector<Input>
 }
 auto Pilot::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::ILocal_Frame>();
-    outputs[0].name = "Local Frame";
-    outputs[0].stream = m_output_stream;
+    std::vector<Output> outputs(0);
     return outputs;
 }
 
@@ -101,30 +95,17 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto local_frame_stream = m_hal.get_streams().find_by_name<stream::ILocal_Frame>(sz.inputs.local_frame);
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
     auto cardinal_points_stream = m_hal.get_streams().find_by_name<stream::ICardinal_Points>(sz.inputs.cardinal_points);
     //auto location_stream = m_hal.get_streams().find_by_name<stream::ILocation>(sz.inputs.location);
     auto battery_state_stream = m_hal.get_streams().find_by_name<stream::IBattery_State>(sz.inputs.battery_state);
     auto commands_stream = m_hal.get_streams().find_by_name<stream::ICommands>(sz.inputs.commands);
 
-    auto rate = local_frame_stream ? local_frame_stream->get_rate() : 0u;
+    auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.local_frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.local_frame, m_output_stream->rate, rate);
-        m_local_frame_stream.reset();
-    }
-    else
-    {
-        m_local_frame_stream = local_frame_stream;
-    }
-
-    rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
-    {
-        m_config->inputs.angular_velocity.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
+        m_config->inputs.angular_velocity.clear();
         m_angular_velocity_stream.reset();
     }
     else

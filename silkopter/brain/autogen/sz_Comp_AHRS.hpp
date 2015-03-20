@@ -885,10 +885,10 @@ w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Se
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_AHRS { struct Local_Frame {
+namespace sz { namespace Comp_AHRS { struct Frame {
  
 
-explicit Local_Frame() {  }
+explicit Frame() {  }
 
 
  
@@ -899,7 +899,7 @@ explicit Local_Frame() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_AHRS::Local_Frame > {
+class SAXEventHandler< ::sz::Comp_AHRS::Frame > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -950,7 +950,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_AHRS::Local_Frame * obj)
+    explicit SAXEventHandler( ::sz::Comp_AHRS::Frame * obj)
         : state(-1)
         , depth(0)
         
@@ -1201,10 +1201,10 @@ public:
     }
 };
 
-template < class Writer2e723ebe5cc5d2e2c78afe8942faa17a4a4e0dac80dbcd9aee345c595af26a37 >
-struct Serializer< Writer2e723ebe5cc5d2e2c78afe8942faa17a4a4e0dac80dbcd9aee345c595af26a37, ::sz::Comp_AHRS::Local_Frame > {
+template < class Writerc08f84d7b8f0c03b5a87957a60d3656c591425e06786eddf5152d7df04d22a7f >
+struct Serializer< Writerc08f84d7b8f0c03b5a87957a60d3656c591425e06786eddf5152d7df04d22a7f, ::sz::Comp_AHRS::Frame > {
 
-    void operator()( Writer2e723ebe5cc5d2e2c78afe8942faa17a4a4e0dac80dbcd9aee345c595af26a37& w, const ::sz::Comp_AHRS::Local_Frame& value) const
+    void operator()( Writerc08f84d7b8f0c03b5a87957a60d3656c591425e06786eddf5152d7df04d22a7f& w, const ::sz::Comp_AHRS::Frame& value) const
     {
         w.StartObject();
 
@@ -1245,9 +1245,9 @@ struct Serializer< Writer2e723ebe5cc5d2e2c78afe8942faa17a4a4e0dac80dbcd9aee345c5
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Comp_AHRS { struct Outputs {
- sz::Comp_AHRS::Local_Frame local_frame;
+ sz::Comp_AHRS::Frame frame;
 
-explicit Outputs():local_frame() {  }
+explicit Outputs():frame() {  }
 
 
  
@@ -1264,7 +1264,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Comp_AHRS::Local_Frame > handler_0;bool has_local_frame;
+    SAXEventHandler< sz::Comp_AHRS::Frame > handler_0;bool has_frame;
 
     bool check_depth(const char* type)
     {
@@ -1279,7 +1279,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "local_frame";
+    return "frame";
         default:
             break;
         }
@@ -1306,14 +1306,14 @@ private:
 
     void reset_flags()
     {
-        has_local_frame = false;
+        has_frame = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Comp_AHRS::Outputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->local_frame)
+        , handler_0(&obj->frame)
     {
         reset_flags();
     }
@@ -1454,8 +1454,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11))
-						 { state=0; has_local_frame = true; }
+            else if (utility::string_equal(str, length, "\x46\x72\x61\x6d\x65", 5))
+						 { state=0; has_frame = true; }
             else {
                 state = -1;
                 return true;
@@ -1537,7 +1537,7 @@ public:
                 break;
             }
         } else {
-            if (!has_local_frame) set_missing_required("local_frame");
+            if (!has_frame) set_missing_required("frame");
         }
         return the_error.empty();
     }
@@ -1584,7 +1584,7 @@ struct Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9a
     {
         w.StartObject();
 
-        w.Key("\x4c\x6f\x63\x61\x6c\x20\x46\x72\x61\x6d\x65", 11, false); Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1, sz::Comp_AHRS::Local_Frame >()(w, value.local_frame);
+        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1, sz::Comp_AHRS::Frame >()(w, value.frame);
 
         w.EndObject(1);
     }

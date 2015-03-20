@@ -51,9 +51,9 @@ auto Gravity_Filter::init() -> bool
 auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
-    inputs[0].class_id = q::rtti::get_class_id<stream::ILocal_Frame>();
+    inputs[0].class_id = q::rtti::get_class_id<stream::IFrame>();
     inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
-    inputs[0].name = "Local Frame";
+    inputs[0].name = "Frame";
     inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
     inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Acceleration";
@@ -74,18 +74,18 @@ void Gravity_Filter::process()
 
     m_output_stream->samples.clear();
 
-    auto local_frame_stream = m_local_frame_stream.lock();
+    auto frame_stream = m_frame_stream.lock();
     auto acceleration_stream = m_acceleration_stream.lock();
-    if (!local_frame_stream || !acceleration_stream)
+    if (!frame_stream || !acceleration_stream)
     {
         return;
     }
 
     //accumulate the input streams
     {
-        auto const& samples = local_frame_stream->get_samples();
-        m_local_frame_samples.reserve(m_local_frame_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_local_frame_samples));
+        auto const& samples = frame_stream->get_samples();
+        m_frame_samples.reserve(m_frame_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_frame_samples));
     }
     {
         auto const& samples = acceleration_stream->get_samples();
@@ -95,7 +95,7 @@ void Gravity_Filter::process()
 
     //TODO add some protecton for severely out-of-sync streams
 
-    size_t count = std::min(m_local_frame_samples.size(), m_acceleration_samples.size());
+    size_t count = std::min(m_frame_samples.size(), m_acceleration_samples.size());
     if (count == 0)
     {
         return;
@@ -108,14 +108,14 @@ void Gravity_Filter::process()
         m_output_stream->last_sample.dt = m_dt;
         m_output_stream->last_sample.sample_idx++;
 
-        auto const& e2l = m_local_frame_samples[i].value.enu_to_local;
-        auto gravity_local = math::rotate(e2l, physics::constants::world_gravity);
+        auto const& p2l = m_frame_samples[i].value.enu_to_local;
+        auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
         m_output_stream->last_sample.value = m_acceleration_samples[i].value - gravity_local;
         m_output_stream->samples[i] = m_output_stream->last_sample;
     }
 
     //consume processed samples
-    m_local_frame_samples.erase(m_local_frame_samples.begin(), m_local_frame_samples.begin() + count);
+    m_frame_samples.erase(m_frame_samples.begin(), m_frame_samples.begin() + count);
     m_acceleration_samples.erase(m_acceleration_samples.begin(), m_acceleration_samples.begin() + count);
 }
 
@@ -135,19 +135,19 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto local_frame_stream = m_hal.get_streams().find_by_name<stream::ILocal_Frame>(sz.inputs.local_frame);
+    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.inputs.frame);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
 
-    auto rate = local_frame_stream ? local_frame_stream->get_rate() : 0u;
+    auto rate = frame_stream ? frame_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.local_frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.local_frame, m_output_stream->rate, rate);
-        m_local_frame_stream.reset();
+        m_config->inputs.frame.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_output_stream->rate, rate);
+        m_frame_stream.reset();
     }
     else
     {
-        m_local_frame_stream = local_frame_stream;
+        m_frame_stream = frame_stream;
     }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;

@@ -239,13 +239,10 @@ void UBLOX::unlock(Buses& buses)
 
 auto UBLOX::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(2);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IWGS84_Location>();
-    outputs[0].name = "WGS84 Location";
-    outputs[0].stream = m_wgs84_location_stream;
-    outputs[1].class_id = q::rtti::get_class_id<stream::IECEF_Location>();
-    outputs[1].name = "ECEF Location";
-    outputs[1].stream = m_ecef_location_stream;
+    std::vector<Output> outputs(1);
+    outputs[0].class_id = q::rtti::get_class_id<stream::IECEF_Location>();
+    outputs[0].name = "Location";
+    outputs[0].stream = m_location_stream;
     return outputs;
 }
 
@@ -279,12 +276,10 @@ auto UBLOX::init() -> bool
         return false;
     }
 
-    m_ecef_location_stream = std::make_shared<ECEF_Location_Stream>();
-    m_wgs84_location_stream = std::make_shared<WGS84_Location_Stream>();
+    m_location_stream = std::make_shared<Location_Stream>();
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 5);
-    m_ecef_location_stream->rate = m_init_params->rate;
-    m_wgs84_location_stream->rate = m_init_params->rate;
+    m_location_stream->rate = m_init_params->rate;
 
     return true;
 }
@@ -400,8 +395,7 @@ void UBLOX::process()
 {
     QLOG_TOPIC("ublox::process");
 
-    m_wgs84_location_stream->samples.clear();
-    m_ecef_location_stream->samples.clear();
+    m_location_stream->samples.clear();
 
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
@@ -431,21 +425,11 @@ void UBLOX::process()
     //watchdog
     if (m_has_nav_status && m_has_pollh && m_has_sol)
     {
-        {
-            WGS84_Location_Stream::Sample& sample = m_wgs84_location_stream->last_sample;
-            sample.dt = dt;
-            sample.tp = now;
-            sample.sample_idx++;
-            m_wgs84_location_stream->samples.push_back(sample);
-        }
-
-        {
-            ECEF_Location_Stream::Sample& sample = m_ecef_location_stream->last_sample;
-            sample.dt = dt;
-            sample.tp = now;
-            sample.sample_idx++;
-            m_ecef_location_stream->samples.push_back(sample);
-        }
+        Location_Stream::Sample& sample = m_location_stream->last_sample;
+        sample.dt = dt;
+        sample.tp = now;
+        sample.sample_idx++;
+        m_location_stream->samples.push_back(sample);
 
         m_last_complete_tp = now;
         m_has_nav_status = m_has_pollh = m_has_sol = false;
@@ -663,10 +647,10 @@ void UBLOX::process_nav_pollh_packet(Buses& buses, Packet& packet)
     //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
 
     {
-        m_wgs84_location_stream->last_sample.value.lat_lon.set(math::radians(data.lat / 10000000.0), math::radians(data.lon / 10000000.0));
-        m_wgs84_location_stream->last_sample.value.lat_lon_accuracy = data.hAcc / 100.f;
-        m_wgs84_location_stream->last_sample.value.altitude = data.height / 100.f;
-        m_wgs84_location_stream->last_sample.value.altitude_accuracy = data.vAcc / 100.f;
+//        m_wgs84_location_stream->last_sample.value.lat_lon.set(math::radians(data.lat / 10000000.0), math::radians(data.lon / 10000000.0));
+//        m_wgs84_location_stream->last_sample.value.lat_lon_accuracy = data.hAcc / 100.f;
+//        m_wgs84_location_stream->last_sample.value.altitude = data.height / 100.f;
+//        m_wgs84_location_stream->last_sample.value.altitude_accuracy = data.vAcc / 100.f;
         m_has_pollh = true;
     }
 }
@@ -719,10 +703,10 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 
     {
         //m_ecef_stream->last_sample.value.sattelite_count = data.numSV;
-        m_ecef_location_stream->last_sample.value.position = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
-        m_ecef_location_stream->last_sample.value.position_accuracy = data.pAcc / 100.0;
-        m_ecef_location_stream->last_sample.value.velocity = math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0;
-        m_ecef_location_stream->last_sample.value.velocity_accuracy = data.sAcc / 100.0;
+        m_location_stream->last_sample.value.position = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
+        m_location_stream->last_sample.value.position_accuracy = data.pAcc / 100.0;
+        m_location_stream->last_sample.value.velocity = math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0;
+        m_location_stream->last_sample.value.velocity_accuracy = data.sAcc / 100.0;
 //        if (data.gpsFix == 0x02)
 //        {
 //            m_stream->last_sample.value.fix = stream::ILocation::Value::Fix::FIX_2D;

@@ -65,8 +65,8 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::ILocal_Frame>();
-    outputs[0].name = "Local Frame";
+    outputs[0].class_id = q::rtti::get_class_id<stream::IFrame>();
+    outputs[0].name = "Frame";
     outputs[0].stream = m_output_stream;
     return outputs;
 }
