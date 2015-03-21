@@ -234,10 +234,10 @@ void Stream_Viewer_Widget::create_viewer()
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<ECEF_Location>(stream)->samples_available_signal.connect([this, viewer](ECEF_Location& stream)
         {
-//            for (auto const& s: stream.samples)
-//            {
-//                viewer->add_sample(s.tp, s.value.lat_lon);
-//            }
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s.tp, s.value.position, s.value.position_accuracy);
+            }
             viewer->process();
         });
     }

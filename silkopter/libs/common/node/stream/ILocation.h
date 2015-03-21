@@ -31,9 +31,43 @@ public:
 DECLARE_CLASS_PTR(IECEF_Location);
 
 
+inline std::array<double, 3> ecef_to_lla(math::vec3d const& ecef)
+{
+    // WGS84 ellipsoid constants
+    static constexpr double a = 6378137; // radius
+    static constexpr double e = 8.1819190842622e-2;  // eccentricity
+    double asq = math::square(a);
+    double esq = math::square(e);
+
+    double x = ecef.x;
+    double y = ecef.y;
+    double z = ecef.z;
+
+    double b = math::sqrt( asq * (1-esq) );
+    double bsq = math::square(b);
+    double ep = math::sqrt( (asq - bsq)/bsq);
+    double p = math::sqrt( math::square(x) + math::square(y) );
+    double th = math::atan2(a*z, b*p);
+
+    double lon = math::atan2(y, x);
+    double lat = math::atan2( (z + math::square(ep)*b*math::pow(math::sin(th), 3.0) ), (p - esq*a*math::pow(math::cos(th), 3.0)) );
+    double N = a/( math::sqrt(1-esq*math::square(math::sin(lat))) );
+    double alt = p / math::cos(lat) - N;
+
+    // mod lat to 0-2pi
+    //lon = lon % (2.0 * math::angled::pi);
+
+    // correction for altitude near poles left out.
+
+    std::array<double, 3> ret = {lat, lon, alt};
+    return ret;
+}
+
+
 }
 }
 }
+
 
 
 namespace util

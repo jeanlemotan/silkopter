@@ -9,7 +9,7 @@ class Map_Viewer : public QWidget
 public:
     Map_Viewer(QWidget *parent);
     ~Map_Viewer();
-    void add_sample(q::Clock::time_point tp, math::vec2d const& lat_lon);
+    void add_sample(q::Clock::time_point tp, math::vec3d const& position, double accuracy);
     void process();
 
 private:
@@ -36,7 +36,8 @@ private:
 
     struct Sample
     {
-        math::vec2d lat_lon;
+        math::vec3d position;
+        double accuracy;
         double tp;
     };
 

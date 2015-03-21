@@ -114,8 +114,9 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
             m_is_following_sample = yes;
             if (yes && !m_samples.empty())
             {
-                auto const& lat_lon = m_samples.back().lat_lon;
-                m_map_control->setView(QPointF(lat_lon.y, lat_lon.x));
+                auto const& ecef = m_samples.back().position;
+                auto lla = silk::node::stream::ecef_to_lla(ecef);
+                m_map_control->setView(QPointF(math::degrees(lla[1]), math::degrees(lla[0])));
             }
         });
 
@@ -143,7 +144,7 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
     menu.exec(pos);
 }
 
-void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec2d const& lat_lon)
+void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position, double accuracy)
 {
     double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
     if (tpd < m_tp)
@@ -152,16 +153,18 @@ void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec2d const& lat_lon)
         return;
     }
 
+    auto lla = silk::node::stream::ecef_to_lla(position);
+
     if (!m_map_control->isPanning() && m_is_following_sample)
     {
-        m_map_control->setView(QPointF(lat_lon.y, lat_lon.x));
+        m_map_control->setView(QPointF(math::degrees(lla[1]), math::degrees(lla[0])));
     }
     else
     {
         m_is_following_sample = false;
     }
     Sample s;
-    s.lat_lon = lat_lon;
+    s.position = position;
     s.tp = tpd;
     m_samples.push_back(s);
 }
