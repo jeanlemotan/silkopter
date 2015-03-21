@@ -1,0 +1,48 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Transformer",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Transformer",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "input", {"required": true, "json_key" : "Input"}],
+        ["std::string", "frame", {"required": true, "json_key" : "Frame"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Transformer",
+    "name": "Output",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Transformer",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Transformer::Output", "output", {"required": true, "json_key" : "Output"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Transformer",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Transformer::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Transformer::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

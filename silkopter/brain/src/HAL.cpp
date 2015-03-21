@@ -32,6 +32,9 @@
 #include "processor/Stability_Processor.h"
 #include "processor/Velocity_Processor.h"
 
+#include "processor/Transformer.h"
+#include "processor/Transformer_Inv.h"
+
 //#include "common/node/IAHRS.h"
 
 #include "autojsoncxx/boost_types.hpp"
@@ -405,6 +408,45 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<IENU_Velocity_Stream>>("ENU Velocity RS", *this);
     m_node_factory.register_node<Resampler<IECEF_Velocity_Stream>>("ECEF Velocity RS", *this);
 
+    m_node_factory.register_node<Transformer<IECEF_Acceleration_Stream, IENU_Acceleration_Stream, IENU_Frame_Stream>>("ECEF->ENU Acceleration", *this);
+    m_node_factory.register_node<Transformer<IENU_Acceleration_Stream, IAcceleration_Stream, IFrame_Stream>>("ENU->Local Acceleration", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Acceleration_Stream, IECEF_Acceleration_Stream, IENU_Frame_Stream>>("ENU->ECEF Acceleration", *this);
+    m_node_factory.register_node<Transformer_Inv<IAcceleration_Stream, IENU_Acceleration_Stream, IFrame_Stream>>("Local->ENU Acceleration", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Angular_Velocity_Stream, IENU_Angular_Velocity_Stream, IENU_Frame_Stream>>("ECEF->ENU Angular Velocity", *this);
+    m_node_factory.register_node<Transformer<IENU_Angular_Velocity_Stream, IAngular_Velocity_Stream, IFrame_Stream>>("ENU->Local Angular Velocity", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Angular_Velocity_Stream, IECEF_Angular_Velocity_Stream, IENU_Frame_Stream>>("ENU->ECEF Angular Velocity", *this);
+    m_node_factory.register_node<Transformer_Inv<IAngular_Velocity_Stream, IENU_Angular_Velocity_Stream, IFrame_Stream>>("Local->ENU Angular Velocity", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Magnetic_Field_Stream, IENU_Magnetic_Field_Stream, IENU_Frame_Stream>>("ECEF->ENU Magnetic Field", *this);
+    m_node_factory.register_node<Transformer<IENU_Magnetic_Field_Stream, IMagnetic_Field_Stream, IFrame_Stream>>("ENU->Local Magnetic Field", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Magnetic_Field_Stream, IECEF_Magnetic_Field_Stream, IENU_Frame_Stream>>("ENU->ECEF Magnetic Field", *this);
+    m_node_factory.register_node<Transformer_Inv<IMagnetic_Field_Stream, IENU_Magnetic_Field_Stream, IFrame_Stream>>("Local->ENU Magnetic Field", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Linear_Acceleration_Stream, IENU_Linear_Acceleration_Stream, IENU_Frame_Stream>>("ECEF->ENU Linear Acceleration", *this);
+    m_node_factory.register_node<Transformer<IENU_Linear_Acceleration_Stream, ILinear_Acceleration_Stream, IFrame_Stream>>("ENU->Local Linear Acceleration", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Linear_Acceleration_Stream, IECEF_Linear_Acceleration_Stream, IENU_Frame_Stream>>("ENU->ECEF Linear Acceleration", *this);
+    m_node_factory.register_node<Transformer_Inv<ILinear_Acceleration_Stream, IENU_Linear_Acceleration_Stream, IFrame_Stream>>("Local->ENU Linear Acceleration", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Distance_Stream, IENU_Distance_Stream, IENU_Frame_Stream>>("ECEF->ENU Distance", *this);
+    m_node_factory.register_node<Transformer<IENU_Distance_Stream, IDistance_Stream, IFrame_Stream>>("ENU->Local Distance", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Distance_Stream, IECEF_Distance_Stream, IENU_Frame_Stream>>("ENU->ECEF Distance", *this);
+    m_node_factory.register_node<Transformer_Inv<IDistance_Stream, IENU_Distance_Stream, IFrame_Stream>>("Local->ENU Distance", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Force_Stream, IENU_Force_Stream, IENU_Frame_Stream>>("ECEF->ENU Force", *this);
+    m_node_factory.register_node<Transformer<IENU_Force_Stream, IForce_Stream, IFrame_Stream>>("ENU->Local Force", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Force_Stream, IECEF_Force_Stream, IENU_Frame_Stream>>("ENU->ECEF Force", *this);
+    m_node_factory.register_node<Transformer_Inv<IForce_Stream, IENU_Force_Stream, IFrame_Stream>>("Local->ENU Force", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Torque_Stream, IENU_Torque_Stream, IENU_Frame_Stream>>("ECEF->ENU Torque", *this);
+    m_node_factory.register_node<Transformer<IENU_Torque_Stream, ITorque_Stream, IFrame_Stream>>("ENU->Local Torque", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Torque_Stream, IECEF_Torque_Stream, IENU_Frame_Stream>>("ENU->ECEF Torque", *this);
+    m_node_factory.register_node<Transformer_Inv<ITorque_Stream, IENU_Torque_Stream, IFrame_Stream>>("Local->ENU Torque", *this);
+
+    m_node_factory.register_node<Transformer<IECEF_Velocity_Stream, IENU_Velocity_Stream, IENU_Frame_Stream>>("ECEF->ENU Velocity", *this);
+    m_node_factory.register_node<Transformer<IENU_Velocity_Stream, IVelocity_Stream, IFrame_Stream>>("ENU->Local Velocity", *this);
+    m_node_factory.register_node<Transformer_Inv<IENU_Velocity_Stream, IECEF_Velocity_Stream, IENU_Frame_Stream>>("ENU->ECEF Velocity", *this);
+    m_node_factory.register_node<Transformer_Inv<IVelocity_Stream, IENU_Velocity_Stream, IFrame_Stream>>("Local->ENU Velocity", *this);
 
     get_streams().remove_all();
     get_nodes().remove_all();

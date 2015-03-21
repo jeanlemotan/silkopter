@@ -186,6 +186,7 @@ HEADERS += \
     ../../../libs/common/node/stream/IADC_Stream.h \
     ../../../libs/common/node/stream/IPWM_Stream.h \
     ../../../libs/common/node/processor/ITransformer.h \
-    ../../src/processor/ENU_Local_Transformer.h \
-    ../../../libs/common/node/processor/IProcessor.h
+    ../../../libs/common/node/processor/IProcessor.h \
+    ../../src/processor/Transformer.h \
+    ../../src/processor/Transformer_Inv.h
 
