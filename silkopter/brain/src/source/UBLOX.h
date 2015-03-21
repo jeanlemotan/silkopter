@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/ILocation_Stream.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
@@ -114,7 +114,7 @@ private:
     bool m_has_sol = false;
     q::Clock::time_point m_last_complete_tp;
 
-    struct Location_Stream : public stream::IECEF_Location
+    struct Location_Stream : public IECEF_Location_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

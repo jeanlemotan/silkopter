@@ -50,13 +50,13 @@ auto Comp_ECEF_Location::init() -> bool
 auto Comp_ECEF_Location::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
-    inputs[0].class_id = q::rtti::get_class_id<stream::IECEF_Location>();
+    inputs[0].type = IECEF_Location_Stream::TYPE;
     inputs[0].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
     inputs[0].name = "Location";
-    inputs[1].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
+    inputs[1].type = ILinear_Acceleration_Stream::TYPE;
     inputs[1].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
     inputs[1].name = "Linear Acceleration (ecef)";
-    inputs[2].class_id = q::rtti::get_class_id<stream::IPressure>();
+    inputs[2].type = IPressure_Stream::TYPE;
     inputs[2].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
     inputs[2].name = "Pressure";
     return inputs;
@@ -64,10 +64,10 @@ auto Comp_ECEF_Location::get_inputs() const -> std::vector<Input>
 auto Comp_ECEF_Location::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IECEF_Location>();
+    outputs[0].type = IECEF_Location_Stream::TYPE;
     outputs[0].name = "Location";
     outputs[0].stream = m_location_output_stream;
-    outputs[1].class_id = q::rtti::get_class_id<stream::IENU_Frame>();
+    outputs[1].type = IENU_Frame_Stream::TYPE;
     outputs[1].name = "ENU Frame";
     outputs[1].stream = m_enu_frame_output_stream;
     return outputs;
@@ -153,9 +153,9 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto location_stream = m_hal.get_streams().find_by_name<stream::IECEF_Location>(sz.inputs.ecef_location);
-    auto linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.inputs.ecef_linear_acceleration);
-    auto pressure_stream = m_hal.get_streams().find_by_name<stream::IPressure>(sz.inputs.pressure);
+    auto location_stream = m_hal.get_streams().find_by_name<IECEF_Location_Stream>(sz.inputs.ecef_location);
+    auto linear_acceleration_stream = m_hal.get_streams().find_by_name<ILinear_Acceleration_Stream>(sz.inputs.ecef_linear_acceleration);
+    auto pressure_stream = m_hal.get_streams().find_by_name<IPressure_Stream>(sz.inputs.pressure);
 
     auto rate = location_stream ? location_stream->get_rate() : 0u;
     if (rate != m_location_output_stream->rate)

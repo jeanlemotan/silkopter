@@ -240,7 +240,7 @@ void UBLOX::unlock(Buses& buses)
 auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IECEF_Location>();
+    outputs[0].type = IECEF_Location_Stream::TYPE;
     outputs[0].name = "Location";
     outputs[0].stream = m_location_stream;
     return outputs;
@@ -709,11 +709,11 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
         m_location_stream->last_sample.value.velocity_accuracy = data.sAcc / 100.0;
 //        if (data.gpsFix == 0x02)
 //        {
-//            m_stream->last_sample.value.fix = stream::ILocation::Value::Fix::FIX_2D;
+//            m_stream->last_sample.value.fix = ILocation::Value::Fix::FIX_2D;
 //        }
 //        else if (data.gpsFix == 0x03)
 //        {
-//            m_stream->last_sample.value.fix = stream::ILocation::Value::Fix::FIX_3D;
+//            m_stream->last_sample.value.fix = ILocation::Value::Fix::FIX_3D;
 //        }
         m_has_sol = true;
     }

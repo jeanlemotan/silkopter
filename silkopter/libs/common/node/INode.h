@@ -9,9 +9,22 @@ namespace node
 
 class INode : q::util::Noncopyable
 {
-    DEFINE_RTTI_BASE_CLASS(INode);
 public:
+    enum class Type : uint8_t
+    {
+        NODE,
+        PROCESSOR,
+        SINK,
+        SOURCE,
+        LPF,
+        PILOT,
+        RESAMPLER,
+        TRANSFORMER
+    };
+
     virtual ~INode() {}
+
+    virtual auto get_type() const -> Type = 0;
 
     virtual auto init(rapidjson::Value const& init_params) -> bool = 0;
     virtual auto get_init_params() const -> rapidjson::Document const& = 0;
@@ -21,7 +34,7 @@ public:
 
     struct Input
     {
-        q::rtti::class_id class_id = 0;
+        IStream::Type type;
         uint32_t rate = 0;
         std::string name;
     };
@@ -29,15 +42,23 @@ public:
 
     struct Output
     {
-        q::rtti::class_id class_id = 0;
+        IStream::Type type;
         std::string name;
-        stream::IStream_ptr stream;
+        IStream_ptr stream;
     };
     virtual auto get_outputs() const -> std::vector<Output> = 0;
 
     virtual void process() = 0;
 };
 DECLARE_CLASS_PTR(INode);
+
+template <INode::Type TYPE_VALUE>
+class INode_Base : public INode
+{
+public:
+    static constexpr Type TYPE = TYPE_VALUE;
+    virtual auto get_type() const -> Type { return TYPE; }
+};
 
 
 }

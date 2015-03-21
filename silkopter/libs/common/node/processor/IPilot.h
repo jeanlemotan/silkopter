@@ -1,18 +1,15 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
+#include "common/node/INode.h"
 
 namespace silk
 {
 namespace node
 {
 
-class IPilot : public IProcessor
+class IPilot : public INode_Base<INode::Type::PILOT>
 {
-    DEFINE_RTTI_CLASS(IPilot, IProcessor);
 public:
-    virtual ~IPilot() {}
-
 };
 
 

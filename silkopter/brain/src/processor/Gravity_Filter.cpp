@@ -51,10 +51,10 @@ auto Gravity_Filter::init() -> bool
 auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
-    inputs[0].class_id = q::rtti::get_class_id<stream::IFrame>();
+    inputs[0].type = IFrame_Stream::TYPE;
     inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Frame";
-    inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[1].type = IAcceleration_Stream::TYPE;
     inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Acceleration";
     return inputs;
@@ -62,7 +62,7 @@ auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 auto Gravity_Filter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::ILinear_Acceleration>();
+    outputs[0].type = ILinear_Acceleration_Stream::TYPE;
     outputs[0].name = "Linear Acceleration";
     outputs[0].stream = m_output_stream;
     return outputs;
@@ -108,7 +108,7 @@ void Gravity_Filter::process()
         m_output_stream->last_sample.dt = m_dt;
         m_output_stream->last_sample.sample_idx++;
 
-        auto const& p2l = m_frame_samples[i].value.enu_to_local;
+        auto const& p2l = m_frame_samples[i].value.parent_to_this;
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
         m_output_stream->last_sample.value = m_acceleration_samples[i].value - gravity_local;
         m_output_stream->samples[i] = m_output_stream->last_sample;
@@ -135,8 +135,8 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.inputs.frame);
-    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
+    auto frame_stream = m_hal.get_streams().find_by_name<IFrame_Stream>(sz.inputs.frame);
+    auto acceleration_stream = m_hal.get_streams().find_by_name<IAcceleration_Stream>(sz.inputs.acceleration);
 
     auto rate = frame_stream ? frame_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

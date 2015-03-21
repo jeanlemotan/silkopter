@@ -9,18 +9,18 @@ namespace node
 namespace stream
 {
 
-class ITorque : public IStream
+class ITorque_Stream : public IStream
 {
-    DEFINE_RTTI_CLASS(ITorque, IStream);
+    DEFINE_RTTI_CLASS(ITorque_Stream, IStream);
 public:
     typedef float             Value; //Nm
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~ITorque() {}
+    virtual ~ITorque_Stream() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(ITorque);
+DECLARE_CLASS_PTR(ITorque_Stream);
 
 
 }

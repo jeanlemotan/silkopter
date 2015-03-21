@@ -6,12 +6,9 @@ namespace silk
 {
 namespace node
 {
-namespace stream
-{
 
-class IVideo : public IStream
+class IVideo_Stream : public IScalar_Stream<IStream::Type::VIDEO>
 {
-    DEFINE_RTTI_CLASS(IVideo, IStream);
 public:
     struct Value
     {
@@ -24,13 +21,10 @@ public:
         math::vec2u32 resolution;
         std::vector<uint8_t> data;
     };
-    typedef stream::Sample<Value>     Sample;
-
-    virtual ~IVideo() {}
+    typedef node::Sample<Value>     Sample;
 };
-DECLARE_CLASS_PTR(IVideo);
+DECLARE_CLASS_PTR(IVideo_Stream);
 
 
-}
 }
 }

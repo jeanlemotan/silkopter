@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IForce.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IVelocity_Stream.h"
+#include "common/node/stream/IFrame_Stream.h"
+#include "common/node/stream/IForce_Stream.h"
 #include "HAL.h"
 
 
@@ -50,13 +50,13 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IVelocity_wptr m_input_stream;
-    stream::IVelocity_wptr m_target_stream;
+    IVelocity_Stream_wptr m_input_stream;
+    IVelocity_Stream_wptr m_target_stream;
 
-    std::vector<stream::IVelocity::Sample> m_input_samples;
-    std::vector<stream::IVelocity::Sample> m_target_samples;
+    std::vector<IVelocity_Stream::Sample> m_input_samples;
+    std::vector<IVelocity_Stream::Sample> m_target_samples;
 
-    struct Frame : public stream::IFrame
+    struct Frame : public IFrame_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -66,7 +66,7 @@ private:
         uint32_t rate = 0;
     };
     mutable std::shared_ptr<Frame> m_frame_stream;
-    struct Force : public stream::IForce
+    struct Force : public IForce_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

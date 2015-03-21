@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
-#include "common/node/stream/IVoltage.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IBattery_State.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IVoltage_Stream.h"
+#include "common/node/stream/ICurrent_Stream.h"
+#include "common/node/stream/IBattery_State_Stream.h"
 
 #include "HAL.h"
 #include "utils/Butterworth.h"
@@ -50,21 +50,21 @@ private:
     std::shared_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
     std::shared_ptr<sz::LiPo_Battery::Config> m_config;
 
-    stream::IVoltage_wptr m_voltage_stream;
-    stream::ICurrent_wptr m_current_stream;
+    IVoltage_Stream_wptr m_voltage_stream;
+    ICurrent_Stream_wptr m_current_stream;
 
-    std::vector<stream::IVoltage::Sample> m_voltage_samples;
-    std::vector<stream::ICurrent::Sample> m_current_samples;
+    std::vector<IVoltage_Stream::Sample> m_voltage_samples;
+    std::vector<ICurrent_Stream::Sample> m_current_samples;
     q::Clock::duration m_dt = q::Clock::duration(0);
 
     auto compute_cell_count() -> boost::optional<uint8_t>;
     boost::optional<uint8_t> m_cell_count;
 
-    util::Butterworth<stream::IVoltage::Value> m_voltage_filter;
-    util::Butterworth<stream::ICurrent::Value> m_current_filter;
+    util::Butterworth<IVoltage_Stream::Value> m_voltage_filter;
+    util::Butterworth<ICurrent_Stream::Value> m_current_filter;
 //    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
-    struct Stream : public stream::IBattery_State
+    struct Stream : public IBattery_State_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

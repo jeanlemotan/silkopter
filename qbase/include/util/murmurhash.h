@@ -67,6 +67,10 @@ inline uint32_t compute_murmur_hash32(char const* c_str, uint32_t seed = 0)
     }
     return compute_murmur_hash32(reinterpret_cast<uint8_t const*>(c_str), strlen(c_str), seed);
 }
+inline uint32_t compute_murmur_hash32(std::string const& str, uint32_t seed = 0)
+{
+    return compute_murmur_hash32(reinterpret_cast<uint8_t const*>(str.data()), str.size(), seed);
+}
 
 inline uint16_t compute_murmur_hash16(uint8_t const* data, size_t size, uint32_t seed = 0)
 {

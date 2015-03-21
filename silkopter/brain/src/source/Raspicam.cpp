@@ -176,7 +176,7 @@ Raspicam::~Raspicam()
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IVideo>();
+    outputs[0].type = IVideo_Stream::TYPE;
     outputs[0].name = "Video";
 //    outputs[0].stream = &m_angular_velocity;
     return outputs;
@@ -221,7 +221,7 @@ auto Raspicam::init() -> bool
                        true);
 
     if (!m_hal.get_sources().add(*this))// ||
-//        !m_hal.get_streams().add<stream::IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
+//        !m_hal.get_streams().add<IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
     {
         return false;
     }

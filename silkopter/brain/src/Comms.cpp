@@ -3,22 +3,21 @@
 #include "utils/Timed_Scope.h"
 #include "utils/Json_Helpers.h"
 
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IADC_Value.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICardinal_Points.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/stream/ILocation.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/IPWM_Value.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/ITemperature.h"
-#include "common/node/stream/IVideo.h"
-#include "common/node/stream/IVoltage.h"
+#include "common/node/stream/IAcceleration_Stream.h"
+#include "common/node/stream/IAngular_Velocity_Stream.h"
+#include "common/node/stream/IADC_Stream.h"
+#include "common/node/stream/IBattery_State_Stream.h"
+#include "common/node/stream/ICurrent_Stream.h"
+#include "common/node/stream/IDistance_Stream.h"
+#include "common/node/stream/ILocation_Stream.h"
+#include "common/node/stream/ILinear_Acceleration_Stream.h"
+#include "common/node/stream/IMagnetic_Field_Stream.h"
+#include "common/node/stream/IPressure_Stream.h"
+#include "common/node/stream/IPWM_Stream.h"
+#include "common/node/stream/IFrame_Stream.h"
+#include "common/node/stream/ITemperature_Stream.h"
+#include "common/node/stream/IVideo_Stream.h"
+#include "common/node/stream/IVoltage_Stream.h"
 
 #include "common/node/processor/IPilot.h"
 
@@ -177,9 +176,9 @@ struct Sample_Data
 };
 #pragma pack(pop)
 
-template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
+template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::IStream const& _stream) -> bool
 {
-    if (q::rtti::is_of_type<Stream>(_stream))
+    if (_stream.get_type() == Stream::TYPE)
     {
         auto const& stream = static_cast<Stream const&>(_stream);
         auto const& samples = stream.get_samples();
@@ -223,29 +222,28 @@ void Comms::gather_telemetry_streams()
         auto stream = ts.stream.lock();
         if (stream)
         {
-            if (gather_telemetry_stream<node::stream::IAcceleration>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IAngular_Velocity>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IMagnetic_Field>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IPressure>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IBattery_State>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ILinear_Acceleration>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ICardinal_Points>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IECEF_Location>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IPWM_Value>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IFrame>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IADC_Value>(ts, *stream)
-                //          send_telemetry_stream<node::stream::IVideo>(sd, *stream)
+            if (gather_telemetry_stream<node::IAcceleration_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IAngular_Velocity_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IMagnetic_Field_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IPressure_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IBattery_State_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::ILinear_Acceleration_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::ICurrent_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IVoltage_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IDistance_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IECEF_Location_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IPWM_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IFrame_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::ITemperature_Stream>(ts, *stream) ||
+                gather_telemetry_stream<node::IADC_Stream>(ts, *stream)
+                //          send_telemetry_stream<node::IVideo>(sd, *stream)
                 )
             {
                 ;//nothing
             }
             else
             {
-                QLOGW("Unrecognized stream type: {} / {}", ts.stream_name, q::rtti::get_class_id(*stream));
+                QLOGW("Unrecognized stream type: {} / {}", ts.stream_name, static_cast<int>(stream->get_type()));
             }
         }
     }
@@ -275,7 +273,7 @@ void pack_outputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     for (auto const& i: io)
     {
         channel.pack_param(i.name);
-        channel.pack_param(i.class_id);
+        channel.pack_param(i.type);
         channel.pack_param(i.stream ? i.stream->get_rate() : 0);
     }
 }
@@ -287,7 +285,7 @@ void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     for (auto const& i: io)
     {
         channel.pack_param(i.name);
-        channel.pack_param(i.class_id);
+        channel.pack_param(i.type);
         channel.pack_param(i.rate);
     }
 }
@@ -329,7 +327,7 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 
 static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& node)
 {
-    channel.pack_param(q::rtti::get_class_id(node));
+    channel.pack_param(node.get_type());
     pack_inputs(channel, node.get_inputs());
     pack_outputs(channel, node.get_outputs());
     pack_json(channel, node.get_init_params());
@@ -363,7 +361,7 @@ void Comms::handle_enumerate_node_defs()
         for (auto const& n: nodes)
         {
             m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(q::rtti::get_class_id(*n.node));
+            m_setup_channel.pack_param(n.node->get_type());
             pack_inputs(m_setup_channel, n.node->get_inputs());
             pack_outputs(m_setup_channel, n.node->get_outputs());
             pack_json(m_setup_channel, n.node->get_init_params());
@@ -502,7 +500,7 @@ void Comms::handle_streams_telemetry_active()
     m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
     m_setup_channel.pack_param(req_id);
 
-    auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
+    auto stream = m_hal.get_streams().find_by_name<node::IStream>(stream_name);
     if (stream)
     {
         Telemetry_Stream ts;
@@ -653,7 +651,7 @@ auto Comms::Source::get_config() const -> rapidjson::Document
 auto Comms::Source::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<node::stream::ICommands>();
+    outputs[0].type = node::ICommands_Stream::TYPE;
     outputs[0].name = "Multirotor Input";
     outputs[0].stream = m_comms.m_commands_stream;
     return outputs;

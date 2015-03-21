@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/ITorque.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IAngular_Velocity_Stream.h"
+#include "common/node/stream/ITorque_Stream.h"
 #include "HAL.h"
 
 
@@ -49,13 +49,13 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IAngular_Velocity_wptr m_input_stream;
-    stream::IAngular_Velocity_wptr m_target_stream;
+    IAngular_Velocity_Stream_wptr m_input_stream;
+    IAngular_Velocity_Stream_wptr m_target_stream;
 
-    std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
-    std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
+    std::vector<IAngular_Velocity_Stream::Sample> m_input_samples;
+    std::vector<IAngular_Velocity_Stream::Sample> m_target_samples;
 
-    struct Stream : public stream::ITorque
+    struct Stream : public ITorque_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

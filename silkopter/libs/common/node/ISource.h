@@ -7,12 +7,9 @@ namespace silk
 namespace node
 {
 
-class ISource : public INode
+class ISource : public INode_Base<INode::Type::SOURCE>
 {
-    DEFINE_RTTI_CLASS(ISource, INode);
 public:
-    virtual ~ISource() {}
-
     //sources don't have any inputs
     virtual auto get_inputs() const -> std::vector<Input> final { return std::vector<Input>(); }
 };

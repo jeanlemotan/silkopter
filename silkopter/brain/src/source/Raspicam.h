@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
-#include "common/node/stream/IVideo.h"
+#include "common/node/stream/IVideo_Stream.h"
 
 
 namespace sz
@@ -54,7 +54,7 @@ public:
     struct Impl;
     void process();
 
-    auto get_stream() -> stream::IVideo& {}
+    auto get_stream() -> IVideo_Stream& {}
 
 private:
     HAL& m_hal;

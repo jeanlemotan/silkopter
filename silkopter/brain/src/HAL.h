@@ -77,7 +77,7 @@ public:
 
     auto get_buses()        -> Registry<node::bus::IBus>&;
     auto get_nodes()        -> Registry<node::INode>&;
-    auto get_streams()      -> Registry<node::stream::IStream>&;
+    auto get_streams()      -> Registry<node::IStream>&;
 
 private:
     auto create_bus(std::string const& type,
@@ -92,7 +92,7 @@ private:
 
     Registry<node::bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
-    Registry<node::stream::IStream> m_streams;
+    Registry<node::IStream> m_streams;
 
     Factory<node::bus::IBus> m_bus_factory;
     Factory<node::INode> m_node_factory;

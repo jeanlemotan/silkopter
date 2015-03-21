@@ -1,17 +1,15 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
+#include "common/node/INode.h"
 
 namespace silk
 {
 namespace node
 {
 
-class ILPF : public IProcessor
+class ILPF : public INode_Base<INode::Type::LPF>
 {
-    DEFINE_RTTI_CLASS(ILPF, IProcessor);
 public:
-    virtual ~ILPF() {}
 };
 DECLARE_CLASS_PTR(ILPF);
 

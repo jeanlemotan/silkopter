@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/stream/IThrottle.h"
-#include "common/node/stream/IPWM_Value.h"
-#include "common/node/IProcessor.h"
+#include "common/node/stream/IPWM_Stream.h"
+#include "common/node/processor/IProcessor.h"
 
 
 namespace sz
@@ -45,9 +45,9 @@ private:
     std::shared_ptr<sz::Throttle_PWM::Init_Params> m_init_params;
     std::shared_ptr<sz::Throttle_PWM::Config> m_config;
 
-    stream::IThrottle_wptr m_input_stream;
+    IThrottle_wptr m_input_stream;
 
-    struct Stream : public stream::IPWM_Value
+    struct Stream : public IPWM_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

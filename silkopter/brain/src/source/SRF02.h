@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IDistance.h"
+#include "common/node/stream/IDistance_Stream.h"
 #include "common/node/bus/II2C.h"
 
 
@@ -47,7 +47,7 @@ private:
     std::shared_ptr<sz::SRF02::Init_Params> m_init_params;
     std::shared_ptr<sz::SRF02::Config> m_config;
 
-    struct Stream : public stream::IDistance
+    struct Stream : public IDistance_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

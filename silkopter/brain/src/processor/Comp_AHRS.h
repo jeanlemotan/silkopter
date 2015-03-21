@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/node/IProcessor.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IFrame.h"
+#include "common/node/processor/IProcessor.h"
+#include "common/node/stream/IAngular_Velocity_Stream.h"
+#include "common/node/stream/IAcceleration_Stream.h"
+#include "common/node/stream/IMagnetic_Field_Stream.h"
+#include "common/node/stream/IFrame_Stream.h"
 #include "HAL.h"
 
 
@@ -51,19 +51,19 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IAngular_Velocity_wptr m_angular_velocity_stream;
-    stream::IAcceleration_wptr m_acceleration_stream;
-    stream::IMagnetic_Field_wptr m_magnetic_field_stream;
+    IAngular_Velocity_Stream_wptr m_angular_velocity_stream;
+    IAcceleration_Stream_wptr m_acceleration_stream;
+    IMagnetic_Field_Stream_wptr m_magnetic_field_stream;
 
-    std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
-    std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
+    std::vector<IAngular_Velocity_Stream::Sample> m_angular_velocity_samples;
+    std::vector<IAcceleration_Stream::Sample> m_acceleration_samples;
+    std::vector<IMagnetic_Field_Stream::Sample> m_magnetic_field_samples;
 
     math::vec3f m_noisy_front_w;
     math::vec3f m_noisy_right_w;
     math::vec3f m_noisy_up_w;
 
-    struct Stream : public stream::IFrame
+    struct Stream : public IFrame_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

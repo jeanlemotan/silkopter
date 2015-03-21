@@ -134,10 +134,10 @@ RC5T619::RC5T619(HAL& hal)
 auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    outputs[0].type = IADC_Stream::TYPE;
     outputs[0].name = "ADC0 Value";
     outputs[0].stream = m_adc[0];
-    outputs[1].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    outputs[1].type = IADC_Stream::TYPE;
     outputs[1].name = "ADC1 Value";
     outputs[1].stream = m_adc[1];
     return outputs;

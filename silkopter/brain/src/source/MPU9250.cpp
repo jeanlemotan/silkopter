@@ -372,16 +372,16 @@ auto MPU9250::akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
 auto MPU9250::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(4);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    outputs[0].type = IAngular_Velocity_Stream::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity;
-    outputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    outputs[1].type = IAcceleration_Stream::TYPE;
     outputs[1].name = "Acceleration";
     outputs[1].stream = m_acceleration;
-    outputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    outputs[2].type = IMagnetic_Field_Stream::TYPE;
     outputs[2].name = "Magnetic Field";
     outputs[2].stream = m_magnetic_field;
-    outputs[3].class_id = q::rtti::get_class_id<stream::ITemperature>();
+    outputs[3].type = ITemperature_Stream::TYPE;
     outputs[3].name = "Temperature";
     outputs[3].stream = m_temperature;
     return outputs;

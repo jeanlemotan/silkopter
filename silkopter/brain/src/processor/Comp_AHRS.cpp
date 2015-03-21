@@ -51,13 +51,13 @@ auto Comp_AHRS::init() -> bool
 auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
-    inputs[0].class_id = q::rtti::get_class_id<stream::IAngular_Velocity>();
+    inputs[0].type = IAngular_Velocity_Stream::TYPE;
     inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Angular Velocity";
-    inputs[1].class_id = q::rtti::get_class_id<stream::IAcceleration>();
+    inputs[1].type = IAcceleration_Stream::TYPE;
     inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[1].name = "Acceleration";
-    inputs[2].class_id = q::rtti::get_class_id<stream::IMagnetic_Field>();
+    inputs[2].type = IMagnetic_Field_Stream::TYPE;
     inputs[2].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[2].name = "Magnetic Field";
     return inputs;
@@ -65,7 +65,7 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::IFrame>();
+    outputs[0].type = IFrame_Stream::TYPE;
     outputs[0].name = "Frame";
     outputs[0].stream = m_output_stream;
     return outputs;
@@ -132,7 +132,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = m_output_stream->last_sample.value.local_to_enu;
+                auto& a = m_output_stream->last_sample.value.this_to_parent;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -162,7 +162,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = m_output_stream->last_sample.value.local_to_enu;
+            auto& rot = m_output_stream->last_sample.value.this_to_parent;
 
             //cancel drift
             static int xxx = 50;
@@ -180,7 +180,7 @@ void Comp_AHRS::process()
             }
             rot = math::normalized<float, math::safe>(rot);
 
-            m_output_stream->last_sample.value.enu_to_local = math::inverse(rot);
+            m_output_stream->last_sample.value.parent_to_this = math::inverse(rot);
         }
 
         m_output_stream->samples[i] = m_output_stream->last_sample;
@@ -209,9 +209,9 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
-    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
-    auto magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.inputs.magnetic_field);
+    auto angular_velocity_stream = m_hal.get_streams().find_by_name<IAngular_Velocity_Stream>(sz.inputs.angular_velocity);
+    auto acceleration_stream = m_hal.get_streams().find_by_name<IAcceleration_Stream>(sz.inputs.acceleration);
+    auto magnetic_field_stream = m_hal.get_streams().find_by_name<IMagnetic_Field_Stream>(sz.inputs.magnetic_field);
 
     auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

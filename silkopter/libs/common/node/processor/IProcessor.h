@@ -7,11 +7,11 @@ namespace silk
 namespace node
 {
 
-class IResampler : public INode_Base<INode::Type::RESAMPLER>
+class IProcessor : public INode_Base<INode::Type::PROCESSOR>
 {
 public:
 };
-DECLARE_CLASS_PTR(IResampler);
+
 
 
 }

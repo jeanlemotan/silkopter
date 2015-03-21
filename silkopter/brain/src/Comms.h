@@ -6,7 +6,7 @@
 #include "utils/RUDP.h"
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/ICommands.h"
+#include "common/node/stream/ICommands_Stream.h"
 
 namespace sz
 {
@@ -71,7 +71,7 @@ public:
 private:
     boost::asio::io_service& m_io_service;
 
-    struct Commands : public node::stream::ICommands
+    struct Commands : public node::ICommands_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -93,13 +93,13 @@ private:
     struct Telemetry_Stream
     {
         std::string stream_name;
-        node::stream::IStream_wptr stream;
+        node::IStream_wptr stream;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
     };
     std::vector<Telemetry_Stream> m_telemetry_streams;
 
-    template<class Stream> auto gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
+    template<class Stream> auto gather_telemetry_stream(Telemetry_Stream& ts, node::IStream const& _stream) -> bool;
     void gather_telemetry_streams();
     void pack_telemetry_streams();
 

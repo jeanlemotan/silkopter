@@ -140,28 +140,17 @@ HEADERS += \
     ../../src/source/RC5T619.h \
     ../../src/source/SRF02.h \
     ../../src/source/UBLOX.h \
-    ../../../libs/common/node/stream/IADC_Value.h \
-    ../../../libs/common/node/stream/ICurrent.h \
-    ../../../libs/common/node/stream/IPressure.h \
-    ../../../libs/common/node/stream/ITemperature.h \
-    ../../../libs/common/node/stream/IVideo.h \
-    ../../../libs/common/node/stream/IVoltage.h \
     ../../../libs/common/node/bus/IBus.h \
     ../../../libs/common/node/stream/IStream.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/ADC_Ammeter.h \
     ../../src/processor/LPF.h \
-    ../../../libs/common/node/stream/IPWM_Value.h \
     ../../src/processor/Resampler.h \
-    ../../../libs/common/node/stream/ICardinal_Points.h \
-    ../../../libs/common/node/stream/IBattery_State.h \
     ../../src/processor/LiPo_Battery.h \
     ../../src/processor/EKF_AHRS.h \
-    ../../src/processor/Compass.h \
     ../../src/processor/Comp_AHRS.h \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/common/node/INode.h \
-    ../../../libs/common/node/IProcessor.h \
     ../../../libs/common/node/ISink.h \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/processor/ILPF.h \
@@ -172,20 +161,31 @@ HEADERS += \
     ../../src/processor/Motor_Mixer.h \
     ../../src/processor/Pilot.h \
     ../../../libs/common/node/processor/IPilot.h \
-    ../../../libs/common/node/stream/ICommands.h \
     ../../src/processor/Throttle_PWM.h \
-    ../../../libs/common/node/stream/ILocation.h \
-    ../../../libs/common/node/stream/IAcceleration.h \
-    ../../../libs/common/node/stream/IAngular_Velocity.h \
-    ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/IForce.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/IMagnetic_Field.h \
-    ../../../libs/common/node/stream/ITorque.h \
-    ../../../libs/common/node/stream/IFrame.h \
     ../../src/processor/Comp_ECEF_Location.h \
     ../../src/processor/Velocity_Processor.h \
     ../../src/processor/Stability_Processor.h \
     ../../src/processor/Rate_Processor.h \
-    ../../../libs/common/node/stream/IVelocity.h
+    ../../../libs/common/node/stream/IAcceleration_Stream.h \
+    ../../../libs/common/node/stream/IAngular_Velocity_Stream.h \
+    ../../../libs/common/node/stream/IBattery_State_Stream.h \
+    ../../../libs/common/node/stream/ICommands_Stream.h \
+    ../../../libs/common/node/stream/ICurrent_Stream.h \
+    ../../../libs/common/node/stream/IDistance_Stream.h \
+    ../../../libs/common/node/stream/IForce_Stream.h \
+    ../../../libs/common/node/stream/IFrame_Stream.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration_Stream.h \
+    ../../../libs/common/node/stream/ILocation_Stream.h \
+    ../../../libs/common/node/stream/IMagnetic_Field_Stream.h \
+    ../../../libs/common/node/stream/IPressure_Stream.h \
+    ../../../libs/common/node/stream/ITemperature_Stream.h \
+    ../../../libs/common/node/stream/ITorque_Stream.h \
+    ../../../libs/common/node/stream/IVelocity_Stream.h \
+    ../../../libs/common/node/stream/IVideo_Stream.h \
+    ../../../libs/common/node/stream/IVoltage_Stream.h \
+    ../../../libs/common/node/stream/IADC_Stream.h \
+    ../../../libs/common/node/stream/IPWM_Stream.h \
+    ../../../libs/common/node/processor/ITransformer.h \
+    ../../src/processor/ENU_Local_Transformer.h \
+    ../../../libs/common/node/processor/IProcessor.h
 

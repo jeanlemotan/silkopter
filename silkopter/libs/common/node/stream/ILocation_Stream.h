@@ -7,12 +7,9 @@ namespace silk
 {
 namespace node
 {
-namespace stream
-{
 
-class IECEF_Location : public IStream
+class IECEF_Location_Stream : public ISpatial_Stream<IStream::Type::LOCATION, Space::ECEF>
 {
-    DEFINE_RTTI_CLASS(IECEF_Location, IStream);
 public:
     struct Value
     {
@@ -26,14 +23,12 @@ public:
 
         math::vec2d direction; //normalized
     };
-
-    typedef stream::Sample<Value>     Sample;
+    typedef node::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IECEF_Location);
+DECLARE_CLASS_PTR(IECEF_Location_Stream);
 
 
-}
 }
 }
 
@@ -43,15 +38,15 @@ namespace util
 {
 namespace dsp
 {
-template<> inline bool equals(silk::node::stream::IECEF_Location::Value const& a, silk::node::stream::IECEF_Location::Value const& b)
+template<> inline bool equals(silk::node::IECEF_Location_Stream::Value const& a, silk::node::IECEF_Location_Stream::Value const& b)
 {
     return math::equals(a.position, b.position) &&
            math::equals(a.velocity, b.velocity) &&
            math::equals(a.direction, b.direction);
 }
-template<> inline silk::node::stream::IECEF_Location::Value add(silk::node::stream::IECEF_Location::Value const& a, silk::node::stream::IECEF_Location::Value const& b)
+template<> inline silk::node::IECEF_Location_Stream::Value add(silk::node::IECEF_Location_Stream::Value const& a, silk::node::IECEF_Location_Stream::Value const& b)
 {
-    silk::node::stream::IECEF_Location::Value r = a;
+    silk::node::IECEF_Location_Stream::Value r = a;
     r.position  += b.position;
     r.position_accuracy  += b.position_accuracy;
     r.velocity  += b.velocity;
@@ -59,9 +54,9 @@ template<> inline silk::node::stream::IECEF_Location::Value add(silk::node::stre
     r.direction += b.direction;
     return r;
 }
-template<> inline silk::node::stream::IECEF_Location::Value scale(silk::node::stream::IECEF_Location::Value const& a, double scale)
+template<> inline silk::node::IECEF_Location_Stream::Value scale(silk::node::IECEF_Location_Stream::Value const& a, double scale)
 {
-    silk::node::stream::IECEF_Location::Value r = a;
+    silk::node::IECEF_Location_Stream::Value r = a;
     r.position  *= scale;
     r.position_accuracy  *= scale;
     r.velocity  *= scale;
@@ -69,11 +64,11 @@ template<> inline silk::node::stream::IECEF_Location::Value scale(silk::node::st
     r.direction *= scale;
     return r;
 }
-template<> inline void fix(silk::node::stream::IECEF_Location::Value& a)
+template<> inline void fix(silk::node::IECEF_Location_Stream::Value& a)
 {
     a.direction.normalize<math::safe>();
-    a.position_accuracy = math::clamp(a.position_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
-    a.velocity_accuracy = math::clamp(a.velocity_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
+    a.position_accuracy = math::clamp(a.position_accuracy, 0.0, silk::node::IECEF_Location_Stream::Value::MAX_VALID_ACCURACY * 2.0);
+    a.velocity_accuracy = math::clamp(a.velocity_accuracy, 0.0, silk::node::IECEF_Location_Stream::Value::MAX_VALID_ACCURACY * 2.0);
 }
 
 }

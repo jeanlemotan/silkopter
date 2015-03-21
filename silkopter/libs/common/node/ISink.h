@@ -7,12 +7,9 @@ namespace silk
 namespace node
 {
 
-class ISink : public INode
+class ISink : public INode_Base<INode::Type::SINK>
 {
-    DEFINE_RTTI_CLASS(ISink, INode);
 public:
-    virtual ~ISink() {}
-
     //sinks don't have any outputs
     virtual auto get_outputs() const -> std::vector<Output> final { return std::vector<Output>(); }
 };

@@ -60,7 +60,7 @@ namespace rtti
     template<class T> friend q::rtti::class_id q::rtti::get_class_id(T const& temp); \
     template<class T> friend q::rtti::class_id q::rtti::get_class_id();
 
-#define DEFINE_RTTI_CLASS2_PART(CLASS, PARENT_1, PARENT_2)	\
+#define DEFINE_RTTI_CLASS2_PART(PARENT_1, PARENT_2)	\
     public:                                 \
         typedef PARENT_1 Parent_1;          \
         typedef PARENT_2 Parent_2;          \
@@ -69,14 +69,14 @@ namespace rtti
         virtual bool rtti_is_of_type(q::rtti::class_name const& typeId) const { return (typeId == rtti_get_class_name()) || PARENT_1::rtti_is_of_type(typeId) || PARENT_2::rtti_is_of_type(typeId); } \
 
 
-#define DEFINE_RTTI_CLASS_PART(CLASS, PARENT)	\
-    public:                                 \
+#define DEFINE_RTTI_CLASS_PART(PARENT)	\
+    public:                             \
         typedef PARENT Parent;          \
     protected:							\
         virtual bool rtti_is_of_type(q::rtti::class_id typeId) const { return (typeId == rtti_get_class_id()) || PARENT::rtti_is_of_type(typeId); } \
         virtual bool rtti_is_of_type(q::rtti::class_name const& typeId) const { return (typeId == rtti_get_class_name()) || PARENT::rtti_is_of_type(typeId); } \
 
-#define DEFINE_RTTI_BASE_CLASS_PART(CLASS)	\
+#define DEFINE_RTTI_BASE_CLASS_PART()	\
 	protected:							\
         virtual bool rtti_is_of_type(q::rtti::class_id typeId) const { return (typeId == rtti_get_class_id()); } \
         virtual bool rtti_is_of_type(q::rtti::class_name const& typeId) const { return (typeId == rtti_get_class_name()); } \
@@ -85,29 +85,29 @@ namespace rtti
 	//////////////////////////////////////////////////////////////////////////
 	// To be used in normal classes
 #define DEFINE_RTTI_CLASS2(CLASS, PARENT_1, PARENT_2)					\
-        DEFINE_RTTI_CLASS2_PART(CLASS, PARENT_1, PARENT_2)			\
+        DEFINE_RTTI_CLASS2_PART(PARENT_1, PARENT_2)			\
         DEFINE_RTTI_CLASS_COMMON_PART(CLASS)
 
 #define DEFINE_RTTI_CLASS(CLASS, PARENT)							\
-        DEFINE_RTTI_CLASS_PART(CLASS, PARENT)						\
+        DEFINE_RTTI_CLASS_PART(PARENT)						\
         DEFINE_RTTI_CLASS_COMMON_PART(CLASS)
 
 #define DEFINE_RTTI_BASE_CLASS(CLASS)								\
-        DEFINE_RTTI_BASE_CLASS_PART(CLASS)							\
+        DEFINE_RTTI_BASE_CLASS_PART()							\
         DEFINE_RTTI_CLASS_COMMON_PART(CLASS)
 
 	//////////////////////////////////////////////////////////////////////////
 	// To be used in templates with a class name
 #define DEFINE_RTTI_CLASS2_TEMPLATE(CLASS_NAME, CLASS, PARENT_1, PARENT_2)	\
-        DEFINE_RTTI_CLASS2_PART(CLASS, PARENT_1, PARENT_2)				\
+        DEFINE_RTTI_CLASS2_PART(PARENT_1, PARENT_2)				\
         DEFINE_RTTI_CLASS_COMMON_TEMPLATE_PART(CLASS, CLASS_NAME)
 
 #define DEFINE_RTTI_CLASS_TEMPLATE(CLASS_NAME, CLASS, PARENT)			\
-        DEFINE_RTTI_CLASS_PART(CLASS, PARENT)							\
+        DEFINE_RTTI_CLASS_PART(PARENT)							\
         DEFINE_RTTI_CLASS_COMMON_TEMPLATE_PART(CLASS, CLASS_NAME)
 
 #define DEFINE_RTTI_BASE_CLASS_TEMPLATE(CLASS_NAME, CLASS)				\
-        DEFINE_RTTI_BASE_CLASS_PART(CLASS)								\
+        DEFINE_RTTI_BASE_CLASS_PART()								\
         DEFINE_RTTI_CLASS_COMMON_TEMPLATE_PART(CLASS, CLASS_NAME)
 
 

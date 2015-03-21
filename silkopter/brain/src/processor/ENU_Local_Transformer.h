@@ -1,22 +1,22 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/ILPF.h"
-#include "utils/Butterworth.h"
+#include "common/node/processor/ITransformer.h"
+#include "common/node/stream/IFrame_Stream.h"
 
 #include "sz_math.hpp"
-#include "sz_LPF.hpp"
+#include "sz_Transformer.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-template<class Stream_t>
-class LPF : public ILPF
+template<class In_Stream_t, class Out_Stream_t>
+class Transformer : public ITransformer
 {
 public:
-    LPF(HAL& hal);
+    Transformer(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -35,44 +35,43 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    sz::LPF::Init_Params m_init_params;
-    sz::LPF::Config m_config;
+    sz::Transformer::Init_Params m_init_params;
+    sz::Transformer::Config m_config;
 
-    std::weak_ptr<Stream_t> m_input_stream;
+    std::weak_ptr<In_Stream_t> m_input_stream;
+    std::weak_ptr<IENU_Frame_Stream> m_input_frame_stream;
 
-    util::Butterworth<typename Stream_t::Value> m_dsp;
-
-    struct Stream : public Stream_t
+    struct Stream : public Out_Stream_t
     {
-        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
+        auto get_samples() const -> std::vector<typename Out_Stream_t::Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
 
         uint32_t rate = 0;
-        std::vector<typename Stream_t::Sample> samples;
+        std::vector<typename Out_Stream_t::Sample> samples;
     };
     mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 
-template<class Stream_t>
-LPF<Stream_t>::LPF(HAL& hal)
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer(HAL& hal)
     : m_hal(hal)
 {
     autojsoncxx::to_document(m_init_params, m_init_paramsj);
 }
 
-template<class Stream_t>
-auto LPF<Stream_t>::init(rapidjson::Value const& init_params) -> bool
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("lpf::init");
+    QLOG_TOPIC("transformer::init");
 
-    sz::LPF::Init_Params sz;
+    sz::Transformer::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize LPF data: {}", ss.str());
+        QLOGE("Cannot deserialize Transformer data: {}", ss.str());
         return false;
     }
     jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
@@ -80,8 +79,8 @@ auto LPF<Stream_t>::init(rapidjson::Value const& init_params) -> bool
     return init();
 }
 
-template<class Stream_t>
-auto LPF<Stream_t>::init() -> bool
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
     if (m_init_params.rate == 0)
@@ -93,27 +92,27 @@ auto LPF<Stream_t>::init() -> bool
     return true;
 }
 
-template<class Stream_t>
-auto LPF<Stream_t>::get_init_params() const -> rapidjson::Document const&
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
 
-template<class Stream_t>
-auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("lpf::set_config");
-    sz::LPF::Config sz;
+    QLOG_TOPIC("transformer::set_config");
+    sz::Transformer::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize LPF config data: {}", ss.str());
+        QLOGE("Cannot deserialize Transformer config data: {}", ss.str());
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
+    auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.inputs.input);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
@@ -145,37 +144,37 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-template<class Stream_t>
-auto LPF<Stream_t>::get_config() const -> rapidjson::Document
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
     return std::move(json);
 }
 
-template<class Stream_t>
-auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
-    inputs[0].type = Stream_t::TYPE;
+    inputs[0].type = In_Stream_t::TYPE;
     inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "Input";
     return inputs;
 }
-template<class Stream_t>
-auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = Stream_t::TYPE;
+    outputs[0].type = In_Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;
     return outputs;
 }
 
-template<class Stream_t>
-void LPF<Stream_t>::process()
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+void Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
 {
-    QLOG_TOPIC("lpf::process");
+    QLOG_TOPIC("transformer::process");
 
     m_output_stream->samples.clear();
 

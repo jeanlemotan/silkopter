@@ -1,9 +1,9 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IADC_Value.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/IProcessor.h"
+#include "common/node/stream/IADC_Stream.h"
+#include "common/node/stream/ICurrent_Stream.h"
+#include "common/node/processor/IProcessor.h"
 
 
 namespace sz
@@ -45,9 +45,9 @@ private:
     std::shared_ptr<sz::ADC_Ammeter::Init_Params> m_init_params;
     std::shared_ptr<sz::ADC_Ammeter::Config> m_config;
 
-    stream::IADC_Value_wptr m_adc_stream;
+    IADC_Stream_wptr m_adc_stream;
 
-    struct Stream : public stream::ICurrent
+    struct Stream : public ICurrent_Stream
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

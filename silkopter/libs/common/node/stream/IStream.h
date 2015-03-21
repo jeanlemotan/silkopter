@@ -6,20 +6,84 @@ namespace silk
 {
 namespace node
 {
-namespace stream
-{
 
+enum class Space : uint8_t
+{
+    ECEF,
+    ENU,
+    LOCAL
+};
+
+constexpr char* Space_Name[] =
+{
+    "ECEF",
+    "ENU",
+    "Local"
+};
+
+
+//for static data that rarely changes
+class IData : q::util::Noncopyable
+{
+public:
+    virtual ~IData() {}
+};
+DECLARE_CLASS_PTR(IData);
+
+
+
+//for streams of data with a fixed sample rate
 class IStream : q::util::Noncopyable
 {
-    DEFINE_RTTI_BASE_CLASS(IStream);
 public:
-    virtual ~IStream() {}
+    enum class Type
+    {
+        ACCELERATION,
+        ADC,
+        ANGULAR_VELOCITY,
+        BATTERY_STATE,
+        COMMANDS,
+        CURRENT,
+        DISTANCE,
+        FORCE,
+        FRAME,
+        LINEAR_ACCELERATION,
+        LOCATION,
+        MAGNETIC_FIELD,
+        PRESSURE,
+        PWM,
+        TEMPERATURE,
+        TORQUE,
+        VELOCITY,
+        VIDEO,
+        VOLTAGE
+    };
 
     virtual auto get_rate() const -> uint32_t = 0;
+    virtual auto get_type() const -> Type = 0;
 };
 DECLARE_CLASS_PTR(IStream);
 
+//for streams of data with a fixed sample rate
+template <IStream::Type TYPE_VALUE>
+class IScalar_Stream : public IStream
+{
+public:
+    static constexpr Type TYPE = TYPE_VALUE;
+    virtual auto get_type() const -> Type { return TYPE; }
+};
 
+//for vectorial streams of data with a fixed sample rate
+template <IStream::Type TYPE_VALUE, Space SPACE_VALUE>
+class ISpatial_Stream : public IStream
+{
+public:
+    static constexpr Type TYPE = TYPE_VALUE;
+    static constexpr Space SPACE = SPACE_VALUE;
+    virtual auto get_type() const -> Type { return TYPE; }
+};
+
+//A stream sample
 template<class T> struct Sample
 {
     Sample() : value() {}
@@ -30,8 +94,5 @@ template<class T> struct Sample
     bool is_healthy = true;
 };
 
-
-
-}
 }
 }

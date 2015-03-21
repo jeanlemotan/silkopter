@@ -49,7 +49,7 @@ auto ADC_Ammeter::init() -> bool
 auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
-    inputs[0].class_id = q::rtti::get_class_id<stream::IADC_Value>();
+    inputs[0].type = IADC_Stream::TYPE;
     inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
     inputs[0].name = "ADC Value";
     return inputs;
@@ -57,7 +57,7 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<stream::ICurrent>();
+    outputs[0].type = ICurrent_Stream::TYPE;
     outputs[0].name = "Current";
     outputs[0].stream = m_output_stream;
     return outputs;
@@ -78,7 +78,7 @@ void ADC_Ammeter::process()
     auto const& s = adc_stream->get_samples();
     m_output_stream->samples.resize(s.size());
 
-    std::transform(s.begin(), s.end(), m_output_stream->samples.begin(), [this](stream::IADC_Value::Sample const& sample)
+    std::transform(s.begin(), s.end(), m_output_stream->samples.begin(), [this](IADC_Stream::Sample const& sample)
     {
        Stream::Sample vs;
        vs.dt = sample.dt;
@@ -105,7 +105,7 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC_Value>(sz.inputs.adc_value);
+    auto adc_stream = m_hal.get_streams().find_by_name<IADC_Stream>(sz.inputs.adc_value);
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

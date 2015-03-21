@@ -6,23 +6,16 @@ namespace silk
 {
 namespace node
 {
-namespace stream
-{
 
-class ICurrent : public IStream
+class ICurrent_Stream : public IScalar_Stream<IStream::Type::CURRENT>
 {
-    DEFINE_RTTI_CLASS(ICurrent, IStream);
 public:
     typedef float             Value; //amperes
-    typedef stream::Sample<Value>     Sample;
-
-    virtual ~ICurrent() {}
-
+    typedef node::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(ICurrent);
+DECLARE_CLASS_PTR(ICurrent_Stream);
 
 
-}
 }
 }

@@ -178,7 +178,7 @@ template<class Stream_t>
 auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(1);
-    inputs[0].class_id = q::rtti::get_class_id<Stream_t>();
+    inputs[0].type = Stream_t::TYPE;
     inputs[0].rate = 0; //any sample rate
     inputs[0].name = "Input";
     return inputs;
@@ -187,7 +187,7 @@ template<class Stream_t>
 auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].class_id = q::rtti::get_class_id<Stream_t>();
+    outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;
     return outputs;
