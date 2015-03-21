@@ -61,18 +61,18 @@ auto LiPo_Battery::init() -> bool
 auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(2);
-    inputs[0].type = IVoltage_Stream::TYPE;
-    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[0].type = stream::IVoltage::TYPE;
+    inputs[0].rate = m_init_params->rate;
     inputs[0].name = "Voltage";
-    inputs[1].type = ICurrent_Stream::TYPE;
-    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[1].type = stream::ICurrent::TYPE;
+    inputs[1].rate = m_init_params->rate;
     inputs[1].name = "Current";
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = IBattery_State_Stream::TYPE;
+    outputs[0].type = stream::IBattery_State::TYPE;
     outputs[0].name = "Battery State";
     outputs[0].stream = m_output_stream;
     return outputs;
@@ -121,7 +121,7 @@ void LiPo_Battery::process()
         {
             auto const& s = m_current_samples[i];
             m_output_stream->last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
-            ICurrent_Stream::Value current = s.value;
+            stream::ICurrent::Value current = s.value;
             if (s.is_healthy)
             {
                 m_current_filter.process(current);
@@ -130,7 +130,7 @@ void LiPo_Battery::process()
         }
         {
             auto const& s = m_voltage_samples[i];
-            IVoltage_Stream::Value voltage = s.value;
+            stream::IVoltage::Value voltage = s.value;
             if (s.is_healthy)
             {
                 m_voltage_filter.process(voltage);
@@ -214,8 +214,8 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto voltage_stream = m_hal.get_streams().find_by_name<IVoltage_Stream>(sz.inputs.voltage);
-    auto current_stream = m_hal.get_streams().find_by_name<ICurrent_Stream>(sz.inputs.current);
+    auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
+    auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
 
     auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

@@ -7,21 +7,22 @@ namespace silk
 namespace node
 {
 
+enum class Type : uint8_t
+{
+    NODE,
+    PROCESSOR,
+    SINK,
+    SOURCE,
+    LPF,
+    PILOT,
+    RESAMPLER,
+    TRANSFORMER,
+    CONTROLLER,
+};
+
 class INode : q::util::Noncopyable
 {
 public:
-    enum class Type : uint8_t
-    {
-        NODE,
-        PROCESSOR,
-        SINK,
-        SOURCE,
-        LPF,
-        PILOT,
-        RESAMPLER,
-        TRANSFORMER
-    };
-
     virtual ~INode() {}
 
     virtual auto get_type() const -> Type = 0;
@@ -34,7 +35,7 @@ public:
 
     struct Input
     {
-        IStream::Type type;
+        stream::Type type;
         uint32_t rate = 0;
         std::string name;
     };
@@ -42,9 +43,9 @@ public:
 
     struct Output
     {
-        IStream::Type type;
+        stream::Type type;
         std::string name;
-        IStream_ptr stream;
+        stream::IStream_ptr stream;
     };
     virtual auto get_outputs() const -> std::vector<Output> = 0;
 
@@ -52,7 +53,7 @@ public:
 };
 DECLARE_CLASS_PTR(INode);
 
-template <INode::Type TYPE_VALUE>
+template <Type TYPE_VALUE>
 class INode_Base : public INode
 {
 public:

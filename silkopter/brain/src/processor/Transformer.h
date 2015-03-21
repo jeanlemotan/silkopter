@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/processor/ITransformer.h"
-#include "common/node/stream/IFrame_Stream.h"
+#include "common/node/stream/IFrame.h"
 
 #include "sz_math.hpp"
 #include "sz_Transformer.hpp"
@@ -167,10 +167,10 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const 
 {
     std::vector<Input> inputs(2);
     inputs[0].type = In_Stream_t::TYPE;
-    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[0].rate = m_init_params.rate;
     inputs[0].name = "Input";
     inputs[1].type = Frame_Stream_t::TYPE;
-    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[1].rate = m_init_params.rate;
     inputs[1].name = "Frame";
     return inputs;
 }

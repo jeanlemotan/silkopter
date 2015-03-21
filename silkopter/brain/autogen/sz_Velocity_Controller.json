@@ -1,0 +1,57 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "input", {"required": true, "json_key" : "Input"}],
+        ["std::string", "target", {"required": true, "json_key" : "Target"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Frame",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Force",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Velocity_Controller::Frame", "frame", {"required": true, "json_key" : "Frame"}],
+        ["sz::Velocity_Controller::Force", "force", {"required": true, "json_key" : "Force"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Velocity_Controller",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Velocity_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Velocity_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

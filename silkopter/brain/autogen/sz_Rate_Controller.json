@@ -1,0 +1,48 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "input", {"required": true, "json_key" : "Input"}],
+        ["std::string", "target", {"required": true, "json_key" : "Target"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
+    "name": "Torque",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Rate_Controller::Torque", "torque", {"required": true, "json_key" : "Torque"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Rate_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Rate_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

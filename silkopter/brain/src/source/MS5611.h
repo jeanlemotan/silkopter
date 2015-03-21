@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IPressure_Stream.h"
-#include "common/node/stream/ITemperature_Stream.h"
+#include "common/node/stream/IPressure.h"
+#include "common/node/stream/ITemperature.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 
@@ -69,7 +69,7 @@ private:
         uint32_t rate = 0;
     };
 
-    struct Pressure : public IPressure_Stream, public Common
+    struct Pressure : public stream::IPressure, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -79,7 +79,7 @@ private:
     };
     mutable std::shared_ptr<Pressure> m_pressure;
 
-    struct Temperature : public ITemperature_Stream, public Common
+    struct Temperature : public stream::ITemperature, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

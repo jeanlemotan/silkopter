@@ -4,10 +4,10 @@
 #include "common/node/ISource.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
-#include "common/node/stream/IAcceleration_Stream.h"
-#include "common/node/stream/IAngular_Velocity_Stream.h"
-#include "common/node/stream/IMagnetic_Field_Stream.h"
-#include "common/node/stream/ITemperature_Stream.h"
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IMagnetic_Field.h"
+#include "common/node/stream/ITemperature.h"
 
 namespace sz
 {
@@ -90,7 +90,7 @@ private:
         q::Clock::duration dt;
     };
 
-    struct Acceleration : public IAcceleration_Stream, public Common
+    struct Acceleration : public stream::IAcceleration, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -101,7 +101,7 @@ private:
     };
     mutable std::shared_ptr<Acceleration> m_acceleration;
 
-    struct Angular_Velocity : public IAngular_Velocity_Stream, public Common
+    struct Angular_Velocity : public stream::IAngular_Velocity, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -113,7 +113,7 @@ private:
     };
     mutable std::shared_ptr<Angular_Velocity> m_angular_velocity;
 
-    struct Magnetic_Field : public IMagnetic_Field_Stream, public Common
+    struct Magnetic_Field : public stream::IMagnetic_Field, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -126,7 +126,7 @@ private:
     };
     mutable std::shared_ptr<Magnetic_Field> m_magnetic_field;
 
-    struct Temperature : public ITemperature_Stream, public Common
+    struct Temperature : public stream::ITemperature, public Common
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

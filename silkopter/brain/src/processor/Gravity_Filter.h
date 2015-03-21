@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/node/processor/IProcessor.h"
-#include "common/node/stream/IFrame_Stream.h"
-#include "common/node/stream/IAcceleration_Stream.h"
-#include "common/node/stream/ILinear_Acceleration_Stream.h"
+#include "common/node/stream/IFrame.h"
+#include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/ILinear_Acceleration.h"
 #include "HAL.h"
 
 namespace sz
@@ -48,13 +48,13 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    IFrame_Stream_wptr m_frame_stream;
-    IAcceleration_Stream_wptr m_acceleration_stream;
+    stream::IFrame_wptr m_frame_stream;
+    stream::IAcceleration_wptr m_acceleration_stream;
 
-    std::vector<IFrame_Stream::Sample> m_frame_samples;
-    std::vector<IAcceleration_Stream::Sample> m_acceleration_samples;
+    std::vector<stream::IFrame::Sample> m_frame_samples;
+    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
 
-    struct Stream : public ILinear_Acceleration_Stream
+    struct Stream : public stream::ILinear_Acceleration
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

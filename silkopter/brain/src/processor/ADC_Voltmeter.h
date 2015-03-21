@@ -1,8 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IADC_Stream.h"
-#include "common/node/stream/IVoltage_Stream.h"
+#include "common/node/stream/IADC.h"
+#include "common/node/stream/IVoltage.h"
 #include "common/node/processor/IProcessor.h"
 
 
@@ -25,12 +25,6 @@ class ADC_Voltmeter : public IProcessor
 public:
     ADC_Voltmeter(HAL& hal);
 
-    struct Init_Params
-    {
-        std::string name;
-        IADC_Stream* input_stream = nullptr;
-    };
-
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
 
@@ -51,9 +45,9 @@ private:
     std::shared_ptr<sz::ADC_Voltmeter::Init_Params> m_init_params;
     std::shared_ptr<sz::ADC_Voltmeter::Config> m_config;
 
-    IADC_Stream_wptr m_adc_stream;
+    stream::IADC_wptr m_adc_stream;
 
-    struct Stream : public IVoltage_Stream
+    struct Stream : public stream::IVoltage
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

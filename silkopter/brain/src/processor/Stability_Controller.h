@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
-#include "common/node/stream/IFrame_Stream.h"
-#include "common/node/stream/IAngular_Velocity_Stream.h"
+#include "common/node/processor/IController.h"
+#include "common/node/stream/IFrame.h"
+#include "common/node/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
 
 namespace sz
 {
-namespace Stability_Processor
+namespace Stability_Controller
 {
 struct Init_Params;
 struct Config;
@@ -22,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class Stability_Processor : public IProcessor
+class Stability_Controller : public IController
 {
 public:
-    Stability_Processor(HAL& hal);
+    Stability_Controller(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -44,18 +44,18 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Stability_Processor::Init_Params> m_init_params;
-    std::shared_ptr<sz::Stability_Processor::Config> m_config;
+    std::shared_ptr<sz::Stability_Controller::Init_Params> m_init_params;
+    std::shared_ptr<sz::Stability_Controller::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    IFrame_Stream_wptr m_input_stream;
-    IFrame_Stream_wptr m_target_stream;
+    stream::IFrame_wptr m_input_stream;
+    stream::IFrame_wptr m_target_stream;
 
-    std::vector<IFrame_Stream::Sample> m_input_samples;
-    std::vector<IFrame_Stream::Sample> m_target_samples;
+    std::vector<stream::IFrame::Sample> m_input_samples;
+    std::vector<stream::IFrame::Sample> m_target_samples;
 
-    struct Stream : public IAngular_Velocity_Stream
+    struct Stream : public stream::IAngular_Velocity
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

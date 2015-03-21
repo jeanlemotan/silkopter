@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
-#include "common/node/stream/IAngular_Velocity_Stream.h"
-#include "common/node/stream/ITorque_Stream.h"
+#include "common/node/processor/IController.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/ITorque.h"
 #include "HAL.h"
 
 
 namespace sz
 {
-namespace Rate_Model
+namespace Rate_Controller
 {
 struct Init_Params;
 struct Config;
@@ -22,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class Rate_Processor : public IProcessor
+class Rate_Controller : public IController
 {
 public:
-    Rate_Processor(HAL& hal);
+    Rate_Controller(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -44,18 +44,18 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Rate_Model::Init_Params> m_init_params;
-    std::shared_ptr<sz::Rate_Model::Config> m_config;
+    std::shared_ptr<sz::Rate_Controller::Init_Params> m_init_params;
+    std::shared_ptr<sz::Rate_Controller::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    IAngular_Velocity_Stream_wptr m_input_stream;
-    IAngular_Velocity_Stream_wptr m_target_stream;
+    stream::IAngular_Velocity_wptr m_input_stream;
+    stream::IAngular_Velocity_wptr m_target_stream;
 
-    std::vector<IAngular_Velocity_Stream::Sample> m_input_samples;
-    std::vector<IAngular_Velocity_Stream::Sample> m_target_samples;
+    std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
+    std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
 
-    struct Stream : public ITorque_Stream
+    struct Stream : public stream::ITorque
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

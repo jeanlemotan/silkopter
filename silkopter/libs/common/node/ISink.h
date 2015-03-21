@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class ISink : public INode_Base<INode::Type::SINK>
+class ISink : public INode_Base<Type::SINK>
 {
 public:
     //sinks don't have any outputs

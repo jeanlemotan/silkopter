@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/node/processor/IPilot.h"
-#include "common/node/stream/IAngular_Velocity_Stream.h"
-#include "common/node/stream/IFrame_Stream.h"
-#include "common/node/stream/IBattery_State_Stream.h"
-#include "common/node/stream/ICommands_Stream.h"
+#include "common/node/stream/IAngular_Velocity.h"
+#include "common/node/stream/IFrame.h"
+#include "common/node/stream/IBattery_State.h"
+#include "common/node/stream/ICommands.h"
 #include "Comms.h"
 #include "HAL.h"
 
@@ -49,17 +49,17 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    IAngular_Velocity_Stream_wptr m_angular_velocity_stream;
+    stream::IAngular_Velocity_wptr m_angular_velocity_stream;
     //ILocation_wptr m_location_stream;
-    IBattery_State_Stream_wptr m_battery_state_stream;
-    ICommands_Stream_wptr m_commands_stream;
+    stream::IBattery_State_wptr m_battery_state_stream;
+    stream::ICommands_wptr m_commands_stream;
 
-    std::vector<IAngular_Velocity_Stream::Sample> m_angular_velocity_samples;
-    //std::vector<ILocation::Sample> m_location_samples;
-    std::vector<IBattery_State_Stream::Sample> m_battery_state_samples;
-    std::vector<ICommands_Stream::Sample> m_commands_samples;
+    std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
+    //std::vector<stream::ILocation::Sample> m_location_samples;
+    std::vector<stream::IBattery_State::Sample> m_battery_state_samples;
+    std::vector<stream::ICommands::Sample> m_commands_samples;
 
-    struct Stream : public IFrame_Stream
+    struct Stream : public stream::IFrame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

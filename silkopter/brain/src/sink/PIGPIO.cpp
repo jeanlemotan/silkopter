@@ -33,7 +33,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     std::transform(m_pwm_channels.begin(), m_pwm_channels.end(), inputs.begin(), [](PWM_Channel const& c)
     {
         Input i;
-        i.type = IPWM_Stream::TYPE;
+        i.type = stream::IPWM::TYPE;
         i.name = "PWMx Value";
         //i.stream = c.stream.lock();
         return i;

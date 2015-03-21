@@ -6,8 +6,10 @@ namespace silk
 {
 namespace node
 {
+namespace stream
+{
 
-class ICommands_Stream : public IScalar_Stream<IStream::Type::COMMANDS>
+class ICommands : public IScalar_Stream<Type::COMMANDS>
 {
 public:
     struct Value
@@ -96,14 +98,15 @@ public:
         Assists assists;
     };
 
-    typedef node::Sample<Value>     Sample;
+    typedef stream::Sample<Value>     Sample;
 
-    virtual ~ICommands_Stream() {}
+    virtual ~ICommands() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(ICommands_Stream);
+DECLARE_CLASS_PTR(ICommands);
 
 
+}
 }
 }

@@ -51,14 +51,14 @@ auto Pilot::init() -> bool
 auto Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
-    inputs[0].type = IAngular_Velocity_Stream::TYPE;
-    inputs[0].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[0].type = stream::IAngular_Velocity::TYPE;
+    inputs[0].rate = m_init_params->rate;
     inputs[0].name = "Angular Velocity";
-    inputs[1].type = IBattery_State_Stream::TYPE;
-    inputs[1].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[1].type = stream::IBattery_State::TYPE;
+    inputs[1].rate = m_init_params->rate;
     inputs[1].name = "Battery State";
-    inputs[2].type = ICommands_Stream::TYPE;
-    inputs[2].rate = m_output_stream ? m_output_stream->rate : 0;
+    inputs[2].type = stream::ICommands::TYPE;
+    inputs[2].rate = m_init_params->rate;
     inputs[2].name = "Commands";
     return inputs;
 }
@@ -89,9 +89,9 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto angular_velocity_stream = m_hal.get_streams().find_by_name<IAngular_Velocity_Stream>(sz.inputs.angular_velocity);
-    auto battery_state_stream = m_hal.get_streams().find_by_name<IBattery_State_Stream>(sz.inputs.battery_state);
-    auto commands_stream = m_hal.get_streams().find_by_name<ICommands_Stream>(sz.inputs.commands);
+    auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.angular_velocity);
+    auto battery_state_stream = m_hal.get_streams().find_by_name<stream::IBattery_State>(sz.inputs.battery_state);
+    auto commands_stream = m_hal.get_streams().find_by_name<stream::ICommands>(sz.inputs.commands);
 
     auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)

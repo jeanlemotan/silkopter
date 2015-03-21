@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/node/processor/IProcessor.h"
-#include "common/node/stream/ILinear_Acceleration_Stream.h"
-#include "common/node/stream/ILocation_Stream.h"
-#include "common/node/stream/IPressure_Stream.h"
-#include "common/node/stream/IFrame_Stream.h"
+#include "common/node/stream/ILinear_Acceleration.h"
+#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPressure.h"
+#include "common/node/stream/IFrame.h"
 
 #include "HAL.h"
 
@@ -51,15 +51,15 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    IECEF_Location_Stream_wptr m_location_stream;
-    ILinear_Acceleration_Stream_wptr m_linear_acceleration_stream;
-    IPressure_Stream_wptr m_pressure_stream;
+    stream::IECEF_Location_wptr m_location_stream;
+    stream::ILinear_Acceleration_wptr m_linear_acceleration_stream;
+    stream::IPressure_wptr m_pressure_stream;
 
-    std::vector<IECEF_Location_Stream::Sample> m_location_samples;
-    std::vector<ILinear_Acceleration_Stream::Sample> m_linear_acceleration_samples;
-    std::vector<IPressure_Stream::Sample> m_pressure_samples;
+    std::vector<stream::IECEF_Location::Sample> m_location_samples;
+    std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
+    std::vector<stream::IPressure::Sample> m_pressure_samples;
 
-    struct ECEF_Location_Stream : public IECEF_Location_Stream
+    struct ECEF_Location_Stream : public stream::IECEF_Location
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -70,7 +70,7 @@ private:
     };
     mutable std::shared_ptr<ECEF_Location_Stream> m_location_output_stream;
 
-    struct ENU_Frame_Stream : public IENU_Frame_Stream
+    struct ENU_Frame_Stream : public stream::IENU_Frame
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

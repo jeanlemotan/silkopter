@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class ISource : public INode_Base<INode::Type::SOURCE>
+class ISource : public INode_Base<Type::SOURCE>
 {
 public:
     //sources don't have any inputs

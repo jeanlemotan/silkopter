@@ -240,7 +240,7 @@ void UBLOX::unlock(Buses& buses)
 auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = IECEF_Location_Stream::TYPE;
+    outputs[0].type = stream::IECEF_Location::TYPE;
     outputs[0].name = "Location";
     outputs[0].stream = m_location_stream;
     return outputs;

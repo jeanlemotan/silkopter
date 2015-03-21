@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IADC_Stream.h"
+#include "common/node/stream/IADC.h"
 #include "common/node/bus/II2C.h"
 
 
@@ -52,7 +52,7 @@ private:
 
     size_t m_stage = 0;
 
-    struct Stream : public IADC_Stream
+    struct Stream : public stream::IADC
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

@@ -107,7 +107,11 @@ SOURCES += \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/processor/Pilot.cpp \
-    ../../src/processor/Comp_ECEF_Location.cpp
+    ../../src/processor/Comp_ECEF_Location.cpp \
+    ../../src/processor/Motor_Mixer.cpp \
+    ../../src/processor/Rate_Controller.cpp \
+    ../../src/processor/Stability_Controller.cpp \
+    ../../src/processor/Velocity_Controller.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -163,30 +167,33 @@ HEADERS += \
     ../../../libs/common/node/processor/IPilot.h \
     ../../src/processor/Throttle_PWM.h \
     ../../src/processor/Comp_ECEF_Location.h \
-    ../../src/processor/Velocity_Processor.h \
-    ../../src/processor/Stability_Processor.h \
-    ../../src/processor/Rate_Processor.h \
-    ../../../libs/common/node/stream/IAcceleration_Stream.h \
-    ../../../libs/common/node/stream/IAngular_Velocity_Stream.h \
-    ../../../libs/common/node/stream/IBattery_State_Stream.h \
-    ../../../libs/common/node/stream/ICommands_Stream.h \
-    ../../../libs/common/node/stream/ICurrent_Stream.h \
-    ../../../libs/common/node/stream/IDistance_Stream.h \
-    ../../../libs/common/node/stream/IForce_Stream.h \
-    ../../../libs/common/node/stream/IFrame_Stream.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration_Stream.h \
-    ../../../libs/common/node/stream/ILocation_Stream.h \
-    ../../../libs/common/node/stream/IMagnetic_Field_Stream.h \
-    ../../../libs/common/node/stream/IPressure_Stream.h \
-    ../../../libs/common/node/stream/ITemperature_Stream.h \
-    ../../../libs/common/node/stream/ITorque_Stream.h \
-    ../../../libs/common/node/stream/IVelocity_Stream.h \
-    ../../../libs/common/node/stream/IVideo_Stream.h \
-    ../../../libs/common/node/stream/IVoltage_Stream.h \
-    ../../../libs/common/node/stream/IADC_Stream.h \
-    ../../../libs/common/node/stream/IPWM_Stream.h \
     ../../../libs/common/node/processor/ITransformer.h \
     ../../../libs/common/node/processor/IProcessor.h \
     ../../src/processor/Transformer.h \
-    ../../src/processor/Transformer_Inv.h
+    ../../src/processor/Transformer_Inv.h \
+    ../../../libs/common/node/data/IData.h \
+    ../../../libs/common/node/stream/IAcceleration.h \
+    ../../../libs/common/node/stream/IADC.h \
+    ../../../libs/common/node/stream/IAngular_Velocity.h \
+    ../../../libs/common/node/stream/IBattery_State.h \
+    ../../../libs/common/node/stream/ICommands.h \
+    ../../../libs/common/node/stream/ICurrent.h \
+    ../../../libs/common/node/stream/IDistance.h \
+    ../../../libs/common/node/stream/IForce.h \
+    ../../../libs/common/node/stream/IFrame.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IMagnetic_Field.h \
+    ../../../libs/common/node/stream/IPressure.h \
+    ../../../libs/common/node/stream/IPWM.h \
+    ../../../libs/common/node/stream/ITemperature.h \
+    ../../../libs/common/node/stream/ITorque.h \
+    ../../../libs/common/node/stream/IVelocity.h \
+    ../../../libs/common/node/stream/IVideo.h \
+    ../../../libs/common/node/stream/IVoltage.h \
+    ../../src/processor/Rate_Controller.h \
+    ../../src/processor/Velocity_Controller.h \
+    ../../src/processor/Stability_Controller.h \
+    ../../../libs/common/node/processor/IController.h \
+    ../../../libs/common/node/stream/IThrottle.h
 

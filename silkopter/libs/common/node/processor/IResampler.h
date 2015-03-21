@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IResampler : public INode_Base<INode::Type::RESAMPLER>
+class IResampler : public INode_Base<Type::RESAMPLER>
 {
 public:
 };

@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISink.h"
-#include "common/node/stream/IPWM_Stream.h"
+#include "common/node/stream/IPWM.h"
 
 namespace sz
 {
@@ -47,7 +47,7 @@ private:
 
     struct PWM_Channel
     {
-        IPWM_Stream_wptr stream;
+        stream::IPWM_wptr stream;
         uint32_t gpio = 0;
     };
 

@@ -176,7 +176,7 @@ Raspicam::~Raspicam()
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = IVideo_Stream::TYPE;
+    outputs[0].type = stream::IVideo::TYPE;
     outputs[0].name = "Video";
 //    outputs[0].stream = &m_angular_velocity;
     return outputs;

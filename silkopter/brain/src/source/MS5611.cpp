@@ -111,10 +111,10 @@ auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& t) -> bool
 auto MS5611::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].type = IPressure_Stream::TYPE;
+    outputs[0].type = stream::IPressure::TYPE;
     outputs[0].name = "Pressure";
     outputs[0].stream = m_pressure;
-    outputs[1].type = ITemperature_Stream::TYPE;
+    outputs[1].type = stream::ITemperature::TYPE;
     outputs[1].name = "Temperature";
     outputs[1].stream = m_temperature;
     return outputs;

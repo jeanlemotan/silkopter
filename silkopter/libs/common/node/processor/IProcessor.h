@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IProcessor : public INode_Base<INode::Type::PROCESSOR>
+class IProcessor : public INode_Base<Type::PROCESSOR>
 {
 public:
 };

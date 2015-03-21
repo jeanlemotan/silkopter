@@ -1,0 +1,48 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Stability_Controller",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Stability_Controller",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "input", {"required": true, "json_key" : "Input"}],
+        ["std::string", "target", {"required": true, "json_key" : "Target"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Stability_Controller",
+    "name": "Angular_Velocity",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Stability_Controller",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Stability_Controller::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Stability_Controller",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Stability_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Stability_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]
