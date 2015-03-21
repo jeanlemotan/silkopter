@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"

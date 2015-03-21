@@ -61,6 +61,9 @@ public:
     virtual auto get_type() const -> Type { return TYPE; }
 };
 
+template<Type T> Type constexpr INode_Base<T>::TYPE;
+
+
 
 }
 }

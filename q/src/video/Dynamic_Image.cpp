@@ -697,7 +697,7 @@ Dynamic_Image& Dynamic_Image::flip_h()
 		}
 		break;
     default:
-        QLOGE("Image format not handled: {}", static_cast<int>(m_format));
+        QLOGE("Image format not handled: {}", m_format);
         break;
 
 	}

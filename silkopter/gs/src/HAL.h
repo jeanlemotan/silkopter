@@ -1,25 +1,28 @@
 #pragma once
 
 #include "common/node/stream/IAcceleration.h"
+#include "common/node/stream/IADC.h"
 #include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IADC_Value.h"
 #include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICardinal_Points.h"
+#include "common/node/stream/ICommands.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
+#include "common/node/stream/IForce.h"
+#include "common/node/stream/IFrame.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IWGS84.h"
-#include "common/node/stream/IECEF.h"
+#include "common/node/stream/ILocation.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
-#include "common/node/stream/IPWM_Value.h"
-#include "common/node/stream/IReference_Frame.h"
+#include "common/node/stream/IPWM.h"
 #include "common/node/stream/ITemperature.h"
+#include "common/node/stream/IThrottle.h"
+#include "common/node/stream/ITorque.h"
+#include "common/node/stream/IVelocity.h"
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
 #include "common/node/INode.h"
-#include "common/node/processor/IMultirotor_Pilot.h"
+#include "common/node/processor/IPilot.h"
 
 #include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
@@ -47,7 +50,7 @@ struct Stream
 {
     Node_wptr node;
     std::string name;
-    q::rtti::class_id class_id;
+    stream::Type type;
     uint32_t rate = 0;
     int telemetry_active_req = 0;
     bool is_telemetry_active = false;
@@ -61,6 +64,29 @@ struct Acceleration : public Stream
     q::util::Signal<void(Acceleration&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Acceleration);
+struct ENU_Acceleration : public Stream
+{
+    typedef IENU_Acceleration::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Acceleration&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Acceleration);
+struct ECEF_Acceleration : public Stream
+{
+    typedef IECEF_Acceleration::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Acceleration&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Acceleration);
+
+struct ADC : public Stream
+{
+    typedef IADC::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ADC&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ADC);
+
 struct Angular_Velocity : public Stream
 {
     typedef IAngular_Velocity::Sample Sample;
@@ -68,13 +94,21 @@ struct Angular_Velocity : public Stream
     q::util::Signal<void(Angular_Velocity&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Angular_Velocity);
-struct ADC_Value : public Stream
+struct ENU_Angular_Velocity : public Stream
 {
-    typedef IADC_Value::Sample Sample;
+    typedef IENU_Angular_Velocity::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(ADC_Value&)> samples_available_signal;
+    q::util::Signal<void(ENU_Angular_Velocity&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(ADC_Value);
+DECLARE_CLASS_PTR(ENU_Angular_Velocity);
+struct ECEF_Angular_Velocity : public Stream
+{
+    typedef IECEF_Angular_Velocity::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Angular_Velocity&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Angular_Velocity);
+
 struct Battery_State : public Stream
 {
     typedef IBattery_State::Sample Sample;
@@ -82,13 +116,15 @@ struct Battery_State : public Stream
     q::util::Signal<void(Battery_State&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Battery_State);
-struct Cardinal_Points : public Stream
+
+struct Commands : public Stream
 {
-    typedef ICardinal_Points::Sample Sample;
+    typedef ICommands::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(Cardinal_Points&)> samples_available_signal;
+    q::util::Signal<void(Commands&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(Cardinal_Points);
+DECLARE_CLASS_PTR(Commands);
+
 struct Current : public Stream
 {
     typedef ICurrent::Sample Sample;
@@ -96,6 +132,7 @@ struct Current : public Stream
     q::util::Signal<void(Current&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Current);
+
 struct Distance : public Stream
 {
     typedef IDistance::Sample Sample;
@@ -103,6 +140,58 @@ struct Distance : public Stream
     q::util::Signal<void(Distance&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Distance);
+struct ENU_Distance : public Stream
+{
+    typedef IENU_Distance::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Distance&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Distance);
+struct ECEF_Distance : public Stream
+{
+    typedef IECEF_Distance::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Distance&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Distance);
+
+struct Force : public Stream
+{
+    typedef IForce::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Force&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Force);
+struct ENU_Force : public Stream
+{
+    typedef IENU_Force::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Force&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Force);
+struct ECEF_Force : public Stream
+{
+    typedef IECEF_Force::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Force&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Force);
+
+struct Frame : public Stream
+{
+    typedef IFrame::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Frame&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Frame);
+struct ENU_Frame : public Stream
+{
+    typedef IENU_Frame::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Frame&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Frame);
+
 struct Linear_Acceleration : public Stream
 {
     typedef ILinear_Acceleration::Sample Sample;
@@ -110,20 +199,29 @@ struct Linear_Acceleration : public Stream
     q::util::Signal<void(Linear_Acceleration&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Linear_Acceleration);
-struct WGS84 : public Stream
+struct ENU_Linear_Acceleration : public Stream
 {
-    typedef IWGS84::Sample Sample;
+    typedef IENU_Linear_Acceleration::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(WGS84&)> samples_available_signal;
+    q::util::Signal<void(ENU_Linear_Acceleration&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(WGS84);
-struct ECEF : public Stream
+DECLARE_CLASS_PTR(ENU_Linear_Acceleration);
+struct ECEF_Linear_Acceleration : public Stream
 {
-    typedef IECEF::Sample Sample;
+    typedef IECEF_Linear_Acceleration::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(ECEF&)> samples_available_signal;
+    q::util::Signal<void(ECEF_Linear_Acceleration&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(ECEF);
+DECLARE_CLASS_PTR(ECEF_Linear_Acceleration);
+
+struct ECEF_Location : public Stream
+{
+    typedef IECEF_Location::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Location&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Location);
+
 struct Magnetic_Field : public Stream
 {
     typedef IMagnetic_Field::Sample Sample;
@@ -131,6 +229,21 @@ struct Magnetic_Field : public Stream
     q::util::Signal<void(Magnetic_Field&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Magnetic_Field);
+struct ENU_Magnetic_Field : public Stream
+{
+    typedef IENU_Magnetic_Field::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Magnetic_Field&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Magnetic_Field);
+struct ECEF_Magnetic_Field : public Stream
+{
+    typedef IECEF_Magnetic_Field::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Magnetic_Field&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Magnetic_Field);
+
 struct Pressure : public Stream
 {
     typedef IPressure::Sample Sample;
@@ -138,27 +251,75 @@ struct Pressure : public Stream
     q::util::Signal<void(Pressure&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Pressure);
-struct PWM_Value : public Stream
+
+struct PWM : public Stream
 {
-    typedef IPWM_Value::Sample Sample;
+    typedef IPWM::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(PWM_Value&)> samples_available_signal;
+    q::util::Signal<void(PWM&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(PWM_Value);
-struct Reference_Frame : public Stream
-{
-    typedef IReference_Frame::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Reference_Frame&)> samples_available_signal;
-};
-DECLARE_CLASS_PTR(Reference_Frame);
+DECLARE_CLASS_PTR(PWM);
+
 struct Temperature : public Stream
 {
-    typedef IADC_Value::Sample Sample;
+    typedef ITemperature::Sample Sample;
     std::vector<Sample> samples;
     q::util::Signal<void(Temperature&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Temperature);
+
+struct Throttle : public Stream
+{
+    typedef IThrottle::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Throttle&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Throttle);
+
+struct Torque : public Stream
+{
+    typedef ITorque::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Torque&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Torque);
+struct ENU_Torque : public Stream
+{
+    typedef IENU_Torque::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Torque&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Torque);
+struct ECEF_Torque : public Stream
+{
+    typedef IECEF_Torque::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Torque&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Torque);
+
+struct Velocity : public Stream
+{
+    typedef IVelocity::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Velocity&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Velocity);
+struct ENU_Velocity : public Stream
+{
+    typedef IENU_Velocity::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ENU_Velocity&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ENU_Velocity);
+struct ECEF_Velocity : public Stream
+{
+    typedef IECEF_Velocity::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(ECEF_Velocity&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(ECEF_Velocity);
+
 struct Voltage : public Stream
 {
     typedef IVoltage::Sample Sample;
@@ -166,6 +327,7 @@ struct Voltage : public Stream
     q::util::Signal<void(Voltage&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Voltage);
+
 struct Video : public Stream
 {
     typedef IVideo::Sample Sample;
@@ -180,13 +342,13 @@ DECLARE_CLASS_PTR(Video);
 struct Node_Def
 {
     std::string name;
-    q::rtti::class_id class_id;
+    node::Type type;
     rapidjson::Document default_init_params;
     rapidjson::Document default_config;
 
     struct Input
     {
-        q::rtti::class_id class_id;
+        stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
@@ -194,7 +356,7 @@ struct Node_Def
 
     struct Output
     {
-        q::rtti::class_id class_id;
+        stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
@@ -205,7 +367,7 @@ DECLARE_CLASS_PTR(Node_Def);
 struct Node
 {
     std::string name;
-    q::rtti::class_id class_id;
+    node::Type type;
 
     rapidjson::Document init_params;
     rapidjson::Document config;
@@ -213,7 +375,7 @@ struct Node
     struct Input
     {
         stream::Stream_wptr stream;
-        q::rtti::class_id class_id;
+        stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
@@ -222,7 +384,7 @@ struct Node
     struct Output
     {
         stream::Stream_ptr stream;
-        q::rtti::class_id class_id;
+        stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };

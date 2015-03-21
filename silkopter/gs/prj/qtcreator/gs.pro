@@ -130,7 +130,18 @@ HEADERS += \
     ../../src/Numeric_Viewer.h \
     ../../src/Map_Viewer.h \
     ../../../libs/common/node/stream/IECEF.h \
-    ../../../libs/common/node/stream/IWGS84.h
+    ../../../libs/common/node/stream/IWGS84.h \
+    ../../../libs/common/node/stream/IADC.h \
+    ../../../libs/common/node/stream/ICommands.h \
+    ../../../libs/common/node/stream/IForce.h \
+    ../../../libs/common/node/stream/IFrame.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IMultirotor_Data.h \
+    ../../../libs/common/node/stream/IPhysical_State.h \
+    ../../../libs/common/node/stream/IPWM.h \
+    ../../../libs/common/node/stream/IThrottle.h \
+    ../../../libs/common/node/stream/ITorque.h \
+    ../../../libs/common/node/stream/IVelocity.h
 
 SOURCES += \
     ../../src/GS.cpp \

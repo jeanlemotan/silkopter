@@ -6,7 +6,7 @@
 #include "common/node/IProcessor.h"
 #include "common/node/processor/ILPF.h"
 #include "common/node/processor/IResampler.h"
-#include "common/node/processor/IMultirotor_Pilot.h"
+#include "common/node/processor/IPilot.h"
 
 #include "Numeric_Viewer.h"
 //#include "Battery_State_Viewer.h"
@@ -87,8 +87,8 @@ void Stream_Viewer_Widget::create_viewer()
         return;
     }
 
-    auto class_id = stream->class_id;
-    if (class_id == q::rtti::get_class_id<IAcceleration>())
+    auto type = stream->type;
+    if (type == IAcceleration::TYPE)
     {
         auto viewer = new Numeric_Viewer("m/s^2", stream->rate, this);
         viewer->add_graph("X", "m/s^2", QColor(0xe74c3c));
@@ -106,7 +106,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IAngular_Velocity>())
+    else if (type == IAngular_Velocity::TYPE)
     {
         auto viewer = new Numeric_Viewer("°/s", stream->rate, this);
         viewer->add_graph("X", "°/s", QColor(0xe74c3c));
@@ -124,7 +124,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IMagnetic_Field>())
+    else if (type == IMagnetic_Field::TYPE)
     {
         auto viewer = new Numeric_Viewer("Teslas", stream->rate, this);
         viewer->add_graph("X", "Teslas", QColor(0xe74c3c));
@@ -142,7 +142,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IPressure>())
+    else if (type == IPressure::TYPE)
     {
         auto viewer = new Numeric_Viewer("Pascals", stream->rate, this);
         viewer->add_graph("Pressure", "Pascals", QColor(0xe74c3c));
@@ -158,11 +158,11 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IBattery_State>())
+    else if (type == IBattery_State::TYPE)
     {
 //        layout()->addWidget(new Battery_State_Viewer(stream, this));
     }
-    else if (class_id == q::rtti::get_class_id<ILinear_Acceleration>())
+    else if (type == ILinear_Acceleration::TYPE)
     {
         auto viewer = new Numeric_Viewer("m/s^2", stream->rate, this);
         viewer->add_graph("X", "m/s^2", QColor(0xe74c3c));
@@ -180,11 +180,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<ICardinal_Points>())
-    {
-//        layout()->addWidget(new Cardinal_Points_Viewer(stream, this));
-    }
-    else if (class_id == q::rtti::get_class_id<ICurrent>())
+    else if (type == ICurrent::TYPE)
     {
         auto viewer = new Numeric_Viewer("A", stream->rate, this);
         viewer->add_graph("Current", "A", QColor(0xe74c3c));
@@ -200,7 +196,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IVoltage>())
+    else if (type == IVoltage::TYPE)
     {
         auto viewer = new Numeric_Viewer("V", stream->rate, this);
         viewer->add_graph("Voltage", "V", QColor(0xe74c3c));
@@ -216,7 +212,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IDistance>())
+    else if (type == IDistance::TYPE)
     {
         auto viewer = new Numeric_Viewer("m", stream->rate, this);
         viewer->add_graph("Distance", "m", QColor(0xe74c3c));
@@ -226,26 +222,26 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                data = { s.value };
+                data = { math::length(s.value) };
                 viewer->add_samples(s.tp, data.data());
             }
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IWGS84>())
+    else if (type == IECEF_Location::TYPE)
     {
         auto viewer = new Map_Viewer(this);
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<WGS84>(stream)->samples_available_signal.connect([this, viewer](WGS84& stream)
+        m_connection = std::static_pointer_cast<ECEF_Location>(stream)->samples_available_signal.connect([this, viewer](ECEF_Location& stream)
         {
-            for (auto const& s: stream.samples)
-            {
-                viewer->add_sample(s.tp, s.value.lat_lon);
-            }
+//            for (auto const& s: stream.samples)
+//            {
+//                viewer->add_sample(s.tp, s.value.lat_lon);
+//            }
             viewer->process();
         });
     }
-//    else if (class_id == q::rtti::get_class_id<IECEF>())
+//    else if (type == IECEF::TYPE)
 //    {
 //        auto viewer = new Map_Viewer(this);
 //        layout()->addWidget(viewer);
@@ -258,12 +254,12 @@ void Stream_Viewer_Widget::create_viewer()
 //            viewer->process();
 //        });
 //    }
-    else if (class_id == q::rtti::get_class_id<IPWM_Value>())
+    else if (type == IPWM::TYPE)
     {
         auto viewer = new Numeric_Viewer("pwm", stream->rate, this);
         viewer->add_graph("PWM", "pwm", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<PWM_Value>(stream)->samples_available_signal.connect([this, viewer](PWM_Value& stream)
+        m_connection = std::static_pointer_cast<PWM>(stream)->samples_available_signal.connect([this, viewer](PWM& stream)
         {
             std::array<double, 1> data;
             for (auto const& s: stream.samples)
@@ -274,11 +270,11 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IReference_Frame>())
+    else if (type == IFrame::TYPE)
     {
 //        layout()->addWidget(new Reference_Frame_Stream_Viewer(stream, this));
     }
-    else if (class_id == q::rtti::get_class_id<ITemperature>())
+    else if (type == ITemperature::TYPE)
     {
         auto viewer = new Numeric_Viewer("°C", stream->rate, this);
         viewer->add_graph("Temperature", "°C", QColor(0xe74c3c));
@@ -294,12 +290,12 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IADC_Value>())
+    else if (type == IADC::TYPE)
     {
         auto viewer = new Numeric_Viewer("adc", stream->rate, this);
         viewer->add_graph("ADC", "adc", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<ADC_Value>(stream)->samples_available_signal.connect([this, viewer](ADC_Value& stream)
+        m_connection = std::static_pointer_cast<ADC>(stream)->samples_available_signal.connect([this, viewer](ADC& stream)
         {
             std::array<double, 1> data;
             for (auto const& s: stream.samples)
@@ -310,7 +306,7 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (class_id == q::rtti::get_class_id<IVideo>())
+    else if (type == IVideo::TYPE)
     {
 //        layout()->addWidget(new Video_Stream_Viewer(stream, this));
     }

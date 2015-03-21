@@ -304,7 +304,7 @@ namespace util
 		{
             if (off == 0)
             {
-                //q::quick_logf("unpacking {} {}, size {}/0, hcrc {}, dcrc {}", (m_decoded.magic & ACK_BIT) ? "ack" : "msg", static_cast<int>(m_decoded.message), m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
+                //q::quick_logf("unpacking {} {}, size {}/0, hcrc {}, dcrc {}", (m_decoded.magic & ACK_BIT) ? "ack" : "msg", m_decoded.message, m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
             }
             if (m_decoded.data_size > 0)
 			{
@@ -321,7 +321,7 @@ namespace util
 		{
             if (off == 0)
             {
-                //q::quick_logf("unpacking {} {}, size {}/{}, hcrc {}, dcrc {}", (m_decoded.magic & ACK_BIT) ? "ack" : "msg", static_cast<int>(m_decoded.message), _sizeof(p) + _sizeof(params...), m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
+                //q::quick_logf("unpacking {} {}, size {}/{}, hcrc {}, dcrc {}", (m_decoded.magic & ACK_BIT) ? "ack" : "msg", m_decoded.message, _sizeof(p) + _sizeof(params...), m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
             }
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             if (m_decoded.data_size == 0 || m_rx_buffer.size() < off + sizeof(Param))
@@ -367,7 +367,7 @@ namespace util
                 if (header_crc != computed_header_crc)
                 {
                     m_error_count++;
-                    q::quick_logf("header crc failed {} / {} for {} {} size {}", header_crc, computed_header_crc, (magic & ACK_BIT) ? "ack" : "msg", static_cast<int>(message), size);
+                    q::quick_logf("header crc failed {} / {} for {} {} size {}", header_crc, computed_header_crc, (magic & ACK_BIT) ? "ack" : "msg", message, size);
                     pop_front(1);
                     return true;
                 }
@@ -391,7 +391,7 @@ namespace util
             if (data_crc != computed_data_crc)
             {
                 m_error_count++;
-                q::quick_logf("data crc failed {} / {} for {} {} size {}", data_crc, computed_data_crc, (magic & ACK_BIT) ? "ack" : "msg",static_cast<int>(message), size);
+                q::quick_logf("data crc failed {} / {} for {} {} size {}", data_crc, computed_data_crc, (magic & ACK_BIT) ? "ack" : "msg",message, size);
                 set_value_fixed(m_rx_buffer, data_crc, DATA_CRC_OFFSET);
                 pop_front(1);
                 return true;
@@ -420,7 +420,7 @@ namespace util
                 else
                 {
                     m_error_count++;
-                    q::quick_logf("received ack for wrong message {} / {}", static_cast<int>(m_decoded.message), static_cast<int>(m_ack.message));
+                    q::quick_logf("received ack for wrong message {} / {}", m_decoded.message, m_ack.message);
                     pop_front(sizeof(Data_Crc_t));
                 }
                 m_decoded.magic = 0;
@@ -428,7 +428,7 @@ namespace util
                 return true;
             }
 
-            //q::quick_logf("received msg {}, size {}, hcrc {}, dcrc {}", static_cast<int>(m_decoded.message), m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
+            //q::quick_logf("received msg {}, size {}, hcrc {}, dcrc {}", m_decoded.message, m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
 
             if (m_decoded.magic & NEEDS_ACK_BIT)
             {
@@ -464,7 +464,7 @@ namespace util
             auto data_crc = q::util::compute_crc<Data_Crc_t>(m_tx_buffer, total_size);
             set_value_fixed(m_tx_buffer, data_crc, DATA_CRC_OFFSET);
 
-            //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", static_cast<int>(message), data_size, header_crc, data_crc);
+            //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
 
 			//send
             m_socket.write(m_tx_buffer, total_size);

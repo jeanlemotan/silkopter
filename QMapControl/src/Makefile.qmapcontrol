@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQMAPCONTROL_LIBRARY -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I.moc/pc/debug -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++
+INCPATH       = -I. -I. -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I.moc/pc/debug -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++
 QMAKE         = /home/pork/dev/Qt/5.4/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -647,7 +647,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtGui/qvector2d.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtGui/qtouchdevice.h \
 		curve.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore curve.h -o .moc/pc/debug/moc_curve.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. curve.h -o .moc/pc/debug/moc_curve.cpp
 
 .moc/pc/debug/moc_geometry.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -753,7 +753,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QRectF \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QLocale \
 		geometry.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore geometry.h -o .moc/pc/debug/moc_geometry.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. geometry.h -o .moc/pc/debug/moc_geometry.cpp
 
 .moc/pc/debug/moc_imagemanager.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -868,7 +868,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qurlquery.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QVariant \
 		imagemanager.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore imagemanager.h -o .moc/pc/debug/moc_imagemanager.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. imagemanager.h -o .moc/pc/debug/moc_imagemanager.cpp
 
 .moc/pc/debug/moc_layer.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1017,7 +1017,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QUrl \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QVariant \
 		layer.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore layer.h -o .moc/pc/debug/moc_layer.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. layer.h -o .moc/pc/debug/moc_layer.cpp
 
 .moc/pc/debug/moc_layermanager.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1166,7 +1166,7 @@ compiler_moc_header_clean:
 		wmsmapadapter.h \
 		tilemapadapter.h \
 		layermanager.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore layermanager.h -o .moc/pc/debug/moc_layermanager.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. layermanager.h -o .moc/pc/debug/moc_layermanager.cpp
 
 .moc/pc/debug/moc_linestring.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1288,7 +1288,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtGui/qvector2d.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtGui/qtouchdevice.h \
 		linestring.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore linestring.h -o .moc/pc/debug/moc_linestring.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. linestring.h -o .moc/pc/debug/moc_linestring.cpp
 
 .moc/pc/debug/moc_mapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1369,7 +1369,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		mapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore mapadapter.h -o .moc/pc/debug/moc_mapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. mapadapter.h -o .moc/pc/debug/moc_mapadapter.cpp
 
 .moc/pc/debug/moc_mapcontrol.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1518,7 +1518,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QUrl \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QVariant \
 		mapcontrol.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore mapcontrol.h -o .moc/pc/debug/moc_mapcontrol.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. mapcontrol.h -o .moc/pc/debug/moc_mapcontrol.cpp
 
 .moc/pc/debug/moc_mapnetwork.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1657,7 +1657,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork/qnetworkdiskcache.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork/qabstractnetworkcache.h \
 		mapnetwork.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore mapnetwork.h -o .moc/pc/debug/moc_mapnetwork.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. mapnetwork.h -o .moc/pc/debug/moc_mapnetwork.cpp
 
 .moc/pc/debug/moc_point.cpp: /home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets/QWidget \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets/qwidget.h \
@@ -1777,7 +1777,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QRectF \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QLocale \
 		point.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore point.h -o .moc/pc/debug/moc_point.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. point.h -o .moc/pc/debug/moc_point.cpp
 
 .moc/pc/debug/moc_tilemapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1859,7 +1859,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		tilemapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore tilemapadapter.h -o .moc/pc/debug/moc_tilemapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. tilemapadapter.h -o .moc/pc/debug/moc_tilemapadapter.cpp
 
 .moc/pc/debug/moc_osmmapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -1942,7 +1942,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		osmmapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore osmmapadapter.h -o .moc/pc/debug/moc_osmmapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. osmmapadapter.h -o .moc/pc/debug/moc_osmmapadapter.cpp
 
 .moc/pc/debug/moc_maplayer.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2091,7 +2091,7 @@ compiler_moc_header_clean:
 		wmsmapadapter.h \
 		tilemapadapter.h \
 		maplayer.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore maplayer.h -o .moc/pc/debug/moc_maplayer.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. maplayer.h -o .moc/pc/debug/moc_maplayer.cpp
 
 .moc/pc/debug/moc_geometrylayer.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2240,7 +2240,7 @@ compiler_moc_header_clean:
 		wmsmapadapter.h \
 		tilemapadapter.h \
 		geometrylayer.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore geometrylayer.h -o .moc/pc/debug/moc_geometrylayer.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. geometrylayer.h -o .moc/pc/debug/moc_geometrylayer.cpp
 
 .moc/pc/debug/moc_yahoomapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2323,7 +2323,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		yahoomapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore yahoomapadapter.h -o .moc/pc/debug/moc_yahoomapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. yahoomapadapter.h -o .moc/pc/debug/moc_yahoomapadapter.cpp
 
 .moc/pc/debug/moc_googlemapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2406,7 +2406,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		googlemapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore googlemapadapter.h -o .moc/pc/debug/moc_googlemapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. googlemapadapter.h -o .moc/pc/debug/moc_googlemapadapter.cpp
 
 .moc/pc/debug/moc_openaerialmapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2489,7 +2489,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		openaerialmapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore openaerialmapadapter.h -o .moc/pc/debug/moc_openaerialmapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. openaerialmapadapter.h -o .moc/pc/debug/moc_openaerialmapadapter.cpp
 
 .moc/pc/debug/moc_emptymapadapter.cpp: qmapcontrol_global.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QtGlobal \
@@ -2571,7 +2571,7 @@ compiler_moc_header_clean:
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/qshareddata.h \
 		/home/pork/dev/Qt/5.4/gcc_64/include/QtCore/QDebug \
 		emptymapadapter.h
-	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore emptymapadapter.h -o .moc/pc/debug/moc_emptymapadapter.cpp
+	/home/pork/dev/Qt/5.4/gcc_64/bin/moc $(DEFINES) -I/home/pork/dev/Qt/5.4/gcc_64/mkspecs/linux-g++ -I/home/pork/dev/silkopter/QMapControl/src -I/home/pork/dev/Qt/5.4/gcc_64/include -I/home/pork/dev/Qt/5.4/gcc_64/include/QtWidgets -I/home/pork/dev/Qt/5.4/gcc_64/include/QtGui -I/home/pork/dev/Qt/5.4/gcc_64/include/QtNetwork -I/home/pork/dev/Qt/5.4/gcc_64/include/QtCore -I. emptymapadapter.h -o .moc/pc/debug/moc_emptymapadapter.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

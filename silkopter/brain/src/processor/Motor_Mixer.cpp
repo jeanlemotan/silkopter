@@ -149,6 +149,8 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_config->outputs.throttles.resize(m_init_params->motor_count);
+    m_config->motors.resize(m_init_params->motor_count);
 
     auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.inputs.torque);
     auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.inputs.force);

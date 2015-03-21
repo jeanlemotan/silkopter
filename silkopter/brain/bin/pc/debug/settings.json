@@ -18,32 +18,121 @@
             }
         },
         "nodes": {
-            "UBLOX": {
-                "name": "UBLOX",
+            "Rate Controller": {
+                "name": "Rate Controller",
                 "init_params": {
-                    "Bus": "uart0",
-                    "Rate (Hz)": 5,
+                    "Rate (Hz)": 50,
                     "__gs": {
                         "position": {
-                            "x": -156.0,
-                            "y": -159.0
+                            "x": -67.0,
+                            "y": -286.0
+                        }
+                    }
+                },
+                "config": {
+                    "Inputs": {
+                        "Input": "",
+                        "Target": ""
+                    },
+                    "Outputs": {
+                        "Torque": {}
+                    }
+                }
+            },
+            "Motor Mixer": {
+                "name": "Motor Mixer",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "Motor Count": 4,
+                    "__gs": {
+                        "position": {
+                            "x": -63.0,
+                            "y": -557.0
+                        }
+                    }
+                },
+                "config": {
+                    "Armed Throttle": 0.0,
+                    "Motors": [
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100%": 0.0,
+                            "Thrust @ 50%": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100%": 0.0,
+                            "Thrust @ 50%": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100%": 0.0,
+                            "Thrust @ 50%": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100%": 0.0,
+                            "Thrust @ 50%": 0.0
+                        }
+                    ],
+                    "Inputs": {
+                        "Torque": "",
+                        "Collective Force": ""
+                    },
+                    "Outputs": {
+                        "Throttles": [
+                            {},
+                            {},
+                            {},
+                            {}
+                        ]
+                    }
+                }
+            },
+            "MS5611": {
+                "name": "MS5611",
+                "init_params": {
+                    "Bus": "i2c0",
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate Ratio": 10,
+                    "__gs": {
+                        "position": {
+                            "x": -143.0,
+                            "y": -653.0
                         }
                     }
                 },
                 "config": {
                     "Outputs": {
-                        "Location": {}
+                        "Pressure": {},
+                        "Temperature": {}
                     }
                 }
             },
-            "Location RS": {
-                "name": "Location RS",
+            "Pressure LPF": {
+                "name": "Pressure LPF",
                 "init_params": {
                     "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -333.0,
-                            "y": -160.0
+                            "x": -562.0,
+                            "y": -752.0
                         }
                     }
                 },
@@ -51,80 +140,28 @@
                     "Poles": 4,
                     "Cutoff Frequency (Hz)": 1.0,
                     "Inputs": {
-                        "Input": "UBLOX/Location"
+                        "Input": "MS5611/Pressure"
                     },
                     "Outputs": {
                         "Output": {}
                     }
                 }
             },
-            "Location LPF": {
-                "name": "Location LPF",
+            "UBLOX": {
+                "name": "UBLOX",
                 "init_params": {
+                    "Bus": "uart0",
                     "Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -256.0,
-                            "y": -305.0
-                        }
-                    }
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 2.0,
-                    "Inputs": {
-                        "Input": "UBLOX/Location"
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "MPU9250": {
-                "name": "MPU9250",
-                "init_params": {
-                    "Bus": "i2c0",
-                    "Acceleration & Angular Velocity Rate (Hz)": 1000,
-                    "Magnetic Field Rate (Hz)": 100,
-                    "Temperature Rate (Hz)": 10,
-                    "Acceleration Range (G)": 8,
-                    "Angular Velocity Range (DPS)": 500,
-                    "__gs": {
-                        "position": {
-                            "x": -483.0,
-                            "y": -451.0
+                            "x": -612.0,
+                            "y": -967.0
                         }
                     }
                 },
                 "config": {
                     "Outputs": {
-                        "Acceleration": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "Scale": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            }
-                        },
-                        "Angular Velocity": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            }
-                        },
-                        "Magnetic Field": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            }
-                        },
-                        "Temperature": {}
+                        "ECEF Location": {}
                     }
                 }
             }

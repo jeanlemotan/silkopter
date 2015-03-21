@@ -481,19 +481,19 @@ Render_Target_ptr GLES_Renderer::get_post_fx_render_target(Hdr_Format format)
 	bool recreate = false;
 	if (!pfx_rt)
 	{
-        QLOGI("Creating postfx render target for format {}", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {}", format);
 		recreate = true;
 	}
 	else if (pfx_rt->get_size() != rt->get_size())
 	{
-        QLOGI("Creating postfx render target for format {} because of size change", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {} because of size change", format);
 		recreate = true;
 	}
 	else if (format == Hdr_Format::NONE &&
 		(rt->get_color_format() != pfx_rt->get_color_format() || rt->get_depth_format() != pfx_rt->get_depth_format() ||
 		rt->get_stencil_format() != pfx_rt->get_stencil_format() || rt->get_aa_format() != pfx_rt->get_aa_format()))
 	{
-        QLOGI("Creating postfx render target for format {} because of mode change", static_cast<int>(format));
+        QLOGI("Creating postfx render target for format {} because of mode change", format);
 		recreate = true;
 	}
 
@@ -503,7 +503,7 @@ Render_Target_ptr GLES_Renderer::get_post_fx_render_target(Hdr_Format format)
 		bool res = pfx_rt->allocate(rt->get_size(), desired_color_format, rt->get_depth_format(), rt->get_stencil_format(), rt->get_aa_format(), false);
 		if (!res)
 		{
-            QLOGE("Cannot create postfx render target for format {}", static_cast<int>(format));
+            QLOGE("Cannot create postfx render target for format {}", format);
 			return Render_Target_ptr();
 		}
 		m_post_fx_data.render_targets[rt_idx] = pfx_rt;

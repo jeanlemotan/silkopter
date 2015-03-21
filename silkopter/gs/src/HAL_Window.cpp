@@ -22,20 +22,24 @@
 #include "common/node/IProcessor.h"
 #include "common/node/processor/ILPF.h"
 #include "common/node/processor/IResampler.h"
-#include "common/node/processor/IMultirotor_Pilot.h"
+#include "common/node/processor/IPilot.h"
+#include "common/node/processor/IController.h"
+#include "common/node/processor/ITransformer.h"
 
 #include "ui_New_Node.h"
 
-static std::map<q::rtti::class_id, QColor> s_node_colors =
+static std::map<silk::node::Type, QColor> s_node_colors =
 {{
-    { q::rtti::get_class_id<silk::node::INode>(), QColor(0xF4D03F) },
-    { q::rtti::get_class_id<silk::node::ISource>(), QColor(0x86E2D5) },
-    { q::rtti::get_class_id<silk::node::ISink>(), QColor(0xF1A9A0) },
-    { q::rtti::get_class_id<silk::node::IProcessor>(), QColor(0xFDE3A7) },
-    { q::rtti::get_class_id<silk::node::ILPF>(), QColor(0xF7CA18) },
-    { q::rtti::get_class_id<silk::node::IResampler>(), QColor(0xEB974E) },
-    { q::rtti::get_class_id<silk::node::IMultirotor_Pilot>(), QColor(0xBE90D4) },
+    { silk::node::ISource::TYPE, QColor(0x86E2D5) },
+    { silk::node::ISink::TYPE, QColor(0xF1A9A0) },
+    { silk::node::IProcessor::TYPE, QColor(0xFDE3A7) },
+    { silk::node::ILPF::TYPE, QColor(0xF7CA18) },
+    { silk::node::IResampler::TYPE, QColor(0xEB974E) },
+    { silk::node::IPilot::TYPE, QColor(0xBE90D4) },
+    { silk::node::IController::TYPE, QColor(0x9B59B6) },
+    { silk::node::ITransformer::TYPE, QColor(0xF1C40F) },
 }};
+
 
 HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget *parent)
     : QMainWindow(parent)
@@ -253,6 +257,8 @@ void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
     QMenu* processors = menu.addMenu(QIcon(":/icons/Processor.png"), "Processors");
     QMenu* lpfs = menu.addMenu(QIcon(":/icons/LPF.png"), "Low Pass Filters");
     QMenu* resamplers = menu.addMenu(QIcon(":/icons/Resampler.png"), "Resamplers");
+    QMenu* controllers = menu.addMenu(QIcon(":/icons/Controller.png"), "Controllers");
+    QMenu* transformers = menu.addMenu(QIcon(":/icons/Transformer.png"), "Transformers");
     QMenu* pilots = menu.addMenu(QIcon(":/icons/Pilot.png"), "Pilots");
     QMenu* misc = menu.addMenu(QIcon(":/icons/Node.png"), "Misc");
     sources->setEnabled(false);
@@ -260,41 +266,53 @@ void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
     processors->setEnabled(false);
     lpfs->setEnabled(false);
     resamplers->setEnabled(false);
+    controllers->setEnabled(false);
+    transformers->setEnabled(false);
     pilots->setEnabled(false);
     misc->setEnabled(false);
 
     for (auto const& n: nodes)
     {
         QAction* action = nullptr;
-        if (n->class_id == q::rtti::get_class_id<silk::node::ISource>())
+        if (n->type == silk::node::ISource::TYPE)
         {
             action = sources->addAction(get_icon(":/icons/Source.png", *n), prettify_name(n->name).c_str());
             sources->setEnabled(true);
         }
-        else if (n->class_id == q::rtti::get_class_id<silk::node::ISink>())
+        else if (n->type == silk::node::ISink::TYPE)
         {
             action = sinks->addAction(get_icon(":/icons/Sink.png", *n), prettify_name(n->name).c_str());
             sinks->setEnabled(true);
         }
-        else if (n->class_id == q::rtti::get_class_id<silk::node::IProcessor>())
+        else if (n->type == silk::node::IProcessor::TYPE)
         {
             action = processors->addAction(get_icon(":/icons/Processor.png", *n), prettify_name(n->name).c_str());
             processors->setEnabled(true);
         }
-        else if (n->class_id == q::rtti::get_class_id<silk::node::ILPF>())
+        else if (n->type == silk::node::ILPF::TYPE)
         {
             action = lpfs->addAction(get_icon(":/icons/LPF.png", *n), prettify_name(n->name).c_str());
             lpfs->setEnabled(true);
         }
-        else if (n->class_id == q::rtti::get_class_id<silk::node::IResampler>())
+        else if (n->type == silk::node::IResampler::TYPE)
         {
             action = resamplers->addAction(get_icon(":/icons/Resampler.png", *n), prettify_name(n->name).c_str());
             resamplers->setEnabled(true);
         }
-        else if (n->class_id == q::rtti::get_class_id<silk::node::IMultirotor_Pilot>())
+        else if (n->type == silk::node::IPilot::TYPE)
         {
             action = pilots->addAction(get_icon(":/icons/Pilot.png", *n), prettify_name(n->name).c_str());
             pilots->setEnabled(true);
+        }
+        else if (n->type == silk::node::IController::TYPE)
+        {
+            action = controllers->addAction(get_icon(":/icons/Controller.png", *n), prettify_name(n->name).c_str());
+            controllers->setEnabled(true);
+        }
+        else if (n->type == silk::node::ITransformer::TYPE)
+        {
+            action = transformers->addAction(get_icon(":/icons/Transformer.png", *n), prettify_name(n->name).c_str());
+            transformers->setEnabled(true);
         }
         else
         {
@@ -426,7 +444,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         {
             id.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
         }
-        id.port->setPortType(i.class_id);
+        id.port->setPortType(static_cast<int>(i.type));
         id.port->setPortRate(i.rate);
         id.port->disconnectAll();
 
@@ -452,7 +470,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         auto& od = data.outputs[o.name];
         QASSERT(od.port);
         od.port->setName(q::util::format2<std::string>("{} {}Hz", o.name, o.rate).c_str());
-        od.port->setPortType(o.class_id);
+        od.port->setPortType(static_cast<int>(o.type));
         od.port->setPortRate(o.rate);
     }
     data.block->refreshGeometry();
@@ -466,6 +484,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 
 void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
 {
+
     auto& data = m_nodes[node->name];
     data = Node_Data();
 
@@ -474,7 +493,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
     b->setName(node->name.c_str());
     b->setId(node->name.c_str());
     b->setPos(pos);
-    b->setBrush(QBrush(s_node_colors[node->class_id]));
+    b->setBrush(QBrush(s_node_colors[node->type]));
 
     data.node = node;
     data.block.reset(b);

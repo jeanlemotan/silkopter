@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IThrottle.h"
 #include "common/node/stream/IPWM.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/IProcessor.h"
 
 
 namespace sz

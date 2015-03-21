@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/stream/IADC.h"
 #include "common/node/stream/IVoltage.h"
-#include "common/node/processor/IProcessor.h"
+#include "common/node/IProcessor.h"
 
 
 namespace sz

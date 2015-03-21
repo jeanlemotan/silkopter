@@ -648,6 +648,13 @@ namespace formatting
         }
     }
 
+    template<class Dst_String, class Placeholder, class T>
+    typename std::enable_if<std::is_enum<T>::value, T>::type
+        format_string(Dst_String& dst, Placeholder const& ph, T e)
+    {
+        format_string(dst, ph, static_cast<int>(e));
+    }
+
 #endif
 
 	template<class Dst_Adapter, class P>

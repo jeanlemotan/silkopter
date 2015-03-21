@@ -232,7 +232,7 @@ namespace jsonutil
             break;
         case kArrayType:
             dst.SetArray();
-            for (size_t i = 0; i < dst.Size(); i++)
+            for (size_t i = 0; i < json.Size(); i++)
             {
                 dst.PushBack(clone_value(json[(uint32_t)(i)], allocator), allocator);
             }

@@ -176,7 +176,7 @@ namespace util
             //header
             detail::set_value_fixed(m_tx_buffer, Message_Size_t(data_size), m_size_off);
 
-            //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", static_cast<int>(message), data_size, header_crc, data_crc);
+            //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
             m_size_off = 0;
             m_data_start_off = 0;
         }

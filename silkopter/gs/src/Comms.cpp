@@ -181,7 +181,7 @@ auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& i: io)
     {
         if (!channel.unpack_param(i.name) ||
-                !channel.unpack_param(i.class_id) ||
+                !channel.unpack_param(i.type) ||
                 !channel.unpack_param(i.rate))
         {
             return false;
@@ -202,7 +202,7 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
     for (auto& o: io)
     {
         if (!channel.unpack_param(o.name) ||
-                !channel.unpack_param(o.class_id) ||
+                !channel.unpack_param(o.type) ||
                 !channel.unpack_param(o.rate))
         {
             return false;
@@ -237,7 +237,7 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& node_def) -> bool
 {
     bool ok = channel.unpack_param(node_def.name);
-    ok &= channel.unpack_param(node_def.class_id);
+    ok &= channel.unpack_param(node_def.type);
     ok &= unpack_inputs(channel, node_def.inputs);
     ok &= unpack_outputs(channel, node_def.outputs);
     ok &= unpack_json(channel, node_def.default_init_params);
@@ -247,7 +247,7 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
 
 static auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool
 {
-    bool ok = channel.unpack_param(node.class_id);
+    bool ok = channel.unpack_param(node.type);
     ok &= unpack_inputs(channel, node.inputs);
     ok &= unpack_outputs(channel, node.outputs);
     ok &= unpack_json(channel, node.init_params);
@@ -339,77 +339,49 @@ void Comms::handle_enumerate_node_defs()
     m_hal.node_defs_refreshed_signal.execute();
 }
 
-auto create_stream_from_class_id(q::rtti::class_id class_id) -> std::shared_ptr<node::stream::Stream>
+auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::stream::Stream>
 {
-    if (class_id == q::rtti::get_class_id<node::stream::IAcceleration>())
+    switch (type)
     {
-        return std::make_shared<node::stream::Acceleration>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IAngular_Velocity>())
-    {
-        return std::make_shared<node::stream::Angular_Velocity>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IMagnetic_Field>())
-    {
-        return std::make_shared<node::stream::Magnetic_Field>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IPressure>())
-    {
-        return std::make_shared<node::stream::Pressure>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IBattery_State>())
-    {
-        return std::make_shared<node::stream::Battery_State>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ILinear_Acceleration>())
-    {
-        return std::make_shared<node::stream::Linear_Acceleration>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ICardinal_Points>())
-    {
-        return std::make_shared<node::stream::Cardinal_Points>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ICurrent>())
-    {
-        return std::make_shared<node::stream::Current>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IVoltage>())
-    {
-        return std::make_shared<node::stream::Voltage>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IDistance>())
-    {
-        return std::make_shared<node::stream::Distance>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IECEF>())
-    {
-        return std::make_shared<node::stream::ECEF>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IWGS84>())
-    {
-        return std::make_shared<node::stream::WGS84>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IPWM_Value>())
-    {
-        return std::make_shared<node::stream::PWM_Value>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IReference_Frame>())
-    {
-        return std::make_shared<node::stream::Reference_Frame>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::ITemperature>())
-    {
-        return std::make_shared<node::stream::Temperature>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IADC_Value>())
-    {
-        return std::make_shared<node::stream::ADC_Value>();
-    }
-    if (class_id == q::rtti::get_class_id<node::stream::IVideo>())
-    {
-        return std::make_shared<node::stream::Video>();
+        case node::stream::IAcceleration::TYPE:             return std::make_shared<node::stream::Acceleration>();
+//        case node::stream::IENU_Acceleration::TYPE:         return std::make_shared<node::stream::ENU_Acceleration>();
+//        case node::stream::IECEF_Acceleration::TYPE:        return std::make_shared<node::stream::ECEF_Acceleration>();
+        case node::stream::IADC::TYPE:                      return std::make_shared<node::stream::ADC>();
+        case node::stream::IAngular_Velocity::TYPE:         return std::make_shared<node::stream::Angular_Velocity>();
+//        case node::stream::IENU_Angular_Velocity::TYPE:     return std::make_shared<node::stream::ENU_Angular_Velocity>();
+//        case node::stream::IECEF_Angular_Velocity::TYPE:    return std::make_shared<node::stream::ECEF_Angular_Velocity>();
+        case node::stream::IBattery_State::TYPE:            return std::make_shared<node::stream::Battery_State>();
+        case node::stream::ICommands::TYPE:                 return std::make_shared<node::stream::Commands>();
+        case node::stream::ICurrent::TYPE:                  return std::make_shared<node::stream::Current>();
+        case node::stream::IDistance::TYPE:                 return std::make_shared<node::stream::Distance>();
+//        case node::stream::IENU_Distance::TYPE:             return std::make_shared<node::stream::ENU_Distance>();
+//        case node::stream::IECEF_Distance::TYPE:            return std::make_shared<node::stream::ECEF_Distance>();
+        case node::stream::IForce::TYPE:                    return std::make_shared<node::stream::Force>();
+//        case node::stream::IENU_Force::TYPE:                return std::make_shared<node::stream::ENU_Force>();
+//        case node::stream::IECEF_Force::TYPE:               return std::make_shared<node::stream::ECEF_Force>();
+        case node::stream::IFrame::TYPE:                    return std::make_shared<node::stream::Frame>();
+        case node::stream::ILinear_Acceleration::TYPE:      return std::make_shared<node::stream::Linear_Acceleration>();
+//        case node::stream::IENU_Linear_Acceleration::TYPE:  return std::make_shared<node::stream::ENU_Linear_Acceleration>();
+//        case node::stream::IECEF_Linear_Acceleration::TYPE: return std::make_shared<node::stream::ECEF_Linear_Acceleration>();
+        case node::stream::IECEF_Location::TYPE:            return std::make_shared<node::stream::ECEF_Location>();
+        case node::stream::IMagnetic_Field::TYPE:           return std::make_shared<node::stream::ECEF_Magnetic_Field>();
+//        case node::stream::IENU_Magnetic_Field::TYPE:       return std::make_shared<node::stream::ENU_Magnetic_Field>();
+//        case node::stream::IECEF_Magnetic_Field::TYPE:      return std::make_shared<node::stream::ECEF_Magnetic_Field>();
+        case node::stream::IPressure::TYPE:                 return std::make_shared<node::stream::Pressure>();
+        case node::stream::IPWM::TYPE:                      return std::make_shared<node::stream::PWM>();
+        case node::stream::ITemperature::TYPE:              return std::make_shared<node::stream::Temperature>();
+        case node::stream::IThrottle::TYPE:                 return std::make_shared<node::stream::Throttle>();
+        case node::stream::ITorque::TYPE:                   return std::make_shared<node::stream::Torque>();
+//        case node::stream::IENU_Torque::TYPE:               return std::make_shared<node::stream::ENU_Torque>();
+//        case node::stream::IECEF_Torque::TYPE:              return std::make_shared<node::stream::ECEF_Torque>();
+        case node::stream::IVelocity::TYPE:                 return std::make_shared<node::stream::Velocity>();
+//        case node::stream::IENU_Velocity::TYPE:             return std::make_shared<node::stream::ENU_Velocity>();
+//        case node::stream::IECEF_Velocity::TYPE:            return std::make_shared<node::stream::ECEF_Velocity>();
+        case node::stream::IVoltage::TYPE:                  return std::make_shared<node::stream::Voltage>();
+        case node::stream::IVideo::TYPE:                    return std::make_shared<node::stream::Video>();
     }
 
+    QASSERT(0);
     return std::shared_ptr<node::stream::Stream>();
 }
 
@@ -417,17 +389,17 @@ auto Comms::publish_output_streams(node::Node_ptr node) -> bool
 {
     for (auto& os: node->outputs)
     {
-        auto stream = create_stream_from_class_id(os.class_id);
+        auto stream = create_stream_from_type(os.type);
         if (!stream)
         {
-            QLOGE("\t\tCannot create output stream '{}/{}', type {}", node->name, os.name, os.class_id);
+            QLOGE("\t\tCannot create output stream '{}/{}', type {}", node->name, os.name, os.type);
             return false;
         }
         os.stream = stream;
 
         stream->node = node;
         stream->name = node->name + "/" + os.name;
-        stream->class_id = os.class_id;
+        stream->type = os.type;
         stream->rate = os.rate;
         m_hal.m_streams.add(stream);
     }
@@ -671,7 +643,7 @@ struct Sample_Data
 template<class IStream, class Stream>
 auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
 {
-    if (_stream.class_id == q::rtti::get_class_id<IStream>())
+    if (_stream.type == IStream::TYPE)
     {
         auto& stream = static_cast<Stream&>(_stream);
         typename Stream::Sample sample;
@@ -727,16 +699,14 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<IPressure, Pressure>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ICardinal_Points, Cardinal_Points>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IWGS84, WGS84>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IECEF, ECEF>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IPWM_Value, PWM_Value>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IReference_Frame, Reference_Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IECEF_Location, ECEF_Location>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IPWM, PWM>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ITemperature, Temperature>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IADC_Value, ADC_Value>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IADC, ADC>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
     {
         QLOGE("Cannot unpack stream '{}'", stream_name);

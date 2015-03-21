@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/IVoltage.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IBattery_State.h"

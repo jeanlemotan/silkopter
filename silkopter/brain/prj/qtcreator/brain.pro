@@ -168,7 +168,6 @@ HEADERS += \
     ../../src/processor/Throttle_PWM.h \
     ../../src/processor/Comp_ECEF_Location.h \
     ../../../libs/common/node/processor/ITransformer.h \
-    ../../../libs/common/node/processor/IProcessor.h \
     ../../src/processor/Transformer.h \
     ../../src/processor/Transformer_Inv.h \
     ../../../libs/common/node/data/IData.h \
@@ -195,5 +194,6 @@ HEADERS += \
     ../../src/processor/Velocity_Controller.h \
     ../../src/processor/Stability_Controller.h \
     ../../../libs/common/node/processor/IController.h \
-    ../../../libs/common/node/stream/IThrottle.h
+    ../../../libs/common/node/stream/IThrottle.h \
+    ../../../libs/common/node/IProcessor.h
 

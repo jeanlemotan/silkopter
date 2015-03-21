@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IProcessor.h"
+#include "common/node/IProcessor.h"
 #include "common/node/stream/ITorque.h"
 #include "common/node/stream/IForce.h"
 #include "common/node/stream/IThrottle.h"
