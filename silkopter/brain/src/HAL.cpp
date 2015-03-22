@@ -37,6 +37,8 @@
 #include "processor/Transformer.h"
 #include "processor/Transformer_Inv.h"
 
+#include "processor/Factor_Generator.h"
+
 //#include "common/node/IAHRS.h"
 
 #include "autojsoncxx/boost_types.hpp"
@@ -340,6 +342,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
 
+    m_node_factory.register_node<Factor_Generator>("Factor Generator", *this);
+
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Acceleration>>("Acceleration LPF (ECEF)", *this);
@@ -365,6 +369,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IPWM>>("PWM LPF", *this);
+    m_node_factory.register_node<LPF<stream::IFactor>>("Factor LPF", *this);
     m_node_factory.register_node<LPF<stream::IForce>>("Force LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Force>>("Force LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Force>>("Force LPF (ECEF)", *this);
@@ -400,6 +405,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IFrame>>("Frame RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IPWM>>("PWM RS", *this);
+    m_node_factory.register_node<Resampler<stream::IFactor>>("Factor RS", *this);
     m_node_factory.register_node<Resampler<stream::IForce>>("Force RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Force>>("Force RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Force>>("Force RS (ECEF)", *this);

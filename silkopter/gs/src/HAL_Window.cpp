@@ -25,6 +25,7 @@
 #include "common/node/processor/IPilot.h"
 #include "common/node/processor/IController.h"
 #include "common/node/processor/ITransformer.h"
+#include "common/node/processor/IGenerator.h"
 
 #include "ui_New_Node.h"
 
@@ -38,6 +39,7 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IPilot::TYPE, QColor(0xBE90D4) },
     { silk::node::IController::TYPE, QColor(0x9B59B6) },
     { silk::node::ITransformer::TYPE, QColor(0xF1C40F) },
+    { silk::node::IGenerator::TYPE, QColor(0xF1C40F) },
 }};
 
 
@@ -259,6 +261,7 @@ void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
     QMenu* resamplers = menu.addMenu(QIcon(":/icons/Resampler.png"), "Resamplers");
     QMenu* controllers = menu.addMenu(QIcon(":/icons/Controller.png"), "Controllers");
     QMenu* transformers = menu.addMenu(QIcon(":/icons/Transformer.png"), "Transformers");
+    QMenu* generators = menu.addMenu(QIcon(":/icons/Generator.png"), "Generators");
     QMenu* pilots = menu.addMenu(QIcon(":/icons/Pilot.png"), "Pilots");
     QMenu* misc = menu.addMenu(QIcon(":/icons/Node.png"), "Misc");
     sources->setEnabled(false);
@@ -268,6 +271,7 @@ void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
     resamplers->setEnabled(false);
     controllers->setEnabled(false);
     transformers->setEnabled(false);
+    generators->setEnabled(false);
     pilots->setEnabled(false);
     misc->setEnabled(false);
 
@@ -313,6 +317,11 @@ void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
         {
             action = transformers->addAction(get_icon(":/icons/Transformer.png", *n), prettify_name(n->name).c_str());
             transformers->setEnabled(true);
+        }
+        else if (n->type == silk::node::IGenerator::TYPE)
+        {
+            action = generators->addAction(get_icon(":/icons/Generator.png", *n), prettify_name(n->name).c_str());
+            generators->setEnabled(true);
         }
         else
         {

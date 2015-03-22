@@ -44,7 +44,8 @@ enum class Type
     VELOCITY,
     THROTTLE,
     VIDEO,
-    VOLTAGE
+    VOLTAGE,
+    FACTOR
 };
 
 //for streams of data with a fixed sample rate

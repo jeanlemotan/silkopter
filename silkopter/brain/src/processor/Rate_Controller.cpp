@@ -104,10 +104,14 @@ void Rate_Controller::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
+        auto& sample = m_output_stream->last_sample;
+        sample.dt = m_dt;
+        sample.tp = m_input_samples[i].tp;
+        sample.sample_idx++;
 
-        m_output_stream->samples[i] = m_output_stream->last_sample;
+        sample.value = m_pid.process(m_input_samples[i].value, m_target_samples[i].value);
+
+        m_output_stream->samples[i] = sample;
     }
 
     //consume processed samples
@@ -156,6 +160,20 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     else
     {
         m_target_stream = target_stream;
+    }
+
+    PID::Params pid_params;
+    pid_params.kp = m_config->pid.kp;
+    pid_params.ki = m_config->pid.ki;
+    pid_params.kd = m_config->pid.kd;
+    pid_params.max_i = m_config->pid.max_i;
+    pid_params.filter_poles = m_config->pid.filter_poles;
+    pid_params.filter_cutoff_frequency = m_config->pid.filter_cutoff_frequency;
+    pid_params.rate = m_output_stream->rate;
+    if (!m_pid.set_params(pid_params))
+    {
+        QLOGE("Bad PID params");
+        return false;
     }
 
     return true;

@@ -32,5 +32,6 @@
         <file>icons/Force.png</file>
         <file>icons/Torque.png</file>
         <file>icons/Velocity.png</file>
+        <file>icons/Generator.png</file>
     </qresource>
 </RCC>

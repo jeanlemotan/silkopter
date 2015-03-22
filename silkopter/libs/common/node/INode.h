@@ -18,6 +18,7 @@ enum class Type : uint8_t
     RESAMPLER,
     TRANSFORMER,
     CONTROLLER,
+    GENERATOR,
 };
 
 class INode : q::util::Noncopyable

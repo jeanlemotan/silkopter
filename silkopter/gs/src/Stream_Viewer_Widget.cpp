@@ -270,6 +270,22 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
+    else if (type == IFactor::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("f", stream->rate, this);
+        viewer->add_graph("Factor", "f", QColor(0xe74c3c));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Factor>(stream)->samples_available_signal.connect([this, viewer](Factor& stream)
+        {
+            std::array<double, 1> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value };
+                viewer->add_samples(s.tp, data.data());
+            }
+            viewer->process();
+        });
+    }
     else if (type == IFrame::TYPE)
     {
 //        layout()->addWidget(new Reference_Frame_Stream_Viewer(stream, this));

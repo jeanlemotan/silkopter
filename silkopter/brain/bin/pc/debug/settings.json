@@ -18,150 +18,87 @@
             }
         },
         "nodes": {
-            "Rate Controller": {
-                "name": "Rate Controller",
+            "Sine Generator": {
+                "name": "Sine Generator",
                 "init_params": {
-                    "Rate (Hz)": 50,
+                    "Rate (Hz)": 100,
+                    "Component Count": 5,
                     "__gs": {
                         "position": {
-                            "x": -67.0,
-                            "y": -286.0
+                            "x": -138.0,
+                            "y": -228.0
                         }
                     }
                 },
                 "config": {
-                    "Inputs": {
-                        "Input": "",
-                        "Target": ""
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    }
-                }
-            },
-            "Motor Mixer": {
-                "name": "Motor Mixer",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "Motor Count": 4,
-                    "__gs": {
-                        "position": {
-                            "x": -63.0,
-                            "y": -557.0
-                        }
-                    }
-                },
-                "config": {
-                    "Armed Throttle": 0.0,
-                    "Motors": [
+                    "Amplitude": 1.0,
+                    "Noise": 1.0,
+                    "Square": true,
+                    "Components": [
                         {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100%": 0.0,
-                            "Thrust @ 50%": 0.0
+                            "Frequency (Hz)": 20.0,
+                            "Amplitude": 1.0
                         },
                         {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100%": 0.0,
-                            "Thrust @ 50%": 0.0
+                            "Frequency (Hz)": 0.0,
+                            "Amplitude": 1.0
                         },
                         {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100%": 0.0,
-                            "Thrust @ 50%": 0.0
+                            "Frequency (Hz)": 0.0,
+                            "Amplitude": 0.5
                         },
                         {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100%": 0.0,
-                            "Thrust @ 50%": 0.0
+                            "Frequency (Hz)": 0.0,
+                            "Amplitude": 0.10000000149011612
+                        },
+                        {
+                            "Frequency (Hz)": 0.0,
+                            "Amplitude": 1.0
                         }
-                    ],
-                    "Inputs": {
-                        "Torque": "",
-                        "Collective Force": ""
-                    },
-                    "Outputs": {
-                        "Throttles": [
-                            {},
-                            {},
-                            {},
-                            {}
-                        ]
-                    }
+                    ]
                 }
             },
-            "MS5611": {
-                "name": "MS5611",
-                "init_params": {
-                    "Bus": "i2c0",
-                    "Pressure Rate (Hz)": 100,
-                    "Temperature Rate Ratio": 10,
-                    "__gs": {
-                        "position": {
-                            "x": -143.0,
-                            "y": -653.0
-                        }
-                    }
-                },
-                "config": {
-                    "Outputs": {
-                        "Pressure": {},
-                        "Temperature": {}
-                    }
-                }
-            },
-            "Pressure LPF": {
-                "name": "Pressure LPF",
+            "Factor LPF": {
+                "name": "Factor LPF",
                 "init_params": {
                     "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -562.0,
-                            "y": -752.0
+                            "x": -165.0,
+                            "y": -399.0
                         }
                     }
                 },
                 "config": {
-                    "Poles": 4,
-                    "Cutoff Frequency (Hz)": 1.0,
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 50.0,
                     "Inputs": {
-                        "Input": "MS5611/Pressure"
+                        "Input": "Sine Generator/Factor"
                     },
                     "Outputs": {
                         "Output": {}
                     }
                 }
             },
-            "UBLOX": {
-                "name": "UBLOX",
+            "Factor RS": {
+                "name": "Factor RS",
                 "init_params": {
-                    "Bus": "uart0",
-                    "Rate (Hz)": 5,
+                    "Rate (Hz)": 1000,
                     "__gs": {
                         "position": {
-                            "x": -612.0,
-                            "y": -967.0
+                            "x": -343.0,
+                            "y": -473.0
                         }
                     }
                 },
                 "config": {
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 50.0,
+                    "Inputs": {
+                        "Input": "Sine Generator/Factor"
+                    },
                     "Outputs": {
-                        "ECEF Location": {}
+                        "Output": {}
                     }
                 }
             }

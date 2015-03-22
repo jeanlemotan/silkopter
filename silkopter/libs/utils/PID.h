@@ -8,35 +8,35 @@ namespace util
 
 namespace pid
 {
-
 template<class Value, class Factor> Factor sub(Value const& a, Value const& b)
 {
     return Factor(a - b);
 }
+}
 
-
-template<class Value, class Factor>
+template<class Scalar, class Value, class Factor>
 class PID
 {
 public:
+    typedef Scalar Scalar_t;
     typedef Value Value_t;
     typedef Factor Factor_t;
 
     struct Params
     {
-        double kp = 0;
-        double ki = 0;
-        double kd = 0;
-        Factor_t max = Factor_t();
+        Scalar_t kp = 0;
+        Scalar_t ki = 0;
+        Scalar_t kd = 0;
+        Factor_t max_i = Factor_t();
         uint32_t filter_poles = 0; //zero - filter disabled
-        double cutoff_frequency = 0;
-        double rate = 0;
+        Scalar_t filter_cutoff_frequency = 0;
+        Scalar_t rate = 0;
     };
 
-    explicit PID(Params const& params);
+    explicit PID(Params const& params = Params());
 
     auto set_params(Params const& params) -> bool;
-    auto process(q::Clock::duration dt, Value_t const& input, Value_t const& target) -> Factor_t;
+    auto process(Value_t const& input, Value_t const& target) -> Factor_t;
     void reset();
 
 private:
@@ -53,16 +53,16 @@ private:
 };
 
 
-template<class Value, class Factor>
-PID<Value, Factor>::PID(Params const& params)
+template<class Scalar, class Value, class Factor>
+PID<Scalar, Value, Factor>::PID(Params const& params)
  : m_integrator()
  , m_last_input()
 {
     set_params(params);
 }
 
-template<class Value, class Factor>
-auto PID<Value, Factor>::process(q::Clock::duration dt, Value_t const& input, Value_t const& target) -> Factor_t
+template<class Scalar, class Value, class Factor>
+auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& target) -> Factor_t
 {
     // Compute proportional component
     auto error = pid::sub<Value_t, Factor_t>(target, input);
@@ -71,8 +71,8 @@ auto PID<Value, Factor>::process(q::Clock::duration dt, Value_t const& input, Va
     // Compute integral component if time has elapsed
     if (m_has_ki)
     {
-        m_integrator = math::clamp(m_integrator + error * dts, -m_params.max, m_params.max);
-        output += m_params.ki * m_integrator;
+        m_integrator = math::clamp(m_integrator + error * m_dts, -m_params.max_i, m_params.max_i);
+        output += m_integrator * m_params.ki;
     }
 
     // Compute derivative component if time has elapsed
@@ -110,16 +110,16 @@ auto PID<Value, Factor>::process(q::Clock::duration dt, Value_t const& input, Va
     return output;
 }
 
-template<class Value, class Factor>
-void PID<Value, Factor>::reset()
+template<class Scalar, class Value, class Factor>
+void PID<Scalar, Value, Factor>::reset()
 {
     m_integrator = Value_t();
     m_is_last_input_valid = false;
     m_last_input = Value_t();
 }
 
-template<class Value, class Factor>
-auto PID<Value, Factor>::set_params(Params const& params) -> bool
+template<class Scalar, class Value, class Factor>
+auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
 {
     if (params.rate <= 0)
     {
@@ -141,8 +141,8 @@ auto PID<Value, Factor>::set_params(Params const& params) -> bool
     }
 
     m_params = params;
-    m_has_ki = !math::is_zero(params.ki, math::epsilon<double>());
-    m_has_kd = !math::is_zero(params.kd, math::epsilon<double>());
+    m_has_ki = !math::is_zero(params.ki, math::epsilon<Scalar>());
+    m_has_kd = !math::is_zero(params.kd, math::epsilon<Scalar>());
     m_dts = 1.0 / params.rate;
     m_dts_inv = 1.0 / m_dts;
 }

@@ -105,13 +105,15 @@ void Gravity_Filter::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
+        auto& sample = m_output_stream->last_sample;
+        sample.dt = m_dt;
+        sample.tp = m_frame_samples[i].tp;
+        sample.sample_idx++;
 
         auto const& p2l = m_frame_samples[i].value.parent_to_this;
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
-        m_output_stream->last_sample.value = m_acceleration_samples[i].value - gravity_local;
-        m_output_stream->samples[i] = m_output_stream->last_sample;
+        sample.value = m_acceleration_samples[i].value - gravity_local;
+        m_output_stream->samples[i] = sample;
     }
 
     //consume processed samples

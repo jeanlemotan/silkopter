@@ -356,6 +356,7 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
         case node::stream::IDistance::TYPE:                 return std::make_shared<node::stream::Distance>();
 //        case node::stream::IENU_Distance::TYPE:             return std::make_shared<node::stream::ENU_Distance>();
 //        case node::stream::IECEF_Distance::TYPE:            return std::make_shared<node::stream::ECEF_Distance>();
+        case node::stream::IFactor::TYPE:                   return std::make_shared<node::stream::Factor>();
         case node::stream::IForce::TYPE:                    return std::make_shared<node::stream::Force>();
 //        case node::stream::IENU_Force::TYPE:                return std::make_shared<node::stream::ENU_Force>();
 //        case node::stream::IECEF_Force::TYPE:               return std::make_shared<node::stream::ECEF_Force>();
@@ -694,21 +695,28 @@ void Comms::handle_stream_data()
     using namespace silk::node::stream;
 
     if (!unpack_stream_samples<IAcceleration, Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IADC, ADC>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IAngular_Velocity, Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ICommands, Commands>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IFactor, Factor>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IForce, Force>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IECEF_Location, ECEF_Location>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IMagnetic_Field, Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IPressure, Pressure>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IECEF_Location, ECEF_Location>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IPWM, PWM>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ITemperature, Temperature>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IADC, ADC>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IThrottle, Throttle>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ITorque, Torque>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IVelocity, Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
     {
+        QASSERT(0);
         QLOGE("Cannot unpack stream '{}'", stream_name);
         return;
     }

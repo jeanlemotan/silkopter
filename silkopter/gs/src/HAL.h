@@ -2,6 +2,7 @@
 
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IADC.h"
+#include "common/node/stream/IFactor.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/ICommands.h"
@@ -154,6 +155,14 @@ struct ECEF_Distance : public Stream
     q::util::Signal<void(ECEF_Distance&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(ECEF_Distance);
+
+struct Factor : public Stream
+{
+    typedef IFactor::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Factor&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Factor);
 
 struct Force : public Stream
 {

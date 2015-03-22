@@ -115,18 +115,20 @@ void LiPo_Battery::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
+        auto& sample = m_output_stream->last_sample;
+        sample.dt = m_dt;
+        sample.tp = m_current_samples[i].tp;
+        sample.sample_idx++;
 
         {
             auto const& s = m_current_samples[i];
-            m_output_stream->last_sample.value.charge_used += s.value * q::Seconds(s.dt).count();
+            sample.value.charge_used += s.value * q::Seconds(s.dt).count();
             stream::ICurrent::Value current = s.value;
             if (s.is_healthy)
             {
                 m_current_filter.process(current);
             }
-            m_output_stream->last_sample.value.average_current = current;
+            sample.value.average_current = current;
         }
         {
             auto const& s = m_voltage_samples[i];
@@ -135,12 +137,12 @@ void LiPo_Battery::process()
             {
                 m_voltage_filter.process(voltage);
             }
-            m_output_stream->last_sample.value.average_voltage = voltage;
+            sample.value.average_voltage = voltage;
         }
-        m_output_stream->last_sample.value.capacity_left =
-                1.f - math::clamp(m_output_stream->last_sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
+        sample.value.capacity_left =
+                1.f - math::clamp(sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
 
-        m_output_stream->samples[i] = m_output_stream->last_sample;
+        m_output_stream->samples[i] = sample;
     }
 
     //consume processed samples

@@ -38,9 +38,24 @@
 {
     "definition" : true,
     "namespace" : "sz::Rate_Controller",
+    "name": "PID",
+    "members":
+    [
+        ["double", "kp", {"required": true, "json_key" : "kP"}],
+        ["double", "ki", {"required": true, "json_key" : "kI"}],
+        ["double", "kd", {"required": true, "json_key" : "kD"}],
+        ["math::vec3f", "max_i", {"required": true, "json_key" : "Max I"}],
+        ["uint32_t", "filter_poles", {"required": true, "json_key" : "D Filter Poles"}],
+        ["double", "filter_cutoff_frequency", {"required": true, "json_key" : "D Filter Cutoff Frequency (Hz)"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Rate_Controller",
     "name": "Config",
     "members":
     [
+        ["sz::Rate_Controller::PID", "pid", {"required": true, "json_key" : "PID"}],
         ["sz::Rate_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
         ["sz::Rate_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]

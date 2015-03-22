@@ -118,8 +118,10 @@ void Comp_AHRS::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
+        auto& sample = m_output_stream->last_sample;
+        sample.dt = m_dt;
+        sample.tp = m_angular_velocity_samples[i].tp;
+        sample.sample_idx++;
 
         {
             auto const& s = m_angular_velocity_samples[i];
@@ -132,7 +134,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = m_output_stream->last_sample.value.this_to_parent;
+                auto& a = sample.value.this_to_parent;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -162,7 +164,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = m_output_stream->last_sample.value.this_to_parent;
+            auto& rot = sample.value.this_to_parent;
 
             //cancel drift
             static int xxx = 50;
@@ -180,10 +182,10 @@ void Comp_AHRS::process()
             }
             rot = math::normalized<float, math::safe>(rot);
 
-            m_output_stream->last_sample.value.parent_to_this = math::inverse(rot);
+            sample.value.parent_to_this = math::inverse(rot);
         }
 
-        m_output_stream->samples[i] = m_output_stream->last_sample;
+        m_output_stream->samples[i] = sample;
     }
 
 

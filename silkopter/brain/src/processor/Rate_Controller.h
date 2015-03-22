@@ -5,6 +5,7 @@
 #include "common/node/stream/ITorque.h"
 #include "HAL.h"
 
+#include "utils/PID.h"
 
 namespace sz
 {
@@ -54,6 +55,9 @@ private:
 
     std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
     std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
+
+    typedef util::PID<float, math::vec3f, math::vec3f> PID;
+    PID m_pid;
 
     struct Stream : public stream::ITorque
     {
