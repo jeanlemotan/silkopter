@@ -90,6 +90,7 @@ auto LPF<Stream_t>::init() -> bool
         return false;
     }
     m_output_stream->rate = m_init_params.rate;
+    m_config.cutoff_frequency = m_init_params.rate / 2;
     return true;
 }
 
@@ -118,7 +119,7 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
         m_input_stream.reset();
     }
     else

@@ -252,7 +252,7 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
     graph.plot_data_map.reserve(100000);
 
     double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.duration;
-    size_t skip = static_cast<int>(pixels_per_second / m_sample_rate) + 1;
+    size_t skip = static_cast<int>(m_sample_rate / pixels_per_second) + 1;
     size_t offset = view.start_idx * m_graphs.size();
     for (size_t i = view.start_idx; i < view.end_idx; i++)
     {

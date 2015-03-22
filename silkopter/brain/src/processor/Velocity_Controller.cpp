@@ -148,7 +148,7 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_init_params->rate)
     {
         m_config->inputs.input.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_init_params->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_init_params->rate, rate);
         m_input_stream.reset();
     }
     else
@@ -160,7 +160,7 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_init_params->rate)
     {
         m_config->inputs.target.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.target, m_init_params->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.target, m_init_params->rate, rate);
         m_target_stream.reset();
     }
     else

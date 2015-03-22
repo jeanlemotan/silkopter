@@ -18,6 +18,10 @@
 #include "common/node/stream/IFrame.h"
 #include "common/node/stream/ITemperature.h"
 #include "common/node/stream/IVideo.h"
+#include "common/node/stream/IForce.h"
+#include "common/node/stream/IVelocity.h"
+#include "common/node/stream/IThrottle.h"
+#include "common/node/stream/ITorque.h"
 #include "common/node/stream/IVoltage.h"
 
 #include "common/node/processor/IPilot.h"
@@ -237,7 +241,11 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::IFrame>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IADC>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IFactor>(ts, *stream)
+                gather_telemetry_stream<node::stream::IFactor>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IForce>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IVelocity>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IThrottle>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::ITorque>(ts, *stream)
                 //          send_telemetry_stream<node::IVideo>(sd, *stream)
                 )
             {
@@ -245,7 +253,7 @@ void Comms::gather_telemetry_streams()
             }
             else
             {
-                QLOGW("Unrecognized stream type: {} / {}", ts.stream_name, static_cast<int>(stream->get_type()));
+                QLOGE("Unrecognized stream type: {} / {}", ts.stream_name, static_cast<int>(stream->get_type()));
             }
         }
     }

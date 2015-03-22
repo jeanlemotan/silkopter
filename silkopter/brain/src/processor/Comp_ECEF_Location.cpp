@@ -161,7 +161,7 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_location_output_stream->rate)
     {
         m_config->inputs.ecef_location.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.ecef_location, m_location_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.ecef_location, m_location_output_stream->rate, rate);
         m_location_stream.reset();
     }
     else
@@ -173,7 +173,7 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_location_output_stream->rate)
     {
         m_config->inputs.ecef_linear_acceleration.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.ecef_linear_acceleration, m_location_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.ecef_linear_acceleration, m_location_output_stream->rate, rate);
         m_linear_acceleration_stream.reset();
     }
     else
@@ -185,7 +185,7 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_location_output_stream->rate)
     {
         m_config->inputs.pressure.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.pressure, m_location_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.pressure, m_location_output_stream->rate, rate);
         m_pressure_stream.reset();
     }
     else

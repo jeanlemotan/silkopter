@@ -210,7 +210,7 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 	}
 	if (level == logging::Level::ERR)
 	{
-//        QASSERT(0);
+        QASSERT_MSG(0, str);
 	}
 }
 

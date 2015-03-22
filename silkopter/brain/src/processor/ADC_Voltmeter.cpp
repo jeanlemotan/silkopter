@@ -111,7 +111,7 @@ auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
         m_adc_stream.reset();
     }
     else

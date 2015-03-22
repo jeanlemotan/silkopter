@@ -103,6 +103,7 @@ auto Resampler<Stream_t>::init() -> bool
         return false;
     }
     m_output_stream->rate = m_init_params.rate;
+    m_config.cutoff_frequency = m_init_params.rate / 2;
 
     m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
 
@@ -134,7 +135,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     auto input_rate = input_stream ? input_stream->get_rate() : 0u;
     if (input_rate == 0)
     {
-        QLOGE("Bad input stream '{}' @ {}Hz", sz.inputs.input, input_rate);
+        QLOGW("Bad input stream '{}' @ {}Hz", sz.inputs.input, input_rate);
         m_input_stream.reset();
         m_input_stream_dt = std::chrono::microseconds(0);
     }

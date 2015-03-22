@@ -1,0 +1,48 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Scalar_Generator",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Scalar_Generator",
+    "name": "Inputs",
+    "members":
+    [
+       ["std::string", "factor", {"required": true, "json_key" : "Factor"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Scalar_Generator",
+    "name": "Output",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Scalar_Generator",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Scalar_Generator::Output", "output", {"required": true, "json_key" : "Output"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Scalar_Generator",
+    "name": "Config",
+    "members":
+    [
+        ["float", "value", {"required": true, "json_key" : "Value", "default" : 0}],
+        ["sz::Scalar_Generator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Scalar_Generator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

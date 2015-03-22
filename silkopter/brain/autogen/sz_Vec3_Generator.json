@@ -1,0 +1,50 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Vec3_Generator",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Vec3_Generator",
+    "name": "Inputs",
+    "members":
+    [
+       ["std::string", "x_factor", {"required": true, "json_key" : "X Factor"}],
+       ["std::string", "y_factor", {"required": true, "json_key" : "Y Factor"}],
+       ["std::string", "z_factor", {"required": true, "json_key" : "Z Factor"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Vec3_Generator",
+    "name": "Output",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Vec3_Generator",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Vec3_Generator::Output", "output", {"required": true, "json_key" : "Output"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Vec3_Generator",
+    "name": "Config",
+    "members":
+    [
+        ["math::vec3f", "value", {"required": true, "json_key" : "Value"}],
+        ["sz::Vec3_Generator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Vec3_Generator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

@@ -219,7 +219,7 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.angular_velocity.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
         m_angular_velocity_stream.reset();
     }
     else
@@ -231,7 +231,7 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.acceleration.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
         m_acceleration_stream.reset();
     }
     else
@@ -243,7 +243,7 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.magnetic_field.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.magnetic_field, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.magnetic_field, m_output_stream->rate, rate);
         m_magnetic_field_stream.reset();
     }
     else

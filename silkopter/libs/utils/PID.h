@@ -145,6 +145,7 @@ auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
     m_has_kd = !math::is_zero(params.kd, math::epsilon<Scalar>());
     m_dts = 1.0 / params.rate;
     m_dts_inv = 1.0 / m_dts;
+    return true;
 }
 
 }

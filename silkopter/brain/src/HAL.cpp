@@ -37,7 +37,9 @@
 #include "processor/Transformer.h"
 #include "processor/Transformer_Inv.h"
 
-#include "processor/Factor_Generator.h"
+#include "generator/Factor_Generator.h"
+#include "generator/Vec3_Generator.h"
+#include "generator/Scalar_Generator.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -94,9 +96,9 @@ void HAL::save_settings()
         auto const& nodes = get_buses().get_all();
         for (auto const& n: nodes)
         {
-            if (!jsonutil::add_value(*busesj, q::Path(n.type + "/name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.type + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.type + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
             {
                 QLOGE("Cannot open create settings node.");
                 return;
@@ -113,9 +115,9 @@ void HAL::save_settings()
         auto const& nodes = get_nodes().get_all();
         for (auto const& n: nodes)
         {
-            if (!jsonutil::add_value(*nodesj, q::Path(n.type + "/name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
-                !jsonutil::add_value(*nodesj, q::Path(n.type + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*nodesj, q::Path(n.type + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+            if (!jsonutil::add_value(*nodesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+                !jsonutil::add_value(*nodesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(*nodesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
             {
                 QLOGE("Cannot open create settings node.");
                 return;
@@ -238,14 +240,14 @@ auto HAL::create_buses(rapidjson::Value& json) -> bool
     auto it = json.MemberBegin();
     for (; it != json.MemberEnd(); ++it)
     {
-        std::string type(it->name.GetString());
-        auto* namej = jsonutil::find_value(it->value, std::string("name"));
-        if (!namej || namej->GetType() != rapidjson::kStringType)
+        std::string name(it->name.GetString());
+        auto* typej = jsonutil::find_value(it->value, std::string("type"));
+        if (!typej || typej->GetType() != rapidjson::kStringType)
         {
-            QLOGE("Node type {} is missing the name", type);
+            QLOGE("Node {} is missing the type", name);
             return false;
         }
-        std::string name(namej->GetString());
+        std::string type(typej->GetString());
         auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
         if (!init_paramsj)
         {
@@ -271,14 +273,14 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     }
     for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
     {
-        std::string type(it->name.GetString());
-        auto* namej = jsonutil::find_value(it->value, std::string("name"));
-        if (!namej || namej->GetType() != rapidjson::kStringType)
+        std::string name(it->name.GetString());
+        auto* typej = jsonutil::find_value(it->value, std::string("type"));
+        if (!typej || typej->GetType() != rapidjson::kStringType)
         {
-            QLOGE("Node type {} is missing the name", type);
+            QLOGE("Node {} is missing the type", name);
             return false;
         }
-        std::string name(namej->GetString());
+        std::string type(typej->GetString());
         auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
         if (!init_paramsj)
         {
@@ -294,8 +296,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     }
     for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
     {
-        auto* namej = jsonutil::find_value(it->value, std::string("name"));
-        std::string name(namej->GetString());
+        std::string name(it->name.GetString());
         auto* configj = jsonutil::find_value(it->value, std::string("config"));
         if (!configj)
         {
@@ -343,6 +344,36 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
 
     m_node_factory.register_node<Factor_Generator>("Factor Generator", *this);
+
+    m_node_factory.register_node<Scalar_Generator<stream::IADC>>("ADC Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::ICurrent>>("Current Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::IVoltage>>("Voltage Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::IPressure>>("Pressure Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::ITemperature>>("Temperature Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::IPWM>>("PWM Generator", *this);
+
+    m_node_factory.register_node<Vec3_Generator<stream::IAcceleration>>("Acceleration Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Acceleration>>("Acceleration Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Acceleration>>("Acceleration Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::ILinear_Acceleration>>("Linear Acceleration Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Linear_Acceleration>>("Linear Acceleration Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Linear_Acceleration>>("Linear Acceleration Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IAngular_Velocity>>("Angular Velocity Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Angular_Velocity>>("Angular Velocity Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Angular_Velocity>>("Angular Velocity Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IMagnetic_Field>>("Magnetic Field Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Magnetic_Field>>("Magnetic Field Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Magnetic_Field>>("Magnetic Field Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IForce>>("Force Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Force>>("Force Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Force>>("Force Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::ITorque>>("Torque Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Torque>>("Torque Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Torque>>("Torque Generator (ECEF)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IVelocity>>("Velocity Generator", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IENU_Velocity>>("Velocity Generator (ENU)", *this);
+    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Velocity>>("Velocity Generator (ECEF)", *this);
+
 
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);

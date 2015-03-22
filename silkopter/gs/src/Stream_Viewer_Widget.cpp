@@ -180,6 +180,58 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
+    else if (type == ITorque::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("Nm", stream->rate, this);
+        viewer->add_graph("X", "Nm", QColor(0xe74c3c));
+        viewer->add_graph("Y", "Nm", QColor(0x2ecc71));
+        viewer->add_graph("Z", "Nm", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Torque>(stream)->samples_available_signal.connect([this, viewer](Torque& stream)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.tp, data.data());
+            }
+            viewer->process();
+        });
+    }
+    else if (type == IVelocity::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("m/s", stream->rate, this);
+        viewer->add_graph("X", "m/s", QColor(0xe74c3c));
+        viewer->add_graph("Y", "m/s", QColor(0x2ecc71));
+        viewer->add_graph("Z", "m/s", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Velocity>(stream)->samples_available_signal.connect([this, viewer](Velocity& stream)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.tp, data.data());
+            }
+            viewer->process();
+        });
+    }
+    else if (type == IThrottle::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("%", stream->rate, this);
+        viewer->add_graph("Throttle", "%", QColor(0xe74c3c));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Throttle>(stream)->samples_available_signal.connect([this, viewer](Throttle& stream)
+        {
+            std::array<double, 1> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value * 100.0 };
+                viewer->add_samples(s.tp, data.data());
+            }
+            viewer->process();
+        });
+    }
     else if (type == ICurrent::TYPE)
     {
         auto viewer = new Numeric_Viewer("A", stream->rate, this);
@@ -328,6 +380,7 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else
     {
+        QASSERT(0);
 //        layout()->addWidget(new Generic_Stream_Viewer(this));
     }
 }

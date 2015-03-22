@@ -57,6 +57,11 @@ auto Factor_Generator::init() -> bool
     return true;
 }
 
+auto Factor_Generator::get_inputs() const -> std::vector<Input>
+{
+    return std::vector<Input>(0);
+}
+
 auto Factor_Generator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);

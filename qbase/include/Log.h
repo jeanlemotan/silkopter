@@ -108,7 +108,7 @@ namespace logging
 	{
 		String message;
         q::util::format(message, fmt, std::forward<Params>(params)...);
-        log(logging::Level::INFO, nullptr, 0, message);
+        printf("%s\n", message.c_str());
 	}
 
 #   define QLOG_TOPIC(topic)    q::logging::Scoped_Topic st_##__LINE__(topic)

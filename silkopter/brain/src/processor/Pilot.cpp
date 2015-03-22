@@ -96,7 +96,7 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
     auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.angular_velocity, m_output_stream->rate, rate);
         m_config->inputs.angular_velocity.clear();
         m_angular_velocity_stream.reset();
     }
@@ -109,7 +109,7 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
 //    if (rate != m_output_stream->rate)
 //    {
 //        m_config->inputs.location.clear();
-//        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
+//        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.location, m_output_stream->rate, rate);
 //        m_location_stream.reset();
 //    }
 //    else
@@ -121,7 +121,7 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.battery_state.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.battery_state, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.battery_state, m_output_stream->rate, rate);
         m_battery_state_stream.reset();
     }
     else
@@ -133,7 +133,7 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.commands.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.commands, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.commands, m_output_stream->rate, rate);
         m_commands_stream.reset();
     }
     else

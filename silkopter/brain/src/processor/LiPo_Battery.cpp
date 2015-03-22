@@ -223,7 +223,7 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.voltage.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.voltage, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.voltage, m_output_stream->rate, rate);
         m_voltage_stream.reset();
     }
     else
@@ -235,7 +235,7 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.current.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.current, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.current, m_output_stream->rate, rate);
         m_current_stream.reset();
     }
     else

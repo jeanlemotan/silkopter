@@ -1,15 +1,15 @@
 {
     "hal": {
         "buses": {
-            "I2C Linux": {
-                "name": "i2c0",
+            "i2c0": {
+                "type": "I2C Linux",
                 "init_params": {
                     "dev": "i2c0"
                 },
                 "config": {}
             },
-            "UART Linux": {
-                "name": "uart0",
+            "uart0": {
+                "type": "UART Linux",
                 "init_params": {
                     "dev": "/dev/ttyUSB0",
                     "baud": 115200
@@ -18,87 +18,118 @@
             }
         },
         "nodes": {
-            "Sine Generator": {
-                "name": "Sine Generator",
+            "Angular Velocity Generator": {
+                "type": "Angular Velocity Generator",
                 "init_params": {
                     "Rate (Hz)": 100,
-                    "Component Count": 5,
                     "__gs": {
                         "position": {
-                            "x": -138.0,
-                            "y": -228.0
+                            "x": -118.0,
+                            "y": -294.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Inputs": {
+                        "X Factor": "Factor Generator/Factor",
+                        "Y Factor": "Factor Generator/Factor",
+                        "Z Factor": "Factor Generator/Factor"
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Angular Velocity Generator Target": {
+                "type": "Angular Velocity Generator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": -151.0,
+                            "y": -629.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Rate Controller": {
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": -215.0,
+                            "y": -621.0
+                        }
+                    }
+                },
+                "config": {
+                    "PID": {
+                        "kP": 1.2,
+                        "kI": 0.5,
+                        "kD": 0.0,
+                        "Max I": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
+                        "D Filter Poles": 0,
+                        "D Filter Cutoff Frequency (Hz)": 0.0
+                    },
+                    "Inputs": {
+                        "Input": "Angular Velocity Generator/Output",
+                        "Target": "Angular Velocity Generator Target/Output"
+                    },
+                    "Outputs": {
+                        "Torque": {}
+                    }
+                }
+            },
+            "Factor Generator": {
+                "type": "Factor Generator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "Component Count": 1,
+                    "__gs": {
+                        "position": {
+                            "x": -533.0,
+                            "y": -825.0
                         }
                     }
                 },
                 "config": {
                     "Amplitude": 1.0,
-                    "Noise": 1.0,
+                    "Noise": 0.0,
                     "Square": true,
                     "Components": [
                         {
-                            "Frequency (Hz)": 20.0,
-                            "Amplitude": 1.0
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 1.0
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 0.5
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 0.10000000149011612
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
+                            "Frequency (Hz)": 1.0,
                             "Amplitude": 1.0
                         }
-                    ]
-                }
-            },
-            "Factor LPF": {
-                "name": "Factor LPF",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "__gs": {
-                        "position": {
-                            "x": -165.0,
-                            "y": -399.0
-                        }
-                    }
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 50.0,
-                    "Inputs": {
-                        "Input": "Sine Generator/Factor"
-                    },
+                    ],
+                    "Inputs": {},
                     "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Factor RS": {
-                "name": "Factor RS",
-                "init_params": {
-                    "Rate (Hz)": 1000,
-                    "__gs": {
-                        "position": {
-                            "x": -343.0,
-                            "y": -473.0
-                        }
-                    }
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 50.0,
-                    "Inputs": {
-                        "Input": "Sine Generator/Factor"
-                    },
-                    "Outputs": {
-                        "Output": {}
+                        "Factor": {}
                     }
                 }
             }

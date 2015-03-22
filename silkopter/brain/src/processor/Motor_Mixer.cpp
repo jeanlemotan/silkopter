@@ -159,7 +159,7 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_init_params->rate)
     {
         m_config->inputs.torque.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.torque, m_init_params->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.torque, m_init_params->rate, rate);
         m_torque_stream.reset();
     }
     else
@@ -171,7 +171,7 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_init_params->rate)
     {
         m_config->inputs.force.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.force, m_init_params->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.force, m_init_params->rate, rate);
         m_force_stream.reset();
     }
     else

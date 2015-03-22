@@ -144,7 +144,7 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_output_stream->rate, rate);
         m_frame_stream.reset();
     }
     else
@@ -156,7 +156,7 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     if (rate != m_output_stream->rate)
     {
         m_config->inputs.acceleration.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
         m_acceleration_stream.reset();
     }
     else

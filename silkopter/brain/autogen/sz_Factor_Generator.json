@@ -53,7 +53,9 @@
         ["float", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}],
         ["float", "noise", {"required": true, "json_key" : "Noise"}],
         ["bool", "square", {"required": true, "json_key" : "Square"}],
-        ["std::vector<sz::Factor_Generator::Component>", "components", {"required": true, "json_key" : "Components"}]
+        ["std::vector<sz::Factor_Generator::Component>", "components", {"required": true, "json_key" : "Components"}],
+        ["sz::Factor_Generator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Factor_Generator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]
