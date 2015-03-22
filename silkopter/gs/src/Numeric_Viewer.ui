@@ -297,7 +297,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="window">
+       <widget class="QSpinBox" name="window">
         <property name="maximumSize">
          <size>
           <width>16777215</width>
@@ -316,13 +316,7 @@
          <string>s</string>
         </property>
         <property name="minimum">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
+         <number>1</number>
         </property>
        </widget>
       </item>

@@ -13,6 +13,7 @@ Factor_Generator::Factor_Generator(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::Factor_Generator::Init_Params())
     , m_config(new sz::Factor_Generator::Config())
+    , m_rnd_distribution(0, 0)
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }

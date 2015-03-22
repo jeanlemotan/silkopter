@@ -13,7 +13,7 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
     QFont font;
     font.setPointSize(8);
 
-    //m_ui.plot->setNotAntialiasedElements(QCP::AntialiasedElements(QCP::aeAll));
+//    m_ui.plot->setNotAntialiasedElements(QCP::AntialiasedElements(QCP::aeAll));
     m_ui.plot->setPlottingHints(QCP::PlottingHints(QCP::phFastPolylines));
 //    m_ui.plot->xAxis->setLabel("Time (s)");
     m_ui.plot->xAxis->setLabelFont(font);
@@ -147,12 +147,12 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
     }
 
     auto* plot = m_ui.plot->addGraph();
-    plot->setPen(color);
+    plot->setPen(QPen(color, 2));
     plot->setAdaptiveSampling(false);
     plot->setName(name.c_str());
 
     auto* fft_plot = m_ui.fft->addGraph();
-    fft_plot->setPen(color);
+    fft_plot->setPen(QPen(color, 2));
     fft_plot->setBrush(color);
     fft_plot->setAdaptiveSampling(false);
     fft_plot->setName(name.c_str());
@@ -252,36 +252,17 @@ void Numeric_Viewer::process_plot_task(size_t graph_idx, View const& view)
     graph.plot_data_map.reserve(100000);
 
     double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.duration;
+    size_t skip = static_cast<int>(pixels_per_second / m_sample_rate) + 1;
     size_t offset = view.start_idx * m_graphs.size();
-    if (pixels_per_second < m_sample_rate)
+    for (size_t i = view.start_idx; i < view.end_idx; i++)
     {
-        double last_key = 0;
-        for (size_t i = view.start_idx; i < view.end_idx; i++)
+        auto const& s = m_samples[i];
+        auto v = m_values[offset + graph_idx];
+        offset += m_graphs.size();
+        graph.stats.max_value = math::max(graph.stats.max_value, v);
+        graph.stats.min_value = math::min(graph.stats.min_value, v);
+        if (i % skip == 0)
         {
-            auto const& s = m_samples[i];
-            auto v = m_values[offset + graph_idx];
-            offset += m_graphs.size();
-            graph.stats.max_value = math::max(graph.stats.max_value, v);
-            graph.stats.min_value = math::min(graph.stats.min_value, v);
-
-            auto key = s.tp;
-            auto dt = key - last_key;
-            if (dt * pixels_per_second >= 1.0)
-            {
-                last_key = key;
-                graph.plot_data_map.push_back(QCPData(key, v));
-            }
-        }
-    }
-    else
-    {
-        for (size_t i = view.start_idx; i < view.end_idx; i++)
-        {
-            auto const& s = m_samples[i];
-            auto v = m_values[offset + graph_idx];
-            offset += m_graphs.size();
-            graph.stats.min_value = math::min(graph.stats.min_value, v);
-            graph.stats.max_value = math::max(graph.stats.max_value, v);
             graph.plot_data_map.push_back(QCPData(s.tp, v));
         }
     }
@@ -294,53 +275,47 @@ void Numeric_Viewer::process_fft_task(size_t graph_idx, View const& view)
 
     auto sample_count = view.end_idx - view.start_idx;
 
-    double div = 1.f / double(sample_count);
+    graph.fft_data_map.resize(0);
+    graph.fft_data_map.reserve(100000);
+
+    if (sample_count < m_sample_rate)
+    {
+        return;
+    }
+
     size_t output_size = sample_count / 2 + 1;
+    double div = 4.f / double(sample_count);
+    double freq_div = m_sample_rate / double(sample_count);
 
-    double freq_div = (m_sample_rate / 2) / double(output_size);
-
-    auto* temp_input = graph.fft.temp_input.get();
     size_t offset = view.start_idx * m_graphs.size();
+    auto* temp_input = graph.fft.temp_input.get();
     for (size_t i = 0; i < sample_count; i++)
     {
-        temp_input[i] = m_values[offset + graph_idx] - graph.stats.average_value;
+        temp_input[i] = m_values[offset + graph_idx];
         offset += m_graphs.size();
     }
     fftw_execute(graph.fft.plan);
     auto* temp_output = graph.fft.temp_output.get();
-    graph.fft_data_map.resize(0);
-    graph.fft_data_map.reserve(100000);
 
     double pixels_per_second = static_cast<double>(m_ui.plot->width()) / view.duration;
-    if (pixels_per_second < m_sample_rate)
     {
         double last_key = 0;
         double max_value = std::numeric_limits<double>::lowest();
         for (size_t i = 1; i < output_size; i++)
         {
-            double x = temp_output[i][0];
-            double y = temp_output[i][1];
-            double v = math::sqrt(x*x + y*y) * div;
+            double x = temp_output[i][0] * div;
+            double y = temp_output[i][1] * div;
+            double v = math::sqrt(x*x + y*y);
             max_value = math::max(max_value, v);
 
             double key = i * freq_div;
             auto dt = key - last_key;
-            if (dt * pixels_per_second >= 1.0)
+            if (dt * pixels_per_second >= 0.2)
             {
                 last_key = key;
                 graph.fft_data_map.push_back(QCPData(key, max_value));
                 max_value = std::numeric_limits<double>::lowest();
             }
-        }
-    }
-    else
-    {
-        for (size_t i = 1; i < output_size; i++)
-        {
-            double x = temp_output[i][0];
-            double y = temp_output[i][1];
-            double v = math::sqrt(x*x + y*y) * div;
-            graph.fft_data_map.push_back(QCPData(i * freq_div, v));
         }
     }
 }
@@ -394,6 +369,8 @@ void Numeric_Viewer::finish_tasks()
 {
     double min_value = std::numeric_limits<double>::max();
     double max_value = std::numeric_limits<double>::lowest();
+    double max_average_value = std::numeric_limits<double>::lowest();
+    double max_value_range = std::numeric_limits<double>::lowest();
     bool has_range = false;
 
     for (size_t i = 0; i < m_graphs.size(); i++)
@@ -407,6 +384,8 @@ void Numeric_Viewer::finish_tasks()
             has_range = true;
             min_value = math::min(min_value, graph.stats.min_value);
             max_value = math::max(max_value, graph.stats.max_value);
+            max_average_value = math::max(max_average_value, graph.stats.average_value);
+            max_value_range = math::max(max_value_range, graph.stats.max_value - graph.stats.min_value);
         }
     }
 
@@ -414,23 +393,24 @@ void Numeric_Viewer::finish_tasks()
     {
         min_value = 0;
         max_value = 0;
+        max_average_value = 0;
     }
 
-    double average_value = (max_value + min_value) * 0.5f;
-    m_ui.data_range->setValue(max_value - min_value);
-    m_ui.average->setValue(average_value);
+    m_ui.data_range->setValue(max_value_range);
+    m_ui.average->setValue(max_average_value);
     m_ui.plot->xAxis->setRange(m_samples[m_view.start_idx].tp, m_samples[m_view.start_idx].tp + m_view.duration);
 
     auto display_range = m_ui.display_range->value();
     if (display_range == 0)
     {
         m_ui.plot->yAxis->setRange(min_value, max_value);
-        m_ui.fft->yAxis->setRange(0, math::sqrt(max_value - min_value));
+        m_ui.fft->yAxis->setRange(0, max_value - min_value);
     }
     else
     {
+        auto average_value = (max_value + min_value) * 0.5;
         m_ui.plot->yAxis->setRange(average_value - display_range / 2, average_value + display_range / 2);
-        m_ui.fft->yAxis->setRange(0, math::sqrt(display_range));
+        m_ui.fft->yAxis->setRange(0, (display_range));
     }
 
     m_ui.plot->replot(QCustomPlot::rpImmediate);
