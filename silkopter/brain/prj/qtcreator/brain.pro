@@ -112,7 +112,8 @@ SOURCES += \
     ../../src/processor/Rate_Controller.cpp \
     ../../src/processor/Stability_Controller.cpp \
     ../../src/processor/Velocity_Controller.cpp \
-    ../../src/generator/Factor_Generator.cpp
+    ../../src/generator/Factor_Generator.cpp \
+    ../../src/processor/Simulator.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -201,5 +202,6 @@ HEADERS += \
     ../../../libs/common/node/processor/IGenerator.h \
     ../../src/generator/Factor_Generator.h \
     ../../src/generator/Vec3_Generator.h \
-    ../../src/generator/Scalar_Generator.h
+    ../../src/generator/Scalar_Generator.h \
+    ../../src/processor/Simulator.h
 

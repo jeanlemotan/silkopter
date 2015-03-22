@@ -135,10 +135,10 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
     outputs[0].type = stream::IADC::TYPE;
-    outputs[0].name = "ADC0 Value";
+    outputs[0].name = "ADC0";
     outputs[0].stream = m_adc[0];
     outputs[1].type = stream::IADC::TYPE;
-    outputs[1].name = "ADC1 Value";
+    outputs[1].name = "ADC1";
     outputs[1].stream = m_adc[1];
     return outputs;
 }

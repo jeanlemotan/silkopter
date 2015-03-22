@@ -29,15 +29,13 @@ PIGPIO::PIGPIO(HAL& hal)
 
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs((m_pwm_channels.size()));
-    std::transform(m_pwm_channels.begin(), m_pwm_channels.end(), inputs.begin(), [](PWM_Channel const& c)
+    std::vector<Input> inputs(m_pwm_channels.size());
+    for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        Input i;
-        i.type = stream::IPWM::TYPE;
-        i.name = "PWMx Value";
-        //i.stream = c.stream.lock();
-        return i;
-    });
+        inputs[i].type = stream::IPWM::TYPE;
+        inputs[i].rate = 0;
+        inputs[i].name = q::util::format2<std::string>("PWM {}", i);
+    };
     return inputs;
 }
 

@@ -1,0 +1,127 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "motor_count", {"required": true, "json_key" : "Motor Count", "default" : 4}],
+        ["uint32_t", "pwm_rate", {"required": true, "json_key" : "PWM Rate (Hz)", "default" : 100}],
+        ["uint32_t", "acceleration_rate", {"required": true, "json_key" : "Acceleration Rate (Hz)", "default" : 1000}],
+        ["uint32_t", "angular_velocity_rate", {"required": true, "json_key" : "Angular Velocity Rate (Hz)", "default" : 1000}],
+        ["uint32_t", "magnetic_field_rate", {"required": true, "json_key" : "Magnetic Field Rate (Hz)", "default" : 100}],
+        ["uint32_t", "pressure_rate", {"required": true, "json_key" : "Pressure Rate (Hz)", "default" : 100}],
+        ["uint32_t", "temperature_rate", {"required": true, "json_key" : "Temperature Rate (Hz)", "default" : 10}],
+        ["uint32_t", "distance_rate", {"required": true, "json_key" : "Distance Rate (Hz)", "default" : 12}],
+        ["uint32_t", "location_rate", {"required": true, "json_key" : "Location Rate (Hz)", "default" : 5}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::vector<std::string>", "pwm", {"required": true, "json_key" : "PWM"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Acceleration",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
+        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Angular_Velocity",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Magnetic_Field",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Temperature",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Pressure",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Distance",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "ECEF_Location",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Simulator::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["sz::Simulator::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["sz::Simulator::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
+        ["sz::Simulator::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}],
+        ["sz::Simulator::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
+        ["sz::Simulator::Distance", "distance", {"required": true, "json_key" : "Distance"}],
+        ["sz::Simulator::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
+     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Motor",
+    "members":
+    [
+        ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
+        ["math::vec2f", "position", {"required": true, "json_key" : "Position"}],
+        ["float", "thrust_100", {"required": true, "json_key" : "Thrust @ 100%"}],
+        ["float", "thrust_50", {"required": true, "json_key" : "Thrust @ 50%"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Simulator",
+    "name": "Config",
+    "members":
+    [
+        ["float", "weight", {"required": true, "json_key" : "Weight (Kg)", "default" : 0.7}],
+        ["std::vector<sz::Simulator::Motor>", "motors", {"required": true, "json_key" : "Motors"}],
+        ["sz::Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Simulator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]
