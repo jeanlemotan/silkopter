@@ -6,6 +6,9 @@
 #include <type_traits>
 #include <typeinfo>
 
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
+
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>

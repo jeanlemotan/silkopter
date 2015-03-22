@@ -18,118 +18,138 @@
             }
         },
         "nodes": {
-            "Angular Velocity Generator": {
-                "type": "Angular Velocity Generator",
+            "Simulator": {
+                "type": "Simulator",
                 "init_params": {
-                    "Rate (Hz)": 100,
+                    "Motor Count": 4,
+                    "PWM Rate (Hz)": 100,
+                    "Acceleration Rate (Hz)": 1000,
+                    "Angular Velocity Rate (Hz)": 1000,
+                    "Magnetic Field Rate (Hz)": 100,
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate (Hz)": 10,
+                    "Distance Rate (Hz)": 12,
+                    "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -118.0,
-                            "y": -294.0
+                            "x": -145.0,
+                            "y": -372.0
                         }
                     }
                 },
                 "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                    "UAV": {
+                        "Mass (Kg)": 1.0,
+                        "Height (m)": 0.10000000149011612,
+                        "Radius (m)": 0.4000000059604645
                     },
-                    "Inputs": {
-                        "X Factor": "Factor Generator/Factor",
-                        "Y Factor": "Factor Generator/Factor",
-                        "Z Factor": "Factor Generator/Factor"
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Angular Velocity Generator Target": {
-                "type": "Angular Velocity Generator",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "__gs": {
-                        "position": {
-                            "x": -151.0,
-                            "y": -629.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Inputs": {
-                        "X Factor": "",
-                        "Y Factor": "",
-                        "Z Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Rate Controller": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "__gs": {
-                        "position": {
-                            "x": -215.0,
-                            "y": -621.0
-                        }
-                    }
-                },
-                "config": {
-                    "PID": {
-                        "kP": 1.2,
-                        "kI": 0.5,
-                        "kD": 0.0,
-                        "Max I": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    },
-                    "Inputs": {
-                        "Input": "Angular Velocity Generator/Output",
-                        "Target": "Angular Velocity Generator Target/Output"
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    }
-                }
-            },
-            "Factor Generator": {
-                "type": "Factor Generator",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "Component Count": 1,
-                    "__gs": {
-                        "position": {
-                            "x": -533.0,
-                            "y": -825.0
-                        }
-                    }
-                },
-                "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.0,
-                    "Square": true,
-                    "Components": [
+                    "Motors": [
                         {
-                            "Frequency (Hz)": 1.0,
-                            "Amplitude": 1.0
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "RPM @ 100%": 0.0,
+                            "Acceleration (RPM/s)": 0.0,
+                            "Deceleration (RPM/s)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "RPM @ 100%": 0.0,
+                            "Acceleration (RPM/s)": 0.0,
+                            "Deceleration (RPM/s)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "RPM @ 100%": 0.0,
+                            "Acceleration (RPM/s)": 0.0,
+                            "Deceleration (RPM/s)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "RPM @ 100%": 0.0,
+                            "Acceleration (RPM/s)": 0.0,
+                            "Deceleration (RPM/s)": 0.0
                         }
                     ],
-                    "Inputs": {},
+                    "Inputs": {
+                        "PWM": [
+                            "",
+                            "",
+                            "",
+                            ""
+                        ]
+                    },
                     "Outputs": {
-                        "Factor": {}
+                        "Acceleration": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "Scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        },
+                        "Angular Velocity": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        },
+                        "Magnetic Field": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        },
+                        "Temperature": {},
+                        "Pressure": {},
+                        "Distance": {},
+                        "ECEF Location": {}
+                    }
+                }
+            },
+            "Acceleration LPF": {
+                "type": "Acceleration LPF",
+                "init_params": {
+                    "Rate (Hz)": 1000,
+                    "__gs": {
+                        "position": {
+                            "x": -275.0,
+                            "y": -651.0
+                        }
+                    }
+                },
+                "config": {
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 500.0,
+                    "Inputs": {
+                        "Input": "Simulator/Acceleration"
+                    },
+                    "Outputs": {
+                        "Output": {}
                     }
                 }
             }

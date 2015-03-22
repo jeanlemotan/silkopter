@@ -15,15 +15,25 @@ namespace jsonutil
         {
             return &value;
         }
-        if (!value.IsObject())
+        if (value.IsArray() && name[0] == '[' && name.size() >= 3 && name.size() < 32)
         {
+            char buffer[32] = {0};
+            memcpy(buffer, name.c_str() + 1, name.size() - 2); //remove the []
+            int idx = atoi(buffer);
+            if (idx >= 0 && idx < value.Size())
+            {
+                return &value[idx];
+            }
             return nullptr;
         }
-        for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++)
+        if (value.IsObject())
         {
-            if (name == it->name.GetString())
+            for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++)
             {
-                return &it->value;
+                if (name == it->name.GetString())
+                {
+                    return &it->value;
+                }
             }
         }
         return nullptr;
@@ -64,11 +74,6 @@ namespace jsonutil
 
     inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, q::Path const& path, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)
     {
-        if (!json.IsObject())
-        {
-            return nullptr;
-        }
-
         //first try a find
         auto v = find_value(json, path);
         if (v && type == v->GetType())
@@ -115,11 +120,6 @@ namespace jsonutil
 
     inline auto add_value(rapidjson::Value& json, q::Path const& path, rapidjson::Value&& value, typename rapidjson::Value::AllocatorType& allocator) -> bool
     {
-        if (!json.IsObject())
-        {
-            return false;
-        }
-
         //now walk the path and create missing elements
         auto p = path;
         rapidjson::Value* parent = &json;

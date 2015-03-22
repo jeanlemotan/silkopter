@@ -1192,9 +1192,9 @@ case 3:
 						 { state=0; has_clockwise = true; }
 else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8))
 						 { state=1; has_position = true; }
-else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25", 13))
+else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 17))
 						 { state=2; has_thrust_100 = true; }
-else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x40\x20\x35\x30\x25", 12))
+else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x40\x20\x35\x30\x25\x20\x28\x4e\x29", 16))
 						 { state=3; has_thrust_50 = true; }
             else {
                 state = -1;
@@ -1383,8 +1383,8 @@ struct Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3a
 
         w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, bool >()(w, value.clockwise);
 w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, math::vec2f >()(w, value.position);
-w.Key("\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25", 13, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, float >()(w, value.thrust_100);
-w.Key("\x54\x68\x72\x75\x73\x74\x20\x40\x20\x35\x30\x25", 12, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, float >()(w, value.thrust_50);
+w.Key("\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 17, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, float >()(w, value.thrust_100);
+w.Key("\x54\x68\x72\x75\x73\x74\x20\x40\x20\x35\x30\x25\x20\x28\x4e\x29", 16, false); Serializer< Writera3aba85be6cda9ad852b59fb4d21a12aa3a43a64502a6b0e912eb3afe28dd7cc, float >()(w, value.thrust_50);
 
         w.EndObject(4);
     }

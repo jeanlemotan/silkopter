@@ -83,16 +83,46 @@ auto Simulator::init() -> bool
         QLOGE("Bad motor count: {}", m_init_params->motor_count);
         return false;
     }
+    if (!m_world.init_world(1000))
+    {
+        return false;
+    }
+
+    m_last_tp = q::Clock::now();
+
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
+    m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
+    m_angular_velocity_stream->last_sample.tp = m_last_tp;
+
     m_acceleration_stream->rate = m_init_params->acceleration_rate;
+    m_acceleration_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_acceleration_stream->rate);
+    m_acceleration_stream->last_sample.tp = m_last_tp;
+
     m_magnetic_field_stream->rate = m_init_params->magnetic_field_rate;
+    m_magnetic_field_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_magnetic_field_stream->rate);
+    m_magnetic_field_stream->last_sample.tp = m_last_tp;
+
     m_pressure_stream->rate = m_init_params->pressure_rate;
+    m_pressure_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_pressure_stream->rate);
+    m_pressure_stream->last_sample.tp = m_last_tp;
+
     m_temperature_stream->rate = m_init_params->temperature_rate;
+    m_temperature_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_temperature_stream->rate);
+    m_temperature_stream->last_sample.tp = m_last_tp;
+
     m_distance_stream->rate = m_init_params->distance_rate;
+    m_distance_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
+    m_distance_stream->last_sample.tp = m_last_tp;
+
     m_ecef_location_stream->rate = m_init_params->location_rate;
+    m_ecef_location_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_ecef_location_stream->rate);
+    m_ecef_location_stream->last_sample.tp = m_last_tp;
+
 
     m_input_pwm_streams.resize(m_init_params->motor_count);
     m_config->motors.resize(m_init_params->motor_count);
+    m_config->inputs.pwm.resize(m_init_params->motor_count);
+
     return true;
 }
 
@@ -103,7 +133,7 @@ auto Simulator::get_inputs() const -> std::vector<Input>
     {
         inputs[i].type = stream::IPWM::TYPE;
         inputs[i].rate = m_init_params->pwm_rate;
-        inputs[i].name = q::util::format2<std::string>("PWM {}", i);
+        inputs[i].name = q::util::format2<std::string>("PWM/[{}]", i);
     }
     return inputs;
 }
@@ -137,6 +167,46 @@ auto Simulator::get_outputs() const -> std::vector<Output>
 void Simulator::process()
 {
     QLOG_TOPIC("simulator::process");
+
+    auto now = q::Clock::now();
+    auto dt = now - m_last_tp;
+    m_last_tp = now;
+
+    m_angular_velocity_stream->samples.clear();
+    m_acceleration_stream->samples.clear();
+    m_magnetic_field_stream->samples.clear();
+    m_pressure_stream->samples.clear();
+    m_temperature_stream->samples.clear();
+    m_distance_stream->samples.clear();
+    m_ecef_location_stream->samples.clear();
+
+    m_world.process(dt, [this](World& world, q::Clock::duration world_dt)
+    {
+        {
+            auto& stream = *m_angular_velocity_stream;
+            stream.accumulated_dt += world_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.sample_idx++;
+                stream.last_sample.value = world.get_uav_angular_velocity();
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_acceleration_stream;
+            stream.accumulated_dt += world_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.sample_idx++;
+                stream.last_sample.value = world.get_uav_acceleration();
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+    });
 }
 
 auto Simulator::set_config(rapidjson::Value const& json) -> bool
@@ -150,6 +220,25 @@ auto Simulator::set_config(rapidjson::Value const& json) -> bool
         std::ostringstream ss;
         ss << result;
         QLOGE("Cannot deserialize Simulator config data: {}", ss.str());
+        return false;
+    }
+
+    World::UAV_Config uav_config;
+    uav_config.mass = sz.uav.mass;
+    uav_config.radius = sz.uav.radius;
+    uav_config.height = sz.uav.height;
+    uav_config.motors.resize(sz.motors.size());
+    for (size_t i = 0; i < uav_config.motors.size(); i++)
+    {
+        uav_config.motors[i].position = sz.motors[i].position;
+        uav_config.motors[i].clockwise = sz.motors[i].clockwise;
+        uav_config.motors[i].max_thrust = sz.motors[i].max_thrust;
+        uav_config.motors[i].max_rpm = sz.motors[i].max_rpm;
+        uav_config.motors[i].acceleration = sz.motors[i].acceleration;
+        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
+    }
+    if (!m_world.init_uav(uav_config))
+    {
         return false;
     }
 

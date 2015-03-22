@@ -48,6 +48,7 @@ QMAKE_CXXFLAGS += -Wno-unused-variable
 QMAKE_CFLAGS += -Wno-unused-variable
 
 
+INCLUDEPATH += /usr/include/bullet
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
@@ -80,6 +81,8 @@ rpi {
     LIBS += -lbcm_host
     LIBS += -lGLESv2
     LIBS += -lEGL
+} else {
+    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath
 }
 
 SOURCES += \
@@ -113,7 +116,8 @@ SOURCES += \
     ../../src/processor/Stability_Controller.cpp \
     ../../src/processor/Velocity_Controller.cpp \
     ../../src/generator/Factor_Generator.cpp \
-    ../../src/processor/Simulator.cpp
+    ../../src/simulator/Simulator.cpp \
+    ../../src/simulator/World.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -203,5 +207,6 @@ HEADERS += \
     ../../src/generator/Factor_Generator.h \
     ../../src/generator/Vec3_Generator.h \
     ../../src/generator/Scalar_Generator.h \
-    ../../src/processor/Simulator.h
+    ../../src/simulator/Simulator.h \
+    ../../src/simulator/World.h
 

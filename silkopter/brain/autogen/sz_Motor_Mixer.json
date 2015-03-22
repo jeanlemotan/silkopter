@@ -27,8 +27,8 @@
     [
         ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
         ["math::vec2f", "position", {"required": true, "json_key" : "Position"}],
-        ["float", "thrust_100", {"required": true, "json_key" : "Thrust @ 100%"}],
-        ["float", "thrust_50", {"required": true, "json_key" : "Thrust @ 50%"}]
+        ["float", "thrust_100", {"required": true, "json_key" : "Thrust @ 100% (N)"}],
+        ["float", "thrust_50", {"required": true, "json_key" : "Thrust @ 50% (N)"}]
     ]
 },
 {

@@ -34,12 +34,15 @@
 #include "processor/Stability_Controller.h"
 #include "processor/Velocity_Controller.h"
 
+#include "simulator/Simulator.h"
+
 #include "processor/Transformer.h"
 #include "processor/Transformer_Inv.h"
 
 #include "generator/Factor_Generator.h"
 #include "generator/Vec3_Generator.h"
 #include "generator/Scalar_Generator.h"
+
 
 //#include "common/node/IAHRS.h"
 
@@ -324,6 +327,8 @@ auto HAL::init(Comms& comms) -> bool
     m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
+
+    m_node_factory.register_node<Simulator>("Simulator", *this);
 
     m_node_factory.register_node<MPU9250>("MPU9250", *this);
     m_node_factory.register_node<MS5611>("MS5611", *this);
