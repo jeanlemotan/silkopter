@@ -76,6 +76,7 @@ private:
 
     struct Motor
     {
+        float drag = 0;
         float throttle = 0;
         float thrust = 0;
         float rpm = 0;

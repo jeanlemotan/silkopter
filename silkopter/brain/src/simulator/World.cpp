@@ -84,6 +84,11 @@ auto World::init_uav(UAV_Config const& config) -> bool
 
     m_uav.motors.clear();
     m_uav.motors.resize(m_uav.config.motors.size());
+    q::util::Rand rnd;
+    for (auto& m: m_uav.motors)
+    {
+        m.drag = rnd.get_positive_float() * 0.2f + 0.1f;
+    }
 
     if (m_uav.body)
     {
@@ -421,17 +426,19 @@ void World::process_uav(q::Clock::duration dt)
             m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(m_uav.enu_position));
         }
 
-//        for (auto const& m : m_motors)
-//        {
-//            float intensity = math::abs(math::dot(m_local_to_world_mat.get_axis_z(), math::normalized(velocity)));
-//            float drag = intensity * m.get_air_drag();
-//            auto force = (-velocity) * drag;
+        for (size_t i = 0; i < m_uav.motors.size(); i++)
+        {
+            auto& m = m_uav.motors[i];
+            auto& mc = m_uav.config.motors[i];
 
-//            math::vec3f local_pos(m.m_position * m_config.radius);
-//            auto pos = math::transform(m_local_to_world_mat, local_pos);
+            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), math::normalized(velocity)));
+            float drag = intensity * m.drag;
+            auto force = (-velocity) * drag;
 
-//            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
-//        }
+            math::vec3f local_pos(mc.position * m_uav.config.radius);
+            auto pos = math::transform(local_to_enu_mat, local_pos);
+            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
+        }
     }
 }
 

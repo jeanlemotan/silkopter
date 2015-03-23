@@ -90,7 +90,6 @@ auto LPF<Stream_t>::init() -> bool
         return false;
     }
     m_output_stream->rate = m_init_params.rate;
-    m_config.cutoff_frequency = m_init_params.rate / 2;
     return true;
 }
 
@@ -181,7 +180,7 @@ void LPF<Stream_t>::process()
     m_output_stream->samples.clear();
 
     auto input_stream = m_input_stream.lock();
-    if (!input_stream)
+    if (!input_stream || m_config.cutoff_frequency == 0)
     {
         return;
     }

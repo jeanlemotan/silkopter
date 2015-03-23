@@ -188,32 +188,39 @@ template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts,
         auto const& stream = static_cast<Stream const&>(_stream);
         auto const& samples = stream.get_samples();
 
-        ts.sample_count += static_cast<uint32_t>(samples.size());
-        size_t off = ts.data.size();
-
-        Sample_Data data;
-        for (auto const& s: samples)
+        if (ts.sample_count < 1000000)
         {
-            util::detail::set_value(ts.data, s.value, off);
+            ts.sample_count += static_cast<uint32_t>(samples.size());
+            size_t off = ts.data.size();
 
-            auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
-            if (dt >= (1 << 24))
+            Sample_Data data;
+            for (auto const& s: samples)
             {
-                QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
-                dt = (1 << 24) - 1;
-            }
-            auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
-            if (tp >= (uint64_t(1) << 40))
-            {
-                QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
-                tp = (uint64_t(1) << 40) - 1;
-            }
+                util::detail::set_value(ts.data, s.value, off);
 
-            data.sample_idx = s.sample_idx;
-            data.is_healthy = s.is_healthy;
-            data.dt = dt;
-            data.tp = tp;
-            util::detail::set_value(ts.data, data, off);
+                auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
+                if (dt >= (1 << 24))
+                {
+                    QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
+                    dt = (1 << 24) - 1;
+                }
+                auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
+                if (tp >= (uint64_t(1) << 40))
+                {
+                    QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
+                    tp = (uint64_t(1) << 40) - 1;
+                }
+
+                data.sample_idx = s.sample_idx;
+                data.is_healthy = s.is_healthy;
+                data.dt = dt;
+                data.tp = tp;
+                util::detail::set_value(ts.data, data, off);
+            }
+        }
+        else
+        {
+            QLOGW("Too many samples accumulated in the telemetry buffer for stream {}: {}", ts.stream_name, ts.sample_count);
         }
         return true;
     }

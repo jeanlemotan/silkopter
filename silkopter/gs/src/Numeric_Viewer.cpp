@@ -355,6 +355,7 @@ void Numeric_Viewer::start_tasks()
             {
                 process_plot_task(i, view);
                 process_fft_task(i, view);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             });
         }
         else
@@ -413,6 +414,6 @@ void Numeric_Viewer::finish_tasks()
         m_ui.fft->yAxis->setRange(0, (display_range));
     }
 
-    m_ui.plot->replot(QCustomPlot::rpImmediate);
+    m_ui.plot->replot(/*QCustomPlot::rpImmediate*/);
     m_ui.fft->replot();
 }
