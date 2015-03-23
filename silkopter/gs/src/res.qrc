@@ -33,5 +33,11 @@
         <file>icons/Torque.png</file>
         <file>icons/Velocity.png</file>
         <file>icons/Generator.png</file>
+        <file>icons/nodes.png</file>
+        <file>icons/reconnect.png</file>
+        <file>icons/search.png</file>
+        <file>icons/simulator.png</file>
+        <file>images/logo.png</file>
+        <file>icons/stop.png</file>
     </qresource>
 </RCC>

@@ -39,7 +39,7 @@
                 },
                 "config": {
                     "UAV": {
-                        "Mass (Kg)": 1.0,
+                        "Mass (Kg)": 2.0,
                         "Height (m)": 0.10000000149011612,
                         "Radius (m)": 0.4000000059604645
                     },
@@ -47,7 +47,18 @@
                         {
                             "Clockwise": false,
                             "Position": {
-                                "x": 0.0,
+                                "x": 1.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "RPM @ 100%": 0.0,
+                            "Acceleration (RPM/s)": 0.0,
+                            "Deceleration (RPM/s)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": -1.0,
                                 "y": 0.0
                             },
                             "Thrust @ 100% (N)": 0.0,
@@ -59,7 +70,7 @@
                             "Clockwise": false,
                             "Position": {
                                 "x": 0.0,
-                                "y": 0.0
+                                "y": 1.0
                             },
                             "Thrust @ 100% (N)": 0.0,
                             "RPM @ 100%": 0.0,
@@ -70,18 +81,7 @@
                             "Clockwise": false,
                             "Position": {
                                 "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "RPM @ 100%": 0.0,
-                            "Acceleration (RPM/s)": 0.0,
-                            "Deceleration (RPM/s)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
+                                "y": -1.0
                             },
                             "Thrust @ 100% (N)": 0.0,
                             "RPM @ 100%": 0.0,
@@ -144,9 +144,162 @@
                 },
                 "config": {
                     "Poles": 2,
-                    "Cutoff Frequency (Hz)": 500.0,
+                    "Cutoff Frequency (Hz)": 5.0,
                     "Inputs": {
                         "Input": "Simulator/Acceleration"
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Rate Controller": {
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 1000,
+                    "__gs": {
+                        "position": {
+                            "x": -409.0,
+                            "y": -547.0
+                        }
+                    }
+                },
+                "config": {
+                    "PID": {
+                        "kP": 1.0,
+                        "kI": 0.0,
+                        "kD": 0.1,
+                        "Max I": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
+                        "D Filter Poles": 0,
+                        "D Filter Cutoff Frequency (Hz)": 10.0
+                    },
+                    "Inputs": {
+                        "Input": "Simulator/Angular Velocity",
+                        "Target": "Angular Velocity Generator/Output"
+                    },
+                    "Outputs": {
+                        "Torque": {}
+                    }
+                }
+            },
+            "Angular Velocity Generator": {
+                "type": "Angular Velocity Generator",
+                "init_params": {
+                    "Rate (Hz)": 1000,
+                    "__gs": {
+                        "position": {
+                            "x": -415.0,
+                            "y": -404.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Motor Mixer": {
+                "type": "Motor Mixer",
+                "init_params": {
+                    "Rate (Hz)": 1000,
+                    "Motor Count": 4,
+                    "__gs": {
+                        "position": {
+                            "x": 120.0,
+                            "y": -617.0
+                        }
+                    }
+                },
+                "config": {
+                    "Armed Throttle": 0.0,
+                    "Motors": [
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "Thrust @ 50% (N)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "Thrust @ 50% (N)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "Thrust @ 50% (N)": 0.0
+                        },
+                        {
+                            "Clockwise": false,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "Thrust @ 100% (N)": 0.0,
+                            "Thrust @ 50% (N)": 0.0
+                        }
+                    ],
+                    "Inputs": {
+                        "Torque": "Rate Controller/Torque",
+                        "Collective Force": "Force Generator/Output"
+                    },
+                    "Outputs": {
+                        "Throttles": [
+                            {},
+                            {},
+                            {},
+                            {}
+                        ]
+                    }
+                }
+            },
+            "Force Generator": {
+                "type": "Force Generator",
+                "init_params": {
+                    "Rate (Hz)": 1000,
+                    "__gs": {
+                        "position": {
+                            "x": 140.0,
+                            "y": -600.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
                     },
                     "Outputs": {
                         "Output": {}

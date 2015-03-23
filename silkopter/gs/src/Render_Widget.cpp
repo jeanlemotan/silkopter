@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Render_Widget.h"
 
 #include <QtOpenGL/QGLFunctions>

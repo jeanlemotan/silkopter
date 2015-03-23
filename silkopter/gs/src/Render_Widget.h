@@ -2,6 +2,38 @@
 
 class QGLFunctions;
 
+struct Render_Context
+{
+    q::scene::Camera camera;
+    q::scene::Scene scene;
+    q::draw::Painter painter;
+    q::text::Font_ptr font;
+    struct Materials
+    {
+        q::video::Material primitive_2d;
+        q::video::Material primitive;
+        q::video::Material textured;
+        q::video::Material font;
+    } materials;
+};
+
+
+struct Mouse_Event
+{
+    enum class Button: uint8_t
+    {
+        LEFT	= 1 << 0,
+        MIDDLE	= 1 << 1,
+        RIGHT	= 1 << 2,
+    };
+    typedef q::util::Flag_Set<Button, uint8_t> Buttons;
+
+    math::vec2f point;
+    float wheel = 0;
+    Buttons buttons;
+};
+
+
 class Render_Widget : public QWidget
 {
 public:

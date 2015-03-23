@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GS</class>
+ <widget class="QMainWindow" name="GS">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Silkopter GS</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="res.qrc">:/images/logo.png</pixmap>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GL_Widget" name="widget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>1</width>
+        <height>1</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1</width>
+        <height>1</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
+   <widget class="QMenu" name="menuConnect">
+    <property name="title">
+     <string>Connect</string>
+    </property>
+    <addaction name="action_search"/>
+    <addaction name="action_connect_to_last"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="action_hal_editor"/>
+    <addaction name="action_simulator"/>
+   </widget>
+   <addaction name="menuConnect"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_search">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/search.png</normaloff>:/icons/search.png</iconset>
+   </property>
+   <property name="text">
+    <string>Search UAV</string>
+   </property>
+  </action>
+  <action name="action_connect_to_last">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/reconnect.png</normaloff>:/icons/reconnect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect To Last UAV</string>
+   </property>
+  </action>
+  <action name="action_hal_editor">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/nodes.png</normaloff>:/icons/nodes.png</iconset>
+   </property>
+   <property name="text">
+    <string>HAL Editor</string>
+   </property>
+  </action>
+  <action name="action_simulator">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/simulator.png</normaloff>:/icons/simulator.png</iconset>
+   </property>
+   <property name="text">
+    <string>Simulator Viewer</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GL_Widget</class>
+   <extends>QWidget</extends>
+   <header>GL_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

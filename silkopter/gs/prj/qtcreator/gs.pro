@@ -142,7 +142,11 @@ HEADERS += \
     ../../../libs/common/node/stream/IPWM.h \
     ../../../libs/common/node/stream/IThrottle.h \
     ../../../libs/common/node/stream/ITorque.h \
-    ../../../libs/common/node/stream/IVelocity.h
+    ../../../libs/common/node/stream/IVelocity.h \
+    ../../src/Sim_Window.h \
+    ../../src/GL_Widget.h \
+    ../../src/Render_Widget.h \
+    ../../src/Camera_Controller_3D.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -158,11 +162,17 @@ SOURCES += \
     ../../../libs/json_editor/JSON_Model.cpp \
     ../../src/Stream_Viewer_Widget.cpp \
     ../../src/Numeric_Viewer.cpp \
-    ../../src/Map_Viewer.cpp
+    ../../src/Map_Viewer.cpp \
+    ../../src/Sim_Window.cpp \
+    ../../src/GL_Widget.cpp \
+    ../../src/Render_Widget.cpp \
+    ../../src/Camera_Controller_3D.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
-    ../../src/Numeric_Viewer.ui
+    ../../src/Numeric_Viewer.ui \
+    ../../src/GS.ui \
+    ../../src/Sim_Window.ui
 
 DISTFILES += \
     ../../src/node.png \

@@ -1,9 +1,8 @@
-#include "stdafx.h"
-#include "Camera_Controller3D.h"
+#include "Camera_Controller_3D.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Camera_Controller3D::Camera_Controller3D(q::scene::Camera& camera)
+Camera_Controller_3D::Camera_Controller_3D(q::scene::Camera& camera)
 	: m_camera(camera)
 {
 	m_screen_depth = 1.f;
@@ -13,7 +12,7 @@ Camera_Controller3D::Camera_Controller3D(q::scene::Camera& camera)
 
 //////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::set_focus_point(math::vec3f const& point)
+void Camera_Controller_3D::set_focus_point(math::vec3f const& point)
 {
 	m_pointer_delta_3d = point;
 	m_press_point_3d = point;
@@ -21,7 +20,7 @@ void Camera_Controller3D::set_focus_point(math::vec3f const& point)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::mouse_press_event(QMouseEvent* event)
+void Camera_Controller_3D::mouse_press_event(QMouseEvent* event)
 {
 	if ((event->buttons() & Qt::LeftButton) != 0)
 	{
@@ -66,7 +65,7 @@ void Camera_Controller3D::mouse_press_event(QMouseEvent* event)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::mouse_release_event(QMouseEvent* /*event*/)
+void Camera_Controller_3D::mouse_release_event(QMouseEvent* /*event*/)
 {
 	m_press_point_3d = m_pointer_3d;
 	m_pointer_pressed = false;
@@ -74,7 +73,7 @@ void Camera_Controller3D::mouse_release_event(QMouseEvent* /*event*/)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::mouse_move_event(QMouseEvent* event)
+void Camera_Controller_3D::mouse_move_event(QMouseEvent* event)
 {
 	m_pointer_delta_2d = math::vec2f(event->x(), event->y()) - m_pointer_2d;
 	m_pointer_2d = math::vec2f(event->x(), event->y());
@@ -117,7 +116,7 @@ void Camera_Controller3D::mouse_move_event(QMouseEvent* event)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::wheel_event(QWheelEvent* event)
+void Camera_Controller_3D::wheel_event(QWheelEvent* event)
 {
 	if ((event->buttons() & Qt::MiddleButton) != 0 || (QApplication::keyboardModifiers() & Qt::AltModifier))
 	{
@@ -147,28 +146,28 @@ void Camera_Controller3D::wheel_event(QWheelEvent* event)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-math::vec2f const& Camera_Controller3D::get_pointer_2d() const
+math::vec2f const& Camera_Controller_3D::get_pointer_2d() const
 {
 	return m_pointer_2d;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-math::vec3f const& Camera_Controller3D::get_pointer_3d() const
+math::vec3f const& Camera_Controller_3D::get_pointer_3d() const
 {
 	return m_pointer_3d;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-float Camera_Controller3D::get_screen_depth() const
+float Camera_Controller_3D::get_screen_depth() const
 {
 	return m_screen_depth;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Camera_Controller3D::set_depth_getter(Depth_Getter getter)
+void Camera_Controller_3D::set_depth_getter(Depth_Getter getter)
 {
 	m_depth_getter = getter;
 }
