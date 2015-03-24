@@ -55,7 +55,9 @@ Render_Widget::~Render_Widget()
 	for (size_t i = 0; i < m_buffers.size(); i++)
 	{
 		auto& buffer = m_buffers[i];
-		// to make sure there is no transfer going on when deleting the framebuffer
+        std::lock_guard<std::mutex> lg(buffer.mutex);
+
+        // to make sure there is no transfer going on when deleting the framebuffer
 		finish_buffer_transfer(buffer);
 	}
 }
@@ -102,6 +104,7 @@ void Render_Widget::finish_buffer_transfer(Buffer& buffer)
 void Render_Widget::begin_rendering()
 {
 	auto& buffer = m_buffers[m_write_buffer_idx];
+    std::lock_guard<std::mutex> lg(buffer.mutex);
 
 	auto size = math::max(math::vec2u32(width(), height()), math::vec2u32(1, 1));
 	if (!buffer.framebuffer || size != buffer.framebuffer->get_size())
@@ -132,6 +135,8 @@ void Render_Widget::end_rendering()
 
 	{
 		auto& buffer = m_buffers[m_write_buffer_idx];
+        std::lock_guard<std::mutex> lg(buffer.mutex);
+
 		buffer.size = buffer.framebuffer->get_size();
 
 		//read color
@@ -197,9 +202,10 @@ void Render_Widget::paintEvent(QPaintEvent* event)
 	if (m_buffers_full)
 	{
  		auto& buffer = m_buffers[m_read_buffer_idx];
- 		resolve_color_buffer(buffer);
+        std::lock_guard<std::mutex> lg(buffer.mutex);
 
-		//std::lock_guard<std::mutex> lg(m_mutex);
+        resolve_color_buffer(buffer);
+
  		QImage img(buffer.color_data.data(), buffer.size.x, buffer.size.y, buffer.size.x * 4, QImage::Format_RGB32);
  		painter.drawImage(QPoint(0, 0), img);
 	}
@@ -270,7 +276,9 @@ float Render_Widget::get_depth_at(const math::vec2u32& coords)
 	if (m_buffers_full)
 	{
 		auto& buffer = m_buffers[m_read_buffer_idx];
-		resolve_depth_buffer(buffer);
+        std::lock_guard<std::mutex> lg(buffer.mutex);
+
+        resolve_depth_buffer(buffer);
 
 		auto c = math::min(coords, buffer.size - math::vec2u32(1, 1));
 

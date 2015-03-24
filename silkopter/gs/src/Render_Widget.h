@@ -67,6 +67,8 @@ private:
 
 	struct Buffer
 	{
+        std::mutex mutex;
+
 		uint32_t color_pbo = 0;
 		uint32_t depth_pbo = 0;
 		q::video::Render_Target_ptr framebuffer;

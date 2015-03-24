@@ -68,7 +68,7 @@ void Sim_Window::render_ground()
     m_context.painter.set_material(mat);
 
     const float k_size = 10000;
-    const int k_line_count = 600;
+    const int k_line_count = 300;
     const int k_half_line_size = k_line_count / 2;
 
     //m_context.painter.fill_rectangle(q::draw::Vertex(math::vec3f(-k_size, -k_size, 0), 0x20FFFFFF), q::draw::Vertex(math::vec3f(k_size, k_size, 0), 0x20FFFFFF));
@@ -137,11 +137,17 @@ void Sim_Window::render_uav()
 
 void Sim_Window::process()
 {
+    if (!isVisible())
+    {
+        return;
+    }
+
     m_ui.render_widget->begin_rendering();
 
     m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_ui.render_widget->width(), m_ui.render_widget->height())));
 
-    q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(math::vec4f(math::vec3f(m_ui.render_widget->width() / 3024.f, 0, 0), 1));
+    auto color = math::color::u32_to_rgba<float>(0x2c3e50);
+    q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
 

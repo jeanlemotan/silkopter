@@ -231,6 +231,15 @@ namespace q
 			static std::vector<math::vec2f> ms_cos_sin_table;//only a table for all painter instances
 		};
 
+        //////////////////////////////////////////////////////////////////////////
+
+        inline bool Painter::is_initialized() const
+        {
+            return m_is_initialized;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+
 		inline Vertex::Vertex()
 			: color(0xFFFFFFFF)
 			, flags(0) {}
