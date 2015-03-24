@@ -130,7 +130,7 @@ void Camera_Controller_3D::wheel_event(QWheelEvent* event)
 	}
 	if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
 	{
-		spd++;
+        spd++;
 	}
 
 	math::vec3f dir = m_camera.get_front_vector();

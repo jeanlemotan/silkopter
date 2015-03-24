@@ -32,5 +32,14 @@ private:
     silk::Comms& m_comms;
     Render_Context& m_context;
     Camera_Controller_3D m_camera_controller;
+
+    void render_uav();
+    void render_ground();
+
+    struct UAV
+    {
+        math::vec3f position;
+        math::quatf local_to_enu;
+    } m_uav;
 };
 
