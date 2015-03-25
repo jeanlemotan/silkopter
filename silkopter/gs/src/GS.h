@@ -38,7 +38,6 @@ private:
     Render_Context m_context;
 
     HAL_Window* m_hal_window = nullptr;
-    Sim_Window* m_sim_window = nullptr;
 
     void set_remote_address(std::string const& address);
     std::string m_remote_address;

@@ -1,8 +1,9 @@
 #include "Sim_Window.h"
 
-Sim_Window::Sim_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& context, QWidget *parent)
+Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
+    , m_sim_node(sim_node)
     , m_comms(comms)
     , m_context(context)
     , m_camera_controller(context.camera)
@@ -13,14 +14,40 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     m_ui.setupUi(this);
 
     //m_ui.action_simulation_on->setChecked(m_config.environment.is_simulation_enabled);
-    QObject::connect(m_ui.action_simulation_on, &QAction::toggled, [this](bool v)
+    QObject::connect(m_ui.action_simulation, &QAction::toggled, [this](bool v)
     {
+        auto* vj = jsonutil::find_value(m_sim_node->config, std::string("Simulation Enabled"));
+        if (vj)
+        {
+            vj->SetBool(v);
+            m_hal.set_node_config(m_sim_node, m_sim_node->config);
+        }
     });
     QObject::connect(m_ui.action_stop_motion, &QAction::triggered, [this](bool)
     {
+        m_comms.get_setup_channel().pack_all(silk::comms::Setup_Message::SIMULATOR_STOP_MOTION, m_sim_node->name);
     });
     QObject::connect(m_ui.action_reset, &QAction::triggered, [this](bool)
     {
+        m_comms.get_setup_channel().pack_all(silk::comms::Setup_Message::SIMULATOR_RESET, m_sim_node->name);
+    });
+    QObject::connect(m_ui.action_ground, &QAction::triggered, [this](bool v)
+    {
+        auto* vj = jsonutil::find_value(m_sim_node->config, std::string("Ground Enabled"));
+        if (vj)
+        {
+            vj->SetBool(v);
+            m_hal.set_node_config(m_sim_node, m_sim_node->config);
+        }
+    });
+    QObject::connect(m_ui.action_gravity, &QAction::triggered, [this](bool v)
+    {
+        auto* vj = jsonutil::find_value(m_sim_node->config, std::string("Gravity Enabled"));
+        if (vj)
+        {
+            vj->SetBool(v);
+            m_hal.set_node_config(m_sim_node, m_sim_node->config);
+        }
     });
 
     //    QActionGroup* ag = new QActionGroup(this);
@@ -42,6 +69,9 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     });
 
 
+    sim_node->changed_signal.connect([this](silk::node::Node&) { read_config(); });
+    read_config();
+
     //////////////////////////////////////////////////////////////////////////
 
     m_ui.render_widget->init();
@@ -50,6 +80,26 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
 Sim_Window::~Sim_Window()
 {
 }
+
+void Sim_Window::read_config()
+{
+    auto* vj = jsonutil::find_value(m_sim_node->config, std::string("Simulation Enabled"));
+    if (vj)
+    {
+        m_ui.action_simulation->setChecked(vj->GetBool());
+    }
+    vj = jsonutil::find_value(m_sim_node->config, std::string("Gravity Enabled"));
+    if (vj)
+    {
+        m_ui.action_gravity->setChecked(vj->GetBool());
+    }
+    vj = jsonutil::find_value(m_sim_node->config, std::string("Ground Enabled"));
+    if (vj)
+    {
+        m_ui.action_ground->setChecked(vj->GetBool());
+    }
+}
+
 
 void Sim_Window::render_ground()
 {

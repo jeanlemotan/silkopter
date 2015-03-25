@@ -1,5 +1,8 @@
 #include "HAL_Window.h"
 
+#include "Sim_Window.h"
+
+
 #include "ModelTest.h"
 #include "json_editor/JSON_Model.h"
 #include "qneblock.h"
@@ -26,6 +29,7 @@
 #include "common/node/processor/IController.h"
 #include "common/node/processor/ITransformer.h"
 #include "common/node/processor/IGenerator.h"
+#include "common/node/processor/ISimulator.h"
 
 #include "ui_New_Node.h"
 
@@ -40,13 +44,15 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IController::TYPE, QColor(0x9B59B6) },
     { silk::node::ITransformer::TYPE, QColor(0xF1C40F) },
     { silk::node::IGenerator::TYPE, QColor(0xF1C40F) },
+    { silk::node::ISimulator::TYPE, QColor(0xF1C40F) },
 }};
 
 
-HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget *parent)
+HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& context, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
     , m_comms(comms)
+    , m_context(context)
 {
     m_scene = new QGraphicsScene();
 
@@ -240,6 +246,22 @@ void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* blo
     QASSERT(block);
 
     QMenu menu(this);
+
+    auto it = m_nodes.find(block->id().toLatin1().data());
+    if (it != m_nodes.end())
+    {
+        auto node = it->second.node.lock();
+        if (node && node->type == silk::node::ISimulator::TYPE)
+        {
+            auto action = menu.addAction(QIcon(":/icons/simulator.png"), "View Simulatior");
+            connect(action, &QAction::triggered, [=](bool)
+            {
+                delete m_sim_window;
+                m_sim_window = new Sim_Window(m_hal, node, m_comms, m_context, this);
+                m_sim_window->show();
+            });
+        }
+    }
 
     menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
 
@@ -587,5 +609,18 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
                 refresh_node(*node);
             }
         });
+    }
+}
+
+void HAL_Window::process()
+{
+    if (m_sim_window)
+    {
+        m_sim_window->process();
+        if (m_sim_window->isHidden())
+        {
+            delete m_sim_window;
+            m_sim_window = 0;
+        }
     }
 }

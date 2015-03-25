@@ -242,6 +242,10 @@ auto Simulator::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
+    m_world.set_gravity_enabled(sz.gravity_enabled);
+    m_world.set_ground_enabled(sz.ground_enabled);
+    m_world.set_simulation_enabled(sz.simulation_enabled);
+
     *m_config = sz;
 
     return true;

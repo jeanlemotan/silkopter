@@ -39,5 +39,7 @@
         <file>icons/simulator.png</file>
         <file>images/logo.png</file>
         <file>icons/stop.png</file>
+        <file>icons/gravity.png</file>
+        <file>icons/ground.png</file>
     </qresource>
 </RCC>

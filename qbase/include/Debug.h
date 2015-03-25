@@ -136,7 +136,11 @@ do 																				\
 #if defined Q_WINDOWS
 #	define QBREAK() __debugbreak()
 #elif defined Q_POSIX_API
-#	define QBREAK() raise(SIGTRAP)
+#   if defined NDEBUG
+#       define QBREAK()
+#   else
+#       define QBREAK() raise(SIGTRAP)
+#   endif
 #else
 #	define QBREAK() assert(0)
 #endif

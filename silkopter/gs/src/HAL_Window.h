@@ -3,6 +3,8 @@
 #include <QMainWindow>
 #include <QtWidgets>
 
+#include "Render_Widget.h"
+
 #include "qneblock.h"
 #include "qnodeseditor.h"
 #include "qneport.h"
@@ -12,12 +14,15 @@
 
 class QNodesEditor;
 class JSON_Model;
+class Sim_Window;
 
 class HAL_Window : public QMainWindow
 {
 public:
-    explicit HAL_Window(silk::HAL& hal, silk::Comms& comms, QWidget* parent = 0);
+    explicit HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& context, QWidget* parent = 0);
     ~HAL_Window();
+
+    void process();
 
 private:
     void on_node_factories_refreshed();
@@ -82,6 +87,9 @@ private:
 
     std::map<std::string, Stream_Data> m_streams;
     std::map<std::string, Node_Data> m_nodes;
+
+    Render_Context& m_context;
+    Sim_Window* m_sim_window = nullptr;
 
     auto compute_unique_name(std::string const& name) const -> std::string;
 };

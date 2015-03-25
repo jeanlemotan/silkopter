@@ -28,8 +28,8 @@ INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
 INCLUDEPATH += ../../../brain/autogen
 
-QMAKE_CXXFLAGS += -Wno-unused-variable
-QMAKE_CFLAGS += -Wno-unused-variable
+QMAKE_CXXFLAGS += -Wno-unused-variable -B$HOME/dev/bin/gold
+QMAKE_CFLAGS += -Wno-unused-variable -B$HOME/dev/bin/gold
 
 PRECOMPILED_HEADER = ../../src/stdafx.h
 CONFIG *= precompile_header

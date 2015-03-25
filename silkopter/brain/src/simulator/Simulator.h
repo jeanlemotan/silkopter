@@ -9,7 +9,7 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/ILocation.h"
 #include "common/node/stream/IPWM.h"
-#include "common/node/IProcessor.h"
+#include "common/node/processor/ISimulator.h"
 
 #include "World.h"
 
@@ -28,7 +28,7 @@ namespace silk
 namespace node
 {
 
-class Simulator : public IProcessor
+class Simulator : public ISimulator
 {
 public:
     Simulator(HAL& hal);

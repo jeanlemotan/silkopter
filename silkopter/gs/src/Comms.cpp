@@ -109,6 +109,11 @@ auto Comms::get_remote_address() const -> boost::asio::ip::address
     return m_remote_endpoint.address();
 }
 
+auto Comms::get_setup_channel() -> Setup_Channel&
+{
+    return m_setup_channel;
+}
+
 void Comms::reset()
 {
     m_hal.m_nodes.remove_all();

@@ -208,5 +208,6 @@ HEADERS += \
     ../../src/generator/Vec3_Generator.h \
     ../../src/generator/Scalar_Generator.h \
     ../../src/simulator/Simulator.h \
-    ../../src/simulator/World.h
+    ../../src/simulator/World.h \
+    ../../../libs/common/node/processor/ISimulator.h
 

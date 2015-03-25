@@ -33,6 +33,9 @@ enum class Setup_Message : uint8_t
 
     STREAM_TELEMETRY_ACTIVE,
 
+    SIMULATOR_STOP_MOTION,
+    SIMULATOR_RESET,
+
     COUNT //keep last
 };
 

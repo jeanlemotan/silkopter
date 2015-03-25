@@ -535,6 +535,17 @@ void Comms::handle_streams_telemetry_active()
     m_setup_channel.end_pack();
 }
 
+void Comms::handle_simulator_stop_motion()
+{
+
+}
+
+void Comms::handle_simulator_reset()
+{
+
+}
+
+
 void Comms::process()
 {
     if (!is_connected())
@@ -565,6 +576,9 @@ void Comms::process()
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+
+        case comms::Setup_Message::SIMULATOR_STOP_MOTION: handle_simulator_stop_motion(); break;
+        case comms::Setup_Message::SIMULATOR_RESET: handle_simulator_reset(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }

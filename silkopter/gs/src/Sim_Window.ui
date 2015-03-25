@@ -56,11 +56,14 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_simulation_on"/>
+   <addaction name="action_simulation"/>
+   <addaction name="action_ground"/>
+   <addaction name="action_gravity"/>
+   <addaction name="separator"/>
    <addaction name="action_reset"/>
    <addaction name="action_stop_motion"/>
   </widget>
-  <action name="action_simulation_on">
+  <action name="action_simulation">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -72,7 +75,7 @@
      <normaloff>:/icons/simulator.png</normaloff>:/icons/simulator.png</iconset>
    </property>
    <property name="text">
-    <string>Simulation On</string>
+    <string>Simulation</string>
    </property>
   </action>
   <action name="action_reset">
@@ -91,6 +94,39 @@
    </property>
    <property name="text">
     <string>Stop Motion</string>
+   </property>
+  </action>
+  <action name="action_ground">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/ground.png</normaloff>:/icons/ground.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ground</string>
+   </property>
+   <property name="toolTip">
+    <string>Ground</string>
+   </property>
+  </action>
+  <action name="action_gravity">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/gravity.png</normaloff>:/icons/gravity.png</iconset>
+   </property>
+   <property name="text">
+    <string>Gravity</string>
    </property>
   </action>
  </widget>

@@ -31,6 +31,8 @@ public:
     typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
     typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
 
+    auto get_setup_channel() -> Setup_Channel&;
+
 private:
     HAL& m_hal;
     uint32_t m_last_req_id = 0;

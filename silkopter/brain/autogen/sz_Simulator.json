@@ -131,6 +131,9 @@
     "name": "Config",
     "members":
     [
+        ["bool", "simulation_enabled", {"required": true, "json_key" : "Simulation Enabled", "default" : true}],
+        ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
+        ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
         ["sz::Simulator::UAV", "uav", {"required": true, "json_key" : "UAV"}],
         ["std::vector<sz::Simulator::Motor>", "motors", {"required": true, "json_key" : "Motors"}],
         ["sz::Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],

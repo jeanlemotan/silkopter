@@ -105,6 +105,9 @@ private:
 
     void handle_clock();
 
+    void handle_simulator_stop_motion();
+    void handle_simulator_reset();
+
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
 

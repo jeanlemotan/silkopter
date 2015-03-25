@@ -1,7 +1,6 @@
 #include "GS.h"
 
 #include "HAL_Window.h"
-#include "Sim_Window.h"
 
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
@@ -51,12 +50,10 @@ GS::GS(QWidget *parent)
 //    connect(m_ui.action_connect_uav_ah, &QAction::triggered, [this](bool) { set_uav_address("10.10.10.10"); });
 //    connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
 
-    m_hal_window = new HAL_Window(m_hal, m_comms, this);
-    m_sim_window = new Sim_Window(m_hal, m_comms, m_context, this);
+    m_hal_window = new HAL_Window(m_hal, m_comms, m_context, this);
 
 
     connect(m_ui.action_hal_editor, &QAction::triggered, [this](bool) { m_hal_window->show(); });
-    connect(m_ui.action_simulator, &QAction::triggered, [this](bool) { m_sim_window->show(); });
 
 
     read_settings();
@@ -116,8 +113,8 @@ void GS::closeEvent(QCloseEvent* event)
     settings.setValue("windowState", saveState());
     settings.setValue("hal_window/geometry", m_hal_window->saveGeometry());
     settings.setValue("hal_window/windowState", m_hal_window->saveState());
-    settings.setValue("sim_window/geometry", m_sim_window->saveGeometry());
-    settings.setValue("sim_window/windowState", m_sim_window->saveState());
+//    settings.setValue("sim_window/geometry", m_sim_window->saveGeometry());
+//    settings.setValue("sim_window/windowState", m_sim_window->saveState());
 
     QMainWindow::closeEvent(event);
 }
@@ -129,8 +126,8 @@ void GS::read_settings()
     restoreState(settings.value("windowState").toByteArray());
     m_hal_window->restoreGeometry(settings.value("hal_window/geometry").toByteArray());
     m_hal_window->restoreState(settings.value("hal_window/windowState").toByteArray());
-    m_sim_window->restoreGeometry(settings.value("sim_window/geometry").toByteArray());
-    m_sim_window->restoreState(settings.value("sim_window/windowState").toByteArray());
+//    m_sim_window->restoreGeometry(settings.value("sim_window/geometry").toByteArray());
+//    m_sim_window->restoreState(settings.value("sim_window/windowState").toByteArray());
 }
 
 
@@ -158,8 +155,7 @@ void GS::process()
 
     q::System::inst().get_renderer()->begin_frame();
 
-    //m_hal_window->update();
-    m_sim_window->process();
+    m_hal_window->process();
 
 
 //	m_render_widget->begin_rendering();

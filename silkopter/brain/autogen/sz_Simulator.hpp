@@ -5638,12 +5638,15 @@ w.Key("\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10, false); Serializer< Writer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Simulator { struct Config {
- sz::Simulator::UAV uav;
+ bool simulation_enabled;
+bool ground_enabled;
+bool gravity_enabled;
+sz::Simulator::UAV uav;
 std::vector<sz::Simulator::Motor> motors;
 sz::Simulator::Inputs inputs;
 sz::Simulator::Outputs outputs;
 
-explicit Config():uav(), motors(), inputs(), outputs() {  }
+explicit Config():simulation_enabled(true), ground_enabled(true), gravity_enabled(true), uav(), motors(), inputs(), outputs() {  }
 
 
  
@@ -5660,10 +5663,16 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Simulator::UAV > handler_0;
-SAXEventHandler< std::vector<sz::Simulator::Motor> > handler_1;
-SAXEventHandler< sz::Simulator::Inputs > handler_2;
-SAXEventHandler< sz::Simulator::Outputs > handler_3;bool has_uav;
+    SAXEventHandler< bool > handler_0;
+SAXEventHandler< bool > handler_1;
+SAXEventHandler< bool > handler_2;
+SAXEventHandler< sz::Simulator::UAV > handler_3;
+SAXEventHandler< std::vector<sz::Simulator::Motor> > handler_4;
+SAXEventHandler< sz::Simulator::Inputs > handler_5;
+SAXEventHandler< sz::Simulator::Outputs > handler_6;bool has_simulation_enabled;
+bool has_ground_enabled;
+bool has_gravity_enabled;
+bool has_uav;
 bool has_motors;
 bool has_inputs;
 bool has_outputs;
@@ -5681,12 +5690,18 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "uav";
+    return "simulation_enabled";
 case 1:
-    return "motors";
+    return "ground_enabled";
 case 2:
-    return "inputs";
+    return "gravity_enabled";
 case 3:
+    return "uav";
+case 4:
+    return "motors";
+case 5:
+    return "inputs";
+case 6:
     return "outputs";
         default:
             break;
@@ -5714,7 +5729,10 @@ case 3:
 
     void reset_flags()
     {
-        has_uav = false;
+        has_simulation_enabled = false;
+has_ground_enabled = false;
+has_gravity_enabled = false;
+has_uav = false;
 has_motors = false;
 has_inputs = false;
 has_outputs = false;
@@ -5724,10 +5742,13 @@ public:
     explicit SAXEventHandler( ::sz::Simulator::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->uav)
-, handler_1(&obj->motors)
-, handler_2(&obj->inputs)
-, handler_3(&obj->outputs)
+        , handler_0(&obj->simulation_enabled)
+, handler_1(&obj->ground_enabled)
+, handler_2(&obj->gravity_enabled)
+, handler_3(&obj->uav)
+, handler_4(&obj->motors)
+, handler_5(&obj->inputs)
+, handler_6(&obj->outputs)
     {
         reset_flags();
     }
@@ -5750,6 +5771,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
+
+case 6:
+    return checked_event_forwarding(handler_6.Null());
 
         default:
             break;
@@ -5776,6 +5806,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
+case 6:
+    return checked_event_forwarding(handler_6.Bool(b));
+
         default:
             break;
         }
@@ -5800,6 +5839,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int(i));
 
         default:
             break;
@@ -5826,6 +5874,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint(i));
+
         default:
             break;
         }
@@ -5850,6 +5907,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int64(i));
 
         default:
             break;
@@ -5876,6 +5942,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint64(i));
+
         default:
             break;
         }
@@ -5900,6 +5975,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
+
+case 6:
+    return checked_event_forwarding(handler_6.Double(d));
 
         default:
             break;
@@ -5926,6 +6010,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.String(str, length, copy));
+
         default:
             break;
         }
@@ -5940,14 +6033,20 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x55\x41\x56", 3))
-						 { state=0; has_uav = true; }
+            else if (utility::string_equal(str, length, "\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18))
+						 { state=0; has_simulation_enabled = true; }
+else if (utility::string_equal(str, length, "\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14))
+						 { state=1; has_ground_enabled = true; }
+else if (utility::string_equal(str, length, "\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15))
+						 { state=2; has_gravity_enabled = true; }
+else if (utility::string_equal(str, length, "\x55\x41\x56", 3))
+						 { state=3; has_uav = true; }
 else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x73", 6))
-						 { state=1; has_motors = true; }
+						 { state=4; has_motors = true; }
 else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=2; has_inputs = true; }
+						 { state=5; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+						 { state=6; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -5967,6 +6066,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.Key(str, length, copy));
 
             default:
                 break;
@@ -5994,6 +6102,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartArray());
+
         default:
             break;
         }
@@ -6019,6 +6136,15 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
 
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndArray(length));
+
         default:
             break;
         }
@@ -6043,6 +6169,15 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartObject());
 
             default:
                 break;
@@ -6070,11 +6205,23 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
 
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_uav) set_missing_required("uav");
+            if (!has_simulation_enabled) set_missing_required("simulation_enabled");
+if (!has_ground_enabled) set_missing_required("ground_enabled");
+if (!has_gravity_enabled) set_missing_required("gravity_enabled");
+if (!has_uav) set_missing_required("uav");
 if (!has_motors) set_missing_required("motors");
 if (!has_inputs) set_missing_required("inputs");
 if (!has_outputs) set_missing_required("outputs");
@@ -6104,6 +6251,12 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
+case 6:
+     handler_6.ReapError(errs); break;
 
         default:
             break;
@@ -6122,6 +6275,9 @@ case 3:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
 
     }
 };
@@ -6133,12 +6289,15 @@ struct Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df3
     {
         w.StartObject();
 
-        w.Key("\x55\x41\x56", 3, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::UAV >()(w, value.uav);
+        w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.simulation_enabled);
+w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.ground_enabled);
+w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.gravity_enabled);
+w.Key("\x55\x41\x56", 3, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::UAV >()(w, value.uav);
 w.Key("\x4d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, std::vector<sz::Simulator::Motor> >()(w, value.motors);
 w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::Inputs >()(w, value.inputs);
 w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::Outputs >()(w, value.outputs);
 
-        w.EndObject(4);
+        w.EndObject(7);
     }
 
 };
