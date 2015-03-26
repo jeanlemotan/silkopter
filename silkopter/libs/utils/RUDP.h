@@ -733,6 +733,26 @@ namespace util
             auto id = packet->any_header.id;
             QASSERT(id > 0);
 
+            //is it from the past?
+            if (id <= last_packet_id)
+            {
+                m_global_stats.rx_zombie_datagrams++;
+
+    //            if (header.channel_idx == 12)
+    //            {
+    //                QLOGW("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
+    //            }
+
+                if (packet->any_header.flag_is_reliable)
+                {
+                    add_packet_cancellation(channel_idx, id);
+                }
+
+                queue.packets.erase(queue.packets.begin());
+                m_global_stats.rx_dropped_packets++;
+                continue;
+            }
+
             auto now = q::Clock::now();
             auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
             bool is_late = (max_receive_time.count() > 0 && now - packet->added >= max_receive_time);
@@ -1394,22 +1414,6 @@ namespace util
         auto channel_idx = header.channel_idx;
         auto fragment_idx = header.fragment_idx;
         auto id = header.id;
-        if (id <= m_rx.last_packet_ids[channel_idx])
-        {
-            m_global_stats.rx_zombie_datagrams++;
-
-//            if (header.channel_idx == 12)
-//            {
-//                QLOGW("Blast from the past - datagram {} for packet {}.", fragment_idx, id);
-//            }
-
-            if (header.flag_is_reliable)
-            {
-                add_packet_cancellation(channel_idx, id);
-            }
-
-            return;
-        }
 
         if (header.flag_is_reliable)
         {
