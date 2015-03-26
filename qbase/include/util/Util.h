@@ -114,7 +114,7 @@ namespace util
 	template<class T>
 	std::vector<std::pair<size_t, size_t>> tokenize_range(T const& str, T const& delimiters)
 	{
-		std::vector<T> tokens;
+        std::vector<std::pair<size_t, size_t>> tokens;
 		tokens.reserve(1000);
 
 		size_t p0 = 0, p1 = T::npos;
