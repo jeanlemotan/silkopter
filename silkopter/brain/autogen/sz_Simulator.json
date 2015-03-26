@@ -103,39 +103,13 @@
 {
     "definition" : true,
     "namespace" : "sz::Simulator",
-    "name": "Motor",
-    "members":
-    [
-        ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
-        ["math::vec2f", "position", {"required": true, "json_key" : "Position"}],
-        ["float", "max_thrust", {"required": true, "json_key" : "Thrust @ 100% (N)"}],
-        ["float", "max_rpm", {"required": true, "json_key" : "RPM @ 100%"}],
-        ["float", "acceleration", {"required": true, "json_key" : "Acceleration (RPM/s)"}],
-        ["float", "deceleration", {"required": true, "json_key" : "Deceleration (RPM/s)"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Simulator",
-    "name": "UAV",
-    "members":
-    [
-        ["float", "mass", {"required": true, "json_key" : "Mass (Kg)", "default" : 0.7}],
-        ["float", "height", {"required": true, "json_key" : "Height (m)", "default" : 0.1}],
-        ["float", "radius", {"required": true, "json_key" : "Radius (m)", "default" : 0.4}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Simulator",
     "name": "Config",
     "members":
     [
         ["bool", "simulation_enabled", {"required": true, "json_key" : "Simulation Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
         ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
-        ["sz::Simulator::UAV", "uav", {"required": true, "json_key" : "UAV"}],
-        ["std::vector<sz::Simulator::Motor>", "motors", {"required": true, "json_key" : "Motors"}],
+        ["silk::node::ISimulator::UAV_Config", "uav_config", {"required": true, "json_key" : "UAV Config"}],
         ["sz::Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
         ["sz::Simulator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
