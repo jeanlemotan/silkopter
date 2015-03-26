@@ -7,6 +7,7 @@
 #include "Comms.h"
 #include "Render_Widget.h"
 #include "Camera_Controller_3D.h"
+#include "common/node/processor/ISimulator.h"
 
 class Sim_Window : public QMainWindow
 {
@@ -39,8 +40,12 @@ private:
 
     struct UAV
     {
-        math::vec3f position;
-        math::quatf local_to_enu;
+        silk::node::ISimulator::UAV_Config config;
+        silk::node::ISimulator::UAV_State state;
     } m_uav;
+
+    bool m_needs_state = true;
+
+    math::vec3f m_camera_position_target;
 };
 

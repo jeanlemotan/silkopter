@@ -62,6 +62,7 @@ private:
     void handle_enumerate_node_defs();
     void handle_streams_telemetry_active();
 
+    void handle_node_message();
     void handle_node_data();
     void handle_add_node();
     void handle_remove_node();

@@ -29,12 +29,10 @@ enum class Setup_Message : uint8_t
     ADD_NODE,
     REMOVE_NODE,
     NODE_CONFIG,
+    NODE_MESSAGE,
     NODE_DATA,
 
     STREAM_TELEMETRY_ACTIVE,
-
-    SIMULATOR_STOP_MOTION,
-    SIMULATOR_RESET,
 
     COUNT //keep last
 };

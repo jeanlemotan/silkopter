@@ -192,6 +192,10 @@ auto Motor_Mixer::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
+auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
+}
 
 
 }

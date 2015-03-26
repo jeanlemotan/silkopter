@@ -35,6 +35,8 @@ public:
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() const -> rapidjson::Document = 0;
 
+    virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
+
     struct Input
     {
         stream::Type type;

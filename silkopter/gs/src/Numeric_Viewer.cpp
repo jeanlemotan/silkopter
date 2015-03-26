@@ -171,7 +171,7 @@ void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src)
     double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
     if (tpd < m_tp)
     {
-        QLOGE("Sample from the past!!");
+        //QLOGE("Sample from the past!!");
         return;
     }
 

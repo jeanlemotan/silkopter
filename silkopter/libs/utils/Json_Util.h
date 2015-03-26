@@ -8,8 +8,8 @@ namespace jsonutil
 //	using namespace rapidjson;
 //	typedef rapidjson::Type Type;
 
-    template <class STRING>
-    rapidjson::Value* find_value(rapidjson::Value& value, STRING const& name)
+    template <class T, class STRING>
+    T* find_value(T& value, STRING const& name)
     {
         if (name.empty())
         {
@@ -20,7 +20,7 @@ namespace jsonutil
             char buffer[32] = {0};
             memcpy(buffer, name.c_str() + 1, name.size() - 2); //remove the []
             int idx = atoi(buffer);
-            if (idx >= 0 && idx < value.Size())
+            if (idx >= 0 && idx < (int)value.Size())
             {
                 return &value[idx];
             }
@@ -28,18 +28,17 @@ namespace jsonutil
         }
         if (value.IsObject())
         {
-            for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++)
+            auto m = value.FindMember(name.c_str());
+            if (m != value.MemberEnd())
             {
-                if (name == it->name.GetString())
-                {
-                    return &it->value;
-                }
+                return &m->value;
             }
         }
         return nullptr;
     }
 
-    inline rapidjson::Value* find_value(rapidjson::Value& value, q::Path const& path)
+    template <class T>
+    inline T* find_value(T& value, q::Path const& path)
     {
         if (path.is_empty())
         {
@@ -55,11 +54,39 @@ namespace jsonutil
     }
 
     template <class STRING>
+    rapidjson::Value* find_value(rapidjson::Document& document, STRING const& name)
+    {
+        return find_value(static_cast<rapidjson::Value&>(document), name);
+    }
+    template <class STRING>
+    rapidjson::Value const* find_value(rapidjson::Document const& document, STRING const& name)
+    {
+        return find_value(static_cast<rapidjson::Value const&>(document), name);
+    }
+    inline rapidjson::Value* find_value(rapidjson::Document& document, q::Path const& path)
+    {
+        return find_value(static_cast<rapidjson::Value&>(document), path);
+    }
+    inline rapidjson::Value const* find_value(rapidjson::Document const& document, q::Path const& path)
+    {
+        return find_value(static_cast<rapidjson::Value const&>(document), path);
+    }
+
+
+    template <class STRING>
     inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, STRING const& name, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)
     {
         auto v = find_value(json, name);
         if (v == nullptr)
         {
+            if (json.IsNull())
+            {
+                json.SetObject();
+            }
+            if (!json.IsObject())
+            {
+                return nullptr;
+            }
             rapidjson::Value n(name.c_str(), name.size(), allocator);
             rapidjson::Value value(type);
             json.AddMember(std::move(n), std::move(value), allocator);
@@ -111,6 +138,15 @@ namespace jsonutil
         if (v != nullptr)
         {
             return false;
+        }
+
+        if (json.IsNull())
+        {
+            json.SetObject();
+        }
+        if (!json.IsObject())
+        {
+            return nullptr;
         }
 
         rapidjson::Value n(name.c_str(), name.size(), allocator);

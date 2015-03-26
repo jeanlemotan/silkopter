@@ -135,6 +135,11 @@ auto ADC_Voltmeter::get_init_params() const -> rapidjson::Document const&
     return m_init_paramsj;
 }
 
+auto ADC_Voltmeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
+}
+
 
 }
 }

@@ -417,7 +417,7 @@ auto Comms::link_input_streams(node::Node_ptr node) -> bool
     for (auto& i: node->inputs)
     {
         //find the connection in the config
-        q::Path input_path("inputs/" + i.name);
+        q::Path input_path("Inputs/" + i.name);
         auto* input_streamj = jsonutil::find_value(node->config, input_path);
         if (!input_streamj || !input_streamj->IsString())
         {
@@ -502,6 +502,47 @@ void Comms::handle_enumerate_nodes()
     m_hal.nodes_refreshed_signal.execute();
 }
 
+
+void Comms::handle_node_message()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    bool ok = m_setup_channel.begin_unpack() &&
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(name);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack node message");
+        return;
+    }
+
+    auto it = std::find_if(begin(m_hal.m_send_node_message_queue), end(m_hal.m_send_node_message_queue), [&](HAL::Send_Node_Message_Queue_Item const& i) { return i.req_id == req_id; });
+    QASSERT(it != m_hal.m_send_node_message_queue.end());
+    if (it == m_hal.m_send_node_message_queue.end())
+    {
+        QLOGE("Cannot find node message request {}", req_id);
+        return;
+    }
+
+    auto node = m_hal.get_nodes().find_by_name(name);
+    if (!node)
+    {
+        it->callback(HAL::Result::FAILED, rapidjson::Document());
+        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        return;
+    }
+
+    QLOGI("Req Id: {}, node '{}' - message received", req_id, name);
+
+    rapidjson::Document json;
+    if (!unpack_json(m_setup_channel, json))
+    {
+        it->callback(HAL::Result::FAILED, rapidjson::Document());
+        QLOGE("Req Id: {}, node '{}' - failed to unpack message", req_id, name);
+    }
+
+    it->callback(HAL::Result::OK, std::move(json));
+}
 
 void Comms::handle_node_data()
 {
@@ -812,6 +853,31 @@ void Comms::send_hal_requests()
             ++it;
         }
     }
+
+    for (auto it = m_hal.m_send_node_message_queue.begin(); it != m_hal.m_send_node_message_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(req.message);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.name);
+            pack_json(m_setup_channel, req.json);
+            m_setup_channel.end_pack();
+        }
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT, rapidjson::Document());
+            m_hal.m_send_node_message_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 
@@ -841,6 +907,7 @@ void Comms::process()
             case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
             case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
+            case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
             case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
             case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
             case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;

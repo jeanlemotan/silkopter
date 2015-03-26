@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/node/processor/ISimulator.h"
+
 namespace silk
 {
 namespace node
@@ -22,47 +24,27 @@ inline btQuaternion quatf_to_bt(math::quatf const& v)
     return btQuaternion(v.x, v.y, v.z, v.w);
 }
 
-class World : q::util::Noncopyable
+class Simulation : q::util::Noncopyable
 {
 public:
 
-    World();
-	~World();
+    Simulation();
+    ~Simulation();
 
-    auto init_world(uint32_t rate) -> bool;
+    auto init(uint32_t rate) -> bool;
 
-    struct Motor_Config
-    {
-        math::vec2f position;
-        bool clockwise = true;
-        float max_thrust = 0; //N
-        float max_rpm = 0; //rot/min
-        float acceleration = 0;
-        float deceleration = 0;
-    };
-
-    struct UAV_Config
-    {
-        float radius = 0.5f;
-        float height = 0.3f;
-        float mass = 0.7f; //Kg
-        std::vector<Motor_Config> motors;
-    };
-
-    auto init_uav(UAV_Config const& config) -> bool;
+    auto init_uav(ISimulator::UAV_Config const& config) -> bool;
 
     void reset();
+    void stop_motion();
 
-    void process(q::Clock::duration dt, std::function<void(World&, q::Clock::duration)> const& callback);
+    void process(q::Clock::duration dt, std::function<void(Simulation&, q::Clock::duration)> const& callback);
 
     void set_gravity_enabled(bool yes);
     void set_ground_enabled(bool yes);
     void set_simulation_enabled(bool yes);
 
-    auto get_uav_enu_position() const -> math::vec3f const&;
-    auto get_uav_local_to_enu_rotation() const -> math::quatf const&;
-    auto get_uav_acceleration() const -> math::vec3f const&;
-    auto get_uav_angular_velocity() const -> math::vec3f const&;
+    auto get_uav_state() const -> ISimulator::UAV_State const&;
 
 private:
     void process_world(q::Clock::duration dt);
@@ -74,33 +56,17 @@ private:
     uint32_t m_rate = 0;
     q::Clock::duration m_dt;
 
-    struct Motor
-    {
-        float drag = 0;
-        float throttle = 0;
-        float thrust = 0;
-        float rpm = 0;
-    };
-
     struct UAV
     {
-        UAV_Config config;
+        ISimulator::UAV_Config config;
         std::unique_ptr<btCylinderShapeZ> shape;
         std::unique_ptr<btMotionState> motion_state;
         std::unique_ptr<btRigidBody> body;
-        math::vec3f enu_position;
-        math::vec3f enu_velocity;
-        math::vec3f enu_linear_acceleration;
-        math::vec3f acceleration;
-        math::quatf local_to_enu_rotation;
-        math::quatf enu_to_local_rotation;
-        math::vec3f angular_velocity;
-
-        std::vector<Motor> motors;
+        ISimulator::UAV_State state;
     } m_uav;
 
-    math::vec3f m_old_linear_velocity;
-    math::quatf m_old_rotation;
+//    math::vec3f m_old_linear_velocity;
+//    math::quatf m_old_rotation;
 
 //    silk::Accelerometer_Sample m_accelerometer_sample;
 //    q::Clock::time_point m_last_accelerometer_time_point;

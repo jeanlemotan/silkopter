@@ -24,6 +24,8 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
+    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -153,6 +155,11 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     }
 
     return true;
+}
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
 }
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> rapidjson::Document

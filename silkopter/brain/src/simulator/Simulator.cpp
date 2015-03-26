@@ -2,6 +2,7 @@
 #include "Simulator.h"
 
 #include "sz_math.hpp"
+#include "sz_Simulator_Structs.hpp"
 #include "sz_Simulator.hpp"
 
 namespace silk
@@ -83,7 +84,7 @@ auto Simulator::init() -> bool
         QLOGE("Bad motor count: {}", m_init_params->motor_count);
         return false;
     }
-    if (!m_world.init_world(1000))
+    if (!m_simulation.init(1000))
     {
         return false;
     }
@@ -120,7 +121,7 @@ auto Simulator::init() -> bool
 
 
     m_input_pwm_streams.resize(m_init_params->motor_count);
-    m_config->motors.resize(m_init_params->motor_count);
+    m_config->uav_config.motors.resize(m_init_params->motor_count);
     m_config->inputs.pwm.resize(m_init_params->motor_count);
 
     return true;
@@ -180,29 +181,30 @@ void Simulator::process()
     m_distance_stream->samples.clear();
     m_ecef_location_stream->samples.clear();
 
-    m_world.process(dt, [this](World& world, q::Clock::duration world_dt)
+    m_simulation.process(dt, [this](Simulation& simulation, q::Clock::duration simulation_dt)
     {
+        auto const& uav_state = simulation.get_uav_state();
         {
             auto& stream = *m_angular_velocity_stream;
-            stream.accumulated_dt += world_dt;
+            stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.last_sample.dt)
             {
                 stream.accumulated_dt -= stream.last_sample.dt;
                 stream.last_sample.tp += stream.last_sample.dt;
                 stream.last_sample.sample_idx++;
-                stream.last_sample.value = world.get_uav_angular_velocity();
+                stream.last_sample.value = uav_state.angular_velocity;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
             auto& stream = *m_acceleration_stream;
-            stream.accumulated_dt += world_dt;
+            stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.last_sample.dt)
             {
                 stream.accumulated_dt -= stream.last_sample.dt;
                 stream.last_sample.tp += stream.last_sample.dt;
                 stream.last_sample.sample_idx++;
-                stream.last_sample.value = world.get_uav_acceleration();
+                stream.last_sample.value = uav_state.acceleration;
                 stream.samples.push_back(stream.last_sample);
             }
         }
@@ -223,28 +225,28 @@ auto Simulator::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    World::UAV_Config uav_config;
-    uav_config.mass = sz.uav.mass;
-    uav_config.radius = sz.uav.radius;
-    uav_config.height = sz.uav.height;
-    uav_config.motors.resize(sz.motors.size());
-    for (size_t i = 0; i < uav_config.motors.size(); i++)
-    {
-        uav_config.motors[i].position = sz.motors[i].position;
-        uav_config.motors[i].clockwise = sz.motors[i].clockwise;
-        uav_config.motors[i].max_thrust = sz.motors[i].max_thrust;
-        uav_config.motors[i].max_rpm = sz.motors[i].max_rpm;
-        uav_config.motors[i].acceleration = sz.motors[i].acceleration;
-        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
-    }
-    if (!m_world.init_uav(uav_config))
+//    Simulation::UAV_Config uav_config;
+//    uav_config.mass = sz.uav.mass;
+//    uav_config.radius = sz.uav.radius;
+//    uav_config.height = sz.uav.height;
+//    uav_config.motors.resize(sz.motors.size());
+//    for (size_t i = 0; i < uav_config.motors.size(); i++)
+//    {
+//        uav_config.motors[i].position = sz.motors[i].position;
+//        uav_config.motors[i].clockwise = sz.motors[i].clockwise;
+//        uav_config.motors[i].max_thrust = sz.motors[i].max_thrust;
+//        uav_config.motors[i].max_rpm = sz.motors[i].max_rpm;
+//        uav_config.motors[i].acceleration = sz.motors[i].acceleration;
+//        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
+//    }
+    if (!m_simulation.init_uav(sz.uav_config))
     {
         return false;
     }
 
-    m_world.set_gravity_enabled(sz.gravity_enabled);
-    m_world.set_ground_enabled(sz.ground_enabled);
-    m_world.set_simulation_enabled(sz.simulation_enabled);
+    m_simulation.set_gravity_enabled(sz.gravity_enabled);
+    m_simulation.set_ground_enabled(sz.ground_enabled);
+    m_simulation.set_simulation_enabled(sz.simulation_enabled);
 
     *m_config = sz;
 
@@ -260,6 +262,42 @@ auto Simulator::get_config() const -> rapidjson::Document
 auto Simulator::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
+}
+auto Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
+{
+    rapidjson::Document response;
+
+    auto* messagej = jsonutil::find_value(json, std::string("message"));
+    if (!messagej)
+    {
+        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
+    }
+    else if (!messagej->IsString())
+    {
+        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
+    }
+    else
+    {
+        std::string message = messagej->GetString();
+        if (message == "reset")
+        {
+            m_simulation.reset();
+        }
+        else if (message == "stop motion")
+        {
+            m_simulation.stop_motion();
+        }
+        else if (message == "get state")
+        {
+            auto const& state = m_simulation.get_uav_state();
+            autojsoncxx::to_document(state, response);
+        }
+        else
+        {
+            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
+        }
+    }
+    return std::move(response);
 }
 
 

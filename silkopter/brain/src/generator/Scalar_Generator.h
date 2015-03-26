@@ -24,6 +24,8 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
+    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -132,6 +134,12 @@ auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> boo
     m_config = sz;
 
     return true;
+}
+
+template<class Stream_t>
+auto Scalar_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
 }
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::get_config() const -> rapidjson::Document

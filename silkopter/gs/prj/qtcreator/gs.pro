@@ -91,7 +91,6 @@ HEADERS += \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/utils/Channel.h \
-    ../../../libs/utils/Json_Helpers.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/RUDP.h \
     ../../../libs/utils/Serial_Channel.h \
@@ -146,7 +145,8 @@ HEADERS += \
     ../../src/Sim_Window.h \
     ../../src/GL_Widget.h \
     ../../src/Render_Widget.h \
-    ../../src/Camera_Controller_3D.h
+    ../../src/Camera_Controller_3D.h \
+    ../../../libs/utils/Json_Util.h
 
 SOURCES += \
     ../../src/GS.cpp \

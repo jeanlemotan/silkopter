@@ -28,7 +28,7 @@
 #include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
 
-#include "utils/Json_Helpers.h"
+#include "utils/Json_Util.h"
 
 namespace silk
 {
@@ -451,6 +451,9 @@ public:
     typedef std::function<void(Result)> Stream_Telemetry_Callback;
     void set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback);
 
+    typedef std::function<void(Result, rapidjson::Document)> Node_Message_Callback;
+    void send_node_message(node::Node_ptr node, rapidjson::Document json, Node_Message_Callback callback);
+
     q::util::Signal<void()> node_defs_refreshed_signal;
     q::util::Signal<void()> nodes_refreshed_signal;
 
@@ -501,6 +504,15 @@ protected:
         Stream_Telemetry_Callback callback;
     };
     std::vector<Stream_Telemetry_Queue_Item> m_stream_telemetry_queue;
+
+    struct Send_Node_Message_Queue_Item : public Queue_Item
+    {
+        silk::comms::Setup_Message message;
+        std::string name;
+        rapidjson::Document json;
+        Node_Message_Callback callback;
+    };
+    std::vector<Send_Node_Message_Queue_Item> m_send_node_message_queue;
 
 private:
 

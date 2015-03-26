@@ -11,7 +11,7 @@
 #include "common/node/stream/IPWM.h"
 #include "common/node/processor/ISimulator.h"
 
-#include "World.h"
+#include "Simulation.h"
 
 
 namespace sz
@@ -38,6 +38,8 @@ public:
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
+
+    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
@@ -129,7 +131,7 @@ private:
 
     std::vector<stream::IPWM_wptr> m_input_pwm_streams;
 
-    World m_world;
+    Simulation m_simulation;
 };
 
 

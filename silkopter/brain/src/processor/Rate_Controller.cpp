@@ -189,6 +189,10 @@ auto Rate_Controller::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
+auto Rate_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
+}
 
 
 }

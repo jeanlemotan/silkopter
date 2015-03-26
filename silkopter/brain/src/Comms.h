@@ -56,6 +56,7 @@ public:
         auto get_init_params() const -> rapidjson::Document const&;
         auto set_config(rapidjson::Value const& json) -> bool;
         auto get_config() const -> rapidjson::Document;
+        auto send_message(rapidjson::Value const& json) -> rapidjson::Document { return rapidjson::Document(); }
         auto get_outputs() const -> std::vector<Output>;
         void process();
     private:
@@ -112,14 +113,8 @@ private:
     void handle_enumerate_nodes();
 
     void handle_node_config();
+    void handle_node_message();
 
-    void handle_source_config();
-    void handle_sink_config();
-    void handle_processor_config();
-    void handle_stream_config();
-
-    void handle_add_source();
-    void handle_add_sink();
     void handle_add_node();
 
     void handle_streams_telemetry_active();

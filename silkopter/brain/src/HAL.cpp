@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "Comms.h"
-#include "utils/Json_Helpers.h"
+#include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +43,8 @@
 #include "generator/Vec3_Generator.h"
 #include "generator/Scalar_Generator.h"
 
+
+//#include "source/EHealth.h"
 
 //#include "common/node/IAHRS.h"
 
@@ -330,6 +332,8 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<Simulator>("Simulator", *this);
 
+    //m_node_factory.register_node<EHealth>("EHealth", *this);
+
     m_node_factory.register_node<MPU9250>("MPU9250", *this);
     m_node_factory.register_node<MS5611>("MS5611", *this);
     m_node_factory.register_node<SRF02>("SRF02", *this);
@@ -571,8 +575,8 @@ auto HAL::init(Comms& comms) -> bool
 //    }
 //    write_gnu_plot("out.dat", out_samples);
 
-    auto* busesj = jsonutil::find_value(settingsj, q::Path("hal/buses"));
-    auto* nodesj = jsonutil::find_value(settingsj, q::Path("hal/nodes"));
+    auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/buses"));
+    auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/nodes"));
 
     if ((busesj && !create_buses(*busesj)) ||
         (nodesj && !create_nodes(*nodesj)))

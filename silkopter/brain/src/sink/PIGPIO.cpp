@@ -241,6 +241,11 @@ auto PIGPIO::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
+auto PIGPIO::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
+}
+
 
 }
 }

@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "World.h"
+#include "Simulation.h"
 #include "physics/constants.h"
 
 namespace silk
@@ -9,7 +9,7 @@ namespace node
 
 //////////////////////////////////////////////////////////////////////////
 
-World::World()
+Simulation::Simulation()
 {
     auto now = q::Clock::now();
 
@@ -20,11 +20,11 @@ World::World()
 
 }
 
-World::~World()
+Simulation::~Simulation()
 {
 }
 
-auto World::init_world(uint32_t rate) -> bool
+auto Simulation::init(uint32_t rate) -> bool
 {
     if (rate == 0)
     {
@@ -62,7 +62,7 @@ auto World::init_world(uint32_t rate) -> bool
     return true;
 }
 
-auto World::init_uav(UAV_Config const& config) -> bool
+auto Simulation::init_uav(ISimulator::UAV_Config const& config) -> bool
 {
     if (math::is_zero(config.mass, math::epsilon<float>()))
     {
@@ -82,12 +82,15 @@ auto World::init_uav(UAV_Config const& config) -> bool
 
     m_uav.config = config;
 
-    m_uav.motors.clear();
-    m_uav.motors.resize(m_uav.config.motors.size());
-    q::util::Rand rnd;
-    for (auto& m: m_uav.motors)
+    if (m_uav.state.motors.size() != m_uav.config.motors.size())
     {
-        m.drag = rnd.get_positive_float() * 0.2f + 0.1f;
+        m_uav.state.motors.clear();
+        m_uav.state.motors.resize(m_uav.config.motors.size());
+        q::util::Rand rnd;
+        for (auto& m: m_uav.state.motors)
+        {
+            m.drag_factor = rnd.get_positive_float() * 0.2f + 0.1f;
+        }
     }
 
     if (m_uav.body)
@@ -100,9 +103,15 @@ auto World::init_uav(UAV_Config const& config) -> bool
 
     m_uav.shape.reset(new btCylinderShapeZ(btVector3(m_uav.config.radius, m_uav.config.radius, m_uav.config.height*0.5f)));
 
+    if (m_is_ground_enabled)
+    {
+        m_uav.state.enu_position.z = math::max(m_uav.state.enu_position.z, m_uav.config.height*0.5f);
+    }
+
     btTransform transform;
     transform.setIdentity();
-    transform.setOrigin(btVector3(0, 0, m_uav.config.height));
+    transform.setOrigin(vec3f_to_bt(m_uav.state.enu_position));
+    transform.setRotation(quatf_to_bt(m_uav.state.local_to_enu_rotation));
 
     btVector3 local_inertia(0, 0, 0);
     m_uav.shape->calculateLocalInertia(m_uav.config.mass, local_inertia);
@@ -116,15 +125,62 @@ auto World::init_uav(UAV_Config const& config) -> bool
 
     m_world->addRigidBody(m_uav.body.get());
 
+    m_uav.body->setLinearVelocity(vec3f_to_bt(m_uav.state.enu_velocity));
+    m_uav.body->setAngularVelocity(vec3f_to_bt(m_uav.state.angular_velocity));
+
     return true;
 }
-void World::reset()
+void Simulation::reset()
 {
-    //reset the uav
-    //m_uav.reset();
+    btTransform trans;
+    trans.setIdentity();
+    trans.setOrigin(btVector3(0, 0, m_uav.config.height/2.f));
+    m_uav.body->setWorldTransform(trans);
+    m_uav.body->setAngularVelocity(btVector3(0, 0, 0));
+    m_uav.body->setLinearVelocity(btVector3(0, 0, 0));
+    m_uav.body->clearForces();
+
+    m_uav.state.acceleration = math::vec3f::zero;
+    m_uav.state.angular_velocity = math::vec3f::zero;
+    m_uav.state.enu_linear_acceleration = math::vec3f::zero;
+    m_uav.state.enu_position = math::vec3f::zero;
+    m_uav.state.enu_velocity = math::vec3f::zero;
+    m_uav.state.local_to_enu_rotation  = math::quatf::identity;
+    for (auto& m: m_uav.state.motors)
+    {
+        m.rpm = 0;
+        m.throttle = 0;
+        m.thrust = 0;
+    }
 }
 
-void World::process(q::Clock::duration dt, std::function<void(World&, q::Clock::duration)> const& callback)
+void Simulation::stop_motion()
+{
+    m_uav.body->clearForces();
+    m_uav.body->setLinearVelocity(btVector3(0, 0, 0));
+    m_uav.body->setAngularVelocity(btVector3(0, 0, 0));
+
+    btTransform wt;
+    m_uav.motion_state->getWorldTransform(wt);
+
+    {
+        auto rotation = bt_to_quatf(wt.getRotation());
+        m_uav.state.local_to_enu_rotation = rotation;
+        m_uav.state.angular_velocity = math::vec3f::zero;
+    }
+
+    {
+        auto new_position = bt_to_vec3f(wt.getOrigin());
+        m_uav.state.enu_position = new_position;
+        m_uav.state.enu_linear_acceleration = math::vec3f::zero;
+        m_uav.state.enu_velocity = math::vec3f::zero;
+        auto enu_to_local = math::inverse(m_uav.state.local_to_enu_rotation);
+        m_uav.state.acceleration = math::rotate(enu_to_local, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
+    }
+
+}
+
+void Simulation::process(q::Clock::duration dt, std::function<void(Simulation&, q::Clock::duration)> const& callback)
 {
     m_physics_duration += dt;
     //m_duration_to_simulate = math::min(m_duration_to_simulate, q::Clock::duration(std::chrono::milliseconds(100)));
@@ -144,7 +200,7 @@ void World::process(q::Clock::duration dt, std::function<void(World&, q::Clock::
     }
 }
 
-void World::set_gravity_enabled(bool yes)
+void Simulation::set_gravity_enabled(bool yes)
 {
     if (m_is_gravity_enabled != yes)
     {
@@ -160,7 +216,7 @@ void World::set_gravity_enabled(bool yes)
     }
 }
 
-void World::set_ground_enabled(bool yes)
+void Simulation::set_ground_enabled(bool yes)
 {
     if (m_is_ground_enabled != yes)
     {
@@ -176,7 +232,7 @@ void World::set_ground_enabled(bool yes)
     }
 }
 
-void World::set_simulation_enabled(bool yes)
+void Simulation::set_simulation_enabled(bool yes)
 {
     m_is_simulation_enabled = yes;
 }
@@ -292,7 +348,7 @@ void World::set_simulation_enabled(bool yes)
 
 //}
 
-void World::process_world(q::Clock::duration dt)
+void Simulation::process_world(q::Clock::duration dt)
 {
     //limit angular velocity
     if (m_uav.body)
@@ -310,25 +366,7 @@ void World::process_world(q::Clock::duration dt)
     process_uav(dt);
 }
 
-auto World::get_uav_enu_position() const -> math::vec3f const&
-{
-    return m_uav.enu_position;
-}
-auto World::get_uav_local_to_enu_rotation() const -> math::quatf const&
-{
-    return m_uav.local_to_enu_rotation;
-}
-auto World::get_uav_acceleration() const -> math::vec3f const&
-{
-    return m_uav.acceleration;
-}
-auto World::get_uav_angular_velocity() const -> math::vec3f const&
-{
-    return m_uav.angular_velocity;
-}
-
-
-void World::process_uav(q::Clock::duration dt)
+void Simulation::process_uav(q::Clock::duration dt)
 {
     if (!m_uav.body)
     {
@@ -342,29 +380,29 @@ void World::process_uav(q::Clock::duration dt)
 
     {
         auto rotation = bt_to_quatf(wt.getRotation());
-        auto delta = (~m_uav.local_to_enu_rotation) * rotation;
-        m_uav.local_to_enu_rotation = rotation;
-
-        m_uav.enu_to_local_rotation = math::inverse(m_uav.local_to_enu_rotation);
+        auto delta = (~m_uav.state.local_to_enu_rotation) * rotation;
+        m_uav.state.local_to_enu_rotation = rotation;
 
         math::vec3f euler;
         delta.get_as_euler_xyz(euler);
-        m_uav.angular_velocity = euler / dts;
+        m_uav.state.angular_velocity = euler / dts;
     }
+
+    auto enu_to_local = math::inverse(m_uav.state.local_to_enu_rotation);
 
     {
         auto new_position = bt_to_vec3f(wt.getOrigin());
         auto new_velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());//(new_position - m_uav.enu_position) / dts;
-        m_uav.enu_position = new_position;
-        m_uav.enu_linear_acceleration = (new_velocity - m_uav.enu_velocity) / dts;
-        m_uav.enu_velocity = new_velocity;
-        m_uav.acceleration = math::rotate(m_uav.enu_to_local_rotation, m_uav.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
-        QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.enu_velocity, m_uav.enu_linear_acceleration, m_uav.acceleration);
+        m_uav.state.enu_position = new_position;
+        m_uav.state.enu_linear_acceleration = (new_velocity - m_uav.state.enu_velocity) / dts;
+        m_uav.state.enu_velocity = new_velocity;
+        m_uav.state.acceleration = math::rotate(enu_to_local, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
+        //QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
     }
 
     math::mat3f local_to_enu_mat;
     math::mat3f enu_to_local_mat;
-    m_uav.local_to_enu_rotation.get_as_mat3_and_inv<math::fast>(local_to_enu_mat, enu_to_local_mat);
+    m_uav.state.local_to_enu_rotation.get_as_mat3_and_inv<math::fast>(local_to_enu_mat, enu_to_local_mat);
 
     auto velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
     float air_speed = math::dot(local_to_enu_mat.get_axis_z(), velocity);
@@ -379,9 +417,9 @@ void World::process_uav(q::Clock::duration dt)
     float total_force = 0.f;
     {
         const auto dir = local_to_enu_mat.get_axis_z();
-        for (size_t i = 0; i < m_uav.motors.size(); i++)
+        for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
-            auto& m = m_uav.motors[i];
+            auto& m = m_uav.state.motors[i];
             auto& mc = m_uav.config.motors[i];
 
             {
@@ -423,16 +461,16 @@ void World::process_uav(q::Clock::duration dt)
             float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), math::normalized(velocity)));
             float drag = intensity * drag_factor;
             auto force = (-velocity) * drag;
-            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(m_uav.enu_position));
+            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(m_uav.state.enu_position));
         }
 
-        for (size_t i = 0; i < m_uav.motors.size(); i++)
+        for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
-            auto& m = m_uav.motors[i];
+            auto& m = m_uav.state.motors[i];
             auto& mc = m_uav.config.motors[i];
 
             float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), math::normalized(velocity)));
-            float drag = intensity * m.drag;
+            float drag = intensity * m.drag_factor;
             auto force = (-velocity) * drag;
 
             math::vec3f local_pos(mc.position * m_uav.config.radius);
@@ -440,6 +478,12 @@ void World::process_uav(q::Clock::duration dt)
             m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
         }
     }
+}
+
+
+auto Simulation::get_uav_state() const -> ISimulator::UAV_State const&
+{
+    return m_uav.state;
 }
 
 

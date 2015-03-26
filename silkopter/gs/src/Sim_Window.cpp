@@ -1,5 +1,8 @@
 #include "Sim_Window.h"
 
+#include "sz_math.hpp"
+#include "sz_Simulator_Structs.hpp"
+
 Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
@@ -25,11 +28,15 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
     });
     QObject::connect(m_ui.action_stop_motion, &QAction::triggered, [this](bool)
     {
-        m_comms.get_setup_channel().pack_all(silk::comms::Setup_Message::SIMULATOR_STOP_MOTION, m_sim_node->name);
+        rapidjson::Document message;
+        jsonutil::add_value(message, std::string("message"), rapidjson::Value("stop motion"), message.GetAllocator());
+        m_hal.send_node_message(m_sim_node, std::move(message), [](silk::HAL::Result, rapidjson::Document) {});
     });
     QObject::connect(m_ui.action_reset, &QAction::triggered, [this](bool)
     {
-        m_comms.get_setup_channel().pack_all(silk::comms::Setup_Message::SIMULATOR_RESET, m_sim_node->name);
+        rapidjson::Document message;
+        jsonutil::add_value(message, std::string("message"), rapidjson::Value("reset"), message.GetAllocator());
+        m_hal.send_node_message(m_sim_node, std::move(message), [](silk::HAL::Result, rapidjson::Document) {});
     });
     QObject::connect(m_ui.action_ground, &QAction::triggered, [this](bool v)
     {
@@ -98,12 +105,25 @@ void Sim_Window::read_config()
     {
         m_ui.action_ground->setChecked(vj->GetBool());
     }
+
+    vj = jsonutil::find_value(m_sim_node->config, std::string("UAV Config"));
+    if (vj)
+    {
+        autojsoncxx::error::ErrorStack result;
+        m_uav.config = silk::node::ISimulator::UAV_Config();
+        if (!autojsoncxx::from_value(m_uav.config, *vj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize position data: {}", ss.str());
+        }
+    }
 }
 
 
 void Sim_Window::render_ground()
 {
-    math::vec3s32 offset(m_uav.position);
+    math::vec3s32 offset(m_uav.state.enu_position);
     offset.z = 0;
 
     math::trans3df trans;
@@ -144,8 +164,8 @@ void Sim_Window::render_ground()
 void Sim_Window::render_uav()
 {
     math::trans3df trans;
-    trans.set_rotation(m_uav.local_to_enu);
-    trans.set_translation(m_uav.position);
+    trans.set_rotation(m_uav.state.local_to_enu_rotation);
+    trans.set_translation(m_uav.state.enu_position);
     m_context.painter.push_post_clip_transform(trans);
 
     m_context.painter.set_material(m_context.materials.primitive);
@@ -157,15 +177,18 @@ void Sim_Window::render_uav()
         //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
         //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
 
-//        const float motor_radius = 0.12f;
-//        for (auto const& m : m_uav.m_motors)
-//        {
-//            auto const& config = m.get_config();
-
-//            m_context.painter.draw_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFFFFFFFF), motor_radius);
-//            float ratio = m.compute_rpm() / (config.Kv * m_config.battery.volts);
-//            m_context.painter.fill_circle(q::draw::Vertex(config.position*m_config.uav.radius, 0xFF00FF00), motor_radius * ratio);
-//        }
+        const float motor_radius = 0.12f;
+        if (m_uav.state.motors.size() == m_uav.config.motors.size())
+        {
+            for (size_t i = 0; i < m_uav.config.motors.size(); i++)
+            {
+                auto const& mc = m_uav.config.motors[i];
+                auto const& m = m_uav.state.motors[i];
+                m_context.painter.draw_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFFFFFFFF), motor_radius);
+                float ratio = m.rpm / float(mc.max_rpm);
+                m_context.painter.fill_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFF00FF00), motor_radius * ratio);
+            }
+        }
     }
 
     m_context.painter.pop_post_clip_transform();
@@ -192,6 +215,35 @@ void Sim_Window::process()
         return;
     }
 
+    //request state
+    if (m_needs_state)
+    {
+        m_needs_state = false;
+        rapidjson::Document message;
+        jsonutil::add_value(message, std::string("message"), rapidjson::Value("get state"), message.GetAllocator());
+        m_hal.send_node_message(m_sim_node, std::move(message), [this](silk::HAL::Result result, rapidjson::Document response)
+        {
+            if (result == silk::HAL::Result::OK)
+            {
+                silk::node::ISimulator::UAV_State state;
+                autojsoncxx::error::ErrorStack result;
+                if (!autojsoncxx::from_value(state, response, result))
+                {
+                    std::ostringstream ss;
+                    ss << result;
+                    QLOGE("Cannot deserialize position data: {}", ss.str());
+                }
+                else
+                {
+                    m_uav.state = state;
+                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
+                }
+            }
+            m_needs_state = true;
+        });
+    };
+
+
     m_ui.render_widget->begin_rendering();
 
     m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_ui.render_widget->width(), m_ui.render_widget->height())));
@@ -200,8 +252,11 @@ void Sim_Window::process()
     q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
+    auto camera_offset = m_context.camera.get_position() - m_camera_position_target;
+    m_camera_position_target = math::lerp(m_camera_position_target, m_uav.state.enu_position, 0.9f);
+    m_context.camera.set_position(m_camera_position_target + camera_offset);
+    m_camera_controller.set_focus_point(m_camera_position_target);
 
-    m_camera_controller.set_focus_point(math::vec3f::zero);
     m_context.painter.set_camera(m_context.camera);
 
 //    m_context.painter.set_material(m_context.materials.primitive);

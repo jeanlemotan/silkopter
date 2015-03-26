@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
 #include "utils/Timed_Scope.h"
-#include "utils/Json_Helpers.h"
+#include "utils/Json_Util.h"
 
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IAngular_Velocity.h"
@@ -455,6 +455,42 @@ void Comms::handle_node_config()
     m_hal.save_settings();
 }
 
+void Comms::handle_node_message()
+{
+    m_setup_channel.begin_unpack();
+    uint32_t req_id = 0;
+    std::string name;
+    if (!m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(name))
+    {
+        QLOGE("Error in unpacking config rquest");
+        return;
+    }
+
+    m_setup_channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+    m_setup_channel.pack_param(req_id);
+    m_setup_channel.pack_param(name);
+
+    QLOGI("Req Id: {} - node message", req_id);
+    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
+        return;
+    }
+
+    rapidjson::Document message;
+    if (!unpack_json(m_setup_channel, message))
+    {
+        QLOGE("Req Id: {} - cannot unpack node '{}' message", req_id, name);
+        return;
+    }
+    auto response = node->send_message(message);
+
+    pack_json(m_setup_channel, response);
+    m_setup_channel.end_pack();
+}
+
 void Comms::handle_add_node()
 {
     uint32_t req_id = 0;
@@ -574,11 +610,9 @@ void Comms::process()
 
         case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
+        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
-
-        case comms::Setup_Message::SIMULATOR_STOP_MOTION: handle_simulator_stop_motion(); break;
-        case comms::Setup_Message::SIMULATOR_RESET: handle_simulator_reset(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }

@@ -34,6 +34,8 @@ public:
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
 
+    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+
     void shutdown();
 
     auto get_outputs() const -> std::vector<Output>;

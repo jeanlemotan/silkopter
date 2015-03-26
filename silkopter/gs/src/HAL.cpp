@@ -1,5 +1,5 @@
 #include "HAL.h"
-#include "utils/Json_Helpers.h"
+#include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
 
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
@@ -103,6 +103,21 @@ void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config
     item.name = node->name;
     item.config = jsonutil::clone_value(config);
     m_set_config_queue.push_back(std::move(item));
+}
+
+void HAL::send_node_message(node::Node_ptr node, rapidjson::Document json, Node_Message_Callback callback)
+{
+    QASSERT(callback);
+    if (!callback)
+    {
+        return;
+    }
+    Send_Node_Message_Queue_Item item;
+    item.message = silk::comms::Setup_Message::NODE_MESSAGE;
+    item.name = node->name;
+    item.json = std::move(json);
+    item.callback = callback;
+    m_send_node_message_queue.push_back(std::move(item));
 }
 
 void HAL::set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback)

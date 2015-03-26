@@ -260,6 +260,11 @@ auto Raspicam::get_init_params() const -> rapidjson::Document const&
     return m_init_paramsj;
 }
 
+auto Raspicam::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+{
+    return rapidjson::Document();
+}
+
 void Raspicam::shutdown()
 {
 #if defined RASPBERRY_PI
