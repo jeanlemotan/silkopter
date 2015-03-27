@@ -21,23 +21,23 @@
 
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
-#include "processor/LPF.h"
-#include "processor/Resampler.h"
 #include "processor/LiPo_Battery.h"
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_ECEF_Location.h"
-#include "processor/Pilot.h"
 #include "processor/Motor_Mixer.h"
+#include "lpf/LPF.h"
+#include "resampler/Resampler.h"
+#include "pilot/Multi_Pilot.h"
 
-#include "processor/Rate_Controller.h"
-#include "processor/Stability_Controller.h"
-#include "processor/Velocity_Controller.h"
+#include "controller/Rate_Controller.h"
+#include "controller/Stability_Controller.h"
+#include "controller/Velocity_Controller.h"
 
-#include "simulator/Simulator.h"
+#include "simulator/Multi_Simulator.h"
 
-#include "processor/Transformer.h"
-#include "processor/Transformer_Inv.h"
+#include "transformer/Transformer.h"
+#include "transformer/Transformer_Inv.h"
 
 #include "generator/Factor_Generator.h"
 #include "generator/Vec3_Generator.h"
@@ -330,7 +330,7 @@ auto HAL::init(Comms& comms) -> bool
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
 
-    m_node_factory.register_node<Simulator>("Simulator", *this);
+    m_node_factory.register_node<Multi_Simulator>("Multi Simulator", *this);
 
     //m_node_factory.register_node<EHealth>("EHealth", *this);
 
@@ -344,7 +344,8 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
 
-    m_node_factory.register_node<Pilot>("Pilot", *this);
+    m_node_factory.register_node<Multi_Pilot>("Multi Pilot", *this);
+
     m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);

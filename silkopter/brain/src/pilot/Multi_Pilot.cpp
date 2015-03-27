@@ -1,33 +1,33 @@
 #include "BrainStdAfx.h"
-#include "Pilot.h"
+#include "Multi_Pilot.h"
 
 #include "sz_math.hpp"
-#include "sz_Pilot.hpp"
+#include "sz_Multi_Pilot.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Pilot::Pilot(HAL& hal)
+Multi_Pilot::Multi_Pilot(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Pilot::Init_Params())
-    , m_config(new sz::Pilot::Config())
+    , m_init_params(new sz::Multi_Pilot::Init_Params())
+    , m_config(new sz::Multi_Pilot::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto Pilot::init(rapidjson::Value const& init_params) -> bool
+auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("pilot::init");
+    QLOG_TOPIC("multi_pilot::init");
 
-    sz::Pilot::Init_Params sz;
+    sz::Multi_Pilot::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Pilot data: {}", ss.str());
+        QLOGE("Cannot deserialize Multi_Pilot data: {}", ss.str());
         return false;
     }
     jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
@@ -35,7 +35,7 @@ auto Pilot::init(rapidjson::Value const& init_params) -> bool
     return init();
 }
 
-auto Pilot::init() -> bool
+auto Multi_Pilot::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
     if (m_init_params->rate == 0)
@@ -48,7 +48,7 @@ auto Pilot::init() -> bool
     return true;
 }
 
-auto Pilot::get_inputs() const -> std::vector<Input>
+auto Multi_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(3);
     inputs[0].type = stream::IAngular_Velocity::TYPE;
@@ -62,28 +62,28 @@ auto Pilot::get_inputs() const -> std::vector<Input>
     inputs[2].name = "Commands";
     return inputs;
 }
-auto Pilot::get_outputs() const -> std::vector<Output>
+auto Multi_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(0);
     return outputs;
 }
 
-void Pilot::process()
+void Multi_Pilot::process()
 {
-    QLOG_TOPIC("pilot::process");
+    QLOG_TOPIC("multi_pilot::process");
 }
 
-auto Pilot::set_config(rapidjson::Value const& json) -> bool
+auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("pilot::set_config");
+    QLOG_TOPIC("multi_pilot::set_config");
 
-    sz::Pilot::Config sz;
+    sz::Multi_Pilot::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Pilot config data: {}", ss.str());
+        QLOGE("Cannot deserialize Multi_Pilot config data: {}", ss.str());
         return false;
     }
 
@@ -143,19 +143,19 @@ auto Pilot::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Pilot::get_config() const -> rapidjson::Document
+auto Multi_Pilot::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Pilot::get_init_params() const -> rapidjson::Document const&
+auto Multi_Pilot::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
 
-auto Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Multi_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

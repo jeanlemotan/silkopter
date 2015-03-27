@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Init_Params",
     "members":
     [
@@ -18,7 +18,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Inputs",
     "members":
     [
@@ -27,7 +27,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Acceleration",
     "members":
     [
@@ -37,7 +37,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Angular_Velocity",
     "members":
     [
@@ -46,7 +46,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Magnetic_Field",
     "members":
     [
@@ -55,7 +55,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Temperature",
     "members":
     [
@@ -63,7 +63,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Pressure",
     "members":
     [
@@ -71,7 +71,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Distance",
     "members":
     [
@@ -79,7 +79,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "ECEF_Location",
     "members":
     [
@@ -87,22 +87,22 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Outputs",
     "members":
     [
-        ["sz::Simulator::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["sz::Simulator::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["sz::Simulator::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
-        ["sz::Simulator::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}],
-        ["sz::Simulator::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
-        ["sz::Simulator::Distance", "distance", {"required": true, "json_key" : "Distance"}],
-        ["sz::Simulator::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
+        ["sz::Multi_Simulator::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["sz::Multi_Simulator::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["sz::Multi_Simulator::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
+        ["sz::Multi_Simulator::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}],
+        ["sz::Multi_Simulator::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
+        ["sz::Multi_Simulator::Distance", "distance", {"required": true, "json_key" : "Distance"}],
+        ["sz::Multi_Simulator::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
      ]
 },
 {
     "definition" : true,
-    "namespace" : "sz::Simulator",
+    "namespace" : "sz::Multi_Simulator",
     "name": "Config",
     "members":
     [
@@ -110,8 +110,8 @@
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
         ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
         ["silk::node::ISimulator::UAV_Config", "uav_config", {"required": true, "json_key" : "UAV Config"}],
-        ["sz::Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Simulator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Multi_Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Multi_Simulator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

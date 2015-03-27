@@ -7,14 +7,6 @@
                     "dev": "i2c0"
                 },
                 "config": {}
-            },
-            "uart0": {
-                "type": "UART Linux",
-                "init_params": {
-                    "dev": "/dev/ttyUSB0",
-                    "baud": 115200
-                },
-                "config": {}
             }
         },
         "nodes": {
@@ -32,63 +24,66 @@
                     "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -145.0,
-                            "y": -372.0
+                            "x": -163.0,
+                            "y": -400.0
                         }
                     }
                 },
                 "config": {
-                    "UAV": {
-                        "Mass (Kg)": 2.0,
-                        "Height (m)": 0.10000000149011612,
-                        "Radius (m)": 0.4000000059604645
+                    "Simulation Enabled": true,
+                    "Ground Enabled": true,
+                    "Gravity Enabled": true,
+                    "UAV Config": {
+                        "Mass (Kg)": 0.699999988079071,
+                        "Height (m)": 0.30000001192092898,
+                        "Radius (m)": 0.5,
+                        "Motors": [
+                            {
+                                "Clockwise": true,
+                                "Position": {
+                                    "x": 0.0,
+                                    "y": 1.0
+                                },
+                                "Thrust @ 100% (N)": 5.0,
+                                "RPM @ 100%": 7000.0,
+                                "Acceleration (RPM/s)": 20000.0,
+                                "Deceleration (RPM/s)": 20000.0
+                            },
+                            {
+                                "Clockwise": true,
+                                "Position": {
+                                    "x": 1.0,
+                                    "y": 0.0
+                                },
+                                "Thrust @ 100% (N)": 5.0,
+                                "RPM @ 100%": 7000.0,
+                                "Acceleration (RPM/s)": 20000.0,
+                                "Deceleration (RPM/s)": 20000.0
+                            },
+                            {
+                                "Clockwise": false,
+                                "Position": {
+                                    "x": 0.0,
+                                    "y": -1.0
+                                },
+                                "Thrust @ 100% (N)": 5.0,
+                                "RPM @ 100%": 7000.0,
+                                "Acceleration (RPM/s)": 20000.0,
+                                "Deceleration (RPM/s)": 20000.0
+                            },
+                            {
+                                "Clockwise": false,
+                                "Position": {
+                                    "x": -1.0,
+                                    "y": 0.0
+                                },
+                                "Thrust @ 100% (N)": 5.0,
+                                "RPM @ 100%": 7000.0,
+                                "Acceleration (RPM/s)": 20000.0,
+                                "Deceleration (RPM/s)": 20000.0
+                            }
+                        ]
                     },
-                    "Motors": [
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 1.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "RPM @ 100%": 0.0,
-                            "Acceleration (RPM/s)": 0.0,
-                            "Deceleration (RPM/s)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": -1.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "RPM @ 100%": 0.0,
-                            "Acceleration (RPM/s)": 0.0,
-                            "Deceleration (RPM/s)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 1.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "RPM @ 100%": 0.0,
-                            "Acceleration (RPM/s)": 0.0,
-                            "Deceleration (RPM/s)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": -1.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "RPM @ 100%": 0.0,
-                            "Acceleration (RPM/s)": 0.0,
-                            "Deceleration (RPM/s)": 0.0
-                        }
-                    ],
                     "Inputs": {
                         "PWM": [
                             "",
@@ -131,97 +126,48 @@
                     }
                 }
             },
-            "Acceleration LPF": {
-                "type": "Acceleration LPF",
-                "init_params": {
-                    "Rate (Hz)": 1000,
-                    "__gs": {
-                        "position": {
-                            "x": -275.0,
-                            "y": -651.0
-                        }
-                    }
-                },
-                "config": {
-                    "Poles": 2,
-                    "Cutoff Frequency (Hz)": 5.0,
-                    "Inputs": {
-                        "Input": "Simulator/Acceleration"
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
             "Rate Controller": {
                 "type": "Rate Controller",
                 "init_params": {
-                    "Rate (Hz)": 1000,
+                    "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -409.0,
-                            "y": -547.0
+                            "x": -79.0,
+                            "y": -679.0
                         }
                     }
                 },
                 "config": {
                     "PID": {
-                        "kP": 1.0,
+                        "kP": 0.0,
                         "kI": 0.0,
-                        "kD": 0.1,
+                        "kD": 0.0,
                         "Max I": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
                         },
                         "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 10.0
+                        "D Filter Cutoff Frequency (Hz)": 0.0
                     },
                     "Inputs": {
-                        "Input": "Simulator/Angular Velocity",
-                        "Target": "Angular Velocity Generator/Output"
+                        "Input": "",
+                        "Target": ""
                     },
                     "Outputs": {
                         "Torque": {}
                     }
                 }
             },
-            "Angular Velocity Generator": {
-                "type": "Angular Velocity Generator",
-                "init_params": {
-                    "Rate (Hz)": 1000,
-                    "__gs": {
-                        "position": {
-                            "x": -415.0,
-                            "y": -404.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Inputs": {
-                        "X Factor": "",
-                        "Y Factor": "",
-                        "Z Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
             "Motor Mixer": {
                 "type": "Motor Mixer",
                 "init_params": {
-                    "Rate (Hz)": 1000,
+                    "Rate (Hz)": 100,
                     "Motor Count": 4,
                     "__gs": {
                         "position": {
-                            "x": 120.0,
-                            "y": -617.0
+                            "x": 95.0,
+                            "y": -257.0
                         }
                     }
                 },
@@ -267,7 +213,7 @@
                     ],
                     "Inputs": {
                         "Torque": "Rate Controller/Torque",
-                        "Collective Force": "Force Generator/Output"
+                        "Collective Force": ""
                     },
                     "Outputs": {
                         "Throttles": [
@@ -276,33 +222,6 @@
                             {},
                             {}
                         ]
-                    }
-                }
-            },
-            "Force Generator": {
-                "type": "Force Generator",
-                "init_params": {
-                    "Rate (Hz)": 1000,
-                    "__gs": {
-                        "position": {
-                            "x": 140.0,
-                            "y": -600.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Inputs": {
-                        "X Factor": "",
-                        "Y Factor": "",
-                        "Z Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
                     }
                 }
             }

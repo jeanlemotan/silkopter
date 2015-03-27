@@ -1,41 +1,41 @@
 #include "BrainStdAfx.h"
-#include "Simulator.h"
+#include "Multi_Simulator.h"
 
 #include "sz_math.hpp"
-#include "sz_Simulator_Structs.hpp"
-#include "sz_Simulator.hpp"
+#include "sz_Multi_Simulator_Structs.hpp"
+#include "sz_Multi_Simulator.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Simulator::Simulator(HAL& hal)
+Multi_Simulator::Multi_Simulator(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Simulator::Init_Params())
-    , m_config(new sz::Simulator::Config())
+    , m_init_params(new sz::Multi_Simulator::Init_Params())
+    , m_config(new sz::Multi_Simulator::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto Simulator::init(rapidjson::Value const& init_params) -> bool
+auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("simulator::init");
+    QLOG_TOPIC("multi_simulator::init");
 
-    sz::Simulator::Init_Params sz;
+    sz::Multi_Simulator::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Simulator data: {}", ss.str());
+        QLOGE("Cannot deserialize Multi_Simulator data: {}", ss.str());
         return false;
     }
     jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
-auto Simulator::init() -> bool
+auto Multi_Simulator::init() -> bool
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -127,7 +127,7 @@ auto Simulator::init() -> bool
     return true;
 }
 
-auto Simulator::get_inputs() const -> std::vector<Input>
+auto Multi_Simulator::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(m_input_pwm_streams.size());
     for (size_t i = 0; i < m_input_pwm_streams.size(); i++)
@@ -138,7 +138,7 @@ auto Simulator::get_inputs() const -> std::vector<Input>
     }
     return inputs;
 }
-auto Simulator::get_outputs() const -> std::vector<Output>
+auto Multi_Simulator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(7);
     outputs[0].type = stream::IAngular_Velocity::TYPE;
@@ -165,13 +165,26 @@ auto Simulator::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Simulator::process()
+void Multi_Simulator::process()
 {
-    QLOG_TOPIC("simulator::process");
+    QLOG_TOPIC("multi_simulator::process");
 
     auto now = q::Clock::now();
     auto dt = now - m_last_tp;
     m_last_tp = now;
+
+    for (size_t i = 0; i < m_input_pwm_streams.size(); i++)
+    {
+        auto pwm = m_input_pwm_streams[i].lock();
+        if (pwm)
+        {
+            auto const& samples = pwm->get_samples();
+            if (!samples.empty())
+            {
+                m_simulation.set_motor_throttle(i, samples.back().value);
+            }
+        }
+    }
 
     m_angular_velocity_stream->samples.clear();
     m_acceleration_stream->samples.clear();
@@ -181,7 +194,7 @@ void Simulator::process()
     m_distance_stream->samples.clear();
     m_ecef_location_stream->samples.clear();
 
-    m_simulation.process(dt, [this](Simulation& simulation, q::Clock::duration simulation_dt)
+    m_simulation.process(dt, [this](Multi_Simulation& simulation, q::Clock::duration simulation_dt)
     {
         auto const& uav_state = simulation.get_uav_state();
         {
@@ -211,17 +224,17 @@ void Simulator::process()
     });
 }
 
-auto Simulator::set_config(rapidjson::Value const& json) -> bool
+auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("simulator::set_config");
+    QLOG_TOPIC("multi_simulator::set_config");
 
-    sz::Simulator::Config sz;
+    sz::Multi_Simulator::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Simulator config data: {}", ss.str());
+        QLOGE("Cannot deserialize Multi_Simulator config data: {}", ss.str());
         return false;
     }
 
@@ -250,20 +263,37 @@ auto Simulator::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    for (size_t i = 0; i < sz.inputs.pwm.size(); i++)
+    {
+        auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.inputs.pwm[i]);
+        auto rate = input_stream ? input_stream->get_rate() : 0u;
+        if (rate != m_init_params->pwm_rate)
+        {
+            m_config->inputs.pwm[i].clear();
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.pwm[i], m_init_params->pwm_rate, rate);
+            m_input_pwm_streams[i].reset();
+        }
+        else
+        {
+            m_input_pwm_streams[i] = input_stream;
+        }
+    }
+
+
     return true;
 }
-auto Simulator::get_config() const -> rapidjson::Document
+auto Multi_Simulator::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Simulator::get_init_params() const -> rapidjson::Document const&
+auto Multi_Simulator::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
-auto Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
+auto Multi_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     rapidjson::Document response;
 

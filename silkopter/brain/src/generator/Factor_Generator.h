@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/stream/IFactor.h"
-#include "common/node/processor/IGenerator.h"
+#include "common/node/IGenerator.h"
 
 
 namespace sz

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/ITransformer.h"
+#include "common/node/ITransformer.h"
 #include "common/node/stream/IFrame.h"
 
 #include "sz_math.hpp"

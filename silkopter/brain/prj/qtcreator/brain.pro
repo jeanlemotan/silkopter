@@ -105,19 +105,19 @@ SOURCES += \
     ../../src/processor/ADC_Ammeter.cpp \
     ../../src/processor/ADC_Voltmeter.cpp \
     ../../src/processor/LiPo_Battery.cpp \
-    ../../src/processor/Dead_Reckoning.cpp \
-    ../../src/processor/EKF_AHRS.cpp \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
-    ../../src/processor/Pilot.cpp \
     ../../src/processor/Comp_ECEF_Location.cpp \
     ../../src/processor/Motor_Mixer.cpp \
-    ../../src/processor/Rate_Controller.cpp \
-    ../../src/processor/Stability_Controller.cpp \
-    ../../src/processor/Velocity_Controller.cpp \
     ../../src/generator/Factor_Generator.cpp \
-    ../../src/simulator/Simulator.cpp \
-    ../../src/simulator/World.cpp
+    ../../src/source/EHealth.cpp \
+    ../../src/controller/Rate_Controller.cpp \
+    ../../src/controller/Stability_Controller.cpp \
+    ../../src/controller/Velocity_Controller.cpp \
+    ../../src/description/Multirotor_Description.cpp \
+    ../../src/pilot/Multi_Pilot.cpp \
+    ../../src/simulator/Multi_Simulation.cpp \
+    ../../src/simulator/Multi_Simulator.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -127,7 +127,7 @@ HEADERS += \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Serial_Channel.h \
     ../../src/Comms.h \
-    ../../../libs/utils/Json_Helpers.h \
+    ../../../libs/utils/Json_Util.h \
     ../../src/Motor_Mixer.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
@@ -154,8 +154,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IStream.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/ADC_Ammeter.h \
-    ../../src/processor/LPF.h \
-    ../../src/processor/Resampler.h \
     ../../src/processor/LiPo_Battery.h \
     ../../src/processor/EKF_AHRS.h \
     ../../src/processor/Comp_AHRS.h \
@@ -163,19 +161,12 @@ HEADERS += \
     ../../../libs/common/node/INode.h \
     ../../../libs/common/node/ISink.h \
     ../../../libs/common/node/ISource.h \
-    ../../../libs/common/node/processor/ILPF.h \
-    ../../../libs/common/node/processor/IResampler.h \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
     ../../src/Ctor_Helper.h \
     ../../src/processor/Motor_Mixer.h \
-    ../../src/processor/Pilot.h \
-    ../../../libs/common/node/processor/IPilot.h \
     ../../src/processor/Throttle_PWM.h \
     ../../src/processor/Comp_ECEF_Location.h \
-    ../../../libs/common/node/processor/ITransformer.h \
-    ../../src/processor/Transformer.h \
-    ../../src/processor/Transformer_Inv.h \
     ../../../libs/common/node/data/IData.h \
     ../../../libs/common/node/stream/IAcceleration.h \
     ../../../libs/common/node/stream/IADC.h \
@@ -196,18 +187,30 @@ HEADERS += \
     ../../../libs/common/node/stream/IVelocity.h \
     ../../../libs/common/node/stream/IVideo.h \
     ../../../libs/common/node/stream/IVoltage.h \
-    ../../src/processor/Rate_Controller.h \
-    ../../src/processor/Velocity_Controller.h \
-    ../../src/processor/Stability_Controller.h \
-    ../../../libs/common/node/processor/IController.h \
     ../../../libs/common/node/stream/IThrottle.h \
     ../../../libs/common/node/IProcessor.h \
     ../../../libs/common/node/stream/IFactor.h \
-    ../../../libs/common/node/processor/IGenerator.h \
     ../../src/generator/Factor_Generator.h \
     ../../src/generator/Vec3_Generator.h \
     ../../src/generator/Scalar_Generator.h \
-    ../../src/simulator/Simulator.h \
-    ../../src/simulator/World.h \
-    ../../../libs/common/node/processor/ISimulator.h
+    ../../src/source/EHealth.h \
+    ../../../libs/common/node/IController.h \
+    ../../../libs/common/node/IDescription.h \
+    ../../../libs/common/node/IGenerator.h \
+    ../../../libs/common/node/ILPF.h \
+    ../../../libs/common/node/IPilot.h \
+    ../../../libs/common/node/IResampler.h \
+    ../../../libs/common/node/ISimulator.h \
+    ../../../libs/common/node/ITransformer.h \
+    ../../src/controller/Rate_Controller.h \
+    ../../src/controller/Stability_Controller.h \
+    ../../src/controller/Velocity_Controller.h \
+    ../../src/lpf/LPF.h \
+    ../../src/resampler/Resampler.h \
+    ../../src/transformer/Transformer.h \
+    ../../src/transformer/Transformer_Inv.h \
+    ../../src/description/Multi_Description.h \
+    ../../src/pilot/Multi_Pilot.h \
+    ../../src/simulator/Multi_Simulation.h \
+    ../../src/simulator/Multi_Simulator.h
 

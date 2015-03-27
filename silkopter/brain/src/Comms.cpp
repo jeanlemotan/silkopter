@@ -24,7 +24,7 @@
 #include "common/node/stream/ITorque.h"
 #include "common/node/stream/IVoltage.h"
 
-#include "common/node/processor/IPilot.h"
+#include "common/node/IPilot.h"
 
 #include "sz_math.hpp"
 #include "sz_Comms_Source.hpp"

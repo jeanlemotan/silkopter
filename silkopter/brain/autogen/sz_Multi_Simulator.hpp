@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Init_Params {
+namespace sz { namespace Multi_Simulator { struct Init_Params {
  uint32_t motor_count;
 uint32_t pwm_rate;
 uint32_t acceleration_rate;
@@ -49,7 +49,7 @@ explicit Init_Params():motor_count(4), pwm_rate(100), acceleration_rate(1000), a
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Init_Params > {
+class SAXEventHandler< ::sz::Multi_Simulator::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -141,7 +141,7 @@ has_location_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->motor_count)
@@ -776,22 +776,22 @@ handler_8.PrepareForReuse();
     }
 };
 
-template < class Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8 >
-struct Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, ::sz::Simulator::Init_Params > {
+template < class Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1 >
+struct Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, ::sz::Multi_Simulator::Init_Params > {
 
-    void operator()( Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8& w, const ::sz::Simulator::Init_Params& value) const
+    void operator()( Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1& w, const ::sz::Multi_Simulator::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x6f\x74\x6f\x72\x20\x43\x6f\x75\x6e\x74", 11, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.motor_count);
-w.Key("\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.pwm_rate);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.acceleration_rate);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.angular_velocity_rate);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.magnetic_field_rate);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.pressure_rate);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.temperature_rate);
-w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.distance_rate);
-w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer7c6b804a141c09096dc3f0a715d448d28e6836be1cc99e87be60ecbc942e46e8, uint32_t >()(w, value.location_rate);
+        w.Key("\x4d\x6f\x74\x6f\x72\x20\x43\x6f\x75\x6e\x74", 11, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.motor_count);
+w.Key("\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pwm_rate);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.acceleration_rate);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.angular_velocity_rate);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.magnetic_field_rate);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pressure_rate);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.temperature_rate);
+w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.distance_rate);
+w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.location_rate);
 
         w.EndObject(9);
     }
@@ -827,7 +827,7 @@ w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29"
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Inputs {
+namespace sz { namespace Multi_Simulator { struct Inputs {
  std::vector<std::string> pwm;
 
 explicit Inputs():pwm() {  }
@@ -841,7 +841,7 @@ explicit Inputs():pwm() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Inputs > {
+class SAXEventHandler< ::sz::Multi_Simulator::Inputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -893,7 +893,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Inputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->pwm)
@@ -1160,14 +1160,14 @@ public:
     }
 };
 
-template < class Writer7c7b52e340ceab2b0435b027d8df797728ee1c47801dec065e028a4ed9ceaac2 >
-struct Serializer< Writer7c7b52e340ceab2b0435b027d8df797728ee1c47801dec065e028a4ed9ceaac2, ::sz::Simulator::Inputs > {
+template < class Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7 >
+struct Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, ::sz::Multi_Simulator::Inputs > {
 
-    void operator()( Writer7c7b52e340ceab2b0435b027d8df797728ee1c47801dec065e028a4ed9ceaac2& w, const ::sz::Simulator::Inputs& value) const
+    void operator()( Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7& w, const ::sz::Multi_Simulator::Inputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x50\x57\x4d", 3, false); Serializer< Writer7c7b52e340ceab2b0435b027d8df797728ee1c47801dec065e028a4ed9ceaac2, std::vector<std::string> >()(w, value.pwm);
+        w.Key("\x50\x57\x4d", 3, false); Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, std::vector<std::string> >()(w, value.pwm);
 
         w.EndObject(1);
     }
@@ -1203,7 +1203,7 @@ struct Serializer< Writer7c7b52e340ceab2b0435b027d8df797728ee1c47801dec065e028a4
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Acceleration {
+namespace sz { namespace Multi_Simulator { struct Acceleration {
  math::vec3f bias;
 math::vec3f scale;
 
@@ -1218,7 +1218,7 @@ explicit Acceleration():bias(0.0), scale(1.0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Acceleration > {
+class SAXEventHandler< ::sz::Multi_Simulator::Acceleration > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1275,7 +1275,7 @@ has_scale = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Acceleration * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Acceleration * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->bias)
@@ -1588,15 +1588,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer3f6ac24bd44ad39cd11ad1538c6c2d9516a4d8b7e0b27429b8fded8f982a1723 >
-struct Serializer< Writer3f6ac24bd44ad39cd11ad1538c6c2d9516a4d8b7e0b27429b8fded8f982a1723, ::sz::Simulator::Acceleration > {
+template < class Writer3ef59433665abbaeb4d4b04ef0275504c8c907fa8a2fbba948c14eae2762d0d9 >
+struct Serializer< Writer3ef59433665abbaeb4d4b04ef0275504c8c907fa8a2fbba948c14eae2762d0d9, ::sz::Multi_Simulator::Acceleration > {
 
-    void operator()( Writer3f6ac24bd44ad39cd11ad1538c6c2d9516a4d8b7e0b27429b8fded8f982a1723& w, const ::sz::Simulator::Acceleration& value) const
+    void operator()( Writer3ef59433665abbaeb4d4b04ef0275504c8c907fa8a2fbba948c14eae2762d0d9& w, const ::sz::Multi_Simulator::Acceleration& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer3f6ac24bd44ad39cd11ad1538c6c2d9516a4d8b7e0b27429b8fded8f982a1723, math::vec3f >()(w, value.bias);
-w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer3f6ac24bd44ad39cd11ad1538c6c2d9516a4d8b7e0b27429b8fded8f982a1723, math::vec3f >()(w, value.scale);
+        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer3ef59433665abbaeb4d4b04ef0275504c8c907fa8a2fbba948c14eae2762d0d9, math::vec3f >()(w, value.bias);
+w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer3ef59433665abbaeb4d4b04ef0275504c8c907fa8a2fbba948c14eae2762d0d9, math::vec3f >()(w, value.scale);
 
         w.EndObject(2);
     }
@@ -1632,7 +1632,7 @@ w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer3f6ac24bd44ad39cd11ad
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Angular_Velocity {
+namespace sz { namespace Multi_Simulator { struct Angular_Velocity {
  math::vec3f bias;
 
 explicit Angular_Velocity():bias(0.0) {  }
@@ -1646,7 +1646,7 @@ explicit Angular_Velocity():bias(0.0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Angular_Velocity > {
+class SAXEventHandler< ::sz::Multi_Simulator::Angular_Velocity > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1698,7 +1698,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Angular_Velocity * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Angular_Velocity * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->bias)
@@ -1965,14 +1965,14 @@ public:
     }
 };
 
-template < class Writer50d8c9db6eaf02039cb11d5eaab6e567fe9030961f2cb933fe071cf5d860ba21 >
-struct Serializer< Writer50d8c9db6eaf02039cb11d5eaab6e567fe9030961f2cb933fe071cf5d860ba21, ::sz::Simulator::Angular_Velocity > {
+template < class Writerd60b3d61efea879c895d066062565a7d934387a5b6348e588a6c83d99f0c72fc >
+struct Serializer< Writerd60b3d61efea879c895d066062565a7d934387a5b6348e588a6c83d99f0c72fc, ::sz::Multi_Simulator::Angular_Velocity > {
 
-    void operator()( Writer50d8c9db6eaf02039cb11d5eaab6e567fe9030961f2cb933fe071cf5d860ba21& w, const ::sz::Simulator::Angular_Velocity& value) const
+    void operator()( Writerd60b3d61efea879c895d066062565a7d934387a5b6348e588a6c83d99f0c72fc& w, const ::sz::Multi_Simulator::Angular_Velocity& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer50d8c9db6eaf02039cb11d5eaab6e567fe9030961f2cb933fe071cf5d860ba21, math::vec3f >()(w, value.bias);
+        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writerd60b3d61efea879c895d066062565a7d934387a5b6348e588a6c83d99f0c72fc, math::vec3f >()(w, value.bias);
 
         w.EndObject(1);
     }
@@ -2008,7 +2008,7 @@ struct Serializer< Writer50d8c9db6eaf02039cb11d5eaab6e567fe9030961f2cb933fe071cf
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Magnetic_Field {
+namespace sz { namespace Multi_Simulator { struct Magnetic_Field {
  math::vec3f bias;
 
 explicit Magnetic_Field():bias(0.0) {  }
@@ -2022,7 +2022,7 @@ explicit Magnetic_Field():bias(0.0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Magnetic_Field > {
+class SAXEventHandler< ::sz::Multi_Simulator::Magnetic_Field > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2074,7 +2074,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Magnetic_Field * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Magnetic_Field * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->bias)
@@ -2341,14 +2341,14 @@ public:
     }
 };
 
-template < class Writer36860624ade234b33c37a24bfb34ae9779909ba546d81015078aaf90ac960fcc >
-struct Serializer< Writer36860624ade234b33c37a24bfb34ae9779909ba546d81015078aaf90ac960fcc, ::sz::Simulator::Magnetic_Field > {
+template < class Writerda31983bb2397865dec2ae59037bc396166a253e5ab54ce0d1b7cd0ecd23fb9a >
+struct Serializer< Writerda31983bb2397865dec2ae59037bc396166a253e5ab54ce0d1b7cd0ecd23fb9a, ::sz::Multi_Simulator::Magnetic_Field > {
 
-    void operator()( Writer36860624ade234b33c37a24bfb34ae9779909ba546d81015078aaf90ac960fcc& w, const ::sz::Simulator::Magnetic_Field& value) const
+    void operator()( Writerda31983bb2397865dec2ae59037bc396166a253e5ab54ce0d1b7cd0ecd23fb9a& w, const ::sz::Multi_Simulator::Magnetic_Field& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer36860624ade234b33c37a24bfb34ae9779909ba546d81015078aaf90ac960fcc, math::vec3f >()(w, value.bias);
+        w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writerda31983bb2397865dec2ae59037bc396166a253e5ab54ce0d1b7cd0ecd23fb9a, math::vec3f >()(w, value.bias);
 
         w.EndObject(1);
     }
@@ -2384,7 +2384,7 @@ struct Serializer< Writer36860624ade234b33c37a24bfb34ae9779909ba546d81015078aaf9
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Temperature {
+namespace sz { namespace Multi_Simulator { struct Temperature {
  
 
 explicit Temperature() {  }
@@ -2398,7 +2398,7 @@ explicit Temperature() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Temperature > {
+class SAXEventHandler< ::sz::Multi_Simulator::Temperature > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2449,7 +2449,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Temperature * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Temperature * obj)
         : state(-1)
         , depth(0)
         
@@ -2700,10 +2700,10 @@ public:
     }
 };
 
-template < class Writer6401535135069464ebd3d25b49477460d0a189cde5f65dc1920e624e321b7eb5 >
-struct Serializer< Writer6401535135069464ebd3d25b49477460d0a189cde5f65dc1920e624e321b7eb5, ::sz::Simulator::Temperature > {
+template < class Writer267e238d896d4e43d6ab281aef5c6165f3625ef743cef4c51a66fa5f1ce0863a >
+struct Serializer< Writer267e238d896d4e43d6ab281aef5c6165f3625ef743cef4c51a66fa5f1ce0863a, ::sz::Multi_Simulator::Temperature > {
 
-    void operator()( Writer6401535135069464ebd3d25b49477460d0a189cde5f65dc1920e624e321b7eb5& w, const ::sz::Simulator::Temperature& value) const
+    void operator()( Writer267e238d896d4e43d6ab281aef5c6165f3625ef743cef4c51a66fa5f1ce0863a& w, const ::sz::Multi_Simulator::Temperature& value) const
     {
         w.StartObject();
 
@@ -2743,7 +2743,7 @@ struct Serializer< Writer6401535135069464ebd3d25b49477460d0a189cde5f65dc1920e624
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Pressure {
+namespace sz { namespace Multi_Simulator { struct Pressure {
  
 
 explicit Pressure() {  }
@@ -2757,7 +2757,7 @@ explicit Pressure() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Pressure > {
+class SAXEventHandler< ::sz::Multi_Simulator::Pressure > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2808,7 +2808,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Pressure * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Pressure * obj)
         : state(-1)
         , depth(0)
         
@@ -3059,10 +3059,10 @@ public:
     }
 };
 
-template < class Writer5f46f81df739a997709adaf62d299b6da82af7a0fb19f91e1ad996a33ecf5a27 >
-struct Serializer< Writer5f46f81df739a997709adaf62d299b6da82af7a0fb19f91e1ad996a33ecf5a27, ::sz::Simulator::Pressure > {
+template < class Writerde128ff1caee74d3cf0341bd924bbf28682608813ff0c08dc5f97e28da51662d >
+struct Serializer< Writerde128ff1caee74d3cf0341bd924bbf28682608813ff0c08dc5f97e28da51662d, ::sz::Multi_Simulator::Pressure > {
 
-    void operator()( Writer5f46f81df739a997709adaf62d299b6da82af7a0fb19f91e1ad996a33ecf5a27& w, const ::sz::Simulator::Pressure& value) const
+    void operator()( Writerde128ff1caee74d3cf0341bd924bbf28682608813ff0c08dc5f97e28da51662d& w, const ::sz::Multi_Simulator::Pressure& value) const
     {
         w.StartObject();
 
@@ -3102,7 +3102,7 @@ struct Serializer< Writer5f46f81df739a997709adaf62d299b6da82af7a0fb19f91e1ad996a
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Distance {
+namespace sz { namespace Multi_Simulator { struct Distance {
  
 
 explicit Distance() {  }
@@ -3116,7 +3116,7 @@ explicit Distance() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Distance > {
+class SAXEventHandler< ::sz::Multi_Simulator::Distance > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -3167,7 +3167,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Distance * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Distance * obj)
         : state(-1)
         , depth(0)
         
@@ -3418,10 +3418,10 @@ public:
     }
 };
 
-template < class Writer7b7f5f07669c0bc9e5b1c430fb298badee2dc39050c29a66a89802e26f6c1661 >
-struct Serializer< Writer7b7f5f07669c0bc9e5b1c430fb298badee2dc39050c29a66a89802e26f6c1661, ::sz::Simulator::Distance > {
+template < class Writerd119f0026281c6fe8d2f522e76f0d55662b5c56289c0b4588abf636e9c857cc4 >
+struct Serializer< Writerd119f0026281c6fe8d2f522e76f0d55662b5c56289c0b4588abf636e9c857cc4, ::sz::Multi_Simulator::Distance > {
 
-    void operator()( Writer7b7f5f07669c0bc9e5b1c430fb298badee2dc39050c29a66a89802e26f6c1661& w, const ::sz::Simulator::Distance& value) const
+    void operator()( Writerd119f0026281c6fe8d2f522e76f0d55662b5c56289c0b4588abf636e9c857cc4& w, const ::sz::Multi_Simulator::Distance& value) const
     {
         w.StartObject();
 
@@ -3461,7 +3461,7 @@ struct Serializer< Writer7b7f5f07669c0bc9e5b1c430fb298badee2dc39050c29a66a89802e
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct ECEF_Location {
+namespace sz { namespace Multi_Simulator { struct ECEF_Location {
  
 
 explicit ECEF_Location() {  }
@@ -3475,7 +3475,7 @@ explicit ECEF_Location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::ECEF_Location > {
+class SAXEventHandler< ::sz::Multi_Simulator::ECEF_Location > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -3526,7 +3526,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::ECEF_Location * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::ECEF_Location * obj)
         : state(-1)
         , depth(0)
         
@@ -3777,10 +3777,10 @@ public:
     }
 };
 
-template < class Writer6157480c0db0ab835136735eb1f2c31ffeb86c59de9ddd7941c43cda10c673af >
-struct Serializer< Writer6157480c0db0ab835136735eb1f2c31ffeb86c59de9ddd7941c43cda10c673af, ::sz::Simulator::ECEF_Location > {
+template < class Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6 >
+struct Serializer< Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6, ::sz::Multi_Simulator::ECEF_Location > {
 
-    void operator()( Writer6157480c0db0ab835136735eb1f2c31ffeb86c59de9ddd7941c43cda10c673af& w, const ::sz::Simulator::ECEF_Location& value) const
+    void operator()( Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6& w, const ::sz::Multi_Simulator::ECEF_Location& value) const
     {
         w.StartObject();
 
@@ -3820,14 +3820,14 @@ struct Serializer< Writer6157480c0db0ab835136735eb1f2c31ffeb86c59de9ddd7941c43cd
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Outputs {
- sz::Simulator::Acceleration acceleration;
-sz::Simulator::Angular_Velocity angular_velocity;
-sz::Simulator::Magnetic_Field magnetic_field;
-sz::Simulator::Temperature temperature;
-sz::Simulator::Pressure pressure;
-sz::Simulator::Distance distance;
-sz::Simulator::ECEF_Location ecef_location;
+namespace sz { namespace Multi_Simulator { struct Outputs {
+ sz::Multi_Simulator::Acceleration acceleration;
+sz::Multi_Simulator::Angular_Velocity angular_velocity;
+sz::Multi_Simulator::Magnetic_Field magnetic_field;
+sz::Multi_Simulator::Temperature temperature;
+sz::Multi_Simulator::Pressure pressure;
+sz::Multi_Simulator::Distance distance;
+sz::Multi_Simulator::ECEF_Location ecef_location;
 
 explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), temperature(), pressure(), distance(), ecef_location() {  }
 
@@ -3840,19 +3840,19 @@ explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), tempera
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Outputs > {
+class SAXEventHandler< ::sz::Multi_Simulator::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Simulator::Acceleration > handler_0;
-SAXEventHandler< sz::Simulator::Angular_Velocity > handler_1;
-SAXEventHandler< sz::Simulator::Magnetic_Field > handler_2;
-SAXEventHandler< sz::Simulator::Temperature > handler_3;
-SAXEventHandler< sz::Simulator::Pressure > handler_4;
-SAXEventHandler< sz::Simulator::Distance > handler_5;
-SAXEventHandler< sz::Simulator::ECEF_Location > handler_6;bool has_acceleration;
+    SAXEventHandler< sz::Multi_Simulator::Acceleration > handler_0;
+SAXEventHandler< sz::Multi_Simulator::Angular_Velocity > handler_1;
+SAXEventHandler< sz::Multi_Simulator::Magnetic_Field > handler_2;
+SAXEventHandler< sz::Multi_Simulator::Temperature > handler_3;
+SAXEventHandler< sz::Multi_Simulator::Pressure > handler_4;
+SAXEventHandler< sz::Multi_Simulator::Distance > handler_5;
+SAXEventHandler< sz::Multi_Simulator::ECEF_Location > handler_6;bool has_acceleration;
 bool has_angular_velocity;
 bool has_magnetic_field;
 bool has_temperature;
@@ -3922,7 +3922,7 @@ has_ecef_location = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Outputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->acceleration)
@@ -4465,20 +4465,20 @@ handler_6.PrepareForReuse();
     }
 };
 
-template < class Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a >
-struct Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, ::sz::Simulator::Outputs > {
+template < class Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557 >
+struct Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, ::sz::Multi_Simulator::Outputs > {
 
-    void operator()( Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a& w, const ::sz::Simulator::Outputs& value) const
+    void operator()( Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557& w, const ::sz::Multi_Simulator::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Acceleration >()(w, value.acceleration);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Angular_Velocity >()(w, value.angular_velocity);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Magnetic_Field >()(w, value.magnetic_field);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Temperature >()(w, value.temperature);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Pressure >()(w, value.pressure);
-w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::Distance >()(w, value.distance);
-w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer456b2e91520f6350047778deb1d5a5f42e4c71c65de19534569c70d9b8d5633a, sz::Simulator::ECEF_Location >()(w, value.ecef_location);
+        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Acceleration >()(w, value.acceleration);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Angular_Velocity >()(w, value.angular_velocity);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Magnetic_Field >()(w, value.magnetic_field);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Temperature >()(w, value.temperature);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Pressure >()(w, value.pressure);
+w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Distance >()(w, value.distance);
+w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::ECEF_Location >()(w, value.ecef_location);
 
         w.EndObject(7);
     }
@@ -4514,13 +4514,13 @@ w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serial
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Simulator { struct Config {
+namespace sz { namespace Multi_Simulator { struct Config {
  bool simulation_enabled;
 bool ground_enabled;
 bool gravity_enabled;
 silk::node::ISimulator::UAV_Config uav_config;
-sz::Simulator::Inputs inputs;
-sz::Simulator::Outputs outputs;
+sz::Multi_Simulator::Inputs inputs;
+sz::Multi_Simulator::Outputs outputs;
 
 explicit Config():simulation_enabled(true), ground_enabled(true), gravity_enabled(true), uav_config(), inputs(), outputs() {  }
 
@@ -4533,7 +4533,7 @@ explicit Config():simulation_enabled(true), ground_enabled(true), gravity_enable
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Simulator::Config > {
+class SAXEventHandler< ::sz::Multi_Simulator::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -4543,8 +4543,8 @@ private:
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< bool > handler_2;
 SAXEventHandler< silk::node::ISimulator::UAV_Config > handler_3;
-SAXEventHandler< sz::Simulator::Inputs > handler_4;
-SAXEventHandler< sz::Simulator::Outputs > handler_5;bool has_simulation_enabled;
+SAXEventHandler< sz::Multi_Simulator::Inputs > handler_4;
+SAXEventHandler< sz::Multi_Simulator::Outputs > handler_5;bool has_simulation_enabled;
 bool has_ground_enabled;
 bool has_gravity_enabled;
 bool has_uav_config;
@@ -4610,7 +4610,7 @@ has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Simulator::Config * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->simulation_enabled)
@@ -5107,19 +5107,19 @@ handler_5.PrepareForReuse();
     }
 };
 
-template < class Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff >
-struct Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, ::sz::Simulator::Config > {
+template < class Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef >
+struct Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, ::sz::Multi_Simulator::Config > {
 
-    void operator()( Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff& w, const ::sz::Simulator::Config& value) const
+    void operator()( Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef& w, const ::sz::Multi_Simulator::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.simulation_enabled);
-w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.ground_enabled);
-w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, bool >()(w, value.gravity_enabled);
-w.Key("\x55\x41\x56\x20\x43\x6f\x6e\x66\x69\x67", 10, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, silk::node::ISimulator::UAV_Config >()(w, value.uav_config);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer66672e2593955e68a9fdae04015ec653b872a8244f0b55357970df364d4ff1ff, sz::Simulator::Outputs >()(w, value.outputs);
+        w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.simulation_enabled);
+w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.ground_enabled);
+w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.gravity_enabled);
+w.Key("\x55\x41\x56\x20\x43\x6f\x6e\x66\x69\x67", 10, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, silk::node::ISimulator::UAV_Config >()(w, value.uav_config);
+w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Outputs >()(w, value.outputs);
 
         w.EndObject(6);
     }

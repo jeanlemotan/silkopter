@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Pilot { struct Init_Params {
+namespace sz { namespace Multi_Pilot { struct Init_Params {
  uint32_t rate;
 
 explicit Init_Params():rate(0) {  }
@@ -41,7 +41,7 @@ explicit Init_Params():rate(0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Pilot::Init_Params > {
+class SAXEventHandler< ::sz::Multi_Pilot::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Pilot::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Multi_Pilot::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67 >
-struct Serializer< Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67, ::sz::Pilot::Init_Params > {
+template < class Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12 >
+struct Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, ::sz::Multi_Pilot::Init_Params > {
 
-    void operator()( Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67& w, const ::sz::Pilot::Init_Params& value) const
+    void operator()( Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12& w, const ::sz::Multi_Pilot::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd524226f67, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.rate);
 
         w.EndObject(1);
     }
@@ -403,7 +403,7 @@ struct Serializer< Writerd0d22abf1cac53abd637bcfa8e7458c56e2031d485ffeb0555b1ecd
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Pilot { struct Inputs {
+namespace sz { namespace Multi_Pilot { struct Inputs {
  std::string angular_velocity;
 std::string cardinal_points;
 std::string ecef_location;
@@ -421,7 +421,7 @@ explicit Inputs():angular_velocity(), cardinal_points(), ecef_location(), batter
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Pilot::Inputs > {
+class SAXEventHandler< ::sz::Multi_Pilot::Inputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -493,7 +493,7 @@ has_commands = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Pilot::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Pilot::Inputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->angular_velocity)
@@ -944,18 +944,18 @@ handler_4.PrepareForReuse();
     }
 };
 
-template < class Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49 >
-struct Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, ::sz::Pilot::Inputs > {
+template < class Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611 >
+struct Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, ::sz::Multi_Pilot::Inputs > {
 
-    void operator()( Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49& w, const ::sz::Pilot::Inputs& value) const
+    void operator()( Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611& w, const ::sz::Multi_Pilot::Inputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.angular_velocity);
-w.Key("\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.cardinal_points);
-w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.ecef_location);
-w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.battery_state);
-w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8, false); Serializer< Writeree5eeb08bc99fb36b08c962c13c7ba0b85ab6f18adfe9f0ed1bfd15979874f49, std::string >()(w, value.commands);
+        w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, std::string >()(w, value.angular_velocity);
+w.Key("\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15, false); Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, std::string >()(w, value.cardinal_points);
+w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, std::string >()(w, value.ecef_location);
+w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, std::string >()(w, value.battery_state);
+w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8, false); Serializer< Writer169c9c636ae5f9d367927df2e8e32e3a0ae4e0eeb07754063cd376556552a611, std::string >()(w, value.commands);
 
         w.EndObject(5);
     }
@@ -991,7 +991,7 @@ w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8, false); Serializer< Writeree5eeb08b
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Pilot { struct Outputs {
+namespace sz { namespace Multi_Pilot { struct Outputs {
  
 
 explicit Outputs() {  }
@@ -1005,7 +1005,7 @@ explicit Outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Pilot::Outputs > {
+class SAXEventHandler< ::sz::Multi_Pilot::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1056,7 +1056,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Pilot::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Pilot::Outputs * obj)
         : state(-1)
         , depth(0)
         
@@ -1307,10 +1307,10 @@ public:
     }
 };
 
-template < class Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d >
-struct Serializer< Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d, ::sz::Pilot::Outputs > {
+template < class Writer63cba81959f60306ecfaecfc8a1ba75f5c4165cc5707fcdbe74f3eed7b6054e5 >
+struct Serializer< Writer63cba81959f60306ecfaecfc8a1ba75f5c4165cc5707fcdbe74f3eed7b6054e5, ::sz::Multi_Pilot::Outputs > {
 
-    void operator()( Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd67ba7a931d& w, const ::sz::Pilot::Outputs& value) const
+    void operator()( Writer63cba81959f60306ecfaecfc8a1ba75f5c4165cc5707fcdbe74f3eed7b6054e5& w, const ::sz::Multi_Pilot::Outputs& value) const
     {
         w.StartObject();
 
@@ -1350,9 +1350,9 @@ struct Serializer< Writere8a5aa8f61d674c46f3fd0c8af1e63d425bd7ae74954b513047ddd6
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Pilot { struct Config {
- sz::Pilot::Inputs inputs;
-sz::Pilot::Outputs outputs;
+namespace sz { namespace Multi_Pilot { struct Config {
+ sz::Multi_Pilot::Inputs inputs;
+sz::Multi_Pilot::Outputs outputs;
 
 explicit Config():inputs(), outputs() {  }
 
@@ -1365,14 +1365,14 @@ explicit Config():inputs(), outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Pilot::Config > {
+class SAXEventHandler< ::sz::Multi_Pilot::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::Pilot::Inputs > handler_0;
-SAXEventHandler< sz::Pilot::Outputs > handler_1;bool has_inputs;
+    SAXEventHandler< sz::Multi_Pilot::Inputs > handler_0;
+SAXEventHandler< sz::Multi_Pilot::Outputs > handler_1;bool has_inputs;
 bool has_outputs;
 
     bool check_depth(const char* type)
@@ -1422,7 +1422,7 @@ has_outputs = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Pilot::Config * obj)
+    explicit SAXEventHandler( ::sz::Multi_Pilot::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->inputs)
@@ -1735,15 +1735,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748 >
-struct Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, ::sz::Pilot::Config > {
+template < class Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f >
+struct Serializer< Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f, ::sz::Multi_Pilot::Config > {
 
-    void operator()( Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748& w, const ::sz::Pilot::Config& value) const
+    void operator()( Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f& w, const ::sz::Multi_Pilot::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, sz::Pilot::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer9b7f308a657637114fe8219369f3e52eecc00119beb4f28802c1f673bc184748, sz::Pilot::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f, sz::Multi_Pilot::Inputs >()(w, value.inputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f, sz::Multi_Pilot::Outputs >()(w, value.outputs);
 
         w.EndObject(2);
     }

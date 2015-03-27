@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Pilot",
+    "namespace" : "sz::Multi_Pilot",
     "name": "Init_Params",
     "members":
     [
@@ -10,7 +10,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Pilot",
+    "namespace" : "sz::Multi_Pilot",
     "name": "Inputs",
     "members":
     [
@@ -23,7 +23,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Pilot",
+    "namespace" : "sz::Multi_Pilot",
     "name": "Outputs",
     "members":
     [
@@ -31,12 +31,12 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Pilot",
+    "namespace" : "sz::Multi_Pilot",
     "name": "Config",
     "members":
     [
-        ["sz::Pilot::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Pilot::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Multi_Pilot::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Multi_Pilot::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]
 }
 ]

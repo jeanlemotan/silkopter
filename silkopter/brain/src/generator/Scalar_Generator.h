@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/IGenerator.h"
+#include "common/node/IGenerator.h"
 #include "generator/Factor_Generator.h"
 
 #include "sz_math.hpp"

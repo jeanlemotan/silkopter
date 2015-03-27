@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "Simulation.h"
+#include "Multi_Simulation.h"
 #include "physics/constants.h"
 
 namespace silk
@@ -9,7 +9,7 @@ namespace node
 
 //////////////////////////////////////////////////////////////////////////
 
-Simulation::Simulation()
+Multi_Simulation::Multi_Simulation()
 {
     auto now = q::Clock::now();
 
@@ -20,11 +20,11 @@ Simulation::Simulation()
 
 }
 
-Simulation::~Simulation()
+Multi_Simulation::~Multi_Simulation()
 {
 }
 
-auto Simulation::init(uint32_t rate) -> bool
+auto Multi_Simulation::init(uint32_t rate) -> bool
 {
     if (rate == 0)
     {
@@ -62,7 +62,7 @@ auto Simulation::init(uint32_t rate) -> bool
     return true;
 }
 
-auto Simulation::init_uav(ISimulator::UAV_Config const& config) -> bool
+auto Multi_Simulation::init_uav(ISimulator::UAV_Config const& config) -> bool
 {
     if (math::is_zero(config.mass, math::epsilon<float>()))
     {
@@ -127,10 +127,11 @@ auto Simulation::init_uav(ISimulator::UAV_Config const& config) -> bool
 
     m_uav.body->setLinearVelocity(vec3f_to_bt(m_uav.state.enu_velocity));
     m_uav.body->setAngularVelocity(vec3f_to_bt(m_uav.state.angular_velocity));
+    m_uav.body->setGravity(btVector3(0, 0, m_is_gravity_enabled ? -physics::constants::g : 0));
 
     return true;
 }
-void Simulation::reset()
+void Multi_Simulation::reset()
 {
     btTransform trans;
     trans.setIdentity();
@@ -154,7 +155,7 @@ void Simulation::reset()
     }
 }
 
-void Simulation::stop_motion()
+void Multi_Simulation::stop_motion()
 {
     m_uav.body->clearForces();
     m_uav.body->setLinearVelocity(btVector3(0, 0, 0));
@@ -180,7 +181,7 @@ void Simulation::stop_motion()
 
 }
 
-void Simulation::process(q::Clock::duration dt, std::function<void(Simulation&, q::Clock::duration)> const& callback)
+void Multi_Simulation::process(q::Clock::duration dt, std::function<void(Multi_Simulation&, q::Clock::duration)> const& callback)
 {
     m_physics_duration += dt;
     //m_duration_to_simulate = math::min(m_duration_to_simulate, q::Clock::duration(std::chrono::milliseconds(100)));
@@ -200,23 +201,16 @@ void Simulation::process(q::Clock::duration dt, std::function<void(Simulation&, 
     }
 }
 
-void Simulation::set_gravity_enabled(bool yes)
+void Multi_Simulation::set_gravity_enabled(bool yes)
 {
     if (m_is_gravity_enabled != yes)
     {
         m_is_gravity_enabled = yes;
-        if (m_is_gravity_enabled)
-        {
-            m_uav.body->setGravity(btVector3(0, 0, -physics::constants::g));
-        }
-        else
-        {
-            m_uav.body->setGravity(btVector3(0, 0, 0));
-        }
+        m_uav.body->setGravity(btVector3(0, 0, m_is_gravity_enabled ? -physics::constants::g : 0));
     }
 }
 
-void Simulation::set_ground_enabled(bool yes)
+void Multi_Simulation::set_ground_enabled(bool yes)
 {
     if (m_is_ground_enabled != yes)
     {
@@ -232,7 +226,7 @@ void Simulation::set_ground_enabled(bool yes)
     }
 }
 
-void Simulation::set_simulation_enabled(bool yes)
+void Multi_Simulation::set_simulation_enabled(bool yes)
 {
     m_is_simulation_enabled = yes;
 }
@@ -348,7 +342,13 @@ void Simulation::set_simulation_enabled(bool yes)
 
 //}
 
-void Simulation::process_world(q::Clock::duration dt)
+void Multi_Simulation::set_motor_throttle(size_t motor, float throttle)
+{
+    m_uav.state.motors[motor].throttle = throttle;
+}
+
+
+void Multi_Simulation::process_world(q::Clock::duration dt)
 {
     //limit angular velocity
     if (m_uav.body)
@@ -366,7 +366,7 @@ void Simulation::process_world(q::Clock::duration dt)
     process_uav(dt);
 }
 
-void Simulation::process_uav(q::Clock::duration dt)
+void Multi_Simulation::process_uav(q::Clock::duration dt)
 {
     if (!m_uav.body)
     {
@@ -481,7 +481,7 @@ void Simulation::process_uav(q::Clock::duration dt)
 }
 
 
-auto Simulation::get_uav_state() const -> ISimulator::UAV_State const&
+auto Multi_Simulation::get_uav_state() const -> ISimulator::UAV_State const&
 {
     return m_uav.state;
 }

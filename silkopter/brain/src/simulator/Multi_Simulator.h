@@ -9,14 +9,14 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/ILocation.h"
 #include "common/node/stream/IPWM.h"
-#include "common/node/processor/ISimulator.h"
+#include "common/node/ISimulator.h"
 
-#include "Simulation.h"
+#include "Multi_Simulation.h"
 
 
 namespace sz
 {
-namespace Simulator
+namespace Multi_Simulator
 {
 struct Init_Params;
 struct Config;
@@ -28,10 +28,10 @@ namespace silk
 namespace node
 {
 
-class Simulator : public ISimulator
+class Multi_Simulator : public ISimulator
 {
 public:
-    Simulator(HAL& hal);
+    Multi_Simulator(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -52,8 +52,8 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Simulator::Init_Params> m_init_params;
-    std::shared_ptr<sz::Simulator::Config> m_config;
+    std::shared_ptr<sz::Multi_Simulator::Init_Params> m_init_params;
+    std::shared_ptr<sz::Multi_Simulator::Config> m_config;
 
     q::Clock::time_point m_last_tp;
 
@@ -131,7 +131,7 @@ private:
 
     std::vector<stream::IPWM_wptr> m_input_pwm_streams;
 
-    Simulation m_simulation;
+    Multi_Simulation m_simulation;
 };
 
 

@@ -215,10 +215,12 @@ void Sim_Window::process()
         return;
     }
 
+    auto now = q::Clock::now();
+
     //request state
-    if (m_needs_state)
+    if (now - m_last_state_request_tp > std::chrono::milliseconds(33) && m_state_requests > 0)
     {
-        m_needs_state = false;
+        m_state_requests--;
         rapidjson::Document message;
         jsonutil::add_value(message, std::string("message"), rapidjson::Value("get state"), message.GetAllocator());
         m_hal.send_node_message(m_sim_node, std::move(message), [this](silk::HAL::Result result, rapidjson::Document response)
@@ -239,7 +241,7 @@ void Sim_Window::process()
                     QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
                 }
             }
-            m_needs_state = true;
+            m_state_requests++;
         });
     };
 

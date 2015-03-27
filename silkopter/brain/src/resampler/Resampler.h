@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/processor/IResampler.h"
+#include "common/node/IResampler.h"
 #include "utils/Butterworth.h"
 #include <deque>
 

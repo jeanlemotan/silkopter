@@ -20,6 +20,7 @@ enum class Type : uint8_t
     CONTROLLER,
     GENERATOR,
     SIMULATOR,
+    DESCRIPTION
 };
 
 class INode : q::util::Noncopyable

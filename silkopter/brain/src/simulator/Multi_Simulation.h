@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/ISimulator.h"
+#include "common/node/ISimulator.h"
 
 namespace silk
 {
@@ -24,12 +24,12 @@ inline btQuaternion quatf_to_bt(math::quatf const& v)
     return btQuaternion(v.x, v.y, v.z, v.w);
 }
 
-class Simulation : q::util::Noncopyable
+class Multi_Simulation : q::util::Noncopyable
 {
 public:
 
-    Simulation();
-    ~Simulation();
+    Multi_Simulation();
+    ~Multi_Simulation();
 
     auto init(uint32_t rate) -> bool;
 
@@ -38,13 +38,15 @@ public:
     void reset();
     void stop_motion();
 
-    void process(q::Clock::duration dt, std::function<void(Simulation&, q::Clock::duration)> const& callback);
+    void process(q::Clock::duration dt, std::function<void(Multi_Simulation&, q::Clock::duration)> const& callback);
 
     void set_gravity_enabled(bool yes);
     void set_ground_enabled(bool yes);
     void set_simulation_enabled(bool yes);
 
     auto get_uav_state() const -> ISimulator::UAV_State const&;
+
+    void set_motor_throttle(size_t motor, float throttle);
 
 private:
     void process_world(q::Clock::duration dt);

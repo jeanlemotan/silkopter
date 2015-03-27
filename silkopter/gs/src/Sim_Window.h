@@ -44,7 +44,8 @@ private:
         silk::node::ISimulator::UAV_State state;
     } m_uav;
 
-    bool m_needs_state = true;
+    q::Clock::time_point m_last_state_request_tp = q::Clock::now();
+    int m_state_requests = 10;
 
     math::vec3f m_camera_position_target;
 };

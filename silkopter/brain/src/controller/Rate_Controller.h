@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/processor/IController.h"
+#include "common/node/IController.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/ITorque.h"
 #include "HAL.h"

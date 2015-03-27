@@ -77,7 +77,7 @@ void HAL::connect_node_input(node::Node_ptr node, std::string const& input_name,
 {
     auto document = jsonutil::clone_value(node->config);
 
-    q::Path path("inputs");
+    q::Path path("Inputs");
     path += input_name;
 
     auto* value = jsonutil::find_value(document, path);
