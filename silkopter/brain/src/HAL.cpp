@@ -172,6 +172,72 @@ auto HAL::get_streams()  -> Registry<node::stream::IStream>&
     return m_streams;
 }
 
+auto HAL::get_multi_config() const -> boost::optional<config::Multi const&>
+{
+    if (!m_configs.multi)
+    {
+        return boost::none;
+    }
+    return boost::optional<config::Multi const&>(*m_configs.multi);
+}
+auto HAL::set_multi_config(config::Multi const& config) -> bool
+{
+    QLOG_TOPIC("hal::set_multi_config");
+
+    if (config.motors.size() < 2)
+    {
+        QLOGE("Bad motor count: {}", config.motors.size());
+        return false;
+    }
+    if (config.height < math::epsilon<float>())
+    {
+        QLOGE("Bad height: {}", config.height);
+        return false;
+    }
+    if (config.radius < math::epsilon<float>())
+    {
+        QLOGE("Bad radius: {}", config.radius);
+        return false;
+    }
+    if (config.mass < math::epsilon<float>())
+    {
+        QLOGE("Bad mass: {}", config.mass);
+        return false;
+    }
+    for (auto const& m: config.motors)
+    {
+        if (math::is_zero(m.position, math::epsilon<float>()))
+        {
+            QLOGE("Bad motor position");
+            return false;
+        }
+        if (m.max_thrust < math::epsilon<float>())
+        {
+            QLOGE("Bad max thrust: {}", m.max_thrust);
+            return false;
+        }
+        if (m.max_rpm < math::epsilon<float>())
+        {
+            QLOGE("Bad max rpm: {}", m.max_rpm);
+            return false;
+        }
+        if (m.acceleration < math::epsilon<float>())
+        {
+            QLOGE("Bad acceleration: {}", m.acceleration);
+            return false;
+        }
+        if (m.deceleration < math::epsilon<float>())
+        {
+            QLOGE("Bad deceleration: {}", m.deceleration);
+            return false;
+        }
+    }
+
+    m_configs.multi = config;
+
+    return true;
+}
+
 template<class T>
 void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 {

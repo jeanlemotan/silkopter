@@ -2,7 +2,6 @@
 #include "Multi_Simulator.h"
 
 #include "sz_math.hpp"
-#include "sz_Multi_Simulator_Structs.hpp"
 #include "sz_Multi_Simulator.hpp"
 
 namespace silk
@@ -84,12 +83,23 @@ auto Multi_Simulator::init() -> bool
         QLOGE("Bad motor count: {}", m_init_params->motor_count);
         return false;
     }
+
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        QLOGE("No multi config found");
+        return false;
+    }
+
     if (!m_simulation.init(1000))
     {
         return false;
     }
 
     m_last_tp = q::Clock::now();
+
+    m_input_pwm_streams.resize(multi_config->motors.size());
+    m_config->inputs.pwm.resize(multi_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
     m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -120,9 +130,6 @@ auto Multi_Simulator::init() -> bool
     m_ecef_location_stream->last_sample.tp = m_last_tp;
 
 
-    m_input_pwm_streams.resize(m_init_params->motor_count);
-    m_config->uav_config.motors.resize(m_init_params->motor_count);
-    m_config->inputs.pwm.resize(m_init_params->motor_count);
 
     return true;
 }
@@ -252,7 +259,15 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 //        uav_config.motors[i].acceleration = sz.motors[i].acceleration;
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
-    if (!m_simulation.init_uav(sz.uav_config))
+
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        QLOGE("No multi config found");
+        return false;
+    }
+
+    if (!m_simulation.init_uav(*multi_config))
     {
         return false;
     }

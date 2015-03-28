@@ -4,6 +4,7 @@
 #include "common/node/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/node/stream/IStream.h"
+#include "common/config/Multi.h"
 
 #include "Ctor_Helper.h"
 
@@ -72,12 +73,21 @@ public:
 
     void save_settings();
 
+    auto get_multi_config() const   -> boost::optional<config::Multi const&>;
+//    auto get_plane_config() const   -> boost::optional<config::Plane const&>;
+//    auto get_copter_config() const  -> boost::optional<config::Copter const&>;
+//    auto get_rover_config() const   -> boost::optional<config::Rover const&>;
+//    auto get_boat_config() const    -> boost::optional<config::Boat const&>;
+
     auto get_bus_factory()          -> Factory<node::bus::IBus>&;
     auto get_node_factory()         -> Factory<node::INode>&;
 
     auto get_buses()        -> Registry<node::bus::IBus>&;
     auto get_nodes()        -> Registry<node::INode>&;
     auto get_streams()      -> Registry<node::stream::IStream>&;
+
+protected:
+    auto set_multi_config(config::Multi const& config) -> bool;
 
 private:
     auto create_bus(std::string const& type,
@@ -89,6 +99,11 @@ private:
                      std::string const& name,
                      rapidjson::Value const& init_params) -> node::INode_ptr;
     auto create_nodes(rapidjson::Value& json) -> bool;
+
+    struct Configs
+    {
+        boost::optional<config::Multi> multi;
+    } m_configs;
 
     Registry<node::bus::IBus> m_buses;
     Registry<node::INode> m_nodes;

@@ -117,6 +117,8 @@ private:
 
     void handle_add_node();
 
+    void handle_multi_config();
+
     void handle_streams_telemetry_active();
 
     HAL& m_hal;

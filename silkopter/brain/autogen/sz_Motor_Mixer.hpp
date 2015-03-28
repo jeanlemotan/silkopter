@@ -457,10 +457,11 @@ w.Key("\x4d\x6f\x74\x6f\x72\x20\x43\x6f\x75\x6e\x74", 11, false); Serializer< Wr
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Motor_Mixer { struct Inputs {
- std::string torque;
+ std::string multi_config;
+std::string torque;
 std::string force;
 
-explicit Inputs():torque(), force() {  }
+explicit Inputs():multi_config(), torque(), force() {  }
 
 
  
@@ -478,7 +479,9 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;bool has_torque;
+SAXEventHandler< std::string > handler_1;
+SAXEventHandler< std::string > handler_2;bool has_multi_config;
+bool has_torque;
 bool has_force;
 
     bool check_depth(const char* type)
@@ -494,8 +497,10 @@ bool has_force;
     {
         switch (state) {
             case 0:
-    return "torque";
+    return "multi_config";
 case 1:
+    return "torque";
+case 2:
     return "force";
         default:
             break;
@@ -523,7 +528,8 @@ case 1:
 
     void reset_flags()
     {
-        has_torque = false;
+        has_multi_config = false;
+has_torque = false;
 has_force = false;
     }
 
@@ -531,8 +537,9 @@ public:
     explicit SAXEventHandler( ::sz::Motor_Mixer::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->torque)
-, handler_1(&obj->force)
+        , handler_0(&obj->multi_config)
+, handler_1(&obj->torque)
+, handler_2(&obj->force)
     {
         reset_flags();
     }
@@ -549,6 +556,9 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -569,6 +579,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -587,6 +600,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -607,6 +623,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -625,6 +644,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -645,6 +667,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -663,6 +688,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -683,6 +711,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -697,10 +728,12 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x54\x6f\x72\x71\x75\x65", 6))
-						 { state=0; has_torque = true; }
+            else if (utility::string_equal(str, length, "\x4d\x75\x6c\x74\x69\x20\x43\x6f\x6e\x66\x69\x67", 12))
+						 { state=0; has_multi_config = true; }
+else if (utility::string_equal(str, length, "\x54\x6f\x72\x71\x75\x65", 6))
+						 { state=1; has_torque = true; }
 else if (utility::string_equal(str, length, "\x43\x6f\x6c\x6c\x65\x63\x74\x69\x76\x65\x20\x46\x6f\x72\x63\x65", 16))
-						 { state=1; has_force = true; }
+						 { state=2; has_force = true; }
             else {
                 state = -1;
                 return true;
@@ -714,6 +747,9 @@ else if (utility::string_equal(str, length, "\x43\x6f\x6c\x6c\x65\x63\x74\x69\x7
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -735,6 +771,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -754,6 +793,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -772,6 +814,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -793,11 +838,15 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_torque) set_missing_required("torque");
+            if (!has_multi_config) set_missing_required("multi_config");
+if (!has_torque) set_missing_required("torque");
 if (!has_force) set_missing_required("force");
         }
         return the_error.empty();
@@ -821,6 +870,8 @@ if (!has_force) set_missing_required("force");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -837,6 +888,7 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
@@ -848,10 +900,11 @@ struct Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5
     {
         w.StartObject();
 
-        w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.torque);
+        w.Key("\x4d\x75\x6c\x74\x69\x20\x43\x6f\x6e\x66\x69\x67", 12, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.multi_config);
+w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.torque);
 w.Key("\x43\x6f\x6c\x6c\x65\x63\x74\x69\x76\x65\x20\x46\x6f\x72\x63\x65", 16, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.force);
 
-        w.EndObject(2);
+        w.EndObject(3);
     }
 
 };

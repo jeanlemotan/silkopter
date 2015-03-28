@@ -4,9 +4,9 @@
 #include "common/node/ISink.h"
 #include "common/node/ISource.h"
 #include "common/node/IProcessor.h"
-#include "common/node/processor/ILPF.h"
-#include "common/node/processor/IResampler.h"
-#include "common/node/processor/IPilot.h"
+#include "common/node/ILPF.h"
+#include "common/node/IResampler.h"
+#include "common/node/IPilot.h"
 
 #include "Numeric_Viewer.h"
 //#include "Battery_State_Viewer.h"

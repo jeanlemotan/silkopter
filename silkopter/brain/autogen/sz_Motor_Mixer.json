@@ -15,6 +15,7 @@
     "name": "Inputs",
     "members":
     [
+        ["std::string", "multi_config", {"required": true, "json_key" : "Multi Config"}],
         ["std::string", "torque", {"required": true, "json_key" : "Torque"}],
         ["std::string", "force", {"required": true, "json_key" : "Collective Force"}]
     ]

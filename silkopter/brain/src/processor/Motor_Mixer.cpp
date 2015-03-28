@@ -46,16 +46,21 @@ auto Motor_Mixer::init() -> bool
         QLOGE("Bad motor count: {}", m_init_params->motor_count);
         return false;
     }
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        QLOGE("No multi config found");
+        return false;
+    }
 
-    m_output_streams.resize(m_init_params->motor_count);
+    m_output_streams.resize(multi_config->motors.size());
     for (auto& os: m_output_streams)
     {
         os = std::make_shared<Stream>();
         os->rate = m_init_params->rate;
     }
 
-    m_config->outputs.throttles.resize(m_init_params->motor_count);
-    m_config->motors.resize(m_init_params->motor_count);
+    m_config->outputs.throttles.resize(multi_config->motors.size());
 
     m_dt = std::chrono::microseconds(1000000 / m_init_params->rate);
     return true;
@@ -149,8 +154,6 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_config->outputs.throttles.resize(m_init_params->motor_count);
-    m_config->motors.resize(m_init_params->motor_count);
 
     auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.inputs.torque);
     auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.inputs.force);

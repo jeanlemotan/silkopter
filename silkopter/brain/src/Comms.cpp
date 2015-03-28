@@ -28,6 +28,7 @@
 
 #include "sz_math.hpp"
 #include "sz_Comms_Source.hpp"
+#include "sz_Multi_Config.hpp"
 
 using namespace silk;
 using namespace boost::asio;
@@ -363,6 +364,56 @@ void Comms::handle_clock()
     }
 }
 
+void Comms::handle_multi_config()
+{
+    m_setup_channel.begin_unpack();
+    uint32_t req_id = 0;
+    if (!m_setup_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking multi config rquest");
+        return;
+    }
+
+    m_setup_channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
+    m_setup_channel.pack_param(req_id);
+
+    QLOGI("Req Id: {} - multi config", req_id);
+
+    rapidjson::Document configj;
+    if (unpack_json(m_setup_channel, configj))
+    {
+        config::Multi config;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(config, configj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
+            return;
+        }
+        if (m_hal.set_multi_config(config))
+        {
+            m_hal.save_settings();
+        }
+    }
+
+    auto config = m_hal.get_multi_config();
+    if (config)
+    {
+        m_setup_channel.pack_param(true);
+        configj.SetObject();
+        autojsoncxx::to_document(*config, configj);
+        pack_json(m_setup_channel, configj);
+    }
+    else
+    {
+        m_setup_channel.pack_param(false);
+    }
+
+    m_setup_channel.end_pack();
+}
+
+
 void Comms::handle_enumerate_node_defs()
 {
     uint32_t req_id = 0;
@@ -605,6 +656,9 @@ void Comms::process()
         switch (msg.get())
         {
         case comms::Setup_Message::CLOCK: handle_clock(); break;
+
+        case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
+
         case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 

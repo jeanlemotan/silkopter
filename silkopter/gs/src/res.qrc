@@ -41,5 +41,8 @@
         <file>icons/stop.png</file>
         <file>icons/gravity.png</file>
         <file>icons/ground.png</file>
+        <file>icons/add_motor.png</file>
+        <file>icons/new.png</file>
+        <file>icons/upload.png</file>
     </qresource>
 </RCC>

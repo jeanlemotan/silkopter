@@ -23,6 +23,12 @@ enum class Setup_Message : uint8_t
 {
     CLOCK,
 
+    MULTI_CONFIG,
+//    COPTER_CONFIG,
+//    PLANE_CONFIG,
+//    ROVER_CONFIG,
+//    BOAT_CONFIG,
+
     ENUMERATE_NODE_DEFS,
     ENUMERATE_NODES,
 

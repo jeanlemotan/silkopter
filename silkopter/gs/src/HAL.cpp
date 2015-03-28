@@ -2,6 +2,9 @@
 #include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
 
+#include "sz_math.hpp"
+#include "sz_Multi_Config.hpp"
+
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "rapidjson/stringbuffer.h"
@@ -39,6 +42,21 @@ auto HAL::get_nodes() const  -> Registry<node::Node> const&
 auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
 {
     return m_streams;
+}
+
+auto HAL::get_multi_config() const -> boost::optional<config::Multi const&>
+{
+    if (!m_configs.multi)
+    {
+        return boost::none;
+    }
+    boost::optional<config::Multi const&>(*m_configs.multi);
+}
+void HAL::set_multi_config(config::Multi const& config)
+{
+    Set_Multi_Config_Queue_Item item;
+    autojsoncxx::to_document(config, item.config);
+    m_multi_set_config_queue.push_back(std::move(item));
 }
 
 void HAL::add_node(std::string const& def_name,
@@ -89,20 +107,18 @@ void HAL::connect_node_input(node::Node_ptr node, std::string const& input_name,
 
     value->SetString(stream_name.c_str(), document.GetAllocator());
 
-    Set_Config_Queue_Item item;
-    item.message = silk::comms::Setup_Message::NODE_CONFIG;
+    Set_Node_Config_Queue_Item item;
     item.name = node->name;
     item.config = std::move(document);
-    m_set_config_queue.push_back(std::move(item));
+    m_node_set_config_queue.push_back(std::move(item));
 }
 
 void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config)
 {
-    Set_Config_Queue_Item item;
-    item.message = silk::comms::Setup_Message::NODE_CONFIG;
+    Set_Node_Config_Queue_Item item;
     item.name = node->name;
     item.config = jsonutil::clone_value(config);
-    m_set_config_queue.push_back(std::move(item));
+    m_node_set_config_queue.push_back(std::move(item));
 }
 
 void HAL::send_node_message(node::Node_ptr node, rapidjson::Document json, Node_Message_Callback callback)
@@ -113,7 +129,6 @@ void HAL::send_node_message(node::Node_ptr node, rapidjson::Document json, Node_
         return;
     }
     Send_Node_Message_Queue_Item item;
-    item.message = silk::comms::Setup_Message::NODE_MESSAGE;
     item.name = node->name;
     item.json = std::move(json);
     item.callback = callback;

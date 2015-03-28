@@ -45,7 +45,8 @@ enum class Type
     THROTTLE,
     VIDEO,
     VOLTAGE,
-    FACTOR
+    FACTOR,
+    MULTI_CONFIG
 };
 
 //for streams of data with a fixed sample rate

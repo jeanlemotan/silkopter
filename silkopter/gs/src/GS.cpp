@@ -1,6 +1,7 @@
 #include "GS.h"
 
 #include "HAL_Window.h"
+#include "Multi_Config_Window.h"
 
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
@@ -51,9 +52,11 @@ GS::GS(QWidget *parent)
 //    connect(m_ui.action_connect_simulator, &QAction::triggered, [this](bool) { set_uav_address("127.0.0.1"); });
 
     m_hal_window = new HAL_Window(m_hal, m_comms, m_context, this);
+    m_multi_config_window = new Multi_Config_Window(m_hal, m_comms, this);
 
 
     connect(m_ui.action_hal_editor, &QAction::triggered, [this](bool) { m_hal_window->show(); });
+    connect(m_ui.action_multi_config_window, &QAction::triggered, [this](bool) { m_multi_config_window->show(); });
 
 
     read_settings();
@@ -113,6 +116,8 @@ void GS::closeEvent(QCloseEvent* event)
     settings.setValue("windowState", saveState());
     settings.setValue("hal_window/geometry", m_hal_window->saveGeometry());
     settings.setValue("hal_window/windowState", m_hal_window->saveState());
+    settings.setValue("multi_config_window/geometry", m_multi_config_window->saveGeometry());
+    settings.setValue("multi_config_window/windowState", m_multi_config_window->saveState());
 //    settings.setValue("sim_window/geometry", m_sim_window->saveGeometry());
 //    settings.setValue("sim_window/windowState", m_sim_window->saveState());
 
@@ -126,6 +131,8 @@ void GS::read_settings()
     restoreState(settings.value("windowState").toByteArray());
     m_hal_window->restoreGeometry(settings.value("hal_window/geometry").toByteArray());
     m_hal_window->restoreState(settings.value("hal_window/windowState").toByteArray());
+    m_multi_config_window->restoreGeometry(settings.value("multi_config_window/geometry").toByteArray());
+    m_multi_config_window->restoreState(settings.value("multi_config_window/windowState").toByteArray());
 //    m_sim_window->restoreGeometry(settings.value("sim_window/geometry").toByteArray());
 //    m_sim_window->restoreState(settings.value("sim_window/windowState").toByteArray());
 }
@@ -156,6 +163,7 @@ void GS::process()
     q::System::inst().get_renderer()->begin_frame();
 
     m_hal_window->process();
+    m_multi_config_window->process();
 
 
 //	m_render_widget->begin_rendering();

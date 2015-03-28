@@ -65,28 +65,6 @@ HEADERS += \
     ../../src/qcustomplot.h \
     ../../src/Comms.h \
     ../../src/HAL.h \
-    ../../../libs/common/node/processor/IAHRS.h \
-    ../../../libs/common/node/processor/IBattery.h \
-    ../../../libs/common/node/processor/ICompass.h \
-    ../../../libs/common/node/processor/IFilter.h \
-    ../../../libs/common/node/processor/ITransform.h \
-    ../../../libs/common/node/sink/IPWM.h \
-    ../../../libs/common/node/stream/IAcceleration.h \
-    ../../../libs/common/node/stream/IADC_Value.h \
-    ../../../libs/common/node/stream/IAngular_Velocity.h \
-    ../../../libs/common/node/stream/IBattery_State.h \
-    ../../../libs/common/node/stream/ICardinal_Points.h \
-    ../../../libs/common/node/stream/ICurrent.h \
-    ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/IMagnetic_Field.h \
-    ../../../libs/common/node/stream/IPressure.h \
-    ../../../libs/common/node/stream/IPWM_Value.h \
-    ../../../libs/common/node/stream/IReference_Frame.h \
-    ../../../libs/common/node/stream/IStream.h \
-    ../../../libs/common/node/stream/ITemperature.h \
-    ../../../libs/common/node/stream/IVideo.h \
-    ../../../libs/common/node/stream/IVoltage.h \
     ../../src/stdafx.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/utils/Butterworth.h \
@@ -120,33 +98,50 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../../libs/json_editor/JSON_Model.h \
-    ../../../libs/common/node/processor/IMultirotor_Pilot.h \
-    ../../../libs/common/node/IProcessor.h \
-    ../../../libs/common/node/ISink.h \
-    ../../../libs/common/node/ISource.h \
-    ../../../libs/common/node/processor/ILPF.h \
-    ../../../libs/common/node/processor/IResampler.h \
     ../../src/Stream_Viewer_Widget.h \
     ../../src/Numeric_Viewer.h \
     ../../src/Map_Viewer.h \
-    ../../../libs/common/node/stream/IECEF.h \
-    ../../../libs/common/node/stream/IWGS84.h \
-    ../../../libs/common/node/stream/IADC.h \
-    ../../../libs/common/node/stream/ICommands.h \
-    ../../../libs/common/node/stream/IForce.h \
-    ../../../libs/common/node/stream/IFrame.h \
-    ../../../libs/common/node/stream/ILocation.h \
-    ../../../libs/common/node/stream/IMultirotor_Data.h \
-    ../../../libs/common/node/stream/IPhysical_State.h \
-    ../../../libs/common/node/stream/IPWM.h \
-    ../../../libs/common/node/stream/IThrottle.h \
-    ../../../libs/common/node/stream/ITorque.h \
-    ../../../libs/common/node/stream/IVelocity.h \
     ../../src/Sim_Window.h \
     ../../src/GL_Widget.h \
     ../../src/Render_Widget.h \
     ../../src/Camera_Controller_3D.h \
-    ../../../libs/utils/Json_Util.h
+    ../../../libs/utils/Json_Util.h \
+    ../../../libs/common/config/Multi.h \
+    ../../../libs/common/node/stream/IAcceleration.h \
+    ../../../libs/common/node/stream/IADC.h \
+    ../../../libs/common/node/stream/IAngular_Velocity.h \
+    ../../../libs/common/node/stream/IBattery_State.h \
+    ../../../libs/common/node/stream/ICommands.h \
+    ../../../libs/common/node/stream/ICurrent.h \
+    ../../../libs/common/node/stream/IDistance.h \
+    ../../../libs/common/node/stream/IFactor.h \
+    ../../../libs/common/node/stream/IForce.h \
+    ../../../libs/common/node/stream/IFrame.h \
+    ../../../libs/common/node/stream/ILinear_Acceleration.h \
+    ../../../libs/common/node/stream/ILocation.h \
+    ../../../libs/common/node/stream/IMagnetic_Field.h \
+    ../../../libs/common/node/stream/IPhysical_State.h \
+    ../../../libs/common/node/stream/IPressure.h \
+    ../../../libs/common/node/stream/IPWM.h \
+    ../../../libs/common/node/stream/IStream.h \
+    ../../../libs/common/node/stream/ITemperature.h \
+    ../../../libs/common/node/stream/IThrottle.h \
+    ../../../libs/common/node/stream/ITorque.h \
+    ../../../libs/common/node/stream/IVelocity.h \
+    ../../../libs/common/node/stream/IVideo.h \
+    ../../../libs/common/node/stream/IVoltage.h \
+    ../../../libs/common/node/IController.h \
+    ../../../libs/common/node/IGenerator.h \
+    ../../../libs/common/node/ILPF.h \
+    ../../../libs/common/node/IMulti_Simulator.h \
+    ../../../libs/common/node/INode.h \
+    ../../../libs/common/node/IPilot.h \
+    ../../../libs/common/node/IProcessor.h \
+    ../../../libs/common/node/IResampler.h \
+    ../../../libs/common/node/ISink.h \
+    ../../../libs/common/node/ISource.h \
+    ../../../libs/common/node/ITransformer.h \
+    ../../src/Multi_Config_Window.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -166,13 +161,15 @@ SOURCES += \
     ../../src/Sim_Window.cpp \
     ../../src/GL_Widget.cpp \
     ../../src/Render_Widget.cpp \
-    ../../src/Camera_Controller_3D.cpp
+    ../../src/Camera_Controller_3D.cpp \
+    ../../src/Multi_Config_Window.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
     ../../src/Numeric_Viewer.ui \
     ../../src/GS.ui \
-    ../../src/Sim_Window.ui
+    ../../src/Sim_Window.ui \
+    ../../src/Multi_Config_Window.ui
 
 DISTFILES += \
     ../../src/node.png \

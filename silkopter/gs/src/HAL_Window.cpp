@@ -23,13 +23,13 @@
 #include "common/node/ISink.h"
 #include "common/node/ISource.h"
 #include "common/node/IProcessor.h"
-#include "common/node/processor/ILPF.h"
-#include "common/node/processor/IResampler.h"
-#include "common/node/processor/IPilot.h"
-#include "common/node/processor/IController.h"
-#include "common/node/processor/ITransformer.h"
-#include "common/node/processor/IGenerator.h"
-#include "common/node/processor/ISimulator.h"
+#include "common/node/ILPF.h"
+#include "common/node/IResampler.h"
+#include "common/node/IPilot.h"
+#include "common/node/IController.h"
+#include "common/node/ITransformer.h"
+#include "common/node/IGenerator.h"
+#include "common/node/IMulti_Simulator.h"
 
 #include "ui_New_Node.h"
 
@@ -44,7 +44,7 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IController::TYPE, QColor(0x9B59B6) },
     { silk::node::ITransformer::TYPE, QColor(0xF1C40F) },
     { silk::node::IGenerator::TYPE, QColor(0xF1C40F) },
-    { silk::node::ISimulator::TYPE, QColor(0xF1C40F) },
+    { silk::node::IMulti_Simulator::TYPE, QColor(0xF1C40F) },
 }};
 
 
@@ -251,7 +251,7 @@ void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* blo
     if (it != m_nodes.end())
     {
         auto node = it->second.node.lock();
-        if (node && node->type == silk::node::ISimulator::TYPE)
+        if (node && node->type == silk::node::IMulti_Simulator::TYPE)
         {
             auto action = menu.addAction(QIcon(":/icons/simulator.png"), "View Simulatior");
             connect(action, &QAction::triggered, [=](bool)

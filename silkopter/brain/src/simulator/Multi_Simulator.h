@@ -9,7 +9,7 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/ILocation.h"
 #include "common/node/stream/IPWM.h"
-#include "common/node/ISimulator.h"
+#include "common/node/IMulti_Simulator.h"
 
 #include "Multi_Simulation.h"
 
@@ -28,7 +28,7 @@ namespace silk
 namespace node
 {
 
-class Multi_Simulator : public ISimulator
+class Multi_Simulator : public IMulti_Simulator
 {
 public:
     Multi_Simulator(HAL& hal);

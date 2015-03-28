@@ -7,7 +7,7 @@
 #include "Comms.h"
 #include "Render_Widget.h"
 #include "Camera_Controller_3D.h"
-#include "common/node/processor/ISimulator.h"
+#include "common/node/IMulti_Simulator.h"
 
 class Sim_Window : public QMainWindow
 {
@@ -40,8 +40,8 @@ private:
 
     struct UAV
     {
-        silk::node::ISimulator::UAV_Config config;
-        silk::node::ISimulator::UAV_State state;
+        //silk::node::ISimulator::UAV_Config config;
+        silk::node::IMulti_Simulator::UAV_State state;
     } m_uav;
 
     q::Clock::time_point m_last_state_request_tp = q::Clock::now();

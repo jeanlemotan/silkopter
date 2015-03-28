@@ -62,7 +62,7 @@ auto Multi_Simulation::init(uint32_t rate) -> bool
     return true;
 }
 
-auto Multi_Simulation::init_uav(ISimulator::UAV_Config const& config) -> bool
+auto Multi_Simulation::init_uav(config::Multi const& config) -> bool
 {
     if (math::is_zero(config.mass, math::epsilon<float>()))
     {
@@ -481,7 +481,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 }
 
 
-auto Multi_Simulation::get_uav_state() const -> ISimulator::UAV_State const&
+auto Multi_Simulation::get_uav_state() const -> IMulti_Simulator::UAV_State const&
 {
     return m_uav.state;
 }

@@ -1,7 +1,7 @@
 #include "Sim_Window.h"
 
 #include "sz_math.hpp"
-#include "sz_Simulator_Structs.hpp"
+#include "sz_Multi_Simulator_Structs.hpp"
 
 Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget *parent)
     : QMainWindow(parent)
@@ -106,18 +106,18 @@ void Sim_Window::read_config()
         m_ui.action_ground->setChecked(vj->GetBool());
     }
 
-    vj = jsonutil::find_value(m_sim_node->config, std::string("UAV Config"));
-    if (vj)
-    {
-        autojsoncxx::error::ErrorStack result;
-        m_uav.config = silk::node::ISimulator::UAV_Config();
-        if (!autojsoncxx::from_value(m_uav.config, *vj, result))
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Cannot deserialize position data: {}", ss.str());
-        }
-    }
+//    vj = jsonutil::find_value(m_sim_node->config, std::string("UAV Config"));
+//    if (vj)
+//    {
+//        autojsoncxx::error::ErrorStack result;
+//        m_uav.config = silk::node::ISimulator::UAV_Config();
+//        if (!autojsoncxx::from_value(m_uav.config, *vj, result))
+//        {
+//            std::ostringstream ss;
+//            ss << result;
+//            QLOGE("Cannot deserialize position data: {}", ss.str());
+//        }
+//    }
 }
 
 
@@ -178,17 +178,17 @@ void Sim_Window::render_uav()
         //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
 
         const float motor_radius = 0.12f;
-        if (m_uav.state.motors.size() == m_uav.config.motors.size())
-        {
-            for (size_t i = 0; i < m_uav.config.motors.size(); i++)
-            {
-                auto const& mc = m_uav.config.motors[i];
-                auto const& m = m_uav.state.motors[i];
-                m_context.painter.draw_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFFFFFFFF), motor_radius);
-                float ratio = m.rpm / float(mc.max_rpm);
-                m_context.painter.fill_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFF00FF00), motor_radius * ratio);
-            }
-        }
+//        if (m_uav.state.motors.size() == m_uav.config.motors.size())
+//        {
+//            for (size_t i = 0; i < m_uav.config.motors.size(); i++)
+//            {
+//                auto const& mc = m_uav.config.motors[i];
+//                auto const& m = m_uav.state.motors[i];
+//                m_context.painter.draw_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFFFFFFFF), motor_radius);
+//                float ratio = m.rpm / float(mc.max_rpm);
+//                m_context.painter.fill_circle(q::draw::Vertex(mc.position*m_uav.config.radius, 0xFF00FF00), motor_radius * ratio);
+//            }
+//        }
     }
 
     m_context.painter.pop_post_clip_transform();
@@ -227,7 +227,7 @@ void Sim_Window::process()
         {
             if (result == silk::HAL::Result::OK)
             {
-                silk::node::ISimulator::UAV_State state;
+                silk::node::IMulti_Simulator::UAV_State state;
                 autojsoncxx::error::ErrorStack result;
                 if (!autojsoncxx::from_value(state, response, result))
                 {
@@ -238,7 +238,7 @@ void Sim_Window::process()
                 else
                 {
                     m_uav.state = state;
-                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
+//                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
                 }
             }
             m_state_requests++;

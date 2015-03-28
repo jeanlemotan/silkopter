@@ -1,5 +1,7 @@
 #include "Comms.h"
 
+#include "sz_math.hpp"
+#include "sz_Multi_Config.hpp"
 
 
 using namespace silk;
@@ -125,6 +127,7 @@ void Comms::request_data()
     m_setup_channel.pack_all(comms::Setup_Message::CLOCK, ++m_last_req_id);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
+    m_setup_channel.pack_all(comms::Setup_Message::MULTI_CONFIG, ++m_last_req_id);
 }
 
 void Comms::request_all_node_configs()
@@ -303,6 +306,45 @@ void Comms::handle_clock()
     {
         QLOGE("Error in enumerating node defs");
     }
+}
+
+void Comms::handle_multi_config()
+{
+    uint32_t req_id = 0;
+    bool success = false;
+    bool ok = m_setup_channel.begin_unpack() &&
+              m_setup_channel.unpack_param(req_id) &&
+              m_setup_channel.unpack_param(success);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack multi config");
+        return;
+    }
+
+    QLOGI("Req Id: {} - multi config received", req_id);
+
+    if (success)
+    {
+        rapidjson::Document configj;
+        if (!unpack_json(m_setup_channel, configj))
+        {
+            QLOGE("Req Id: {} - failed to unpack config json", req_id);
+        }
+
+        config::Multi config;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(config, configj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
+            return;
+        }
+        m_hal.m_configs.multi = config;
+    }
+    m_hal.multi_config_refreshed_signal.execute();
+
+    m_setup_channel.end_unpack();
 }
 
 
@@ -805,28 +847,15 @@ void Comms::send_hal_requests()
     }
 
 
-    for (auto it = m_hal.m_set_config_queue.begin(); it != m_hal.m_set_config_queue.end();)
+    while (!m_hal.m_node_set_config_queue.empty())
     {
-        auto& req = *it;
-        if (!req.was_sent)
-        {
-            req.was_sent = true;
-            req.sent_time_point = now;
-            req.req_id = ++m_last_req_id;
-            m_setup_channel.begin_pack(req.message);
-            m_setup_channel.pack_param(req.req_id);
-            m_setup_channel.pack_param(req.name);
-            pack_json(m_setup_channel, req.config);
-            m_setup_channel.end_pack();
-        }
-        if (now - req.sent_time_point > REQUEST_TIMEOUT)
-        {
-            m_hal.m_set_config_queue.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
+        auto& req = m_hal.m_node_set_config_queue.back();
+        m_setup_channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+        m_setup_channel.pack_param(++m_last_req_id);
+        m_setup_channel.pack_param(req.name);
+        pack_json(m_setup_channel, req.config);
+        m_setup_channel.end_pack();
+        m_hal.m_node_set_config_queue.pop_back();
     }
 
     for (auto it = m_hal.m_stream_telemetry_queue.begin(); it != m_hal.m_stream_telemetry_queue.end();)
@@ -862,7 +891,7 @@ void Comms::send_hal_requests()
             req.was_sent = true;
             req.sent_time_point = now;
             req.req_id = ++m_last_req_id;
-            m_setup_channel.begin_pack(req.message);
+            m_setup_channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
             m_setup_channel.pack_param(req.req_id);
             m_setup_channel.pack_param(req.name);
             pack_json(m_setup_channel, req.json);
@@ -877,6 +906,16 @@ void Comms::send_hal_requests()
         {
             ++it;
         }
+    }
+
+    while (!m_hal.m_multi_set_config_queue.empty())
+    {
+        auto& req = m_hal.m_multi_set_config_queue.back();
+        m_setup_channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
+        m_setup_channel.pack_param(++m_last_req_id);
+        pack_json(m_setup_channel, req.config);
+        m_setup_channel.end_pack();
+        m_hal.m_multi_set_config_queue.pop_back();
     }
 }
 
@@ -902,6 +941,8 @@ void Comms::process()
     {
         switch (msg.get())
         {
+            case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
+
             case comms::Setup_Message::CLOCK: handle_clock(); break;
 
             case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;

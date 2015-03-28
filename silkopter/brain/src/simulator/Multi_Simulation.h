@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common/node/ISimulator.h"
+#include "common/node/IMulti_Simulator.h"
+#include "common/config/Multi.h"
 
 namespace silk
 {
@@ -33,7 +34,7 @@ public:
 
     auto init(uint32_t rate) -> bool;
 
-    auto init_uav(ISimulator::UAV_Config const& config) -> bool;
+    auto init_uav(config::Multi const& config) -> bool;
 
     void reset();
     void stop_motion();
@@ -44,7 +45,7 @@ public:
     void set_ground_enabled(bool yes);
     void set_simulation_enabled(bool yes);
 
-    auto get_uav_state() const -> ISimulator::UAV_State const&;
+    auto get_uav_state() const -> IMulti_Simulator::UAV_State const&;
 
     void set_motor_throttle(size_t motor, float throttle);
 
@@ -60,11 +61,11 @@ private:
 
     struct UAV
     {
-        ISimulator::UAV_Config config;
+        config::Multi config;
         std::unique_ptr<btCylinderShapeZ> shape;
         std::unique_ptr<btMotionState> motion_state;
         std::unique_ptr<btRigidBody> body;
-        ISimulator::UAV_State state;
+        IMulti_Simulator::UAV_State state;
     } m_uav;
 
 //    math::vec3f m_old_linear_velocity;

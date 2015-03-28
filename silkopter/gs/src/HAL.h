@@ -23,8 +23,9 @@
 #include "common/node/stream/IVoltage.h"
 
 #include "common/node/INode.h"
-#include "common/node/processor/IPilot.h"
+#include "common/node/IPilot.h"
 
+#include "common/config/Multi.h"
 #include "common/Comm_Data.h"
 #include "common/Manual_Clock.h"
 
@@ -428,6 +429,12 @@ public:
     HAL();
     ~HAL();
 
+    auto get_multi_config() const   -> boost::optional<config::Multi const&>;
+    void set_multi_config(config::Multi const& config);
+
+    q::util::Signal<void()> multi_config_refreshed_signal;
+
+
     auto get_node_defs() const      -> Registry<node::Node_Def> const&;
     auto get_nodes() const          -> Registry<node::Node> const&;
     auto get_streams() const        -> Registry<node::stream::Stream> const&;
@@ -462,6 +469,11 @@ public:
 protected:
     Manual_Clock m_remote_clock;
 
+    struct Configs
+    {
+        boost::optional<config::Multi> multi;
+    } m_configs;
+
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
     Registry<node::stream::Stream> m_streams;
@@ -472,6 +484,12 @@ protected:
         q::Clock::time_point sent_time_point;
         uint32_t req_id = 0;
     };
+
+    struct Set_Multi_Config_Queue_Item
+    {
+        rapidjson::Document config;
+    };
+    std::vector<Set_Multi_Config_Queue_Item> m_multi_set_config_queue;
 
     struct Add_Queue_Item : public Queue_Item
     {
@@ -489,13 +507,12 @@ protected:
     };
     std::vector<Remove_Queue_Item> m_remove_queue;
 
-    struct Set_Config_Queue_Item : public Queue_Item
+    struct Set_Node_Config_Queue_Item
     {
-        silk::comms::Setup_Message message;
         std::string name;
         rapidjson::Document config;
     };
-    std::vector<Set_Config_Queue_Item> m_set_config_queue;
+    std::vector<Set_Node_Config_Queue_Item> m_node_set_config_queue;
 
     struct Stream_Telemetry_Queue_Item : public Queue_Item
     {
@@ -507,7 +524,6 @@ protected:
 
     struct Send_Node_Message_Queue_Item : public Queue_Item
     {
-        silk::comms::Setup_Message message;
         std::string name;
         rapidjson::Document json;
         Node_Message_Callback callback;

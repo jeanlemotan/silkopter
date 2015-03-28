@@ -57,6 +57,8 @@ private:
 
     void handle_stream_data();
 
+    void handle_multi_config();
+
     void handle_clock();
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();

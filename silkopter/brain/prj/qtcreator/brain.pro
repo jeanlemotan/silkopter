@@ -114,7 +114,6 @@ SOURCES += \
     ../../src/controller/Rate_Controller.cpp \
     ../../src/controller/Stability_Controller.cpp \
     ../../src/controller/Velocity_Controller.cpp \
-    ../../src/description/Multirotor_Description.cpp \
     ../../src/pilot/Multi_Pilot.cpp \
     ../../src/simulator/Multi_Simulation.cpp \
     ../../src/simulator/Multi_Simulator.cpp
@@ -195,12 +194,10 @@ HEADERS += \
     ../../src/generator/Scalar_Generator.h \
     ../../src/source/EHealth.h \
     ../../../libs/common/node/IController.h \
-    ../../../libs/common/node/IDescription.h \
     ../../../libs/common/node/IGenerator.h \
     ../../../libs/common/node/ILPF.h \
     ../../../libs/common/node/IPilot.h \
     ../../../libs/common/node/IResampler.h \
-    ../../../libs/common/node/ISimulator.h \
     ../../../libs/common/node/ITransformer.h \
     ../../src/controller/Rate_Controller.h \
     ../../src/controller/Stability_Controller.h \
@@ -209,8 +206,10 @@ HEADERS += \
     ../../src/resampler/Resampler.h \
     ../../src/transformer/Transformer.h \
     ../../src/transformer/Transformer_Inv.h \
-    ../../src/description/Multi_Description.h \
     ../../src/pilot/Multi_Pilot.h \
     ../../src/simulator/Multi_Simulation.h \
-    ../../src/simulator/Multi_Simulator.h
+    ../../src/simulator/Multi_Simulator.h \
+    ../../../libs/common/node/IConfig.h \
+    ../../../libs/common/node/IMulti_Simulator.h \
+    ../../../libs/common/config/Multi.h
 
