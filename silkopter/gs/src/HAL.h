@@ -429,7 +429,7 @@ public:
     HAL();
     ~HAL();
 
-    auto get_multi_config() const   -> boost::optional<config::Multi const&>;
+    auto get_multi_config() const   -> boost::optional<config::Multi>;
     void set_multi_config(config::Multi const& config);
 
     q::util::Signal<void()> multi_config_refreshed_signal;

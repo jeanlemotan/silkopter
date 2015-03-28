@@ -172,13 +172,9 @@ auto HAL::get_streams()  -> Registry<node::stream::IStream>&
     return m_streams;
 }
 
-auto HAL::get_multi_config() const -> boost::optional<config::Multi const&>
+auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {
-    if (!m_configs.multi)
-    {
-        return boost::none;
-    }
-    return boost::optional<config::Multi const&>(*m_configs.multi);
+    return m_configs.multi;
 }
 auto HAL::set_multi_config(config::Multi const& config) -> bool
 {
@@ -206,11 +202,6 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
     }
     for (auto const& m: config.motors)
     {
-        if (math::is_zero(m.position, math::epsilon<float>()))
-        {
-            QLOGE("Bad motor position");
-            return false;
-        }
         if (m.max_thrust < math::epsilon<float>())
         {
             QLOGE("Bad max thrust: {}", m.max_thrust);

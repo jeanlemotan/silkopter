@@ -44,13 +44,9 @@ auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
     return m_streams;
 }
 
-auto HAL::get_multi_config() const -> boost::optional<config::Multi const&>
+auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {
-    if (!m_configs.multi)
-    {
-        return boost::none;
-    }
-    boost::optional<config::Multi const&>(*m_configs.multi);
+    return m_configs.multi;
 }
 void HAL::set_multi_config(config::Multi const& config)
 {

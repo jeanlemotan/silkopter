@@ -73,7 +73,7 @@ public:
 
     void save_settings();
 
-    auto get_multi_config() const   -> boost::optional<config::Multi const&>;
+    auto get_multi_config() const   -> boost::optional<config::Multi>;
 //    auto get_plane_config() const   -> boost::optional<config::Plane const&>;
 //    auto get_copter_config() const  -> boost::optional<config::Copter const&>;
 //    auto get_rover_config() const   -> boost::optional<config::Rover const&>;
