@@ -49,6 +49,8 @@
 //#include "common/node/IAHRS.h"
 
 #include "autojsoncxx/boost_types.hpp"
+#include "sz_math.hpp"
+#include "sz_Multi_Config.hpp"
 
 
 namespace silk
@@ -90,6 +92,19 @@ void HAL::save_settings()
     settingsj->SetObject();
 
     auto& allocator = settingsj->GetAllocator();
+
+    if (m_configs.multi)
+    {
+        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/multi_config"), rapidjson::kObjectType, allocator);
+        if (!configj)
+        {
+            QLOGE("Cannot open create multi config node.");
+            return;
+        }
+        rapidjson::Document json;
+        autojsoncxx::to_document(*m_configs.multi, json);
+        jsonutil::clone_value(*configj, json, settingsj->GetAllocator());
+    }
 
     {
         auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/buses"), rapidjson::kObjectType, allocator);
@@ -632,6 +647,25 @@ auto HAL::init(Comms& comms) -> bool
 //        out_samples.push_back(outputs / inputs);
 //    }
 //    write_gnu_plot("out.dat", out_samples);
+
+    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/multi_config"));
+    if (configj)
+    {
+        config::Multi config;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(config, *configj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
+            return false;
+        }
+        if (!set_multi_config(config))
+        {
+            return false;
+        }
+    }
+
 
     auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/buses"));
     auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/nodes"));
