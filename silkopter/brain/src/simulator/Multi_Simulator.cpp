@@ -78,11 +78,6 @@ auto Multi_Simulator::init() -> bool
         QLOGE("Bad location rate: {}Hz", m_init_params->location_rate);
         return false;
     }
-    if (m_init_params->motor_count == 0)
-    {
-        QLOGE("Bad motor count: {}", m_init_params->motor_count);
-        return false;
-    }
 
     auto multi_config = m_hal.get_multi_config();
     if (!multi_config)

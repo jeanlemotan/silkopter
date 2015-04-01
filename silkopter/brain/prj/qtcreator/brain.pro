@@ -127,7 +127,6 @@ HEADERS += \
     ../../../libs/utils/Serial_Channel.h \
     ../../src/Comms.h \
     ../../../libs/utils/Json_Util.h \
-    ../../src/Motor_Mixer.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \

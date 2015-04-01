@@ -5,8 +5,7 @@
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}],
-        ["uint32_t", "motor_count", {"required": true, "json_key" : "Motor Count", "default" : 4}]
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
     ]
 },
 {

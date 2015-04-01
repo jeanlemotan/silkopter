@@ -10,6 +10,8 @@ INCLUDEPATH += ../../../qmath/include
 PRECOMPILED_HEADER = ../../include/QInputStdAfx.h
 CONFIG *= precompile_header
 
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
 
 
 rpi {

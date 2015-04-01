@@ -28,8 +28,7 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Simulator { struct Init_Params {
- uint32_t motor_count;
-uint32_t pwm_rate;
+ uint32_t pwm_rate;
 uint32_t acceleration_rate;
 uint32_t angular_velocity_rate;
 uint32_t magnetic_field_rate;
@@ -38,7 +37,7 @@ uint32_t temperature_rate;
 uint32_t distance_rate;
 uint32_t location_rate;
 
-explicit Init_Params():motor_count(4), pwm_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), location_rate(5) {  }
+explicit Init_Params():pwm_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), location_rate(5) {  }
 
 
  
@@ -62,9 +61,7 @@ SAXEventHandler< uint32_t > handler_3;
 SAXEventHandler< uint32_t > handler_4;
 SAXEventHandler< uint32_t > handler_5;
 SAXEventHandler< uint32_t > handler_6;
-SAXEventHandler< uint32_t > handler_7;
-SAXEventHandler< uint32_t > handler_8;bool has_motor_count;
-bool has_pwm_rate;
+SAXEventHandler< uint32_t > handler_7;bool has_pwm_rate;
 bool has_acceleration_rate;
 bool has_angular_velocity_rate;
 bool has_magnetic_field_rate;
@@ -86,22 +83,20 @@ bool has_location_rate;
     {
         switch (state) {
             case 0:
-    return "motor_count";
-case 1:
     return "pwm_rate";
-case 2:
+case 1:
     return "acceleration_rate";
-case 3:
+case 2:
     return "angular_velocity_rate";
-case 4:
+case 3:
     return "magnetic_field_rate";
-case 5:
+case 4:
     return "pressure_rate";
-case 6:
+case 5:
     return "temperature_rate";
-case 7:
+case 6:
     return "distance_rate";
-case 8:
+case 7:
     return "location_rate";
         default:
             break;
@@ -129,8 +124,7 @@ case 8:
 
     void reset_flags()
     {
-        has_motor_count = false;
-has_pwm_rate = false;
+        has_pwm_rate = false;
 has_acceleration_rate = false;
 has_angular_velocity_rate = false;
 has_magnetic_field_rate = false;
@@ -144,15 +138,14 @@ public:
     explicit SAXEventHandler( ::sz::Multi_Simulator::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->motor_count)
-, handler_1(&obj->pwm_rate)
-, handler_2(&obj->acceleration_rate)
-, handler_3(&obj->angular_velocity_rate)
-, handler_4(&obj->magnetic_field_rate)
-, handler_5(&obj->pressure_rate)
-, handler_6(&obj->temperature_rate)
-, handler_7(&obj->distance_rate)
-, handler_8(&obj->location_rate)
+        , handler_0(&obj->pwm_rate)
+, handler_1(&obj->acceleration_rate)
+, handler_2(&obj->angular_velocity_rate)
+, handler_3(&obj->magnetic_field_rate)
+, handler_4(&obj->pressure_rate)
+, handler_5(&obj->temperature_rate)
+, handler_6(&obj->distance_rate)
+, handler_7(&obj->location_rate)
     {
         reset_flags();
     }
@@ -187,9 +180,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Null());
-
-case 8:
-    return checked_event_forwarding(handler_8.Null());
 
         default:
             break;
@@ -228,9 +218,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Bool(b));
 
-case 8:
-    return checked_event_forwarding(handler_8.Bool(b));
-
         default:
             break;
         }
@@ -267,9 +254,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Int(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Int(i));
 
         default:
             break;
@@ -308,9 +292,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Uint(i));
 
-case 8:
-    return checked_event_forwarding(handler_8.Uint(i));
-
         default:
             break;
         }
@@ -347,9 +328,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Int64(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Int64(i));
 
         default:
             break;
@@ -388,9 +366,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.Uint64(i));
 
-case 8:
-    return checked_event_forwarding(handler_8.Uint64(i));
-
         default:
             break;
         }
@@ -427,9 +402,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Double(d));
-
-case 8:
-    return checked_event_forwarding(handler_8.Double(d));
 
         default:
             break;
@@ -468,9 +440,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.String(str, length, copy));
 
-case 8:
-    return checked_event_forwarding(handler_8.String(str, length, copy));
-
         default:
             break;
         }
@@ -485,24 +454,22 @@ case 8:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x43\x6f\x75\x6e\x74", 11))
-						 { state=0; has_motor_count = true; }
-else if (utility::string_equal(str, length, "\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13))
-						 { state=1; has_pwm_rate = true; }
+            else if (utility::string_equal(str, length, "\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13))
+						 { state=0; has_pwm_rate = true; }
 else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22))
-						 { state=2; has_acceleration_rate = true; }
+						 { state=1; has_acceleration_rate = true; }
 else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26))
-						 { state=3; has_angular_velocity_rate = true; }
+						 { state=2; has_angular_velocity_rate = true; }
 else if (utility::string_equal(str, length, "\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24))
-						 { state=4; has_magnetic_field_rate = true; }
+						 { state=3; has_magnetic_field_rate = true; }
 else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
-						 { state=5; has_pressure_rate = true; }
+						 { state=4; has_pressure_rate = true; }
 else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21))
-						 { state=6; has_temperature_rate = true; }
+						 { state=5; has_temperature_rate = true; }
 else if (utility::string_equal(str, length, "\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
-						 { state=7; has_distance_rate = true; }
+						 { state=6; has_distance_rate = true; }
 else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
-						 { state=8; has_location_rate = true; }
+						 { state=7; has_location_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -534,9 +501,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.Key(str, length, copy));
-
-case 8:
-    return checked_event_forwarding(handler_8.Key(str, length, copy));
 
             default:
                 break;
@@ -576,9 +540,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.StartArray());
 
-case 8:
-    return checked_event_forwarding(handler_8.StartArray());
-
         default:
             break;
         }
@@ -616,9 +577,6 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.EndArray(length));
 
-case 8:
-    return checked_event_forwarding(handler_8.EndArray(length));
-
         default:
             break;
         }
@@ -655,9 +613,6 @@ case 6:
 
 case 7:
     return checked_event_forwarding(handler_7.StartObject());
-
-case 8:
-    return checked_event_forwarding(handler_8.StartObject());
 
             default:
                 break;
@@ -697,15 +652,11 @@ case 6:
 case 7:
     return checked_event_forwarding(handler_7.EndObject(length));
 
-case 8:
-    return checked_event_forwarding(handler_8.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_motor_count) set_missing_required("motor_count");
-if (!has_pwm_rate) set_missing_required("pwm_rate");
+            if (!has_pwm_rate) set_missing_required("pwm_rate");
 if (!has_acceleration_rate) set_missing_required("acceleration_rate");
 if (!has_angular_velocity_rate) set_missing_required("angular_velocity_rate");
 if (!has_magnetic_field_rate) set_missing_required("magnetic_field_rate");
@@ -747,8 +698,6 @@ case 6:
      handler_6.ReapError(errs); break;
 case 7:
      handler_7.ReapError(errs); break;
-case 8:
-     handler_8.ReapError(errs); break;
 
         default:
             break;
@@ -771,7 +720,6 @@ handler_4.PrepareForReuse();
 handler_5.PrepareForReuse();
 handler_6.PrepareForReuse();
 handler_7.PrepareForReuse();
-handler_8.PrepareForReuse();
 
     }
 };
@@ -783,8 +731,7 @@ struct Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e009
     {
         w.StartObject();
 
-        w.Key("\x4d\x6f\x74\x6f\x72\x20\x43\x6f\x75\x6e\x74", 11, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.motor_count);
-w.Key("\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pwm_rate);
+        w.Key("\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pwm_rate);
 w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.acceleration_rate);
 w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.angular_velocity_rate);
 w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.magnetic_field_rate);
@@ -793,7 +740,7 @@ w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\
 w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.distance_rate);
 w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.location_rate);
 
-        w.EndObject(9);
+        w.EndObject(8);
     }
 
 };

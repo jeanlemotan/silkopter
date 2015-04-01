@@ -37,6 +37,8 @@ private:
 
     void render_uav();
     void render_ground();
+    void render_enu_axis();
+
 
     struct UAV
     {

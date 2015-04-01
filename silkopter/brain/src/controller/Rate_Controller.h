@@ -50,8 +50,6 @@ private:
     std::shared_ptr<sz::Rate_Controller::Init_Params> m_init_params;
     std::shared_ptr<sz::Rate_Controller::Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
     stream::IAngular_Velocity_wptr m_input_stream;
     stream::IAngular_Velocity_wptr m_target_stream;
 

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Axis.h"
 
 using namespace q;
@@ -10,7 +9,7 @@ static bool s_is_initialized = false;
 
 //////////////////////////////////////////////////////////////////////////
 
-void render_arrow(math::vec3f const& start, math::vec3f const& end, q::video::Material const& material, uint32_t color, q::draw::Painter& painter)
+void render_arrow(math::vec3f const& start, math::vec3f const& end, q::video::Material const& material, float width, uint32_t color, q::draw::Painter& painter)
 {
     if (!s_is_initialized)
     {
@@ -44,7 +43,7 @@ void render_arrow(math::vec3f const& start, math::vec3f const& end, q::video::Ma
 
 //////////////////////////////////////////////////////////////////////////
 
-void render_axes(q::draw::Painter& painter, float length)
+void render_axis(q::draw::Painter& painter, float width, float length)
 {
     if (!s_is_initialized)
     {

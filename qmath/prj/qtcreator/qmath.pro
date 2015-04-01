@@ -12,6 +12,9 @@ INCLUDEPATH += /usr/include/lua5.1
 #QMAKE_CFLAGS_RELEASE += -g
 #QMAKE_LFLAGS_RELEASE =
 
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
+
 
 rpi {
     DEFINES+=RASPBERRY_PI

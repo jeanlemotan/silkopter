@@ -5,7 +5,6 @@
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "motor_count", {"required": true, "json_key" : "Motor Count", "default" : 4}],
         ["uint32_t", "pwm_rate", {"required": true, "json_key" : "PWM Rate (Hz)", "default" : 100}],
         ["uint32_t", "acceleration_rate", {"required": true, "json_key" : "Acceleration Rate (Hz)", "default" : 1000}],
         ["uint32_t", "angular_velocity_rate", {"required": true, "json_key" : "Angular Velocity Rate (Hz)", "default" : 1000}],

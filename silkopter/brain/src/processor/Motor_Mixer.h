@@ -45,6 +45,9 @@ public:
 private:
     auto init() -> bool;
 
+    void compute_throttles(config::Multi const& config);
+
+
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
@@ -56,10 +59,6 @@ private:
 
     std::vector<stream::ITorque::Sample> m_torque_samples;
     std::vector<stream::IForce::Sample> m_force_samples;
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
-    auto compute_cell_count() -> boost::optional<uint8_t>;
-    boost::optional<uint8_t> m_cell_count;
 
     struct Stream : public stream::IThrottle
     {
@@ -71,6 +70,7 @@ private:
         std::vector<Sample> samples;
     };
     mutable std::vector<std::shared_ptr<Stream>> m_output_streams;
+    mutable std::vector<float> m_outputs;
 };
 
 

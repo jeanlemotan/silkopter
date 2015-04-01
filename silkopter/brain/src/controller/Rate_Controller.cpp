@@ -43,7 +43,7 @@ auto Rate_Controller::init() -> bool
         return false;
     }
     m_output_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+
     return true;
 }
 
@@ -105,7 +105,7 @@ void Rate_Controller::process()
     for (size_t i = 0; i < count; i++)
     {
         auto& sample = m_output_stream->last_sample;
-        sample.dt = m_dt;
+        sample.dt = m_input_samples[i].dt;
         sample.tp = m_input_samples[i].tp;
         sample.sample_idx++;
 

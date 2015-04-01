@@ -41,7 +41,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -62,6 +62,9 @@
    <addaction name="separator"/>
    <addaction name="action_reset"/>
    <addaction name="action_stop_motion"/>
+   <addaction name="separator"/>
+   <addaction name="action_show_axis"/>
+   <addaction name="action_show_altitude"/>
   </widget>
   <action name="action_simulation">
    <property name="checkable">
@@ -127,6 +130,36 @@
    </property>
    <property name="text">
     <string>Gravity</string>
+   </property>
+  </action>
+  <action name="action_show_axis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/Frame.png</normaloff>:/icons/Frame.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Axis</string>
+   </property>
+  </action>
+  <action name="action_show_altitude">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/Distance.png</normaloff>:/icons/Distance.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Altitude</string>
    </property>
   </action>
  </widget>

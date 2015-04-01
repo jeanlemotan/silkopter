@@ -1,5 +1,57 @@
 {
     "hal": {
+        "multi_config": {
+            "Name": "",
+            "Mass (Kg)": 0.699999988079071,
+            "Height (m)": 0.20000000298023225,
+            "Radius (m)": 0.30000001192092898,
+            "Motors": [
+                {
+                    "Clockwise": true,
+                    "Position": {
+                        "x": 0.0,
+                        "y": 1.0
+                    },
+                    "Thrust @ 100% (N)": 6.0,
+                    "RPM @ 100%": 6000.0,
+                    "Acceleration (RPM/s)": 20000.0,
+                    "Deceleration (RPM/s)": 20000.0
+                },
+                {
+                    "Clockwise": true,
+                    "Position": {
+                        "x": 1.0,
+                        "y": 0.0
+                    },
+                    "Thrust @ 100% (N)": 6.0,
+                    "RPM @ 100%": 6000.0,
+                    "Acceleration (RPM/s)": 20000.0,
+                    "Deceleration (RPM/s)": 20000.0
+                },
+                {
+                    "Clockwise": false,
+                    "Position": {
+                        "x": 0.0,
+                        "y": -1.0
+                    },
+                    "Thrust @ 100% (N)": 6.0,
+                    "RPM @ 100%": 6000.0,
+                    "Acceleration (RPM/s)": 20000.0,
+                    "Deceleration (RPM/s)": 20000.0
+                },
+                {
+                    "Clockwise": false,
+                    "Position": {
+                        "x": -1.0,
+                        "y": 0.0
+                    },
+                    "Thrust @ 100% (N)": 6.0,
+                    "RPM @ 100%": 6000.0,
+                    "Acceleration (RPM/s)": 20000.0,
+                    "Deceleration (RPM/s)": 20000.0
+                }
+            ]
+        },
         "buses": {
             "i2c0": {
                 "type": "I2C Linux",
@@ -10,10 +62,9 @@
             }
         },
         "nodes": {
-            "Simulator": {
-                "type": "Simulator",
+            "Multi Simulator": {
+                "type": "Multi Simulator",
                 "init_params": {
-                    "Motor Count": 4,
                     "PWM Rate (Hz)": 100,
                     "Acceleration Rate (Hz)": 1000,
                     "Angular Velocity Rate (Hz)": 1000,
@@ -24,72 +75,21 @@
                     "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -163.0,
-                            "y": -400.0
+                            "x": -150.0,
+                            "y": -307.0
                         }
                     }
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Ground Enabled": true,
+                    "Ground Enabled": false,
                     "Gravity Enabled": true,
-                    "UAV Config": {
-                        "Mass (Kg)": 0.699999988079071,
-                        "Height (m)": 0.30000001192092898,
-                        "Radius (m)": 0.5,
-                        "Motors": [
-                            {
-                                "Clockwise": true,
-                                "Position": {
-                                    "x": 0.0,
-                                    "y": 1.0
-                                },
-                                "Thrust @ 100% (N)": 5.0,
-                                "RPM @ 100%": 7000.0,
-                                "Acceleration (RPM/s)": 20000.0,
-                                "Deceleration (RPM/s)": 20000.0
-                            },
-                            {
-                                "Clockwise": true,
-                                "Position": {
-                                    "x": 1.0,
-                                    "y": 0.0
-                                },
-                                "Thrust @ 100% (N)": 5.0,
-                                "RPM @ 100%": 7000.0,
-                                "Acceleration (RPM/s)": 20000.0,
-                                "Deceleration (RPM/s)": 20000.0
-                            },
-                            {
-                                "Clockwise": false,
-                                "Position": {
-                                    "x": 0.0,
-                                    "y": -1.0
-                                },
-                                "Thrust @ 100% (N)": 5.0,
-                                "RPM @ 100%": 7000.0,
-                                "Acceleration (RPM/s)": 20000.0,
-                                "Deceleration (RPM/s)": 20000.0
-                            },
-                            {
-                                "Clockwise": false,
-                                "Position": {
-                                    "x": -1.0,
-                                    "y": 0.0
-                                },
-                                "Thrust @ 100% (N)": 5.0,
-                                "RPM @ 100%": 7000.0,
-                                "Acceleration (RPM/s)": 20000.0,
-                                "Deceleration (RPM/s)": 20000.0
-                            }
-                        ]
-                    },
                     "Inputs": {
                         "PWM": [
-                            "",
-                            "",
-                            "",
-                            ""
+                            "PWM Generator/Output",
+                            "PWM Generator/Output",
+                            "PWM Generator/Output",
+                            "PWM Generator/Output"
                         ]
                     },
                     "Outputs": {
@@ -126,102 +126,24 @@
                     }
                 }
             },
-            "Rate Controller": {
-                "type": "Rate Controller",
+            "PWM Generator": {
+                "type": "PWM Generator",
                 "init_params": {
                     "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -79.0,
-                            "y": -679.0
+                            "x": -254.0,
+                            "y": -451.0
                         }
                     }
                 },
                 "config": {
-                    "PID": {
-                        "kP": 0.0,
-                        "kI": 0.0,
-                        "kD": 0.0,
-                        "Max I": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    },
+                    "Value": 1.0,
                     "Inputs": {
-                        "Input": "",
-                        "Target": ""
+                        "Factor": ""
                     },
                     "Outputs": {
-                        "Torque": {}
-                    }
-                }
-            },
-            "Motor Mixer": {
-                "type": "Motor Mixer",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "Motor Count": 4,
-                    "__gs": {
-                        "position": {
-                            "x": 95.0,
-                            "y": -257.0
-                        }
-                    }
-                },
-                "config": {
-                    "Armed Throttle": 0.0,
-                    "Motors": [
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "Thrust @ 50% (N)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "Thrust @ 50% (N)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "Thrust @ 50% (N)": 0.0
-                        },
-                        {
-                            "Clockwise": false,
-                            "Position": {
-                                "x": 0.0,
-                                "y": 0.0
-                            },
-                            "Thrust @ 100% (N)": 0.0,
-                            "Thrust @ 50% (N)": 0.0
-                        }
-                    ],
-                    "Inputs": {
-                        "Torque": "Rate Controller/Torque",
-                        "Collective Force": ""
-                    },
-                    "Outputs": {
-                        "Throttles": [
-                            {},
-                            {},
-                            {},
-                            {}
-                        ]
+                        "Output": {}
                     }
                 }
             }

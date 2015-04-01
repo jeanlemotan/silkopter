@@ -12,6 +12,9 @@ INCLUDEPATH += /usr/include/freetype2
 PRECOMPILED_HEADER = ../../include/QStdAfx.h
 CONFIG *= precompile_header
 
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
+
 rpi {
     DEFINES+=RASPBERRY_PI
 }
