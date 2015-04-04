@@ -5,10 +5,10 @@
     "name": "PWM_Channel",
     "members":
     [
-        ["uint32_t", "min", {"required": true}],
-        ["uint32_t", "max", {"required": true}],
-        ["uint32_t", "range", {"required": true}],
-        ["uint32_t", "rate", {"required": true}]
+        ["uint32_t", "min", {"required": true, "default" : 1000, "json_key" : "Min"}],
+        ["uint32_t", "max", {"required": true, "default" : 2000, "json_key" : "Max"}],
+        ["uint32_t", "range", {"required": true, "default" : 2500, "json_key" : "Range"}],
+        ["uint32_t", "rate", {"required": true, "default" : 400, "json_key" : "Rate (Hz)"}]
     ]
 },
 {
@@ -17,16 +17,15 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}],
-        ["uint32_t", "period_micro", {"required": true}],
-        ["sz::PIGPIO::PWM_Channel", "channel_4", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_17", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_18", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_22", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_23", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_24", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_25", {"required": false}],
-        ["sz::PIGPIO::PWM_Channel", "channel_27", {"required": false}]
+        ["uint32_t", "period_micro", {"required": true, "default" : 5, "json_key" : "Period (us)"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_4", {"required": false, "json_key" : "Channel 4"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_17", {"required": false, "json_key" : "Channel 17"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_18", {"required": false, "json_key" : "Channel 18"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_22", {"required": false, "json_key" : "Channel 22"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_23", {"required": false, "json_key" : "Channel 23"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_24", {"required": false, "json_key" : "Channel 24"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_25", {"required": false, "json_key" : "Channel 25"}],
+        ["sz::PIGPIO::PWM_Channel", "channel_27", {"required": false, "json_key" : "Channel 27"}]
     ]
 },
 {
@@ -35,14 +34,14 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "channel_4", {"required": true}],
-        ["std::string", "channel_17", {"required": true}],
-        ["std::string", "channel_18", {"required": true}],
-        ["std::string", "channel_22", {"required": true}],
-        ["std::string", "channel_23", {"required": true}],
-        ["std::string", "channel_24", {"required": true}],
-        ["std::string", "channel_25", {"required": true}],
-        ["std::string", "channel_27", {"required": true}]
+        ["std::string", "channel_4", {"required": true, "json_key" : "Channel 4"}],
+        ["std::string", "channel_17", {"required": true, "json_key" : "Channel 17"}],
+        ["std::string", "channel_18", {"required": true, "json_key" : "Channel 18"}],
+        ["std::string", "channel_22", {"required": true, "json_key" : "Channel 22"}],
+        ["std::string", "channel_23", {"required": true, "json_key" : "Channel 23"}],
+        ["std::string", "channel_24", {"required": true, "json_key" : "Channel 24"}],
+        ["std::string", "channel_25", {"required": true, "json_key" : "Channel 25"}],
+        ["std::string", "channel_27", {"required": true, "json_key" : "Channel 27"}]
     ]
 },
 {
@@ -51,7 +50,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::PIGPIO::Inputs", "inputs", {"required": true}]
+        ["sz::PIGPIO::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}]
     ]
 }
 ]

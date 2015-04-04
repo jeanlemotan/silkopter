@@ -33,7 +33,7 @@ uint32_t max;
 uint32_t range;
 uint32_t rate;
 
-explicit PWM_Channel():min(), max(), range(), rate() {  }
+explicit PWM_Channel():min(1000), max(2000), range(2500), rate(400) {  }
 
 
  
@@ -330,13 +330,13 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6d\x69\x6e", 3))
+            else if (utility::string_equal(str, length, "\x4d\x69\x6e", 3))
 						 { state=0; has_min = true; }
-else if (utility::string_equal(str, length, "\x6d\x61\x78", 3))
+else if (utility::string_equal(str, length, "\x4d\x61\x78", 3))
 						 { state=1; has_max = true; }
-else if (utility::string_equal(str, length, "\x72\x61\x6e\x67\x65", 5))
+else if (utility::string_equal(str, length, "\x52\x61\x6e\x67\x65", 5))
 						 { state=2; has_range = true; }
-else if (utility::string_equal(str, length, "\x72\x61\x74\x65", 4))
+else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=3; has_rate = true; }
             else {
                 state = -1;
@@ -523,10 +523,10 @@ struct Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc38716
     {
         w.StartObject();
 
-        w.Key("\x6d\x69\x6e", 3, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.min);
-w.Key("\x6d\x61\x78", 3, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.max);
-w.Key("\x72\x61\x6e\x67\x65", 5, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.range);
-w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.rate);
+        w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.min);
+w.Key("\x4d\x61\x78", 3, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.max);
+w.Key("\x52\x61\x6e\x67\x65", 5, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.range);
+w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer4712655c439cd1bb07e4910104a72f8ef3681447509a8ddffc387168f79ad59c, uint32_t >()(w, value.rate);
 
         w.EndObject(4);
     }
@@ -563,8 +563,7 @@ w.Key("\x72\x61\x74\x65", 4, false); Serializer< Writer4712655c439cd1bb07e491010
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace PIGPIO { struct Init_Params {
- std::string name;
-uint32_t period_micro;
+ uint32_t period_micro;
 sz::PIGPIO::PWM_Channel channel_4;
 sz::PIGPIO::PWM_Channel channel_17;
 sz::PIGPIO::PWM_Channel channel_18;
@@ -574,7 +573,7 @@ sz::PIGPIO::PWM_Channel channel_24;
 sz::PIGPIO::PWM_Channel channel_25;
 sz::PIGPIO::PWM_Channel channel_27;
 
-explicit Init_Params():name(), period_micro(), channel_4(), channel_17(), channel_18(), channel_22(), channel_23(), channel_24(), channel_25(), channel_27() {  }
+explicit Init_Params():period_micro(5), channel_4(), channel_17(), channel_18(), channel_22(), channel_23(), channel_24(), channel_25(), channel_27() {  }
 
 
  
@@ -591,17 +590,15 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< uint32_t > handler_1;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_1;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_2;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_3;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_4;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_5;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_6;
 SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_7;
-SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_8;
-SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_9;bool has_name;
-bool has_period_micro;
+SAXEventHandler< sz::PIGPIO::PWM_Channel > handler_8;bool has_period_micro;
 
     bool check_depth(const char* type)
     {
@@ -616,24 +613,22 @@ bool has_period_micro;
     {
         switch (state) {
             case 0:
-    return "name";
-case 1:
     return "period_micro";
-case 2:
+case 1:
     return "channel_4";
-case 3:
+case 2:
     return "channel_17";
-case 4:
+case 3:
     return "channel_18";
-case 5:
+case 4:
     return "channel_22";
-case 6:
+case 5:
     return "channel_23";
-case 7:
+case 6:
     return "channel_24";
-case 8:
+case 7:
     return "channel_25";
-case 9:
+case 8:
     return "channel_27";
         default:
             break;
@@ -661,8 +656,7 @@ case 9:
 
     void reset_flags()
     {
-        has_name = false;
-has_period_micro = false;
+        has_period_micro = false;
 
 
 
@@ -677,16 +671,15 @@ public:
     explicit SAXEventHandler( ::sz::PIGPIO::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
-, handler_1(&obj->period_micro)
-, handler_2(&obj->channel_4)
-, handler_3(&obj->channel_17)
-, handler_4(&obj->channel_18)
-, handler_5(&obj->channel_22)
-, handler_6(&obj->channel_23)
-, handler_7(&obj->channel_24)
-, handler_8(&obj->channel_25)
-, handler_9(&obj->channel_27)
+        , handler_0(&obj->period_micro)
+, handler_1(&obj->channel_4)
+, handler_2(&obj->channel_17)
+, handler_3(&obj->channel_18)
+, handler_4(&obj->channel_22)
+, handler_5(&obj->channel_23)
+, handler_6(&obj->channel_24)
+, handler_7(&obj->channel_25)
+, handler_8(&obj->channel_27)
     {
         reset_flags();
     }
@@ -724,9 +717,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Null());
-
-case 9:
-    return checked_event_forwarding(handler_9.Null());
 
         default:
             break;
@@ -768,9 +758,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Bool(b));
 
-case 9:
-    return checked_event_forwarding(handler_9.Bool(b));
-
         default:
             break;
         }
@@ -810,9 +797,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Int(i));
-
-case 9:
-    return checked_event_forwarding(handler_9.Int(i));
 
         default:
             break;
@@ -854,9 +838,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Uint(i));
 
-case 9:
-    return checked_event_forwarding(handler_9.Uint(i));
-
         default:
             break;
         }
@@ -896,9 +877,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Int64(i));
-
-case 9:
-    return checked_event_forwarding(handler_9.Int64(i));
 
         default:
             break;
@@ -940,9 +918,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Uint64(i));
 
-case 9:
-    return checked_event_forwarding(handler_9.Uint64(i));
-
         default:
             break;
         }
@@ -982,9 +957,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Double(d));
-
-case 9:
-    return checked_event_forwarding(handler_9.Double(d));
 
         default:
             break;
@@ -1026,9 +998,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.String(str, length, copy));
 
-case 9:
-    return checked_event_forwarding(handler_9.String(str, length, copy));
-
         default:
             break;
         }
@@ -1043,26 +1012,24 @@ case 9:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x70\x65\x72\x69\x6f\x64\x5f\x6d\x69\x63\x72\x6f", 12))
-						 { state=1; has_period_micro = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x34", 9))
+            else if (utility::string_equal(str, length, "\x50\x65\x72\x69\x6f\x64\x20\x28\x75\x73\x29", 11))
+						 { state=0; has_period_micro = true; }
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9))
+						 { state=1;  }
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10))
 						 { state=2;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x37", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10))
 						 { state=3;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x38", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10))
 						 { state=4;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x32", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10))
 						 { state=5;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x33", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10))
 						 { state=6;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x34", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10))
 						 { state=7;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x35", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10))
 						 { state=8;  }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x37", 10))
-						 { state=9;  }
             else {
                 state = -1;
                 return true;
@@ -1097,9 +1064,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Key(str, length, copy));
-
-case 9:
-    return checked_event_forwarding(handler_9.Key(str, length, copy));
 
             default:
                 break;
@@ -1142,9 +1106,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.StartArray());
 
-case 9:
-    return checked_event_forwarding(handler_9.StartArray());
-
         default:
             break;
         }
@@ -1185,9 +1146,6 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.EndArray(length));
 
-case 9:
-    return checked_event_forwarding(handler_9.EndArray(length));
-
         default:
             break;
         }
@@ -1227,9 +1185,6 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.StartObject());
-
-case 9:
-    return checked_event_forwarding(handler_9.StartObject());
 
             default:
                 break;
@@ -1272,15 +1227,11 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.EndObject(length));
 
-case 9:
-    return checked_event_forwarding(handler_9.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
-if (!has_period_micro) set_missing_required("period_micro");
+            if (!has_period_micro) set_missing_required("period_micro");
         }
         return the_error.empty();
     }
@@ -1317,8 +1268,6 @@ case 7:
      handler_7.ReapError(errs); break;
 case 8:
      handler_8.ReapError(errs); break;
-case 9:
-     handler_9.ReapError(errs); break;
 
         default:
             break;
@@ -1342,7 +1291,6 @@ handler_5.PrepareForReuse();
 handler_6.PrepareForReuse();
 handler_7.PrepareForReuse();
 handler_8.PrepareForReuse();
-handler_9.PrepareForReuse();
 
     }
 };
@@ -1354,18 +1302,17 @@ struct Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d763471132091
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, std::string >()(w, value.name);
-w.Key("\x70\x65\x72\x69\x6f\x64\x5f\x6d\x69\x63\x72\x6f", 12, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, uint32_t >()(w, value.period_micro);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x34", 9, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_4);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x37", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_17);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x38", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_18);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x32", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_22);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x33", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_23);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x34", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_24);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x35", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_25);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x37", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_27);
+        w.Key("\x50\x65\x72\x69\x6f\x64\x20\x28\x75\x73\x29", 11, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, uint32_t >()(w, value.period_micro);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_4);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_17);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_18);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_22);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_23);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_24);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_25);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer2f3515a066b342d6136021fc7d4acb98a48223fbc5d7634711320911c027882e, sz::PIGPIO::PWM_Channel >()(w, value.channel_27);
 
-        w.EndObject(10);
+        w.EndObject(9);
     }
 
 };
@@ -1826,21 +1773,21 @@ case 7:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x34", 9))
+            else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9))
 						 { state=0; has_channel_4 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x37", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10))
 						 { state=1; has_channel_17 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x38", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10))
 						 { state=2; has_channel_18 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x32", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10))
 						 { state=3; has_channel_22 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x33", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10))
 						 { state=4; has_channel_23 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x34", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10))
 						 { state=5; has_channel_24 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x35", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10))
 						 { state=6; has_channel_25 = true; }
-else if (utility::string_equal(str, length, "\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x37", 10))
+else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10))
 						 { state=7; has_channel_27 = true; }
             else {
                 state = -1;
@@ -2103,14 +2050,14 @@ struct Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660
     {
         w.StartObject();
 
-        w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x34", 9, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_4);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_17);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x31\x38", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_18);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x32", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_22);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x33", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_23);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x34", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_24);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x35", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_25);
-w.Key("\x63\x68\x61\x6e\x6e\x65\x6c\x5f\x32\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_27);
+        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_4);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_17);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_18);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_22);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_23);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_24);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_25);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_27);
 
         w.EndObject(8);
     }
@@ -2356,7 +2303,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x69\x6e\x70\x75\x74\x73", 6))
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
 						 { state=0; has_inputs = true; }
             else {
                 state = -1;
@@ -2486,7 +2433,7 @@ struct Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e780
     {
         w.StartObject();
 
-        w.Key("\x69\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e7805b83ae349, sz::PIGPIO::Inputs >()(w, value.inputs);
+        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e7805b83ae349, sz::PIGPIO::Inputs >()(w, value.inputs);
 
         w.EndObject(1);
     }

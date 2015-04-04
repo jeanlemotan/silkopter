@@ -5,8 +5,8 @@
     "name": "Quality",
     "members":
     [
-        ["math::vec2u32", "resolution", {"required": true}],
-        ["uint32_t", "bitrate", {"required": true}]
+        ["math::vec2u32", "resolution", {"required": true, "json_key" : "Resolution"}],
+        ["uint32_t", "bitrate", {"required": true, "json_key" : "Bitrate (bps)"}]
     ]
 },
 {
@@ -15,10 +15,8 @@
     "name": "Init_Params",
     "members":
     [
-        ["std::string", "name", {"required": true}],
-        ["uint32_t", "fps", {"required": true}],
+        ["uint32_t", "fps", {"required": true, "default" : 30, "json_key" : "Bitrate (bps)"}],
         ["sz::Raspicam::Quality", "low", {"required": true}],
-        ["sz::Raspicam::Quality", "medium", {"required": true}],
         ["sz::Raspicam::Quality", "high", {"required": true}],
         ["sz::Raspicam::Quality", "recording", {"required": true}]
     ]
@@ -37,6 +35,9 @@
     "name": "Config",
     "members":
     [
+        ["uint32_t", "iso", {"required": true, "default" : 0, "json_key" : "Iso"}],
+        ["uint32_t", "shutter_speed", {"required": true, "default" : 0, "json_key" : "Shutter Speed (ms)"}],
+        ["uint32_t", "quality", {"required": true, "default" : 1, "json_key" : "Quality (0..1)"}],
         ["sz::Raspicam::Outputs", "outputs", {"required": true}]
     ]
 }

@@ -215,12 +215,7 @@ void Resampler<Stream_t>::process()
     //first accumulate input samples
     auto const& is = input_stream->get_samples();
 
-    if (m_output_stream->rate == input_stream->get_rate())
-    {
-        m_output_stream->samples.reserve(is.size());
-        std::copy(is.begin(), is.end(), std::back_inserter(m_output_stream->samples));
-    }
-    else if (m_output_stream->rate < input_stream->get_rate())
+    if (m_output_stream->rate <= input_stream->get_rate())
     {
         for (auto const& s: is)
         {

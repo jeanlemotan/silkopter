@@ -402,7 +402,9 @@ auto HAL::init(Comms& comms) -> bool
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
 
+#if !defined RASPBERRY_PI
     m_node_factory.register_node<Multi_Simulator>("Multi Simulator", *this);
+#endif
 
     //m_node_factory.register_node<EHealth>("EHealth", *this);
 

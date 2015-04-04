@@ -10,7 +10,7 @@ using namespace boost::asio;
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t INPUT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
-
+constexpr uint8_t VIDEO_CHANNEL = 4;
 
 Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     : m_hal(hal)
@@ -20,6 +20,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     , m_setup_channel(m_rudp, SETUP_CHANNEL)
     , m_input_channel(m_rudp, INPUT_CHANNEL)
     , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
+    , m_video_channel(m_rudp, VIDEO_CHANNEL)
 {
     {
         util::RUDP::Send_Params params;
@@ -64,6 +65,11 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
         m_rudp.set_receive_params(TELEMETRY_CHANNEL, params);
     }
 
+    {
+        util::RUDP::Receive_Params params;
+        params.max_receive_time = std::chrono::milliseconds(150);
+        m_rudp.set_receive_params(VIDEO_CHANNEL, params);
+    }
 }
 
 auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
@@ -810,6 +816,54 @@ void Comms::handle_stream_data()
     }
 }
 
+void Comms::handle_frame_data()
+{
+    std::string stream_name;
+    node::stream::IVideo::Value::Type type;
+    math::vec2u32 resolution;
+    bool ok = m_video_channel.begin_unpack() &&
+              m_video_channel.unpack_param(stream_name) &&
+              m_video_channel.unpack_param(type) &&
+              m_video_channel.unpack_param(resolution);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack video stream");
+        return;
+    }
+    auto _stream = m_hal.get_streams().find_by_name(stream_name);
+    if (!_stream || _stream->type != node::stream::IVideo::TYPE)
+    {
+        QLOGE("Cannot find stream '{}'", stream_name);
+        return;
+    }
+    auto& stream = static_cast<node::stream::Video&>(*_stream);
+
+    Sample_Data data;
+    uint32_t size = 0;
+    ok &= m_video_channel.unpack_param(data);
+    ok &= m_video_channel.unpack_param(size);
+    if (!ok)
+    {
+        QLOGE("Error unpacking header!!!");
+        return;
+    }
+
+    node::stream::Video::Sample sample;
+    sample.sample_idx = data.sample_idx;
+    sample.dt = std::chrono::microseconds(data.dt << 3);
+    sample.tp = Manual_Clock::time_point(std::chrono::microseconds(data.tp));
+    sample.is_healthy = data.is_healthy ? true : false;
+    sample.value.data.resize(size);
+    if (!m_video_channel.unpack_data(sample.value.data.data(), size))
+    {
+        QLOGE("Error unpacking frame data!!!");
+        return;
+    }
+    stream.samples.push_back(std::move(sample));
+    stream.samples_available_signal.execute(stream);
+    stream.samples.clear();
+ }
+
 void Comms::send_hal_requests()
 {
 #ifdef NDEBUG
@@ -928,6 +982,14 @@ void Comms::process()
     }
 
     send_hal_requests();
+
+    while (auto msg = m_video_channel.get_next_message())
+    {
+        switch (msg.get())
+        {
+            case comms::Video_Message::FRAME_DATA : handle_frame_data(); break;
+        }
+    }
 
     while (auto msg = m_telemetry_channel.get_next_message())
     {

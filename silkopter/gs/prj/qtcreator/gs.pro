@@ -142,7 +142,8 @@ HEADERS += \
     ../../../libs/common/node/ISource.h \
     ../../../libs/common/node/ITransformer.h \
     ../../src/Multi_Config_Window.h \
-    ../../src/Axis.h
+    ../../src/Axis.h \
+    ../../src/Video_Viewer.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -164,7 +165,8 @@ SOURCES += \
     ../../src/Render_Widget.cpp \
     ../../src/Camera_Controller_3D.cpp \
     ../../src/Multi_Config_Window.cpp \
-    ../../src/Axis.cpp
+    ../../src/Axis.cpp \
+    ../../src/Video_Viewer.cpp
 
 FORMS += \
     ../../src/New_Node.ui \

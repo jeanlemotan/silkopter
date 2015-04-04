@@ -2,6 +2,8 @@
 #include "Multi_Simulation.h"
 #include "physics/constants.h"
 
+#if !defined RASPBERRY_PI
+
 namespace silk
 {
 namespace node
@@ -489,3 +491,5 @@ auto Multi_Simulation::get_uav_state() const -> IMulti_Simulator::UAV_State cons
 
 }
 }
+
+#endif

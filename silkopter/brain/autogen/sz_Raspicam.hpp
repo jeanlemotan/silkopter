@@ -268,9 +268,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x72\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e", 10))
+            else if (utility::string_equal(str, length, "\x52\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e", 10))
 						 { state=0; has_resolution = true; }
-else if (utility::string_equal(str, length, "\x62\x69\x74\x72\x61\x74\x65", 7))
+else if (utility::string_equal(str, length, "\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13))
 						 { state=1; has_bitrate = true; }
             else {
                 state = -1;
@@ -419,8 +419,8 @@ struct Serializer< Writeraac53a350c7b4180fdbd97e8f7711f68a9c3e89658e6ea13ab6b80e
     {
         w.StartObject();
 
-        w.Key("\x72\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e", 10, false); Serializer< Writeraac53a350c7b4180fdbd97e8f7711f68a9c3e89658e6ea13ab6b80e0a8bce73b, math::vec2u32 >()(w, value.resolution);
-w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writeraac53a350c7b4180fdbd97e8f7711f68a9c3e89658e6ea13ab6b80e0a8bce73b, uint32_t >()(w, value.bitrate);
+        w.Key("\x52\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e", 10, false); Serializer< Writeraac53a350c7b4180fdbd97e8f7711f68a9c3e89658e6ea13ab6b80e0a8bce73b, math::vec2u32 >()(w, value.resolution);
+w.Key("\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13, false); Serializer< Writeraac53a350c7b4180fdbd97e8f7711f68a9c3e89658e6ea13ab6b80e0a8bce73b, uint32_t >()(w, value.bitrate);
 
         w.EndObject(2);
     }
@@ -457,14 +457,12 @@ w.Key("\x62\x69\x74\x72\x61\x74\x65", 7, false); Serializer< Writeraac53a350c7b4
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Raspicam { struct Init_Params {
- std::string name;
-uint32_t fps;
+ uint32_t fps;
 sz::Raspicam::Quality low;
-sz::Raspicam::Quality medium;
 sz::Raspicam::Quality high;
 sz::Raspicam::Quality recording;
 
-explicit Init_Params():name(), fps(), low(), medium(), high(), recording() {  }
+explicit Init_Params():fps(30), low(), high(), recording() {  }
 
 
  
@@ -481,15 +479,11 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< uint32_t > handler_1;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< sz::Raspicam::Quality > handler_1;
 SAXEventHandler< sz::Raspicam::Quality > handler_2;
-SAXEventHandler< sz::Raspicam::Quality > handler_3;
-SAXEventHandler< sz::Raspicam::Quality > handler_4;
-SAXEventHandler< sz::Raspicam::Quality > handler_5;bool has_name;
-bool has_fps;
+SAXEventHandler< sz::Raspicam::Quality > handler_3;bool has_fps;
 bool has_low;
-bool has_medium;
 bool has_high;
 bool has_recording;
 
@@ -506,16 +500,12 @@ bool has_recording;
     {
         switch (state) {
             case 0:
-    return "name";
-case 1:
     return "fps";
-case 2:
+case 1:
     return "low";
-case 3:
-    return "medium";
-case 4:
+case 2:
     return "high";
-case 5:
+case 3:
     return "recording";
         default:
             break;
@@ -543,10 +533,8 @@ case 5:
 
     void reset_flags()
     {
-        has_name = false;
-has_fps = false;
+        has_fps = false;
 has_low = false;
-has_medium = false;
 has_high = false;
 has_recording = false;
     }
@@ -555,12 +543,10 @@ public:
     explicit SAXEventHandler( ::sz::Raspicam::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
-, handler_1(&obj->fps)
-, handler_2(&obj->low)
-, handler_3(&obj->medium)
-, handler_4(&obj->high)
-, handler_5(&obj->recording)
+        , handler_0(&obj->fps)
+, handler_1(&obj->low)
+, handler_2(&obj->high)
+, handler_3(&obj->recording)
     {
         reset_flags();
     }
@@ -583,12 +569,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
-
-case 4:
-    return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -615,12 +595,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
-case 4:
-    return checked_event_forwarding(handler_4.Bool(b));
-
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
         default:
             break;
         }
@@ -645,12 +619,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -677,12 +645,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
         default:
             break;
         }
@@ -707,12 +669,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -739,12 +695,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
         default:
             break;
         }
@@ -769,12 +719,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
-
-case 4:
-    return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -801,12 +745,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
-case 4:
-    return checked_event_forwarding(handler_4.String(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
         default:
             break;
         }
@@ -821,18 +759,14 @@ case 5:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x66\x70\x73", 3))
-						 { state=1; has_fps = true; }
+            else if (utility::string_equal(str, length, "\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13))
+						 { state=0; has_fps = true; }
 else if (utility::string_equal(str, length, "\x6c\x6f\x77", 3))
-						 { state=2; has_low = true; }
-else if (utility::string_equal(str, length, "\x6d\x65\x64\x69\x75\x6d", 6))
-						 { state=3; has_medium = true; }
+						 { state=1; has_low = true; }
 else if (utility::string_equal(str, length, "\x68\x69\x67\x68", 4))
-						 { state=4; has_high = true; }
+						 { state=2; has_high = true; }
 else if (utility::string_equal(str, length, "\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9))
-						 { state=5; has_recording = true; }
+						 { state=3; has_recording = true; }
             else {
                 state = -1;
                 return true;
@@ -852,12 +786,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -885,12 +813,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
-case 4:
-    return checked_event_forwarding(handler_4.StartArray());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
         default:
             break;
         }
@@ -916,12 +838,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndArray(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
         default:
             break;
         }
@@ -946,12 +862,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -979,20 +889,12 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndObject(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
-if (!has_fps) set_missing_required("fps");
+            if (!has_fps) set_missing_required("fps");
 if (!has_low) set_missing_required("low");
-if (!has_medium) set_missing_required("medium");
 if (!has_high) set_missing_required("high");
 if (!has_recording) set_missing_required("recording");
         }
@@ -1021,10 +923,6 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
-case 4:
-     handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -1043,8 +941,6 @@ case 5:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
-handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
 
     }
 };
@@ -1056,14 +952,12 @@ struct Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8
     {
         w.StartObject();
 
-        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, std::string >()(w, value.name);
-w.Key("\x66\x70\x73", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, uint32_t >()(w, value.fps);
+        w.Key("\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, uint32_t >()(w, value.fps);
 w.Key("\x6c\x6f\x77", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.low);
-w.Key("\x6d\x65\x64\x69\x75\x6d", 6, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.medium);
 w.Key("\x68\x69\x67\x68", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.high);
 w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.recording);
 
-        w.EndObject(6);
+        w.EndObject(4);
     }
 
 };
@@ -1457,9 +1351,12 @@ struct Serializer< Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Raspicam { struct Config {
- sz::Raspicam::Outputs outputs;
+ uint32_t iso;
+uint32_t shutter_speed;
+uint32_t quality;
+sz::Raspicam::Outputs outputs;
 
-explicit Config():outputs() {  }
+explicit Config():iso(0), shutter_speed(0), quality(1), outputs() {  }
 
 
  
@@ -1476,7 +1373,13 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Raspicam::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< sz::Raspicam::Outputs > handler_3;bool has_iso;
+bool has_shutter_speed;
+bool has_quality;
+bool has_outputs;
 
     bool check_depth(const char* type)
     {
@@ -1491,6 +1394,12 @@ private:
     {
         switch (state) {
             case 0:
+    return "iso";
+case 1:
+    return "shutter_speed";
+case 2:
+    return "quality";
+case 3:
     return "outputs";
         default:
             break;
@@ -1518,14 +1427,20 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_iso = false;
+has_shutter_speed = false;
+has_quality = false;
+has_outputs = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Raspicam::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->iso)
+, handler_1(&obj->shutter_speed)
+, handler_2(&obj->quality)
+, handler_3(&obj->outputs)
     {
         reset_flags();
     }
@@ -1539,6 +1454,15 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -1556,6 +1480,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -1571,6 +1504,15 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -1588,6 +1530,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -1603,6 +1554,15 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -1620,6 +1580,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -1635,6 +1604,15 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -1652,6 +1630,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -1666,8 +1653,14 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x73\x6f", 3))
+						 { state=0; has_iso = true; }
+else if (utility::string_equal(str, length, "\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18))
+						 { state=1; has_shutter_speed = true; }
+else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
+						 { state=2; has_quality = true; }
+else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
+						 { state=3; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -1678,6 +1671,15 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -1696,6 +1698,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -1712,6 +1723,15 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
         default:
             break;
         }
@@ -1727,6 +1747,15 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -1745,11 +1774,23 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_iso) set_missing_required("iso");
+if (!has_shutter_speed) set_missing_required("shutter_speed");
+if (!has_quality) set_missing_required("quality");
+if (!has_outputs) set_missing_required("outputs");
         }
         return the_error.empty();
     }
@@ -1770,6 +1811,12 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -1785,6 +1832,9 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
 
     }
 };
@@ -1796,9 +1846,12 @@ struct Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201
     {
         w.StartObject();
 
-        w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, sz::Raspicam::Outputs >()(w, value.outputs);
+        w.Key("\x49\x73\x6f", 3, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.iso);
+w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.shutter_speed);
+w.Key("\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.quality);
+w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, sz::Raspicam::Outputs >()(w, value.outputs);
 
-        w.EndObject(1);
+        w.EndObject(4);
     }
 
 };

@@ -242,6 +242,22 @@ namespace util
 //            }
             return detail::get_value(p, m_rx_buffer, m_decoded.offset);
         }
+        inline auto unpack_data(uint8_t* dst, size_t size) -> bool
+        {
+            QASSERT(dst);
+            if (size == 0)
+            {
+                return true;
+            }
+            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+            if (m_decoded.offset + size > m_decoded.data_size || m_decoded.offset + size > m_rx_buffer.size())
+            {
+                return false;
+            }
+            std::copy(m_rx_buffer.begin() + m_decoded.offset, m_rx_buffer.begin() + m_decoded.offset + size, dst);
+            m_decoded.offset += size;
+            return true;
+        }
         void end_unpack()
         {
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == m_decoded.data_size, "{}, {}", m_decoded.data_size, m_rx_buffer.size());

@@ -66,6 +66,7 @@ public:
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
     typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
     typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
+    typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
 
     auto get_source() -> std::shared_ptr<Source>;
 
@@ -99,6 +100,8 @@ private:
         std::vector<uint8_t> data;
     };
     std::vector<Telemetry_Stream> m_telemetry_streams;
+
+    auto send_video_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
 
     template<class Stream> auto gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
     void gather_telemetry_streams();
@@ -136,6 +139,7 @@ private:
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
     Telemetry_Channel m_telemetry_channel;
+    Video_Channel m_video_channel;
 
     q::Clock::time_point m_comms_start_tp;
 

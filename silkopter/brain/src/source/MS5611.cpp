@@ -292,35 +292,10 @@ void MS5611::calculate(q::Clock::duration dt)
     auto t = static_cast<float>(TEMP) * 0.01;
     auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
-    float xxx_output = 0.f;
-    {
-        static q::Clock::duration s_dt(0);
-        s_dt += dt;
-        static const float noise = 0.1f;
-        std::vector<std::pair<float, float>> freq =
-        {{
-             { 10.f, 1.f },
-             { 17.f, 0.7f },
-             { 33.f, 0.5f }
-         }};
-        static std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
-        static std::mt19937 engine; // Mersenne twister MT19937
-        auto generator = std::bind(distribution, engine);
-        {
-            xxx_output = 0.f;
-            float a = q::Seconds(s_dt).count() * math::anglef::_2pi;
-            for (auto& f: freq)
-            {
-                xxx_output += math::sin(a * f.first) * f.second;
-            }
-            xxx_output += generator();
-        }
-    }
-
     auto now = q::Clock::now();
 
     Temperature::Sample& ts = m_temperature->last_sample;
-    ts.value = t + xxx_output; //REMOVE ME
+    ts.value = t;
     ts.sample_idx++;
     ts.dt = dt;
     ts.tp = now;
@@ -328,7 +303,7 @@ void MS5611::calculate(q::Clock::duration dt)
     //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
 
     Pressure::Sample& ps = m_pressure->last_sample;
-    ps.value = p + xxx_output; //REMOVE ME;
+    ps.value = p;
     ps.sample_idx++;
     ps.dt = dt;
     ps.tp = now;

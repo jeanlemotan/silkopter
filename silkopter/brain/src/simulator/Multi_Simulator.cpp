@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Multi_Simulator.h"
 
+#if !defined RASPBERRY_PI
+
 #include "sz_math.hpp"
 #include "sz_Multi_Simulator.hpp"
 
@@ -343,3 +345,5 @@ auto Multi_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::D
 
 }
 }
+
+#endif

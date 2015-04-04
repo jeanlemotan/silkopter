@@ -37,7 +37,6 @@ constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t INPUT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 constexpr uint8_t VIDEO_CHANNEL = 4;
-constexpr uint8_t SIMULATOR_CHANNEL = 30;
 
 constexpr q::Clock::duration RUDP_PERIOD = std::chrono::milliseconds(30);
 
@@ -49,6 +48,7 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     , m_setup_channel(m_rudp, SETUP_CHANNEL)
     , m_input_channel(m_rudp, INPUT_CHANNEL)
     , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
+    , m_video_channel(m_rudp, VIDEO_CHANNEL)
     , m_comms_start_tp(q::Clock::now())
 {
     {
@@ -66,15 +66,6 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
         params.is_reliable = false;
         params.importance = 127;
         m_rudp.set_send_params(INPUT_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Send_Params params;
-        params.mtu = 100;
-        params.is_compressed = true;
-        params.is_reliable = true;
-        params.importance = 127;
-        m_rudp.set_send_params(SIMULATOR_CHANNEL, params);
     }
 
     {
@@ -108,12 +99,6 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
         util::RUDP::Receive_Params params;
         params.max_receive_time = std::chrono::milliseconds(100);
         m_rudp.set_receive_params(INPUT_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Receive_Params params;
-        params.max_receive_time = std::chrono::seconds(999999);
-        m_rudp.set_receive_params(SIMULATOR_CHANNEL, params);
     }
 
     {
@@ -182,6 +167,52 @@ struct Sample_Data
 };
 #pragma pack(pop)
 
+auto Comms::send_video_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
+{
+    if (_stream.get_type() != node::stream::IVideo::TYPE)
+    {
+        return false;
+    }
+
+    auto const& stream = static_cast<node::stream::IVideo const&>(_stream);
+    auto const& samples = stream.get_samples();
+
+    Sample_Data data;
+
+    for (auto const& s: samples)
+    {
+        m_video_channel.begin_pack(comms::Video_Message::FRAME_DATA);
+        m_video_channel.pack_param(ts.stream_name);
+        m_video_channel.pack_param(s.value.type);
+        m_video_channel.pack_param(s.value.resolution);
+
+        auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
+        if (dt >= (1 << 24))
+        {
+            QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
+            dt = (1 << 24) - 1;
+        }
+        auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
+        if (tp >= (uint64_t(1) << 40))
+        {
+            QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
+            tp = (uint64_t(1) << 40) - 1;
+        }
+
+        data.sample_idx = s.sample_idx;
+        data.is_healthy = s.is_healthy;
+        data.dt = dt;
+        data.tp = tp;
+
+        m_video_channel.pack_param(data);
+        m_video_channel.pack_param(static_cast<uint32_t>(s.value.data.size()));
+        m_video_channel.pack_data(s.value.data.data(), s.value.data.size());
+        m_video_channel.end_pack();
+    }
+
+    return true;
+}
+
 template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
@@ -230,6 +261,8 @@ template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts,
 
 void Comms::gather_telemetry_streams()
 {
+    //first we gather samples and we send them at 30Hz. This improves bandwidth by reducing header overhead and allowing for better compression
+    //Except for video which is always sent directly as it comes
     for (auto& ts: m_telemetry_streams)
     {
         auto stream = ts.stream.lock();
@@ -253,8 +286,8 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::IForce>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IThrottle>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ITorque>(ts, *stream)
-                //          send_telemetry_stream<node::IVideo>(sd, *stream)
+                gather_telemetry_stream<node::stream::ITorque>(ts, *stream) ||
+                send_video_stream(ts, *stream)
                 )
             {
                 ;//nothing
@@ -696,6 +729,8 @@ void Comms::process()
         m_input_channel.send();
         m_telemetry_channel.try_sending();
     }
+
+    m_video_channel.try_sending();
 
 //    static std::vector<uint8_t> buf;
 //    if (buf.empty())

@@ -6,10 +6,10 @@ namespace comms
 {
 
 
-enum class Sim_Message : uint8_t
+enum class Video_Message : uint8_t
 {
-    SENSORS,
-    MOTORS,
+    FRAME_DATA,
+    COUNT //keep last
 };
 
 enum class Telemetry_Message : uint8_t

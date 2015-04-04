@@ -13,7 +13,7 @@
 //#include "Cardinal_Points_Viewer.h"
 #include "Map_Viewer.h"
 //#include "Reference_Frame_Stream_Viewer.h"
-//#include "Video_Stream_Viewer.h"
+#include "Video_Viewer.h"
 //#include "Generic_Stream_Viewer.h"
 
 
@@ -376,7 +376,15 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (type == IVideo::TYPE)
     {
-//        layout()->addWidget(new Video_Stream_Viewer(stream, this));
+        auto viewer = new Video_Viewer(this);
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Video>(stream)->samples_available_signal.connect([this, viewer](Video& stream)
+        {
+            for (auto const& s: stream.samples)
+            {
+                viewer->add_sample(s);
+            }
+        });
     }
     else
     {

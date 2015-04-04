@@ -48,9 +48,9 @@ typedef std::shared_ptr<MMAL_POOL_T> Pool_ptr;
 /// \brief The Video_Server::Camera_Private_Data struct
 /// connection:
 /// - camera output
-///     - high encoder
-///     - medium resizer
-///         - medium encoder
+///     - recording encoder
+///     - high resizer
+///         - high encoder
 ///         - low resizer
 ///             - low encoder
 
@@ -65,6 +65,8 @@ struct Raspicam::Impl
 
     struct Encoder_Data
     {
+        sz::Raspicam::Quality* quality = nullptr;
+
         Component_ptr encoder;
         Connection_ptr encoder_connection;
         Pool_ptr output_pool;
@@ -77,15 +79,13 @@ struct Raspicam::Impl
         std::atomic<bool> is_active{false};
 
         q::Clock::time_point start;
+
+        Raspicam::Data_Available_Callback callback;
     };
 
     Encoder_Data recording;
     Encoder_Data high;
-    Encoder_Data medium;
     Encoder_Data low;
-
-    Raspicam::Data_Available_Callback file_callback;
-    Raspicam::Data_Available_Callback stream_callback;
 
     size_t frame_idx = 0;
 };
@@ -122,10 +122,11 @@ Raspicam::Raspicam(HAL& hal)
 
     m_impl->recording.is_active = false;
     m_impl->high.is_active = false;
-    m_impl->medium.is_active = false;
     m_impl->low.is_active = false;
 
-    m_impl->file_callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2);
+    m_impl->recording.callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 #endif
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
@@ -136,7 +137,6 @@ Raspicam::~Raspicam()
     {
         //first kill the pools to disable the callbacks
         m_impl->low.output_pool.reset();
-        m_impl->medium.output_pool.reset();
         m_impl->high.output_pool.reset();
         m_impl->recording.output_pool.reset();
     }
@@ -150,11 +150,6 @@ Raspicam::~Raspicam()
     m_impl->low.resizer.reset();
     m_impl->low.encoder.reset();
 
-    m_impl->medium.resizer_connection.reset();
-    m_impl->medium.encoder_connection.reset();
-    m_impl->medium.resizer.reset();
-    m_impl->medium.encoder.reset();
-
     m_impl->high.resizer_connection.reset();
     m_impl->high.encoder_connection.reset();
     m_impl->high.resizer.reset();
@@ -167,7 +162,10 @@ Raspicam::~Raspicam()
 
     m_impl->camera_splitter_connection.reset();
     m_impl->camera_splitter.reset();
-    mmal_port_disable(m_impl->camera->control);
+    if (m_impl->camera)
+    {
+        mmal_port_disable(m_impl->camera->control);
+    }
     m_impl->camera.reset();
 
 #endif
@@ -178,7 +176,7 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(1);
     outputs[0].type = stream::IVideo::TYPE;
     outputs[0].name = "Video";
-//    outputs[0].stream = &m_angular_velocity;
+    outputs[0].stream = m_stream;
     return outputs;
 }
 
@@ -209,22 +207,21 @@ auto Raspicam::init() -> bool
     }
 
     m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 30);
+    m_stream = std::make_shared<Stream>();
+    m_stream->rate = m_init_params->fps;
+
+    m_impl->recording.quality = &m_init_params->recording;
+    m_impl->high.quality = &m_init_params->high;
+    m_impl->low.quality = &m_init_params->low;
 
     if (!create_components())
     {
         return false;
     }
 
-    //start_recording();
     set_active_streams(false,
-                       false,
-                       true);
-
-    if (!m_hal.get_sources().add(*this))// ||
-//        !m_hal.get_streams().add<IVideo>(q::util::format2<std::string>("{}/stream", params.name), m_accelerometer.get_stream()) ||
-    {
-        return false;
-    }
+                       true,
+                       false);
 
     return true;
 #else
@@ -246,6 +243,9 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
+    set_active_streams(true, m_config->quality == 0, m_config->quality == 1);
+
     return true;
 }
 auto Raspicam::get_config() const -> rapidjson::Document
@@ -276,12 +276,16 @@ void Raspicam::shutdown()
 void Raspicam::process()
 {
     QLOG_TOPIC("raspicam::process");
+
+    std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
+
+    std::swap(m_stream->samples, m_temp_samples.samples);
+    m_temp_samples.samples.clear();
 }
 
 
-void Raspicam::file_callback(uint8_t const* data, size_t size)
+void Raspicam::file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution)
 {
-    QASSERT(data && size);
     if (!data || size == 0)
     {
         return;
@@ -294,45 +298,55 @@ void Raspicam::file_callback(uint8_t const* data, size_t size)
     sink->write(data, size);
 }
 
-void Raspicam::set_data_callback(Data_Available_Callback cb)
+void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution)
 {
-#if defined RASPBERRY_PI
-    std::lock_guard<std::mutex> lg(m_impl->mutex);
+    if (!data || size == 0)
+    {
+        return;
+    }
 
-    m_impl->stream_callback = cb;
-#endif
+    std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
+
+    m_temp_samples.samples.resize(m_temp_samples.samples.size() + 1);
+    auto& sample = m_temp_samples.samples.back();
+    sample.value.type = Stream::Value::Type::H264;
+    sample.dt = std::chrono::microseconds(1000000 / m_stream->rate);
+    sample.tp = q::Clock::now();
+    sample.value.resolution = resolution;
+    sample.value.data.resize(size);
+    std::copy(data, data + size, sample.value.data.begin());
 }
 
-void Raspicam::set_active_streams(bool high, bool medium, bool low)
+void Raspicam::set_active_streams(bool recording, bool high, bool low)
 {
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
-    if (m_impl->high.is_active == high &&
-        m_impl->medium.is_active == medium &&
+    if (m_impl->recording.is_active == recording &&
+        m_impl->high.is_active == high &&
         m_impl->low.is_active == low)
     {
         return;
     }
 
-    QLOGI("activating streams high {}, medium {}, low {}", high, medium, low);
+    QLOGI("activating streams recording {}, high {}, low {}", recording, high, low);
 
-    if (set_connection_enabled(m_impl->high.encoder_connection, high))
+    if (set_connection_enabled(m_impl->recording.encoder_connection, recording))
+    {
+        m_impl->recording.is_active = recording;
+    }
+    else
+    {
+        QLOGW("Cannot {} recording bitrate encoder", recording ? "enable" : "disable");
+    }
+
+    if (set_connection_enabled(m_impl->high.resizer_connection, high))
     {
         m_impl->high.is_active = high;
     }
     else
     {
         QLOGW("Cannot {} high bitrate encoder", high ? "enable" : "disable");
-    }
-
-    if (set_connection_enabled(m_impl->medium.resizer_connection, medium))
-    {
-        m_impl->medium.is_active = medium;
-    }
-    else
-    {
-        QLOGW("Cannot {} medium bitrate encoder", medium ? "enable" : "disable");
     }
 
     if (set_connection_enabled(m_impl->low.resizer_connection, low))
@@ -649,7 +663,7 @@ static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, mat
     return res;
 }
 
-static Component_ptr create_encoder_component_for_saving(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
+static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -936,11 +950,10 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
 
 static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
                                        Raspicam::Impl::Encoder_Data& encoder_data,
-                                       Raspicam::Data_Available_Callback const& callback,
                                        MMAL_PORT_T* /*port*/,
                                        MMAL_BUFFER_HEADER_T* buffer)
 {
-    if (!callback)
+    if (!encoder_data.callback)
     {
         MMAL_CALL(mmal_buffer_header_release(buffer));
         return;
@@ -953,15 +966,14 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 
     bool sent = false;
 
+    MMAL_CALL(mmal_buffer_header_mem_lock(buffer));
     {
-        MMAL_CALL(mmal_buffer_header_mem_lock(buffer));
-
         size_t off = encoder_data.data.size();
         if (off == 0 && is_end_frame) //complete frame and the data is empty - send the buffer directly to avoid a copy
         {
-            if (encoder_data.is_active && callback)
+            if (encoder_data.is_active)
             {
-                callback(buffer->data, buffer->length);
+                encoder_data.callback(buffer->data, buffer->length, encoder_data.quality->resolution);
             }
             sent = true;
         }
@@ -971,9 +983,8 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
             encoder_data.data.resize(encoder_data.data.size() + buffer->length);
             std::copy(buffer->data, buffer->data + buffer->length, encoder_data.data.data() + off);
         }
-
-        MMAL_CALL(mmal_buffer_header_mem_unlock(buffer));
     }
+    MMAL_CALL(mmal_buffer_header_mem_unlock(buffer));
 
     // release buffer back to the pool
     MMAL_CALL(mmal_buffer_header_release(buffer));
@@ -981,9 +992,9 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
     if (!sent && is_end_frame)
     {
         std::lock_guard<std::mutex> lg(encoder_data.data_mutex);
-        if (encoder_data.is_active && callback)
+        if (encoder_data.is_active)
         {
-            callback(encoder_data.data.data(), encoder_data.data.size());
+            encoder_data.callback(encoder_data.data.data(), encoder_data.data.size(), encoder_data.quality->resolution);
         }
         encoder_data.data.clear();
     }
@@ -996,7 +1007,7 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 //    }
 }
 
-static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
+static void recording_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1005,17 +1016,17 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
-    encoder_buffer_callback_fn(*impl, impl->high, impl->file_callback, port, buffer);
+    encoder_buffer_callback_fn(*impl, impl->recording, port, buffer);
 }
 
-static void medium_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
+static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
     Raspicam::Impl* impl = reinterpret_cast<Raspicam::Impl*>(port->userdata);
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
-    encoder_buffer_callback_fn(*impl, impl->medium, impl->stream_callback, port, buffer);
+    encoder_buffer_callback_fn(*impl, impl->high, port, buffer);
 }
 
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
@@ -1025,7 +1036,7 @@ static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T*
     QASSERT(impl);
     std::lock_guard<std::mutex> lg(impl->mutex);
 
-    encoder_buffer_callback_fn(*impl, impl->low, impl->stream_callback, port, buffer);
+    encoder_buffer_callback_fn(*impl, impl->low, port, buffer);
 }
 
 #endif
@@ -1059,12 +1070,12 @@ auto Raspicam::create_components() -> bool
         MMAL_PARAMETER_CAMERA_CONFIG_T cam_config;
         cam_config.hdr.id = MMAL_PARAMETER_CAMERA_CONFIG;
         cam_config.hdr.size = sizeof(cam_config);
-        cam_config.max_stills_w = m_params.high.resolution.x;
-        cam_config.max_stills_h = m_params.high.resolution.y;
+        cam_config.max_stills_w = m_init_params->recording.resolution.x;
+        cam_config.max_stills_h = m_init_params->recording.resolution.y;
         cam_config.stills_yuv422 = 0;
         cam_config.one_shot_stills = 0;
-        cam_config.max_preview_video_w = m_params.high.resolution.x;
-        cam_config.max_preview_video_h = m_params.high.resolution.y;
+        cam_config.max_preview_video_w = m_init_params->recording.resolution.x;
+        cam_config.max_preview_video_h = m_init_params->recording.resolution.y;
         cam_config.num_preview_video_frames = 3;
         cam_config.stills_capture_circular_buffer_height = 0;
         cam_config.fast_preview_resume = 0;
@@ -1083,7 +1094,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_preview_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        setup_video_format(format, m_params.high.resolution, true, m_fps);
+        setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
@@ -1098,7 +1109,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_video_port->format;
         format->encoding = MMAL_ENCODING_OPAQUE;
         format->encoding_variant = MMAL_ENCODING_I420;
-        setup_video_format(format, m_params.high.resolution, true, m_fps);
+        setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
         MMAL_STATUS_T status;
         status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
@@ -1113,12 +1124,12 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_capture_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        format->es->video.width = VCOS_ALIGN_UP(m_params.high.resolution.x, 32);
-        format->es->video.height = VCOS_ALIGN_UP(m_params.high.resolution.y, 16);
+        format->es->video.width = VCOS_ALIGN_UP(m_init_params->recording.resolution.x, 32);
+        format->es->video.height = VCOS_ALIGN_UP(m_init_params->recording.resolution.y, 16);
         format->es->video.crop.x = 0;
         format->es->video.crop.y = 0;
-        format->es->video.crop.width = m_params.high.resolution.x;
-        format->es->video.crop.height = m_params.high.resolution.y;
+        format->es->video.crop.width = m_init_params->recording.resolution.x;
+        format->es->video.crop.height = m_init_params->recording.resolution.y;
         format->es->video.frame_rate.num = 0;
         format->es->video.frame_rate.den = 1;
         format->es->video.par.num = 1;
@@ -1157,61 +1168,64 @@ auto Raspicam::create_components() -> bool
     }
 
 
+    //recording
+    auto& recording = m_impl->recording;
+    recording.encoder = create_encoder_component_for_recording(camera_video_port, m_init_params->recording.resolution, m_init_params->recording.bitrate);
+    recording.encoder_connection = connect_ports(camera_video_port, recording.encoder->input[0]);
+    if (!recording.encoder_connection || !set_connection_enabled(recording.encoder_connection, true))
+    {
+        QLOGE("Cannot create recording bitrate encoder");
+        return false;
+    }
+
+    recording.output_pool = create_output_port_pool(recording.encoder->output[0], userdata, recording_encoder_buffer_callback, buffer_count);
+    if (!recording.output_pool)
+    {
+        QLOGE("Cannot create recording bitrate encoder port");
+        return false;
+    }
+
     //high
-    m_impl->high.encoder = create_encoder_component_for_saving(camera_video_port, m_params.high.resolution, m_params.high.bitrate);
-    m_impl->high.encoder_connection = connect_ports(camera_video_port, m_impl->high.encoder->input[0]);
-    if (!m_impl->high.encoder_connection || !set_connection_enabled(m_impl->high.encoder_connection, true))
+    auto& high = m_impl->high;
+    high.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_init_params->high.resolution, m_init_params->fps);
+    high.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], high.resizer->input[0]);
+    if (!high.resizer_connection)
+    {
+        QLOGE("Cannot create high bitrate resizer");
+        return false;
+    }
+    high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], m_init_params->high.resolution, m_init_params->high.bitrate);
+    high.encoder_connection = connect_ports(high.resizer->output[0], high.encoder->input[0]);
+    if (!high.encoder_connection || !set_connection_enabled(high.encoder_connection, true))
     {
         QLOGE("Cannot create high bitrate encoder");
         return false;
     }
-
-    m_impl->high.output_pool = create_output_port_pool(m_impl->high.encoder->output[0], userdata, high_encoder_buffer_callback, buffer_count);
-    if (!m_impl->high.output_pool)
+    high.output_pool = create_output_port_pool(high.encoder->output[0], userdata, high_encoder_buffer_callback, buffer_count);
+    if (!high.output_pool)
     {
         QLOGE("Cannot create high bitrate encoder port");
         return false;
     }
 
-    //medium
-    m_impl->medium.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_params.medium.resolution, m_fps);
-    m_impl->medium.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], m_impl->medium.resizer->input[0]);
-    if (!m_impl->medium.resizer_connection)
-    {
-        QLOGE("Cannot create medium bitrate resizer");
-        return false;
-    }
-    m_impl->medium.encoder = create_encoder_component_for_streaming(m_impl->medium.resizer->output[0], m_params.medium.resolution, m_params.medium.bitrate);
-    m_impl->medium.encoder_connection = connect_ports(m_impl->medium.resizer->output[0], m_impl->medium.encoder->input[0]);
-    if (!m_impl->medium.encoder_connection || !set_connection_enabled(m_impl->medium.encoder_connection, true))
-    {
-        QLOGE("Cannot create medium bitrate encoder");
-        return false;
-    }
-    m_impl->medium.output_pool = create_output_port_pool(m_impl->medium.encoder->output[0], userdata, medium_encoder_buffer_callback, buffer_count);
-    if (!m_impl->medium.output_pool)
-    {
-        QLOGE("Cannot create medium bitrate encoder port");
-        return false;
-    }
-
     //low
-    m_impl->low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_params.low.resolution, m_fps);
-    m_impl->low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], m_impl->low.resizer->input[0]);
-    if (!m_impl->low.resizer_connection)
+    auto& low = m_impl->low;
+    low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_init_params->low.resolution, m_init_params->fps);
+    low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], low.resizer->input[0]);
+    if (!low.resizer_connection)
     {
         QLOGE("Cannot create low bitrate resizer");
         return false;
     }
-    m_impl->low.encoder = create_encoder_component_for_streaming(m_impl->low.resizer->output[0], m_params.low.resolution, m_params.low.bitrate);
-    m_impl->low.encoder_connection = connect_ports(m_impl->low.resizer->output[0], m_impl->low.encoder->input[0]);
-    if (!m_impl->low.encoder_connection || !set_connection_enabled(m_impl->low.encoder_connection, true))
+    low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], m_init_params->low.resolution, m_init_params->low.bitrate);
+    low.encoder_connection = connect_ports(low.resizer->output[0], low.encoder->input[0]);
+    if (!low.encoder_connection || !set_connection_enabled(low.encoder_connection, true))
     {
         QLOGE("Cannot create low bitrate encoder");
         return false;
     }
-    m_impl->low.output_pool = create_output_port_pool(m_impl->low.encoder->output[0], userdata, low_encoder_buffer_callback, buffer_count);
-    if (!m_impl->low.output_pool)
+    low.output_pool = create_output_port_pool(low.encoder->output[0], userdata, low_encoder_buffer_callback, buffer_count);
+    if (!low.output_pool)
     {
         QLOGE("Cannot create low bitrate encoder port");
         return false;
@@ -1300,16 +1314,6 @@ void Raspicam::stop_recording()
 //                           m_stream_quality == camera_input::Stream_Quality::LOW);
     }
 #endif
-}
-
-void Raspicam::set_iso(uint32_t iso)
-{
-    m_iso = iso;
-}
-
-void Raspicam::set_shutter_speed(q::Clock::duration ss)
-{
-    m_shutter_speed = ss;
 }
 
 //void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)

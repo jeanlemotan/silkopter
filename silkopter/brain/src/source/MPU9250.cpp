@@ -780,7 +780,7 @@ void MPU9250::process()
                     auto& gsample = m_angular_velocity->samples[i];
                     gsample.value.set(x * m_angular_velocity->scale_inv, y * m_angular_velocity->scale_inv, z * m_angular_velocity->scale_inv);
                     gsample.sample_idx = ++m_angular_velocity->last_sample.sample_idx;
-                    asample.tp = tp;
+                    gsample.tp = tp;
                     gsample.dt = dt;
 
                     tp += dt;
@@ -817,39 +817,6 @@ void MPU9250::process_compass(Buses& buses)
     if (now - m_magnetic_field->last_tp < m_magnetic_field->dt)
     {
         return;
-    }
-
-    {
-        math::vec3f xxx_output = math::vec3f::zero;
-        {
-            static q::Clock::duration s_dt(0);
-            s_dt += m_magnetic_field->dt;
-            static const float noise = 0.1f;
-            std::vector<std::pair<float, float>> freq =
-            {{
-                 { 10.f, 1.f },
-                 { 17.f, 0.7f },
-                 { 33.f, 0.5f }
-             }};
-            static std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
-            static std::mt19937 engine; // Mersenne twister MT19937
-            auto generator = std::bind(distribution, engine);
-            {
-                xxx_output = math::vec3f::zero;
-                float a = q::Seconds(s_dt).count() * math::anglef::_2pi;
-                xxx_output.x += math::sin(a * freq[0].first) * freq[0].second + generator();
-                xxx_output.y += math::sin(a * freq[1].first) * freq[1].second + generator();
-                xxx_output.z += math::sin(a * freq[2].first) * freq[2].second + generator();
-            }
-        }
-
-        Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
-        sample.value = xxx_output; //REMOVE ME
-        sample.sample_idx++;
-        sample.tp = now;
-        sample.dt = m_magnetic_field->dt;
-
-        m_magnetic_field->samples.push_back(sample);
     }
 
     std::array<uint8_t, 8> tmp;

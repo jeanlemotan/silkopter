@@ -138,15 +138,15 @@ void Motor_Mixer::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        auto& sample = m_output_stream->last_sample;
-        sample.dt = m_torque_samples[i].dt;
-        sample.tp = m_torque_samples[i].tp;
-        sample.sample_idx++;
+//        auto& sample = m_output_stream->last_sample;
+//        sample.dt = m_torque_samples[i].dt;
+//        sample.tp = m_torque_samples[i].tp;
+//        sample.sample_idx++;
 
-//        sample.value = m_pid.process(m_input_samples[i].value, m_target_samples[i].value);
-        compute_throttles(*multi_config, m_force_samples[i].value, m_torque_samples[i].value);
+////        sample.value = m_pid.process(m_input_samples[i].value, m_target_samples[i].value);
+//        compute_throttles(*multi_config, m_force_samples[i].value, m_torque_samples[i].value);
 
-        m_output_stream->samples[i] = sample;
+//        m_output_stream->samples[i] = sample;
     }
 
     //consume processed samples
@@ -173,7 +173,7 @@ static float compute_moment_of_inertia(float mass, float radius, float height)
     return (1.f / 12.f) * mass * (3.f * math::square(radius) + math::square(height));
 }
 
-void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& torque)
+/*void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& torque)
 {
     math::vec3f speeds2d(-m_roll, m_pitch, 0.f);
 
@@ -259,7 +259,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         }
     }
 }
-
+*/
 auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
