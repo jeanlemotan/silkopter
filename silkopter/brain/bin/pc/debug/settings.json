@@ -146,6 +146,44 @@
                         "Output": {}
                     }
                 }
+            },
+            "Servo Gimbal": {
+                "type": "Servo Gimbal",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": -479.0,
+                            "y": -521.0
+                        }
+                    }
+                },
+                "config": {
+                    "Inputs": {
+                        "Frame": "",
+                        "Target": ""
+                    },
+                    "Outputs": {
+                        "X PWM": {
+                            "Min Angle (°)": -179.0,
+                            "Min PWM": 0.0,
+                            "Max Angle (°)": 179.0,
+                            "Max PWM": 1.0
+                        },
+                        "Y PWM": {
+                            "Min Angle (°)": -179.0,
+                            "Min PWM": 0.0,
+                            "Max Angle (°)": 179.0,
+                            "Max PWM": 1.0
+                        },
+                        "Z PWM": {
+                            "Min Angle (°)": -179.0,
+                            "Min PWM": 0.0,
+                            "Max Angle (°)": 179.0,
+                            "Max PWM": 1.0
+                        }
+                    }
+                }
             }
         }
     }

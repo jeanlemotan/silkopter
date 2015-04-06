@@ -110,7 +110,7 @@ void Gravity_Filter::process()
         sample.tp = m_frame_samples[i].tp;
         sample.sample_idx++;
 
-        auto const& p2l = m_frame_samples[i].value.parent_to_this;
+        auto p2l = math::inverse<float, math::safe>(m_frame_samples[i].value.rotation);
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
         sample.value = m_acceleration_samples[i].value - gravity_local;
         m_output_stream->samples[i] = sample;

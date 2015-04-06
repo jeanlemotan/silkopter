@@ -30,7 +30,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     for (auto& i: inputs)
     {
         i.type = stream::IPWM::TYPE;
-    };
+    }
     inputs[0].rate = m_init_params->channel_4.rate;
     inputs[0].name = "Channel 4";
     inputs[1].rate = m_init_params->channel_17.rate;
@@ -216,16 +216,34 @@ void PIGPIO::process()
             auto const& samples = stream->get_samples();
             if (!samples.empty())
             {
-                if (samples.size() > 2)
-                {
-                    QLOGW("channel {} on GPIO {} is too slow. {} samples are queued", i, ch.gpio, samples.size());
-                }
+//                if (samples.size() > 20)
+//                {
+//                    QLOGW("channel {} on GPIO {} is too slow. {} samples are queued", i, ch.gpio, samples.size());
+//                }
 
                 set_pwm_value(i, samples.back().value);
             }
         }
     }
 }
+
+
+#define READ_CONFIG(IDX, CH)\
+{\
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.inputs.channel_##CH);\
+    auto rate = input_stream ? input_stream->get_rate() : 0u;\
+    if (rate != m_init_params->channel_##CH.rate)\
+    {\
+        m_config->inputs.channel_##CH.clear();\
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.channel_##CH, m_init_params->channel_##CH.rate, rate);\
+        m_pwm_channels[IDX].stream.reset();\
+    }\
+    else\
+    {\
+        m_pwm_channels[IDX].stream = input_stream;\
+    }\
+}
+
 
 auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
 {
@@ -242,6 +260,16 @@ auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
+    READ_CONFIG(0, 4);
+    READ_CONFIG(1, 17);
+    READ_CONFIG(2, 18);
+    READ_CONFIG(3, 22);
+    READ_CONFIG(4, 23);
+    READ_CONFIG(5, 24);
+    READ_CONFIG(6, 25);
+    READ_CONFIG(7, 27);
+
     return true;
 }
 auto PIGPIO::get_config() const -> rapidjson::Document

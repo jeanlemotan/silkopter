@@ -98,8 +98,6 @@ private:
     double		m_c5 = 0;
     double		m_c6 = 0;
 
-    void calculate(q::Clock::duration dt);
-
     uint8_t         m_stage = 0;
 
     q::Clock::time_point m_last_tp;

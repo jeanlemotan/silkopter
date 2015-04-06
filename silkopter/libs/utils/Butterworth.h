@@ -47,7 +47,7 @@ public:
         }
 //        m_dsp.setup(poles, rate, cutoff_frequency);
         m_rate = rate;
-        m_poles = poles;
+        m_count = poles / 2;
 
 //        printf("  n = filter order 2,4,6,...\n");
 //        printf("  s = sampling frequency\n");
@@ -79,7 +79,7 @@ public:
 
     void reset(T const& t)
     {
-        for(size_t i = 0; i < m_poles / 2; ++i)
+        for(size_t i = 0; i < m_count; ++i)
         {
             w0[i] = t;
             w1[i] = t;
@@ -118,7 +118,7 @@ public:
             reset(t);
         }
 //        m_dsp.process(t);
-        for(size_t i=0; i < m_poles / 2; ++i)
+        for(size_t i = 0; i < m_count; ++i)
         {
             w0[i] = dsp::add(dsp::add(dsp::scale(w1[i], d1[i]), dsp::scale(w2[i], d2[i])), t);
             t = dsp::scale(dsp::add(dsp::add(w0[i], dsp::scale(w1[i], 2.0)), w2[i]), A[i]);
@@ -130,7 +130,7 @@ public:
     }
 
 private:
-    size_t m_poles = 0;
+    size_t m_count = 0; //this is poles divided by 2
     double m_rate = 0;
     bool m_needs_reset = true;
     std::vector<double> A;

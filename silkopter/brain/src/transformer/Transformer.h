@@ -231,7 +231,7 @@ void Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
     {
         m_output_stream->last_sample.dt = m_dt;
         m_output_stream->last_sample.sample_idx++;
-        m_output_stream->last_sample.value = math::rotate(m_frame_samples[i].value.parent_to_this, m_input_samples[i].value);
+        m_output_stream->last_sample.value = math::rotate(math::inverse(m_frame_samples[i].value.rotation), m_input_samples[i].value);
         m_output_stream->samples[i] = m_output_stream->last_sample;
     }
 

@@ -1,0 +1,54 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Servo_Gimbal",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Servo_Gimbal",
+    "name": "Inputs",
+    "members":
+    [
+        ["std::string", "frame", {"required": true, "json_key" : "Frame"}],
+        ["std::string", "target", {"required": true, "json_key" : "Target"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Servo_Gimbal",
+    "name": "PWM",
+    "members":
+    [
+        ["float", "min_angle", {"required": true, "json_key" : "Min Angle (°)", "default" : -179}],
+        ["float", "min_pwm", {"required": true, "json_key" : "Min PWM", "default" : 0}],
+        ["float", "max_angle", {"required": true, "json_key" : "Max Angle (°)", "default" : 179}],
+        ["float", "max_pwm", {"required": true, "json_key" : "Max PWM", "default" : 1}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Servo_Gimbal",
+    "name": "Outputs",
+    "members":
+    [
+        ["sz::Servo_Gimbal::PWM", "x_pwm", {"required": true, "json_key" : "X PWM"}],
+        ["sz::Servo_Gimbal::PWM", "y_pwm", {"required": true, "json_key" : "Y PWM"}],
+        ["sz::Servo_Gimbal::PWM", "z_pwm", {"required": true, "json_key" : "Z PWM"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Servo_Gimbal",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Servo_Gimbal::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
+        ["sz::Servo_Gimbal::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+    ]
+}
+]

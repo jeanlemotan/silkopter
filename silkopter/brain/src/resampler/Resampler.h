@@ -247,13 +247,13 @@ void Resampler<Stream_t>::downsample()
     auto tp = q::Clock::now() - m_input_accumulated_dt;
     tp += m_dt;
 
+    typename Stream_t::Sample s;
+    s.dt = m_dt;
     while (m_input_accumulated_dt >= m_dt)
     {
-        typename Stream_t::Sample s;
         s.value = m_input_samples.front().value;
         s.sample_idx = ++m_output_stream->sample_idx;
         s.tp = tp;
-        s.dt = m_dt;
         tp += m_dt;
 
         m_output_stream->samples.push_back(s);
@@ -293,13 +293,13 @@ void Resampler<Stream_t>::upsample()
     auto tp = q::Clock::now() - m_input_accumulated_dt;
     tp += m_dt;
 
+    typename Stream_t::Sample s;
+    s.dt = m_dt;
     while (m_input_accumulated_dt >= m_dt)
     {
-        typename Stream_t::Sample s;
         s.value = m_input_samples.front().value;
         s.sample_idx = ++m_output_stream->sample_idx;
         s.tp = tp;
-        s.dt = m_dt;
         tp += m_dt;
 
         if (s.is_healthy)

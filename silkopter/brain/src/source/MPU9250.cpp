@@ -814,9 +814,16 @@ void MPU9250::process_compass(Buses& buses)
 
 #ifdef USE_AK8963
     auto now = q::Clock::now();
-    if (now - m_magnetic_field->last_tp < m_magnetic_field->dt)
+
+    auto dt = now - m_magnetic_field->last_tp;
+    if (dt < m_magnetic_field->dt)
     {
         return;
+    }
+    else if (dt >= std::chrono::seconds(1))
+    {
+        QLOGW("reset compass!");
+        setup_compass(buses);
     }
 
     std::array<uint8_t, 8> tmp;
@@ -828,17 +835,17 @@ void MPU9250::process_compass(Buses& buses)
     {
         return;
     }
-    if ((tmp[0] & AKM_DATA_OVERRUN))
-    {
-        return;
-    }
     if (tmp[7] & AKM_OVERFLOW)
     {
+        QLOGW("data overflow");
         return;
     }
 
-    auto dt = now - m_magnetic_field->last_tp;
-    m_magnetic_field->last_tp = now;
+    if ((tmp[0] & AKM_DATA_OVERRUN))
+    {
+//        QLOGW("data overrun: {}", dt);
+//        return; //no return here - the data is good but
+    }
 
     short data[3];
     data[0] = (tmp[2] << 8) | tmp[1];
@@ -854,15 +861,27 @@ void MPU9250::process_compass(Buses& buses)
             math::quatf::from_axis_z(math::radians(90.f));
     math::vec3f c(data[0], data[1], data[2]);
     c *= 0.15f;//16 bit mode
+    c = math::rotate(rot, c);
 
-    Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
-    sample.value = math::rotate(rot, c);
-    sample.sample_idx++;
-    sample.tp = now;
-    sample.dt = dt;
+    m_magnetic_field->samples.reserve(32);
 
-    m_magnetic_field->samples.push_back(sample);
-//    LOG_INFO("c: {}", *m_samples.compass);
+    auto tp = m_magnetic_field->last_tp + m_magnetic_field->dt;
+    while (dt >= m_magnetic_field->dt)
+    {
+        Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
+        sample.value = c;
+        sample.sample_idx++;
+        sample.tp = tp;
+        sample.dt = m_magnetic_field->dt;
+
+        m_magnetic_field->samples.push_back(sample);
+
+        tp += m_magnetic_field->dt;
+        dt -= m_magnetic_field->dt;
+    }
+
+    m_magnetic_field->last_tp = now - dt; //add the reminder to be processed next frame
+
 #endif
 }
 

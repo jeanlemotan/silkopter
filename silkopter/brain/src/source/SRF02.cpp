@@ -156,13 +156,13 @@ void SRF02::process()
 
     m_stream->samples.clear();
 
-    if (distance >= m_config->min_distance && distance <= m_config->max_distance)
     {
         Stream::Sample& sample = m_stream->last_sample;
-        sample.value = m_config->direction * distance;
+        sample.value = m_config->direction * math::clamp(distance, m_config->min_distance, m_config->max_distance);
         sample.sample_idx++;
         sample.dt = m_stream->dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
         sample.tp = now;
+        sample.is_healthy = distance >= m_config->min_distance && distance <= m_config->max_distance;
         m_stream->samples.push_back(sample);
     }
 }

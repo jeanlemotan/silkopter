@@ -222,8 +222,6 @@ void MS5611::process()
         return;
     }
 
-    m_last_tp = now;
-
     std::array<uint8_t, 3> buf;
     if (m_stage == 0)
     {
@@ -264,57 +262,54 @@ void MS5611::process()
         }
     }
 
-    calculate(dt);
-}
-
-void MS5611::calculate(q::Clock::duration dt)
-{
-    // Formulas from manufacturer datasheet
-    // sub -20c temperature compensation is not included
-
-    double dT = m_temperature->reading - m_c5 * 256.0;
-    double TEMP = 2000.0 + (dT * m_c6)*0.00000011920928955078125;
-    double OFF = m_c2 * 65536.0 + (m_c4 * dT) * 0.0078125;
-    double SENS = m_c1 * 32768.0 + (m_c3 * dT) * 0.00390625;
-
-    if (TEMP < 2000.0)
     {
-        // second order temperature compensation when under 20 degrees C
-        double T2 = (dT*dT) / 0x80000000;
-        double Aux = TEMP*TEMP;
-        double OFF2 = 2.5*Aux;
-        double SENS2 = 1.25*Aux;
-        TEMP = TEMP - T2;
-        OFF = OFF - OFF2;
-        SENS = SENS - SENS2;
+        // Formulas from manufacturer datasheet
+        // sub -20c temperature compensation is not included
+
+        double dT = m_temperature->reading - m_c5 * 256.0;
+        double TEMP = 2000.0 + (dT * m_c6)*0.00000011920928955078125;
+        double OFF = m_c2 * 65536.0 + (m_c4 * dT) * 0.0078125;
+        double SENS = m_c1 * 32768.0 + (m_c3 * dT) * 0.00390625;
+
+        if (TEMP < 2000.0)
+        {
+            // second order temperature compensation when under 20 degrees C
+            double T2 = (dT*dT) / 0x80000000;
+            double Aux = TEMP*TEMP;
+            double OFF2 = 2.5*Aux;
+            double SENS2 = 1.25*Aux;
+            TEMP = TEMP - T2;
+            OFF = OFF - OFF2;
+            SENS = SENS - SENS2;
+        }
+
+        auto t = static_cast<float>(TEMP) * 0.01;
+        auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+
+        auto tp = m_last_tp + m_dt;
+        while (dt >= m_dt)
+        {
+            Temperature::Sample& ts = m_temperature->last_sample;
+            ts.value = t;
+            ts.sample_idx++;
+            ts.dt = m_dt;
+            ts.tp = tp;
+            m_temperature->samples.push_back(ts);
+            //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
+
+            Pressure::Sample& ps = m_pressure->last_sample;
+            ps.value = p;
+            ps.sample_idx++;
+            ps.dt = m_dt;
+            ps.tp = tp;
+            m_pressure->samples.push_back(ps);
+
+            tp += m_dt;
+            dt -= m_dt;
+        }
+
+        m_last_tp = now - dt; //reminder for the next frame
     }
-
-    auto t = static_cast<float>(TEMP) * 0.01;
-    auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
-
-    auto now = q::Clock::now();
-
-    Temperature::Sample& ts = m_temperature->last_sample;
-    ts.value = t;
-    ts.sample_idx++;
-    ts.dt = dt;
-    ts.tp = now;
-    m_temperature->samples.push_back(ts);
-    //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
-
-    Pressure::Sample& ps = m_pressure->last_sample;
-    ps.value = p;
-    ps.sample_idx++;
-    ps.dt = dt;
-    ps.tp = now;
-    m_pressure->samples.push_back(ps);
-
-//    static Butterworth xxx;
-//    m_pressure = xxx.process(m_pressure.get());
-//    double alt = (1.0 - math::pow(m_pressure.get() / 1013.25, 0.190284)) * 4430769.396f;
-//    LOG_INFO("{} / {}, cm: {}", m_temperature, m_pressure, alt);
-
-    //LOG_INFO("pressure: {}, temp: {}", m_pressure, m_temperature);
 }
 
 auto MS5611::set_config(rapidjson::Value const& json) -> bool

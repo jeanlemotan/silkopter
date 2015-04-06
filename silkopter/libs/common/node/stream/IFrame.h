@@ -15,8 +15,7 @@ class IFrame_Base
 public:
     struct Value
     {
-        math::quatf parent_to_this;
-        math::quatf this_to_parent;
+        math::quatf rotation; //local to parent. vec local * rotation == vec parent
     };
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
@@ -49,24 +48,23 @@ namespace dsp
 
 template<> inline bool equals(silk::node::stream::IFrame_Base::Value const& a, silk::node::stream::IFrame_Base::Value const& b)
 {
-    return math::equals(a.this_to_parent, b.this_to_parent);
+    return math::equals(a.rotation, b.rotation);
 }
 template<> inline silk::node::stream::IFrame_Base::Value add(silk::node::stream::IFrame_Base::Value const& a, silk::node::stream::IFrame_Base::Value const& b)
 {
     silk::node::stream::IFrame_Base::Value r;
-    r.this_to_parent = a.this_to_parent * b.this_to_parent;
+    r.rotation = a.rotation * b.rotation;
     return r;
 }
 template<> inline silk::node::stream::IFrame_Base::Value scale(silk::node::stream::IFrame_Base::Value const& a, double scale)
 {
     silk::node::stream::IFrame_Base::Value r;
-    r.this_to_parent = math::slerp(math::quatf(), a.this_to_parent, scale);
+    r.rotation = math::slerp(math::quatf(), a.rotation, scale);
     return r;
 }
 template<> inline void fix(silk::node::stream::IFrame_Base::Value& a)
 {
-    a.this_to_parent.normalize<math::safe>();
-    a.parent_to_this = math::inverse<float, math::safe>(a.this_to_parent);
+    a.rotation.normalize<math::safe>();
 }
 
 }

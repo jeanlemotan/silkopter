@@ -116,7 +116,8 @@ SOURCES += \
     ../../src/controller/Velocity_Controller.cpp \
     ../../src/pilot/Multi_Pilot.cpp \
     ../../src/simulator/Multi_Simulation.cpp \
-    ../../src/simulator/Multi_Simulator.cpp
+    ../../src/simulator/Multi_Simulator.cpp \
+    ../../src/processor/Servo_Gimbal.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -210,5 +211,6 @@ HEADERS += \
     ../../src/simulator/Multi_Simulator.h \
     ../../../libs/common/node/IConfig.h \
     ../../../libs/common/node/IMulti_Simulator.h \
-    ../../../libs/common/config/Multi.h
+    ../../../libs/common/config/Multi.h \
+    ../../src/processor/Servo_Gimbal.h
 

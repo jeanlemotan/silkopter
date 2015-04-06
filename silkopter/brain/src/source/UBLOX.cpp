@@ -683,13 +683,13 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 
     if (data.numSV > 0)
     {
-//        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
-//                  data.flags,
-//                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
-//                  data.pAcc / 100.f,
-//                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
-//                  data.sAcc / 100.f,
-//                  data.numSV);
+        QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
+                  data.flags,
+                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
+                  data.pAcc / 100.f,
+                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
+                  data.sAcc / 100.f,
+                  data.numSV);
     }
 
     //gpsfix
@@ -782,7 +782,7 @@ void UBLOX::process_mon_hw_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(MON_HW));
     MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
 
-//    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", data.jamInd, data.noisePerMS, data.agcCnt);
+    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", data.jamInd, data.noisePerMS, data.agcCnt);
 
     send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
 }

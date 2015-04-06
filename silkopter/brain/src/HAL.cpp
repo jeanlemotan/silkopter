@@ -26,6 +26,8 @@
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_ECEF_Location.h"
 #include "processor/Motor_Mixer.h"
+#include "processor/Servo_Gimbal.h"
+
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
 #include "pilot/Multi_Pilot.h"
@@ -572,6 +574,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Transformer_Inv<stream::IVelocity, stream::IENU_Velocity, stream::IFrame>>("Velocity (Local->ENU)", *this);
 
     m_node_factory.register_node<Motor_Mixer>("Motor Mixer", *this);
+    m_node_factory.register_node<Servo_Gimbal>("Servo Gimbal", *this);
 
     m_node_factory.register_node<Rate_Controller>("Rate Controller", *this);
     m_node_factory.register_node<Stability_Controller>("Stability Controller", *this);

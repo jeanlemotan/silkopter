@@ -134,7 +134,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = sample.value.this_to_parent;
+                auto& a = sample.value.rotation;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -164,7 +164,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = sample.value.this_to_parent;
+            auto& rot = sample.value.rotation;
 
             //cancel drift
             static int xxx = 50;
@@ -181,8 +181,6 @@ void Comp_AHRS::process()
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);
-
-            sample.value.parent_to_this = math::inverse(rot);
         }
 
         m_output_stream->samples[i] = sample;
