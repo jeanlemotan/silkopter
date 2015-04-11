@@ -83,9 +83,7 @@ auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, u
 
         m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
 
-        m_rudp.start();
-
-        request_data();
+        m_rudp.start_listening();
 
         QLOGI("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
@@ -981,8 +979,6 @@ void Comms::process()
         return;
     }
 
-    send_hal_requests();
-
     while (auto msg = m_video_channel.get_next_message())
     {
         switch (msg.get())
@@ -1021,6 +1017,22 @@ void Comms::process()
     //    QLOGI("*********** LOOP: {}", xxx);
 
     m_rudp.process();
+
+    if (m_rudp.is_connected())
+    {
+        if (!m_did_request_data)
+        {
+            m_did_request_data = true;
+            request_data();
+        }
+    }
+    else
+    {
+        m_did_request_data = false;
+    }
+
+    send_hal_requests();
+
     m_setup_channel.send();
     m_telemetry_channel.try_sending();
     m_input_channel.try_sending();

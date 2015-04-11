@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 
+#ifdef RASPBERRY_PI
 struct i2c_msg
 {
   __u16 addr;
@@ -26,6 +27,7 @@ struct i2c_msg
   __u16 len;
   __u8 * buf;
 };
+#endif
 
 
 namespace silk
@@ -122,7 +124,7 @@ auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
     msg[0].addr = address;
     msg[0].flags = I2C_M_RD;
     msg[0].len = size;
-    msg[0].buf = data;
+    msg[0].buf = reinterpret_cast<decltype(i2c_msg::buf)>(data);
 
     io.msgs = msg;
     io.nmsgs = 1;
@@ -146,7 +148,7 @@ auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     msg.addr = address;
     msg.flags = 0;
     msg.len = size;
-    msg.buf = const_cast<uint8_t*>(data);
+    msg.buf = decltype(i2c_msg::buf)(data);
     io.msgs = &msg;
     io.nmsgs = 1;
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
@@ -170,12 +172,12 @@ auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_
     msg[0].addr = address;
     msg[0].flags = 0;
     msg[0].len = 1;
-    msg[0].buf = &reg;
+    msg[0].buf = decltype(i2c_msg::buf)(&reg);
 
     msg[1].addr = address;
     msg[1].flags = I2C_M_RD;
     msg[1].len = size;
-    msg[1].buf = data;
+    msg[1].buf = decltype(i2c_msg::buf)(data);
 
     io.msgs = msg;
     io.nmsgs = 2;
@@ -207,7 +209,7 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
     msg.addr = address;
     msg.flags = 0;
     msg.len = size + 1;
-    msg.buf = m_buffer.data();
+    msg.buf = decltype(i2c_msg::buf)(m_buffer.data());
     io.msgs = &msg;
     io.nmsgs = 1;
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)

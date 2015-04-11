@@ -40,6 +40,7 @@ private:
 
     void reset();
     void request_data();
+    bool m_did_request_data = false;
 
     void send_hal_requests();
 

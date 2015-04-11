@@ -125,7 +125,7 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
         m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
         //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address::from_string("192.168.1.37"), send_port));
 
-        m_rudp.start();
+        m_rudp.start_listening();
     }
     catch(std::exception e)
     {

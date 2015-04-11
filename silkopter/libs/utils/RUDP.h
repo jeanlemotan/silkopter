@@ -49,7 +49,10 @@ namespace util
         auto get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&;
         auto get_last_receive_endpoint() const -> boost::asio::ip::udp::endpoint const&;
 
-        void start();
+        void start_listening();
+
+        void reconnect();
+        auto is_connected() const -> bool;
 
         struct Send_Params
         {
@@ -81,6 +84,9 @@ namespace util
 
         auto _send_locked(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
 
+        static const uint8_t VERSION = 1;
+        const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(500);
+
         enum Type
         {
             TYPE_PACKET             =   0,
@@ -88,6 +94,8 @@ namespace util
             TYPE_PACKETS_CANCELLED  =   2,
             TYPE_PING               =   3,
             TYPE_PONG               =   4,
+            TYPE_CONNECT_REQ          =   5,
+            TYPE_CONNECT_RES          =   6,
         };
 
         static const size_t MAX_CHANNELS = 32;
@@ -139,6 +147,23 @@ namespace util
             uint16_t seq;
         };
 
+        struct Connect_Req_Header : public Header
+        {
+            uint8_t version;
+        };
+        struct Connect_Res_Header : public Header
+        {
+            uint8_t version;
+
+            enum class Response : uint8_t
+            {
+                OK = 0,
+                VERSION_MISMATCH
+            };
+
+            Response response;
+        };
+
 #pragma pack(pop)
 
         Socket_t& m_socket;
@@ -162,8 +187,8 @@ namespace util
             struct Datagram : public detail::Pool_Item_Base
             {
                 Send_Params params;
-                q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
-                q::Clock::time_point sent = q::Clock::time_point(q::Clock::duration{0});
+                q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
+                q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 std::atomic_bool is_in_transit = {false};
                 Buffer_t data;
             };
@@ -183,6 +208,8 @@ namespace util
             struct Internal_Queues
             {
                 std::mutex mutex;
+                Datagram_ptr connection_req;
+                Datagram_ptr connection_res;
                 Datagram_ptr ping;
                 Datagram_ptr pong;
 
@@ -212,7 +239,7 @@ namespace util
             struct Packet : public detail::Pool_Item_Base
             {
                 size_t received_fragment_count = 0;
-                q::Clock::time_point added = q::Clock::time_point(q::Clock::duration{0});
+                q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 Packet_Main_Header main_header;
                 Packet_Header any_header;
                 std::array<Datagram_ptr, 256> fragments;
@@ -267,8 +294,21 @@ namespace util
             size_t rx_pongs = 0;
         };
 
+        struct Connection
+        {
+            std::atomic_bool is_connected = { false };
+
+            mutable std::mutex mutex;
+            q::Clock::time_point last_sent_tp = q::Clock::time_point(q::Clock::duration{0});
+        } m_connection;
+
+        void disconnect();
+        void connect();
+
+        void purge();
+
         q::Clock::time_point m_init_tp = q::Clock::time_point(q::Clock::duration{0});
-        std::array<uint32_t, MAX_CHANNELS> m_last_id;
+        std::array<std::atomic_int, MAX_CHANNELS> m_last_id;
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
@@ -311,8 +351,11 @@ namespace util
 
         void send_packet_ping();
         void send_packet_pong(Ping_Header const& ping);
-
         void process_pings();
+
+        void send_packet_connect_req();
+        void send_packet_connect_res(Connect_Res_Header::Response response);
+        void process_connection();
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram);
         void process_packet_datagram(RX::Datagram_ptr& datagram);
@@ -320,6 +363,8 @@ namespace util
         void process_packets_cancelled_datagram(RX::Datagram_ptr& datagram);
         void process_ping_datagram(RX::Datagram_ptr& datagram);
         void process_pong_datagram(RX::Datagram_ptr& datagram);
+        void process_connect_req_datagram(RX::Datagram_ptr& datagram);
+        void process_connect_res_datagram(RX::Datagram_ptr& datagram);
    };
 
     namespace detail
@@ -404,8 +449,8 @@ namespace util
         QASSERT(!datagram->is_in_transit);
         datagram->data.resize(0); //this will force zero-ing the data
         datagram->data.resize(data_size);
-        datagram->added = q::Clock::time_point(q::Clock::duration{0});
-        datagram->sent = q::Clock::time_point(q::Clock::duration{0});
+        datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
+        datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
         datagram->is_in_transit = false;
         return datagram;
     }
@@ -420,7 +465,7 @@ namespace util
     {
         auto packet = packet_pool.acquire();
         packet->received_fragment_count = 0;
-        packet->added = q::Clock::now();
+        packet->added_tp = q::Clock::now();
         return packet;
     }
 
@@ -456,6 +501,8 @@ namespace util
         case Type::TYPE_PACKETS_CANCELLED: return sizeof(Packets_Cancelled_Header);
         case Type::TYPE_PING: return sizeof(Ping_Header);
         case Type::TYPE_PONG: return sizeof(Pong_Header);
+        case Type::TYPE_CONNECT_REQ: return sizeof(Connect_Req_Header);
+        case Type::TYPE_CONNECT_RES: return sizeof(Connect_Res_Header);
         }
         QASSERT(0);
         return 0;
@@ -538,6 +585,8 @@ namespace util
     {
         QLOGI("Sending to {}:{} endpoint", endpoint.address().to_string(), endpoint.port());
         m_tx.endpoint = endpoint;
+
+        reconnect();
     }
     inline auto RUDP::get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&
     {
@@ -547,8 +596,22 @@ namespace util
     {
         return m_rx.endpoint;
     }
-
-    inline void RUDP::start()
+    inline void RUDP::reconnect()
+    {
+        std::lock_guard<std::mutex> lg(m_connection.mutex);
+        disconnect();
+        m_connection.last_sent_tp = q::Clock::now() - RECONNECT_BEACON_TIMEOUT;
+    }
+    inline auto RUDP::is_connected() const -> bool
+    {
+        bool is_connected = false;
+        {
+            std::lock_guard<std::mutex> lg(m_connection.mutex);
+            is_connected = m_connection.is_connected;
+        }
+        return is_connected;
+    }
+    inline void RUDP::start_listening()
     {
         m_socket.async_receive_from(boost::asio::buffer(m_rx.temp_buffer),
                                 m_rx.endpoint,
@@ -559,9 +622,15 @@ namespace util
 
     inline auto RUDP::send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
     {
+        QLOG_TOPIC("rudp::send");
         if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
         {
-            QASSERT(0);
+            QLOGE("Invalid channel ({}) or data ({}, {} bytes)", channel_idx, data, size);
+            return false;
+        }
+        if (!m_connection.is_connected)
+        {
+            QLOGE("Not connected.");
             return false;
         }
 
@@ -572,9 +641,15 @@ namespace util
     }
     inline auto RUDP::try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
     {
+        QLOG_TOPIC("rudp::try_sending");
         if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
         {
-            QASSERT(0);
+            QLOGE("Invalid channel ({}) or data ({}, {} bytes)", channel_idx, data, size);
+            return false;
+        }
+        if (!m_connection.is_connected)
+        {
+            QLOGE("Not connected.");
             return false;
         }
 
@@ -691,7 +766,7 @@ namespace util
                 data += fragment_size;
                 left -= fragment_size;
 
-                fragment->added = now;
+                fragment->added_tp = now;
                 prepare_to_send_datagram(*fragment);
                 m_tx.packet_queue.push_back(fragment);
             }
@@ -704,10 +779,16 @@ namespace util
 
     inline bool RUDP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
     {
+        QLOG_TOPIC("rudp::receive");
+
         data.clear();
         if (channel_idx >= MAX_CHANNELS)
         {
-            QASSERT(0);
+            QLOGE("Invalid channel {}", channel_idx);
+            return false;
+        }
+        if (!m_connection.is_connected)
+        {
             return false;
         }
 
@@ -755,7 +836,7 @@ namespace util
 
             auto now = q::Clock::now();
             auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
-            bool is_late = (max_receive_time.count() > 0 && now - packet->added >= max_receive_time);
+            bool is_late = (max_receive_time.count() > 0 && now - packet->added_tp >= max_receive_time);
 
             //the next packet in sequence is missing - wait for it some more or cancel
             if (id > next_expected_id)
@@ -834,6 +915,26 @@ namespace util
         return !data.empty();
     }
 
+    inline void RUDP::process_connection()
+    {
+        if (m_connection.is_connected)
+        {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lg(m_ping.mutex);
+
+        auto now = q::Clock::now();
+        if (now - m_connection.last_sent_tp < RECONNECT_BEACON_TIMEOUT)
+        {
+            return;
+        }
+        m_connection.last_sent_tp = now;
+
+        QLOGI("Sending reconnect request");
+        send_packet_connect_req();
+    }
+
     inline void RUDP::process_pings()
     {
         std::lock_guard<std::mutex> lg(m_ping.mutex);
@@ -895,14 +996,21 @@ namespace util
 
     inline void RUDP::process()
     {
-//        {
-//            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-//            QLOGI("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
-//        }
-        send_pending_confirmations();
-        send_pending_cancellations();
+        //        {
+        //            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+        //            QLOGI("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
+        //        }
 
-        process_pings();
+        if (!m_connection.is_connected)
+        {
+            process_connection();
+        }
+        else
+        {
+            send_pending_confirmations();
+            send_pending_cancellations();
+            process_pings();
+        }
 
         send_datagram();
     }
@@ -913,11 +1021,11 @@ namespace util
         auto crc = compute_crc(datagram.data.data(), datagram.data.size());
         header.crc = crc;
 
-        if (datagram.added.time_since_epoch().count() == 0)
+        if (datagram.added_tp.time_since_epoch().count() == 0)
         {
-            datagram.added = q::Clock::now();
+            datagram.added_tp = q::Clock::now();
         }
-        datagram.sent = q::Clock::time_point(q::Clock::duration{0});
+        datagram.sent_tp = q::Clock::time_point(q::Clock::duration{0});
 
 //            if (header.crc == 0)
 //            {
@@ -991,7 +1099,7 @@ namespace util
             auto const& params = datagram->params;
 
             //eliminate old datagrams
-            if (params.cancel_after.count() > 0 && now - datagram->added >= params.cancel_after)
+            if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
             {
                 erase_unordered(queue, it);
                 continue;
@@ -1011,19 +1119,19 @@ namespace util
         {
             auto& datagram = *it;
             if (!datagram->is_in_transit &&
-                 now - datagram->sent > min_resend_duration)
+                 now - datagram->sent_tp > min_resend_duration)
             {
                 QASSERT(!datagram->is_in_transit);
                 auto const& params = datagram->params;
                 int priority = params.importance;
-                if (params.bump_priority_after.count() > 0 && now - datagram->added >= params.bump_priority_after)
+                if (params.bump_priority_after.count() > 0 && now - datagram->added_tp >= params.bump_priority_after)
                 {
                     priority += 63; //bump it by half
                 }
 
                 auto const& header = get_header<Packet_Header>(datagram->data);
 
-                auto age = now - datagram->added;
+                auto age = now - datagram->added_tp;
                 if (best == queue.end() ||
                     (priority > best_priority) ||                                                   //most important first
                     (priority == best_priority && age > best_age) ||                                //oldest first
@@ -1055,7 +1163,21 @@ namespace util
         {
             std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
             //first try the ping and pong
-            if (m_tx.internal_queues.pong)
+            if (m_tx.internal_queues.connection_res)
+            {
+                datagram = std::move(m_tx.internal_queues.connection_res);
+                QASSERT(!datagram->is_in_transit);
+                m_tx.internal_queues.connection_res.reset();
+//                QLOGI("Sending connection res datagram {}", static_cast<int>(get_header<Con_Header>(datagram->data).seq));
+            }
+            else if (m_tx.internal_queues.connection_req)
+            {
+                datagram = std::move(m_tx.internal_queues.connection_req);
+                QASSERT(!datagram->is_in_transit);
+                m_tx.internal_queues.connection_req.reset();
+//                QLOGI("Sending connection_req datagram {}", static_cast<int>(get_header<connection_req_Header>(datagram->data).seq));
+            }
+            else if (m_tx.internal_queues.pong)
             {
                 datagram = std::move(m_tx.internal_queues.pong);
                 QASSERT(!datagram->is_in_transit);
@@ -1165,7 +1287,7 @@ namespace util
     {
         QASSERT(datagram->is_in_transit);
 
-        datagram->sent = q::Clock::now();
+        datagram->sent_tp = q::Clock::now();
 
         xxx_on_air--;
         xxx_sent++;
@@ -1219,7 +1341,7 @@ namespace util
                 std::copy(m_rx.temp_buffer.begin(), m_rx.temp_buffer.begin() + bytes_transferred, datagram->data.begin());
             }
 
-            start();
+            start_listening();
 
             if (datagram)
             {
@@ -1367,6 +1489,37 @@ namespace util
         send_datagram();
     }
 
+    inline void RUDP::send_packet_connect_req()
+    {
+        {
+            std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
+
+            m_tx.internal_queues.connection_req = m_tx.acquire_datagram(sizeof(Connect_Req_Header));
+            auto& header = get_header<Connect_Req_Header>(m_tx.internal_queues.connection_req->data);
+            header.version = VERSION;
+            header.type = TYPE_CONNECT_REQ;
+
+            prepare_to_send_datagram(*m_tx.internal_queues.connection_req);
+        }
+
+        send_datagram();
+    }
+    inline void RUDP::send_packet_connect_res(Connect_Res_Header::Response response)
+    {
+        {
+            std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
+
+            m_tx.internal_queues.connection_res = m_tx.acquire_datagram(sizeof(Connect_Res_Header));
+            auto& header = get_header<Connect_Res_Header>(m_tx.internal_queues.connection_res->data);
+            header.version = VERSION;
+            header.response = response;
+            header.type = TYPE_CONNECT_RES;
+
+            prepare_to_send_datagram(*m_tx.internal_queues.connection_res);
+        }
+        send_datagram();
+    }
+
     inline void RUDP::process_incoming_datagram(RX::Datagram_ptr& datagram)
     {
         QASSERT(datagram);
@@ -1394,14 +1547,28 @@ namespace util
         }
         m_global_stats.rx_good_datagrams++;
 
-        switch (header.type)
+        if (!m_connection.is_connected)
         {
-        case Type::TYPE_PACKET: process_packet_datagram(datagram); break;
-        case Type::TYPE_PACKETS_CONFIRMED: process_packets_confirmed_datagram(datagram); break;
-        case Type::TYPE_PACKETS_CANCELLED: process_packets_cancelled_datagram(datagram); break;
-        case Type::TYPE_PING: process_ping_datagram(datagram); break;
-        case Type::TYPE_PONG: process_pong_datagram(datagram); break;
-        default: QASSERT(0); break;
+            switch (header.type)
+            {
+            case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(datagram); break;
+            case Type::TYPE_CONNECT_RES: process_connect_res_datagram(datagram); break;
+            default: QLOGI("Disconnected: Ignoring datagram type {}", static_cast<int>(header.type)); break;
+            }
+        }
+        else
+        {
+            switch (header.type)
+            {
+            case Type::TYPE_PACKET: process_packet_datagram(datagram); break;
+            case Type::TYPE_PACKETS_CONFIRMED: process_packets_confirmed_datagram(datagram); break;
+            case Type::TYPE_PACKETS_CANCELLED: process_packets_cancelled_datagram(datagram); break;
+            case Type::TYPE_PING: process_ping_datagram(datagram); break;
+            case Type::TYPE_PONG: process_pong_datagram(datagram); break;
+            case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(datagram); break;
+            case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
+            default: QASSERT(0); break;
+            }
         }
         //m_rx.release_datagram(std::move(datagram));
     }
@@ -1650,6 +1817,120 @@ namespace util
 //            xxx = q::Clock::now();
 //            //QLOGI("RTT: {}", m_ping.rtt);
 //        }
+    }
+
+    inline void RUDP::purge()
+    {
+        //purge confirmations
+        {
+            std::lock_guard<std::mutex> lg(m_tx.crt_confirmations_mutex);
+            m_tx.crt_confirmations.reset();
+        }
+        //purge cancellations
+        {
+            std::lock_guard<std::mutex> lg(m_tx.crt_cancellations_mutex);
+            m_tx.crt_cancellations.reset();
+        }
+
+        {
+            std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
+            m_tx.internal_queues.ping.reset();
+            m_tx.internal_queues.pong.reset();
+        }
+
+        {
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            m_tx.packet_queue.clear();
+        }
+
+        for (size_t i = 0; i < MAX_CHANNELS; i++)
+        {
+            auto& queue = m_rx.packet_queues[i];
+
+            std::lock_guard<std::mutex> lg(queue.mutex);
+            queue.packets.clear();
+
+            m_rx.last_packet_ids[i] = 0;
+        };
+
+        {
+            std::lock_guard<std::mutex> lg(m_ping.mutex);
+            m_ping.last_seq = 0;
+            m_ping.is_done = true;
+            m_ping.rtts.clear();
+            m_ping.rtt = q::Clock::duration{0};
+        };
+
+        std::fill(m_last_id.begin(), m_last_id.end(), 0);
+    }
+
+    inline void RUDP::disconnect()
+    {
+        m_connection.is_connected = false;
+
+        QLOGI("Disconncting.");
+        purge();
+    }
+    inline void RUDP::connect()
+    {
+        if (m_connection.is_connected)
+        {
+            QLOGI("Already connected.");
+            return;
+        }
+
+        QLOGI("Connected.");
+
+        purge();
+        m_connection.is_connected = true;
+
+        //...
+    }
+
+    inline void RUDP::process_connect_req_datagram(RX::Datagram_ptr& datagram)
+    {
+        QASSERT(datagram);
+        auto& header = get_header<Connect_Req_Header>(datagram->data);
+
+        Connect_Res_Header::Response response;
+        if (header.version != VERSION)
+        {
+            auto v = VERSION;
+            QLOGW("Connection refused due to version mismatch: local version {} != remove version {}", v, header.version);
+            response = Connect_Res_Header::Response::VERSION_MISMATCH;
+        }
+        else
+        {
+            //we received a connection request, so the other end already reset its connection. Time to reset the local one as well
+            disconnect();
+            connect();
+
+            response = Connect_Res_Header::Response::OK;
+        }
+
+        send_packet_connect_res(response);
+    }
+    inline void RUDP::process_connect_res_datagram(RX::Datagram_ptr& datagram)
+    {
+        if (m_connection.is_connected)
+        {
+            QLOGI("Ignoring connection response.");
+            return;
+        }
+
+        QASSERT(datagram);
+        auto& header = get_header<Connect_Res_Header>(datagram->data);
+
+        if (header.response == Connect_Res_Header::Response::OK)
+        {
+            //we received a connection response, so the other end already reset its connection. Time to reset the local one as well
+            disconnect();
+            connect();
+        }
+        else
+        {
+            QLOGW("Connection refused: remote version {}, response {}", header.version, header.response);
+        }
     }
 
 

@@ -195,7 +195,10 @@ namespace util
             if (!m_tx_buffer.empty())
             {
                 //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-                m_rudp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                if (m_rudp.is_connected())
+                {
+                    m_rudp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                }
                 m_tx_buffer.clear();
             }
         }
@@ -204,7 +207,10 @@ namespace util
             if (!m_tx_buffer.empty())
             {
                 //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-                m_rudp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                if (m_rudp.is_connected())
+                {
+                    m_rudp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                }
                 m_tx_buffer.clear();
             }
         }
