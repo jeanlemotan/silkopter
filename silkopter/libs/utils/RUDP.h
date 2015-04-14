@@ -510,9 +510,7 @@ namespace util
 
     inline auto RUDP::compute_crc(uint8_t const* data, size_t size) -> uint32_t
     {
-        auto crc = q::util::compute_murmur_hash32(data, size);
-        //crc ^= (crc >> 28);
-        //crc &= 0xFFFFF;
+        auto crc = q::util::compute_murmur_hash32(data, size, 0);
         return crc;
     }
 

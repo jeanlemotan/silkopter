@@ -7,9 +7,9 @@ namespace util
 
 inline uint32_t compute_murmur_hash32(uint8_t const* data, size_t size, uint32_t seed = 0)
 {
-    QASSERT(data);
     if (!data)
     {
+        QASSERT(0);
         return seed;
     }
     // 'm' and 'r' are mixing constants generated offline.
@@ -23,7 +23,7 @@ inline uint32_t compute_murmur_hash32(uint8_t const* data, size_t size, uint32_t
     uint32_t h = seed ^ size;
 
 	// Mix 4 bytes at a time into the hash
-    while(size >= 4)
+    while (size >= 4)
 	{
 		uint32_t k = *(uint32_t *)data;
 

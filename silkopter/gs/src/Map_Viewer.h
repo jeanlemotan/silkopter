@@ -4,6 +4,15 @@
 #include "Comms.h"
 //#include "ui_Map_Viewer.h"
 
+
+namespace qmapcontrol
+{
+    class MapControl;
+    class MapAdapter;
+    class MapLayer;
+}
+
+
 class Map_Viewer : public QWidget
 {
 public:

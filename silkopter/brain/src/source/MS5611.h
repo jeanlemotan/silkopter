@@ -78,6 +78,8 @@ private:
 
         std::vector<Sample> samples;
         Sample last_sample;
+        q::Clock::time_point last_tp;
+        q::Clock::duration dt;
     };
     mutable std::shared_ptr<Pressure> m_pressure;
 
@@ -88,6 +90,8 @@ private:
 
         std::vector<Sample> samples;
         Sample last_sample;
+        q::Clock::time_point last_tp;
+        q::Clock::duration dt;
     };
     mutable std::shared_ptr<Temperature> m_temperature;
 
@@ -99,9 +103,7 @@ private:
     double		m_c6 = 0;
 
     uint8_t         m_stage = 0;
-
-    q::Clock::time_point m_last_tp;
-    q::Clock::duration m_dt;
+    q::Clock::time_point m_last_reading_tp;
 };
 
 

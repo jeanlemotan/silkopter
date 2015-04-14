@@ -10,7 +10,7 @@ public:
     Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QWidget *parent);
     ~Numeric_Viewer();
     void add_graph(std::string const& name, std::string const& unit, QColor color);
-    void add_samples(q::Clock::time_point tp, double const* src);
+    void add_samples(q::Clock::time_point tp, double const* src, bool is_healthy);
     void process();
 
 private:
@@ -32,6 +32,7 @@ private:
     struct Sample
     {
         double tp;
+        bool is_healthy = true;
     };
     std::vector<double> m_values;
 

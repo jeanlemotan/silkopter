@@ -41,6 +41,8 @@ public:
 private:
     auto init() -> bool;
 
+    void trigger(bus::II2C& i2c);
+
     HAL& m_hal;
 
     std::weak_ptr<bus::II2C> m_i2c;
@@ -58,11 +60,10 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
         q::Clock::duration dt;
+        q::Clock::time_point trigger_tp;
         q::Clock::time_point last_tp;
     };
     mutable std::shared_ptr<Stream> m_stream;
-
-    int m_state = 0;
 };
 
 }

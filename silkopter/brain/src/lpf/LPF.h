@@ -197,15 +197,8 @@ void LPF<Stream_t>::process()
 
     for (auto const& s: is)
     {
-       if (s.is_healthy)
-       {
-           m_output_stream->samples.push_back(s);
-           m_dsp.process(m_output_stream->samples.back().value);
-       }
-       else
-       {
-           m_output_stream->samples.push_back(s);
-       }
+       m_output_stream->samples.push_back(s);
+       m_dsp.process(m_output_stream->samples.back().value);
     };
 }
 

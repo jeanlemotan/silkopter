@@ -2466,8 +2466,8 @@ public:
   QCPData();
   QCPData(double key, double value);
   double key, value;
-  double keyErrorPlus, keyErrorMinus;
-  double valueErrorPlus, valueErrorMinus;
+//  double keyErrorPlus, keyErrorMinus;
+//  double valueErrorPlus, valueErrorMinus;
 };
 Q_DECLARE_TYPEINFO(QCPData, Q_MOVABLE_TYPE);
 

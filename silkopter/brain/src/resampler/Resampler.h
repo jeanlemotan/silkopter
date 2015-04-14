@@ -221,10 +221,7 @@ void Resampler<Stream_t>::process()
         {
             m_input_accumulated_dt += s.dt;
             m_input_samples.push_back(s);
-            if (s.is_healthy)
-            {
-                m_dsp.process(m_input_samples.back().value);
-            }
+            m_dsp.process(m_input_samples.back().value);
         }
         downsample();
     }
@@ -297,16 +294,14 @@ void Resampler<Stream_t>::upsample()
     s.dt = m_dt;
     while (m_input_accumulated_dt >= m_dt)
     {
-        s.value = m_input_samples.front().value;
+        auto const& is = m_input_samples.front();
+        s.value = is.value;
+        s.is_healthy = is.is_healthy;
         s.sample_idx = ++m_output_stream->sample_idx;
         s.tp = tp;
         tp += m_dt;
 
-        if (s.is_healthy)
-        {
-            m_dsp.process(s.value);
-        }
-
+        m_dsp.process(s.value);
         m_output_stream->samples.push_back(s);
 
         m_input_accumulated_dt -= m_dt;

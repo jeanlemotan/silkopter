@@ -2,6 +2,13 @@
 #include "HAL.h"
 #include "Comms.h"
 
+#include <mapcontrol.h>
+#include <osmmapadapter.h>
+#include <googlemapadapter.h>
+#include <maplayer.h>
+#include <circlepoint.h>
+
+
 Map_Viewer::Map_Viewer(QWidget *parent)
     : QWidget(parent)
 {

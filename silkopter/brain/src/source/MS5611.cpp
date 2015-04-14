@@ -156,7 +156,14 @@ auto MS5611::init() -> bool
     m_pressure->rate = m_init_params->pressure_rate;
     m_temperature->rate = m_init_params->pressure_rate / m_init_params->temperature_rate_ratio;
 
-    m_dt = std::chrono::milliseconds(1000 / m_init_params->pressure_rate);
+    auto now = q::Clock::now();
+    m_last_reading_tp = now;
+
+    m_pressure->dt = std::chrono::milliseconds(1000 / m_pressure->rate);
+    m_pressure->last_tp = now;
+
+    m_temperature->dt = std::chrono::milliseconds(1000 / m_temperature->rate);
+    m_temperature->last_tp = now;
 
     QLOGI("Probing MS5611 on {}", m_init_params->bus);
 
@@ -216,8 +223,7 @@ void MS5611::process()
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    if (dt < m_dt)
+    if (now - m_last_reading_tp < m_pressure->dt)
     {
         return;
     }
@@ -286,29 +292,40 @@ void MS5611::process()
         auto t = static_cast<float>(TEMP) * 0.01;
         auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
-        auto tp = m_last_tp + m_dt;
-        while (dt >= m_dt)
         {
-            Temperature::Sample& ts = m_temperature->last_sample;
-            ts.value = t;
-            ts.sample_idx++;
-            ts.dt = m_dt;
-            ts.tp = tp;
-            m_temperature->samples.push_back(ts);
-            //m_pressure = (m_pressure_data*SENS/2097152.f - OFF)/32768.f;
+            auto dt = now - m_pressure->last_tp;
+            auto tp = m_pressure->last_tp + m_pressure->dt;
+            while (dt >= m_pressure->dt)
+            {
+                Pressure::Sample& ps = m_pressure->last_sample;
+                ps.value = p;
+                ps.sample_idx++;
+                ps.dt = m_pressure->dt;
+                ps.tp = tp;
+                m_pressure->samples.push_back(ps);
 
-            Pressure::Sample& ps = m_pressure->last_sample;
-            ps.value = p;
-            ps.sample_idx++;
-            ps.dt = m_dt;
-            ps.tp = tp;
-            m_pressure->samples.push_back(ps);
-
-            tp += m_dt;
-            dt -= m_dt;
+                tp += m_pressure->dt;
+                dt -= m_pressure->dt;
+            }
+            m_pressure->last_tp = now - dt; //reminder for the next frame
         }
+        {
+            auto dt = now - m_temperature->last_tp;
+            auto tp = m_temperature->last_tp + m_temperature->dt;
+            while (dt >= m_temperature->dt)
+            {
+                Temperature::Sample& ts = m_temperature->last_sample;
+                ts.value = t;
+                ts.sample_idx++;
+                ts.dt = m_temperature->dt;
+                ts.tp = tp;
+                m_temperature->samples.push_back(ts);
 
-        m_last_tp = now - dt; //reminder for the next frame
+                tp += m_temperature->dt;
+                dt -= m_temperature->dt;
+            }
+            m_temperature->last_tp = now - dt; //reminder for the next frame
+        }
     }
 }
 

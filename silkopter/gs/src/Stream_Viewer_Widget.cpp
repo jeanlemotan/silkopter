@@ -101,7 +101,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -119,7 +119,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -137,7 +137,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -153,7 +153,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -175,7 +175,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -193,7 +193,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -211,7 +211,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value.x, s.value.y, s.value.z };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -227,7 +227,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value * 100.0 };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -243,7 +243,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -259,7 +259,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -275,7 +275,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { math::length(s.value) };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -317,7 +317,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -333,7 +333,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -353,7 +353,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });
@@ -369,7 +369,7 @@ void Stream_Viewer_Widget::create_viewer()
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
-                viewer->add_samples(s.tp, data.data());
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();
         });

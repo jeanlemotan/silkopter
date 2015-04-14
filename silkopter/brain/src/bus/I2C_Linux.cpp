@@ -12,11 +12,10 @@
 #include <fcntl.h>
 
 
-#ifdef RASPBERRY_PI
 struct i2c_msg
 {
-  __u16 addr;
-  __u16 flags;
+  uint16_t addr;
+  uint16_t flags;
 #define I2C_M_TEN		0x0010
 #define I2C_M_RD		0x0001
 #define I2C_M_NOSTART		0x4000
@@ -24,10 +23,9 @@ struct i2c_msg
 #define I2C_M_IGNORE_NAK	0x1000
 #define I2C_M_NO_RD_ACK		0x0800
 #define I2C_M_RECV_LEN		0x0400
-  __u16 len;
-  __u8 * buf;
+  uint16_t len;
+  uint8_t* buf;
 };
-#endif
 
 
 namespace silk

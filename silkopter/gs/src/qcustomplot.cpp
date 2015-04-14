@@ -14549,11 +14549,11 @@ void QCPColorScaleAxisRectPrivate::axisSelectableChanged(QCPAxis::SelectablePart
 */
 QCPData::QCPData() :
   key(0),
-  value(0),
-  keyErrorPlus(0),
-  keyErrorMinus(0),
-  valueErrorPlus(0),
-  valueErrorMinus(0)
+  value(0)
+//  keyErrorPlus(0),
+//  keyErrorMinus(0),
+//  valueErrorPlus(0),
+//  valueErrorMinus(0)
 {
 }
 
@@ -14562,11 +14562,11 @@ QCPData::QCPData() :
 */
 QCPData::QCPData(double key, double value) :
   key(key),
-  value(value),
-  keyErrorPlus(0),
-  keyErrorMinus(0),
-  valueErrorPlus(0),
-  valueErrorMinus(0)
+  value(value)
+//  keyErrorPlus(0),
+//  keyErrorMinus(0),
+//  valueErrorPlus(0),
+//  valueErrorMinus(0)
 {
 }
 
@@ -14706,22 +14706,22 @@ void QCPGraph::setData(const QVector<double> &key, const QVector<double> &value)
   
   For asymmetrical errors (plus different from minus), see the overloaded version of this function.
 */
-void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueError)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, valueError.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.valueErrorMinus = valueError[i];
-    newData.valueErrorPlus = valueError[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueError)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, valueError.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.valueErrorMinus = valueError[i];
+//    newData.valueErrorPlus = valueError[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 /*!
   \overload
@@ -14732,23 +14732,23 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
   The provided vectors should have equal length. Else, the number of added points will be the size of the
   smallest vector.
 */
-void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, valueErrorMinus.size());
-  n = qMin(n, valueErrorPlus.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.valueErrorMinus = valueErrorMinus[i];
-    newData.valueErrorPlus = valueErrorPlus[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, valueErrorMinus.size());
+//  n = qMin(n, valueErrorPlus.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.valueErrorMinus = valueErrorMinus[i];
+//    newData.valueErrorPlus = valueErrorPlus[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 /*!
   Replaces the current data with the provided points in \a key and \a value pairs. Additionally the
@@ -14759,22 +14759,22 @@ void QCPGraph::setDataValueError(const QVector<double> &key, const QVector<doubl
   
   For asymmetrical errors (plus different from minus), see the overloaded version of this function.
 */
-void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, keyError.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.keyErrorMinus = keyError[i];
-    newData.keyErrorPlus = keyError[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, keyError.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.keyErrorMinus = keyError[i];
+//    newData.keyErrorPlus = keyError[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 /*!
   \overload
@@ -14785,23 +14785,23 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
   The provided vectors should have equal length. Else, the number of added points will be the size of the
   smallest vector.
 */
-void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, keyErrorMinus.size());
-  n = qMin(n, keyErrorPlus.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.keyErrorMinus = keyErrorMinus[i];
-    newData.keyErrorPlus = keyErrorPlus[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, keyErrorMinus.size());
+//  n = qMin(n, keyErrorPlus.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.keyErrorMinus = keyErrorMinus[i];
+//    newData.keyErrorPlus = keyErrorPlus[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 /*!
   Replaces the current data with the provided points in \a key and \a value pairs. Additionally the
@@ -14812,25 +14812,25 @@ void QCPGraph::setDataKeyError(const QVector<double> &key, const QVector<double>
   
   For asymmetrical errors (plus different from minus), see the overloaded version of this function.
 */
-void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError, const QVector<double> &valueError)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, valueError.size());
-  n = qMin(n, keyError.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.keyErrorMinus = keyError[i];
-    newData.keyErrorPlus = keyError[i];
-    newData.valueErrorMinus = valueError[i];
-    newData.valueErrorPlus = valueError[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError, const QVector<double> &valueError)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, valueError.size());
+//  n = qMin(n, keyError.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.keyErrorMinus = keyError[i];
+//    newData.keyErrorPlus = keyError[i];
+//    newData.valueErrorMinus = valueError[i];
+//    newData.valueErrorPlus = valueError[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 /*!
   \overload
@@ -14841,27 +14841,27 @@ void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double
   The provided vectors should have equal length. Else, the number of added points will be the size of the
   smallest vector.
 */
-void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
-{
-  mData->resize(0);
-  int n = key.size();
-  n = qMin(n, value.size());
-  n = qMin(n, valueErrorMinus.size());
-  n = qMin(n, valueErrorPlus.size());
-  n = qMin(n, keyErrorMinus.size());
-  n = qMin(n, keyErrorPlus.size());
-  QCPData newData;
-  for (int i=0; i<n; ++i)
-  {
-    newData.key = key[i];
-    newData.value = value[i];
-    newData.keyErrorMinus = keyErrorMinus[i];
-    newData.keyErrorPlus = keyErrorPlus[i];
-    newData.valueErrorMinus = valueErrorMinus[i];
-    newData.valueErrorPlus = valueErrorPlus[i];
-    mData->insert(key[i], newData);
-  }
-}
+//void QCPGraph::setDataBothError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus, const QVector<double> &valueErrorMinus, const QVector<double> &valueErrorPlus)
+//{
+//  mData->resize(0);
+//  int n = key.size();
+//  n = qMin(n, value.size());
+//  n = qMin(n, valueErrorMinus.size());
+//  n = qMin(n, valueErrorPlus.size());
+//  n = qMin(n, keyErrorMinus.size());
+//  n = qMin(n, keyErrorPlus.size());
+//  QCPData newData;
+//  for (int i=0; i<n; ++i)
+//  {
+//    newData.key = key[i];
+//    newData.value = value[i];
+//    newData.keyErrorMinus = keyErrorMinus[i];
+//    newData.keyErrorPlus = keyErrorPlus[i];
+//    newData.valueErrorMinus = valueErrorMinus[i];
+//    newData.valueErrorPlus = valueErrorPlus[i];
+//    mData->insert(key[i], newData);
+//  }
+//}
 
 
 /*!
@@ -15974,97 +15974,97 @@ void QCPGraph::getPreparedData(QVector<QCPData> *lineData, QVector<QCPData> *sca
 */
 void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData &data) const
 {
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
+//  QCPAxis *keyAxis = mKeyAxis.data();
+//  QCPAxis *valueAxis = mValueAxis.data();
+//  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   
-  double a, b; // positions of error bar bounds in pixels
-  double barWidthHalf = mErrorBarSize*0.5;
-  double skipSymbolMargin = mScatterStyle.size(); // pixels left blank per side, when mErrorBarSkipSymbol is true
+//  double a, b; // positions of error bar bounds in pixels
+//  double barWidthHalf = mErrorBarSize*0.5;
+//  double skipSymbolMargin = mScatterStyle.size(); // pixels left blank per side, when mErrorBarSkipSymbol is true
 
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    // draw key error vertically and value error horizontally
-    if (mErrorType == etKey || mErrorType == etBoth)
-    {
-      a = keyAxis->coordToPixel(data.key-data.keyErrorMinus);
-      b = keyAxis->coordToPixel(data.key+data.keyErrorPlus);
-      if (keyAxis->rangeReversed())
-        qSwap(a,b);
-      // draw spine:
-      if (mErrorBarSkipSymbol)
-      {
-        if (a-y > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
-          painter->drawLine(QLineF(x, a, x, y+skipSymbolMargin));
-        if (y-b > skipSymbolMargin)
-          painter->drawLine(QLineF(x, y-skipSymbolMargin, x, b));
-      } else
-        painter->drawLine(QLineF(x, a, x, b));
-      // draw handles:
-      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
-      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
-    }
-    if (mErrorType == etValue || mErrorType == etBoth)
-    {
-      a = valueAxis->coordToPixel(data.value-data.valueErrorMinus);
-      b = valueAxis->coordToPixel(data.value+data.valueErrorPlus);
-      if (valueAxis->rangeReversed())
-        qSwap(a,b);
-      // draw spine:
-      if (mErrorBarSkipSymbol)
-      {
-        if (x-a > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
-          painter->drawLine(QLineF(a, y, x-skipSymbolMargin, y));
-        if (b-x > skipSymbolMargin)
-          painter->drawLine(QLineF(x+skipSymbolMargin, y, b, y));
-      } else
-        painter->drawLine(QLineF(a, y, b, y));
-      // draw handles:
-      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
-      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
-    }
-  } else // mKeyAxis->orientation() is Qt::Horizontal
-  {
-    // draw value error vertically and key error horizontally
-    if (mErrorType == etKey || mErrorType == etBoth)
-    {
-      a = keyAxis->coordToPixel(data.key-data.keyErrorMinus);
-      b = keyAxis->coordToPixel(data.key+data.keyErrorPlus);
-      if (keyAxis->rangeReversed())
-        qSwap(a,b);
-      // draw spine:
-      if (mErrorBarSkipSymbol)
-      {
-        if (x-a > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
-          painter->drawLine(QLineF(a, y, x-skipSymbolMargin, y));
-        if (b-x > skipSymbolMargin)
-          painter->drawLine(QLineF(x+skipSymbolMargin, y, b, y));
-      } else
-        painter->drawLine(QLineF(a, y, b, y));
-      // draw handles:
-      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
-      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
-    }
-    if (mErrorType == etValue || mErrorType == etBoth)
-    {
-      a = valueAxis->coordToPixel(data.value-data.valueErrorMinus);
-      b = valueAxis->coordToPixel(data.value+data.valueErrorPlus);
-      if (valueAxis->rangeReversed())
-        qSwap(a,b);
-      // draw spine:
-      if (mErrorBarSkipSymbol)
-      {
-        if (a-y > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
-          painter->drawLine(QLineF(x, a, x, y+skipSymbolMargin));
-        if (y-b > skipSymbolMargin)
-          painter->drawLine(QLineF(x, y-skipSymbolMargin, x, b));
-      } else
-        painter->drawLine(QLineF(x, a, x, b));
-      // draw handles:
-      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
-      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
-    }
-  }
+//  if (keyAxis->orientation() == Qt::Vertical)
+//  {
+//    // draw key error vertically and value error horizontally
+//    if (mErrorType == etKey || mErrorType == etBoth)
+//    {
+//      a = keyAxis->coordToPixel(data.key-data.keyErrorMinus);
+//      b = keyAxis->coordToPixel(data.key+data.keyErrorPlus);
+//      if (keyAxis->rangeReversed())
+//        qSwap(a,b);
+//      // draw spine:
+//      if (mErrorBarSkipSymbol)
+//      {
+//        if (a-y > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
+//          painter->drawLine(QLineF(x, a, x, y+skipSymbolMargin));
+//        if (y-b > skipSymbolMargin)
+//          painter->drawLine(QLineF(x, y-skipSymbolMargin, x, b));
+//      } else
+//        painter->drawLine(QLineF(x, a, x, b));
+//      // draw handles:
+//      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
+//      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
+//    }
+//    if (mErrorType == etValue || mErrorType == etBoth)
+//    {
+//      a = valueAxis->coordToPixel(data.value-data.valueErrorMinus);
+//      b = valueAxis->coordToPixel(data.value+data.valueErrorPlus);
+//      if (valueAxis->rangeReversed())
+//        qSwap(a,b);
+//      // draw spine:
+//      if (mErrorBarSkipSymbol)
+//      {
+//        if (x-a > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
+//          painter->drawLine(QLineF(a, y, x-skipSymbolMargin, y));
+//        if (b-x > skipSymbolMargin)
+//          painter->drawLine(QLineF(x+skipSymbolMargin, y, b, y));
+//      } else
+//        painter->drawLine(QLineF(a, y, b, y));
+//      // draw handles:
+//      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
+//      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
+//    }
+//  } else // mKeyAxis->orientation() is Qt::Horizontal
+//  {
+//    // draw value error vertically and key error horizontally
+//    if (mErrorType == etKey || mErrorType == etBoth)
+//    {
+//      a = keyAxis->coordToPixel(data.key-data.keyErrorMinus);
+//      b = keyAxis->coordToPixel(data.key+data.keyErrorPlus);
+//      if (keyAxis->rangeReversed())
+//        qSwap(a,b);
+//      // draw spine:
+//      if (mErrorBarSkipSymbol)
+//      {
+//        if (x-a > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
+//          painter->drawLine(QLineF(a, y, x-skipSymbolMargin, y));
+//        if (b-x > skipSymbolMargin)
+//          painter->drawLine(QLineF(x+skipSymbolMargin, y, b, y));
+//      } else
+//        painter->drawLine(QLineF(a, y, b, y));
+//      // draw handles:
+//      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
+//      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
+//    }
+//    if (mErrorType == etValue || mErrorType == etBoth)
+//    {
+//      a = valueAxis->coordToPixel(data.value-data.valueErrorMinus);
+//      b = valueAxis->coordToPixel(data.value+data.valueErrorPlus);
+//      if (valueAxis->rangeReversed())
+//        qSwap(a,b);
+//      // draw spine:
+//      if (mErrorBarSkipSymbol)
+//      {
+//        if (a-y > skipSymbolMargin) // don't draw spine if error is so small it's within skipSymbolmargin
+//          painter->drawLine(QLineF(x, a, x, y+skipSymbolMargin));
+//        if (y-b > skipSymbolMargin)
+//          painter->drawLine(QLineF(x, y-skipSymbolMargin, x, b));
+//      } else
+//        painter->drawLine(QLineF(x, a, x, b));
+//      // draw handles:
+//      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
+//      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
+//    }
+//  }
 }
 
 /*!  \internal
@@ -16640,8 +16640,8 @@ QCPRange QCPGraph::getKeyRange(bool &foundRange, SignDomain inSignDomain, bool i
     while (it != mData->constEnd())
     {
       current = it->key;
-      currentErrorMinus = (includeErrors ? it->keyErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->keyErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->keyErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->keyErrorPlus : 0);
       if (current-currentErrorMinus < range.lower || !haveLower)
       {
         range.lower = current-currentErrorMinus;
@@ -16660,8 +16660,8 @@ QCPRange QCPGraph::getKeyRange(bool &foundRange, SignDomain inSignDomain, bool i
     while (it != mData->constEnd())
     {
       current = it->key;
-      currentErrorMinus = (includeErrors ? it->keyErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->keyErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->keyErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->keyErrorPlus : 0);
       if ((current-currentErrorMinus < range.lower || !haveLower) && current-currentErrorMinus < 0)
       {
         range.lower = current-currentErrorMinus;
@@ -16693,8 +16693,8 @@ QCPRange QCPGraph::getKeyRange(bool &foundRange, SignDomain inSignDomain, bool i
     while (it != mData->constEnd())
     {
       current = it->key;
-      currentErrorMinus = (includeErrors ? it->keyErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->keyErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->keyErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->keyErrorPlus : 0);
       if ((current-currentErrorMinus < range.lower || !haveLower) && current-currentErrorMinus > 0)
       {
         range.lower = current-currentErrorMinus;
@@ -16746,8 +16746,8 @@ QCPRange QCPGraph::getValueRange(bool &foundRange, SignDomain inSignDomain, bool
     while (it != mData->constEnd())
     {
       current = it->value;
-      currentErrorMinus = (includeErrors ? it->valueErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->valueErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->valueErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->valueErrorPlus : 0);
       if (current-currentErrorMinus < range.lower || !haveLower)
       {
         range.lower = current-currentErrorMinus;
@@ -16766,8 +16766,8 @@ QCPRange QCPGraph::getValueRange(bool &foundRange, SignDomain inSignDomain, bool
     while (it != mData->constEnd())
     {
       current = it->value;
-      currentErrorMinus = (includeErrors ? it->valueErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->valueErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->valueErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->valueErrorPlus : 0);
       if ((current-currentErrorMinus < range.lower || !haveLower) && current-currentErrorMinus < 0)
       {
         range.lower = current-currentErrorMinus;
@@ -16799,8 +16799,8 @@ QCPRange QCPGraph::getValueRange(bool &foundRange, SignDomain inSignDomain, bool
     while (it != mData->constEnd())
     {
       current = it->value;
-      currentErrorMinus = (includeErrors ? it->valueErrorMinus : 0);
-      currentErrorPlus = (includeErrors ? it->valueErrorPlus : 0);
+      currentErrorMinus = 0;//(includeErrors ? it->valueErrorMinus : 0);
+      currentErrorPlus = 0;//(includeErrors ? it->valueErrorPlus : 0);
       if ((current-currentErrorMinus < range.lower || !haveLower) && current-currentErrorMinus > 0)
       {
         range.lower = current-currentErrorMinus;

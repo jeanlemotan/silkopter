@@ -166,7 +166,7 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
     graph.fft_plot = fft_plot;
 }
 
-void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src)
+void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src, bool is_healthy)
 {
     double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
     if (tpd < m_tp)
@@ -177,6 +177,7 @@ void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src)
 
     Sample sample;
     sample.tp = tpd;
+    sample.is_healthy = is_healthy;
     size_t off = m_values.size();
     m_values.resize(m_values.size() + m_graphs.size());
     std::copy(src, src + m_graphs.size(), m_values.begin() + off);

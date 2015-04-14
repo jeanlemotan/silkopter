@@ -93,9 +93,12 @@ auto SRF02::init() -> bool
 
     QLOGI("SRF02 Revision: {}", rev);
 
+    auto now = q::Clock::now();
     m_stream->dt = std::chrono::milliseconds(1000 / m_init_params->rate);
-    m_stream->last_tp = q::Clock::now();
-    m_state = 0;
+    m_stream->trigger_tp = now;
+    m_stream->last_tp = now;
+
+    trigger(*i2c);
 
 //    if (!m_init_params->name.empty())
 //    {
@@ -108,6 +111,12 @@ auto SRF02::init() -> bool
 //    }
 
     return true;
+}
+
+void SRF02::trigger(bus::II2C& i2c)
+{
+    m_stream->trigger_tp = q::Clock::now();
+    i2c.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
 void SRF02::process()
@@ -123,48 +132,46 @@ void SRF02::process()
         return;
     }
 
-    //begin?
-    if (m_state == 0)
-    {
-        if (now - m_stream->last_tp < m_stream->dt)
-        {
-            return;
-        }
-
-        m_state = 1;
-        m_stream->last_tp = now;
-        i2c->write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
-        return; //we have to wait first
-    }
-
     //wait for echo
-    if (now - m_stream->last_tp < m_stream->dt)
+    if (now - m_stream->trigger_tp < m_stream->dt)
     {
         return;
     }
 
-    m_state = 0;
-
     std::array<uint8_t, 4> buf;
     i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
+    //trigger immediately
+    trigger(*i2c);
+
     int d = (unsigned int)(buf[0] << 8) | buf[1];
-    //int min_d = (unsigned int)(buf[2] << 8) | buf[3];
+    int min_d = (unsigned int)(buf[2] << 8) | buf[3];
 
     float distance = static_cast<float>(d) / 100.f; //meters
-    //float min_distance = static_cast<float>(min_d) / 100.f; //meters
+
+    float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
+    float max_distance = m_config->max_distance;
+    auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
+    auto is_healthy = distance >= min_distance && distance <= max_distance;
 
     m_stream->samples.clear();
 
+    auto dt = now - m_stream->last_tp;
+    auto tp = m_stream->last_tp + m_stream->dt;
+    while (dt >= m_stream->dt)
     {
         Stream::Sample& sample = m_stream->last_sample;
-        sample.value = m_config->direction * math::clamp(distance, m_config->min_distance, m_config->max_distance);
+        sample.value = value;
         sample.sample_idx++;
         sample.dt = m_stream->dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
-        sample.tp = now;
-        sample.is_healthy = distance >= m_config->min_distance && distance <= m_config->max_distance;
+        sample.tp = tp;
+        sample.is_healthy = is_healthy;
         m_stream->samples.push_back(sample);
+
+        tp += m_stream->dt;
+        dt -= m_stream->dt;
     }
+    m_stream->last_tp = now - dt; //add the reminder to be processed next frame
 }
 
 auto SRF02::set_config(rapidjson::Value const& json) -> bool
@@ -184,6 +191,11 @@ auto SRF02::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     m_config->min_distance = math::max(m_config->min_distance, 0.1f);
     m_config->max_distance = math::min(m_config->max_distance, 12.f);
+    if (math::is_zero(math::length(m_config->direction), math::epsilon<float>()))
+    {
+        m_config->direction = math::vec3f(0, 0, -1); //pointing down
+    }
+    m_config->direction.normalize<math::safe>();
 
     return true;
 }

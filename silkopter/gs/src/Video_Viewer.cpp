@@ -2,6 +2,19 @@
 #include "HAL.h"
 #include "Comms.h"
 
+extern "C"
+{
+#include <libavutil/opt.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/common.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/mathematics.h>
+#include <libavutil/samplefmt.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+}
+
+
 Video_Viewer::Video_Viewer(QWidget *parent)
     : QWidget(parent)
 {
@@ -65,8 +78,9 @@ Video_Viewer::Video_Viewer(QWidget *parent)
         exit(1);
     }
 
-    m_ffmpeg.rgb.linesize[0] = 0;
-    m_ffmpeg.rgb.data[0] = nullptr;
+    m_ffmpeg.rgb.reset(new AVPicture);
+    m_ffmpeg.rgb->linesize[0] = 0;
+    m_ffmpeg.rgb->data[0] = nullptr;
 }
 
 Video_Viewer::~Video_Viewer()
@@ -115,18 +129,18 @@ void Video_Viewer::add_sample(silk::node::stream::Video::Sample const& sample)
 
             if (m_ffmpeg.sws_context)
             {
-                if (img_w * 4 != m_ffmpeg.rgb.linesize[0])
+                if (img_w * 4 != m_ffmpeg.rgb->linesize[0])
                 {
-                    m_ffmpeg.rgb.linesize[0] = img_w * 4;
-                    delete[] m_ffmpeg.rgb.data[0];
-                    m_ffmpeg.rgb.data[0] = new uint8_t[(m_ffmpeg.rgb.linesize[0] + 1) * (img_h + 1)];
-                    m_image = QImage(m_ffmpeg.rgb.data[0], img_w, img_h, QImage::Format_ARGB32_Premultiplied);
+                    m_ffmpeg.rgb->linesize[0] = img_w * 4;
+                    delete[] m_ffmpeg.rgb->data[0];
+                    m_ffmpeg.rgb->data[0] = new uint8_t[(m_ffmpeg.rgb->linesize[0] + 1) * (img_h + 1)];
+                    m_image = QImage(m_ffmpeg.rgb->data[0], img_w, img_h, QImage::Format_ARGB32_Premultiplied);
                 }
 
                 sws_scale(m_ffmpeg.sws_context,
                           m_ffmpeg.frame_yuv->data, m_ffmpeg.frame_yuv->linesize,
                           0, frame_h,
-                          m_ffmpeg.rgb.data, m_ffmpeg.rgb.linesize);
+                          m_ffmpeg.rgb->data, m_ffmpeg.rgb->linesize);
 
                 m_image_flipped = m_image.mirrored(false, false);
             }

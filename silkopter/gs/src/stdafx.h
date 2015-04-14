@@ -47,24 +47,6 @@
 #include <QtCore/QSettings>
 #include <QFileDialog>
 
-#include <mapcontrol.h>
-#include <osmmapadapter.h>
-#include <googlemapadapter.h>
-#include <maplayer.h>
-#include <circlepoint.h>
-
-extern "C"
-{
-#include <libavutil/opt.h>
-#include <libavcodec/avcodec.h>
-#include <libavutil/common.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/mathematics.h>
-#include <libavutil/samplefmt.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-}
-
 extern "C"
 {
 #include <fftw3.h>
@@ -81,6 +63,7 @@ extern "C"
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "rapidjson/stringbuffer.h"
+
 
 namespace std
 {
@@ -105,3 +88,5 @@ namespace silk
         return future;
     }
 }
+
+

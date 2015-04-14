@@ -3,6 +3,16 @@
 #include "HAL.h"
 #include "Comms.h"
 
+extern "C"
+{
+struct AVCodec;
+struct AVCodecContext;
+struct SwsContext;
+struct AVFrame;
+struct AVPicture;
+}
+
+
 class Video_Viewer : public QWidget
 {
 public:
@@ -27,6 +37,6 @@ private:
         SwsContext* sws_context = nullptr;
         AVFrame* frame_yuv = nullptr;
         AVFrame* frame_rgb = nullptr;
-        AVPicture rgb;
+        std::shared_ptr<AVPicture> rgb;
     } m_ffmpeg;
 };
