@@ -151,7 +151,6 @@ void Multi_Simulation::reset()
     m_uav.state.local_to_enu_rotation  = math::quatf::identity;
     for (auto& m: m_uav.state.motors)
     {
-        m.rpm = 0;
         m.throttle = 0;
         m.thrust = 0;
     }
@@ -415,7 +414,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
 
     //motors
-    float total_rpm = 0.f;
+//    float total_rpm = 0.f;
     float total_force = 0.f;
     {
         const auto dir = local_to_enu_mat.get_axis_z();
@@ -425,23 +424,22 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
             auto& mc = m_uav.config.motors[i];
 
             {
-                auto target_rpm = m.throttle * mc.max_rpm;
-                if (!math::equals(m.rpm, target_rpm))
+                auto target_thrust = math::square(m.throttle) * mc.max_thrust;
+                if (!math::equals(m.thrust, target_thrust))
                 {
-                    auto delta = target_rpm - m.rpm;
+                    auto delta = (target_thrust - m.thrust) / mc.max_thrust;
                     float acc = delta > 0 ? mc.acceleration : mc.deceleration;
                     float d = math::min(math::abs(delta), acc * q::Seconds(dt).count());
-                    m.rpm += math::sgn(delta) * d;
-                    m.rpm = math::clamp(m.rpm, 0.f, mc.max_rpm);
+                    m.thrust += math::sgn(delta) * d * mc.max_thrust;
+                    m.thrust = math::clamp(m.thrust, 0.f, mc.max_thrust);
                 }
             }
-            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
+//            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 
-            float force = m.throttle * m.throttle * mc.max_thrust;
-            total_force += force;
+            total_force += m.thrust;
             math::vec3f local_pos(mc.position * m_uav.config.radius);
             auto pos = math::transform(local_to_enu_mat, local_pos);
-            m_uav.body->applyForce(vec3f_to_bt(dir * force), vec3f_to_bt(pos));
+            m_uav.body->applyForce(vec3f_to_bt(dir * m.thrust), vec3f_to_bt(pos));
         }
     }
 
@@ -449,8 +447,8 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     //yaw
     {
-        auto torque = math::transform(local_to_enu_mat, math::vec3f(0, 0, total_rpm * 0.0001f));
-        m_uav.body->applyTorque(vec3f_to_bt(torque));
+//        auto torque = math::transform(local_to_enu_mat, math::vec3f(0, 0, total_rpm * 0.0001f));
+//        m_uav.body->applyTorque(vec3f_to_bt(torque));
     }
 
     //air drag

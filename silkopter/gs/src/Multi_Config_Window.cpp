@@ -53,7 +53,14 @@ Multi_Config_Window::Multi_Config_Window(silk::HAL& hal, silk::Comms& comms, QWi
     });
     QObject::connect(m_ui.action_add_motor, &QAction::triggered, [this](bool)
     {
-        m_config.motors.push_back(silk::config::Multi::Motor());
+        if (m_config.motors.empty())
+        {
+            m_config.motors.push_back(silk::config::Multi::Motor());
+        }
+        else
+        {
+            m_config.motors.push_back(m_config.motors.back());
+        }
         show_config();
     });
     QObject::connect(m_ui.action_apply_config, &QAction::triggered, [this](bool)

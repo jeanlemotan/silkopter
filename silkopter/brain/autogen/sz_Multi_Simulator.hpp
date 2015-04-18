@@ -5062,11 +5062,9 @@ private:
 
     SAXEventHandler< float > handler_0;
 SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;
-SAXEventHandler< float > handler_3;bool has_drag_factor;
+SAXEventHandler< float > handler_2;bool has_drag_factor;
 bool has_throttle;
 bool has_thrust;
-bool has_rpm;
 
     bool check_depth(const char* type)
     {
@@ -5086,8 +5084,6 @@ case 1:
     return "throttle";
 case 2:
     return "thrust";
-case 3:
-    return "rpm";
         default:
             break;
         }
@@ -5117,7 +5113,6 @@ case 3:
         has_drag_factor = false;
 has_throttle = false;
 has_thrust = false;
-has_rpm = false;
     }
 
 public:
@@ -5127,7 +5122,6 @@ public:
         , handler_0(&obj->drag_factor)
 , handler_1(&obj->throttle)
 , handler_2(&obj->thrust)
-, handler_3(&obj->rpm)
     {
         reset_flags();
     }
@@ -5147,9 +5141,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -5173,9 +5164,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
         default:
             break;
         }
@@ -5197,9 +5185,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -5223,9 +5208,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
         default:
             break;
         }
@@ -5247,9 +5229,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -5273,9 +5252,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
         default:
             break;
         }
@@ -5297,9 +5273,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -5323,9 +5296,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
         default:
             break;
         }
@@ -5346,8 +5316,6 @@ else if (utility::string_equal(str, length, "\x54\x68\x72\x6f\x74\x74\x6c\x65\x2
 						 { state=1; has_throttle = true; }
 else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 10))
 						 { state=2; has_thrust = true; }
-else if (utility::string_equal(str, length, "\x52\x50\x4d\x20\x28\x52\x6f\x74\x2f\x4d\x69\x6e\x29", 13))
-						 { state=3; has_rpm = true; }
             else {
                 state = -1;
                 return true;
@@ -5364,9 +5332,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -5391,9 +5356,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
         default:
             break;
         }
@@ -5416,9 +5378,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
         default:
             break;
         }
@@ -5440,9 +5399,6 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -5467,9 +5423,6 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
             default:
                 break;
             }
@@ -5477,7 +5430,6 @@ case 3:
             if (!has_drag_factor) set_missing_required("drag_factor");
 if (!has_throttle) set_missing_required("throttle");
 if (!has_thrust) set_missing_required("thrust");
-if (!has_rpm) set_missing_required("rpm");
         }
         return the_error.empty();
     }
@@ -5502,8 +5454,6 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -5521,7 +5471,6 @@ case 3:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
 
     }
 };
@@ -5536,9 +5485,8 @@ struct Serializer< Writer51ae19aa27d70d4d6396d9976ca47b521e9ebdf320811191ca9a636
         w.Key("\x44\x72\x61\x67\x20\x46\x61\x63\x74\x6f\x72\x20\x28\x30\x2d\x31\x29", 17, false); Serializer< Writer51ae19aa27d70d4d6396d9976ca47b521e9ebdf320811191ca9a636abcb1f6b5, float >()(w, value.drag_factor);
 w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x28\x30\x2d\x31\x29", 14, false); Serializer< Writer51ae19aa27d70d4d6396d9976ca47b521e9ebdf320811191ca9a636abcb1f6b5, float >()(w, value.throttle);
 w.Key("\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 10, false); Serializer< Writer51ae19aa27d70d4d6396d9976ca47b521e9ebdf320811191ca9a636abcb1f6b5, float >()(w, value.thrust);
-w.Key("\x52\x50\x4d\x20\x28\x52\x6f\x74\x2f\x4d\x69\x6e\x29", 13, false); Serializer< Writer51ae19aa27d70d4d6396d9976ca47b521e9ebdf320811191ca9a636abcb1f6b5, float >()(w, value.rpm);
 
-        w.EndObject(4);
+        w.EndObject(3);
     }
 
 };

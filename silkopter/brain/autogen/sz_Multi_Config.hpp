@@ -38,17 +38,13 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< bool > handler_0;
-SAXEventHandler< math::vec3f > handler_1;
-SAXEventHandler< math::vec3f > handler_2;
+    SAXEventHandler< math::vec3f > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
 SAXEventHandler< float > handler_3;
-SAXEventHandler< float > handler_4;
-SAXEventHandler< float > handler_5;
-SAXEventHandler< float > handler_6;bool has_clockwise;
-bool has_position;
-bool has_thrust_vector;
+SAXEventHandler< float > handler_4;bool has_position;
+bool has_max_z_torque;
 bool has_max_thrust;
-bool has_max_rpm;
 bool has_acceleration;
 bool has_deceleration;
 
@@ -65,18 +61,14 @@ bool has_deceleration;
     {
         switch (state) {
             case 0:
-    return "clockwise";
-case 1:
     return "position";
+case 1:
+    return "max_z_torque";
 case 2:
-    return "thrust_vector";
-case 3:
     return "max_thrust";
-case 4:
-    return "max_rpm";
-case 5:
+case 3:
     return "acceleration";
-case 6:
+case 4:
     return "deceleration";
         default:
             break;
@@ -104,11 +96,9 @@ case 6:
 
     void reset_flags()
     {
-        has_clockwise = false;
-has_position = false;
-has_thrust_vector = false;
+        has_position = false;
+has_max_z_torque = false;
 has_max_thrust = false;
-has_max_rpm = false;
 has_acceleration = false;
 has_deceleration = false;
     }
@@ -117,13 +107,11 @@ public:
     explicit SAXEventHandler( ::silk::config::Multi::Motor * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->clockwise)
-, handler_1(&obj->position)
-, handler_2(&obj->thrust_vector)
-, handler_3(&obj->max_thrust)
-, handler_4(&obj->max_rpm)
-, handler_5(&obj->acceleration)
-, handler_6(&obj->deceleration)
+        , handler_0(&obj->position)
+, handler_1(&obj->max_z_torque)
+, handler_2(&obj->max_thrust)
+, handler_3(&obj->acceleration)
+, handler_4(&obj->deceleration)
     {
         reset_flags();
     }
@@ -149,12 +137,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
-
-case 6:
-    return checked_event_forwarding(handler_6.Null());
 
         default:
             break;
@@ -184,12 +166,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Bool(b));
 
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
-case 6:
-    return checked_event_forwarding(handler_6.Bool(b));
-
         default:
             break;
         }
@@ -217,12 +193,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int(i));
 
         default:
             break;
@@ -252,12 +222,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint(i));
 
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint(i));
-
         default:
             break;
         }
@@ -285,12 +249,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int64(i));
 
         default:
             break;
@@ -320,12 +278,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint64(i));
 
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint64(i));
-
         default:
             break;
         }
@@ -353,12 +305,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
-
-case 6:
-    return checked_event_forwarding(handler_6.Double(d));
 
         default:
             break;
@@ -388,12 +334,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.String(str, length, copy));
 
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.String(str, length, copy));
-
         default:
             break;
         }
@@ -408,20 +348,16 @@ case 6:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9))
-						 { state=0; has_clockwise = true; }
-else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8))
-						 { state=1; has_position = true; }
-else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x56\x65\x63\x74\x6f\x72", 13))
-						 { state=2; has_thrust_vector = true; }
+            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8))
+						 { state=0; has_position = true; }
+else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x6d\x29", 17))
+						 { state=1; has_max_z_torque = true; }
 else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 17))
-						 { state=3; has_max_thrust = true; }
-else if (utility::string_equal(str, length, "\x52\x50\x4d\x20\x40\x20\x31\x30\x30\x25", 10))
-						 { state=4; has_max_rpm = true; }
-else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x52\x50\x4d\x2f\x73\x29", 20))
-						 { state=5; has_acceleration = true; }
-else if (utility::string_equal(str, length, "\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x52\x50\x4d\x2f\x73\x29", 20))
-						 { state=6; has_deceleration = true; }
+						 { state=2; has_max_thrust = true; }
+else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 16))
+						 { state=3; has_acceleration = true; }
+else if (utility::string_equal(str, length, "\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 16))
+						 { state=4; has_deceleration = true; }
             else {
                 state = -1;
                 return true;
@@ -444,12 +380,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.Key(str, length, copy));
 
             default:
                 break;
@@ -480,12 +410,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.StartArray());
 
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartArray());
-
         default:
             break;
         }
@@ -514,12 +438,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndArray(length));
 
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndArray(length));
-
         default:
             break;
         }
@@ -547,12 +465,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartObject());
 
             default:
                 break;
@@ -583,21 +495,13 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndObject(length));
 
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_clockwise) set_missing_required("clockwise");
-if (!has_position) set_missing_required("position");
-if (!has_thrust_vector) set_missing_required("thrust_vector");
+            if (!has_position) set_missing_required("position");
+if (!has_max_z_torque) set_missing_required("max_z_torque");
 if (!has_max_thrust) set_missing_required("max_thrust");
-if (!has_max_rpm) set_missing_required("max_rpm");
 if (!has_acceleration) set_missing_required("acceleration");
 if (!has_deceleration) set_missing_required("deceleration");
         }
@@ -628,10 +532,6 @@ case 3:
      handler_3.ReapError(errs); break;
 case 4:
      handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
-case 6:
-     handler_6.ReapError(errs); break;
 
         default:
             break;
@@ -651,8 +551,6 @@ handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
-handler_6.PrepareForReuse();
 
     }
 };
@@ -664,15 +562,13 @@ struct Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfec
     {
         w.StartObject();
 
-        w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, bool >()(w, value.clockwise);
-w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3f >()(w, value.position);
-w.Key("\x54\x68\x72\x75\x73\x74\x20\x56\x65\x63\x74\x6f\x72", 13, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3f >()(w, value.thrust_vector);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3f >()(w, value.position);
+w.Key("\x4d\x61\x78\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x6d\x29", 17, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.max_z_torque);
 w.Key("\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 17, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.max_thrust);
-w.Key("\x52\x50\x4d\x20\x40\x20\x31\x30\x30\x25", 10, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.max_rpm);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x52\x50\x4d\x2f\x73\x29", 20, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.acceleration);
-w.Key("\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x52\x50\x4d\x2f\x73\x29", 20, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.deceleration);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 16, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.acceleration);
+w.Key("\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 16, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, float >()(w, value.deceleration);
 
-        w.EndObject(7);
+        w.EndObject(5);
     }
 
 };

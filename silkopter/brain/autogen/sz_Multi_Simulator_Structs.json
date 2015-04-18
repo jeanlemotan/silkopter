@@ -7,8 +7,7 @@
     [
         ["float", "drag_factor", {"required": true, "json_key" : "Drag Factor (0-1)"}],
         ["float", "throttle", {"required": true, "json_key" : "Throttle (0-1)"}],
-        ["float", "thrust", {"required": true, "json_key" : "Thrust (N)"}],
-        ["float", "rpm", {"required": true, "json_key" : "RPM (Rot/Min)"}]
+        ["float", "thrust", {"required": true, "json_key" : "Thrust (N)"}]
     ]
 },
 {

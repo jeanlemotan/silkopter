@@ -15,7 +15,6 @@ public:
         float drag_factor = 0;
         float throttle = 0;
         float thrust = 0;
-        float rpm = 0;
     };
 
     struct UAV_State

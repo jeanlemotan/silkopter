@@ -11,10 +11,8 @@ public:
     struct Motor
     {
         math::vec3f position;
-        math::vec3f thrust_vector;
-        bool clockwise = true;
+        float max_z_torque = 0; //Nm
         float max_thrust = 0; //N
-        float max_rpm = 0;
         float acceleration = 0; //rpm/s
         float deceleration = 0; //rpm/s
     };

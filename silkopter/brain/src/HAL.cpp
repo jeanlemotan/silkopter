@@ -224,11 +224,6 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
             QLOGE("Bad max thrust: {}", m.max_thrust);
             return false;
         }
-        if (m.max_rpm < math::epsilon<float>())
-        {
-            QLOGE("Bad max rpm: {}", m.max_rpm);
-            return false;
-        }
         if (m.acceleration < math::epsilon<float>())
         {
             QLOGE("Bad acceleration: {}", m.acceleration);

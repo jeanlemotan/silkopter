@@ -13,6 +13,8 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
     , m_context(context)
     , m_camera_controller(context.camera)
 {
+    QASSERT(sim_node);
+
     setWindowTitle("Simulator");
     setMouseTracking(true);
 
@@ -197,7 +199,7 @@ void Sim_Window::render_uav()
             m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0xFFFFFFFF), motor_radius, 16); //motor
 
             m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0x40FFFFFF), propeller_radius, 32); //motor + prop
-            float ratio = m.rpm / float(mc.max_rpm);
+            float ratio = m.thrust / float(mc.max_thrust);
             m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
         }
     }

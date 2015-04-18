@@ -68,13 +68,21 @@ private:
         uint32_t rate = 0;
         Sample last_sample;
         std::vector<Sample> samples;
-    };
-    std::vector<math::vec3f> m_torques;
-    std::vector<float> m_thrusts;
-    std::vector<float> m_throttles;
 
-    mutable std::vector<std::shared_ptr<Stream>> m_output_streams;
-    mutable std::vector<float> m_outputs;
+        struct Config
+        {
+            math::vec3f position;
+            float max_thrust = 0;
+            float max_thrust_inv = 0.f;
+            float max_z_torque = 0;
+        } config;
+
+        float throttle = 0;
+        float thrust = 0;
+        math::vec3f torque;
+    };
+
+    mutable std::vector<std::shared_ptr<Stream>> m_outputs;
 };
 
 

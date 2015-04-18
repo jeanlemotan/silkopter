@@ -5,13 +5,11 @@
     "name": "Motor",
     "members":
     [
-        ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
         ["math::vec3f", "position", {"required": true, "json_key" : "Position"}],
-        ["math::vec3f", "thrust_vector", {"required": true, "json_key" : "Thrust Vector"}],
+        ["float", "max_z_torque", {"required": true, "json_key" : "Max Z Torque (Nm)"}],
         ["float", "max_thrust", {"required": true, "json_key" : "Thrust @ 100% (N)"}],
-        ["float", "max_rpm", {"required": true, "json_key" : "RPM @ 100%"}],
-        ["float", "acceleration", {"required": true, "json_key" : "Acceleration (RPM/s)"}],
-        ["float", "deceleration", {"required": true, "json_key" : "Deceleration (RPM/s)"}]
+        ["float", "acceleration", {"required": true, "json_key" : "Acceleration (s)"}],
+        ["float", "deceleration", {"required": true, "json_key" : "Deceleration (s)"}]
     ]
 },
 {
