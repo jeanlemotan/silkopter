@@ -17,10 +17,13 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(res);
 
-	QApplication a(argc, argv);
-	QCoreApplication::setOrganizationName("Silkopter");
+    QApplication a(argc, argv);
+//    QApplication::setStyle("fusion");
+
+    QCoreApplication::setOrganizationName("Silkopter");
     QCoreApplication::setOrganizationDomain("silkopter.com");
 	QCoreApplication::setApplicationName("Silkopter");
+
 
     a.setQuitOnLastWindowClosed(true);
 

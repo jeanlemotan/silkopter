@@ -6,7 +6,8 @@
     "members":
     [
         ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
-        ["math::vec2f", "position", {"required": true, "json_key" : "Position"}],
+        ["math::vec3f", "position", {"required": true, "json_key" : "Position"}],
+        ["math::vec3f", "thrust_vector", {"required": true, "json_key" : "Thrust Vector"}],
         ["float", "max_thrust", {"required": true, "json_key" : "Thrust @ 100% (N)"}],
         ["float", "max_rpm", {"required": true, "json_key" : "RPM @ 100%"}],
         ["float", "acceleration", {"required": true, "json_key" : "Acceleration (RPM/s)"}],

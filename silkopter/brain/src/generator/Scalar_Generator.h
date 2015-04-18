@@ -152,10 +152,10 @@ auto Scalar_Generator<Stream_t>::get_config() const -> rapidjson::Document
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(1);
-    inputs[0].type = stream::IFactor::TYPE;
-    inputs[0].rate = m_init_params.rate;
-    inputs[0].name = "Factor";
+    std::vector<Input> inputs =
+    {{
+        { stream::IFactor::TYPE, m_init_params.rate, "Factor" }
+    }};
     return inputs;
 }
 template<class Stream_t>

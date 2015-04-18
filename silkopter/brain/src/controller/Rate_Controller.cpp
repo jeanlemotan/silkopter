@@ -49,13 +49,11 @@ auto Rate_Controller::init() -> bool
 
 auto Rate_Controller::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = stream::IAngular_Velocity::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Input";
-    inputs[1].type = stream::IAngular_Velocity::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Target";
+    std::vector<Input> inputs =
+    {{
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input" },
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Target" }
+    }};
     return inputs;
 }
 auto Rate_Controller::get_outputs() const -> std::vector<Output>

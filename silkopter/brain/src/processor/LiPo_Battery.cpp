@@ -60,13 +60,11 @@ auto LiPo_Battery::init() -> bool
 
 auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = stream::IVoltage::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Voltage";
-    inputs[1].type = stream::ICurrent::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Current";
+    std::vector<Input> inputs =
+    {{
+        { stream::IVoltage::TYPE, m_init_params->rate, "Voltage" },
+        { stream::ICurrent::TYPE, m_init_params->rate, "Current" }
+    }};
     return inputs;
 }
 auto LiPo_Battery::get_outputs() const -> std::vector<Output>

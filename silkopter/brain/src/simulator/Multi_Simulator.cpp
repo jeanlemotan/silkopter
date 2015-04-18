@@ -95,8 +95,8 @@ auto Multi_Simulator::init() -> bool
 
     m_last_tp = q::Clock::now();
 
-    m_input_pwm_streams.resize(multi_config->motors.size());
-    m_config->inputs.pwm.resize(multi_config->motors.size());
+    m_input_throttle_streams.resize(multi_config->motors.size());
+    m_config->inputs.throttle.resize(multi_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
     m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -133,12 +133,12 @@ auto Multi_Simulator::init() -> bool
 
 auto Multi_Simulator::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_input_pwm_streams.size());
-    for (size_t i = 0; i < m_input_pwm_streams.size(); i++)
+    std::vector<Input> inputs(m_input_throttle_streams.size());
+    for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
-        inputs[i].type = stream::IPWM::TYPE;
-        inputs[i].rate = m_init_params->pwm_rate;
-        inputs[i].name = q::util::format2<std::string>("PWM/[{}]", i);
+        inputs[i].type = stream::IThrottle::TYPE;
+        inputs[i].rate = m_init_params->throttle_rate;
+        inputs[i].name = q::util::format2<std::string>("Throttle/[{}]", i);
     }
     return inputs;
 }
@@ -177,12 +177,12 @@ void Multi_Simulator::process()
     auto dt = now - m_last_tp;
     m_last_tp = now;
 
-    for (size_t i = 0; i < m_input_pwm_streams.size(); i++)
+    for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
-        auto pwm = m_input_pwm_streams[i].lock();
-        if (pwm)
+        auto throttle = m_input_throttle_streams[i].lock();
+        if (throttle)
         {
-            auto const& samples = pwm->get_samples();
+            auto const& samples = throttle->get_samples();
             if (!samples.empty())
             {
                 m_simulation.set_motor_throttle(i, samples.back().value);
@@ -275,19 +275,19 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    for (size_t i = 0; i < sz.inputs.pwm.size(); i++)
+    for (size_t i = 0; i < sz.inputs.throttle.size(); i++)
     {
-        auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.inputs.pwm[i]);
+        auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(sz.inputs.throttle[i]);
         auto rate = input_stream ? input_stream->get_rate() : 0u;
-        if (rate != m_init_params->pwm_rate)
+        if (rate != m_init_params->throttle_rate)
         {
-            m_config->inputs.pwm[i].clear();
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.pwm[i], m_init_params->pwm_rate, rate);
-            m_input_pwm_streams[i].reset();
+            m_config->inputs.throttle[i].clear();
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.throttle[i], m_init_params->throttle_rate, rate);
+            m_input_throttle_streams[i].reset();
         }
         else
         {
-            m_input_pwm_streams[i] = input_stream;
+            m_input_throttle_streams[i] = input_stream;
         }
     }
 

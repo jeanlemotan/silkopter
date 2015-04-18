@@ -14,21 +14,8 @@
     "name": "Inputs",
     "members":
     [
-        ["std::string", "multi_config", {"required": true, "json_key" : "Multi Config"}],
         ["std::string", "torque", {"required": true, "json_key" : "Torque"}],
         ["std::string", "force", {"required": true, "json_key" : "Collective Force"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Motor_Mixer",
-    "name": "Motor",
-    "members":
-    [
-        ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}],
-        ["math::vec2f", "position", {"required": true, "json_key" : "Position"}],
-        ["float", "thrust_100", {"required": true, "json_key" : "Thrust @ 100% (N)"}],
-        ["float", "thrust_50", {"required": true, "json_key" : "Thrust @ 50% (N)"}]
     ]
 },
 {
@@ -55,7 +42,6 @@
     "members":
     [
         ["float", "armed_throttle", {"required": true, "json_key" : "Armed Throttle"}],
-        ["std::vector<sz::Motor_Mixer::Motor>", "motors", {"required": true, "json_key" : "Motors"}],
         ["sz::Motor_Mixer::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
         ["sz::Motor_Mixer::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]

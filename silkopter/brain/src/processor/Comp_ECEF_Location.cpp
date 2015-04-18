@@ -49,16 +49,12 @@ auto Comp_ECEF_Location::init() -> bool
 
 auto Comp_ECEF_Location::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(3);
-    inputs[0].type = stream::IECEF_Location::TYPE;
-    inputs[0].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
-    inputs[0].name = "Location";
-    inputs[1].type = stream::ILinear_Acceleration::TYPE;
-    inputs[1].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
-    inputs[1].name = "Linear Acceleration (ecef)";
-    inputs[2].type = stream::IPressure::TYPE;
-    inputs[2].rate = m_location_output_stream ? m_location_output_stream->rate : 0;
-    inputs[2].name = "Pressure";
+    std::vector<Input> inputs =
+    {{
+        { stream::IECEF_Location::TYPE, m_init_params->rate, "Location" },
+        { stream::ILinear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)" },
+        { stream::IPressure::TYPE, m_init_params->rate, "Pressure" }
+    }};
     return inputs;
 }
 auto Comp_ECEF_Location::get_outputs() const -> std::vector<Output>

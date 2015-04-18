@@ -26,28 +26,17 @@ PIGPIO::PIGPIO(HAL& hal)
 
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(8);
-    for (auto& i: inputs)
-    {
-        i.type = stream::IPWM::TYPE;
-    }
-    inputs[0].rate = m_init_params->channel_4.rate;
-    inputs[0].name = "Channel 4";
-    inputs[1].rate = m_init_params->channel_17.rate;
-    inputs[1].name = "Channel 17";
-    inputs[2].rate = m_init_params->channel_18.rate;
-    inputs[2].name = "Channel 18";
-    inputs[3].rate = m_init_params->channel_22.rate;
-    inputs[3].name = "Channel 22";
-    inputs[4].rate = m_init_params->channel_23.rate;
-    inputs[4].name = "Channel 23";
-    inputs[5].rate = m_init_params->channel_24.rate;
-    inputs[5].name = "Channel 24";
-    inputs[6].rate = m_init_params->channel_25.rate;
-    inputs[6].name = "Channel 25";
-    inputs[7].rate = m_init_params->channel_27.rate;
-    inputs[7].name = "Channel 27";
-
+    std::vector<Input> inputs =
+    {{
+        { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4" },
+        { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17" },
+        { stream::IPWM::TYPE, m_init_params->channel_18.rate, "Channel 18" },
+        { stream::IPWM::TYPE, m_init_params->channel_22.rate, "Channel 22" },
+        { stream::IPWM::TYPE, m_init_params->channel_23.rate, "Channel 23" },
+        { stream::IPWM::TYPE, m_init_params->channel_24.rate, "Channel 24" },
+        { stream::IPWM::TYPE, m_init_params->channel_25.rate, "Channel 25" },
+        { stream::IPWM::TYPE, m_init_params->channel_27.rate, "Channel 27" }
+    }};
     return inputs;
 }
 

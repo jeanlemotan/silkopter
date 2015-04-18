@@ -50,13 +50,11 @@ auto Gravity_Filter::init() -> bool
 
 auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = stream::IFrame::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Frame";
-    inputs[1].type = stream::IAcceleration::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Acceleration";
+    std::vector<Input> inputs =
+    {{
+        { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
+        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration" }
+    }};
     return inputs;
 }
 auto Gravity_Filter::get_outputs() const -> std::vector<Output>

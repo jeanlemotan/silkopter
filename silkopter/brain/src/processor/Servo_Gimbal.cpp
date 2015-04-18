@@ -54,13 +54,11 @@ auto Servo_Gimbal::init() -> bool
 
 auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = stream::IFrame::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Frame";
-    inputs[1].type = stream::IFrame::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Target";
+    std::vector<Input> inputs =
+    {{
+        { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
+        { stream::IFrame::TYPE, m_init_params->rate, "Target" }
+    }};
     return inputs;
 }
 auto Servo_Gimbal::get_outputs() const -> std::vector<Output>

@@ -34,6 +34,9 @@ auto Motor_Mixer::init(rapidjson::Value const& init_params) -> bool
     *m_init_params = sz;
     return init();
 }
+
+constexpr math::vec3f THRUST_VECTOR(0, 0, -1);
+
 auto Motor_Mixer::init() -> bool
 {
     if (m_init_params->rate == 0)
@@ -45,6 +48,38 @@ auto Motor_Mixer::init() -> bool
     if (!multi_config)
     {
         QLOGE("No multi config found");
+        return false;
+    }
+//    if (multi_config->motors.size() != 4)
+//    {
+//        QLOGE("Motor_Mixer works only for quadrotor cofigurations");
+//        return false;
+//    }
+
+
+    //check symmetry
+    math::vec3f center;
+    math::vec3f torque;
+    int yaw = 0;
+    for (auto& mc: multi_config->motors)
+    {
+        center += mc.position;
+        torque += math::cross(THRUST_VECTOR, mc.position);
+        yaw += mc.clockwise ? 1 : -1;
+    }
+    if (!math::is_zero(center, 0.05f))
+    {
+        QLOGE("Motors are not a symmetrical");
+        return false;
+    }
+    if (!math::is_zero(torque, 0.05f))
+    {
+        QLOGE("Motors don't produce symmetrical thrust");
+        return false;
+    }
+    if (yaw != 0)
+    {
+        QLOGE("Motors spin direction has to alternate and ammount to zero");
         return false;
     }
 
@@ -63,13 +98,11 @@ auto Motor_Mixer::init() -> bool
 
 auto Motor_Mixer::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = stream::ITorque::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Torque";
-    inputs[1].type = stream::IForce::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Collective Force";
+    std::vector<Input> inputs =
+    {{
+        { stream::ITorque::TYPE, m_init_params->rate, "Torque" },
+        { stream::IForce::TYPE, m_init_params->rate, "Collective Force" }
+    }};
     return inputs;
 }
 auto Motor_Mixer::get_outputs() const -> std::vector<Output>
@@ -138,15 +171,20 @@ void Motor_Mixer::process()
 
     for (size_t i = 0; i < count; i++)
     {
-//        auto& sample = m_output_stream->last_sample;
-//        sample.dt = m_torque_samples[i].dt;
-//        sample.tp = m_torque_samples[i].tp;
-//        sample.sample_idx++;
+        compute_throttles(*multi_config, m_force_samples[i].value, m_torque_samples[i].value);
 
-////        sample.value = m_pid.process(m_input_samples[i].value, m_target_samples[i].value);
-//        compute_throttles(*multi_config, m_force_samples[i].value, m_torque_samples[i].value);
+        auto dt = m_torque_samples[i].dt;
+        auto tp = m_torque_samples[i].tp;
 
-//        m_output_stream->samples[i] = sample;
+        for (size_t mi = 0; mi < m_output_streams.size(); mi++)
+        {
+            auto& sample = m_output_streams[mi]->last_sample;
+            sample.dt = dt;
+            sample.tp = tp;
+            sample.value = m_throttles[mi];
+            sample.sample_idx++;
+            m_output_streams[mi]->samples[i] = sample;
+        }
     }
 
     //consume processed samples
@@ -154,17 +192,22 @@ void Motor_Mixer::process()
     m_torque_samples.erase(m_torque_samples.begin(), m_torque_samples.begin() + count);
 }
 
-static float compute_throttle_from_force(float max_force, float force)
+static float compute_throttle_from_thrust(float max_thrust, float thrust)
 {
-    if (math::is_zero(max_force, math::epsilon<float>()))
+    if (math::is_zero(max_thrust, math::epsilon<float>()))
     {
         return 0;
     }
-    auto ratio = force / max_force;
+    auto ratio = thrust / max_thrust;
 
     //thrust increases approximately with throttle^2
     auto throttle = math::sqrt<float, math::safe>(ratio);
     return throttle;
+}
+static float compute_thrust_from_throttle(float max_thrust, float throttle)
+{
+    auto thrust = math::square(throttle * max_thrust);
+    return thrust;
 }
 
 static float compute_moment_of_inertia(float mass, float radius, float height)
@@ -173,93 +216,118 @@ static float compute_moment_of_inertia(float mass, float radius, float height)
     return (1.f / 12.f) * mass * (3.f * math::square(radius) + math::square(height));
 }
 
-/*void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& torque)
+void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& target)
 {
-    math::vec3f speeds2d(-m_roll, m_pitch, 0.f);
+//    auto max_throttle = m_config->max_throttle;
+//    auto min_throttle = m_config->min_throttle;
 
-    auto max_throttle = m_config->max_throttle;
-    auto min_throttle = m_config->min_throttle;
+    m_thrusts.resize(m_output_streams.size());
+    m_torques.resize(m_output_streams.size());
+    QASSERT(multi_config.motors.size() == m_thrusts.size());
 
-    for (size_t i = 0; i < multi_config.motors.size(); i++)
+    //reset thrusts to mid range
+    for (size_t i = 0; i < m_thrusts.size(); i++)
     {
-        auto const& config = multi_config.motors[i];
+        auto const& mc = multi_config.motors[i];
+        m_thrusts[i] = mc.max_thrust * 0.5f;
+    }
 
-        //the dinamic range is limited by the distance from 0 to the collective thrust,
-        //  or the half of the max thrust - which ever is smaller
-        float half_thrust = config.max_thrust * 0.5f;
-        float dynamic_range = math::min(collective_thrust, half_thrust);
-
-        float max = -999.f;
-        float output = math::dot(math::vec3f(config.position, 0.f), speeds2d);
-        if (motor.info.clockwise)
+    constexpr float STEP = 0.4f;
+    size_t iteration = 0;
+    while (true)
+    {
+        //calculate motor torques
+        for (size_t i = 0; i < multi_config.motors.size(); i++)
         {
-            output += m_yaw;
-        }
-        else
-        {
-            output -= m_yaw;
-        }
-        output = math::clamp(output, -dynamic_range, dynamic_range) + math::max(m_throttle, min_throttle);
-        max = math::max(max, output);
-        motor.output = output;
-        QASSERT(output + std::numeric_limits<float>::epsilon() >= min_throttle);
-
-        //if over the max, reduce throttle
-        //This should never bring any motor under min because of how we calculated the dynamic range
-        if (max > max_throttle)
-        {
-            float diff = max - max_throttle;
-            for (auto& motor: m_output_streams)
-            {
-                motor.output -= diff;
-                QASSERT(motor.output + std::numeric_limits<float>::epsilon() >= min_throttle);
-                QASSERT(motor.output - std::numeric_limits<float>::epsilon() <= max_throttle);
-            }
+            auto const& mc = multi_config.motors[i];
+            m_torques[i] = math::cross(THRUST_VECTOR * m_thrusts[i], mc.position);
         }
 
-
-
-        auto base_throttle = compute_throttle_from_force(config.max_thrust, force);
-
-        //the dinamic range is limited by the distance from min to throttle,
-        //  or the half total throttle range - which ever is smaller
-        float min_v = math::max(base_throttle - min_throttle, 0.f);
-        float half_range = (max_throttle - min_throttle) * 0.5f;
-        float dynamic_range = math::min(min_v, half_range);
-
-        float max = -999.f;
-        for (auto& motor: m_motors)
+        //calculate the crt torque
+        math::vec3f crt;
+        for (size_t i = 0; i < m_torques.size(); i++)
         {
-            float output = math::dot(math::vec3f(motor.info.position, 0.f), speeds2d);
-            if (motor.info.clockwise)
-            {
-                output += m_yaw;
-            }
-            else
-            {
-                output -= m_yaw;
-            }
-            output = math::clamp(output, -dynamic_range, dynamic_range) + math::max(m_throttle, min_throttle);
-            max = math::max(max, output);
-            motor.output = output;
-            QASSERT(output + std::numeric_limits<float>::epsilon() >= min_throttle);
+            crt += m_torques[i];
         }
 
-        //if over the max, reduce throttle
-        //This should never bring any motor under min because of how we calculated the dynamic range
-        if (max > max_throttle)
+        //check if we're done
+        if (math::equals(crt, target, 0.0001f))
         {
-            float diff = max - max_throttle;
-            for (auto& motor: m_output_streams)
-            {
-                motor.output -= diff;
-                QASSERT(motor.output + std::numeric_limits<float>::epsilon() >= min_throttle);
-                QASSERT(motor.output - std::numeric_limits<float>::epsilon() <= max_throttle);
-            }
+            QLOGI("{}: Done in {} iterations", STEP, iteration);
+            break;
+        }
+
+        //how far are we for the target?
+        //divide by motor count because I want to distribute the difference to all motors
+        auto diff = (target - crt) / float(m_output_streams.size());
+
+        //distribute the diff to all motors
+        for (size_t i = 0; i < multi_config.motors.size(); i++)
+        {
+            auto const& mc = multi_config.motors[i];
+            //figure out how much each motor can influence the target torque
+            //  by doing a dot product with the normalized torque vector
+            auto tq = math::normalized<float, math::safe>(m_torques[i]);
+            auto f = math::dot(tq, diff) * STEP; //go toqards the difference in small steps so we can converge
+            m_thrusts[i] = math::clamp(m_thrusts[i] + f, 0.f, mc.max_thrust);
+        }
+
+        iteration++;
+        if (iteration > 5000)
+        {
+            QLOGE("Too many iterations!!! {}", iteration);
+            break;
         }
     }
+
+    float target_thrust = math::dot(THRUST_VECTOR, collective_thrust);
+
+    //calculate total thrust
+    float total_thrust = 0;
+    float max_inc = std::numeric_limits<float>::max(); //how much can we increase throttle before clipping
+    float max_dec = std::numeric_limits<float>::max(); //max decrease before clipping
+    for (size_t i = 0; i < m_thrusts.size(); i++)
+    {
+        auto const& mc = multi_config.motors[i];
+        auto const& t = m_thrusts[i];
+        total_thrust += t; //take into account only motors that produce useful thrust
+        max_dec = math::min(max_dec, t);
+        max_inc = math::min(max_inc, mc.max_thrust - t);
+    }
+
+    //either increase or decrease if needed
+    float diff = (target_thrust - total_thrust) / float(m_thrusts.size());
+    if (diff > 0)
+    {
+        diff = math::min(diff, max_inc);
+        for (size_t i = 0; i < m_thrusts.size(); i++)
+        {
+            auto const& mc = multi_config.motors[i];
+            m_thrusts[i] += diff;
+            QASSERT(m_thrusts[i] >= 0 && m_thrusts[i] <= mc.max_thrust);
+        }
+    }
+    else if (diff < 0)
+    {
+        diff = math::min(-diff, max_dec);
+        for (size_t i = 0; i < m_thrusts.size(); i++)
+        {
+            auto const& mc = multi_config.motors[i];
+            m_thrusts[i] -= diff;
+            QASSERT(m_thrusts[i] >= 0 && m_thrusts[i] <= mc.max_thrust);
+        }
+    }
+
+    //convert thrust to throttle and clip
+    m_throttles.resize(m_thrusts.size());
+    for (size_t i = 0; i < m_thrusts.size(); i++)
+    {
+        auto const& mc = multi_config.motors[i];
+        m_throttles[i] = compute_throttle_from_thrust(mc.max_thrust, m_thrusts[i]);
+    }
+
 }
-*/
+
 auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");

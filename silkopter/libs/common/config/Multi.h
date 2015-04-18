@@ -10,7 +10,8 @@ class Multi
 public:
     struct Motor
     {
-        math::vec2f position;
+        math::vec3f position;
+        math::vec3f thrust_vector;
         bool clockwise = true;
         float max_thrust = 0; //N
         float max_rpm = 0;

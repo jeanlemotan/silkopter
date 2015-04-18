@@ -5,7 +5,7 @@
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "pwm_rate", {"required": true, "json_key" : "PWM Rate (Hz)", "default" : 100}],
+        ["uint32_t", "throttle_rate", {"required": true, "json_key" : "Throttle Rate (Hz)", "default" : 100}],
         ["uint32_t", "acceleration_rate", {"required": true, "json_key" : "Acceleration Rate (Hz)", "default" : 1000}],
         ["uint32_t", "angular_velocity_rate", {"required": true, "json_key" : "Angular Velocity Rate (Hz)", "default" : 1000}],
         ["uint32_t", "magnetic_field_rate", {"required": true, "json_key" : "Magnetic Field Rate (Hz)", "default" : 100}],
@@ -21,7 +21,7 @@
     "name": "Inputs",
     "members":
     [
-        ["std::vector<std::string>", "pwm", {"required": true, "json_key" : "PWM"}]
+        ["std::vector<std::string>", "throttle", {"required": true, "json_key" : "Throttle"}]
     ]
 },
 {

@@ -108,7 +108,6 @@ SOURCES += \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/processor/Comp_ECEF_Location.cpp \
-    ../../src/processor/Motor_Mixer.cpp \
     ../../src/generator/Factor_Generator.cpp \
     ../../src/source/EHealth.cpp \
     ../../src/controller/Rate_Controller.cpp \
@@ -117,7 +116,8 @@ SOURCES += \
     ../../src/pilot/Multi_Pilot.cpp \
     ../../src/simulator/Multi_Simulation.cpp \
     ../../src/simulator/Multi_Simulator.cpp \
-    ../../src/processor/Servo_Gimbal.cpp
+    ../../src/processor/Servo_Gimbal.cpp \
+    ../../src/processor/Motor_Mixer.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -163,7 +163,6 @@ HEADERS += \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
     ../../src/Ctor_Helper.h \
-    ../../src/processor/Motor_Mixer.h \
     ../../src/processor/Throttle_PWM.h \
     ../../src/processor/Comp_ECEF_Location.h \
     ../../../libs/common/node/data/IData.h \
@@ -212,5 +211,6 @@ HEADERS += \
     ../../../libs/common/node/IConfig.h \
     ../../../libs/common/node/IMulti_Simulator.h \
     ../../../libs/common/config/Multi.h \
-    ../../src/processor/Servo_Gimbal.h
+    ../../src/processor/Servo_Gimbal.h \
+    ../../src/processor/Motor_Mixer.h
 

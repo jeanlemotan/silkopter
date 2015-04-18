@@ -31,6 +31,58 @@ void signal_handler(int signum)
     QLOGI("Exitting due to signal {}", signum);
 }
 
+void test_mm(math::vec3f const& target, float step)
+{
+    struct Motor
+    {
+        math::vec3f torque; //precomputed maximum torque
+        float factor;
+    };
+
+    //some test configuration with random data
+    std::vector<Motor> motors = {{
+                                     {{2, 3, 0.1}, 0},
+                                     {{5, -1, -0.1}, 0},
+                                     {{-1, -7, 0.1}, 0},
+                                     {{-4, 2, -0.1}, 0},
+                                     {{-0.1, .2, -1}, 0},
+                                }};
+
+    size_t iteration = 0;
+    while (true)
+    {
+        //first calculate the crt torque
+        math::vec3f crt;
+        for (auto& m: motors)
+        {
+            crt += m.torque * m.factor;
+        }
+
+        //check if we're done
+        if (math::equals(crt, target, 0.0001f))
+        {
+            QLOGI("{}: Done in {} iterations", step, iteration);
+            break;
+        }
+
+        //how far are we for the target?
+        //divide by motor count because I want to distribute the difference to all motors
+        auto diff = (target - crt) / float(motors.size());
+
+        //distribute the diff to all motors
+        for (auto& m: motors)
+        {
+            //figure out how much each motor can influence the target torque
+            //  by doing a dot product with the normalized torque vector
+            auto t = math::normalized(m.torque);
+            auto f = math::dot(t, diff) * step; //go toqards the difference in small steps so we can converge
+            m.factor += f;
+        }
+
+        iteration++;
+    }
+}
+
 int main(int argc, char const* argv[])
 {
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
@@ -41,6 +93,15 @@ int main(int argc, char const* argv[])
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIME, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
     QLOG_TOPIC("silk");
+
+//    q::util::Rand rnd;
+//    while (true)
+//    {
+//        math::vec3f target(rnd.get_float() * 40.f, rnd.get_float() * 40.f, rnd.get_float() * 10.f);
+//        test_mm(target, 0.01);
+//        test_mm(target, 0.1);
+//        test_mm(target, 0.5);
+//    }
 
     namespace po = boost::program_options;
 
@@ -128,18 +189,6 @@ int main(int argc, char const* argv[])
             abort();
         }
 
-//        if (hal.camera)
-//        {
-//            hal.camera->set_data_callback([&](uint8_t const* data, size_t size)
-//            {
-//                comms.send_video_frame(silk::Comms::Video_Flags(), data, size);
-//            });
-//            hal.camera->set_stream_quality(silk::comms::Camera_Params::Stream_Quality::MEDIUM);
-//        }
-
-//        camera.set_stream_quality(silk::camera_input::Stream_Quality::LOW);
-
-
         while (!s_exit)
         {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -182,11 +231,6 @@ int main(int argc, char const* argv[])
             boost::this_thread::yield();
             async_thread.join();
         }
-
-//        if (hal.camera)
-//        {
-//            hal.camera->set_data_callback(nullptr);
-//        }
         hal.shutdown();
     }
     catch (std::exception const& e)

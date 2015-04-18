@@ -179,16 +179,12 @@ auto Vec3_Generator<Stream_t>::get_config() const -> rapidjson::Document
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(3);
-    inputs[0].type = stream::IFactor::TYPE;
-    inputs[0].rate = m_init_params.rate;
-    inputs[0].name = "X Factor";
-    inputs[1].type = stream::IFactor::TYPE;
-    inputs[1].rate = m_init_params.rate;
-    inputs[1].name = "Y Factor";
-    inputs[2].type = stream::IFactor::TYPE;
-    inputs[2].rate = m_init_params.rate;
-    inputs[2].name = "Z Factor";
+    std::vector<Input> inputs =
+    {{
+        { stream::IFactor::TYPE, m_init_params.rate, "X Factor" },
+        { stream::IFactor::TYPE, m_init_params.rate, "Y Factor" },
+        { stream::IFactor::TYPE, m_init_params.rate, "Z Factor" }
+    }};
     return inputs;
 }
 template<class Stream_t>

@@ -45,7 +45,7 @@ public:
 private:
     auto init() -> bool;
 
-    void compute_throttles(config::Multi const& config);
+    void compute_throttles(config::Multi const& config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
     HAL& m_hal;
@@ -69,6 +69,10 @@ private:
         Sample last_sample;
         std::vector<Sample> samples;
     };
+    std::vector<math::vec3f> m_torques;
+    std::vector<float> m_thrusts;
+    std::vector<float> m_throttles;
+
     mutable std::vector<std::shared_ptr<Stream>> m_output_streams;
     mutable std::vector<float> m_outputs;
 };

@@ -1,7 +1,7 @@
 {
     "hal": {
         "multi_config": {
-            "Name": "",
+            "Name": "silkopter",
             "Mass (Kg)": 0.699999988079071,
             "Height (m)": 0.20000000298023225,
             "Radius (m)": 0.30000001192092898,
@@ -10,32 +10,50 @@
                     "Clockwise": true,
                     "Position": {
                         "x": 0.0,
-                        "y": 1.0
+                        "y": 1.0,
+                        "z": 0.0
                     },
-                    "Thrust @ 100% (N)": 6.0,
-                    "RPM @ 100%": 6000.0,
-                    "Acceleration (RPM/s)": 20000.0,
-                    "Deceleration (RPM/s)": 20000.0
-                },
-                {
-                    "Clockwise": true,
-                    "Position": {
-                        "x": 1.0,
-                        "y": 0.0
+                    "Thrust Vector": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -1.0
                     },
-                    "Thrust @ 100% (N)": 6.0,
-                    "RPM @ 100%": 6000.0,
+                    "Thrust @ 100% (N)": 5.0,
+                    "RPM @ 100%": 5000.0,
                     "Acceleration (RPM/s)": 20000.0,
                     "Deceleration (RPM/s)": 20000.0
                 },
                 {
                     "Clockwise": false,
                     "Position": {
-                        "x": 0.0,
-                        "y": -1.0
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
                     },
-                    "Thrust @ 100% (N)": 6.0,
-                    "RPM @ 100%": 6000.0,
+                    "Thrust Vector": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -1.0
+                    },
+                    "Thrust @ 100% (N)": 5.0,
+                    "RPM @ 100%": 5000.0,
+                    "Acceleration (RPM/s)": 20000.0,
+                    "Deceleration (RPM/s)": 20000.0
+                },
+                {
+                    "Clockwise": true,
+                    "Position": {
+                        "x": 0.0,
+                        "y": -1.0,
+                        "z": 0.0
+                    },
+                    "Thrust Vector": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -1.0
+                    },
+                    "Thrust @ 100% (N)": 5.0,
+                    "RPM @ 100%": 5000.0,
                     "Acceleration (RPM/s)": 20000.0,
                     "Deceleration (RPM/s)": 20000.0
                 },
@@ -43,10 +61,16 @@
                     "Clockwise": false,
                     "Position": {
                         "x": -1.0,
-                        "y": 0.0
+                        "y": 0.0,
+                        "z": 0.0
                     },
-                    "Thrust @ 100% (N)": 6.0,
-                    "RPM @ 100%": 6000.0,
+                    "Thrust Vector": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -1.0
+                    },
+                    "Thrust @ 100% (N)": 5.0,
+                    "RPM @ 100%": 5000.0,
                     "Acceleration (RPM/s)": 20000.0,
                     "Deceleration (RPM/s)": 20000.0
                 }
@@ -62,10 +86,91 @@
             }
         },
         "nodes": {
+            "Motor Mixer": {
+                "type": "Motor Mixer",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": -103.0,
+                            "y": -160.0
+                        }
+                    }
+                },
+                "config": {
+                    "Armed Throttle": 0.0,
+                    "Inputs": {
+                        "Torque": "Torque Generator/Output",
+                        "Collective Force": "Force Generator/Output"
+                    },
+                    "Outputs": {
+                        "Throttles": [
+                            {},
+                            {},
+                            {},
+                            {}
+                        ]
+                    }
+                }
+            },
+            "Torque Generator": {
+                "type": "Torque Generator",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": -10.0,
+                            "y": -450.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 1.0
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Force Generator": {
+                "type": "Force Generator",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": -42.0,
+                            "y": -281.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -5.0
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
             "Multi Simulator": {
                 "type": "Multi Simulator",
                 "init_params": {
-                    "PWM Rate (Hz)": 100,
+                    "Throttle Rate (Hz)": 50,
                     "Acceleration Rate (Hz)": 1000,
                     "Angular Velocity Rate (Hz)": 1000,
                     "Magnetic Field Rate (Hz)": 100,
@@ -75,21 +180,21 @@
                     "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -150.0,
-                            "y": -307.0
+                            "x": 82.0,
+                            "y": -258.0
                         }
                     }
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Ground Enabled": false,
+                    "Ground Enabled": true,
                     "Gravity Enabled": true,
                     "Inputs": {
-                        "PWM": [
-                            "PWM Generator/Output",
-                            "PWM Generator/Output",
-                            "PWM Generator/Output",
-                            "PWM Generator/Output"
+                        "Throttle": [
+                            "Motor Mixer/Throttle 0",
+                            "Motor Mixer/Throttle 1",
+                            "Motor Mixer/Throttle 2",
+                            "Motor Mixer/Throttle 3"
                         ]
                     },
                     "Outputs": {
@@ -123,65 +228,6 @@
                         "Pressure": {},
                         "Distance": {},
                         "ECEF Location": {}
-                    }
-                }
-            },
-            "PWM Generator": {
-                "type": "PWM Generator",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "__gs": {
-                        "position": {
-                            "x": -254.0,
-                            "y": -451.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": 1.0,
-                    "Inputs": {
-                        "Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Servo Gimbal": {
-                "type": "Servo Gimbal",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -479.0,
-                            "y": -521.0
-                        }
-                    }
-                },
-                "config": {
-                    "Inputs": {
-                        "Frame": "",
-                        "Target": ""
-                    },
-                    "Outputs": {
-                        "X PWM": {
-                            "Min Angle (°)": -179.0,
-                            "Min PWM": 0.0,
-                            "Max Angle (°)": 179.0,
-                            "Max PWM": 1.0
-                        },
-                        "Y PWM": {
-                            "Min Angle (°)": -179.0,
-                            "Min PWM": 0.0,
-                            "Max Angle (°)": 179.0,
-                            "Max PWM": 1.0
-                        },
-                        "Z PWM": {
-                            "Min Angle (°)": -179.0,
-                            "Min PWM": 0.0,
-                            "Max Angle (°)": 179.0,
-                            "Max PWM": 1.0
-                        }
                     }
                 }
             }

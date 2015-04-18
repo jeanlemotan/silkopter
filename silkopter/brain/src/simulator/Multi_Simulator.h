@@ -8,7 +8,7 @@
 #include "common/node/stream/ITemperature.h"
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/ILocation.h"
-#include "common/node/stream/IPWM.h"
+#include "common/node/stream/IThrottle.h"
 #include "common/node/IMulti_Simulator.h"
 
 #include "Multi_Simulation.h"
@@ -129,7 +129,7 @@ private:
     mutable std::shared_ptr<Distance> m_distance_stream;
     mutable std::shared_ptr<ECEF_Location> m_ecef_location_stream;
 
-    std::vector<stream::IPWM_wptr> m_input_pwm_streams;
+    std::vector<stream::IThrottle_wptr> m_input_throttle_streams;
 
     Multi_Simulation m_simulation;
 };

@@ -41,7 +41,7 @@ public:
     struct Input
     {
         stream::Type type;
-        uint32_t rate = 0;
+        uint32_t rate;
         std::string name;
     };
     virtual auto get_inputs() const -> std::vector<Input> = 0;

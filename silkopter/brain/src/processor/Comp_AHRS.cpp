@@ -50,16 +50,12 @@ auto Comp_AHRS::init() -> bool
 
 auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(3);
-    inputs[0].type = stream::IAngular_Velocity::TYPE;
-    inputs[0].rate = m_init_params->rate;
-    inputs[0].name = "Angular Velocity";
-    inputs[1].type = stream::IAcceleration::TYPE;
-    inputs[1].rate = m_init_params->rate;
-    inputs[1].name = "Acceleration";
-    inputs[2].type = stream::IMagnetic_Field::TYPE;
-    inputs[2].rate = m_init_params->rate;
-    inputs[2].name = "Magnetic Field";
+    std::vector<Input> inputs =
+    {{
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity" },
+        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration" },
+        { stream::IMagnetic_Field::TYPE, m_init_params->rate, "Magnetic Field" }
+    }};
     return inputs;
 }
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>

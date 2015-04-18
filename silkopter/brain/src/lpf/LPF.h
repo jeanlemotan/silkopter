@@ -163,10 +163,10 @@ auto LPF<Stream_t>::get_config() const -> rapidjson::Document
 template<class Stream_t>
 auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(1);
-    inputs[0].type = Stream_t::TYPE;
-    inputs[0].rate = m_init_params.rate;
-    inputs[0].name = "Input";
+    std::vector<Input> inputs =
+    {{
+        { Stream_t::TYPE, m_init_params.rate, "Input" }
+    }};
     return inputs;
 }
 template<class Stream_t>

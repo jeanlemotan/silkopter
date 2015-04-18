@@ -28,7 +28,7 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Simulator { struct Init_Params {
- uint32_t pwm_rate;
+ uint32_t throttle_rate;
 uint32_t acceleration_rate;
 uint32_t angular_velocity_rate;
 uint32_t magnetic_field_rate;
@@ -37,7 +37,7 @@ uint32_t temperature_rate;
 uint32_t distance_rate;
 uint32_t location_rate;
 
-explicit Init_Params():pwm_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), location_rate(5) {  }
+explicit Init_Params():throttle_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), location_rate(5) {  }
 
 
  
@@ -61,7 +61,7 @@ SAXEventHandler< uint32_t > handler_3;
 SAXEventHandler< uint32_t > handler_4;
 SAXEventHandler< uint32_t > handler_5;
 SAXEventHandler< uint32_t > handler_6;
-SAXEventHandler< uint32_t > handler_7;bool has_pwm_rate;
+SAXEventHandler< uint32_t > handler_7;bool has_throttle_rate;
 bool has_acceleration_rate;
 bool has_angular_velocity_rate;
 bool has_magnetic_field_rate;
@@ -83,7 +83,7 @@ bool has_location_rate;
     {
         switch (state) {
             case 0:
-    return "pwm_rate";
+    return "throttle_rate";
 case 1:
     return "acceleration_rate";
 case 2:
@@ -124,7 +124,7 @@ case 7:
 
     void reset_flags()
     {
-        has_pwm_rate = false;
+        has_throttle_rate = false;
 has_acceleration_rate = false;
 has_angular_velocity_rate = false;
 has_magnetic_field_rate = false;
@@ -138,7 +138,7 @@ public:
     explicit SAXEventHandler( ::sz::Multi_Simulator::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pwm_rate)
+        , handler_0(&obj->throttle_rate)
 , handler_1(&obj->acceleration_rate)
 , handler_2(&obj->angular_velocity_rate)
 , handler_3(&obj->magnetic_field_rate)
@@ -454,8 +454,8 @@ case 7:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13))
-						 { state=0; has_pwm_rate = true; }
+            else if (utility::string_equal(str, length, "\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
+						 { state=0; has_throttle_rate = true; }
 else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22))
 						 { state=1; has_acceleration_rate = true; }
 else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26))
@@ -656,7 +656,7 @@ case 7:
                 break;
             }
         } else {
-            if (!has_pwm_rate) set_missing_required("pwm_rate");
+            if (!has_throttle_rate) set_missing_required("throttle_rate");
 if (!has_acceleration_rate) set_missing_required("acceleration_rate");
 if (!has_angular_velocity_rate) set_missing_required("angular_velocity_rate");
 if (!has_magnetic_field_rate) set_missing_required("magnetic_field_rate");
@@ -731,7 +731,7 @@ struct Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e009
     {
         w.StartObject();
 
-        w.Key("\x50\x57\x4d\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pwm_rate);
+        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.throttle_rate);
 w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.acceleration_rate);
 w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.angular_velocity_rate);
 w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.magnetic_field_rate);
@@ -775,9 +775,9 @@ w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29"
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Simulator { struct Inputs {
- std::vector<std::string> pwm;
+ std::vector<std::string> throttle;
 
-explicit Inputs():pwm() {  }
+explicit Inputs():throttle() {  }
 
 
  
@@ -794,7 +794,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::vector<std::string> > handler_0;bool has_pwm;
+    SAXEventHandler< std::vector<std::string> > handler_0;bool has_throttle;
 
     bool check_depth(const char* type)
     {
@@ -809,7 +809,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "pwm";
+    return "throttle";
         default:
             break;
         }
@@ -836,14 +836,14 @@ private:
 
     void reset_flags()
     {
-        has_pwm = false;
+        has_throttle = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Multi_Simulator::Inputs * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pwm)
+        , handler_0(&obj->throttle)
     {
         reset_flags();
     }
@@ -984,8 +984,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x57\x4d", 3))
-						 { state=0; has_pwm = true; }
+            else if (utility::string_equal(str, length, "\x54\x68\x72\x6f\x74\x74\x6c\x65", 8))
+						 { state=0; has_throttle = true; }
             else {
                 state = -1;
                 return true;
@@ -1067,7 +1067,7 @@ public:
                 break;
             }
         } else {
-            if (!has_pwm) set_missing_required("pwm");
+            if (!has_throttle) set_missing_required("throttle");
         }
         return the_error.empty();
     }
@@ -1114,7 +1114,7 @@ struct Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca
     {
         w.StartObject();
 
-        w.Key("\x50\x57\x4d", 3, false); Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, std::vector<std::string> >()(w, value.pwm);
+        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65", 8, false); Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, std::vector<std::string> >()(w, value.throttle);
 
         w.EndObject(1);
     }

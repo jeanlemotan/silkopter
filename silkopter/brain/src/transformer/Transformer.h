@@ -172,13 +172,11 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(2);
-    inputs[0].type = In_Stream_t::TYPE;
-    inputs[0].rate = m_init_params.rate;
-    inputs[0].name = "Input";
-    inputs[1].type = Frame_Stream_t::TYPE;
-    inputs[1].rate = m_init_params.rate;
-    inputs[1].name = "Frame";
+    std::vector<Input> inputs =
+    {{
+        { In_Stream_t::TYPE, m_init_params.rate, "Input" },
+        { Frame_Stream_t::TYPE, m_init_params.rate, "Frame" }
+    }};
     return inputs;
 }
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
