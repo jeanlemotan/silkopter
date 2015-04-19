@@ -91,7 +91,7 @@ auto Multi_Simulation::init_uav(config::Multi const& config) -> bool
         q::util::Rand rnd;
         for (auto& m: m_uav.state.motors)
         {
-            m.drag_factor = rnd.get_positive_float() * 0.2f + 0.1f;
+            m.drag_factor = rnd.get_positive_float() * 0.01f + 0.01f;
         }
     }
 
@@ -187,10 +187,24 @@ void Multi_Simulation::process(q::Clock::duration dt, std::function<void(Multi_S
     m_physics_duration += dt;
     //m_duration_to_simulate = math::min(m_duration_to_simulate, q::Clock::duration(std::chrono::milliseconds(100)));
 
-    //float dts = q::Seconds(dt).count();
+    float dts = q::Seconds(m_dt).count();
     while (m_physics_duration >= m_dt)
     {
-        process_world(m_dt);
+        //limit angular velocity
+        if (m_uav.body)
+        {
+            auto vel = bt_to_vec3f(m_uav.body->getAngularVelocity());
+            vel = math::clamp(vel, math::vec3f(-10.f), math::vec3f(10.f));// + math::vec3f(0.001f, 0.f, 0.f);
+            m_uav.body->setAngularVelocity(vec3f_to_bt(vel));
+        }
+
+        if (m_is_simulation_enabled)
+        {
+            m_world->stepSimulation(dts, 1, dts * 0.5f);
+        }
+
+        process_uav(m_dt);
+
         if (callback)
         {
             callback(*this, m_dt);
@@ -231,141 +245,16 @@ void Multi_Simulation::set_simulation_enabled(bool yes)
 {
     m_is_simulation_enabled = yes;
 }
-
-//void World::process_sensors()
-//{
-//    if (m_state != State::RUNNING)
-//    {
-//        return;
-//    }
-
-//    q::util::Rand rand;
-
-//    auto now = m_physics_timestamp;
-//    Sensors sensors;
-
-//    auto dt = now - m_last_accelerometer_time_point;
-//    if (dt >= m_config.accelerometer.sample_period)
-//    {
-//        m_last_accelerometer_time_point = now;
-
-//        auto acceleration = m_uav.get_acceleration();
-
-//        auto noise = math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * m_config.accelerometer.noise;
-//        auto acc = acceleration + noise;
-
-//        m_accelerometer_sample.dt = dt;
-//        m_accelerometer_sample.sample_idx++;
-//        m_accelerometer_sample.value = acc;
-//        m_accelerometer_sample.value += m_config.accelerometer.bias;
-//        m_accelerometer_sample.value *= m_config.accelerometer.scale;
-//        sensors.set(Sensor::ACCELEROMETER);
-//    }
-//    dt = now - m_last_gyroscope_time_point;
-//    if (dt >= m_config.gyroscope.sample_period)
-//    {
-//        m_last_gyroscope_time_point = now;
-
-//        auto noise = math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * math::radians(m_config.gyroscope.noise_degrees);
-//        m_gyroscope_sample.value = m_uav.get_angular_velocity() + noise;
-//        m_gyroscope_sample.value += math::radians(m_config.gyroscope.bias_degrees);
-//        m_gyroscope_sample.dt = dt;
-//        m_gyroscope_sample.sample_idx++;
-
-//        sensors.set(Sensor::GYROSCOPE);
-//    }
-//    dt = now - m_last_compass_time_point;
-//    if (dt >= m_config.compass.sample_period)
-//    {
-//        m_last_compass_time_point = now;
-
-//        auto direction = math::transform(m_uav.m_world_to_local_mat, math::vec3f(-1000, 0, 0));
-//        direction += math::vec3f(rand.get_float(), rand.get_float(), rand.get_float()) * m_config.compass.noise;
-//        direction += m_config.compass.bias;
-
-//        m_compass_sample.value = direction;
-//        m_compass_sample.dt = dt;
-//        m_compass_sample.sample_idx++;
-//        sensors.set(Sensor::COMPASS);
-//    }
-
-
-//    if (sensors.any())
-//    {
-//        m_channel.begin_pack();
-//        m_channel.pack_param(sensors);
-
-//        if (sensors.test(Sensor::ACCELEROMETER))
-//        {
-//            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_accelerometer_sample.dt).count()));
-//            m_channel.pack_param(m_accelerometer_sample.value);
-//        }
-//        if (sensors.test(Sensor::GYROSCOPE))
-//        {
-//            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_gyroscope_sample.dt).count()));
-//            m_channel.pack_param(m_gyroscope_sample.value);
-//        }
-//        if (sensors.test(Sensor::COMPASS))
-//        {
-//            m_channel.pack_param(static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(m_compass_sample.dt).count()));
-//            m_channel.pack_param(m_compass_sample.value);
-//        }
-//        if (sensors.test(Sensor::BAROMETER))
-//        {
-//            QASSERT(0);
-////            m_channel.pack_param(m_barometer_data.pressure);
-//        }
-//        if (sensors.test(Sensor::THERMOMETER))
-//        {
-//            QASSERT(0);
-////            m_channel.pack_param(m_thermometer_data.temperature);
-//        }
-//        if (sensors.test(Sensor::SONAR))
-//        {
-//            QASSERT(0);
-////            m_channel.pack_param(m_sonar_data.distance);
-//        }
-//        if (sensors.test(Sensor::VOLTAGE))
-//        {
-//            QASSERT(0);
-////            uint16_t d = m_sonar_data.distance * 1000.f;
-////            m_channel.pack_param(d);
-//        }
-//        if (sensors.test(Sensor::CURRENT))
-//        {
-//            QASSERT(0);
-////            uint16_t d = m_sonar_data.distance * 1000.f;
-////            m_channel.pack_param(d);
-//        }
-
-//        m_channel.end_pack(Message::SENSOR_DATA);
-//    }
-
-//}
+void Multi_Simulation::set_drag_enabled(bool yes)
+{
+    m_is_drag_enabled = yes;
+}
 
 void Multi_Simulation::set_motor_throttle(size_t motor, float throttle)
 {
     m_uav.state.motors[motor].throttle = throttle;
 }
 
-
-void Multi_Simulation::process_world(q::Clock::duration dt)
-{
-    //limit angular velocity
-    if (m_uav.body)
-    {
-        auto vel = bt_to_vec3f(m_uav.body->getAngularVelocity());
-        vel = math::clamp(vel, math::vec3f(-10.f), math::vec3f(10.f));// + math::vec3f(0.001f, 0.f, 0.f);
-        m_uav.body->setAngularVelocity(vec3f_to_bt(vel));
-    }
-
-    if (m_is_simulation_enabled)
-    {
-        m_world->stepSimulation(q::Seconds(dt).count(), 100, q::Seconds(m_dt).count());
-    }
-
-    process_uav(dt);
-}
 
 void Multi_Simulation::process_uav(q::Clock::duration dt)
 {
@@ -414,7 +303,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
 
     //motors
-//    float total_rpm = 0.f;
+    math::vec3f z_torque;
     float total_force = 0.f;
     {
         const auto dir = local_to_enu_mat.get_axis_z();
@@ -434,10 +323,12 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
                     m.thrust = math::clamp(m.thrust, 0.f, mc.max_thrust);
                 }
             }
+            z_torque.z += mc.max_z_torque * (m.thrust / mc.max_thrust);
+
 //            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 
             total_force += m.thrust;
-            math::vec3f local_pos(mc.position * m_uav.config.radius);
+            math::vec3f local_pos = mc.position;
             auto pos = math::transform(local_to_enu_mat, local_pos);
             m_uav.body->applyForce(vec3f_to_bt(dir * m.thrust), vec3f_to_bt(pos));
         }
@@ -447,21 +338,24 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     //yaw
     {
-//        auto torque = math::transform(local_to_enu_mat, math::vec3f(0, 0, total_rpm * 0.0001f));
-//        m_uav.body->applyTorque(vec3f_to_bt(torque));
+        auto torque = math::transform(local_to_enu_mat, z_torque);
+        m_uav.body->applyTorque(vec3f_to_bt(torque));
     }
 
     //air drag
-    if (math::length_sq(velocity) != 0)
+    if (m_is_drag_enabled && math::length_sq(velocity) != 0)
     {
+        auto velocity_normalized = math::normalized(velocity);
+        auto speed2 = math::length_sq(velocity);
+
         //body
         {
-            float drag_factor = 0.3f;
+            float drag_factor = 0.05f;
 
-            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), math::normalized(velocity)));
+            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), velocity_normalized));
             float drag = intensity * drag_factor;
-            auto force = (-velocity) * drag;
-            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(m_uav.state.enu_position));
+            auto force = -velocity_normalized * drag * speed2;
+            m_uav.body->applyForce(vec3f_to_bt(force), btVector3(0, 0, 0));
         }
 
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
@@ -469,11 +363,11 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
             auto& m = m_uav.state.motors[i];
             auto& mc = m_uav.config.motors[i];
 
-            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), math::normalized(velocity)));
+            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), velocity_normalized));
             float drag = intensity * m.drag_factor;
-            auto force = (-velocity) * drag;
+            auto force = -velocity_normalized * drag * speed2;
 
-            math::vec3f local_pos(mc.position * m_uav.config.radius);
+            math::vec3f local_pos(mc.position);
             auto pos = math::transform(local_to_enu_mat, local_pos);
             m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
         }

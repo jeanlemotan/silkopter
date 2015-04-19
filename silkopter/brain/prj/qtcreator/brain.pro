@@ -212,5 +212,19 @@ HEADERS += \
     ../../../libs/common/node/IMulti_Simulator.h \
     ../../../libs/common/config/Multi.h \
     ../../src/processor/Servo_Gimbal.h \
-    ../../src/processor/Motor_Mixer.h
+    ../../src/processor/Motor_Mixer.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/allocators.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/document.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodedstream.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodings.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/filereadstream.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/filestream.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/filewritestream.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorybuffer.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorystream.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/prettywriter.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/rapidjson.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/reader.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h
 

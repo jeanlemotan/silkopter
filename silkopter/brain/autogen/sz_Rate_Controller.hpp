@@ -1571,7 +1571,7 @@ namespace sz { namespace Rate_Controller { struct PID {
  double kp;
 double ki;
 double kd;
-math::vec3f max_i;
+double max_i;
 uint32_t filter_poles;
 double filter_cutoff_frequency;
 
@@ -1595,7 +1595,7 @@ private:
     SAXEventHandler< double > handler_0;
 SAXEventHandler< double > handler_1;
 SAXEventHandler< double > handler_2;
-SAXEventHandler< math::vec3f > handler_3;
+SAXEventHandler< double > handler_3;
 SAXEventHandler< uint32_t > handler_4;
 SAXEventHandler< double > handler_5;bool has_kp;
 bool has_ki;
@@ -2170,7 +2170,7 @@ struct Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270f
         w.Key("\x6b\x50", 2, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.kp);
 w.Key("\x6b\x49", 2, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.ki);
 w.Key("\x6b\x44", 2, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.kd);
-w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, math::vec3f >()(w, value.max_i);
+w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.max_i);
 w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x50\x6f\x6c\x65\x73", 14, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, uint32_t >()(w, value.filter_poles);
 w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 30, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.filter_cutoff_frequency);
 
@@ -2209,11 +2209,15 @@ w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Config {
- sz::Rate_Controller::PID pid;
+ bool combined_xy_pid;
+sz::Rate_Controller::PID xy_pid;
+sz::Rate_Controller::PID x_pid;
+sz::Rate_Controller::PID y_pid;
+sz::Rate_Controller::PID z_pid;
 sz::Rate_Controller::Inputs inputs;
 sz::Rate_Controller::Outputs outputs;
 
-explicit Config():pid(), inputs(), outputs() {  }
+explicit Config():combined_xy_pid(true), xy_pid(), x_pid(), y_pid(), z_pid(), inputs(), outputs() {  }
 
 
  
@@ -2230,9 +2234,14 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Rate_Controller::PID > handler_0;
-SAXEventHandler< sz::Rate_Controller::Inputs > handler_1;
-SAXEventHandler< sz::Rate_Controller::Outputs > handler_2;bool has_pid;
+    SAXEventHandler< bool > handler_0;
+SAXEventHandler< sz::Rate_Controller::PID > handler_1;
+SAXEventHandler< sz::Rate_Controller::PID > handler_2;
+SAXEventHandler< sz::Rate_Controller::PID > handler_3;
+SAXEventHandler< sz::Rate_Controller::PID > handler_4;
+SAXEventHandler< sz::Rate_Controller::Inputs > handler_5;
+SAXEventHandler< sz::Rate_Controller::Outputs > handler_6;bool has_combined_xy_pid;
+bool has_z_pid;
 bool has_inputs;
 bool has_outputs;
 
@@ -2249,10 +2258,18 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "pid";
+    return "combined_xy_pid";
 case 1:
-    return "inputs";
+    return "xy_pid";
 case 2:
+    return "x_pid";
+case 3:
+    return "y_pid";
+case 4:
+    return "z_pid";
+case 5:
+    return "inputs";
+case 6:
     return "outputs";
         default:
             break;
@@ -2280,7 +2297,11 @@ case 2:
 
     void reset_flags()
     {
-        has_pid = false;
+        has_combined_xy_pid = false;
+
+
+
+has_z_pid = false;
 has_inputs = false;
 has_outputs = false;
     }
@@ -2289,9 +2310,13 @@ public:
     explicit SAXEventHandler( ::sz::Rate_Controller::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->pid)
-, handler_1(&obj->inputs)
-, handler_2(&obj->outputs)
+        , handler_0(&obj->combined_xy_pid)
+, handler_1(&obj->xy_pid)
+, handler_2(&obj->x_pid)
+, handler_3(&obj->y_pid)
+, handler_4(&obj->z_pid)
+, handler_5(&obj->inputs)
+, handler_6(&obj->outputs)
     {
         reset_flags();
     }
@@ -2311,6 +2336,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
+
+case 6:
+    return checked_event_forwarding(handler_6.Null());
 
         default:
             break;
@@ -2334,6 +2371,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
+case 6:
+    return checked_event_forwarding(handler_6.Bool(b));
+
         default:
             break;
         }
@@ -2355,6 +2404,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int(i));
 
         default:
             break;
@@ -2378,6 +2439,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint(i));
+
         default:
             break;
         }
@@ -2399,6 +2472,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int64(i));
 
         default:
             break;
@@ -2422,6 +2507,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint64(i));
+
         default:
             break;
         }
@@ -2443,6 +2540,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
+
+case 6:
+    return checked_event_forwarding(handler_6.Double(d));
 
         default:
             break;
@@ -2466,6 +2575,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.String(str, length, copy));
+
         default:
             break;
         }
@@ -2480,12 +2601,20 @@ case 2:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x49\x44", 3))
-						 { state=0; has_pid = true; }
+            else if (utility::string_equal(str, length, "\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15))
+						 { state=0; has_combined_xy_pid = true; }
+else if (utility::string_equal(str, length, "\x58\x59\x20\x50\x49\x44", 6))
+						 { state=1;  }
+else if (utility::string_equal(str, length, "\x58\x20\x50\x49\x44", 5))
+						 { state=2;  }
+else if (utility::string_equal(str, length, "\x59\x20\x50\x49\x44", 5))
+						 { state=3;  }
+else if (utility::string_equal(str, length, "\x5a\x20\x50\x49\x44", 5))
+						 { state=4; has_z_pid = true; }
 else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=1; has_inputs = true; }
+						 { state=5; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=2; has_outputs = true; }
+						 { state=6; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -2502,6 +2631,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.Key(str, length, copy));
 
             default:
                 break;
@@ -2526,6 +2667,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartArray());
+
         default:
             break;
         }
@@ -2548,6 +2701,18 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndArray(length));
+
         default:
             break;
         }
@@ -2569,6 +2734,18 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartObject());
 
             default:
                 break;
@@ -2593,11 +2770,24 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_pid) set_missing_required("pid");
+            if (!has_combined_xy_pid) set_missing_required("combined_xy_pid");
+if (!has_z_pid) set_missing_required("z_pid");
 if (!has_inputs) set_missing_required("inputs");
 if (!has_outputs) set_missing_required("outputs");
         }
@@ -2624,6 +2814,14 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
+case 6:
+     handler_6.ReapError(errs); break;
 
         default:
             break;
@@ -2641,6 +2839,10 @@ case 2:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
 
     }
 };
@@ -2652,11 +2854,15 @@ struct Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310
     {
         w.StartObject();
 
-        w.Key("\x50\x49\x44", 3, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::PID >()(w, value.pid);
+        w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, bool >()(w, value.combined_xy_pid);
+w.Key("\x58\x59\x20\x50\x49\x44", 6, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::PID >()(w, value.xy_pid);
+w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::PID >()(w, value.x_pid);
+w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::PID >()(w, value.y_pid);
+w.Key("\x5a\x20\x50\x49\x44", 5, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::PID >()(w, value.z_pid);
 w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Inputs >()(w, value.inputs);
 w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Outputs >()(w, value.outputs);
 
-        w.EndObject(3);
+        w.EndObject(7);
     }
 
 };

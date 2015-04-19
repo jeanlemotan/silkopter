@@ -30,6 +30,15 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
             m_hal.set_node_config(m_sim_node, m_sim_node->config);
         }
     });
+    QObject::connect(m_ui.action_drag, &QAction::toggled, [this](bool v)
+    {
+        auto* vj = jsonutil::find_value(m_sim_node->config, std::string("Drag Enabled"));
+        if (vj)
+        {
+            vj->SetBool(v);
+            m_hal.set_node_config(m_sim_node, m_sim_node->config);
+        }
+    });
     QObject::connect(m_ui.action_stop_motion, &QAction::triggered, [this](bool)
     {
         rapidjson::Document message;
@@ -109,19 +118,11 @@ void Sim_Window::read_config()
     {
         m_ui.action_ground->setChecked(vj->GetBool());
     }
-
-//    vj = jsonutil::find_value(m_sim_node->config, std::string("UAV Config"));
-//    if (vj)
-//    {
-//        autojsoncxx::error::ErrorStack result;
-//        m_uav.config = silk::node::ISimulator::UAV_Config();
-//        if (!autojsoncxx::from_value(m_uav.config, *vj, result))
-//        {
-//            std::ostringstream ss;
-//            ss << result;
-//            QLOGE("Cannot deserialize position data: {}", ss.str());
-//        }
-//    }
+    vj = jsonutil::find_value(m_sim_node->config, std::string("Drag Enabled"));
+    if (vj)
+    {
+        m_ui.action_drag->setChecked(vj->GetBool());
+    }
 }
 
 

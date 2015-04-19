@@ -50,21 +50,11 @@ template<> inline bool equals(silk::node::stream::IFrame_Base::Value const& a, s
 {
     return math::equals(a.rotation, b.rotation);
 }
-template<> inline silk::node::stream::IFrame_Base::Value add(silk::node::stream::IFrame_Base::Value const& a, silk::node::stream::IFrame_Base::Value const& b)
+template<> inline void apply_coefficients(silk::node::stream::IFrame_Base::Value& x,
+                                   silk::node::stream::IFrame_Base::Value& w0,
+                                   silk::node::stream::IFrame_Base::Value& w1,
+                                   silk::node::stream::IFrame_Base::Value& w2, float d1, float d2, float A)
 {
-    silk::node::stream::IFrame_Base::Value r;
-    r.rotation = a.rotation * b.rotation;
-    return r;
-}
-template<> inline silk::node::stream::IFrame_Base::Value scale(silk::node::stream::IFrame_Base::Value const& a, double scale)
-{
-    silk::node::stream::IFrame_Base::Value r;
-    r.rotation = math::slerp(math::quatf(), a.rotation, scale);
-    return r;
-}
-template<> inline void fix(silk::node::stream::IFrame_Base::Value& a)
-{
-    a.rotation.normalize<math::safe>();
 }
 
 }

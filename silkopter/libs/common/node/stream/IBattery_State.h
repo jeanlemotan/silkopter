@@ -43,23 +43,12 @@ template<> inline bool equals(silk::node::stream::IBattery_State::Value const& a
            math::equals(a.average_current, b.average_current) &&
            math::equals(a.capacity_left, b.capacity_left);
 }
-template<> inline silk::node::stream::IBattery_State::Value add(silk::node::stream::IBattery_State::Value const& a, silk::node::stream::IBattery_State::Value const& b)
+template<> inline void apply_coefficients(silk::node::stream::IBattery_State::Value& x,
+                                   silk::node::stream::IBattery_State::Value& w0,
+                                   silk::node::stream::IBattery_State::Value& w1,
+                                   silk::node::stream::IBattery_State::Value& w2, float d1, float d2, float A)
 {
-    silk::node::stream::IBattery_State::Value r = a;
-    r.charge_used += b.charge_used;
-    r.average_voltage += b.average_voltage;
-    r.average_current += b.average_current;
-    r.capacity_left += b.capacity_left;
-    return r;
 }
-template<> inline silk::node::stream::IBattery_State::Value scale(silk::node::stream::IBattery_State::Value const& a, double scale)
-{
-    silk::node::stream::IBattery_State::Value r = a;
-    r.charge_used *= scale;
-    r.average_voltage *= scale;
-    r.average_current *= scale;
-    r.capacity_left *= scale;
-    return r;
-}
+
 }
 }

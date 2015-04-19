@@ -93,6 +93,11 @@ auto Multi_Simulator::init() -> bool
         return false;
     }
 
+    if (!m_simulation.init_uav(*multi_config))
+    {
+        return false;
+    }
+
     m_last_tp = q::Clock::now();
 
     m_input_throttle_streams.resize(multi_config->motors.size());
@@ -175,6 +180,10 @@ void Multi_Simulator::process()
 
     auto now = q::Clock::now();
     auto dt = now - m_last_tp;
+    if (dt < std::chrono::milliseconds(1))
+    {
+        return;
+    }
     m_last_tp = now;
 
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
@@ -271,6 +280,7 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 
     m_simulation.set_gravity_enabled(sz.gravity_enabled);
     m_simulation.set_ground_enabled(sz.ground_enabled);
+    m_simulation.set_drag_enabled(sz.drag_enabled);
     m_simulation.set_simulation_enabled(sz.simulation_enabled);
 
     *m_config = sz;

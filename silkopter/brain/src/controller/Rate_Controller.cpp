@@ -107,7 +107,11 @@ void Rate_Controller::process()
         sample.tp = m_input_samples[i].tp;
         sample.sample_idx++;
 
-        sample.value = m_pid.process(m_input_samples[i].value, m_target_samples[i].value);
+        float x = m_x_pid.process(m_input_samples[i].value.x, m_target_samples[i].value.x);
+        float y = m_y_pid.process(m_input_samples[i].value.y, m_target_samples[i].value.y);
+        float z = m_z_pid.process(m_input_samples[i].value.z, m_target_samples[i].value.z);
+
+        sample.value.set(x, y, z);
 
         m_output_stream->samples[i] = sample;
     }
@@ -160,15 +164,33 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
         m_target_stream = target_stream;
     }
 
-    PID::Params pid_params;
-    pid_params.kp = m_config->pid.kp;
-    pid_params.ki = m_config->pid.ki;
-    pid_params.kd = m_config->pid.kd;
-    pid_params.max_i = m_config->pid.max_i;
-    pid_params.filter_poles = m_config->pid.filter_poles;
-    pid_params.filter_cutoff_frequency = m_config->pid.filter_cutoff_frequency;
-    pid_params.rate = m_output_stream->rate;
-    if (!m_pid.set_params(pid_params))
+    auto fill_params = [this](PID::Params& dst, sz::Rate_Controller::PID const& src)
+    {
+        dst.kp = src.kp;
+        dst.ki = src.ki;
+        dst.kd = src.kd;
+        dst.max_i = src.max_i;
+        dst.filter_poles = src.filter_poles;
+        dst.filter_cutoff_frequency = src.filter_cutoff_frequency;
+        dst.rate = m_output_stream->rate;
+    };
+
+    PID::Params x_params, y_params, z_params;
+    if (m_config->combined_xy_pid)
+    {
+        fill_params(x_params, m_config->xy_pid);
+        fill_params(y_params, m_config->xy_pid);
+    }
+    else
+    {
+        fill_params(x_params, m_config->x_pid);
+        fill_params(y_params, m_config->y_pid);
+    }
+    fill_params(z_params, m_config->z_pid);
+
+    if (!m_x_pid.set_params(x_params) ||
+        !m_y_pid.set_params(y_params) ||
+        !m_z_pid.set_params(z_params))
     {
         QLOGE("Bad PID params");
         return false;
@@ -180,6 +202,15 @@ auto Rate_Controller::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
+    if (m_config->combined_xy_pid)
+    {
+        json.RemoveMember("X PID");
+        json.RemoveMember("Y PID");
+    }
+    else
+    {
+        json.RemoveMember("XY PID");
+    }
     return std::move(json);
 }
 

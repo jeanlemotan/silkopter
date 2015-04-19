@@ -59,6 +59,7 @@
    <addaction name="action_simulation"/>
    <addaction name="action_ground"/>
    <addaction name="action_gravity"/>
+   <addaction name="action_drag"/>
    <addaction name="separator"/>
    <addaction name="action_reset"/>
    <addaction name="action_stop_motion"/>
@@ -160,6 +161,24 @@
    </property>
    <property name="text">
     <string>Show Altitude</string>
+   </property>
+  </action>
+  <action name="action_drag">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/Generator.png</normaloff>:/icons/Generator.png</iconset>
+   </property>
+   <property name="text">
+    <string>Drag</string>
+   </property>
+   <property name="toolTip">
+    <string>Drag</string>
    </property>
   </action>
  </widget>

@@ -44,7 +44,7 @@
         ["double", "kp", {"required": true, "json_key" : "kP"}],
         ["double", "ki", {"required": true, "json_key" : "kI"}],
         ["double", "kd", {"required": true, "json_key" : "kD"}],
-        ["math::vec3f", "max_i", {"required": true, "json_key" : "Max I"}],
+        ["double", "max_i", {"required": true, "json_key" : "Max I"}],
         ["uint32_t", "filter_poles", {"required": true, "json_key" : "D Filter Poles"}],
         ["double", "filter_cutoff_frequency", {"required": true, "json_key" : "D Filter Cutoff Frequency (Hz)"}]
     ]
@@ -55,7 +55,11 @@
     "name": "Config",
     "members":
     [
-        ["sz::Rate_Controller::PID", "pid", {"required": true, "json_key" : "PID"}],
+        ["bool", "combined_xy_pid", {"required": true, "json_key" : "Combined XY PID", "default" : true}],
+        ["sz::Rate_Controller::PID", "xy_pid", {"required": false, "json_key" : "XY PID"}],
+        ["sz::Rate_Controller::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
+        ["sz::Rate_Controller::PID", "y_pid", {"required": false, "json_key" : "Y PID"}],
+        ["sz::Rate_Controller::PID", "z_pid", {"required": true, "json_key" : "Z PID"}],
         ["sz::Rate_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
         ["sz::Rate_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
     ]

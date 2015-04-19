@@ -44,6 +44,7 @@ public:
     void set_gravity_enabled(bool yes);
     void set_ground_enabled(bool yes);
     void set_simulation_enabled(bool yes);
+    void set_drag_enabled(bool yes);
 
     auto get_uav_state() const -> IMulti_Simulator::UAV_State const&;
 
@@ -55,6 +56,7 @@ private:
     bool m_is_simulation_enabled = true;
     bool m_is_ground_enabled = false;
     bool m_is_gravity_enabled = true;
+    bool m_is_drag_enabled = true;
 
     uint32_t m_rate = 0;
     q::Clock::duration m_dt;

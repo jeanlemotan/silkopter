@@ -50,12 +50,6 @@ auto Motor_Mixer::init() -> bool
         QLOGE("No multi config found");
         return false;
     }
-//    if (multi_config->motors.size() != 4)
-//    {
-//        QLOGE("Motor_Mixer works only for quadrotor cofigurations");
-//        return false;
-//    }
-
 
     //check symmetry
     math::vec3f center;
@@ -63,7 +57,7 @@ auto Motor_Mixer::init() -> bool
     for (auto& mc: multi_config->motors)
     {
         center += mc.position;
-        torque += math::cross(THRUST_VECTOR, mc.position) + mc.max_z_torque;
+        torque += math::cross(mc.position, THRUST_VECTOR) + mc.max_z_torque;
     }
     if (!math::is_zero(center, 0.05f))
     {
@@ -151,6 +145,15 @@ void Motor_Mixer::process()
     //TODO add some protecton for severely out-of-sync streams
 
     size_t count = std::min(m_force_samples.size(), m_torque_samples.size());
+
+
+    if (math::abs((int)m_force_samples.size() - (int)m_torque_samples.size()) > 30)
+    {
+        m_force_samples.resize(count);
+        m_torque_samples.resize(count);
+    }
+
+
     if (count == 0)
     {
         return;
@@ -235,7 +238,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         for (auto& out: m_outputs)
         {
             float ratio = out->thrust * out->config.max_thrust_inv;
-            out->torque = math::cross(THRUST_VECTOR * out->thrust, out->config.position);
+            out->torque = math::cross(out->config.position, THRUST_VECTOR * out->thrust);
             //add z torque which is torque along the thrust axis
             out->torque += THRUST_VECTOR * (out->config.max_z_torque * ratio);
         }

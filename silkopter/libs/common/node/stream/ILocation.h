@@ -80,32 +80,38 @@ template<> inline bool equals(silk::node::stream::IECEF_Location::Value const& a
            math::equals(a.velocity, b.velocity) &&
            math::equals(a.direction, b.direction);
 }
-template<> inline silk::node::stream::IECEF_Location::Value add(silk::node::stream::IECEF_Location::Value const& a, silk::node::stream::IECEF_Location::Value const& b)
+template<> inline void apply_coefficients(silk::node::stream::IECEF_Location::Value& x,
+                                   silk::node::stream::IECEF_Location::Value& w0,
+                                   silk::node::stream::IECEF_Location::Value& w1,
+                                   silk::node::stream::IECEF_Location::Value& w2, float d1, float d2, float A)
 {
-    silk::node::stream::IECEF_Location::Value r = a;
-    r.position  += b.position;
-    r.position_accuracy  += b.position_accuracy;
-    r.velocity  += b.velocity;
-    r.velocity_accuracy  += b.velocity_accuracy;
-    r.direction += b.direction;
-    return r;
 }
-template<> inline silk::node::stream::IECEF_Location::Value scale(silk::node::stream::IECEF_Location::Value const& a, double scale)
-{
-    silk::node::stream::IECEF_Location::Value r = a;
-    r.position  *= scale;
-    r.position_accuracy  *= scale;
-    r.velocity  *= scale;
-    r.velocity_accuracy  *= scale;
-    r.direction *= scale;
-    return r;
-}
-template<> inline void fix(silk::node::stream::IECEF_Location::Value& a)
-{
-    a.direction.normalize<math::safe>();
-    a.position_accuracy = math::clamp(a.position_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
-    a.velocity_accuracy = math::clamp(a.velocity_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
-}
+//template<> inline silk::node::stream::IECEF_Location::Value add(silk::node::stream::IECEF_Location::Value const& a, silk::node::stream::IECEF_Location::Value const& b)
+//{
+//    silk::node::stream::IECEF_Location::Value r = a;
+//    r.position  += b.position;
+//    r.position_accuracy  += b.position_accuracy;
+//    r.velocity  += b.velocity;
+//    r.velocity_accuracy  += b.velocity_accuracy;
+//    r.direction += b.direction;
+//    return r;
+//}
+//template<> inline silk::node::stream::IECEF_Location::Value scale(silk::node::stream::IECEF_Location::Value const& a, double scale)
+//{
+//    silk::node::stream::IECEF_Location::Value r = a;
+//    r.position  *= scale;
+//    r.position_accuracy  *= scale;
+//    r.velocity  *= scale;
+//    r.velocity_accuracy  *= scale;
+//    r.direction *= scale;
+//    return r;
+//}
+//template<> inline void fix(silk::node::stream::IECEF_Location::Value& a)
+//{
+//    a.direction.normalize<math::safe>();
+//    a.position_accuracy = math::clamp(a.position_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
+//    a.velocity_accuracy = math::clamp(a.velocity_accuracy, 0.0, silk::node::stream::IECEF_Location::Value::MAX_VALID_ACCURACY * 2.0);
+//}
 
 }
 }

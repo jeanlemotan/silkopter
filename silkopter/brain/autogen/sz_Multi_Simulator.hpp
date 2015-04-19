@@ -4463,12 +4463,13 @@ w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serial
 
 namespace sz { namespace Multi_Simulator { struct Config {
  bool simulation_enabled;
+bool drag_enabled;
 bool ground_enabled;
 bool gravity_enabled;
 sz::Multi_Simulator::Inputs inputs;
 sz::Multi_Simulator::Outputs outputs;
 
-explicit Config():simulation_enabled(true), ground_enabled(true), gravity_enabled(true), inputs(), outputs() {  }
+explicit Config():simulation_enabled(true), drag_enabled(true), ground_enabled(true), gravity_enabled(true), inputs(), outputs() {  }
 
 
  
@@ -4488,8 +4489,10 @@ private:
     SAXEventHandler< bool > handler_0;
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< bool > handler_2;
-SAXEventHandler< sz::Multi_Simulator::Inputs > handler_3;
-SAXEventHandler< sz::Multi_Simulator::Outputs > handler_4;bool has_simulation_enabled;
+SAXEventHandler< bool > handler_3;
+SAXEventHandler< sz::Multi_Simulator::Inputs > handler_4;
+SAXEventHandler< sz::Multi_Simulator::Outputs > handler_5;bool has_simulation_enabled;
+bool has_drag_enabled;
 bool has_ground_enabled;
 bool has_gravity_enabled;
 bool has_inputs;
@@ -4510,12 +4513,14 @@ bool has_outputs;
             case 0:
     return "simulation_enabled";
 case 1:
-    return "ground_enabled";
+    return "drag_enabled";
 case 2:
-    return "gravity_enabled";
+    return "ground_enabled";
 case 3:
-    return "inputs";
+    return "gravity_enabled";
 case 4:
+    return "inputs";
+case 5:
     return "outputs";
         default:
             break;
@@ -4544,6 +4549,7 @@ case 4:
     void reset_flags()
     {
         has_simulation_enabled = false;
+has_drag_enabled = false;
 has_ground_enabled = false;
 has_gravity_enabled = false;
 has_inputs = false;
@@ -4555,10 +4561,11 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->simulation_enabled)
-, handler_1(&obj->ground_enabled)
-, handler_2(&obj->gravity_enabled)
-, handler_3(&obj->inputs)
-, handler_4(&obj->outputs)
+, handler_1(&obj->drag_enabled)
+, handler_2(&obj->ground_enabled)
+, handler_3(&obj->gravity_enabled)
+, handler_4(&obj->inputs)
+, handler_5(&obj->outputs)
     {
         reset_flags();
     }
@@ -4584,6 +4591,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -4613,6 +4623,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Bool(b));
 
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
         default:
             break;
         }
@@ -4640,6 +4653,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -4669,6 +4685,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
         default:
             break;
         }
@@ -4696,6 +4715,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -4725,6 +4747,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint64(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
         default:
             break;
         }
@@ -4752,6 +4777,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -4781,6 +4809,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.String(str, length, copy));
 
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
         default:
             break;
         }
@@ -4797,14 +4828,16 @@ case 4:
             }
             else if (utility::string_equal(str, length, "\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18))
 						 { state=0; has_simulation_enabled = true; }
+else if (utility::string_equal(str, length, "\x44\x72\x61\x67\x20\x45\x6e\x61\x62\x6c\x65\x64", 12))
+						 { state=1; has_drag_enabled = true; }
 else if (utility::string_equal(str, length, "\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14))
-						 { state=1; has_ground_enabled = true; }
+						 { state=2; has_ground_enabled = true; }
 else if (utility::string_equal(str, length, "\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15))
-						 { state=2; has_gravity_enabled = true; }
+						 { state=3; has_gravity_enabled = true; }
 else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=3; has_inputs = true; }
+						 { state=4; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=4; has_outputs = true; }
+						 { state=5; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -4827,6 +4860,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -4857,6 +4893,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.StartArray());
 
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
         default:
             break;
         }
@@ -4885,6 +4924,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndArray(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
         default:
             break;
         }
@@ -4912,6 +4954,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -4942,11 +4987,15 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndObject(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_simulation_enabled) set_missing_required("simulation_enabled");
+if (!has_drag_enabled) set_missing_required("drag_enabled");
 if (!has_ground_enabled) set_missing_required("ground_enabled");
 if (!has_gravity_enabled) set_missing_required("gravity_enabled");
 if (!has_inputs) set_missing_required("inputs");
@@ -4979,6 +5028,8 @@ case 3:
      handler_3.ReapError(errs); break;
 case 4:
      handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -4998,6 +5049,7 @@ handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
 
     }
 };
@@ -5010,12 +5062,13 @@ struct Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97
         w.StartObject();
 
         w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.simulation_enabled);
+w.Key("\x44\x72\x61\x67\x20\x45\x6e\x61\x62\x6c\x65\x64", 12, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.drag_enabled);
 w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.ground_enabled);
 w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.gravity_enabled);
 w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Inputs >()(w, value.inputs);
 w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Outputs >()(w, value.outputs);
 
-        w.EndObject(5);
+        w.EndObject(6);
     }
 
 };

@@ -106,6 +106,7 @@
     "members":
     [
         ["bool", "simulation_enabled", {"required": true, "json_key" : "Simulation Enabled", "default" : true}],
+        ["bool", "drag_enabled", {"required": true, "json_key" : "Drag Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
         ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
         ["sz::Multi_Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],

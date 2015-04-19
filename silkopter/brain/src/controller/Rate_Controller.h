@@ -56,8 +56,10 @@ private:
     std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
     std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
 
-    typedef util::PID<float, math::vec3f, math::vec3f> PID;
-    PID m_pid;
+    typedef util::PID<float, float, float> PID;
+    PID m_x_pid;
+    PID m_y_pid;
+    PID m_z_pid;
 
     struct Stream : public stream::ITorque
     {

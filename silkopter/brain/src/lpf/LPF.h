@@ -105,9 +105,8 @@ template<class Stream_t>
 auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("lpf::set_config");
-    sz::LPF::Config sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(m_config, json, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -115,12 +114,13 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.inputs.input);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.inputs.input, m_output_stream->rate, rate);
+        m_config.inputs.input.clear();
         m_input_stream.reset();
     }
     else
@@ -128,22 +128,20 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         m_input_stream = input_stream;
     }
 
-    if (sz.cutoff_frequency > m_output_stream->rate / 2)
+    if (m_config.cutoff_frequency > m_output_stream->rate / 2)
     {
         QLOGE("Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",
-              sz.cutoff_frequency, m_output_stream->rate / 2);
+              m_config.cutoff_frequency, m_output_stream->rate / 2);
         return false;
     }
 
-    sz.poles = math::max<uint32_t>(sz.poles, 2);
-    if (!m_dsp.setup(sz.poles, m_output_stream->rate, sz.cutoff_frequency))
+    m_config.poles = math::max<uint32_t>(m_config.poles, 2);
+    if (!m_dsp.setup(m_config.poles, m_output_stream->rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
     }
     m_dsp.reset();
-
-    m_config = sz;
 
     return true;
 }

@@ -122,9 +122,8 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("resampler::set_config");
 
-    sz::Resampler::Config sz;
     autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    if (!autojsoncxx::from_value(m_config, json, result))
     {
         std::ostringstream ss;
         ss << result;
@@ -132,11 +131,12 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(sz.inputs.input);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.inputs.input);
     auto input_rate = input_stream ? input_stream->get_rate() : 0u;
     if (input_rate == 0)
     {
-        QLOGW("Bad input stream '{}' @ {}Hz", sz.inputs.input, input_rate);
+        QLOGW("Bad input stream '{}' @ {}Hz", m_config.inputs.input, input_rate);
+        m_config.inputs.input.clear();
         m_input_stream.reset();
         m_input_stream_dt = std::chrono::microseconds(0);
     }
@@ -150,21 +150,19 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 
     uint32_t filter_rate = math::max(output_rate, input_rate);
     double max_cutoff = math::min(output_rate / 2.0, input_rate / 2.0);
-    sz.cutoff_frequency = sz.cutoff_frequency > 0 ? sz.cutoff_frequency : max_cutoff;
-    if (sz.cutoff_frequency > max_cutoff)
+    m_config.cutoff_frequency = m_config.cutoff_frequency > 0 ? m_config.cutoff_frequency : max_cutoff;
+    if (m_config.cutoff_frequency > max_cutoff)
     {
-        QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", sz.cutoff_frequency, max_cutoff);
+        QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", m_config.cutoff_frequency, max_cutoff);
         return false;
     }
-    sz.poles = math::max<uint32_t>(sz.poles, 2);
-    if (!m_dsp.setup(sz.poles, filter_rate, sz.cutoff_frequency))
+    m_config.poles = math::max<uint32_t>(m_config.poles, 2);
+    if (input_stream && !m_dsp.setup(m_config.poles, filter_rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
     }
     m_dsp.reset();
-
-    m_config = sz;
 
     return true;
 }

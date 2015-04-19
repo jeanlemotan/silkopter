@@ -2,7 +2,6 @@
 
 #include "qmath.h"
 
-
 namespace util
 {
 
@@ -14,21 +13,13 @@ template<class T> bool equals(T const& a, T const& b)
     return math::equals(a, b);
 }
 
-template<class T> T add(T const& a, T const& b)
+template<class T> void apply_coefficients(T& x, T& w0, T& w1, T& w2, float d1, float d2, float A)
 {
-    return a + b;
+    w0 = d1*w1 + d2*w2 + x;
+    x = A*(w0 + 2.f*w1 + w2);
+    w2 = w1;
+    w1 = w0;
 }
-
-template<class T> T scale(T const& a, double scale)
-{
-    return a * scale;
-}
-
-template<class T> void fix(T& a)
-{
-    ; //nothing
-}
-
 
 }
 
@@ -38,40 +29,39 @@ template<class T>
 class Butterworth : q::util::Noncopyable
 {
 public:
-    auto setup(size_t poles, double rate, double cutoff_frequency) -> bool
+    auto setup(size_t order, float rate, float cutoff_frequency) -> bool
     {
-        if (poles % 2 == 1 ||
-            math::is_zero(rate, std::numeric_limits<double>::epsilon()))
+        if (rate < math::epsilon<float>() ||
+            cutoff_frequency < math::epsilon<float>())
         {
             return false;
         }
 //        m_dsp.setup(poles, rate, cutoff_frequency);
         m_rate = rate;
-        m_count = poles / 2;
+        m_order = order;
 
 //        printf("  n = filter order 2,4,6,...\n");
 //        printf("  s = sampling frequency\n");
 //        printf("  f = half power frequency\n");
 
-        size_t n = poles / 2;
-//        double s = rate;
-//        double f = cutoff_frequency;
-        double a = math::tan(math::angled::pi*cutoff_frequency/rate);
-        double a2 = a*a;
-        A.resize(n);
-        d1.resize(n);
-        d2.resize(n);
-        w0.resize(n);
-        w1.resize(n);
-        w2.resize(n);
+//        float s = rate;
+//        float f = cutoff_frequency;
+        float a = math::tan(math::anglef::pi*cutoff_frequency/rate);
+        float a2 = a*a;
+        A.resize(m_order);
+        d1.resize(m_order);
+        d2.resize(m_order);
+        w0.resize(m_order);
+        w1.resize(m_order);
+        w2.resize(m_order);
 
-        for(size_t i = 0; i < n; ++i)
+        for(size_t i = 0; i < m_order; ++i)
         {
-            double r = math::sin(math::angled::pi*(2.0*i+1.0)/(4.0*n));
-            double s = a2 + 2.0*a*r + 1.0;
+            float r = math::sin(math::anglef::pi*(2.f*i+1.f)/(4.f*m_order));
+            float s = a2 + 2.f*a*r + 1.f;
             A[i] = a2/s;
-            d1[i] = 2.0*(1-a2)/s;
-            d2[i] = -(a2 - 2.0*a*r + 1.0)/s;
+            d1[i] = 2.f*(1.f-a2)/s;
+            d2[i] = -(a2 - 2.f*a*r + 1.f)/s;
         }
 
         return true;
@@ -79,7 +69,7 @@ public:
 
     void reset(T const& t)
     {
-        for(size_t i = 0; i < m_count; ++i)
+        for(size_t i = 0; i < m_order; ++i)
         {
             w0[i] = t;
             w1[i] = t;
@@ -117,25 +107,20 @@ public:
             m_needs_reset = false;
             reset(t);
         }
-//        m_dsp.process(t);
-        for(size_t i = 0; i < m_count; ++i)
+        for(size_t i = 0; i < m_order; ++i)
         {
-            w0[i] = dsp::add(dsp::add(dsp::scale(w1[i], d1[i]), dsp::scale(w2[i], d2[i])), t);
-            t = dsp::scale(dsp::add(dsp::add(w0[i], dsp::scale(w1[i], 2.0)), w2[i]), A[i]);
-            w2[i] = w1[i];
-            w1[i] = w0[i];
+            dsp::apply_coefficients(t, w0[i], w1[i], w2[i], d1[i], d2[i], A[i]);
         }
-        dsp::fix(t);
         m_last = t;
     }
 
 private:
-    size_t m_count = 0; //this is poles divided by 2
-    double m_rate = 0;
+    size_t m_order = 0;
+    float m_rate = 0;
     bool m_needs_reset = true;
-    std::vector<double> A;
-    std::vector<double> d1;
-    std::vector<double> d2;
+    std::vector<float> A;
+    std::vector<float> d1;
+    std::vector<float> d2;
     std::vector<T> w0;
     std::vector<T> w1;
     std::vector<T> w2;

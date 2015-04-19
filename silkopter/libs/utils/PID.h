@@ -71,7 +71,7 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
     // Compute integral component if time has elapsed
     if (m_has_ki)
     {
-        m_integrator = math::clamp(m_integrator + error * m_dts, -m_params.max_i, m_params.max_i);
+        m_integrator = math::clamp(m_integrator + Factor_t(error * m_dts), -m_params.max_i, m_params.max_i);
         output += m_integrator * m_params.ki;
     }
 
