@@ -189,6 +189,9 @@ void Sim_Window::render_uav()
         //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
         //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
 
+        //UAV radius
+        m_context.painter.draw_circle(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), config->radius, 32); //motor
+
         const float propeller_radius = 0.12f;
         const float motor_radius = 0.02f;
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
@@ -196,12 +199,12 @@ void Sim_Window::render_uav()
             auto const& mc = config->motors[i];
             auto const& m = m_uav.state.motors[i];
 
-            m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(mc.position*config->radius, 0xFFFFFFFF));
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0xFFFFFFFF), motor_radius, 16); //motor
+            m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(mc.position, 0xFFFFFFFF));
+            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0xFFFFFFFF), motor_radius, 16); //motor
 
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0x40FFFFFF), propeller_radius, 32); //motor + prop
-            float ratio = m.thrust / float(mc.max_thrust);
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position*config->radius, 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
+            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0x40FFFFFF), propeller_radius, 32); //motor + prop
+            float ratio = m.thrust / float(config->motor_thrust);
+            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
         }
     }
 
@@ -300,10 +303,13 @@ void Sim_Window::process()
     q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
-    auto camera_offset = m_context.camera.get_position() - m_camera_position_target;
-    m_camera_position_target = math::lerp(m_camera_position_target, m_uav.state.enu_position, 0.9f);
-    m_context.camera.set_position(m_camera_position_target + camera_offset);
-    m_camera_controller.set_focus_point(m_camera_position_target);
+    {
+        auto delta = m_uav.state.enu_position - m_camera_position_target;
+        delta *= 0.9f;
+        m_camera_position_target += delta;
+        m_context.camera.set_position(m_context.camera.get_position() + delta);
+        m_camera_controller.set_focus_point(m_camera_position_target);
+    }
 
     m_context.painter.set_camera(m_context.camera);
 

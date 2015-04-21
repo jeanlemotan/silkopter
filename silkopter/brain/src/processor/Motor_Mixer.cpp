@@ -57,7 +57,7 @@ auto Motor_Mixer::init() -> bool
     for (auto& mc: multi_config->motors)
     {
         center += mc.position;
-        torque += math::cross(mc.position, THRUST_VECTOR) + mc.max_z_torque;
+        torque += math::cross(mc.position, THRUST_VECTOR) + THRUST_VECTOR*(multi_config->motor_z_torque * (mc.clockwise ? 1 : -1));
     }
     if (!math::is_zero(center, 0.05f))
     {
@@ -213,45 +213,72 @@ static float compute_moment_of_inertia(float mass, float radius, float height)
 
 constexpr float MIN_THRUST = 0.01f;
 
-void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& target)
-{
-//    auto max_throttle = m_config->max_throttle;
-//    auto min_throttle = m_config->min_throttle;
 
-    //reset thrusts to mid range
+void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& _target)
+{
+    auto target = _target;
+
+    //precalculate some data
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
         auto const& mc = multi_config.motors[i];
-        m_outputs[i]->config.position = mc.position;
-        m_outputs[i]->config.max_thrust = mc.max_thrust;
-        m_outputs[i]->config.max_thrust_inv = math::inverse<float, math::safe>(mc.max_thrust);
-        m_outputs[i]->config.max_z_torque = mc.max_z_torque;
+        auto& out = m_outputs[i];
+        out->config.position = mc.position;
 
-        m_outputs[i]->thrust = MIN_THRUST;
+        out->config.max_torque = math::cross(out->config.position, THRUST_VECTOR * multi_config.motor_thrust);
+        out->config.max_torque += THRUST_VECTOR * (multi_config.motor_z_torque * (mc.clockwise ? 1 : -1));
+        out->config.torque_vector = math::normalized<float, math::safe>(out->config.max_torque);
+
+        out->thrust = MIN_THRUST;
     }
 
-    constexpr float STEP = 0.4f;
+
+    //apply the desired thrust
+    float min_thrust = MIN_THRUST;
+    float max_thrust = MIN_THRUST;
+    float target_thrust = math::dot(collective_thrust, THRUST_VECTOR);
+    if (target_thrust >= 0)
+    {
+        auto th = math::clamp(target_thrust / float(m_outputs.size()), MIN_THRUST, multi_config.motor_thrust);
+        for (auto& out: m_outputs)
+        {
+            out->thrust = th; //take into account only motors that produce useful thrust
+        }
+
+        float dyn_range = math::min(th - MIN_THRUST, multi_config.motor_thrust - th);
+        dyn_range *= 1.5f; //allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
+        min_thrust = math::max(th - dyn_range, MIN_THRUST);
+        max_thrust = math::min(th + dyn_range, multi_config.motor_thrust);
+    }
+
+
+    //compute thrusts for the target torque
+    float STEP = 0.9f;
     size_t iteration = 0;
+    math::vec3f old_crt;
     while (true)
     {
         //calculate motor torques
-        for (auto& out: m_outputs)
-        {
-            float ratio = out->thrust * out->config.max_thrust_inv;
-            out->torque = math::cross(out->config.position, THRUST_VECTOR * out->thrust);
-            //add z torque which is torque along the thrust axis
-            out->torque += THRUST_VECTOR * (out->config.max_z_torque * ratio);
-        }
-
-        //calculate the crt torque
         math::vec3f crt;
         for (auto& out: m_outputs)
         {
+            float ratio = out->thrust / multi_config.motor_thrust;
+            out->torque = out->config.max_torque * ratio;
             crt += out->torque;
         }
 
+        if (iteration > 0)
+        {
+            if (math::equals(crt, old_crt, math::epsilon<float>()))
+            {
+                QLOGI("{}: Stabilized in {} iterations: {} - {}", STEP, iteration, crt, target);
+                break;
+            }
+        }
+        old_crt = crt;
+
         //check if we're done
-        if (math::equals(crt, target, 0.0001f))
+        if (math::equals(crt, target, 0.01f))
         {
             QLOGI("{}: Done in {} iterations", STEP, iteration);
             break;
@@ -266,60 +293,188 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         {
             //figure out how much each motor can influence the target torque
             //  by doing a dot product with the normalized torque vector
-            auto tq = math::normalized<float, math::safe>(out->torque);
-            auto f = math::dot(tq, diff) * STEP; //go toqards the difference in small steps so we can converge
-            out->thrust = math::clamp(out->thrust + f, MIN_THRUST, out->config.max_thrust);
+            auto f = math::dot(out->config.torque_vector, diff) * STEP; //go toqards the difference in small steps so we can converge
+//            auto th = math::cross(diff, out->config.position);
+//            auto f = math::dot(th, THRUST_VECTOR) * STEP; //go toqards the difference in small steps so we can converge
+            out->thrust = math::clamp(out->thrust + f, min_thrust, max_thrust);
         }
 
         iteration++;
         if (iteration > 5000)
         {
             QLOGW("Too many iterations!!! {}", iteration);
+        }
+        if (iteration > 50000)
+        {
+            QLOGW("Too many iterations!!! {}", iteration);
             break;
         }
     }
 
-    float target_thrust = math::dot(THRUST_VECTOR, collective_thrust);
-
-    //calculate total thrust
-    float total_thrust = 0;
-    float max_inc = std::numeric_limits<float>::max(); //how much can we increase throttle before clipping
-    float max_dec = std::numeric_limits<float>::max(); //max decrease before clipping
     for (auto& out: m_outputs)
     {
-        total_thrust += out->thrust; //take into account only motors that produce useful thrust
-        max_dec = math::clamp(max_dec, 0.f, out->thrust - MIN_THRUST);
-        max_inc = math::min(max_inc, out->config.max_thrust - out->thrust);
-    }
-
-    //either increase or decrease if needed
-    float diff = (target_thrust - total_thrust) / float(m_outputs.size());
-    if (diff > 0)
-    {
-        diff = math::min(diff, max_inc);
-        for (auto& out: m_outputs)
-        {
-            out->thrust += diff;
-            QASSERT(out->thrust >= MIN_THRUST && out->thrust <= out->config.max_thrust);
-        }
-    }
-    else if (diff < 0)
-    {
-        diff = math::min(-diff, max_dec);
-        for (auto& out: m_outputs)
-        {
-            out->thrust -= diff;
-            QASSERT(out->thrust >= MIN_THRUST && out->thrust <= out->config.max_thrust);
-        }
+        out->thrust = math::clamp(out->thrust, min_thrust, max_thrust);
     }
 
     //convert thrust to throttle and clip
     for (auto& out: m_outputs)
     {
-        out->throttle = compute_throttle_from_thrust(out->config.max_thrust, out->thrust);
+        out->throttle = compute_throttle_from_thrust(multi_config.motor_thrust, out->thrust);
     }
 
 }
+//void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& _target)
+//{
+////    auto max_throttle = m_config->max_throttle;
+////    auto min_throttle = m_config->min_throttle;
+
+//    auto target = _target;
+
+//    //precalculate some data
+//    for (size_t i = 0; i < m_outputs.size(); i++)
+//    {
+//        auto const& mc = multi_config.motors[i];
+//        auto& out = m_outputs[i];
+//        out->config.position = mc.position;
+//        out->config.max_thrust = mc.max_thrust;
+
+//        out->config.max_torque = math::cross(out->config.position, THRUST_VECTOR * mc.max_thrust);
+//        out->config.max_torque += THRUST_VECTOR * mc.max_z_torque;
+//        out->config.torque_vector = math::normalized<float, math::safe>(out->config.max_torque);
+
+//        out->thrust = MIN_THRUST;
+//    }
+
+//    //compute torque range
+////    {
+////        auto target_normalized = math::normalized(target);
+////        float max_torque = 0;
+////        //calculate motor torques
+////        for (auto& out: m_outputs)
+////        {
+////            math::vec3f torque = math::cross(out->config.position, THRUST_VECTOR * out->config.max_thrust);
+////            //add z torque which is torque along the thrust axis
+////            torque += THRUST_VECTOR * out->config.max_z_torque;
+////            auto dot = math::dot(torque, target_normalized);
+////            if (dot > 0)
+////            {
+////                max_torque += dot;
+////            }
+////        }
+////        max_torque *= 0.75f; //don't use the whole range to leave some room for mechanical issues with the motors and props
+////        if (math::length_sq(target) > math::square(max_torque))
+////        {
+////            int a = 0;
+////            //target.set_length(max_torque);
+////        }
+////    }
+
+
+//    //compute thrusts for the target torque
+//    float STEP = 0.9f;
+//    size_t iteration = 0;
+//    math::vec3f old_crt;
+//    while (true)
+//    {
+//        //calculate motor torques
+//        math::vec3f crt;
+//        for (auto& out: m_outputs)
+//        {
+//            float ratio = out->thrust / out->config.max_thrust;
+//            out->torque = out->config.max_torque * ratio;
+//            crt += out->torque;
+//        }
+
+//        if (iteration > 0)
+//        {
+//            if (math::equals(crt, old_crt, math::epsilon<float>()))
+//            {
+//                QLOGI("{}: Stabilized in {} iterations: {} - {}", STEP, iteration, crt, target);
+//                break;
+//            }
+//        }
+//        old_crt = crt;
+
+//        //check if we're done
+//        if (math::equals(crt, target, 0.01f))
+//        {
+//            QLOGI("{}: Done in {} iterations", STEP, iteration);
+//            break;
+//        }
+
+//        //how far are we for the target?
+//        //divide by motor count because I want to distribute the difference to all motors
+//        auto diff = (target - crt) / float(m_outputs.size());
+
+//        //distribute the diff to all motors
+//        for (auto& out: m_outputs)
+//        {
+//            //figure out how much each motor can influence the target torque
+//            //  by doing a dot product with the normalized torque vector
+//            auto f = math::dot(out->config.torque_vector, diff) * STEP; //go toqards the difference in small steps so we can converge
+////            auto th = math::cross(diff, out->config.position);
+////            auto f = math::dot(th, THRUST_VECTOR) * STEP; //go toqards the difference in small steps so we can converge
+//            out->thrust = math::clamp(out->thrust + f, MIN_THRUST, out->config.max_thrust);
+//        }
+
+//        iteration++;
+//        if (iteration > 5000)
+//        {
+//            QLOGW("Too many iterations!!! {}", iteration);
+//        }
+//        if (iteration > 50000)
+//        {
+//            QLOGW("Too many iterations!!! {}", iteration);
+//            break;
+//        }
+//    }
+
+//    for (auto& out: m_outputs)
+//    {
+//        out->thrust = math::clamp(out->thrust, MIN_THRUST, out->config.max_thrust);
+//    }
+
+//    float target_thrust = math::dot(THRUST_VECTOR, collective_thrust);
+
+//    //calculate total thrust
+//    float total_thrust = 0;
+//    float max_inc = std::numeric_limits<float>::max(); //how much can we increase throttle before clipping
+//    float max_dec = std::numeric_limits<float>::max(); //max decrease before clipping
+//    for (auto& out: m_outputs)
+//    {
+//        total_thrust += out->thrust; //take into account only motors that produce useful thrust
+//        max_dec = math::clamp(max_dec, 0.f, out->thrust - MIN_THRUST);
+//        max_inc = math::min(max_inc, out->config.max_thrust - out->thrust);
+//    }
+
+//    //either increase or decrease if needed
+//    float diff = (target_thrust - total_thrust) / float(m_outputs.size());
+//    if (diff > 0)
+//    {
+//        diff = math::min(diff, max_inc);
+//        for (auto& out: m_outputs)
+//        {
+//            out->thrust += diff;
+//            QASSERT(out->thrust >= MIN_THRUST && out->thrust <= out->config.max_thrust);
+//        }
+//    }
+//    else if (diff < 0)
+//    {
+//        diff = math::min(-diff, max_dec);
+//        for (auto& out: m_outputs)
+//        {
+//            out->thrust -= diff;
+//            QASSERT(out->thrust >= MIN_THRUST && out->thrust <= out->config.max_thrust);
+//        }
+//    }
+
+//    //convert thrust to throttle and clip
+//    for (auto& out: m_outputs)
+//    {
+//        out->throttle = compute_throttle_from_thrust(out->config.max_thrust, out->thrust);
+//    }
+
+//}
 
 auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
 {

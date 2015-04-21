@@ -54,7 +54,7 @@ private:
     void process_world(q::Clock::duration dt);
 
     bool m_is_simulation_enabled = true;
-    bool m_is_ground_enabled = false;
+    bool m_is_ground_enabled = true;
     bool m_is_gravity_enabled = true;
     bool m_is_drag_enabled = true;
 

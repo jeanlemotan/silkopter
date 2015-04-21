@@ -72,9 +72,8 @@ private:
         struct Config
         {
             math::vec3f position;
-            float max_thrust = 0;
-            float max_thrust_inv = 0.f;
-            float max_z_torque = 0;
+            math::vec3f max_torque;
+            math::vec3f torque_vector;
         } config;
 
         float throttle = 0;

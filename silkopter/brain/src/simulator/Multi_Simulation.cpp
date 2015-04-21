@@ -59,7 +59,7 @@ auto Multi_Simulation::init(uint32_t rate) -> bool
 
     btRigidBody::btRigidBodyConstructionInfo info(0.f, nullptr, m_ground_shape.get());
     m_ground_body.reset(new btRigidBody(info));
-    //m_world->addRigidBody(m_ground_body.get());
+    m_world->addRigidBody(m_ground_body.get());
 
     return true;
 }
@@ -313,17 +313,17 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
             auto& mc = m_uav.config.motors[i];
 
             {
-                auto target_thrust = math::square(m.throttle) * mc.max_thrust;
+                auto target_thrust = math::square(m.throttle) * m_uav.config.motor_thrust;
                 if (!math::equals(m.thrust, target_thrust))
                 {
-                    auto delta = (target_thrust - m.thrust) / mc.max_thrust;
-                    float acc = delta > 0 ? mc.acceleration : mc.deceleration;
+                    auto delta = (target_thrust - m.thrust) / m_uav.config.motor_thrust;
+                    float acc = delta > 0 ? 1.f / m_uav.config.motor_acceleration : 1.f / m_uav.config.motor_deceleration;
                     float d = math::min(math::abs(delta), acc * q::Seconds(dt).count());
-                    m.thrust += math::sgn(delta) * d * mc.max_thrust;
-                    m.thrust = math::clamp(m.thrust, 0.f, mc.max_thrust);
+                    m.thrust += math::sgn(delta) * d * m_uav.config.motor_thrust;
+                    m.thrust = math::clamp(m.thrust, 0.f, m_uav.config.motor_thrust);
                 }
             }
-            z_torque.z += mc.max_z_torque * (m.thrust / mc.max_thrust);
+            z_torque.z += m_uav.config.motor_z_torque * (mc.clockwise ? 1 : -1) * (m.thrust / m_uav.config.motor_thrust);
 
 //            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 

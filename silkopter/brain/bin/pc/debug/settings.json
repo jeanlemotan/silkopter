@@ -1,54 +1,46 @@
 {
     "hal": {
         "multi_config": {
-            "Name": "sk",
+            "Name": "dancing quad",
             "Mass (Kg)": 0.699999988079071,
             "Height (m)": 0.20000000298023225,
             "Radius (m)": 0.30000001192092898,
+            "Motor Thrust @ 100% (N)": 5.0,
+            "Motor Z Torque @ 100% (Nm)": 0.5,
+            "Motor Acceleration (s)": 0.10000000149011612,
+            "Motor Deceleration (s)": 0.15000000596046449,
             "Motors": [
                 {
                     "Position": {
                         "x": 0.0,
-                        "y": 1.0,
+                        "y": 0.30000001192092898,
                         "z": 0.0
                     },
-                    "Max Z Torque (Nm)": 0.5,
-                    "Thrust @ 100% (N)": 5.0,
-                    "Acceleration (s)": 10.0,
-                    "Deceleration (s)": 5.0
+                    "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": 1.0,
+                        "x": 0.30000001192092898,
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "Max Z Torque (Nm)": -0.5,
-                    "Thrust @ 100% (N)": 5.0,
-                    "Acceleration (s)": 10.0,
-                    "Deceleration (s)": 5.0
+                    "Clockwise": true
                 },
                 {
                     "Position": {
                         "x": 0.0,
-                        "y": -1.0,
+                        "y": -0.30000001192092898,
                         "z": 0.0
                     },
-                    "Max Z Torque (Nm)": 0.5,
-                    "Thrust @ 100% (N)": 5.0,
-                    "Acceleration (s)": 10.0,
-                    "Deceleration (s)": 5.0
+                    "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": -1.0,
+                        "x": -0.30000001192092898,
                         "y": 0.0,
                         "z": 0.0
                     },
-                    "Max Z Torque (Nm)": -0.5,
-                    "Thrust @ 100% (N)": 5.0,
-                    "Acceleration (s)": 10.0,
-                    "Deceleration (s)": 5.0
+                    "Clockwise": true
                 }
             ]
         },
@@ -62,44 +54,6 @@
             }
         },
         "nodes": {
-            "Rate Controller": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -50.0,
-                            "y": -189.0
-                        }
-                    }
-                },
-                "config": {
-                    "Combined XY PID": true,
-                    "XY PID": {
-                        "kP": 2.0,
-                        "kI": 1.0,
-                        "kD": 0.0,
-                        "Max I": 1.0,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    },
-                    "Inputs": {
-                        "Input": "Multi Simulator/Angular Velocity",
-                        "Target": "Angular Velocity Generator/Output"
-                    },
-                    "Z PID": {
-                        "kP": 0.5,
-                        "kI": 0.5,
-                        "kD": 0.0,
-                        "Max I": 0.5,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    }
-                }
-            },
             "Multi Simulator": {
                 "type": "Multi Simulator",
                 "init_params": {
@@ -113,14 +67,14 @@
                     "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": 227.0,
-                            "y": -326.0
+                            "x": 352.0,
+                            "y": -212.0
                         }
                     }
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": true,
+                    "Drag Enabled": false,
                     "Ground Enabled": false,
                     "Gravity Enabled": true,
                     "Inputs": {
@@ -165,52 +119,14 @@
                     }
                 }
             },
-            "Rate Controller 0": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -83.0,
-                            "y": -460.0
-                        }
-                    }
-                },
-                "config": {
-                    "Combined XY PID": true,
-                    "XY PID": {
-                        "kP": 0.0,
-                        "kI": 0.0,
-                        "kD": 0.0,
-                        "Max I": 0.0,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    },
-                    "Inputs": {
-                        "Input": "",
-                        "Target": ""
-                    },
-                    "Z PID": {
-                        "kP": 0.0,
-                        "kI": 0.0,
-                        "kD": 0.0,
-                        "Max I": 0.0,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    }
-                }
-            },
             "Motor Mixer": {
                 "type": "Motor Mixer",
                 "init_params": {
                     "Rate (Hz)": 50,
                     "__gs": {
                         "position": {
-                            "x": 8.0,
-                            "y": -471.0
+                            "x": 547.0,
+                            "y": -248.0
                         }
                     }
                 },
@@ -230,14 +146,14 @@
                     }
                 }
             },
-            "Force Generator": {
-                "type": "Force Generator",
+            "Torque Generator": {
+                "type": "Torque Generator",
                 "init_params": {
                     "Rate (Hz)": 50,
                     "__gs": {
                         "position": {
-                            "x": -46.0,
-                            "y": -279.0
+                            "x": 378.0,
+                            "y": -288.0
                         }
                     }
                 },
@@ -254,6 +170,71 @@
                     },
                     "Outputs": {
                         "Output": {}
+                    }
+                }
+            },
+            "Force Generator": {
+                "type": "Force Generator",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": 354.0,
+                            "y": -88.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 6.599999904632568
+                    },
+                    "Inputs": {
+                        "X Factor": "",
+                        "Y Factor": "",
+                        "Z Factor": ""
+                    },
+                    "Outputs": {
+                        "Output": {}
+                    }
+                }
+            },
+            "Rate Controller": {
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": 422.0,
+                            "y": -388.0
+                        }
+                    }
+                },
+                "config": {
+                    "Combined XY PID": true,
+                    "XY PID": {
+                        "kP": 2.0,
+                        "kI": 1.0,
+                        "kD": 0.0,
+                        "Max I": 1.0,
+                        "D Filter Poles": 0,
+                        "D Filter Cutoff Frequency (Hz)": 0.0
+                    },
+                    "Outputs": {
+                        "Torque": {}
+                    },
+                    "Inputs": {
+                        "Input": "Multi Simulator/Angular Velocity",
+                        "Target": "Angular Velocity Generator/Output"
+                    },
+                    "Z PID": {
+                        "kP": 3.0,
+                        "kI": 0.3,
+                        "kD": 0.0,
+                        "Max I": 0.3,
+                        "D Filter Poles": 0,
+                        "D Filter Cutoff Frequency (Hz)": 0.0
                     }
                 }
             },
@@ -263,8 +244,8 @@
                     "Rate (Hz)": 50,
                     "__gs": {
                         "position": {
-                            "x": -259.0,
-                            "y": -412.0
+                            "x": 345.0,
+                            "y": -358.0
                         }
                     }
                 },
@@ -272,42 +253,43 @@
                     "Value": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": 1.5
                     },
                     "Inputs": {
                         "X Factor": "",
                         "Y Factor": "",
-                        "Z Factor": ""
+                        "Z Factor": "Factor Generator/Factor"
                     },
                     "Outputs": {
                         "Output": {}
                     }
                 }
             },
-            "Torque Generator": {
-                "type": "Torque Generator",
+            "Factor Generator": {
+                "type": "Factor Generator",
                 "init_params": {
                     "Rate (Hz)": 50,
+                    "Component Count": 1,
                     "__gs": {
                         "position": {
-                            "x": 39.0,
-                            "y": -142.0
+                            "x": 168.0,
+                            "y": -368.0
                         }
                     }
                 },
                 "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Inputs": {
-                        "X Factor": "",
-                        "Y Factor": "",
-                        "Z Factor": ""
-                    },
+                    "Amplitude": 3.0,
+                    "Noise": 0.0,
+                    "Square": true,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 0.5,
+                            "Amplitude": 1.0
+                        }
+                    ],
+                    "Inputs": {},
                     "Outputs": {
-                        "Output": {}
+                        "Factor": {}
                     }
                 }
             }

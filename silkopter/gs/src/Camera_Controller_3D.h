@@ -27,6 +27,7 @@ private:
     math::vec2f m_pointer_delta_2d;
     math::vec3f m_pointer_3d;
     math::vec3f m_pointer_delta_3d;
+    math::vec3f m_focus_point;
     float m_screen_depth;
 
     math::vec3f m_press_point_3d;

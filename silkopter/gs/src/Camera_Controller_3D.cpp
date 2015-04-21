@@ -14,8 +14,9 @@ Camera_Controller_3D::Camera_Controller_3D(q::scene::Camera& camera)
 
 void Camera_Controller_3D::set_focus_point(math::vec3f const& point)
 {
-	m_pointer_delta_3d = point;
-	m_press_point_3d = point;
+//	m_pointer_delta_3d = point;
+//	m_press_point_3d = point;
+    m_focus_point = point;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,9 +95,10 @@ void Camera_Controller_3D::mouse_move_event(QMouseEvent* event)
             qy.set_from_angle_axis(-rot.y, math::vec3d(m_camera.get_right_vector()));
 			math::quatd qdelta = qx * qy;
 			math::vec3d p(m_camera.get_position());
-			math::vec3d dir = math::vec3d(m_press_point_3d) - p;
-			p = math::vec3d(m_press_point_3d) - math::rotate(qdelta, dir);
-			math::quatd q = qdelta * math::quatd(m_camera.get_rotation());
+            math::vec3d dir = math::vec3d(m_focus_point) - p;
+            p = math::vec3d(m_focus_point) - math::rotate(qdelta, dir);
+            //math::quatd q = qdelta * math::quatd(m_camera.get_rotation());
+            auto q = math::quatd::look_at(math::vec3d(m_focus_point) - p, math::vec3d(0, 0, 1));
 			m_camera.set_transform(math::vec3f(p), math::quatf(q));
 		}
 // 		else

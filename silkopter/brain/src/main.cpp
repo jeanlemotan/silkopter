@@ -126,6 +126,8 @@ int main(int argc, char const* argv[])
 
     QLOGI("Creating io_service thread");
 
+    std::string xxx("x");
+
     boost::asio::io_service io_service;
     auto io_thread = boost::thread([&io_service]()
     {

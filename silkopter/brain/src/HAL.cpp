@@ -217,21 +217,26 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
         QLOGE("Bad mass: {}", config.mass);
         return false;
     }
+    if (config.motor_thrust < math::epsilon<float>())
+    {
+        QLOGE("Bad motor thrust thrust: {}", config.motor_thrust);
+        return false;
+    }
+    if (config.motor_acceleration < math::epsilon<float>())
+    {
+        QLOGE("Bad acceleration: {}", config.motor_acceleration);
+        return false;
+    }
+    if (config.motor_deceleration < math::epsilon<float>())
+    {
+        QLOGE("Bad deceleration: {}", config.motor_deceleration);
+        return false;
+    }
     for (auto const& m: config.motors)
     {
-        if (m.max_thrust < math::epsilon<float>())
+        if (math::is_zero(m.position, math::epsilon<float>()))
         {
-            QLOGE("Bad max thrust: {}", m.max_thrust);
-            return false;
-        }
-        if (m.acceleration < math::epsilon<float>())
-        {
-            QLOGE("Bad acceleration: {}", m.acceleration);
-            return false;
-        }
-        if (m.deceleration < math::epsilon<float>())
-        {
-            QLOGE("Bad deceleration: {}", m.deceleration);
+            QLOGE("Bad motor position: {}", m.position);
             return false;
         }
     }

@@ -126,7 +126,7 @@ auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
         return false;
     }
 
-    if (params.filter_poles == 0)
+    if (params.filter_poles <= 0 || params.filter_cutoff_frequency <= 0)
     {
         m_has_filter = false;
     }
