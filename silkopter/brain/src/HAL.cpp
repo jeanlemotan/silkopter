@@ -243,6 +243,9 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
 
     m_configs.multi = config;
 
+    //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
+    m_configs.multi->moment_of_inertia = (1.f / 12.f) * config.mass * (3.f * math::square(config.radius) + math::square(config.height));
+
     return true;
 }
 

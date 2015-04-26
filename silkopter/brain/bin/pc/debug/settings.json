@@ -74,7 +74,7 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": false,
+                    "Drag Enabled": true,
                     "Ground Enabled": false,
                     "Gravity Enabled": true,
                     "Inputs": {
@@ -188,7 +188,7 @@
                     "Value": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 6.599999904632568
+                        "z": 10.0
                     },
                     "Inputs": {
                         "X Factor": "",
@@ -197,44 +197,6 @@
                     },
                     "Outputs": {
                         "Output": {}
-                    }
-                }
-            },
-            "Rate Controller": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": 422.0,
-                            "y": -388.0
-                        }
-                    }
-                },
-                "config": {
-                    "Combined XY PID": true,
-                    "XY PID": {
-                        "kP": 2.0,
-                        "kI": 1.0,
-                        "kD": 0.0,
-                        "Max I": 1.0,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    },
-                    "Inputs": {
-                        "Input": "Multi Simulator/Angular Velocity",
-                        "Target": "Angular Velocity Generator/Output"
-                    },
-                    "Z PID": {
-                        "kP": 3.0,
-                        "kI": 0.3,
-                        "kD": 0.0,
-                        "Max I": 0.3,
-                        "D Filter Poles": 0,
-                        "D Filter Cutoff Frequency (Hz)": 0.0
                     }
                 }
             },
@@ -251,12 +213,12 @@
                 },
                 "config": {
                     "Value": {
-                        "x": 0.0,
+                        "x": 1.5,
                         "y": 0.0,
-                        "z": 1.5
+                        "z": 0.0
                     },
                     "Inputs": {
-                        "X Factor": "",
+                        "X Factor": "Factor Generator 0/Factor",
                         "Y Factor": "",
                         "Z Factor": "Factor Generator/Factor"
                     },
@@ -278,12 +240,84 @@
                     }
                 },
                 "config": {
-                    "Amplitude": 3.0,
+                    "Amplitude": 0.0,
                     "Noise": 0.0,
                     "Square": true,
                     "Components": [
                         {
                             "Frequency (Hz)": 0.5,
+                            "Amplitude": 1.0
+                        }
+                    ],
+                    "Inputs": {},
+                    "Outputs": {
+                        "Factor": {}
+                    }
+                }
+            },
+            "Rate Controller": {
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "__gs": {
+                        "position": {
+                            "x": 244.0,
+                            "y": -455.0
+                        }
+                    }
+                },
+                "config": {
+                    "Ratio FF <-> FB (0-1)": 0.4000000059604645,
+                    "Feedback": {
+                        "Combined XY PID": true,
+                        "XY PID": {
+                            "kP": 1.0,
+                            "kI": 0.5,
+                            "kD": 0.0,
+                            "Max I": 1.0,
+                            "D Filter Poles": 0,
+                            "D Filter Cutoff Frequency (Hz)": 0.0
+                        },
+                        "Z PID": {
+                            "kP": 2.0,
+                            "kI": 0.5,
+                            "kD": 0.0,
+                            "Max I": 0.7,
+                            "D Filter Poles": 0,
+                            "D Filter Cutoff Frequency (Hz)": 0.0
+                        }
+                    },
+                    "Feedforward": {
+                        "Max Torque": 0.0
+                    },
+                    "Inputs": {
+                        "Input": "Multi Simulator/Angular Velocity",
+                        "Target": "Angular Velocity Generator/Output"
+                    },
+                    "Outputs": {
+                        "Torque": {}
+                    }
+                }
+            },
+            "Factor Generator 0": {
+                "type": "Factor Generator",
+                "init_params": {
+                    "Rate (Hz)": 50,
+                    "Component Count": 1,
+                    "__gs": {
+                        "position": {
+                            "x": -45.0,
+                            "y": -434.0
+                        }
+                    }
+                },
+                "config": {
+                    "Amplitude": 3.0,
+                    "Noise": 0.0,
+                    "Square": true,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 1.0,
                             "Amplitude": 1.0
                         }
                     ],

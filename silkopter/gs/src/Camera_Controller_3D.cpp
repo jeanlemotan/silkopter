@@ -98,9 +98,16 @@ void Camera_Controller_3D::mouse_move_event(QMouseEvent* event)
             math::vec3d dir = math::vec3d(m_focus_point) - p;
             p = math::vec3d(m_focus_point) - math::rotate(qdelta, dir);
             //math::quatd q = qdelta * math::quatd(m_camera.get_rotation());
-            auto q = math::quatd::look_at(math::vec3d(m_focus_point) - p, math::vec3d(0, 0, 1));
-			m_camera.set_transform(math::vec3f(p), math::quatf(q));
-		}
+            if (!math::is_zero(dir, math::epsilon<double>()))
+            {
+                auto q = math::quatd::look_at(dir, math::vec3d(0, 0, 1));
+                m_camera.set_transform(math::vec3f(p), math::quatf(q));
+            }
+            else
+            {
+                m_camera.set_transform(math::vec3f(p), math::quatf());
+            }
+        }
 // 		else
 // 		{
 // 			math::planef plane(m_press_point_3d, m_camera.get_front_vector());

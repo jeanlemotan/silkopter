@@ -72,6 +72,51 @@ namespace jsonutil
         return find_value(static_cast<rapidjson::Value const&>(document), path);
     }
 
+    template <class T, class STRING>
+    auto remove_value(T& value, STRING const& name) -> bool
+    {
+        if (name.empty())
+        {
+            return false;
+        }
+        if (value.IsArray() && name[0] == '[' && name.size() >= 3 && name.size() < 32)
+        {
+            char buffer[32] = {0};
+            memcpy(buffer, name.c_str() + 1, name.size() - 2); //remove the []
+            int idx = atoi(buffer);
+            if (idx >= 0 && idx < (int)value.Size())
+            {
+                value.Erase(value.Begin() + idx);
+                return true;
+            }
+            return false;
+        }
+        if (value.IsObject())
+        {
+            return value.RemoveMember(name.c_str());
+        }
+        return false;
+    }
+
+    template <class T>
+    inline auto remove_value(T& value, q::Path const& path) -> bool
+    {
+        if (path.is_empty())
+        {
+            return false;
+        }
+        if (path.size() == 1)
+        {
+            return remove_value(value, path[0]);
+        }
+        auto v = find_value(value, path[0]);
+        if (v != nullptr)
+        {
+            auto p = path.get_sub_path(1, 0);
+            return remove_value(*v, p);
+        }
+        return false;
+    }
 
     template <class STRING>
     inline rapidjson::Value* get_or_add_value(rapidjson::Value& json, STRING const& name, rapidjson::Type type, typename rapidjson::Value::AllocatorType& allocator)

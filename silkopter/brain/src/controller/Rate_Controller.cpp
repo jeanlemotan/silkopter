@@ -78,6 +78,12 @@ void Rate_Controller::process()
         return;
     }
 
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        return;
+    }
+
     //accumulate the input streams
     {
         auto const& samples = target_stream->get_samples();
@@ -107,11 +113,10 @@ void Rate_Controller::process()
         sample.tp = m_input_samples[i].tp;
         sample.sample_idx++;
 
-        float x = m_x_pid.process(m_input_samples[i].value.x, m_target_samples[i].value.x);
-        float y = m_y_pid.process(m_input_samples[i].value.y, m_target_samples[i].value.y);
-        float z = m_z_pid.process(m_input_samples[i].value.z, m_target_samples[i].value.z);
+        math::vec3f ff = compute_feedforward(*multi_config, m_input_samples[i].value, m_target_samples[i].value);
+        math::vec3f fb = compute_feedback(m_input_samples[i].value, m_target_samples[i].value);
 
-        sample.value.set(x, y, z);
+        sample.value.set(math::lerp(ff, fb, m_config->ratio_ff_fb));
 
         m_output_stream->samples[i] = sample;
     }
@@ -119,6 +124,27 @@ void Rate_Controller::process()
     //consume processed samples
     m_target_samples.erase(m_target_samples.begin(), m_target_samples.begin() + count);
     m_input_samples.erase(m_input_samples.begin(), m_input_samples.begin() + count);
+}
+
+
+math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+{
+    //F = m*a
+    //v = a * t
+
+    auto dt = std::chrono::duration<float>(0.05f);
+    auto dv = target - input;
+    auto a = dv / dt.count();
+    auto t = a * config.moment_of_inertia;
+
+    return t;
+}
+math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+{
+    float x = m_x_pid.process(input.x, target.x);
+    float y = m_y_pid.process(input.y, target.y);
+    float z = m_z_pid.process(input.z, target.z);
+    return math::vec3f(x, y, z);
 }
 
 auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
@@ -164,6 +190,12 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
         m_target_stream = target_stream;
     }
 
+    m_config->ratio_ff_fb = math::clamp(m_config->ratio_ff_fb, 0.f, 1.f);
+
+    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
+
+
+
     auto fill_params = [this](PID::Params& dst, sz::Rate_Controller::PID const& src)
     {
         dst.kp = src.kp;
@@ -176,17 +208,17 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     };
 
     PID::Params x_params, y_params, z_params;
-    if (m_config->combined_xy_pid)
+    if (m_config->feedback.combined_xy_pid)
     {
-        fill_params(x_params, m_config->xy_pid);
-        fill_params(y_params, m_config->xy_pid);
+        fill_params(x_params, m_config->feedback.xy_pid);
+        fill_params(y_params, m_config->feedback.xy_pid);
     }
     else
     {
-        fill_params(x_params, m_config->x_pid);
-        fill_params(y_params, m_config->y_pid);
+        fill_params(x_params, m_config->feedback.x_pid);
+        fill_params(y_params, m_config->feedback.y_pid);
     }
-    fill_params(z_params, m_config->z_pid);
+    fill_params(z_params, m_config->feedback.z_pid);
 
     if (!m_x_pid.set_params(x_params) ||
         !m_y_pid.set_params(y_params) ||
@@ -202,14 +234,14 @@ auto Rate_Controller::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
-    if (m_config->combined_xy_pid)
+    if (m_config->feedback.combined_xy_pid)
     {
-        json.RemoveMember("X PID");
-        json.RemoveMember("Y PID");
+        jsonutil::remove_value(json, q::Path("Feedback/X PID"));
+        jsonutil::remove_value(json, q::Path("Feedback/Y PID"));
     }
     else
     {
-        json.RemoveMember("XY PID");
+        jsonutil::remove_value(json, q::Path("Feedback/XY PID"));
     }
     return std::move(json);
 }

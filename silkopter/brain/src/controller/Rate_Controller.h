@@ -44,6 +44,10 @@ public:
 private:
     auto init() -> bool;
 
+    math::vec3f compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+
+
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;

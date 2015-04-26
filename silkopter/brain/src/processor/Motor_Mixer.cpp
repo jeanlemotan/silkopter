@@ -205,12 +205,6 @@ static float compute_thrust_from_throttle(float max_thrust, float throttle)
     return thrust;
 }
 
-static float compute_moment_of_inertia(float mass, float radius, float height)
-{
-    //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    return (1.f / 12.f) * mass * (3.f * math::square(radius) + math::square(height));
-}
-
 constexpr float MIN_THRUST = 0.01f;
 
 
