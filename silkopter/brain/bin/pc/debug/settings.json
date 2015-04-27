@@ -76,7 +76,7 @@
                     "Simulation Enabled": true,
                     "Drag Enabled": true,
                     "Ground Enabled": false,
-                    "Gravity Enabled": true,
+                    "Gravity Enabled": false,
                     "Inputs": {
                         "Throttle": [
                             "Motor Mixer/Throttle 0",
@@ -188,7 +188,7 @@
                     "Value": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 10.0
+                        "z": 9.0
                     },
                     "Inputs": {
                         "X Factor": "",
@@ -213,9 +213,9 @@
                 },
                 "config": {
                     "Value": {
-                        "x": 1.5,
+                        "x": 2.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": 1.0
                     },
                     "Inputs": {
                         "X Factor": "Factor Generator 0/Factor",
@@ -240,12 +240,12 @@
                     }
                 },
                 "config": {
-                    "Amplitude": 0.0,
+                    "Amplitude": 2.0,
                     "Noise": 0.0,
                     "Square": true,
                     "Components": [
                         {
-                            "Frequency (Hz)": 0.5,
+                            "Frequency (Hz)": 0.10000000149011612,
                             "Amplitude": 1.0
                         }
                     ],
@@ -267,22 +267,22 @@
                     }
                 },
                 "config": {
-                    "Ratio FF <-> FB (0-1)": 0.4000000059604645,
+                    "Ratio FF <-> FB (0-1)": 1.0,
                     "Feedback": {
                         "Combined XY PID": true,
                         "XY PID": {
                             "kP": 1.0,
-                            "kI": 0.5,
+                            "kI": 0.1,
                             "kD": 0.0,
-                            "Max I": 1.0,
+                            "Max I": 0.1,
                             "D Filter Poles": 0,
                             "D Filter Cutoff Frequency (Hz)": 0.0
                         },
                         "Z PID": {
                             "kP": 2.0,
-                            "kI": 0.5,
+                            "kI": 0.1,
                             "kD": 0.0,
-                            "Max I": 0.7,
+                            "Max I": 0.1,
                             "D Filter Poles": 0,
                             "D Filter Cutoff Frequency (Hz)": 0.0
                         }
@@ -312,12 +312,12 @@
                     }
                 },
                 "config": {
-                    "Amplitude": 3.0,
+                    "Amplitude": 4.0,
                     "Noise": 0.0,
                     "Square": true,
                     "Components": [
                         {
-                            "Frequency (Hz)": 1.0,
+                            "Frequency (Hz)": 0.5,
                             "Amplitude": 1.0
                         }
                     ],

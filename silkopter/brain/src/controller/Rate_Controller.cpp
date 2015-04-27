@@ -132,12 +132,29 @@ math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::
     //F = m*a
     //v = a * t
 
-    auto dt = std::chrono::duration<float>(0.05f);
-    auto dv = target - input;
-    auto a = dv / dt.count();
-    auto t = a * config.moment_of_inertia;
+//    auto dt = std::chrono::duration<float>(0.05f);
+//    auto dv = target - input;
+//    auto a = dv / dt.count();
+//    auto t = a * config.moment_of_inertia;
 
-    return t;
+    math::vec3f v = target - input;
+    float vm = math::length(v) * config.moment_of_inertia;
+
+    float max_T = 5.f;
+    float A = config.motor_acceleration;
+    float C = config.motor_deceleration;
+
+    for (float x = 1.f; x >= 0.f; x -= 0.01f)
+    {
+        float min_Tt = ((A + C) * x / 2.f) * max_T * x;
+        float BT = vm - min_Tt;
+        if (BT >= 0)
+        {
+            return math::normalized<float, math::safe>(v) * max_T * x;
+        }
+    }
+
+    return math::vec3f::zero;
 }
 math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
