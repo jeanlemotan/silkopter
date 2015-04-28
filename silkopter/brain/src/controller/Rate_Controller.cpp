@@ -116,7 +116,7 @@ void Rate_Controller::process()
         math::vec3f ff = compute_feedforward(*multi_config, m_input_samples[i].value, m_target_samples[i].value);
         math::vec3f fb = compute_feedback(m_input_samples[i].value, m_target_samples[i].value);
 
-        sample.value.set(math::lerp(ff, fb, m_config->ratio_ff_fb));
+        sample.value.set(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
         m_output_stream->samples[i] = sample;
     }
@@ -132,29 +132,18 @@ math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::
     //F = m*a
     //v = a * t
 
-//    auto dt = std::chrono::duration<float>(0.05f);
-//    auto dv = target - input;
-//    auto a = dv / dt.count();
-//    auto t = a * config.moment_of_inertia;
-
     math::vec3f v = target - input;
     float vm = math::length(v) * config.moment_of_inertia;
 
-    float max_T = 5.f;
+    float max_T = m_config->feedforward.max_torque;
+
     float A = config.motor_acceleration;
     float C = config.motor_deceleration;
 
-    for (float x = 1.f; x >= 0.f; x -= 0.01f)
-    {
-        float min_Tt = ((A + C) * x / 2.f) * max_T * x;
-        float BT = vm - min_Tt;
-        if (BT >= 0)
-        {
-            return math::normalized<float, math::safe>(v) * max_T * x;
-        }
-    }
+    float x_sq = vm / ((A + C) * max_T / 2.f);
+    float x = math::min(1.f, math::sqrt(x_sq));
 
-    return math::vec3f::zero;
+    return math::normalized<float, math::safe>(v) * max_T * x;
 }
 math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
@@ -207,7 +196,8 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
         m_target_stream = target_stream;
     }
 
-    m_config->ratio_ff_fb = math::clamp(m_config->ratio_ff_fb, 0.f, 1.f);
+    m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);
+    m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.f, 1.f);
 
     m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
 

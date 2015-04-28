@@ -2209,13 +2209,14 @@ w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Feedback {
- bool combined_xy_pid;
+ float weight;
+bool combined_xy_pid;
 sz::Rate_Controller::PID xy_pid;
 sz::Rate_Controller::PID x_pid;
 sz::Rate_Controller::PID y_pid;
 sz::Rate_Controller::PID z_pid;
 
-explicit Feedback():combined_xy_pid(true), xy_pid(), x_pid(), y_pid(), z_pid() {  }
+explicit Feedback():weight(0), combined_xy_pid(true), xy_pid(), x_pid(), y_pid(), z_pid() {  }
 
 
  
@@ -2232,11 +2233,13 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< bool > handler_0;
-SAXEventHandler< sz::Rate_Controller::PID > handler_1;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< bool > handler_1;
 SAXEventHandler< sz::Rate_Controller::PID > handler_2;
 SAXEventHandler< sz::Rate_Controller::PID > handler_3;
-SAXEventHandler< sz::Rate_Controller::PID > handler_4;bool has_combined_xy_pid;
+SAXEventHandler< sz::Rate_Controller::PID > handler_4;
+SAXEventHandler< sz::Rate_Controller::PID > handler_5;bool has_weight;
+bool has_combined_xy_pid;
 bool has_z_pid;
 
     bool check_depth(const char* type)
@@ -2252,14 +2255,16 @@ bool has_z_pid;
     {
         switch (state) {
             case 0:
-    return "combined_xy_pid";
+    return "weight";
 case 1:
-    return "xy_pid";
+    return "combined_xy_pid";
 case 2:
-    return "x_pid";
+    return "xy_pid";
 case 3:
-    return "y_pid";
+    return "x_pid";
 case 4:
+    return "y_pid";
+case 5:
     return "z_pid";
         default:
             break;
@@ -2287,7 +2292,8 @@ case 4:
 
     void reset_flags()
     {
-        has_combined_xy_pid = false;
+        has_weight = false;
+has_combined_xy_pid = false;
 
 
 
@@ -2298,11 +2304,12 @@ public:
     explicit SAXEventHandler( ::sz::Rate_Controller::Feedback * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->combined_xy_pid)
-, handler_1(&obj->xy_pid)
-, handler_2(&obj->x_pid)
-, handler_3(&obj->y_pid)
-, handler_4(&obj->z_pid)
+        , handler_0(&obj->weight)
+, handler_1(&obj->combined_xy_pid)
+, handler_2(&obj->xy_pid)
+, handler_3(&obj->x_pid)
+, handler_4(&obj->y_pid)
+, handler_5(&obj->z_pid)
     {
         reset_flags();
     }
@@ -2328,6 +2335,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -2357,6 +2367,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Bool(b));
 
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
         default:
             break;
         }
@@ -2384,6 +2397,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -2413,6 +2429,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
         default:
             break;
         }
@@ -2440,6 +2459,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -2469,6 +2491,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint64(i));
 
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
         default:
             break;
         }
@@ -2496,6 +2521,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -2525,6 +2553,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.String(str, length, copy));
 
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
         default:
             break;
         }
@@ -2539,16 +2570,18 @@ case 4:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15))
-						 { state=0; has_combined_xy_pid = true; }
+            else if (utility::string_equal(str, length, "\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12))
+						 { state=0; has_weight = true; }
+else if (utility::string_equal(str, length, "\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15))
+						 { state=1; has_combined_xy_pid = true; }
 else if (utility::string_equal(str, length, "\x58\x59\x20\x50\x49\x44", 6))
-						 { state=1;  }
-else if (utility::string_equal(str, length, "\x58\x20\x50\x49\x44", 5))
 						 { state=2;  }
-else if (utility::string_equal(str, length, "\x59\x20\x50\x49\x44", 5))
+else if (utility::string_equal(str, length, "\x58\x20\x50\x49\x44", 5))
 						 { state=3;  }
+else if (utility::string_equal(str, length, "\x59\x20\x50\x49\x44", 5))
+						 { state=4;  }
 else if (utility::string_equal(str, length, "\x5a\x20\x50\x49\x44", 5))
-						 { state=4; has_z_pid = true; }
+						 { state=5; has_z_pid = true; }
             else {
                 state = -1;
                 return true;
@@ -2571,6 +2604,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -2601,6 +2637,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.StartArray());
 
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
         default:
             break;
         }
@@ -2629,6 +2668,9 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndArray(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
         default:
             break;
         }
@@ -2656,6 +2698,9 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -2686,11 +2731,15 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndObject(length));
 
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_combined_xy_pid) set_missing_required("combined_xy_pid");
+            if (!has_weight) set_missing_required("weight");
+if (!has_combined_xy_pid) set_missing_required("combined_xy_pid");
 if (!has_z_pid) set_missing_required("z_pid");
         }
         return the_error.empty();
@@ -2720,6 +2769,8 @@ case 3:
      handler_3.ReapError(errs); break;
 case 4:
      handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -2739,6 +2790,7 @@ handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
 
     }
 };
@@ -2750,13 +2802,14 @@ struct Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf3781
     {
         w.StartObject();
 
-        w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, bool >()(w, value.combined_xy_pid);
+        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, float >()(w, value.weight);
+w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, bool >()(w, value.combined_xy_pid);
 w.Key("\x58\x59\x20\x50\x49\x44", 6, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::Rate_Controller::PID >()(w, value.xy_pid);
 w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::Rate_Controller::PID >()(w, value.x_pid);
 w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::Rate_Controller::PID >()(w, value.y_pid);
 w.Key("\x5a\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::Rate_Controller::PID >()(w, value.z_pid);
 
-        w.EndObject(5);
+        w.EndObject(6);
     }
 
 };
@@ -2791,9 +2844,10 @@ w.Key("\x5a\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f80444
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Feedforward {
- float max_torque;
+ float weight;
+float max_torque;
 
-explicit Feedforward():max_torque(0) {  }
+explicit Feedforward():weight(1), max_torque(0) {  }
 
 
  
@@ -2810,7 +2864,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;bool has_max_torque;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;bool has_weight;
+bool has_max_torque;
 
     bool check_depth(const char* type)
     {
@@ -2825,6 +2881,8 @@ private:
     {
         switch (state) {
             case 0:
+    return "weight";
+case 1:
     return "max_torque";
         default:
             break;
@@ -2852,14 +2910,16 @@ private:
 
     void reset_flags()
     {
-        has_max_torque = false;
+        has_weight = false;
+has_max_torque = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Rate_Controller::Feedforward * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->max_torque)
+        , handler_0(&obj->weight)
+, handler_1(&obj->max_torque)
     {
         reset_flags();
     }
@@ -2873,6 +2933,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -2890,6 +2953,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -2905,6 +2971,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -2922,6 +2991,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -2937,6 +3009,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -2954,6 +3029,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -2969,6 +3047,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -2986,6 +3067,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -3000,8 +3084,10 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10))
-						 { state=0; has_max_torque = true; }
+            else if (utility::string_equal(str, length, "\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12))
+						 { state=0; has_weight = true; }
+else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10))
+						 { state=1; has_max_torque = true; }
             else {
                 state = -1;
                 return true;
@@ -3012,6 +3098,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -3030,6 +3119,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -3046,6 +3138,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
         default:
             break;
         }
@@ -3061,6 +3156,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -3079,11 +3177,15 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_max_torque) set_missing_required("max_torque");
+            if (!has_weight) set_missing_required("weight");
+if (!has_max_torque) set_missing_required("max_torque");
         }
         return the_error.empty();
     }
@@ -3104,6 +3206,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -3119,6 +3223,7 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
@@ -3130,9 +3235,10 @@ struct Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.max_torque);
+        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.weight);
+w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.max_torque);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };
@@ -3167,13 +3273,12 @@ struct Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Config {
- float ratio_ff_fb;
-sz::Rate_Controller::Feedback feedback;
+ sz::Rate_Controller::Feedback feedback;
 sz::Rate_Controller::Feedforward feedforward;
 sz::Rate_Controller::Inputs inputs;
 sz::Rate_Controller::Outputs outputs;
 
-explicit Config():ratio_ff_fb(1), feedback(), feedforward(), inputs(), outputs() {  }
+explicit Config():feedback(), feedforward(), inputs(), outputs() {  }
 
 
  
@@ -3190,12 +3295,10 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< sz::Rate_Controller::Feedback > handler_1;
-SAXEventHandler< sz::Rate_Controller::Feedforward > handler_2;
-SAXEventHandler< sz::Rate_Controller::Inputs > handler_3;
-SAXEventHandler< sz::Rate_Controller::Outputs > handler_4;bool has_ratio_ff_fb;
-bool has_inputs;
+    SAXEventHandler< sz::Rate_Controller::Feedback > handler_0;
+SAXEventHandler< sz::Rate_Controller::Feedforward > handler_1;
+SAXEventHandler< sz::Rate_Controller::Inputs > handler_2;
+SAXEventHandler< sz::Rate_Controller::Outputs > handler_3;bool has_inputs;
 bool has_outputs;
 
     bool check_depth(const char* type)
@@ -3211,14 +3314,12 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "ratio_ff_fb";
-case 1:
     return "feedback";
-case 2:
+case 1:
     return "feedforward";
-case 3:
+case 2:
     return "inputs";
-case 4:
+case 3:
     return "outputs";
         default:
             break;
@@ -3246,8 +3347,7 @@ case 4:
 
     void reset_flags()
     {
-        has_ratio_ff_fb = false;
-
+        
 
 has_inputs = false;
 has_outputs = false;
@@ -3257,11 +3357,10 @@ public:
     explicit SAXEventHandler( ::sz::Rate_Controller::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->ratio_ff_fb)
-, handler_1(&obj->feedback)
-, handler_2(&obj->feedforward)
-, handler_3(&obj->inputs)
-, handler_4(&obj->outputs)
+        , handler_0(&obj->feedback)
+, handler_1(&obj->feedforward)
+, handler_2(&obj->inputs)
+, handler_3(&obj->outputs)
     {
         reset_flags();
     }
@@ -3284,9 +3383,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
-
-case 4:
-    return checked_event_forwarding(handler_4.Null());
 
         default:
             break;
@@ -3313,9 +3409,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
-case 4:
-    return checked_event_forwarding(handler_4.Bool(b));
-
         default:
             break;
         }
@@ -3340,9 +3433,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int(i));
 
         default:
             break;
@@ -3369,9 +3459,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint(i));
-
         default:
             break;
         }
@@ -3396,9 +3483,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int64(i));
 
         default:
             break;
@@ -3425,9 +3509,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint64(i));
-
         default:
             break;
         }
@@ -3452,9 +3533,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
-
-case 4:
-    return checked_event_forwarding(handler_4.Double(d));
 
         default:
             break;
@@ -3481,9 +3559,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
-case 4:
-    return checked_event_forwarding(handler_4.String(str, length, copy));
-
         default:
             break;
         }
@@ -3498,16 +3573,14 @@ case 4:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x52\x61\x74\x69\x6f\x20\x46\x46\x20\x3c\x2d\x3e\x20\x46\x42\x20\x28\x30\x2d\x31\x29", 21))
-						 { state=0; has_ratio_ff_fb = true; }
-else if (utility::string_equal(str, length, "\x46\x65\x65\x64\x62\x61\x63\x6b", 8))
-						 { state=1;  }
+            else if (utility::string_equal(str, length, "\x46\x65\x65\x64\x62\x61\x63\x6b", 8))
+						 { state=0;  }
 else if (utility::string_equal(str, length, "\x46\x65\x65\x64\x66\x6f\x72\x77\x61\x72\x64", 11))
-						 { state=2;  }
+						 { state=1;  }
 else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=3; has_inputs = true; }
+						 { state=2; has_inputs = true; }
 else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=4; has_outputs = true; }
+						 { state=3; has_outputs = true; }
             else {
                 state = -1;
                 return true;
@@ -3527,9 +3600,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.Key(str, length, copy));
 
             default:
                 break;
@@ -3557,9 +3627,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
-case 4:
-    return checked_event_forwarding(handler_4.StartArray());
-
         default:
             break;
         }
@@ -3585,9 +3652,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndArray(length));
-
         default:
             break;
         }
@@ -3612,9 +3676,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartObject());
 
             default:
                 break;
@@ -3642,15 +3703,11 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_ratio_ff_fb) set_missing_required("ratio_ff_fb");
-if (!has_inputs) set_missing_required("inputs");
+            if (!has_inputs) set_missing_required("inputs");
 if (!has_outputs) set_missing_required("outputs");
         }
         return the_error.empty();
@@ -3678,8 +3735,6 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
-case 4:
-     handler_4.ReapError(errs); break;
 
         default:
             break;
@@ -3698,7 +3753,6 @@ case 4:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
-handler_4.PrepareForReuse();
 
     }
 };
@@ -3710,13 +3764,12 @@ struct Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x69\x6f\x20\x46\x46\x20\x3c\x2d\x3e\x20\x46\x42\x20\x28\x30\x2d\x31\x29", 21, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, float >()(w, value.ratio_ff_fb);
-w.Key("\x46\x65\x65\x64\x62\x61\x63\x6b", 8, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Feedback >()(w, value.feedback);
+        w.Key("\x46\x65\x65\x64\x62\x61\x63\x6b", 8, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Feedback >()(w, value.feedback);
 w.Key("\x46\x65\x65\x64\x66\x6f\x72\x77\x61\x72\x64", 11, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Feedforward >()(w, value.feedforward);
 w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Inputs >()(w, value.inputs);
 w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Outputs >()(w, value.outputs);
 
-        w.EndObject(5);
+        w.EndObject(4);
     }
 
 };
