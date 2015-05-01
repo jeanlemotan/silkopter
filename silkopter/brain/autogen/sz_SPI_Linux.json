@@ -6,7 +6,8 @@
     "members":
     [
         ["std::string", "dev", {"required": true}],
-        ["uint32_t", "mode", {"required": true}]
+        ["uint32_t", "mode", {"required": true}],
+        ["uint32_t", "speed", {"required": true}]
     ]
 },
 {

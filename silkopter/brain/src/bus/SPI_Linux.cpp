@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
 
+#include <linux/spi/spidev.h>
+#define READ_FLAG   0x80
+
 #include "sz_SPI_Linux.hpp"
 
 namespace silk
@@ -88,6 +91,24 @@ auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
 
     std::lock_guard<SPI_Linux> lg(*this);
 
+    spi_ioc_transfer spi_transfer;
+    memset(&spi_transfer, 0, sizeof(spi_ioc_transfer));
+
+    m_tx_buffer.resize(size);
+    spi_transfer.tx_buf = (unsigned long)m_tx_buffer.data();
+    spi_transfer.rx_buf = (unsigned long)data;
+    spi_transfer.len = size;
+    spi_transfer.speed_hz = m_init_params->speed;
+    spi_transfer.bits_per_word = 8;
+    spi_transfer.delay_usecs = 0;
+
+    int status = ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+    if (status < 0)
+    {
+        QLOGW("read failed: {}", strerror(errno));
+        return false;
+    }
+
     return false;
 }
 auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
@@ -96,6 +117,24 @@ auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
     QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
+
+    spi_ioc_transfer spi_transfer;
+    memset(&spi_transfer, 0, sizeof(spi_ioc_transfer));
+
+    m_rx_buffer.resize(size);
+    spi_transfer.tx_buf = (unsigned long)data;
+    spi_transfer.rx_buf = (unsigned long)m_rx_buffer.data();
+    spi_transfer.len = size;
+    spi_transfer.speed_hz = m_init_params->speed;
+    spi_transfer.bits_per_word = 8;
+    spi_transfer.delay_usecs = 0;
+
+    int status = ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+    if (status < 0)
+    {
+        QLOGW("write failed: {}", strerror(errno));
+        return false;
+    }
 
     return false;
 }
@@ -107,7 +146,19 @@ auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
 
     std::lock_guard<SPI_Linux> lg(*this);
 
-    return false;
+    m_tx_buffer.resize(size + 1);
+    m_tx_buffer[0] = reg | READ_FLAG;
+
+    m_rx_buffer.resize(size + 1);
+
+    auto ok = read(m_rx_buffer.data(), size + 1);
+    if (!ok)
+    {
+        return false;
+    }
+
+    std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), data);
+    return true;
 }
 auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
@@ -116,7 +167,12 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
 
     std::lock_guard<SPI_Linux> lg(*this);
 
-    return false;
+    m_tx_buffer.clear();
+    m_tx_buffer.resize(size + 1);
+    m_tx_buffer[0] = reg | READ_FLAG;
+    std::copy(data, data + size, m_tx_buffer.begin() + 1);
+
+    return write(m_tx_buffer.data(), size + 1);
 }
 
 auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool

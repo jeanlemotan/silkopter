@@ -52,7 +52,8 @@ private:
 
     int m_fd = -1;
     std::recursive_mutex m_mutex;
-    std::vector<uint8_t> m_buffer;
+    std::vector<uint8_t> m_tx_buffer;
+    std::vector<uint8_t> m_rx_buffer;
 };
 
 }

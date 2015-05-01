@@ -117,7 +117,9 @@ SOURCES += \
     ../../src/simulator/Multi_Simulation.cpp \
     ../../src/simulator/Multi_Simulator.cpp \
     ../../src/processor/Servo_Gimbal.cpp \
-    ../../src/processor/Motor_Mixer.cpp
+    ../../src/processor/Motor_Mixer.cpp \
+    ../../src/source/ADS1115.cpp \
+    ../../src/sink/PCA9685.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -226,5 +228,7 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/rapidjson.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/reader.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h
+    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
+    ../../src/source/ADS1115.h \
+    ../../src/sink/PCA9685.h
 

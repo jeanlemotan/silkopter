@@ -27,12 +27,11 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct Init_Params {
+namespace sz { namespace ADS1115 { struct Init_Params {
  std::string bus;
-uint32_t adc0_rate;
-uint32_t adc1_rate_ratio;
+uint32_t rate;
 
-explicit Init_Params():bus(), adc0_rate(50), adc1_rate_ratio(10) {  }
+explicit Init_Params():bus(), rate(500) {  }
 
 
  
@@ -43,17 +42,15 @@ explicit Init_Params():bus(), adc0_rate(50), adc1_rate_ratio(10) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::Init_Params > {
+class SAXEventHandler< ::sz::ADS1115::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< uint32_t > handler_1;
-SAXEventHandler< uint32_t > handler_2;bool has_bus;
-bool has_adc0_rate;
-bool has_adc1_rate_ratio;
+SAXEventHandler< uint32_t > handler_1;bool has_bus;
+bool has_rate;
 
     bool check_depth(const char* type)
     {
@@ -70,9 +67,7 @@ bool has_adc1_rate_ratio;
             case 0:
     return "bus";
 case 1:
-    return "adc0_rate";
-case 2:
-    return "adc1_rate_ratio";
+    return "rate";
         default:
             break;
         }
@@ -100,17 +95,15 @@ case 2:
     void reset_flags()
     {
         has_bus = false;
-has_adc0_rate = false;
-has_adc1_rate_ratio = false;
+has_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::ADS1115::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->bus)
-, handler_1(&obj->adc0_rate)
-, handler_2(&obj->adc1_rate_ratio)
+, handler_1(&obj->rate)
     {
         reset_flags();
     }
@@ -127,9 +120,6 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
-
-case 2:
-    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -150,9 +140,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
-case 2:
-    return checked_event_forwarding(handler_2.Bool(b));
-
         default:
             break;
         }
@@ -171,9 +158,6 @@ case 2:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -194,9 +178,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
-case 2:
-    return checked_event_forwarding(handler_2.Uint(i));
-
         default:
             break;
         }
@@ -215,9 +196,6 @@ case 2:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -238,9 +216,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
-case 2:
-    return checked_event_forwarding(handler_2.Uint64(i));
-
         default:
             break;
         }
@@ -259,9 +234,6 @@ case 2:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
-
-case 2:
-    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -282,9 +254,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
-case 2:
-    return checked_event_forwarding(handler_2.String(str, length, copy));
-
         default:
             break;
         }
@@ -302,9 +271,7 @@ case 2:
             else if (utility::string_equal(str, length, "\x42\x75\x73", 3))
 						 { state=0; has_bus = true; }
 else if (utility::string_equal(str, length, "\x41\x44\x43\x30\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 14))
-						 { state=1; has_adc0_rate = true; }
-else if (utility::string_equal(str, length, "\x41\x44\x43\x31\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 15))
-						 { state=2; has_adc1_rate_ratio = true; }
+						 { state=1; has_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -318,9 +285,6 @@ else if (utility::string_equal(str, length, "\x41\x44\x43\x31\x20\x52\x61\x74\x6
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -342,9 +306,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
-case 2:
-    return checked_event_forwarding(handler_2.StartArray());
-
         default:
             break;
         }
@@ -364,9 +325,6 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
-case 2:
-    return checked_event_forwarding(handler_2.EndArray(length));
-
         default:
             break;
         }
@@ -385,9 +343,6 @@ case 2:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -409,16 +364,12 @@ case 2:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
-case 2:
-    return checked_event_forwarding(handler_2.EndObject(length));
-
             default:
                 break;
             }
         } else {
             if (!has_bus) set_missing_required("bus");
-if (!has_adc0_rate) set_missing_required("adc0_rate");
-if (!has_adc1_rate_ratio) set_missing_required("adc1_rate_ratio");
+if (!has_rate) set_missing_required("rate");
         }
         return the_error.empty();
     }
@@ -441,8 +392,6 @@ if (!has_adc1_rate_ratio) set_missing_required("adc1_rate_ratio");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
-case 2:
-     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -459,23 +408,21 @@ case 2:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
-handler_2.PrepareForReuse();
 
     }
 };
 
-template < class Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82 >
-struct Serializer< Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82, ::sz::RC5T619::Init_Params > {
+template < class Writer0222b254de3affbf36ae7a37e59c04a2d2df51d07e90b4318548d6489d536fb8 >
+struct Serializer< Writer0222b254de3affbf36ae7a37e59c04a2d2df51d07e90b4318548d6489d536fb8, ::sz::ADS1115::Init_Params > {
 
-    void operator()( Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82& w, const ::sz::RC5T619::Init_Params& value) const
+    void operator()( Writer0222b254de3affbf36ae7a37e59c04a2d2df51d07e90b4318548d6489d536fb8& w, const ::sz::ADS1115::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x75\x73", 3, false); Serializer< Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82, std::string >()(w, value.bus);
-w.Key("\x41\x44\x43\x30\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 14, false); Serializer< Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82, uint32_t >()(w, value.adc0_rate);
-w.Key("\x41\x44\x43\x31\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 15, false); Serializer< Writer59c195c4113cf61eac733a4f577565dff0725c62b49f448c02f46b4c1f273f82, uint32_t >()(w, value.adc1_rate_ratio);
+        w.Key("\x42\x75\x73", 3, false); Serializer< Writer0222b254de3affbf36ae7a37e59c04a2d2df51d07e90b4318548d6489d536fb8, std::string >()(w, value.bus);
+w.Key("\x41\x44\x43\x30\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 14, false); Serializer< Writer0222b254de3affbf36ae7a37e59c04a2d2df51d07e90b4318548d6489d536fb8, uint32_t >()(w, value.rate);
 
-        w.EndObject(3);
+        w.EndObject(2);
     }
 
 };
@@ -509,7 +456,7 @@ w.Key("\x41\x44\x43\x31\x20\x52\x61\x74\x65\x20\x52\x61\x74\x69\x6f", 15, false)
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct ADC {
+namespace sz { namespace ADS1115 { struct ADC {
  
 
 explicit ADC() {  }
@@ -523,7 +470,7 @@ explicit ADC() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::ADC > {
+class SAXEventHandler< ::sz::ADS1115::ADC > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -574,7 +521,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::ADC * obj)
+    explicit SAXEventHandler( ::sz::ADS1115::ADC * obj)
         : state(-1)
         , depth(0)
         
@@ -825,10 +772,10 @@ public:
     }
 };
 
-template < class Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8 >
-struct Serializer< Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8, ::sz::RC5T619::ADC > {
+template < class Writer8dc4d11c7773a588fb7de4cf138039477bbad4bc9206639a7fa93a704382a944 >
+struct Serializer< Writer8dc4d11c7773a588fb7de4cf138039477bbad4bc9206639a7fa93a704382a944, ::sz::ADS1115::ADC > {
 
-    void operator()( Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf99843d5905ef8& w, const ::sz::RC5T619::ADC& value) const
+    void operator()( Writer8dc4d11c7773a588fb7de4cf138039477bbad4bc9206639a7fa93a704382a944& w, const ::sz::ADS1115::ADC& value) const
     {
         w.StartObject();
 
@@ -868,11 +815,13 @@ struct Serializer< Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf9984
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct Outputs {
- sz::RC5T619::ADC adc0;
-sz::RC5T619::ADC adc1;
+namespace sz { namespace ADS1115 { struct Outputs {
+ sz::ADS1115::ADC adc0;
+sz::ADS1115::ADC adc1;
+sz::ADS1115::ADC adc2;
+sz::ADS1115::ADC adc3;
 
-explicit Outputs():adc0(), adc1() {  }
+explicit Outputs():adc0(), adc1(), adc2(), adc3() {  }
 
 
  
@@ -883,15 +832,19 @@ explicit Outputs():adc0(), adc1() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::Outputs > {
+class SAXEventHandler< ::sz::ADS1115::Outputs > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::RC5T619::ADC > handler_0;
-SAXEventHandler< sz::RC5T619::ADC > handler_1;bool has_adc0;
+    SAXEventHandler< sz::ADS1115::ADC > handler_0;
+SAXEventHandler< sz::ADS1115::ADC > handler_1;
+SAXEventHandler< sz::ADS1115::ADC > handler_2;
+SAXEventHandler< sz::ADS1115::ADC > handler_3;bool has_adc0;
 bool has_adc1;
+bool has_adc2;
+bool has_adc3;
 
     bool check_depth(const char* type)
     {
@@ -909,6 +862,10 @@ bool has_adc1;
     return "adc0";
 case 1:
     return "adc1";
+case 2:
+    return "adc2";
+case 3:
+    return "adc3";
         default:
             break;
         }
@@ -937,14 +894,18 @@ case 1:
     {
         has_adc0 = false;
 has_adc1 = false;
+has_adc2 = false;
+has_adc3 = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::Outputs * obj)
+    explicit SAXEventHandler( ::sz::ADS1115::Outputs * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->adc0)
 , handler_1(&obj->adc1)
+, handler_2(&obj->adc2)
+, handler_3(&obj->adc3)
     {
         reset_flags();
     }
@@ -961,6 +922,12 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -981,6 +948,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -999,6 +972,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -1019,6 +998,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -1037,6 +1022,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -1057,6 +1048,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -1075,6 +1072,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -1095,6 +1098,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -1113,6 +1122,10 @@ case 1:
 						 { state=0; has_adc0 = true; }
 else if (utility::string_equal(str, length, "\x41\x44\x43\x31", 4))
 						 { state=1; has_adc1 = true; }
+else if (utility::string_equal(str, length, "\x41\x44\x43\x32", 4))
+						 { state=2; has_adc2 = true; }
+else if (utility::string_equal(str, length, "\x41\x44\x43\x33", 4))
+						 { state=3; has_adc3 = true; }
             else {
                 state = -1;
                 return true;
@@ -1126,6 +1139,12 @@ else if (utility::string_equal(str, length, "\x41\x44\x43\x31", 4))
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -1147,6 +1166,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -1166,6 +1191,12 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
         default:
             break;
         }
@@ -1184,6 +1215,12 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
 
             default:
                 break;
@@ -1205,12 +1242,20 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_adc0) set_missing_required("adc0");
 if (!has_adc1) set_missing_required("adc1");
+if (!has_adc2) set_missing_required("adc2");
+if (!has_adc3) set_missing_required("adc3");
         }
         return the_error.empty();
     }
@@ -1233,6 +1278,10 @@ if (!has_adc1) set_missing_required("adc1");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -1249,21 +1298,25 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
 
     }
 };
 
-template < class Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c >
-struct Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, ::sz::RC5T619::Outputs > {
+template < class Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5 >
+struct Serializer< Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5, ::sz::ADS1115::Outputs > {
 
-    void operator()( Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c& w, const ::sz::RC5T619::Outputs& value) const
+    void operator()( Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5& w, const ::sz::ADS1115::Outputs& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x30", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc0);
-w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc1);
+        w.Key("\x41\x44\x43\x30", 4, false); Serializer< Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5, sz::ADS1115::ADC >()(w, value.adc0);
+w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5, sz::ADS1115::ADC >()(w, value.adc1);
+w.Key("\x41\x44\x43\x32", 4, false); Serializer< Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5, sz::ADS1115::ADC >()(w, value.adc2);
+w.Key("\x41\x44\x43\x33", 4, false); Serializer< Writereedf2551dae476464f071e5096c4a67b3e59bee74275ac1b46ac32890a7b3ec5, sz::ADS1115::ADC >()(w, value.adc3);
 
-        w.EndObject(2);
+        w.EndObject(4);
     }
 
 };
@@ -1297,8 +1350,8 @@ w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct Config {
- sz::RC5T619::Outputs outputs;
+namespace sz { namespace ADS1115 { struct Config {
+ sz::ADS1115::Outputs outputs;
 
 explicit Config():outputs() {  }
 
@@ -1311,13 +1364,13 @@ explicit Config():outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::Config > {
+class SAXEventHandler< ::sz::ADS1115::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< sz::RC5T619::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< sz::ADS1115::Outputs > handler_0;bool has_outputs;
 
     bool check_depth(const char* type)
     {
@@ -1363,7 +1416,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::Config * obj)
+    explicit SAXEventHandler( ::sz::ADS1115::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->outputs)
@@ -1630,14 +1683,14 @@ public:
     }
 };
 
-template < class Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d >
-struct Serializer< Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d, ::sz::RC5T619::Config > {
+template < class Writerdc14898e630e16c37e72332a72bcc27c6733755a38788dfde7ef90e43e33df7b >
+struct Serializer< Writerdc14898e630e16c37e72332a72bcc27c6733755a38788dfde7ef90e43e33df7b, ::sz::ADS1115::Config > {
 
-    void operator()( Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d& w, const ::sz::RC5T619::Config& value) const
+    void operator()( Writerdc14898e630e16c37e72332a72bcc27c6733755a38788dfde7ef90e43e33df7b& w, const ::sz::ADS1115::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d, sz::RC5T619::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerdc14898e630e16c37e72332a72bcc27c6733755a38788dfde7ef90e43e33df7b, sz::ADS1115::Outputs >()(w, value.outputs);
 
         w.EndObject(1);
     }
