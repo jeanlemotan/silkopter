@@ -4,6 +4,8 @@
 #include "sz_math.hpp"
 #include "sz_UBLOX.hpp"
 
+#include <boost/scope_exit.hpp>
+
 namespace silk
 {
 namespace node
@@ -156,7 +158,7 @@ struct INF_NOTICE
     char start;
 };
 
-struct MON_HW
+struct MON_HW_6
 {
     X4 pinSel = 0;
     X4 pinBank = 0;
@@ -175,6 +177,27 @@ struct MON_HW
     X4 pullIrq = 0;
     X4 pullH = 0;
     X4 pullL = 0;
+};
+
+struct MON_HW_7
+{
+    X4 pinSel;
+    X4 pinBank;
+    X4 pinDir;
+    X4 pinVal;
+    U2 noisePerMS;
+    U2 agcCnt;
+    U1 aStatus;
+    U1 aPower;
+    X1 flags;
+    U1 reserved1;
+    X4 usedMask;
+    U1 VP[17];
+    U1 jamInd;
+    U2 reserved3;
+    X4 pinIrq;
+    X4 pullH;
+    X4 pullL;
 };
 
 struct MON_VER
@@ -292,8 +315,8 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     }
     else if (buses.spi)
     {
-        QASSERT(0);
-        return 0;
+        max_size = math::min(max_size, 32u);
+        return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
     {
@@ -311,8 +334,7 @@ auto UBLOX::write(Buses& buses, uint8_t const* data, size_t size) -> bool
     }
     else if (buses.spi)
     {
-        QASSERT(0);
-        return false;
+        return buses.spi->write(data, size);
     }
     else if (buses.i2c)
     {
@@ -337,6 +359,12 @@ auto UBLOX::setup() -> bool
         QLOGE("No bus configured");
         return false;
     }
+
+    lock(buses);
+    BOOST_SCOPE_EXIT(this_, &buses)
+    {
+        this_->unlock(buses);
+    } BOOST_SCOPE_EXIT_END
 
     {
         QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
@@ -417,6 +445,13 @@ void UBLOX::process()
         return;
     }
 
+    lock(buses);
+    BOOST_SCOPE_EXIT(this_, &buses)
+    {
+        this_->unlock(buses);
+    } BOOST_SCOPE_EXIT_END
+
+
     read_data(buses);
 
     auto now = q::Clock::now();
@@ -443,13 +478,18 @@ void UBLOX::process()
 
 void UBLOX::read_data(Buses& buses)
 {
-    do
+    auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+    if (res > 0)
     {
-        auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
-        if (res > 0)
-        {
-            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+        std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
 
+        //spi marker for 'no data available'
+        while (!m_buffer.empty() && m_buffer.front() == 0xFF)
+        {
+            m_buffer.pop_front();
+        }
+        if (!m_buffer.empty())
+        {
             bool found = false;
             do
             {
@@ -461,11 +501,7 @@ void UBLOX::read_data(Buses& buses)
                 }
             } while(found);
         }
-        else
-        {
-            break;
-        }
-    } while (1);
+    }
 }
 
 auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
@@ -476,7 +512,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
         size_t payload_size = 0;
         uint8_t ck_a = 0;
         uint8_t ck_b = 0;
-        bool is_broken = false;
+        bool is_invalid = false;
 
         packet.payload.clear();
 
@@ -490,7 +526,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 packet.payload.clear();
                 if (d != PREAMBLE1)
                 {
-                    is_broken = true;
+                    is_invalid = true;
                     break;
                 }
                 step++;
@@ -498,7 +534,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
             case 1:
                 if (d != PREAMBLE2)
                 {
-                    is_broken = true;
+                    is_invalid = true;
                     break;
                 }
                 step++;
@@ -522,7 +558,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 payload_size = (d << 8) | payload_size;
                 if (payload_size > MAX_PAYLOAD_SIZE)
                 {
-                    is_broken = true;
+                    is_invalid = true;
                     break;
                 }
                 if (payload_size > 0)
@@ -544,7 +580,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
             case 7:
                 if (ck_a != d)
                 {
-                    is_broken = true;
+                    is_invalid = true;
                     break;
                 }
                 step++;
@@ -552,7 +588,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
             case 8:
                 if (ck_b != d)
                 {
-                    is_broken = true;
+                    is_invalid = true;
                     break;
                 }
 
@@ -561,13 +597,13 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 // a valid UBlox packet
                 return true;
             }
-            if (is_broken)
+            if (is_invalid)
             {
                 break;
             }
         }
 
-        if (is_broken)
+        if (is_invalid)
         {
             //remove the preamble and start again
             buffer.pop_front();
@@ -660,7 +696,7 @@ void UBLOX::process_nav_status_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_STATUS));
     NAV_STATUS& data = reinterpret_cast<NAV_STATUS&>(*packet.payload.data());
 
-    //LOG_INFO("STATUS: iTOW:{}, Fix:{}, flags:{}, fs:{}, flags2:{}", data.iTOW, data.gpsFix, data.flags, data.fixStat, data.flags2);
+    //QLOGI("STATUS: iTOW:{}, Fix:{}, flags:{}, fs:{}, flags2:{}", data.iTOW, data.gpsFix, data.flags, data.fixStat, data.flags2);
 
     //gpsFix
 //    - 0x00 = no fix
@@ -681,7 +717,7 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_SOL));
     NAV_SOL& data = reinterpret_cast<NAV_SOL&>(*packet.payload.data());
 
-    if (data.numSV > 0)
+    if (0 && data.numSV > 0)
     {
         QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
                   data.flags,
@@ -779,11 +815,29 @@ void UBLOX::process_inf_notice_packet(Buses& buses, Packet& packet)
 
 void UBLOX::process_mon_hw_packet(Buses& buses, Packet& packet)
 {
-    QASSERT(packet.payload.size() == sizeof(MON_HW));
-    MON_HW& data = reinterpret_cast<MON_HW&>(*packet.payload.data());
+    uint32_t jamInd = 0;
+    uint32_t noisePerMS = 0;
+    uint32_t agcCnt = 0;
+    if (packet.payload.size() == sizeof(MON_HW_6))
+    {
+        auto& data = reinterpret_cast<MON_HW_6&>(*packet.payload.data());
+        jamInd = data.jamInd;
+        noisePerMS = data.noisePerMS;
+        agcCnt = data.agcCnt;
+    }
+    else if (packet.payload.size() == sizeof(MON_HW_7))
+    {
+        auto& data = reinterpret_cast<MON_HW_7&>(*packet.payload.data());
+        jamInd = data.jamInd;
+        noisePerMS = data.noisePerMS;
+        agcCnt = data.agcCnt;
+    }
+    else
+    {
+        QLOGE("unknown HW_MON packet size: {}", packet.payload.size());
+    }
 
-    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", data.jamInd, data.noisePerMS, data.agcCnt);
-
+    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", jamInd, noisePerMS, agcCnt);
     send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
 }
 

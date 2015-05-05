@@ -80,7 +80,7 @@ auto PCA9685::init() -> bool
     }
 
 
-#if defined (RASPBERRY_PI)
+#if defined (RASPBERRY_PI0)
 
     //first validate
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
@@ -165,7 +165,7 @@ void PCA9685::set_pwm_value(size_t idx, float value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
-#if defined RASPBERRY_PI
+#if defined RASPBERRY_PI0
     auto const& ch = *m_pwm_channels[idx].config;
     value = math::clamp(value, 0.f, 1.f);
     int pulse = value * (ch.max - ch.min);

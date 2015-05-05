@@ -158,6 +158,32 @@ constexpr uint8_t MPU_REG_GYRO_ZOUT_H                    = 0x47;
 constexpr uint8_t MPU_REG_GYRO_ZOUT_L                    = 0x48;
 constexpr uint8_t MPU_REG_RAW_COMPASS                    = 0x49;
 
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_00               = 0x49;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_01               = 0x4A;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_02               = 0x4B;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_03               = 0x4C;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_04               = 0x4D;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_05               = 0x4E;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_06               = 0x4F;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_07               = 0x50;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_08               = 0x51;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_09               = 0x52;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_10               = 0x53;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_11               = 0x54;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_12               = 0x55;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_13               = 0x56;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_14               = 0x57;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_15               = 0x58;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_16               = 0x59;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_17               = 0x5A;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_18               = 0x5B;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_19               = 0x5C;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_20               = 0x5D;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_21               = 0x5E;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_22               = 0x5F;
+constexpr uint8_t MPU_REG_EXT_SENS_DATA_23               = 0x60;
+
+
 constexpr uint8_t MPU_REG_I2C_SLV0_DO                    = 0x63;
 constexpr uint8_t MPU_REG_I2C_SLV1_DO                    = 0x64;
 constexpr uint8_t MPU_REG_I2C_SLV2_DO                    = 0x65;
@@ -215,11 +241,6 @@ constexpr uint8_t MPU_REG_WHO_AM_I                       = 0x75;
 //////////////////////////////////////////////////////////////////
 
 
-constexpr uint8_t USER_CTRL_VALUE = MPU_BIT_FIFO_EN | MPU_BIT_FIFO_RST/* | MPU_BIT_I2C_MST*/;
-
-
-//////////////////////////////////////////////////////////////////
-
 #ifdef USE_AK8963
 
 //#if defined USE_AK8975
@@ -243,7 +264,8 @@ constexpr uint8_t AKM_REG_HZH                       = 0x08;
 
 constexpr uint8_t AKM_REG_ST2                       = 0x09;
 
-constexpr uint8_t AKM_REG_CNTL                      = 0x0A;
+constexpr uint8_t AKM_REG_CNTL1                     = 0x0A;
+constexpr uint8_t AKM_REG_CNTL2                     = 0x0B;
 constexpr uint8_t AKM_REG_ASTC                      = 0x0C;
 constexpr uint8_t AKM_REG_ASAX                      = 0x10;
 constexpr uint8_t AKM_REG_ASAY                      = 0x11;
@@ -256,13 +278,16 @@ constexpr uint8_t AKM_DATA_ERROR                    = 0x40;
 
 constexpr uint8_t AKM_BIT_SELF_TEST                 = 0x40;
 
-constexpr uint8_t AKM_POWER_DOWN                    = 0x00;
-constexpr uint8_t AKM_SINGLE_MEASUREMENT            = 0x01;
-constexpr uint8_t AKM_CONTINUOUS1_MEASUREMENT       = 0x02;
-constexpr uint8_t AKM_CONTINUOUS2_MEASUREMENT       = 0x06;
-constexpr uint8_t AKM_FUSE_ROM_ACCESS               = 0x0F;
+constexpr uint8_t AKM_CNTL1_POWER_DOWN              = 0x00;
+constexpr uint8_t AKM_CNTL1_SINGLE_MEASUREMENT      = 0x01;
+constexpr uint8_t AKM_CNTL1_CONTINUOUS1_MEASUREMENT = 0x02;
+constexpr uint8_t AKM_CNTL1_CONTINUOUS2_MEASUREMENT = 0x06;
+constexpr uint8_t AKM_CNTL1_FUSE_ROM_ACCESS         = 0x0F;
+constexpr uint8_t AKM_CNTL1_16_BIT_MODE             = 1 << 4;
+
+constexpr uint8_t AKM_CNTL2_RESET                   = 0x01;
+
 constexpr uint8_t AKM_MODE_SELF_TEST                = 0x08;
-constexpr uint8_t AKM_16_BIT_MODE                   = 1 << 4;
 
 constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
@@ -340,33 +365,77 @@ auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
 }
 auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register(m_magnetic_field->akm_address, reg, data, size)
-         : buses.spi ? buses.spi->read_register(reg, data, size)
-         : false;
+    if (buses.i2c)
+    {
+        return buses.i2c->read_register(m_magnetic_field->akm_address, reg, data, size);
+    }
+
+    //spi read
+
+    bool res = true;
+    constexpr uint8_t READ_FLAG = 0x80;
+    constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+    if (m_magnetic_field->akm_address != akm_address)
+    {
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        m_magnetic_field->akm_address = akm_address;
+    }
+
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+    res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size);
+    return res;
 }
 auto MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u8(m_magnetic_field->akm_address, reg, dst)
-         : buses.spi ? buses.spi->read_register_u8(reg, dst)
-         : false;
+    return akm_read(buses, reg, &dst, sizeof(dst));
 }
 auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u16(m_magnetic_field->akm_address, reg, dst)
-         : buses.spi ? buses.spi->read_register_u16(reg, dst)
-         : false;
+    if (buses.i2c)
+    {
+        return buses.i2c->read_register_u16(m_magnetic_field->akm_address, reg, dst);
+    }
+
+    //spi read
+
+    bool res = true;
+    constexpr uint8_t READ_FLAG = 0x80;
+    constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+    if (m_magnetic_field->akm_address != akm_address)
+    {
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        m_magnetic_field->akm_address = akm_address;
+    }
+
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + sizeof(dst));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+    res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst);
+    return res;
 }
 auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register_u8(m_magnetic_field->akm_address, reg, t)
-         : buses.spi ? buses.spi->write_register_u8(reg, t)
-         : false;
-}
-auto MPU9250::akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
-{
-    return buses.i2c ? buses.i2c->write_register_u16(m_magnetic_field->akm_address, reg, t)
-         : buses.spi ? buses.spi->write_register_u16(reg, t)
-         : false;
+    if (buses.i2c)
+    {
+        return buses.i2c->write_register_u8(m_magnetic_field->akm_address, reg, t);
+    }
+
+    //spi write
+
+    bool res = true;
+    constexpr uint8_t akm_address = 0x0C;
+    if (m_magnetic_field->akm_address != akm_address)
+    {
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        m_magnetic_field->akm_address = akm_address;
+    }
+
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_DO,   t);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 1); //one byte
+    return res;
 }
 
 auto MPU9250::get_outputs() const -> std::vector<Output>
@@ -564,7 +633,9 @@ auto MPU9250::init() -> bool
     m_fifo_sample_size = 12;
 
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+
+    m_user_ctrl_value = MPU_BIT_FIFO_EN;
+    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     m_last_fifo_tp = q::Clock::now();
@@ -583,10 +654,30 @@ auto MPU9250::init() -> bool
 
 auto MPU9250::setup_compass(Buses& buses) -> bool
 {
-    QLOG_TOPIC("mpu9250::setup_compass");
+    if (buses.i2c)
+    {
+        return setup_compass_i2c(buses);
+    }
+    else if (buses.spi)
+    {
+        return setup_compass_spi(buses);
+    }
+    return false;
+}
+
+auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
+{
+    QLOG_TOPIC("mpu9250::setup_compass_i2c");
 
 #ifdef USE_AK8963
-    set_bypass(buses, 1);
+    {
+        m_user_ctrl_value &= ~MPU_BIT_I2C_MST;
+        mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+
+        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_BYPASS_EN);
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+    }
 
     // Find compass. Possible addresses range from 0x0C to 0x0F.
     for (m_magnetic_field->akm_address = 0x0C; m_magnetic_field->akm_address <= 0x0F; m_magnetic_field->akm_address++)
@@ -607,10 +698,10 @@ auto MPU9250::setup_compass(Buses& buses) -> bool
 
     QLOGI("Compass found at 0x{X}", m_magnetic_field->akm_address);
 
-    akm_write_u8(buses, AKM_REG_CNTL, AKM_POWER_DOWN);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
-    akm_write_u8(buses, AKM_REG_CNTL, AKM_FUSE_ROM_ACCESS);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
     // Get sensitivity adjustment data from fuse ROM.
@@ -620,48 +711,11 @@ auto MPU9250::setup_compass(Buses& buses) -> bool
     m_magnetic_field->magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field->magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
-    akm_write_u8(buses, AKM_REG_CNTL, AKM_POWER_DOWN);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 
-    akm_write_u8(buses, AKM_REG_CNTL, AKM_CONTINUOUS2_MEASUREMENT | AKM_16_BIT_MODE);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-
-//    mpu_set_bypass(0);
-
-//    // Set up master mode, master clock, and ES bit.
-//    mpu_write_u8(MPU_REG_I2C_MST_CTRL, MPU_BIT_WAIT_FOR_ES);
-
-//    // Slave 0 reads from AKM data registers.
-//    constexpr uint8_t MPU_BIT_I2C_READ = 0x80;
-//    mpu_write_u8(MPU_REG_I2C_SLV0_ADDR, MPU_BIT_I2C_READ | m_compass_addr);
-
-//    // Compass reads start at this register.
-//    mpu_write_u8(MPU_REG_I2C_SLV0_REG, AKM_REG_ST1);
-
-//    // Enable slave 0, 8-byte reads.
-//    mpu_write_u8(MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN | 8);
-
-//    // Slave 1 changes AKM measurement mode.
-//    mpu_write_u8(MPU_REG_I2C_SLV1_ADDR, m_compass_addr);
-
-//    // AKM measurement mode register.
-//    mpu_write_u8(MPU_REG_I2C_SLV1_REG, AKM_REG_CNTL);
-
-//    // Enable slave 1, 1-byte writes.
-//    mpu_write_u8(MPU_REG_I2C_SLV1_CTRL, MPU_BIT_I2C_SLV1_EN | 1);
-
-//    // Set slave 1 data.
-//    mpu_write_u8(MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
-
-//    // Trigger slave 0 and slave 1 actions at each sample.
-//    mpu_write_u8(MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_I2C_SLV0_DLY_EN | MPU_BIT_I2C_SLV1_DLY_EN);
-
-//    {
-//        uint8_t div = m_sample_rate / 10 - 1;
-//        mpu_write_u8(MPU_REG_I2C_SLV4_CTRL, div);
-//    }
-
-//    mpu_write_u8(MPU_REG_I2C_SLV1_DO, AKM_SINGLE_MEASUREMENT);
 
 #endif
 
@@ -669,42 +723,101 @@ auto MPU9250::setup_compass(Buses& buses) -> bool
     return true;
 }
 
-void MPU9250::set_bypass(Buses& buses, bool on)
+auto MPU9250::setup_compass_spi(Buses& buses) -> bool
 {
-    QLOG_TOPIC("mpu9250::set_bypass");
+    QLOG_TOPIC("mpu9250::setup_compass_spi");
 
-    if (on)
-    {
-        uint8_t tmp;
-        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
-        tmp &= ~MPU_BIT_I2C_MST;
-        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
-        tmp = MPU_BIT_BYPASS_EN;
-        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
-    }
-    else
+    bool res = true;
+
+
+#ifdef USE_AK8963
+
     {
         // Enable I2C master mode if compass is being used.
-        uint8_t tmp;
-        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
-        tmp |= MPU_BIT_I2C_MST;
-        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
+        res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
-        tmp = 0;
-        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
+
+        m_user_ctrl_value |= MPU_BIT_I2C_MST;
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+
+        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 0x0D); //400Khz i2c speed
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
     }
+
+    m_magnetic_field->akm_address = 0;
+
+    {
+        uint8_t data;
+        res &= akm_read_u8(buses, AKM_REG_WHOAMI, data);
+        if (!res || data != AKM_WHOAMI)
+        {
+            QLOGW("Compass not found!!");
+            //return false;
+        }
+    }
+
+    res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+
+    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+
+    // Get sensitivity adjustment data from fuse ROM.
+    uint8_t data[4] = {0};
+    res &= akm_read(buses, AKM_REG_ASAX, data, 3);
+    m_magnetic_field->magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field->magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field->magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+
+    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+
+    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+
+#endif
+
+    m_magnetic_field->last_tp = q::Clock::now();
+    return res;
 }
+
+//void MPU9250::set_bypass(Buses& buses, bool on)
+//{
+//    QLOG_TOPIC("mpu9250::set_bypass");
+
+//    if (on)
+//    {
+//        uint8_t tmp;
+//        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
+//        tmp &= ~MPU_BIT_I2C_MST;
+//        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
+//        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+//        tmp = MPU_BIT_BYPASS_EN;
+//        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
+//    }
+//    else
+//    {
+//        // Enable I2C master mode if compass is being used.
+//        uint8_t tmp;
+//        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
+//        tmp |= MPU_BIT_I2C_MST;
+//        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
+//        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+//        tmp = 0;
+//        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
+//    }
+//}
 
 void MPU9250::reset_fifo(Buses& buses)
 {
     QLOG_TOPIC("mpu9250::reset_fifo");
 
-    mpu_write_u8(buses, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_FIFO_EN, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    mpu_write_u8(buses, MPU_REG_USER_CTRL, USER_CTRL_VALUE);
+    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
 }
@@ -827,10 +940,33 @@ void MPU9250::process_compass(Buses& buses)
     }
 
     std::array<uint8_t, 8> tmp;
-    if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size()))
+    if (buses.i2c)
     {
-        return;
+        if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size()))
+        {
+            return;
+        }
     }
+    else //spi
+    {
+        //first read what is in the ext registers (so the previous reading)
+        if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size()))
+        {
+            return;
+        }
+
+        //now request the transfer again
+        constexpr uint8_t READ_FLAG = 0x80;
+        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+        if (m_magnetic_field->akm_address != akm_address)
+        {
+            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+            m_magnetic_field->akm_address = akm_address;
+        }
+        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
+        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + tmp.size());
+    }
+
     if (!(tmp[0] & AKM_DATA_READY))
     {
         return;

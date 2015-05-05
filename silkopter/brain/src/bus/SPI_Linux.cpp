@@ -84,19 +84,17 @@ void SPI_Linux::unlock()
     m_mutex.unlock();
 }
 
-auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
+auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) -> bool
 {
-    QLOG_TOPIC("spi_linux::read");
-    QASSERT(m_fd >= 0);
-
-    std::lock_guard<SPI_Linux> lg(*this);
+    QLOG_TOPIC("spi_linux::transfer");
+    QASSERT(m_fd >= 0 && size > 0);
 
     spi_ioc_transfer spi_transfer;
     memset(&spi_transfer, 0, sizeof(spi_ioc_transfer));
 
     m_tx_buffer.resize(size);
-    spi_transfer.tx_buf = (unsigned long)m_tx_buffer.data();
-    spi_transfer.rx_buf = (unsigned long)data;
+    spi_transfer.tx_buf = (unsigned long)tx_data;
+    spi_transfer.rx_buf = (unsigned long)rx_data;
     spi_transfer.len = size;
     spi_transfer.speed_hz = m_init_params->speed;
     spi_transfer.bits_per_word = 8;
@@ -105,38 +103,26 @@ auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
     int status = ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
     if (status < 0)
     {
-        QLOGW("read failed: {}", strerror(errno));
+        QLOGW("transfer failed: {}", strerror(errno));
         return false;
     }
 
-    return false;
+    return true;
+}
+
+auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
+{
+    QLOG_TOPIC("spi_linux::read");
+
+    std::lock_guard<SPI_Linux> lg(*this);
+    return transfer(nullptr, data, size);
 }
 auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("spi_linux::write");
-    QASSERT(m_fd >= 0);
 
     std::lock_guard<SPI_Linux> lg(*this);
-
-    spi_ioc_transfer spi_transfer;
-    memset(&spi_transfer, 0, sizeof(spi_ioc_transfer));
-
-    m_rx_buffer.resize(size);
-    spi_transfer.tx_buf = (unsigned long)data;
-    spi_transfer.rx_buf = (unsigned long)m_rx_buffer.data();
-    spi_transfer.len = size;
-    spi_transfer.speed_hz = m_init_params->speed;
-    spi_transfer.bits_per_word = 8;
-    spi_transfer.delay_usecs = 0;
-
-    int status = ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
-    if (status < 0)
-    {
-        QLOGW("write failed: {}", strerror(errno));
-        return false;
-    }
-
-    return false;
+    return transfer(data, nullptr, size);
 }
 
 auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
@@ -146,13 +132,12 @@ auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
 
     std::lock_guard<SPI_Linux> lg(*this);
 
+    m_tx_buffer.clear();
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg | READ_FLAG;
 
     m_rx_buffer.resize(size + 1);
-
-    auto ok = read(m_rx_buffer.data(), size + 1);
-    if (!ok)
+    if (!transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1))
     {
         return false;
     }
@@ -169,10 +154,11 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
 
     m_tx_buffer.clear();
     m_tx_buffer.resize(size + 1);
-    m_tx_buffer[0] = reg | READ_FLAG;
+    m_tx_buffer[0] = reg;
     std::copy(data, data + size, m_tx_buffer.begin() + 1);
 
-    return write(m_tx_buffer.data(), size + 1);
+    m_rx_buffer.resize(size + 1);
+    return transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1);
 }
 
 auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool

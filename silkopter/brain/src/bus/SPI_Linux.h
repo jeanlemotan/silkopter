@@ -46,6 +46,9 @@ public:
 private:
     auto init() -> bool;
 
+    auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) -> bool;
+
+
     rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::SPI_Linux::Init_Params> m_init_params;
     std::shared_ptr<sz::SPI_Linux::Config> m_config;

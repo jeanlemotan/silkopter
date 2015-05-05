@@ -67,7 +67,6 @@ private:
     auto akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
     auto akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
     auto akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool;
-    auto akm_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool;
 
     auto lock(Buses& buses) -> bool;
     void unlock(Buses& buses);
@@ -75,7 +74,10 @@ private:
     void reset_fifo(Buses& buses);
 
     auto setup_compass(Buses& buses) -> bool;
-    void set_bypass(Buses& buses, bool on);
+    auto setup_compass_i2c(Buses& buses) -> bool;
+    auto setup_compass_spi(Buses& buses) -> bool;
+
+//    void set_bypass(Buses& buses, bool on);
     void process_compass(Buses& buses);
 
     rapidjson::Document m_init_paramsj;
@@ -85,6 +87,8 @@ private:
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;
     q::Clock::time_point m_last_fifo_tp = q::Clock::now();
+
+    uint8_t m_user_ctrl_value = 0;
 
     struct Common
     {
