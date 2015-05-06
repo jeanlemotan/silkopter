@@ -403,11 +403,11 @@ struct Serializer< Writer0342c3801b8b0238b08f55c3707a04052ce24dc24fadc55ba5c7a57
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Motor_Mixer { struct Inputs {
+namespace sz { namespace Motor_Mixer { struct Input_Streams {
  std::string torque;
 std::string force;
 
-explicit Inputs():torque(), force() {  }
+explicit Input_Streams():torque(), force() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():torque(), force() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Motor_Mixer::Inputs > {
+class SAXEventHandler< ::sz::Motor_Mixer::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_force = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Motor_Mixer::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Motor_Mixer::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->torque)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430 >
-struct Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, ::sz::Motor_Mixer::Inputs > {
+template < class Writerfa7be4f30ef0d1fbd0e51bfe948ef2e6c594548cea695630a2bae3eb0df096ea >
+struct Serializer< Writerfa7be4f30ef0d1fbd0e51bfe948ef2e6c594548cea695630a2bae3eb0df096ea, ::sz::Motor_Mixer::Input_Streams > {
 
-    void operator()( Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430& w, const ::sz::Motor_Mixer::Inputs& value) const
+    void operator()( Writerfa7be4f30ef0d1fbd0e51bfe948ef2e6c594548cea695630a2bae3eb0df096ea& w, const ::sz::Motor_Mixer::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.torque);
-w.Key("\x43\x6f\x6c\x6c\x65\x63\x74\x69\x76\x65\x20\x46\x6f\x72\x63\x65", 16, false); Serializer< Writerc4dc841ebda3355a19322a8f5f6abbaa206240426bccf033f0d7de5fa188f430, std::string >()(w, value.force);
+        w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writerfa7be4f30ef0d1fbd0e51bfe948ef2e6c594548cea695630a2bae3eb0df096ea, std::string >()(w, value.torque);
+w.Key("\x43\x6f\x6c\x6c\x65\x63\x74\x69\x76\x65\x20\x46\x6f\x72\x63\x65", 16, false); Serializer< Writerfa7be4f30ef0d1fbd0e51bfe948ef2e6c594548cea695630a2bae3eb0df096ea, std::string >()(w, value.force);
 
         w.EndObject(2);
     }
@@ -1191,10 +1191,10 @@ struct Serializer< Writer65cc9b924503ccb047e404f8efec2967cd47f8a59996fe3fc91ef44
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Motor_Mixer { struct Outputs {
+namespace sz { namespace Motor_Mixer { struct Output_Streams {
  std::vector<sz::Motor_Mixer::Throttle> throttles;
 
-explicit Outputs():throttles() {  }
+explicit Output_Streams():throttles() {  }
 
 
  
@@ -1205,7 +1205,7 @@ explicit Outputs():throttles() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Motor_Mixer::Outputs > {
+class SAXEventHandler< ::sz::Motor_Mixer::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Motor_Mixer::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Motor_Mixer::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->throttles)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writer28fc11108ee46acffbe27c66587af3503a7fb84b684a7a318c02b528e0ba0cf0 >
-struct Serializer< Writer28fc11108ee46acffbe27c66587af3503a7fb84b684a7a318c02b528e0ba0cf0, ::sz::Motor_Mixer::Outputs > {
+template < class Writer2b66965b5640ab118a66420a91522905db53f7718955e64cbe0e7729100f4c90 >
+struct Serializer< Writer2b66965b5640ab118a66420a91522905db53f7718955e64cbe0e7729100f4c90, ::sz::Motor_Mixer::Output_Streams > {
 
-    void operator()( Writer28fc11108ee46acffbe27c66587af3503a7fb84b684a7a318c02b528e0ba0cf0& w, const ::sz::Motor_Mixer::Outputs& value) const
+    void operator()( Writer2b66965b5640ab118a66420a91522905db53f7718955e64cbe0e7729100f4c90& w, const ::sz::Motor_Mixer::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x73", 9, false); Serializer< Writer28fc11108ee46acffbe27c66587af3503a7fb84b684a7a318c02b528e0ba0cf0, std::vector<sz::Motor_Mixer::Throttle> >()(w, value.throttles);
+        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x73", 9, false); Serializer< Writer2b66965b5640ab118a66420a91522905db53f7718955e64cbe0e7729100f4c90, std::vector<sz::Motor_Mixer::Throttle> >()(w, value.throttles);
 
         w.EndObject(1);
     }
@@ -1569,10 +1569,10 @@ struct Serializer< Writer28fc11108ee46acffbe27c66587af3503a7fb84b684a7a318c02b52
 
 namespace sz { namespace Motor_Mixer { struct Config {
  float armed_throttle;
-sz::Motor_Mixer::Inputs inputs;
-sz::Motor_Mixer::Outputs outputs;
+sz::Motor_Mixer::Input_Streams input_streams;
+sz::Motor_Mixer::Output_Streams output_streams;
 
-explicit Config():armed_throttle(), inputs(), outputs() {  }
+explicit Config():armed_throttle(), input_streams(), output_streams() {  }
 
 
  
@@ -1590,10 +1590,10 @@ private:
     int depth;
 
     SAXEventHandler< float > handler_0;
-SAXEventHandler< sz::Motor_Mixer::Inputs > handler_1;
-SAXEventHandler< sz::Motor_Mixer::Outputs > handler_2;bool has_armed_throttle;
-bool has_inputs;
-bool has_outputs;
+SAXEventHandler< sz::Motor_Mixer::Input_Streams > handler_1;
+SAXEventHandler< sz::Motor_Mixer::Output_Streams > handler_2;bool has_armed_throttle;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1610,9 +1610,9 @@ bool has_outputs;
             case 0:
     return "armed_throttle";
 case 1:
-    return "inputs";
+    return "input_streams";
 case 2:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1640,8 +1640,8 @@ case 2:
     void reset_flags()
     {
         has_armed_throttle = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -1649,8 +1649,8 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->armed_throttle)
-, handler_1(&obj->inputs)
-, handler_2(&obj->outputs)
+, handler_1(&obj->input_streams)
+, handler_2(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1841,10 +1841,10 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14))
 						 { state=0; has_armed_throttle = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=1; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=2; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=1; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=2; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1957,8 +1957,8 @@ case 2:
             }
         } else {
             if (!has_armed_throttle) set_missing_required("armed_throttle");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2012,8 +2012,8 @@ struct Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746
         w.StartObject();
 
         w.Key("\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, float >()(w, value.armed_throttle);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, sz::Motor_Mixer::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, sz::Motor_Mixer::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, sz::Motor_Mixer::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, sz::Motor_Mixer::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(3);
     }

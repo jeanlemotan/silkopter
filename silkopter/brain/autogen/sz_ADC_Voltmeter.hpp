@@ -403,10 +403,10 @@ struct Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace ADC_Voltmeter { struct Inputs {
+namespace sz { namespace ADC_Voltmeter { struct Input_Streams {
  std::string adc_value;
 
-explicit Inputs():adc_value() {  }
+explicit Input_Streams():adc_value() {  }
 
 
  
@@ -417,7 +417,7 @@ explicit Inputs():adc_value() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::ADC_Voltmeter::Inputs > {
+class SAXEventHandler< ::sz::ADC_Voltmeter::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -469,7 +469,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::ADC_Voltmeter::Inputs * obj)
+    explicit SAXEventHandler( ::sz::ADC_Voltmeter::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->adc_value)
@@ -736,14 +736,14 @@ public:
     }
 };
 
-template < class Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91 >
-struct Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, ::sz::ADC_Voltmeter::Inputs > {
+template < class Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919 >
+struct Serializer< Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919, ::sz::ADC_Voltmeter::Input_Streams > {
 
-    void operator()( Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91& w, const ::sz::ADC_Voltmeter::Inputs& value) const
+    void operator()( Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919& w, const ::sz::ADC_Voltmeter::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writerea1edb9c21b5d7e266ee00b1bb56375cce1338baa49bdda00b8cf0d94255fc91, std::string >()(w, value.adc_value);
+        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919, std::string >()(w, value.adc_value);
 
         w.EndObject(1);
     }
@@ -1208,10 +1208,10 @@ w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer9e9f6cee21d97564537fb
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace ADC_Voltmeter { struct Outputs {
+namespace sz { namespace ADC_Voltmeter { struct Output_Streams {
  sz::ADC_Voltmeter::Voltage voltage;
 
-explicit Outputs():voltage() {  }
+explicit Output_Streams():voltage() {  }
 
 
  
@@ -1222,7 +1222,7 @@ explicit Outputs():voltage() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::ADC_Voltmeter::Outputs > {
+class SAXEventHandler< ::sz::ADC_Voltmeter::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1274,7 +1274,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::ADC_Voltmeter::Outputs * obj)
+    explicit SAXEventHandler( ::sz::ADC_Voltmeter::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->voltage)
@@ -1541,14 +1541,14 @@ public:
     }
 };
 
-template < class Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55 >
-struct Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55, ::sz::ADC_Voltmeter::Outputs > {
+template < class Writer7b884a8bb6dcc52278b1b2c22728a4cdce0000a43f121f5ac4a36230827f2496 >
+struct Serializer< Writer7b884a8bb6dcc52278b1b2c22728a4cdce0000a43f121f5ac4a36230827f2496, ::sz::ADC_Voltmeter::Output_Streams > {
 
-    void operator()( Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55& w, const ::sz::ADC_Voltmeter::Outputs& value) const
+    void operator()( Writer7b884a8bb6dcc52278b1b2c22728a4cdce0000a43f121f5ac4a36230827f2496& w, const ::sz::ADC_Voltmeter::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab6a6f96d55, sz::ADC_Voltmeter::Voltage >()(w, value.voltage);
+        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer7b884a8bb6dcc52278b1b2c22728a4cdce0000a43f121f5ac4a36230827f2496, sz::ADC_Voltmeter::Voltage >()(w, value.voltage);
 
         w.EndObject(1);
     }
@@ -1585,10 +1585,10 @@ struct Serializer< Writer8f5ce484fa1589354f9179e43fc087289162587d00b1859b1dc01ab
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Voltmeter { struct Config {
- sz::ADC_Voltmeter::Inputs inputs;
-sz::ADC_Voltmeter::Outputs outputs;
+ sz::ADC_Voltmeter::Input_Streams input_streams;
+sz::ADC_Voltmeter::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1605,9 +1605,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::ADC_Voltmeter::Inputs > handler_0;
-SAXEventHandler< sz::ADC_Voltmeter::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::ADC_Voltmeter::Input_Streams > handler_0;
+SAXEventHandler< sz::ADC_Voltmeter::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1622,9 +1622,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1651,16 +1651,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Voltmeter::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1825,10 +1825,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1925,8 +1925,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1976,8 +1976,8 @@ struct Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer5f0f294ea0f3ec28c10a95794f9fc40c116ab2f55253ca723a673f9aa7449f74, sz::ADC_Voltmeter::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

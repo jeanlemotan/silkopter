@@ -4,6 +4,7 @@
 #include "common/node/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/node/stream/IStream.h"
+#include "common/node/param/IParam.h"
 #include "common/config/Multi.h"
 
 #include "Ctor_Helper.h"
@@ -85,6 +86,7 @@ public:
     auto get_buses()        -> Registry<node::bus::IBus>&;
     auto get_nodes()        -> Registry<node::INode>&;
     auto get_streams()      -> Registry<node::stream::IStream>&;
+    auto get_params()       -> Registry<node::param::IParam>&;
 
 protected:
     auto set_multi_config(config::Multi const& config) -> bool;
@@ -108,6 +110,7 @@ private:
     Registry<node::bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
     Registry<node::stream::IStream> m_streams;
+    Registry<node::param::IParam> m_params;
 
     Factory<node::bus::IBus> m_bus_factory;
     Factory<node::INode> m_node_factory;

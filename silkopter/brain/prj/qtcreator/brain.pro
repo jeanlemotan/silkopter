@@ -230,5 +230,8 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../src/source/ADS1115.h \
-    ../../src/sink/PCA9685.h
+    ../../src/sink/PCA9685.h \
+    ../../../libs/common/node/param/IFloat.h \
+    ../../../libs/common/node/param/IParam.h \
+    ../../../libs/common/node/param/IToggle.h
 

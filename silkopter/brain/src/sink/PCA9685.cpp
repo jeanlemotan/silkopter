@@ -10,6 +10,35 @@ namespace silk
 namespace node
 {
 
+
+constexpr uint8_t PCA9685_RA_MODE1            = 0x00;
+constexpr uint8_t PCA9685_RA_MODE2            = 0x01;
+constexpr uint8_t PCA9685_RA_LED0_ON_L        = 0x06;
+constexpr uint8_t PCA9685_RA_LED0_ON_H        = 0x07;
+constexpr uint8_t PCA9685_RA_LED0_OFF_L       = 0x08;
+constexpr uint8_t PCA9685_RA_LED0_OFF_H       = 0x09;
+constexpr uint8_t PCA9685_RA_ALL_LED_ON_L     = 0xFA;
+constexpr uint8_t PCA9685_RA_ALL_LED_ON_H     = 0xFB;
+constexpr uint8_t PCA9685_RA_ALL_LED_OFF_L    = 0xFC;
+constexpr uint8_t PCA9685_RA_ALL_LED_OFF_H    = 0xFD;
+constexpr uint8_t PCA9685_RA_PRE_SCALE        = 0xFE;
+
+constexpr uint8_t PCA9685_MODE1_RESTART_BIT   = 1 << 7;
+constexpr uint8_t PCA9685_MODE1_EXTCLK_BIT    = 1 << 6;
+constexpr uint8_t PCA9685_MODE1_AI_BIT        = 1 << 5;
+constexpr uint8_t PCA9685_MODE1_SLEEP_BIT     = 1 << 4;
+constexpr uint8_t PCA9685_MODE1_SUB1_BIT      = 1 << 3;
+constexpr uint8_t PCA9685_MODE1_SUB2_BIT      = 1 << 2;
+constexpr uint8_t PCA9685_MODE1_SUB3_BIT      = 1 << 1;
+constexpr uint8_t PCA9685_MODE1_ALLCALL_BIT   = 1 << 0;
+
+constexpr uint8_t PCA9685_MODE2_INVRT_BIT     = 1 << 4;
+constexpr uint8_t PCA9685_MODE2_OCH_BIT       = 1 << 3;
+constexpr uint8_t PCA9685_MODE2_OUTDRV_BIT    = 1 << 2;
+constexpr uint8_t PCA9685_MODE2_OUTNE1_BIT    = 1 << 1;
+constexpr uint8_t PCA9685_MODE2_OUTNE0_BIT    = 1 << 0;
+
+
 PCA9685::PCA9685(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::PCA9685::Init_Params())
@@ -18,26 +47,26 @@ PCA9685::PCA9685(HAL& hal)
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto PCA9685::get_inputs() const -> std::vector<Input>
+auto PCA9685::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
-        { stream::IPWM::TYPE, m_init_params->channel_1.rate, "Channel 1" },
-        { stream::IPWM::TYPE, m_init_params->channel_2.rate, "Channel 2" },
-        { stream::IPWM::TYPE, m_init_params->channel_3.rate, "Channel 3" },
-        { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4" },
-        { stream::IPWM::TYPE, m_init_params->channel_5.rate, "Channel 5" },
-        { stream::IPWM::TYPE, m_init_params->channel_6.rate, "Channel 6" },
-        { stream::IPWM::TYPE, m_init_params->channel_7.rate, "Channel 7" },
-        { stream::IPWM::TYPE, m_init_params->channel_8.rate, "Channel 8" },
-        { stream::IPWM::TYPE, m_init_params->channel_9.rate, "Channel 9" },
-        { stream::IPWM::TYPE, m_init_params->channel_10.rate, "Channel 10" },
-        { stream::IPWM::TYPE, m_init_params->channel_11.rate, "Channel 11" },
-        { stream::IPWM::TYPE, m_init_params->channel_12.rate, "Channel 12" },
-        { stream::IPWM::TYPE, m_init_params->channel_13.rate, "Channel 13" },
-        { stream::IPWM::TYPE, m_init_params->channel_14.rate, "Channel 14" },
-        { stream::IPWM::TYPE, m_init_params->channel_15.rate, "Channel 15" },
-        { stream::IPWM::TYPE, m_init_params->channel_16.rate, "Channel 16" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 1" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 2" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 3" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 4" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 5" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 6" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 7" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 8" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 9" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 10" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 11" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 12" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 13" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 14" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 15" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 16" },
     }};
     return inputs;
 }
@@ -63,118 +92,88 @@ auto PCA9685::init(rapidjson::Value const& init_params) -> bool
 
 auto PCA9685::init() -> bool
 {
-    size_t period = m_init_params->period_micro;
-
-    std::vector<size_t> periods = {1, 2, 4, 5, 8, 10};
-    if (std::find(periods.begin(), periods.end(), period) == periods.end())
+    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    auto i2c = m_i2c.lock();
+    if (!i2c)
     {
-        QLOGE("Invalid period {}. Supported are: {}", period, periods);
+        QLOGE("No bus configured");
         return false;
     }
 
-    std::vector<size_t> rates = { 40000, 20000, 10000, 8000, 5000, 4000, 2500, 2000, 1600, 1250, 1000, 800, 500, 400, 250, 200, 100, 50 };
-    for (auto& f: rates)
+    if (m_init_params->address > 127)
     {
-        auto x = math::round(double(f) / double(period));
-        f = static_cast<size_t>(x);
-    }
-
-
-#if defined (RASPBERRY_PI0)
-
-    //first validate
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
-    {
-        auto const& ch = *m_pwm_channels[i].config;
-        auto gpio = m_pwm_channels[i].gpio;
-        if (ch.min >= ch.max)
-        {
-            QLOGE("channel {}: min ({}) is bigger than max ({})", gpio, ch.min, ch.max);
-            return false;
-        }
-        if (ch.max > ch.range)
-        {
-            QLOGE("channel {}: max ({}) is bigger than the range ({})", gpio, ch.max, ch.range);
-            return false;
-        }
-        if (std::find(rates.begin(), rates.end(), ch.rate) == rates.end())
-        {
-            QLOGE("channel {}: invalid rate {}. Supported are: {}", gpio, ch.rate, rates);
-            return false;
-        }
-    }
-
-    QLOGI("Initializing PCA9685");
-    if (gpioCfgClock(period, 1, 0) < 0 ||
-        gpioCfgPermissions(static_cast<uint64_t>(-1)) ||
-        gpioCfgInterfaces(PI_DISABLE_SOCK_IF | PI_DISABLE_FIFO_IF))
-    {
-        QLOGE("Cannot configure PCA9685");
-        return false;
-    }
-    if (gpioInitialise() < 0)
-    {
-        QLOGE("Cannot initialize PCA9685");
+        QLOGE("Invalid address {}", m_init_params->address);
         return false;
     }
 
-    //first of all turn on the pull-down to that if the board is reset of powerred off the motors don't start spinning
-    //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    //                            4     5     6     8    10   12   15   20   24   30   40   60   75  80, 100 120 150 200 240
+    std::vector<size_t> rates = { 1500, 1200, 1000, 750, 600, 500, 400, 300, 250, 200, 150, 100, 80, 75, 60, 50, 40, 30, 25 };
+    if (std::find(rates.begin(), rates.end(), m_init_params->rate) == rates.end())
     {
-        auto gpio = m_pwm_channels[i].gpio;
-        if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
-        {
-            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, gpio);
-            return false;
-        }
-        if (gpioSetMode(gpio, PI_OUTPUT) < 0)
-        {
-            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, gpio);
-            return false;
-        }
-     }
-
-    //now configure the pin for PWM or servo
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
-    {
-        auto const& ch = *m_pwm_channels[i].config;
-        auto gpio = m_pwm_channels[i].gpio;
-        auto f = gpioSetPWMfrequency(gpio, ch.rate);
-        if (f < 0)
-        {
-            QLOGE("channel {}: Cannot set pwm rate {}", gpio, ch.rate);
-            return false;
-        }
-        if (gpioSetPWMrange(gpio, ch.range) < 0)
-        {
-            QLOGE("channel {}: Cannot set pwm range {} on gpio {}", gpio, ch.range);
-            return false;
-        }
-        QLOGI("channel {}: rate {} range {}", gpio, ch.rate, ch.range);
+        QLOGE("Invalid rate {}. Supported are: {}", m_init_params->rate, rates);
+        return false;
     }
+
+    bool res = i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_AI_BIT);
+    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
+    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
+    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
+
+    uint8_t data;
+    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, data);
+    if (!res && data <= 3)
+    {
+        QLOGE("PCA9685 not found on {}, address {}", m_init_params->bus, m_init_params->address);
+        return false;
+    }
+
+    uint8_t prescale = math::round(24576000.f / 4096.f / m_init_params->rate) - 1;
+    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, prescale);
+    if (!res)
+    {
+        QLOGE("I2C error while setting rate {}, prescale {}", m_init_params->rate, prescale);
+        return false;
+    }
+
+    m_pwm_channels.resize(16);
 
     return true;
-#else
-    QLOGE("PCA9685 only supported on the raspberry pi");
-    return false;
-#endif
 }
 
 void PCA9685::set_pwm_value(size_t idx, float value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
-#if defined RASPBERRY_PI0
-    auto const& ch = *m_pwm_channels[idx].config;
+    //auto const& ch = *m_pwm_channels[idx].config;
     value = math::clamp(value, 0.f, 1.f);
-    int pulse = value * (ch.max - ch.min);
-    gpioPWM(m_pwm_channels[idx].gpio, ch.min + pulse);
-#else
-    QUNUSED(idx);
-    QUNUSED(value);
-    QASSERT(0);
-#endif
+    int pulse = value * 4096;//(ch.max - ch.min);
+
+
+    uint8_t data[4] = {0, 0, 0, 0};
+    if (pulse == 0)
+    {
+        data[3] = 0x10;
+    }
+    else if (pulse >= 4096)
+    {
+        data[1] = 0x10;
+    }
+    else
+    {
+        //data[0] = offset & 0xFF;
+        //data[1] = offset >> 8;
+        data[2] = pulse & 0xFF;
+        data[3] = pulse >> 8;
+    }
+
+    auto i2c = m_i2c.lock();
+    if (!i2c)
+    {
+        QLOGE("Bus not found");
+        return;
+    }
+
+    i2c->write_register(m_init_params->address, PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
 }
 
 void PCA9685::process()
@@ -202,20 +201,11 @@ void PCA9685::process()
 }
 
 
-#define READ_CONFIG(IDX, CH)\
+#define READ_CONFIG(CH)\
 {\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.inputs.channel_##CH);\
-    auto rate = input_stream ? input_stream->get_rate() : 0u;\
-    if (rate != m_init_params->channel_##CH.rate)\
-    {\
-        m_config->inputs.channel_##CH.clear();\
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.channel_##CH, m_init_params->channel_##CH.rate, rate);\
-        m_pwm_channels[IDX].stream.reset();\
-    }\
-    else\
-    {\
-        m_pwm_channels[IDX].stream = input_stream;\
-    }\
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.input_streams.channel_##CH);\
+    m_pwm_channels[CH - 1].stream = input_stream;\
+    m_pwm_channels[CH - 1].config = &m_config->ranges.channel_##CH;\
 }
 
 
@@ -235,22 +225,22 @@ auto PCA9685::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    READ_CONFIG(0, 1);
-    READ_CONFIG(1, 2);
-    READ_CONFIG(2, 3);
-    READ_CONFIG(3, 4);
-    READ_CONFIG(4, 5);
-    READ_CONFIG(5, 6);
-    READ_CONFIG(6, 7);
-    READ_CONFIG(7, 8);
-    READ_CONFIG(8, 9);
-    READ_CONFIG(9, 10);
-    READ_CONFIG(10, 11);
-    READ_CONFIG(11, 12);
-    READ_CONFIG(12, 13);
-    READ_CONFIG(13, 14);
-    READ_CONFIG(14, 15);
-    READ_CONFIG(15, 16);
+    READ_CONFIG(1);
+    READ_CONFIG(2);
+    READ_CONFIG(3);
+    READ_CONFIG(4);
+    READ_CONFIG(5);
+    READ_CONFIG(6);
+    READ_CONFIG(7);
+    READ_CONFIG(8);
+    READ_CONFIG(9);
+    READ_CONFIG(10);
+    READ_CONFIG(11);
+    READ_CONFIG(12);
+    READ_CONFIG(13);
+    READ_CONFIG(14);
+    READ_CONFIG(15);
+    READ_CONFIG(16);
 
     return true;
 }

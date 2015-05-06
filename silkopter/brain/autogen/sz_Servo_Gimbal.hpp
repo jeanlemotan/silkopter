@@ -403,11 +403,11 @@ struct Serializer< Writer257ededf43beca45e514ae35e310a145a92619b350442eca4b1c41c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Servo_Gimbal { struct Inputs {
+namespace sz { namespace Servo_Gimbal { struct Input_Streams {
  std::string frame;
 std::string target;
 
-explicit Inputs():frame(), target() {  }
+explicit Input_Streams():frame(), target() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():frame(), target() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Servo_Gimbal::Inputs > {
+class SAXEventHandler< ::sz::Servo_Gimbal::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_target = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Servo_Gimbal::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Servo_Gimbal::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->frame)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer557d21c4b75e7e8352c490e9721798d6bacb34b389c1e0b4ad927e5c7c7e4f10 >
-struct Serializer< Writer557d21c4b75e7e8352c490e9721798d6bacb34b389c1e0b4ad927e5c7c7e4f10, ::sz::Servo_Gimbal::Inputs > {
+template < class Writer04d380cefd0929390e7354ba69ad522ead33eb36039083b7da745f151627b370 >
+struct Serializer< Writer04d380cefd0929390e7354ba69ad522ead33eb36039083b7da745f151627b370, ::sz::Servo_Gimbal::Input_Streams > {
 
-    void operator()( Writer557d21c4b75e7e8352c490e9721798d6bacb34b389c1e0b4ad927e5c7c7e4f10& w, const ::sz::Servo_Gimbal::Inputs& value) const
+    void operator()( Writer04d380cefd0929390e7354ba69ad522ead33eb36039083b7da745f151627b370& w, const ::sz::Servo_Gimbal::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writer557d21c4b75e7e8352c490e9721798d6bacb34b389c1e0b4ad927e5c7c7e4f10, std::string >()(w, value.frame);
-w.Key("\x54\x61\x72\x67\x65\x74", 6, false); Serializer< Writer557d21c4b75e7e8352c490e9721798d6bacb34b389c1e0b4ad927e5c7c7e4f10, std::string >()(w, value.target);
+        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writer04d380cefd0929390e7354ba69ad522ead33eb36039083b7da745f151627b370, std::string >()(w, value.frame);
+w.Key("\x54\x61\x72\x67\x65\x74", 6, false); Serializer< Writer04d380cefd0929390e7354ba69ad522ead33eb36039083b7da745f151627b370, std::string >()(w, value.target);
 
         w.EndObject(2);
     }
@@ -1367,12 +1367,12 @@ w.Key("\x4d\x61\x78\x20\x50\x57\x4d", 7, false); Serializer< Writeraa8e14d052248
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Servo_Gimbal { struct Outputs {
+namespace sz { namespace Servo_Gimbal { struct Output_Streams {
  sz::Servo_Gimbal::PWM x_pwm;
 sz::Servo_Gimbal::PWM y_pwm;
 sz::Servo_Gimbal::PWM z_pwm;
 
-explicit Outputs():x_pwm(), y_pwm(), z_pwm() {  }
+explicit Output_Streams():x_pwm(), y_pwm(), z_pwm() {  }
 
 
  
@@ -1383,7 +1383,7 @@ explicit Outputs():x_pwm(), y_pwm(), z_pwm() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Servo_Gimbal::Outputs > {
+class SAXEventHandler< ::sz::Servo_Gimbal::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1445,7 +1445,7 @@ has_z_pwm = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Servo_Gimbal::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Servo_Gimbal::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x_pwm)
@@ -1804,16 +1804,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078 >
-struct Serializer< Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078, ::sz::Servo_Gimbal::Outputs > {
+template < class Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd >
+struct Serializer< Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd, ::sz::Servo_Gimbal::Output_Streams > {
 
-    void operator()( Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078& w, const ::sz::Servo_Gimbal::Outputs& value) const
+    void operator()( Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd& w, const ::sz::Servo_Gimbal::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x58\x20\x50\x57\x4d", 5, false); Serializer< Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078, sz::Servo_Gimbal::PWM >()(w, value.x_pwm);
-w.Key("\x59\x20\x50\x57\x4d", 5, false); Serializer< Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078, sz::Servo_Gimbal::PWM >()(w, value.y_pwm);
-w.Key("\x5a\x20\x50\x57\x4d", 5, false); Serializer< Writerc0fcd8ff46e345e92fc827731535263689fcb9ef8d05b6fe08eb29ae5bcf8078, sz::Servo_Gimbal::PWM >()(w, value.z_pwm);
+        w.Key("\x58\x20\x50\x57\x4d", 5, false); Serializer< Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd, sz::Servo_Gimbal::PWM >()(w, value.x_pwm);
+w.Key("\x59\x20\x50\x57\x4d", 5, false); Serializer< Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd, sz::Servo_Gimbal::PWM >()(w, value.y_pwm);
+w.Key("\x5a\x20\x50\x57\x4d", 5, false); Serializer< Writer26644eb11cbc8f5444f23a115f956fe2c148fe0ab04ade89f0dd46ce18b1c4bd, sz::Servo_Gimbal::PWM >()(w, value.z_pwm);
 
         w.EndObject(3);
     }
@@ -1850,10 +1850,10 @@ w.Key("\x5a\x20\x50\x57\x4d", 5, false); Serializer< Writerc0fcd8ff46e345e92fc82
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Servo_Gimbal { struct Config {
- sz::Servo_Gimbal::Inputs inputs;
-sz::Servo_Gimbal::Outputs outputs;
+ sz::Servo_Gimbal::Input_Streams input_streams;
+sz::Servo_Gimbal::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1870,9 +1870,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Servo_Gimbal::Inputs > handler_0;
-SAXEventHandler< sz::Servo_Gimbal::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::Servo_Gimbal::Input_Streams > handler_0;
+SAXEventHandler< sz::Servo_Gimbal::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1887,9 +1887,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1916,16 +1916,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Servo_Gimbal::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -2090,10 +2090,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -2190,8 +2190,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2241,8 +2241,8 @@ struct Serializer< Writer79bf3eac07d24b8a515cccea255760774fcab04d103969658d88f2e
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer79bf3eac07d24b8a515cccea255760774fcab04d103969658d88f2ecf2700aef, sz::Servo_Gimbal::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer79bf3eac07d24b8a515cccea255760774fcab04d103969658d88f2ecf2700aef, sz::Servo_Gimbal::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer79bf3eac07d24b8a515cccea255760774fcab04d103969658d88f2ecf2700aef, sz::Servo_Gimbal::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer79bf3eac07d24b8a515cccea255760774fcab04d103969658d88f2ecf2700aef, sz::Servo_Gimbal::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

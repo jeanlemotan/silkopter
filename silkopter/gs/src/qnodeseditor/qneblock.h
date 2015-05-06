@@ -60,11 +60,11 @@ private:
 
     QString m_name;
     QString m_id;
-    int horzMargin;
-	int vertMargin;
-	int width;
-	int height;
-    QGraphicsTextItem* label = nullptr;
+    int m_horzMargin;
+    int m_vertMargin;
+    int m_width;
+    int m_height;
+    QGraphicsTextItem* m_label = nullptr;
 };
 
 #endif // QNEBLOCK_H

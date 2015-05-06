@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Velocity_Controller",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "input", {"required": true, "json_key" : "Input"}],
@@ -37,7 +37,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Velocity_Controller",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Velocity_Controller::Frame", "frame", {"required": true, "json_key" : "Frame"}],
@@ -50,8 +50,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Velocity_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Velocity_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Velocity_Controller::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Velocity_Controller::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

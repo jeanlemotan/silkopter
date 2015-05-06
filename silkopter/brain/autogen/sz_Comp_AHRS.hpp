@@ -403,12 +403,12 @@ struct Serializer< Writer30fc2fe5847330908e60ae4e416207ec2a5ccb47e130ab1c2896568
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_AHRS { struct Inputs {
+namespace sz { namespace Comp_AHRS { struct Input_Streams {
  std::string angular_velocity;
 std::string acceleration;
 std::string magnetic_field;
 
-explicit Inputs():angular_velocity(), acceleration(), magnetic_field() {  }
+explicit Input_Streams():angular_velocity(), acceleration(), magnetic_field() {  }
 
 
  
@@ -419,7 +419,7 @@ explicit Inputs():angular_velocity(), acceleration(), magnetic_field() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_AHRS::Inputs > {
+class SAXEventHandler< ::sz::Comp_AHRS::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -481,7 +481,7 @@ has_magnetic_field = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_AHRS::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Comp_AHRS::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->angular_velocity)
@@ -840,16 +840,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954 >
-struct Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, ::sz::Comp_AHRS::Inputs > {
+template < class Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551 >
+struct Serializer< Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551, ::sz::Comp_AHRS::Input_Streams > {
 
-    void operator()( Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954& w, const ::sz::Comp_AHRS::Inputs& value) const
+    void operator()( Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551& w, const ::sz::Comp_AHRS::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.angular_velocity);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.acceleration);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer507b25d14858dde95b032d360826cfbe2c30429679f97174cfa168c305e3f954, std::string >()(w, value.magnetic_field);
+        w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551, std::string >()(w, value.angular_velocity);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551, std::string >()(w, value.acceleration);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer04f91bc2f1279d5274bfdfb2685dbc43b092c1271862d589ae8a8af98530c551, std::string >()(w, value.magnetic_field);
 
         w.EndObject(3);
     }
@@ -1244,10 +1244,10 @@ struct Serializer< Writerc08f84d7b8f0c03b5a87957a60d3656c591425e06786eddf5152d7d
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_AHRS { struct Outputs {
+namespace sz { namespace Comp_AHRS { struct Output_Streams {
  sz::Comp_AHRS::Frame frame;
 
-explicit Outputs():frame() {  }
+explicit Output_Streams():frame() {  }
 
 
  
@@ -1258,7 +1258,7 @@ explicit Outputs():frame() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_AHRS::Outputs > {
+class SAXEventHandler< ::sz::Comp_AHRS::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1310,7 +1310,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_AHRS::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Comp_AHRS::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->frame)
@@ -1577,14 +1577,14 @@ public:
     }
 };
 
-template < class Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1 >
-struct Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1, ::sz::Comp_AHRS::Outputs > {
+template < class Writere54c0b84b623680d4fb421e28f30d63ce982a0fbf09b792cef35e02d246db507 >
+struct Serializer< Writere54c0b84b623680d4fb421e28f30d63ce982a0fbf09b792cef35e02d246db507, ::sz::Comp_AHRS::Output_Streams > {
 
-    void operator()( Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1& w, const ::sz::Comp_AHRS::Outputs& value) const
+    void operator()( Writere54c0b84b623680d4fb421e28f30d63ce982a0fbf09b792cef35e02d246db507& w, const ::sz::Comp_AHRS::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9af3b8dfdf1, sz::Comp_AHRS::Frame >()(w, value.frame);
+        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writere54c0b84b623680d4fb421e28f30d63ce982a0fbf09b792cef35e02d246db507, sz::Comp_AHRS::Frame >()(w, value.frame);
 
         w.EndObject(1);
     }
@@ -1621,10 +1621,10 @@ struct Serializer< Writera0f5b600866ac4e12fe1dbf8c8db88fcbf84e30a4695c785d651d9a
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Comp_AHRS { struct Config {
- sz::Comp_AHRS::Inputs inputs;
-sz::Comp_AHRS::Outputs outputs;
+ sz::Comp_AHRS::Input_Streams input_streams;
+sz::Comp_AHRS::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1641,9 +1641,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Comp_AHRS::Inputs > handler_0;
-SAXEventHandler< sz::Comp_AHRS::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::Comp_AHRS::Input_Streams > handler_0;
+SAXEventHandler< sz::Comp_AHRS::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1658,9 +1658,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1687,16 +1687,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Comp_AHRS::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1861,10 +1861,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1961,8 +1961,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2012,8 +2012,8 @@ struct Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b683935
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b68393522e55ab41, sz::Comp_AHRS::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b68393522e55ab41, sz::Comp_AHRS::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b68393522e55ab41, sz::Comp_AHRS::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b68393522e55ab41, sz::Comp_AHRS::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

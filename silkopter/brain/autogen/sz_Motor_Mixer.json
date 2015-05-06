@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Motor_Mixer",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "torque", {"required": true, "json_key" : "Torque"}],
@@ -29,7 +29,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Motor_Mixer",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["std::vector<sz::Motor_Mixer::Throttle>", "throttles", {"required": true, "json_key" : "Throttles"}]
@@ -42,8 +42,8 @@
     "members":
     [
         ["float", "armed_throttle", {"required": true, "json_key" : "Armed Throttle"}],
-        ["sz::Motor_Mixer::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Motor_Mixer::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Motor_Mixer::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Motor_Mixer::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

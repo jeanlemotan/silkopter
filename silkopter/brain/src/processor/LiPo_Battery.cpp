@@ -58,18 +58,18 @@ auto LiPo_Battery::init() -> bool
     return true;
 }
 
-auto LiPo_Battery::get_inputs() const -> std::vector<Input>
+auto LiPo_Battery::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IVoltage::TYPE, m_init_params->rate, "Voltage" },
         { stream::ICurrent::TYPE, m_init_params->rate, "Current" }
     }};
     return inputs;
 }
-auto LiPo_Battery::get_outputs() const -> std::vector<Output>
+auto LiPo_Battery::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IBattery_State::TYPE;
     outputs[0].name = "Battery State";
     outputs[0].stream = m_output_stream;
@@ -214,14 +214,14 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.inputs.voltage);
-    auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.inputs.current);
+    auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.input_streams.voltage);
+    auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.input_streams.current);
 
     auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.voltage.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.voltage, m_output_stream->rate, rate);
+        m_config->input_streams.voltage.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.voltage, m_output_stream->rate, rate);
         m_voltage_stream.reset();
     }
     else
@@ -232,8 +232,8 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     rate = current_stream ? current_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.current.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.current, m_output_stream->rate, rate);
+        m_config->input_streams.current.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.current, m_output_stream->rate, rate);
         m_current_stream.reset();
     }
     else

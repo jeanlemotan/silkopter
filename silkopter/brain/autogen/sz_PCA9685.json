@@ -2,44 +2,28 @@
 {
     "definition" : true,
     "namespace" : "sz::PCA9685",
-    "name": "PWM_Channel",
-    "members":
-    [
-        ["uint32_t", "min", {"required": true, "default" : 1000, "json_key" : "Min (us)"}],
-        ["uint32_t", "max", {"required": true, "default" : 2000, "json_key" : "Max (us)"}],
-        ["uint32_t", "range", {"required": true, "default" : 2500, "json_key" : "Range (us)"}],
-        ["uint32_t", "rate", {"required": true, "default" : 400, "json_key" : "Rate (Hz)"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::PCA9685",
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "period_micro", {"required": true, "default" : 5, "json_key" : "Period (us)"}],
-        ["sz::PCA9685::PWM_Channel", "channel_1", {"required": false, "json_key" : "Channel 1"}],
-        ["sz::PCA9685::PWM_Channel", "channel_2", {"required": false, "json_key" : "Channel 2"}],
-        ["sz::PCA9685::PWM_Channel", "channel_3", {"required": false, "json_key" : "Channel 3"}],
-        ["sz::PCA9685::PWM_Channel", "channel_4", {"required": false, "json_key" : "Channel 4"}],
-        ["sz::PCA9685::PWM_Channel", "channel_5", {"required": false, "json_key" : "Channel 5"}],
-        ["sz::PCA9685::PWM_Channel", "channel_6", {"required": false, "json_key" : "Channel 6"}],
-        ["sz::PCA9685::PWM_Channel", "channel_7", {"required": false, "json_key" : "Channel 7"}],
-        ["sz::PCA9685::PWM_Channel", "channel_8", {"required": false, "json_key" : "Channel 8"}],
-        ["sz::PCA9685::PWM_Channel", "channel_9", {"required": false, "json_key" : "Channel 9"}],
-        ["sz::PCA9685::PWM_Channel", "channel_10", {"required": false, "json_key" : "Channel 10"}],
-        ["sz::PCA9685::PWM_Channel", "channel_11", {"required": false, "json_key" : "Channel 11"}],
-        ["sz::PCA9685::PWM_Channel", "channel_12", {"required": false, "json_key" : "Channel 12"}],
-        ["sz::PCA9685::PWM_Channel", "channel_13", {"required": false, "json_key" : "Channel 13"}],
-        ["sz::PCA9685::PWM_Channel", "channel_14", {"required": false, "json_key" : "Channel 14"}],
-        ["sz::PCA9685::PWM_Channel", "channel_15", {"required": false, "json_key" : "Channel 15"}],
-        ["sz::PCA9685::PWM_Channel", "channel_16", {"required": false, "json_key" : "Channel 16"}]
+    	["std::string", "bus", {"required": true, "json_key" : "Bus"}],
+        ["uint32_t", "address", {"required": true, "default" : 64, "json_key" : "Address"}],
+        ["uint32_t", "rate", {"required": true, "default" : 1000, "json_key" : "Rate (Hz)"}]
     ]
 },
 {
     "definition" : true,
     "namespace" : "sz::PCA9685",
-    "name": "Inputs",
+    "name": "PWM_Channel",
+    "members":
+    [
+        ["float", "min", {"required": true, "default" : 0, "json_key" : "Min"}],
+        ["float", "max", {"required": true, "default" : 1, "json_key" : "Max"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::PCA9685",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "channel_1", {"required": true, "json_key" : "Channel 1"}],
@@ -63,10 +47,35 @@
 {
     "definition" : true,
     "namespace" : "sz::PCA9685",
+    "name": "Ranges",
+    "members":
+    [
+        ["sz::PCA9685::PWM_Channel", "channel_1", {"required": false, "json_key" : "Channel 1"}],
+        ["sz::PCA9685::PWM_Channel", "channel_2", {"required": false, "json_key" : "Channel 2"}],
+        ["sz::PCA9685::PWM_Channel", "channel_3", {"required": false, "json_key" : "Channel 3"}],
+        ["sz::PCA9685::PWM_Channel", "channel_4", {"required": false, "json_key" : "Channel 4"}],
+        ["sz::PCA9685::PWM_Channel", "channel_5", {"required": false, "json_key" : "Channel 5"}],
+        ["sz::PCA9685::PWM_Channel", "channel_6", {"required": false, "json_key" : "Channel 6"}],
+        ["sz::PCA9685::PWM_Channel", "channel_7", {"required": false, "json_key" : "Channel 7"}],
+        ["sz::PCA9685::PWM_Channel", "channel_8", {"required": false, "json_key" : "Channel 8"}],
+        ["sz::PCA9685::PWM_Channel", "channel_9", {"required": false, "json_key" : "Channel 9"}],
+        ["sz::PCA9685::PWM_Channel", "channel_10", {"required": false, "json_key" : "Channel 10"}],
+        ["sz::PCA9685::PWM_Channel", "channel_11", {"required": false, "json_key" : "Channel 11"}],
+        ["sz::PCA9685::PWM_Channel", "channel_12", {"required": false, "json_key" : "Channel 12"}],
+        ["sz::PCA9685::PWM_Channel", "channel_13", {"required": false, "json_key" : "Channel 13"}],
+        ["sz::PCA9685::PWM_Channel", "channel_14", {"required": false, "json_key" : "Channel 14"}],
+        ["sz::PCA9685::PWM_Channel", "channel_15", {"required": false, "json_key" : "Channel 15"}],
+        ["sz::PCA9685::PWM_Channel", "channel_16", {"required": false, "json_key" : "Channel 16"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::PCA9685",
     "name": "Config",
     "members":
     [
-        ["sz::PCA9685::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}]
+        ["sz::PCA9685::Ranges", "ranges", {"required": true, "json_key" : "Ranges"}],
+        ["sz::PCA9685::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }
 ]

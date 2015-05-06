@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_ECEF_Location",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "ecef_location", {"required": true, "json_key" : "ECEF Location"}],
@@ -30,7 +30,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_ECEF_Location",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Comp_ECEF_Location::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
@@ -42,8 +42,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Comp_ECEF_Location::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Comp_ECEF_Location::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Comp_ECEF_Location::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Comp_ECEF_Location::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

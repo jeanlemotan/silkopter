@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/node/stream/IStream.h"
+#include "common/node/param/IParam.h"
 
 namespace silk
 {
@@ -38,35 +39,50 @@ public:
 
     virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
 
-    struct Input
+    struct Stream_Input
     {
         stream::Type type;
         uint32_t rate;
         std::string name;
     };
-    virtual auto get_inputs() const -> std::vector<Input> = 0;
+    virtual auto get_stream_inputs() const -> std::vector<Stream_Input> = 0;
 
-    struct Output
+    struct Stream_Output
     {
         stream::Type type;
         std::string name;
         stream::IStream_ptr stream;
     };
-    virtual auto get_outputs() const -> std::vector<Output> = 0;
+    virtual auto get_stream_outputs() const -> std::vector<Stream_Output> = 0;
+
+    struct Param_Input
+    {
+        param::Type type;
+        std::string name;
+    };
+    virtual auto get_param_inputs() const -> std::vector<Param_Input> { return std::vector<Param_Input>(); }
+
+    struct Param_Output
+    {
+        param::Type type;
+        std::string name;
+        param::IParam_ptr param;
+    };
+    virtual auto get_param_outputs() const -> std::vector<Param_Output> { return std::vector<Param_Output>(); }
 
     virtual void process() = 0;
 };
 DECLARE_CLASS_PTR(INode);
 
 template <Type TYPE_VALUE>
-class INode_Base : public INode
+class Node_Base : public INode
 {
 public:
     static constexpr Type TYPE = TYPE_VALUE;
     virtual auto get_type() const -> Type { return TYPE; }
 };
 
-template<Type T> Type constexpr INode_Base<T>::TYPE;
+template<Type T> Type constexpr Node_Base<T>::TYPE;
 
 
 

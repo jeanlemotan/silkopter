@@ -43,6 +43,10 @@ auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
 {
     return m_streams;
 }
+auto HAL::get_params() const  -> Registry<node::param::Param> const&
+{
+    return m_params;
+}
 
 auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {
@@ -87,7 +91,7 @@ void HAL::remove_node(node::Node_ptr node,
     m_remove_queue.push_back(std::move(item));
 }
 
-void HAL::connect_node_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
+void HAL::connect_node_stream_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
 {
     auto document = jsonutil::clone_value(node->config);
 

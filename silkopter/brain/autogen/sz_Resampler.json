@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Resampler",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "input", {"required": true, "json_key" : "Input"}]
@@ -28,7 +28,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Resampler",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Resampler::Output", "output", {"required": true, "json_key" : "Output"}]
@@ -42,8 +42,8 @@
     [
         ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 2}],
         ["double", "cutoff_frequency", {"required": false, "json_key" : "Cutoff Frequency (Hz)", "default" : 0}],
-        ["sz::Resampler::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Resampler::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Resampler::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Resampler::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

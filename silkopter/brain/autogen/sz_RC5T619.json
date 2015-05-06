@@ -21,7 +21,7 @@
 {
     "definition" : true,
     "namespace" : "sz::RC5T619",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::RC5T619::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
@@ -34,7 +34,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::RC5T619::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::RC5T619::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

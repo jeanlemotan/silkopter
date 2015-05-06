@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IGenerator : public INode_Base<Type::GENERATOR>
+class IGenerator : public Node_Base<Type::GENERATOR>
 {
 public:
 };

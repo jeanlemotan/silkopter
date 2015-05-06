@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Stability_Controller",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "input", {"required": true, "json_key" : "Input"}],
@@ -29,7 +29,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Stability_Controller",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Stability_Controller::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}]
@@ -41,8 +41,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Stability_Controller::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Stability_Controller::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Stability_Controller::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Stability_Controller::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

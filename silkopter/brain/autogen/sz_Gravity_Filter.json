@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Gravity_Filter",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "frame", {"required": true, "json_key" : "Frame"}],
@@ -29,7 +29,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Gravity_Filter",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Gravity_Filter::Linear_Acceleration", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}]
@@ -41,8 +41,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Gravity_Filter::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Gravity_Filter::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Gravity_Filter::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Gravity_Filter::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

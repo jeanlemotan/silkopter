@@ -18,7 +18,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comms::Source",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Comms::Source::Multirotor_Input", "multirotor_input", {"required": true, "json_key" : "Multirotor Input"}]
@@ -30,7 +30,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::Comms::Source::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Comms::Source::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

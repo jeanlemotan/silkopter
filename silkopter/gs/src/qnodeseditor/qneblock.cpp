@@ -41,11 +41,11 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	setBrush(Qt::green);
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
-	horzMargin = 20;
-	vertMargin = 5;
-	width = horzMargin;
-	height = vertMargin;
-    label = new QGraphicsTextItem(this);
+    m_horzMargin = 20;
+    m_vertMargin = 5;
+    m_width = m_horzMargin;
+    m_height = m_vertMargin;
+    m_label = new QGraphicsTextItem(this);
 
     setAcceptHoverEvents(true);
     setAcceptTouchEvents(true);
@@ -59,10 +59,16 @@ void QNEBlock::setId(const QString &n)
 void QNEBlock::setName(const QString &n)
 {
     m_name = n;
-    label->setPlainText(n);
+    m_label->setPlainText(n);
     QFont font(scene()->font());
     font.setBold(true);
-    label->setFont(font);
+    m_label->setFont(font);
+    m_label->setDefaultTextColor(QColor(Qt::black));
+
+    std::string s;
+    s.size();
+
+    std::string* p = &s;
 
     refreshGeometry();
 }
@@ -85,14 +91,14 @@ void QNEBlock::refreshGeometry()
 {
     QFontMetrics fm(scene()->font());
 
-    width = 0;
+    m_width = 0;
 
     {
         int w = fm.width(m_name);
         // port->setPos(0, height + h/2);
-        if (w > width - horzMargin)
+        if (w > m_width - m_horzMargin)
         {
-            width = w + horzMargin;
+            m_width = w + m_horzMargin;
         }
     }
 
@@ -105,15 +111,15 @@ void QNEBlock::refreshGeometry()
         QNEPort *port = (QNEPort*) port_;
         int w = fm.width(port->name());
         // port->setPos(0, height + h/2);
-        if (w > width - horzMargin)
+        if (w > m_width - m_horzMargin)
         {
-            width = w + horzMargin;
+            m_width = w + m_horzMargin;
         }
     }
 
     int h = fm.height();
-    label->setPos(0, 0);
-    int y = vertMargin;
+    m_label->setPos(0, 0);
+    int y = m_vertMargin;
     y += h * 2;
 
     foreach(QGraphicsItem *port_, childItems())
@@ -126,7 +132,7 @@ void QNEBlock::refreshGeometry()
         QNEPort *port = (QNEPort*) port_;
         if (port->isOutput())
         {
-            port->setPos(width + port->radius(), y);
+            port->setPos(m_width + port->radius(), y);
         }
         else
         {
@@ -134,10 +140,10 @@ void QNEBlock::refreshGeometry()
         }
         y += h;
     }
-    height = y;
+    m_height = y;
 
     QPainterPath p;
-    p.addRoundedRect(0, 0, width, height, 5, 5);
+    p.addRoundedRect(0, 0, m_width, m_height, 5, 5);
     setPath(p);
 
 }

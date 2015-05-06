@@ -131,9 +131,9 @@ RC5T619::RC5T619(HAL& hal)
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto RC5T619::get_outputs() const -> std::vector<Output>
+auto RC5T619::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(2);
+    std::vector<Stream_Output> outputs(2);
     outputs[0].type = stream::IADC::TYPE;
     outputs[0].name = "ADC0";
     outputs[0].stream = m_adc[0];

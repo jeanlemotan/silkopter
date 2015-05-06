@@ -403,11 +403,11 @@ struct Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47d
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LiPo_Battery { struct Inputs {
+namespace sz { namespace LiPo_Battery { struct Input_Streams {
  std::string voltage;
 std::string current;
 
-explicit Inputs():voltage(), current() {  }
+explicit Input_Streams():voltage(), current() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():voltage(), current() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LiPo_Battery::Inputs > {
+class SAXEventHandler< ::sz::LiPo_Battery::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_current = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LiPo_Battery::Inputs * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->voltage)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408 >
-struct Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, ::sz::LiPo_Battery::Inputs > {
+template < class Writerfec95ac18b450a7dc4a3db0887a702775c4dfce761241eefa9260fa66345751c >
+struct Serializer< Writerfec95ac18b450a7dc4a3db0887a702775c4dfce761241eefa9260fa66345751c, ::sz::LiPo_Battery::Input_Streams > {
 
-    void operator()( Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408& w, const ::sz::LiPo_Battery::Inputs& value) const
+    void operator()( Writerfec95ac18b450a7dc4a3db0887a702775c4dfce761241eefa9260fa66345751c& w, const ::sz::LiPo_Battery::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.voltage);
-w.Key("\x43\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer5885a9377c25bb3cfc4daaa9e4c68b95fefd0952b1750a7aeab69382b8389408, std::string >()(w, value.current);
+        w.Key("\x56\x6f\x6c\x74\x61\x67\x65", 7, false); Serializer< Writerfec95ac18b450a7dc4a3db0887a702775c4dfce761241eefa9260fa66345751c, std::string >()(w, value.voltage);
+w.Key("\x43\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writerfec95ac18b450a7dc4a3db0887a702775c4dfce761241eefa9260fa66345751c, std::string >()(w, value.current);
 
         w.EndObject(2);
     }
@@ -1191,10 +1191,10 @@ struct Serializer< Writerf02086923a37b24bbd274c220c26982a85252c7c161e04321f0c9a4
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LiPo_Battery { struct Outputs {
+namespace sz { namespace LiPo_Battery { struct Output_Streams {
  sz::LiPo_Battery::Battery_State battery_state;
 
-explicit Outputs():battery_state() {  }
+explicit Output_Streams():battery_state() {  }
 
 
  
@@ -1205,7 +1205,7 @@ explicit Outputs():battery_state() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LiPo_Battery::Outputs > {
+class SAXEventHandler< ::sz::LiPo_Battery::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LiPo_Battery::Outputs * obj)
+    explicit SAXEventHandler( ::sz::LiPo_Battery::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->battery_state)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e >
-struct Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, ::sz::LiPo_Battery::Outputs > {
+template < class Writer760e6f7190e9cf16def35b8d6a6b244006804ba9f82f2cae8bf6da160c06d376 >
+struct Serializer< Writer760e6f7190e9cf16def35b8d6a6b244006804ba9f82f2cae8bf6da160c06d376, ::sz::LiPo_Battery::Output_Streams > {
 
-    void operator()( Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e& w, const ::sz::LiPo_Battery::Outputs& value) const
+    void operator()( Writer760e6f7190e9cf16def35b8d6a6b244006804ba9f82f2cae8bf6da160c06d376& w, const ::sz::LiPo_Battery::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38bfaf4004e, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
+        w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writer760e6f7190e9cf16def35b8d6a6b244006804ba9f82f2cae8bf6da160c06d376, sz::LiPo_Battery::Battery_State >()(w, value.battery_state);
 
         w.EndObject(1);
     }
@@ -1569,10 +1569,10 @@ struct Serializer< Writer6588e86ebec7f40c07e82d394055e670917a898735ca598a0644b38
 
 namespace sz { namespace LiPo_Battery { struct Config {
  float full_charge;
-sz::LiPo_Battery::Inputs inputs;
-sz::LiPo_Battery::Outputs outputs;
+sz::LiPo_Battery::Input_Streams input_streams;
+sz::LiPo_Battery::Output_Streams output_streams;
 
-explicit Config():full_charge(2.2), inputs(), outputs() {  }
+explicit Config():full_charge(2.2), input_streams(), output_streams() {  }
 
 
  
@@ -1590,10 +1590,10 @@ private:
     int depth;
 
     SAXEventHandler< float > handler_0;
-SAXEventHandler< sz::LiPo_Battery::Inputs > handler_1;
-SAXEventHandler< sz::LiPo_Battery::Outputs > handler_2;bool has_full_charge;
-bool has_inputs;
-bool has_outputs;
+SAXEventHandler< sz::LiPo_Battery::Input_Streams > handler_1;
+SAXEventHandler< sz::LiPo_Battery::Output_Streams > handler_2;bool has_full_charge;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1610,9 +1610,9 @@ bool has_outputs;
             case 0:
     return "full_charge";
 case 1:
-    return "inputs";
+    return "input_streams";
 case 2:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1640,8 +1640,8 @@ case 2:
     void reset_flags()
     {
         has_full_charge = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -1649,8 +1649,8 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->full_charge)
-, handler_1(&obj->inputs)
-, handler_2(&obj->outputs)
+, handler_1(&obj->input_streams)
+, handler_2(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1841,10 +1841,10 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16))
 						 { state=0; has_full_charge = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=1; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=2; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=1; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=2; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1957,8 +1957,8 @@ case 2:
             }
         } else {
             if (!has_full_charge) set_missing_required("full_charge");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2012,8 +2012,8 @@ struct Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b
         w.StartObject();
 
         w.Key("\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, sz::LiPo_Battery::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(3);
     }

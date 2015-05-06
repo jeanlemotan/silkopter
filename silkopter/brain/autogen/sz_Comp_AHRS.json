@@ -11,7 +11,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_AHRS",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
@@ -30,7 +30,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_AHRS",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Comp_AHRS::Frame", "frame", {"required": true, "json_key" : "Frame"}]
@@ -42,8 +42,8 @@
     "name": "Config",
     "members":
     [
-        ["sz::Comp_AHRS::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Comp_AHRS::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Comp_AHRS::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Comp_AHRS::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

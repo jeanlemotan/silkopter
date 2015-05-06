@@ -33,8 +33,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 

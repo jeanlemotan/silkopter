@@ -403,11 +403,11 @@ struct Serializer< Writer2ae6ad2eb529136eccdce9d437d51d8e25539ba5aedfb13bd50bd73
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Transformer { struct Inputs {
+namespace sz { namespace Transformer { struct Input_Streams {
  std::string input;
 std::string frame;
 
-explicit Inputs():input(), frame() {  }
+explicit Input_Streams():input(), frame() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():input(), frame() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Transformer::Inputs > {
+class SAXEventHandler< ::sz::Transformer::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_frame = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Transformer::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Transformer::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->input)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer713c343d2867828b1fa96c6ae97e0ccdf0cc72e0a09d78c6112adfd72a14677d >
-struct Serializer< Writer713c343d2867828b1fa96c6ae97e0ccdf0cc72e0a09d78c6112adfd72a14677d, ::sz::Transformer::Inputs > {
+template < class Writer19a579fc8d179b7bf4db31309b526ed26ce78fc35b1468f47be1d4d6b6a3ea80 >
+struct Serializer< Writer19a579fc8d179b7bf4db31309b526ed26ce78fc35b1468f47be1d4d6b6a3ea80, ::sz::Transformer::Input_Streams > {
 
-    void operator()( Writer713c343d2867828b1fa96c6ae97e0ccdf0cc72e0a09d78c6112adfd72a14677d& w, const ::sz::Transformer::Inputs& value) const
+    void operator()( Writer19a579fc8d179b7bf4db31309b526ed26ce78fc35b1468f47be1d4d6b6a3ea80& w, const ::sz::Transformer::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writer713c343d2867828b1fa96c6ae97e0ccdf0cc72e0a09d78c6112adfd72a14677d, std::string >()(w, value.input);
-w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writer713c343d2867828b1fa96c6ae97e0ccdf0cc72e0a09d78c6112adfd72a14677d, std::string >()(w, value.frame);
+        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writer19a579fc8d179b7bf4db31309b526ed26ce78fc35b1468f47be1d4d6b6a3ea80, std::string >()(w, value.input);
+w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writer19a579fc8d179b7bf4db31309b526ed26ce78fc35b1468f47be1d4d6b6a3ea80, std::string >()(w, value.frame);
 
         w.EndObject(2);
     }
@@ -1191,10 +1191,10 @@ struct Serializer< Writerc089193be09625fbc07711f154d60431ce35fd914579157c4fad5a8
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Transformer { struct Outputs {
+namespace sz { namespace Transformer { struct Output_Streams {
  sz::Transformer::Output output;
 
-explicit Outputs():output() {  }
+explicit Output_Streams():output() {  }
 
 
  
@@ -1205,7 +1205,7 @@ explicit Outputs():output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Transformer::Outputs > {
+class SAXEventHandler< ::sz::Transformer::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Transformer::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Transformer::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->output)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writere1a4e7973c8abff158b3a8fd99c4219e649656f8de764d885f96d785a2da7845 >
-struct Serializer< Writere1a4e7973c8abff158b3a8fd99c4219e649656f8de764d885f96d785a2da7845, ::sz::Transformer::Outputs > {
+template < class Writer1a79f3548779bb9915f58a2b8984bee8ef75795599ba198586bff1eb7f3e4b47 >
+struct Serializer< Writer1a79f3548779bb9915f58a2b8984bee8ef75795599ba198586bff1eb7f3e4b47, ::sz::Transformer::Output_Streams > {
 
-    void operator()( Writere1a4e7973c8abff158b3a8fd99c4219e649656f8de764d885f96d785a2da7845& w, const ::sz::Transformer::Outputs& value) const
+    void operator()( Writer1a79f3548779bb9915f58a2b8984bee8ef75795599ba198586bff1eb7f3e4b47& w, const ::sz::Transformer::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writere1a4e7973c8abff158b3a8fd99c4219e649656f8de764d885f96d785a2da7845, sz::Transformer::Output >()(w, value.output);
+        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writer1a79f3548779bb9915f58a2b8984bee8ef75795599ba198586bff1eb7f3e4b47, sz::Transformer::Output >()(w, value.output);
 
         w.EndObject(1);
     }
@@ -1568,10 +1568,10 @@ struct Serializer< Writere1a4e7973c8abff158b3a8fd99c4219e649656f8de764d885f96d78
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Transformer { struct Config {
- sz::Transformer::Inputs inputs;
-sz::Transformer::Outputs outputs;
+ sz::Transformer::Input_Streams input_streams;
+sz::Transformer::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1588,9 +1588,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Transformer::Inputs > handler_0;
-SAXEventHandler< sz::Transformer::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::Transformer::Input_Streams > handler_0;
+SAXEventHandler< sz::Transformer::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1605,9 +1605,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1634,16 +1634,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Transformer::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1808,10 +1808,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1908,8 +1908,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1959,8 +1959,8 @@ struct Serializer< Writerc05c59a303b5a3fa6095e49e2a71985a5fcb28c60f8eeb884beba49
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerc05c59a303b5a3fa6095e49e2a71985a5fcb28c60f8eeb884beba49da2731924, sz::Transformer::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerc05c59a303b5a3fa6095e49e2a71985a5fcb28c60f8eeb884beba49da2731924, sz::Transformer::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerc05c59a303b5a3fa6095e49e2a71985a5fcb28c60f8eeb884beba49da2731924, sz::Transformer::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerc05c59a303b5a3fa6095e49e2a71985a5fcb28c60f8eeb884beba49da2731924, sz::Transformer::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

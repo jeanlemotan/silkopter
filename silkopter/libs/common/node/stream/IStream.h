@@ -1,7 +1,5 @@
 #pragma once
 
-#include "rapidjson/document.h"
-
 namespace silk
 {
 namespace node

@@ -26,8 +26,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 
@@ -127,14 +127,14 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapidjso
 
     m_config = sz;
 
-    auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.inputs.input);
-    auto frame_stream = m_hal.get_streams().template find_by_name<Frame_Stream_t>(sz.inputs.frame);
+    auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.input_streams.input);
+    auto frame_stream = m_hal.get_streams().template find_by_name<Frame_Stream_t>(sz.input_streams.frame);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config.inputs.input.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
+        m_config.input_streams.input.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
         m_input_stream.reset();
     }
     else
@@ -145,8 +145,8 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapidjso
     rate = frame_stream ? frame_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config.inputs.frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_output_stream->rate, rate);
+        m_config.input_streams.frame.clear();
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
         m_frame_stream.reset();
     }
     else
@@ -170,9 +170,9 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const 
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const -> std::vector<Input>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { In_Stream_t::TYPE, m_init_params.rate, "Input" },
         { Frame_Stream_t::TYPE, m_init_params.rate, "Frame" }
@@ -180,9 +180,9 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const 
     return inputs;
 }
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const -> std::vector<Output>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = Out_Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

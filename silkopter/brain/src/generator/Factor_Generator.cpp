@@ -57,14 +57,14 @@ auto Factor_Generator::init() -> bool
     return true;
 }
 
-auto Factor_Generator::get_inputs() const -> std::vector<Input>
+auto Factor_Generator::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    return std::vector<Input>(0);
+    return std::vector<Stream_Input>(0);
 }
 
-auto Factor_Generator::get_outputs() const -> std::vector<Output>
+auto Factor_Generator::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IFactor::TYPE;
     outputs[0].name = "Factor";
     outputs[0].stream = m_output_stream;

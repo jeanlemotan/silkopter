@@ -815,10 +815,10 @@ struct Serializer< Writeraef4b9a622364f51af90e53c5bb07fbae7377cd8ed4b87a38293a1c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace UBLOX { struct Outputs {
+namespace sz { namespace UBLOX { struct Output_Streams {
  sz::UBLOX::ECEF_Location ecef_location;
 
-explicit Outputs():ecef_location() {  }
+explicit Output_Streams():ecef_location() {  }
 
 
  
@@ -829,7 +829,7 @@ explicit Outputs():ecef_location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::UBLOX::Outputs > {
+class SAXEventHandler< ::sz::UBLOX::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -881,7 +881,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::UBLOX::Outputs * obj)
+    explicit SAXEventHandler( ::sz::UBLOX::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->ecef_location)
@@ -1148,14 +1148,14 @@ public:
     }
 };
 
-template < class Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174 >
-struct Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174, ::sz::UBLOX::Outputs > {
+template < class Writer44ce999b1965707852eedb7c3d4432a902c9935994780a562f7fa5e38125d620 >
+struct Serializer< Writer44ce999b1965707852eedb7c3d4432a902c9935994780a562f7fa5e38125d620, ::sz::UBLOX::Output_Streams > {
 
-    void operator()( Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174& w, const ::sz::UBLOX::Outputs& value) const
+    void operator()( Writer44ce999b1965707852eedb7c3d4432a902c9935994780a562f7fa5e38125d620& w, const ::sz::UBLOX::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412ae28439174, sz::UBLOX::ECEF_Location >()(w, value.ecef_location);
+        w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer44ce999b1965707852eedb7c3d4432a902c9935994780a562f7fa5e38125d620, sz::UBLOX::ECEF_Location >()(w, value.ecef_location);
 
         w.EndObject(1);
     }
@@ -1192,9 +1192,9 @@ struct Serializer< Writerf004c5943da1cf7f360e180b75e378e5e0f9cbd2d2bf0889a55412a
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace UBLOX { struct Config {
- sz::UBLOX::Outputs outputs;
+ sz::UBLOX::Output_Streams output_streams;
 
-explicit Config():outputs() {  }
+explicit Config():output_streams() {  }
 
 
  
@@ -1211,7 +1211,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::UBLOX::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< sz::UBLOX::Output_Streams > handler_0;bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1226,7 +1226,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1253,14 +1253,14 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::UBLOX::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1401,8 +1401,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=0; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1484,7 +1484,7 @@ public:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1531,7 +1531,7 @@ struct Serializer< Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f, sz::UBLOX::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer354a68268af01f38ed02831c598718f48ce7e5afbcbfcfd81c03eef5e816f87f, sz::UBLOX::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(1);
     }

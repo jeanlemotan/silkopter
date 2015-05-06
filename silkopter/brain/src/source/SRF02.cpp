@@ -40,9 +40,9 @@ SRF02::SRF02(HAL& hal)
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto SRF02::get_outputs() const -> std::vector<Output>
+auto SRF02::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IDistance::TYPE;
     outputs[0].name = "Distance";
     outputs[0].stream = m_stream;

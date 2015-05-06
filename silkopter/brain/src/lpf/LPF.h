@@ -26,8 +26,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 
@@ -114,13 +114,13 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.inputs.input);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.input_streams.input);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.inputs.input, m_output_stream->rate, rate);
-        m_config.inputs.input.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.input_streams.input, m_output_stream->rate, rate);
+        m_config.input_streams.input.clear();
         m_input_stream.reset();
     }
     else
@@ -136,7 +136,9 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     }
 
     m_config.poles = math::max<uint32_t>(m_config.poles, 2);
-    if (!m_dsp.setup(m_config.poles, m_output_stream->rate, m_config.cutoff_frequency))
+    if (m_config.poles > 0 &&
+        m_config.cutoff_frequency > 0 &&
+        !m_dsp.setup(m_config.poles, m_output_stream->rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
@@ -159,18 +161,18 @@ auto LPF<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
+auto LPF<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { Stream_t::TYPE, m_init_params.rate, "Input" }
     }};
     return inputs;
 }
 template<class Stream_t>
-auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
+auto LPF<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

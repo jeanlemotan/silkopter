@@ -379,8 +379,8 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& node)
 {
     channel.pack_param(node.get_type());
-    pack_inputs(channel, node.get_inputs());
-    pack_outputs(channel, node.get_outputs());
+    pack_inputs(channel, node.get_stream_inputs());
+    pack_outputs(channel, node.get_stream_outputs());
     pack_json(channel, node.get_init_params());
     pack_json(channel, node.get_config());
 }
@@ -463,8 +463,8 @@ void Comms::handle_enumerate_node_defs()
         {
             m_setup_channel.pack_param(n.name);
             m_setup_channel.pack_param(n.node->get_type());
-            pack_inputs(m_setup_channel, n.node->get_inputs());
-            pack_outputs(m_setup_channel, n.node->get_outputs());
+            pack_inputs(m_setup_channel, n.node->get_stream_inputs());
+            pack_outputs(m_setup_channel, n.node->get_stream_outputs());
             pack_json(m_setup_channel, n.node->get_init_params());
             pack_json(m_setup_channel, n.node->get_config());
         }
@@ -802,9 +802,9 @@ auto Comms::Source::get_config() const -> rapidjson::Document
     autojsoncxx::to_document(*m_comms.m_config, json);
     return std::move(json);
 }
-auto Comms::Source::get_outputs() const -> std::vector<Output>
+auto Comms::Source::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = node::stream::ICommands::TYPE;
     outputs[0].name = "Multirotor Input";
     outputs[0].stream = m_comms.m_commands_stream;

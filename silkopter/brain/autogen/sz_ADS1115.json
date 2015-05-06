@@ -20,7 +20,7 @@
 {
     "definition" : true,
     "namespace" : "sz::ADS1115",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::ADS1115::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
@@ -35,7 +35,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::ADS1115::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::ADS1115::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

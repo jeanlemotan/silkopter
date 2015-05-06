@@ -24,9 +24,9 @@ PIGPIO::PIGPIO(HAL& hal)
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto PIGPIO::get_inputs() const -> std::vector<Input>
+auto PIGPIO::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4" },
         { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17" },
@@ -219,12 +219,12 @@ void PIGPIO::process()
 
 #define READ_CONFIG(IDX, CH)\
 {\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.inputs.channel_##CH);\
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.input_streams.channel_##CH);\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_init_params->channel_##CH.rate)\
     {\
-        m_config->inputs.channel_##CH.clear();\
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.channel_##CH, m_init_params->channel_##CH.rate, rate);\
+        m_config->input_streams.channel_##CH.clear();\
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.channel_##CH, m_init_params->channel_##CH.rate, rate);\
         m_pwm_channels[IDX].stream.reset();\
     }\
     else\

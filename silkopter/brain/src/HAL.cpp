@@ -15,9 +15,11 @@
 #include "source/MPU9250.h"
 #include "source/MS5611.h"
 #include "source/RC5T619.h"
+#include "source/ADS1115.h"
 #include "source/SRF02.h"
 #include "source/UBLOX.h"
 #include "sink/PIGPIO.h"
+#include "sink/PCA9685.h"
 
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
@@ -189,6 +191,10 @@ auto HAL::get_streams()  -> Registry<node::stream::IStream>&
 {
     return m_streams;
 }
+auto HAL::get_params()  -> Registry<node::param::IParam>&
+{
+    return m_params;
+}
 
 auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {
@@ -298,13 +304,23 @@ auto HAL::create_node(
     {
         auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
-        auto outputs = node->get_outputs();
-        for (auto const& x: outputs)
+        auto output_streams = node->get_stream_outputs();
+        for (auto const& x: output_streams)
         {
             std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
             if (!m_streams.add(stream_name, std::string(), x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
+                return node::INode_ptr();
+            }
+        }
+        auto output_params = node->get_param_outputs();
+        for (auto const& x: output_params)
+        {
+            std::string param_name = q::util::format2<std::string>("{}/{}", name, x.name);
+            if (!m_params.add(param_name, std::string(), x.param))
+            {
+                QLOGE("Cannot add param '{}'", param_name);
                 return node::INode_ptr();
             }
         }
@@ -419,10 +435,12 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<SRF02>("SRF02", *this);
     m_node_factory.register_node<Raspicam>("Raspicam", *this);
     m_node_factory.register_node<RC5T619>("RC5T619", *this);
+    m_node_factory.register_node<ADS1115>("ADS1115", *this);
     m_node_factory.register_node<UBLOX>("UBLOX", *this);
     m_node_factory.register_node<Comms::Source>("Comms Source", comms);
 
     m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
+   m_node_factory.register_node<PCA9685>("PCA9685", *this);
 
     m_node_factory.register_node<Multi_Pilot>("Multi Pilot", *this);
 
@@ -586,6 +604,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Velocity_Controller>("Velocity Controller", *this);
 
 
+    get_params().remove_all();
     get_streams().remove_all();
     get_nodes().remove_all();
 

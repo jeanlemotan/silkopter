@@ -29,8 +29,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 
@@ -131,12 +131,12 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.inputs.input);
+    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.input_streams.input);
     auto input_rate = input_stream ? input_stream->get_rate() : 0u;
     if (input_rate == 0)
     {
-        QLOGW("Bad input stream '{}' @ {}Hz", m_config.inputs.input, input_rate);
-        m_config.inputs.input.clear();
+        QLOGW("Bad input stream '{}' @ {}Hz", m_config.input_streams.input, input_rate);
+        m_config.input_streams.input.clear();
         m_input_stream.reset();
         m_input_stream_dt = std::chrono::microseconds(0);
     }
@@ -180,18 +180,18 @@ auto Resampler<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
+auto Resampler<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { Stream_t::TYPE, m_init_params.rate, "Input" }
     }};
     return inputs;
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
+auto Resampler<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

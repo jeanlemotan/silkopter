@@ -83,6 +83,7 @@ void QNEPort::setName(const QString &n)
 {
     m_name = n;
     m_label->setPlainText(n);
+    m_label->setDefaultTextColor(QColor(Qt::black));
 
     if (m_isOutput)
     {

@@ -868,11 +868,11 @@ struct Serializer< Writer9ebd0b9c89ed41a197d614be793bcbd30e9e8dd319955cf35bf9984
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace RC5T619 { struct Outputs {
+namespace sz { namespace RC5T619 { struct Output_Streams {
  sz::RC5T619::ADC adc0;
 sz::RC5T619::ADC adc1;
 
-explicit Outputs():adc0(), adc1() {  }
+explicit Output_Streams():adc0(), adc1() {  }
 
 
  
@@ -883,7 +883,7 @@ explicit Outputs():adc0(), adc1() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::RC5T619::Outputs > {
+class SAXEventHandler< ::sz::RC5T619::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -940,7 +940,7 @@ has_adc1 = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::RC5T619::Outputs * obj)
+    explicit SAXEventHandler( ::sz::RC5T619::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->adc0)
@@ -1253,15 +1253,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c >
-struct Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, ::sz::RC5T619::Outputs > {
+template < class Writer9f18aca078a07473d7cff596a4dec3b878fc81d41950c179664a35b285d0fbbb >
+struct Serializer< Writer9f18aca078a07473d7cff596a4dec3b878fc81d41950c179664a35b285d0fbbb, ::sz::RC5T619::Output_Streams > {
 
-    void operator()( Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c& w, const ::sz::RC5T619::Outputs& value) const
+    void operator()( Writer9f18aca078a07473d7cff596a4dec3b878fc81d41950c179664a35b285d0fbbb& w, const ::sz::RC5T619::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x30", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc0);
-w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38c06c58ea4e9b1dcbd59d3c45d8b147cacc67a6c, sz::RC5T619::ADC >()(w, value.adc1);
+        w.Key("\x41\x44\x43\x30", 4, false); Serializer< Writer9f18aca078a07473d7cff596a4dec3b878fc81d41950c179664a35b285d0fbbb, sz::RC5T619::ADC >()(w, value.adc0);
+w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writer9f18aca078a07473d7cff596a4dec3b878fc81d41950c179664a35b285d0fbbb, sz::RC5T619::ADC >()(w, value.adc1);
 
         w.EndObject(2);
     }
@@ -1298,9 +1298,9 @@ w.Key("\x41\x44\x43\x31", 4, false); Serializer< Writerd34dc3f85b81dc36b6884ac38
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace RC5T619 { struct Config {
- sz::RC5T619::Outputs outputs;
+ sz::RC5T619::Output_Streams output_streams;
 
-explicit Config():outputs() {  }
+explicit Config():output_streams() {  }
 
 
  
@@ -1317,7 +1317,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::RC5T619::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< sz::RC5T619::Output_Streams > handler_0;bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1332,7 +1332,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1359,14 +1359,14 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::RC5T619::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1507,8 +1507,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=0; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1590,7 +1590,7 @@ public:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1637,7 +1637,7 @@ struct Serializer< Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d, sz::RC5T619::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer5c9889223e14c99e56b726ef34d3fcbdadf13972e45fc0e783f0852ee4c9310d, sz::RC5T619::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(1);
     }

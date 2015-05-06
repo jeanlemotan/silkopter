@@ -991,10 +991,10 @@ w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f74
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Raspicam { struct Outputs {
+namespace sz { namespace Raspicam { struct Output_Streams {
  
 
-explicit Outputs() {  }
+explicit Output_Streams() {  }
 
 
  
@@ -1005,7 +1005,7 @@ explicit Outputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Raspicam::Outputs > {
+class SAXEventHandler< ::sz::Raspicam::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1056,7 +1056,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Raspicam::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Raspicam::Output_Streams * obj)
         : state(-1)
         , depth(0)
         
@@ -1307,10 +1307,10 @@ public:
     }
 };
 
-template < class Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd42678a622 >
-struct Serializer< Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd42678a622, ::sz::Raspicam::Outputs > {
+template < class Writer571dfc56f9b00acab2a7b7385916de85aa75169a687d9d16cda8390e233ab05d >
+struct Serializer< Writer571dfc56f9b00acab2a7b7385916de85aa75169a687d9d16cda8390e233ab05d, ::sz::Raspicam::Output_Streams > {
 
-    void operator()( Writerace5281bda5980b6ccc01267961610c57e95045b9e1c98304629dbd42678a622& w, const ::sz::Raspicam::Outputs& value) const
+    void operator()( Writer571dfc56f9b00acab2a7b7385916de85aa75169a687d9d16cda8390e233ab05d& w, const ::sz::Raspicam::Output_Streams& value) const
     {
         w.StartObject();
 
@@ -1354,9 +1354,9 @@ namespace sz { namespace Raspicam { struct Config {
  uint32_t iso;
 uint32_t shutter_speed;
 uint32_t quality;
-sz::Raspicam::Outputs outputs;
+sz::Raspicam::Output_Streams output_streams;
 
-explicit Config():iso(0), shutter_speed(0), quality(1), outputs() {  }
+explicit Config():iso(0), shutter_speed(0), quality(1), output_streams() {  }
 
 
  
@@ -1376,10 +1376,10 @@ private:
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< uint32_t > handler_2;
-SAXEventHandler< sz::Raspicam::Outputs > handler_3;bool has_iso;
+SAXEventHandler< sz::Raspicam::Output_Streams > handler_3;bool has_iso;
 bool has_shutter_speed;
 bool has_quality;
-bool has_outputs;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1400,7 +1400,7 @@ case 1:
 case 2:
     return "quality";
 case 3:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1430,7 +1430,7 @@ case 3:
         has_iso = false;
 has_shutter_speed = false;
 has_quality = false;
-has_outputs = false;
+has_output_streams = false;
     }
 
 public:
@@ -1440,7 +1440,7 @@ public:
         , handler_0(&obj->iso)
 , handler_1(&obj->shutter_speed)
 , handler_2(&obj->quality)
-, handler_3(&obj->outputs)
+, handler_3(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1659,8 +1659,8 @@ else if (utility::string_equal(str, length, "\x53\x68\x75\x74\x74\x65\x72\x20\x5
 						 { state=1; has_shutter_speed = true; }
 else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
 						 { state=2; has_quality = true; }
-else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x6f\x75\x74\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=3; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1790,7 +1790,7 @@ case 3:
             if (!has_iso) set_missing_required("iso");
 if (!has_shutter_speed) set_missing_required("shutter_speed");
 if (!has_quality) set_missing_required("quality");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1849,7 +1849,7 @@ struct Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201
         w.Key("\x49\x73\x6f", 3, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.iso);
 w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.shutter_speed);
 w.Key("\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.quality);
-w.Key("\x6f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, sz::Raspicam::Outputs >()(w, value.outputs);
+w.Key("\x6f\x75\x74\x70\x75\x74\x5f\x73\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, sz::Raspicam::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(4);
     }

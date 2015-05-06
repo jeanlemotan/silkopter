@@ -438,9 +438,9 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
     return res;
 }
 
-auto MPU9250::get_outputs() const -> std::vector<Output>
+auto MPU9250::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(4);
+    std::vector<Stream_Output> outputs(4);
     outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity;

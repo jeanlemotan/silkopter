@@ -250,8 +250,8 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
 {
     bool ok = channel.unpack_param(node_def.name);
     ok &= channel.unpack_param(node_def.type);
-    ok &= unpack_inputs(channel, node_def.inputs);
-    ok &= unpack_outputs(channel, node_def.outputs);
+    ok &= unpack_inputs(channel, node_def.input_streams);
+    ok &= unpack_outputs(channel, node_def.output_streams);
     ok &= unpack_json(channel, node_def.default_init_params);
     ok &= unpack_json(channel, node_def.default_config);
     return ok;
@@ -260,8 +260,8 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
 static auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool
 {
     bool ok = channel.unpack_param(node.type);
-    ok &= unpack_inputs(channel, node.inputs);
-    ok &= unpack_outputs(channel, node.outputs);
+    ok &= unpack_inputs(channel, node.input_streams);
+    ok &= unpack_outputs(channel, node.output_streams);
     ok &= unpack_json(channel, node.init_params);
     ok &= unpack_json(channel, node.config);
     return ok;
@@ -439,7 +439,7 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
 
 auto Comms::publish_output_streams(node::Node_ptr node) -> bool
 {
-    for (auto& os: node->outputs)
+    for (auto& os: node->output_streams)
     {
         auto stream = create_stream_from_type(os.type);
         if (!stream)
@@ -460,10 +460,10 @@ auto Comms::publish_output_streams(node::Node_ptr node) -> bool
 
 auto Comms::link_input_streams(node::Node_ptr node) -> bool
 {
-    for (auto& i: node->inputs)
+    for (auto& i: node->input_streams)
     {
         //find the connection in the config
-        q::Path input_path("Inputs/" + i.name);
+        q::Path input_path("Input Streams/" + i.name);
         auto* input_streamj = jsonutil::find_value(node->config, input_path);
         if (!input_streamj || !input_streamj->IsString())
         {

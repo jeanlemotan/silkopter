@@ -20,7 +20,7 @@
 {
     "definition" : true,
     "namespace" : "sz::SRF02",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::SRF02::Distance", "distance", {"required": true, "json_key" : "Distance"}]
@@ -35,7 +35,7 @@
        ["math::vec3f", "direction", {"required": true, "json_key" : "Direction (normalized vector)"}],
        ["float", "min_distance", {"required": false, "json_key" : "Minimum Distance (m)", "default" : 0.12}],
        ["float", "max_distance", {"required": false, "json_key" : "Maximum Distance (m)", "default" : 6}],
-       ["sz::SRF02::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+       ["sz::SRF02::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

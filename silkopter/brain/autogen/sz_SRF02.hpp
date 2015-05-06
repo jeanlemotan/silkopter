@@ -815,10 +815,10 @@ struct Serializer< Writerb3900d4db9ddf5bb55c3b8f54f2d57ade036eef94172d32d30c78ba
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SRF02 { struct Outputs {
+namespace sz { namespace SRF02 { struct Output_Streams {
  sz::SRF02::Distance distance;
 
-explicit Outputs():distance() {  }
+explicit Output_Streams():distance() {  }
 
 
  
@@ -829,7 +829,7 @@ explicit Outputs():distance() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SRF02::Outputs > {
+class SAXEventHandler< ::sz::SRF02::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -881,7 +881,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SRF02::Outputs * obj)
+    explicit SAXEventHandler( ::sz::SRF02::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->distance)
@@ -1148,14 +1148,14 @@ public:
     }
 };
 
-template < class Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177 >
-struct Serializer< Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177, ::sz::SRF02::Outputs > {
+template < class Writerbfc631caeca1addaeb5c9f91e2be7a43fccb4be4687394eff4ab267495a6355b >
+struct Serializer< Writerbfc631caeca1addaeb5c9f91e2be7a43fccb4be4687394eff4ab267495a6355b, ::sz::SRF02::Output_Streams > {
 
-    void operator()( Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177& w, const ::sz::SRF02::Outputs& value) const
+    void operator()( Writerbfc631caeca1addaeb5c9f91e2be7a43fccb4be4687394eff4ab267495a6355b& w, const ::sz::SRF02::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writer141859ca3ff1da9d5640e5f29753d9002a6bdb471a2cbbb29c574b4a27a53177, sz::SRF02::Distance >()(w, value.distance);
+        w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writerbfc631caeca1addaeb5c9f91e2be7a43fccb4be4687394eff4ab267495a6355b, sz::SRF02::Distance >()(w, value.distance);
 
         w.EndObject(1);
     }
@@ -1195,9 +1195,9 @@ namespace sz { namespace SRF02 { struct Config {
  math::vec3f direction;
 float min_distance;
 float max_distance;
-sz::SRF02::Outputs outputs;
+sz::SRF02::Output_Streams output_streams;
 
-explicit Config():direction(), min_distance(0.12), max_distance(6), outputs() {  }
+explicit Config():direction(), min_distance(0.12), max_distance(6), output_streams() {  }
 
 
  
@@ -1217,8 +1217,8 @@ private:
     SAXEventHandler< math::vec3f > handler_0;
 SAXEventHandler< float > handler_1;
 SAXEventHandler< float > handler_2;
-SAXEventHandler< sz::SRF02::Outputs > handler_3;bool has_direction;
-bool has_outputs;
+SAXEventHandler< sz::SRF02::Output_Streams > handler_3;bool has_direction;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1239,7 +1239,7 @@ case 1:
 case 2:
     return "max_distance";
 case 3:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1269,7 +1269,7 @@ case 3:
         has_direction = false;
 
 
-has_outputs = false;
+has_output_streams = false;
     }
 
 public:
@@ -1279,7 +1279,7 @@ public:
         , handler_0(&obj->direction)
 , handler_1(&obj->min_distance)
 , handler_2(&obj->max_distance)
-, handler_3(&obj->outputs)
+, handler_3(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1498,8 +1498,8 @@ else if (utility::string_equal(str, length, "\x4d\x69\x6e\x69\x6d\x75\x6d\x20\x4
 						 { state=1;  }
 else if (utility::string_equal(str, length, "\x4d\x61\x78\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20))
 						 { state=2;  }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=3; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1627,7 +1627,7 @@ case 3:
             }
         } else {
             if (!has_direction) set_missing_required("direction");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1686,7 +1686,7 @@ struct Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d03
         w.Key("\x44\x69\x72\x65\x63\x74\x69\x6f\x6e\x20\x28\x6e\x6f\x72\x6d\x61\x6c\x69\x7a\x65\x64\x20\x76\x65\x63\x74\x6f\x72\x29", 29, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, math::vec3f >()(w, value.direction);
 w.Key("\x4d\x69\x6e\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.min_distance);
 w.Key("\x4d\x61\x78\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.max_distance);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, sz::SRF02::Outputs >()(w, value.outputs);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, sz::SRF02::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(4);
     }

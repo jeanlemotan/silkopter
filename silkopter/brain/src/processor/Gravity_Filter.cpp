@@ -48,18 +48,18 @@ auto Gravity_Filter::init() -> bool
     return true;
 }
 
-auto Gravity_Filter::get_inputs() const -> std::vector<Input>
+auto Gravity_Filter::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
         { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration" }
     }};
     return inputs;
 }
-auto Gravity_Filter::get_outputs() const -> std::vector<Output>
+auto Gravity_Filter::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::ILinear_Acceleration::TYPE;
     outputs[0].name = "Linear Acceleration";
     outputs[0].stream = m_output_stream;
@@ -135,14 +135,14 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.inputs.frame);
-    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.inputs.acceleration);
+    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
+    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
 
     auto rate = frame_stream ? frame_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.frame.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_output_stream->rate, rate);
+        m_config->input_streams.frame.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
         m_frame_stream.reset();
     }
     else
@@ -153,8 +153,8 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.acceleration.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.acceleration, m_output_stream->rate, rate);
+        m_config->input_streams.acceleration.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, m_output_stream->rate, rate);
         m_acceleration_stream.reset();
     }
     else

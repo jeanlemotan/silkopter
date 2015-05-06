@@ -456,10 +456,10 @@ w.Key("\x43\x6f\x6d\x70\x6f\x6e\x65\x6e\x74\x20\x43\x6f\x75\x6e\x74", 15, false)
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Factor_Generator { struct Inputs {
+namespace sz { namespace Factor_Generator { struct Input_Streams {
  
 
-explicit Inputs() {  }
+explicit Input_Streams() {  }
 
 
  
@@ -470,7 +470,7 @@ explicit Inputs() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Factor_Generator::Inputs > {
+class SAXEventHandler< ::sz::Factor_Generator::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -521,7 +521,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Factor_Generator::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Factor_Generator::Input_Streams * obj)
         : state(-1)
         , depth(0)
         
@@ -772,10 +772,10 @@ public:
     }
 };
 
-template < class Writerfb27126ba199978af89cc662c16758c618c3280eaca1f46ff56f5553a0b81e30 >
-struct Serializer< Writerfb27126ba199978af89cc662c16758c618c3280eaca1f46ff56f5553a0b81e30, ::sz::Factor_Generator::Inputs > {
+template < class Writerd69104eb04084fd7491b07df724dba5b7f3f663e7b54e2877b75650b6b47fdf7 >
+struct Serializer< Writerd69104eb04084fd7491b07df724dba5b7f3f663e7b54e2877b75650b6b47fdf7, ::sz::Factor_Generator::Input_Streams > {
 
-    void operator()( Writerfb27126ba199978af89cc662c16758c618c3280eaca1f46ff56f5553a0b81e30& w, const ::sz::Factor_Generator::Inputs& value) const
+    void operator()( Writerd69104eb04084fd7491b07df724dba5b7f3f663e7b54e2877b75650b6b47fdf7& w, const ::sz::Factor_Generator::Input_Streams& value) const
     {
         w.StartObject();
 
@@ -1174,10 +1174,10 @@ struct Serializer< Writer456582a55795ac819ebdc8cb75880498e2b23c2b7cdc6fb8b16c61e
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Factor_Generator { struct Outputs {
+namespace sz { namespace Factor_Generator { struct Output_Streams {
  sz::Factor_Generator::Factor factor;
 
-explicit Outputs():factor() {  }
+explicit Output_Streams():factor() {  }
 
 
  
@@ -1188,7 +1188,7 @@ explicit Outputs():factor() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Factor_Generator::Outputs > {
+class SAXEventHandler< ::sz::Factor_Generator::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1240,7 +1240,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Factor_Generator::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Factor_Generator::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->factor)
@@ -1507,14 +1507,14 @@ public:
     }
 };
 
-template < class Writer71439ad9b79e4e767f5b3cca82f5bc88960dde18c52fabf92a9e2f2f3b2ac778 >
-struct Serializer< Writer71439ad9b79e4e767f5b3cca82f5bc88960dde18c52fabf92a9e2f2f3b2ac778, ::sz::Factor_Generator::Outputs > {
+template < class Writerb5bc3c32d04abc35bfbd9a717fb82d8dcacb500250c477f09376b027520538f0 >
+struct Serializer< Writerb5bc3c32d04abc35bfbd9a717fb82d8dcacb500250c477f09376b027520538f0, ::sz::Factor_Generator::Output_Streams > {
 
-    void operator()( Writer71439ad9b79e4e767f5b3cca82f5bc88960dde18c52fabf92a9e2f2f3b2ac778& w, const ::sz::Factor_Generator::Outputs& value) const
+    void operator()( Writerb5bc3c32d04abc35bfbd9a717fb82d8dcacb500250c477f09376b027520538f0& w, const ::sz::Factor_Generator::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x46\x61\x63\x74\x6f\x72", 6, false); Serializer< Writer71439ad9b79e4e767f5b3cca82f5bc88960dde18c52fabf92a9e2f2f3b2ac778, sz::Factor_Generator::Factor >()(w, value.factor);
+        w.Key("\x46\x61\x63\x74\x6f\x72", 6, false); Serializer< Writerb5bc3c32d04abc35bfbd9a717fb82d8dcacb500250c477f09376b027520538f0, sz::Factor_Generator::Factor >()(w, value.factor);
 
         w.EndObject(1);
     }
@@ -1984,10 +1984,10 @@ namespace sz { namespace Factor_Generator { struct Config {
 float noise;
 bool square;
 std::vector<sz::Factor_Generator::Component> components;
-sz::Factor_Generator::Inputs inputs;
-sz::Factor_Generator::Outputs outputs;
+sz::Factor_Generator::Input_Streams input_streams;
+sz::Factor_Generator::Output_Streams output_streams;
 
-explicit Config():amplitude(1), noise(), square(), components(), inputs(), outputs() {  }
+explicit Config():amplitude(1), noise(), square(), components(), input_streams(), output_streams() {  }
 
 
  
@@ -2008,13 +2008,13 @@ private:
 SAXEventHandler< float > handler_1;
 SAXEventHandler< bool > handler_2;
 SAXEventHandler< std::vector<sz::Factor_Generator::Component> > handler_3;
-SAXEventHandler< sz::Factor_Generator::Inputs > handler_4;
-SAXEventHandler< sz::Factor_Generator::Outputs > handler_5;bool has_amplitude;
+SAXEventHandler< sz::Factor_Generator::Input_Streams > handler_4;
+SAXEventHandler< sz::Factor_Generator::Output_Streams > handler_5;bool has_amplitude;
 bool has_noise;
 bool has_square;
 bool has_components;
-bool has_inputs;
-bool has_outputs;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -2037,9 +2037,9 @@ case 2:
 case 3:
     return "components";
 case 4:
-    return "inputs";
+    return "input_streams";
 case 5:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -2070,8 +2070,8 @@ case 5:
 has_noise = false;
 has_square = false;
 has_components = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -2082,8 +2082,8 @@ public:
 , handler_1(&obj->noise)
 , handler_2(&obj->square)
 , handler_3(&obj->components)
-, handler_4(&obj->inputs)
-, handler_5(&obj->outputs)
+, handler_4(&obj->input_streams)
+, handler_5(&obj->output_streams)
     {
         reset_flags();
     }
@@ -2352,10 +2352,10 @@ else if (utility::string_equal(str, length, "\x53\x71\x75\x61\x72\x65", 6))
 						 { state=2; has_square = true; }
 else if (utility::string_equal(str, length, "\x43\x6f\x6d\x70\x6f\x6e\x65\x6e\x74\x73", 10))
 						 { state=3; has_components = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=4; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=5; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=4; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=5; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -2516,8 +2516,8 @@ case 5:
 if (!has_noise) set_missing_required("noise");
 if (!has_square) set_missing_required("square");
 if (!has_components) set_missing_required("components");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2583,8 +2583,8 @@ struct Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a
 w.Key("\x4e\x6f\x69\x73\x65", 5, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, float >()(w, value.noise);
 w.Key("\x53\x71\x75\x61\x72\x65", 6, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, bool >()(w, value.square);
 w.Key("\x43\x6f\x6d\x70\x6f\x6e\x65\x6e\x74\x73", 10, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, std::vector<sz::Factor_Generator::Component> >()(w, value.components);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, sz::Factor_Generator::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, sz::Factor_Generator::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, sz::Factor_Generator::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer50910aebd4a472bfd9e18b96d424b19a088b053a3245a63bf4a4f1a30bc56275, sz::Factor_Generator::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(6);
     }

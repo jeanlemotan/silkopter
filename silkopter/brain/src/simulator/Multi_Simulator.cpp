@@ -101,7 +101,7 @@ auto Multi_Simulator::init() -> bool
     m_last_tp = q::Clock::now();
 
     m_input_throttle_streams.resize(multi_config->motors.size());
-    m_config->inputs.throttle.resize(multi_config->motors.size());
+    m_config->input_streams.throttle.resize(multi_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
     m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -136,9 +136,9 @@ auto Multi_Simulator::init() -> bool
     return true;
 }
 
-auto Multi_Simulator::get_inputs() const -> std::vector<Input>
+auto Multi_Simulator::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs(m_input_throttle_streams.size());
+    std::vector<Stream_Input> inputs(m_input_throttle_streams.size());
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         inputs[i].type = stream::IThrottle::TYPE;
@@ -147,9 +147,9 @@ auto Multi_Simulator::get_inputs() const -> std::vector<Input>
     }
     return inputs;
 }
-auto Multi_Simulator::get_outputs() const -> std::vector<Output>
+auto Multi_Simulator::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(7);
+    std::vector<Stream_Output> outputs(7);
     outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity_stream;
@@ -285,14 +285,14 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    for (size_t i = 0; i < sz.inputs.throttle.size(); i++)
+    for (size_t i = 0; i < sz.input_streams.throttle.size(); i++)
     {
-        auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(sz.inputs.throttle[i]);
+        auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(sz.input_streams.throttle[i]);
         auto rate = input_stream ? input_stream->get_rate() : 0u;
         if (rate != m_init_params->throttle_rate)
         {
-            m_config->inputs.throttle[i].clear();
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.throttle[i], m_init_params->throttle_rate, rate);
+            m_config->input_streams.throttle[i].clear();
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.throttle[i], m_init_params->throttle_rate, rate);
             m_input_throttle_streams[i].reset();
         }
         else

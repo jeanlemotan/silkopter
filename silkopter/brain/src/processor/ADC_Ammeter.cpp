@@ -46,17 +46,17 @@ auto ADC_Ammeter::init() -> bool
     return true;
 }
 
-auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
+auto ADC_Ammeter::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IADC::TYPE, m_init_params->rate, "ADC" }
     }};
     return inputs;
 }
-auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
+auto ADC_Ammeter::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::ICurrent::TYPE;
     outputs[0].name = "Current";
     outputs[0].stream = m_output_stream;
@@ -84,7 +84,7 @@ void ADC_Ammeter::process()
        vs.dt = sample.dt;
        vs.tp = sample.tp;
        vs.sample_idx = sample.sample_idx;
-       vs.value = sample.value * m_config->outputs.current.scale + m_config->outputs.current.bias;
+       vs.value = sample.value * m_config->output_streams.current.scale + m_config->output_streams.current.bias;
        return vs;
     });
 
@@ -105,12 +105,12 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.inputs.adc_value);
+    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc_value);
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc_value, m_output_stream->rate, rate);
         m_adc_stream.reset();
     }
     else

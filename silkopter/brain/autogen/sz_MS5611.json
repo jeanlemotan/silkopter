@@ -29,7 +29,7 @@
 {
     "definition" : true,
     "namespace" : "sz::MS5611",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::MS5611::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
@@ -42,7 +42,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::MS5611::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::MS5611::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

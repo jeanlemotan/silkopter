@@ -47,18 +47,18 @@ auto Rate_Controller::init() -> bool
     return true;
 }
 
-auto Rate_Controller::get_inputs() const -> std::vector<Input>
+auto Rate_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input" },
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Target" }
     }};
     return inputs;
 }
-auto Rate_Controller::get_outputs() const -> std::vector<Output>
+auto Rate_Controller::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::ITorque::TYPE;
     outputs[0].name = "Torque";
     outputs[0].stream = m_output_stream;
@@ -169,14 +169,14 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.input);
-    auto target_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.inputs.target);
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.input);
+    auto target_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.target);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.input.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.input, m_output_stream->rate, rate);
+        m_config->input_streams.input.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
         m_input_stream.reset();
     }
     else
@@ -187,8 +187,8 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     rate = target_stream ? target_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        m_config->inputs.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.target, m_output_stream->rate, rate);
+        m_config->input_streams.target.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->rate, rate);
         m_target_stream.reset();
     }
     else

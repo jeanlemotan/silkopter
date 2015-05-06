@@ -1346,7 +1346,7 @@ w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace PIGPIO { struct Inputs {
+namespace sz { namespace PIGPIO { struct Input_Streams {
  std::string channel_4;
 std::string channel_17;
 std::string channel_18;
@@ -1356,7 +1356,7 @@ std::string channel_24;
 std::string channel_25;
 std::string channel_27;
 
-explicit Inputs():channel_4(), channel_17(), channel_18(), channel_22(), channel_23(), channel_24(), channel_25(), channel_27() {  }
+explicit Input_Streams():channel_4(), channel_17(), channel_18(), channel_22(), channel_23(), channel_24(), channel_25(), channel_27() {  }
 
 
  
@@ -1367,7 +1367,7 @@ explicit Inputs():channel_4(), channel_17(), channel_18(), channel_22(), channel
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::PIGPIO::Inputs > {
+class SAXEventHandler< ::sz::PIGPIO::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1454,7 +1454,7 @@ has_channel_27 = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::PIGPIO::Inputs * obj)
+    explicit SAXEventHandler( ::sz::PIGPIO::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->channel_4)
@@ -2043,21 +2043,21 @@ handler_7.PrepareForReuse();
     }
 };
 
-template < class Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0 >
-struct Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, ::sz::PIGPIO::Inputs > {
+template < class Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1 >
+struct Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, ::sz::PIGPIO::Input_Streams > {
 
-    void operator()( Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0& w, const ::sz::PIGPIO::Inputs& value) const
+    void operator()( Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1& w, const ::sz::PIGPIO::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_4);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_17);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_18);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_22);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_23);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_24);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_25);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writerf739557776b0b455f87b0e85706a5667a8c0d45f2b0c9afa3789660b7df530a0, std::string >()(w, value.channel_27);
+        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_4);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_17);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_18);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_22);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_23);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_24);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_25);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_27);
 
         w.EndObject(8);
     }
@@ -2094,9 +2094,9 @@ w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace PIGPIO { struct Config {
- sz::PIGPIO::Inputs inputs;
+ sz::PIGPIO::Input_Streams input_streams;
 
-explicit Config():inputs() {  }
+explicit Config():input_streams() {  }
 
 
  
@@ -2113,7 +2113,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::PIGPIO::Inputs > handler_0;bool has_inputs;
+    SAXEventHandler< sz::PIGPIO::Input_Streams > handler_0;bool has_input_streams;
 
     bool check_depth(const char* type)
     {
@@ -2128,7 +2128,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
         default:
             break;
         }
@@ -2155,14 +2155,14 @@ private:
 
     void reset_flags()
     {
-        has_inputs = false;
+        has_input_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::PIGPIO::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
+        , handler_0(&obj->input_streams)
     {
         reset_flags();
     }
@@ -2303,8 +2303,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -2386,7 +2386,7 @@ public:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
+            if (!has_input_streams) set_missing_required("input_streams");
         }
         return the_error.empty();
     }
@@ -2433,7 +2433,7 @@ struct Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e780
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e7805b83ae349, sz::PIGPIO::Inputs >()(w, value.inputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e7805b83ae349, sz::PIGPIO::Input_Streams >()(w, value.input_streams);
 
         w.EndObject(1);
     }

@@ -403,12 +403,12 @@ struct Serializer< Writer69485d8908c27f42ccac06fad0ed25329779895a1c15b903b1d7cba
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Vec3_Generator { struct Inputs {
+namespace sz { namespace Vec3_Generator { struct Input_Streams {
  std::string x_factor;
 std::string y_factor;
 std::string z_factor;
 
-explicit Inputs():x_factor(), y_factor(), z_factor() {  }
+explicit Input_Streams():x_factor(), y_factor(), z_factor() {  }
 
 
  
@@ -419,7 +419,7 @@ explicit Inputs():x_factor(), y_factor(), z_factor() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Vec3_Generator::Inputs > {
+class SAXEventHandler< ::sz::Vec3_Generator::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -481,7 +481,7 @@ has_z_factor = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Vec3_Generator::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Vec3_Generator::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x_factor)
@@ -840,16 +840,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c >
-struct Serializer< Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c, ::sz::Vec3_Generator::Inputs > {
+template < class Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf >
+struct Serializer< Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf, ::sz::Vec3_Generator::Input_Streams > {
 
-    void operator()( Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c& w, const ::sz::Vec3_Generator::Inputs& value) const
+    void operator()( Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf& w, const ::sz::Vec3_Generator::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x58\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c, std::string >()(w, value.x_factor);
-w.Key("\x59\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c, std::string >()(w, value.y_factor);
-w.Key("\x5a\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer651f9b2a27af08f31ea39794abf9abc889d6b60fcfc04abe7903b42b9f50fc2c, std::string >()(w, value.z_factor);
+        w.Key("\x58\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf, std::string >()(w, value.x_factor);
+w.Key("\x59\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf, std::string >()(w, value.y_factor);
+w.Key("\x5a\x20\x46\x61\x63\x74\x6f\x72", 8, false); Serializer< Writer86ea96c4aa948ad080d7de9109cceacdca159c3c3f07e3e5493f0e6259d1c1bf, std::string >()(w, value.z_factor);
 
         w.EndObject(3);
     }
@@ -1244,10 +1244,10 @@ struct Serializer< Writer3927a76ec1ee7ca47ac2c04de4c6510dacbe3e141dca64b2e9a2e8b
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Vec3_Generator { struct Outputs {
+namespace sz { namespace Vec3_Generator { struct Output_Streams {
  sz::Vec3_Generator::Output output;
 
-explicit Outputs():output() {  }
+explicit Output_Streams():output() {  }
 
 
  
@@ -1258,7 +1258,7 @@ explicit Outputs():output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Vec3_Generator::Outputs > {
+class SAXEventHandler< ::sz::Vec3_Generator::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1310,7 +1310,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Vec3_Generator::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Vec3_Generator::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->output)
@@ -1577,14 +1577,14 @@ public:
     }
 };
 
-template < class Writer6382537065269f77ac38c3d596707cbd3b886f010297fa6a0f753826b445d418 >
-struct Serializer< Writer6382537065269f77ac38c3d596707cbd3b886f010297fa6a0f753826b445d418, ::sz::Vec3_Generator::Outputs > {
+template < class Writerff696ffccb3a062ef8f9a8cb83cf0e30d39a3e4fe1db53dfa7a1a8d02cba5e91 >
+struct Serializer< Writerff696ffccb3a062ef8f9a8cb83cf0e30d39a3e4fe1db53dfa7a1a8d02cba5e91, ::sz::Vec3_Generator::Output_Streams > {
 
-    void operator()( Writer6382537065269f77ac38c3d596707cbd3b886f010297fa6a0f753826b445d418& w, const ::sz::Vec3_Generator::Outputs& value) const
+    void operator()( Writerff696ffccb3a062ef8f9a8cb83cf0e30d39a3e4fe1db53dfa7a1a8d02cba5e91& w, const ::sz::Vec3_Generator::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writer6382537065269f77ac38c3d596707cbd3b886f010297fa6a0f753826b445d418, sz::Vec3_Generator::Output >()(w, value.output);
+        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writerff696ffccb3a062ef8f9a8cb83cf0e30d39a3e4fe1db53dfa7a1a8d02cba5e91, sz::Vec3_Generator::Output >()(w, value.output);
 
         w.EndObject(1);
     }
@@ -1622,10 +1622,10 @@ struct Serializer< Writer6382537065269f77ac38c3d596707cbd3b886f010297fa6a0f75382
 
 namespace sz { namespace Vec3_Generator { struct Config {
  math::vec3f value;
-sz::Vec3_Generator::Inputs inputs;
-sz::Vec3_Generator::Outputs outputs;
+sz::Vec3_Generator::Input_Streams input_streams;
+sz::Vec3_Generator::Output_Streams output_streams;
 
-explicit Config():value(), inputs(), outputs() {  }
+explicit Config():value(), input_streams(), output_streams() {  }
 
 
  
@@ -1643,10 +1643,10 @@ private:
     int depth;
 
     SAXEventHandler< math::vec3f > handler_0;
-SAXEventHandler< sz::Vec3_Generator::Inputs > handler_1;
-SAXEventHandler< sz::Vec3_Generator::Outputs > handler_2;bool has_value;
-bool has_inputs;
-bool has_outputs;
+SAXEventHandler< sz::Vec3_Generator::Input_Streams > handler_1;
+SAXEventHandler< sz::Vec3_Generator::Output_Streams > handler_2;bool has_value;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1663,9 +1663,9 @@ bool has_outputs;
             case 0:
     return "value";
 case 1:
-    return "inputs";
+    return "input_streams";
 case 2:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1693,8 +1693,8 @@ case 2:
     void reset_flags()
     {
         has_value = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -1702,8 +1702,8 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->value)
-, handler_1(&obj->inputs)
-, handler_2(&obj->outputs)
+, handler_1(&obj->input_streams)
+, handler_2(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1894,10 +1894,10 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x56\x61\x6c\x75\x65", 5))
 						 { state=0; has_value = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=1; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=2; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=1; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=2; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -2010,8 +2010,8 @@ case 2:
             }
         } else {
             if (!has_value) set_missing_required("value");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2065,8 +2065,8 @@ struct Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c3
         w.StartObject();
 
         w.Key("\x56\x61\x6c\x75\x65", 5, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, math::vec3f >()(w, value.value);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, sz::Vec3_Generator::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, sz::Vec3_Generator::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, sz::Vec3_Generator::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, sz::Vec3_Generator::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(3);
     }

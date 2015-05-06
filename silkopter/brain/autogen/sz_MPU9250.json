@@ -52,7 +52,7 @@
 {
     "definition" : true,
     "namespace" : "sz::MPU9250",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::MPU9250::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
@@ -67,7 +67,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::MPU9250::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::MPU9250::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

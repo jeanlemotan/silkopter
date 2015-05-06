@@ -403,10 +403,10 @@ struct Serializer< Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Inputs {
+namespace sz { namespace LPF { struct Input_Streams {
  std::string input;
 
-explicit Inputs():input() {  }
+explicit Input_Streams():input() {  }
 
 
  
@@ -417,7 +417,7 @@ explicit Inputs():input() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Inputs > {
+class SAXEventHandler< ::sz::LPF::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -469,7 +469,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Inputs * obj)
+    explicit SAXEventHandler( ::sz::LPF::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->input)
@@ -736,14 +736,14 @@ public:
     }
 };
 
-template < class Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1 >
-struct Serializer< Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1, ::sz::LPF::Inputs > {
+template < class Writer9f9926dc6f6b4e4b5b05ee66128554c7eb1bdb9f49e4299ca65758c631b25130 >
+struct Serializer< Writer9f9926dc6f6b4e4b5b05ee66128554c7eb1bdb9f49e4299ca65758c631b25130, ::sz::LPF::Input_Streams > {
 
-    void operator()( Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1& w, const ::sz::LPF::Inputs& value) const
+    void operator()( Writer9f9926dc6f6b4e4b5b05ee66128554c7eb1bdb9f49e4299ca65758c631b25130& w, const ::sz::LPF::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writeref56a22436823cee9c53550e8402431056a38f3e6afb979bc45c99219f585fc1, std::string >()(w, value.input);
+        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writer9f9926dc6f6b4e4b5b05ee66128554c7eb1bdb9f49e4299ca65758c631b25130, std::string >()(w, value.input);
 
         w.EndObject(1);
     }
@@ -1138,10 +1138,10 @@ struct Serializer< Writera01eb46252df6bc5d8391a873af63d4cddcd56aeaabd8b9559926f5
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace LPF { struct Outputs {
+namespace sz { namespace LPF { struct Output_Streams {
  sz::LPF::Output output;
 
-explicit Outputs():output() {  }
+explicit Output_Streams():output() {  }
 
 
  
@@ -1152,7 +1152,7 @@ explicit Outputs():output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::LPF::Outputs > {
+class SAXEventHandler< ::sz::LPF::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1204,7 +1204,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::LPF::Outputs * obj)
+    explicit SAXEventHandler( ::sz::LPF::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->output)
@@ -1471,14 +1471,14 @@ public:
     }
 };
 
-template < class Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47 >
-struct Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47, ::sz::LPF::Outputs > {
+template < class Writer89f5092ac11f3e31c2154daa70cb3924316cd346ebb5763293c85a5d3eed8bb6 >
+struct Serializer< Writer89f5092ac11f3e31c2154daa70cb3924316cd346ebb5763293c85a5d3eed8bb6, ::sz::LPF::Output_Streams > {
 
-    void operator()( Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47& w, const ::sz::LPF::Outputs& value) const
+    void operator()( Writer89f5092ac11f3e31c2154daa70cb3924316cd346ebb5763293c85a5d3eed8bb6& w, const ::sz::LPF::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887ee167e1b47, sz::LPF::Output >()(w, value.output);
+        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writer89f5092ac11f3e31c2154daa70cb3924316cd346ebb5763293c85a5d3eed8bb6, sz::LPF::Output >()(w, value.output);
 
         w.EndObject(1);
     }
@@ -1517,10 +1517,10 @@ struct Serializer< Writer7a1ff449bae1c5d7f790f336dcb48dcabb182a7af64f7445fec887e
 namespace sz { namespace LPF { struct Config {
  uint32_t poles;
 double cutoff_frequency;
-sz::LPF::Inputs inputs;
-sz::LPF::Outputs outputs;
+sz::LPF::Input_Streams input_streams;
+sz::LPF::Output_Streams output_streams;
 
-explicit Config():poles(2), cutoff_frequency(), inputs(), outputs() {  }
+explicit Config():poles(2), cutoff_frequency(), input_streams(), output_streams() {  }
 
 
  
@@ -1539,11 +1539,11 @@ private:
 
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< double > handler_1;
-SAXEventHandler< sz::LPF::Inputs > handler_2;
-SAXEventHandler< sz::LPF::Outputs > handler_3;bool has_poles;
+SAXEventHandler< sz::LPF::Input_Streams > handler_2;
+SAXEventHandler< sz::LPF::Output_Streams > handler_3;bool has_poles;
 bool has_cutoff_frequency;
-bool has_inputs;
-bool has_outputs;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1562,9 +1562,9 @@ bool has_outputs;
 case 1:
     return "cutoff_frequency";
 case 2:
-    return "inputs";
+    return "input_streams";
 case 3:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1593,8 +1593,8 @@ case 3:
     {
         has_poles = false;
 has_cutoff_frequency = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -1603,8 +1603,8 @@ public:
         , depth(0)
         , handler_0(&obj->poles)
 , handler_1(&obj->cutoff_frequency)
-, handler_2(&obj->inputs)
-, handler_3(&obj->outputs)
+, handler_2(&obj->input_streams)
+, handler_3(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1821,10 +1821,10 @@ case 3:
 						 { state=0; has_poles = true; }
 else if (utility::string_equal(str, length, "\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21))
 						 { state=1; has_cutoff_frequency = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=2; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=2; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=3; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1953,8 +1953,8 @@ case 3:
         } else {
             if (!has_poles) set_missing_required("poles");
 if (!has_cutoff_frequency) set_missing_required("cutoff_frequency");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2012,8 +2012,8 @@ struct Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59a
 
         w.Key("\x50\x6f\x6c\x65\x73", 5, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, uint32_t >()(w, value.poles);
 w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, double >()(w, value.cutoff_frequency);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, sz::LPF::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(4);
     }

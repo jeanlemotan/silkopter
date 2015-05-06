@@ -403,10 +403,10 @@ struct Serializer< Writer1575f330557cb4b2b91beb05dead434f8b8cbf79f99951b38f6df5c
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Resampler { struct Inputs {
+namespace sz { namespace Resampler { struct Input_Streams {
  std::string input;
 
-explicit Inputs():input() {  }
+explicit Input_Streams():input() {  }
 
 
  
@@ -417,7 +417,7 @@ explicit Inputs():input() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Resampler::Inputs > {
+class SAXEventHandler< ::sz::Resampler::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -469,7 +469,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Resampler::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Resampler::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->input)
@@ -736,14 +736,14 @@ public:
     }
 };
 
-template < class Writerda4d898e1de9f6af9c9d28801270d523bee668ed41200466951af3a5417a30aa >
-struct Serializer< Writerda4d898e1de9f6af9c9d28801270d523bee668ed41200466951af3a5417a30aa, ::sz::Resampler::Inputs > {
+template < class Writer86fa89d2e8aabe0bf058e3532a18c99c1a45a2698e58a91755951706df2dc3b9 >
+struct Serializer< Writer86fa89d2e8aabe0bf058e3532a18c99c1a45a2698e58a91755951706df2dc3b9, ::sz::Resampler::Input_Streams > {
 
-    void operator()( Writerda4d898e1de9f6af9c9d28801270d523bee668ed41200466951af3a5417a30aa& w, const ::sz::Resampler::Inputs& value) const
+    void operator()( Writer86fa89d2e8aabe0bf058e3532a18c99c1a45a2698e58a91755951706df2dc3b9& w, const ::sz::Resampler::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writerda4d898e1de9f6af9c9d28801270d523bee668ed41200466951af3a5417a30aa, std::string >()(w, value.input);
+        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writer86fa89d2e8aabe0bf058e3532a18c99c1a45a2698e58a91755951706df2dc3b9, std::string >()(w, value.input);
 
         w.EndObject(1);
     }
@@ -1138,10 +1138,10 @@ struct Serializer< Writerc8961189eaa783f870f6100415d7e2c7600c0fdab2843612cc77f5b
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Resampler { struct Outputs {
+namespace sz { namespace Resampler { struct Output_Streams {
  sz::Resampler::Output output;
 
-explicit Outputs():output() {  }
+explicit Output_Streams():output() {  }
 
 
  
@@ -1152,7 +1152,7 @@ explicit Outputs():output() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Resampler::Outputs > {
+class SAXEventHandler< ::sz::Resampler::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1204,7 +1204,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Resampler::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Resampler::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->output)
@@ -1471,14 +1471,14 @@ public:
     }
 };
 
-template < class Writere76c2e0c9ee856eb2227c2a21338d0d6289dd808d64711af2585d451de3b17dc >
-struct Serializer< Writere76c2e0c9ee856eb2227c2a21338d0d6289dd808d64711af2585d451de3b17dc, ::sz::Resampler::Outputs > {
+template < class Writera4811f5590137fdd45e9bc5d66595a6f2a7197cfb64a56461b9cd0929a5a9753 >
+struct Serializer< Writera4811f5590137fdd45e9bc5d66595a6f2a7197cfb64a56461b9cd0929a5a9753, ::sz::Resampler::Output_Streams > {
 
-    void operator()( Writere76c2e0c9ee856eb2227c2a21338d0d6289dd808d64711af2585d451de3b17dc& w, const ::sz::Resampler::Outputs& value) const
+    void operator()( Writera4811f5590137fdd45e9bc5d66595a6f2a7197cfb64a56461b9cd0929a5a9753& w, const ::sz::Resampler::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writere76c2e0c9ee856eb2227c2a21338d0d6289dd808d64711af2585d451de3b17dc, sz::Resampler::Output >()(w, value.output);
+        w.Key("\x4f\x75\x74\x70\x75\x74", 6, false); Serializer< Writera4811f5590137fdd45e9bc5d66595a6f2a7197cfb64a56461b9cd0929a5a9753, sz::Resampler::Output >()(w, value.output);
 
         w.EndObject(1);
     }
@@ -1517,10 +1517,10 @@ struct Serializer< Writere76c2e0c9ee856eb2227c2a21338d0d6289dd808d64711af2585d45
 namespace sz { namespace Resampler { struct Config {
  uint32_t poles;
 double cutoff_frequency;
-sz::Resampler::Inputs inputs;
-sz::Resampler::Outputs outputs;
+sz::Resampler::Input_Streams input_streams;
+sz::Resampler::Output_Streams output_streams;
 
-explicit Config():poles(2), cutoff_frequency(0), inputs(), outputs() {  }
+explicit Config():poles(2), cutoff_frequency(0), input_streams(), output_streams() {  }
 
 
  
@@ -1539,10 +1539,10 @@ private:
 
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< double > handler_1;
-SAXEventHandler< sz::Resampler::Inputs > handler_2;
-SAXEventHandler< sz::Resampler::Outputs > handler_3;bool has_poles;
-bool has_inputs;
-bool has_outputs;
+SAXEventHandler< sz::Resampler::Input_Streams > handler_2;
+SAXEventHandler< sz::Resampler::Output_Streams > handler_3;bool has_poles;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1561,9 +1561,9 @@ bool has_outputs;
 case 1:
     return "cutoff_frequency";
 case 2:
-    return "inputs";
+    return "input_streams";
 case 3:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1592,8 +1592,8 @@ case 3:
     {
         has_poles = false;
 
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -1602,8 +1602,8 @@ public:
         , depth(0)
         , handler_0(&obj->poles)
 , handler_1(&obj->cutoff_frequency)
-, handler_2(&obj->inputs)
-, handler_3(&obj->outputs)
+, handler_2(&obj->input_streams)
+, handler_3(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1820,10 +1820,10 @@ case 3:
 						 { state=0; has_poles = true; }
 else if (utility::string_equal(str, length, "\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21))
 						 { state=1;  }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=2; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=2; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=3; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1951,8 +1951,8 @@ case 3:
             }
         } else {
             if (!has_poles) set_missing_required("poles");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -2010,8 +2010,8 @@ struct Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bcca
 
         w.Key("\x50\x6f\x6c\x65\x73", 5, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, uint32_t >()(w, value.poles);
 w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, double >()(w, value.cutoff_frequency);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, sz::Resampler::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, sz::Resampler::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, sz::Resampler::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, sz::Resampler::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(4);
     }

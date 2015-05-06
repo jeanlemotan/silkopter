@@ -171,9 +171,9 @@ Raspicam::~Raspicam()
 #endif
 }
 
-auto Raspicam::get_outputs() const -> std::vector<Output>
+auto Raspicam::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IVideo::TYPE;
     outputs[0].name = "Video";
     outputs[0].stream = m_stream;

@@ -403,10 +403,10 @@ struct Serializer< Writer880dacd0efb4b9839c17b13b6228a63c4295e18bd58f567962543cb
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace ADC_Ammeter { struct Inputs {
+namespace sz { namespace ADC_Ammeter { struct Input_Streams {
  std::string adc_value;
 
-explicit Inputs():adc_value() {  }
+explicit Input_Streams():adc_value() {  }
 
 
  
@@ -417,7 +417,7 @@ explicit Inputs():adc_value() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::ADC_Ammeter::Inputs > {
+class SAXEventHandler< ::sz::ADC_Ammeter::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -469,7 +469,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::ADC_Ammeter::Inputs * obj)
+    explicit SAXEventHandler( ::sz::ADC_Ammeter::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->adc_value)
@@ -736,14 +736,14 @@ public:
     }
 };
 
-template < class Writer26a4557efba3417f0e3895b4b247b783dd17fe4067c94664eb923089ad707317 >
-struct Serializer< Writer26a4557efba3417f0e3895b4b247b783dd17fe4067c94664eb923089ad707317, ::sz::ADC_Ammeter::Inputs > {
+template < class Writerd84effb30ab9d443138f2ef9d139df2955048ab8e54869d9b81b98b7fb587ce4 >
+struct Serializer< Writerd84effb30ab9d443138f2ef9d139df2955048ab8e54869d9b81b98b7fb587ce4, ::sz::ADC_Ammeter::Input_Streams > {
 
-    void operator()( Writer26a4557efba3417f0e3895b4b247b783dd17fe4067c94664eb923089ad707317& w, const ::sz::ADC_Ammeter::Inputs& value) const
+    void operator()( Writerd84effb30ab9d443138f2ef9d139df2955048ab8e54869d9b81b98b7fb587ce4& w, const ::sz::ADC_Ammeter::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writer26a4557efba3417f0e3895b4b247b783dd17fe4067c94664eb923089ad707317, std::string >()(w, value.adc_value);
+        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writerd84effb30ab9d443138f2ef9d139df2955048ab8e54869d9b81b98b7fb587ce4, std::string >()(w, value.adc_value);
 
         w.EndObject(1);
     }
@@ -1208,10 +1208,10 @@ w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer9cb1b4daa1f0b7e59caf3
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace ADC_Ammeter { struct Outputs {
+namespace sz { namespace ADC_Ammeter { struct Output_Streams {
  sz::ADC_Ammeter::Current current;
 
-explicit Outputs():current() {  }
+explicit Output_Streams():current() {  }
 
 
  
@@ -1222,7 +1222,7 @@ explicit Outputs():current() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::ADC_Ammeter::Outputs > {
+class SAXEventHandler< ::sz::ADC_Ammeter::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1274,7 +1274,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::ADC_Ammeter::Outputs * obj)
+    explicit SAXEventHandler( ::sz::ADC_Ammeter::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->current)
@@ -1541,14 +1541,14 @@ public:
     }
 };
 
-template < class Writer0aeb3c6545cc72fe363077c6ae1f13a29bc965863b5ad57205fa4d462f8d1098 >
-struct Serializer< Writer0aeb3c6545cc72fe363077c6ae1f13a29bc965863b5ad57205fa4d462f8d1098, ::sz::ADC_Ammeter::Outputs > {
+template < class Writerd63988e99d4adbd8cd835f8fae751b2ed6130e17362b57b0835c190aa34edf76 >
+struct Serializer< Writerd63988e99d4adbd8cd835f8fae751b2ed6130e17362b57b0835c190aa34edf76, ::sz::ADC_Ammeter::Output_Streams > {
 
-    void operator()( Writer0aeb3c6545cc72fe363077c6ae1f13a29bc965863b5ad57205fa4d462f8d1098& w, const ::sz::ADC_Ammeter::Outputs& value) const
+    void operator()( Writerd63988e99d4adbd8cd835f8fae751b2ed6130e17362b57b0835c190aa34edf76& w, const ::sz::ADC_Ammeter::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x43\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writer0aeb3c6545cc72fe363077c6ae1f13a29bc965863b5ad57205fa4d462f8d1098, sz::ADC_Ammeter::Current >()(w, value.current);
+        w.Key("\x43\x75\x72\x72\x65\x6e\x74", 7, false); Serializer< Writerd63988e99d4adbd8cd835f8fae751b2ed6130e17362b57b0835c190aa34edf76, sz::ADC_Ammeter::Current >()(w, value.current);
 
         w.EndObject(1);
     }
@@ -1585,10 +1585,10 @@ struct Serializer< Writer0aeb3c6545cc72fe363077c6ae1f13a29bc965863b5ad57205fa4d4
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Ammeter { struct Config {
- sz::ADC_Ammeter::Inputs inputs;
-sz::ADC_Ammeter::Outputs outputs;
+ sz::ADC_Ammeter::Input_Streams input_streams;
+sz::ADC_Ammeter::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1605,9 +1605,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::ADC_Ammeter::Inputs > handler_0;
-SAXEventHandler< sz::ADC_Ammeter::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::ADC_Ammeter::Input_Streams > handler_0;
+SAXEventHandler< sz::ADC_Ammeter::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1622,9 +1622,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1651,16 +1651,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Ammeter::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1825,10 +1825,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1925,8 +1925,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1976,8 +1976,8 @@ struct Serializer< Writer9b42efb88cdc00797bd1baab9f4e8b67b2479c6cf63de1bace0f2c2
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer9b42efb88cdc00797bd1baab9f4e8b67b2479c6cf63de1bace0f2c2da405f513, sz::ADC_Ammeter::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer9b42efb88cdc00797bd1baab9f4e8b67b2479c6cf63de1bace0f2c2da405f513, sz::ADC_Ammeter::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer9b42efb88cdc00797bd1baab9f4e8b67b2479c6cf63de1bace0f2c2da405f513, sz::ADC_Ammeter::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer9b42efb88cdc00797bd1baab9f4e8b67b2479c6cf63de1bace0f2c2da405f513, sz::ADC_Ammeter::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

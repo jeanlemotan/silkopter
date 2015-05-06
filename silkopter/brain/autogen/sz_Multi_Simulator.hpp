@@ -774,10 +774,10 @@ w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29"
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct Inputs {
+namespace sz { namespace Multi_Simulator { struct Input_Streams {
  std::vector<std::string> throttle;
 
-explicit Inputs():throttle() {  }
+explicit Input_Streams():throttle() {  }
 
 
  
@@ -788,7 +788,7 @@ explicit Inputs():throttle() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::Inputs > {
+class SAXEventHandler< ::sz::Multi_Simulator::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -840,7 +840,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->throttle)
@@ -1107,14 +1107,14 @@ public:
     }
 };
 
-template < class Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7 >
-struct Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, ::sz::Multi_Simulator::Inputs > {
+template < class Writer98add89c36915fe0eddeebd5349a3bb76c1d4efbce019397835fb5c951ae4a75 >
+struct Serializer< Writer98add89c36915fe0eddeebd5349a3bb76c1d4efbce019397835fb5c951ae4a75, ::sz::Multi_Simulator::Input_Streams > {
 
-    void operator()( Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7& w, const ::sz::Multi_Simulator::Inputs& value) const
+    void operator()( Writer98add89c36915fe0eddeebd5349a3bb76c1d4efbce019397835fb5c951ae4a75& w, const ::sz::Multi_Simulator::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65", 8, false); Serializer< Writerba46b5a923482820fab572be89e012ce97f60e4ace7e0c0ed9289ca806b657b7, std::vector<std::string> >()(w, value.throttle);
+        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65", 8, false); Serializer< Writer98add89c36915fe0eddeebd5349a3bb76c1d4efbce019397835fb5c951ae4a75, std::vector<std::string> >()(w, value.throttle);
 
         w.EndObject(1);
     }
@@ -3767,7 +3767,7 @@ struct Serializer< Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct Outputs {
+namespace sz { namespace Multi_Simulator { struct Output_Streams {
  sz::Multi_Simulator::Acceleration acceleration;
 sz::Multi_Simulator::Angular_Velocity angular_velocity;
 sz::Multi_Simulator::Magnetic_Field magnetic_field;
@@ -3776,7 +3776,7 @@ sz::Multi_Simulator::Pressure pressure;
 sz::Multi_Simulator::Distance distance;
 sz::Multi_Simulator::ECEF_Location ecef_location;
 
-explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), temperature(), pressure(), distance(), ecef_location() {  }
+explicit Output_Streams():acceleration(), angular_velocity(), magnetic_field(), temperature(), pressure(), distance(), ecef_location() {  }
 
 
  
@@ -3787,7 +3787,7 @@ explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), tempera
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::Outputs > {
+class SAXEventHandler< ::sz::Multi_Simulator::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -3869,7 +3869,7 @@ has_ecef_location = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->acceleration)
@@ -4412,20 +4412,20 @@ handler_6.PrepareForReuse();
     }
 };
 
-template < class Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557 >
-struct Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, ::sz::Multi_Simulator::Outputs > {
+template < class Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d >
+struct Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, ::sz::Multi_Simulator::Output_Streams > {
 
-    void operator()( Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557& w, const ::sz::Multi_Simulator::Outputs& value) const
+    void operator()( Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d& w, const ::sz::Multi_Simulator::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Acceleration >()(w, value.acceleration);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Angular_Velocity >()(w, value.angular_velocity);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Magnetic_Field >()(w, value.magnetic_field);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Temperature >()(w, value.temperature);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Pressure >()(w, value.pressure);
-w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::Distance >()(w, value.distance);
-w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer1f5f4be1c84f0da9c32f0f25a7366932140327e58c70bfe68adff10fa8e40557, sz::Multi_Simulator::ECEF_Location >()(w, value.ecef_location);
+        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Acceleration >()(w, value.acceleration);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Angular_Velocity >()(w, value.angular_velocity);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Magnetic_Field >()(w, value.magnetic_field);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Temperature >()(w, value.temperature);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Pressure >()(w, value.pressure);
+w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Distance >()(w, value.distance);
+w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::ECEF_Location >()(w, value.ecef_location);
 
         w.EndObject(7);
     }
@@ -4466,10 +4466,10 @@ namespace sz { namespace Multi_Simulator { struct Config {
 bool drag_enabled;
 bool ground_enabled;
 bool gravity_enabled;
-sz::Multi_Simulator::Inputs inputs;
-sz::Multi_Simulator::Outputs outputs;
+sz::Multi_Simulator::Input_Streams input_streams;
+sz::Multi_Simulator::Output_Streams output_streams;
 
-explicit Config():simulation_enabled(true), drag_enabled(true), ground_enabled(true), gravity_enabled(true), inputs(), outputs() {  }
+explicit Config():simulation_enabled(true), drag_enabled(true), ground_enabled(true), gravity_enabled(true), input_streams(), output_streams() {  }
 
 
  
@@ -4490,13 +4490,13 @@ private:
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< bool > handler_2;
 SAXEventHandler< bool > handler_3;
-SAXEventHandler< sz::Multi_Simulator::Inputs > handler_4;
-SAXEventHandler< sz::Multi_Simulator::Outputs > handler_5;bool has_simulation_enabled;
+SAXEventHandler< sz::Multi_Simulator::Input_Streams > handler_4;
+SAXEventHandler< sz::Multi_Simulator::Output_Streams > handler_5;bool has_simulation_enabled;
 bool has_drag_enabled;
 bool has_ground_enabled;
 bool has_gravity_enabled;
-bool has_inputs;
-bool has_outputs;
+bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -4519,9 +4519,9 @@ case 2:
 case 3:
     return "gravity_enabled";
 case 4:
-    return "inputs";
+    return "input_streams";
 case 5:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -4552,8 +4552,8 @@ case 5:
 has_drag_enabled = false;
 has_ground_enabled = false;
 has_gravity_enabled = false;
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -4564,8 +4564,8 @@ public:
 , handler_1(&obj->drag_enabled)
 , handler_2(&obj->ground_enabled)
 , handler_3(&obj->gravity_enabled)
-, handler_4(&obj->inputs)
-, handler_5(&obj->outputs)
+, handler_4(&obj->input_streams)
+, handler_5(&obj->output_streams)
     {
         reset_flags();
     }
@@ -4834,10 +4834,10 @@ else if (utility::string_equal(str, length, "\x47\x72\x6f\x75\x6e\x64\x20\x45\x6
 						 { state=2; has_ground_enabled = true; }
 else if (utility::string_equal(str, length, "\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15))
 						 { state=3; has_gravity_enabled = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=4; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=5; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=4; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=5; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -4998,8 +4998,8 @@ case 5:
 if (!has_drag_enabled) set_missing_required("drag_enabled");
 if (!has_ground_enabled) set_missing_required("ground_enabled");
 if (!has_gravity_enabled) set_missing_required("gravity_enabled");
-if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -5065,8 +5065,8 @@ struct Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97
 w.Key("\x44\x72\x61\x67\x20\x45\x6e\x61\x62\x6c\x65\x64", 12, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.drag_enabled);
 w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.ground_enabled);
 w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.gravity_enabled);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(6);
     }

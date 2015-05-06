@@ -12,7 +12,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Factor_Generator",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
     ]
@@ -28,7 +28,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Factor_Generator",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Factor_Generator::Factor", "factor", {"required": true, "json_key" : "Factor"}]
@@ -54,8 +54,8 @@
         ["float", "noise", {"required": true, "json_key" : "Noise"}],
         ["bool", "square", {"required": true, "json_key" : "Square"}],
         ["std::vector<sz::Factor_Generator::Component>", "components", {"required": true, "json_key" : "Components"}],
-        ["sz::Factor_Generator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Factor_Generator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Factor_Generator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Factor_Generator::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

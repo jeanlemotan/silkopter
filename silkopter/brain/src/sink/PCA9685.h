@@ -3,6 +3,7 @@
 #include "HAL.h"
 #include "common/node/ISink.h"
 #include "common/node/stream/IPWM.h"
+#include "common/node/bus/II2C.h"
 
 namespace sz
 {
@@ -35,7 +36,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
 
     void process();
 
@@ -43,6 +44,8 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
+
+    std::weak_ptr<bus::II2C> m_i2c;
 
     rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::PCA9685::Init_Params> m_init_params;
@@ -52,7 +55,6 @@ private:
     {
         sz::PCA9685::PWM_Channel* config = nullptr;
         stream::IPWM_wptr stream;
-        uint32_t gpio = 0;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

@@ -20,7 +20,7 @@
 {
     "definition" : true,
     "namespace" : "sz::UBLOX",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::UBLOX::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
@@ -32,7 +32,7 @@
     "name": "Config",
     "members":
     [
-       ["sz::UBLOX::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+       ["sz::UBLOX::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

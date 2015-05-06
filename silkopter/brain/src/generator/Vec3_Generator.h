@@ -26,8 +26,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 
@@ -126,10 +126,10 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto x_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.inputs.x_factor);
+    auto x_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.x_factor);
     if (x_factor_stream && x_factor_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad x factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.x_factor, m_output_stream->rate, x_factor_stream->get_rate());
+        QLOGW("Bad x factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_factor, m_output_stream->rate, x_factor_stream->get_rate());
         m_x_factor_stream.reset();
     }
     else
@@ -137,10 +137,10 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         m_x_factor_stream = x_factor_stream;
     }
 
-    auto y_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.inputs.y_factor);
+    auto y_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.y_factor);
     if (y_factor_stream && y_factor_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad y factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.y_factor, m_output_stream->rate, y_factor_stream->get_rate());
+        QLOGW("Bad y factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_factor, m_output_stream->rate, y_factor_stream->get_rate());
         m_y_factor_stream.reset();
     }
     else
@@ -148,10 +148,10 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         m_y_factor_stream = y_factor_stream;
     }
 
-    auto z_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.inputs.z_factor);
+    auto z_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.z_factor);
     if (z_factor_stream && z_factor_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad z factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.z_factor, m_output_stream->rate, z_factor_stream->get_rate());
+        QLOGW("Bad z factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_factor, m_output_stream->rate, z_factor_stream->get_rate());
         m_z_factor_stream.reset();
     }
     else
@@ -177,9 +177,9 @@ auto Vec3_Generator<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
+auto Vec3_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IFactor::TYPE, m_init_params.rate, "X Factor" },
         { stream::IFactor::TYPE, m_init_params.rate, "Y Factor" },
@@ -188,9 +188,9 @@ auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
     return inputs;
 }
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_outputs() const -> std::vector<Output>
+auto Vec3_Generator<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

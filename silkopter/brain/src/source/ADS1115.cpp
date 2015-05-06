@@ -20,9 +20,9 @@ ADS1115::ADS1115(HAL& hal)
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto ADS1115::get_outputs() const -> std::vector<Output>
+auto ADS1115::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs =
+    std::vector<Stream_Output> outputs =
     {{
         { stream::IADC::TYPE, "ADC0", m_adc[0] },
         { stream::IADC::TYPE, "ADC1", m_adc[1] },

@@ -403,11 +403,11 @@ struct Serializer< Writerf31381824f1134bdfcc8854d4908d81d491eb9c009eebc7ddd63162
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Gravity_Filter { struct Inputs {
+namespace sz { namespace Gravity_Filter { struct Input_Streams {
  std::string frame;
 std::string acceleration;
 
-explicit Inputs():frame(), acceleration() {  }
+explicit Input_Streams():frame(), acceleration() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():frame(), acceleration() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Gravity_Filter::Inputs > {
+class SAXEventHandler< ::sz::Gravity_Filter::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_acceleration = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Gravity_Filter::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->frame)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94 >
-struct Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, ::sz::Gravity_Filter::Inputs > {
+template < class Writer89aa4e4c8f05a81bd56f890232d843c7248139cf036c599167cb2a9aea1a8619 >
+struct Serializer< Writer89aa4e4c8f05a81bd56f890232d843c7248139cf036c599167cb2a9aea1a8619, ::sz::Gravity_Filter::Input_Streams > {
 
-    void operator()( Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94& w, const ::sz::Gravity_Filter::Inputs& value) const
+    void operator()( Writer89aa4e4c8f05a81bd56f890232d843c7248139cf036c599167cb2a9aea1a8619& w, const ::sz::Gravity_Filter::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.frame);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerf17351893c7218d916dd39c5941a8387296335940ae4b9ccfd20a646c4423a94, std::string >()(w, value.acceleration);
+        w.Key("\x46\x72\x61\x6d\x65", 5, false); Serializer< Writer89aa4e4c8f05a81bd56f890232d843c7248139cf036c599167cb2a9aea1a8619, std::string >()(w, value.frame);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer89aa4e4c8f05a81bd56f890232d843c7248139cf036c599167cb2a9aea1a8619, std::string >()(w, value.acceleration);
 
         w.EndObject(2);
     }
@@ -1191,10 +1191,10 @@ struct Serializer< Writer86b1c62a533ca5726187139826adfd52fca913da570b26066478d07
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Gravity_Filter { struct Outputs {
+namespace sz { namespace Gravity_Filter { struct Output_Streams {
  sz::Gravity_Filter::Linear_Acceleration linear_acceleration;
 
-explicit Outputs():linear_acceleration() {  }
+explicit Output_Streams():linear_acceleration() {  }
 
 
  
@@ -1205,7 +1205,7 @@ explicit Outputs():linear_acceleration() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Gravity_Filter::Outputs > {
+class SAXEventHandler< ::sz::Gravity_Filter::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Gravity_Filter::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Gravity_Filter::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->linear_acceleration)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930 >
-struct Serializer< Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930, ::sz::Gravity_Filter::Outputs > {
+template < class Writer610ea3b4bc40a81da074e514cb818f081b8b658c960930e179e48358f2971852 >
+struct Serializer< Writer610ea3b4bc40a81da074e514cb818f081b8b658c960930e179e48358f2971852, ::sz::Gravity_Filter::Output_Streams > {
 
-    void operator()( Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930& w, const ::sz::Gravity_Filter::Outputs& value) const
+    void operator()( Writer610ea3b4bc40a81da074e514cb818f081b8b658c960930e179e48358f2971852& w, const ::sz::Gravity_Filter::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279cb2159930, sz::Gravity_Filter::Linear_Acceleration >()(w, value.linear_acceleration);
+        w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 19, false); Serializer< Writer610ea3b4bc40a81da074e514cb818f081b8b658c960930e179e48358f2971852, sz::Gravity_Filter::Linear_Acceleration >()(w, value.linear_acceleration);
 
         w.EndObject(1);
     }
@@ -1568,10 +1568,10 @@ struct Serializer< Writerbb0b2d657e0239cc142d8f00dc1e7ba73c4ff9077765cd7fa8ab279
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Gravity_Filter { struct Config {
- sz::Gravity_Filter::Inputs inputs;
-sz::Gravity_Filter::Outputs outputs;
+ sz::Gravity_Filter::Input_Streams input_streams;
+sz::Gravity_Filter::Output_Streams output_streams;
 
-explicit Config():inputs(), outputs() {  }
+explicit Config():input_streams(), output_streams() {  }
 
 
  
@@ -1588,9 +1588,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::Gravity_Filter::Inputs > handler_0;
-SAXEventHandler< sz::Gravity_Filter::Outputs > handler_1;bool has_inputs;
-bool has_outputs;
+    SAXEventHandler< sz::Gravity_Filter::Input_Streams > handler_0;
+SAXEventHandler< sz::Gravity_Filter::Output_Streams > handler_1;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1605,9 +1605,9 @@ bool has_outputs;
     {
         switch (state) {
             case 0:
-    return "inputs";
+    return "input_streams";
 case 1:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1634,16 +1634,16 @@ case 1:
 
     void reset_flags()
     {
-        has_inputs = false;
-has_outputs = false;
+        has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Gravity_Filter::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->inputs)
-, handler_1(&obj->outputs)
+        , handler_0(&obj->input_streams)
+, handler_1(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1808,10 +1808,10 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=0; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=1; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=0; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=1; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1908,8 +1908,8 @@ case 1:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1959,8 +1959,8 @@ struct Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acf
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Outputs >()(w, value.outputs);
+        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writer0a5564cff1634052a76f0fc565e5b0cb5f3ae2a821242eeb1a65acfe80b9fc6a, sz::Gravity_Filter::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(2);
     }

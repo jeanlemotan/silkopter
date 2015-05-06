@@ -31,7 +31,7 @@
 {
     "definition" : true,
     "namespace" : "sz::PIGPIO",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::string", "channel_4", {"required": true, "json_key" : "Channel 4"}],
@@ -50,7 +50,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::PIGPIO::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}]
+        ["sz::PIGPIO::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }
 ]

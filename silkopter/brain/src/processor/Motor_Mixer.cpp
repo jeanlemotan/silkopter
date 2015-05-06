@@ -77,23 +77,23 @@ auto Motor_Mixer::init() -> bool
         os->rate = m_init_params->rate;
     }
 
-    m_config->outputs.throttles.resize(multi_config->motors.size());
+    m_config->output_streams.throttles.resize(multi_config->motors.size());
 
     return true;
 }
 
-auto Motor_Mixer::get_inputs() const -> std::vector<Input>
+auto Motor_Mixer::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::ITorque::TYPE, m_init_params->rate, "Torque" },
         { stream::IForce::TYPE, m_init_params->rate, "Collective Force" }
     }};
     return inputs;
 }
-auto Motor_Mixer::get_outputs() const -> std::vector<Output>
+auto Motor_Mixer::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(m_outputs.size());
+    std::vector<Stream_Output> outputs(m_outputs.size());
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
         outputs[i].type = stream::IThrottle::TYPE;
@@ -486,14 +486,14 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.inputs.torque);
-    auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.inputs.force);
+    auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.input_streams.torque);
+    auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.input_streams.force);
 
     auto rate = torque_stream ? torque_stream->get_rate() : 0u;
     if (rate != m_init_params->rate)
     {
-        m_config->inputs.torque.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.torque, m_init_params->rate, rate);
+        m_config->input_streams.torque.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.torque, m_init_params->rate, rate);
         m_torque_stream.reset();
     }
     else
@@ -504,8 +504,8 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     rate = force_stream ? force_stream->get_rate() : 0u;
     if (rate != m_init_params->rate)
     {
-        m_config->inputs.force.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.force, m_init_params->rate, rate);
+        m_config->input_streams.force.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.force, m_init_params->rate, rate);
         m_force_stream.reset();
     }
     else

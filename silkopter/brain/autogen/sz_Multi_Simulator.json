@@ -18,7 +18,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Simulator",
-    "name": "Inputs",
+    "name": "Input_Streams",
     "members":
     [
         ["std::vector<std::string>", "throttle", {"required": true, "json_key" : "Throttle"}]
@@ -87,7 +87,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Simulator",
-    "name": "Outputs",
+    "name": "Output_Streams",
     "members":
     [
         ["sz::Multi_Simulator::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
@@ -109,8 +109,8 @@
         ["bool", "drag_enabled", {"required": true, "json_key" : "Drag Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
         ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
-        ["sz::Multi_Simulator::Inputs", "inputs", {"required": true, "json_key" : "Inputs"}],
-        ["sz::Multi_Simulator::Outputs", "outputs", {"required": true, "json_key" : "Outputs"}]
+        ["sz::Multi_Simulator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Multi_Simulator::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 },
 {

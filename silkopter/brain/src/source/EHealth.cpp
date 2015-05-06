@@ -17,9 +17,9 @@ EHealth::~EHealth()
 {
 }
 
-auto EHealth::get_outputs() const -> std::vector<Output>
+auto EHealth::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IAcceleration::TYPE;
     outputs[0].name = "EKG";
     outputs[0].stream = m_stream;

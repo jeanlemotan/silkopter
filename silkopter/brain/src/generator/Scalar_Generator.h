@@ -26,8 +26,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_inputs() const -> std::vector<Stream_Input>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
     void process();
 
@@ -119,11 +119,11 @@ auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> boo
         return false;
     }
 
-    auto factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.inputs.factor);
+    auto factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.factor);
 
     if (factor_stream && factor_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.factor, m_output_stream->rate, factor_stream->get_rate());
+        QLOGW("Bad factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.factor, m_output_stream->rate, factor_stream->get_rate());
         m_factor_stream.reset();
     }
     else
@@ -150,18 +150,18 @@ auto Scalar_Generator<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
+auto Scalar_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IFactor::TYPE, m_init_params.rate, "Factor" }
     }};
     return inputs;
 }
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_outputs() const -> std::vector<Output>
+auto Scalar_Generator<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

@@ -46,17 +46,17 @@ auto ADC_Voltmeter::init() -> bool
     return true;
 }
 
-auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
+auto ADC_Voltmeter::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IADC::TYPE, m_init_params->rate, "ADC" }
     }};
     return inputs;
 }
-auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
+auto ADC_Voltmeter::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IVoltage::TYPE;
     outputs[0].name = "Voltage";
     outputs[0].stream = m_output_stream;
@@ -85,7 +85,7 @@ void ADC_Voltmeter::process()
        vs.dt = sample.dt;
        vs.tp = sample.tp;
        vs.sample_idx = sample.sample_idx;
-       vs.value = sample.value * m_config->outputs.voltage.scale + m_config->outputs.voltage.bias;
+       vs.value = sample.value * m_config->output_streams.voltage.scale + m_config->output_streams.voltage.bias;
        return vs;
     });
 
@@ -106,12 +106,12 @@ auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.inputs.adc_value);
+    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc_value);
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.adc_value, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc_value, m_output_stream->rate, rate);
         m_adc_stream.reset();
     }
     else

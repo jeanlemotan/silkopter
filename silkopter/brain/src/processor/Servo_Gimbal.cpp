@@ -52,18 +52,18 @@ auto Servo_Gimbal::init() -> bool
     return true;
 }
 
-auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
+auto Servo_Gimbal::get_stream_inputs() const -> std::vector<Stream_Input>
 {
-    std::vector<Input> inputs =
+    std::vector<Stream_Input> inputs =
     {{
         { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
         { stream::IFrame::TYPE, m_init_params->rate, "Target" }
     }};
     return inputs;
 }
-auto Servo_Gimbal::get_outputs() const -> std::vector<Output>
+auto Servo_Gimbal::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(3);
+    std::vector<Stream_Output> outputs(3);
     outputs[0].type = stream::IPWM::TYPE;
     outputs[0].name = "X PWM";
     outputs[0].stream = m_x_output_stream;
@@ -129,7 +129,7 @@ void Servo_Gimbal::process()
             sample.tp = m_frame_samples[i].tp;
             sample.sample_idx++;
 
-            auto const& config = m_config->outputs.x_pwm;
+            auto const& config = m_config->output_streams.x_pwm;
 
             math::anglef angle(rotation_euler.x);
             angle.normalize();
@@ -186,14 +186,14 @@ auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.inputs.frame);
-    auto target_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.inputs.target);
+    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
+    auto target_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.target);
 
     auto rate = frame_stream ? frame_stream->get_rate() : 0u;
     if (rate != m_init_params->rate)
     {
-        m_config->inputs.frame.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.frame, m_init_params->rate, rate);
+        m_config->input_streams.frame.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_init_params->rate, rate);
         m_frame_stream.reset();
     }
     else
@@ -204,8 +204,8 @@ auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
     rate = target_stream ? target_stream->get_rate() : 0u;
     if (rate != m_init_params->rate)
     {
-        m_config->inputs.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.inputs.target, m_init_params->rate, rate);
+        m_config->input_streams.target.clear();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_init_params->rate, rate);
         m_target_stream.reset();
     }
     else

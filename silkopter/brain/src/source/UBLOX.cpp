@@ -260,9 +260,9 @@ void UBLOX::unlock(Buses& buses)
     }
 }
 
-auto UBLOX::get_outputs() const -> std::vector<Output>
+auto UBLOX::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Output> outputs(1);
+    std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IECEF_Location::TYPE;
     outputs[0].name = "Location";
     outputs[0].stream = m_location_stream;
@@ -315,7 +315,7 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     }
     else if (buses.spi)
     {
-        max_size = math::min(max_size, 32u);
+        max_size = math::min<size_t>(max_size, 32);
         return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)

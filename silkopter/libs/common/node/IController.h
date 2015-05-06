@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IController : public INode_Base<Type::CONTROLLER>
+class IController : public Node_Base<Type::CONTROLLER>
 {
 public:
 };

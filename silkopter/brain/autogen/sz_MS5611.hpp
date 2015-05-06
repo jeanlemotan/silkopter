@@ -1227,11 +1227,11 @@ struct Serializer< Writer03eb42de66eee7ed6ddd65b3ff5caf54e14048ece3fd007fb1d8a3b
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace MS5611 { struct Outputs {
+namespace sz { namespace MS5611 { struct Output_Streams {
  sz::MS5611::Pressure pressure;
 sz::MS5611::Temperature temperature;
 
-explicit Outputs():pressure(), temperature() {  }
+explicit Output_Streams():pressure(), temperature() {  }
 
 
  
@@ -1242,7 +1242,7 @@ explicit Outputs():pressure(), temperature() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::MS5611::Outputs > {
+class SAXEventHandler< ::sz::MS5611::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1299,7 +1299,7 @@ has_temperature = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::MS5611::Outputs * obj)
+    explicit SAXEventHandler( ::sz::MS5611::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->pressure)
@@ -1612,15 +1612,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a >
-struct Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, ::sz::MS5611::Outputs > {
+template < class Writereb1655fff5528a61b40981277632e29da368e087db1e787ee7d5df22a09aed3a >
+struct Serializer< Writereb1655fff5528a61b40981277632e29da368e087db1e787ee7d5df22a09aed3a, ::sz::MS5611::Output_Streams > {
 
-    void operator()( Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a& w, const ::sz::MS5611::Outputs& value) const
+    void operator()( Writereb1655fff5528a61b40981277632e29da368e087db1e787ee7d5df22a09aed3a& w, const ::sz::MS5611::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Pressure >()(w, value.pressure);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer5acb9f2e05255de2dedfa7dac6e855947f564f2619d3ab8f474fa25f64cb151a, sz::MS5611::Temperature >()(w, value.temperature);
+        w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writereb1655fff5528a61b40981277632e29da368e087db1e787ee7d5df22a09aed3a, sz::MS5611::Pressure >()(w, value.pressure);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writereb1655fff5528a61b40981277632e29da368e087db1e787ee7d5df22a09aed3a, sz::MS5611::Temperature >()(w, value.temperature);
 
         w.EndObject(2);
     }
@@ -1657,9 +1657,9 @@ w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Wr
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace MS5611 { struct Config {
- sz::MS5611::Outputs outputs;
+ sz::MS5611::Output_Streams output_streams;
 
-explicit Config():outputs() {  }
+explicit Config():output_streams() {  }
 
 
  
@@ -1676,7 +1676,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::MS5611::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< sz::MS5611::Output_Streams > handler_0;bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -1691,7 +1691,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -1718,14 +1718,14 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::MS5611::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->output_streams)
     {
         reset_flags();
     }
@@ -1866,8 +1866,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=0; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -1949,7 +1949,7 @@ public:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -1996,7 +1996,7 @@ struct Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9faca9a4c1, sz::MS5611::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerfb28da1b2429a521ac175052b5cccf743119a54dd561009f02496d9faca9a4c1, sz::MS5611::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(1);
     }

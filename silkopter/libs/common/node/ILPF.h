@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class ILPF : public INode_Base<Type::LPF>
+class ILPF : public Node_Base<Type::LPF>
 {
 public:
 };

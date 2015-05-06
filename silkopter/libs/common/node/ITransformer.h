@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class ITransformer : public INode_Base<Type::TRANSFORMER>
+class ITransformer : public Node_Base<Type::TRANSFORMER>
 {
 public:
 };

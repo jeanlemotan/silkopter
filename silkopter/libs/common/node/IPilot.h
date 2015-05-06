@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IPilot : public INode_Base<Type::PILOT>
+class IPilot : public Node_Base<Type::PILOT>
 {
 public:
 };

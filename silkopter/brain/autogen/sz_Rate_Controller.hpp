@@ -403,11 +403,11 @@ struct Serializer< Writer86b0f57ac06d768c3734cbec9bab61e448e65ce45fec61e08ff7872
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Rate_Controller { struct Inputs {
+namespace sz { namespace Rate_Controller { struct Input_Streams {
  std::string input;
 std::string target;
 
-explicit Inputs():input(), target() {  }
+explicit Input_Streams():input(), target() {  }
 
 
  
@@ -418,7 +418,7 @@ explicit Inputs():input(), target() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Rate_Controller::Inputs > {
+class SAXEventHandler< ::sz::Rate_Controller::Input_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -475,7 +475,7 @@ has_target = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Rate_Controller::Inputs * obj)
+    explicit SAXEventHandler( ::sz::Rate_Controller::Input_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->input)
@@ -788,15 +788,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer29c2539738bc3aa93e3becaf42c25da7fa9ea87af5617252cbe450efffdc077a >
-struct Serializer< Writer29c2539738bc3aa93e3becaf42c25da7fa9ea87af5617252cbe450efffdc077a, ::sz::Rate_Controller::Inputs > {
+template < class Writerba02b4f99e9312065d9d266fd630d962fb1063ec82d8048c2b1443401b5bfd31 >
+struct Serializer< Writerba02b4f99e9312065d9d266fd630d962fb1063ec82d8048c2b1443401b5bfd31, ::sz::Rate_Controller::Input_Streams > {
 
-    void operator()( Writer29c2539738bc3aa93e3becaf42c25da7fa9ea87af5617252cbe450efffdc077a& w, const ::sz::Rate_Controller::Inputs& value) const
+    void operator()( Writerba02b4f99e9312065d9d266fd630d962fb1063ec82d8048c2b1443401b5bfd31& w, const ::sz::Rate_Controller::Input_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writer29c2539738bc3aa93e3becaf42c25da7fa9ea87af5617252cbe450efffdc077a, std::string >()(w, value.input);
-w.Key("\x54\x61\x72\x67\x65\x74", 6, false); Serializer< Writer29c2539738bc3aa93e3becaf42c25da7fa9ea87af5617252cbe450efffdc077a, std::string >()(w, value.target);
+        w.Key("\x49\x6e\x70\x75\x74", 5, false); Serializer< Writerba02b4f99e9312065d9d266fd630d962fb1063ec82d8048c2b1443401b5bfd31, std::string >()(w, value.input);
+w.Key("\x54\x61\x72\x67\x65\x74", 6, false); Serializer< Writerba02b4f99e9312065d9d266fd630d962fb1063ec82d8048c2b1443401b5bfd31, std::string >()(w, value.target);
 
         w.EndObject(2);
     }
@@ -1191,10 +1191,10 @@ struct Serializer< Writer5d8dcb302eb242bfe630f5af64953d0eb684dfcb88d0ae4c35dd949
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Rate_Controller { struct Outputs {
+namespace sz { namespace Rate_Controller { struct Output_Streams {
  sz::Rate_Controller::Torque torque;
 
-explicit Outputs():torque() {  }
+explicit Output_Streams():torque() {  }
 
 
  
@@ -1205,7 +1205,7 @@ explicit Outputs():torque() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Rate_Controller::Outputs > {
+class SAXEventHandler< ::sz::Rate_Controller::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1257,7 +1257,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Rate_Controller::Outputs * obj)
+    explicit SAXEventHandler( ::sz::Rate_Controller::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->torque)
@@ -1524,14 +1524,14 @@ public:
     }
 };
 
-template < class Writer7dbf43225bcd9d60e95191780ad6283b60120549ed1a86427e0e4a5cff154c77 >
-struct Serializer< Writer7dbf43225bcd9d60e95191780ad6283b60120549ed1a86427e0e4a5cff154c77, ::sz::Rate_Controller::Outputs > {
+template < class Writerbac384b04807b0c4fc4cae4d15a8eb5b5e762f75aa04d2993d580a6a5dac95cf >
+struct Serializer< Writerbac384b04807b0c4fc4cae4d15a8eb5b5e762f75aa04d2993d580a6a5dac95cf, ::sz::Rate_Controller::Output_Streams > {
 
-    void operator()( Writer7dbf43225bcd9d60e95191780ad6283b60120549ed1a86427e0e4a5cff154c77& w, const ::sz::Rate_Controller::Outputs& value) const
+    void operator()( Writerbac384b04807b0c4fc4cae4d15a8eb5b5e762f75aa04d2993d580a6a5dac95cf& w, const ::sz::Rate_Controller::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writer7dbf43225bcd9d60e95191780ad6283b60120549ed1a86427e0e4a5cff154c77, sz::Rate_Controller::Torque >()(w, value.torque);
+        w.Key("\x54\x6f\x72\x71\x75\x65", 6, false); Serializer< Writerbac384b04807b0c4fc4cae4d15a8eb5b5e762f75aa04d2993d580a6a5dac95cf, sz::Rate_Controller::Torque >()(w, value.torque);
 
         w.EndObject(1);
     }
@@ -3275,10 +3275,10 @@ w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10, false); Serializer< Writer
 namespace sz { namespace Rate_Controller { struct Config {
  sz::Rate_Controller::Feedback feedback;
 sz::Rate_Controller::Feedforward feedforward;
-sz::Rate_Controller::Inputs inputs;
-sz::Rate_Controller::Outputs outputs;
+sz::Rate_Controller::Input_Streams input_streams;
+sz::Rate_Controller::Output_Streams output_streams;
 
-explicit Config():feedback(), feedforward(), inputs(), outputs() {  }
+explicit Config():feedback(), feedforward(), input_streams(), output_streams() {  }
 
 
  
@@ -3297,9 +3297,9 @@ private:
 
     SAXEventHandler< sz::Rate_Controller::Feedback > handler_0;
 SAXEventHandler< sz::Rate_Controller::Feedforward > handler_1;
-SAXEventHandler< sz::Rate_Controller::Inputs > handler_2;
-SAXEventHandler< sz::Rate_Controller::Outputs > handler_3;bool has_inputs;
-bool has_outputs;
+SAXEventHandler< sz::Rate_Controller::Input_Streams > handler_2;
+SAXEventHandler< sz::Rate_Controller::Output_Streams > handler_3;bool has_input_streams;
+bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -3318,9 +3318,9 @@ bool has_outputs;
 case 1:
     return "feedforward";
 case 2:
-    return "inputs";
+    return "input_streams";
 case 3:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -3349,8 +3349,8 @@ case 3:
     {
         
 
-has_inputs = false;
-has_outputs = false;
+has_input_streams = false;
+has_output_streams = false;
     }
 
 public:
@@ -3359,8 +3359,8 @@ public:
         , depth(0)
         , handler_0(&obj->feedback)
 , handler_1(&obj->feedforward)
-, handler_2(&obj->inputs)
-, handler_3(&obj->outputs)
+, handler_2(&obj->input_streams)
+, handler_3(&obj->output_streams)
     {
         reset_flags();
     }
@@ -3577,10 +3577,10 @@ case 3:
 						 { state=0;  }
 else if (utility::string_equal(str, length, "\x46\x65\x65\x64\x66\x6f\x72\x77\x61\x72\x64", 11))
 						 { state=1;  }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x73", 6))
-						 { state=2; has_inputs = true; }
-else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=3; has_outputs = true; }
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
+						 { state=2; has_input_streams = true; }
+else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=3; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -3707,8 +3707,8 @@ case 3:
                 break;
             }
         } else {
-            if (!has_inputs) set_missing_required("inputs");
-if (!has_outputs) set_missing_required("outputs");
+            if (!has_input_streams) set_missing_required("input_streams");
+if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -3766,8 +3766,8 @@ struct Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310
 
         w.Key("\x46\x65\x65\x64\x62\x61\x63\x6b", 8, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Feedback >()(w, value.feedback);
 w.Key("\x46\x65\x65\x64\x66\x6f\x72\x77\x61\x72\x64", 11, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Feedforward >()(w, value.feedforward);
-w.Key("\x49\x6e\x70\x75\x74\x73", 6, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Inputs >()(w, value.inputs);
-w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Outputs >()(w, value.outputs);
+w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Input_Streams >()(w, value.input_streams);
+w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerfc549c0b3e6b9f33edca0d3950f66dd57d32e3e8eca4e77d511b310a1e873adc, sz::Rate_Controller::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(4);
     }

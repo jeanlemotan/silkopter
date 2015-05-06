@@ -22,6 +22,10 @@
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
 
+#include "common/node/param/IParam.h"
+#include "common/node/param/IToggle.h"
+#include "common/node/param/IFloat.h"
+
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
 
@@ -349,6 +353,43 @@ DECLARE_CLASS_PTR(Video);
 }
 
 
+
+
+namespace param
+{
+
+struct Param
+{
+    Node_wptr node;
+    std::string name;
+    param::Id id = 0;
+    param::Type type;
+    int telemetry_active_req = 0;
+    bool is_telemetry_active = false;
+};
+DECLARE_CLASS_PTR(Param);
+
+struct Toggle : public Param
+{
+    typedef IToggle::Value Value;
+    Value value;
+    q::util::Signal<void(Toggle&)> value_changed_signal;
+};
+DECLARE_CLASS_PTR(Toggle);
+
+struct Float : public Param
+{
+    typedef IFloat::Value Value;
+    Value value;
+    q::util::Signal<void(Float&)> value_changed_signal;
+};
+DECLARE_CLASS_PTR(Float);
+
+}
+
+
+
+
 struct Node_Def
 {
     std::string name;
@@ -356,21 +397,33 @@ struct Node_Def
     rapidjson::Document default_init_params;
     rapidjson::Document default_config;
 
-    struct Input
+    struct Stream_Input
     {
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Input> inputs;
+    std::vector<Stream_Input> input_streams;
+    struct Stream_Output
+    {
+        stream::Type type;
+        std::string name;
+        uint32_t rate = 0;
+    };
+    std::vector<Stream_Output> output_streams;
 
-    struct Output
+    struct Param_Input
     {
-        stream::Type type;
+        param::Type type;
         std::string name;
-        uint32_t rate = 0;
     };
-    std::vector<Output> outputs;
+    std::vector<Param_Input> input_params;
+    struct Param_Output
+    {
+        param::Type type;
+        std::string name;
+    };
+    std::vector<Param_Output> output_params;
 };
 DECLARE_CLASS_PTR(Node_Def);
 
@@ -382,23 +435,37 @@ struct Node
     rapidjson::Document init_params;
     rapidjson::Document config;
 
-    struct Input
+    struct Stream_Input
     {
         stream::Stream_wptr stream;
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Input> inputs;
-
-    struct Output
+    std::vector<Stream_Input> input_streams;
+    struct Stream_Output
     {
         stream::Stream_ptr stream;
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Output> outputs;
+    std::vector<Stream_Output> output_streams;
+
+    struct Param_Input
+    {
+        param::Param_wptr param;
+        param::Type type;
+        std::string name;
+    };
+    std::vector<Param_Input> input_params;
+    struct Param_Output
+    {
+        param::Param_ptr param;
+        param::Type type;
+        std::string name;
+    };
+    std::vector<Param_Output> output_params;
 
     q::util::Signal<void(Node&)> changed_signal;
 };
@@ -438,6 +505,7 @@ public:
     auto get_node_defs() const      -> Registry<node::Node_Def> const&;
     auto get_nodes() const          -> Registry<node::Node> const&;
     auto get_streams() const        -> Registry<node::stream::Stream> const&;
+    auto get_params() const         -> Registry<node::param::Param> const&;
 
     enum class Result
     {
@@ -452,7 +520,7 @@ public:
     typedef std::function<void(Result)> Remove_Node_Callback;
     void remove_node(node::Node_ptr node, Remove_Node_Callback callback);
 
-    void connect_node_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
+    void connect_node_stream_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
 
     typedef std::function<void(Result)> Stream_Telemetry_Callback;
@@ -477,6 +545,7 @@ protected:
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
     Registry<node::stream::Stream> m_streams;
+    Registry<node::param::Param> m_params;
 
     struct Queue_Item
     {

@@ -2208,13 +2208,13 @@ struct Serializer< Writer81db95b7c76c840570af0534348e5066b5e2911ef8ef69f181595fe
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace MPU9250 { struct Outputs {
+namespace sz { namespace MPU9250 { struct Output_Streams {
  sz::MPU9250::Acceleration acceleration;
 sz::MPU9250::Angular_Velocity angular_velocity;
 sz::MPU9250::Magnetic_Field magnetic_field;
 sz::MPU9250::Temperature temperature;
 
-explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), temperature() {  }
+explicit Output_Streams():acceleration(), angular_velocity(), magnetic_field(), temperature() {  }
 
 
  
@@ -2225,7 +2225,7 @@ explicit Outputs():acceleration(), angular_velocity(), magnetic_field(), tempera
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::MPU9250::Outputs > {
+class SAXEventHandler< ::sz::MPU9250::Output_Streams > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2292,7 +2292,7 @@ has_temperature = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::MPU9250::Outputs * obj)
+    explicit SAXEventHandler( ::sz::MPU9250::Output_Streams * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->acceleration)
@@ -2697,17 +2697,17 @@ handler_3.PrepareForReuse();
     }
 };
 
-template < class Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b >
-struct Serializer< Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b, ::sz::MPU9250::Outputs > {
+template < class Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472 >
+struct Serializer< Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472, ::sz::MPU9250::Output_Streams > {
 
-    void operator()( Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b& w, const ::sz::MPU9250::Outputs& value) const
+    void operator()( Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472& w, const ::sz::MPU9250::Output_Streams& value) const
     {
         w.StartObject();
 
-        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b, sz::MPU9250::Acceleration >()(w, value.acceleration);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b, sz::MPU9250::Angular_Velocity >()(w, value.angular_velocity);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b, sz::MPU9250::Magnetic_Field >()(w, value.magnetic_field);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer600547845582492df10873716b288510220dd3203c922875bb68f25353d42b0b, sz::MPU9250::Temperature >()(w, value.temperature);
+        w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472, sz::MPU9250::Acceleration >()(w, value.acceleration);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472, sz::MPU9250::Angular_Velocity >()(w, value.angular_velocity);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472, sz::MPU9250::Magnetic_Field >()(w, value.magnetic_field);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer7624dd65c8fa4f0e447047428a50ab27dc1085d8c32c58cfaa9c1679b24f5472, sz::MPU9250::Temperature >()(w, value.temperature);
 
         w.EndObject(4);
     }
@@ -2744,9 +2744,9 @@ w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Wr
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace MPU9250 { struct Config {
- sz::MPU9250::Outputs outputs;
+ sz::MPU9250::Output_Streams output_streams;
 
-explicit Config():outputs() {  }
+explicit Config():output_streams() {  }
 
 
  
@@ -2763,7 +2763,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::MPU9250::Outputs > handler_0;bool has_outputs;
+    SAXEventHandler< sz::MPU9250::Output_Streams > handler_0;bool has_output_streams;
 
     bool check_depth(const char* type)
     {
@@ -2778,7 +2778,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "outputs";
+    return "output_streams";
         default:
             break;
         }
@@ -2805,14 +2805,14 @@ private:
 
     void reset_flags()
     {
-        has_outputs = false;
+        has_output_streams = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::MPU9250::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->outputs)
+        , handler_0(&obj->output_streams)
     {
         reset_flags();
     }
@@ -2953,8 +2953,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x73", 7))
-						 { state=0; has_outputs = true; }
+            else if (utility::string_equal(str, length, "\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14))
+						 { state=0; has_output_streams = true; }
             else {
                 state = -1;
                 return true;
@@ -3036,7 +3036,7 @@ public:
                 break;
             }
         } else {
-            if (!has_outputs) set_missing_required("outputs");
+            if (!has_output_streams) set_missing_required("output_streams");
         }
         return the_error.empty();
     }
@@ -3083,7 +3083,7 @@ struct Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33
     {
         w.StartObject();
 
-        w.Key("\x4f\x75\x74\x70\x75\x74\x73", 7, false); Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33437b52104, sz::MPU9250::Outputs >()(w, value.outputs);
+        w.Key("\x4f\x75\x74\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 14, false); Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33437b52104, sz::MPU9250::Output_Streams >()(w, value.output_streams);
 
         w.EndObject(1);
     }

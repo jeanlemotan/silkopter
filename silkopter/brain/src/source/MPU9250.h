@@ -41,7 +41,7 @@ public:
 
     void process();
 
-    auto get_outputs() const -> std::vector<Output>;
+    auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
 private:
     auto init() -> bool;

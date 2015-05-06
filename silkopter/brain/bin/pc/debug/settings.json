@@ -1,49 +1,5 @@
 {
     "hal": {
-        "multi_config": {
-            "Name": "bubu",
-            "Mass (Kg)": 0.699999988079071,
-            "Height (m)": 0.20000000298023225,
-            "Radius (m)": 0.30000001192092898,
-            "Motor Thrust @ 100% (N)": 5.0,
-            "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
-            "Motor Acceleration (s)": 0.10000000149011612,
-            "Motor Deceleration (s)": 0.15000000596046449,
-            "Motors": [
-                {
-                    "Position": {
-                        "x": 0.0,
-                        "y": 0.30000001192092898,
-                        "z": 0.0
-                    },
-                    "Clockwise": false
-                },
-                {
-                    "Position": {
-                        "x": 0.30000001192092898,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Clockwise": true
-                },
-                {
-                    "Position": {
-                        "x": 0.0,
-                        "y": -0.30000001192092898,
-                        "z": 0.0
-                    },
-                    "Clockwise": false
-                },
-                {
-                    "Position": {
-                        "x": -0.30000001192092898,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Clockwise": true
-                }
-            ]
-        },
         "buses": {
             "i2c0": {
                 "type": "I2C Linux",
@@ -54,287 +10,15 @@
             }
         },
         "nodes": {
-            "Multi Simulator": {
-                "type": "Multi Simulator",
-                "init_params": {
-                    "Throttle Rate (Hz)": 50,
-                    "Acceleration Rate (Hz)": 50,
-                    "Angular Velocity Rate (Hz)": 50,
-                    "Magnetic Field Rate (Hz)": 50,
-                    "Pressure Rate (Hz)": 100,
-                    "Temperature Rate (Hz)": 10,
-                    "Distance Rate (Hz)": 12,
-                    "Location Rate (Hz)": 5,
-                    "__gs": {
-                        "position": {
-                            "x": -194.0,
-                            "y": -359.0
-                        }
-                    }
-                },
-                "config": {
-                    "Simulation Enabled": true,
-                    "Drag Enabled": false,
-                    "Ground Enabled": true,
-                    "Gravity Enabled": true,
-                    "Inputs": {
-                        "Throttle": [
-                            "Motor Mixer/Throttle 0",
-                            "Motor Mixer/Throttle 1",
-                            "Motor Mixer/Throttle 2",
-                            "Motor Mixer/Throttle 3"
-                        ]
-                    },
-                    "Outputs": {
-                        "Acceleration": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "Scale": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            }
-                        },
-                        "Angular Velocity": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            }
-                        },
-                        "Magnetic Field": {
-                            "Bias": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            }
-                        },
-                        "Temperature": {},
-                        "Pressure": {},
-                        "Distance": {},
-                        "ECEF Location": {}
-                    }
-                }
-            },
-            "Throttle Generator": {
-                "type": "Throttle Generator",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -399.0,
-                            "y": -544.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": 0.0,
-                    "Inputs": {
-                        "Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Rate Controller": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -182.0,
-                            "y": -658.0
-                        }
-                    }
-                },
-                "config": {
-                    "Feedback": {
-                        "Weight (0-1)": 1.0,
-                        "Combined XY PID": true,
-                        "XY PID": {
-                            "kP": 1.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter Poles": 0,
-                            "D Filter Cutoff Frequency (Hz)": 0.0
-                        },
-                        "Z PID": {
-                            "kP": 1.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter Poles": 0,
-                            "D Filter Cutoff Frequency (Hz)": 0.0
-                        }
-                    },
-                    "Feedforward": {
-                        "Weight (0-1)": 0.0,
-                        "Max Torque": 1.600000023841858
-                    },
-                    "Inputs": {
-                        "Input": "Multi Simulator/Angular Velocity",
-                        "Target": "Angular Velocity Generator/Output"
-                    },
-                    "Outputs": {
-                        "Torque": {}
-                    }
-                }
-            },
-            "Angular Velocity Generator": {
-                "type": "Angular Velocity Generator",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -475.0,
-                            "y": -668.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.5
-                    },
-                    "Inputs": {
-                        "X Factor": "Factor Generator 0/Factor",
-                        "Y Factor": "",
-                        "Z Factor": "Factor Generator/Factor"
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
-            "Motor Mixer": {
-                "type": "Motor Mixer",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -275.0,
-                            "y": -648.0
-                        }
-                    }
-                },
-                "config": {
-                    "Armed Throttle": 0.0,
-                    "Inputs": {
-                        "Torque": "Rate Controller/Torque",
-                        "Collective Force": "Force Generator/Output"
-                    },
-                    "Outputs": {
-                        "Throttles": [
-                            {},
-                            {},
-                            {},
-                            {}
-                        ]
-                    }
-                }
-            },
-            "Force Generator": {
-                "type": "Force Generator",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "__gs": {
-                        "position": {
-                            "x": -702.0,
-                            "y": -372.0
-                        }
-                    }
-                },
-                "config": {
-                    "Value": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 6.0
-                    },
-                    "Inputs": {
-                        "X Factor": "",
-                        "Y Factor": "",
-                        "Z Factor": ""
-                    },
-                    "Outputs": {
-                        "Output": {}
-                    }
-                }
-            },
             "Factor Generator": {
                 "type": "Factor Generator",
                 "init_params": {
-                    "Rate (Hz)": 50,
-                    "Component Count": 2,
-                    "__gs": {
-                        "position": {
-                            "x": -870.0,
-                            "y": -828.0
-                        }
-                    }
-                },
-                "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.0,
-                    "Square": true,
-                    "Components": [
-                        {
-                            "Frequency (Hz)": 0.20000000298023225,
-                            "Amplitude": 1.0
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 1.0
-                        }
-                    ],
-                    "Inputs": {},
-                    "Outputs": {
-                        "Factor": {}
-                    }
-                }
-            },
-            "Factor Generator 0": {
-                "type": "Factor Generator",
-                "init_params": {
-                    "Rate (Hz)": 50,
-                    "Component Count": 1,
-                    "__gs": {
-                        "position": {
-                            "x": -930.0,
-                            "y": -661.0
-                        }
-                    }
-                },
-                "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.0,
-                    "Square": false,
-                    "Components": [
-                        {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 1.0
-                        }
-                    ],
-                    "Inputs": {},
-                    "Outputs": {
-                        "Factor": {}
-                    }
-                }
-            },
-            "Factor Generator 1": {
-                "type": "Factor Generator",
-                "init_params": {
-                    "Rate (Hz)": 400,
+                    "Rate (Hz)": 100,
                     "Component Count": 3,
                     "__gs": {
                         "position": {
-                            "x": -907.0,
-                            "y": -860.0
+                            "x": -175.0,
+                            "y": -400.0
                         }
                     }
                 },
@@ -344,15 +28,15 @@
                     "Square": false,
                     "Components": [
                         {
-                            "Frequency (Hz)": 4.0,
+                            "Frequency (Hz)": 1.0,
+                            "Amplitude": 0.30000001192092898
+                        },
+                        {
+                            "Frequency (Hz)": 7.0,
                             "Amplitude": 1.0
                         },
                         {
-                            "Frequency (Hz)": 0.0,
-                            "Amplitude": 1.0
-                        },
-                        {
-                            "Frequency (Hz)": 0.0,
+                            "Frequency (Hz)": 30.0,
                             "Amplitude": 1.0
                         }
                     ],
@@ -365,19 +49,19 @@
             "Factor LPF": {
                 "type": "Factor LPF",
                 "init_params": {
-                    "Rate (Hz)": 400,
+                    "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -750.0,
-                            "y": -716.0
+                            "x": -74.0,
+                            "y": -474.0
                         }
                     }
                 },
                 "config": {
-                    "Poles": 8,
-                    "Cutoff Frequency (Hz)": 8.0,
+                    "Poles": 4,
+                    "Cutoff Frequency (Hz)": 2.0,
                     "Inputs": {
-                        "Input": "Factor Generator 1/Factor"
+                        "Input": "Factor Generator/Factor"
                     },
                     "Outputs": {
                         "Output": {}
