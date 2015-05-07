@@ -97,10 +97,8 @@ void Factor_Generator::process()
        vs.value = 0;
 
        m_period += q::Seconds(m_dt).count();
-//           if (m_period > math::anglef::_2pi)
-//           {
-//               m_period -= math::anglef::_2pi;
-//           }
+       m_period = std::fmod(m_period, 1.f);
+
        float a = m_period * math::anglef::_2pi;
        for (auto& c: m_config->components)
        {
