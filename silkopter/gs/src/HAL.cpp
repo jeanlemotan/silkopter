@@ -95,7 +95,7 @@ void HAL::connect_node_stream_input(node::Node_ptr node, std::string const& inpu
 {
     auto document = jsonutil::clone_value(node->config);
 
-    q::Path path("Inputs");
+    q::Path path("Input Streams");
     path += input_name;
 
     auto* value = jsonutil::find_value(document, path);
