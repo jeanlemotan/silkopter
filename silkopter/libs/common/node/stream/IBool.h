@@ -9,14 +9,14 @@ namespace node
 namespace stream
 {
 
-class IFactor : public IScalar_Stream<Type::FACTOR>
+class IBool : public IScalar_Stream<Type::BOOL>
 {
 public:
-    typedef float                       Value;
-    typedef stream::Sample<Value>       Sample;
+    typedef bool                    Value;
+    typedef stream::Sample<Value>   Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IFactor);
+DECLARE_CLASS_PTR(IBool);
 
 
 }

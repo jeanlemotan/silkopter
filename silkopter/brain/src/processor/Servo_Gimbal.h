@@ -2,7 +2,7 @@
 
 #include "common/node/IProcessor.h"
 #include "common/node/stream/IFrame.h"
-#include "common/node/stream/IFactor.h"
+#include "common/node/stream/IFloat.h"
 #include "common/node/stream/IPWM.h"
 #include "HAL.h"
 

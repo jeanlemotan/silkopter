@@ -43,8 +43,8 @@ enum class Type
     THROTTLE,
     VIDEO,
     VOLTAGE,
-    FACTOR,
-    MULTI_CONFIG
+    FLOAT,
+    BOOL
 };
 
 //for streams of data with a fixed sample rate

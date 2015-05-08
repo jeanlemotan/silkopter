@@ -141,7 +141,8 @@ HEADERS += \
     ../../../libs/common/node/ITransformer.h \
     ../../src/Multi_Config_Window.h \
     ../../src/Axis.h \
-    ../../src/Video_Viewer.h
+    ../../src/Video_Viewer.h \
+    ../../../libs/common/node/stream/IBool.h
 
 SOURCES += \
     ../../src/GS.cpp \

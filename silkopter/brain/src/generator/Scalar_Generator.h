@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/IGenerator.h"
-#include "generator/Factor_Generator.h"
+#include "generator/Oscillator.h"
 
 #include "sz_math.hpp"
 #include "sz_Scalar_Generator.hpp"
@@ -40,7 +40,7 @@ private:
     sz::Scalar_Generator::Init_Params m_init_params;
     sz::Scalar_Generator::Config m_config;
 
-    std::weak_ptr<stream::IFactor> m_factor_stream;
+    std::weak_ptr<stream::IFloat> m_modulation_stream;
 
     q::Clock::time_point m_last_tp;
     q::Clock::duration m_dt;
@@ -119,16 +119,16 @@ auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> boo
         return false;
     }
 
-    auto factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.factor);
+    auto modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.modulation);
 
-    if (factor_stream && factor_stream->get_rate() != m_output_stream->rate)
+    if (modulation_stream && modulation_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.factor, m_output_stream->rate, factor_stream->get_rate());
-        m_factor_stream.reset();
+        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.modulation, m_output_stream->rate, modulation_stream->get_rate());
+        m_modulation_stream.reset();
     }
     else
     {
-        m_factor_stream = factor_stream;
+        m_modulation_stream = modulation_stream;
     }
 
     m_config = sz;
@@ -154,7 +154,7 @@ auto Scalar_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFactor::TYPE, m_init_params.rate, "Factor" }
+        { stream::IFloat::TYPE, m_init_params.rate, "Modulation" }
     }};
     return inputs;
 }
@@ -175,10 +175,10 @@ void Scalar_Generator<Stream_t>::process()
 
     m_output_stream->samples.clear();
 
-    auto factor_stream = m_factor_stream.lock();
-    if (factor_stream)
+    auto modulation_stream = m_modulation_stream.lock();
+    if (modulation_stream)
     {
-        auto const& samples = factor_stream->get_samples();
+        auto const& samples = modulation_stream->get_samples();
         m_output_stream->samples.reserve(samples.size());
         for (auto const& s: samples)
         {

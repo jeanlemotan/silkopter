@@ -6,7 +6,8 @@
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IADC.h"
-#include "common/node/stream/IFactor.h"
+#include "common/node/stream/IFloat.h"
+#include "common/node/stream/IBool.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
@@ -282,7 +283,8 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::IFrame>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IADC>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IFactor>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IFloat>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IBool>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IForce>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IThrottle>(ts, *stream) ||

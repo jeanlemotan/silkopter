@@ -43,9 +43,8 @@ GS::GS(QWidget *parent)
 
     init_graphics();
 
-    //set_remote_address("10.10.10.10");
-    //set_uav_address("192.168.1.110");
-    set_remote_address("127.0.0.1");
+    set_remote_address("10.10.10.10");
+    //set_remote_address("127.0.0.1");
 
 //    connect(m_ui.action_connect_uav, &QAction::triggered, [this](bool) { set_uav_address("192.168.1.110"); });
 //    connect(m_ui.action_connect_uav_ah, &QAction::triggered, [this](bool) { set_uav_address("10.10.10.10"); });

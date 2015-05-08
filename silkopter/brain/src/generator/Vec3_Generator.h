@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/IGenerator.h"
-#include "generator/Factor_Generator.h"
+#include "generator/Oscillator.h"
 
 #include "sz_math.hpp"
 #include "sz_Vec3_Generator.hpp"
@@ -40,13 +40,13 @@ private:
     sz::Vec3_Generator::Init_Params m_init_params;
     sz::Vec3_Generator::Config m_config;
 
-    std::weak_ptr<stream::IFactor> m_x_factor_stream;
-    std::weak_ptr<stream::IFactor> m_y_factor_stream;
-    std::weak_ptr<stream::IFactor> m_z_factor_stream;
+    std::weak_ptr<stream::IFloat> m_x_modulation_stream;
+    std::weak_ptr<stream::IFloat> m_y_modulation_stream;
+    std::weak_ptr<stream::IFloat> m_z_modulation_stream;
 
-    std::vector<stream::IFactor::Sample> m_x_factor_samples;
-    std::vector<stream::IFactor::Sample> m_y_factor_samples;
-    std::vector<stream::IFactor::Sample> m_z_factor_samples;
+    std::vector<stream::IFloat::Sample> m_x_modulation_samples;
+    std::vector<stream::IFloat::Sample> m_y_modulation_samples;
+    std::vector<stream::IFloat::Sample> m_z_modulation_samples;
 
 
     q::Clock::time_point m_last_tp;
@@ -126,37 +126,37 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto x_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.x_factor);
-    if (x_factor_stream && x_factor_stream->get_rate() != m_output_stream->rate)
+    auto x_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.x_modulation);
+    if (x_modulation_stream && x_modulation_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad x factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_factor, m_output_stream->rate, x_factor_stream->get_rate());
-        m_x_factor_stream.reset();
+        QLOGW("Bad x modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_modulation, m_output_stream->rate, x_modulation_stream->get_rate());
+        m_x_modulation_stream.reset();
     }
     else
     {
-        m_x_factor_stream = x_factor_stream;
+        m_x_modulation_stream = x_modulation_stream;
     }
 
-    auto y_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.y_factor);
-    if (y_factor_stream && y_factor_stream->get_rate() != m_output_stream->rate)
+    auto y_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.y_modulation);
+    if (y_modulation_stream && y_modulation_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad y factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_factor, m_output_stream->rate, y_factor_stream->get_rate());
-        m_y_factor_stream.reset();
+        QLOGW("Bad y modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_modulation, m_output_stream->rate, y_modulation_stream->get_rate());
+        m_y_modulation_stream.reset();
     }
     else
     {
-        m_y_factor_stream = y_factor_stream;
+        m_y_modulation_stream = y_modulation_stream;
     }
 
-    auto z_factor_stream = m_hal.get_streams().template find_by_name<stream::IFactor>(sz.input_streams.z_factor);
-    if (z_factor_stream && z_factor_stream->get_rate() != m_output_stream->rate)
+    auto z_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.z_modulation);
+    if (z_modulation_stream && z_modulation_stream->get_rate() != m_output_stream->rate)
     {
-        QLOGW("Bad z factor stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_factor, m_output_stream->rate, z_factor_stream->get_rate());
-        m_z_factor_stream.reset();
+        QLOGW("Bad z modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_modulation, m_output_stream->rate, z_modulation_stream->get_rate());
+        m_z_modulation_stream.reset();
     }
     else
     {
-        m_z_factor_stream = z_factor_stream;
+        m_z_modulation_stream = z_modulation_stream;
     }
 
     m_config = sz;
@@ -181,9 +181,9 @@ auto Vec3_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_I
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFactor::TYPE, m_init_params.rate, "X Factor" },
-        { stream::IFactor::TYPE, m_init_params.rate, "Y Factor" },
-        { stream::IFactor::TYPE, m_init_params.rate, "Z Factor" }
+        { stream::IFloat::TYPE, m_init_params.rate, "X Modulation" },
+        { stream::IFloat::TYPE, m_init_params.rate, "Y Modulation" },
+        { stream::IFloat::TYPE, m_init_params.rate, "Z Modulation" }
     }};
     return inputs;
 }
@@ -204,9 +204,9 @@ void Vec3_Generator<Stream_t>::process()
 
     m_output_stream->samples.clear();
 
-    auto x_factor_stream = m_x_factor_stream.lock();
-    auto y_factor_stream = m_y_factor_stream.lock();
-    auto z_factor_stream = m_z_factor_stream.lock();
+    auto x_modulation_stream = m_x_modulation_stream.lock();
+    auto y_modulation_stream = m_y_modulation_stream.lock();
+    auto z_modulation_stream = m_z_modulation_stream.lock();
 
     auto now = q::Clock::now();
     auto dt = now - m_last_tp;
@@ -216,26 +216,26 @@ void Vec3_Generator<Stream_t>::process()
     }
     size_t count = dt / m_dt;
 
-    if (x_factor_stream)
+    if (x_modulation_stream)
     {
-        auto const& samples = x_factor_stream->get_samples();
-        m_x_factor_samples.reserve(m_x_factor_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_x_factor_samples));
-        count = std::min(count, m_x_factor_samples.size());
+        auto const& samples = x_modulation_stream->get_samples();
+        m_x_modulation_samples.reserve(m_x_modulation_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_x_modulation_samples));
+        count = std::min(count, m_x_modulation_samples.size());
     }
-    if (y_factor_stream)
+    if (y_modulation_stream)
     {
-        auto const& samples = y_factor_stream->get_samples();
-        m_y_factor_samples.reserve(m_y_factor_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_y_factor_samples));
-        count = std::min(count, m_y_factor_samples.size());
+        auto const& samples = y_modulation_stream->get_samples();
+        m_y_modulation_samples.reserve(m_y_modulation_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_y_modulation_samples));
+        count = std::min(count, m_y_modulation_samples.size());
     }
-    if (z_factor_stream)
+    if (z_modulation_stream)
     {
-        auto const& samples = z_factor_stream->get_samples();
-        m_z_factor_samples.reserve(m_z_factor_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_z_factor_samples));
-        count = std::min(count, m_z_factor_samples.size());
+        auto const& samples = z_modulation_stream->get_samples();
+        m_z_modulation_samples.reserve(m_z_modulation_samples.size() + samples.size());
+        std::copy(samples.begin(), samples.end(), std::back_inserter(m_z_modulation_samples));
+        count = std::min(count, m_z_modulation_samples.size());
     }
 
     if (count == 0)
@@ -256,17 +256,17 @@ void Vec3_Generator<Stream_t>::process()
         vs.sample_idx = ++m_output_stream->sample_idx;
         vs.value = m_config.value;
 
-        if (m_x_factor_samples.size() > i)
+        if (m_x_modulation_samples.size() > i)
         {
-            vs.value.x += m_x_factor_samples[i].value;
+            vs.value.x += m_x_modulation_samples[i].value;
         }
-        if (m_y_factor_samples.size() > i)
+        if (m_y_modulation_samples.size() > i)
         {
-            vs.value.y += m_y_factor_samples[i].value;
+            vs.value.y += m_y_modulation_samples[i].value;
         }
-        if (m_z_factor_samples.size() > i)
+        if (m_z_modulation_samples.size() > i)
         {
-            vs.value.z += m_z_factor_samples[i].value;
+            vs.value.z += m_z_modulation_samples[i].value;
         }
 
         m_output_stream->samples[i] = vs;
@@ -278,17 +278,17 @@ void Vec3_Generator<Stream_t>::process()
     m_last_tp -= dt;
 
     //consume samples
-    if (m_x_factor_samples.size() >= count)
+    if (m_x_modulation_samples.size() >= count)
     {
-        m_x_factor_samples.erase(m_x_factor_samples.begin(), m_x_factor_samples.begin() + count);
+        m_x_modulation_samples.erase(m_x_modulation_samples.begin(), m_x_modulation_samples.begin() + count);
     }
-    if (m_y_factor_samples.size() >= count)
+    if (m_y_modulation_samples.size() >= count)
     {
-        m_y_factor_samples.erase(m_y_factor_samples.begin(), m_y_factor_samples.begin() + count);
+        m_y_modulation_samples.erase(m_y_modulation_samples.begin(), m_y_modulation_samples.begin() + count);
     }
-    if (m_z_factor_samples.size() >= count)
+    if (m_z_modulation_samples.size() >= count)
     {
-        m_z_factor_samples.erase(m_z_factor_samples.begin(), m_z_factor_samples.begin() + count);
+        m_z_modulation_samples.erase(m_z_modulation_samples.begin(), m_z_modulation_samples.begin() + count);
     }
 }
 

@@ -1,41 +1,41 @@
 #include "BrainStdAfx.h"
-#include "Factor_Generator.h"
+#include "Oscillator.h"
 
 #include "sz_math.hpp"
-#include "sz_Factor_Generator.hpp"
+#include "sz_Oscillator.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Factor_Generator::Factor_Generator(HAL& hal)
+Oscillator::Oscillator(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Factor_Generator::Init_Params())
-    , m_config(new sz::Factor_Generator::Config())
+    , m_init_params(new sz::Oscillator::Init_Params())
+    , m_config(new sz::Oscillator::Config())
     , m_rnd_distribution(0, 0)
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
-auto Factor_Generator::init(rapidjson::Value const& init_params) -> bool
+auto Oscillator::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("factor_generator::init");
+    QLOG_TOPIC("Oscillator::init");
 
-    sz::Factor_Generator::Init_Params sz;
+    sz::Oscillator::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Factor_Generator data: {}", ss.str());
+        QLOGE("Cannot deserialize Oscillator data: {}", ss.str());
         return false;
     }
     jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
-auto Factor_Generator::init() -> bool
+auto Oscillator::init() -> bool
 {
     m_output_stream = std::make_shared<Stream>();
     if (m_init_params->rate == 0)
@@ -57,23 +57,23 @@ auto Factor_Generator::init() -> bool
     return true;
 }
 
-auto Factor_Generator::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Oscillator::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     return std::vector<Stream_Input>(0);
 }
 
-auto Factor_Generator::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Oscillator::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(1);
-    outputs[0].type = stream::IFactor::TYPE;
-    outputs[0].name = "Factor";
-    outputs[0].stream = m_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::IFloat::TYPE, "Output", m_output_stream }
+    }};
     return outputs;
 }
 
-void Factor_Generator::process()
+void Oscillator::process()
 {
-    QLOG_TOPIC("factor_generator::process");
+    QLOG_TOPIC("Oscillator::process");
 
     m_output_stream->samples.clear();
 
@@ -87,6 +87,8 @@ void Factor_Generator::process()
     m_last_tp = now;
 
     m_output_stream->samples.reserve(dt / m_dt);
+
+    float amplitude = m_config->amplitude;
 
     while (dt >= m_dt)
     {
@@ -110,7 +112,7 @@ void Factor_Generator::process()
        }
        vs.value += m_rnd_distribution(m_rnd_engine);
 
-       vs.value *= m_config->amplitude;
+       vs.value *= amplitude;
 
        m_output_stream->samples.push_back(vs);
 
@@ -122,17 +124,17 @@ void Factor_Generator::process()
     m_last_tp -= dt;
 }
 
-auto Factor_Generator::set_config(rapidjson::Value const& json) -> bool
+auto Oscillator::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("factor_generator::set_config");
+    QLOG_TOPIC("Oscillator::set_config");
 
-    sz::Factor_Generator::Config sz;
+    sz::Oscillator::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Factor_Generator config data: {}", ss.str());
+        QLOGE("Cannot deserialize Oscillator config data: {}", ss.str());
         return false;
     }
 
@@ -142,19 +144,19 @@ auto Factor_Generator::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Factor_Generator::get_config() const -> rapidjson::Document
+auto Oscillator::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Factor_Generator::get_init_params() const -> rapidjson::Document const&
+auto Oscillator::get_init_params() const -> rapidjson::Document const&
 {
     return m_init_paramsj;
 }
 
-auto Factor_Generator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Oscillator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

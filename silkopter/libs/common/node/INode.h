@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/node/stream/IStream.h"
-#include "common/node/param/IParam.h"
 
 namespace silk
 {
@@ -54,21 +53,6 @@ public:
         stream::IStream_ptr stream;
     };
     virtual auto get_stream_outputs() const -> std::vector<Stream_Output> = 0;
-
-    struct Param_Input
-    {
-        param::Type type;
-        std::string name;
-    };
-    virtual auto get_param_inputs() const -> std::vector<Param_Input> { return std::vector<Param_Input>(); }
-
-    struct Param_Output
-    {
-        param::Type type;
-        std::string name;
-        param::IParam_ptr param;
-    };
-    virtual auto get_param_outputs() const -> std::vector<Param_Output> { return std::vector<Param_Output>(); }
 
     virtual void process() = 0;
 };

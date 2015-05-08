@@ -1,0 +1,34 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Oscillator",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}],
+        ["uint32_t", "component_count", {"required": true, "json_key" : "Component Count", "default" : 1}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Oscillator",
+    "name": "Component",
+    "members":
+    [
+        ["float", "frequency", {"required": true, "json_key" : "Frequency (Hz)"}],
+        ["float", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Oscillator",
+    "name": "Config",
+    "members":
+    [
+        ["float", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}],
+        ["float", "noise", {"required": true, "json_key" : "Noise"}],
+        ["bool", "square", {"required": true, "json_key" : "Square"}],
+        ["std::vector<sz::Oscillator::Component>", "components", {"required": true, "json_key" : "Components"}]
+     ]
+}
+]

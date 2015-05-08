@@ -322,17 +322,33 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (type == IFactor::TYPE)
+    else if (type == IFloat::TYPE)
     {
         auto viewer = new Numeric_Viewer("f", stream->rate, this);
-        viewer->add_graph("Factor", "f", QColor(0xe74c3c));
+        viewer->add_graph("Float", "f", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Factor>(stream)->samples_available_signal.connect([this, viewer](Factor& stream)
+        m_connection = std::static_pointer_cast<Float>(stream)->samples_available_signal.connect([this, viewer](Float& stream)
         {
             std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
                 data = { s.value };
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
+    }
+    else if (type == IBool::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("v", stream->rate, this);
+        viewer->add_graph("Bool", "v", QColor(0xe74c3c));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Bool>(stream)->samples_available_signal.connect([this, viewer](Bool& stream)
+        {
+            std::array<double, 1> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value ? 1 : 0 };
                 viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();

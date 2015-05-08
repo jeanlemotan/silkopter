@@ -2,7 +2,8 @@
 
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/IADC.h"
-#include "common/node/stream/IFactor.h"
+#include "common/node/stream/IFloat.h"
+#include "common/node/stream/IBool.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/ICommands.h"
@@ -21,10 +22,6 @@
 #include "common/node/stream/IVelocity.h"
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
-
-#include "common/node/param/IParam.h"
-#include "common/node/param/IToggle.h"
-#include "common/node/param/IFloat.h"
 
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
@@ -161,13 +158,21 @@ struct ECEF_Distance : public Stream
 };
 DECLARE_CLASS_PTR(ECEF_Distance);
 
-struct Factor : public Stream
+struct Float : public Stream
 {
-    typedef IFactor::Sample Sample;
+    typedef IFloat::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(Factor&)> samples_available_signal;
+    q::util::Signal<void(Float&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(Factor);
+DECLARE_CLASS_PTR(Float);
+
+struct Bool : public Stream
+{
+    typedef IBool::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Bool&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Float);
 
 struct Force : public Stream
 {
@@ -355,41 +360,6 @@ DECLARE_CLASS_PTR(Video);
 
 
 
-namespace param
-{
-
-struct Param
-{
-    Node_wptr node;
-    std::string name;
-    param::Id id = 0;
-    param::Type type;
-    int telemetry_active_req = 0;
-    bool is_telemetry_active = false;
-};
-DECLARE_CLASS_PTR(Param);
-
-struct Toggle : public Param
-{
-    typedef IToggle::Value Value;
-    Value value;
-    q::util::Signal<void(Toggle&)> value_changed_signal;
-};
-DECLARE_CLASS_PTR(Toggle);
-
-struct Float : public Param
-{
-    typedef IFloat::Value Value;
-    Value value;
-    q::util::Signal<void(Float&)> value_changed_signal;
-};
-DECLARE_CLASS_PTR(Float);
-
-}
-
-
-
-
 struct Node_Def
 {
     std::string name;
@@ -411,19 +381,6 @@ struct Node_Def
         uint32_t rate = 0;
     };
     std::vector<Stream_Output> output_streams;
-
-    struct Param_Input
-    {
-        param::Type type;
-        std::string name;
-    };
-    std::vector<Param_Input> input_params;
-    struct Param_Output
-    {
-        param::Type type;
-        std::string name;
-    };
-    std::vector<Param_Output> output_params;
 };
 DECLARE_CLASS_PTR(Node_Def);
 
@@ -451,21 +408,6 @@ struct Node
         uint32_t rate = 0;
     };
     std::vector<Stream_Output> output_streams;
-
-    struct Param_Input
-    {
-        param::Param_wptr param;
-        param::Type type;
-        std::string name;
-    };
-    std::vector<Param_Input> input_params;
-    struct Param_Output
-    {
-        param::Param_ptr param;
-        param::Type type;
-        std::string name;
-    };
-    std::vector<Param_Output> output_params;
 
     q::util::Signal<void(Node&)> changed_signal;
 };
@@ -505,7 +447,6 @@ public:
     auto get_node_defs() const      -> Registry<node::Node_Def> const&;
     auto get_nodes() const          -> Registry<node::Node> const&;
     auto get_streams() const        -> Registry<node::stream::Stream> const&;
-    auto get_params() const         -> Registry<node::param::Param> const&;
 
     enum class Result
     {
@@ -545,7 +486,6 @@ protected:
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
     Registry<node::stream::Stream> m_streams;
-    Registry<node::param::Param> m_params;
 
     struct Queue_Item
     {

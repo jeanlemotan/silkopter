@@ -43,10 +43,6 @@ auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
 {
     return m_streams;
 }
-auto HAL::get_params() const  -> Registry<node::param::Param> const&
-{
-    return m_params;
-}
 
 auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {

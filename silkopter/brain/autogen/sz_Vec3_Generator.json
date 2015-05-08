@@ -14,26 +14,9 @@
     "name": "Input_Streams",
     "members":
     [
-       ["std::string", "x_factor", {"required": true, "json_key" : "X Factor"}],
-       ["std::string", "y_factor", {"required": true, "json_key" : "Y Factor"}],
-       ["std::string", "z_factor", {"required": true, "json_key" : "Z Factor"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Vec3_Generator",
-    "name": "Output",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Vec3_Generator",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Vec3_Generator::Output", "output", {"required": true, "json_key" : "Output"}]
+       ["std::string", "x_modulation", {"required": true, "json_key" : "X Modulation"}],
+       ["std::string", "y_modulation", {"required": true, "json_key" : "Y Modulation"}],
+       ["std::string", "z_modulation", {"required": true, "json_key" : "Z Modulation"}]
     ]
 },
 {
@@ -43,8 +26,7 @@
     "members":
     [
         ["math::vec3f", "value", {"required": true, "json_key" : "Value"}],
-        ["sz::Vec3_Generator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Vec3_Generator::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+        ["sz::Vec3_Generator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }
 ]

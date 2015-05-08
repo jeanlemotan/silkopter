@@ -43,7 +43,7 @@
 #include "transformer/Transformer.h"
 #include "transformer/Transformer_Inv.h"
 
-#include "generator/Factor_Generator.h"
+#include "generator/Oscillator.h"
 #include "generator/Vec3_Generator.h"
 #include "generator/Scalar_Generator.h"
 
@@ -191,11 +191,6 @@ auto HAL::get_streams()  -> Registry<node::stream::IStream>&
 {
     return m_streams;
 }
-auto HAL::get_params()  -> Registry<node::param::IParam>&
-{
-    return m_params;
-}
-
 auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 {
     return m_configs.multi;
@@ -311,16 +306,6 @@ auto HAL::create_node(
             if (!m_streams.add(stream_name, std::string(), x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
-                return node::INode_ptr();
-            }
-        }
-        auto output_params = node->get_param_outputs();
-        for (auto const& x: output_params)
-        {
-            std::string param_name = q::util::format2<std::string>("{}/{}", name, x.name);
-            if (!m_params.add(param_name, std::string(), x.param))
-            {
-                QLOGE("Cannot add param '{}'", param_name);
                 return node::INode_ptr();
             }
         }
@@ -451,7 +436,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
 
-    m_node_factory.register_node<Factor_Generator>("Factor Generator", *this);
+    m_node_factory.register_node<Oscillator>("Oscillator", *this);
 
     m_node_factory.register_node<Scalar_Generator<stream::IADC>>("ADC Generator", *this);
     m_node_factory.register_node<Scalar_Generator<stream::ICurrent>>("Current Generator", *this);
@@ -509,7 +494,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IPWM>>("PWM LPF", *this);
-    m_node_factory.register_node<LPF<stream::IFactor>>("Factor LPF", *this);
+    m_node_factory.register_node<LPF<stream::IFloat>>("Float LPF", *this);
     m_node_factory.register_node<LPF<stream::IForce>>("Force LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Force>>("Force LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Force>>("Force LPF (ECEF)", *this);
@@ -545,7 +530,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IFrame>>("Frame RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IPWM>>("PWM RS", *this);
-    m_node_factory.register_node<Resampler<stream::IFactor>>("Factor RS", *this);
+    m_node_factory.register_node<Resampler<stream::IFloat>>("Float RS", *this);
     m_node_factory.register_node<Resampler<stream::IForce>>("Force RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Force>>("Force RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Force>>("Force RS (ECEF)", *this);
@@ -604,7 +589,6 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Velocity_Controller>("Velocity Controller", *this);
 
 
-    get_params().remove_all();
     get_streams().remove_all();
     get_nodes().remove_all();
 

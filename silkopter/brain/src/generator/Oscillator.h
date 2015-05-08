@@ -1,13 +1,13 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IFactor.h"
+#include "common/node/stream/IFloat.h"
 #include "common/node/IGenerator.h"
 
 
 namespace sz
 {
-namespace Factor_Generator
+namespace Oscillator
 {
 struct Init_Params;
 struct Config;
@@ -19,10 +19,10 @@ namespace silk
 namespace node
 {
 
-class Factor_Generator : public IGenerator
+class Oscillator : public IGenerator
 {
 public:
-    Factor_Generator(HAL& hal);
+    Oscillator(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -43,8 +43,8 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Factor_Generator::Init_Params> m_init_params;
-    std::shared_ptr<sz::Factor_Generator::Config> m_config;
+    std::shared_ptr<sz::Oscillator::Init_Params> m_init_params;
+    std::shared_ptr<sz::Oscillator::Config> m_config;
 
     q::Clock::time_point m_last_tp;
     q::Clock::duration m_dt;
@@ -52,7 +52,7 @@ private:
     std::uniform_real_distribution<float> m_rnd_distribution;
     std::mt19937 m_rnd_engine;
 
-    struct Stream : public stream::IFactor
+    struct Stream : public stream::IFloat
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

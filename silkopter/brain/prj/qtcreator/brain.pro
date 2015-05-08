@@ -108,7 +108,6 @@ SOURCES += \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/processor/Comp_ECEF_Location.cpp \
-    ../../src/generator/Factor_Generator.cpp \
     ../../src/source/EHealth.cpp \
     ../../src/controller/Rate_Controller.cpp \
     ../../src/controller/Stability_Controller.cpp \
@@ -119,7 +118,8 @@ SOURCES += \
     ../../src/processor/Servo_Gimbal.cpp \
     ../../src/processor/Motor_Mixer.cpp \
     ../../src/source/ADS1115.cpp \
-    ../../src/sink/PCA9685.cpp
+    ../../src/sink/PCA9685.cpp \
+    ../../src/generator/Oscillator.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -189,8 +189,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IVoltage.h \
     ../../../libs/common/node/stream/IThrottle.h \
     ../../../libs/common/node/IProcessor.h \
-    ../../../libs/common/node/stream/IFactor.h \
-    ../../src/generator/Factor_Generator.h \
     ../../src/generator/Vec3_Generator.h \
     ../../src/generator/Scalar_Generator.h \
     ../../src/source/EHealth.h \
@@ -231,7 +229,7 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../src/source/ADS1115.h \
     ../../src/sink/PCA9685.h \
-    ../../../libs/common/node/param/IFloat.h \
-    ../../../libs/common/node/param/IParam.h \
-    ../../../libs/common/node/param/IToggle.h
+    ../../../libs/common/node/stream/IFloat.h \
+    ../../src/generator/Oscillator.h \
+    ../../../libs/common/node/stream/IBool.h
 

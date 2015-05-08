@@ -407,7 +407,8 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
         case node::stream::IDistance::TYPE:                 return std::make_shared<node::stream::Distance>();
 //        case node::stream::IENU_Distance::TYPE:             return std::make_shared<node::stream::ENU_Distance>();
 //        case node::stream::IECEF_Distance::TYPE:            return std::make_shared<node::stream::ECEF_Distance>();
-        case node::stream::IFactor::TYPE:                   return std::make_shared<node::stream::Factor>();
+        case node::stream::IFloat::TYPE:                    return std::make_shared<node::stream::Float>();
+        case node::stream::IBool::TYPE:                     return std::make_shared<node::stream::Bool>();
         case node::stream::IForce::TYPE:                    return std::make_shared<node::stream::Force>();
 //        case node::stream::IENU_Force::TYPE:                return std::make_shared<node::stream::ENU_Force>();
 //        case node::stream::IECEF_Force::TYPE:               return std::make_shared<node::stream::ECEF_Force>();
@@ -793,7 +794,8 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<ICommands, Commands>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IFactor, Factor>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IFloat, Float>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IBool, Bool>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IForce, Force>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&

@@ -383,7 +383,7 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) 
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
     res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size);
     return res;
 }
@@ -411,7 +411,7 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + sizeof(dst));
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
     res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst);
     return res;
 }
@@ -493,7 +493,7 @@ auto MPU9250::init() -> bool
 
     std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
-    std::vector<size_t> imu_rates = { 250, 500, 1000 }; //, 2000, 4000, 8000 };
+    std::vector<size_t> imu_rates = { 250, 500, 1000 };//, 8000 }; //8Khz has issues with the compass and it fills the fifo too fast
 
     auto req_params = *m_init_params;
 
@@ -530,10 +530,14 @@ auto MPU9250::init() -> bool
     QLOGI("Magnetic Field Rate {}Hz (requested {}Hz)", m_init_params->magnetic_field_rate, req_params.magnetic_field_rate);
     QLOGI("Temperature Rate {}Hz (requested {}Hz)", m_init_params->temperature_rate, req_params.temperature_rate);
 
+    m_magnetic_field->rate = m_init_params->magnetic_field_rate;
     m_acceleration->rate = m_init_params->acceleration_angular_velocity_rate;
     m_angular_velocity->rate = m_acceleration->rate;
-    m_magnetic_field->rate = m_init_params->magnetic_field_rate;
     m_temperature->rate = m_init_params->temperature_rate;
+
+    m_acceleration->dt = m_angular_velocity->dt = std::chrono::milliseconds(1000 / m_init_params->acceleration_angular_velocity_rate);
+    m_magnetic_field->dt = std::chrono::milliseconds(1000 / m_init_params->magnetic_field_rate);
+    m_temperature->dt = std::chrono::milliseconds(1000 / m_init_params->temperature_rate);
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (m_init_params->angular_velocity_range)
@@ -583,13 +587,14 @@ auto MPU9250::init() -> bool
         return false;
     }
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
-
     auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
-    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0); //wakeup
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+
+    res &= mpu_write_u8(buses, MPU_REG_SIGNAL_PATH_RESET, MPU_BIT_GYRO_RST | MPU_BIT_ACCEL_RST | MPU_BIT_TEMP_RST);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -605,42 +610,74 @@ auto MPU9250::init() -> bool
     }
     QLOGI("Found MPU9250 id: {x}", who_am_i);
 
-    res &= mpu_write_u8(buses, MPU_REG_GYRO_CONFIG, gyro_range);
-    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG, accel_range);
-
-    //res &= mpu_write_u8(MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_20_1);
-    res &= mpu_write_u8(buses, MPU_REG_CONFIG, MPU_BIT_DLPF_CFG_184_1);
-
-
-    //compute the rate
-    uint8_t div = 1000 / m_init_params->acceleration_angular_velocity_rate - 1;
-    res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-
-    m_acceleration->dt = m_angular_velocity->dt = std::chrono::milliseconds(1000 / m_init_params->acceleration_angular_velocity_rate);
-    m_magnetic_field->dt = std::chrono::milliseconds(1000 / m_init_params->magnetic_field_rate);
-    m_temperature->dt = std::chrono::milliseconds(1000 / m_init_params->temperature_rate);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_2, 0);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-    //res &= mpu_write_u8(MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_20_1);
-    mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | MPU_BIT_A_DLPF_CFG_460_1);
+    res &= mpu_write_u8(buses, MPU_REG_GYRO_CONFIG, gyro_range);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
+    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG, accel_range);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+
+    //compute the rate
+    uint8_t g_dlpf = 0;
+    uint8_t a_dlpf = 0;
+    uint8_t div = 0;
+    if (m_init_params->acceleration_angular_velocity_rate <= 1000)
+    {
+        g_dlpf = MPU_BIT_DLPF_CFG_184_1;
+        a_dlpf = MPU_BIT_A_DLPF_CFG_460_1;
+        div = 1000 / m_init_params->acceleration_angular_velocity_rate - 1;
+    }
+    else
+    {
+        g_dlpf = MPU_BIT_DLPF_CFG_3600_8;
+        a_dlpf = MPU_BIT_ACCEL_FCHOICE_B; //disable lpf - resulting in a 4KHz sample rate. This is unaffected by the sample_rate_div
+        div = 0;//8000 / m_init_params->acceleration_angular_velocity_rate - 1;
+    }
+
+    res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+
+    res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+
+    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | a_dlpf);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
 
     res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
     m_fifo_sample_size = 12;
 
+    m_user_ctrl_value = MPU_BIT_FIFO_EN;
+    if (buses.i2c)
+    {
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_SIG_COND_RST);
+    }
+    else
+    {
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_I2C_IF_DIS | MPU_BIT_SIG_COND_RST);
+    }
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
-    m_user_ctrl_value = MPU_BIT_FIFO_EN;
+    int tries = 10;
+    while (--tries > 0)
+    {
+        if (setup_compass(buses))
+        {
+            break;
+        }
+    }
+    if (tries < 0)
+    {
+        return false;
+    }
+    QLOGI("Compass setup after {} tries", tries);
+
     res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
-    m_last_fifo_tp = q::Clock::now();
-
-    res &= setup_compass(buses);
     if (!res)
     {
         QLOGE("Failed to setup mpu9250");
@@ -648,6 +685,8 @@ auto MPU9250::init() -> bool
         return false;
 #endif
     }
+
+    m_last_fifo_tp = q::Clock::now();
 
     return true;
 }
@@ -735,33 +774,49 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
     {
         // Enable I2C master mode if compass is being used.
         res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
 
         m_user_ctrl_value |= MPU_BIT_I2C_MST;
-        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_I2C_MST_RST);
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
 
-        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 0x0D); //400Khz i2c speed
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+        //  0 348 kHz
+        //  1 333 kHz
+        //  2 320 kHz
+        //  3 308 kHz
+        //  4 296 kHz
+        //  5 286 kHz
+        //  6 276 kHz
+        //  7 267 kHz
+        //  8 258 kHz
+        //  9 500 kHz
+        // 10 471 kHz
+        // 11 444 kHz
+        // 12 421 kHz
+        // 13 400 kHz
+        // 14 381 kHz
+        // 15 364 kHz
+        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 13); //i2c speed
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
     }
 
     m_magnetic_field->akm_address = 0;
+
+    res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     {
         uint8_t data;
         res &= akm_read_u8(buses, AKM_REG_WHOAMI, data);
         if (!res || data != AKM_WHOAMI)
         {
-            QLOGW("Compass not found!!");
-            //return false;
+            QLOGW("Compass not found ({}, {})!!", res, data);
+            return false;
         }
     }
 
-    res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
@@ -770,11 +825,8 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
     m_magnetic_field->magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field->magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
-    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
 #endif
 
@@ -872,6 +924,16 @@ void MPU9250::process()
                 auto tp = m_last_fifo_tp + dt;
                 m_last_fifo_tp = now;
 
+//                static q::Clock::time_point s_last_stat_tp = q::Clock::now();
+//                static size_t s_sample_count = 0;
+//                s_sample_count += sample_count;
+//                if (now - s_last_stat_tp >= std::chrono::seconds(1))
+//                {
+//                    QLOGI("SPS: {}", s_sample_count);
+//                    s_sample_count = 0;
+//                    s_last_stat_tp = now;
+//                }
+
                 m_angular_velocity->samples.resize(sample_count);
                 m_acceleration->samples.resize(sample_count);
                 auto* data = m_fifo_buffer.data();
@@ -933,7 +995,7 @@ void MPU9250::process_compass(Buses& buses)
     {
         return;
     }
-    else if (dt >= std::chrono::seconds(1))
+    else if (dt >= std::chrono::seconds(5))
     {
         QLOGW("reset compass!");
         setup_compass(buses);
