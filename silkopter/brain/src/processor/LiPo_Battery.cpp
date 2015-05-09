@@ -55,6 +55,10 @@ auto LiPo_Battery::init() -> bool
     }
     m_output_stream->rate = m_init_params->rate;
     m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+
+    m_current_filter.setup(2, m_output_stream->rate, 10.0);
+    m_voltage_filter.setup(2, m_output_stream->rate, 2.0);
+
     return true;
 }
 
@@ -69,10 +73,10 @@ auto LiPo_Battery::get_stream_inputs() const -> std::vector<Stream_Input>
 }
 auto LiPo_Battery::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(1);
-    outputs[0].type = stream::IBattery_State::TYPE;
-    outputs[0].name = "Battery State";
-    outputs[0].stream = m_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::IBattery_State::TYPE, "Battery State", m_output_stream }
+    }};
     return outputs;
 }
 
@@ -172,12 +176,10 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-
     m_accumulator.clear_streams();
 
     auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.input_streams.voltage);
     auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.input_streams.current);
-
 
     auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
