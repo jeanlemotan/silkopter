@@ -132,28 +132,26 @@
                 },
                 "config": {
                     "Feedback": {
-                        "Weight (0-1)": 1.0,
+                        "Weight (0-1)": 0.0,
                         "Combined XY PID": true,
                         "XY PID": {
-                            "kP": 3.0,
+                            "kP": 2.0,
                             "kI": 1.0,
-                            "kD": 0.04,
+                            "kD": 0.05,
                             "Max I": 0.0,
-                            "D Filter Poles": 1,
-                            "D Filter Cutoff Frequency (Hz)": 1.0
+                            "D Filter": 0.03
                         },
                         "Z PID": {
                             "kP": 1.0,
                             "kI": 0.0,
                             "kD": 0.0,
                             "Max I": 0.0,
-                            "D Filter Poles": 0,
-                            "D Filter Cutoff Frequency (Hz)": 0.0
+                            "D Filter": 0.0
                         }
                     },
                     "Feedforward": {
-                        "Weight (0-1)": 0.0,
-                        "Max Torque": 1.600000023841858
+                        "Weight (0-1)": 1.0,
+                        "Max Torque": 3.0
                     },
                     "Input Streams": {
                         "Input": "Multi Simulator/Angular Velocity",
@@ -230,7 +228,7 @@
                     "Value": {
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 7.0
+                        "z": 6.0
                     },
                     "Input Streams": {
                         "X Modulation": "",
@@ -260,9 +258,28 @@
                             "Frequency (Hz)": 0.5,
                             "Amplitude": 1.0
                         }
-                    ],
-                    "Input Params": {
-                        "Amplitude": ""
+                    ]
+                }
+            },
+            "Torque LPF": {
+                "type": "Torque LPF",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": -219.0,
+                            "y": -614.0
+                        }
+                    }
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 45.0,
+                    "Input Streams": {
+                        "Input": "Rate Controller/Torque"
+                    },
+                    "Output Streams": {
+                        "Output": {}
                     }
                 }
             }

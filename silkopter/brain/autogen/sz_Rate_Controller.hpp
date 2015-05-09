@@ -1572,10 +1572,9 @@ namespace sz { namespace Rate_Controller { struct PID {
 double ki;
 double kd;
 double max_i;
-uint32_t filter_poles;
-double filter_cutoff_frequency;
+double d_filter;
 
-explicit PID():kp(), ki(), kd(), max_i(), filter_poles(), filter_cutoff_frequency() {  }
+explicit PID():kp(), ki(), kd(), max_i(), d_filter() {  }
 
 
  
@@ -1596,13 +1595,11 @@ private:
 SAXEventHandler< double > handler_1;
 SAXEventHandler< double > handler_2;
 SAXEventHandler< double > handler_3;
-SAXEventHandler< uint32_t > handler_4;
-SAXEventHandler< double > handler_5;bool has_kp;
+SAXEventHandler< double > handler_4;bool has_kp;
 bool has_ki;
 bool has_kd;
 bool has_max_i;
-bool has_filter_poles;
-bool has_filter_cutoff_frequency;
+bool has_d_filter;
 
     bool check_depth(const char* type)
     {
@@ -1625,9 +1622,7 @@ case 2:
 case 3:
     return "max_i";
 case 4:
-    return "filter_poles";
-case 5:
-    return "filter_cutoff_frequency";
+    return "d_filter";
         default:
             break;
         }
@@ -1658,8 +1653,7 @@ case 5:
 has_ki = false;
 has_kd = false;
 has_max_i = false;
-has_filter_poles = false;
-has_filter_cutoff_frequency = false;
+has_d_filter = false;
     }
 
 public:
@@ -1670,8 +1664,7 @@ public:
 , handler_1(&obj->ki)
 , handler_2(&obj->kd)
 , handler_3(&obj->max_i)
-, handler_4(&obj->filter_poles)
-, handler_5(&obj->filter_cutoff_frequency)
+, handler_4(&obj->d_filter)
     {
         reset_flags();
     }
@@ -1697,9 +1690,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -1729,9 +1719,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Bool(b));
 
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
         default:
             break;
         }
@@ -1759,9 +1746,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -1791,9 +1775,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint(i));
 
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
         default:
             break;
         }
@@ -1821,9 +1802,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -1853,9 +1831,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.Uint64(i));
 
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
         default:
             break;
         }
@@ -1883,9 +1858,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -1915,9 +1887,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.String(str, length, copy));
 
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
         default:
             break;
         }
@@ -1940,10 +1909,8 @@ else if (utility::string_equal(str, length, "\x6b\x44", 2))
 						 { state=2; has_kd = true; }
 else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x49", 5))
 						 { state=3; has_max_i = true; }
-else if (utility::string_equal(str, length, "\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x50\x6f\x6c\x65\x73", 14))
-						 { state=4; has_filter_poles = true; }
-else if (utility::string_equal(str, length, "\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 30))
-						 { state=5; has_filter_cutoff_frequency = true; }
+else if (utility::string_equal(str, length, "\x44\x20\x46\x69\x6c\x74\x65\x72", 8))
+						 { state=4; has_d_filter = true; }
             else {
                 state = -1;
                 return true;
@@ -1966,9 +1933,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -1999,9 +1963,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.StartArray());
 
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
         default:
             break;
         }
@@ -2030,9 +1991,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndArray(length));
 
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
         default:
             break;
         }
@@ -2060,9 +2018,6 @@ case 3:
 
 case 4:
     return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -2093,9 +2048,6 @@ case 3:
 case 4:
     return checked_event_forwarding(handler_4.EndObject(length));
 
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
             default:
                 break;
             }
@@ -2104,8 +2056,7 @@ case 5:
 if (!has_ki) set_missing_required("ki");
 if (!has_kd) set_missing_required("kd");
 if (!has_max_i) set_missing_required("max_i");
-if (!has_filter_poles) set_missing_required("filter_poles");
-if (!has_filter_cutoff_frequency) set_missing_required("filter_cutoff_frequency");
+if (!has_d_filter) set_missing_required("d_filter");
         }
         return the_error.empty();
     }
@@ -2134,8 +2085,6 @@ case 3:
      handler_3.ReapError(errs); break;
 case 4:
      handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -2155,7 +2104,6 @@ handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
 
     }
 };
@@ -2171,10 +2119,9 @@ struct Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270f
 w.Key("\x6b\x49", 2, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.ki);
 w.Key("\x6b\x44", 2, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.kd);
 w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.max_i);
-w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x50\x6f\x6c\x65\x73", 14, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, uint32_t >()(w, value.filter_poles);
-w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 30, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.filter_cutoff_frequency);
+w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writer4795cffe3db5cc9658c20d0c6582fb0c403119bdf75ef93774c270fdc9f12c44, double >()(w, value.d_filter);
 
-        w.EndObject(6);
+        w.EndObject(5);
     }
 
 };

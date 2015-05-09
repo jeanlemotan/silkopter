@@ -178,8 +178,7 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
         dst.ki = src.ki;
         dst.kd = src.kd;
         dst.max_i = src.max_i;
-        dst.filter_poles = src.filter_poles;
-        dst.filter_cutoff_frequency = src.filter_cutoff_frequency;
+        dst.d_filter = src.d_filter;
         dst.rate = m_output_stream->rate;
     };
 

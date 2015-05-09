@@ -135,7 +135,7 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    m_config.poles = math::max<uint32_t>(m_config.poles, 2);
+    m_config.poles = math::max<uint32_t>(m_config.poles, 1);
     if (m_config.poles > 0 &&
         m_config.cutoff_frequency > 0 &&
         !m_dsp.setup(m_config.poles, m_output_stream->rate, m_config.cutoff_frequency))

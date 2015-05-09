@@ -28,8 +28,7 @@ public:
         Scalar_t ki = 0;
         Scalar_t kd = 0;
         Factor_t max_i = Factor_t();
-        uint32_t filter_poles = 0; //zero - filter disabled
-        Scalar_t filter_cutoff_frequency = 0;
+        Factor_t d_filter = Factor_t();
         Scalar_t rate = 0;
     };
 
@@ -40,15 +39,14 @@ public:
     void reset();
 
 private:
-    util::Butterworth<Value_t> m_dsp;
     Params m_params;
     double m_dts = 0;
     double m_dts_inv = 0;
     bool m_has_ki = false;
     bool m_has_kd = false;
-    bool m_has_filter = false;
     Value_t m_integrator;
     Value_t m_last_input;
+    Factor_t m_last_derivative = Factor_t();
     bool m_is_last_input_valid = false;
 };
 
@@ -71,36 +69,30 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
     // Compute integral component if time has elapsed
     if (m_has_ki)
     {
-        m_integrator = math::clamp(m_integrator + Factor_t(error * m_dts), -m_params.max_i, m_params.max_i);
-        output += m_integrator * m_params.ki;
+        m_integrator = math::clamp(m_integrator + Factor_t(error * m_params.ki * m_dts), -m_params.max_i, m_params.max_i);
+        output += m_integrator;
     }
 
     // Compute derivative component if time has elapsed
     if (m_has_kd)
     {
-        Factor_t derivative;
-        if (m_has_filter)
+        Factor_t derivative = Factor_t();
+        if (!m_is_last_input_valid)
         {
-            auto filtered_input = input;
-            m_dsp.process(filtered_input);
-            if (!m_is_last_input_valid)
-            {
-                m_last_input = filtered_input;
-                m_is_last_input_valid = true;
-            }
-            derivative = pid::sub<Value_t, Factor_t>(filtered_input, m_last_input) * m_dts_inv;
-            m_last_input = filtered_input;
+            m_last_input = input;
+            m_is_last_input_valid = true;
+            m_last_derivative = Factor_t();
         }
         else
         {
-            if (!m_is_last_input_valid)
-            {
-                m_last_input = input;
-                m_is_last_input_valid = true;
-            }
             derivative = pid::sub<Value_t, Factor_t>(input, m_last_input) * m_dts_inv;
-            m_last_input = input;
         }
+        m_last_input = input;
+
+        //low pass filter
+        //Note - a butterworth doesn't work here due to some weird ringing
+        derivative = m_last_derivative + (m_dts / (m_params.d_filter + m_dts)) * (derivative - m_last_derivative);
+        m_last_derivative = derivative;
 
         // add in derivative component
         //m_output += m_params.kd * derivative;
@@ -116,6 +108,7 @@ void PID<Scalar, Value, Factor>::reset()
     m_integrator = Value_t();
     m_is_last_input_valid = false;
     m_last_input = Value_t();
+    m_last_derivative = Factor_t();
 }
 
 template<class Scalar, class Value, class Factor>
@@ -124,20 +117,6 @@ auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
     if (params.rate <= 0)
     {
         return false;
-    }
-
-    if (params.filter_poles <= 0 || params.filter_cutoff_frequency <= 0)
-    {
-        m_has_filter = false;
-    }
-    else
-    {
-        m_has_filter = true;
-        if (!m_dsp.setup(params.filter_poles, params.rate, params.filter_cutoff_frequency))
-        {
-            return false;
-        }
-        m_dsp.reset();
     }
 
     m_params = params;
