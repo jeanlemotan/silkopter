@@ -112,13 +112,6 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    auto force_stream = m_force_stream.lock();
-    auto torque_stream = m_torque_stream.lock();
-    if (!force_stream || !torque_stream)
-    {
-        return;
-    }
-
     auto multi_config = m_hal.get_multi_config();
     if (!multi_config)
     {
@@ -130,46 +123,20 @@ void Motor_Mixer::process()
         return;
     }
 
-    //accumulate the input streams
+//    for (auto& os: m_outputs)
+//    {
+//        os->samples.resize(count);
+//    }
+
+    m_accumulator.process([this, &multi_config](
+                          size_t idx,
+                          stream::ITorque::Sample const& t_sample,
+                          stream::IForce::Sample const& f_sample)
     {
-        auto const& samples = force_stream->get_samples();
-        m_force_samples.reserve(m_force_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_force_samples));
-    }
-    {
-        auto const& samples = torque_stream->get_samples();
-        m_torque_samples.reserve(m_torque_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_torque_samples));
-    }
+        compute_throttles(*multi_config, f_sample.value, t_sample.value);
 
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_force_samples.size(), m_torque_samples.size());
-
-
-    if (math::abs((int)m_force_samples.size() - (int)m_torque_samples.size()) > 30)
-    {
-        m_force_samples.resize(count);
-        m_torque_samples.resize(count);
-    }
-
-
-    if (count == 0)
-    {
-        return;
-    }
-
-    for (auto& os: m_outputs)
-    {
-        os->samples.resize(count);
-    }
-
-    for (size_t i = 0; i < count; i++)
-    {
-        compute_throttles(*multi_config, m_force_samples[i].value, m_torque_samples[i].value);
-
-        auto dt = m_torque_samples[i].dt;
-        auto tp = m_torque_samples[i].tp;
+        auto dt = t_sample.dt;
+        auto tp = t_sample.tp;
 
         for (size_t mi = 0; mi < m_outputs.size(); mi++)
         {
@@ -178,13 +145,9 @@ void Motor_Mixer::process()
             sample.tp = tp;
             sample.value = m_outputs[mi]->throttle;
             sample.sample_idx++;
-            m_outputs[mi]->samples[i] = sample;
+            m_outputs[mi]->samples.push_back(sample);
         }
-    }
-
-    //consume processed samples
-    m_force_samples.erase(m_force_samples.begin(), m_force_samples.begin() + count);
-    m_torque_samples.erase(m_torque_samples.begin(), m_torque_samples.begin() + count);
+    });
 }
 
 static float compute_throttle_from_thrust(float max_thrust, float thrust)
@@ -296,7 +259,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         iteration++;
         if (iteration > 5000)
         {
-            QLOGW("Too many iterations!!! {}", iteration);
+//            QLOGW("Too many iterations!!! {}", iteration);
         }
         if (iteration > 50000)
         {
@@ -485,6 +448,7 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.input_streams.torque);
     auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.input_streams.force);
@@ -494,11 +458,10 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.torque.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.torque, m_init_params->rate, rate);
-        m_torque_stream.reset();
     }
     else
     {
-        m_torque_stream = torque_stream;
+        m_accumulator.set_stream<0>(torque_stream);
     }
 
     rate = force_stream ? force_stream->get_rate() : 0u;
@@ -506,11 +469,10 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.force.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.force, m_init_params->rate, rate);
-        m_force_stream.reset();
     }
     else
     {
-        m_force_stream = force_stream;
+        m_accumulator.set_stream<1>(force_stream);
     }
 
     return true;

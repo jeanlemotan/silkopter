@@ -5,6 +5,7 @@
 #include "common/node/stream/IAcceleration.h"
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "HAL.h"
+#include "Sample_Accumulator.h"
 
 namespace sz
 {
@@ -50,11 +51,7 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IFrame_wptr m_frame_stream;
-    stream::IAcceleration_wptr m_acceleration_stream;
-
-    std::vector<stream::IFrame::Sample> m_frame_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
+    Sample_Accumulator<stream::IFrame, stream::IAcceleration> m_accumulator;
 
     struct Stream : public stream::ILinear_Acceleration
     {

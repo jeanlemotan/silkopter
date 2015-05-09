@@ -26,24 +26,24 @@ template<typename ... Types>
 struct make_indexes : make_indexes_impl<0, index_tuple<>, Types...>
 {};
 
+//create object from tuple arguments
 template<class T, class... Args, int... Indexes >
-T* apply_helper(index_tuple< Indexes... >, std::tuple<Args...>&& tup)
+T* create_helper(index_tuple< Indexes... >, std::tuple<Args...>&& tup)
 {
     return new T( std::forward<Args>( std::get<Indexes>(tup))... );
 }
 
 template<class T, class ... Args>
-T* apply(const std::tuple<Args...>&  tup)
+T* create(const std::tuple<Args...>&  tup)
 {
-    return apply_helper<T>(typename make_indexes<Args...>::type(), std::tuple<Args...>(tup));
+    return create_helper<T>(typename make_indexes<Args...>::type(), std::tuple<Args...>(tup));
 }
 
 template<class T, class ... Args>
-T* apply(std::tuple<Args...>&&  tup)
+T* create(std::tuple<Args...>&&  tup)
 {
-    return apply_helper<T>(typename make_indexes<Args...>::type(), std::forward<std::tuple<Args...>>(tup));
+    return create_helper<T>(typename make_indexes<Args...>::type(), std::forward<std::tuple<Args...>>(tup));
 }
-
 
 template<class Base>
 class Ctor_Helper_Base
@@ -63,10 +63,32 @@ public:
     }
     auto create() -> Base*
     {
-        return apply<T>(tuple);
+        return detail::create<T>(tuple);
     }
     std::tuple<Params...> tuple;
 };
+
+
+//call function with tuple arguments
+template<class Ret, class... Args, int... Indexes >
+Ret call_helper(std::function<Ret(Args...)> const& func, index_tuple< Indexes... >, std::tuple<Args...>&& tup)
+{
+    return func( std::forward<Args>( std::get<Indexes>(tup))... );
+}
+
+template<class Ret, class ... Args>
+Ret call(std::function<Ret(Args...)> const& func, const std::tuple<Args...>&  tup)
+{
+    return call_helper(func, typename make_indexes<Args...>::type(), std::tuple<Args...>(tup));
+}
+
+template<class Ret, class ... Args>
+Ret call(std::function<Ret(Args...)> const& func, std::tuple<Args...>&&  tup)
+{
+    return call_helper(func, typename make_indexes<Args...>::type(), std::forward<std::tuple<Args...>>(tup));
+}
+
+
 
 
 }

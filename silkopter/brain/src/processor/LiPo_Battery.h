@@ -8,6 +8,9 @@
 #include "HAL.h"
 #include "utils/Butterworth.h"
 
+#include "Sample_Accumulator.h"
+
+
 namespace sz
 {
 namespace LiPo_Battery
@@ -52,11 +55,8 @@ private:
     std::shared_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
     std::shared_ptr<sz::LiPo_Battery::Config> m_config;
 
-    stream::IVoltage_wptr m_voltage_stream;
-    stream::ICurrent_wptr m_current_stream;
+    Sample_Accumulator<stream::ICurrent, stream::IVoltage> m_accumulator;
 
-    std::vector<stream::IVoltage::Sample> m_voltage_samples;
-    std::vector<stream::ICurrent::Sample> m_current_samples;
     q::Clock::duration m_dt = q::Clock::duration(0);
 
     auto compute_cell_count() -> boost::optional<uint8_t>;

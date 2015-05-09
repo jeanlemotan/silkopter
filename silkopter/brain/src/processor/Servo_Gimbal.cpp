@@ -63,16 +63,12 @@ auto Servo_Gimbal::get_stream_inputs() const -> std::vector<Stream_Input>
 }
 auto Servo_Gimbal::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(3);
-    outputs[0].type = stream::IPWM::TYPE;
-    outputs[0].name = "X PWM";
-    outputs[0].stream = m_x_output_stream;
-    outputs[1].type = stream::IPWM::TYPE;
-    outputs[1].name = "Y PWM";
-    outputs[1].stream = m_x_output_stream;
-    outputs[2].type = stream::IPWM::TYPE;
-    outputs[2].name = "Z PWM";
-    outputs[2].stream = m_x_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::IPWM::TYPE, "X PWM", m_x_output_stream },
+         { stream::IPWM::TYPE, "Y PWM", m_y_output_stream },
+         { stream::IPWM::TYPE, "Z PWM", m_z_output_stream }
+    }};
     return outputs;
 }
 

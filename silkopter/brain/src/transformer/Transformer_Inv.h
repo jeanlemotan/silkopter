@@ -7,6 +7,8 @@
 #include "sz_math.hpp"
 #include "sz_Transformer.hpp"
 
+#include "Sample_Accumulator.h"
+
 namespace silk
 {
 namespace node
@@ -42,11 +44,7 @@ private:
     sz::Transformer::Init_Params m_init_params;
     sz::Transformer::Config m_config;
 
-    std::weak_ptr<In_Stream_t> m_input_stream;
-    std::weak_ptr<Frame_Stream_t> m_frame_stream;
-
-    std::vector<typename In_Stream_t::Sample> m_input_samples;
-    std::vector<typename Frame_Stream_t::Sample> m_frame_samples;
+    Sample_Accumulator<In_Stream_t, Frame_Stream_t> m_accumulator;
 
     struct Stream : public Out_Stream_t
     {
@@ -126,6 +124,7 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     }
 
     m_config = sz;
+    m_accumulator.clear_streams();
 
     auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.input_streams.input);
     auto frame_stream = m_hal.get_streams().template find_by_name<Frame_Stream_t>(sz.input_streams.frame);
@@ -135,11 +134,10 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     {
         m_config.input_streams.input.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
-        m_input_stream.reset();
     }
     else
     {
-        m_input_stream = input_stream;
+        m_accumulator.template set_stream<0>(input_stream);
     }
 
     rate = frame_stream ? frame_stream->get_rate() : 0u;
@@ -147,11 +145,10 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     {
         m_config.input_streams.frame.clear();
         QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
-        m_frame_stream.reset();
     }
     else
     {
-        m_frame_stream = frame_stream;
+        m_accumulator.template set_stream<1>(frame_stream);
     }
 
     return true;
@@ -196,46 +193,16 @@ void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
 
     m_output_stream->samples.clear();
 
-    auto input_stream = m_input_stream.lock();
-    auto frame_stream = m_frame_stream.lock();
-    if (!input_stream || !frame_stream)
-    {
-        return;
-    }
-
-    //accumulate the input streams
-    {
-        auto const& samples = input_stream->get_samples();
-        m_input_samples.reserve(m_input_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_samples));
-    }
-    {
-        auto const& samples = frame_stream->get_samples();
-        m_frame_samples.reserve(m_frame_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_frame_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_input_samples.size(), m_frame_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
+    m_accumulator.process([this](
+                          size_t idx,
+                          typename In_Stream_t::Sample const& in_sample,
+                          typename Frame_Stream_t::Sample const& f_sample)
     {
         m_output_stream->last_sample.dt = m_dt;
         m_output_stream->last_sample.sample_idx++;
-        m_output_stream->last_sample.value = math::rotate(m_frame_samples[i].value.rotation, m_input_samples[i].value);
-        m_output_stream->samples[i] = m_output_stream->last_sample;
-    }
-
-    //consume processed samples
-    m_input_samples.erase(m_input_samples.begin(), m_input_samples.begin() + count);
-    m_frame_samples.erase(m_frame_samples.begin(), m_frame_samples.begin() + count);
+        m_output_stream->last_sample.value = math::rotate(f_sample.value.rotation, in_sample.value);
+        m_output_stream->samples.push_back(m_output_stream->last_sample);
+    });
 }
 
 

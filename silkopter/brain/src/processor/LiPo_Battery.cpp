@@ -82,70 +82,29 @@ void LiPo_Battery::process()
 
     m_output_stream->samples.clear();
 
-    auto current_stream = m_current_stream.lock();
-    auto voltage_stream = m_voltage_stream.lock();
-    if (!current_stream || !voltage_stream)
-    {
-        return;
-    }
-
-    //accumulate the input streams
-    {
-        auto const& samples = current_stream->get_samples();
-        m_current_samples.reserve(m_current_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_current_samples));
-    }
-    {
-        auto const& samples = voltage_stream->get_samples();
-        m_voltage_samples.reserve(m_voltage_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_voltage_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_current_samples.size(), m_voltage_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
+    m_accumulator.process([this](size_t idx, stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
     {
         auto& sample = m_output_stream->last_sample;
         sample.dt = m_dt;
-        sample.tp = m_current_samples[i].tp;
+        sample.tp = current_sample.tp;
         sample.sample_idx++;
 
         {
-            auto const& s = m_current_samples[i];
-            sample.value.charge_used += s.value * q::Seconds(s.dt).count();
-            stream::ICurrent::Value current = s.value;
-            if (s.is_healthy)
-            {
-                m_current_filter.process(current);
-            }
+            sample.value.charge_used += current_sample.value * q::Seconds(current_sample.dt).count();
+            stream::ICurrent::Value current = current_sample.value;
+            m_current_filter.process(current);
             sample.value.average_current = current;
         }
         {
-            auto const& s = m_voltage_samples[i];
-            stream::IVoltage::Value voltage = s.value;
-            if (s.is_healthy)
-            {
-                m_voltage_filter.process(voltage);
-            }
+            stream::IVoltage::Value voltage = voltage_sample.value;
+            m_voltage_filter.process(voltage);
             sample.value.average_voltage = voltage;
         }
         sample.value.capacity_left =
                 1.f - math::clamp(sample.value.charge_used / m_config->full_charge, 0.f, 1.f);
 
-        m_output_stream->samples[i] = sample;
-    }
-
-    //consume processed samples
-    m_current_samples.erase(m_current_samples.begin(), m_current_samples.begin() + count);
-    m_voltage_samples.erase(m_voltage_samples.begin(), m_voltage_samples.begin() + count);
+        m_output_stream->samples.push_back(sample);
+    });
 
     //compute cell count
     if (!m_cell_count)
@@ -214,19 +173,21 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    m_accumulator.clear_streams();
+
     auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.input_streams.voltage);
     auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.input_streams.current);
+
 
     auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
         m_config->input_streams.voltage.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.voltage, m_output_stream->rate, rate);
-        m_voltage_stream.reset();
     }
     else
     {
-        m_voltage_stream = voltage_stream;
+        m_accumulator.set_stream<1>(voltage_stream);
     }
 
     rate = current_stream ? current_stream->get_rate() : 0u;
@@ -234,11 +195,10 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.current.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.current, m_output_stream->rate, rate);
-        m_current_stream.reset();
     }
     else
     {
-        m_current_stream = current_stream;
+        m_accumulator.set_stream<0>(current_stream);
     }
 
     return true;

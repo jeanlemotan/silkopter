@@ -1,5 +1,49 @@
 {
     "hal": {
+        "multi_config": {
+            "Name": "SILK",
+            "Mass (Kg)": 0.699999988079071,
+            "Height (m)": 0.20000000298023225,
+            "Radius (m)": 0.30000001192092898,
+            "Motor Thrust @ 100% (N)": 5.0,
+            "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
+            "Motor Acceleration (s)": 0.10000000149011612,
+            "Motor Deceleration (s)": 0.20000000298023225,
+            "Motors": [
+                {
+                    "Position": {
+                        "x": 0.0,
+                        "y": 0.30000001192092898,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": 0.30000001192092898,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                },
+                {
+                    "Position": {
+                        "x": 0.0,
+                        "y": -0.30000001192092898,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": -0.30000001192092898,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                }
+            ]
+        },
         "buses": {
             "i2c0": {
                 "type": "I2C Linux",
@@ -10,61 +54,215 @@
             }
         },
         "nodes": {
-            "Factor Generator": {
-                "type": "Factor Generator",
+            "Multi Simulator": {
+                "type": "Multi Simulator",
                 "init_params": {
-                    "Rate (Hz)": 100,
-                    "Component Count": 3,
+                    "Throttle Rate (Hz)": 100,
+                    "Acceleration Rate (Hz)": 100,
+                    "Angular Velocity Rate (Hz)": 100,
+                    "Magnetic Field Rate (Hz)": 100,
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate (Hz)": 10,
+                    "Distance Rate (Hz)": 12,
+                    "Location Rate (Hz)": 5,
                     "__gs": {
                         "position": {
-                            "x": -175.0,
-                            "y": -400.0
+                            "x": -106.0,
+                            "y": -238.0
                         }
                     }
                 },
                 "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.5,
-                    "Square": false,
-                    "Components": [
-                        {
-                            "Frequency (Hz)": 1.0,
-                            "Amplitude": 0.30000001192092898
+                    "Simulation Enabled": true,
+                    "Drag Enabled": false,
+                    "Ground Enabled": false,
+                    "Gravity Enabled": false,
+                    "Input Streams": {
+                        "Throttle": [
+                            "Motor Mixer/Throttle 0",
+                            "Motor Mixer/Throttle 1",
+                            "Motor Mixer/Throttle 2",
+                            "Motor Mixer/Throttle 3"
+                        ]
+                    },
+                    "Output Streams": {
+                        "Acceleration": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "Scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
                         },
-                        {
-                            "Frequency (Hz)": 7.0,
-                            "Amplitude": 1.0
+                        "Angular Velocity": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
                         },
-                        {
-                            "Frequency (Hz)": 30.0,
-                            "Amplitude": 1.0
-                        }
-                    ],
-                    "Inputs": {},
-                    "Outputs": {
-                        "Factor": {}
+                        "Magnetic Field": {
+                            "Bias": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        },
+                        "Temperature": {},
+                        "Pressure": {},
+                        "Distance": {},
+                        "ECEF Location": {}
                     }
                 }
             },
-            "Factor LPF": {
-                "type": "Factor LPF",
+            "Rate Controller": {
+                "type": "Rate Controller",
                 "init_params": {
                     "Rate (Hz)": 100,
                     "__gs": {
                         "position": {
-                            "x": -74.0,
-                            "y": -474.0
+                            "x": -36.0,
+                            "y": -340.0
                         }
                     }
                 },
                 "config": {
-                    "Poles": 4,
-                    "Cutoff Frequency (Hz)": 2.0,
-                    "Inputs": {
-                        "Input": "Factor Generator/Factor"
+                    "Feedback": {
+                        "Weight (0-1)": 1.0,
+                        "Combined XY PID": true,
+                        "XY PID": {
+                            "kP": 3.0,
+                            "kI": 1.0,
+                            "kD": 0.04,
+                            "Max I": 0.0,
+                            "D Filter Poles": 1,
+                            "D Filter Cutoff Frequency (Hz)": 1.0
+                        },
+                        "Z PID": {
+                            "kP": 1.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter Poles": 0,
+                            "D Filter Cutoff Frequency (Hz)": 0.0
+                        }
                     },
-                    "Outputs": {
-                        "Output": {}
+                    "Feedforward": {
+                        "Weight (0-1)": 0.0,
+                        "Max Torque": 1.600000023841858
+                    },
+                    "Input Streams": {
+                        "Input": "Multi Simulator/Angular Velocity",
+                        "Target": "Angular Velocity Generator/Output"
+                    },
+                    "Output Streams": {
+                        "Torque": {}
+                    }
+                }
+            },
+            "Angular Velocity Generator": {
+                "type": "Angular Velocity Generator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": -138.0,
+                            "y": -306.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 2.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Input Streams": {
+                        "X Modulation": "Oscillator/Output",
+                        "Y Modulation": "",
+                        "Z Modulation": ""
+                    }
+                }
+            },
+            "Motor Mixer": {
+                "type": "Motor Mixer",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": 122.0,
+                            "y": -472.0
+                        }
+                    }
+                },
+                "config": {
+                    "Armed Throttle": 0.0,
+                    "Input Streams": {
+                        "Torque": "Rate Controller/Torque",
+                        "Collective Force": "Force Generator/Output"
+                    },
+                    "Output Streams": {
+                        "Throttles": [
+                            {},
+                            {},
+                            {},
+                            {}
+                        ]
+                    }
+                }
+            },
+            "Force Generator": {
+                "type": "Force Generator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "__gs": {
+                        "position": {
+                            "x": -453.0,
+                            "y": -226.0
+                        }
+                    }
+                },
+                "config": {
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 7.0
+                    },
+                    "Input Streams": {
+                        "X Modulation": "",
+                        "Y Modulation": "",
+                        "Z Modulation": ""
+                    }
+                }
+            },
+            "Oscillator": {
+                "type": "Oscillator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "Component Count": 1,
+                    "__gs": {
+                        "position": {
+                            "x": -851.0,
+                            "y": -427.0
+                        }
+                    }
+                },
+                "config": {
+                    "Amplitude": 4.0,
+                    "Noise": 0.0,
+                    "Square": true,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 0.5,
+                            "Amplitude": 1.0
+                        }
+                    ],
+                    "Input Params": {
+                        "Amplitude": ""
                     }
                 }
             }

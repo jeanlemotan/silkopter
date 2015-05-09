@@ -6,6 +6,7 @@
 #include "HAL.h"
 
 #include "utils/PID.h"
+#include "Sample_Accumulator.h"
 
 namespace sz
 {
@@ -54,11 +55,7 @@ private:
     std::shared_ptr<sz::Rate_Controller::Init_Params> m_init_params;
     std::shared_ptr<sz::Rate_Controller::Config> m_config;
 
-    stream::IAngular_Velocity_wptr m_input_stream;
-    stream::IAngular_Velocity_wptr m_target_stream;
-
-    std::vector<stream::IAngular_Velocity::Sample> m_input_samples;
-    std::vector<stream::IAngular_Velocity::Sample> m_target_samples;
+    Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
     typedef util::PID<float, float, float> PID;
     PID m_x_pid;

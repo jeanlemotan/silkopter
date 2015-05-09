@@ -8,6 +8,8 @@
 
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+
 
 namespace sz
 {
@@ -53,13 +55,7 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IECEF_Location_wptr m_location_stream;
-    stream::ILinear_Acceleration_wptr m_linear_acceleration_stream;
-    stream::IPressure_wptr m_pressure_stream;
-
-    std::vector<stream::IECEF_Location::Sample> m_location_samples;
-    std::vector<stream::ILinear_Acceleration::Sample> m_linear_acceleration_samples;
-    std::vector<stream::IPressure::Sample> m_pressure_samples;
+    Sample_Accumulator<stream::IECEF_Location, stream::ILinear_Acceleration, stream::IPressure> m_accumulator;
 
     struct ECEF_Location_Stream : public stream::IECEF_Location
     {

@@ -58,10 +58,10 @@ auto Rate_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
 }
 auto Rate_Controller::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(1);
-    outputs[0].type = stream::ITorque::TYPE;
-    outputs[0].name = "Torque";
-    outputs[0].stream = m_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::ITorque::TYPE, "Torque", m_output_stream }
+    }};
     return outputs;
 }
 
@@ -71,59 +71,29 @@ void Rate_Controller::process()
 
     m_output_stream->samples.clear();
 
-    auto target_stream = m_target_stream.lock();
-    auto input_stream = m_input_stream.lock();
-    if (!target_stream || !input_stream)
-    {
-        return;
-    }
-
     auto multi_config = m_hal.get_multi_config();
     if (!multi_config)
     {
         return;
     }
 
-    //accumulate the input streams
-    {
-        auto const& samples = target_stream->get_samples();
-        m_target_samples.reserve(m_target_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_target_samples));
-    }
-    {
-        auto const& samples = input_stream->get_samples();
-        m_input_samples.reserve(m_input_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_target_samples.size(), m_input_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
+    m_accumulator.process([this, &multi_config](
+                          size_t idx,
+                          stream::IAngular_Velocity::Sample const& i_sample,
+                          stream::IAngular_Velocity::Sample const& t_sample)
     {
         auto& sample = m_output_stream->last_sample;
-        sample.dt = m_input_samples[i].dt;
-        sample.tp = m_input_samples[i].tp;
+        sample.dt = i_sample.dt;
+        sample.tp = i_sample.tp;
         sample.sample_idx++;
 
-        math::vec3f ff = compute_feedforward(*multi_config, m_input_samples[i].value, m_target_samples[i].value);
-        math::vec3f fb = compute_feedback(m_input_samples[i].value, m_target_samples[i].value);
+        math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+        math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
         sample.value.set(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
-        m_output_stream->samples[i] = sample;
-    }
-
-    //consume processed samples
-    m_target_samples.erase(m_target_samples.begin(), m_target_samples.begin() + count);
-    m_input_samples.erase(m_input_samples.begin(), m_input_samples.begin() + count);
+        m_output_stream->samples.push_back(sample);
+    });
 }
 
 
@@ -168,6 +138,7 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto input_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.input);
     auto target_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.target);
@@ -177,11 +148,10 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.input.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
-        m_input_stream.reset();
     }
     else
     {
-        m_input_stream = input_stream;
+        m_accumulator.set_stream<0>(input_stream);
     }
 
     rate = target_stream ? target_stream->get_rate() : 0u;
@@ -189,11 +159,10 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.target.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->rate, rate);
-        m_target_stream.reset();
     }
     else
     {
-        m_target_stream = target_stream;
+        m_accumulator.set_stream<1>(target_stream);
     }
 
     m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);

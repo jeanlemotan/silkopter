@@ -59,13 +59,11 @@ auto Comp_ECEF_Location::get_stream_inputs() const -> std::vector<Stream_Input>
 }
 auto Comp_ECEF_Location::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(2);
-    outputs[0].type = stream::IECEF_Location::TYPE;
-    outputs[0].name = "Location";
-    outputs[0].stream = m_location_output_stream;
-    outputs[1].type = stream::IENU_Frame::TYPE;
-    outputs[1].name = "ENU Frame";
-    outputs[1].stream = m_enu_frame_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+        { stream::IECEF_Location::TYPE, "Location", m_location_output_stream },
+        { stream::IENU_Frame::TYPE, "ENU Frame", m_enu_frame_output_stream },
+    }};
     return outputs;
 }
 
@@ -73,63 +71,22 @@ void Comp_ECEF_Location::process()
 {
     QLOG_TOPIC("comp_location::process");
 
+
     m_location_output_stream->samples.clear();
 
-    auto location_stream = m_location_stream.lock();
-    auto linear_acceleration_stream = m_linear_acceleration_stream.lock();
-    auto pressure_stream = m_pressure_stream.lock();
-    if (!location_stream ||
-        !linear_acceleration_stream ||
-        !pressure_stream)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IECEF_Location::Sample const& loc_sample,
+                          stream::ILinear_Acceleration::Sample const& la_sample,
+                          stream::IPressure::Sample const& p_sample)
     {
-        return;
-    }
+        auto& sample = m_location_output_stream->last_sample;
+        sample.dt = m_dt;
+        sample.sample_idx++;
+        sample.value = loc_sample.value;
 
-    //accumulate the input streams
-    {
-        auto const& samples = location_stream->get_samples();
-        m_location_samples.reserve(m_location_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_location_samples));
-    }
-    {
-        auto const& samples = linear_acceleration_stream->get_samples();
-        m_linear_acceleration_samples.reserve(m_linear_acceleration_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_linear_acceleration_samples));
-    }
-    {
-        auto const& samples = pressure_stream->get_samples();
-        m_pressure_samples.reserve(m_pressure_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_pressure_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(std::min(
-                         m_location_samples.size(),
-                         m_linear_acceleration_samples.size()),
-                         m_pressure_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_location_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
-    {
-        m_location_output_stream->last_sample.dt = m_dt;
-        m_location_output_stream->last_sample.sample_idx++;
-
-        m_location_output_stream->last_sample.value = m_location_samples[i].value;
-
-        m_location_output_stream->samples[i] = m_location_output_stream->last_sample;
-    }
-
-
-    //consume processed samples
-    m_location_samples.erase(m_location_samples.begin(), m_location_samples.begin() + count);
-    m_linear_acceleration_samples.erase(m_linear_acceleration_samples.begin(), m_linear_acceleration_samples.begin() + count);
-    m_pressure_samples.erase(m_pressure_samples.begin(), m_pressure_samples.begin() + count);
+        m_location_output_stream->samples.push_back(sample);
+    });
 }
 
 
@@ -148,6 +105,7 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto location_stream = m_hal.get_streams().find_by_name<stream::IECEF_Location>(sz.input_streams.ecef_location);
     auto linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.input_streams.ecef_linear_acceleration);
@@ -158,11 +116,10 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.ecef_location.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.ecef_location, m_location_output_stream->rate, rate);
-        m_location_stream.reset();
     }
     else
     {
-        m_location_stream = location_stream;
+        m_accumulator.set_stream<0>(location_stream);
     }
 
     rate = linear_acceleration_stream ? linear_acceleration_stream->get_rate() : 0u;
@@ -170,11 +127,10 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.ecef_linear_acceleration.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.ecef_linear_acceleration, m_location_output_stream->rate, rate);
-        m_linear_acceleration_stream.reset();
     }
     else
     {
-        m_linear_acceleration_stream = linear_acceleration_stream;
+        m_accumulator.set_stream<1>(linear_acceleration_stream);
     }
 
     rate = pressure_stream ? pressure_stream->get_rate() : 0u;
@@ -182,11 +138,10 @@ auto Comp_ECEF_Location::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.pressure.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.pressure, m_location_output_stream->rate, rate);
-        m_pressure_stream.reset();
     }
     else
     {
-        m_pressure_stream = pressure_stream;
+        m_accumulator.set_stream<2>(pressure_stream);
     }
 
     return true;

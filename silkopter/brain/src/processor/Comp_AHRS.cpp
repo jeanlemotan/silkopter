@@ -73,56 +73,22 @@ void Comp_AHRS::process()
 
     m_output_stream->samples.clear();
 
-    auto angular_velocity_stream = m_angular_velocity_stream.lock();
-    auto acceleration_stream     = m_acceleration_stream.lock();
-    auto magnetic_field_stream   = m_magnetic_field_stream.lock();
-    if (!angular_velocity_stream ||
-        !acceleration_stream ||
-        !magnetic_field_stream)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IAngular_Velocity::Sample const& av_sample,
+                          stream::IAcceleration::Sample const& a_sample,
+                          stream::IMagnetic_Field::Sample const& m_sample)
     {
-        return;
-    }
+        float av_length = 0;
 
-    //accumulate the input streams
-    {
-        auto const& samples = angular_velocity_stream->get_samples();
-        m_angular_velocity_samples.reserve(m_angular_velocity_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_angular_velocity_samples));
-    }
-    {
-        auto const& samples = acceleration_stream->get_samples();
-        m_acceleration_samples.reserve(m_acceleration_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_acceleration_samples));
-    }
-    {
-        auto const& samples = magnetic_field_stream->get_samples();
-        m_magnetic_field_samples.reserve(m_magnetic_field_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_magnetic_field_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(std::min(m_angular_velocity_samples.size(), m_acceleration_samples.size()), m_magnetic_field_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    float av_length = 0;
-
-    for (size_t i = 0; i < count; i++)
-    {
         auto& sample = m_output_stream->last_sample;
         sample.dt = m_dt;
-        sample.tp = m_angular_velocity_samples[i].tp;
+        sample.tp = av_sample.tp;
         sample.sample_idx++;
 
         {
-            auto const& s = m_angular_velocity_samples[i];
-            auto omega = s.value;
-            auto dts = q::Seconds(s.dt).count();
+            auto omega = av_sample.value;
+            auto dts = q::Seconds(av_sample.dt).count();
 
             auto theta = omega * dts;
             auto theta_magnitude = math::length(theta);
@@ -146,11 +112,8 @@ void Comp_AHRS::process()
         }
 
         {
-            auto const& as = m_acceleration_samples[i];
-            auto const& ms = m_magnetic_field_samples[i];
-
-            m_noisy_up_w = math::normalized<float, math::safe>(as.value); //acceleration points opposite of gravity - so up
-            m_noisy_front_w = math::normalized<float, math::safe>(ms.value); //this is always good
+            m_noisy_up_w = math::normalized<float, math::safe>(a_sample.value); //acceleration points opposite of gravity - so up
+            m_noisy_front_w = math::normalized<float, math::safe>(m_sample.value); //this is always good
             m_noisy_right_w = math::normalized<float, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
             m_noisy_front_w = math::cross(m_noisy_right_w, m_noisy_up_w);
             //m_earth_frame_up = math::cross(m_earth_frame_right, m_earth_frame_front);
@@ -179,14 +142,8 @@ void Comp_AHRS::process()
             rot = math::normalized<float, math::safe>(rot);
         }
 
-        m_output_stream->samples[i] = sample;
-    }
-
-
-    //consume processed samples
-    m_angular_velocity_samples.erase(m_angular_velocity_samples.begin(), m_angular_velocity_samples.begin() + count);
-    m_acceleration_samples.erase(m_acceleration_samples.begin(), m_acceleration_samples.begin() + count);
-    m_magnetic_field_samples.erase(m_magnetic_field_samples.begin(), m_magnetic_field_samples.begin() + count);
+        m_output_stream->samples.push_back(sample);
+    });
 }
 
 auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
@@ -204,6 +161,7 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.angular_velocity);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
@@ -214,11 +172,10 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.angular_velocity.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.angular_velocity, m_output_stream->rate, rate);
-        m_angular_velocity_stream.reset();
     }
     else
     {
-        m_angular_velocity_stream = angular_velocity_stream;
+        m_accumulator.set_stream<0>(angular_velocity_stream);
     }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
@@ -226,11 +183,10 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.acceleration.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, m_output_stream->rate, rate);
-        m_acceleration_stream.reset();
     }
     else
     {
-        m_acceleration_stream = acceleration_stream;
+        m_accumulator.set_stream<1>(acceleration_stream);
     }
 
     rate = magnetic_field_stream ? magnetic_field_stream->get_rate() : 0u;
@@ -238,11 +194,10 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.magnetic_field.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.magnetic_field, m_output_stream->rate, rate);
-        m_magnetic_field_stream.reset();
     }
     else
     {
-        m_magnetic_field_stream = magnetic_field_stream;
+        m_accumulator.set_stream<2>(magnetic_field_stream);
     }
 
     return true;

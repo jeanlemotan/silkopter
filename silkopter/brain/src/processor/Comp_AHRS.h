@@ -7,6 +7,8 @@
 #include "common/node/stream/IFrame.h"
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+
 
 namespace sz
 {
@@ -53,13 +55,7 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IAngular_Velocity_wptr m_angular_velocity_stream;
-    stream::IAcceleration_wptr m_acceleration_stream;
-    stream::IMagnetic_Field_wptr m_magnetic_field_stream;
-
-    std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
-    std::vector<stream::IAcceleration::Sample> m_acceleration_samples;
-    std::vector<stream::IMagnetic_Field::Sample> m_magnetic_field_samples;
+    Sample_Accumulator<stream::IAngular_Velocity, stream::IAcceleration, stream::IMagnetic_Field> m_accumulator;
 
     math::vec3f m_noisy_front_w;
     math::vec3f m_noisy_right_w;

@@ -59,10 +59,10 @@ auto Gravity_Filter::get_stream_inputs() const -> std::vector<Stream_Input>
 }
 auto Gravity_Filter::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(1);
-    outputs[0].type = stream::ILinear_Acceleration::TYPE;
-    outputs[0].name = "Linear Acceleration";
-    outputs[0].stream = m_output_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::ILinear_Acceleration::TYPE, "Linear Acceleration", m_output_stream }
+    }};
     return outputs;
 }
 
@@ -72,51 +72,21 @@ void Gravity_Filter::process()
 
     m_output_stream->samples.clear();
 
-    auto frame_stream = m_frame_stream.lock();
-    auto acceleration_stream = m_acceleration_stream.lock();
-    if (!frame_stream || !acceleration_stream)
-    {
-        return;
-    }
-
-    //accumulate the input streams
-    {
-        auto const& samples = frame_stream->get_samples();
-        m_frame_samples.reserve(m_frame_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_frame_samples));
-    }
-    {
-        auto const& samples = acceleration_stream->get_samples();
-        m_acceleration_samples.reserve(m_acceleration_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_acceleration_samples));
-    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_frame_samples.size(), m_acceleration_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IFrame::Sample const& f_sample,
+                          stream::IAcceleration::Sample const& a_sample)
     {
         auto& sample = m_output_stream->last_sample;
         sample.dt = m_dt;
-        sample.tp = m_frame_samples[i].tp;
+        sample.tp = f_sample.tp;
         sample.sample_idx++;
 
-        auto p2l = math::inverse<float, math::safe>(m_frame_samples[i].value.rotation);
+        auto p2l = math::inverse<float, math::safe>(f_sample.value.rotation);
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
-        sample.value = m_acceleration_samples[i].value - gravity_local;
-        m_output_stream->samples[i] = sample;
-    }
-
-    //consume processed samples
-    m_frame_samples.erase(m_frame_samples.begin(), m_frame_samples.begin() + count);
-    m_acceleration_samples.erase(m_acceleration_samples.begin(), m_acceleration_samples.begin() + count);
+        sample.value = a_sample.value - gravity_local;
+        m_output_stream->samples.push_back(sample);
+    });
 }
 
 auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
@@ -134,6 +104,7 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
@@ -143,11 +114,10 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.frame.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
-        m_frame_stream.reset();
     }
     else
     {
-        m_frame_stream = frame_stream;
+        m_accumulator.set_stream<0>(frame_stream);
     }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
@@ -155,11 +125,10 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.acceleration.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, m_output_stream->rate, rate);
-        m_acceleration_stream.reset();
     }
     else
     {
-        m_acceleration_stream = acceleration_stream;
+        m_accumulator.set_stream<1>(acceleration_stream);
     }
 
     return true;

@@ -7,6 +7,8 @@
 
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+
 namespace sz
 {
 namespace Motor_Mixer
@@ -54,11 +56,7 @@ private:
     std::shared_ptr<sz::Motor_Mixer::Init_Params> m_init_params;
     std::shared_ptr<sz::Motor_Mixer::Config> m_config;
 
-    stream::ITorque_wptr m_torque_stream;
-    stream::IForce_wptr m_force_stream;
-
-    std::vector<stream::ITorque::Sample> m_torque_samples;
-    std::vector<stream::IForce::Sample> m_force_samples;
+    Sample_Accumulator<stream::ITorque, stream::IForce> m_accumulator;
 
     struct Stream : public stream::IThrottle
     {

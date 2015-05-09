@@ -164,7 +164,6 @@ HEADERS += \
     ../../../libs/common/node/ISource.h \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
-    ../../src/Ctor_Helper.h \
     ../../src/processor/Throttle_PWM.h \
     ../../src/processor/Comp_ECEF_Location.h \
     ../../../libs/common/node/data/IData.h \
@@ -231,5 +230,7 @@ HEADERS += \
     ../../src/sink/PCA9685.h \
     ../../../libs/common/node/stream/IFloat.h \
     ../../src/generator/Oscillator.h \
-    ../../../libs/common/node/stream/IBool.h
+    ../../../libs/common/node/stream/IBool.h \
+    ../../src/Sample_Accumulator.h \
+    ../../src/MPL_Helper.h
 
