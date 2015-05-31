@@ -2,6 +2,27 @@
 #include "Multi_Simulation.h"
 #include "physics/constants.h"
 
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
+
+static math::vec3f bt_to_vec3f(btVector3 const& v)
+{
+    return math::vec3f(v.x(), v.y(), v.z());
+}
+static math::quatf bt_to_quatf(btQuaternion const& v)
+{
+    return math::quatf(v.x(), v.y(), v.z(), v.w());
+}
+static btVector3 vec3f_to_bt(math::vec3f const& v)
+{
+    return btVector3(v.x, v.y, v.z);
+}
+static btQuaternion quatf_to_bt(math::quatf const& v)
+{
+    return btQuaternion(v.x, v.y, v.z, v.w);
+}
+
+
 #if !defined RASPBERRY_PI
 
 namespace silk

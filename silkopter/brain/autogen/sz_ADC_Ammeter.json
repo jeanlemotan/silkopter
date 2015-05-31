@@ -14,7 +14,7 @@
     "name": "Input_Streams",
     "members":
     [
-        ["std::string", "adc_value", {"required": true, "json_key" : "ADC Value"}]
+        ["std::string", "adc", {"required": true, "json_key" : "ADC"}]
     ]
 },
 {

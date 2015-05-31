@@ -981,26 +981,41 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_video_channel.get_next_message())
     {
-        switch (msg.get())
+        auto start = q::Clock::now();
+        auto msg = m_video_channel.get_next_message();
+        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
         {
+            switch (msg.get())
+            {
             case comms::Video_Message::FRAME_DATA : handle_frame_data(); break;
+            }
+
+            msg = m_video_channel.get_next_message();
         }
     }
 
-    while (auto msg = m_telemetry_channel.get_next_message())
     {
-        switch (msg.get())
+        auto start = q::Clock::now();
+        auto msg = m_telemetry_channel.get_next_message();
+        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
         {
+            switch (msg.get())
+            {
             case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
+            }
+
+            msg = m_telemetry_channel.get_next_message();
         }
     }
 
-    while (auto msg = m_setup_channel.get_next_message())
     {
-        switch (msg.get())
+        auto start = q::Clock::now();
+        auto msg = m_setup_channel.get_next_message();
+        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
         {
+            switch (msg.get())
+            {
             case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
 
             case comms::Setup_Message::CLOCK: handle_clock(); break;
@@ -1014,6 +1029,9 @@ void Comms::process()
             case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
 
             case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+            }
+
+            msg = m_setup_channel.get_next_message();
         }
     }
     //    QLOGI("*********** LOOP: {}", xxx);

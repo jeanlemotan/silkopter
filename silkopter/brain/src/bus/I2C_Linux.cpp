@@ -181,7 +181,7 @@ auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_
     io.nmsgs = 2;
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
-        QLOGW("read register failed: {}", reg, strerror(errno));
+        QLOGW("read register {} failed: {}", reg, strerror(errno));
         return false;
     }
     return true;

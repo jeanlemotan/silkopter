@@ -5,6 +5,9 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <boost/program_options.hpp>
+#include <boost/thread.hpp>
+
 size_t s_test = 0;
 bool s_exit = false;
 boost::asio::io_service s_async_io_service;

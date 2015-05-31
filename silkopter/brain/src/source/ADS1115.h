@@ -49,8 +49,8 @@ private:
     std::shared_ptr<sz::ADS1115::Init_Params> m_init_params;
     std::shared_ptr<sz::ADS1115::Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
-    q::Clock::duration m_dt;
+    q::Clock::time_point m_last_last_tp = q::Clock::now();
+//    q::Clock::duration m_dt;
 
     struct Stream : public stream::IADC
     {
@@ -59,10 +59,29 @@ private:
 
         std::vector<Sample> samples;
         q::Clock::time_point last_tp = q::Clock::now();
+        q::Clock::duration dt;
         Sample last_sample;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<Stream> m_adc[4];
+    mutable std::array<std::shared_ptr<Stream>, 4> m_adc;
+
+
+    auto set_config_register(bus::II2C& i2c) -> bool;
+
+    struct Config_Register
+    {
+        uint16_t gain = 0;
+        uint16_t mux = 0;
+        uint16_t status = 0;
+        uint16_t mode = 0;
+        uint16_t rate = 0;
+        uint16_t comparator = 0;
+        uint16_t polarity = 0;
+        uint16_t latch = 0;
+        uint16_t queue = 0;
+    } m_config_register;
+
+    uint8_t m_crt_adc = 0;
 };
 
 

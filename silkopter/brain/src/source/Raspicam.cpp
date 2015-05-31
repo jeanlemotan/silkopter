@@ -128,6 +128,18 @@ Raspicam::Raspicam(HAL& hal)
     m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 #endif
+
+    m_init_params->fps = 30;
+
+    m_init_params->low.resolution.set(320, 240);
+    m_init_params->low.bitrate = 100000;
+
+    m_init_params->high.resolution.set(640, 480);
+    m_init_params->high.bitrate = 2000000;
+
+    m_init_params->recording.resolution.set(1280, 960);
+    m_init_params->recording.bitrate = 8000000;
+
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 Raspicam::~Raspicam()

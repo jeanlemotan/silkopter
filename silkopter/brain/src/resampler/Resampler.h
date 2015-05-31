@@ -156,7 +156,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", m_config.cutoff_frequency, max_cutoff);
         return false;
     }
-    m_config.poles = math::max<uint32_t>(m_config.poles, 2);
+    m_config.poles = math::max<uint32_t>(m_config.poles, 1);
     if (input_stream && !m_dsp.setup(m_config.poles, filter_rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");

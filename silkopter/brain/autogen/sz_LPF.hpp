@@ -1520,7 +1520,7 @@ double cutoff_frequency;
 sz::LPF::Input_Streams input_streams;
 sz::LPF::Output_Streams output_streams;
 
-explicit Config():poles(2), cutoff_frequency(), input_streams(), output_streams() {  }
+explicit Config():poles(1), cutoff_frequency(), input_streams(), output_streams() {  }
 
 
  

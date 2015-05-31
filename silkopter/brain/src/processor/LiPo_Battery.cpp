@@ -94,7 +94,7 @@ void LiPo_Battery::process()
         sample.sample_idx++;
 
         {
-            sample.value.charge_used += current_sample.value * q::Seconds(current_sample.dt).count();
+            sample.value.charge_used += current_sample.value * (q::Seconds(current_sample.dt).count() / 3600.f);
             stream::ICurrent::Value current = current_sample.value;
             m_current_filter.process(current);
             sample.value.average_current = current;

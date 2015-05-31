@@ -40,7 +40,7 @@
     "name": "Config",
     "members":
     [
-        ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 2}],
+        ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 1}],
         ["double", "cutoff_frequency", {"required": true, "json_key" : "Cutoff Frequency (Hz)"}],
         ["sz::LPF::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
         ["sz::LPF::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]

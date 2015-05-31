@@ -160,7 +160,22 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (type == IBattery_State::TYPE)
     {
-//        layout()->addWidget(new Battery_State_Viewer(stream, this));
+        auto viewer = new Numeric_Viewer("Battery", stream->rate, this);
+        viewer->add_graph("Charge Used", "Ah", QColor(0xe74c3c));
+        viewer->add_graph("Capacity Left", "%", QColor(0x2ecc71));
+        viewer->add_graph("Average Current", "A", QColor(0x3498db));
+        viewer->add_graph("Average Voltage", "V", QColor(0x9834db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Battery_State>(stream)->samples_available_signal.connect([this, viewer](Battery_State& stream)
+        {
+            std::array<double, 4> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.charge_used, s.value.capacity_left, s.value.average_current, s.value.average_voltage };
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
     }
     else if (type == ILinear_Acceleration::TYPE)
     {

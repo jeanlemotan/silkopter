@@ -1520,7 +1520,7 @@ double cutoff_frequency;
 sz::Resampler::Input_Streams input_streams;
 sz::Resampler::Output_Streams output_streams;
 
-explicit Config():poles(2), cutoff_frequency(0), input_streams(), output_streams() {  }
+explicit Config():poles(1), cutoff_frequency(0), input_streams(), output_streams() {  }
 
 
  

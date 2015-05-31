@@ -404,9 +404,9 @@ struct Serializer< Writercd3cd46fe59357c635053e44d5c769432b04950bc4cdb1061e58520
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace ADC_Voltmeter { struct Input_Streams {
- std::string adc_value;
+ std::string adc;
 
-explicit Input_Streams():adc_value() {  }
+explicit Input_Streams():adc() {  }
 
 
  
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;bool has_adc_value;
+    SAXEventHandler< std::string > handler_0;bool has_adc;
 
     bool check_depth(const char* type)
     {
@@ -438,7 +438,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "adc_value";
+    return "adc";
         default:
             break;
         }
@@ -465,14 +465,14 @@ private:
 
     void reset_flags()
     {
-        has_adc_value = false;
+        has_adc = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::ADC_Voltmeter::Input_Streams * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->adc_value)
+        , handler_0(&obj->adc)
     {
         reset_flags();
     }
@@ -613,8 +613,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9))
-						 { state=0; has_adc_value = true; }
+            else if (utility::string_equal(str, length, "\x41\x44\x43", 3))
+						 { state=0; has_adc = true; }
             else {
                 state = -1;
                 return true;
@@ -696,7 +696,7 @@ public:
                 break;
             }
         } else {
-            if (!has_adc_value) set_missing_required("adc_value");
+            if (!has_adc) set_missing_required("adc");
         }
         return the_error.empty();
     }
@@ -743,7 +743,7 @@ struct Serializer< Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b0495
     {
         w.StartObject();
 
-        w.Key("\x41\x44\x43\x20\x56\x61\x6c\x75\x65", 9, false); Serializer< Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919, std::string >()(w, value.adc_value);
+        w.Key("\x41\x44\x43", 3, false); Serializer< Writerdb94c38ee7f69813e7809d68aeaae41b887186be2cce2efed7b049558a56c919, std::string >()(w, value.adc);
 
         w.EndObject(1);
     }

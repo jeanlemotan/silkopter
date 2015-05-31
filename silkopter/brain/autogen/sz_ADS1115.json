@@ -6,7 +6,10 @@
     "members":
     [
         ["std::string", "bus", {"required": true, "json_key" : "Bus"}],
-        ["uint32_t", "rate", {"required": true, "json_key" : "ADC0 Rate (Hz)", "default" : 500}]
+        ["uint32_t", "adc0_rate", {"required": true, "json_key" : "ADC0 Rate (Hz)", "default" : 200}],
+        ["uint32_t", "adc1_rate", {"required": true, "json_key" : "ADC1 Rate (Hz)", "default" : 200}],
+        ["uint32_t", "adc2_rate", {"required": true, "json_key" : "ADC2 Rate (Hz)", "default" : 200}],
+        ["uint32_t", "adc3_rate", {"required": true, "json_key" : "ADC3 Rate (Hz)", "default" : 200}]
     ]
 },
 {

@@ -3,27 +3,22 @@
 #include "common/node/IMulti_Simulator.h"
 #include "common/config/Multi.h"
 
+class btCylinderShapeZ;
+class btMotionState;
+class btRigidBody;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btDbvtBroadphase;
+class btSequentialImpulseConstraintSolver;
+class btCollisionShape;
+class btRigidBody;
+class btDiscreteDynamicsWorld;
+
+
 namespace silk
 {
 namespace node
 {
-
-inline math::vec3f bt_to_vec3f(btVector3 const& v)
-{
-    return math::vec3f(v.x(), v.y(), v.z());
-}
-inline math::quatf bt_to_quatf(btQuaternion const& v)
-{
-    return math::quatf(v.x(), v.y(), v.z(), v.w());
-}
-inline btVector3 vec3f_to_bt(math::vec3f const& v)
-{
-    return btVector3(v.x, v.y, v.z);
-}
-inline btQuaternion quatf_to_bt(math::quatf const& v)
-{
-    return btQuaternion(v.x, v.y, v.z, v.w);
-}
 
 class Multi_Simulation : q::util::Noncopyable
 {
@@ -64,9 +59,9 @@ private:
     struct UAV
     {
         config::Multi config;
-        std::unique_ptr<btCylinderShapeZ> shape;
-        std::unique_ptr<btMotionState> motion_state;
-        std::unique_ptr<btRigidBody> body;
+        std::shared_ptr<btCylinderShapeZ> shape;
+        std::shared_ptr<btMotionState> motion_state;
+        std::shared_ptr<btRigidBody> body;
         IMulti_Simulator::UAV_State state;
     } m_uav;
 
@@ -94,15 +89,15 @@ private:
 //    silk::GPS_Sample m_gps_sample;
 //    q::Clock::time_point m_last_gps_time_point;
 
-	std::unique_ptr<btDefaultCollisionConfiguration> m_collision_configuration;
-	std::unique_ptr<btCollisionDispatcher> m_dispatcher;
-	std::unique_ptr<btDbvtBroadphase> m_broadphase;
-	std::unique_ptr<btSequentialImpulseConstraintSolver> m_solver;
+    std::shared_ptr<btDefaultCollisionConfiguration> m_collision_configuration;
+    std::shared_ptr<btCollisionDispatcher> m_dispatcher;
+    std::shared_ptr<btDbvtBroadphase> m_broadphase;
+    std::shared_ptr<btSequentialImpulseConstraintSolver> m_solver;
 
-	std::unique_ptr<btCollisionShape> m_ground_shape;
-	std::unique_ptr<btRigidBody> m_ground_body;
+    std::shared_ptr<btCollisionShape> m_ground_shape;
+    std::shared_ptr<btRigidBody> m_ground_body;
 
-	std::unique_ptr<btDiscreteDynamicsWorld> m_world;
+    std::shared_ptr<btDiscreteDynamicsWorld> m_world;
 
 
     q::Clock::time_point m_physics_timestamp;

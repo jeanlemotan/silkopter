@@ -106,12 +106,12 @@ auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc_value);
+    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc);
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
     if (rate != m_output_stream->rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc_value, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc, m_output_stream->rate, rate);
         m_adc_stream.reset();
     }
     else

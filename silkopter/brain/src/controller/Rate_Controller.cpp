@@ -99,9 +99,6 @@ void Rate_Controller::process()
 
 math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
-    //F = m*a
-    //v = a * t
-
     math::vec3f v = target - input;
     float vm = math::length(v) * config.moment_of_inertia;
 

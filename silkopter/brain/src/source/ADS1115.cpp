@@ -12,6 +12,93 @@ namespace node
 {
 
 
+constexpr uint8_t ADS1115_ADDRESS_ADDR_GND    = 0x48; // address pin low (GND)
+constexpr uint8_t ADS1115_ADDRESS_ADDR_VDD    = 0x49; // address pin high (VCC)
+constexpr uint8_t ADS1115_ADDRESS_ADDR_SDA    = 0x4A; // address pin tied to SDA pin
+constexpr uint8_t ADS1115_ADDRESS_ADDR_SCL    = 0x4B; // address pin tied to SCL pin
+constexpr uint8_t ADS1115_DEFAULT_ADDRESS     = ADS1115_ADDRESS_ADDR_GND;
+
+constexpr uint8_t ADS1115_RA_CONVERSION       = 0x00;
+constexpr uint8_t ADS1115_RA_CONFIG           = 0x01;
+constexpr uint8_t ADS1115_RA_LO_THRESH        = 0x02;
+constexpr uint8_t ADS1115_RA_HI_THRESH        = 0x03;
+
+constexpr uint16_t ADS1115_OS_SHIFT            = 15;
+constexpr uint16_t ADS1115_OS_INACTIVE         = 0x00 << ADS1115_OS_SHIFT;
+constexpr uint16_t ADS1115_OS_ACTIVE           = 0x01 << ADS1115_OS_SHIFT;
+
+constexpr uint16_t ADS1115_MUX_SHIFT           = 12;
+constexpr uint16_t ADS1115_MUX_P0_N1           = 0x00 << ADS1115_MUX_SHIFT; /* default */
+constexpr uint16_t ADS1115_MUX_P0_N3           = 0x01 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P1_N3           = 0x02 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P2_N3           = 0x03 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P0_NG           = 0x04 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P1_NG           = 0x05 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P2_NG           = 0x06 << ADS1115_MUX_SHIFT;
+constexpr uint16_t ADS1115_MUX_P3_NG           = 0x07 << ADS1115_MUX_SHIFT;
+
+constexpr uint16_t ADS1115_PGA_SHIFT           = 9;
+constexpr uint16_t ADS1115_PGA_6144            = 0x00 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_4096            = 0x01 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_2048            = 0x02 << ADS1115_PGA_SHIFT; // default
+constexpr uint16_t ADS1115_PGA_1024            = 0x03 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_512             = 0x04 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_256             = 0x05 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_256B            = 0x06 << ADS1115_PGA_SHIFT;
+constexpr uint16_t ADS1115_PGA_256C            = 0x07 << ADS1115_PGA_SHIFT;
+
+constexpr float ADS1115_MV_6144                = 0.000187500f;
+constexpr float ADS1115_MV_4096                = 0.000125000f;
+constexpr float ADS1115_MV_2048                = 0.000062500f; // default
+constexpr float ADS1115_MV_1024                = 0.000031250f;
+constexpr float ADS1115_MV_512                 = 0.000015625f;
+constexpr float ADS1115_MV_256                 = 0.000007813f;
+constexpr float ADS1115_MV_256B                = 0.000007813f;
+constexpr float ADS1115_MV_256C                = 0.000007813f;
+
+constexpr uint16_t ADS1115_MODE_SHIFT          = 8;
+constexpr uint16_t ADS1115_MODE_CONTINUOUS     = 0x00 << ADS1115_MODE_SHIFT;
+constexpr uint16_t ADS1115_MODE_SINGLESHOT     = 0x01 << ADS1115_MODE_SHIFT; // default
+
+constexpr uint16_t ADS1115_RATE_SHIFT          = 5;
+constexpr uint16_t ADS1115_RATE_8              = 0x00 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_16             = 0x01 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_32             = 0x02 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_64             = 0x03 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_128            = 0x04 << ADS1115_RATE_SHIFT; // default
+constexpr uint16_t ADS1115_RATE_250            = 0x05 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_475            = 0x06 << ADS1115_RATE_SHIFT;
+constexpr uint16_t ADS1115_RATE_860            = 0x07 << ADS1115_RATE_SHIFT;
+
+constexpr uint16_t ADS1115_COMP_MODE_SHIFT        = 4;
+constexpr uint16_t ADS1115_COMP_MODE_HYSTERESIS   = 0x00 << ADS1115_COMP_MODE_SHIFT;        // default
+constexpr uint16_t ADS1115_COMP_MODE_WINDOW       = 0x01 << ADS1115_COMP_MODE_SHIFT;
+
+constexpr uint16_t ADS1115_COMP_POL_SHIFT         = 3;
+constexpr uint16_t ADS1115_COMP_POL_ACTIVE_LOW    = 0x00 << ADS1115_COMP_POL_SHIFT;     // default
+constexpr uint16_t ADS1115_COMP_POL_ACTIVE_HIGH   = 0x01 << ADS1115_COMP_POL_SHIFT;
+
+constexpr uint16_t ADS1115_COMP_LAT_SHIFT         = 2;
+constexpr uint16_t ADS1115_COMP_LAT_NON_LATCHING  = 0x00 << ADS1115_COMP_LAT_SHIFT;    // default
+constexpr uint16_t ADS1115_COMP_LAT_LATCHING      = 0x01 << ADS1115_COMP_LAT_SHIFT;
+
+constexpr uint16_t ADS1115_COMP_QUE_SHIFT      = 0;
+constexpr uint16_t ADS1115_COMP_QUE_ASSERT1    = 0x00 << ADS1115_COMP_QUE_SHIFT;
+constexpr uint16_t ADS1115_COMP_QUE_ASSERT2    = 0x01 << ADS1115_COMP_QUE_SHIFT;
+constexpr uint16_t ADS1115_COMP_QUE_ASSERT4    = 0x02 << ADS1115_COMP_QUE_SHIFT;
+constexpr uint16_t ADS1115_COMP_QUE_DISABLE    = 0x03 << ADS1115_COMP_QUE_SHIFT; // default
+
+
+
+
+
+
+
+
+constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
+
+
+
 ADS1115::ADS1115(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::ADS1115::Init_Params())
@@ -60,21 +147,59 @@ auto ADS1115::init() -> bool
         return false;
     }
 
-    m_adc[0] = std::make_shared<Stream>();
-    m_adc[1] = std::make_shared<Stream>();
-    m_adc[2] = std::make_shared<Stream>();
-    m_adc[3] = std::make_shared<Stream>();
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 800);
+    m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 500);
+    m_init_params->adc1_rate = math::clamp<size_t>(m_init_params->adc1_rate, 1, 500);
+    m_init_params->adc2_rate = math::clamp<size_t>(m_init_params->adc2_rate, 1, 500);
+    m_init_params->adc3_rate = math::clamp<size_t>(m_init_params->adc3_rate, 1, 500);
 
-    m_adc[0]->rate = m_init_params->rate;
-    m_adc[1]->rate = m_init_params->rate;
-    m_adc[2]->rate = m_init_params->rate;
-    m_adc[3]->rate = m_init_params->rate;
+    for (auto& adc: m_adc)
+    {
+        adc = std::make_shared<Stream>();
+    }
 
-    m_dt = std::chrono::milliseconds(1000 / m_init_params->rate);
+    m_adc[0]->rate = m_init_params->adc0_rate;
+    m_adc[1]->rate = m_init_params->adc1_rate;
+    m_adc[2]->rate = m_init_params->adc2_rate;
+    m_adc[3]->rate = m_init_params->adc3_rate;
 
-    return true;
+    for (auto& adc: m_adc)
+    {
+        adc->dt = std::chrono::milliseconds(1000 / adc->rate);
+    }
+
+
+    m_config_register.gain = ADS1115_PGA_4096;
+    m_config_register.mux = ADS1115_MUX_P0_NG;
+    m_config_register.mode = ADS1115_MODE_SINGLESHOT;//ADS1115_MODE_CONTINUOUS;
+    m_config_register.queue = ADS1115_COMP_QUE_DISABLE;
+    m_config_register.rate = ADS1115_RATE_860;
+
+    bool res = set_config_register(*i2c);
+
+    uint8_t data;
+    res &= i2c->read_register_u8(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, data);
+
+    //start first measurement
+    m_crt_adc = 0;
+    m_config_register.status = ADS1115_OS_ACTIVE;
+    res &= set_config_register(*i2c);
+
+    return res;
+}
+
+auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
+{
+    uint16_t config =   m_config_register.gain |
+                        m_config_register.mux |
+                        m_config_register.status |
+                        m_config_register.mode |
+                        m_config_register.rate |
+                        m_config_register.comparator |
+                        m_config_register.polarity |
+                        m_config_register.latch |
+                        m_config_register.queue;
+    return i2c.write_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, config);
 }
 
 
@@ -93,14 +218,96 @@ void ADS1115::process()
         return;
     }
 
+    auto& adc = *m_adc[m_crt_adc];
     auto now = q::Clock::now();
-    if (now - m_last_tp < m_dt)
+    auto dt = now - adc.last_tp;
+    if (dt < adc.dt || now - m_last_last_tp < MIN_CONVERSION_DURATION)
     {
         return;
     }
 
-    m_last_tp = now;
+    if (m_config_register.mode == ADS1115_MODE_SINGLESHOT)
+    {
+        uint16_t cr = 0;
+        if (!i2c->read_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, cr))
+        {
+            return;
+        }
+        //not ready
+        if ((cr & ADS1115_OS_ACTIVE) == 0)
+        {
+            return;
+        }
+    }
 
+    uint16_t ufvalue = 0;
+    if (!i2c->read_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONVERSION, ufvalue))
+    {
+        return;
+    }
+    int16_t fvalue = reinterpret_cast<int16_t&>(ufvalue);
+
+    float value = 0;
+    switch (m_config_register.gain)
+    {
+    case ADS1115_PGA_6144:
+        value = fvalue * ADS1115_MV_6144;
+        break;
+    case ADS1115_PGA_4096:
+        value = fvalue * ADS1115_MV_4096;
+        break;
+    case ADS1115_PGA_2048:
+        value = fvalue * ADS1115_MV_2048;
+        break;
+    case ADS1115_PGA_1024:
+        value = fvalue * ADS1115_MV_1024;
+        break;
+    case ADS1115_PGA_512:
+        value = fvalue * ADS1115_MV_512;
+        break;
+    case ADS1115_PGA_256:
+    case ADS1115_PGA_256B:
+    case ADS1115_PGA_256C:
+        value = fvalue * ADS1115_MV_256;
+        break;
+    default:
+        return;
+    }
+
+    //scale 0..3.3v to 0..1
+    value = math::clamp(value / 3.3f, 0.f, 1.f);
+
+    //add samples up to the sample rate
+    auto tp = adc.last_tp + adc.dt;
+    while (dt >= adc.dt)
+    {
+        Stream::Sample& sample = adc.last_sample;
+        sample.value = value;
+        sample.sample_idx++;
+        sample.dt = adc.dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
+        sample.tp = tp;
+        sample.is_healthy = true;
+        adc.samples.push_back(sample);
+
+        tp += adc.dt;
+        dt -= adc.dt;
+    }
+    adc.last_tp = now - dt; //add the reminder to be processed next frame
+
+
+    ///////////////////////////////////////////////////////
+    //advance to next ADC
+    uint8_t next_adc = (m_crt_adc + 1) % m_adc.size();
+
+    //start measurement again
+    uint16_t muxes[] = { ADS1115_MUX_P0_NG, ADS1115_MUX_P1_NG, ADS1115_MUX_P2_NG, ADS1115_MUX_P3_NG };
+    m_config_register.mux = muxes[next_adc];
+    if (set_config_register(*i2c))
+    {
+        m_crt_adc = next_adc;
+    }
+
+    m_last_last_tp = now;
 }
 
 auto ADS1115::set_config(rapidjson::Value const& json) -> bool
