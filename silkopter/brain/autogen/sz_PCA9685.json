@@ -16,6 +16,7 @@
     "name": "PWM_Channel",
     "members":
     [
+        ["bool", "servo_signal", {"required": false, "default" : false, "json_key" : "Servo Signal"}],
         ["float", "min", {"required": true, "default" : 0, "json_key" : "Min"}],
         ["float", "max", {"required": true, "default" : 1, "json_key" : "Max"}]
     ]
@@ -47,7 +48,7 @@
 {
     "definition" : true,
     "namespace" : "sz::PCA9685",
-    "name": "Ranges",
+    "name": "Channels",
     "members":
     [
         ["sz::PCA9685::PWM_Channel", "channel_1", {"required": false, "json_key" : "Channel 1"}],
@@ -74,7 +75,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::PCA9685::Ranges", "ranges", {"required": true, "json_key" : "Ranges"}],
+        ["sz::PCA9685::Channels", "channels", {"required": true, "json_key" : "Channels"}],
         ["sz::PCA9685::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }

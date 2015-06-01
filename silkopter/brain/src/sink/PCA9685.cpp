@@ -115,20 +115,25 @@ auto PCA9685::init() -> bool
     }
 
     bool res = i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_AI_BIT);
-    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
-    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
-    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
+    res &= restart(*i2c);
 
     uint8_t data;
-    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, data);
+    res &= i2c->read_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, data);
     if (!res && data <= 3)
     {
         QLOGE("PCA9685 not found on {}, address {}", m_init_params->bus, m_init_params->address);
         return false;
     }
 
+    //set sleep mode so we can change the prescaler
+    i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+
     uint8_t prescale = math::round(24576000.f / 4096.f / m_init_params->rate) - 1;
     res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, prescale);
+
+    //restart to activate the new prescaler
+    res &= restart(*i2c);
     if (!res)
     {
         QLOGE("I2C error while setting rate {}, prescale {}", m_init_params->rate, prescale);
@@ -140,31 +145,66 @@ auto PCA9685::init() -> bool
     return true;
 }
 
+auto PCA9685::restart(bus::II2C& i2c) -> bool
+{
+    bool res = i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    return res;
+}
+
+
+constexpr float MIN_SERVO_MS = 1.f;
+constexpr float MAX_SERVO_MS = 2.f;
+
 void PCA9685::set_pwm_value(size_t idx, float value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
-    //auto const& ch = *m_pwm_channels[idx].config;
-    value = math::clamp(value, 0.f, 1.f);
-    int pulse = value * 4096;//(ch.max - ch.min);
+    auto& ch = m_pwm_channels[idx];
+    value = math::clamp(value, ch.config->min, ch.config->max);
 
+    if (ch.config->servo_signal)
+    {
+        //servo signals vary between 1ms and 2ms
+        float period_ms = 1000.f / m_init_params->rate;
+        float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
+        value = servo_ms / period_ms;
+    }
+
+
+    int pulse = value * 4096;
 
     uint8_t data[4] = {0, 0, 0, 0};
+    constexpr uint8_t ON_L = 0;
+    constexpr uint8_t ON_H = 1;
+    constexpr uint8_t OFF_L = 2;
+    constexpr uint8_t OFF_H = 3;
+
     if (pulse == 0)
     {
-        data[3] = 0x10;
+        data[OFF_H] = 0x10;
     }
     else if (pulse >= 4096)
     {
-        data[1] = 0x10;
+        data[ON_H] = 0x10;
     }
     else
     {
-        //data[0] = offset & 0xFF;
-        //data[1] = offset >> 8;
-        data[2] = pulse & 0xFF;
-        data[3] = pulse >> 8;
+//        data[ON_L] = offset & 0xFF;
+//        data[ON_H] = offset >> 8;
+        data[OFF_L] = pulse & 0xFF;
+        data[OFF_H] = pulse >> 8;
     }
+
+    if (ch.last_data.pulse == pulse)
+    {
+        return;
+    }
+    ch.last_data.pulse = pulse;
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -189,11 +229,6 @@ void PCA9685::process()
             auto const& samples = stream->get_samples();
             if (!samples.empty())
             {
-//                if (samples.size() > 20)
-//                {
-//                    QLOGW("channel {} on GPIO {} is too slow. {} samples are queued", i, ch.gpio, samples.size());
-//                }
-
                 set_pwm_value(i, samples.back().value);
             }
         }
@@ -248,6 +283,29 @@ auto PCA9685::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
+
+    //rates lower than 50 and higher than 400Hz don't support servo signals
+    if (m_init_params->rate > 400 || m_init_params->rate < 50)
+    {
+        jsonutil::remove_value(json, q::Path("Channels/Channel 1/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 2/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 3/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 4/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 5/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 6/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 7/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 8/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 9/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 10/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 11/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 12/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 13/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 14/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 15/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channels/Channel 16/Servo Signal"));
+    }
+
+
     return std::move(json);
 }
 

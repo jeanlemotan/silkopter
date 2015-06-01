@@ -510,10 +510,11 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerbb7c1
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace PCA9685 { struct PWM_Channel {
- float min;
+ bool servo_signal;
+float min;
 float max;
 
-explicit PWM_Channel():min(0), max(1) {  }
+explicit PWM_Channel():servo_signal(false), min(0), max(1) {  }
 
 
  
@@ -530,8 +531,10 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< float > handler_1;bool has_min;
+    SAXEventHandler< bool > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_servo_signal;
+bool has_min;
 bool has_max;
 
     bool check_depth(const char* type)
@@ -547,8 +550,10 @@ bool has_max;
     {
         switch (state) {
             case 0:
-    return "min";
+    return "servo_signal";
 case 1:
+    return "min";
+case 2:
     return "max";
         default:
             break;
@@ -576,7 +581,8 @@ case 1:
 
     void reset_flags()
     {
-        has_min = false;
+        has_servo_signal = false;
+has_min = false;
 has_max = false;
     }
 
@@ -584,8 +590,9 @@ public:
     explicit SAXEventHandler( ::sz::PCA9685::PWM_Channel * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->min)
-, handler_1(&obj->max)
+        , handler_0(&obj->servo_signal)
+, handler_1(&obj->min)
+, handler_2(&obj->max)
     {
         reset_flags();
     }
@@ -602,6 +609,9 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -622,6 +632,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -640,6 +653,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -660,6 +676,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -678,6 +697,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -698,6 +720,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -716,6 +741,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -736,6 +764,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -750,10 +781,12 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4d\x69\x6e", 3))
-						 { state=0; has_min = true; }
+            else if (utility::string_equal(str, length, "\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12))
+						 { state=0; has_servo_signal = true; }
+else if (utility::string_equal(str, length, "\x4d\x69\x6e", 3))
+						 { state=1; has_min = true; }
 else if (utility::string_equal(str, length, "\x4d\x61\x78", 3))
-						 { state=1; has_max = true; }
+						 { state=2; has_max = true; }
             else {
                 state = -1;
                 return true;
@@ -767,6 +800,9 @@ else if (utility::string_equal(str, length, "\x4d\x61\x78", 3))
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -788,6 +824,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -807,6 +846,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -825,6 +867,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -846,11 +891,15 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_min) set_missing_required("min");
+            if (!has_servo_signal) set_missing_required("servo_signal");
+if (!has_min) set_missing_required("min");
 if (!has_max) set_missing_required("max");
         }
         return the_error.empty();
@@ -874,6 +923,8 @@ if (!has_max) set_missing_required("max");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -890,6 +941,7 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
@@ -901,10 +953,11 @@ struct Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db
     {
         w.StartObject();
 
-        w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min);
+        w.Key("\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, bool >()(w, value.servo_signal);
+w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min);
 w.Key("\x4d\x61\x78", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.max);
 
-        w.EndObject(2);
+        w.EndObject(3);
     }
 
 };

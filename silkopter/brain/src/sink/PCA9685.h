@@ -43,6 +43,8 @@ public:
 private:
     auto init() -> bool;
 
+    auto restart(bus::II2C& i2c) -> bool;
+
     HAL& m_hal;
 
     std::weak_ptr<bus::II2C> m_i2c;
@@ -55,6 +57,10 @@ private:
     {
         sz::PCA9685::PWM_Channel* config = nullptr;
         stream::IPWM_wptr stream;
+        struct Last_Data
+        {
+            int pulse = -1;
+        } last_data;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

@@ -981,57 +981,44 @@ void Comms::process()
         return;
     }
 
+    while (auto msg = m_video_channel.get_next_message())
     {
-        auto start = q::Clock::now();
-        auto msg = m_video_channel.get_next_message();
-        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
+        switch (msg.get())
         {
-            switch (msg.get())
-            {
-            case comms::Video_Message::FRAME_DATA : handle_frame_data(); break;
-            }
-
-            msg = m_video_channel.get_next_message();
+        case comms::Video_Message::FRAME_DATA : handle_frame_data(); break;
         }
     }
 
+    auto start = q::Clock::now();
+    while (auto msg = m_telemetry_channel.get_next_message())
     {
-        auto start = q::Clock::now();
-        auto msg = m_telemetry_channel.get_next_message();
-        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
+        //process only the first 10 ms worh of data and discard the rest
+        if (q::Clock::now() - start < std::chrono::milliseconds(10))
         {
             switch (msg.get())
             {
             case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
             }
-
-            msg = m_telemetry_channel.get_next_message();
         }
     }
 
+    while (auto msg = m_setup_channel.get_next_message())
     {
-        auto start = q::Clock::now();
-        auto msg = m_setup_channel.get_next_message();
-        while (msg && q::Clock::now() - start < std::chrono::milliseconds(10))
+        switch (msg.get())
         {
-            switch (msg.get())
-            {
-            case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
+        case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
 
-            case comms::Setup_Message::CLOCK: handle_clock(); break;
+        case comms::Setup_Message::CLOCK: handle_clock(); break;
 
-            case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
-            case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
+        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
+        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
-            case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
-            case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
-            case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
-            case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
+        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
+        case comms::Setup_Message::NODE_DATA: handle_node_data(); break;
+        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
 
-            case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
-            }
-
-            msg = m_setup_channel.get_next_message();
+        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
         }
     }
     //    QLOGI("*********** LOOP: {}", xxx);
