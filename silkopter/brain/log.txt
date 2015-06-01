@@ -1,0 +1,4 @@
+servo limits: 0.1 - 0.77
+ammeter scale: 39
+voltmeter scale: 34.1
+servo gimbal: -30 - 50
