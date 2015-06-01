@@ -142,6 +142,29 @@ auto PCA9685::init() -> bool
 
     m_pwm_channels.resize(16);
 
+    m_pwm_channels[0].config = &m_config->channels.channel_1;
+    m_pwm_channels[1].config = &m_config->channels.channel_2;
+    m_pwm_channels[2].config = &m_config->channels.channel_3;
+    m_pwm_channels[3].config = &m_config->channels.channel_4;
+    m_pwm_channels[4].config = &m_config->channels.channel_5;
+    m_pwm_channels[5].config = &m_config->channels.channel_6;
+    m_pwm_channels[6].config = &m_config->channels.channel_7;
+    m_pwm_channels[7].config = &m_config->channels.channel_8;
+    m_pwm_channels[8].config = &m_config->channels.channel_9;
+    m_pwm_channels[9].config = &m_config->channels.channel_10;
+    m_pwm_channels[10].config = &m_config->channels.channel_11;
+    m_pwm_channels[11].config = &m_config->channels.channel_12;
+    m_pwm_channels[12].config = &m_config->channels.channel_13;
+    m_pwm_channels[13].config = &m_config->channels.channel_14;
+    m_pwm_channels[14].config = &m_config->channels.channel_15;
+    m_pwm_channels[15].config = &m_config->channels.channel_16;
+
+    //reseet all channels
+    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    {
+        set_pwm_value(i, boost::none);
+    }
+
     return true;
 }
 
@@ -157,8 +180,8 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 }
 
 
-constexpr float MIN_SERVO_MS = 1.f;
-constexpr float MAX_SERVO_MS = 2.f;
+constexpr float MIN_SERVO_MS = 0.5f;
+constexpr float MAX_SERVO_MS = 2.49f;
 
 void PCA9685::set_pwm_value(size_t idx, boost::optional<float> _value)
 {
@@ -169,7 +192,10 @@ void PCA9685::set_pwm_value(size_t idx, boost::optional<float> _value)
     float value = 0;
     if (_value)
     {
-        value = math::clamp(*_value, ch.config->min, ch.config->max);
+        value = math::clamp(value, 0.f, 1.f);
+        float range = ch.config->max - ch.config->min;
+        value = (*_value) * range + ch.config->min;
+
         if (ch.config->servo_signal)
         {
             //servo signals vary between 1ms and 2ms

@@ -120,6 +120,7 @@ constexpr uint8_t MPU_REG_I2C_SLV4_REG                   = 0x32;
 constexpr uint8_t MPU_REG_I2C_SLV4_DO                    = 0x33;
 constexpr uint8_t MPU_REG_I2C_SLV4_CTRL                  = 0x34;
     constexpr uint8_t MPU_BIT_I2C_SLV4_EN                = 0x80;
+    constexpr uint8_t MPU_BIT_I2C_MST_DLY                = 0; //4 bits
 
 constexpr uint8_t MPU_REG_INT_PIN_CFG                    = 0x37;
     constexpr uint8_t MPU_BIT_ACTL                       = 1 << 7;
@@ -798,6 +799,16 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
         // 15 364 kHz
         res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 13); //i2c speed
         boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
+
+        //how often to read the magnetometer
+        int delay = m_init_params->acceleration_angular_velocity_rate / m_magnetic_field->rate;
+        delay = math::clamp(delay - 1, 0, 31);
+
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV4_CTRL, delay); //i2c slave delay
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+
+        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_DELAY_ES_SHADOW | MPU_BIT_I2C_SLV0_DLY_EN); //i2c slave delay enable
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
 
     m_magnetic_field->akm_address = 0;
@@ -827,6 +838,17 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+
+    //now request the transfer again
+    constexpr uint8_t READ_FLAG = 0x80;
+    constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+    if (m_magnetic_field->akm_address != akm_address)
+    {
+        mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        m_magnetic_field->akm_address = akm_address;
+    }
+    mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
+    mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 8);
 
 #endif
 
@@ -991,11 +1013,7 @@ void MPU9250::process_compass(Buses& buses)
     auto now = q::Clock::now();
 
     auto dt = now - m_magnetic_field->last_tp;
-    if (dt < m_magnetic_field->dt)
-    {
-        return;
-    }
-    else if (dt >= std::chrono::seconds(5))
+    if (dt >= std::chrono::seconds(5))
     {
         QLOGW("reset compass!");
         setup_compass(buses);
@@ -1004,6 +1022,11 @@ void MPU9250::process_compass(Buses& buses)
     std::array<uint8_t, 8> tmp;
     if (buses.i2c)
     {
+        if (dt < m_magnetic_field->dt)
+        {
+            return;
+        }
+
         if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size()))
         {
             return;
@@ -1011,22 +1034,28 @@ void MPU9250::process_compass(Buses& buses)
     }
     else //spi
     {
+        //read as often as possible
+//        if (dt < m_magnetic_field->dt)
+//        {
+//            return;
+//        }
+
         //first read what is in the ext registers (so the previous reading)
         if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size()))
         {
             return;
         }
 
-        //now request the transfer again
-        constexpr uint8_t READ_FLAG = 0x80;
-        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-        if (m_magnetic_field->akm_address != akm_address)
-        {
-            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-            m_magnetic_field->akm_address = akm_address;
-        }
-        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
-        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + tmp.size());
+//        //now request the transfer again
+//        constexpr uint8_t READ_FLAG = 0x80;
+//        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+//        if (m_magnetic_field->akm_address != akm_address)
+//        {
+//            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+//            m_magnetic_field->akm_address = akm_address;
+//        }
+//        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
+//        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + tmp.size());
     }
 
     if (!(tmp[0] & AKM_DATA_READY))
