@@ -60,7 +60,7 @@ private:
     std::shared_ptr<sz::Raspicam::Init_Params> m_init_params;
     std::shared_ptr<sz::Raspicam::Config> m_config;
 
-    void set_active_streams(bool recording, bool high, bool low);
+    void set_active_streams(bool recording, uint32_t quality);
 
     std::shared_ptr<Impl> m_impl;
 

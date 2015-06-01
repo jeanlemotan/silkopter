@@ -1356,7 +1356,7 @@ uint32_t shutter_speed;
 uint32_t quality;
 sz::Raspicam::Output_Streams output_streams;
 
-explicit Config():iso(0), shutter_speed(0), quality(1), output_streams() {  }
+explicit Config():iso(0), shutter_speed(0), quality(0), output_streams() {  }
 
 
  

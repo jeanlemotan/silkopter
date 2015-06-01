@@ -160,19 +160,23 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 constexpr float MIN_SERVO_MS = 1.f;
 constexpr float MAX_SERVO_MS = 2.f;
 
-void PCA9685::set_pwm_value(size_t idx, float value)
+void PCA9685::set_pwm_value(size_t idx, boost::optional<float> _value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
     auto& ch = m_pwm_channels[idx];
-    value = math::clamp(value, ch.config->min, ch.config->max);
 
-    if (ch.config->servo_signal)
+    float value = 0;
+    if (_value)
     {
-        //servo signals vary between 1ms and 2ms
-        float period_ms = 1000.f / m_init_params->rate;
-        float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
-        value = servo_ms / period_ms;
+        value = math::clamp(*_value, ch.config->min, ch.config->max);
+        if (ch.config->servo_signal)
+        {
+            //servo signals vary between 1ms and 2ms
+            float period_ms = 1000.f / m_init_params->rate;
+            float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
+            value = servo_ms / period_ms;
+        }
     }
 
 
@@ -232,6 +236,10 @@ void PCA9685::process()
                 set_pwm_value(i, samples.back().value);
             }
         }
+        else
+        {
+            set_pwm_value(i, boost::none);
+        }
     }
 }
 
@@ -240,7 +248,7 @@ void PCA9685::process()
 {\
     auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.input_streams.channel_##CH);\
     m_pwm_channels[CH - 1].stream = input_stream;\
-    m_pwm_channels[CH - 1].config = &m_config->ranges.channel_##CH;\
+    m_pwm_channels[CH - 1].config = &m_config->channels.channel_##CH;\
 }
 
 

@@ -533,8 +533,7 @@ private:
 
     SAXEventHandler< bool > handler_0;
 SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;bool has_servo_signal;
-bool has_min;
+SAXEventHandler< float > handler_2;bool has_min;
 bool has_max;
 
     bool check_depth(const char* type)
@@ -581,7 +580,7 @@ case 2:
 
     void reset_flags()
     {
-        has_servo_signal = false;
+        
 has_min = false;
 has_max = false;
     }
@@ -782,7 +781,7 @@ case 2:
             if (0) {
             }
             else if (utility::string_equal(str, length, "\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12))
-						 { state=0; has_servo_signal = true; }
+						 { state=0;  }
 else if (utility::string_equal(str, length, "\x4d\x69\x6e", 3))
 						 { state=1; has_min = true; }
 else if (utility::string_equal(str, length, "\x4d\x61\x78", 3))
@@ -898,8 +897,7 @@ case 2:
                 break;
             }
         } else {
-            if (!has_servo_signal) set_missing_required("servo_signal");
-if (!has_min) set_missing_required("min");
+            if (!has_min) set_missing_required("min");
 if (!has_max) set_missing_required("max");
         }
         return the_error.empty();
@@ -2162,7 +2160,7 @@ w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x36", 10, false); Serializer< Writer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace PCA9685 { struct Ranges {
+namespace sz { namespace PCA9685 { struct Channels {
  sz::PCA9685::PWM_Channel channel_1;
 sz::PCA9685::PWM_Channel channel_2;
 sz::PCA9685::PWM_Channel channel_3;
@@ -2180,7 +2178,7 @@ sz::PCA9685::PWM_Channel channel_14;
 sz::PCA9685::PWM_Channel channel_15;
 sz::PCA9685::PWM_Channel channel_16;
 
-explicit Ranges():channel_1(), channel_2(), channel_3(), channel_4(), channel_5(), channel_6(), channel_7(), channel_8(), channel_9(), channel_10(), channel_11(), channel_12(), channel_13(), channel_14(), channel_15(), channel_16() {  }
+explicit Channels():channel_1(), channel_2(), channel_3(), channel_4(), channel_5(), channel_6(), channel_7(), channel_8(), channel_9(), channel_10(), channel_11(), channel_12(), channel_13(), channel_14(), channel_15(), channel_16() {  }
 
 
  
@@ -2191,7 +2189,7 @@ explicit Ranges():channel_1(), channel_2(), channel_3(), channel_4(), channel_5(
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::PCA9685::Ranges > {
+class SAXEventHandler< ::sz::PCA9685::Channels > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2303,7 +2301,7 @@ case 15:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::PCA9685::Ranges * obj)
+    explicit SAXEventHandler( ::sz::PCA9685::Channels * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->channel_1)
@@ -3245,29 +3243,29 @@ handler_15.PrepareForReuse();
     }
 };
 
-template < class Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c >
-struct Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, ::sz::PCA9685::Ranges > {
+template < class Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595 >
+struct Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, ::sz::PCA9685::Channels > {
 
-    void operator()( Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c& w, const ::sz::PCA9685::Ranges& value) const
+    void operator()( Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595& w, const ::sz::PCA9685::Channels& value) const
     {
         w.StartObject();
 
-        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_1);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_2);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x33", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_3);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_4);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x35", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_5);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x36", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_6);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x37", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_7);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x38", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_8);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x39", 9, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_9);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x30", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_10);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x31", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_11);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x32", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_12);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x33", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_13);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x34", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_14);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x35", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_15);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x36", 10, false); Serializer< Writer7acd21fd5df8c46dbb77d80619d50e147f8877fe33293e8e84499dcdaf2a274c, sz::PCA9685::PWM_Channel >()(w, value.channel_16);
+        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_1);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_2);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x33", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_3);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_4);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x35", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_5);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x36", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_6);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x37", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_7);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x38", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_8);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x39", 9, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_9);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x30", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_10);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x31", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_11);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x32", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_12);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x33", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_13);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x34", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_14);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x35", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_15);
+w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x36", 10, false); Serializer< Writer8f21d0af7cad4c30ef765d79e9d949ab993e3390211e5f62cf0d9905983c1595, sz::PCA9685::PWM_Channel >()(w, value.channel_16);
 
         w.EndObject(16);
     }
@@ -3304,10 +3302,10 @@ w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x36", 10, false); Serializer< Writer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace PCA9685 { struct Config {
- sz::PCA9685::Ranges ranges;
+ sz::PCA9685::Channels channels;
 sz::PCA9685::Input_Streams input_streams;
 
-explicit Config():ranges(), input_streams() {  }
+explicit Config():channels(), input_streams() {  }
 
 
  
@@ -3324,8 +3322,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::PCA9685::Ranges > handler_0;
-SAXEventHandler< sz::PCA9685::Input_Streams > handler_1;bool has_ranges;
+    SAXEventHandler< sz::PCA9685::Channels > handler_0;
+SAXEventHandler< sz::PCA9685::Input_Streams > handler_1;bool has_channels;
 bool has_input_streams;
 
     bool check_depth(const char* type)
@@ -3341,7 +3339,7 @@ bool has_input_streams;
     {
         switch (state) {
             case 0:
-    return "ranges";
+    return "channels";
 case 1:
     return "input_streams";
         default:
@@ -3370,7 +3368,7 @@ case 1:
 
     void reset_flags()
     {
-        has_ranges = false;
+        has_channels = false;
 has_input_streams = false;
     }
 
@@ -3378,7 +3376,7 @@ public:
     explicit SAXEventHandler( ::sz::PCA9685::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->ranges)
+        , handler_0(&obj->channels)
 , handler_1(&obj->input_streams)
     {
         reset_flags();
@@ -3544,8 +3542,8 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x52\x61\x6e\x67\x65\x73", 6))
-						 { state=0; has_ranges = true; }
+            else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x73", 8))
+						 { state=0; has_channels = true; }
 else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
 						 { state=1; has_input_streams = true; }
             else {
@@ -3644,7 +3642,7 @@ case 1:
                 break;
             }
         } else {
-            if (!has_ranges) set_missing_required("ranges");
+            if (!has_channels) set_missing_required("channels");
 if (!has_input_streams) set_missing_required("input_streams");
         }
         return the_error.empty();
@@ -3695,7 +3693,7 @@ struct Serializer< Writerc1e28de29ada41a692a3af3a61964af4e7edfba6565ab979ee4fbd1
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x6e\x67\x65\x73", 6, false); Serializer< Writerc1e28de29ada41a692a3af3a61964af4e7edfba6565ab979ee4fbd1a0763fce9, sz::PCA9685::Ranges >()(w, value.ranges);
+        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x73", 8, false); Serializer< Writerc1e28de29ada41a692a3af3a61964af4e7edfba6565ab979ee4fbd1a0763fce9, sz::PCA9685::Channels >()(w, value.channels);
 w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerc1e28de29ada41a692a3af3a61964af4e7edfba6565ab979ee4fbd1a0763fce9, sz::PCA9685::Input_Streams >()(w, value.input_streams);
 
         w.EndObject(2);

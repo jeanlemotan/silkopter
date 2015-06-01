@@ -65,7 +65,7 @@ private:
 
     std::vector<PWM_Channel> m_pwm_channels;
 
-    void set_pwm_value(size_t idx, float value);
+    void set_pwm_value(size_t idx, boost::optional<float> value);
 };
 
 }

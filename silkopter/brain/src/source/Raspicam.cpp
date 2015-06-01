@@ -231,9 +231,7 @@ auto Raspicam::init() -> bool
         return false;
     }
 
-    set_active_streams(false,
-                       true,
-                       false);
+    set_active_streams(false, m_config->quality);
 
     return true;
 #else
@@ -256,7 +254,7 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    set_active_streams(true, m_config->quality == 0, m_config->quality == 1);
+    set_active_streams(false, m_config->quality);
 
     return true;
 }
@@ -329,10 +327,13 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     std::copy(data, data + size, sample.value.data.begin());
 }
 
-void Raspicam::set_active_streams(bool recording, bool high, bool low)
+void Raspicam::set_active_streams(bool recording, uint32_t quality)
 {
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
+
+    bool high = quality == 0;
+    bool low = quality == 1;
 
     if (m_impl->recording.is_active == recording &&
         m_impl->high.is_active == high &&
@@ -341,7 +342,7 @@ void Raspicam::set_active_streams(bool recording, bool high, bool low)
         return;
     }
 
-    QLOGI("activating streams recording {}, high {}, low {}", recording, high, low);
+    QLOGI("activating streams recording {}, quality {}", recording, quality);
 
     if (set_connection_enabled(m_impl->recording.encoder_connection, recording))
     {
