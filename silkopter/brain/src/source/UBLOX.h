@@ -2,11 +2,14 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPosition.h"
+#include "common/node/stream/IVelocity.h"
+#include "common/node/stream/IGPS_Info.h"
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 #include "common/node/bus/IUART.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -111,21 +114,22 @@ private:
     std::array<uint8_t, 1024> m_temp_buffer;
     std::deque<uint8_t> m_buffer;
 
+    typedef Basic_Output_Stream<stream::IECEF_Position> Position_Stream;
+    mutable std::shared_ptr<Position_Stream> m_position_stream;
+
+    typedef Basic_Output_Stream<stream::IECEF_Velocity> Velocity_Stream;
+    mutable std::shared_ptr<Velocity_Stream> m_velocity_stream;
+
+    typedef Basic_Output_Stream<stream::IGPS_Info> GPS_Info_Stream;
+    mutable std::shared_ptr<GPS_Info_Stream> m_gps_info_stream;
+
     bool m_has_nav_status = false;
     bool m_has_pollh = false;
     bool m_has_sol = false;
     q::Clock::time_point m_last_complete_tp;
-
-    struct Location_Stream : public stream::IECEF_Location
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        Sample last_sample;
-    };
-    mutable std::shared_ptr<Location_Stream> m_location_stream;
+    Position_Stream::Value m_last_position_value;
+    Velocity_Stream::Value m_last_velocity_value;
+    GPS_Info_Stream::Value m_last_gps_info_value;
 };
 
 

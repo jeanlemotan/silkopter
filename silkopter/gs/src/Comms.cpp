@@ -413,10 +413,11 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
 //        case node::stream::IENU_Force::TYPE:                return std::make_shared<node::stream::ENU_Force>();
 //        case node::stream::IECEF_Force::TYPE:               return std::make_shared<node::stream::ECEF_Force>();
         case node::stream::IFrame::TYPE:                    return std::make_shared<node::stream::Frame>();
+        case node::stream::IGPS_Info::TYPE:                 return std::make_shared<node::stream::GPS_Info>();
         case node::stream::ILinear_Acceleration::TYPE:      return std::make_shared<node::stream::Linear_Acceleration>();
 //        case node::stream::IENU_Linear_Acceleration::TYPE:  return std::make_shared<node::stream::ENU_Linear_Acceleration>();
 //        case node::stream::IECEF_Linear_Acceleration::TYPE: return std::make_shared<node::stream::ECEF_Linear_Acceleration>();
-        case node::stream::IECEF_Location::TYPE:            return std::make_shared<node::stream::ECEF_Location>();
+        case node::stream::IECEF_Position::TYPE:            return std::make_shared<node::stream::ECEF_Position>();
         case node::stream::IMagnetic_Field::TYPE:           return std::make_shared<node::stream::ECEF_Magnetic_Field>();
 //        case node::stream::IENU_Magnetic_Field::TYPE:       return std::make_shared<node::stream::ENU_Magnetic_Field>();
 //        case node::stream::IECEF_Magnetic_Field::TYPE:      return std::make_shared<node::stream::ECEF_Magnetic_Field>();
@@ -798,8 +799,9 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<IBool, Bool>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IForce, Force>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IGPS_Info, GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IECEF_Location, ECEF_Location>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IECEF_Position, ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IMagnetic_Field, Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IPressure, Pressure>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IPWM, PWM>(m_telemetry_channel, sample_count, *stream) &&

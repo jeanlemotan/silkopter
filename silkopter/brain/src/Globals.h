@@ -28,6 +28,26 @@ namespace silk
         s_async_io_service.post(std::bind(&packaged_task::operator(), task));
         return future;
     }
+
+
+    struct At_Exit : boost::noncopyable
+    {
+    public:
+        At_Exit(std::function<void()> at_exit)
+            : m_at_exit(at_exit)
+        {
+        }
+        ~At_Exit()
+        {
+            if (m_at_exit)
+            {
+                m_at_exit();
+            }
+        }
+    private:
+        std::function<void()> m_at_exit;
+    };
+
 }
 
 

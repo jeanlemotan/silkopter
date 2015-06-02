@@ -35,9 +35,9 @@ uint32_t magnetic_field_rate;
 uint32_t pressure_rate;
 uint32_t temperature_rate;
 uint32_t distance_rate;
-uint32_t location_rate;
+uint32_t gps_rate;
 
-explicit Init_Params():throttle_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), location_rate(5) {  }
+explicit Init_Params():throttle_rate(100), acceleration_rate(1000), angular_velocity_rate(1000), magnetic_field_rate(100), pressure_rate(100), temperature_rate(10), distance_rate(12), gps_rate(5) {  }
 
 
  
@@ -68,7 +68,7 @@ bool has_magnetic_field_rate;
 bool has_pressure_rate;
 bool has_temperature_rate;
 bool has_distance_rate;
-bool has_location_rate;
+bool has_gps_rate;
 
     bool check_depth(const char* type)
     {
@@ -97,7 +97,7 @@ case 5:
 case 6:
     return "distance_rate";
 case 7:
-    return "location_rate";
+    return "gps_rate";
         default:
             break;
         }
@@ -131,7 +131,7 @@ has_magnetic_field_rate = false;
 has_pressure_rate = false;
 has_temperature_rate = false;
 has_distance_rate = false;
-has_location_rate = false;
+has_gps_rate = false;
     }
 
 public:
@@ -145,7 +145,7 @@ public:
 , handler_4(&obj->pressure_rate)
 , handler_5(&obj->temperature_rate)
 , handler_6(&obj->distance_rate)
-, handler_7(&obj->location_rate)
+, handler_7(&obj->gps_rate)
     {
         reset_flags();
     }
@@ -468,8 +468,8 @@ else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x7
 						 { state=5; has_temperature_rate = true; }
 else if (utility::string_equal(str, length, "\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
 						 { state=6; has_distance_rate = true; }
-else if (utility::string_equal(str, length, "\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
-						 { state=7; has_location_rate = true; }
+else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13))
+						 { state=7; has_gps_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -663,7 +663,7 @@ if (!has_magnetic_field_rate) set_missing_required("magnetic_field_rate");
 if (!has_pressure_rate) set_missing_required("pressure_rate");
 if (!has_temperature_rate) set_missing_required("temperature_rate");
 if (!has_distance_rate) set_missing_required("distance_rate");
-if (!has_location_rate) set_missing_required("location_rate");
+if (!has_gps_rate) set_missing_required("gps_rate");
         }
         return the_error.empty();
     }
@@ -738,7 +738,7 @@ w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\
 w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pressure_rate);
 w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.temperature_rate);
 w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.distance_rate);
-w.Key("\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.location_rate);
+w.Key("\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.gps_rate);
 
         w.EndObject(8);
     }
@@ -3408,10 +3408,10 @@ struct Serializer< Writerd119f0026281c6fe8d2f522e76f0d55662b5c56289c0b4588abf636
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct ECEF_Location {
+namespace sz { namespace Multi_Simulator { struct ECEF_Position {
  
 
-explicit ECEF_Location() {  }
+explicit ECEF_Position() {  }
 
 
  
@@ -3422,7 +3422,7 @@ explicit ECEF_Location() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::ECEF_Location > {
+class SAXEventHandler< ::sz::Multi_Simulator::ECEF_Position > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -3473,7 +3473,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::ECEF_Location * obj)
+    explicit SAXEventHandler( ::sz::Multi_Simulator::ECEF_Position * obj)
         : state(-1)
         , depth(0)
         
@@ -3724,10 +3724,10 @@ public:
     }
 };
 
-template < class Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6 >
-struct Serializer< Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6, ::sz::Multi_Simulator::ECEF_Location > {
+template < class Writer39988805200d6a53d3d3a12f64662ddd6fd51ad4ff64c1099a401dcf706b9af3 >
+struct Serializer< Writer39988805200d6a53d3d3a12f64662ddd6fd51ad4ff64c1099a401dcf706b9af3, ::sz::Multi_Simulator::ECEF_Position > {
 
-    void operator()( Writer77f64683c7c132c1131d3003298d459dc66c2fb1645e88c90bea9b8155d897c6& w, const ::sz::Multi_Simulator::ECEF_Location& value) const
+    void operator()( Writer39988805200d6a53d3d3a12f64662ddd6fd51ad4ff64c1099a401dcf706b9af3& w, const ::sz::Multi_Simulator::ECEF_Position& value) const
     {
         w.StartObject();
 
@@ -3774,9 +3774,9 @@ sz::Multi_Simulator::Magnetic_Field magnetic_field;
 sz::Multi_Simulator::Temperature temperature;
 sz::Multi_Simulator::Pressure pressure;
 sz::Multi_Simulator::Distance distance;
-sz::Multi_Simulator::ECEF_Location ecef_location;
+sz::Multi_Simulator::ECEF_Position ecef_position;
 
-explicit Output_Streams():acceleration(), angular_velocity(), magnetic_field(), temperature(), pressure(), distance(), ecef_location() {  }
+explicit Output_Streams():acceleration(), angular_velocity(), magnetic_field(), temperature(), pressure(), distance(), ecef_position() {  }
 
 
  
@@ -3799,13 +3799,13 @@ SAXEventHandler< sz::Multi_Simulator::Magnetic_Field > handler_2;
 SAXEventHandler< sz::Multi_Simulator::Temperature > handler_3;
 SAXEventHandler< sz::Multi_Simulator::Pressure > handler_4;
 SAXEventHandler< sz::Multi_Simulator::Distance > handler_5;
-SAXEventHandler< sz::Multi_Simulator::ECEF_Location > handler_6;bool has_acceleration;
+SAXEventHandler< sz::Multi_Simulator::ECEF_Position > handler_6;bool has_acceleration;
 bool has_angular_velocity;
 bool has_magnetic_field;
 bool has_temperature;
 bool has_pressure;
 bool has_distance;
-bool has_ecef_location;
+bool has_ecef_position;
 
     bool check_depth(const char* type)
     {
@@ -3832,7 +3832,7 @@ case 4:
 case 5:
     return "distance";
 case 6:
-    return "ecef_location";
+    return "ecef_position";
         default:
             break;
         }
@@ -3865,7 +3865,7 @@ has_magnetic_field = false;
 has_temperature = false;
 has_pressure = false;
 has_distance = false;
-has_ecef_location = false;
+has_ecef_position = false;
     }
 
 public:
@@ -3878,7 +3878,7 @@ public:
 , handler_3(&obj->temperature)
 , handler_4(&obj->pressure)
 , handler_5(&obj->distance)
-, handler_6(&obj->ecef_location)
+, handler_6(&obj->ecef_position)
     {
         reset_flags();
     }
@@ -4175,8 +4175,8 @@ else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65", 
 						 { state=4; has_pressure = true; }
 else if (utility::string_equal(str, length, "\x44\x69\x73\x74\x61\x6e\x63\x65", 8))
 						 { state=5; has_distance = true; }
-else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13))
-						 { state=6; has_ecef_location = true; }
+else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 13))
+						 { state=6; has_ecef_position = true; }
             else {
                 state = -1;
                 return true;
@@ -4354,7 +4354,7 @@ if (!has_magnetic_field) set_missing_required("magnetic_field");
 if (!has_temperature) set_missing_required("temperature");
 if (!has_pressure) set_missing_required("pressure");
 if (!has_distance) set_missing_required("distance");
-if (!has_ecef_location) set_missing_required("ecef_location");
+if (!has_ecef_position) set_missing_required("ecef_position");
         }
         return the_error.empty();
     }
@@ -4425,7 +4425,7 @@ w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Se
 w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Temperature >()(w, value.temperature);
 w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Pressure >()(w, value.pressure);
 w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65", 8, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::Distance >()(w, value.distance);
-w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::ECEF_Location >()(w, value.ecef_location);
+w.Key("\x45\x43\x45\x46\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 13, false); Serializer< Writercab8e8ce8b57badd082f9896e66c3e20957fb449684f23fd0eb042e334bd754d, sz::Multi_Simulator::ECEF_Position >()(w, value.ecef_position);
 
         w.EndObject(7);
     }

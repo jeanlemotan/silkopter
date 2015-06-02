@@ -26,7 +26,7 @@
 #include "processor/LiPo_Battery.h"
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
-#include "processor/Comp_ECEF_Location.h"
+#include "processor/Comp_ECEF_Position.h"
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
 
@@ -432,7 +432,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
-    m_node_factory.register_node<Comp_ECEF_Location>("Comp ECEF Location", *this);
+    m_node_factory.register_node<Comp_ECEF_Position>("Comp ECEF Position", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
 
@@ -478,11 +478,10 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular Velocity LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Angular_Velocity>>("Angular Velocity LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Angular_Velocity>>("Angular Velocity LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IBattery_State>>("Battery State LPF", *this);
     m_node_factory.register_node<LPF<stream::IADC>>("ADC LPF", *this);
     m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
     m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Location>>("Location LPF (ECEF)", *this);
+    m_node_factory.register_node<LPF<stream::IECEF_Position>>("Position LPF (ECEF)", *this);
     m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Distance>>("Distance LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Distance>>("Distance LPF (ECEF)", *this);
@@ -514,11 +513,10 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular Velocity RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Angular_Velocity>>("Angular Velocity RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Angular_Velocity>>("Angular Velocity RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IBattery_State>>("Battery State RS", *this);
     m_node_factory.register_node<Resampler<stream::IADC>>("ADC RS", *this);
     m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
     m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Location>>("Location RS (ECEF)", *this);
+    m_node_factory.register_node<Resampler<stream::IECEF_Position>>("Position RS (ECEF)", *this);
     m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Distance>>("Distance RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Distance>>("Distance RS (ECEF)", *this);

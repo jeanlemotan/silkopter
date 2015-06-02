@@ -16,7 +16,7 @@
     [
         ["std::string", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
         ["std::string", "cardinal_points", {"required": true, "json_key" : "Cardinal Points"}],
-        ["std::string", "ecef_location", {"required": true, "json_key" : "ECEF Location"}],
+        ["std::string", "ecef_position", {"required": true, "json_key" : "ECEF Position"}],
         ["std::string", "battery_state", {"required": true, "json_key" : "Battery State"}],
         ["std::string", "commands", {"required": true, "json_key" : "Commands"}]
     ]

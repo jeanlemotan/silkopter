@@ -12,7 +12,7 @@
         ["uint32_t", "pressure_rate", {"required": true, "json_key" : "Pressure Rate (Hz)", "default" : 100}],
         ["uint32_t", "temperature_rate", {"required": true, "json_key" : "Temperature Rate (Hz)", "default" : 10}],
         ["uint32_t", "distance_rate", {"required": true, "json_key" : "Distance Rate (Hz)", "default" : 12}],
-        ["uint32_t", "location_rate", {"required": true, "json_key" : "Location Rate (Hz)", "default" : 5}]
+        ["uint32_t", "gps_rate", {"required": true, "json_key" : "GPS Rate (Hz)", "default" : 5}]
     ]
 },
 {
@@ -79,7 +79,7 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Simulator",
-    "name": "ECEF_Location",
+    "name": "ECEF_Position",
     "members":
     [
     ]
@@ -96,7 +96,7 @@
         ["sz::Multi_Simulator::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}],
         ["sz::Multi_Simulator::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
         ["sz::Multi_Simulator::Distance", "distance", {"required": true, "json_key" : "Distance"}],
-        ["sz::Multi_Simulator::ECEF_Location", "ecef_location", {"required": true, "json_key" : "ECEF Location"}]
+        ["sz::Multi_Simulator::ECEF_Position", "ecef_position", {"required": true, "json_key" : "ECEF Position"}]
      ]
 },
 {

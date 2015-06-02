@@ -111,10 +111,10 @@ auto ADS1115::get_stream_outputs() const -> std::vector<Stream_Output>
 {
     std::vector<Stream_Output> outputs =
     {{
-        { stream::IADC::TYPE, "ADC0", m_adc[0] },
-        { stream::IADC::TYPE, "ADC1", m_adc[1] },
-        { stream::IADC::TYPE, "ADC2", m_adc[2] },
-        { stream::IADC::TYPE, "ADC3", m_adc[3] }
+        { stream::IADC::TYPE, "ADC0", m_adcs[0] },
+        { stream::IADC::TYPE, "ADC1", m_adcs[1] },
+        { stream::IADC::TYPE, "ADC2", m_adcs[2] },
+        { stream::IADC::TYPE, "ADC3", m_adcs[3] }
      }};
     return outputs;
 }
@@ -147,27 +147,33 @@ auto ADS1115::init() -> bool
         return false;
     }
 
+    i2c->lock();
+    At_Exit at_exit([this, &i2c]()
+    {
+        i2c->unlock();
+    });
+
 
     m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 500);
     m_init_params->adc1_rate = math::clamp<size_t>(m_init_params->adc1_rate, 1, 500);
     m_init_params->adc2_rate = math::clamp<size_t>(m_init_params->adc2_rate, 1, 500);
     m_init_params->adc3_rate = math::clamp<size_t>(m_init_params->adc3_rate, 1, 500);
 
-    for (auto& adc: m_adc)
+    for (auto& adc: m_adcs)
     {
-        adc = std::make_shared<Stream>();
+        adc = std::make_shared<Output_Stream>();
     }
 
-    m_adc[0]->rate = m_init_params->adc0_rate;
-    m_adc[1]->rate = m_init_params->adc1_rate;
-    m_adc[2]->rate = m_init_params->adc2_rate;
-    m_adc[3]->rate = m_init_params->adc3_rate;
+    m_adcs[0]->set_rate(m_init_params->adc0_rate);
+    m_adcs[1]->set_rate(m_init_params->adc1_rate);
+    m_adcs[2]->set_rate(m_init_params->adc2_rate);
+    m_adcs[3]->set_rate(m_init_params->adc3_rate);
 
-    for (auto& adc: m_adc)
+    auto now = q::Clock::now();
+    for (auto& adc: m_adcs)
     {
-        adc->dt = std::chrono::milliseconds(1000 / adc->rate);
+        adc->set_tp(now);
     }
-
 
     m_config_register.gain = ADS1115_PGA_4096;
     m_config_register.mux = ADS1115_MUX_P0_NG;
@@ -207,10 +213,10 @@ void ADS1115::process()
 {
     QLOG_TOPIC("ADS1115::process");
 
-    m_adc[0]->samples.clear();
-    m_adc[1]->samples.clear();
-    m_adc[2]->samples.clear();
-    m_adc[3]->samples.clear();
+    for (auto& adc: m_adcs)
+    {
+        adc->clear();
+    }
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -218,10 +224,16 @@ void ADS1115::process()
         return;
     }
 
-    auto& adc = *m_adc[m_crt_adc];
+    i2c->lock();
+    At_Exit at_exit([this, &i2c]()
+    {
+        i2c->unlock();
+    });
+
+    auto& adc = *m_adcs[m_crt_adc];
+    auto samples_needed = adc.compute_samples_needed();
     auto now = q::Clock::now();
-    auto dt = now - adc.last_tp;
-    if (dt < adc.dt || now - m_last_last_tp < MIN_CONVERSION_DURATION)
+    if (samples_needed == 0 || now - m_last_tp < MIN_CONVERSION_DURATION)
     {
         return;
     }
@@ -278,26 +290,16 @@ void ADS1115::process()
     value = math::clamp(value / 3.3f, 0.f, 1.f);
 
     //add samples up to the sample rate
-    auto tp = adc.last_tp + adc.dt;
-    while (dt >= adc.dt)
+    while (samples_needed > 0)
     {
-        Stream::Sample& sample = adc.last_sample;
-        sample.value = value;
-        sample.sample_idx++;
-        sample.dt = adc.dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
-        sample.tp = tp;
-        sample.is_healthy = true;
-        adc.samples.push_back(sample);
-
-        tp += adc.dt;
-        dt -= adc.dt;
+        adc.push_sample(value, true);
+        samples_needed--;
     }
-    adc.last_tp = now - dt; //add the reminder to be processed next frame
 
 
     ///////////////////////////////////////////////////////
     //advance to next ADC
-    uint8_t next_adc = (m_crt_adc + 1) % m_adc.size();
+    uint8_t next_adc = (m_crt_adc + 1) % m_adcs.size();
 
     //start measurement again
     uint16_t muxes[] = { ADS1115_MUX_P0_NG, ADS1115_MUX_P1_NG, ADS1115_MUX_P2_NG, ADS1115_MUX_P3_NG };
@@ -307,7 +309,7 @@ void ADS1115::process()
         m_crt_adc = next_adc;
     }
 
-    m_last_last_tp = now;
+    m_last_tp = now;
 }
 
 auto ADS1115::set_config(rapidjson::Value const& json) -> bool

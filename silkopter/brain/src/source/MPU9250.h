@@ -9,6 +9,8 @@
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/ITemperature.h"
 
+#include "Basic_Output_Stream.h"
+
 namespace sz
 {
 namespace MPU9250
@@ -86,61 +88,26 @@ private:
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;
-    q::Clock::time_point m_last_fifo_tp = q::Clock::now();
 
     uint8_t m_user_ctrl_value = 0;
 
-    struct Common
-    {
-        uint32_t rate = 0;
-        q::Clock::duration dt;
-    };
+    typedef Basic_Output_Stream<stream::IAcceleration> Acceleration_Stream;
+    mutable std::shared_ptr<Acceleration_Stream> m_acceleration;
+    float m_acceleration_scale_inv = 1.f;
 
-    struct Acceleration : public stream::IAcceleration, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<stream::IAngular_Velocity> Angular_Velocity_Stream;
+    mutable std::shared_ptr<Angular_Velocity_Stream> m_angular_velocity;
+    float m_angular_velocity_scale_inv = 1.f;
 
-        Sample last_sample;
-        std::vector<Sample> samples;
-        float scale_inv = 1.f;
-    };
-    mutable std::shared_ptr<Acceleration> m_acceleration;
+    typedef Basic_Output_Stream<stream::IMagnetic_Field> Magnetic_Field_Stream;
+    mutable std::shared_ptr<Magnetic_Field_Stream> m_magnetic_field;
+    uint8_t m_akm_address = 0;
+    float m_magnetic_field_adj[3];
+    math::vec3f m_last_magnetic_field_value;
 
-    struct Angular_Velocity : public stream::IAngular_Velocity, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<stream::ITemperature> Temperature_Stream;
+    mutable std::shared_ptr<Temperature_Stream> m_temperature;
 
-        std::vector<Sample> samples;
-        Sample last_sample;
-        std::string name;
-        float scale_inv = 1.f;
-    };
-    mutable std::shared_ptr<Angular_Velocity> m_angular_velocity;
-
-    struct Magnetic_Field : public stream::IMagnetic_Field, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        std::vector<Sample> samples;
-        Sample last_sample;
-        uint8_t akm_address = 0;
-        q::Clock::time_point last_tp = q::Clock::now();
-        float magnetic_adj[3];
-    };
-    mutable std::shared_ptr<Magnetic_Field> m_magnetic_field;
-
-    struct Temperature : public stream::ITemperature, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        std::vector<Sample> samples;
-        Sample last_sample;
-    };
-    mutable std::shared_ptr<Temperature> m_temperature;
 };
 
 

@@ -295,15 +295,15 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (type == IECEF_Location::TYPE)
+    else if (type == IECEF_Position::TYPE)
     {
         auto viewer = new Map_Viewer(this);
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<ECEF_Location>(stream)->samples_available_signal.connect([this, viewer](ECEF_Location& stream)
+        m_connection = std::static_pointer_cast<ECEF_Position>(stream)->samples_available_signal.connect([this, viewer](ECEF_Position& stream)
         {
             for (auto const& s: stream.samples)
             {
-                viewer->add_sample(s.tp, s.value.position, s.value.position_accuracy);
+                viewer->add_sample(s.tp, s.value);
             }
             viewer->process();
         });

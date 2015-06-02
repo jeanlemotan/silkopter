@@ -7,7 +7,7 @@
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/ITemperature.h"
 #include "common/node/stream/IDistance.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPosition.h"
 #include "common/node/stream/IThrottle.h"
 #include "common/node/IMulti_Simulator.h"
 
@@ -111,7 +111,7 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
     };
-    struct ECEF_Location : public stream::IECEF_Location
+    struct ECEF_Position : public stream::IECEF_Position
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -127,7 +127,7 @@ private:
     mutable std::shared_ptr<Pressure> m_pressure_stream;
     mutable std::shared_ptr<Temperature> m_temperature_stream;
     mutable std::shared_ptr<Distance> m_distance_stream;
-    mutable std::shared_ptr<ECEF_Location> m_ecef_location_stream;
+    mutable std::shared_ptr<ECEF_Position> m_ecef_position_stream;
 
     std::vector<stream::IThrottle_wptr> m_input_throttle_streams;
 

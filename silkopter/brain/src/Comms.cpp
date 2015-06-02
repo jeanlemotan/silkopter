@@ -11,12 +11,13 @@
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPosition.h"
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IPWM.h"
 #include "common/node/stream/IFrame.h"
+#include "common/node/stream/IGPS_Info.h"
 #include "common/node/stream/ITemperature.h"
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IForce.h"
@@ -278,9 +279,11 @@ void Comms::gather_telemetry_streams()
                 gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IECEF_Location>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IECEF_Position>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IECEF_Velocity>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IPWM>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IFrame>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IGPS_Info>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IADC>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IFloat>(ts, *stream) ||

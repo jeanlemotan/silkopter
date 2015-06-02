@@ -87,8 +87,6 @@ rpi {
 
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
-    ../../src/storage/Storage_FS.cpp \
-    ../../src/storage/Storage_MB85RC.cpp \
     ../../src/Comms.cpp \
     ../../src/main.cpp \
     ../../src/HAL.cpp \
@@ -107,7 +105,6 @@ SOURCES += \
     ../../src/processor/LiPo_Battery.cpp \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
-    ../../src/processor/Comp_ECEF_Location.cpp \
     ../../src/source/EHealth.cpp \
     ../../src/controller/Rate_Controller.cpp \
     ../../src/controller/Stability_Controller.cpp \
@@ -119,7 +116,8 @@ SOURCES += \
     ../../src/processor/Motor_Mixer.cpp \
     ../../src/source/ADS1115.cpp \
     ../../src/sink/PCA9685.cpp \
-    ../../src/generator/Oscillator.cpp
+    ../../src/generator/Oscillator.cpp \
+    ../../src/processor/Comp_ECEF_Position.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -135,7 +133,6 @@ HEADERS += \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
     ../../../libs/utils/RUDP.h \
-    ../../src/storage/Storage_MB85RC.h \
     ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
@@ -165,7 +162,6 @@ HEADERS += \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
     ../../src/processor/Throttle_PWM.h \
-    ../../src/processor/Comp_ECEF_Location.h \
     ../../../libs/common/node/data/IData.h \
     ../../../libs/common/node/stream/IAcceleration.h \
     ../../../libs/common/node/stream/IADC.h \
@@ -177,7 +173,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IForce.h \
     ../../../libs/common/node/stream/IFrame.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/ILocation.h \
     ../../../libs/common/node/stream/IMagnetic_Field.h \
     ../../../libs/common/node/stream/IPressure.h \
     ../../../libs/common/node/stream/IPWM.h \
@@ -233,5 +228,8 @@ HEADERS += \
     ../../../libs/common/node/stream/IBool.h \
     ../../src/Sample_Accumulator.h \
     ../../src/MPL_Helper.h \
-    ../../src/Basic_Output_Stream.h
+    ../../src/Basic_Output_Stream.h \
+    ../../../libs/common/node/stream/IPosition.h \
+    ../../src/processor/Comp_ECEF_Position.h \
+    ../../../libs/common/node/stream/IGPS_Info.h
 

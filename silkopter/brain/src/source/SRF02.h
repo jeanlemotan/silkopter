@@ -5,6 +5,7 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/bus/II2C.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -51,19 +52,10 @@ private:
     std::shared_ptr<sz::SRF02::Init_Params> m_init_params;
     std::shared_ptr<sz::SRF02::Config> m_config;
 
-    struct Stream : public stream::IDistance
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
+    q::Clock::time_point m_last_trigger_tp;
 
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        Sample last_sample;
-        q::Clock::duration dt;
-        q::Clock::time_point trigger_tp;
-        q::Clock::time_point last_tp;
-    };
-    mutable std::shared_ptr<Stream> m_stream;
 };
 
 }

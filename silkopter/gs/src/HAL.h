@@ -11,8 +11,9 @@
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/IForce.h"
 #include "common/node/stream/IFrame.h"
+#include "common/node/stream/IGPS_Info.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPosition.h"
 #include "common/node/stream/IMagnetic_Field.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IPWM.h"
@@ -211,6 +212,14 @@ struct ENU_Frame : public Stream
 };
 DECLARE_CLASS_PTR(ENU_Frame);
 
+struct GPS_Info : public Stream
+{
+    typedef IGPS_Info::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(GPS_Info&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(GPS_Info);
+
 struct Linear_Acceleration : public Stream
 {
     typedef ILinear_Acceleration::Sample Sample;
@@ -233,13 +242,13 @@ struct ECEF_Linear_Acceleration : public Stream
 };
 DECLARE_CLASS_PTR(ECEF_Linear_Acceleration);
 
-struct ECEF_Location : public Stream
+struct ECEF_Position : public Stream
 {
-    typedef IECEF_Location::Sample Sample;
+    typedef IECEF_Position::Sample Sample;
     std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Location&)> samples_available_signal;
+    q::util::Signal<void(ECEF_Position&)> samples_available_signal;
 };
-DECLARE_CLASS_PTR(ECEF_Location);
+DECLARE_CLASS_PTR(ECEF_Position);
 
 struct Magnetic_Field : public Stream
 {

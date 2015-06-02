@@ -1,0 +1,49 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_ECEF_Position",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_ECEF_Position",
+    "name": "Input_Streams",
+    "members":
+    [
+        ["std::string", "ecef_position", {"required": true, "json_key" : "ECEF Position"}],
+        ["std::string", "ecef_linear_acceleration", {"required": true, "json_key" : "ECEF Linear Acceleration"}],
+        ["std::string", "pressure", {"required": true, "json_key" : "Pressure"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_ECEF_Position",
+    "name": "ECEF_Position",
+    "members":
+    [
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_ECEF_Position",
+    "name": "Output_Streams",
+    "members":
+    [
+        ["sz::Comp_ECEF_Position::ECEF_Position", "ecef_position", {"required": true, "json_key" : "ECEF Position"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Comp_ECEF_Position",
+    "name": "Config",
+    "members":
+    [
+        ["sz::Comp_ECEF_Position::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
+        ["sz::Comp_ECEF_Position::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+    ]
+}
+]

@@ -9,6 +9,7 @@ namespace stream
 
 enum class Space : uint8_t
 {
+    LLA,
     ECEF,
     ENU,
     LOCAL
@@ -33,7 +34,7 @@ enum class Type
     FORCE,
     FRAME,
     LINEAR_ACCELERATION,
-    LOCATION,
+    POSITION,
     MAGNETIC_FIELD,
     PRESSURE,
     PWM,
@@ -42,6 +43,7 @@ enum class Type
     VELOCITY,
     THROTTLE,
     VIDEO,
+    GPS_INFO,
     VOLTAGE,
     FLOAT,
     BOOL

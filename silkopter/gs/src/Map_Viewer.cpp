@@ -123,7 +123,7 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
             {
                 auto const& ecef = m_samples.back().position;
                 auto lla = silk::node::stream::ecef_to_lla(ecef);
-                m_map_control->setView(QPointF(math::degrees(lla[1]), math::degrees(lla[0])));
+                m_map_control->setView(QPointF(math::degrees(lla.longitude), math::degrees(lla.latitude)));
             }
         });
 
@@ -151,7 +151,7 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
     menu.exec(pos);
 }
 
-void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position, double accuracy)
+void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position)
 {
     double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
     if (tpd < m_tp)
@@ -164,7 +164,7 @@ void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position
 
     if (!m_map_control->isPanning() && m_is_following_sample)
     {
-        m_map_control->setView(QPointF(math::degrees(lla[1]), math::degrees(lla[0])));
+        m_map_control->setView(QPointF(math::degrees(lla.longitude), math::degrees(lla.latitude)));
     }
     else
     {

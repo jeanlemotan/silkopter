@@ -44,7 +44,7 @@ auto Multi_Simulator::init() -> bool
     m_pressure_stream = std::make_shared<Pressure>();
     m_temperature_stream = std::make_shared<Temperature>();
     m_distance_stream = std::make_shared<Distance>();
-    m_ecef_location_stream = std::make_shared<ECEF_Location>();
+    m_ecef_position_stream = std::make_shared<ECEF_Position>();
     if (m_init_params->angular_velocity_rate == 0)
     {
         QLOGE("Bad angular velocity rate: {}Hz", m_init_params->angular_velocity_rate);
@@ -75,9 +75,9 @@ auto Multi_Simulator::init() -> bool
         QLOGE("Bad distance rate: {}Hz", m_init_params->distance_rate);
         return false;
     }
-    if (m_init_params->location_rate == 0)
+    if (m_init_params->gps_rate == 0)
     {
-        QLOGE("Bad location rate: {}Hz", m_init_params->location_rate);
+        QLOGE("Bad gps rate: {}Hz", m_init_params->gps_rate);
         return false;
     }
 
@@ -127,9 +127,9 @@ auto Multi_Simulator::init() -> bool
     m_distance_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
     m_distance_stream->last_sample.tp = m_last_tp;
 
-    m_ecef_location_stream->rate = m_init_params->location_rate;
-    m_ecef_location_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_ecef_location_stream->rate);
-    m_ecef_location_stream->last_sample.tp = m_last_tp;
+    m_ecef_position_stream->rate = m_init_params->gps_rate;
+    m_ecef_position_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
+    m_ecef_position_stream->last_sample.tp = m_last_tp;
 
 
 
@@ -168,9 +168,9 @@ auto Multi_Simulator::get_stream_outputs() const -> std::vector<Stream_Output>
     outputs[5].type = stream::IDistance::TYPE;
     outputs[5].name = "Sonar Distance";
     outputs[5].stream = m_distance_stream;
-    outputs[6].type = stream::IECEF_Location::TYPE;
-    outputs[6].name = "Location (ecef)";
-    outputs[6].stream = m_ecef_location_stream;
+    outputs[6].type = stream::IECEF_Position::TYPE;
+    outputs[6].name = "Position (ecef)";
+    outputs[6].stream = m_ecef_position_stream;
     return outputs;
 }
 
@@ -205,7 +205,7 @@ void Multi_Simulator::process()
     m_pressure_stream->samples.clear();
     m_temperature_stream->samples.clear();
     m_distance_stream->samples.clear();
-    m_ecef_location_stream->samples.clear();
+    m_ecef_position_stream->samples.clear();
 
     m_simulation.process(dt, [this](Multi_Simulation& simulation, q::Clock::duration simulation_dt)
     {

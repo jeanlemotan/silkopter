@@ -71,7 +71,6 @@ private:
     struct Common : public Base
     {
         double      reading = 0;
-        uint32_t rate = 0;
     };
 
     typedef Basic_Output_Stream<Common<stream::IPressure>> Pressure_Stream;

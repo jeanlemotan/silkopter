@@ -368,7 +368,7 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) 
 {
     if (buses.i2c)
     {
-        return buses.i2c->read_register(m_magnetic_field->akm_address, reg, data, size);
+        return buses.i2c->read_register(m_akm_address, reg, data, size);
     }
 
     //spi read
@@ -376,10 +376,10 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) 
     bool res = true;
     constexpr uint8_t READ_FLAG = 0x80;
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-    if (m_magnetic_field->akm_address != akm_address)
+    if (m_akm_address != akm_address)
     {
         res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-        m_magnetic_field->akm_address = akm_address;
+        m_akm_address = akm_address;
     }
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
@@ -396,7 +396,7 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
 {
     if (buses.i2c)
     {
-        return buses.i2c->read_register_u16(m_magnetic_field->akm_address, reg, dst);
+        return buses.i2c->read_register_u16(m_akm_address, reg, dst);
     }
 
     //spi read
@@ -404,10 +404,10 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
     bool res = true;
     constexpr uint8_t READ_FLAG = 0x80;
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-    if (m_magnetic_field->akm_address != akm_address)
+    if (m_akm_address != akm_address)
     {
         res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-        m_magnetic_field->akm_address = akm_address;
+        m_akm_address = akm_address;
     }
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
@@ -420,17 +420,17 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
 {
     if (buses.i2c)
     {
-        return buses.i2c->write_register_u8(m_magnetic_field->akm_address, reg, t);
+        return buses.i2c->write_register_u8(m_akm_address, reg, t);
     }
 
     //spi write
 
     bool res = true;
     constexpr uint8_t akm_address = 0x0C;
-    if (m_magnetic_field->akm_address != akm_address)
+    if (m_akm_address != akm_address)
     {
         res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-        m_magnetic_field->akm_address = akm_address;
+        m_akm_address = akm_address;
     }
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
@@ -487,10 +487,17 @@ auto MPU9250::init() -> bool
         return false;
     }
 
-    m_acceleration = std::make_shared<Acceleration>();
-    m_angular_velocity = std::make_shared<Angular_Velocity>();
-    m_magnetic_field = std::make_shared<Magnetic_Field>();
-    m_temperature = std::make_shared<Temperature>();
+    lock(buses);
+    At_Exit at_exit([this, &buses]()
+    {
+        unlock(buses);
+    });
+
+
+    m_acceleration = std::make_shared<Acceleration_Stream>();
+    m_angular_velocity = std::make_shared<Angular_Velocity_Stream>();
+    m_magnetic_field = std::make_shared<Magnetic_Field_Stream>();
+    m_temperature = std::make_shared<Temperature_Stream>();
 
     std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
@@ -531,33 +538,24 @@ auto MPU9250::init() -> bool
     QLOGI("Magnetic Field Rate {}Hz (requested {}Hz)", m_init_params->magnetic_field_rate, req_params.magnetic_field_rate);
     QLOGI("Temperature Rate {}Hz (requested {}Hz)", m_init_params->temperature_rate, req_params.temperature_rate);
 
-    m_magnetic_field->rate = m_init_params->magnetic_field_rate;
-    m_acceleration->rate = m_init_params->acceleration_angular_velocity_rate;
-    m_angular_velocity->rate = m_acceleration->rate;
-    m_temperature->rate = m_init_params->temperature_rate;
-
-    m_acceleration->dt = m_angular_velocity->dt = std::chrono::milliseconds(1000 / m_init_params->acceleration_angular_velocity_rate);
-    m_magnetic_field->dt = std::chrono::milliseconds(1000 / m_init_params->magnetic_field_rate);
-    m_temperature->dt = std::chrono::milliseconds(1000 / m_init_params->temperature_rate);
-
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (m_init_params->angular_velocity_range)
     {
     case 250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_angular_velocity->scale_inv = math::radians(1.f) / (131.f);
+        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f);
         break;
     case 500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_angular_velocity->scale_inv = math::radians(1.f) / (131.f / 2.f);
+        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 2.f);
         break;
     case 1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_angular_velocity->scale_inv = math::radians(1.f) / (131.f / 4.f);
+        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 4.f);
         break;
     case 2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_angular_velocity->scale_inv = math::radians(1.f) / (131.f / 8.f);
+        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
         QLOGE("Invalid angular velocity range: {}", m_init_params->angular_velocity_range);
@@ -569,19 +567,19 @@ auto MPU9250::init() -> bool
     {
     case 2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
-        m_acceleration->scale_inv = physics::constants::g / 16384.f;
+        m_acceleration_scale_inv = physics::constants::g / 16384.f;
         break;
     case 4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
-        m_acceleration->scale_inv = physics::constants::g / 8192.f;
+        m_acceleration_scale_inv = physics::constants::g / 8192.f;
         break;
     case 8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-        m_acceleration->scale_inv = physics::constants::g / 4096.f;
+        m_acceleration_scale_inv = physics::constants::g / 4096.f;
         break;
     case 16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
-        m_acceleration->scale_inv = physics::constants::g / 2048.f;
+        m_acceleration_scale_inv = physics::constants::g / 2048.f;
         break;
     default:
         QLOGE("Invalid acceleration range: {}", m_init_params->acceleration_range);
@@ -687,7 +685,20 @@ auto MPU9250::init() -> bool
 #endif
     }
 
-    m_last_fifo_tp = q::Clock::now();
+    auto now = q::Clock::now();
+
+    m_magnetic_field->set_rate(m_init_params->magnetic_field_rate);
+    m_magnetic_field->set_tp(now);
+
+    m_acceleration->set_rate(m_init_params->acceleration_angular_velocity_rate);
+    m_acceleration->set_tp(now);
+
+    m_angular_velocity->set_rate(m_init_params->acceleration_angular_velocity_rate);
+    m_angular_velocity->set_tp(now);
+
+    m_temperature->set_rate(m_init_params->temperature_rate);
+    m_temperature->set_tp(now);
+
 
     return true;
 }
@@ -720,7 +731,7 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
     }
 
     // Find compass. Possible addresses range from 0x0C to 0x0F.
-    for (m_magnetic_field->akm_address = 0x0C; m_magnetic_field->akm_address <= 0x0F; m_magnetic_field->akm_address++)
+    for (m_akm_address = 0x0C; m_akm_address <= 0x0F; m_akm_address++)
     {
         uint8_t data;
         auto res = akm_read_u8(buses, AKM_REG_WHOAMI, data);
@@ -730,13 +741,13 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
         }
     }
 
-    if (m_magnetic_field->akm_address > 0x0F)
+    if (m_akm_address > 0x0F)
     {
         QLOGE("Compass not found.");
         return false;
     }
 
-    QLOGI("Compass found at 0x{X}", m_magnetic_field->akm_address);
+    QLOGI("Compass found at 0x{X}", m_akm_address);
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -747,9 +758,9 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field->magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field->magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field->magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -759,7 +770,7 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
 
 #endif
 
-    m_magnetic_field->last_tp = q::Clock::now();
+    m_magnetic_field->set_tp(q::Clock::now());
     return true;
 }
 
@@ -801,7 +812,7 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
         boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
 
         //how often to read the magnetometer
-        int delay = m_init_params->acceleration_angular_velocity_rate / m_magnetic_field->rate;
+        int delay = m_init_params->acceleration_angular_velocity_rate / m_init_params->magnetic_field_rate;
         delay = math::clamp(delay - 1, 0, 31);
 
         res &= mpu_write_u8(buses, MPU_REG_I2C_SLV4_CTRL, delay); //i2c slave delay
@@ -811,7 +822,7 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
 
-    m_magnetic_field->akm_address = 0;
+    m_akm_address = 0;
 
     res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -832,9 +843,9 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     res &= akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field->magnetic_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field->magnetic_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field->magnetic_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -842,17 +853,17 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
     //now request the transfer again
     constexpr uint8_t READ_FLAG = 0x80;
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-    if (m_magnetic_field->akm_address != akm_address)
+    if (m_akm_address != akm_address)
     {
         mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-        m_magnetic_field->akm_address = akm_address;
+        m_akm_address = akm_address;
     }
     mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
     mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 8);
 
 #endif
 
-    m_magnetic_field->last_tp = q::Clock::now();
+    m_magnetic_field->set_tp(q::Clock::now());
     return res;
 }
 
@@ -906,10 +917,16 @@ void MPU9250::process()
         return;
     }
 
-    m_acceleration->samples.clear();
-    m_angular_velocity->samples.clear();
-    m_magnetic_field->samples.clear();
-    m_temperature->samples.clear();
+    lock(buses);
+    At_Exit at_exit([this, &buses]()
+    {
+        unlock(buses);
+    });
+
+    m_acceleration->clear();
+    m_angular_velocity->clear();
+    m_magnetic_field->clear();
+    m_temperature->clear();
 
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -940,12 +957,6 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             if (mpu_read(buses, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
             {
-                auto now = q::Clock::now();
-                auto total_dt = now - m_last_fifo_tp;
-                auto dt = total_dt / sample_count;
-                auto tp = m_last_fifo_tp + dt;
-                m_last_fifo_tp = now;
-
 //                static q::Clock::time_point s_last_stat_tp = q::Clock::now();
 //                static size_t s_sample_count = 0;
 //                s_sample_count += sample_count;
@@ -956,46 +967,29 @@ void MPU9250::process()
 //                    s_last_stat_tp = now;
 //                }
 
-                m_angular_velocity->samples.resize(sample_count);
-                m_acceleration->samples.resize(sample_count);
+//                m_angular_velocity->samples.resize(sample_count);
+//                m_acceleration->samples.resize(sample_count);
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     short x = (data[0] << 8) | data[1]; data += 2;
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
-                    auto& asample = m_acceleration->samples[i];
-                    asample.value.set(x * m_acceleration->scale_inv, y * m_acceleration->scale_inv, z * m_acceleration->scale_inv);
-                    asample.sample_idx = ++m_acceleration->last_sample.sample_idx;
-                    asample.tp = tp;
-                    asample.dt = dt;
+                    math::vec3f value(x * m_acceleration_scale_inv, y * m_acceleration_scale_inv, z * m_acceleration_scale_inv);
+                    m_acceleration->push_sample(value, true);
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
 
-                    auto& gsample = m_angular_velocity->samples[i];
-                    gsample.value.set(x * m_angular_velocity->scale_inv, y * m_angular_velocity->scale_inv, z * m_angular_velocity->scale_inv);
-                    gsample.sample_idx = ++m_angular_velocity->last_sample.sample_idx;
-                    gsample.tp = tp;
-                    gsample.dt = dt;
-
-                    tp += dt;
+                    value.set(x * m_angular_velocity_scale_inv, y * m_angular_velocity_scale_inv, z * m_angular_velocity_scale_inv);
+                    m_angular_velocity->push_sample(value, true);
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
 //                    {
 //                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.angular_velocity[i], m_samples.acceleration[i]);
 //                    }
                 }
-            }
-
-            if (!m_acceleration->samples.empty())
-            {
-                m_acceleration->last_sample = m_acceleration->samples.back();
-            }
-            if (!m_angular_velocity->samples.empty())
-            {
-                m_angular_velocity->last_sample = m_angular_velocity->samples.back();
             }
         }
     }
@@ -1012,7 +1006,7 @@ void MPU9250::process_compass(Buses& buses)
 #ifdef USE_AK8963
     auto now = q::Clock::now();
 
-    auto dt = now - m_magnetic_field->last_tp;
+    auto dt = now - m_magnetic_field->get_tp();
     if (dt >= std::chrono::seconds(5))
     {
         QLOGW("reset compass!");
@@ -1022,7 +1016,7 @@ void MPU9250::process_compass(Buses& buses)
     std::array<uint8_t, 8> tmp;
     if (buses.i2c)
     {
-        if (dt < m_magnetic_field->dt)
+        if (dt < m_magnetic_field->get_dt())
         {
             return;
         }
@@ -1034,12 +1028,6 @@ void MPU9250::process_compass(Buses& buses)
     }
     else //spi
     {
-        //read as often as possible
-//        if (dt < m_magnetic_field->dt)
-//        {
-//            return;
-//        }
-
         //first read what is in the ext registers (so the previous reading)
         if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size()))
         {
@@ -1049,65 +1037,46 @@ void MPU9250::process_compass(Buses& buses)
 //        //now request the transfer again
 //        constexpr uint8_t READ_FLAG = 0x80;
 //        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-//        if (m_magnetic_field->akm_address != akm_address)
+//        if (m_akm_address != akm_address)
 //        {
 //            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-//            m_magnetic_field->akm_address = akm_address;
+//            m_akm_address = akm_address;
 //        }
 //        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
 //        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + tmp.size());
     }
 
-    if (!(tmp[0] & AKM_DATA_READY))
+    if ((tmp[0] & AKM_DATA_READY) != 0)
     {
-        return;
-    }
-    if (tmp[7] & AKM_OVERFLOW)
-    {
-        QLOGW("data overflow");
-        return;
-    }
+        if (tmp[7] & AKM_OVERFLOW)
+        {
+            QLOGW("data overflow");
+            return;
+        }
 
-    if ((tmp[0] & AKM_DATA_OVERRUN))
-    {
-//        QLOGW("data overrun: {}", dt);
-//        return; //no return here - the data is good but
-    }
+        short data[3];
+        data[0] = (tmp[2] << 8) | tmp[1];
+        data[1] = (tmp[4] << 8) | tmp[3];
+        data[2] = (tmp[6] << 8) | tmp[5];
 
-    short data[3];
-    data[0] = (tmp[2] << 8) | tmp[1];
-    data[1] = (tmp[4] << 8) | tmp[3];
-    data[2] = (tmp[6] << 8) | tmp[5];
+        data[0] = data[0] * m_magnetic_field_adj[0];
+        data[1] = data[1] * m_magnetic_field_adj[1];
+        data[2] = data[2] * m_magnetic_field_adj[2];
 
-    data[0] = data[0] * m_magnetic_field->magnetic_adj[0];
-    data[1] = data[1] * m_magnetic_field->magnetic_adj[1];
-    data[2] = data[2] * m_magnetic_field->magnetic_adj[2];
-
-    //change of axis according to the specs. By default the compass has front X, right Y and down Z
-    static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
-            math::quatf::from_axis_z(math::radians(90.f));
-    math::vec3f c(data[0], data[1], data[2]);
-    c *= 0.15f;//16 bit mode
-    c = math::rotate(rot, c);
-
-    m_magnetic_field->samples.reserve(32);
-
-    auto tp = m_magnetic_field->last_tp + m_magnetic_field->dt;
-    while (dt >= m_magnetic_field->dt)
-    {
-        Magnetic_Field::Sample& sample = m_magnetic_field->last_sample;
-        sample.value = c;
-        sample.sample_idx++;
-        sample.tp = tp;
-        sample.dt = m_magnetic_field->dt;
-
-        m_magnetic_field->samples.push_back(sample);
-
-        tp += m_magnetic_field->dt;
-        dt -= m_magnetic_field->dt;
+        //change of axis according to the specs. By default the compass has front X, right Y and down Z
+        static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
+                math::quatf::from_axis_z(math::radians(90.f));
+        math::vec3f c(data[0], data[1], data[2]);
+        c *= 0.15f;//16 bit mode
+        m_last_magnetic_field_value = math::rotate(rot, c);
     }
 
-    m_magnetic_field->last_tp = now - dt; //add the reminder to be processed next frame
+    size_t samples_needed = m_magnetic_field->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_magnetic_field->push_sample(m_last_magnetic_field_value, true);
+        samples_needed--;
+    }
 
 #endif
 }

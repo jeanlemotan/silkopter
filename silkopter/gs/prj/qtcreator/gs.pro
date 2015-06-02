@@ -116,7 +116,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IForce.h \
     ../../../libs/common/node/stream/IFrame.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/ILocation.h \
     ../../../libs/common/node/stream/IMagnetic_Field.h \
     ../../../libs/common/node/stream/IPhysical_State.h \
     ../../../libs/common/node/stream/IPressure.h \
@@ -142,7 +141,9 @@ HEADERS += \
     ../../src/Multi_Config_Window.h \
     ../../src/Axis.h \
     ../../src/Video_Viewer.h \
-    ../../../libs/common/node/stream/IBool.h
+    ../../../libs/common/node/stream/IBool.h \
+    ../../../libs/common/node/stream/IPosition.h \
+    ../../../libs/common/node/stream/IGPS_Info.h
 
 SOURCES += \
     ../../src/GS.cpp \

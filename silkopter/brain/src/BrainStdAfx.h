@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/optional.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "QBase.h"
 #include "QData.h"

@@ -4,7 +4,6 @@
 #include "sz_math.hpp"
 #include "sz_UBLOX.hpp"
 
-#include <boost/scope_exit.hpp>
 
 namespace silk
 {
@@ -262,10 +261,12 @@ void UBLOX::unlock(Buses& buses)
 
 auto UBLOX::get_stream_outputs() const -> std::vector<Stream_Output>
 {
-    std::vector<Stream_Output> outputs(1);
-    outputs[0].type = stream::IECEF_Location::TYPE;
-    outputs[0].name = "Location";
-    outputs[0].stream = m_location_stream;
+    std::vector<Stream_Output> outputs =
+    {{
+         { stream::IECEF_Position::TYPE, "Position", m_position_stream },
+         { stream::IECEF_Velocity::TYPE, "Velocity", m_velocity_stream },
+         { stream::IGPS_Info::TYPE, "GPS Info", m_gps_info_stream },
+    }};
     return outputs;
 }
 
@@ -299,10 +300,20 @@ auto UBLOX::init() -> bool
         return false;
     }
 
-    m_location_stream = std::make_shared<Location_Stream>();
+    m_position_stream = std::make_shared<Position_Stream>();
+    m_velocity_stream = std::make_shared<Velocity_Stream>();
+    m_gps_info_stream = std::make_shared<GPS_Info_Stream>();
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 5);
-    m_location_stream->rate = m_init_params->rate;
+    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
+
+    m_position_stream->set_rate(m_init_params->rate);
+    m_position_stream->set_tp(q::Clock::now());
+
+    m_velocity_stream->set_rate(m_init_params->rate);
+    m_velocity_stream->set_tp(q::Clock::now());
+
+    m_gps_info_stream->set_rate(m_init_params->rate);
+    m_gps_info_stream->set_tp(q::Clock::now());
 
     return true;
 }
@@ -361,10 +372,10 @@ auto UBLOX::setup() -> bool
     }
 
     lock(buses);
-    BOOST_SCOPE_EXIT(this_, &buses)
+    At_Exit at_exit([this, &buses]()
     {
-        this_->unlock(buses);
-    } BOOST_SCOPE_EXIT_END
+        unlock(buses);
+    });
 
     {
         QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
@@ -423,7 +434,9 @@ void UBLOX::process()
 {
     QLOG_TOPIC("ublox::process");
 
-    m_location_stream->samples.clear();
+    m_position_stream->clear();
+    m_velocity_stream->clear();
+    m_gps_info_stream->clear();
 
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
@@ -445,31 +458,46 @@ void UBLOX::process()
         return;
     }
 
-    lock(buses);
-    BOOST_SCOPE_EXIT(this_, &buses)
-    {
-        this_->unlock(buses);
-    } BOOST_SCOPE_EXIT_END
 
+    lock(buses);
+    At_Exit at_exit([this, &buses]()
+    {
+        unlock(buses);
+    });
 
     read_data(buses);
 
     auto now = q::Clock::now();
-    auto dt = now - m_last_complete_tp;
+
+    size_t samples_needed = m_position_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
+        samples_needed--;
+    }
+
+    samples_needed = m_velocity_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
+        samples_needed--;
+    }
+
+    samples_needed = m_gps_info_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_gps_info_stream->push_sample(m_last_gps_info_value, true);
+        samples_needed--;
+    }
+
 
     //watchdog
     if (m_has_nav_status && m_has_pollh && m_has_sol)
     {
-        Location_Stream::Sample& sample = m_location_stream->last_sample;
-        sample.dt = dt;
-        sample.tp = now;
-        sample.sample_idx++;
-        m_location_stream->samples.push_back(sample);
-
         m_last_complete_tp = now;
         m_has_nav_status = m_has_pollh = m_has_sol = false;
     }
-    else if (dt >= REINIT_WATCHGOD_TIMEOUT)
+    else if (now - m_last_complete_tp >= REINIT_WATCHGOD_TIMEOUT)
     {
         //check if we need to reset
         m_is_setup = false;
@@ -739,18 +767,26 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 
     {
         //m_ecef_stream->last_sample.value.sattelite_count = data.numSV;
-        m_location_stream->last_sample.value.position = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
-        m_location_stream->last_sample.value.position_accuracy = data.pAcc / 100.0;
-        m_location_stream->last_sample.value.velocity = math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0;
-        m_location_stream->last_sample.value.velocity_accuracy = data.sAcc / 100.0;
-//        if (data.gpsFix == 0x02)
-//        {
-//            m_stream->last_sample.value.fix = ILocation::Value::Fix::FIX_2D;
-//        }
-//        else if (data.gpsFix == 0x03)
-//        {
-//            m_stream->last_sample.value.fix = ILocation::Value::Fix::FIX_3D;
-//        }
+        m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
+        m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+
+        m_last_gps_info_value.visible_satellites = data.numSV;
+        m_last_gps_info_value.fix_satellites = data.numSV;
+        m_last_gps_info_value.position_accuracy = data.pAcc / 100.0;
+        m_last_gps_info_value.velocity_accuracy = data.sAcc / 100.0;
+        m_last_gps_info_value.pdop = data.pDOP;
+        if (data.gpsFix == 0x02)
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_2D;
+        }
+        else if (data.gpsFix == 0x03)
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
+        }
+        else
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
+        }
         m_has_sol = true;
     }
 }

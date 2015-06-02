@@ -2,7 +2,7 @@
 
 #include "common/node/IProcessor.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/ILocation.h"
+#include "common/node/stream/IPosition.h"
 #include "common/node/stream/IPressure.h"
 #include "common/node/stream/IFrame.h"
 
@@ -13,7 +13,7 @@
 
 namespace sz
 {
-namespace Comp_ECEF_Location
+namespace Comp_ECEF_Position
 {
 struct Init_Params;
 struct Config;
@@ -26,10 +26,10 @@ namespace silk
 namespace node
 {
 
-class Comp_ECEF_Location : public IProcessor
+class Comp_ECEF_Position : public IProcessor
 {
 public:
-    Comp_ECEF_Location(HAL& hal);
+    Comp_ECEF_Position(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document const&;
@@ -50,14 +50,14 @@ private:
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
-    std::shared_ptr<sz::Comp_ECEF_Location::Init_Params> m_init_params;
-    std::shared_ptr<sz::Comp_ECEF_Location::Config> m_config;
+    std::shared_ptr<sz::Comp_ECEF_Position::Init_Params> m_init_params;
+    std::shared_ptr<sz::Comp_ECEF_Position::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    Sample_Accumulator<stream::IECEF_Location, stream::ILinear_Acceleration, stream::IPressure> m_accumulator;
+    Sample_Accumulator<stream::IECEF_Position, stream::ILinear_Acceleration, stream::IPressure> m_accumulator;
 
-    struct ECEF_Location_Stream : public stream::IECEF_Location
+    struct ECEF_Position_Stream : public stream::IECEF_Position
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
@@ -66,7 +66,7 @@ private:
         std::vector<Sample> samples;
         uint32_t rate = 0;
     };
-    mutable std::shared_ptr<ECEF_Location_Stream> m_location_output_stream;
+    mutable std::shared_ptr<ECEF_Position_Stream> m_position_output_stream;
 
     struct ENU_Frame_Stream : public stream::IENU_Frame
     {

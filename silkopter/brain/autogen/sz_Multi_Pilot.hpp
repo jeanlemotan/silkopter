@@ -406,11 +406,11 @@ struct Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04
 namespace sz { namespace Multi_Pilot { struct Input_Streams {
  std::string angular_velocity;
 std::string cardinal_points;
-std::string ecef_location;
+std::string ecef_position;
 std::string battery_state;
 std::string commands;
 
-explicit Input_Streams():angular_velocity(), cardinal_points(), ecef_location(), battery_state(), commands() {  }
+explicit Input_Streams():angular_velocity(), cardinal_points(), ecef_position(), battery_state(), commands() {  }
 
 
  
@@ -433,7 +433,7 @@ SAXEventHandler< std::string > handler_2;
 SAXEventHandler< std::string > handler_3;
 SAXEventHandler< std::string > handler_4;bool has_angular_velocity;
 bool has_cardinal_points;
-bool has_ecef_location;
+bool has_ecef_position;
 bool has_battery_state;
 bool has_commands;
 
@@ -454,7 +454,7 @@ bool has_commands;
 case 1:
     return "cardinal_points";
 case 2:
-    return "ecef_location";
+    return "ecef_position";
 case 3:
     return "battery_state";
 case 4:
@@ -487,7 +487,7 @@ case 4:
     {
         has_angular_velocity = false;
 has_cardinal_points = false;
-has_ecef_location = false;
+has_ecef_position = false;
 has_battery_state = false;
 has_commands = false;
     }
@@ -498,7 +498,7 @@ public:
         , depth(0)
         , handler_0(&obj->angular_velocity)
 , handler_1(&obj->cardinal_points)
-, handler_2(&obj->ecef_location)
+, handler_2(&obj->ecef_position)
 , handler_3(&obj->battery_state)
 , handler_4(&obj->commands)
     {
@@ -741,8 +741,8 @@ case 4:
 						 { state=0; has_angular_velocity = true; }
 else if (utility::string_equal(str, length, "\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15))
 						 { state=1; has_cardinal_points = true; }
-else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13))
-						 { state=2; has_ecef_location = true; }
+else if (utility::string_equal(str, length, "\x45\x43\x45\x46\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 13))
+						 { state=2; has_ecef_position = true; }
 else if (utility::string_equal(str, length, "\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13))
 						 { state=3; has_battery_state = true; }
 else if (utility::string_equal(str, length, "\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8))
@@ -890,7 +890,7 @@ case 4:
         } else {
             if (!has_angular_velocity) set_missing_required("angular_velocity");
 if (!has_cardinal_points) set_missing_required("cardinal_points");
-if (!has_ecef_location) set_missing_required("ecef_location");
+if (!has_ecef_position) set_missing_required("ecef_position");
 if (!has_battery_state) set_missing_required("battery_state");
 if (!has_commands) set_missing_required("commands");
         }
@@ -953,7 +953,7 @@ struct Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f24
 
         w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.angular_velocity);
 w.Key("\x43\x61\x72\x64\x69\x6e\x61\x6c\x20\x50\x6f\x69\x6e\x74\x73", 15, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.cardinal_points);
-w.Key("\x45\x43\x45\x46\x20\x4c\x6f\x63\x61\x74\x69\x6f\x6e", 13, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.ecef_location);
+w.Key("\x45\x43\x45\x46\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 13, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.ecef_position);
 w.Key("\x42\x61\x74\x74\x65\x72\x79\x20\x53\x74\x61\x74\x65", 13, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.battery_state);
 w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73", 8, false); Serializer< Writer1a8b66c9ddbca20e7d53c7db8c10a4fed46853f42a1c29dae299f2437499c9b3, std::string >()(w, value.commands);
 

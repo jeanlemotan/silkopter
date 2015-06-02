@@ -5,6 +5,7 @@
 #include "common/node/stream/IADC.h"
 #include "common/node/bus/II2C.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -49,22 +50,10 @@ private:
     std::shared_ptr<sz::ADS1115::Init_Params> m_init_params;
     std::shared_ptr<sz::ADS1115::Config> m_config;
 
-    q::Clock::time_point m_last_last_tp = q::Clock::now();
-//    q::Clock::duration m_dt;
+    q::Clock::time_point m_last_tp = q::Clock::now();
 
-    struct Stream : public stream::IADC
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        std::vector<Sample> samples;
-        q::Clock::time_point last_tp = q::Clock::now();
-        q::Clock::duration dt;
-        Sample last_sample;
-        uint32_t rate = 0;
-    };
-    mutable std::array<std::shared_ptr<Stream>, 4> m_adc;
-
+    typedef Basic_Output_Stream<stream::IADC> Output_Stream;
+    mutable std::array<std::shared_ptr<Output_Stream>, 4> m_adcs;
 
     auto set_config_register(bus::II2C& i2c) -> bool;
 

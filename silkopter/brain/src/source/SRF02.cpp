@@ -32,6 +32,9 @@ constexpr uint8_t BURST                     = 0x5C;
 constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 
 
+constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(80);
+
+
 SRF02::SRF02(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::SRF02::Init_Params())
@@ -45,7 +48,7 @@ auto SRF02::get_stream_outputs() const -> std::vector<Stream_Output>
     std::vector<Stream_Output> outputs(1);
     outputs[0].type = stream::IDistance::TYPE;
     outputs[0].name = "Distance";
-    outputs[0].stream = m_stream;
+    outputs[0].stream = m_output_stream;
     return outputs;
 }
 auto SRF02::init(rapidjson::Value const& init_params) -> bool
@@ -76,10 +79,15 @@ auto SRF02::init() -> bool
         return false;
     }
 
-    m_stream = std::make_shared<Stream>();
+    i2c->lock();
+    At_Exit at_exit([this, &i2c]()
+    {
+        i2c->unlock();
+    });
+
+    m_output_stream = std::make_shared<Output_Stream>();
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 12);
-    m_stream->rate = m_init_params->rate;
 
     QLOGI("Probing SRF02 on {}", m_init_params->bus);
 
@@ -93,29 +101,17 @@ auto SRF02::init() -> bool
 
     QLOGI("SRF02 Revision: {}", rev);
 
-    auto now = q::Clock::now();
-    m_stream->dt = std::chrono::milliseconds(1000 / m_init_params->rate);
-    m_stream->trigger_tp = now;
-    m_stream->last_tp = now;
-
     trigger(*i2c);
 
-//    if (!m_init_params->name.empty())
-//    {
-//        m_stream->name = q::util::format2<std::string>("{}-distance", m_init_params->name);
-//        if (!m_hal.get_sources().add(*this) ||
-//            !m_hal.get_streams().add(m_stream))
-//        {
-//            return false;
-//        }
-//    }
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
 
     return true;
 }
 
 void SRF02::trigger(bus::II2C& i2c)
 {
-    m_stream->trigger_tp = q::Clock::now();
+    m_last_trigger_tp = q::Clock::now();
     i2c.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
@@ -124,7 +120,7 @@ void SRF02::process()
     QLOG_TOPIC("srf02::process");
     auto now = q::Clock::now();
 
-    m_stream->samples.clear();
+    m_output_stream->clear();
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -132,8 +128,14 @@ void SRF02::process()
         return;
     }
 
+    i2c->lock();
+    At_Exit at_exit([this, &i2c]()
+    {
+        i2c->unlock();
+    });
+
     //wait for echo
-    if (now - m_stream->trigger_tp < m_stream->dt)
+    if (now - m_last_trigger_tp < MAX_MEASUREMENT_DURATION)
     {
         return;
     }
@@ -154,24 +156,13 @@ void SRF02::process()
     auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
     auto is_healthy = distance >= min_distance && distance <= max_distance;
 
-    m_stream->samples.clear();
-
-    auto dt = now - m_stream->last_tp;
-    auto tp = m_stream->last_tp + m_stream->dt;
-    while (dt >= m_stream->dt)
+    m_output_stream->clear();
+    auto samples_needed = m_output_stream->compute_samples_needed();
+    while (samples_needed > 0)
     {
-        Stream::Sample& sample = m_stream->last_sample;
-        sample.value = value;
-        sample.sample_idx++;
-        sample.dt = m_stream->dt; //TODO - calculate the dt since the last sample time_point, not since the trigger time
-        sample.tp = tp;
-        sample.is_healthy = is_healthy;
-        m_stream->samples.push_back(sample);
-
-        tp += m_stream->dt;
-        dt -= m_stream->dt;
+        m_output_stream->push_sample(value, is_healthy);
+        samples_needed--;
     }
-    m_stream->last_tp = now - dt; //add the reminder to be processed next frame
 }
 
 auto SRF02::set_config(rapidjson::Value const& json) -> bool

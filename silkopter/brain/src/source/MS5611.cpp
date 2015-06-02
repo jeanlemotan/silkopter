@@ -148,6 +148,12 @@ auto MS5611::init() -> bool
         return false;
     }
 
+    lock(buses);
+    At_Exit at_exit([this, &buses]()
+    {
+        unlock(buses);
+    });
+
     m_pressure = std::make_shared<Pressure_Stream>();
     m_temperature = std::make_shared<Temperature_Stream>();
 
@@ -219,6 +225,12 @@ void MS5611::process()
     {
         return;
     }
+
+    lock(buses);
+    At_Exit at_exit([this, &buses]()
+    {
+        unlock(buses);
+    });
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
