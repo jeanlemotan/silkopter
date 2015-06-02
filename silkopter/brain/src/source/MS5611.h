@@ -7,6 +7,8 @@
 #include "common/node/bus/II2C.h"
 #include "common/node/bus/ISPI.h"
 
+#include "Basic_Output_Stream.h"
+
 namespace sz
 {
 namespace MS5611
@@ -65,35 +67,18 @@ private:
     std::shared_ptr<sz::MS5611::Init_Params> m_init_params;
     std::shared_ptr<sz::MS5611::Config> m_config;
 
-    struct Common
+    template<class Base>
+    struct Common : public Base
     {
         double      reading = 0;
         uint32_t rate = 0;
     };
 
-    struct Pressure : public stream::IPressure, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<Common<stream::IPressure>> Pressure_Stream;
+    mutable std::shared_ptr<Pressure_Stream> m_pressure;
 
-        std::vector<Sample> samples;
-        Sample last_sample;
-        q::Clock::time_point last_tp;
-        q::Clock::duration dt;
-    };
-    mutable std::shared_ptr<Pressure> m_pressure;
-
-    struct Temperature : public stream::ITemperature, public Common
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        std::vector<Sample> samples;
-        Sample last_sample;
-        q::Clock::time_point last_tp;
-        q::Clock::duration dt;
-    };
-    mutable std::shared_ptr<Temperature> m_temperature;
+    typedef Basic_Output_Stream<Common<stream::ITemperature>> Temperature_Stream;
+    mutable std::shared_ptr<Temperature_Stream> m_temperature;
 
     double		m_c1 = 0;
     double		m_c2 = 0;

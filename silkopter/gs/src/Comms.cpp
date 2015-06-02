@@ -993,7 +993,7 @@ void Comms::process()
     while (auto msg = m_telemetry_channel.get_next_message())
     {
         //process only the first 10 ms worh of data and discard the rest
-        if (q::Clock::now() - start < std::chrono::milliseconds(10))
+        if (q::Clock::now() - start < std::chrono::milliseconds(100))
         {
             switch (msg.get())
             {

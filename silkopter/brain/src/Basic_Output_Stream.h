@@ -75,7 +75,7 @@ public:
 
     auto compute_samples_needed() -> size_t
     {
-        auto dt = q::Clock::now() - m_last_sample.tp;
+        auto dt = q::Clock::now() - m_tp;
         if (dt < q::Clock::duration(0))
         {
             return 0;

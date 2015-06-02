@@ -81,7 +81,7 @@ void Comp_AHRS::process()
     {
         float av_length = 0;
 
-        Output_Stream::Value value;
+        Output_Stream::Value value = m_output_stream->get_last_sample().value;
 
         {
             auto omega = av_sample.value;

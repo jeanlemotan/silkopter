@@ -148,22 +148,11 @@ auto MS5611::init() -> bool
         return false;
     }
 
-    m_pressure = std::make_shared<Pressure>();
-    m_temperature = std::make_shared<Temperature>();
+    m_pressure = std::make_shared<Pressure_Stream>();
+    m_temperature = std::make_shared<Temperature_Stream>();
 
     m_init_params->pressure_rate = math::clamp<size_t>(m_init_params->pressure_rate, 10, 100);
     m_init_params->temperature_rate_ratio = math::clamp<size_t>(m_init_params->temperature_rate_ratio, 1, 10);
-    m_pressure->rate = m_init_params->pressure_rate;
-    m_temperature->rate = m_init_params->pressure_rate / m_init_params->temperature_rate_ratio;
-
-    auto now = q::Clock::now();
-    m_last_reading_tp = now;
-
-    m_pressure->dt = std::chrono::milliseconds(1000 / m_pressure->rate);
-    m_pressure->last_tp = now;
-
-    m_temperature->dt = std::chrono::milliseconds(1000 / m_temperature->rate);
-    m_temperature->last_tp = now;
 
     QLOGI("Probing MS5611 on {}", m_init_params->bus);
 
@@ -207,13 +196,23 @@ auto MS5611::init() -> bool
 
     bus_write(buses, CMD_CONVERT_D2_OSR256, nullptr, 0);
 
+    auto now = q::Clock::now();
+    m_last_reading_tp = now;
+
+    m_pressure->set_rate(m_init_params->pressure_rate);
+    m_pressure->set_tp(now);
+
+    m_temperature->set_rate(m_init_params->pressure_rate / m_init_params->temperature_rate_ratio);
+    m_temperature->set_tp(now);
+
+
     return true;
 }
 
 void MS5611::process()
 {
-    m_pressure->samples.clear();
-    m_temperature->samples.clear();
+    m_pressure->clear();
+    m_temperature->clear();
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
@@ -223,7 +222,7 @@ void MS5611::process()
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
-    if (now - m_last_reading_tp < m_pressure->dt)
+    if (now - m_last_reading_tp < m_pressure->get_dt())
     {
         return;
     }
@@ -267,6 +266,7 @@ void MS5611::process()
             m_stage++;
         }
     }
+    m_last_reading_tp = now;
 
     {
         // Formulas from manufacturer datasheet
@@ -293,38 +293,20 @@ void MS5611::process()
         auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
         {
-            auto dt = now - m_pressure->last_tp;
-            auto tp = m_pressure->last_tp + m_pressure->dt;
-            while (dt >= m_pressure->dt)
+            auto samples_needed = m_pressure->compute_samples_needed();
+            while (samples_needed > 0)
             {
-                Pressure::Sample& ps = m_pressure->last_sample;
-                ps.value = p;
-                ps.sample_idx++;
-                ps.dt = m_pressure->dt;
-                ps.tp = tp;
-                m_pressure->samples.push_back(ps);
-
-                tp += m_pressure->dt;
-                dt -= m_pressure->dt;
+                m_pressure->push_sample(p, true);
+                samples_needed--;
             }
-            m_pressure->last_tp = now - dt; //reminder for the next frame
         }
         {
-            auto dt = now - m_temperature->last_tp;
-            auto tp = m_temperature->last_tp + m_temperature->dt;
-            while (dt >= m_temperature->dt)
+            auto samples_needed = m_temperature->compute_samples_needed();
+            while (samples_needed > 0)
             {
-                Temperature::Sample& ts = m_temperature->last_sample;
-                ts.value = t;
-                ts.sample_idx++;
-                ts.dt = m_temperature->dt;
-                ts.tp = tp;
-                m_temperature->samples.push_back(ts);
-
-                tp += m_temperature->dt;
-                dt -= m_temperature->dt;
+                m_temperature->push_sample(t, true);
+                samples_needed--;
             }
-            m_temperature->last_tp = now - dt; //reminder for the next frame
         }
     }
 }

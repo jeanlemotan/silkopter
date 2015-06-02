@@ -371,7 +371,22 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (type == IFrame::TYPE)
     {
-//        layout()->addWidget(new Reference_Frame_Stream_Viewer(stream, this));
+        auto viewer = new Numeric_Viewer("Frame", stream->rate, this);
+        viewer->add_graph("X", "", QColor(0xe74c3c));
+        viewer->add_graph("Y", "", QColor(0x2ecc71));
+        viewer->add_graph("Z", "", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Frame>(stream)->samples_available_signal.connect([this, viewer](Frame& stream)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: stream.samples)
+            {
+                math::mat3f mat = s.value.rotation.get_as_mat3();
+                data = { math::dot(mat.get_axis_x(), math::vec3f(1, 0, 0)), math::dot(mat.get_axis_y(), math::vec3f(0, 1, 0)), math::dot(mat.get_axis_z(), math::vec3f(0, 0, 1)) };
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
     }
     else if (type == ITemperature::TYPE)
     {
