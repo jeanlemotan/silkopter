@@ -6,6 +6,7 @@
 #include "common/node/stream/IPWM.h"
 #include "HAL.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -50,26 +51,16 @@ private:
     std::shared_ptr<sz::Servo_Gimbal::Init_Params> m_init_params;
     std::shared_ptr<sz::Servo_Gimbal::Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
     stream::IFrame_wptr m_frame_stream;
     stream::IFrame_wptr m_target_stream;
 
     std::vector<stream::IFrame::Sample> m_frame_samples;
     std::vector<stream::IFrame::Sample> m_target_frame_samples;
 
-    struct Stream : public stream::IPWM
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Stream> m_x_output_stream;
-    mutable std::shared_ptr<Stream> m_y_output_stream;
-    mutable std::shared_ptr<Stream> m_z_output_stream;
+    typedef Basic_Output_Stream<stream::IPWM> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_x_output_stream;
+    mutable std::shared_ptr<Output_Stream> m_y_output_stream;
+    mutable std::shared_ptr<Output_Stream> m_z_output_stream;
 };
 
 

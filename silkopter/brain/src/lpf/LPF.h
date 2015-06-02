@@ -3,6 +3,7 @@
 #include "HAL.h"
 #include "common/node/ILPF.h"
 #include "utils/Butterworth.h"
+#include "Basic_Output_Stream.h"
 
 #include "sz_math.hpp"
 #include "sz_LPF.hpp"
@@ -44,15 +45,8 @@ private:
 
     util::Butterworth<typename Stream_t::Value> m_dsp;
 
-    struct Stream : public Stream_t
-    {
-        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<typename Stream_t::Sample> samples;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<Stream_t> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
@@ -85,13 +79,14 @@ auto LPF<Stream_t>::init(rapidjson::Value const& init_params) -> bool
 template<class Stream_t>
 auto LPF<Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
         return false;
     }
-    m_output_stream->rate = m_init_params.rate;
+    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -116,10 +111,12 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 
     auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.input_streams.input);
 
+    auto output_rate = m_output_stream->get_rate();
+
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.input_streams.input, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.input_streams.input, output_rate, rate);
         m_config.input_streams.input.clear();
         m_input_stream.reset();
     }
@@ -128,17 +125,17 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         m_input_stream = input_stream;
     }
 
-    if (m_config.cutoff_frequency > m_output_stream->rate / 2)
+    if (m_config.cutoff_frequency > output_rate / 2)
     {
         QLOGE("Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",
-              m_config.cutoff_frequency, m_output_stream->rate / 2);
+              m_config.cutoff_frequency, output_rate / 2);
         return false;
     }
 
     m_config.poles = math::max<uint32_t>(m_config.poles, 1);
     if (m_config.poles > 0 &&
         m_config.cutoff_frequency > 0 &&
-        !m_dsp.setup(m_config.poles, m_output_stream->rate, m_config.cutoff_frequency))
+        !m_dsp.setup(m_config.poles, output_rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
@@ -184,7 +181,7 @@ void LPF<Stream_t>::process()
 {
     QLOG_TOPIC("lpf::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     auto input_stream = m_input_stream.lock();
     if (!input_stream || m_config.cutoff_frequency == 0)
@@ -193,12 +190,11 @@ void LPF<Stream_t>::process()
     }
 
     auto const& is = input_stream->get_samples();
-    m_output_stream->samples.reserve(is.size());
-
     for (auto const& s: is)
     {
-       m_output_stream->samples.push_back(s);
-       m_dsp.process(m_output_stream->samples.back().value);
+        auto value = s.value;
+        m_dsp.process(value);
+        m_output_stream->push_sample(value, s.is_healthy);
     };
 }
 

@@ -36,13 +36,14 @@ auto ADC_Ammeter::init(rapidjson::Value const& init_params) -> bool
 }
 auto ADC_Ammeter::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -67,7 +68,7 @@ void ADC_Ammeter::process()
 {
     QLOG_TOPIC("adc_ammeter::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     auto adc_stream = m_adc_stream.lock();
     if (!adc_stream)
@@ -75,20 +76,11 @@ void ADC_Ammeter::process()
         return;
     }
 
-    auto const& s = adc_stream->get_samples();
-    m_output_stream->samples.resize(s.size());
-
-    std::transform(s.begin(), s.end(), m_output_stream->samples.begin(), [this](stream::IADC::Sample const& sample)
+    auto const& iss = adc_stream->get_samples();
+    for (auto const& is: iss)
     {
-       Stream::Sample vs;
-       vs.dt = sample.dt;
-       vs.tp = sample.tp;
-       vs.sample_idx = sample.sample_idx;
-       vs.value = sample.value * m_config->output_streams.current.scale + m_config->output_streams.current.bias;
-       return vs;
-    });
-
-    //TODO - apply scale - bias
+       m_output_stream->push_sample(is.value * m_config->output_streams.current.scale + m_config->output_streams.current.bias, is.is_healthy);
+    };
 }
 
 auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
@@ -108,9 +100,9 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
     auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc);
 
     auto rate = adc_stream ? adc_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != m_output_stream->get_rate())
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc, m_output_stream->get_rate(), rate);
         m_adc_stream.reset();
     }
     else

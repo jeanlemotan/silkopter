@@ -516,7 +516,7 @@ namespace util
 
     //to avoid popping front in vectors
     //Note - I use a vector instead of a deque because the deque is too slow at iterating.
-    //The pop_front can be implemented optimally for vectors if order need not be preserved.
+    //The erase can be implemented optimally for vectors if order need not be preserved.
     template<class T> void RUDP::erase_unordered(std::vector<T>& c, typename std::vector<T>::iterator it)
     {
         QASSERT(!c.empty());

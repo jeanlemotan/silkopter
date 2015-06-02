@@ -4,6 +4,8 @@
 #include "common/node/IGenerator.h"
 #include "generator/Oscillator.h"
 
+#include "Basic_Output_Stream.h"
+
 #include "sz_math.hpp"
 #include "sz_Scalar_Generator.hpp"
 
@@ -42,19 +44,8 @@ private:
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
 
-    q::Clock::time_point m_last_tp;
-    q::Clock::duration m_dt;
-
-    struct Stream : public Stream_t
-    {
-        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<typename Stream_t::Sample> samples;
-        uint32_t sample_idx = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<Stream_t> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
@@ -87,15 +78,14 @@ auto Scalar_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bo
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
         return false;
     }
-    m_output_stream->rate = m_init_params.rate;
-    m_last_tp = q::Clock::now();
-    m_dt = std::chrono::microseconds(1000000 / m_init_params.rate);
+    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -121,9 +111,9 @@ auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> boo
 
     auto modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.modulation);
 
-    if (modulation_stream && modulation_stream->get_rate() != m_output_stream->rate)
+    if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
     {
-        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.modulation, m_output_stream->rate, modulation_stream->get_rate());
+        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.modulation, m_output_stream->get_rate(), modulation_stream->get_rate());
         m_modulation_stream.reset();
     }
     else
@@ -173,48 +163,25 @@ void Scalar_Generator<Stream_t>::process()
 {
     QLOG_TOPIC("scalar_generator::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     auto modulation_stream = m_modulation_stream.lock();
     if (modulation_stream)
     {
         auto const& samples = modulation_stream->get_samples();
-        m_output_stream->samples.reserve(samples.size());
         for (auto const& s: samples)
         {
-            typename Stream::Sample vs;
-            vs.dt = m_dt;
-            vs.tp = s.tp;
-            vs.sample_idx = ++m_output_stream->sample_idx;
-            vs.value = m_config.value + s.value;
-            m_output_stream->samples.push_back(vs);
+            m_output_stream->push_sample(m_config.value + s.value, s.is_healthy);
         }
     }
     else
     {
-        auto now = q::Clock::now();
-        auto dt = now - m_last_tp;
-        if (dt < m_dt)
+        auto samples_needed = m_output_stream->compute_samples_needed();
+        while (samples_needed > 0)
         {
-            return;
+            m_output_stream->push_sample(m_config.value, true);
+            samples_needed++;
         }
-        auto tp = m_last_tp + m_dt;
-        m_last_tp = now;
-
-        m_output_stream->samples.reserve(dt / m_dt);
-        while (dt >= m_dt)
-        {
-            typename Stream::Sample vs;
-            vs.dt = m_dt;
-            vs.tp = tp;
-            vs.sample_idx = ++m_output_stream->sample_idx;
-            vs.value = m_config.value;
-            m_output_stream->samples.push_back(vs);
-            tp += m_dt;
-            dt -= m_dt;
-        }
-        //reminder for next process
-        m_last_tp -= dt;
     }
 }
 

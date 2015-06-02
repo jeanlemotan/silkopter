@@ -37,7 +37,7 @@ auto Oscillator::init(rapidjson::Value const& init_params) -> bool
 }
 auto Oscillator::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -48,12 +48,11 @@ auto Oscillator::init() -> bool
         QLOGE("Needs at least one frequency component");
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
 
     m_config->components.resize(m_init_params->component_count);
 
-    m_last_tp = q::Clock::now();
-    m_dt = std::chrono::microseconds(1000000 / m_init_params->rate);
     return true;
 }
 
@@ -75,53 +74,35 @@ void Oscillator::process()
 {
     QLOG_TOPIC("Oscillator::process");
 
-    m_output_stream->samples.clear();
-
-    auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    if (dt < m_dt)
-    {
-        return;
-    }
-    auto tp = m_last_tp + m_dt;
-    m_last_tp = now;
-
-    m_output_stream->samples.reserve(dt / m_dt);
+    m_output_stream->clear();
 
     float amplitude = m_config->amplitude;
 
-    while (dt >= m_dt)
+    size_t samples_needed = m_output_stream->compute_samples_needed();
+    while (samples_needed > 0)
     {
-       Stream::Sample vs;
-       vs.dt = m_dt;
-       vs.tp = tp;
-       vs.sample_idx = ++m_output_stream->sample_idx;
-       vs.value = 0;
+       float value = 0;
 
-       m_period += q::Seconds(m_dt).count();
+       m_period += q::Seconds(m_output_stream->get_dt()).count();
        //m_period = std::fmod(m_period, 1.f);
 
        float a = m_period * math::anglef::_2pi;
        for (auto& c: m_config->components)
        {
-           vs.value += math::sin(a * c.frequency) * 0.5f * c.amplitude;
+           value += math::sin(a * c.frequency) * 0.5f * c.amplitude;
        }
        if (m_config->square)
        {
-           vs.value = vs.value < 0.f ? -0.5f : 0.5f;
+           value = value < 0.f ? -0.5f : 0.5f;
        }
-       vs.value += m_rnd_distribution(m_rnd_engine);
+       value += m_rnd_distribution(m_rnd_engine);
 
-       vs.value *= amplitude;
+       value *= amplitude;
 
-       m_output_stream->samples.push_back(vs);
+       m_output_stream->push_sample(value, true);
 
-       tp += m_dt;
-       dt -= m_dt;
+       samples_needed--;
     }
-
-    //reminder for next process
-    m_last_tp -= dt;
 }
 
 auto Oscillator::set_config(rapidjson::Value const& json) -> bool

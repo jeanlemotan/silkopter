@@ -37,15 +37,14 @@ auto Gravity_Filter::init(rapidjson::Value const& init_params) -> bool
 }
 auto Gravity_Filter::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
-    return true;
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());    return true;
 }
 
 auto Gravity_Filter::get_stream_inputs() const -> std::vector<Stream_Input>
@@ -70,22 +69,16 @@ void Gravity_Filter::process()
 {
     QLOG_TOPIC("gravity_filter::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     m_accumulator.process([this](
                           size_t idx,
                           stream::IFrame::Sample const& f_sample,
                           stream::IAcceleration::Sample const& a_sample)
     {
-        auto& sample = m_output_stream->last_sample;
-        sample.dt = m_dt;
-        sample.tp = f_sample.tp;
-        sample.sample_idx++;
-
         auto p2l = math::inverse<float, math::safe>(f_sample.value.rotation);
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);
-        sample.value = a_sample.value - gravity_local;
-        m_output_stream->samples.push_back(sample);
+        m_output_stream->push_sample(a_sample.value - gravity_local, f_sample.is_healthy & a_sample.is_healthy);
     });
 }
 
@@ -106,14 +99,16 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     m_accumulator.clear_streams();
 
+    auto output_rate = m_output_stream->get_rate();
+
     auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
 
     auto rate = frame_stream ? frame_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config->input_streams.frame.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, output_rate, rate);
     }
     else
     {
@@ -121,10 +116,10 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config->input_streams.acceleration.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, output_rate, rate);
     }
     else
     {

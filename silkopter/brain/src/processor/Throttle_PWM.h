@@ -5,6 +5,7 @@
 #include "common/node/stream/IPWM.h"
 #include "common/node/IProcessor.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -49,15 +50,8 @@ private:
 
     IThrottle_wptr m_input_stream;
 
-    struct Stream : public IPWM
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::IPWM> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

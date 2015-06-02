@@ -232,5 +232,6 @@ HEADERS += \
     ../../src/generator/Oscillator.h \
     ../../../libs/common/node/stream/IBool.h \
     ../../src/Sample_Accumulator.h \
-    ../../src/MPL_Helper.h
+    ../../src/MPL_Helper.h \
+    ../../src/Basic_Output_Stream.h
 

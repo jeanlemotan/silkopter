@@ -649,7 +649,7 @@ namespace formatting
     }
 
     template<class Dst_String, class Placeholder, class T>
-    typename std::enable_if<std::is_enum<T>::value, void>::type
+    typename std::enable_if<std::is_enum<typename std::remove_reference<T>::type>::value, void>::type
         format_string(Dst_String& dst, Placeholder const& ph, T e)
     {
         format_string(dst, ph, static_cast<int>(e));

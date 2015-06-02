@@ -4,6 +4,8 @@
 #include "common/node/stream/IFloat.h"
 #include "common/node/IGenerator.h"
 
+#include "Basic_Output_Stream.h"
+
 
 namespace sz
 {
@@ -46,22 +48,12 @@ private:
     std::shared_ptr<sz::Oscillator::Init_Params> m_init_params;
     std::shared_ptr<sz::Oscillator::Config> m_config;
 
-    q::Clock::time_point m_last_tp;
-    q::Clock::duration m_dt;
     float m_period = 0;
     std::uniform_real_distribution<float> m_rnd_distribution;
     std::mt19937 m_rnd_engine;
 
-    struct Stream : public stream::IFloat
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        uint32_t sample_idx = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::IFloat> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

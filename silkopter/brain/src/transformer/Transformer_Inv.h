@@ -8,6 +8,7 @@
 #include "sz_Transformer.hpp"
 
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 namespace silk
 {
@@ -38,24 +39,14 @@ private:
 
     HAL& m_hal;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
     rapidjson::Document m_init_paramsj;
     sz::Transformer::Init_Params m_init_params;
     sz::Transformer::Config m_config;
 
     Sample_Accumulator<In_Stream_t, Frame_Stream_t> m_accumulator;
 
-    struct Stream : public Out_Stream_t
-    {
-        auto get_samples() const -> std::vector<typename Out_Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<typename Out_Stream_t::Sample> samples;
-        typename Out_Stream_t::Sample last_sample;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<Out_Stream_t> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
@@ -92,14 +83,14 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(rapidjson:
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
         return false;
     }
-    m_output_stream->rate = m_init_params.rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -126,14 +117,16 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     m_config = sz;
     m_accumulator.clear_streams();
 
+    auto output_rate = m_output_stream->get_rate();
+
     auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.input_streams.input);
     auto frame_stream = m_hal.get_streams().template find_by_name<Frame_Stream_t>(sz.input_streams.frame);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config.input_streams.input.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, output_rate, rate);
     }
     else
     {
@@ -141,10 +134,10 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     }
 
     rate = frame_stream ? frame_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config.input_streams.frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_output_stream->rate, rate);
+        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, output_rate, rate);
     }
     else
     {
@@ -191,17 +184,14 @@ void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
 {
     QLOG_TOPIC("transformer_inv::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     m_accumulator.process([this](
                           size_t idx,
                           typename In_Stream_t::Sample const& in_sample,
                           typename Frame_Stream_t::Sample const& f_sample)
     {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
-        m_output_stream->last_sample.value = math::rotate(f_sample.value.rotation, in_sample.value);
-        m_output_stream->samples.push_back(m_output_stream->last_sample);
+        m_output_stream->push_sample(math::rotate(f_sample.value.rotation, in_sample.value), in_sample.is_healthy & f_sample.is_healthy);
     });
 }
 

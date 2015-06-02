@@ -78,6 +78,8 @@ public:
 //A stream sample
 template<class T> struct Sample
 {
+    typedef T Value;
+
     Sample() : value() {}
     T value;
     uint32_t sample_idx = 0; //different for each sample. NOTE - it's allowed to wrap so don't compare like this: if (my_sample_idx > sample_idx) !!!!!!!

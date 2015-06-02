@@ -36,14 +36,14 @@ auto Stability_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Stability_Controller::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -69,48 +69,26 @@ void Stability_Controller::process()
 {
     QLOG_TOPIC("stability_controller::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
-    auto target_stream = m_target_stream.lock();
-    auto input_stream = m_input_stream.lock();
-    if (!target_stream || !input_stream)
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
     {
         return;
     }
 
-    //accumulate the input streams
+    m_accumulator.process([this, &multi_config](
+                          size_t idx,
+                          stream::IFrame::Sample const& i_sample,
+                          stream::IFrame::Sample const& t_sample)
     {
-        auto const& samples = target_stream->get_samples();
-        m_target_samples.reserve(m_target_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_target_samples));
-    }
-    {
-        auto const& samples = input_stream->get_samples();
-        m_input_samples.reserve(m_input_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_samples));
-    }
+//        math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+//        math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
-    //TODO add some protecton for severely out-of-sync streams
+//        Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
-    size_t count = std::min(m_target_samples.size(), m_input_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_output_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
-    {
-        m_output_stream->last_sample.dt = m_dt;
-        m_output_stream->last_sample.sample_idx++;
-
-        m_output_stream->samples[i] = m_output_stream->last_sample;
-    }
-
-    //consume processed samples
-    m_target_samples.erase(m_target_samples.begin(), m_target_samples.begin() + count);
-    m_input_samples.erase(m_input_samples.begin(), m_input_samples.begin() + count);
+//        m_output_stream->push_sample(value, i_sample.is_healthy & t_sample.is_healthy);
+    });
 }
 
 auto Stability_Controller::set_config(rapidjson::Value const& json) -> bool
@@ -128,32 +106,31 @@ auto Stability_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto input_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.input);
     auto target_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.target);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != m_output_stream->get_rate())
     {
         m_config->input_streams.input.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
-        m_input_stream.reset();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->get_rate(), rate);
     }
     else
     {
-        m_input_stream = input_stream;
+        m_accumulator.set_stream<0>(input_stream);
     }
 
     rate = target_stream ? target_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != m_output_stream->get_rate())
     {
         m_config->input_streams.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->rate, rate);
-        m_target_stream.reset();
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->get_rate(), rate);
     }
     else
     {
-        m_target_stream = target_stream;
+        m_accumulator.set_stream<1>(target_stream);
     }
 
     return true;

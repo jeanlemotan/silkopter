@@ -48,20 +48,8 @@ private:
     std::vector<stream::IFloat::Sample> m_y_modulation_samples;
     std::vector<stream::IFloat::Sample> m_z_modulation_samples;
 
-
-    q::Clock::time_point m_last_tp;
-    q::Clock::duration m_dt;
-
-    struct Stream : public Stream_t
-    {
-        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<typename Stream_t::Sample> samples;
-        uint32_t sample_idx = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<Stream_t> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
@@ -94,15 +82,14 @@ auto Vec3_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bool
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
         return false;
     }
-    m_output_stream->rate = m_init_params.rate;
-    m_last_tp = q::Clock::now();
-    m_dt = std::chrono::microseconds(1000000 / m_init_params.rate);
+    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -127,9 +114,9 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     }
 
     auto x_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.x_modulation);
-    if (x_modulation_stream && x_modulation_stream->get_rate() != m_output_stream->rate)
+    if (x_modulation_stream && x_modulation_stream->get_rate() != m_output_stream->get_rate())
     {
-        QLOGW("Bad x modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_modulation, m_output_stream->rate, x_modulation_stream->get_rate());
+        QLOGW("Bad x modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_modulation, m_output_stream->get_rate(), x_modulation_stream->get_rate());
         m_x_modulation_stream.reset();
     }
     else
@@ -138,9 +125,9 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     }
 
     auto y_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.y_modulation);
-    if (y_modulation_stream && y_modulation_stream->get_rate() != m_output_stream->rate)
+    if (y_modulation_stream && y_modulation_stream->get_rate() != m_output_stream->get_rate())
     {
-        QLOGW("Bad y modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_modulation, m_output_stream->rate, y_modulation_stream->get_rate());
+        QLOGW("Bad y modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_modulation, m_output_stream->get_rate(), y_modulation_stream->get_rate());
         m_y_modulation_stream.reset();
     }
     else
@@ -149,9 +136,9 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     }
 
     auto z_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.z_modulation);
-    if (z_modulation_stream && z_modulation_stream->get_rate() != m_output_stream->rate)
+    if (z_modulation_stream && z_modulation_stream->get_rate() != m_output_stream->get_rate())
     {
-        QLOGW("Bad z modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_modulation, m_output_stream->rate, z_modulation_stream->get_rate());
+        QLOGW("Bad z modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_modulation, m_output_stream->get_rate(), z_modulation_stream->get_rate());
         m_z_modulation_stream.reset();
     }
     else
@@ -202,19 +189,17 @@ void Vec3_Generator<Stream_t>::process()
 {
     QLOG_TOPIC("vec3_generator::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     auto x_modulation_stream = m_x_modulation_stream.lock();
     auto y_modulation_stream = m_y_modulation_stream.lock();
     auto z_modulation_stream = m_z_modulation_stream.lock();
 
-    auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    if (dt < m_dt)
+    auto count = m_output_stream->compute_samples_needed();
+    if (count == 0)
     {
         return;
     }
-    size_t count = dt / m_dt;
 
     if (x_modulation_stream)
     {
@@ -243,39 +228,25 @@ void Vec3_Generator<Stream_t>::process()
         return;
     }
 
-
-    auto tp = m_last_tp + m_dt;
-    m_last_tp = now;
-
-    m_output_stream->samples.resize(count);
     for (size_t i = 0; i < count; i++)
     {
-        typename Stream::Sample vs;
-        vs.dt = m_dt;
-        vs.tp = tp;
-        vs.sample_idx = ++m_output_stream->sample_idx;
-        vs.value = m_config.value;
+        math::vec3f value = m_config.value;
 
         if (m_x_modulation_samples.size() > i)
         {
-            vs.value.x += m_x_modulation_samples[i].value;
+            value.x += m_x_modulation_samples[i].value;
         }
         if (m_y_modulation_samples.size() > i)
         {
-            vs.value.y += m_y_modulation_samples[i].value;
+            value.y += m_y_modulation_samples[i].value;
         }
         if (m_z_modulation_samples.size() > i)
         {
-            vs.value.z += m_z_modulation_samples[i].value;
+            value.z += m_z_modulation_samples[i].value;
         }
 
-        m_output_stream->samples[i] = vs;
-        tp += m_dt;
-        dt -= m_dt;
+        m_output_stream->push_sample(value, true);
     }
-
-    //reminder for next process
-    m_last_tp -= dt;
 
     //consume samples
     if (m_x_modulation_samples.size() >= count)

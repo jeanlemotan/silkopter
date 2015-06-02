@@ -6,6 +6,9 @@
 #include "common/node/stream/IForce.h"
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
+
 
 namespace sz
 {
@@ -50,34 +53,13 @@ private:
     std::shared_ptr<sz::Velocity_Controller::Init_Params> m_init_params;
     std::shared_ptr<sz::Velocity_Controller::Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
+    Sample_Accumulator<stream::IVelocity, stream::IVelocity> m_accumulator;
 
-    stream::IVelocity_wptr m_input_stream;
-    stream::IVelocity_wptr m_target_stream;
+    typedef Basic_Output_Stream<stream::IFrame> Output_Frame_Stream;
+    mutable std::shared_ptr<Output_Frame_Stream> m_output_frame_stream;
 
-    std::vector<stream::IVelocity::Sample> m_input_samples;
-    std::vector<stream::IVelocity::Sample> m_target_samples;
-
-    struct Frame : public stream::IFrame
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Frame> m_frame_stream;
-    struct Force : public stream::IForce
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Force> m_force_stream;
+    typedef Basic_Output_Stream<stream::IForce> Output_Force_Stream;
+    mutable std::shared_ptr<Output_Force_Stream> m_output_force_stream;
 };
 
 

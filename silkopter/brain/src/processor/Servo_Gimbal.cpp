@@ -37,18 +37,22 @@ auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
 
 auto Servo_Gimbal::init() -> bool
 {
-    m_x_output_stream = std::make_shared<Stream>();
-    m_y_output_stream = std::make_shared<Stream>();
-    m_z_output_stream = std::make_shared<Stream>();
+    m_x_output_stream = std::make_shared<Output_Stream>();
+    m_y_output_stream = std::make_shared<Output_Stream>();
+    m_z_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_x_output_stream->rate = m_init_params->rate;
-    m_y_output_stream->rate = m_init_params->rate;
-    m_z_output_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_init_params->rate);
+
+    m_x_output_stream->set_rate(m_init_params->rate);
+    m_x_output_stream->set_tp(q::Clock::now());
+    m_y_output_stream->set_rate(m_init_params->rate);
+    m_y_output_stream->set_tp(q::Clock::now());
+    m_z_output_stream->set_rate(m_init_params->rate);
+    m_z_output_stream->set_tp(q::Clock::now());
+
     return true;
 }
 
@@ -76,9 +80,9 @@ void Servo_Gimbal::process()
 {
     QLOG_TOPIC("servo_gimbal::process");
 
-    m_x_output_stream->samples.clear();
-    m_y_output_stream->samples.clear();
-    m_z_output_stream->samples.clear();
+    m_x_output_stream->clear();
+    m_y_output_stream->clear();
+    m_z_output_stream->clear();
 
     auto frame_stream = m_frame_stream.lock();
 //    auto target_frame_stream = m_target_stream.lock();
@@ -108,10 +112,6 @@ void Servo_Gimbal::process()
         return;
     }
 
-    m_x_output_stream->samples.resize(count);
-    m_y_output_stream->samples.resize(count);
-    m_z_output_stream->samples.resize(count);
-
     math::vec3f rotation_euler;
 
     for (size_t i = 0; i < count; i++)
@@ -119,12 +119,9 @@ void Servo_Gimbal::process()
         auto rotation = m_frame_samples[i].value.rotation;
         rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
 
-        {
-            auto& sample = m_x_output_stream->last_sample;
-            sample.dt = m_dt;
-            sample.tp = m_frame_samples[i].tp;
-            sample.sample_idx++;
+        bool is_healthy = m_frame_samples[i].is_healthy;
 
+        {
             auto const& config = m_config->output_streams.x_pwm;
 
             math::anglef angle(rotation_euler.x);
@@ -138,25 +135,18 @@ void Servo_Gimbal::process()
             auto max_a = math::radians(config.max_angle);
             auto mu = (a - min_a) / (max_a - min_a);
             mu = math::clamp(mu, 0.f, 1.f);
-            sample.value = mu * (config.max_pwm - config.min_pwm) + config.min_pwm;
 
-            m_x_output_stream->samples[i] = sample;
+            m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
-            auto& sample = m_y_output_stream->last_sample;
-            sample.dt = m_dt;
-            sample.tp = m_frame_samples[i].tp;
-            sample.sample_idx++;
-
-            m_y_output_stream->samples[i] = sample;
+            auto const& config = m_config->output_streams.y_pwm;
+            float mu = 0;
+            m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
-            auto& sample = m_z_output_stream->last_sample;
-            sample.dt = m_dt;
-            sample.tp = m_frame_samples[i].tp;
-            sample.sample_idx++;
-
-            m_z_output_stream->samples[i] = sample;
+            auto const& config = m_config->output_streams.z_pwm;
+            float mu = 0;
+            m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
     }
 

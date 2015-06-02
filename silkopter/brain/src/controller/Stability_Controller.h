@@ -5,6 +5,9 @@
 #include "common/node/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
+
 
 namespace sz
 {
@@ -49,24 +52,10 @@ private:
     std::shared_ptr<sz::Stability_Controller::Init_Params> m_init_params;
     std::shared_ptr<sz::Stability_Controller::Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
+    Sample_Accumulator<stream::IFrame, stream::IFrame> m_accumulator;
 
-    stream::IFrame_wptr m_input_stream;
-    stream::IFrame_wptr m_target_stream;
-
-    std::vector<stream::IFrame::Sample> m_input_samples;
-    std::vector<stream::IFrame::Sample> m_target_samples;
-
-    struct Stream : public stream::IAngular_Velocity
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::IAngular_Velocity> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

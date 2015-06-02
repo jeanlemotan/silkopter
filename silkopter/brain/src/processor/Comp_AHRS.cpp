@@ -37,14 +37,14 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
 
 auto Comp_AHRS::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_output_stream->rate);
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -71,7 +71,7 @@ void Comp_AHRS::process()
 {
     QLOG_TOPIC("comp_ahrs::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     m_accumulator.process([this](
                           size_t idx,
@@ -81,10 +81,7 @@ void Comp_AHRS::process()
     {
         float av_length = 0;
 
-        auto& sample = m_output_stream->last_sample;
-        sample.dt = m_dt;
-        sample.tp = av_sample.tp;
-        sample.sample_idx++;
+        Output_Stream::Value value;
 
         {
             auto omega = av_sample.value;
@@ -96,7 +93,7 @@ void Comp_AHRS::process()
             {
                 auto av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = sample.value.rotation;
+                auto& a = value.rotation;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
@@ -123,7 +120,7 @@ void Comp_AHRS::process()
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            auto& rot = sample.value.rotation;
+            auto& rot = value.rotation;
 
             //cancel drift
             static int xxx = 50;
@@ -136,13 +133,13 @@ void Comp_AHRS::process()
             {
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
-                float mu = q::Seconds(m_dt).count() * 0.5f + av_length;
+                float mu = q::Seconds(m_output_stream->get_dt()).count() * 0.5f + av_length;
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);
         }
 
-        m_output_stream->samples.push_back(sample);
+        m_output_stream->push_sample(value, av_sample.is_healthy & a_sample.is_healthy & m_sample.is_healthy);
     });
 }
 
@@ -163,15 +160,17 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
     m_accumulator.clear_streams();
 
+    auto output_rate = m_output_stream->get_rate();
+
     auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.angular_velocity);
     auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
     auto magnetic_field_stream = m_hal.get_streams().find_by_name<stream::IMagnetic_Field>(sz.input_streams.magnetic_field);
 
     auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config->input_streams.angular_velocity.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.angular_velocity, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.angular_velocity, output_rate, rate);
     }
     else
     {
@@ -179,10 +178,10 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     }
 
     rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config->input_streams.acceleration.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, output_rate, rate);
     }
     else
     {
@@ -190,10 +189,10 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     }
 
     rate = magnetic_field_stream ? magnetic_field_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != output_rate)
     {
         m_config->input_streams.magnetic_field.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.magnetic_field, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.magnetic_field, output_rate, rate);
     }
     else
     {

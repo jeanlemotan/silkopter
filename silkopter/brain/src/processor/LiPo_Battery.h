@@ -9,6 +9,7 @@
 #include "utils/Butterworth.h"
 
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 
 namespace sz
@@ -57,8 +58,6 @@ private:
 
     Sample_Accumulator<stream::ICurrent, stream::IVoltage> m_accumulator;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
     auto compute_cell_count() -> boost::optional<uint8_t>;
     boost::optional<uint8_t> m_cell_count;
 
@@ -66,16 +65,9 @@ private:
     util::Butterworth<stream::ICurrent::Value> m_current_filter;
 //    typename Stream_t::FILTER_CHANNEL_TYPE* m_channels[Stream_t::FILTER_CHANNELS] = { nullptr };
 
-    struct Stream : public stream::IBattery_State
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<stream::IBattery_State> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 
-        uint32_t rate = 0;
-        Sample last_sample;
-        std::vector<Sample> samples;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
 };
 
 

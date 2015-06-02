@@ -5,6 +5,7 @@
 #include "common/node/stream/IVoltage.h"
 #include "common/node/IProcessor.h"
 
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -49,16 +50,8 @@ private:
 
     stream::IADC_wptr m_adc_stream;
 
-    struct Stream : public stream::IVoltage
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        std::vector<Sample> samples;
-        uint32_t sample_idx = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::IVoltage> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

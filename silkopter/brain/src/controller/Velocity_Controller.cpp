@@ -36,16 +36,17 @@ auto Velocity_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Velocity_Controller::init() -> bool
 {
-    m_frame_stream = std::make_shared<Frame>();
-    m_force_stream = std::make_shared<Force>();
+    m_output_frame_stream = std::make_shared<Output_Frame_Stream>();
+    m_output_force_stream = std::make_shared<Output_Force_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_frame_stream->rate = m_init_params->rate;
-    m_force_stream->rate = m_init_params->rate;
-    m_dt = std::chrono::microseconds(1000000 / m_init_params->rate);
+    m_output_frame_stream->set_rate(m_init_params->rate);
+    m_output_frame_stream->set_tp(q::Clock::now());
+    m_output_force_stream->set_rate(m_init_params->rate);
+    m_output_force_stream->set_tp(q::Clock::now());
     return true;
 }
 
@@ -63,10 +64,10 @@ auto Velocity_Controller::get_stream_outputs() const -> std::vector<Stream_Outpu
     std::vector<Stream_Output> outputs(2);
     outputs[0].type = stream::IFrame::TYPE;
     outputs[0].name = "Frame";
-    outputs[0].stream = m_frame_stream;
+    outputs[0].stream = m_output_frame_stream;
     outputs[1].type = stream::IForce::TYPE;
     outputs[1].name = "Collective Frame";
-    outputs[1].stream = m_force_stream;
+    outputs[1].stream = m_output_force_stream;
     return outputs;
 }
 
@@ -74,53 +75,21 @@ void Velocity_Controller::process()
 {
     QLOG_TOPIC("velocity_controller::process");
 
-    m_frame_stream->samples.clear();
-    m_force_stream->samples.clear();
+    m_output_frame_stream->clear();
+    m_output_force_stream->clear();
 
-    auto target_stream = m_target_stream.lock();
-    auto input_stream = m_input_stream.lock();
-    if (!target_stream || !input_stream)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IVelocity::Sample const& i_sample,
+                          stream::IVelocity::Sample const& t_sample)
     {
-        return;
-    }
+//        math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+//        math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
-    //accumulate the input streams
-    {
-        auto const& samples = target_stream->get_samples();
-        m_target_samples.reserve(m_target_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_target_samples));
-    }
-    {
-        auto const& samples = input_stream->get_samples();
-        m_input_samples.reserve(m_input_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_input_samples));
-    }
+//        Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
-    //TODO add some protecton for severely out-of-sync streams
-
-    size_t count = std::min(m_target_samples.size(), m_input_samples.size());
-    if (count == 0)
-    {
-        return;
-    }
-
-    m_frame_stream->samples.resize(count);
-    m_force_stream->samples.resize(count);
-
-    for (size_t i = 0; i < count; i++)
-    {
-        m_frame_stream->last_sample.dt = m_dt;
-        m_frame_stream->last_sample.sample_idx++;
-        m_frame_stream->samples[i] = m_frame_stream->last_sample;
-
-        m_force_stream->last_sample.dt = m_dt;
-        m_force_stream->last_sample.sample_idx++;
-        m_force_stream->samples[i] = m_force_stream->last_sample;
-    }
-
-    //consume processed samples
-    m_target_samples.erase(m_target_samples.begin(), m_target_samples.begin() + count);
-    m_input_samples.erase(m_input_samples.begin(), m_input_samples.begin() + count);
+//        m_output_stream->push_sample(value, i_sample.is_healthy & t_sample.is_healthy);
+    });
 }
 
 auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
@@ -138,6 +107,7 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+    m_accumulator.clear_streams();
 
     auto input_stream = m_hal.get_streams().find_by_name<stream::IVelocity>(sz.input_streams.input);
     auto target_stream = m_hal.get_streams().find_by_name<stream::IVelocity>(sz.input_streams.target);
@@ -147,11 +117,10 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.input.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_init_params->rate, rate);
-        m_input_stream.reset();
     }
     else
     {
-        m_input_stream = input_stream;
+        m_accumulator.set_stream<0>(input_stream);
     }
 
     rate = target_stream ? target_stream->get_rate() : 0u;
@@ -159,11 +128,10 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     {
         m_config->input_streams.target.clear();
         QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_init_params->rate, rate);
-        m_target_stream.reset();
     }
     else
     {
-        m_target_stream = target_stream;
+        m_accumulator.set_stream<1>(target_stream);
     }
 
     return true;

@@ -36,13 +36,14 @@ auto Rate_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Rate_Controller::init() -> bool
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->rate = m_init_params->rate;
+    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_tp(q::Clock::now());
 
     return true;
 }
@@ -69,7 +70,7 @@ void Rate_Controller::process()
 {
     QLOG_TOPIC("rate_controller::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     auto multi_config = m_hal.get_multi_config();
     if (!multi_config)
@@ -82,17 +83,12 @@ void Rate_Controller::process()
                           stream::IAngular_Velocity::Sample const& i_sample,
                           stream::IAngular_Velocity::Sample const& t_sample)
     {
-        auto& sample = m_output_stream->last_sample;
-        sample.dt = i_sample.dt;
-        sample.tp = i_sample.tp;
-        sample.sample_idx++;
-
         math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
         math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
-        sample.value.set(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
+        Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
-        m_output_stream->samples.push_back(sample);
+        m_output_stream->push_sample(value, i_sample.is_healthy & t_sample.is_healthy);
     });
 }
 
@@ -141,10 +137,10 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     auto target_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.target);
 
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != m_output_stream->get_rate())
     {
         m_config->input_streams.input.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->get_rate(), rate);
     }
     else
     {
@@ -152,10 +148,10 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     rate = target_stream ? target_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
+    if (rate != m_output_stream->get_rate())
     {
         m_config->input_streams.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->get_rate(), rate);
     }
     else
     {
@@ -176,7 +172,7 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
         dst.kd = src.kd;
         dst.max_i = src.max_i;
         dst.d_filter = src.d_filter;
-        dst.rate = m_output_stream->rate;
+        dst.rate = m_output_stream->get_rate();
     };
 
     PID::Params x_params, y_params, z_params;

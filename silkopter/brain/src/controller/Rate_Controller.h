@@ -7,6 +7,7 @@
 
 #include "utils/PID.h"
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -62,16 +63,8 @@ private:
     PID m_y_pid;
     PID m_z_pid;
 
-    struct Stream : public stream::ITorque
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::ITorque> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

@@ -6,6 +6,7 @@
 #include "common/node/stream/ILinear_Acceleration.h"
 #include "HAL.h"
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 namespace sz
 {
@@ -49,20 +50,10 @@ private:
     std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
     std::shared_ptr<sz::Gravity_Filter::Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
-
     Sample_Accumulator<stream::IFrame, stream::IAcceleration> m_accumulator;
 
-    struct Stream : public stream::ILinear_Acceleration
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        uint32_t rate = 0;
-        Sample last_sample;
-        std::vector<Sample> samples;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::ILinear_Acceleration> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
