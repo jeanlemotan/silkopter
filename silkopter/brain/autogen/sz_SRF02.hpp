@@ -1197,7 +1197,7 @@ float min_distance;
 float max_distance;
 sz::SRF02::Output_Streams output_streams;
 
-explicit Config():direction(), min_distance(0.12), max_distance(6), output_streams() {  }
+explicit Config():direction(), min_distance(0.2), max_distance(6), output_streams() {  }
 
 
  

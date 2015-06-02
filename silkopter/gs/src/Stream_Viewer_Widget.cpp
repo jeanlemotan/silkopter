@@ -308,6 +308,26 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
+    else if (type == IGPS_Info::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("Info", stream->rate, this);
+        viewer->add_graph("Sats", "#", QColor(0xe74c3c));
+        viewer->add_graph("PDOP", "m", QColor(0x2ecc71));
+        viewer->add_graph("PAcc", "m", QColor(0x3498db));
+        viewer->add_graph("VAcc", "m/s", QColor(0x9834db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<GPS_Info>(stream)->samples_available_signal.connect([this, viewer](GPS_Info& stream)
+        {
+            std::array<double, 4> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.fix_satellites, s.value.pdop, s.value.position_accuracy, s.value.velocity_accuracy };
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
+    }
+
 //    else if (type == IECEF::TYPE)
 //    {
 //        auto viewer = new Map_Viewer(this);

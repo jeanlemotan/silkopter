@@ -16,6 +16,7 @@ constexpr uint8_t ADDR = 0x70;
 
 //Registers
 constexpr uint8_t SW_REV_CMD        = 0x0;
+constexpr uint8_t UNUSED            = 0x1;
 constexpr uint8_t RANGE_H           = 0x2;
 constexpr uint8_t RANGE_L           = 0x3;
 constexpr uint8_t AUTOTUNE_MIN_H	= 0x4;
@@ -32,7 +33,7 @@ constexpr uint8_t BURST                     = 0x5C;
 constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 
 
-constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(80);
+constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(100);
 
 
 SRF02::SRF02(HAL& hal)
@@ -40,6 +41,8 @@ SRF02::SRF02(HAL& hal)
     , m_init_params(new sz::SRF02::Init_Params())
     , m_config(new sz::SRF02::Config())
 {
+    m_config->direction = math::vec3f(0, 0, -1); //pointing down
+
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
@@ -87,19 +90,20 @@ auto SRF02::init() -> bool
 
     m_output_stream = std::make_shared<Output_Stream>();
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 12);
+    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 
     QLOGI("Probing SRF02 on {}", m_init_params->bus);
 
-    uint8_t rev = 0;
+    uint8_t rev = 0, test = 0;
     auto ret = i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
-    if (!ret || rev == 255)
+    ret &= i2c->read_register_u8(ADDR, UNUSED, test);
+    if (!ret || rev == 0 || rev == 255 || test == 0 || test == 255)
     {
-        QLOGE("Failed to initialize SRF02");
+        QLOGE("Failed to initialize SRF02: i2c {}, rev {}, test {}", ret, rev, test);
         return false;
     }
 
-    QLOGI("SRF02 Revision: {}", rev);
+    QLOGI("SRF02 Revision: {}", rev);//rev is 6 so far
 
     trigger(*i2c);
 
@@ -118,9 +122,16 @@ void SRF02::trigger(bus::II2C& i2c)
 void SRF02::process()
 {
     QLOG_TOPIC("srf02::process");
-    auto now = q::Clock::now();
 
     m_output_stream->clear();
+
+    //wait for echo
+    auto now = q::Clock::now();
+    if (now - m_last_trigger_tp < MAX_MEASUREMENT_DURATION ||
+        now - m_last_trigger_tp < m_output_stream->get_dt())
+    {
+        return;
+    }
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -134,34 +145,33 @@ void SRF02::process()
         i2c->unlock();
     });
 
-    //wait for echo
-    if (now - m_last_trigger_tp < MAX_MEASUREMENT_DURATION)
-    {
-        return;
-    }
-
     std::array<uint8_t, 4> buf;
-    i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
+    bool res = i2c->read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     //trigger immediately
     trigger(*i2c);
 
-    int d = (unsigned int)(buf[0] << 8) | buf[1];
-    int min_d = (unsigned int)(buf[2] << 8) | buf[3];
-
-    float distance = static_cast<float>(d) / 100.f; //meters
-
-    float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
-    float max_distance = m_config->max_distance;
-    auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
-    auto is_healthy = distance >= min_distance && distance <= max_distance;
-
-    m_output_stream->clear();
-    auto samples_needed = m_output_stream->compute_samples_needed();
-    while (samples_needed > 0)
+    if (res)
     {
-        m_output_stream->push_sample(value, is_healthy);
-        samples_needed--;
+        int d = (unsigned int)(buf[0] << 8) | buf[1];
+        int min_d = (unsigned int)(buf[2] << 8) | buf[3];
+
+        //QLOGI("d = {}, min_d = {}", d, min_d);
+
+        float distance = static_cast<float>(d) / 100.f; //meters
+
+        float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
+        float max_distance = m_config->max_distance;
+        auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
+        auto is_healthy = distance >= min_distance && distance <= max_distance;
+
+        m_output_stream->clear();
+        auto samples_needed = m_output_stream->compute_samples_needed();
+        while (samples_needed > 0)
+        {
+            m_output_stream->push_sample(value, is_healthy);
+            samples_needed--;
+        }
     }
 }
 
