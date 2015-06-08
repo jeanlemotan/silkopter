@@ -383,7 +383,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 1> data;
             for (auto const& s: stream.samples)
             {
-                data = { s.value ? 1 : 0 };
+                data = { s.value ? 1.0 : 0.0 };
                 viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }
             viewer->process();

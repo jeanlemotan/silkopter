@@ -3033,7 +3033,7 @@ case 1:
             }
             else if (utility::string_equal(str, length, "\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12))
 						 { state=0; has_weight = true; }
-else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10))
+else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x29", 14))
 						 { state=1; has_max_torque = true; }
             else {
                 state = -1;
@@ -3183,7 +3183,7 @@ struct Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7
         w.StartObject();
 
         w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.weight);
-w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65", 10, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.max_torque);
+w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x29", 14, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.max_torque);
 
         w.EndObject(2);
     }

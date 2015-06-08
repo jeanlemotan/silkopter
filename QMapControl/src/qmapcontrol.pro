@@ -1,9 +1,12 @@
 TARGET = qmapcontrol
 TEMPLATE = lib
+CONFIG += staticlib
+CONFIG -= app_bundle
+CONFIG += c++11
 QT += network
 QT += gui
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-greaterThan(QT_MAJOR_VERSION, 4): cache()
+QT += widgets
+
 
 VERSION = 0.9.7.8
 

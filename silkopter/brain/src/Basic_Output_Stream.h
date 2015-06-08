@@ -55,8 +55,11 @@ public:
     void push_sample(Value const& value, bool is_healthy)
     {
         m_tp += m_dt;
-        if (m_tp > q::Clock::now() + std::chrono::milliseconds(10))
+
+        auto future = q::Clock::now() + std::chrono::milliseconds(10);
+        if (m_tp > future && !m_future_warning)
         {
+            m_future_warning = true;
             QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
         }
 
@@ -71,6 +74,7 @@ public:
     void clear()
     {
         m_samples.clear();
+        m_future_warning = false;
     }
 
     auto compute_samples_needed() -> size_t
@@ -91,6 +95,7 @@ private:
     uint32_t m_rate = 0;
     std::vector<Sample> m_samples;
     Sample m_last_sample;
+    bool m_future_warning = false;
 };
 
 

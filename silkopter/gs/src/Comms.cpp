@@ -469,7 +469,7 @@ auto Comms::link_input_streams(node::Node_ptr node) -> bool
         auto* input_streamj = jsonutil::find_value(node->config, input_path);
         if (!input_streamj || !input_streamj->IsString())
         {
-            QLOGE("Cannot find config for input stream '{}'", input_path);
+            QLOGE("Cannot find config for input stream '{}', node '{}'", input_path, node->name);
             return false;
         }
         q::Path stream_path(input_streamj->GetString());
@@ -480,14 +480,14 @@ auto Comms::link_input_streams(node::Node_ptr node) -> bool
         }
         if (stream_path.size() != 2)
         {
-            QLOGE("Wrong value for input stream '{}' - {}", input_path, stream_path);
+            QLOGE("Wrong value for input stream '{}' - {}, node '{}'", input_path, stream_path, node->name);
             return false;
         }
         std::string stream_name = stream_path.get_as<std::string>();
         auto stream = m_hal.m_streams.find_by_name(stream_name);
         if (!stream)
         {
-            QLOGE("Cannot find input stream '{}' - {}", input_path, stream_path);
+            QLOGE("Cannot find input stream '{}' - {}, node '{}'", input_path, stream_path, node->name);
             return false;
         }
         i.stream = stream;

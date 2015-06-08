@@ -171,6 +171,11 @@ void HAL::save_settings()
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
+auto HAL::get_telemetry_data() const -> Telemetry_Data const&
+{
+    return m_telemetry_data;
+}
+
 auto HAL::get_bus_factory()    -> Factory<node::bus::IBus>&
 {
     return m_bus_factory;
@@ -706,9 +711,29 @@ void HAL::process()
 //    {
 //        n->process();
 //    }
+
+    auto now = q::Clock::now();
+    auto dt = now - m_last_process_tp;
+    m_telemetry_data.rate = dt.count() > 0 ? 1.f / std::chrono::duration<float>(dt).count() : 0.f;
+
+
+    auto total_start = now;
+    auto node_start = total_start;
+
     for (auto const& n: m_nodes.get_all())
     {
         n.node->process();
+
+        auto now = q::Clock::now();
+        m_telemetry_data.nodes[n.name].process_duration = now - node_start;
+        node_start = now;
+    }
+
+    m_telemetry_data.total_duration = q::Clock::now() - total_start;
+    //calculate percentages
+    for (auto& nt: m_telemetry_data.nodes)
+    {
+        nt.second.process_percentage = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
     }
 
 //    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");

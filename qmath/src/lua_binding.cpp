@@ -7,7 +7,7 @@ namespace math
 {
 
 
-void bind_to_lua(lua_State* L, const std::string& module_name)
+void bind_to_lua(lua_State* L, const std::string& /*module_name*/)
 {
     QASSERT(L);
     if (!L)

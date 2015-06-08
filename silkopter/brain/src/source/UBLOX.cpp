@@ -18,7 +18,7 @@ constexpr uint16_t MAX_PAYLOAD_SIZE = 256;
 
 constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
 
-constexpr std::chrono::seconds REINIT_WATCHGOD_TIMEOUT(3);
+constexpr std::chrono::seconds REINIT_WATCHDOG_TIMEOUT(5);
 
 
 
@@ -293,13 +293,6 @@ auto UBLOX::init() -> bool
     m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
     m_uart = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
 
-    Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
-    if (!buses.i2c && !buses.spi && !buses.uart)
-    {
-        QLOGE("No bus configured");
-        return false;
-    }
-
     m_position_stream = std::make_shared<Position_Stream>();
     m_velocity_stream = std::make_shared<Velocity_Stream>();
     m_gps_info_stream = std::make_shared<GPS_Info_Stream>();
@@ -315,7 +308,7 @@ auto UBLOX::init() -> bool
     m_gps_info_stream->set_rate(m_init_params->rate);
     m_gps_info_stream->set_tp(q::Clock::now());
 
-    return true;
+    return setup();
 }
 
 auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
@@ -377,6 +370,16 @@ auto UBLOX::setup() -> bool
         unlock(buses);
     });
 
+    //read some data from the port to make sure the GPS doesn't have pending data
+    {
+        QLOGI("Flushing GPS buffers");
+        for (size_t i = 0; i < 100; i++)
+        {
+            auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+            //QLOGI("\t{}: {} bytes", i, res);
+        }
+    }
+
     {
         QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
         CFG_RATE data;
@@ -425,6 +428,10 @@ auto UBLOX::setup() -> bool
         send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
     }
 
+    m_position_stream->set_tp(q::Clock::now());
+    m_velocity_stream->set_tp(q::Clock::now());
+    m_gps_info_stream->set_tp(q::Clock::now());
+
     m_last_complete_tp = q::Clock::now();
     m_is_setup = true;
     return true;
@@ -437,12 +444,6 @@ void UBLOX::process()
     m_position_stream->clear();
     m_velocity_stream->clear();
     m_gps_info_stream->clear();
-
-    Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
-    if (!buses.i2c && !buses.spi && !buses.uart)
-    {
-        return;
-    }
 
     if (!m_is_setup)
     {
@@ -458,6 +459,11 @@ void UBLOX::process()
         return;
     }
 
+    Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
+    if (!buses.i2c && !buses.spi && !buses.uart)
+    {
+        return;
+    }
 
     lock(buses);
     At_Exit at_exit([this, &buses]()
@@ -497,7 +503,7 @@ void UBLOX::process()
         m_last_complete_tp = now;
         m_has_nav_status = m_has_pollh = m_has_sol = false;
     }
-    else if (now - m_last_complete_tp >= REINIT_WATCHGOD_TIMEOUT)
+    else if (now - m_last_complete_tp >= REINIT_WATCHDOG_TIMEOUT)
     {
         //check if we need to reset
         m_is_setup = false;
@@ -547,7 +553,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
         for (auto it = buffer.begin(); it != buffer.end(); ++it)
         {
             auto const d = *it;
-            //LOG_INFO("step: {}, d: {}", step, d);
+            //QLOGI("step: {}, d: {}", step, d);
             switch (step)
             {
             case 0:
@@ -804,8 +810,8 @@ void UBLOX::process_cfg_ant_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(CFG_ANT));
     CFG_ANT& data = reinterpret_cast<CFG_ANT&>(*packet.payload.data());
 
-    int a = 0;
-    a = 1;
+    //int a = 0;
+    //a = 1;
 }
 
 void UBLOX::process_cfg_msg_packet(Buses& buses, Packet& packet)
@@ -829,8 +835,8 @@ void UBLOX::process_cfg_sbas_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(CFG_SBAS));
     CFG_SBAS& data = reinterpret_cast<CFG_SBAS&>(*packet.payload.data());
 
-    int a = 0;
-    a = 1;
+    //int a = 0;
+    //a = 1;
 
     //disable SBAS
 //    if (data.mode != 0)
@@ -951,6 +957,7 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
         {
             return true;
         }
+        QLOGI("\t retrying {}", i);
     }
     return false;
 }

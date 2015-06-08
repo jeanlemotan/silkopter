@@ -89,6 +89,20 @@ public:
 protected:
     auto set_multi_config(config::Multi const& config) -> bool;
 
+    struct Telemetry_Data
+    {
+        q::Clock::duration total_duration;
+        float rate = 0;
+        struct Node
+        {
+            q::Clock::duration process_duration;
+            float process_percentage = 0;
+        };
+        std::map<std::string, Node> nodes;
+    };
+
+    auto get_telemetry_data() const -> Telemetry_Data const&;
+
 private:
     auto create_bus(std::string const& type,
                     std::string const& name,
@@ -111,6 +125,11 @@ private:
 
     Factory<node::bus::IBus> m_bus_factory;
     Factory<node::INode> m_node_factory;
+
+    q::Clock::time_point m_last_process_tp = q::Clock::now();
+
+
+    Telemetry_Data m_telemetry_data;
 };
 
 

@@ -75,12 +75,12 @@ private:
 
     void reset_fifo(Buses& buses);
 
-    auto setup_compass(Buses& buses) -> bool;
-    auto setup_compass_i2c(Buses& buses) -> bool;
-    auto setup_compass_spi(Buses& buses) -> bool;
+    auto setup_magnetometer(Buses& buses) -> bool;
+    auto setup_magnetometer_i2c(Buses& buses) -> bool;
+    auto setup_magnetometer_spi(Buses& buses) -> bool;
 
 //    void set_bypass(Buses& buses, bool on);
-    void process_compass(Buses& buses);
+    void process_magnetometer(Buses& buses);
 
     rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::MPU9250::Init_Params> m_init_params;

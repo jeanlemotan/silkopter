@@ -69,7 +69,7 @@
     "members":
     [
         ["float", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 1}],
-        ["float", "max_torque", {"required": true, "json_key" : "Max Torque", "default" : 0}]
+        ["float", "max_torque", {"required": true, "json_key" : "Max Torque (N)", "default" : 0}]
     ]
 },
 {

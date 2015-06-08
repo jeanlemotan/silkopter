@@ -5,6 +5,11 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
+
+
+
+#if !defined RASPBERRY_PI
+
 static math::vec3f bt_to_vec3f(btVector3 const& v)
 {
     return math::vec3f(v.x(), v.y(), v.z());
@@ -21,9 +26,6 @@ static btQuaternion quatf_to_bt(math::quatf const& v)
 {
     return btQuaternion(v.x, v.y, v.z, v.w);
 }
-
-
-#if !defined RASPBERRY_PI
 
 namespace silk
 {

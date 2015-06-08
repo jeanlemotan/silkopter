@@ -86,11 +86,21 @@ void test_mm(math::vec3f const& target, float step)
     }
 }
 
+void out_of_memory_handler()
+{
+    std::cout << "Out of memory\n";
+    QLOGE("Out of memory");
+    std::abort();
+}
+
 int main(int argc, char const* argv[])
 {
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
     signal(SIGKILL, signal_handler);
     signal(SIGUSR1, signal_handler);
+
+    //set the new_handler
+    std::set_new_handler(out_of_memory_handler);
 
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIME, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));

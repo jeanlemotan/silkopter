@@ -46,10 +46,6 @@ public:
 private:
     auto init() -> bool;
 
-    math::vec3f compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
-    math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
-
-
     HAL& m_hal;
 
     rapidjson::Document m_init_paramsj;
@@ -57,6 +53,9 @@ private:
     std::shared_ptr<sz::Rate_Controller::Config> m_config;
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
+
+    math::vec3f compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
     typedef util::PID<float, float, float> PID;
     PID m_x_pid;

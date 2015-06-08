@@ -180,7 +180,7 @@ void Scalar_Generator<Stream_t>::process()
         while (samples_needed > 0)
         {
             m_output_stream->push_sample(m_config.value, true);
-            samples_needed++;
+            samples_needed--;
         }
     }
 }

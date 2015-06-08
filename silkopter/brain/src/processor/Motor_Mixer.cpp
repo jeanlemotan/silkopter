@@ -162,11 +162,11 @@ static float compute_throttle_from_thrust(float max_thrust, float thrust)
     auto throttle = math::sqrt<float, math::safe>(ratio);
     return throttle;
 }
-static float compute_thrust_from_throttle(float max_thrust, float throttle)
-{
-    auto thrust = math::square(throttle * max_thrust);
-    return thrust;
-}
+//static float compute_thrust_from_throttle(float max_thrust, float throttle)
+//{
+//    auto thrust = math::square(throttle * max_thrust);
+//    return thrust;
+//}
 
 constexpr float MIN_THRUST = 0.01f;
 

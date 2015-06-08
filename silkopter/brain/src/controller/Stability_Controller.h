@@ -5,6 +5,7 @@
 #include "common/node/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
+#include "utils/PID.h"
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
@@ -53,6 +54,14 @@ private:
     std::shared_ptr<sz::Stability_Controller::Config> m_config;
 
     Sample_Accumulator<stream::IFrame, stream::IFrame> m_accumulator;
+
+    math::vec3f compute_feedforward(config::Multi& config, stream::IFrame::Value const& input, stream::IFrame::Value const& target);
+    math::vec3f compute_feedback(stream::IFrame::Value const& input, stream::IFrame::Value const& target);
+
+    typedef util::PID<float, float, float> PID;
+    PID m_x_pid;
+    PID m_y_pid;
+    PID m_z_pid;
 
     typedef Basic_Output_Stream<stream::IAngular_Velocity> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

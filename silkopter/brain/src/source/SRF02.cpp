@@ -92,18 +92,28 @@ auto SRF02::init() -> bool
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 
-    QLOGI("Probing SRF02 on {}", m_init_params->bus);
+    QLOGI("Probing SRF02 on {}...", m_init_params->bus);
 
-    uint8_t rev = 0, test = 0;
-    auto ret = i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
-    ret &= i2c->read_register_u8(ADDR, UNUSED, test);
-    if (!ret || rev == 0 || rev == 255 || test == 0 || test == 255)
+    uint32_t tries = 0;
+    constexpr uint32_t max_tries = 10;
+    while (++tries <= max_tries)
     {
-        QLOGE("Failed to initialize SRF02: i2c {}, rev {}, test {}", ret, rev, test);
-        return false;
+        uint8_t rev = 0, test = 0;
+        auto ret = i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
+        ret &= i2c->read_register_u8(ADDR, UNUSED, test);
+        if (ret && rev != 0 && rev != 255 && test != 0 && test != 255)
+        {
+            QLOGI("Found SRF02 rev {} after {} tries", rev, tries);//rev is 6 so far
+            break;
+        }
+        QLOGW("\tFailed {} try to initialize SRF02: i2c {}, rev {}, test {}", tries, ret, rev, test);
     }
 
-    QLOGI("SRF02 Revision: {}", rev);//rev is 6 so far
+    if (tries > max_tries)
+    {
+        QLOGE("Failed to initialize SRF02");
+        return false;
+    }
 
     trigger(*i2c);
 

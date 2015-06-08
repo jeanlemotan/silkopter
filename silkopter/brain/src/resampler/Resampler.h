@@ -184,7 +184,7 @@ auto Resampler<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { Stream_t::TYPE, m_init_params.rate, "Input" }
+        { Stream_t::TYPE, 0, "Input" }
     }};
     return inputs;
 }

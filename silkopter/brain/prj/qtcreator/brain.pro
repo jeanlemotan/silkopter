@@ -44,8 +44,9 @@ UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin/$${DEST_FOLDER}
 
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
-QMAKE_CXXFLAGS += -Wno-unused-variable
-QMAKE_CFLAGS += -Wno-unused-variable
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
+QMAKE_LFLAGS += -rdynamic
 
 
 INCLUDEPATH += /usr/include/bullet

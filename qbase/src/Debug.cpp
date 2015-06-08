@@ -161,6 +161,17 @@ void q::debug::dump_stacktrace()
 #endif
 }
 
+bool q::volatile_true()
+{
+    return true;
+}
+
+bool q::volatile_false()
+{
+    return false;
+}
+
+
 #endif
 
 

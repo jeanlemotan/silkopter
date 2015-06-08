@@ -15,6 +15,7 @@ enum class Video_Message : uint8_t
 enum class Telemetry_Message : uint8_t
 {
     STREAM_DATA,
+    HAL_DATA,
 
     COUNT //keep last
 };
@@ -39,6 +40,7 @@ enum class Setup_Message : uint8_t
     NODE_DATA,
 
     STREAM_TELEMETRY_ACTIVE,
+    HAL_TELEMETRY_ACTIVE,
 
     COUNT //keep last
 };

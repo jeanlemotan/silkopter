@@ -169,7 +169,7 @@ struct Sample_Data
 };
 #pragma pack(pop)
 
-auto Comms::send_video_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
+auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() != node::stream::IVideo::TYPE)
     {
@@ -215,7 +215,7 @@ auto Comms::send_video_stream(Telemetry_Stream& ts, node::stream::IStream const&
     return true;
 }
 
-template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool
+template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
     {
@@ -261,11 +261,11 @@ template<class Stream> auto Comms::gather_telemetry_stream(Telemetry_Stream& ts,
     return false;
 }
 
-void Comms::gather_telemetry_streams()
+void Comms::gather_telemetry_data()
 {
     //first we gather samples and we send them at 30Hz. This improves bandwidth by reducing header overhead and allowing for better compression
     //Except for video which is always sent directly as it comes
-    for (auto& ts: m_telemetry_streams)
+    for (auto& ts: m_stream_telemetry_data)
     {
         auto stream = ts.stream.lock();
         if (stream)
@@ -303,11 +303,37 @@ void Comms::gather_telemetry_streams()
             }
         }
     }
+
+
+    //pack HAL telemetry
+    if (m_hal_telemetry_data.is_enabled)
+    {
+        HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
+
+        m_hal_telemetry_data.sample_count++;
+        size_t off = m_hal_telemetry_data.data.size();
+
+        auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
+        util::detail::set_value(m_hal_telemetry_data.data, dt, off);
+        util::detail::set_value(m_hal_telemetry_data.data, telemetry_data.rate, off);
+        util::detail::set_value(m_hal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
+
+        for (auto const& nt: telemetry_data.nodes)
+        {
+            auto const& node_name = nt.first;
+            auto const& node_telemetry_data = nt.second;
+
+            util::detail::set_value(m_hal_telemetry_data.data, node_name, off);
+            auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
+            util::detail::set_value(m_hal_telemetry_data.data, dt, off);
+            util::detail::set_value(m_hal_telemetry_data.data, node_telemetry_data.process_percentage, off);
+        }
+    }
 }
 
-void Comms::pack_telemetry_streams()
+void Comms::pack_telemetry_data()
 {
-    for (auto& ts: m_telemetry_streams)
+    for (auto& ts: m_stream_telemetry_data)
     {
         if (!ts.data.empty() && ts.sample_count > 0)
         {
@@ -319,6 +345,20 @@ void Comms::pack_telemetry_streams()
         }
         ts.data.clear();
         ts.sample_count = 0;
+    }
+
+    if (m_hal_telemetry_data.is_enabled)
+    {
+        auto& t = m_hal_telemetry_data;
+        if (!t.data.empty() && t.sample_count > 0)
+        {
+            m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+            m_telemetry_channel.pack_param(t.sample_count);
+            m_telemetry_channel.pack_data(t.data.data(), t.data.size());
+            m_telemetry_channel.end_pack();
+        }
+        t.data.clear();
+        t.sample_count = 0;
     }
 }
 
@@ -454,6 +494,10 @@ void Comms::handle_multi_config()
 
 void Comms::handle_enumerate_node_defs()
 {
+    //first disable all telemetry because the GS doesn't yet have all the streams
+    m_stream_telemetry_data.clear();
+    m_hal_telemetry_data.is_enabled = false;
+
     uint32_t req_id = 0;
     if (m_setup_channel.unpack_all(req_id))
     {
@@ -484,6 +528,10 @@ void Comms::handle_enumerate_node_defs()
 
 void Comms::handle_enumerate_nodes()
 {
+    //first disable all telemetry because the GS doesn't yet have all the streams
+    m_stream_telemetry_data.clear();
+    m_hal_telemetry_data.is_enabled = false;
+
     uint32_t req_id = 0;
     if (m_setup_channel.unpack_all(req_id))
     {
@@ -642,21 +690,63 @@ void Comms::handle_streams_telemetry_active()
     m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
     m_setup_channel.pack_param(req_id);
 
-    auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
-    if (stream)
+    //remove the stream from the telemetry list (it's added again below if needed)
+    m_stream_telemetry_data.erase(m_stream_telemetry_data.begin(),
+                                  std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
     {
-        Telemetry_Stream ts;
-        ts.stream_name = stream_name;
-        ts.stream = stream;
-        m_telemetry_streams.push_back(ts);
+        return ts.stream_name == stream_name;
+    }));
 
-        m_setup_channel.pack_param(true);
+
+    if (is_active)
+    {
+        auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
+        if (stream)
+        {
+            //add the stream to the telemetry list
+            Stream_Telemetry_Data ts;
+            ts.stream_name = stream_name;
+            ts.stream = stream;
+            m_stream_telemetry_data.push_back(ts);
+
+            m_setup_channel.pack_param(true);
+        }
+        else
+        {
+            m_setup_channel.pack_param(false);
+            QLOGE("Req Id: {} - cannot find stream '{}' for telemetry", req_id, stream_name);
+        }
     }
     else
     {
         m_setup_channel.pack_param(false);
-        QLOGE("Req Id: {} - cannot find stream '{}' for telemetry", req_id, stream_name);
     }
+
+    m_setup_channel.end_pack();
+}
+
+void Comms::handle_hal_telemetry_active()
+{
+    uint32_t req_id = 0;
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id))
+    {
+        QLOGE("Error in unpacking stream telemetry");
+        return;
+    }
+    m_setup_channel.end_unpack();
+
+    bool is_active = false;
+    if (m_setup_channel.unpack_param(is_active))
+    {
+        QLOGI("Req Id: {} - hal telemetry: {}", req_id, is_active ? "ON" : "OFF");
+        m_hal_telemetry_data.is_enabled = is_active;
+    }
+
+    //respond
+    m_setup_channel.begin_pack(comms::Setup_Message::HAL_TELEMETRY_ACTIVE);
+    m_setup_channel.pack_param(req_id);
+    m_setup_channel.pack_param(m_hal_telemetry_data.is_enabled);
     m_setup_channel.end_pack();
 }
 
@@ -705,12 +795,13 @@ void Comms::process()
         case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+        case comms::Setup_Message::HAL_TELEMETRY_ACTIVE: handle_hal_telemetry_active(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }
     }
 
-    gather_telemetry_streams();
+    gather_telemetry_data();
 
     {
         if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())
@@ -728,7 +819,7 @@ void Comms::process()
     {
         m_last_rudp_tp = now;
 
-        pack_telemetry_streams();
+        pack_telemetry_data();
 
         m_setup_channel.send();
         m_input_channel.send();

@@ -92,20 +92,28 @@ private:
     void handle_accept(boost::system::error_code const& error);
 
 
-    struct Telemetry_Stream
+    struct Stream_Telemetry_Data
     {
         std::string stream_name;
         node::stream::IStream_wptr stream;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
     };
-    std::vector<Telemetry_Stream> m_telemetry_streams;
+    std::vector<Stream_Telemetry_Data> m_stream_telemetry_data;
 
-    auto send_video_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
+    struct HAL_Telemetry
+    {
+        bool is_enabled = false;
+        uint32_t sample_count = 0;
+        std::vector<uint8_t> data;
+    } m_hal_telemetry_data;
 
-    template<class Stream> auto gather_telemetry_stream(Telemetry_Stream& ts, node::stream::IStream const& _stream) -> bool;
-    void gather_telemetry_streams();
-    void pack_telemetry_streams();
+
+    auto send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool;
+
+    template<class Stream> auto gather_telemetry_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool;
+    void gather_telemetry_data();
+    void pack_telemetry_data();
 
     void handle_clock();
 
@@ -123,6 +131,7 @@ private:
     void handle_multi_config();
 
     void handle_streams_telemetry_active();
+    void handle_hal_telemetry_active();
 
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();

@@ -42,6 +42,9 @@ namespace q
 
         void dump_stacktrace();
 	}
+
+    extern bool volatile_true();
+    extern bool volatile_false();
 }
 
 #define QUNUSED(x) (void)sizeof(x)
@@ -55,7 +58,7 @@ namespace q
 			{																				\
 				q::debug::detail::call_handler(#condition, __FILE__, __LINE__, nullptr);	\
 			}																				\
-		} while(0)
+        } while(q::volatile_false())
 
 	#define QASSERT_MSG(condition, fmt, ...)											\
 		do 																				\
@@ -66,7 +69,7 @@ namespace q
 				q::util::format(_msg__, fmt, ##__VA_ARGS__);							\
 				q::debug::detail::call_handler(#condition, __FILE__, __LINE__, _msg__.c_str());	\
 			}																			\
-		} while(0)
+        } while(q::volatile_false())
 
 	#define QASSERT_ONCE(condition)														\
 		do 																				\
@@ -77,7 +80,7 @@ namespace q
 				q::debug::detail::set_assert_enabled(__FILE__, __LINE__, false);		\
 				q::debug::detail::call_handler(#condition, __FILE__, __LINE__, nullptr);			\
 			}																			\
-		} while(0)
+        } while(q::volatile_false())
 
 	#define QASSERT_MSG_ONCE(condition, fmt, ...)										\
 		do 																				\
@@ -90,15 +93,15 @@ namespace q
 				q::util::format(_msg__, fmt, ##__VA_ARGS__);							\
 				q::debug::detail::call_handler(#condition, __FILE__, __LINE__, _msg__.c_str());	\
 			}																			\
-		} while(0)
+        } while(q::volatile_false())
 
 #else
 
 	#define QASSERT(condition) QUNUSED(condition)
-	#define QASSERT_MSG(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(0)	
+    #define QASSERT_MSG(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(q::volatile_false())
 
 	#define QASSERT_ONCE(condition) QUNUSED(condition)
-	#define QASSERT_MSG_ONCE(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(0)	
+    #define QASSERT_MSG_ONCE(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(q::volatile_false())
 
 #endif
 
@@ -108,7 +111,7 @@ namespace q
 do 																				\
 {																				\
 	q::debug::detail::call_handler("PANIC", __FILE__, __LINE__, nullptr);/*this never returns*/\
-} while(0)
+} while(q::volatile_false())
 
 #define PANIC_MSG(fmt, ...)														\
 do 																				\
@@ -116,7 +119,7 @@ do 																				\
 	q::FString<128> __msg;														\
 	q::util::format(__msg, fmt, ##__VA_ARGS__);									\
 	q::debug::detail::call_handler("PANIC", __FILE__, __LINE__, __msg.c_str());/*this never returns*/\
-} while(0)
+} while(q::volatile_false())
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +142,7 @@ do 																				\
 #   if defined NDEBUG
 #       define QBREAK()
 #   else
-#       define QBREAK() raise(SIGTRAP)
+#       define QBREAK() do { if (q::volatile_true()) { raise(SIGTRAP); } } while (q::volatile_false())
 #   endif
 #else
 #	define QBREAK() assert(0)

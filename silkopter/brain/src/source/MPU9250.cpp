@@ -501,7 +501,7 @@ auto MPU9250::init() -> bool
 
     std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
-    std::vector<size_t> imu_rates = { 250, 500, 1000 };//, 8000 }; //8Khz has issues with the compass and it fills the fifo too fast
+    std::vector<size_t> imu_rates = { 250, 500, 1000 };//, 8000 }; //8Khz has issues with the magnetometer and it fills the fifo too fast
 
     auto req_params = *m_init_params;
 
@@ -660,19 +660,23 @@ auto MPU9250::init() -> bool
     }
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
-    int tries = 10;
-    while (--tries > 0)
+    QLOGI("Probing Magnetometer");
+
+    uint32_t tries = 0;
+    constexpr uint32_t max_tries = 10;
+    while (++tries <= max_tries)
     {
-        if (setup_compass(buses))
+        if (setup_magnetometer(buses))
         {
+            QLOGI("Found Magnetometer after {} tries", tries);
             break;
         }
     }
-    if (tries < 0)
+    if (tries > max_tries)
     {
+        QLOGE("Failed to initialize Magnetometer");
         return false;
     }
-    QLOGI("Compass setup after {} tries", tries);
 
     res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
@@ -684,6 +688,8 @@ auto MPU9250::init() -> bool
         return false;
 #endif
     }
+
+    reset_fifo(buses);
 
     auto now = q::Clock::now();
 
@@ -703,22 +709,22 @@ auto MPU9250::init() -> bool
     return true;
 }
 
-auto MPU9250::setup_compass(Buses& buses) -> bool
+auto MPU9250::setup_magnetometer(Buses& buses) -> bool
 {
     if (buses.i2c)
     {
-        return setup_compass_i2c(buses);
+        return setup_magnetometer_i2c(buses);
     }
     else if (buses.spi)
     {
-        return setup_compass_spi(buses);
+        return setup_magnetometer_spi(buses);
     }
     return false;
 }
 
-auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
+auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
 {
-    QLOG_TOPIC("mpu9250::setup_compass_i2c");
+    QLOG_TOPIC("mpu9250::setup_magnetometer_i2c");
 
 #ifdef USE_AK8963
     {
@@ -730,7 +736,7 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
     }
 
-    // Find compass. Possible addresses range from 0x0C to 0x0F.
+    // Find magnetometer. Possible addresses range from 0x0C to 0x0F.
     for (m_akm_address = 0x0C; m_akm_address <= 0x0F; m_akm_address++)
     {
         uint8_t data;
@@ -743,11 +749,11 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
 
     if (m_akm_address > 0x0F)
     {
-        QLOGE("Compass not found.");
+        QLOGE("\tMagnetometer not found.");
         return false;
     }
 
-    QLOGI("Compass found at 0x{X}", m_akm_address);
+    QLOGI("\tMagnetometer found at 0x{X}", m_akm_address);
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -774,9 +780,9 @@ auto MPU9250::setup_compass_i2c(Buses& buses) -> bool
     return true;
 }
 
-auto MPU9250::setup_compass_spi(Buses& buses) -> bool
+auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 {
-    QLOG_TOPIC("mpu9250::setup_compass_spi");
+    QLOG_TOPIC("mpu9250::setup_magnetometer_spi");
 
     bool res = true;
 
@@ -784,7 +790,7 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
 #ifdef USE_AK8963
 
     {
-        // Enable I2C master mode if compass is being used.
+        // Enable I2C master mode if magnetometer is being used.
         res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
 
@@ -832,7 +838,7 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
         res &= akm_read_u8(buses, AKM_REG_WHOAMI, data);
         if (!res || data != AKM_WHOAMI)
         {
-            QLOGW("Compass not found ({}, {})!!", res, data);
+            QLOGW("\tMagnetometer not found ({}, {})!!", res, data);
             return false;
         }
     }
@@ -883,7 +889,7 @@ auto MPU9250::setup_compass_spi(Buses& buses) -> bool
 //    }
 //    else
 //    {
-//        // Enable I2C master mode if compass is being used.
+//        // Enable I2C master mode if magnetometer is being used.
 //        uint8_t tmp;
 //        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
 //        tmp |= MPU_BIT_I2C_MST;
@@ -994,14 +1000,14 @@ void MPU9250::process()
         }
     }
 
-    process_compass(buses);
+    process_magnetometer(buses);
 
 //    LOG_INFO("fc {} / {}", fifo_count, fc2);
 }
 
-void MPU9250::process_compass(Buses& buses)
+void MPU9250::process_magnetometer(Buses& buses)
 {
-    QLOG_TOPIC("mpu9250::process_compass");
+    QLOG_TOPIC("mpu9250::process_magnetometer");
 
 #ifdef USE_AK8963
     auto now = q::Clock::now();
@@ -1009,8 +1015,8 @@ void MPU9250::process_compass(Buses& buses)
     auto dt = now - m_magnetic_field->get_tp();
     if (dt >= std::chrono::seconds(5))
     {
-        QLOGW("reset compass!");
-        setup_compass(buses);
+        QLOGW("reset magnetometer!");
+        setup_magnetometer(buses);
     }
 
     std::array<uint8_t, 8> tmp;
@@ -1063,7 +1069,7 @@ void MPU9250::process_compass(Buses& buses)
         data[1] = data[1] * m_magnetic_field_adj[1];
         data[2] = data[2] * m_magnetic_field_adj[2];
 
-        //change of axis according to the specs. By default the compass has front X, right Y and down Z
+        //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
         static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
                 math::quatf::from_axis_z(math::radians(90.f));
         math::vec3f c(data[0], data[1], data[2]);

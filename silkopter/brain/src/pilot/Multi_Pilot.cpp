@@ -52,7 +52,7 @@ auto Multi_Pilot::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input" },
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity" },
         { stream::IBattery_State::TYPE, m_init_params->rate, "Battery State" },
         { stream::ICommands::TYPE, m_init_params->rate, "Commands" }
     }};
