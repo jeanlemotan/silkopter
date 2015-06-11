@@ -99,7 +99,7 @@ namespace logging
     void logf(logging::Level level, char const* file, int line, Fmt const& fmt, Params&&... params)
 	{
 		String message;
-        q::util::format(message, fmt, std::forward<Params>(params)...);
+        q::util::format_emplace(message, fmt, std::forward<Params>(params)...);
         log(level, file, line, message);
 	}
 
@@ -107,7 +107,7 @@ namespace logging
     void quick_logf(Fmt const& fmt, Params&&... params)
 	{
 		String message;
-        q::util::format(message, fmt, std::forward<Params>(params)...);
+        q::util::format_emplace(message, fmt, std::forward<Params>(params)...);
         printf("%s\n", message.c_str());
         fflush(stdout);
 	}

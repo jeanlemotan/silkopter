@@ -42,6 +42,11 @@ private:
 
     void open_stream_viewer(std::string const& stream_name);
 
+    void do_acceleration_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj, rapidjson::Value& scalej);
+    void do_magnetic_field_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj);
+    void do_angular_velocity_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj);
+
+
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node, QPointF pos);
     void create_node(silk::node::Node_Def_ptr def, QPointF pos);

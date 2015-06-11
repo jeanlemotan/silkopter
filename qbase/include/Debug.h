@@ -66,7 +66,7 @@ namespace q
 			if (!(condition)) 															\
 			{																			\
 				DBG_STRING _msg__;														\
-				q::util::format(_msg__, fmt, ##__VA_ARGS__);							\
+                q::util::format_emplace(_msg__, fmt, ##__VA_ARGS__);							\
 				q::debug::detail::call_handler(#condition, __FILE__, __LINE__, _msg__.c_str());	\
 			}																			\
         } while(q::volatile_false())

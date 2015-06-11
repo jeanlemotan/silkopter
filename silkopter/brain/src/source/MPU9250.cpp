@@ -300,6 +300,8 @@ MPU9250::MPU9250(HAL& hal)
     , m_config(new sz::MPU9250::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
+
+    m_config->output_streams.acceleration.scale = math::vec3f::one;
 }
 
 MPU9250::~MPU9250()
@@ -543,48 +545,50 @@ auto MPU9250::init() -> bool
     {
     case 250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f);
         break;
     case 500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 2.f);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 2.f);
         break;
     case 1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 4.f);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 4.f);
         break;
     case 2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_angular_velocity_scale_inv = math::radians(1.f) / (131.f / 8.f);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
         QLOGE("Invalid angular velocity range: {}", m_init_params->angular_velocity_range);
         return false;
     }
 
+
     uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
     switch (m_init_params->acceleration_range)
     {
     case 2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
-        m_acceleration_scale_inv = physics::constants::g / 16384.f;
+        m_acceleration_sensor_scale = physics::constants::g / 16384.f;
         break;
     case 4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
-        m_acceleration_scale_inv = physics::constants::g / 8192.f;
+        m_acceleration_sensor_scale = physics::constants::g / 8192.f;
         break;
     case 8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-        m_acceleration_scale_inv = physics::constants::g / 4096.f;
+        m_acceleration_sensor_scale = physics::constants::g / 4096.f;
         break;
     case 16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
-        m_acceleration_scale_inv = physics::constants::g / 2048.f;
+        m_acceleration_sensor_scale = physics::constants::g / 2048.f;
         break;
     default:
         QLOGE("Invalid acceleration range: {}", m_init_params->acceleration_range);
         return false;
     }
+
 
     auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
@@ -764,9 +768,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
@@ -849,9 +854,10 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     res &= akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field_adj[0] = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field_adj[1] = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
-    m_magnetic_field_adj[2] = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
@@ -917,6 +923,11 @@ void MPU9250::process()
 {
     QLOG_TOPIC("mpu9250::process");
 
+    m_acceleration->clear();
+    m_angular_velocity->clear();
+    m_magnetic_field->clear();
+    m_temperature->clear();
+
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
     {
@@ -928,11 +939,6 @@ void MPU9250::process()
     {
         unlock(buses);
     });
-
-    m_acceleration->clear();
-    m_angular_velocity->clear();
-    m_magnetic_field->clear();
-    m_temperature->clear();
 
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -975,20 +981,25 @@ void MPU9250::process()
 
 //                m_angular_velocity->samples.resize(sample_count);
 //                m_acceleration->samples.resize(sample_count);
+
+                math::vec3f acceleration_scale = m_acceleration_sensor_scale * m_config->output_streams.acceleration.scale;
+
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     short x = (data[0] << 8) | data[1]; data += 2;
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
-                    math::vec3f value(x * m_acceleration_scale_inv, y * m_acceleration_scale_inv, z * m_acceleration_scale_inv);
+                    math::vec3f value(x, y, z);
+                    value = value * acceleration_scale + m_config->output_streams.acceleration.bias;
                     m_acceleration->push_sample(value, true);
 
                     x = (data[0] << 8) | data[1]; data += 2;
                     y = (data[0] << 8) | data[1]; data += 2;
                     z = (data[0] << 8) | data[1]; data += 2;
 
-                    value.set(x * m_angular_velocity_scale_inv, y * m_angular_velocity_scale_inv, z * m_angular_velocity_scale_inv);
+                    value.set(x, y, z);
+                    value = value * m_angular_velocity_sensor_scale + m_config->output_streams.angular_velocity.bias;
                     m_angular_velocity->push_sample(value, true);
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
@@ -1060,21 +1071,17 @@ void MPU9250::process_magnetometer(Buses& buses)
             return;
         }
 
-        short data[3];
-        data[0] = (tmp[2] << 8) | tmp[1];
-        data[1] = (tmp[4] << 8) | tmp[3];
-        data[2] = (tmp[6] << 8) | tmp[5];
+        math::vec3f data((tmp[2] << 8) | tmp[1],
+                         (tmp[4] << 8) | tmp[3],
+                         (tmp[6] << 8) | tmp[5]);
 
-        data[0] = data[0] * m_magnetic_field_adj[0];
-        data[1] = data[1] * m_magnetic_field_adj[1];
-        data[2] = data[2] * m_magnetic_field_adj[2];
+        data = data * m_magnetic_field_sensor_scale + m_config->output_streams.magnetic_field.bias;
 
         //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
         static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
                 math::quatf::from_axis_z(math::radians(90.f));
-        math::vec3f c(data[0], data[1], data[2]);
-        c *= 0.15f;//16 bit mode
-        m_last_magnetic_field_value = math::rotate(rot, c);
+
+        m_last_magnetic_field_value = math::rotate(rot, data);
     }
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();
@@ -1102,6 +1109,7 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
     return true;
 }
 auto MPU9250::get_config() const -> rapidjson::Document

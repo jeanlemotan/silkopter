@@ -1272,7 +1272,7 @@ void Raspicam::create_file_sink()
     do
     {
         std::string filepath;
-        q::util::format(filepath, "capture/{}-{}", mbstr, file_idx);
+        q::util::format_emplace(filepath, "capture/{}-{}", mbstr, file_idx);
         if (!q::util::fs::exists(q::Path(filepath)))
         {
             m_file_sink.reset(new q::data::File_Sink(q::Path(filepath)));

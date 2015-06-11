@@ -762,7 +762,7 @@ namespace formatting
 //////////////////////////////////////////////////////////////////////////
 
 template<class Dst, class Format_String, typename... Params>
-Dst& format(Dst& dst, Format_String const& fmt, Params&&... params) // recursive variadic function
+Dst& format_emplace(Dst& dst, Format_String const& fmt, Params&&... params) // recursive variadic function
 {
 	util::formatting::Dst_Adapter<Dst> dst_adapter(dst);
 	dst_adapter.clear();

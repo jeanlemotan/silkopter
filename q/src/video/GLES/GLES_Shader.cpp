@@ -198,7 +198,7 @@ String GLES_Shader::patch_shader(
 		}
 		else if (udef.get_link() == Path("transform/worldviewprojection") && skin_npv > 0)
 		{
-			util::format(final_name, "_u_{}_", name);
+			util::format_emplace(final_name, "_u_{}_", name);
 			declaration += "uniform ";
 			declaration += get_shader_type_precision_str(udef);
 			declaration += " ";
@@ -207,12 +207,12 @@ String GLES_Shader::patch_shader(
 			declaration += final_name;
 			declaration += "; // auto declaration\n";
 
-			util::format(final_name, "({} * getSkinTransform())", final_name);
+			util::format_emplace(final_name, "({} * getSkinTransform())", final_name);
 			has_world_transform = true;
 		}
 		else
 		{
-			util::format(final_name, "_u_{}_", name);
+			util::format_emplace(final_name, "_u_{}_", name);
 			declaration += "uniform ";
 			declaration += get_shader_type_precision_str(udef);
 			declaration += " ";
@@ -222,7 +222,7 @@ String GLES_Shader::patch_shader(
 			if (udef.get_default_value().get_count() > 1)
 			{
 				std::string _s;
-				util::format(_s, "[{}]", udef.get_default_value().get_count());
+				util::format_emplace(_s, "[{}]", udef.get_default_value().get_count());
 				declaration += _s;
 			}
 			declaration += "; // auto declaration\n";
@@ -246,7 +246,7 @@ String GLES_Shader::patch_shader(
 			if (is_array)
 			{
 				std::string final_name_array;
-				util::format(final_name_array, "{}[{}]", final_name, exp.index.value);
+				util::format_emplace(final_name_array, "{}[{}]", final_name, exp.index.value);
 				patch_items.emplace_back(exp.value, final_name_array);
 			}
 			else
@@ -264,7 +264,7 @@ String GLES_Shader::patch_shader(
 		Sampler_Def& sdef = *sit;
 
 		std::string final_name;
-		util::format(final_name, "_s_{}_", name);
+		util::format_emplace(final_name, "_s_{}_", name);
 
 		std::vector<Shader_Source::Expression> const& all_expressions = it.second;
 		for (auto const& exp: all_expressions)
@@ -294,7 +294,7 @@ String GLES_Shader::patch_shader(
 		Attribute_Def& adef = *ait;
 
 		std::string final_name;
-		util::format(final_name, "_a_{}_", name);
+		util::format_emplace(final_name, "_a_{}_", name);
 
 		std::vector<Shader_Source::Expression> const& allExpressions = it.second;
 		for (auto const& exp: allExpressions)
@@ -410,7 +410,7 @@ String GLES_Shader::patch_shader(
 		m_max_skin_nodes = (m_max_uniforms - uniform_floats) / 16;//(9 + 3 + 9 + 9);
 		//declaration += String::format("uniform highp mat3 _u_skin_rotations_[%d];\n", mMaxSkinNodes).c_str();
 		std::string _s;
-		util::format(_s, "uniform highp vec4 _u_skin_transforms_[{}];\n", m_max_skin_nodes);
+		util::format_emplace(_s, "uniform highp vec4 _u_skin_transforms_[{}];\n", m_max_skin_nodes);
 		declaration += _s;
 
 		{
