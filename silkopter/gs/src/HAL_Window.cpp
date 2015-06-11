@@ -241,34 +241,33 @@ void HAL_Window::connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConne
     menu.exec(event->screenPos());
 }
 
-static void get_acceleration_calibration_json(silk::node::stream::Stream& stream, rapidjson::Value*& biasj, rapidjson::Value*& scalej)
+auto HAL_Window::supports_acceleration_calibration(silk::node::stream::Stream const& stream) const -> bool
 {
     auto node = stream.node.lock();
     if (!node || stream.type != silk::node::stream::IAcceleration::TYPE)
     {
-        return;
+        return false;
     }
-    biasj = jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
-    scalej = jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "scale");
+    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias")
+            && jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "scale");
 }
-static void get_magnetic_field_calibration_json(silk::node::stream::Stream& stream, rapidjson::Value*& biasj)
+auto HAL_Window::supports_magnetic_field_calibration(silk::node::stream::Stream const& stream) const -> bool
 {
     auto node = stream.node.lock();
     if (!node || stream.type != silk::node::stream::IMagnetic_Field::TYPE)
     {
-        return;
+        return false;
     }
-    biasj = jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
+    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
 }
-static void get_angular_velocity_calibration_json(silk::node::stream::Stream& stream, rapidjson::Value*& biasj)
+auto HAL_Window::supports_angular_velocity_calibration(silk::node::stream::Stream const& stream) const -> bool
 {
     auto node = stream.node.lock();
-    if (!node || stream.type != silk::node::stream::IMagnetic_Field::TYPE)
+    if (!node || stream.type != silk::node::stream::IAngular_Velocity::TYPE)
     {
-        return;
+        return false;
     }
-    ;
-    biasj = jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
+    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
 }
 
 
@@ -293,42 +292,33 @@ void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* blo
             });
         }
 
-        for (auto const& s: node->output_streams)
+        for (auto const& os: node->output_streams)
         {
-            rapidjson::Value* biasj = nullptr;
-            rapidjson::Value* scalej = nullptr;
-
-            get_acceleration_calibration_json(*s.stream, biasj, scalej);
-            if (biasj && scalej)
+            auto stream = os.stream;
+            if (supports_acceleration_calibration(*stream))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_acceleration_calibration(node, *biasj, *scalej);
+                    do_acceleration_calibration(stream);
                 });
-
-                continue;
             }
-
-            get_angular_velocity_calibration_json(*s.stream, biasj);
-            if (biasj)
+            if (supports_angular_velocity_calibration(*stream))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_angular_velocity_calibration(node, *biasj);
+                    do_angular_velocity_calibration(stream);
                 });
 
                 continue;
             }
-
-            get_magnetic_field_calibration_json(*s.stream, biasj);
-            if (biasj)
+            if (supports_magnetic_field_calibration(*stream))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_magnetic_field_calibration(node, *biasj);
+                    do_magnetic_field_calibration(stream);
                 });
 
                 continue;
@@ -532,17 +522,17 @@ void HAL_Window::open_stream_viewer(std::string const& stream_name)
     //dock->show();
 }
 
-void HAL_Window::do_acceleration_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj, rapidjson::Value& scalej)
+void HAL_Window::do_acceleration_calibration(silk::node::stream::Stream_ptr stream)
 {
 
 }
 
-void HAL_Window::do_magnetic_field_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj)
+void HAL_Window::do_magnetic_field_calibration(silk::node::stream::Stream_ptr stream)
 {
 
 }
 
-void HAL_Window::do_angular_velocity_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj)
+void HAL_Window::do_angular_velocity_calibration(silk::node::stream::Stream_ptr stream)
 {
 
 }

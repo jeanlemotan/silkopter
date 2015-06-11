@@ -32,6 +32,10 @@ private:
 private:
     void refresh_nodes();
 
+    auto supports_acceleration_calibration(silk::node::stream::Stream const& stream) const -> bool;
+    auto supports_magnetic_field_calibration(silk::node::stream::Stream const& stream) const -> bool;
+    auto supports_angular_velocity_calibration(silk::node::stream::Stream const& stream) const -> bool;
+
     void contextMenu(QGraphicsSceneMouseEvent* event);
     void portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port);
     void blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
@@ -42,9 +46,9 @@ private:
 
     void open_stream_viewer(std::string const& stream_name);
 
-    void do_acceleration_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj, rapidjson::Value& scalej);
-    void do_magnetic_field_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj);
-    void do_angular_velocity_calibration(silk::node::Node_ptr node, rapidjson::Value& biasj);
+    void do_acceleration_calibration(silk::node::stream::Stream_ptr stream);
+    void do_magnetic_field_calibration(silk::node::stream::Stream_ptr stream);
+    void do_angular_velocity_calibration(silk::node::stream::Stream_ptr stream);
 
 
     void refresh_node(silk::node::Node& node);
