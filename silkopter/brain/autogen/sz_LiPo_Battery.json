@@ -11,39 +11,10 @@
 {
     "definition" : true,
     "namespace" : "sz::LiPo_Battery",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "voltage", {"required": true, "json_key" : "Voltage"}],
-        ["std::string", "current", {"required": true, "json_key" : "Current"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::LiPo_Battery",
-    "name": "Battery_State",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::LiPo_Battery",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::LiPo_Battery::Battery_State", "battery_state", {"required": true, "json_key" : "Battery State"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::LiPo_Battery",
     "name": "Config",
     "members":
     [
-        ["float", "full_charge", {"required": true, "json_key" : "Full Charge (Ah)", "default" : 2.2}],
-        ["sz::LiPo_Battery::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::LiPo_Battery::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+        ["float", "full_charge", {"required": true, "json_key" : "Full Charge (Ah)", "default" : 2.2}]
     ]
 }
 ]

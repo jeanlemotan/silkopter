@@ -122,9 +122,11 @@ private:
 
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
+    void handle_get_node_data();
 
     void handle_node_config();
     void handle_node_message();
+    void handle_node_input_stream_path();
 
     void handle_add_node();
     void handle_remove_node();

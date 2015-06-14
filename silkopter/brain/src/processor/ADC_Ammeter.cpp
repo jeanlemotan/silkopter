@@ -51,7 +51,7 @@ auto ADC_Ammeter::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IADC::TYPE, m_init_params->rate, "ADC" }
+        { stream::IADC::TYPE, m_init_params->rate, "ADC", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -70,17 +70,18 @@ void ADC_Ammeter::process()
 
     m_output_stream->clear();
 
-    auto adc_stream = m_adc_stream.lock();
-    if (!adc_stream)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IADC::Sample const& i_sample)
     {
-        return;
-    }
+        m_output_stream->push_sample(i_sample.value * m_config->scale + m_config->bias, i_sample.is_healthy);
+    });
+}
 
-    auto const& iss = adc_stream->get_samples();
-    for (auto const& is: iss)
-    {
-       m_output_stream->push_sample(is.value * m_config->output_streams.current.scale + m_config->output_streams.current.bias, is.is_healthy);
-    };
+void ADC_Ammeter::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
@@ -95,19 +96,6 @@ auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool
         ss << result;
         QLOGE("Cannot deserialize ADC_Ammeter config data: {}", ss.str());
         return false;
-    }
-
-    auto adc_stream = m_hal.get_streams().find_by_name<stream::IADC>(sz.input_streams.adc);
-
-    auto rate = adc_stream ? adc_stream->get_rate() : 0u;
-    if (rate != m_output_stream->get_rate())
-    {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.adc, m_output_stream->get_rate(), rate);
-        m_adc_stream.reset();
-    }
-    else
-    {
-        m_adc_stream = adc_stream;
     }
 
     *m_config = sz;

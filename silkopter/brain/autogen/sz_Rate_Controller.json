@@ -11,33 +11,6 @@
 {
     "definition" : true,
     "namespace" : "sz::Rate_Controller",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "input", {"required": true, "json_key" : "Input"}],
-        ["std::string", "target", {"required": true, "json_key" : "Target"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Rate_Controller",
-    "name": "Torque",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Rate_Controller",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Rate_Controller::Torque", "torque", {"required": true, "json_key" : "Torque"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Rate_Controller",
     "name": "PID",
     "members":
     [
@@ -79,9 +52,7 @@
     "members":
     [
         ["sz::Rate_Controller::Feedback", "feedback", {"required": false, "json_key" : "Feedback"}],
-        ["sz::Rate_Controller::Feedforward", "feedforward", {"required": false, "json_key" : "Feedforward"}],
-        ["sz::Rate_Controller::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Rate_Controller::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+        ["sz::Rate_Controller::Feedforward", "feedforward", {"required": false, "json_key" : "Feedforward"}]
     ]
 }
 ]

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include <boost/optional.hpp>
 #include "RUDP.h"
 
@@ -159,6 +162,14 @@ namespace util
             auto off = m_tx_buffer.size();
             detail::set_value(m_tx_buffer, p, off);
         }
+        void pack_param(rapidjson::Document const& json)
+        {
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            json.Accept(writer);
+            std::string str(buffer.GetString(), buffer.GetSize());
+            pack_param(str);
+        }
         void pack_data(uint8_t const* src, size_t size)
         {
             QASSERT(src);
@@ -247,6 +258,21 @@ namespace util
 //                return false;
 //            }
             return detail::get_value(p, m_rx_buffer, m_decoded.offset);
+        }
+        auto unpack_param(rapidjson::Document& json) -> bool
+        {
+            std::string str;
+            if (!unpack_param(str))
+            {
+                return false;
+            }
+            json.SetObject();
+            if (!str.empty() && json.Parse(str.c_str()).HasParseError())
+            {
+                QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
+                return false;
+            }
+            return true;
         }
         inline auto unpack_data(uint8_t* dst, size_t size) -> bool
         {

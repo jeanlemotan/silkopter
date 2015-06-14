@@ -11,38 +11,9 @@
 {
     "definition" : true,
     "namespace" : "sz::Gravity_Filter",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "frame", {"required": true, "json_key" : "Frame"}],
-        ["std::string", "acceleration", {"required": true, "json_key" : "Acceleration"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Gravity_Filter",
-    "name": "Linear_Acceleration",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Gravity_Filter",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Gravity_Filter::Linear_Acceleration", "linear_acceleration", {"required": true, "json_key" : "Linear Acceleration"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Gravity_Filter",
     "name": "Config",
     "members":
     [
-        ["sz::Gravity_Filter::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Gravity_Filter::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

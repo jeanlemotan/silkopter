@@ -5,6 +5,7 @@
 #include "common/node/stream/IVoltage.h"
 #include "common/node/IProcessor.h"
 
+#include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
 namespace sz
@@ -34,6 +35,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -48,7 +50,7 @@ private:
     std::shared_ptr<sz::ADC_Voltmeter::Init_Params> m_init_params;
     std::shared_ptr<sz::ADC_Voltmeter::Config> m_config;
 
-    stream::IADC_wptr m_adc_stream;
+    Sample_Accumulator<stream::IADC> m_accumulator;
 
     typedef Basic_Output_Stream<stream::IVoltage> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

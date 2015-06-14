@@ -11,20 +11,10 @@
 {
     "definition" : true,
     "namespace" : "sz::Scalar_Generator",
-    "name": "Input_Streams",
-    "members":
-    [
-       ["std::string", "modulation", {"required": true, "json_key" : "Modulation"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Scalar_Generator",
     "name": "Config",
     "members":
     [
-        ["float", "value", {"required": true, "json_key" : "Value", "default" : 0}],
-        ["sz::Scalar_Generator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
+        ["float", "value", {"required": true, "json_key" : "Value", "default" : 0}]
     ]
 }
 ]

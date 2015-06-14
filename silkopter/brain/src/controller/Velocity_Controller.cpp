@@ -54,8 +54,8 @@ auto Velocity_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IVelocity::TYPE, m_init_params->rate, "Input" },
-        { stream::IVelocity::TYPE, m_init_params->rate, "Target" }
+        { stream::IVelocity::TYPE, m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
+        { stream::IVelocity::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -92,6 +92,12 @@ void Velocity_Controller::process()
     });
 }
 
+void Velocity_Controller::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+}
+
 auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("velocity_controller::set_config");
@@ -107,32 +113,6 @@ auto Velocity_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IVelocity>(sz.input_streams.input);
-    auto target_stream = m_hal.get_streams().find_by_name<stream::IVelocity>(sz.input_streams.target);
-
-    auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.input.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_init_params->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(input_stream);
-    }
-
-    rate = target_stream ? target_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_init_params->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(target_stream);
-    }
 
     return true;
 }

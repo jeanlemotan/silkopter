@@ -24,31 +24,7 @@
 {
     "definition" : true,
     "namespace" : "sz::PCA9685",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "channel_1", {"required": true, "json_key" : "Channel 1"}],
-        ["std::string", "channel_2", {"required": true, "json_key" : "Channel 2"}],
-        ["std::string", "channel_3", {"required": true, "json_key" : "Channel 3"}],
-        ["std::string", "channel_4", {"required": true, "json_key" : "Channel 4"}],
-        ["std::string", "channel_5", {"required": true, "json_key" : "Channel 5"}],
-        ["std::string", "channel_6", {"required": true, "json_key" : "Channel 6"}],
-        ["std::string", "channel_7", {"required": true, "json_key" : "Channel 7"}],
-        ["std::string", "channel_8", {"required": true, "json_key" : "Channel 8"}],
-        ["std::string", "channel_9", {"required": true, "json_key" : "Channel 9"}],
-        ["std::string", "channel_10", {"required": true, "json_key" : "Channel 10"}],
-        ["std::string", "channel_11", {"required": true, "json_key" : "Channel 11"}],
-        ["std::string", "channel_12", {"required": true, "json_key" : "Channel 12"}],
-        ["std::string", "channel_13", {"required": true, "json_key" : "Channel 13"}],
-        ["std::string", "channel_14", {"required": true, "json_key" : "Channel 14"}],
-        ["std::string", "channel_15", {"required": true, "json_key" : "Channel 15"}],
-        ["std::string", "channel_16", {"required": true, "json_key" : "Channel 16"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::PCA9685",
-    "name": "Channels",
+    "name": "Config",
     "members":
     [
         ["sz::PCA9685::PWM_Channel", "channel_1", {"required": false, "json_key" : "Channel 1"}],
@@ -67,16 +43,6 @@
         ["sz::PCA9685::PWM_Channel", "channel_14", {"required": false, "json_key" : "Channel 14"}],
         ["sz::PCA9685::PWM_Channel", "channel_15", {"required": false, "json_key" : "Channel 15"}],
         ["sz::PCA9685::PWM_Channel", "channel_16", {"required": false, "json_key" : "Channel 16"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::PCA9685",
-    "name": "Config",
-    "members":
-    [
-        ["sz::PCA9685::Channels", "channels", {"required": true, "json_key" : "Channels"}],
-        ["sz::PCA9685::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }
 ]

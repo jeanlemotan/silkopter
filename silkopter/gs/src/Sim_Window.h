@@ -29,6 +29,8 @@ private:
 
     Ui::Sim_Window m_ui;
 
+    std::vector<q::util::Connection> m_connections;
+
     silk::HAL& m_hal;
     silk::node::Node_ptr m_sim_node;
     silk::Comms& m_comms;

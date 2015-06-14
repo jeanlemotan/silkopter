@@ -11,16 +11,6 @@
 {
     "definition" : true,
     "namespace" : "sz::Servo_Gimbal",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "frame", {"required": true, "json_key" : "Frame"}],
-        ["std::string", "target", {"required": true, "json_key" : "Target"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Servo_Gimbal",
     "name": "PWM",
     "members":
     [
@@ -33,22 +23,12 @@
 {
     "definition" : true,
     "namespace" : "sz::Servo_Gimbal",
-    "name": "Output_Streams",
+    "name": "Config",
     "members":
     [
         ["sz::Servo_Gimbal::PWM", "x_pwm", {"required": true, "json_key" : "X PWM"}],
         ["sz::Servo_Gimbal::PWM", "y_pwm", {"required": true, "json_key" : "Y PWM"}],
         ["sz::Servo_Gimbal::PWM", "z_pwm", {"required": true, "json_key" : "Z PWM"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Servo_Gimbal",
-    "name": "Config",
-    "members":
-    [
-        ["sz::Servo_Gimbal::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Servo_Gimbal::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

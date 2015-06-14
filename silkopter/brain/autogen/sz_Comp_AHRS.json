@@ -11,39 +11,9 @@
 {
     "definition" : true,
     "namespace" : "sz::Comp_AHRS",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["std::string", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["std::string", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Comp_AHRS",
-    "name": "Frame",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Comp_AHRS",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Comp_AHRS::Frame", "frame", {"required": true, "json_key" : "Frame"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Comp_AHRS",
     "name": "Config",
     "members":
     [
-        ["sz::Comp_AHRS::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Comp_AHRS::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

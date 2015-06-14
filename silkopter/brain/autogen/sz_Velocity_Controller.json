@@ -11,47 +11,9 @@
 {
     "definition" : true,
     "namespace" : "sz::Velocity_Controller",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "input", {"required": true, "json_key" : "Input"}],
-        ["std::string", "target", {"required": true, "json_key" : "Target"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Velocity_Controller",
-    "name": "Frame",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Velocity_Controller",
-    "name": "Force",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Velocity_Controller",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Velocity_Controller::Frame", "frame", {"required": true, "json_key" : "Frame"}],
-        ["sz::Velocity_Controller::Force", "force", {"required": true, "json_key" : "Force"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Velocity_Controller",
     "name": "Config",
     "members":
     [
-        ["sz::Velocity_Controller::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Velocity_Controller::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

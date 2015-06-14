@@ -101,7 +101,7 @@ auto Multi_Simulator::init() -> bool
     m_last_tp = q::Clock::now();
 
     m_input_throttle_streams.resize(multi_config->motors.size());
-    m_config->input_streams.throttle.resize(multi_config->motors.size());
+    m_input_throttle_stream_paths.resize(multi_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
     m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -237,6 +237,25 @@ void Multi_Simulator::process()
     });
 }
 
+void Multi_Simulator::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
+    auto rate = input_stream ? input_stream->get_rate() : 0u;
+    if (rate != m_init_params->throttle_rate)
+    {
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->throttle_rate, rate);
+        m_input_throttle_streams[idx].reset();
+        m_input_throttle_stream_paths[idx].clear();
+    }
+    else
+    {
+        m_input_throttle_streams[idx] = input_stream;
+        m_input_throttle_stream_paths[idx] = path;
+    }
+}
+
 auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("multi_simulator::set_config");
@@ -284,23 +303,6 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
     m_simulation.set_simulation_enabled(sz.simulation_enabled);
 
     *m_config = sz;
-
-    for (size_t i = 0; i < sz.input_streams.throttle.size(); i++)
-    {
-        auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(sz.input_streams.throttle[i]);
-        auto rate = input_stream ? input_stream->get_rate() : 0u;
-        if (rate != m_init_params->throttle_rate)
-        {
-            m_config->input_streams.throttle[i].clear();
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.throttle[i], m_init_params->throttle_rate, rate);
-            m_input_throttle_streams[i].reset();
-        }
-        else
-        {
-            m_input_throttle_streams[i] = input_stream;
-        }
-    }
-
 
     return true;
 }

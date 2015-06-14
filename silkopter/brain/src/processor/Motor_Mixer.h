@@ -37,6 +37,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 

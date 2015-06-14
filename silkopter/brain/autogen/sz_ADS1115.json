@@ -15,30 +15,9 @@
 {
     "definition" : true,
     "namespace" : "sz::ADS1115",
-    "name": "ADC",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::ADS1115",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::ADS1115::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
-        ["sz::ADS1115::ADC", "adc1", {"required": true, "json_key" : "ADC1"}],
-        ["sz::ADS1115::ADC", "adc2", {"required": true, "json_key" : "ADC2"}],
-        ["sz::ADS1115::ADC", "adc3", {"required": true, "json_key" : "ADC3"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::ADS1115",
     "name": "Config",
     "members":
     [
-        ["sz::ADS1115::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

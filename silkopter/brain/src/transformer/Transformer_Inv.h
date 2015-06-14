@@ -29,6 +29,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -101,6 +102,13 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
+void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+}
+
+template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("transformer_inv::set_config");
@@ -115,34 +123,6 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapi
     }
 
     m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto output_rate = m_output_stream->get_rate();
-
-    auto input_stream = m_hal.get_streams().template find_by_name<In_Stream_t>(sz.input_streams.input);
-    auto frame_stream = m_hal.get_streams().template find_by_name<Frame_Stream_t>(sz.input_streams.frame);
-
-    auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config.input_streams.input.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.template set_stream<0>(input_stream);
-    }
-
-    rate = frame_stream ? frame_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config.input_streams.frame.clear();
-        QLOGE("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.template set_stream<1>(frame_stream);
-    }
 
     return true;
 }
@@ -164,8 +144,8 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_inpu
 {
     std::vector<Stream_Input> inputs =
     {{
-        { In_Stream_t::TYPE, m_init_params.rate, "Input" },
-        { Out_Stream_t::TYPE, m_init_params.rate, "Frame" }
+        { In_Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) },
+        { Out_Stream_t::TYPE, m_init_params.rate, "Frame", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

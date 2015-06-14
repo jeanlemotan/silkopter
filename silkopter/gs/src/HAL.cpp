@@ -1,4 +1,5 @@
 #include "HAL.h"
+#include "Comms.h"
 #include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
 
@@ -17,7 +18,8 @@ namespace silk
 
 ///////////////////////////////////////////////////////////////
 
-HAL::HAL()
+HAL::HAL(Comms& comms)
+    : m_comms(comms)
 {
     QLOG_TOPIC("hal");
 }
@@ -50,106 +52,84 @@ auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 }
 void HAL::set_multi_config(config::Multi const& config)
 {
-    Set_Multi_Config_Queue_Item item;
-    autojsoncxx::to_document(config, item.config);
-    m_multi_set_config_queue.push_back(std::move(item));
+//    Set_Multi_Config_Queue_Item item;
+//    autojsoncxx::to_document(config, item.config);
+//    m_multi_set_config_queue.push_back(std::move(item));
 }
 
 void HAL::add_node(std::string const& def_name,
                      std::string const& name,
-                     rapidjson::Document&& init_params,
-                     Add_Node_Callback callback)
+                     rapidjson::Document&& init_params)
 {
-    QASSERT(callback);
-    if (!callback)
-    {
-        return;
-    }
-    Add_Queue_Item item;
-    item.def_name = def_name;
-    item.name = name;
-    item.init_params = std::move(init_params);
-    item.callback = callback;
-    m_add_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::ADD_NODE);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(def_name);
+    channel.pack_param(name);
+    channel.pack_param(init_params);
+    channel.end_pack();
 }
 
-void HAL::remove_node(node::Node_ptr node,
-                     Remove_Node_Callback callback)
+void HAL::remove_node(node::Node_ptr node)
 {
-    QASSERT(callback);
-    if (!callback)
-    {
-        return;
-    }
-    Remove_Queue_Item item;
-    item.name = node->name;
-    item.callback = callback;
-    m_remove_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(node->name);
+    channel.end_pack();
 }
 
-void HAL::connect_node_stream_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name)
+void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path)
 {
-    auto document = jsonutil::clone_value(node->config);
-
-    q::Path path("Input Streams");
-    path += input_name;
-
-    auto* value = jsonutil::find_value(document, path);
-    if (!value)
+    auto it = std::find_if(node->input_streams.begin(), node->input_streams.end(), [input_name](node::Node::Stream_Input const& is) { return is.name == input_name; });
+    if (it == node->input_streams.end())
     {
-        QASSERT(0);
+        QLOGE("Cannot find input stream '{}' for node '{}'", input_name, node->name);
         return;
     }
 
-    value->SetString(stream_name.c_str(), document.GetAllocator());
+    uint32_t input_idx = static_cast<uint32_t>(std::distance(it, node->input_streams.begin()));
 
-    Set_Node_Config_Queue_Item item;
-    item.name = node->name;
-    item.config = std::move(document);
-    m_node_set_config_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(node->name);
+    channel.pack_param(input_idx);
+    channel.pack_param(stream_path);
+    channel.end_pack();
 }
 
 void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config)
 {
-    Set_Node_Config_Queue_Item item;
-    item.name = node->name;
-    item.config = jsonutil::clone_value(config);
-    m_node_set_config_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(node->name);
+    channel.pack_param(config);
+    channel.end_pack();
 }
 
-void HAL::send_node_message(node::Node_ptr node, rapidjson::Document json, Node_Message_Callback callback)
+void HAL::send_node_message(node::Node_ptr node, rapidjson::Document const& json)
 {
-    QASSERT(callback);
-    if (!callback)
-    {
-        return;
-    }
-    Send_Node_Message_Queue_Item item;
-    item.name = node->name;
-    item.json = std::move(json);
-    item.callback = callback;
-    m_send_node_message_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(node->name);
+    channel.pack_param(json);
+    channel.end_pack();
 }
 
-void HAL::set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback)
+void HAL::set_stream_telemetry_active(std::string const& stream_name, bool active)
 {
-    QASSERT(callback);
-    if (!callback)
-    {
-        return;
-    }
     auto stream = m_streams.find_by_name(stream_name);
     if (!stream)
     {
         QLOGE("Cannot find stream '{}'", stream_name);
-        callback(Result::FAILED);
         return;
     }
     if (stream->telemetry_active_req == 0 && !active)
     {
-        QASSERT(0);
-        QLOGE("Trying to disable stream '{}' but it's already disabled", stream_name);
-        callback(Result::FAILED);
+        QLOGW("Trying to disable stream '{}' but it's already disabled", stream_name);
         return;
     }
 
@@ -159,15 +139,15 @@ void HAL::set_stream_telemetry_active(std::string const& stream_name, bool activ
     bool new_active = stream->telemetry_active_req > 0;
     if (new_active == stream->is_telemetry_active)
     {
-        callback(Result::OK);
         return;
     }
 
-    Stream_Telemetry_Queue_Item item;
-    item.stream_name = stream_name;
-    item.callback = callback;
-    item.is_active = new_active;
-    m_stream_telemetry_queue.push_back(std::move(item));
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(stream_name);
+    channel.pack_param(new_active);
+    channel.end_pack();
 }
 
 

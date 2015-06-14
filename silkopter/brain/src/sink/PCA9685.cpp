@@ -45,28 +45,30 @@ PCA9685::PCA9685(HAL& hal)
     , m_config(new sz::PCA9685::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
+
+    m_pwm_channels.resize(16);
 }
 
 auto PCA9685::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 1" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 2" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 3" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 4" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 5" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 6" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 7" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 8" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 9" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 10" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 11" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 12" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 13" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 14" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 15" },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 16" },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 1", m_pwm_channels[0].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 2", m_pwm_channels[1].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 3", m_pwm_channels[2].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 4", m_pwm_channels[3].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 5", m_pwm_channels[4].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 6", m_pwm_channels[5].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 7", m_pwm_channels[6].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 8", m_pwm_channels[7].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 9", m_pwm_channels[8].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 10",m_pwm_channels[9].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 11",m_pwm_channels[10].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 12",m_pwm_channels[11].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 13",m_pwm_channels[12].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 14",m_pwm_channels[13].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 15",m_pwm_channels[14].stream_path },
+        { stream::IPWM::TYPE, m_init_params->rate, "Channel 16",m_pwm_channels[15].stream_path },
     }};
     return inputs;
 }
@@ -140,24 +142,22 @@ auto PCA9685::init() -> bool
         return false;
     }
 
-    m_pwm_channels.resize(16);
-
-    m_pwm_channels[0].config = &m_config->channels.channel_1;
-    m_pwm_channels[1].config = &m_config->channels.channel_2;
-    m_pwm_channels[2].config = &m_config->channels.channel_3;
-    m_pwm_channels[3].config = &m_config->channels.channel_4;
-    m_pwm_channels[4].config = &m_config->channels.channel_5;
-    m_pwm_channels[5].config = &m_config->channels.channel_6;
-    m_pwm_channels[6].config = &m_config->channels.channel_7;
-    m_pwm_channels[7].config = &m_config->channels.channel_8;
-    m_pwm_channels[8].config = &m_config->channels.channel_9;
-    m_pwm_channels[9].config = &m_config->channels.channel_10;
-    m_pwm_channels[10].config = &m_config->channels.channel_11;
-    m_pwm_channels[11].config = &m_config->channels.channel_12;
-    m_pwm_channels[12].config = &m_config->channels.channel_13;
-    m_pwm_channels[13].config = &m_config->channels.channel_14;
-    m_pwm_channels[14].config = &m_config->channels.channel_15;
-    m_pwm_channels[15].config = &m_config->channels.channel_16;
+    m_pwm_channels[0].config = &m_config->channel_1;
+    m_pwm_channels[1].config = &m_config->channel_2;
+    m_pwm_channels[2].config = &m_config->channel_3;
+    m_pwm_channels[3].config = &m_config->channel_4;
+    m_pwm_channels[4].config = &m_config->channel_5;
+    m_pwm_channels[5].config = &m_config->channel_6;
+    m_pwm_channels[6].config = &m_config->channel_7;
+    m_pwm_channels[7].config = &m_config->channel_8;
+    m_pwm_channels[8].config = &m_config->channel_9;
+    m_pwm_channels[9].config = &m_config->channel_10;
+    m_pwm_channels[10].config = &m_config->channel_11;
+    m_pwm_channels[11].config = &m_config->channel_12;
+    m_pwm_channels[12].config = &m_config->channel_13;
+    m_pwm_channels[13].config = &m_config->channel_14;
+    m_pwm_channels[14].config = &m_config->channel_15;
+    m_pwm_channels[15].config = &m_config->channel_16;
 
     //reseet all channels
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
@@ -269,12 +269,34 @@ void PCA9685::process()
     }
 }
 
-
-#define READ_CONFIG(CH)\
+#define FIND_STREAM(CH)\
+if (idx == CH - 1)\
 {\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.input_streams.channel_##CH);\
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     m_pwm_channels[CH - 1].stream = input_stream;\
-    m_pwm_channels[CH - 1].config = &m_config->channels.channel_##CH;\
+    m_pwm_channels[CH - 1].config = &m_config->channel_##CH;\
+}
+
+void PCA9685::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+
+    FIND_STREAM(1);
+    FIND_STREAM(2);
+    FIND_STREAM(3);
+    FIND_STREAM(4);
+    FIND_STREAM(5);
+    FIND_STREAM(6);
+    FIND_STREAM(7);
+    FIND_STREAM(8);
+    FIND_STREAM(9);
+    FIND_STREAM(10);
+    FIND_STREAM(11);
+    FIND_STREAM(12);
+    FIND_STREAM(13);
+    FIND_STREAM(14);
+    FIND_STREAM(15);
+    FIND_STREAM(16);
 }
 
 
@@ -293,23 +315,6 @@ auto PCA9685::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-
-    READ_CONFIG(1);
-    READ_CONFIG(2);
-    READ_CONFIG(3);
-    READ_CONFIG(4);
-    READ_CONFIG(5);
-    READ_CONFIG(6);
-    READ_CONFIG(7);
-    READ_CONFIG(8);
-    READ_CONFIG(9);
-    READ_CONFIG(10);
-    READ_CONFIG(11);
-    READ_CONFIG(12);
-    READ_CONFIG(13);
-    READ_CONFIG(14);
-    READ_CONFIG(15);
-    READ_CONFIG(16);
 
     return true;
 }

@@ -56,6 +56,7 @@ private:
     void create_node(silk::node::Node_Def_ptr def, QPointF pos);
     void remove_node(silk::node::Node_ptr node);
 
+    std::vector<q::util::Connection> m_connections;
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;

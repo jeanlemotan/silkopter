@@ -35,6 +35,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
 
     void process();
@@ -53,6 +54,7 @@ private:
         sz::PIGPIO::PWM_Channel* config = nullptr;
         stream::IPWM_wptr stream;
         uint32_t gpio = 0;
+        q::Path stream_path;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

@@ -94,9 +94,8 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
-    m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::refresh_nodes, this));
 
-    refresh_nodes();
+//    refresh_nodes();
 }
 
 HAL_Window::~HAL_Window()
@@ -253,7 +252,7 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
     connect(action, &QAction::triggered, [=](bool)
     {
         std::string input_name = input_port->id().toLatin1().data();
-        m_hal.connect_node_stream_input(node, input_name, std::string());
+        m_hal.set_node_input_stream_path(node, input_name, q::Path());
     });
 
     menu.exec(event->screenPos());
@@ -642,8 +641,9 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
         {
             auto* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
-            std::string stream_name = node_name + "/" + output_port->id().toLatin1().data();
-            m_hal.connect_node_stream_input(node, input_name, stream_name);
+            q::Path stream_path(node_name);
+            stream_path += output_port->id().toLatin1().data();
+            m_hal.set_node_input_stream_path(node, input_name, stream_path);
         });
 
         auto& port_data = data.inputs[i.name];
@@ -664,10 +664,11 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
         stream_data.block = data.block;
     }
 
-    node->changed_signal.connect([this](silk::node::Node& node)
+    auto* node_ptr = node.get();
+    m_connections.push_back( node->changed_signal.connect([this, node_ptr]()
     {
-        refresh_node(node);
-    });
+        refresh_node(*node_ptr);
+    }) );
 }
 
 void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
@@ -703,14 +704,14 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
             jsonutil::clone_value(*positionj, doc, init_params.GetAllocator());
         }
 
-        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
-        {
-            if (result == silk::HAL::Result::OK)
-            {
-                add_node(node, pos);
-                refresh_node(*node);
-            }
-        });
+//        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
+//        {
+//            if (result == silk::HAL::Result::OK)
+//            {
+//                add_node(node, pos);
+//                refresh_node(*node);
+//            }
+//        });
     }
 }
 
@@ -721,20 +722,20 @@ void HAL_Window::remove_node(silk::node::Node_ptr node)
     auto answer = QMessageBox::question(this, "Question", q::util::format2<std::string>("Are you sure you want to remove node {}", node->name).c_str());
     if (answer == QMessageBox::Yes)
     {
-        m_hal.remove_node(node, [this, nodeName](silk::HAL::Result result)
-        {
-            if (result == silk::HAL::Result::OK)
-            {
-                auto it = m_nodes.find(nodeName);
-                if (it == m_nodes.end())
-                {
-                    return;
-                }
-                Node_Data& nd = it->second;
-                m_scene->removeItem(nd.block.get());
-                m_nodes.erase(it);
-            }
-        });
+//        m_hal.remove_node(node, [this, nodeName](silk::HAL::Result result)
+//        {
+//            if (result == silk::HAL::Result::OK)
+//            {
+//                auto it = m_nodes.find(nodeName);
+//                if (it == m_nodes.end())
+//                {
+//                    return;
+//                }
+//                Node_Data& nd = it->second;
+//                m_scene->removeItem(nd.block.get());
+//                m_nodes.erase(it);
+//            }
+//        });
     }
 }
 

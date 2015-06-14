@@ -11,38 +11,9 @@
 {
     "definition" : true,
     "namespace" : "sz::Transformer",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "input", {"required": true, "json_key" : "Input"}],
-        ["std::string", "frame", {"required": true, "json_key" : "Frame"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Transformer",
-    "name": "Output",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Transformer",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Transformer::Output", "output", {"required": true, "json_key" : "Output"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Transformer",
     "name": "Config",
     "members":
     [
-        ["sz::Transformer::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Transformer::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

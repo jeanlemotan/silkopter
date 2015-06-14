@@ -33,6 +33,7 @@ public:
     typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
 
     auto get_setup_channel() -> Setup_Channel&;
+    uint32_t get_new_req_id();
 
 private:
     HAL& m_hal;
@@ -41,8 +42,6 @@ private:
     void reset();
     void request_data();
     bool m_did_request_data = false;
-
-    void send_hal_requests();
 
     boost::asio::io_service& m_io_service;
     boost::asio::ip::udp::socket m_socket;
@@ -55,8 +54,8 @@ private:
     mutable Telemetry_Channel m_telemetry_channel;
     mutable Video_Channel m_video_channel;
 
+    auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool;
     auto link_input_streams(node::Node_ptr node) -> bool;
-    auto link_output_streams(node::Node_ptr node) -> bool;
     auto publish_output_streams(node::Node_ptr node) -> bool;
     auto unpublish_output_streams(node::Node_ptr node) -> bool;
 
@@ -68,12 +67,15 @@ private:
     void handle_clock();
     void handle_enumerate_nodes();
     void handle_enumerate_node_defs();
+    void handle_get_node_data();
+
     void handle_streams_telemetry_active();
 
-    void handle_node_message();
-    void handle_node_data();
     void handle_add_node();
     void handle_remove_node();
+    void handle_node_message();
+    void handle_node_config();
+    void handle_node_input_stream_path();
 };
 
 }

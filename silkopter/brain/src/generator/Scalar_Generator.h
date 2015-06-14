@@ -28,6 +28,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -43,6 +44,7 @@ private:
     sz::Scalar_Generator::Config m_config;
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
+    q::Path m_modulation_stream_path;
 
     typedef Basic_Output_Stream<Stream_t> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
@@ -96,6 +98,25 @@ auto Scalar_Generator<Stream_t>::get_init_params() const -> rapidjson::Document 
 }
 
 template<class Stream_t>
+void Scalar_Generator<Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+
+    auto modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
+    {
+        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", path, m_output_stream->get_rate(), modulation_stream->get_rate());
+        m_modulation_stream.reset();
+        m_modulation_stream_path.clear();
+    }
+    else
+    {
+        m_modulation_stream = modulation_stream;
+        m_modulation_stream_path = path;
+    }
+}
+
+template<class Stream_t>
 auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("scalar_generator::set_config");
@@ -107,18 +128,6 @@ auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> boo
         ss << result;
         QLOGE("Cannot deserialize Scalar_Generator config data: {}", ss.str());
         return false;
-    }
-
-    auto modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.modulation);
-
-    if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
-    {
-        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.modulation, m_output_stream->get_rate(), modulation_stream->get_rate());
-        m_modulation_stream.reset();
-    }
-    else
-    {
-        m_modulation_stream = modulation_stream;
     }
 
     m_config = sz;
@@ -144,7 +153,7 @@ auto Scalar_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_init_params.rate, "Modulation" }
+        { stream::IFloat::TYPE, m_init_params.rate, "Modulation", m_modulation_stream_path }
     }};
     return inputs;
 }

@@ -13,36 +13,9 @@
 {
     "definition" : true,
     "namespace" : "sz::MS5611",
-    "name": "Pressure",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MS5611",
-    "name": "Temperature",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MS5611",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::MS5611::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
-        ["sz::MS5611::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MS5611",
     "name": "Config",
     "members":
     [
-        ["sz::MS5611::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

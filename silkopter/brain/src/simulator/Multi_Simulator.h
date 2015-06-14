@@ -41,6 +41,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -130,6 +131,7 @@ private:
     mutable std::shared_ptr<ECEF_Position> m_ecef_position_stream;
 
     std::vector<stream::IThrottle_wptr> m_input_throttle_streams;
+    std::vector<q::Path> m_input_throttle_stream_paths;
 
     Multi_Simulation m_simulation;
 };

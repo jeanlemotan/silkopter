@@ -20,6 +20,24 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
 
     m_ui.setupUi(this);
 
+    sim_node->message_received_signal.connect([this](rapidjson::Document const& message)
+    {
+        silk::node::IMulti_Simulator::UAV_State state;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(state, message, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize position data: {}", ss.str());
+        }
+        else
+        {
+            m_uav.state = state;
+//                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
+        }
+        m_state_requests++;
+    });
+
     //m_ui.action_simulation_on->setChecked(m_config.environment.is_simulation_enabled);
     QObject::connect(m_ui.action_simulation, &QAction::toggled, [this](bool v)
     {
@@ -43,13 +61,13 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
     {
         rapidjson::Document message;
         jsonutil::add_value(message, std::string("message"), rapidjson::Value("stop motion"), message.GetAllocator());
-        m_hal.send_node_message(m_sim_node, std::move(message), [](silk::HAL::Result, rapidjson::Document) {});
+        m_hal.send_node_message(m_sim_node, message);
     });
     QObject::connect(m_ui.action_reset, &QAction::triggered, [this](bool)
     {
         rapidjson::Document message;
         jsonutil::add_value(message, std::string("message"), rapidjson::Value("reset"), message.GetAllocator());
-        m_hal.send_node_message(m_sim_node, std::move(message), [](silk::HAL::Result, rapidjson::Document) {});
+        m_hal.send_node_message(m_sim_node, message);
     });
     QObject::connect(m_ui.action_ground, &QAction::triggered, [this](bool v)
     {
@@ -89,7 +107,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
     });
 
 
-    sim_node->changed_signal.connect([this](silk::node::Node&) { read_config(); });
+    m_connections.push_back( sim_node->changed_signal.connect([this]() { read_config(); }) );
     read_config();
 
     //////////////////////////////////////////////////////////////////////////
@@ -272,26 +290,7 @@ void Sim_Window::process()
         m_state_requests--;
         rapidjson::Document message;
         jsonutil::add_value(message, std::string("message"), rapidjson::Value("get state"), message.GetAllocator());
-        m_hal.send_node_message(m_sim_node, std::move(message), [this](silk::HAL::Result result, rapidjson::Document response)
-        {
-            if (result == silk::HAL::Result::OK)
-            {
-                silk::node::IMulti_Simulator::UAV_State state;
-                autojsoncxx::error::ErrorStack result;
-                if (!autojsoncxx::from_value(state, response, result))
-                {
-                    std::ostringstream ss;
-                    ss << result;
-                    QLOGE("Cannot deserialize position data: {}", ss.str());
-                }
-                else
-                {
-                    m_uav.state = state;
-//                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
-                }
-            }
-            m_state_requests++;
-        });
+        m_hal.send_node_message(m_sim_node, message);
     };
 
 

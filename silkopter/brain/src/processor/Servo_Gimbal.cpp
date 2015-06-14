@@ -60,8 +60,8 @@ auto Servo_Gimbal::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
-        { stream::IFrame::TYPE, m_init_params->rate, "Target" }
+        { stream::IFrame::TYPE, m_init_params->rate, "Frame", m_accumulator.get_stream_path(0) },
+        //{ stream::IFrame::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -84,45 +84,19 @@ void Servo_Gimbal::process()
     m_y_output_stream->clear();
     m_z_output_stream->clear();
 
-    auto frame_stream = m_frame_stream.lock();
-//    auto target_frame_stream = m_target_stream.lock();
-    if (!frame_stream/* || !target_frame_stream*/)
+    m_accumulator.process([this](
+                          size_t idx,
+                          stream::IFrame::Sample const& i_sample)
     {
-        return;
-    }
+        auto rotation = i_sample.value.rotation;
 
-    //accumulate the input streams
-    {
-        auto const& samples = frame_stream->get_samples();
-        m_frame_samples.reserve(m_frame_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_frame_samples));
-    }
-//    {
-//        auto const& samples = target_frame_stream->get_samples();
-//        m_target_frame_samples.reserve(m_target_frame_samples.size() + samples.size());
-//        std::copy(samples.begin(), samples.end(), std::back_inserter(m_target_frame_samples));
-//    }
-
-    //TODO add some protecton for severely out-of-sync streams
-
-//    size_t count = std::min(m_frame_samples.size(), m_target_frame_samples.size());
-    size_t count = m_frame_samples.size();
-    if (count == 0)
-    {
-        return;
-    }
-
-    math::vec3f rotation_euler;
-
-    for (size_t i = 0; i < count; i++)
-    {
-        auto rotation = m_frame_samples[i].value.rotation;
+        math::vec3f rotation_euler;
         rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
 
-        bool is_healthy = m_frame_samples[i].is_healthy;
+        bool is_healthy = i_sample.is_healthy;
 
         {
-            auto const& config = m_config->output_streams.x_pwm;
+            auto const& config = m_config->x_pwm;
 
             math::anglef angle(rotation_euler.x);
             angle.normalize();
@@ -139,21 +113,23 @@ void Servo_Gimbal::process()
             m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
-            auto const& config = m_config->output_streams.y_pwm;
+            auto const& config = m_config->y_pwm;
             float mu = 0;
             m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
-            auto const& config = m_config->output_streams.z_pwm;
+            auto const& config = m_config->z_pwm;
             float mu = 0;
             m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
-    }
+    });
 
+}
 
-    //consume processed samples
-    m_frame_samples.erase(m_frame_samples.begin(), m_frame_samples.begin() + count);
-//    m_target_frame_samples.erase(m_target_frame_samples.begin(), m_target_frame_samples.begin() + count);
+void Servo_Gimbal::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 
 auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
@@ -171,33 +147,6 @@ auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-
-    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
-    auto target_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.target);
-
-    auto rate = frame_stream ? frame_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.frame.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, m_init_params->rate, rate);
-        m_frame_stream.reset();
-    }
-    else
-    {
-        m_frame_stream = frame_stream;
-    }
-
-    rate = target_stream ? target_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_init_params->rate, rate);
-        m_target_stream.reset();
-    }
-    else
-    {
-        m_target_stream = target_stream;
-    }
 
     return true;
 }

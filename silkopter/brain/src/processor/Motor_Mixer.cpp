@@ -77,7 +77,7 @@ auto Motor_Mixer::init() -> bool
         os->rate = m_init_params->rate;
     }
 
-    m_config->output_streams.throttles.resize(multi_config->motors.size());
+    //m_config->output_streams.throttles.resize(multi_config->motors.size());
 
     return true;
 }
@@ -86,8 +86,8 @@ auto Motor_Mixer::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::ITorque::TYPE, m_init_params->rate, "Torque" },
-        { stream::IForce::TYPE, m_init_params->rate, "Collective Force" }
+        { stream::ITorque::TYPE, m_init_params->rate, "Torque", m_accumulator.get_stream_path(0) },
+        { stream::IForce::TYPE, m_init_params->rate, "Collective Force", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -433,6 +433,12 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
 
 //}
 
+void Motor_Mixer::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+}
+
 auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
@@ -448,32 +454,6 @@ auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto torque_stream = m_hal.get_streams().find_by_name<stream::ITorque>(sz.input_streams.torque);
-    auto force_stream = m_hal.get_streams().find_by_name<stream::IForce>(sz.input_streams.force);
-
-    auto rate = torque_stream ? torque_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.torque.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.torque, m_init_params->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(torque_stream);
-    }
-
-    rate = force_stream ? force_stream->get_rate() : 0u;
-    if (rate != m_init_params->rate)
-    {
-        m_config->input_streams.force.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.force, m_init_params->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(force_stream);
-    }
 
     return true;
 }

@@ -26,6 +26,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -40,13 +41,9 @@ private:
     sz::Vec3_Generator::Init_Params m_init_params;
     sz::Vec3_Generator::Config m_config;
 
-    std::weak_ptr<stream::IFloat> m_x_modulation_stream;
-    std::weak_ptr<stream::IFloat> m_y_modulation_stream;
-    std::weak_ptr<stream::IFloat> m_z_modulation_stream;
-
-    std::vector<stream::IFloat::Sample> m_x_modulation_samples;
-    std::vector<stream::IFloat::Sample> m_y_modulation_samples;
-    std::vector<stream::IFloat::Sample> m_z_modulation_samples;
+    std::array<q::Path, 3> m_modulation_stream_paths;
+    std::array<std::weak_ptr<stream::IFloat>, 3> m_modulation_streams;
+    std::array<std::vector<stream::IFloat::Sample>, 3> m_modulation_samples;
 
     typedef Basic_Output_Stream<Stream_t> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
@@ -100,6 +97,31 @@ auto Vec3_Generator<Stream_t>::get_init_params() const -> rapidjson::Document co
 }
 
 template<class Stream_t>
+void Vec3_Generator<Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    if (idx >= 3)
+    {
+        return;
+    }
+
+    char name[3] = { 'x', 'y', 'z' };
+
+    auto stream = m_hal.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    if (stream && stream->get_rate() != m_output_stream->get_rate())
+    {
+        QLOGW("Bad {} modulation stream '{}'. Expected rate {}Hz, got {}Hz", name[idx], path, m_output_stream->get_rate(), stream->get_rate());
+        m_modulation_streams[idx].reset();
+        m_modulation_stream_paths[idx].clear();
+    }
+    else
+    {
+        m_modulation_streams[idx] = stream;
+        m_modulation_stream_paths[idx] = path;
+    }
+}
+
+template<class Stream_t>
 auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("vec3_generator::set_config");
@@ -111,39 +133,6 @@ auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         ss << result;
         QLOGE("Cannot deserialize Vec3_Generator config data: {}", ss.str());
         return false;
-    }
-
-    auto x_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.x_modulation);
-    if (x_modulation_stream && x_modulation_stream->get_rate() != m_output_stream->get_rate())
-    {
-        QLOGW("Bad x modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.x_modulation, m_output_stream->get_rate(), x_modulation_stream->get_rate());
-        m_x_modulation_stream.reset();
-    }
-    else
-    {
-        m_x_modulation_stream = x_modulation_stream;
-    }
-
-    auto y_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.y_modulation);
-    if (y_modulation_stream && y_modulation_stream->get_rate() != m_output_stream->get_rate())
-    {
-        QLOGW("Bad y modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.y_modulation, m_output_stream->get_rate(), y_modulation_stream->get_rate());
-        m_y_modulation_stream.reset();
-    }
-    else
-    {
-        m_y_modulation_stream = y_modulation_stream;
-    }
-
-    auto z_modulation_stream = m_hal.get_streams().template find_by_name<stream::IFloat>(sz.input_streams.z_modulation);
-    if (z_modulation_stream && z_modulation_stream->get_rate() != m_output_stream->get_rate())
-    {
-        QLOGW("Bad z modulation stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.z_modulation, m_output_stream->get_rate(), z_modulation_stream->get_rate());
-        m_z_modulation_stream.reset();
-    }
-    else
-    {
-        m_z_modulation_stream = z_modulation_stream;
     }
 
     m_config = sz;
@@ -168,9 +157,9 @@ auto Vec3_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_I
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_init_params.rate, "X Modulation" },
-        { stream::IFloat::TYPE, m_init_params.rate, "Y Modulation" },
-        { stream::IFloat::TYPE, m_init_params.rate, "Z Modulation" }
+        { stream::IFloat::TYPE, m_init_params.rate, "X Modulation", m_modulation_stream_paths[0] },
+        { stream::IFloat::TYPE, m_init_params.rate, "Y Modulation", m_modulation_stream_paths[0] },
+        { stream::IFloat::TYPE, m_init_params.rate, "Z Modulation", m_modulation_stream_paths[0] }
     }};
     return inputs;
 }
@@ -191,36 +180,22 @@ void Vec3_Generator<Stream_t>::process()
 
     m_output_stream->clear();
 
-    auto x_modulation_stream = m_x_modulation_stream.lock();
-    auto y_modulation_stream = m_y_modulation_stream.lock();
-    auto z_modulation_stream = m_z_modulation_stream.lock();
-
     auto count = m_output_stream->compute_samples_needed();
     if (count == 0)
     {
         return;
     }
 
-    if (x_modulation_stream)
+    for (size_t s = 0; s < 3; s++)
     {
-        auto const& samples = x_modulation_stream->get_samples();
-        m_x_modulation_samples.reserve(m_x_modulation_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_x_modulation_samples));
-        count = std::min(count, m_x_modulation_samples.size());
-    }
-    if (y_modulation_stream)
-    {
-        auto const& samples = y_modulation_stream->get_samples();
-        m_y_modulation_samples.reserve(m_y_modulation_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_y_modulation_samples));
-        count = std::min(count, m_y_modulation_samples.size());
-    }
-    if (z_modulation_stream)
-    {
-        auto const& samples = z_modulation_stream->get_samples();
-        m_z_modulation_samples.reserve(m_z_modulation_samples.size() + samples.size());
-        std::copy(samples.begin(), samples.end(), std::back_inserter(m_z_modulation_samples));
-        count = std::min(count, m_z_modulation_samples.size());
+        auto stream = m_modulation_streams[s].lock();
+        if (stream)
+        {
+            auto const& samples = stream->get_samples();
+            m_modulation_samples[s].reserve(m_modulation_samples[s].size() + samples.size());
+            std::copy(samples.begin(), samples.end(), std::back_inserter(m_modulation_samples[s]));
+            count = std::min(count, m_modulation_samples[s].size());
+        }
     }
 
     if (count == 0)
@@ -232,34 +207,29 @@ void Vec3_Generator<Stream_t>::process()
     {
         math::vec3f value = m_config.value;
 
-        if (m_x_modulation_samples.size() > i)
+        if (m_modulation_samples[0].size() > i)
         {
-            value.x += m_x_modulation_samples[i].value;
+            value.x += m_modulation_samples[0][i].value;
         }
-        if (m_y_modulation_samples.size() > i)
+        if (m_modulation_samples[1].size() > i)
         {
-            value.y += m_y_modulation_samples[i].value;
+            value.y += m_modulation_samples[1][i].value;
         }
-        if (m_z_modulation_samples.size() > i)
+        if (m_modulation_samples[2].size() > i)
         {
-            value.z += m_z_modulation_samples[i].value;
+            value.z += m_modulation_samples[2][i].value;
         }
 
         m_output_stream->push_sample(value, true);
     }
 
     //consume samples
-    if (m_x_modulation_samples.size() >= count)
+    for (auto& samples: m_modulation_samples)
     {
-        m_x_modulation_samples.erase(m_x_modulation_samples.begin(), m_x_modulation_samples.begin() + count);
-    }
-    if (m_y_modulation_samples.size() >= count)
-    {
-        m_y_modulation_samples.erase(m_y_modulation_samples.begin(), m_y_modulation_samples.begin() + count);
-    }
-    if (m_z_modulation_samples.size() >= count)
-    {
-        m_z_modulation_samples.erase(m_z_modulation_samples.begin(), m_z_modulation_samples.begin() + count);
+        if (samples.size() >= count)
+        {
+            samples.erase(samples.begin(), samples.begin() + count);
+        }
     }
 }
 

@@ -51,9 +51,9 @@ auto Comp_ECEF_Position::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position" },
-        { stream::ILinear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)" },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure" }
+        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position", m_accumulator.get_stream_path(0) },
+        { stream::ILinear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(2) }
     }};
     return inputs;
 }
@@ -89,6 +89,11 @@ void Comp_ECEF_Position::process()
     });
 }
 
+void Comp_ECEF_Position::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+}
 
 auto Comp_ECEF_Position::set_config(rapidjson::Value const& json) -> bool
 {
@@ -105,44 +110,6 @@ auto Comp_ECEF_Position::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto position_stream = m_hal.get_streams().find_by_name<stream::IECEF_Position>(sz.input_streams.ecef_position);
-    auto linear_acceleration_stream = m_hal.get_streams().find_by_name<stream::ILinear_Acceleration>(sz.input_streams.ecef_linear_acceleration);
-    auto pressure_stream = m_hal.get_streams().find_by_name<stream::IPressure>(sz.input_streams.pressure);
-
-    auto rate = position_stream ? position_stream->get_rate() : 0u;
-    if (rate != m_position_output_stream->rate)
-    {
-        m_config->input_streams.ecef_position.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.ecef_position, m_position_output_stream->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(position_stream);
-    }
-
-    rate = linear_acceleration_stream ? linear_acceleration_stream->get_rate() : 0u;
-    if (rate != m_position_output_stream->rate)
-    {
-        m_config->input_streams.ecef_linear_acceleration.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.ecef_linear_acceleration, m_position_output_stream->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(linear_acceleration_stream);
-    }
-
-    rate = pressure_stream ? pressure_stream->get_rate() : 0u;
-    if (rate != m_position_output_stream->rate)
-    {
-        m_config->input_streams.pressure.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.pressure, m_position_output_stream->rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<2>(pressure_stream);
-    }
 
     return true;
 }

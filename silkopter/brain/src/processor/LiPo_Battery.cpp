@@ -66,8 +66,8 @@ auto LiPo_Battery::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IVoltage::TYPE, m_init_params->rate, "Voltage" },
-        { stream::ICurrent::TYPE, m_init_params->rate, "Current" }
+        { stream::IVoltage::TYPE, m_init_params->rate, "Voltage", m_accumulator.get_stream_path(0) },
+        { stream::ICurrent::TYPE, m_init_params->rate, "Current", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -159,6 +159,12 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
     return boost::none;
 }
 
+void LiPo_Battery::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+}
+
 auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("lipo_battery::set_config");
@@ -174,34 +180,6 @@ auto LiPo_Battery::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto output_rate = m_output_stream->get_rate();
-
-    auto voltage_stream = m_hal.get_streams().find_by_name<stream::IVoltage>(sz.input_streams.voltage);
-    auto current_stream = m_hal.get_streams().find_by_name<stream::ICurrent>(sz.input_streams.current);
-
-    auto rate = voltage_stream ? voltage_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config->input_streams.voltage.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.voltage, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(voltage_stream);
-    }
-
-    rate = current_stream ? current_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config->input_streams.current.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.current, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(current_stream);
-    }
 
     return true;
 }

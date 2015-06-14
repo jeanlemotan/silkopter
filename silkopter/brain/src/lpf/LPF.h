@@ -3,6 +3,8 @@
 #include "HAL.h"
 #include "common/node/ILPF.h"
 #include "utils/Butterworth.h"
+
+#include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
 #include "sz_math.hpp"
@@ -27,6 +29,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -41,7 +44,7 @@ private:
     sz::LPF::Init_Params m_init_params;
     sz::LPF::Config m_config;
 
-    std::weak_ptr<Stream_t> m_input_stream;
+    Sample_Accumulator<Stream_t> m_accumulator;
 
     util::Butterworth<typename Stream_t::Value> m_dsp;
 
@@ -97,6 +100,13 @@ auto LPF<Stream_t>::get_init_params() const -> rapidjson::Document const&
 }
 
 template<class Stream_t>
+void LPF<Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+}
+
+template<class Stream_t>
 auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("lpf::set_config");
@@ -109,21 +119,7 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_stream = m_hal.get_streams().template find_by_name<Stream_t>(m_config.input_streams.input);
-
     auto output_rate = m_output_stream->get_rate();
-
-    auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", m_config.input_streams.input, output_rate, rate);
-        m_config.input_streams.input.clear();
-        m_input_stream.reset();
-    }
-    else
-    {
-        m_input_stream = input_stream;
-    }
 
     if (m_config.cutoff_frequency > output_rate / 2)
     {
@@ -162,7 +158,7 @@ auto LPF<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { Stream_t::TYPE, m_init_params.rate, "Input" }
+        { Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -183,19 +179,19 @@ void LPF<Stream_t>::process()
 
     m_output_stream->clear();
 
-    auto input_stream = m_input_stream.lock();
-    if (!input_stream || m_config.cutoff_frequency == 0)
+    if (m_config.cutoff_frequency == 0)
     {
         return;
     }
 
-    auto const& is = input_stream->get_samples();
-    for (auto const& s: is)
+    m_accumulator.process([this](
+                          size_t idx,
+                          typename Stream_t::Sample const& i_sample)
     {
-        auto value = s.value;
+        auto value = i_sample.value;
         m_dsp.process(value);
-        m_output_stream->push_sample(value, s.is_healthy);
-    };
+        m_output_stream->push_sample(value, i_sample.is_healthy);
+    });
 }
 
 

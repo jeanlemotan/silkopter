@@ -12,45 +12,9 @@
 {
     "definition" : true,
     "namespace" : "sz::UBLOX",
-    "name": "ECEF_Position",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::UBLOX",
-    "name": "ECEF_Velocity",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::UBLOX",
-    "name": "GPS_Info",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::UBLOX",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::UBLOX::ECEF_Position", "ecef_position", {"required": true, "json_key" : "ECEF Position"}],
-        ["sz::UBLOX::ECEF_Velocity", "ecef_velocity", {"required": true, "json_key" : "ECEF Velocity"}],
-        ["sz::UBLOX::GPS_Info", "gps_info", {"required": true, "json_key" : "GPS Info"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::UBLOX",
     "name": "Config",
     "members":
     [
-       ["sz::UBLOX::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

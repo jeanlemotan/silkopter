@@ -8,6 +8,8 @@
 #include "Comms.h"
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
+
 namespace sz
 {
 namespace Multi_Pilot
@@ -35,6 +37,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -51,15 +54,7 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    stream::IAngular_Velocity_wptr m_angular_velocity_stream;
-    //ILocation_wptr m_location_stream;
-    stream::IBattery_State_wptr m_battery_state_stream;
-    stream::ICommands_wptr m_commands_stream;
-
-    std::vector<stream::IAngular_Velocity::Sample> m_angular_velocity_samples;
-    //std::vector<stream::ILocation::Sample> m_location_samples;
-    std::vector<stream::IBattery_State::Sample> m_battery_state_samples;
-    std::vector<stream::ICommands::Sample> m_commands_samples;
+    Sample_Accumulator<stream::IAngular_Velocity, stream::IBattery_State, stream::ICommands> m_accumulator;
 
     struct Stream : public stream::IFrame
     {

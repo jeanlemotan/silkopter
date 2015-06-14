@@ -13,28 +13,9 @@
 {
     "definition" : true,
     "namespace" : "sz::RC5T619",
-    "name": "ADC",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::RC5T619",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::RC5T619::ADC", "adc0", {"required": true, "json_key" : "ADC0"}],
-        ["sz::RC5T619::ADC", "adc1", {"required": true, "json_key" : "ADC1"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::RC5T619",
     "name": "Config",
     "members":
     [
-        ["sz::RC5T619::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

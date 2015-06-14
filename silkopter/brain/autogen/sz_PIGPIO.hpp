@@ -1346,757 +1346,10 @@ w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace PIGPIO { struct Input_Streams {
- std::string channel_4;
-std::string channel_17;
-std::string channel_18;
-std::string channel_22;
-std::string channel_23;
-std::string channel_24;
-std::string channel_25;
-std::string channel_27;
-
-explicit Input_Streams():channel_4(), channel_17(), channel_18(), channel_22(), channel_23(), channel_24(), channel_25(), channel_27() {  }
-
-
- 
-}; }
- }
-
-
-namespace autojsoncxx {
-
-template <>
-class SAXEventHandler< ::sz::PIGPIO::Input_Streams > {
-private:
-    utility::scoped_ptr<error::ErrorBase> the_error;
-    int state;
-    int depth;
-
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< std::string > handler_1;
-SAXEventHandler< std::string > handler_2;
-SAXEventHandler< std::string > handler_3;
-SAXEventHandler< std::string > handler_4;
-SAXEventHandler< std::string > handler_5;
-SAXEventHandler< std::string > handler_6;
-SAXEventHandler< std::string > handler_7;bool has_channel_4;
-bool has_channel_17;
-bool has_channel_18;
-bool has_channel_22;
-bool has_channel_23;
-bool has_channel_24;
-bool has_channel_25;
-bool has_channel_27;
-
-    bool check_depth(const char* type)
-    {
-        if (depth <= 0) {
-            the_error.reset(new error::TypeMismatchError("object", type));
-            return false;
-        }
-        return true;
-    }
-
-    const char* current_member_name() const
-    {
-        switch (state) {
-            case 0:
-    return "channel_4";
-case 1:
-    return "channel_17";
-case 2:
-    return "channel_18";
-case 3:
-    return "channel_22";
-case 4:
-    return "channel_23";
-case 5:
-    return "channel_24";
-case 6:
-    return "channel_25";
-case 7:
-    return "channel_27";
-        default:
-            break;
-        }
-        return "<UNKNOWN>";
-    }
-
-    bool checked_event_forwarding(bool success)
-    {
-        if (!success)
-            the_error.reset(new error::ObjectMemberError(current_member_name()));
-        return success;
-    }
-
-    void set_missing_required(const char* name)
-    {
-        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
-            the_error.reset(new error::RequiredFieldMissingError());
-
-        std::vector<std::string>& missing =
-            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
-
-        missing.push_back(name);
-    }
-
-    void reset_flags()
-    {
-        has_channel_4 = false;
-has_channel_17 = false;
-has_channel_18 = false;
-has_channel_22 = false;
-has_channel_23 = false;
-has_channel_24 = false;
-has_channel_25 = false;
-has_channel_27 = false;
-    }
-
-public:
-    explicit SAXEventHandler( ::sz::PIGPIO::Input_Streams * obj)
-        : state(-1)
-        , depth(0)
-        , handler_0(&obj->channel_4)
-, handler_1(&obj->channel_17)
-, handler_2(&obj->channel_18)
-, handler_3(&obj->channel_22)
-, handler_4(&obj->channel_23)
-, handler_5(&obj->channel_24)
-, handler_6(&obj->channel_25)
-, handler_7(&obj->channel_27)
-    {
-        reset_flags();
-    }
-
-    bool Null()
-    {
-        if (!check_depth("null"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
-
-case 2:
-    return checked_event_forwarding(handler_2.Null());
-
-case 3:
-    return checked_event_forwarding(handler_3.Null());
-
-case 4:
-    return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
-
-case 6:
-    return checked_event_forwarding(handler_6.Null());
-
-case 7:
-    return checked_event_forwarding(handler_7.Null());
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Bool(bool b)
-    {
-        if (!check_depth("bool"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
-
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
-case 2:
-    return checked_event_forwarding(handler_2.Bool(b));
-
-case 3:
-    return checked_event_forwarding(handler_3.Bool(b));
-
-case 4:
-    return checked_event_forwarding(handler_4.Bool(b));
-
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
-case 6:
-    return checked_event_forwarding(handler_6.Bool(b));
-
-case 7:
-    return checked_event_forwarding(handler_7.Bool(b));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int(int i)
-    {
-        if (!check_depth("int"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Int(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint(unsigned i)
-    {
-        if (!check_depth("unsigned"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Uint(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Uint(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Uint(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Int64(utility::int64_t i)
-    {
-        if (!check_depth("int64_t"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Int64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Int64(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Int64(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Uint64(utility::uint64_t i)
-    {
-        if (!check_depth("uint64_t"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint64(i));
-
-case 3:
-    return checked_event_forwarding(handler_3.Uint64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Uint64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
-case 6:
-    return checked_event_forwarding(handler_6.Uint64(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Uint64(i));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Double(double d)
-    {
-        if (!check_depth("double"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
-
-case 2:
-    return checked_event_forwarding(handler_2.Double(d));
-
-case 3:
-    return checked_event_forwarding(handler_3.Double(d));
-
-case 4:
-    return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
-
-case 6:
-    return checked_event_forwarding(handler_6.Double(d));
-
-case 7:
-    return checked_event_forwarding(handler_7.Double(d));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool String(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("string"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.String(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.String(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.String(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.String(str, length, copy));
-
-case 7:
-    return checked_event_forwarding(handler_7.String(str, length, copy));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool Key(const char* str, SizeType length, bool copy)
-    {
-        if (!check_depth("object"))
-            return false;
-
-        if (depth == 1) {
-            if (0) {
-            }
-            else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9))
-						 { state=0; has_channel_4 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10))
-						 { state=1; has_channel_17 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10))
-						 { state=2; has_channel_18 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10))
-						 { state=3; has_channel_22 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10))
-						 { state=4; has_channel_23 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10))
-						 { state=5; has_channel_24 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10))
-						 { state=6; has_channel_25 = true; }
-else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10))
-						 { state=7; has_channel_27 = true; }
-            else {
-                state = -1;
-                return true;
-            }
-
-        } else {
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.Key(str, length, copy));
-
-case 3:
-    return checked_event_forwarding(handler_3.Key(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
-
-case 6:
-    return checked_event_forwarding(handler_6.Key(str, length, copy));
-
-case 7:
-    return checked_event_forwarding(handler_7.Key(str, length, copy));
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool StartArray()
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartArray());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartArray());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartArray());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartArray());
-
-case 7:
-    return checked_event_forwarding(handler_7.StartArray());
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool EndArray(SizeType length)
-    {
-        if (!check_depth("array"))
-            return false;
-
-        switch (state) {
-
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
-
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndArray(length));
-
-case 3:
-    return checked_event_forwarding(handler_3.EndArray(length));
-
-case 4:
-    return checked_event_forwarding(handler_4.EndArray(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndArray(length));
-
-case 7:
-    return checked_event_forwarding(handler_7.EndArray(length));
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    bool StartObject()
-    {
-        ++depth;
-        if (depth > 1) {
-
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartObject());
-
-case 3:
-    return checked_event_forwarding(handler_3.StartObject());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
-
-case 6:
-    return checked_event_forwarding(handler_6.StartObject());
-
-case 7:
-    return checked_event_forwarding(handler_7.StartObject());
-
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    bool EndObject(SizeType length)
-    {
-        --depth;
-        if (depth > 0) {
-
-            switch (state) {
-
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
-
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndObject(length));
-
-case 3:
-    return checked_event_forwarding(handler_3.EndObject(length));
-
-case 4:
-    return checked_event_forwarding(handler_4.EndObject(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
-case 6:
-    return checked_event_forwarding(handler_6.EndObject(length));
-
-case 7:
-    return checked_event_forwarding(handler_7.EndObject(length));
-
-            default:
-                break;
-            }
-        } else {
-            if (!has_channel_4) set_missing_required("channel_4");
-if (!has_channel_17) set_missing_required("channel_17");
-if (!has_channel_18) set_missing_required("channel_18");
-if (!has_channel_22) set_missing_required("channel_22");
-if (!has_channel_23) set_missing_required("channel_23");
-if (!has_channel_24) set_missing_required("channel_24");
-if (!has_channel_25) set_missing_required("channel_25");
-if (!has_channel_27) set_missing_required("channel_27");
-        }
-        return the_error.empty();
-    }
-
-    bool HasError() const
-    {
-        return !this->the_error.empty();
-    }
-
-    bool ReapError(error::ErrorStack& errs)
-    {
-        if (this->the_error.empty())
-            return false;
-
-        errs.push(this->the_error.release());
-
-        switch (state) {
-
-        case 0:
-     handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
-case 2:
-     handler_2.ReapError(errs); break;
-case 3:
-     handler_3.ReapError(errs); break;
-case 4:
-     handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
-case 6:
-     handler_6.ReapError(errs); break;
-case 7:
-     handler_7.ReapError(errs); break;
-
-        default:
-            break;
-        }
-
-        return true;
-    }
-
-    void PrepareForReuse()
-    {
-        depth = 0;
-        state = -1;
-        the_error.reset();
-        reset_flags();
-        handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
-handler_2.PrepareForReuse();
-handler_3.PrepareForReuse();
-handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
-handler_6.PrepareForReuse();
-handler_7.PrepareForReuse();
-
-    }
-};
-
-template < class Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1 >
-struct Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, ::sz::PIGPIO::Input_Streams > {
-
-    void operator()( Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1& w, const ::sz::PIGPIO::Input_Streams& value) const
-    {
-        w.StartObject();
-
-        w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_4);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x37", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_17);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x38", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_18);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x32", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_22);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x33", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_23);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x34", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_24);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x35", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_25);
-w.Key("\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32\x37", 10, false); Serializer< Writer4bf12890a3102520d33e587d93a0dd87d2e0fc5e714471ade527791565d0f4d1, std::string >()(w, value.channel_27);
-
-        w.EndObject(8);
-    }
-
-};
-}
-
-
-// The MIT License (MIT)
-//
-// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-#include <autojsoncxx/autojsoncxx.hpp>
-
-// The comments are reserved for replacement
-// such syntax is chosen so that the template file looks like valid C++
-
 namespace sz { namespace PIGPIO { struct Config {
- sz::PIGPIO::Input_Streams input_streams;
+ 
 
-explicit Config():input_streams() {  }
+explicit Config() {  }
 
 
  
@@ -2113,7 +1366,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::PIGPIO::Input_Streams > handler_0;bool has_input_streams;
+    
 
     bool check_depth(const char* type)
     {
@@ -2127,8 +1380,7 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            case 0:
-    return "input_streams";
+            
         default:
             break;
         }
@@ -2155,14 +1407,14 @@ private:
 
     void reset_flags()
     {
-        has_input_streams = false;
+        
     }
 
 public:
     explicit SAXEventHandler( ::sz::PIGPIO::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->input_streams)
+        
     {
         reset_flags();
     }
@@ -2174,8 +1426,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Null());
+        
 
         default:
             break;
@@ -2190,8 +1441,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Bool(b));
+        
 
         default:
             break;
@@ -2206,8 +1456,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int(i));
+        
 
         default:
             break;
@@ -2222,8 +1471,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint(i));
+        
 
         default:
             break;
@@ -2238,8 +1486,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Int64(i));
+        
 
         default:
             break;
@@ -2254,8 +1501,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Uint64(i));
+        
 
         default:
             break;
@@ -2270,8 +1516,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.Double(d));
+        
 
         default:
             break;
@@ -2286,8 +1531,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.String(str, length, copy));
+        
 
         default:
             break;
@@ -2303,8 +1547,7 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13))
-						 { state=0; has_input_streams = true; }
+            
             else {
                 state = -1;
                 return true;
@@ -2313,8 +1556,7 @@ public:
         } else {
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.Key(str, length, copy));
+            
 
             default:
                 break;
@@ -2330,8 +1572,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.StartArray());
+        
 
         default:
             break;
@@ -2346,8 +1587,7 @@ public:
 
         switch (state) {
 
-        case 0:
-    return checked_event_forwarding(handler_0.EndArray(length));
+        
 
         default:
             break;
@@ -2362,8 +1602,7 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.StartObject());
+            
 
             default:
                 break;
@@ -2379,14 +1618,13 @@ public:
 
             switch (state) {
 
-            case 0:
-    return checked_event_forwarding(handler_0.EndObject(length));
+            
 
             default:
                 break;
             }
         } else {
-            if (!has_input_streams) set_missing_required("input_streams");
+            
         }
         return the_error.empty();
     }
@@ -2405,8 +1643,7 @@ public:
 
         switch (state) {
 
-        case 0:
-     handler_0.ReapError(errs); break;
+        
 
         default:
             break;
@@ -2421,8 +1658,7 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        handler_0.PrepareForReuse();
-
+        
     }
 };
 
@@ -2433,9 +1669,9 @@ struct Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e780
     {
         w.StartObject();
 
-        w.Key("\x49\x6e\x70\x75\x74\x20\x53\x74\x72\x65\x61\x6d\x73", 13, false); Serializer< Writerf8f206d8edf0a8e434b9de998c1beca38835264e2db8c30bb96e7805b83ae349, sz::PIGPIO::Input_Streams >()(w, value.input_streams);
+        
 
-        w.EndObject(1);
+        w.EndObject(0);
     }
 
 };

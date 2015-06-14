@@ -52,9 +52,9 @@ auto Multi_Pilot::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity" },
-        { stream::IBattery_State::TYPE, m_init_params->rate, "Battery State" },
-        { stream::ICommands::TYPE, m_init_params->rate, "Commands" }
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(0) },
+        { stream::IBattery_State::TYPE, m_init_params->rate, "Battery State", m_accumulator.get_stream_path(1) },
+        { stream::ICommands::TYPE, m_init_params->rate, "Commands", m_accumulator.get_stream_path(2) }
     }};
     return inputs;
 }
@@ -67,6 +67,12 @@ auto Multi_Pilot::get_stream_outputs() const -> std::vector<Stream_Output>
 void Multi_Pilot::process()
 {
     QLOG_TOPIC("multi_pilot::process");
+}
+
+void Multi_Pilot::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    //m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool
@@ -84,58 +90,6 @@ auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-
-    auto angular_velocity_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.angular_velocity);
-    auto battery_state_stream = m_hal.get_streams().find_by_name<stream::IBattery_State>(sz.input_streams.battery_state);
-    auto commands_stream = m_hal.get_streams().find_by_name<stream::ICommands>(sz.input_streams.commands);
-
-    auto rate = angular_velocity_stream ? angular_velocity_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
-    {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.angular_velocity, m_output_stream->rate, rate);
-        m_config->input_streams.angular_velocity.clear();
-        m_angular_velocity_stream.reset();
-    }
-    else
-    {
-        m_angular_velocity_stream = angular_velocity_stream;
-    }
-
-//    rate = location_stream ? location_stream->get_rate() : 0u;
-//    if (rate != m_output_stream->rate)
-//    {
-//        m_config->input_streams.location.clear();
-//        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.location, m_output_stream->rate, rate);
-//        m_location_stream.reset();
-//    }
-//    else
-//    {
-//        m_location_stream = location_stream;
-//    }
-
-    rate = battery_state_stream ? battery_state_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
-    {
-        m_config->input_streams.battery_state.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.battery_state, m_output_stream->rate, rate);
-        m_battery_state_stream.reset();
-    }
-    else
-    {
-        m_battery_state_stream = battery_state_stream;
-    }
-
-    rate = commands_stream ? commands_stream->get_rate() : 0u;
-    if (rate != m_output_stream->rate)
-    {
-        m_config->input_streams.commands.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.commands, m_output_stream->rate, rate);
-        m_commands_stream.reset();
-    }
-    else
-    {
-        m_commands_stream = commands_stream;
-    }
 
     return true;
 }

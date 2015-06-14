@@ -31,26 +31,9 @@
 {
     "definition" : true,
     "namespace" : "sz::PIGPIO",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "channel_4", {"required": true, "json_key" : "Channel 4"}],
-        ["std::string", "channel_17", {"required": true, "json_key" : "Channel 17"}],
-        ["std::string", "channel_18", {"required": true, "json_key" : "Channel 18"}],
-        ["std::string", "channel_22", {"required": true, "json_key" : "Channel 22"}],
-        ["std::string", "channel_23", {"required": true, "json_key" : "Channel 23"}],
-        ["std::string", "channel_24", {"required": true, "json_key" : "Channel 24"}],
-        ["std::string", "channel_25", {"required": true, "json_key" : "Channel 25"}],
-        ["std::string", "channel_27", {"required": true, "json_key" : "Channel 27"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::PIGPIO",
     "name": "Config",
     "members":
     [
-        ["sz::PIGPIO::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
     ]
 }
 ]

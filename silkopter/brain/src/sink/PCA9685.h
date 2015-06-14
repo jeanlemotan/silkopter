@@ -36,6 +36,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
 
     void process();
@@ -61,6 +62,7 @@ private:
         {
             int pulse = -1;
         } last_data;
+        q::Path stream_path;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

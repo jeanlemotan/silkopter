@@ -28,14 +28,14 @@ Stream_Viewer_Widget::Stream_Viewer_Widget(silk::HAL& hal, silk::Comms& comms, Q
 
 Stream_Viewer_Widget::~Stream_Viewer_Widget()
 {
-    m_hal.set_stream_telemetry_active(m_stream_name, false, [](silk::HAL::Result) {});
+    m_hal.set_stream_telemetry_active(m_stream_name, false);
 }
 
 void Stream_Viewer_Widget::set_stream_name(std::string const& stream_name)
 {
     if (!m_stream_name.empty())
     {
-        m_hal.set_stream_telemetry_active(m_stream_name, false, [](silk::HAL::Result) {});
+        m_hal.set_stream_telemetry_active(m_stream_name, false);
         m_stream_name.clear();
     }
 
@@ -51,24 +51,11 @@ void Stream_Viewer_Widget::set_stream_name(std::string const& stream_name)
 
     m_stream = stream;
     m_stream_name = stream_name;
-    label->setText(q::util::format2<std::string>("Activating {}...", m_stream_name).c_str());
 
-    m_hal.set_stream_telemetry_active(m_stream_name, true, [this, label](silk::HAL::Result result)
-    {
-        if (result == silk::HAL::Result::FAILED)
-        {
-            label->setText("Failed");
-        }
-        else if (result == silk::HAL::Result::TIMEOUT)
-        {
-            label->setText("Timeout");
-        }
-        else
-        {
-            delete label;
-            create_viewer();
-        }
-    });
+    m_hal.set_stream_telemetry_active(m_stream_name, true);
+
+    delete label;
+    create_viewer();
 }
 
 void Stream_Viewer_Widget::create_viewer()

@@ -300,8 +300,6 @@ MPU9250::MPU9250(HAL& hal)
     , m_config(new sz::MPU9250::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
-
-    m_config->output_streams.acceleration.scale = math::vec3f::one;
 }
 
 MPU9250::~MPU9250()
@@ -982,7 +980,7 @@ void MPU9250::process()
 //                m_angular_velocity->samples.resize(sample_count);
 //                m_acceleration->samples.resize(sample_count);
 
-                math::vec3f acceleration_scale = m_acceleration_sensor_scale * m_config->output_streams.acceleration.scale;
+                math::vec3f acceleration_scale = math::vec3f(m_acceleration_sensor_scale);// * m_config->output_streams.acceleration.scale;
 
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
@@ -991,7 +989,7 @@ void MPU9250::process()
                     short y = (data[0] << 8) | data[1]; data += 2;
                     short z = (data[0] << 8) | data[1]; data += 2;
                     math::vec3f value(x, y, z);
-                    value = value * acceleration_scale + m_config->output_streams.acceleration.bias;
+                    value = value * acceleration_scale;// + m_config->output_streams.acceleration.bias;
                     m_acceleration->push_sample(value, true);
 
                     x = (data[0] << 8) | data[1]; data += 2;
@@ -999,7 +997,7 @@ void MPU9250::process()
                     z = (data[0] << 8) | data[1]; data += 2;
 
                     value.set(x, y, z);
-                    value = value * m_angular_velocity_sensor_scale + m_config->output_streams.angular_velocity.bias;
+                    value = value * m_angular_velocity_sensor_scale;// + m_config->output_streams.angular_velocity.bias;
                     m_angular_velocity->push_sample(value, true);
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
@@ -1075,7 +1073,7 @@ void MPU9250::process_magnetometer(Buses& buses)
                          (tmp[4] << 8) | tmp[3],
                          (tmp[6] << 8) | tmp[5]);
 
-        data = data * m_magnetic_field_sensor_scale + m_config->output_streams.magnetic_field.bias;
+        data = data * m_magnetic_field_sensor_scale;// + m_config->output_streams.magnetic_field.bias;
 
         //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
         static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *

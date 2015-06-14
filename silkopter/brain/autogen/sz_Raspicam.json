@@ -24,21 +24,12 @@
 {
     "definition" : true,
     "namespace" : "sz::Raspicam",
-    "name": "Output_Streams",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Raspicam",
     "name": "Config",
     "members":
     [
         ["uint32_t", "iso", {"required": true, "default" : 0, "json_key" : "Iso"}],
         ["uint32_t", "shutter_speed", {"required": true, "default" : 0, "json_key" : "Shutter Speed (ms)"}],
-        ["uint32_t", "quality", {"required": true, "default" : 0, "json_key" : "Quality (0..1)"}],
-        ["sz::Raspicam::Output_Streams", "output_streams", {"required": true}]
+        ["uint32_t", "quality", {"required": true, "default" : 0, "json_key" : "Quality (0..1)"}]
     ]
 }
 ]

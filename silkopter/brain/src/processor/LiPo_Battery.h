@@ -40,6 +40,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -56,7 +57,7 @@ private:
     std::shared_ptr<sz::LiPo_Battery::Init_Params> m_init_params;
     std::shared_ptr<sz::LiPo_Battery::Config> m_config;
 
-    Sample_Accumulator<stream::ICurrent, stream::IVoltage> m_accumulator;
+    Sample_Accumulator<stream::IVoltage, stream::ICurrent> m_accumulator;
 
     auto compute_cell_count() -> boost::optional<uint8_t>;
     boost::optional<uint8_t> m_cell_count;

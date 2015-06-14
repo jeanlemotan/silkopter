@@ -51,8 +51,8 @@ auto Gravity_Filter::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IFrame::TYPE, m_init_params->rate, "Frame" },
-        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration" }
+        { stream::IFrame::TYPE, m_init_params->rate, "Frame", m_accumulator.get_stream_path(0) },
+        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -82,6 +82,12 @@ void Gravity_Filter::process()
     });
 }
 
+void Gravity_Filter::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+}
+
 auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("gravity_filter::set_config");
@@ -97,34 +103,6 @@ auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto output_rate = m_output_stream->get_rate();
-
-    auto frame_stream = m_hal.get_streams().find_by_name<stream::IFrame>(sz.input_streams.frame);
-    auto acceleration_stream = m_hal.get_streams().find_by_name<stream::IAcceleration>(sz.input_streams.acceleration);
-
-    auto rate = frame_stream ? frame_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config->input_streams.frame.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.frame, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(frame_stream);
-    }
-
-    rate = acceleration_stream ? acceleration_stream->get_rate() : 0u;
-    if (rate != output_rate)
-    {
-        m_config->input_streams.acceleration.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.acceleration, output_rate, rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(acceleration_stream);
-    }
 
     return true;
 }

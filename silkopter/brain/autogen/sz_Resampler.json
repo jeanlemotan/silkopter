@@ -5,33 +5,8 @@
     "name": "Init_Params",
     "members":
     [
+        ["uint32_t", "input_rate", {"required": true, "json_key" : "Input Rate (Hz)", "default" : 0}],
         ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Resampler",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "input", {"required": true, "json_key" : "Input"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Resampler",
-    "name": "Output",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Resampler",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Resampler::Output", "output", {"required": true, "json_key" : "Output"}]
     ]
 },
 {
@@ -41,9 +16,7 @@
     "members":
     [
         ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 1}],
-        ["double", "cutoff_frequency", {"required": false, "json_key" : "Cutoff Frequency (Hz)", "default" : 0}],
-        ["sz::Resampler::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Resampler::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+        ["double", "cutoff_frequency", {"required": false, "json_key" : "Cutoff Frequency (Hz)", "default" : 0}]
     ]
 }
 ]

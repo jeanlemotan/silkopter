@@ -140,9 +140,18 @@ void HAL::save_settings()
         auto const& nodes = get_nodes().get_all();
         for (auto const& n: nodes)
         {
+            auto stream_inputs = n.node->get_stream_inputs();
+            rapidjson::Value stream_input_pathsj;
+            stream_input_pathsj.SetArray();
+            for (auto const& si: stream_inputs)
+            {
+                stream_input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
+            }
+
             if (!jsonutil::add_value(*nodesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
                 !jsonutil::add_value(*nodesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*nodesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+                !jsonutil::add_value(*nodesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator) ||
+                !jsonutil::add_value(*nodesj, q::Path(n.name + "/stream_input_paths"), std::move(stream_input_pathsj), allocator))
             {
                 QLOGE("Cannot open create settings node.");
                 return;
@@ -386,14 +395,33 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
     {
         std::string name(it->name.GetString());
+        auto node = get_nodes().find_by_name<node::INode>(name);
+        QASSERT(node);
+
+        auto* stream_input_pathsj = jsonutil::find_value(it->value, std::string("stream_input_paths"));
+        if (!stream_input_pathsj || !stream_input_pathsj->IsArray())
+        {
+            QLOGE("Node {} is missing the stream input paths", name);
+            return false;
+        }
+
+        size_t input_idx = 0;
+        for (auto it = stream_input_pathsj->Begin(); it != stream_input_pathsj->End(); ++it)
+        {
+            if (!it->IsString())
+            {
+                QLOGE("Node {} has a bad stream input paths", name);
+                return false;
+            }
+            node->set_stream_input_path(input_idx, q::Path(it->GetString()));
+        }
+
         auto* configj = jsonutil::find_value(it->value, std::string("config"));
         if (!configj)
         {
             QLOGE("Node {} is missing the config", name);
             return false;
         }
-        auto node = get_nodes().find_by_name<node::INode>(name);
-        QASSERT(node);
         if (!node->set_config(*configj))
         {
             QLOGE("Failed to set config for node '{}'", name);

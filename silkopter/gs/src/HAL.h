@@ -37,6 +37,7 @@ namespace silk
 {
 
 class HAL;
+class Comms;
 
 
 
@@ -403,6 +404,7 @@ struct Node
 
     struct Stream_Input
     {
+        q::Path stream_path;
         stream::Stream_wptr stream;
         stream::Type type;
         std::string name;
@@ -418,7 +420,8 @@ struct Node
     };
     std::vector<Stream_Output> output_streams;
 
-    q::util::Signal<void(Node&)> changed_signal;
+    q::util::Signal<void()> changed_signal;
+    q::util::Signal<void(rapidjson::Document const& json)> message_received_signal;
 };
 DECLARE_CLASS_PTR(Node);
 
@@ -444,7 +447,7 @@ class HAL : q::util::Noncopyable
 {
     friend class Comms;
 public:
-    HAL();
+    HAL(Comms& comms);
     ~HAL();
 
     auto get_multi_config() const   -> boost::optional<config::Multi>;
@@ -464,28 +467,22 @@ public:
         TIMEOUT
     };
 
-    typedef std::function<void(Result, node::Node_ptr)> Add_Node_Callback;
-    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params, Add_Node_Callback callback);
-
-    typedef std::function<void(Result)> Remove_Node_Callback;
-    void remove_node(node::Node_ptr node, Remove_Node_Callback callback);
-
-    void connect_node_stream_input(node::Node_ptr node, std::string const& input_name, std::string const& stream_name);
+    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params);
+    void remove_node(node::Node_ptr node);
+    void set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path);
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
-
-    typedef std::function<void(Result)> Stream_Telemetry_Callback;
-    void set_stream_telemetry_active(std::string const& stream_name, bool active, Stream_Telemetry_Callback callback);
-
-    typedef std::function<void(Result, rapidjson::Document)> Node_Message_Callback;
-    void send_node_message(node::Node_ptr node, rapidjson::Document json, Node_Message_Callback callback);
+    void set_stream_telemetry_active(std::string const& stream_name, bool active);
+    void send_node_message(node::Node_ptr node, rapidjson::Document const& json);
 
     q::util::Signal<void()> node_defs_refreshed_signal;
-    q::util::Signal<void()> nodes_refreshed_signal;
+    q::util::Signal<void(node::Node_ptr)> node_added_signal;
+    q::util::Signal<void(node::Node_ptr)> node_removed_signal;
 
     auto get_remote_clock() const -> Manual_Clock const&;
 
 protected:
     Manual_Clock m_remote_clock;
+    Comms& m_comms;
 
     struct Configs
     {
@@ -495,58 +492,6 @@ protected:
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
     Registry<node::stream::Stream> m_streams;
-
-    struct Queue_Item
-    {
-        bool was_sent = false;
-        q::Clock::time_point sent_time_point;
-        uint32_t req_id = 0;
-    };
-
-    struct Set_Multi_Config_Queue_Item
-    {
-        rapidjson::Document config;
-    };
-    std::vector<Set_Multi_Config_Queue_Item> m_multi_set_config_queue;
-
-    struct Add_Queue_Item : public Queue_Item
-    {
-        std::string def_name;
-        std::string name;
-        rapidjson::Document init_params;
-        Add_Node_Callback callback;
-    };
-    std::vector<Add_Queue_Item> m_add_queue;
-
-    struct Remove_Queue_Item : public Queue_Item
-    {
-        std::string name;
-        Remove_Node_Callback callback;
-    };
-    std::vector<Remove_Queue_Item> m_remove_queue;
-
-    struct Set_Node_Config_Queue_Item
-    {
-        std::string name;
-        rapidjson::Document config;
-    };
-    std::vector<Set_Node_Config_Queue_Item> m_node_set_config_queue;
-
-    struct Stream_Telemetry_Queue_Item : public Queue_Item
-    {
-        std::string stream_name;
-        bool is_active = false;
-        Stream_Telemetry_Callback callback;
-    };
-    std::vector<Stream_Telemetry_Queue_Item> m_stream_telemetry_queue;
-
-    struct Send_Node_Message_Queue_Item : public Queue_Item
-    {
-        std::string name;
-        rapidjson::Document json;
-        Node_Message_Callback callback;
-    };
-    std::vector<Send_Node_Message_Queue_Item> m_send_node_message_queue;
 
 private:
 

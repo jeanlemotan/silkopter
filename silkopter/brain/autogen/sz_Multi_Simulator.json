@@ -18,99 +18,13 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Simulator",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::vector<std::string>", "throttle", {"required": true, "json_key" : "Throttle"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Acceleration",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
-        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Angular_Velocity",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Magnetic_Field",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Temperature",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Pressure",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Distance",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "ECEF_Position",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::Multi_Simulator::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["sz::Multi_Simulator::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["sz::Multi_Simulator::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
-        ["sz::Multi_Simulator::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}],
-        ["sz::Multi_Simulator::Pressure", "pressure", {"required": true, "json_key" : "Pressure"}],
-        ["sz::Multi_Simulator::Distance", "distance", {"required": true, "json_key" : "Distance"}],
-        ["sz::Multi_Simulator::ECEF_Position", "ecef_position", {"required": true, "json_key" : "ECEF Position"}]
-     ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
     "name": "Config",
     "members":
     [
         ["bool", "simulation_enabled", {"required": true, "json_key" : "Simulation Enabled", "default" : true}],
         ["bool", "drag_enabled", {"required": true, "json_key" : "Drag Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
-        ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
-        ["sz::Multi_Simulator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::Multi_Simulator::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
+        ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}]
     ]
 },
 {

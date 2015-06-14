@@ -105,6 +105,11 @@ void Oscillator::process()
     }
 }
 
+void Oscillator::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+}
+
 auto Oscillator::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("Oscillator::set_config");

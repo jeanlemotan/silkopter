@@ -11,22 +11,10 @@
 {
     "definition" : true,
     "namespace" : "sz::Vec3_Generator",
-    "name": "Input_Streams",
-    "members":
-    [
-       ["std::string", "x_modulation", {"required": true, "json_key" : "X Modulation"}],
-       ["std::string", "y_modulation", {"required": true, "json_key" : "Y Modulation"}],
-       ["std::string", "z_modulation", {"required": true, "json_key" : "Z Modulation"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Vec3_Generator",
     "name": "Config",
     "members":
     [
-        ["math::vec3f", "value", {"required": true, "json_key" : "Value"}],
-        ["sz::Vec3_Generator::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}]
+        ["math::vec3f", "value", {"required": true, "json_key" : "Value"}]
     ]
 }
 ]

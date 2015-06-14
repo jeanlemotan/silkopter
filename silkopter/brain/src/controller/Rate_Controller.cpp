@@ -52,8 +52,8 @@ auto Rate_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input" },
-        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Target" }
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
+        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -116,6 +116,12 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
     return math::vec3f(x, y, z);
 }
 
+void Rate_Controller::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+}
+
 auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("rate_controller::set_config");
@@ -131,39 +137,11 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_accumulator.clear_streams();
-
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.input);
-    auto target_stream = m_hal.get_streams().find_by_name<stream::IAngular_Velocity>(sz.input_streams.target);
-
-    auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_output_stream->get_rate())
-    {
-        m_config->input_streams.input.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.input, m_output_stream->get_rate(), rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<0>(input_stream);
-    }
-
-    rate = target_stream ? target_stream->get_rate() : 0u;
-    if (rate != m_output_stream->get_rate())
-    {
-        m_config->input_streams.target.clear();
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.target, m_output_stream->get_rate(), rate);
-    }
-    else
-    {
-        m_accumulator.set_stream<1>(target_stream);
-    }
 
     m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);
     m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.f, 1.f);
 
     m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
-
-
 
     auto fill_params = [this](PID::Params& dst, sz::Rate_Controller::PID const& src)
     {

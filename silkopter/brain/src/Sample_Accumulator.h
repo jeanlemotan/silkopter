@@ -17,6 +17,17 @@ template<class... Streams>
 class Storage
 {
 public:
+    template<size_t N>
+    auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal) -> bool
+    {
+        return false;
+    }
+    template<size_t N>
+    auto get_stream_path(size_t idx) const -> q::Path const&
+    {
+        return q::Path::null;
+    }
+
     void clear_streams()
     {
     }
@@ -74,6 +85,46 @@ public:
         m_stream = stream;
     }
 
+    template<size_t N>
+    auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal) -> bool
+    {
+        if (idx == N)
+        {
+            m_stream_path.clear();
+            m_stream.reset();
+
+            auto stream = hal.get_streams().find_by_name<Stream>(path.get_as<std::string>());
+            if (stream)
+            {
+                if (desired_rate > 0 && stream->get_rate() != desired_rate)
+                {
+                    QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, desired_rate, stream->get_rate());
+                    return false;
+                }
+                m_stream_path = path;
+                m_stream = stream;
+            }
+
+            return stream != nullptr;
+        }
+        else
+        {
+            return Parent_t::template set_stream_path<N + 1>(idx, path, desired_rate, hal);
+        }
+    }
+    template<size_t N>
+    auto get_stream_path(size_t idx) const -> q::Path const&
+    {
+        if (idx == N)
+        {
+            return m_stream_path;
+        }
+        else
+        {
+            return Parent_t::template get_stream_path<N + 1>(idx);
+        }
+    }
+
     auto lock() -> bool
     {
         m_locked_stream = m_stream.lock();
@@ -122,6 +173,7 @@ public:
 private:
     std::shared_ptr<Stream> m_locked_stream;
     std::weak_ptr<Stream> m_stream;
+    q::Path m_stream_path;
     std::vector<Sample_t> m_samples;
 
 };
@@ -140,6 +192,15 @@ public:
     void clear_streams()
     {
         m_storage.clear_streams();
+    }
+
+    void set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal)
+    {
+        m_storage.template set_stream_path<0>(idx, path, desired_rate, hal);
+    }
+    auto get_stream_path(size_t idx) const -> q::Path const&
+    {
+        return m_storage.template get_stream_path<0>(idx);
     }
 
     template<size_t N, class T>

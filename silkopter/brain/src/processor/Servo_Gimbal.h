@@ -6,6 +6,7 @@
 #include "common/node/stream/IPWM.h"
 #include "HAL.h"
 
+#include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
 namespace sz
@@ -37,6 +38,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    void set_stream_input_path(size_t idx, q::Path const& path);
     auto get_stream_inputs() const -> std::vector<Stream_Input>;
     auto get_stream_outputs() const -> std::vector<Stream_Output>;
 
@@ -51,8 +53,7 @@ private:
     std::shared_ptr<sz::Servo_Gimbal::Init_Params> m_init_params;
     std::shared_ptr<sz::Servo_Gimbal::Config> m_config;
 
-    stream::IFrame_wptr m_frame_stream;
-    stream::IFrame_wptr m_target_stream;
+    Sample_Accumulator<stream::IFrame/*, stream::IFrame*/> m_accumulator;
 
     std::vector<stream::IFrame::Sample> m_frame_samples;
     std::vector<stream::IFrame::Sample> m_target_frame_samples;

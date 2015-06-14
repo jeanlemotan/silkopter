@@ -11,39 +11,11 @@
 {
     "definition" : true,
     "namespace" : "sz::ADC_Ammeter",
-    "name": "Input_Streams",
-    "members":
-    [
-        ["std::string", "adc", {"required": true, "json_key" : "ADC"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::ADC_Ammeter",
-    "name": "Current",
+    "name": "Config",
     "members":
     [
         ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
         ["float", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::ADC_Ammeter",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::ADC_Ammeter::Current", "current", {"required": true, "json_key" : "Current"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::ADC_Ammeter",
-    "name": "Config",
-    "members":
-    [
-        ["sz::ADC_Ammeter::Input_Streams", "input_streams", {"required": true, "json_key" : "Input Streams"}],
-        ["sz::ADC_Ammeter::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

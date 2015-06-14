@@ -16,58 +16,9 @@
 {
     "definition" : true,
     "namespace" : "sz::MPU9250",
-    "name": "Acceleration",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}],
-        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Angular_Velocity",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Magnetic_Field",
-    "members":
-    [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias", "default" : 0.0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Temperature",
-    "members":
-    [
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Output_Streams",
-    "members":
-    [
-        ["sz::MPU9250::Acceleration", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["sz::MPU9250::Angular_Velocity", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["sz::MPU9250::Magnetic_Field", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}],
-        ["sz::MPU9250::Temperature", "temperature", {"required": true, "json_key" : "Temperature"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
     "name": "Config",
     "members":
     [
-        ["sz::MPU9250::Output_Streams", "output_streams", {"required": true, "json_key" : "Output Streams"}]
     ]
 }
 ]

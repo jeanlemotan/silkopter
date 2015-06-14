@@ -22,20 +22,22 @@ PIGPIO::PIGPIO(HAL& hal)
     , m_config(new sz::PIGPIO::Config())
 {
     autojsoncxx::to_document(*m_init_params, m_init_paramsj);
+
+    m_pwm_channels.resize(8);
 }
 
 auto PIGPIO::get_stream_inputs() const -> std::vector<Stream_Input>
 {
     std::vector<Stream_Input> inputs =
     {{
-        { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4" },
-        { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17" },
-        { stream::IPWM::TYPE, m_init_params->channel_18.rate, "Channel 18" },
-        { stream::IPWM::TYPE, m_init_params->channel_22.rate, "Channel 22" },
-        { stream::IPWM::TYPE, m_init_params->channel_23.rate, "Channel 23" },
-        { stream::IPWM::TYPE, m_init_params->channel_24.rate, "Channel 24" },
-        { stream::IPWM::TYPE, m_init_params->channel_25.rate, "Channel 25" },
-        { stream::IPWM::TYPE, m_init_params->channel_27.rate, "Channel 27" }
+        { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4", m_pwm_channels[0].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17", m_pwm_channels[1].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_18.rate, "Channel 18", m_pwm_channels[2].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_22.rate, "Channel 22", m_pwm_channels[3].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_23.rate, "Channel 23", m_pwm_channels[4].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_24.rate, "Channel 24", m_pwm_channels[5].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_25.rate, "Channel 25", m_pwm_channels[6].stream_path },
+        { stream::IPWM::TYPE, m_init_params->channel_27.rate, "Channel 27", m_pwm_channels[7].stream_path }
     }};
     return inputs;
 }
@@ -77,7 +79,6 @@ auto PIGPIO::init() -> bool
         f = static_cast<size_t>(x);
     }
 
-    m_pwm_channels.resize(8);
     m_pwm_channels[0].gpio = 4;
     m_pwm_channels[0].config = &m_init_params->channel_4;
     m_pwm_channels[1].gpio = 17;
@@ -218,19 +219,33 @@ void PIGPIO::process()
 
 
 #define READ_CONFIG(IDX, CH)\
+if (idx == IDX)\
 {\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(sz.input_streams.channel_##CH);\
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_init_params->channel_##CH.rate)\
     {\
-        m_config->input_streams.channel_##CH.clear();\
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", sz.input_streams.channel_##CH, m_init_params->channel_##CH.rate, rate);\
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->channel_##CH.rate, rate);\
         m_pwm_channels[IDX].stream.reset();\
     }\
     else\
     {\
         m_pwm_channels[IDX].stream = input_stream;\
     }\
+}
+
+void PIGPIO::set_stream_input_path(size_t idx, q::Path const& path)
+{
+    QLOG_TOPIC("rate_controller::set_stream_input_path");
+
+    READ_CONFIG(0, 4);
+    READ_CONFIG(1, 17);
+    READ_CONFIG(2, 18);
+    READ_CONFIG(3, 22);
+    READ_CONFIG(4, 23);
+    READ_CONFIG(5, 24);
+    READ_CONFIG(6, 25);
+    READ_CONFIG(7, 27);
 }
 
 
@@ -249,15 +264,6 @@ auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-
-    READ_CONFIG(0, 4);
-    READ_CONFIG(1, 17);
-    READ_CONFIG(2, 18);
-    READ_CONFIG(3, 22);
-    READ_CONFIG(4, 23);
-    READ_CONFIG(5, 24);
-    READ_CONFIG(6, 25);
-    READ_CONFIG(7, 27);
 
     return true;
 }
