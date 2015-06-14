@@ -460,6 +460,16 @@ auto Comms::publish_output_streams(node::Node_ptr node) -> bool
     return true;
 }
 
+auto Comms::unpublish_output_streams(node::Node_ptr node) -> bool
+{
+    for (auto& os: node->output_streams)
+    {
+        auto stream = m_hal.m_streams.find_by_name(node->name + "/" + os.name);
+        m_hal.m_streams.remove(stream);
+    }
+    return true;
+}
+
 auto Comms::link_input_streams(node::Node_ptr node) -> bool
 {
     for (auto& i: node->input_streams)
@@ -491,6 +501,16 @@ auto Comms::link_input_streams(node::Node_ptr node) -> bool
             return false;
         }
         i.stream = stream;
+    }
+    return true;
+}
+auto Comms::link_output_streams(node::Node_ptr node) -> bool
+{
+    for (auto& os: node->output_streams)
+    {
+        auto stream = m_hal.m_streams.find_by_name(node->name + "/" + os.name);
+        QASSERT(stream);
+        os.stream = stream;
     }
     return true;
 }
@@ -564,18 +584,17 @@ void Comms::handle_node_message()
         return;
     }
 
-    auto it = std::find_if(begin(m_hal.m_send_node_message_queue), end(m_hal.m_send_node_message_queue), [&](HAL::Send_Node_Message_Queue_Item const& i) { return i.req_id == req_id; });
-    QASSERT(it != m_hal.m_send_node_message_queue.end());
-    if (it == m_hal.m_send_node_message_queue.end())
+    HAL::Node_Message_Callback callback = nullptr;
     {
-        QLOGE("Cannot find node message request {}", req_id);
-        return;
+        auto it = std::find_if(begin(m_hal.m_send_node_message_queue), end(m_hal.m_send_node_message_queue), [&](HAL::Send_Node_Message_Queue_Item const& i) { return i.req_id == req_id; });
+        callback = it != m_hal.m_send_node_message_queue.end() ? it->callback : HAL::Node_Message_Callback([](HAL::Result, rapidjson::Document) {});
+        m_hal.m_send_node_message_queue.erase(it);
     }
 
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        it->callback(HAL::Result::FAILED, rapidjson::Document());
+        callback(HAL::Result::FAILED, rapidjson::Document());
         QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
         return;
     }
@@ -585,11 +604,11 @@ void Comms::handle_node_message()
     rapidjson::Document json;
     if (!unpack_json(m_setup_channel, json))
     {
-        it->callback(HAL::Result::FAILED, rapidjson::Document());
+        callback(HAL::Result::FAILED, rapidjson::Document());
         QLOGE("Req Id: {}, node '{}' - failed to unpack message", req_id, name);
     }
 
-    it->callback(HAL::Result::OK, std::move(json));
+    callback(HAL::Result::OK, std::move(json));
 }
 
 void Comms::handle_node_data()
@@ -619,6 +638,7 @@ void Comms::handle_node_data()
         QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
     link_input_streams(node);
+    link_output_streams(node);
 
     node->changed_signal.execute(*node);
 }
@@ -626,38 +646,42 @@ void Comms::handle_node_data()
 void Comms::handle_add_node()
 {
     uint32_t req_id = 0;
-    if (!m_setup_channel.begin_unpack() || !m_setup_channel.unpack_param(req_id))
+    std::string name;
+    if (!m_setup_channel.begin_unpack() ||
+        !m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(name))
     {
         QLOGE("Failed to unpack add node request");
         return;
     }
-    auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
-    QASSERT(it != m_hal.m_add_queue.end());
-    if (it == m_hal.m_add_queue.end())
+
+    HAL::Add_Node_Callback callback = nullptr;
     {
-        QLOGE("Cannot find add node request {}", req_id);
-        return;
+        auto it = std::find_if(begin(m_hal.m_add_queue), end(m_hal.m_add_queue), [&](HAL::Add_Queue_Item const& i) { return i.req_id == req_id; });
+        callback = it != m_hal.m_add_queue.end() ? it->callback : HAL::Add_Node_Callback([](HAL::Result, node::Node_ptr) {});
+        m_hal.m_add_queue.erase(it);
     }
+
     auto node = std::make_shared<node::Node>();
     bool ok = unpack_node_data(m_setup_channel, *node);
     if (!ok)
     {
-        it->callback(HAL::Result::FAILED, node::Node_ptr());
+        callback(HAL::Result::FAILED, node::Node_ptr());
         return;
     }
     if (!link_input_streams(node))
     {
-        it->callback(HAL::Result::FAILED, node::Node_ptr());
+        callback(HAL::Result::FAILED, node::Node_ptr());
         return;
     }
 
-    node->name = it->name;
+    node->name = name;
     m_hal.m_nodes.add(node);
 
     publish_output_streams(node);
     link_input_streams(node);
 
-    it->callback(HAL::Result::OK, node);
+    callback(HAL::Result::OK, node);
 }
 
 void Comms::handle_remove_node()
@@ -672,31 +696,24 @@ void Comms::handle_remove_node()
         QLOGE("Failed to unpack remove node request");
         return;
     }
-    auto it = std::find_if(begin(m_hal.m_remove_queue), end(m_hal.m_remove_queue), [&](HAL::Remove_Queue_Item const& i) { return i.req_id == req_id; });
-    QASSERT(it != m_hal.m_remove_queue.end());
-    if (it == m_hal.m_remove_queue.end())
+
+    HAL::Remove_Node_Callback callback = nullptr;
     {
-        QLOGE("Cannot find remove node request {}", req_id);
-        return;
+        auto it = std::find_if(begin(m_hal.m_remove_queue), end(m_hal.m_remove_queue), [&](HAL::Remove_Queue_Item const& i) { return i.req_id == req_id; });
+        callback = it != m_hal.m_remove_queue.end() ? it->callback : HAL::Remove_Node_Callback([](HAL::Result) {});
+        m_hal.m_remove_queue.erase(it);
     }
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        it->callback(HAL::Result::FAILED);
+        callback(HAL::Result::FAILED);
         QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
         return;
     }
 
-    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
-
-    if (!unpack_node_data(m_setup_channel, *node))
-    {
-        it->callback(HAL::Result::FAILED);
-        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
-        return;
-    }
+    unpublish_output_streams(node);
     m_hal.m_nodes.remove(node);
-    it->callback(HAL::Result::OK);
+    callback(HAL::Result::OK);
 
     request_all_node_configs();
 }
@@ -713,16 +730,17 @@ void Comms::handle_streams_telemetry_active()
         QLOGE("Failed to unpack remove node request");
         return;
     }
-    auto it = std::find_if(begin(m_hal.m_stream_telemetry_queue), end(m_hal.m_stream_telemetry_queue),
-                           [&](HAL::Stream_Telemetry_Queue_Item const& i) { return i.req_id == req_id; });
-    QASSERT(it != m_hal.m_stream_telemetry_queue.end());
-    if (it == m_hal.m_stream_telemetry_queue.end())
+
     {
-        QLOGE("Cannot find telemetry node request {}", req_id);
-        return;
+        auto it = std::find_if(begin(m_hal.m_stream_telemetry_queue), end(m_hal.m_stream_telemetry_queue),
+                               [&](HAL::Stream_Telemetry_Queue_Item const& i) { return i.req_id == req_id; });
+        QASSERT(it != m_hal.m_stream_telemetry_queue.end());
+        if (it != m_hal.m_stream_telemetry_queue.end())
+        {
+            it->callback(it->is_active == is_active ? HAL::Result::OK : HAL::Result::FAILED);
+            m_hal.m_stream_telemetry_queue.erase(it);
+        }
     }
-    it->callback(is_active ? HAL::Result::OK : HAL::Result::FAILED);
-    m_hal.m_stream_telemetry_queue.erase(it);
 }
 
 #pragma pack(push, 1)
@@ -895,6 +913,30 @@ void Comms::send_hal_requests()
         {
             req.callback(HAL::Result::TIMEOUT, node::Node_ptr());
             m_hal.m_add_queue.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    for (auto it = m_hal.m_remove_queue.begin(); it != m_hal.m_remove_queue.end();)
+    {
+        auto& req = *it;
+        if (!req.was_sent)
+        {
+            req.was_sent = true;
+            req.sent_time_point = now;
+            req.req_id = ++m_last_req_id;
+            m_setup_channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+            m_setup_channel.pack_param(req.req_id);
+            m_setup_channel.pack_param(req.name);
+            m_setup_channel.end_pack();
+        }
+        if (now - req.sent_time_point > REQUEST_TIMEOUT)
+        {
+            req.callback(HAL::Result::TIMEOUT);
+            m_hal.m_remove_queue.erase(it);
         }
         else
         {

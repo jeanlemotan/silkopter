@@ -5,7 +5,7 @@ CONFIG -= qt
 CONFIG += c++11
 
 TARGET = brain
-target.path = /home/pi
+target.path = /root
 INSTALLS = target
 
 PRECOMPILED_HEADER = ../../src/BrainStdAfx.h

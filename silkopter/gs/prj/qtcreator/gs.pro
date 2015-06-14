@@ -143,7 +143,8 @@ HEADERS += \
     ../../src/Video_Viewer.h \
     ../../../libs/common/node/stream/IBool.h \
     ../../../libs/common/node/stream/IPosition.h \
-    ../../../libs/common/node/stream/IGPS_Info.h
+    ../../../libs/common/node/stream/IGPS_Info.h \
+    ../../src/Custom_Item_Delegate.h
 
 SOURCES += \
     ../../src/GS.cpp \

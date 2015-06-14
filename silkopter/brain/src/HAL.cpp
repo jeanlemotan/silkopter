@@ -108,7 +108,7 @@ void HAL::save_settings()
         }
         rapidjson::Document json;
         autojsoncxx::to_document(*m_configs.multi, json);
-        jsonutil::clone_value(*configj, json, settingsj->GetAllocator());
+        jsonutil::clone_value(*configj, json, allocator);
     }
 
     {
@@ -598,7 +598,8 @@ auto HAL::init(Comms& comms) -> bool
     q::data::File_Source fs(k_settings_path);
     if (!fs.is_open())
     {
-        QLOGE("Failed to load '{}'", k_settings_path);
+        QLOGW("Failed to load '{}'", k_settings_path);
+        generate_settings_file();
         return false;
     }
 
@@ -701,6 +702,68 @@ void HAL::shutdown()
 {
 }
 
+void HAL::generate_settings_file()
+{
+#if defined RASPBERRY_PI
+
+    for (size_t i = 0; i < 2; i++)
+    {
+        auto node = m_bus_factory.create_node("SPI Linux");
+        QASSERT(node);
+        rapidjson::Document json;
+        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+        QASSERT(valj);
+        valj->SetString(q::util::format2<std::string>("/dev/spidev0.{}", i), json.GetAllocator());
+        valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
+        QASSERT(valj);
+        valj->SetInt(1000000);
+        if (node->init(json))
+        {
+            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI Linux", node);
+            QASSERT(res);
+        }
+    }
+
+    {
+        auto node = m_bus_factory.create_node("I2C Linux");
+        QASSERT(node);
+        rapidjson::Document json;
+        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+        QASSERT(valj);
+        valj->SetString("/dev/i2c-1");
+        if (node->init(json))
+        {
+            auto res = m_buses.add("i2c1", "I2C Linux", node);
+            QASSERT(res);
+        }
+    }
+
+    {
+        auto node = m_bus_factory.create_node("UART Linux");
+        QASSERT(node);
+        rapidjson::Document json;
+        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+        QASSERT(valj);
+        valj->SetString("/dev/ttyAMA0");
+        valj = jsonutil::get_or_add_value(json, q::Path("baud"), rapidjson::Type::kNumberType, json.GetAllocator());
+        QASSERT(valj);
+        valj->SetInt(115200);
+        if (node->init(json))
+        {
+            auto res = m_buses.add("uart0", "UART Linux", node);
+            QASSERT(res);
+        }
+    }
+
+#else
+
+#endif
+
+    save_settings();
+}
 
 //static std::vector<double> s_samples;
 //static std::vector<double> s_samples_lpf;

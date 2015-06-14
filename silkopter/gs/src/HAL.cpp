@@ -82,7 +82,7 @@ void HAL::remove_node(node::Node_ptr node,
         return;
     }
     Remove_Queue_Item item;
-    item.node = std::move(node);
+    item.name = node->name;
     item.callback = callback;
     m_remove_queue.push_back(std::move(item));
 }

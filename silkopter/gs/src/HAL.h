@@ -520,7 +520,7 @@ protected:
 
     struct Remove_Queue_Item : public Queue_Item
     {
-        node::Node_ptr node;
+        std::string name;
         Remove_Node_Callback callback;
     };
     std::vector<Remove_Queue_Item> m_remove_queue;

@@ -32,14 +32,14 @@ private:
 private:
     void refresh_nodes();
 
-    auto supports_acceleration_calibration(silk::node::stream::Stream const& stream) const -> bool;
-    auto supports_magnetic_field_calibration(silk::node::stream::Stream const& stream) const -> bool;
-    auto supports_angular_velocity_calibration(silk::node::stream::Stream const& stream) const -> bool;
+    auto supports_acceleration_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
+    auto supports_magnetic_field_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
+    auto supports_angular_velocity_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
 
-    void contextMenu(QGraphicsSceneMouseEvent* event);
-    void portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port);
-    void blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
-    void connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
+    void context_menu(QGraphicsSceneMouseEvent* event);
+    void port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port);
+    void block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
+    void connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
 
     void selection_changed();
     void set_config_editor_node(silk::node::Node_ptr node);
@@ -54,6 +54,8 @@ private:
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node, QPointF pos);
     void create_node(silk::node::Node_Def_ptr def, QPointF pos);
+    void remove_node(silk::node::Node_ptr node);
+
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;

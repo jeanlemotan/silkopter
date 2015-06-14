@@ -127,6 +127,7 @@ private:
     void handle_node_message();
 
     void handle_add_node();
+    void handle_remove_node();
 
     void handle_multi_config();
 

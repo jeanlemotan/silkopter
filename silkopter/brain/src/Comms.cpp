@@ -638,9 +638,6 @@ void Comms::handle_add_node()
         std::string def_name, name;
         rapidjson::Document init_params;
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ADD_NODE);
-        m_setup_channel.pack_param(req_id);
-
         bool ok = m_setup_channel.unpack_param(def_name);
         ok &= m_setup_channel.unpack_param(name);
         ok &= unpack_json(m_setup_channel, init_params);
@@ -661,12 +658,47 @@ void Comms::handle_add_node()
         m_hal.save_settings();
 
         //reply
+        m_setup_channel.begin_pack(comms::Setup_Message::ADD_NODE);
+        m_setup_channel.pack_param(req_id);
+        m_setup_channel.pack_param(name);
         pack_node_data(m_setup_channel, *node);
         m_setup_channel.end_pack();
     }
     else
     {
         QLOGE("Error in adding node");
+    }
+}
+
+void Comms::handle_remove_node()
+{
+    uint32_t req_id = 0;
+    std::string name;
+    if (m_setup_channel.begin_unpack() &&
+        m_setup_channel.unpack_param(req_id) &&
+        m_setup_channel.unpack_param(name))
+    {
+        QLOGI("Req Id: {} - remove node {}", req_id, name);
+
+        auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+        if (!node)
+        {
+            QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
+            return;
+        }
+
+        m_hal.get_nodes().remove(node);
+        m_hal.save_settings();
+
+        //reply
+        m_setup_channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+        m_setup_channel.pack_param(req_id);
+        m_setup_channel.pack_param(name);
+        m_setup_channel.end_pack();
+    }
+    else
+    {
+        QLOGE("Error in removing node");
     }
 }
 
@@ -691,11 +723,10 @@ void Comms::handle_streams_telemetry_active()
     m_setup_channel.pack_param(req_id);
 
     //remove the stream from the telemetry list (it's added again below if needed)
-    m_stream_telemetry_data.erase(m_stream_telemetry_data.begin(),
-                                  std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
+    m_stream_telemetry_data.erase(std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
     {
         return ts.stream_name == stream_name;
-    }));
+    }), m_stream_telemetry_data.end());
 
 
     if (is_active)
@@ -791,6 +822,7 @@ void Comms::process()
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
 
         case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
         case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
 

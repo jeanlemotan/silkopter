@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QGraphicsSceneMouseEvent>
 #include "Stream_Viewer_Widget.h"
+#include "Custom_Item_Delegate.h"
 
 #include "boost/algorithm/string.hpp"
 
@@ -81,16 +82,16 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
 
     m_selection.config_dock->setWidget(m_selection.config_view);
     m_selection.config_view->setModel(m_selection.config_model);
+    m_selection.config_view->setItemDelegate(new Custom_Item_Delegate(m_selection.config_view));
 
     addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
 
-
     connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
 
-    connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &HAL_Window::contextMenu);
-    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::portContextMenu);
-    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::blockContextMenu);
-    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connectionContextMenu);
+    connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &HAL_Window::context_menu);
+    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::port_context_menu);
+    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
+    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
     m_hal.nodes_refreshed_signal.connect(std::bind(&HAL_Window::refresh_nodes, this));
@@ -186,7 +187,7 @@ static auto get_icon(std::string const& node_icon_name, silk::node::Node_Def& no
     return QIcon(node_icon_name.c_str());
 }
 
-void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
+void HAL_Window::port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port)
 {
     QASSERT(port);
 
@@ -202,16 +203,10 @@ void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
     {
         QNEPort* other = c->port1() == port ? c->port2() : c->port1();
         QASSERT(other);
-        if (other)
+        if (other && !output_port && other->isOutput())
         {
-            menu.addAction(QIcon(":/icons/remove.png"),
-                           q::util::format2<std::string>("Disconnect from {}/{}",
-                                                         other->block()->id().toLatin1().data(),
-                                                         other->id().toLatin1().data()).c_str());
-            if (!output_port && other->isOutput())
-            {
-                output_port = other;
-            }
+            output_port = other;
+            break;
         }
     }
 
@@ -228,9 +223,26 @@ void HAL_Window::portContextMenu(QGraphicsSceneMouseEvent* event, QNEPort* port)
     menu.exec(event->screenPos());
 }
 
-void HAL_Window::connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConnection* connection)
+void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection)
 {
     QASSERT(connection);
+
+    QNEPort* input_port = !connection->port1()->isOutput() ? connection->port1() : connection->port2();
+    QASSERT(!input_port->isOutput());
+
+    auto* block = input_port->block();
+    QASSERT(block);
+
+    auto it = m_nodes.find(block->id().toLatin1().data());
+    if (it == m_nodes.end())
+    {
+        return;
+    }
+    auto node = it->second.node.lock();
+    if (!node)
+    {
+        return;
+    }
 
     QMenu menu(this);
 
@@ -238,40 +250,49 @@ void HAL_Window::connectionContextMenu(QGraphicsSceneMouseEvent* event, QNEConne
     menu.addSeparator();
     action = menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
 
+    connect(action, &QAction::triggered, [=](bool)
+    {
+        std::string input_name = input_port->id().toLatin1().data();
+        m_hal.connect_node_stream_input(node, input_name, std::string());
+    });
+
     menu.exec(event->screenPos());
 }
 
-auto HAL_Window::supports_acceleration_calibration(silk::node::stream::Stream const& stream) const -> bool
+auto HAL_Window::supports_acceleration_calibration(silk::node::Node::Stream_Output const& so) const -> bool
 {
-    auto node = stream.node.lock();
-    if (!node || stream.type != silk::node::stream::IAcceleration::TYPE)
+    QASSERT(so.stream);
+    auto node = so.stream->node.lock();
+    if (!node || so.type != silk::node::stream::IAcceleration::TYPE)
     {
         return false;
     }
-    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias")
-            && jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "scale");
+    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias")
+            && jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Scale");
 }
-auto HAL_Window::supports_magnetic_field_calibration(silk::node::stream::Stream const& stream) const -> bool
+auto HAL_Window::supports_magnetic_field_calibration(silk::node::Node::Stream_Output const& so) const -> bool
 {
-    auto node = stream.node.lock();
-    if (!node || stream.type != silk::node::stream::IMagnetic_Field::TYPE)
+    QASSERT(so.stream);
+    auto node = so.stream->node.lock();
+    if (!node || so.type != silk::node::stream::IMagnetic_Field::TYPE)
     {
         return false;
     }
-    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
+    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias");
 }
-auto HAL_Window::supports_angular_velocity_calibration(silk::node::stream::Stream const& stream) const -> bool
+auto HAL_Window::supports_angular_velocity_calibration(silk::node::Node::Stream_Output const& so) const -> bool
 {
-    auto node = stream.node.lock();
-    if (!node || stream.type != silk::node::stream::IAngular_Velocity::TYPE)
+    QASSERT(so.stream);
+    auto node = so.stream->node.lock();
+    if (!node || so.type != silk::node::stream::IAngular_Velocity::TYPE)
     {
         return false;
     }
-    return jsonutil::find_value(node->init_params, q::Path("Output Streams") + stream.name + "bias");
+    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias");
 }
 
 
-void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
+void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
 {
     QASSERT(block);
 
@@ -294,44 +315,47 @@ void HAL_Window::blockContextMenu(QGraphicsSceneMouseEvent* event, QNEBlock* blo
 
         for (auto const& os: node->output_streams)
         {
-            auto stream = os.stream;
-            if (supports_acceleration_calibration(*stream))
+            if (supports_acceleration_calibration(os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_acceleration_calibration(stream);
+                    do_acceleration_calibration(os.stream);
                 });
             }
-            if (supports_angular_velocity_calibration(*stream))
+            if (supports_angular_velocity_calibration(os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_angular_velocity_calibration(stream);
+                    do_angular_velocity_calibration(os.stream);
                 });
 
                 continue;
             }
-            if (supports_magnetic_field_calibration(*stream))
+            if (supports_magnetic_field_calibration(os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_magnetic_field_calibration(stream);
+                    do_magnetic_field_calibration(os.stream);
                 });
 
                 continue;
             }
         }
+
+        QAction* action = menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
+        connect(action, &QAction::triggered, [this, node](bool)
+        {
+            remove_node(node);
+        });
+
+        menu.exec(event->screenPos());
     }
-
-    menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
-
-    menu.exec(event->screenPos());
 }
 
-void HAL_Window::contextMenu(QGraphicsSceneMouseEvent* event)
+void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
 {
     QMenu menu(this);
 
@@ -594,7 +618,6 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 
 void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
 {
-
     auto& data = m_nodes[node->name];
     data = Node_Data();
 
@@ -690,6 +713,31 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
         });
     }
 }
+
+void HAL_Window::remove_node(silk::node::Node_ptr node)
+{
+    std::string nodeName = node->name;
+
+    auto answer = QMessageBox::question(this, "Question", q::util::format2<std::string>("Are you sure you want to remove node {}", node->name).c_str());
+    if (answer == QMessageBox::Yes)
+    {
+        m_hal.remove_node(node, [this, nodeName](silk::HAL::Result result)
+        {
+            if (result == silk::HAL::Result::OK)
+            {
+                auto it = m_nodes.find(nodeName);
+                if (it == m_nodes.end())
+                {
+                    return;
+                }
+                Node_Data& nd = it->second;
+                m_scene->removeItem(nd.block.get());
+                m_nodes.erase(it);
+            }
+        });
+    }
+}
+
 
 void HAL_Window::process()
 {

@@ -53,6 +53,7 @@ public:
     void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
     auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool;
+    void remove(std::shared_ptr<Base> const& node);
 private:
     std::vector<Item> m_nodes;
 };
@@ -104,6 +105,8 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
+    void generate_settings_file();
+
     auto create_bus(std::string const& type,
                     std::string const& name,
                     rapidjson::Value const& init_params) -> node::bus::IBus_ptr;
@@ -164,6 +167,12 @@ auto Registry<Base>::add(std::string const& name, std::string const& type, std::
     m_nodes.push_back({name, type, node});
     return true;
 }
+template<class Base>
+void Registry<Base>::remove(std::shared_ptr<Base> const& node)
+{
+    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [node](Item const& item) { return item.node == node; }), m_nodes.end());
+}
+
 
 template<class Base>
 template <class T, typename... Params>
