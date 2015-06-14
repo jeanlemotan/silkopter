@@ -467,7 +467,7 @@ public:
         TIMEOUT
     };
 
-    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document&& init_params);
+    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document const& init_params, rapidjson::Document const& config);
     void remove_node(node::Node_ptr node);
     void set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path);
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);

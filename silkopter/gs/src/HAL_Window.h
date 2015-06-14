@@ -52,9 +52,10 @@ private:
 
 
     void refresh_node(silk::node::Node& node);
-    void add_node(silk::node::Node_ptr node, QPointF pos);
-    void create_node(silk::node::Node_Def_ptr def, QPointF pos);
+    void add_node(silk::node::Node_ptr node);
     void remove_node(silk::node::Node_ptr node);
+    void try_add_node(silk::node::Node_Def_ptr def, QPointF pos);
+    void try_remove_node(silk::node::Node_ptr node);
 
     std::vector<q::util::Connection> m_connections;
 

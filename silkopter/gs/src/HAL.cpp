@@ -59,7 +59,8 @@ void HAL::set_multi_config(config::Multi const& config)
 
 void HAL::add_node(std::string const& def_name,
                      std::string const& name,
-                     rapidjson::Document&& init_params)
+                     rapidjson::Document const& init_params,
+                     rapidjson::Document const& config)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
@@ -67,6 +68,7 @@ void HAL::add_node(std::string const& def_name,
     channel.pack_param(def_name);
     channel.pack_param(name);
     channel.pack_param(init_params);
+    channel.pack_param(config);
     channel.end_pack();
 }
 
@@ -91,11 +93,11 @@ void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& inp
     uint32_t input_idx = static_cast<uint32_t>(std::distance(it, node->input_streams.begin()));
 
     auto& channel = m_comms.get_setup_channel();
-    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
     channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(node->name);
     channel.pack_param(input_idx);
-    channel.pack_param(stream_path);
+    channel.pack_param(stream_path.get_as<std::string>());
     channel.end_pack();
 }
 

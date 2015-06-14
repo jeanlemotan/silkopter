@@ -609,7 +609,7 @@ void Comms::handle_node_config()
     m_setup_channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
     m_setup_channel.pack_param(req_id);
     m_setup_channel.pack_param(name);
-    pack_node_data(m_setup_channel, *node);
+    m_setup_channel.pack_param(node->get_config());
     m_setup_channel.end_pack();
 }
 
@@ -687,12 +687,14 @@ void Comms::handle_add_node()
 {
     uint32_t req_id = 0;
     std::string def_name, name;
-    rapidjson::Document init_params;
+    rapidjson::Document init_paramsj;
+    rapidjson::Document configj;
     if (!m_setup_channel.begin_unpack() ||
         !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(def_name) ||
         !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(init_params))
+        !m_setup_channel.unpack_param(init_paramsj) ||
+        !m_setup_channel.unpack_param(configj))
     {
         QLOGE("Error in unpacking add node request");
         return;
@@ -701,12 +703,13 @@ void Comms::handle_add_node()
     QLOGI("Req Id: {} - add node", req_id);
     QLOGI("\tAdd node {} of type {}", name, def_name);
 
-    auto node = m_hal.create_node(def_name, name, std::move(init_params));
+    auto node = m_hal.create_node(def_name, name, std::move(init_paramsj));
     if (!node)
     {
         m_setup_channel.end_pack();
         return;
     }
+    node->set_config(configj);
     m_hal.save_settings();
 
     //reply

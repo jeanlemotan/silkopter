@@ -15,6 +15,7 @@ namespace util
 
         template<class T> auto get_value_fixed(T& val, RX_Buffer_t const& t, size_t off) -> bool
         {
+            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
             if (off + sizeof(T) > t.size())
             {
                 return false;
@@ -40,6 +41,7 @@ namespace util
         }
         template<class T> auto get_value(T& val, RX_Buffer_t const& t, size_t& off) -> bool
         {
+            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
             if (!get_value_fixed(val, t, off))
             {
                 return false;
@@ -81,6 +83,7 @@ namespace util
         }
         template<class T> void set_value_fixed(TX_Buffer_t& t, T const& val, size_t off)
         {
+            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
             QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
             auto const* src = reinterpret_cast<uint8_t const*>(&val);
             std::copy(src, src + sizeof(T), t.data() + off);
@@ -94,6 +97,7 @@ namespace util
         }
         template<class T> void set_value(TX_Buffer_t& t, T const& val, size_t& off)
         {
+            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
             if (off + sizeof(T) > t.size())
             {
                 t.resize(off + sizeof(T));

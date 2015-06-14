@@ -94,6 +94,15 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 
     m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
+    m_hal.node_added_signal.connect([this](silk::node::Node_ptr node)
+    {
+        add_node(node);
+    });
+    m_hal.node_removed_signal.connect([this](silk::node::Node_ptr node)
+    {
+        remove_node(node);
+    });
+
 
 //    refresh_nodes();
 }
@@ -108,35 +117,35 @@ void HAL_Window::on_node_factories_refreshed()
 {
 }
 
-void HAL_Window::refresh_nodes()
-{
-    auto nodes = m_hal.get_nodes().get_all();
+//void HAL_Window::refresh_nodes()
+//{
+//    auto nodes = m_hal.get_nodes().get_all();
 
-    for (auto const& n: nodes)
-    {
-        QPointF pos;
-        auto* positionj = jsonutil::find_value(n->init_params, q::Path("__gs/position"));
-        if (positionj)
-        {
-            math::vec2f position;
-            autojsoncxx::error::ErrorStack result;
-            if (!autojsoncxx::from_value(position, *positionj, result))
-            {
-                std::ostringstream ss;
-                ss << result;
-                QLOGE("Cannot deserialize position data: {}", ss.str());
-            }
-            pos.setX(position.x);
-            pos.setY(position.y);
-        }
+//    for (auto const& n: nodes)
+//    {
+//        QPointF pos;
+//        auto* positionj = jsonutil::find_value(n->init_params, q::Path("__gs/position"));
+//        if (positionj)
+//        {
+//            math::vec2f position;
+//            autojsoncxx::error::ErrorStack result;
+//            if (!autojsoncxx::from_value(position, *positionj, result))
+//            {
+//                std::ostringstream ss;
+//                ss << result;
+//                QLOGE("Cannot deserialize position data: {}", ss.str());
+//            }
+//            pos.setX(position.x);
+//            pos.setY(position.y);
+//        }
 
-        add_node(n, pos);
-    }
-    for (auto const& n: nodes)
-    {
-        refresh_node(*n);
-    }
-}
+//        add_node(n, pos);
+//    }
+//    for (auto const& n: nodes)
+//    {
+//        refresh_node(*n);
+//    }
+//}
 
 void HAL_Window::on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
 {
@@ -347,7 +356,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
         QAction* action = menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
         connect(action, &QAction::triggered, [this, node](bool)
         {
-            remove_node(node);
+            try_remove_node(node);
         });
 
         menu.exec(event->screenPos());
@@ -439,7 +448,7 @@ void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
 
         if (action)
         {
-            connect(action, &QAction::triggered, [=](bool) { create_node(n, pos); });
+            connect(action, &QAction::triggered, [=](bool) { try_add_node(n, pos); });
         }
     }
 
@@ -565,6 +574,22 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 {
     auto& data = m_nodes[node.name];
 
+//    QPointF pos;
+//    auto* positionj = jsonutil::find_value(node->config, q::Path("__gs/position"));
+//    if (positionj)
+//    {
+//        math::vec2f position;
+//        autojsoncxx::error::ErrorStack result;
+//        if (!autojsoncxx::from_value(position, *positionj, result))
+//        {
+//            std::ostringstream ss;
+//            ss << result;
+//            QLOGE("Cannot deserialize position data: {}", ss.str());
+//        }
+//        pos.setX(position.x);
+//        pos.setY(position.y);
+//    }
+
     for (auto const& i: node.input_streams)
     {
         auto& id = data.inputs[i.name];
@@ -615,8 +640,24 @@ void HAL_Window::refresh_node(silk::node::Node& node)
     }
 }
 
-void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
+void HAL_Window::add_node(silk::node::Node_ptr node)
 {
+    QPointF pos;
+    auto* positionj = jsonutil::find_value(node->config, q::Path("__gs/position"));
+    if (positionj)
+    {
+        math::vec2f position;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(position, *positionj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize position data: {}", ss.str());
+        }
+        pos.setX(position.x);
+        pos.setY(position.y);
+    }
+
     auto& data = m_nodes[node->name];
     data = Node_Data();
 
@@ -669,11 +710,14 @@ void HAL_Window::add_node(silk::node::Node_ptr node, QPointF pos)
     {
         refresh_node(*node_ptr);
     }) );
+
+    refresh_node(*node);
 }
 
-void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
+void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
 {
-    auto init_params = jsonutil::clone_value(def->default_init_params);
+    auto init_paramsj = jsonutil::clone_value(def->default_init_params);
+    auto configj = jsonutil::clone_value(def->default_config);
 
     QDialog dialog;
     dialog.setLayout(new QVBoxLayout(&dialog));
@@ -685,7 +729,7 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
     dialog.layout()->addWidget(widget);
 
     JSON_Model* model = new JSON_Model(ui.init_params);
-    model->set_document("Init Params", &init_params);
+    model->set_document("Init Params", &init_paramsj);
     ui.init_params->setModel(model);
     ui.init_params->expandAll();
     ui.init_params->header()->resizeSections(QHeaderView::ResizeToContents);
@@ -696,46 +740,37 @@ void HAL_Window::create_node(silk::node::Node_Def_ptr def, QPointF pos)
 
     if (dialog.exec() == QDialog::Accepted)
     {
-        auto* positionj = jsonutil::get_or_add_value(init_params, q::Path("__gs/position"), rapidjson::kObjectType, init_params.GetAllocator());
+        auto* positionj = jsonutil::get_or_add_value(configj, q::Path("__gs/position"), rapidjson::kObjectType, configj.GetAllocator());
         if (positionj)
         {
             rapidjson::Document doc;
             autojsoncxx::to_document(math::vec2f(pos.x(), pos.y()), doc);
-            jsonutil::clone_value(*positionj, doc, init_params.GetAllocator());
+            jsonutil::clone_value(*positionj, doc, configj.GetAllocator());
         }
 
-//        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_params), [this, pos](silk::HAL::Result result, silk::node::Node_ptr node)
-//        {
-//            if (result == silk::HAL::Result::OK)
-//            {
-//                add_node(node, pos);
-//                refresh_node(*node);
-//            }
-//        });
+        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_paramsj), std::move(configj));
     }
 }
 
 void HAL_Window::remove_node(silk::node::Node_ptr node)
+{
+    auto it = m_nodes.find(node->name);
+    if (it != m_nodes.end())
+    {
+        Node_Data& nd = it->second;
+        m_scene->removeItem(nd.block.get());
+        m_nodes.erase(it);
+    }
+}
+
+void HAL_Window::try_remove_node(silk::node::Node_ptr node)
 {
     std::string nodeName = node->name;
 
     auto answer = QMessageBox::question(this, "Question", q::util::format2<std::string>("Are you sure you want to remove node {}", node->name).c_str());
     if (answer == QMessageBox::Yes)
     {
-//        m_hal.remove_node(node, [this, nodeName](silk::HAL::Result result)
-//        {
-//            if (result == silk::HAL::Result::OK)
-//            {
-//                auto it = m_nodes.find(nodeName);
-//                if (it == m_nodes.end())
-//                {
-//                    return;
-//                }
-//                Node_Data& nd = it->second;
-//                m_scene->removeItem(nd.block.get());
-//                m_nodes.erase(it);
-//            }
-//        });
+        m_hal.remove_node(node);
     }
 }
 

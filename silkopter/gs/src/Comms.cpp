@@ -192,15 +192,17 @@ auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
         return false;
     }
     io.resize(size);
+    std::string stream_path;
     for (auto& i: io)
     {
         if (!channel.unpack_param(i.name) ||
                 !channel.unpack_param(i.type) ||
                 !channel.unpack_param(i.rate) ||
-                !channel.unpack_param(i.stream_path))
+                !channel.unpack_param(stream_path))
         {
             return false;
         }
+        i.stream_path = q::Path(stream_path);
     }
     return true;
 }
