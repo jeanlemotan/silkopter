@@ -53,7 +53,7 @@ public:
     {
         Source(Comms& comms) : m_comms(comms) {}
         auto init(rapidjson::Value const& init_params) -> bool;
-        auto get_init_params() const -> rapidjson::Document const&;
+        auto get_init_params() const -> rapidjson::Document;
         auto set_config(rapidjson::Value const& json) -> bool;
         auto get_config() const -> rapidjson::Document;
         auto send_message(rapidjson::Value const& json) -> rapidjson::Document { return rapidjson::Document(); }
@@ -84,7 +84,6 @@ private:
     };
     mutable std::shared_ptr<Commands> m_commands_stream;
 
-    rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::Comms::Source::Init_Params> m_init_params;
     std::shared_ptr<sz::Comms::Source::Config> m_config;
     std::shared_ptr<Source> m_source;

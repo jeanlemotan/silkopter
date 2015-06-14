@@ -14,7 +14,6 @@ Motor_Mixer::Motor_Mixer(HAL& hal)
     , m_init_params(new sz::Motor_Mixer::Init_Params())
     , m_config(new sz::Motor_Mixer::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Motor_Mixer::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Motor_Mixer::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Motor_Mixer data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -464,9 +462,11 @@ auto Motor_Mixer::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Motor_Mixer::get_init_params() const -> rapidjson::Document const&
+auto Motor_Mixer::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

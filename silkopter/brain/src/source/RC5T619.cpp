@@ -128,7 +128,6 @@ RC5T619::RC5T619(HAL& hal)
     , m_init_params(new sz::RC5T619::Init_Params())
     , m_config(new sz::RC5T619::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto RC5T619::get_stream_outputs() const -> std::vector<Stream_Output>
@@ -155,7 +154,6 @@ auto RC5T619::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize RC5T619 data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -334,9 +332,11 @@ auto RC5T619::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto RC5T619::get_init_params() const -> rapidjson::Document const&
+auto RC5T619::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto RC5T619::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

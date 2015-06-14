@@ -34,6 +34,9 @@
 
 #include "ui_New_Node.h"
 
+static const q::Path k_settings_path("settings.json");
+
+
 static std::map<silk::node::Type, QColor> s_node_colors =
 {{
     { silk::node::ISource::TYPE, QColor(0x86E2D5) },
@@ -59,6 +62,8 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
 
     setWindowTitle("HAL Editor");
     setMouseTracking(true);
+
+    load_editor_data();
 
 
     m_view = new QGraphicsView(this);
@@ -254,9 +259,9 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
 
     QMenu menu(this);
 
-    QAction* action = menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
-    menu.addSeparator();
-    action = menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
+//    QAction* action = menu.addAction(QIcon(":/icons/view.png"), "Open Viewer");
+//    menu.addSeparator();
+    QAction* action = menu.addAction(QIcon(":/icons/remove.png"), "Disconnect");
 
     connect(action, &QAction::triggered, [=](bool)
     {
@@ -266,39 +271,6 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
 
     menu.exec(event->screenPos());
 }
-
-auto HAL_Window::supports_acceleration_calibration(silk::node::Node::Stream_Output const& so) const -> bool
-{
-    QASSERT(so.stream);
-    auto node = so.stream->node.lock();
-    if (!node || so.type != silk::node::stream::IAcceleration::TYPE)
-    {
-        return false;
-    }
-    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias")
-            && jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Scale");
-}
-auto HAL_Window::supports_magnetic_field_calibration(silk::node::Node::Stream_Output const& so) const -> bool
-{
-    QASSERT(so.stream);
-    auto node = so.stream->node.lock();
-    if (!node || so.type != silk::node::stream::IMagnetic_Field::TYPE)
-    {
-        return false;
-    }
-    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias");
-}
-auto HAL_Window::supports_angular_velocity_calibration(silk::node::Node::Stream_Output const& so) const -> bool
-{
-    QASSERT(so.stream);
-    auto node = so.stream->node.lock();
-    if (!node || so.type != silk::node::stream::IAngular_Velocity::TYPE)
-    {
-        return false;
-    }
-    return jsonutil::find_value(node->config, q::Path("Output Streams") + so.name + "Bias");
-}
-
 
 void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
 {
@@ -323,7 +295,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
 
         for (auto const& os: node->output_streams)
         {
-            if (supports_acceleration_calibration(os))
+            if (os.type == silk::node::stream::IAcceleration::TYPE)
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
@@ -331,7 +303,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                     do_acceleration_calibration(os.stream);
                 });
             }
-            if (supports_angular_velocity_calibration(os))
+            if (os.type == silk::node::stream::IAngular_Velocity::TYPE)
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
@@ -341,7 +313,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
 
                 continue;
             }
-            if (supports_magnetic_field_calibration(os))
+            if (os.type == silk::node::stream::IMagnetic_Field::TYPE)
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
@@ -642,7 +614,8 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 
 void HAL_Window::add_node(silk::node::Node_ptr node)
 {
-    QPointF pos;
+    QPointF pos = get_node_position(node->name);
+
     auto* positionj = jsonutil::find_value(node->config, q::Path("__gs/position"));
     if (positionj)
     {
@@ -667,6 +640,10 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
     b->setId(node->name.c_str());
     b->setPos(pos);
     b->setBrush(QBrush(s_node_colors[node->type]));
+    b->positionChangedSignal.connect([this, node](const QPointF& pos)
+        {
+            set_node_position(node->name, pos);
+        });
 
     data.node = node;
     data.block.reset(b);
@@ -740,15 +717,9 @@ void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
 
     if (dialog.exec() == QDialog::Accepted)
     {
-        auto* positionj = jsonutil::get_or_add_value(configj, q::Path("__gs/position"), rapidjson::kObjectType, configj.GetAllocator());
-        if (positionj)
-        {
-            rapidjson::Document doc;
-            autojsoncxx::to_document(math::vec2f(pos.x(), pos.y()), doc);
-            jsonutil::clone_value(*positionj, doc, configj.GetAllocator());
-        }
-
-        m_hal.add_node(def->name, ui.name->text().toLatin1().data(), std::move(init_paramsj), std::move(configj));
+        std::string node_name = ui.name->text().toLatin1().data();
+        set_node_position(node_name, pos);
+        m_hal.add_node(def->name, node_name, std::move(init_paramsj), std::move(configj));
     }
 }
 
@@ -774,6 +745,67 @@ void HAL_Window::try_remove_node(silk::node::Node_ptr node)
     }
 }
 
+void HAL_Window::set_node_position(std::string const& node_name, QPointF const& pos)
+{
+    q::Path path("nodes/" + node_name + "/hal_editor/position");
+    auto* positionj = jsonutil::get_or_add_value(m_editor_data, path, rapidjson::kObjectType, m_editor_data.GetAllocator());
+    if (positionj)
+    {
+        rapidjson::Document doc;
+        autojsoncxx::to_document(math::vec2f(pos.x(), pos.y()), doc);
+        jsonutil::clone_value(*positionj, doc, m_editor_data.GetAllocator());
+    }
+    save_editor_data();
+}
+auto HAL_Window::get_node_position(std::string const& node_name) -> QPointF
+{
+    math::vec2f sz;
+    q::Path path("nodes/" + node_name + "/hal_editor/position");
+    auto* positionj = jsonutil::get_or_add_value(m_editor_data, path, rapidjson::kObjectType, m_editor_data.GetAllocator());
+    if (positionj)
+    {
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(sz, *positionj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Cannot deserialize node {} position: {}", node_name, ss.str());
+        }
+    }
+    return QPointF(sz.x, sz.y);
+}
+
+void HAL_Window::save_editor_data()
+{
+    rapidjson::StringBuffer s;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+    m_editor_data.Accept(writer);
+    q::data::File_Sink fs(k_settings_path);
+    if (fs.is_open())
+    {
+        fs.write(reinterpret_cast<uint8_t const*>(s.GetString()), s.GetSize());
+    }
+    else
+    {
+        QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+    }
+}
+void HAL_Window::load_editor_data()
+{
+    m_editor_data.SetObject();
+
+    q::data::File_Source fs(k_settings_path);
+    if (!fs.is_open())
+    {
+        return;
+    }
+
+    auto data = q::data::read_whole_source_as_string<std::string>(fs);
+    if (m_editor_data.Parse(data.c_str()).HasParseError())
+    {
+        QLOGE("Failed to load '{}': {}:{}", k_settings_path, m_editor_data.GetParseError(), m_editor_data.GetErrorOffset());
+    }
+}
 
 void HAL_Window::process()
 {

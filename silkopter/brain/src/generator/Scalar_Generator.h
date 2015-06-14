@@ -21,7 +21,7 @@ public:
     Scalar_Generator(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document const&;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -39,7 +39,6 @@ private:
 
     HAL& m_hal;
 
-    rapidjson::Document m_init_paramsj;
     sz::Scalar_Generator::Init_Params m_init_params;
     sz::Scalar_Generator::Config m_config;
 
@@ -55,7 +54,6 @@ template<class Stream_t>
 Scalar_Generator<Stream_t>::Scalar_Generator(HAL& hal)
     : m_hal(hal)
 {
-    autojsoncxx::to_document(m_init_params, m_init_paramsj);
 }
 
 template<class Stream_t>
@@ -72,7 +70,6 @@ auto Scalar_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bo
         QLOGE("Cannot deserialize Scalar_Generator data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     m_init_params = sz;
     return init();
 }
@@ -92,9 +89,11 @@ auto Scalar_Generator<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_init_params() const -> rapidjson::Document const&
+auto Scalar_Generator<Stream_t>::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(m_init_params, json);
+    return std::move(json);
 }
 
 template<class Stream_t>

@@ -14,7 +14,6 @@ Stability_Controller::Stability_Controller(HAL& hal)
     , m_init_params(new sz::Stability_Controller::Init_Params())
     , m_config(new sz::Stability_Controller::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Stability_Controller::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Stability_Controller::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Stability_Controller data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -195,9 +193,11 @@ auto Stability_Controller::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Stability_Controller::get_init_params() const -> rapidjson::Document const&
+auto Stability_Controller::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Stability_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

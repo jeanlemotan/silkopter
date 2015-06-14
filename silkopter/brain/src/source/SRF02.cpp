@@ -42,8 +42,6 @@ SRF02::SRF02(HAL& hal)
     , m_config(new sz::SRF02::Config())
 {
     m_config->direction = math::vec3f(0, 0, -1); //pointing down
-
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto SRF02::get_stream_outputs() const -> std::vector<Stream_Output>
@@ -67,7 +65,6 @@ auto SRF02::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize SRF02 data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -217,9 +214,11 @@ auto SRF02::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto SRF02::get_init_params() const -> rapidjson::Document const&
+auto SRF02::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto SRF02::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

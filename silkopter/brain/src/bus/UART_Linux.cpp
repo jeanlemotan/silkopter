@@ -16,7 +16,6 @@ UART_Linux::UART_Linux()
     : m_init_params(new sz::UART_Linux::Init_Params())
     , m_config(new sz::UART_Linux::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 UART_Linux::~UART_Linux()
@@ -37,7 +36,6 @@ auto UART_Linux::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize UART_Linux data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -166,9 +164,11 @@ auto UART_Linux::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto UART_Linux::get_init_params() const -> rapidjson::Document const&
+auto UART_Linux::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 

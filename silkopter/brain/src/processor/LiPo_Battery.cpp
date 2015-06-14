@@ -25,7 +25,6 @@ LiPo_Battery::LiPo_Battery(HAL& hal)
     , m_init_params(new sz::LiPo_Battery::Init_Params())
     , m_config(new sz::LiPo_Battery::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
@@ -41,7 +40,6 @@ auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize LiPo_Battery data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -190,9 +188,11 @@ auto LiPo_Battery::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto LiPo_Battery::get_init_params() const -> rapidjson::Document const&
+auto LiPo_Battery::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto LiPo_Battery::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

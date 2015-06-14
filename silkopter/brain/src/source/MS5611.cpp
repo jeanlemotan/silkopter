@@ -40,7 +40,6 @@ MS5611::MS5611(HAL& hal)
     , m_init_params(new sz::MS5611::Init_Params())
     , m_config(new sz::MS5611::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto MS5611::lock(Buses& buses) -> bool
@@ -132,7 +131,6 @@ auto MS5611::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize MS5611 data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -347,9 +345,11 @@ auto MS5611::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto MS5611::get_init_params() const -> rapidjson::Document const&
+auto MS5611::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto MS5611::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

@@ -214,7 +214,6 @@ UBLOX::UBLOX(HAL& hal)
     , m_init_params(new sz::UBLOX::Init_Params())
     , m_config(new sz::UBLOX::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 UBLOX::~UBLOX()
@@ -283,7 +282,6 @@ auto UBLOX::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize UBLOX data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -987,9 +985,11 @@ auto UBLOX::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto UBLOX::get_init_params() const -> rapidjson::Document const&
+auto UBLOX::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto UBLOX::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

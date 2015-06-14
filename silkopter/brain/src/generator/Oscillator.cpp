@@ -15,7 +15,6 @@ Oscillator::Oscillator(HAL& hal)
     , m_config(new sz::Oscillator::Config())
     , m_rnd_distribution(0, 0)
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Oscillator::init(rapidjson::Value const& init_params) -> bool
@@ -31,7 +30,6 @@ auto Oscillator::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Oscillator data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -137,9 +135,11 @@ auto Oscillator::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Oscillator::get_init_params() const -> rapidjson::Document const&
+auto Oscillator::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Oscillator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

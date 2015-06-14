@@ -52,6 +52,8 @@ public:
 
 	int type() const { return Type; }
 
+    q::util::Signal<void(const QPointF&)> positionChangedSignal;
+
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 

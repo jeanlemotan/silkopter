@@ -1,6 +1,21 @@
 {
     "hal": {
         "buses": {},
-        "nodes": {}
+        "nodes": {
+            "Current RS": {
+                "type": "Current RS",
+                "init_params": {
+                    "Input Rate (Hz)": 100,
+                    "Rate (Hz)": 200
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "stream_input_paths": [
+                    "ADC Ammeter/Current"
+                ]
+            }
+        }
     }
 }

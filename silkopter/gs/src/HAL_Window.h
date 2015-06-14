@@ -32,10 +32,6 @@ private:
 private:
     void refresh_nodes();
 
-    auto supports_acceleration_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
-    auto supports_magnetic_field_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
-    auto supports_angular_velocity_calibration(silk::node::Node::Stream_Output const& so) const -> bool;
-
     void context_menu(QGraphicsSceneMouseEvent* event);
     void port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port);
     void block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
@@ -64,6 +60,8 @@ private:
     QNodesEditor* m_nodes_editor;
     QGraphicsView* m_view;
     QGraphicsScene* m_scene;
+
+    rapidjson::Document m_editor_data;
 
     struct Selection
     {
@@ -105,5 +103,11 @@ private:
     Sim_Window* m_sim_window = nullptr;
 
     auto compute_unique_name(std::string const& name) const -> std::string;
+
+    void set_node_position(std::string const& node_name, QPointF const& pos);
+    auto get_node_position(std::string const& node_name) -> QPointF;
+
+    void save_editor_data();
+    void load_editor_data();
 };
 

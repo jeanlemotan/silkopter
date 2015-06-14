@@ -19,7 +19,7 @@ public:
     ~EHealth();
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document const&;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -41,8 +41,6 @@ private:
     {
         bus::IUART_ptr uart;
     };
-
-    rapidjson::Document m_init_paramsj;
 
     std::array<char, 1024> m_temp_buffer;
     std::string m_buffer;

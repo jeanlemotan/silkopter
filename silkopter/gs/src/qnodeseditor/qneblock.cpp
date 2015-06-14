@@ -41,6 +41,7 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	setBrush(Qt::green);
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
     m_horzMargin = 20;
     m_vertMargin = 5;
     m_width = m_horzMargin;
@@ -199,8 +200,10 @@ QVector<QNEPort*> QNEBlock::ports()
 
 QVariant QNEBlock::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-
-    Q_UNUSED(change);
+    if (change == QGraphicsItem::ItemPositionHasChanged)
+    {
+        positionChangedSignal.execute(scenePos());
+    }
 
 	return value;
 }

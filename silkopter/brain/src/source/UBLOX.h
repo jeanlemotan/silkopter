@@ -34,7 +34,7 @@ public:
     ~UBLOX();
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document const&;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -67,7 +67,6 @@ private:
     auto read(Buses& buses, uint8_t* data, size_t max_size) -> size_t;
     auto write(Buses& buses, uint8_t const* data, size_t size) -> bool;
 
-    rapidjson::Document m_init_paramsj;
     std::shared_ptr<sz::UBLOX::Init_Params> m_init_params;
     std::shared_ptr<sz::UBLOX::Config> m_config;
 

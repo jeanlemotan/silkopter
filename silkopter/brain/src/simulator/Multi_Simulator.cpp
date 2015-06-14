@@ -16,7 +16,6 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     , m_init_params(new sz::Multi_Simulator::Init_Params())
     , m_config(new sz::Multi_Simulator::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
@@ -32,7 +31,6 @@ auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Multi_Simulator data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -313,9 +311,11 @@ auto Multi_Simulator::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Multi_Simulator::get_init_params() const -> rapidjson::Document const&
+auto Multi_Simulator::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto Multi_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {

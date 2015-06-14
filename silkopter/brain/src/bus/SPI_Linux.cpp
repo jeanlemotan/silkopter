@@ -17,7 +17,6 @@ SPI_Linux::SPI_Linux()
     : m_init_params(new sz::SPI_Linux::Init_Params())
     , m_config(new sz::SPI_Linux::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 SPI_Linux::~SPI_Linux()
@@ -38,7 +37,6 @@ auto SPI_Linux::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize SPI_Linux data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -185,9 +183,11 @@ auto SPI_Linux::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto SPI_Linux::get_init_params() const -> rapidjson::Document const&
+auto SPI_Linux::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 

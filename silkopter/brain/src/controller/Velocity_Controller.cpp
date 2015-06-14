@@ -14,7 +14,6 @@ Velocity_Controller::Velocity_Controller(HAL& hal)
     , m_init_params(new sz::Velocity_Controller::Init_Params())
     , m_config(new sz::Velocity_Controller::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Velocity_Controller::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Velocity_Controller::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Velocity_Controller data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -123,9 +121,11 @@ auto Velocity_Controller::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Velocity_Controller::get_init_params() const -> rapidjson::Document const&
+auto Velocity_Controller::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto Velocity_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

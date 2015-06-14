@@ -114,7 +114,6 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
 
     m_config.reset(new sz::Comms::Source::Config);
     m_init_params.reset(new sz::Comms::Source::Init_Params);
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
@@ -951,14 +950,15 @@ auto Comms::Source::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Comms::Source data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_comms.m_init_paramsj, init_params, m_comms.m_init_paramsj.GetAllocator());
     *m_comms.m_init_params = sz;
     m_comms.m_commands_stream->rate = 50;
     return true;
 }
-auto Comms::Source::get_init_params() const -> rapidjson::Document const&
+auto Comms::Source::get_init_params() const -> rapidjson::Document
 {
-    return m_comms.m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_comms.m_init_params, json);
+    return std::move(json);
 }
 auto Comms::Source::set_config(rapidjson::Value const& json) -> bool
 {

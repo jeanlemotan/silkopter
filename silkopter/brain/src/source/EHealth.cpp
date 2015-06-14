@@ -126,9 +126,11 @@ auto EHealth::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto EHealth::get_init_params() const -> rapidjson::Document const&
+auto EHealth::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    //autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto EHealth::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

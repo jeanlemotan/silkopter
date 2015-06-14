@@ -14,7 +14,6 @@ Multi_Pilot::Multi_Pilot(HAL& hal)
     , m_init_params(new sz::Multi_Pilot::Init_Params())
     , m_config(new sz::Multi_Pilot::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Multi_Pilot data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -100,9 +98,11 @@ auto Multi_Pilot::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Multi_Pilot::get_init_params() const -> rapidjson::Document const&
+auto Multi_Pilot::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Multi_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

@@ -44,8 +44,6 @@ PCA9685::PCA9685(HAL& hal)
     , m_init_params(new sz::PCA9685::Init_Params())
     , m_config(new sz::PCA9685::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
-
     m_pwm_channels.resize(16);
 }
 
@@ -87,7 +85,6 @@ auto PCA9685::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize PCA9685 data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -348,9 +345,11 @@ auto PCA9685::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto PCA9685::get_init_params() const -> rapidjson::Document const&
+auto PCA9685::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 auto PCA9685::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

@@ -14,7 +14,6 @@ Comp_ECEF_Position::Comp_ECEF_Position(HAL& hal)
     , m_init_params(new sz::Comp_ECEF_Position::Init_Params())
     , m_config(new sz::Comp_ECEF_Position::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Comp_Position data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -120,9 +118,11 @@ auto Comp_ECEF_Position::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Comp_ECEF_Position::get_init_params() const -> rapidjson::Document const&
+auto Comp_ECEF_Position::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Comp_ECEF_Position::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

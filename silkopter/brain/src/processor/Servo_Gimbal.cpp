@@ -14,7 +14,6 @@ Servo_Gimbal::Servo_Gimbal(HAL& hal)
     , m_init_params(new sz::Servo_Gimbal::Init_Params())
     , m_config(new sz::Servo_Gimbal::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Servo_Gimbal data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -157,9 +155,11 @@ auto Servo_Gimbal::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Servo_Gimbal::get_init_params() const -> rapidjson::Document const&
+auto Servo_Gimbal::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Servo_Gimbal::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

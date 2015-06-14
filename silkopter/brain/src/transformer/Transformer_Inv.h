@@ -22,7 +22,7 @@ public:
     Transformer_Inv(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document const&;
+    auto get_init_params() const -> rapidjson::Document;
 
     auto set_config(rapidjson::Value const& json) -> bool;
     auto get_config() const -> rapidjson::Document;
@@ -40,7 +40,6 @@ private:
 
     HAL& m_hal;
 
-    rapidjson::Document m_init_paramsj;
     sz::Transformer::Init_Params m_init_params;
     sz::Transformer::Config m_config;
 
@@ -58,8 +57,6 @@ Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(HAL&
     static_assert(In_Stream_t::TYPE == Out_Stream_t::TYPE, "Both streams need to be of the same type");
     static_assert(In_Stream_t::SPACE == Frame_Stream_t::SPACE, "Bad Input stream or Frame");
     static_assert(Out_Stream_t::SPACE == Frame_Stream_t::PARENT_SPACE, "Bad Output stream or Frame");
-
-    autojsoncxx::to_document(m_init_params, m_init_paramsj);
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
@@ -76,7 +73,6 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(rapidjson:
         QLOGE("Cannot deserialize Transformer_Inv data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     m_init_params = sz;
     return init();
 }
@@ -96,9 +92,11 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params() const -> rapidjson::Document const&
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(m_init_params, json);
+    return std::move(json);
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>

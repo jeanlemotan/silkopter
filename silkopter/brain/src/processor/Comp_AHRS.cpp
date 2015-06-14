@@ -14,7 +14,6 @@ Comp_AHRS::Comp_AHRS(HAL& hal)
     , m_init_params(new sz::Comp_AHRS::Init_Params())
     , m_config(new sz::Comp_AHRS::Config())
 {
-    autojsoncxx::to_document(*m_init_params, m_init_paramsj);
 }
 
 auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
@@ -30,7 +29,6 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
         QLOGE("Cannot deserialize Comp_AHRS data: {}", ss.str());
         return false;
     }
-    jsonutil::clone_value(m_init_paramsj, init_params, m_init_paramsj.GetAllocator());
     *m_init_params = sz;
     return init();
 }
@@ -174,9 +172,11 @@ auto Comp_AHRS::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Comp_AHRS::get_init_params() const -> rapidjson::Document const&
+auto Comp_AHRS::get_init_params() const -> rapidjson::Document
 {
-    return m_init_paramsj;
+    rapidjson::Document json;
+    autojsoncxx::to_document(*m_init_params, json);
+    return std::move(json);
 }
 
 auto Comp_AHRS::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

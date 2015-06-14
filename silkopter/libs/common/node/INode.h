@@ -31,7 +31,7 @@ public:
     virtual auto get_type() const -> Type = 0;
 
     virtual auto init(rapidjson::Value const& init_params) -> bool = 0;
-    virtual auto get_init_params() const -> rapidjson::Document const& = 0;
+    virtual auto get_init_params() const -> rapidjson::Document = 0;
 
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() const -> rapidjson::Document = 0;
