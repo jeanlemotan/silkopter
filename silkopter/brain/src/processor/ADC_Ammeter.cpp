@@ -45,17 +45,17 @@ auto ADC_Ammeter::init() -> bool
     return true;
 }
 
-auto ADC_Ammeter::get_stream_inputs() const -> std::vector<Stream_Input>
+auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IADC::TYPE, m_init_params->rate, "ADC", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
-auto ADC_Ammeter::get_stream_outputs() const -> std::vector<Stream_Output>
+auto ADC_Ammeter::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = stream::ICurrent::TYPE;
     outputs[0].name = "Current";
     outputs[0].stream = m_output_stream;
@@ -72,13 +72,12 @@ void ADC_Ammeter::process()
                           size_t idx,
                           stream::IADC::Sample const& i_sample)
     {
-        m_output_stream->push_sample(i_sample.value * m_config->scale + m_config->bias, i_sample.is_healthy);
+        m_output_stream->push_sample(i_sample.value, i_sample.is_healthy);
     });
 }
 
-void ADC_Ammeter::set_stream_input_path(size_t idx, q::Path const& path)
+void ADC_Ammeter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 

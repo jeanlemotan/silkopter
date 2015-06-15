@@ -54,18 +54,18 @@ auto Servo_Gimbal::init() -> bool
     return true;
 }
 
-auto Servo_Gimbal::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IFrame::TYPE, m_init_params->rate, "Frame", m_accumulator.get_stream_path(0) },
         //{ stream::IFrame::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
-auto Servo_Gimbal::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Servo_Gimbal::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
          { stream::IPWM::TYPE, "X PWM", m_x_output_stream },
          { stream::IPWM::TYPE, "Y PWM", m_y_output_stream },
@@ -124,9 +124,8 @@ void Servo_Gimbal::process()
 
 }
 
-void Servo_Gimbal::set_stream_input_path(size_t idx, q::Path const& path)
+void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 

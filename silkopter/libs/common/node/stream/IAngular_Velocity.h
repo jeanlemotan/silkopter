@@ -15,6 +15,9 @@ public:
     typedef math::vec3f       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef stream::Calibration_Data<math::vec3f> Calibration_Data;
+    Calibration_Data calibration_data;
 };
 DECLARE_CLASS_PTR(IAngular_Velocity);
 
@@ -24,6 +27,8 @@ public:
     typedef math::vec3f       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IENU_Angular_Velocity);
 
@@ -33,6 +38,8 @@ public:
     typedef math::vec3f       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Angular_Velocity);
 

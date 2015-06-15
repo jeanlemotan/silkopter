@@ -16,6 +16,8 @@ public:
     typedef math::vec3d Value; //meters
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Position);
 
@@ -31,6 +33,8 @@ public:
 
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(ILLA_Position);
 

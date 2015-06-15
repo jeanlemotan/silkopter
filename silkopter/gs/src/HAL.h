@@ -377,20 +377,20 @@ struct Node_Def
     rapidjson::Document default_init_params;
     rapidjson::Document default_config;
 
-    struct Stream_Input
+    struct Input
     {
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Stream_Input> input_streams;
-    struct Stream_Output
+    std::vector<Input> inputs;
+    struct Output
     {
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Stream_Output> output_streams;
+    std::vector<Output> outputs;
 };
 DECLARE_CLASS_PTR(Node_Def);
 
@@ -402,7 +402,7 @@ struct Node
     rapidjson::Document init_params;
     rapidjson::Document config;
 
-    struct Stream_Input
+    struct Input
     {
         q::Path stream_path;
         stream::Stream_wptr stream;
@@ -410,15 +410,15 @@ struct Node
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Stream_Input> input_streams;
-    struct Stream_Output
+    std::vector<Input> inputs;
+    struct Output
     {
         stream::Stream_ptr stream;
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
     };
-    std::vector<Stream_Output> output_streams;
+    std::vector<Output> outputs;
 
     q::util::Signal<void()> changed_signal;
     q::util::Signal<void(rapidjson::Document const& json)> message_received_signal;

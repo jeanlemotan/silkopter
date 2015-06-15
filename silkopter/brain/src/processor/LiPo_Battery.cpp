@@ -60,18 +60,18 @@ auto LiPo_Battery::init() -> bool
     return true;
 }
 
-auto LiPo_Battery::get_stream_inputs() const -> std::vector<Stream_Input>
+auto LiPo_Battery::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IVoltage::TYPE, m_init_params->rate, "Voltage", m_accumulator.get_stream_path(0) },
         { stream::ICurrent::TYPE, m_init_params->rate, "Current", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
-auto LiPo_Battery::get_stream_outputs() const -> std::vector<Stream_Output>
+auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
          { stream::IBattery_State::TYPE, "Battery State", m_output_stream }
     }};
@@ -157,9 +157,8 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
     return boost::none;
 }
 
-void LiPo_Battery::set_stream_input_path(size_t idx, q::Path const& path)
+void LiPo_Battery::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 

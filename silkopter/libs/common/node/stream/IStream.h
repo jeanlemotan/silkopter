@@ -90,6 +90,12 @@ template<class T> struct Sample
     bool is_healthy = true;
 };
 
+template<class T> struct Calibration_Data
+{
+    T bias = T(0);
+    T scale = T(1);
+};
+
 }
 }
 }

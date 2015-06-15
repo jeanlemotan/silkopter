@@ -258,9 +258,9 @@ void UBLOX::unlock(Buses& buses)
     }
 }
 
-auto UBLOX::get_stream_outputs() const -> std::vector<Stream_Output>
+auto UBLOX::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
          { stream::IECEF_Position::TYPE, "Position", m_position_stream },
          { stream::IECEF_Velocity::TYPE, "Velocity", m_velocity_stream },

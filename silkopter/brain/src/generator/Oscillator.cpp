@@ -54,14 +54,14 @@ auto Oscillator::init() -> bool
     return true;
 }
 
-auto Oscillator::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Oscillator::get_inputs() const -> std::vector<Input>
 {
-    return std::vector<Stream_Input>(0);
+    return std::vector<Input>(0);
 }
 
-auto Oscillator::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Oscillator::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
          { stream::IFloat::TYPE, "Output", m_output_stream }
     }};
@@ -103,9 +103,8 @@ void Oscillator::process()
     }
 }
 
-void Oscillator::set_stream_input_path(size_t idx, q::Path const& path)
+void Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
 }
 
 auto Oscillator::set_config(rapidjson::Value const& json) -> bool

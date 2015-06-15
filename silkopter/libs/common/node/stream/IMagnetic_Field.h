@@ -15,6 +15,9 @@ public:
     typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef stream::Calibration_Data<math::vec3f> Calibration_Data;
+    Calibration_Data calibration_data;
 };
 DECLARE_CLASS_PTR(IMagnetic_Field);
 
@@ -24,6 +27,8 @@ public:
     typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IENU_Magnetic_Field);
 
@@ -33,6 +38,8 @@ public:
     typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Magnetic_Field);
 

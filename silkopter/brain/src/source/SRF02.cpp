@@ -44,9 +44,9 @@ SRF02::SRF02(HAL& hal)
     m_config->direction = math::vec3f(0, 0, -1); //pointing down
 }
 
-auto SRF02::get_stream_outputs() const -> std::vector<Stream_Output>
+auto SRF02::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = stream::IDistance::TYPE;
     outputs[0].name = "Distance";
     outputs[0].stream = m_output_stream;

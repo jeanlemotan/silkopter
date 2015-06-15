@@ -29,9 +29,9 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    void set_stream_input_path(size_t idx, q::Path const& path);
-    auto get_stream_inputs() const -> std::vector<Stream_Input>;
-    auto get_stream_outputs() const -> std::vector<Stream_Output>;
+    void set_input_stream_path(size_t idx, q::Path const& path);
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -100,9 +100,8 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
@@ -138,9 +137,9 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() co
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { In_Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) },
         { Out_Stream_t::TYPE, m_init_params.rate, "Frame", m_accumulator.get_stream_path(1) }
@@ -148,9 +147,9 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_inpu
     return inputs;
 }
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = Out_Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

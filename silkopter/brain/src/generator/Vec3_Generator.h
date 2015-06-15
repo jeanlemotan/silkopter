@@ -26,9 +26,9 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    void set_stream_input_path(size_t idx, q::Path const& path);
-    auto get_stream_inputs() const -> std::vector<Stream_Input>;
-    auto get_stream_outputs() const -> std::vector<Stream_Output>;
+    void set_input_stream_path(size_t idx, q::Path const& path);
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -96,9 +96,8 @@ auto Vec3_Generator<Stream_t>::get_init_params() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-void Vec3_Generator<Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     if (idx >= 3)
     {
         return;
@@ -152,9 +151,9 @@ auto Vec3_Generator<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IFloat::TYPE, m_init_params.rate, "X Modulation", m_modulation_stream_paths[0] },
         { stream::IFloat::TYPE, m_init_params.rate, "Y Modulation", m_modulation_stream_paths[0] },
@@ -163,9 +162,9 @@ auto Vec3_Generator<Stream_t>::get_stream_inputs() const -> std::vector<Stream_I
     return inputs;
 }
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Vec3_Generator<Stream_t>::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

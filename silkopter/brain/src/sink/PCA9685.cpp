@@ -47,9 +47,9 @@ PCA9685::PCA9685(HAL& hal)
     m_pwm_channels.resize(16);
 }
 
-auto PCA9685::get_stream_inputs() const -> std::vector<Stream_Input>
+auto PCA9685::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IPWM::TYPE, m_init_params->rate, "Channel 1", m_pwm_channels[0].stream_path },
         { stream::IPWM::TYPE, m_init_params->rate, "Channel 2", m_pwm_channels[1].stream_path },
@@ -274,10 +274,8 @@ if (idx == CH - 1)\
     m_pwm_channels[CH - 1].config = &m_config->channel_##CH;\
 }
 
-void PCA9685::set_stream_input_path(size_t idx, q::Path const& path)
+void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
-
     FIND_STREAM(1);
     FIND_STREAM(2);
     FIND_STREAM(3);

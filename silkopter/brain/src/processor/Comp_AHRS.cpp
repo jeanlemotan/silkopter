@@ -46,9 +46,9 @@ auto Comp_AHRS::init() -> bool
     return true;
 }
 
-auto Comp_AHRS::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(0) },
         { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration", m_accumulator.get_stream_path(1) },
@@ -56,9 +56,9 @@ auto Comp_AHRS::get_stream_inputs() const -> std::vector<Stream_Input>
     }};
     return inputs;
 }
-auto Comp_AHRS::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = stream::IFrame::TYPE;
     outputs[0].name = "Frame";
     outputs[0].stream = m_output_stream;
@@ -141,9 +141,8 @@ void Comp_AHRS::process()
     });
 }
 
-void Comp_AHRS::set_stream_input_path(size_t idx, q::Path const& path)
+void Comp_AHRS::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 

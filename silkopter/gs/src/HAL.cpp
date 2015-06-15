@@ -83,14 +83,14 @@ void HAL::remove_node(node::Node_ptr node)
 
 void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path)
 {
-    auto it = std::find_if(node->input_streams.begin(), node->input_streams.end(), [input_name](node::Node::Stream_Input const& is) { return is.name == input_name; });
-    if (it == node->input_streams.end())
+    auto it = std::find_if(node->inputs.begin(), node->inputs.end(), [input_name](node::Node::Input const& is) { return is.name == input_name; });
+    if (it == node->inputs.end())
     {
         QLOGE("Cannot find input stream '{}' for node '{}'", input_name, node->name);
         return;
     }
 
-    uint32_t input_idx = static_cast<uint32_t>(std::distance(it, node->input_streams.begin()));
+    uint32_t input_idx = static_cast<uint32_t>(std::distance(it, node->inputs.begin()));
 
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);

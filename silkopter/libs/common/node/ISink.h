@@ -11,7 +11,7 @@ class ISink : public Node_Base<Type::SINK>
 {
 public:
     //sinks don't have any outputs
-    virtual auto get_stream_outputs() const -> std::vector<Stream_Output> final { return std::vector<Stream_Output>(); }
+    virtual auto get_outputs() const -> std::vector<Output> final { return std::vector<Output>(); }
 };
 DECLARE_CLASS_PTR(ISink);
 

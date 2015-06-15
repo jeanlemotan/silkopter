@@ -55,9 +55,9 @@ private:
     mutable Video_Channel m_video_channel;
 
     auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool;
-    auto link_input_streams(node::Node_ptr node) -> bool;
-    auto publish_output_streams(node::Node_ptr node) -> bool;
-    auto unpublish_output_streams(node::Node_ptr node) -> bool;
+    auto link_inputs(node::Node_ptr node) -> bool;
+    auto publish_outputs(node::Node_ptr node) -> bool;
+    auto unpublish_outputs(node::Node_ptr node) -> bool;
 
     void handle_stream_data();
     void handle_frame_data();

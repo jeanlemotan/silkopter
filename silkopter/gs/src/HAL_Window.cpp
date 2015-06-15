@@ -293,7 +293,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
             });
         }
 
-        for (auto const& os: node->output_streams)
+        for (auto const& os: node->outputs)
         {
             if (os.type == silk::node::stream::IAcceleration::TYPE)
             {
@@ -562,7 +562,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 //        pos.setY(position.y);
 //    }
 
-    for (auto const& i: node.input_streams)
+    for (auto const& i: node.inputs)
     {
         auto& id = data.inputs[i.name];
         QASSERT(id.port);
@@ -595,7 +595,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         }
     }
 
-    for (auto const& o: node.output_streams)
+    for (auto const& o: node.outputs)
     {
         auto& od = data.outputs[o.name];
         QASSERT(od.port);
@@ -648,7 +648,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
     data.node = node;
     data.block.reset(b);
 
-    for (auto const& i: node->input_streams)
+    for (auto const& i: node->inputs)
     {
         auto port = b->addInputPort(QString());
         port->setBrush(QBrush(QColor(0xe67e22)));
@@ -667,7 +667,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         auto& port_data = data.inputs[i.name];
         port_data.port.reset(port);
     }
-    for (auto const& o: node->output_streams)
+    for (auto const& o: node->outputs)
     {
         auto port = b->addOutputPort(QString());
         port->setBrush(QBrush(QColor(0x9b59b6)));

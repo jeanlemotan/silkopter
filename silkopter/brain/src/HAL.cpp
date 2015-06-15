@@ -140,18 +140,18 @@ void HAL::save_settings()
         auto const& nodes = get_nodes().get_all();
         for (auto const& n: nodes)
         {
-            auto stream_inputs = n.node->get_stream_inputs();
-            rapidjson::Value stream_input_pathsj;
-            stream_input_pathsj.SetArray();
-            for (auto const& si: stream_inputs)
+            auto inputs = n.node->get_inputs();
+            rapidjson::Value input_pathsj;
+            input_pathsj.SetArray();
+            for (auto const& si: inputs)
             {
-                stream_input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
+                input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
             }
 
             if (!jsonutil::add_value(*nodesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
                 !jsonutil::add_value(*nodesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
                 !jsonutil::add_value(*nodesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator) ||
-                !jsonutil::add_value(*nodesj, q::Path(n.name + "/stream_input_paths"), std::move(stream_input_pathsj), allocator))
+                !jsonutil::add_value(*nodesj, q::Path(n.name + "/input_paths"), std::move(input_pathsj), allocator))
             {
                 QLOGE("Cannot open create settings node.");
                 return;
@@ -313,8 +313,8 @@ auto HAL::create_node(
     {
         auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
-        auto output_streams = node->get_stream_outputs();
-        for (auto const& x: output_streams)
+        auto outputs = node->get_outputs();
+        for (auto const& x: outputs)
         {
             std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
             if (!m_streams.add(stream_name, std::string(), x.stream))
@@ -362,6 +362,132 @@ auto HAL::create_buses(rapidjson::Value& json) -> bool
     return true;
 }
 
+static bool read_input_stream_paths(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
+{
+    auto* input_pathsj = jsonutil::find_value(value, std::string("input_paths"));
+    if (!input_pathsj || !input_pathsj->IsArray())
+    {
+        QLOGE("Node {} is missing the stream input paths", node_name);
+        return false;
+    }
+    size_t input_idx = 0;
+    for (auto it = input_pathsj->Begin(); it != input_pathsj->End(); ++it, input_idx++)
+    {
+        if (!it->IsString())
+        {
+            QLOGE("Node {} has a bad stream input paths", node_name);
+            return false;
+        }
+        node.set_input_stream_path(input_idx, q::Path(it->GetString()));
+    }
+    return true;
+}
+
+template<class Stream>
+typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == true, bool>::type
+read_stream_calibration_data(rapidjson::Value const& json, node::stream::IStream& _stream)
+{
+    if (_stream.get_type() == Stream::TYPE)
+    {
+        QLOGE("Trying to set calibration data for a stream that doesn't support it!!!");
+        return true;
+    }
+    return false;
+}
+
+template<class Stream>
+typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == false, bool>::type
+read_stream_calibration_data(rapidjson::Value const& json, node::stream::IStream& _stream)
+{
+    if (_stream.get_type() == Stream::TYPE)
+    {
+        auto& stream = static_cast<Stream&>(_stream);
+
+        auto* biasj = jsonutil::find_value(json, std::string("bias"));
+        if (!biasj)
+        {
+            QLOGE("No bias data found");
+            return false;
+        }
+        auto* scalej = jsonutil::find_value(json, std::string("scale"));
+        if (!scalej)
+        {
+            QLOGE("No scale data found");
+            return false;
+        }
+
+        typename Stream::Calibration_Data calibration_data;
+        autojsoncxx::error::ErrorStack result;
+        if (!autojsoncxx::from_value(calibration_data.bias, *biasj, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Req Id: {} - Cannot deserialize calibration data: {}", ss.str());
+            return false;
+        }
+        if (!autojsoncxx::from_value(calibration_data.scale, *scalej, result))
+        {
+            std::ostringstream ss;
+            ss << result;
+            QLOGE("Req Id: {} - Cannot deserialize calibration data: {}", ss.str());
+            return false;
+        }
+        stream.calibration_data = calibration_data;
+        return true;
+    }
+    return false;
+}
+static bool read_output_calibration_datas(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
+{
+    auto* output_calibrationj = jsonutil::find_value(value, std::string("output_calibration"));
+    if (!output_calibrationj || !output_calibrationj->IsArray())
+    {
+        QLOGE("Node {} is missing the output calibration data", node_name);
+        return false;
+    }
+    auto outputs = node.get_outputs();
+    size_t output_idx = 0;
+    for (auto it = output_calibrationj->Begin(); it != output_calibrationj->End(); ++it, output_idx++)
+    {
+        auto stream = outputs[output_idx].stream;
+        if (!stream)
+        {
+            continue;
+        }
+
+        if (read_stream_calibration_data<node::stream::IAcceleration>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IAngular_Velocity>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IMagnetic_Field>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IPressure>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::ILinear_Acceleration>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::ICurrent>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IVoltage>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IDistance>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IECEF_Position>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IECEF_Velocity>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IPWM>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IFrame>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::ITemperature>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IADC>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IFloat>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IForce>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IVelocity>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::IThrottle>(*it, *stream) ||
+            read_stream_calibration_data<node::stream::ITorque>(*it, *stream)
+                )
+        {
+            ;//nothing
+        }
+        else
+        {
+            QLOGE("unrecognized stream type");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 auto HAL::create_nodes(rapidjson::Value& json) -> bool
 {
     if (!json.IsObject())
@@ -398,22 +524,14 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         auto node = get_nodes().find_by_name<node::INode>(name);
         QASSERT(node);
 
-        auto* stream_input_pathsj = jsonutil::find_value(it->value, std::string("stream_input_paths"));
-        if (!stream_input_pathsj || !stream_input_pathsj->IsArray())
+        if (!read_input_stream_paths(name, *node, it->value))
         {
-            QLOGE("Node {} is missing the stream input paths", name);
             return false;
         }
 
-        size_t input_idx = 0;
-        for (auto it = stream_input_pathsj->Begin(); it != stream_input_pathsj->End(); ++it)
+        if (!read_output_calibration_datas(name, *node, it->value))
         {
-            if (!it->IsString())
-            {
-                QLOGE("Node {} has a bad stream input paths", name);
-                return false;
-            }
-            node->set_stream_input_path(input_idx, q::Path(it->GetString()));
+            return false;
         }
 
         auto* configj = jsonutil::find_value(it->value, std::string("config"));

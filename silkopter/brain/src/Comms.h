@@ -57,7 +57,7 @@ public:
         auto set_config(rapidjson::Value const& json) -> bool;
         auto get_config() const -> rapidjson::Document;
         auto send_message(rapidjson::Value const& json) -> rapidjson::Document { return rapidjson::Document(); }
-        auto get_stream_outputs() const -> std::vector<Stream_Output>;
+        auto get_outputs() const -> std::vector<Output>;
         void process();
     private:
         Comms& m_comms;
@@ -126,6 +126,7 @@ private:
     void handle_node_config();
     void handle_node_message();
     void handle_node_input_stream_path();
+    void handle_node_output_calibration_data();
 
     void handle_add_node();
     void handle_remove_node();

@@ -15,6 +15,8 @@ public:
     typedef math::vec3f             Value; //m/s
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IVelocity);
 
@@ -24,6 +26,8 @@ public:
     typedef math::vec3f             Value; //m/s
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IENU_Velocity);
 
@@ -33,6 +37,8 @@ public:
     typedef math::vec3f             Value; //m/s
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Velocity);
 

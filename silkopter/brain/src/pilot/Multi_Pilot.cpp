@@ -46,9 +46,9 @@ auto Multi_Pilot::init() -> bool
     return true;
 }
 
-auto Multi_Pilot::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Multi_Pilot::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(0) },
         { stream::IBattery_State::TYPE, m_init_params->rate, "Battery State", m_accumulator.get_stream_path(1) },
@@ -56,9 +56,9 @@ auto Multi_Pilot::get_stream_inputs() const -> std::vector<Stream_Input>
     }};
     return inputs;
 }
-auto Multi_Pilot::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Multi_Pilot::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(0);
+    std::vector<Output> outputs(0);
     return outputs;
 }
 
@@ -67,9 +67,8 @@ void Multi_Pilot::process()
     QLOG_TOPIC("multi_pilot::process");
 }
 
-void Multi_Pilot::set_stream_input_path(size_t idx, q::Path const& path)
+void Multi_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     //m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 

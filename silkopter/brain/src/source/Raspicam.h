@@ -38,7 +38,7 @@ public:
 
     void shutdown();
 
-    auto get_stream_outputs() const -> std::vector<Stream_Output>;
+    auto get_outputs() const -> std::vector<Output>;
 
     //----------------------------------------------------------------------
 

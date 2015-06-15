@@ -410,8 +410,8 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 
 static void pack_node_def_data(Comms::Setup_Channel& channel, node::INode const& node)
 {
-    pack_def_inputs(channel, node.get_stream_inputs());
-    pack_outputs(channel, node.get_stream_outputs());
+    pack_def_inputs(channel, node.get_inputs());
+    pack_outputs(channel, node.get_outputs());
     channel.pack_param(node.get_init_params());
     channel.pack_param(node.get_config());
 }
@@ -419,8 +419,8 @@ static void pack_node_def_data(Comms::Setup_Channel& channel, node::INode const&
 static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& node)
 {
     channel.pack_param(node.get_type());
-    pack_inputs(channel, node.get_stream_inputs());
-    pack_outputs(channel, node.get_stream_outputs());
+    pack_inputs(channel, node.get_inputs());
+    pack_outputs(channel, node.get_outputs());
     channel.pack_param(node.get_init_params());
     channel.pack_param(node.get_config());
 }
@@ -671,11 +671,110 @@ void Comms::handle_node_input_stream_path()
         return;
     }
 
-    node->set_stream_input_path(input_idx, q::Path(path));
+    node->set_input_stream_path(input_idx, q::Path(path));
 
     m_hal.save_settings();
 
     m_setup_channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
+    m_setup_channel.pack_param(req_id);
+    m_setup_channel.pack_param(name);
+    pack_node_data(m_setup_channel, *node);
+    m_setup_channel.end_pack();
+}
+
+
+template<class Channel, class Stream>
+typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == true, bool>::type
+set_stream_calibration_data(Channel& channel, node::stream::IStream const& _stream)
+{
+    if (_stream.get_type() == Stream::TYPE)
+    {
+        QLOGE("Trying to set calibration data for a stream that doesn't support it!!!");
+        return true;
+    }
+    return false;
+}
+
+template<class Channel, class Stream>
+typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == false, bool>::type
+set_stream_calibration_data(Channel& channel, node::stream::IStream const& _stream)
+{
+    if (_stream.get_type() == Stream::TYPE)
+    {
+
+        return true;
+    }
+    return false;
+}
+
+void Comms::handle_node_output_calibration_data()
+{
+    m_setup_channel.begin_unpack();
+    uint32_t req_id = 0;
+    std::string name;
+    uint32_t output_idx = 0;
+    std::string path;
+    if (!m_setup_channel.unpack_param(req_id) ||
+        !m_setup_channel.unpack_param(name) ||
+        !m_setup_channel.unpack_param(output_idx))
+    {
+        QLOGE("Error in unpacking input stream path request");
+        return;
+    }
+
+    QLOGI("Req Id: {} - node input stream path", req_id);
+    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    if (!node)
+    {
+        QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
+        return;
+    }
+
+    auto outputs = node->get_outputs();
+    if (output_idx >= outputs.size())
+    {
+        QLOGE("Req Id: {} - output stream idx {} is out of range", req_id, output_idx);
+        return;
+    }
+    auto stream = outputs[output_idx].stream;
+    if (!stream)
+    {
+        QLOGE("Req Id: {} - output stream idx {} is null", req_id, output_idx);
+        return;
+    }
+
+    if (set_stream_calibration_data<Setup_Channel, node::stream::IAcceleration>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IAngular_Velocity>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IMagnetic_Field>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IPressure>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::ILinear_Acceleration>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::ICurrent>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IVoltage>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IDistance>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IECEF_Position>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IECEF_Velocity>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IPWM>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IFrame>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::ITemperature>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IADC>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IFloat>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IForce>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IVelocity>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::IThrottle>(m_setup_channel, *stream) ||
+        set_stream_calibration_data<Setup_Channel, node::stream::ITorque>(m_setup_channel, *stream)
+            )
+    {
+        ;//nothing
+    }
+    else
+    {
+        QLOGE("Req Id: {} - unrecognized stream type", req_id);
+        return;
+    }
+
+    m_hal.save_settings();
+
+    m_setup_channel.begin_pack(comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA);
     m_setup_channel.pack_param(req_id);
     m_setup_channel.pack_param(name);
     pack_node_data(m_setup_channel, *node);
@@ -875,6 +974,7 @@ void Comms::process()
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
         case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
         case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
+        case comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA: handle_node_output_calibration_data(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
         case comms::Setup_Message::HAL_TELEMETRY_ACTIVE: handle_hal_telemetry_active(); break;
@@ -981,9 +1081,9 @@ auto Comms::Source::get_config() const -> rapidjson::Document
     autojsoncxx::to_document(*m_comms.m_config, json);
     return std::move(json);
 }
-auto Comms::Source::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Comms::Source::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = node::stream::ICommands::TYPE;
     outputs[0].name = "Multirotor Input";
     outputs[0].stream = m_comms.m_commands_stream;

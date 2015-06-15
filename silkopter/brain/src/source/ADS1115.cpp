@@ -106,9 +106,9 @@ ADS1115::ADS1115(HAL& hal)
 {
 }
 
-auto ADS1115::get_stream_outputs() const -> std::vector<Stream_Output>
+auto ADS1115::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
         { stream::IADC::TYPE, "ADC0", m_adcs[0] },
         { stream::IADC::TYPE, "ADC1", m_adcs[1] },

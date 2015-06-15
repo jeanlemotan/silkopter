@@ -45,9 +45,9 @@ auto Comp_ECEF_Position::init() -> bool
     return true;
 }
 
-auto Comp_ECEF_Position::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Comp_ECEF_Position::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IECEF_Position::TYPE, m_init_params->rate, "Position", m_accumulator.get_stream_path(0) },
         { stream::ILinear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(1) },
@@ -55,9 +55,9 @@ auto Comp_ECEF_Position::get_stream_inputs() const -> std::vector<Stream_Input>
     }};
     return inputs;
 }
-auto Comp_ECEF_Position::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
         { stream::IECEF_Position::TYPE, "Position", m_position_output_stream },
         { stream::IENU_Frame::TYPE, "ENU Frame", m_enu_frame_output_stream },
@@ -87,9 +87,8 @@ void Comp_ECEF_Position::process()
     });
 }
 
-void Comp_ECEF_Position::set_stream_input_path(size_t idx, q::Path const& path)
+void Comp_ECEF_Position::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 

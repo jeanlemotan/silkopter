@@ -80,18 +80,18 @@ auto Motor_Mixer::init() -> bool
     return true;
 }
 
-auto Motor_Mixer::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Motor_Mixer::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::ITorque::TYPE, m_init_params->rate, "Torque", m_accumulator.get_stream_path(0) },
         { stream::IForce::TYPE, m_init_params->rate, "Collective Force", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
-auto Motor_Mixer::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Motor_Mixer::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(m_outputs.size());
+    std::vector<Output> outputs(m_outputs.size());
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
         outputs[i].type = stream::IThrottle::TYPE;
@@ -431,9 +431,8 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
 
 //}
 
-void Motor_Mixer::set_stream_input_path(size_t idx, q::Path const& path)
+void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 

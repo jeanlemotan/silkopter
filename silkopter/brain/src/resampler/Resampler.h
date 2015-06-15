@@ -32,9 +32,9 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    void set_stream_input_path(size_t idx, q::Path const& path);
-    auto get_stream_inputs() const -> std::vector<Stream_Input>;
-    auto get_stream_outputs() const -> std::vector<Stream_Output>;
+    void set_input_stream_path(size_t idx, q::Path const& path);
+    auto get_inputs() const -> std::vector<Input>;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
@@ -127,9 +127,8 @@ auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-void Resampler<Stream_t>::set_stream_input_path(size_t idx, q::Path const& path)
+void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_init_params.input_rate, m_hal);
 }
 
@@ -182,18 +181,18 @@ auto Resampler<Stream_t>::get_config() const -> rapidjson::Document
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { Stream_t::TYPE, m_init_params.input_rate, "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Resampler<Stream_t>::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(1);
+    std::vector<Output> outputs(1);
     outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;

@@ -134,9 +134,9 @@ auto Multi_Simulator::init() -> bool
     return true;
 }
 
-auto Multi_Simulator::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Multi_Simulator::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs(m_input_throttle_streams.size());
+    std::vector<Input> inputs(m_input_throttle_streams.size());
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         inputs[i].type = stream::IThrottle::TYPE;
@@ -145,9 +145,9 @@ auto Multi_Simulator::get_stream_inputs() const -> std::vector<Stream_Input>
     }
     return inputs;
 }
-auto Multi_Simulator::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Multi_Simulator::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(7);
+    std::vector<Output> outputs(7);
     outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity_stream;
@@ -235,10 +235,8 @@ void Multi_Simulator::process()
     });
 }
 
-void Multi_Simulator::set_stream_input_path(size_t idx, q::Path const& path)
+void Multi_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
-
     auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_init_params->throttle_rate)

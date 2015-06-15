@@ -256,8 +256,8 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
 {
     bool ok = channel.unpack_param(node_def.name);
     ok &= channel.unpack_param(node_def.type);
-    ok &= unpack_def_inputs(channel, node_def.input_streams);
-    ok &= unpack_outputs(channel, node_def.output_streams);
+    ok &= unpack_def_inputs(channel, node_def.inputs);
+    ok &= unpack_outputs(channel, node_def.outputs);
     ok &= channel.unpack_param(node_def.default_init_params);
     ok &= channel.unpack_param(node_def.default_config);
     return ok;
@@ -266,14 +266,14 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
 auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool
 {
     bool ok = channel.unpack_param(node.type);
-    ok &= unpack_inputs(channel, node.input_streams);
-    ok &= unpack_outputs(channel, node.output_streams);
+    ok &= unpack_inputs(channel, node.inputs);
+    ok &= unpack_outputs(channel, node.outputs);
     ok &= channel.unpack_param(node.init_params);
     ok &= channel.unpack_param(node.config);
 
     if (ok)
     {
-        for (auto& os: node.output_streams)
+        for (auto& os: node.outputs)
         {
             auto stream = m_hal.m_streams.find_by_name(node.name + "/" + os.name);
             os.stream = stream;
@@ -448,9 +448,9 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
     return std::shared_ptr<node::stream::Stream>();
 }
 
-auto Comms::publish_output_streams(node::Node_ptr node) -> bool
+auto Comms::publish_outputs(node::Node_ptr node) -> bool
 {
-    for (auto& os: node->output_streams)
+    for (auto& os: node->outputs)
     {
         auto stream = create_stream_from_type(os.type);
         if (!stream)
@@ -469,9 +469,9 @@ auto Comms::publish_output_streams(node::Node_ptr node) -> bool
     return true;
 }
 
-auto Comms::unpublish_output_streams(node::Node_ptr node) -> bool
+auto Comms::unpublish_outputs(node::Node_ptr node) -> bool
 {
-    for (auto& os: node->output_streams)
+    for (auto& os: node->outputs)
     {
         auto stream = m_hal.m_streams.find_by_name(node->name + "/" + os.name);
         m_hal.m_streams.remove(stream);
@@ -479,9 +479,9 @@ auto Comms::unpublish_output_streams(node::Node_ptr node) -> bool
     return true;
 }
 
-auto Comms::link_input_streams(node::Node_ptr node) -> bool
+auto Comms::link_inputs(node::Node_ptr node) -> bool
 {
-    for (auto& i: node->input_streams)
+    for (auto& i: node->inputs)
     {
         if (i.stream_path.empty())
         {
@@ -536,14 +536,14 @@ void Comms::handle_enumerate_nodes()
     auto nodes = m_hal.get_nodes().get_all();
     for (auto& n: nodes)
     {
-        if (!publish_output_streams(n))
+        if (!publish_outputs(n))
         {
             return;
         }
     }
     for (auto& n: nodes)
     {
-        if (!link_input_streams(n))
+        if (!link_inputs(n))
         {
             return;
         }
@@ -640,7 +640,7 @@ void Comms::handle_get_node_data()
     {
         QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
-    link_input_streams(node);
+    link_inputs(node);
 
     node->changed_signal.execute();
 }
@@ -670,7 +670,7 @@ void Comms::handle_node_input_stream_path()
     {
         QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
     }
-    link_input_streams(node);
+    link_inputs(node);
 
     node->changed_signal.execute();
 }
@@ -693,7 +693,7 @@ void Comms::handle_add_node()
     {
         return;
     }
-    if (!link_input_streams(node))
+    if (!link_inputs(node))
     {
         return;
     }
@@ -701,8 +701,8 @@ void Comms::handle_add_node()
     node->name = name;
     m_hal.m_nodes.add(node);
 
-    publish_output_streams(node);
-    link_input_streams(node);
+    publish_outputs(node);
+    link_inputs(node);
 
     m_hal.node_added_signal.execute(node);
 }
@@ -727,7 +727,7 @@ void Comms::handle_remove_node()
         return;
     }
 
-    unpublish_output_streams(node);
+    unpublish_outputs(node);
     m_hal.m_nodes.remove(node);
 
     m_hal.node_removed_signal.execute(node);

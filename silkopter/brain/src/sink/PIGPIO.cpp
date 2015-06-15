@@ -24,9 +24,9 @@ PIGPIO::PIGPIO(HAL& hal)
     m_pwm_channels.resize(8);
 }
 
-auto PIGPIO::get_stream_inputs() const -> std::vector<Stream_Input>
+auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4", m_pwm_channels[0].stream_path },
         { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17", m_pwm_channels[1].stream_path },
@@ -231,10 +231,8 @@ if (idx == IDX)\
     }\
 }
 
-void PIGPIO::set_stream_input_path(size_t idx, q::Path const& path)
+void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
-
     READ_CONFIG(0, 4);
     READ_CONFIG(1, 17);
     READ_CONFIG(2, 18);

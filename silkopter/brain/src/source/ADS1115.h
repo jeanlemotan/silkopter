@@ -36,7 +36,7 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto get_stream_outputs() const -> std::vector<Stream_Output>;
+    auto get_outputs() const -> std::vector<Output>;
 
     void process();
 

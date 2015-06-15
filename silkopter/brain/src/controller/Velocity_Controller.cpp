@@ -48,18 +48,18 @@ auto Velocity_Controller::init() -> bool
     return true;
 }
 
-auto Velocity_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Velocity_Controller::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IVelocity::TYPE, m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
         { stream::IVelocity::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
-auto Velocity_Controller::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Velocity_Controller::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs(2);
+    std::vector<Output> outputs(2);
     outputs[0].type = stream::IFrame::TYPE;
     outputs[0].name = "Frame";
     outputs[0].stream = m_output_frame_stream;
@@ -90,9 +90,8 @@ void Velocity_Controller::process()
     });
 }
 
-void Velocity_Controller::set_stream_input_path(size_t idx, q::Path const& path)
+void Velocity_Controller::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 

@@ -46,18 +46,18 @@ auto Rate_Controller::init() -> bool
     return true;
 }
 
-auto Rate_Controller::get_stream_inputs() const -> std::vector<Stream_Input>
+auto Rate_Controller::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Stream_Input> inputs =
+    std::vector<Input> inputs =
     {{
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
         { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
-auto Rate_Controller::get_stream_outputs() const -> std::vector<Stream_Output>
+auto Rate_Controller::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Stream_Output> outputs =
+    std::vector<Output> outputs =
     {{
          { stream::ITorque::TYPE, "Torque", m_output_stream }
     }};
@@ -114,9 +114,8 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
     return math::vec3f(x, y, z);
 }
 
-void Rate_Controller::set_stream_input_path(size_t idx, q::Path const& path)
+void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    QLOG_TOPIC("rate_controller::set_stream_input_path");
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
