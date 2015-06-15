@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IStream.h"
+#include "Stream_Base.h"
 
 namespace silk
 {
@@ -9,15 +9,12 @@ namespace node
 namespace stream
 {
 
-class IAcceleration : public ISpatial_Stream<Type::ACCELERATION, Space::LOCAL>
+class IAcceleration : public ISpatial_Stream<Type::ACCELERATION, Space::LOCAL, Bias_Scale_Calibration_Data<math::vec3f>>
 {
 public:
     typedef math::vec3f             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef stream::Calibration_Data<math::vec3f> Calibration_Data;
-    Calibration_Data calibration_data;
 };
 DECLARE_CLASS_PTR(IAcceleration);
 

@@ -55,17 +55,6 @@ public:
 //        m_samples.push_back(m_last_sample);
 //    }
 
-    template<class CD>
-    typename std::enable_if<std::is_void<CD>::value == false, Value>::type apply_calibration(Value const& value)
-    {
-        return value * Base::calibration_data.scale + Base::calibration_data.bias;
-    }
-    template<class CD>
-    typename std::enable_if<std::is_void<CD>::value == true, Value>::type apply_calibration(Value const& value)
-    {
-        return value;
-    }
-
     void push_sample(Value const& value, bool is_healthy)
     {
         m_tp += m_dt;
@@ -77,7 +66,7 @@ public:
             QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
         }
 
-        m_last_sample.value = apply_calibration<typename Base::Calibration_Data>(value);
+        m_last_sample.value = apply(Base::calibration_data, value);
         m_last_sample.sample_idx++;
         m_last_sample.dt = m_dt;
         m_last_sample.tp = m_tp;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IStream.h"
+#include "Stream_Base.h"
 
 namespace silk
 {
@@ -103,8 +103,6 @@ public:
     virtual ~ICommands() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(ICommands);
 

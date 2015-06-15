@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rapidjson/document.h"     // rapidjson's DOM-style API
+
 namespace silk
 {
 namespace node
@@ -55,27 +57,14 @@ class IStream : q::util::Noncopyable
 public:
     virtual auto get_rate() const -> uint32_t = 0;
     virtual auto get_type() const -> Type = 0;
+
+    virtual auto deserialize_calibration_data(rapidjson::Value const& json) -> bool = 0;
+    virtual auto serialize_calibration_data(rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) const -> bool = 0;
+    virtual auto deserialize_calibration_data(std::vector<uint8_t> const& binary) -> bool = 0;
+    virtual auto serialize_calibration_data(std::vector<uint8_t>& binary) const -> bool = 0;
 };
 DECLARE_CLASS_PTR(IStream);
 
-//for streams of data with a fixed sample rate
-template <Type TYPE_VALUE>
-class IScalar_Stream : public IStream
-{
-public:
-    static constexpr Type TYPE = TYPE_VALUE;
-    virtual auto get_type() const -> Type { return TYPE; }
-};
-
-//for vectorial streams of data with a fixed sample rate
-template <Type TYPE_VALUE, Space SPACE_VALUE>
-class ISpatial_Stream : public IStream
-{
-public:
-    static constexpr Type TYPE = TYPE_VALUE;
-    static constexpr Space SPACE = SPACE_VALUE;
-    virtual auto get_type() const -> Type { return TYPE; }
-};
 
 //A stream sample
 template<class T> struct Sample
@@ -90,11 +79,6 @@ template<class T> struct Sample
     bool is_healthy = true;
 };
 
-template<class T> struct Calibration_Data
-{
-    T bias = T(0);
-    T scale = T(1);
-};
 
 }
 }

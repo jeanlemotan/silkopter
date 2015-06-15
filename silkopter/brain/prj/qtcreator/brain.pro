@@ -232,5 +232,6 @@ HEADERS += \
     ../../src/Basic_Output_Stream.h \
     ../../../libs/common/node/stream/IPosition.h \
     ../../src/processor/Comp_ECEF_Position.h \
-    ../../../libs/common/node/stream/IGPS_Info.h
+    ../../../libs/common/node/stream/IGPS_Info.h \
+    ../../../libs/common/node/stream/Stream_Base.h
 

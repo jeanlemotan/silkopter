@@ -79,60 +79,6 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 };
 
 
-template<class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == true, bool>::type
-read_stream_calibration_data(node::stream::IStream& _stream, rapidjson::Value const& json)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-        //QLOGE("Trying to set calibration data for a stream that doesn't support it!!!");
-        return true;
-    }
-    return false;
-}
-
-template<class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == false, bool>::type
-read_stream_calibration_data(node::stream::IStream& _stream, rapidjson::Value const& json)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-        auto& stream = static_cast<Stream&>(_stream);
-
-        auto* biasj = jsonutil::find_value(json, std::string("bias"));
-        if (!biasj)
-        {
-            QLOGE("No bias data found");
-            return false;
-        }
-        auto* scalej = jsonutil::find_value(json, std::string("scale"));
-        if (!scalej)
-        {
-            QLOGE("No scale data found");
-            return false;
-        }
-
-        typename Stream::Calibration_Data calibration_data;
-        autojsoncxx::error::ErrorStack result;
-        if (!autojsoncxx::from_value(calibration_data.bias, *biasj, result))
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Req Id: {} - Cannot deserialize calibration data: {}", ss.str());
-            return false;
-        }
-        if (!autojsoncxx::from_value(calibration_data.scale, *scalej, result))
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Req Id: {} - Cannot deserialize calibration data: {}", ss.str());
-            return false;
-        }
-        stream.calibration_data = calibration_data;
-        return true;
-    }
-    return false;
-}
 static bool read_node_outputs_calibration_datas(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
 {
     auto* output_calibrationj = jsonutil::find_value(value, std::string("output_calibration"));
@@ -146,82 +92,15 @@ static bool read_node_outputs_calibration_datas(std::string const& node_name, si
     for (auto it = output_calibrationj->Begin(); it != output_calibrationj->End(); ++it, output_idx++)
     {
         auto stream = outputs[output_idx].stream;
-        if (!stream)
+        if (stream)
         {
-            continue;
-        }
-
-        if (read_stream_calibration_data<node::stream::IAcceleration>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IAngular_Velocity>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IMagnetic_Field>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IPressure>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::ILinear_Acceleration>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::ICurrent>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IVoltage>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IDistance>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IECEF_Position>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IECEF_Velocity>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IPWM>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IFrame>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::ITemperature>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IADC>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IFloat>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IForce>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IVelocity>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::IThrottle>(*stream, *it) ||
-            read_stream_calibration_data<node::stream::ITorque>(*stream, *it)
-                )
-        {
-            ;//nothing
+            stream->deserialize_calibration_data(*it);
         }
     }
-
     return true;
 }
 
 
-template<class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == true, bool>::type
-write_stream_calibration_data(node::stream::IStream const& _stream, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-        //QLOGE("Trying to set calibration data for a stream that doesn't support it!!!");
-        return true;
-    }
-    return false;
-}
-
-template<class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == false, bool>::type
-write_stream_calibration_data(node::stream::IStream const& _stream, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-        auto const& stream = static_cast<Stream const&>(_stream);
-
-        auto* biasj = jsonutil::get_or_add_value(json, std::string("bias"), rapidjson::kObjectType, allocator);
-        if (!biasj)
-        {
-            QLOGE("Cannot create bias data");
-            return false;
-        }
-        auto* scalej = jsonutil::get_or_add_value(json, std::string("scale"), rapidjson::kObjectType, allocator);
-        if (!scalej)
-        {
-            QLOGE("Cannot create scale data");
-            return false;
-        }
-
-        rapidjson::Document json;
-        autojsoncxx::to_document(stream.calibration_data.bias, json);
-        jsonutil::clone_value(*biasj, json, allocator);
-        autojsoncxx::to_document(stream.calibration_data.scale, json);
-        jsonutil::clone_value(*scalej, json, allocator);
-        return true;
-    }
-    return false;
-}
 static bool write_node_outputs_calibration_datas(std::string const& node_name, silk::node::INode& node, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator)
 {
     auto* output_calibrationj = jsonutil::get_or_add_value(json, std::string("output_calibration"), rapidjson::kArrayType, allocator);
@@ -235,30 +114,10 @@ static bool write_node_outputs_calibration_datas(std::string const& node_name, s
     {
         rapidjson::Document dataj;
         auto stream = o.stream;
-        if (write_stream_calibration_data<node::stream::IAcceleration>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IAngular_Velocity>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IMagnetic_Field>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IPressure>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::ILinear_Acceleration>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::ICurrent>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IVoltage>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IDistance>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IECEF_Position>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IECEF_Velocity>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IPWM>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IFrame>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::ITemperature>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IADC>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IFloat>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IForce>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IVelocity>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::IThrottle>(*stream, dataj, allocator) ||
-            write_stream_calibration_data<node::stream::ITorque>(*stream, dataj, allocator)
-                )
+        if (stream)
         {
-            ;//nothing
+            stream->serialize_calibration_data(dataj, allocator);
         }
-
         output_calibrationj->PushBack(std::move(dataj), allocator);
     }
 

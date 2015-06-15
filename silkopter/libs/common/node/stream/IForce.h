@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IStream.h"
+#include "Stream_Base.h"
 
 namespace silk
 {
@@ -15,8 +15,6 @@ public:
     typedef math::vec3f             Value; //N
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IForce);
 
@@ -26,8 +24,6 @@ public:
     typedef math::vec3f             Value; //N
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IENU_Force);
 
@@ -37,8 +33,6 @@ public:
     typedef math::vec3f             Value; //N
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Force);
 

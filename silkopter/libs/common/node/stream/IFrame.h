@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IStream.h"
+#include "Stream_Base.h"
 #include "utils/Butterworth.h"
 
 namespace silk
@@ -19,8 +19,6 @@ public:
     };
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 
 class IFrame : public ISpatial_Stream<Type::FRAME, Space::LOCAL>, public IFrame_Base
