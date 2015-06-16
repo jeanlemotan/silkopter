@@ -119,7 +119,9 @@ SOURCES += \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
     ../../src/processor/Comp_ECEF_Position.cpp \
-    ../../../libs/utils/RUDP.inl
+    ../../../libs/utils/RCP.inl \
+    ../../../libs/utils/RCP_RFMON_Socket.cpp \
+    ../../../libs/utils/RCP_UDP_Socket.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -134,7 +136,6 @@ HEADERS += \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
-    ../../../libs/utils/RUDP.h \
     ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
@@ -234,5 +235,8 @@ HEADERS += \
     ../../../libs/common/node/stream/IPosition.h \
     ../../src/processor/Comp_ECEF_Position.h \
     ../../../libs/common/node/stream/IGPS_Info.h \
-    ../../../libs/common/node/stream/Stream_Base.h
+    ../../../libs/common/node/stream/Stream_Base.h \
+    ../../../libs/utils/RCP.h \
+    ../../../libs/utils/RCP_RFMON_Socket.h \
+    ../../../libs/utils/RCP_UDP_Socket.h
 

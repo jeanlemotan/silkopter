@@ -4,7 +4,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <boost/optional.hpp>
-#include "RUDP.h"
+#include "RCP.h"
 
 namespace util
 {
@@ -132,7 +132,7 @@ namespace util
         typedef MESSAGE_SIZE_T Message_Size_t;
         typedef Channel<MESSAGE_T, MESSAGE_SIZE_T> This_t;
 
-        Channel(RUDP& rudp, uint8_t channel_idx) : m_rudp(rudp), m_channel_idx(channel_idx) {}
+        Channel(uint8_t channel_idx) : m_channel_idx(channel_idx) {}
 
 		//////////////////////////////////////////////////////////////////////////
 
@@ -205,26 +205,26 @@ namespace util
             return !m_rx_buffer.empty();
         }
 
-        void send()
+        void send(util::RCP& rcp)
         {
             if (!m_tx_buffer.empty())
             {
                 //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-                if (m_rudp.is_connected())
+                if (rcp.is_connected())
                 {
-                    m_rudp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                    rcp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
                 }
                 m_tx_buffer.clear();
             }
         }
-        void try_sending()
+        void try_sending(util::RCP& rcp)
         {
             if (!m_tx_buffer.empty())
             {
                 //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-                if (m_rudp.is_connected())
+                if (rcp.is_connected())
                 {
-                    m_rudp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
+                    rcp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
                 }
                 m_tx_buffer.clear();
             }
@@ -234,8 +234,8 @@ namespace util
 
 		//returns the nest message or nothing.
 		//the message, if any, has to be decoded with decode_next_message(...)
-        auto get_next_message() -> boost::optional<Message_t>  { return _get_next_message(); }
-        auto get_next_message(Message_t& message) -> bool {  auto res = _get_next_message(); message = res ? *res : message; return res.is_initialized(); }
+        auto get_next_message(util::RCP& rcp) -> boost::optional<Message_t>  { return _get_next_message(rcp); }
+        auto get_next_message(Message_t& message, util::RCP& rcp) -> bool {  auto res = _get_next_message(rcp); message = res ? *res : message; return res.is_initialized(); }
 
 		//decodes the next message
 		template<typename... Params>
@@ -342,7 +342,7 @@ namespace util
 
 		//returns the nest message or nothing.
 		//the message, if any, has to be decoded with decode_next_message(...)
-        auto _get_next_message() -> boost::optional<Message_t>
+        auto _get_next_message(util::RCP& rcp) -> boost::optional<Message_t>
 		{
             if (m_decoded.data_size > 0)
             {
@@ -352,7 +352,7 @@ namespace util
                 m_decoded.is_valid = false;
             }
 
-            m_rudp.receive(m_channel_idx, m_temp_rx_buffer);
+            rcp.receive(m_channel_idx, m_temp_rx_buffer);
             if (!m_temp_rx_buffer.empty())
             {
                 //q::quick_logf("Received {} bytes", m_temp_rx_buffer.size());
@@ -445,7 +445,6 @@ namespace util
 
         //////////////////////////////////////////////////////////////////////////
 
-        util::RUDP& m_rudp;
         uint8_t m_channel_idx = 0;
         detail::RX_Buffer_t m_rx_buffer;
         std::vector<uint8_t> m_temp_rx_buffer;

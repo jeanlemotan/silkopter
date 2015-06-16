@@ -198,7 +198,7 @@ int main(int argc, char const* argv[])
         }
 
         //start listening for a remote system
-        if (!comms.start(send_port, receive_port))
+        if (!comms.start_udp(send_port, receive_port))
         {
             QLOGE("Cannot start communication channel! Aborting");
             abort();

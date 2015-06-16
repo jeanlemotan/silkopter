@@ -2,7 +2,6 @@
 
 #include <deque>
 #include <zlib.h>
-#include <boost/asio.hpp>
 #include <boost/intrusive_ptr.hpp>
 
 namespace util
@@ -34,16 +33,19 @@ namespace util
 
 
     //socket interface
-    class RUDP_Socket
+    class RCP_Socket
     {
     public:
-        virtual ~RUDP_Socket() {}
+        virtual ~RCP_Socket() {}
 
         enum class Result
         {
             OK,
             ERROR,
+            RECONNECTED,
         };
+
+        virtual auto process() -> Result = 0;
 
         std::function<void(uint8_t const* data, size_t size)> receive_callback;
         std::function<void(Result)> send_callback;
@@ -51,17 +53,11 @@ namespace util
         virtual void async_send(uint8_t const* data, size_t size) = 0;
     };
 
-    //main RUDP protocol implementation
-    class RUDP : q::util::Noncopyable
+    //Reliable Channel Protocol
+    class RCP : q::util::Noncopyable
     {
     public:
-        RUDP(RUDP_Socket& socket);
-
-//        void set_send_endpoint(boost::asio::ip::udp::endpoint const& endpoint);
-//        auto get_send_endpoint() const -> boost::asio::ip::udp::endpoint const&;
-//        auto get_last_receive_endpoint() const -> boost::asio::ip::udp::endpoint const&;
-
-//        void start_listening();
+        RCP(RCP_Socket& socket);
 
         void reconnect();
         auto is_connected() const -> bool;
@@ -73,6 +69,7 @@ namespace util
             bool is_reliable = true;
             bool is_compressed = true;
             bool cancel_on_new_data = false; //if true, new packets cancel old-unsent packets
+            uint8_t unreliable_retransmit_count = 0; //for unreliable channels, retransmit data this many times to increase the chances of arrival. Zero means just the main transmission and no retransmit
             q::Clock::duration bump_priority_after = q::Clock::duration{0}; //zero means never
             q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
         };
@@ -178,7 +175,7 @@ namespace util
 
 #pragma pack(pop)
 
-        RUDP_Socket& m_socket;
+        RCP_Socket& m_socket;
 
         typedef std::vector<uint8_t> Buffer_t;
 
@@ -235,7 +232,6 @@ namespace util
 
         struct RX
         {
-            //boost::asio::ip::udp::endpoint endpoint;
             std::vector<uint8_t> compression_buffer;
 
             //std::vector<uint8_t> temp_buffer;
@@ -352,7 +348,7 @@ namespace util
         auto process_packet_queue() -> TX::Send_Queue::iterator;
         void send_datagram();
 
-        void handle_send(RUDP_Socket::Result reult);
+        void handle_send(RCP_Socket::Result reult);
         void handle_receive(uint8_t const* data, size_t size);
 
         void send_pending_confirmations();
@@ -382,5 +378,5 @@ namespace util
 }
 
 
-#include "RUDP.inl"
+#include "RCP.inl"
 

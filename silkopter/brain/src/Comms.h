@@ -3,7 +3,8 @@
 #include "common/Comm_Data.h"
 #include "HAL.h"
 #include "utils/Channel.h"
-#include "utils/RUDP.h"
+#include "utils/RCP.h"
+
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
 #include "common/node/stream/ICommands.h"
@@ -28,26 +29,13 @@ class Comms : q::util::Noncopyable
 public:
     Comms(boost::asio::io_service& io_service, HAL& hal);
 
-    auto start(uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_rfmon(std::string const& interface) -> bool;
 
     auto is_connected() const -> bool;
-    auto get_remote_address() const -> boost::asio::ip::address;
     auto get_remote_clock() const -> Manual_Clock const&;
 
-    auto get_rudp() -> util::RUDP&;
-
     void process();
-
-    auto get_error_count() const -> size_t;
-
-    enum class Video_Flag : uint8_t
-    {
-        FLAG_KEYFRAME = 1 << 0,
-    };
-    typedef q::util::Flag_Set<Video_Flag, uint8_t> Video_Flags;
-    //sends a video frame.
-    //The data needs to be alive only for the duration of this call.
-    auto send_video_frame(Video_Flags flags, uint8_t const* data, size_t size) -> bool;
 
     struct Source : public node::ISource
     {
@@ -72,6 +60,8 @@ public:
 
 private:
     boost::asio::io_service& m_io_service;
+
+    void configure_channels();
 
     struct Commands : public node::stream::ICommands
     {
@@ -141,12 +131,10 @@ private:
 
     Manual_Clock m_remote_clock;
 
-    q::Clock::time_point m_last_rudp_tp = q::Clock::now();
+    q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 
-    uint16_t m_send_port = 0;
-    uint16_t m_receive_port = 0;
-    util::RUDP_Asio_Socket m_socket;
-    util::RUDP m_rudp;
+    std::shared_ptr<util::RCP_Socket> m_socket;
+    std::shared_ptr<util::RCP> m_rcp;
 
     Setup_Channel m_setup_channel;
     Input_Channel m_input_channel;
