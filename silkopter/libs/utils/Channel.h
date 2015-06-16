@@ -294,6 +294,18 @@ namespace util
             m_decoded.offset += size;
             return true;
         }
+        inline auto unpack_remaining_data(std::vector<uint8_t>& dst) -> bool
+        {
+            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+            if (m_decoded.offset > m_decoded.data_size || m_decoded.offset > m_rx_buffer.size())
+            {
+                return false;
+            }
+            dst.reserve(dst.size() + (m_decoded.data_size - m_decoded.offset));
+            std::copy(m_rx_buffer.begin() + m_decoded.offset, m_rx_buffer.begin() + m_decoded.data_size, std::back_inserter(dst));
+            m_decoded.offset = m_decoded.data_size;
+            return true;
+        }
         void end_unpack()
         {
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == m_decoded.data_size, "{}, {}", m_decoded.data_size, m_rx_buffer.size());
@@ -304,6 +316,7 @@ namespace util
             }
         }
 
+        auto get_remaining_message_size() const -> size_t { return m_decoded.data_size - m_decoded.offset; }
         auto get_message_size() const -> size_t { return m_decoded.data_size; }
 
 		//////////////////////////////////////////////////////////////////////////

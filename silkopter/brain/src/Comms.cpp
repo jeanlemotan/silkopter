@@ -120,13 +120,8 @@ auto Comms::start(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        m_socket.open(ip::udp::v4());
-        m_socket.set_option(ip::udp::socket::reuse_address(true));
-        //m_socket.set_option(socket_base::send_buffer_size(65536));
-        m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
-        //m_rudp.set_send_endpoint(ip::udp::endpoint(ip::address::from_string("192.168.1.37"), send_port));
-
-        m_rudp.start_listening();
+        m_socket.open(receive_port);
+        m_socket.start_listening();
     }
     catch(std::exception e)
     {
@@ -150,7 +145,7 @@ auto Comms::is_connected() const -> bool
 
 auto Comms::get_remote_address() const -> boost::asio::ip::address
 {
-    return m_rudp.get_send_endpoint().address();
+    return m_socket.get_send_endpoint().address();
 }
 
 auto Comms::get_remote_clock() const -> Manual_Clock const&
@@ -682,31 +677,6 @@ void Comms::handle_node_input_stream_path()
     m_setup_channel.end_pack();
 }
 
-
-template<class Channel, class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == true, bool>::type
-set_stream_calibration_data(Channel& channel, node::stream::IStream const& _stream)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-        QLOGE("Trying to set calibration data for a stream that doesn't support it!!!");
-        return true;
-    }
-    return false;
-}
-
-template<class Channel, class Stream>
-typename std::enable_if<std::is_void<typename Stream::Calibration_Data>::value == false, bool>::type
-set_stream_calibration_data(Channel& channel, node::stream::IStream const& _stream)
-{
-    if (_stream.get_type() == Stream::TYPE)
-    {
-
-        return true;
-    }
-    return false;
-}
-
 void Comms::handle_node_output_calibration_data()
 {
     m_setup_channel.begin_unpack();
@@ -743,32 +713,11 @@ void Comms::handle_node_output_calibration_data()
         return;
     }
 
-    if (set_stream_calibration_data<Setup_Channel, node::stream::IAcceleration>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IAngular_Velocity>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IMagnetic_Field>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IPressure>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::ILinear_Acceleration>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::ICurrent>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IVoltage>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IDistance>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IECEF_Position>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IECEF_Velocity>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IPWM>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IFrame>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::ITemperature>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IADC>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IFloat>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IForce>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IVelocity>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::IThrottle>(m_setup_channel, *stream) ||
-        set_stream_calibration_data<Setup_Channel, node::stream::ITorque>(m_setup_channel, *stream)
-            )
+    std::vector<uint8_t> data;
+    if (!m_setup_channel.unpack_remaining_data(data) ||
+        !stream->deserialize_calibration_data(data))
     {
-        ;//nothing
-    }
-    else
-    {
-        QLOGE("Req Id: {} - unrecognized stream type", req_id);
+        QLOGE("Req Id: {} - cannot deserialize calibration data", req_id);
         return;
     }
 
@@ -986,11 +935,12 @@ void Comms::process()
     gather_telemetry_data();
 
     {
-        if (m_rudp.get_send_endpoint().address().is_unspecified() && !m_rudp.get_last_receive_endpoint().address().is_unspecified())
+        if (m_socket.get_send_endpoint().address().is_unspecified() && !m_socket.get_last_receive_endpoint().address().is_unspecified())
         {
-            auto endpoint = m_rudp.get_last_receive_endpoint();
+            auto endpoint = m_socket.get_last_receive_endpoint();
             endpoint.port(m_send_port);
-            m_rudp.set_send_endpoint(endpoint);
+            m_socket.set_send_endpoint(endpoint);
+            m_rudp.reconnect();
         }
     }
 

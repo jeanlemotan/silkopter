@@ -145,7 +145,7 @@ private:
 
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
-    boost::asio::ip::udp::socket m_socket;
+    util::RUDP_Asio_Socket m_socket;
     util::RUDP m_rudp;
 
     Setup_Channel m_setup_channel;

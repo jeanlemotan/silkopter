@@ -118,7 +118,8 @@ SOURCES += \
     ../../src/source/ADS1115.cpp \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
-    ../../src/processor/Comp_ECEF_Position.cpp
+    ../../src/processor/Comp_ECEF_Position.cpp \
+    ../../../libs/utils/RUDP.inl
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
