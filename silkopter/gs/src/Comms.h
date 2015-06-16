@@ -13,13 +13,11 @@ class Comms : q::util::Noncopyable
 public:
     Comms(boost::asio::io_service& io_service, HAL& hal);
 
-    auto start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_rfmon(std::string const& interface) -> bool;
+
     void disconnect();
-
     auto is_connected() const -> bool;
-    auto get_remote_address() const -> boost::asio::ip::address;
-
-    auto get_rudp() -> util::RUDP&;
 
     void request_all_node_configs();
 
@@ -39,15 +37,17 @@ private:
     HAL& m_hal;
     uint32_t m_last_req_id = 0;
 
+    void configure_channels();
+
+
     void reset();
     void request_data();
     bool m_did_request_data = false;
 
     boost::asio::io_service& m_io_service;
-    boost::asio::ip::udp::socket m_socket;
-    boost::asio::ip::udp::endpoint m_remote_endpoint;
 
-    util::RUDP m_rudp;
+    std::shared_ptr<util::RCP_Socket> m_socket;
+    std::shared_ptr<util::RCP> m_rcp;
 
     mutable Setup_Channel m_setup_channel;
     mutable Input_Channel m_input_channel;

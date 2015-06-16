@@ -75,6 +75,8 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     }
     catch(std::exception e)
     {
+        m_socket.reset();
+        m_rcp.reset();
         QLOGW("Cannot start comms on ports s:{} r:{}", send_port, receive_port);
         return false;
     }

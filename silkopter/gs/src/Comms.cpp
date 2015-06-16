@@ -3,6 +3,9 @@
 #include "sz_math.hpp"
 #include "sz_Multi_Config.hpp"
 
+#include "utils/RCP_UDP_Socket.h"
+#include "utils/RCP_RFMON_Socket.h"
+
 
 using namespace silk;
 using namespace boost::asio;
@@ -15,104 +18,114 @@ constexpr uint8_t VIDEO_CHANNEL = 4;
 Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     : m_hal(hal)
     , m_io_service(io_service)
-    , m_socket(io_service)
-    , m_rudp(m_socket)
-    , m_setup_channel(m_rudp, SETUP_CHANNEL)
-    , m_input_channel(m_rudp, INPUT_CHANNEL)
-    , m_telemetry_channel(m_rudp, TELEMETRY_CHANNEL)
-    , m_video_channel(m_rudp, VIDEO_CHANNEL)
+    , m_setup_channel(SETUP_CHANNEL)
+    , m_input_channel(INPUT_CHANNEL)
+    , m_telemetry_channel(TELEMETRY_CHANNEL)
+    , m_video_channel(VIDEO_CHANNEL)
 {
-    {
-        util::RUDP::Send_Params params;
-        params.is_compressed = true;
-        params.is_reliable = false;
-        params.importance = 64;
-        m_rudp.set_send_params(TELEMETRY_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Send_Params params;
-        params.mtu = 100;
-        params.is_compressed = true;
-        params.is_reliable = true;
-        params.importance = 126;
-        m_rudp.set_send_params(SETUP_CHANNEL, params);
-    }
-    {
-        util::RUDP::Send_Params params;
-        params.mtu = 100;
-        params.is_compressed = true;
-        params.is_reliable = false;
-        params.cancel_on_new_data = true;
-        params.importance = 127;
-        m_rudp.set_send_params(INPUT_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Receive_Params params;
-        params.max_receive_time = std::chrono::seconds(999999);
-        m_rudp.set_receive_params(SETUP_CHANNEL, params);
-    }
-    {
-        util::RUDP::Receive_Params params;
-        params.max_receive_time = std::chrono::seconds(200);
-        m_rudp.set_receive_params(INPUT_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(50);
-        m_rudp.set_receive_params(TELEMETRY_CHANNEL, params);
-    }
-
-    {
-        util::RUDP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(150);
-        m_rudp.set_receive_params(VIDEO_CHANNEL, params);
-    }
 }
 
-auto Comms::start(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
+auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        m_socket.open(ip::udp::v4());
-        m_socket.set_option(ip::udp::socket::reuse_address(true));
-        m_socket.set_option(socket_base::send_buffer_size(65536));
-        m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
+        auto s = new util::RCP_UDP_Socket(m_io_service);
+        m_socket.reset(s);
+        m_rcp.reset(new util::RCP(*m_socket));
 
-        m_rudp.set_send_endpoint(ip::udp::endpoint(address, send_port));
+        s->open(send_port, receive_port);
+        s->set_send_endpoint(ip::udp::endpoint(address, send_port));
+        s->start_listening();
 
-        m_rudp.start_listening();
+//        m_socket.open(ip::udp::v4());
+//        m_socket.set_option(ip::udp::socket::reuse_address(true));
+//        m_socket.set_option(socket_base::send_buffer_size(65536));
+//        m_socket.bind(ip::udp::endpoint(ip::udp::v4(), receive_port));
+
+//        m_rudp.set_send_endpoint();
+
+//        m_rudp.start_listening();
 
         QLOGI("Started sending on port {} and receiving on port {}", send_port, receive_port);
     }
     catch(...)
     {
-        m_socket.close();
+        m_socket.reset();
+        m_rcp.reset();
         QLOGW("Connect failed");
         return false;
     }
 
+    configure_channels();
     reset();
 
     return true;
 }
 
+
 void Comms::disconnect()
 {
     reset();
-    m_socket.close();
+    m_socket.reset();
 }
 
 auto Comms::is_connected() const -> bool
 {
-    return m_socket.is_open();
+    return m_socket != nullptr;
 }
 
-auto Comms::get_remote_address() const -> boost::asio::ip::address
+
+void Comms::configure_channels()
 {
-    return m_remote_endpoint.address();
+    {
+        util::RCP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = false;
+        params.importance = 64;
+        m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
+    }
+
+    {
+        util::RCP::Send_Params params;
+        params.mtu = 100;
+        params.is_compressed = true;
+        params.is_reliable = true;
+        params.importance = 126;
+        m_rcp->set_send_params(SETUP_CHANNEL, params);
+    }
+    {
+        util::RCP::Send_Params params;
+        params.mtu = 100;
+        params.is_compressed = true;
+        params.is_reliable = false;
+        params.cancel_on_new_data = true;
+        params.importance = 127;
+        m_rcp->set_send_params(INPUT_CHANNEL, params);
+    }
+
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(999999);
+        m_rcp->set_receive_params(SETUP_CHANNEL, params);
+    }
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(200);
+        m_rcp->set_receive_params(INPUT_CHANNEL, params);
+    }
+
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::milliseconds(50);
+        m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
+    }
+
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::milliseconds(150);
+        m_rcp->set_receive_params(VIDEO_CHANNEL, params);
+    }
+
 }
 
 auto Comms::get_setup_channel() -> Setup_Channel&
@@ -897,7 +910,7 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_video_channel.get_next_message())
+    while (auto msg = m_video_channel.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
@@ -906,7 +919,7 @@ void Comms::process()
     }
 
     auto start = q::Clock::now();
-    while (auto msg = m_telemetry_channel.get_next_message())
+    while (auto msg = m_telemetry_channel.get_next_message(*m_rcp))
     {
         //process only the first 10 ms worh of data and discard the rest
         if (q::Clock::now() - start < std::chrono::milliseconds(100))
@@ -918,7 +931,7 @@ void Comms::process()
         }
     }
 
-    while (auto msg = m_setup_channel.get_next_message())
+    while (auto msg = m_setup_channel.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
@@ -941,9 +954,9 @@ void Comms::process()
     }
     //    QLOGI("*********** LOOP: {}", xxx);
 
-    m_rudp.process();
+    m_rcp->process();
 
-    if (m_rudp.is_connected())
+    if (m_rcp->is_connected())
     {
         if (!m_did_request_data)
         {
@@ -956,12 +969,8 @@ void Comms::process()
         m_did_request_data = false;
     }
 
-    m_setup_channel.send();
-    m_telemetry_channel.try_sending();
-    m_input_channel.try_sending();
+    m_setup_channel.send(*m_rcp);
+    m_telemetry_channel.try_sending(*m_rcp);
+    m_input_channel.try_sending(*m_rcp);
 }
 
-auto Comms::get_rudp() -> util::RUDP&
-{
-    return m_rudp;
-}

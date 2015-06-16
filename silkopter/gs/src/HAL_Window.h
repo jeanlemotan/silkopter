@@ -75,22 +75,22 @@ private:
     struct Stream_Data
     {
         silk::node::stream::Stream_wptr stream;
-        std::shared_ptr<QNEPort> port;
-        std::shared_ptr<QNEBlock> block;
+        QNEPort* port = nullptr;
+        QNEBlock* block = nullptr;
     };
 
     struct Node_Data
     {
         silk::node::Node_wptr node;
 
-        std::shared_ptr<QNEBlock> block;
+        QNEBlock* block = nullptr;
         struct Input_Data
         {
-            std::shared_ptr<QNEPort> port;
+            QNEPort* port = nullptr;
         };
         struct Output_Data
         {
-            std::shared_ptr<QNEPort> port;
+            QNEPort* port = nullptr;
         };
         std::map<std::string, Input_Data> inputs;
         std::map<std::string, Output_Data> outputs;

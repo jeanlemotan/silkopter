@@ -68,7 +68,6 @@ HEADERS += \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/utils/Channel.h \
     ../../../libs/utils/PID.h \
-    ../../../libs/utils/RUDP.h \
     ../../../libs/utils/Serial_Channel.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/common/node/bus/IBus.h \
@@ -144,7 +143,10 @@ HEADERS += \
     ../../../libs/common/node/stream/IBool.h \
     ../../../libs/common/node/stream/IPosition.h \
     ../../../libs/common/node/stream/IGPS_Info.h \
-    ../../src/Custom_Item_Delegate.h
+    ../../src/Custom_Item_Delegate.h \
+    ../../../libs/utils/RCP_RFMON_Socket.h \
+    ../../../libs/utils/RCP_UDP_Socket.h \
+    ../../../libs/utils/RCP.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -167,7 +169,10 @@ SOURCES += \
     ../../src/Camera_Controller_3D.cpp \
     ../../src/Multi_Config_Window.cpp \
     ../../src/Axis.cpp \
-    ../../src/Video_Viewer.cpp
+    ../../src/Video_Viewer.cpp \
+    ../../../libs/utils/RCP_RFMON_Socket.cpp \
+    ../../../libs/utils/RCP_UDP_Socket.cpp \
+    ../../../libs/utils/RCP.inl
 
 FORMS += \
     ../../src/New_Node.ui \

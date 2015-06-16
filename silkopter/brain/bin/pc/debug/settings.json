@@ -69,22 +69,6 @@
                     ""
                 ]
             },
-            "LiPo Battery": {
-                "output_calibration": [
-                    {}
-                ],
-                "type": "LiPo Battery",
-                "init_params": {
-                    "Rate (Hz)": 8
-                },
-                "config": {
-                    "Full Charge (Ah)": 2.200000047683716
-                },
-                "input_paths": [
-                    "",
-                    ""
-                ]
-            },
             "Gravity Filter": {
                 "output_calibration": [
                     {}
@@ -92,21 +76,6 @@
                 "type": "Gravity Filter",
                 "init_params": {
                     "Rate (Hz)": 44
-                },
-                "config": {},
-                "input_paths": [
-                    "",
-                    ""
-                ]
-            },
-            "Velocity Controller": {
-                "output_calibration": [
-                    {},
-                    {}
-                ],
-                "type": "Velocity Controller",
-                "init_params": {
-                    "Rate (Hz)": 22
                 },
                 "config": {},
                 "input_paths": [
@@ -144,7 +113,7 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 0.0
+                    "Cutoff Frequency (Hz)": 100.0
                 },
                 "input_paths": [
                     ""

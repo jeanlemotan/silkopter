@@ -64,7 +64,7 @@ GS::GS(QWidget *parent)
 
 GS::~GS()
 {
-    m_comms.disconnect();
+//    m_comms.disconnect();
 
 	m_stop_io_service_thread = true;
     m_io_service.stop();
@@ -151,7 +151,7 @@ void GS::process()
 {
     if (!m_comms.is_connected() && !m_remote_address.empty())
     {
-        m_comms.start(boost::asio::ip::address::from_string(m_remote_address), 52521, 52520);
+        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 52521, 52520);
     }
 
     auto now = q::Clock::now();

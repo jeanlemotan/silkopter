@@ -589,8 +589,8 @@ void HAL_Window::refresh_node(silk::node::Node& node)
         {
             auto connection = new QNEConnection(0);
             m_scene->addItem(connection);
-            connection->setPort1((QNEPort*)id.port.get());
-            connection->setPort2(it_stream->second.port.get());
+            connection->setPort1((QNEPort*)id.port);
+            connection->setPort2(it_stream->second.port);
             connection->updatePath();
         }
     }
@@ -646,7 +646,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         });
 
     data.node = node;
-    data.block.reset(b);
+    data.block = b;
 
     for (auto const& i: node->inputs)
     {
@@ -665,7 +665,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         });
 
         auto& port_data = data.inputs[i.name];
-        port_data.port.reset(port);
+        port_data.port = port;
     }
     for (auto const& o: node->outputs)
     {
@@ -674,7 +674,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         port->setId(o.name.c_str());
 
         auto& port_data = data.outputs[o.name];
-        port_data.port.reset(port);
+        port_data.port = port;
 
         auto& stream_data = m_streams[o.stream->name];
         stream_data.stream = o.stream;
@@ -729,7 +729,8 @@ void HAL_Window::remove_node(silk::node::Node_ptr node)
     if (it != m_nodes.end())
     {
         Node_Data& nd = it->second;
-        m_scene->removeItem(nd.block.get());
+        m_scene->removeItem(nd.block);
+        delete nd.block;
         m_nodes.erase(it);
     }
 }

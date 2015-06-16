@@ -30,6 +30,11 @@ void RCP_UDP_Socket::start_listening()
     m_socket.async_receive_from(boost::asio::buffer(m_buffer), m_rx_endpoint, m_asio_receive_callback);
 }
 
+void RCP_UDP_Socket::set_send_endpoint(boost::asio::ip::udp::endpoint endpoint)
+{
+    m_tx_endpoint = endpoint;
+}
+
 void RCP_UDP_Socket::async_send(uint8_t const* data, size_t size)
 {
     m_socket.async_send_to(boost::asio::buffer(data, size), m_tx_endpoint, m_asio_send_callback);

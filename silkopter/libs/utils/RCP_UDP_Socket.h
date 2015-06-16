@@ -14,6 +14,7 @@ public:
 
     auto process() -> Result;
 
+    void set_send_endpoint(boost::asio::ip::udp::endpoint endpoint);
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
 
