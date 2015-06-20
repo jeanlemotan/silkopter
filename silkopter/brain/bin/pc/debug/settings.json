@@ -92,32 +92,49 @@
                 "config": {},
                 "input_paths": []
             },
-            "Angular Velocity LPF": {
+            "Oscillator": {
                 "output_calibration": [
-                    {
-                        "bias": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        }
-                    }
+                    {}
                 ],
-                "type": "Angular Velocity LPF",
+                "type": "Oscillator",
                 "init_params": {
-                    "Rate (Hz)": 11
+                    "Rate (Hz)": 20000,
+                    "Component Count": 1
                 },
                 "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 100.0
+                    "Amplitude": 1.0,
+                    "Noise": 0.0,
+                    "Square": false,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 1.0,
+                            "Amplitude": 1.0
+                        }
+                    ]
                 },
-                "input_paths": [
-                    ""
-                ]
+                "input_paths": []
+            },
+            "Oscillator 0": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Oscillator",
+                "init_params": {
+                    "Rate (Hz)": 10000,
+                    "Component Count": 1
+                },
+                "config": {
+                    "Amplitude": 1.0,
+                    "Noise": 0.0,
+                    "Square": false,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 1000.0,
+                            "Amplitude": 1.0
+                        }
+                    ]
+                },
+                "input_paths": []
             }
         }
     }

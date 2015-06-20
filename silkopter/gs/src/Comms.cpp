@@ -272,7 +272,6 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
     ok &= unpack_def_inputs(channel, node_def.inputs);
     ok &= unpack_outputs(channel, node_def.outputs);
     ok &= channel.unpack_param(node_def.default_init_params);
-    ok &= channel.unpack_param(node_def.default_config);
     return ok;
 }
 
@@ -819,7 +818,7 @@ void Comms::handle_stream_data()
     auto stream = m_hal.get_streams().find_by_name(stream_name);
     if (!stream)
     {
-        QLOGE("Cannot find stream '{}'", stream_name);
+        QLOGW("Cannot find stream '{}'", stream_name);
         return;
     }
 

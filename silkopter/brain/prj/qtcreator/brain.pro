@@ -73,6 +73,7 @@ LIBS += -lboost_thread
 LIBS += -lboost_program_options
 LIBS += -lrt
 LIBS += -lz
+LIBS += -lpcap
 rpi {
     LIBS += -lpigpio
     LIBS += -lmmal_core
@@ -238,5 +239,7 @@ HEADERS += \
     ../../../libs/common/node/stream/Stream_Base.h \
     ../../../libs/utils/RCP.h \
     ../../../libs/utils/RCP_RFMON_Socket.h \
-    ../../../libs/utils/RCP_UDP_Socket.h
+    ../../../libs/utils/RCP_UDP_Socket.h \
+    ../../../libs/utils/radiotap/ieee80211_radiotap.h \
+    ../../../libs/utils/radiotap/radiotap.h
 

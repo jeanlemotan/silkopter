@@ -59,8 +59,7 @@ void HAL::set_multi_config(config::Multi const& config)
 
 void HAL::add_node(std::string const& def_name,
                      std::string const& name,
-                     rapidjson::Document const& init_params,
-                     rapidjson::Document const& config)
+                     rapidjson::Document const& init_params)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
@@ -68,7 +67,6 @@ void HAL::add_node(std::string const& def_name,
     channel.pack_param(def_name);
     channel.pack_param(name);
     channel.pack_param(init_params);
-    channel.pack_param(config);
     channel.end_pack();
 }
 

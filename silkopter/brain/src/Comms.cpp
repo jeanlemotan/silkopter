@@ -29,7 +29,6 @@
 #include "common/node/IPilot.h"
 
 #include "utils/RCP_UDP_Socket.h"
-#include "utils/RCP_RFMON_Socket.h"
 
 
 #include "sz_math.hpp"
@@ -89,30 +88,6 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     return true;
 }
 
-auto Comms::start_rfmon(std::string const& interface) -> bool
-{
-    try
-    {
-        auto s = new util::RCP_RFMON_Socket();
-        m_socket.reset(s);
-        m_rcp.reset(new util::RCP(*m_socket));
-
-        s->open(interface);
-    }
-    catch(std::exception e)
-    {
-        QLOGW("Cannot start comms on interface '{}'", interface);
-        return false;
-    }
-
-    m_is_connected = true;
-    QLOGI("Started sending on ports '{}'", interface);
-
-    configure_channels();
-
-    return true;
-}
-
 void Comms::configure_channels()
 {
     {
@@ -134,7 +109,7 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 8192;
+        params.mtu = 1450;
         params.is_compressed = true;
         params.is_reliable = false;
         params.importance = 0;
@@ -145,7 +120,7 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 16000;
+        params.mtu = 1450;
         params.is_compressed = false;
         params.is_reliable = false;
         params.importance = 10;
@@ -437,7 +412,6 @@ static void pack_node_def_data(Comms::Setup_Channel& channel, node::INode const&
     pack_def_inputs(channel, node.get_inputs());
     pack_outputs(channel, node.get_outputs());
     channel.pack_param(node.get_init_params());
-    channel.pack_param(node.get_config());
 }
 
 static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& node)
@@ -764,13 +738,11 @@ void Comms::handle_add_node()
     uint32_t req_id = 0;
     std::string def_name, name;
     rapidjson::Document init_paramsj;
-    rapidjson::Document configj;
     if (!m_setup_channel.begin_unpack() ||
         !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(def_name) ||
         !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(init_paramsj) ||
-        !m_setup_channel.unpack_param(configj))
+        !m_setup_channel.unpack_param(init_paramsj))
     {
         QLOGE("Error in unpacking add node request");
         return;
@@ -785,7 +757,6 @@ void Comms::handle_add_node()
         m_setup_channel.end_pack();
         return;
     }
-    node->set_config(configj);
     m_hal.save_settings();
 
     //reply

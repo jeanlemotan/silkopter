@@ -64,7 +64,7 @@ namespace util
 
         struct Send_Params
         {
-            size_t mtu = 2000;
+            size_t mtu = 1420;
             int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             bool is_compressed = true;

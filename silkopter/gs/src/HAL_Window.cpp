@@ -694,7 +694,6 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
 void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
 {
     auto init_paramsj = jsonutil::clone_value(def->default_init_params);
-    auto configj = jsonutil::clone_value(def->default_config);
 
     QDialog dialog;
     dialog.setLayout(new QVBoxLayout(&dialog));
@@ -719,7 +718,7 @@ void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
     {
         std::string node_name = ui.name->text().toLatin1().data();
         set_node_position(node_name, pos);
-        m_hal.add_node(def->name, node_name, std::move(init_paramsj), std::move(configj));
+        m_hal.add_node(def->name, node_name, std::move(init_paramsj));
     }
 }
 

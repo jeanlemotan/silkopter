@@ -151,7 +151,7 @@ void GS::process()
 {
     if (!m_comms.is_connected() && !m_remote_address.empty())
     {
-        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 52521, 52520);
+        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8011, 8010);
     }
 
     auto now = q::Clock::now();
