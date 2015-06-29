@@ -30,7 +30,8 @@ private:
     std::string m_interface;
     uint8_t m_id = 0;
     bool m_exit = false;
-    boost::thread m_thread;
+    boost::thread m_rx_thread;
+    boost::thread m_tx_thread;
 };
 
 }

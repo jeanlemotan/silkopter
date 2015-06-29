@@ -4,7 +4,6 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <boost/optional.hpp>
-#include "RCP.h"
 
 namespace util
 {

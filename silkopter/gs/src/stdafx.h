@@ -58,8 +58,6 @@ extern "C"
 #include "QInput.h"
 #include "q.h"
 
-#include "utils/Channel.h"
-
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "rapidjson/stringbuffer.h"

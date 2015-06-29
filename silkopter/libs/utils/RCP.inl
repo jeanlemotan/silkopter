@@ -798,11 +798,14 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
         ++it;
     }
 
-    if (best_id != no_id)
-    {
-        auto const& header = get_header<Packet_Header>((*best)->data);
-        //QLOGI("P{} F{}, {}", header.id, header.fragment_idx, (*best)->sent_count);
-    }
+//    if (best_id != no_id)
+//    {
+//        auto const& header = get_header<Packet_Header>((*best)->data);
+//        if (header.channel_idx == 4)
+//        {
+//            QLOGI("P{} F{}, {}", header.id, header.fragment_idx, (*best)->sent_count);
+//        }
+//    }
 
     return best_id == no_id ? queue.end() : best;
 }
@@ -1211,11 +1214,7 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
     if (packet->fragments[fragment_idx]) //we already have the fragment
     {
         m_global_stats.rx_duplicated_datagrams++;
-
-//            if (header.channel_idx == 12)
-//            {
-//                QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
-//            }
+        QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
         return;
     }
 
@@ -1227,7 +1226,11 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
     }
     packet->fragments[fragment_idx] = std::move(datagram);
 
-//        QLOGI("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count, static_cast<size_t>(packet->main_header.fragment_count));
+    if (channel_idx == 4)
+    {
+        QLOGI("Received fragment {} for packet {}: {}/{} received", fragment_idx, id, packet->received_fragment_count,
+              packet->fragments[0] ? static_cast<size_t>(packet->main_header.fragment_count) : 0u);
+    }
 }
 inline void RCP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
 {
@@ -1292,7 +1295,10 @@ inline void RCP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-                //QLOGI("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                if (hdr.channel_idx == 4)
+//                {
+//                    QLOGI("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                }
                 erase_unordered(m_tx.packet_queue, it);
 //                    count--;
 //                    if (count == 0)
@@ -1399,7 +1405,10 @@ inline void RCP::process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-                QLOGI("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                if (hdr.channel_idx == 4)
+//                {
+//                    QLOGI("Cancelling fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                }
                 erase_unordered(m_tx.packet_queue, it);
                 continue;
             }

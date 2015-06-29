@@ -2,8 +2,6 @@
 
 #include "common/Comm_Data.h"
 #include "HAL.h"
-#include "utils/Channel.h"
-#include "utils/RCP.h"
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
@@ -19,6 +17,12 @@ struct Init_Params;
 struct Config;
 }
 }
+}
+
+namespace util
+{
+class RCP;
+class RCP_Socket;
 }
 
 namespace silk
@@ -51,12 +55,9 @@ public:
         Comms& m_comms;
     };
 
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
-    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
-    typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
-
     auto get_source() -> std::shared_ptr<Source>;
+
+    struct Channels;
 
 private:
     void configure_channels();
@@ -134,10 +135,7 @@ private:
     std::shared_ptr<util::RCP_Socket> m_socket;
     std::shared_ptr<util::RCP> m_rcp;
 
-    Setup_Channel m_setup_channel;
-    Input_Channel m_input_channel;
-    Telemetry_Channel m_telemetry_channel;
-    Video_Channel m_video_channel;
+    std::shared_ptr<Channels> m_channels;
 
     q::Clock::time_point m_comms_start_tp;
 

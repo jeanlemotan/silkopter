@@ -28,8 +28,11 @@
 
 #include "common/node/IPilot.h"
 
+
+#include "utils/RCP.h"
 #include "utils/RCP_UDP_Socket.h"
 #include "utils/RCP_RFMON_Socket.h"
+#include "utils/Channel.h"
 
 
 #include "sz_math.hpp"
@@ -46,13 +49,30 @@ constexpr uint8_t VIDEO_CHANNEL = 4;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
+struct Comms::Channels
+{
+    typedef util::Channel<comms::Setup_Message, uint16_t> Setup;
+    typedef util::Channel<comms::Input_Message, uint16_t> Input;
+    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry;
+    typedef util::Channel<comms::Video_Message, uint32_t> Video;
+
+    Channels()
+        : setup(SETUP_CHANNEL)
+        , input(INPUT_CHANNEL)
+        , telemetry(TELEMETRY_CHANNEL)
+        , video(VIDEO_CHANNEL)
+    {}
+
+    Setup setup;
+    Input input;
+    Telemetry telemetry;
+    Video video;
+};
+
 Comms::Comms(HAL& hal)
     : m_hal(hal)
-    , m_setup_channel(SETUP_CHANNEL)
-    , m_input_channel(INPUT_CHANNEL)
-    , m_telemetry_channel(TELEMETRY_CHANNEL)
-    , m_video_channel(VIDEO_CHANNEL)
     , m_comms_start_tp(q::Clock::now())
+    , m_channels(new Channels())
 {
     m_source.reset(new Source(*this));
     m_commands_stream.reset(new Commands);
@@ -212,10 +232,10 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
 
     for (auto const& s: samples)
     {
-        m_video_channel.begin_pack(comms::Video_Message::FRAME_DATA);
-        m_video_channel.pack_param(ts.stream_name);
-        m_video_channel.pack_param(s.value.type);
-        m_video_channel.pack_param(s.value.resolution);
+        m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
+        m_channels->video.pack_param(ts.stream_name);
+        m_channels->video.pack_param(s.value.type);
+        m_channels->video.pack_param(s.value.resolution);
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
         if (dt >= (1 << 24))
@@ -235,26 +255,26 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
         data.dt = dt;
         data.tp = tp;
 
-        m_video_channel.pack_param(data);
-        m_video_channel.pack_param(static_cast<uint32_t>(s.value.data.size()));
-        m_video_channel.pack_data(s.value.data.data(), s.value.data.size());
-        m_video_channel.end_pack();
+        m_channels->video.pack_param(data);
+        m_channels->video.pack_param(static_cast<uint32_t>(s.value.data.size()));
+        m_channels->video.pack_data(s.value.data.data(), s.value.data.size());
+        m_channels->video.end_pack();
 
         if (s.value.is_keyframe)
         {
             //QLOGI("Keyframe");
             auto params = m_rcp->get_send_params(VIDEO_CHANNEL);
-            params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
-            params.cancel_after = std::chrono::milliseconds(200);
+            //params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
+            //params.cancel_after = std::chrono::milliseconds(200);
             //params.is_reliable = true;
-            params.unreliable_retransmit_count = 3;
-            auto const& tx_buffer = m_video_channel.get_tx_buffer();
+            //params.unreliable_retransmit_count = 3;
+            auto const& tx_buffer = m_channels->video.get_tx_buffer();
             m_rcp->try_sending(VIDEO_CHANNEL, params, tx_buffer.data(), tx_buffer.size());
-            m_video_channel.clear_tx_buffer();
+            m_channels->video.clear_tx_buffer();
         }
         else
         {
-            m_video_channel.try_sending(*m_rcp);
+            m_channels->video.try_sending(*m_rcp);
         }
     }
 
@@ -383,11 +403,11 @@ void Comms::pack_telemetry_data()
     {
         if (!ts.data.empty() && ts.sample_count > 0)
         {
-            m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-            m_telemetry_channel.pack_param(ts.stream_name);
-            m_telemetry_channel.pack_param(ts.sample_count);
-            m_telemetry_channel.pack_data(ts.data.data(), ts.data.size());
-            m_telemetry_channel.end_pack();
+            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+            m_channels->telemetry.pack_param(ts.stream_name);
+            m_channels->telemetry.pack_param(ts.sample_count);
+            m_channels->telemetry.pack_data(ts.data.data(), ts.data.size());
+            m_channels->telemetry.end_pack();
         }
         ts.data.clear();
         ts.sample_count = 0;
@@ -398,10 +418,10 @@ void Comms::pack_telemetry_data()
         auto& t = m_hal_telemetry_data;
         if (!t.data.empty() && t.sample_count > 0)
         {
-            m_telemetry_channel.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-            m_telemetry_channel.pack_param(t.sample_count);
-            m_telemetry_channel.pack_data(t.data.data(), t.data.size());
-            m_telemetry_channel.end_pack();
+            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+            m_channels->telemetry.pack_param(t.sample_count);
+            m_channels->telemetry.pack_data(t.data.data(), t.data.size());
+            m_channels->telemetry.end_pack();
         }
         t.data.clear();
         t.sample_count = 0;
@@ -409,7 +429,7 @@ void Comms::pack_telemetry_data()
 }
 
 template<class T>
-void pack_outputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
+void pack_outputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
 {
     channel.pack_param(static_cast<uint32_t>(io.size()));
     for (auto const& i: io)
@@ -421,7 +441,7 @@ void pack_outputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
 }
 
 template<class T>
-void pack_def_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
+void pack_def_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
 {
     channel.pack_param(static_cast<uint32_t>(io.size()));
     for (auto const& i: io)
@@ -432,7 +452,7 @@ void pack_def_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
     }
 }
 template<class T>
-void pack_inputs(Comms::Setup_Channel& channel, std::vector<T> const& io)
+void pack_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
 {
     channel.pack_param(static_cast<uint32_t>(io.size()));
     for (auto const& i: io)
@@ -455,14 +475,14 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
     return std::move(json);
 }
 
-static void pack_node_def_data(Comms::Setup_Channel& channel, node::INode const& node)
+static void pack_node_def_data(Comms::Channels::Setup& channel, node::INode const& node)
 {
     pack_def_inputs(channel, node.get_inputs());
     pack_outputs(channel, node.get_outputs());
     channel.pack_param(node.get_init_params());
 }
 
-static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& node)
+static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& node)
 {
     channel.pack_param(node.get_type());
     pack_inputs(channel, node.get_inputs());
@@ -477,20 +497,22 @@ static void pack_node_data(Comms::Setup_Channel& channel, node::INode const& nod
 void Comms::handle_clock()
 {
     uint32_t req_id = 0;
-    if (m_setup_channel.unpack_all(req_id))
+    auto& channel = m_channels->setup;
+    if (channel.unpack_all(req_id))
     {
         QLOGI("Req Id: {} - clock", req_id);
 
         auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now() - m_comms_start_tp).count());
-        m_setup_channel.pack_all(comms::Setup_Message::CLOCK, req_id, tp);
+        channel.pack_all(comms::Setup_Message::CLOCK, req_id, tp);
     }
 }
 
 void Comms::handle_multi_config()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+    channel.begin_unpack();
     uint32_t req_id = 0;
-    if (!m_setup_channel.unpack_param(req_id))
+    if (!channel.unpack_param(req_id))
     {
         QLOGE("Error in unpacking multi config rquest");
         return;
@@ -499,7 +521,7 @@ void Comms::handle_multi_config()
     QLOGI("Req Id: {} - multi config", req_id);
 
     rapidjson::Document configj;
-    if (m_setup_channel.unpack_param(configj))
+    if (channel.unpack_param(configj))
     {
         config::Multi config;
         autojsoncxx::error::ErrorStack result;
@@ -516,50 +538,52 @@ void Comms::handle_multi_config()
         }
     }
 
-    m_setup_channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
-    m_setup_channel.pack_param(req_id);
+    channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
+    channel.pack_param(req_id);
 
     auto config = m_hal.get_multi_config();
     if (config)
     {
-        m_setup_channel.pack_param(true);
+        channel.pack_param(true);
         configj.SetObject();
         autojsoncxx::to_document(*config, configj);
-        m_setup_channel.pack_param(configj);
+        channel.pack_param(configj);
     }
     else
     {
-        m_setup_channel.pack_param(false);
+        channel.pack_param(false);
     }
 
-    m_setup_channel.end_pack();
+    channel.end_pack();
 }
 
 
 void Comms::handle_enumerate_node_defs()
 {
+    auto& channel = m_channels->setup;
+
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
     m_hal_telemetry_data.is_enabled = false;
 
     uint32_t req_id = 0;
-    if (m_setup_channel.unpack_all(req_id))
+    if (channel.unpack_all(req_id))
     {
         QLOGI("Req Id: {} - enumerate node factory", req_id);
         auto nodes = m_hal.get_node_factory().create_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(nodes.size()));
+        channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
+        channel.pack_param(req_id);
+        channel.pack_param(static_cast<uint32_t>(nodes.size()));
 
         for (auto const& n: nodes)
         {
-            m_setup_channel.pack_param(n.name);
-            m_setup_channel.pack_param(n.node->get_type());
-            pack_node_def_data(m_setup_channel, *n.node);
+            channel.pack_param(n.name);
+            channel.pack_param(n.node->get_type());
+            pack_node_def_data(channel, *n.node);
         }
 
-        m_setup_channel.end_pack();
+        channel.end_pack();
     }
     else
     {
@@ -569,27 +593,29 @@ void Comms::handle_enumerate_node_defs()
 
 void Comms::handle_enumerate_nodes()
 {
+    auto& channel = m_channels->setup;
+
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
     m_hal_telemetry_data.is_enabled = false;
 
     uint32_t req_id = 0;
-    if (m_setup_channel.unpack_all(req_id))
+    if (channel.unpack_all(req_id))
     {
         QLOGI("Req Id: {} - enumerate nodes", req_id);
         auto const& nodes = m_hal.get_nodes().get_all();
 
-        m_setup_channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
-        m_setup_channel.pack_param(req_id);
-        m_setup_channel.pack_param(static_cast<uint32_t>(nodes.size()));
+        channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
+        channel.pack_param(req_id);
+        channel.pack_param(static_cast<uint32_t>(nodes.size()));
 
         for (auto const& n: nodes)
         {
-            m_setup_channel.pack_param(n.name);
-            pack_node_data(m_setup_channel, *n.node);
+            channel.pack_param(n.name);
+            pack_node_data(channel, *n.node);
         }
 
-        m_setup_channel.end_pack();
+        channel.end_pack();
     }
     else
     {
@@ -599,11 +625,13 @@ void Comms::handle_enumerate_nodes()
 
 void Comms::handle_get_node_data()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+
+    channel.begin_unpack();
     uint32_t req_id = 0;
     std::string name;
-    if (!m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name))
+    if (!channel.unpack_param(req_id) ||
+        !channel.unpack_param(name))
     {
         QLOGE("Error in unpacking node data request");
         return;
@@ -617,20 +645,22 @@ void Comms::handle_get_node_data()
         return;
     }
 
-    m_setup_channel.begin_pack(comms::Setup_Message::GET_NODE_DATA);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    pack_node_data(m_setup_channel, *node);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::GET_NODE_DATA);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    pack_node_data(m_channels->setup, *node);
+    channel.end_pack();
 }
 
 void Comms::handle_node_config()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+
+    channel.begin_unpack();
     uint32_t req_id = 0;
     std::string name;
-    if (!m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name))
+    if (!channel.unpack_param(req_id) ||
+        !channel.unpack_param(name))
     {
         QLOGE("Error in unpacking config request");
         return;
@@ -645,26 +675,28 @@ void Comms::handle_node_config()
     }
 
     rapidjson::Document config;
-    if (m_setup_channel.unpack_param(config))
+    if (channel.unpack_param(config))
     {
         node->set_config(config);
     }
     m_hal.save_settings();
 
-    m_setup_channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    m_setup_channel.pack_param(node->get_config());
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    channel.pack_param(node->get_config());
+    channel.end_pack();
 }
 
 void Comms::handle_node_message()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+
+    channel.begin_unpack();
     uint32_t req_id = 0;
     std::string name;
-    if (!m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name))
+    if (!channel.unpack_param(req_id) ||
+        !channel.unpack_param(name))
     {
         QLOGE("Error in unpacking config rquest");
         return;
@@ -679,31 +711,33 @@ void Comms::handle_node_message()
     }
 
     rapidjson::Document message;
-    if (!m_setup_channel.unpack_param(message))
+    if (!channel.unpack_param(message))
     {
         QLOGE("Req Id: {} - cannot unpack node '{}' message", req_id, name);
         return;
     }
     auto response = node->send_message(message);
 
-    m_setup_channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    m_setup_channel.pack_param(response);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    channel.pack_param(response);
+    channel.end_pack();
 }
 
 void Comms::handle_node_input_stream_path()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+
+    channel.begin_unpack();
     uint32_t req_id = 0;
     std::string name;
     uint32_t input_idx = 0;
     std::string path;
-    if (!m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(input_idx) ||
-        !m_setup_channel.unpack_param(path))
+    if (!channel.unpack_param(req_id) ||
+        !channel.unpack_param(name) ||
+        !channel.unpack_param(input_idx) ||
+        !channel.unpack_param(path))
     {
         QLOGE("Error in unpacking input stream path request");
         return;
@@ -721,23 +755,25 @@ void Comms::handle_node_input_stream_path()
 
     m_hal.save_settings();
 
-    m_setup_channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    pack_node_data(m_setup_channel, *node);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    pack_node_data(m_channels->setup, *node);
+    channel.end_pack();
 }
 
 void Comms::handle_node_output_calibration_data()
 {
-    m_setup_channel.begin_unpack();
+    auto& channel = m_channels->setup;
+
+    channel.begin_unpack();
     uint32_t req_id = 0;
     std::string name;
     uint32_t output_idx = 0;
     std::string path;
-    if (!m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(output_idx))
+    if (!channel.unpack_param(req_id) ||
+        !channel.unpack_param(name) ||
+        !channel.unpack_param(output_idx))
     {
         QLOGE("Error in unpacking input stream path request");
         return;
@@ -765,7 +801,7 @@ void Comms::handle_node_output_calibration_data()
     }
 
     std::vector<uint8_t> data;
-    if (!m_setup_channel.unpack_remaining_data(data) ||
+    if (!channel.unpack_remaining_data(data) ||
         !stream->deserialize_calibration_data(data))
     {
         QLOGE("Req Id: {} - cannot deserialize calibration data", req_id);
@@ -774,23 +810,25 @@ void Comms::handle_node_output_calibration_data()
 
     m_hal.save_settings();
 
-    m_setup_channel.begin_pack(comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    pack_node_data(m_setup_channel, *node);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    pack_node_data(m_channels->setup, *node);
+    channel.end_pack();
 }
 
 void Comms::handle_add_node()
 {
+    auto& channel = m_channels->setup;
+
     uint32_t req_id = 0;
     std::string def_name, name;
     rapidjson::Document init_paramsj;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(def_name) ||
-        !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(init_paramsj))
+    if (!channel.begin_unpack() ||
+        !channel.unpack_param(req_id) ||
+        !channel.unpack_param(def_name) ||
+        !channel.unpack_param(name) ||
+        !channel.unpack_param(init_paramsj))
     {
         QLOGE("Error in unpacking add node request");
         return;
@@ -802,26 +840,28 @@ void Comms::handle_add_node()
     auto node = m_hal.create_node(def_name, name, std::move(init_paramsj));
     if (!node)
     {
-        m_setup_channel.end_pack();
+        channel.end_pack();
         return;
     }
     m_hal.save_settings();
 
     //reply
-    m_setup_channel.begin_pack(comms::Setup_Message::ADD_NODE);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    pack_node_data(m_setup_channel, *node);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::ADD_NODE);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    pack_node_data(m_channels->setup, *node);
+    channel.end_pack();
 }
 
 void Comms::handle_remove_node()
 {
+    auto& channel = m_channels->setup;
+
     uint32_t req_id = 0;
     std::string name;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(name))
+    if (!channel.begin_unpack() ||
+        !channel.unpack_param(req_id) ||
+        !channel.unpack_param(name))
     {
         QLOGE("Error in unpacking remove node request");
         return;
@@ -840,26 +880,28 @@ void Comms::handle_remove_node()
     m_hal.save_settings();
 
     //reply
-    m_setup_channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(name);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+    channel.pack_param(req_id);
+    channel.pack_param(name);
+    channel.end_pack();
 }
 
 void Comms::handle_streams_telemetry_active()
 {
+    auto& channel = m_channels->setup;
+
     uint32_t req_id = 0;
     std::string stream_name;
     bool is_active = false;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
-        !m_setup_channel.unpack_param(stream_name) ||
-        !m_setup_channel.unpack_param(is_active))
+    if (!channel.begin_unpack() ||
+        !channel.unpack_param(req_id) ||
+        !channel.unpack_param(stream_name) ||
+        !channel.unpack_param(is_active))
     {
         QLOGE("Error in unpacking stream telemetry");
         return;
     }
-    m_setup_channel.end_unpack();
+    channel.end_unpack();
 
     QLOGI("Req Id: {} - stream '{}' telemetry: {}", req_id, stream_name, is_active ? "ON" : "OFF");
 
@@ -870,8 +912,8 @@ void Comms::handle_streams_telemetry_active()
     }), m_stream_telemetry_data.end());
 
 
-    m_setup_channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
-    m_setup_channel.pack_param(req_id);
+    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
+    channel.pack_param(req_id);
 
     if (is_active)
     {
@@ -884,45 +926,47 @@ void Comms::handle_streams_telemetry_active()
             ts.stream = stream;
             m_stream_telemetry_data.push_back(ts);
 
-            m_setup_channel.pack_param(true);
+            channel.pack_param(true);
         }
         else
         {
-            m_setup_channel.pack_param(false);
+            channel.pack_param(false);
             QLOGE("Req Id: {} - cannot find stream '{}' for telemetry", req_id, stream_name);
         }
     }
     else
     {
-        m_setup_channel.pack_param(false);
+        channel.pack_param(false);
     }
 
-    m_setup_channel.end_pack();
+    channel.end_pack();
 }
 
 void Comms::handle_hal_telemetry_active()
 {
+    auto& channel = m_channels->setup;
+
     uint32_t req_id = 0;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id))
+    if (!channel.begin_unpack() ||
+        !channel.unpack_param(req_id))
     {
         QLOGE("Error in unpacking stream telemetry");
         return;
     }
-    m_setup_channel.end_unpack();
+    channel.end_unpack();
 
     bool is_active = false;
-    if (m_setup_channel.unpack_param(is_active))
+    if (channel.unpack_param(is_active))
     {
         QLOGI("Req Id: {} - hal telemetry: {}", req_id, is_active ? "ON" : "OFF");
         m_hal_telemetry_data.is_enabled = is_active;
     }
 
     //respond
-    m_setup_channel.begin_pack(comms::Setup_Message::HAL_TELEMETRY_ACTIVE);
-    m_setup_channel.pack_param(req_id);
-    m_setup_channel.pack_param(m_hal_telemetry_data.is_enabled);
-    m_setup_channel.end_pack();
+    channel.begin_pack(comms::Setup_Message::HAL_TELEMETRY_ACTIVE);
+    channel.pack_param(req_id);
+    channel.pack_param(m_hal_telemetry_data.is_enabled);
+    channel.end_pack();
 }
 
 void Comms::handle_simulator_stop_motion()
@@ -943,7 +987,7 @@ void Comms::process()
         return;
     }
 
-    while (auto msg = m_input_channel.get_next_message(*m_rcp))
+    while (auto msg = m_channels->input.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
@@ -954,7 +998,7 @@ void Comms::process()
     }
 
 
-    while (auto msg = m_setup_channel.get_next_message(*m_rcp))
+    while (auto msg = m_channels->setup.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
@@ -998,9 +1042,9 @@ void Comms::process()
 
         pack_telemetry_data();
 
-        m_setup_channel.send(*m_rcp);
-        m_input_channel.send(*m_rcp);
-        m_telemetry_channel.try_sending(*m_rcp);
+        m_channels->setup.send(*m_rcp);
+        m_channels->input.send(*m_rcp);
+        m_channels->telemetry.try_sending(*m_rcp);
     }
 
 //    static std::vector<uint8_t> buf;

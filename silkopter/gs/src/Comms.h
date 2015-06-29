@@ -3,6 +3,10 @@
 #include "HAL.h"
 #include "common/Comm_Data.h"
 
+#include "utils/RCP.h"
+#include "utils/Channel.h"
+
+
 namespace silk
 {
 class HAL;
