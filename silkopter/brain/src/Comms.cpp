@@ -154,9 +154,9 @@ void Comms::configure_channels()
         params.is_compressed = false;
         params.is_reliable = false;
         params.importance = 10;
-        params.unreliable_retransmit_count = 10;
+        params.unreliable_retransmit_count = 5;
 //        params.cancel_previous_data = true;
-        params.cancel_after = std::chrono::milliseconds(100);
+        params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(VIDEO_CHANNEL, params);
     }
 
@@ -242,12 +242,12 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
 
         if (s.value.is_keyframe)
         {
-            QLOGI("Keyframe");
+            //QLOGI("Keyframe");
             auto params = m_rcp->get_send_params(VIDEO_CHANNEL);
-            //params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
-            //params.cancel_after = std::chrono::milliseconds(200);
+            params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
+            params.cancel_after = std::chrono::milliseconds(200);
             //params.is_reliable = true;
-            //params.unreliable_retransmit_count = 1;
+            params.unreliable_retransmit_count = 3;
             auto const& tx_buffer = m_video_channel.get_tx_buffer();
             m_rcp->try_sending(VIDEO_CHANNEL, params, tx_buffer.data(), tx_buffer.size());
             m_video_channel.clear_tx_buffer();

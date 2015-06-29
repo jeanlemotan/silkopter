@@ -293,7 +293,7 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
         if (now - xxx_last_tp >= std::chrono::seconds(1))
         {
             float r = std::chrono::duration<float>(now - xxx_last_tp).count();
-            std::cout << "Received: " << float(xxx_data)/r/1024.f << " KB/s\n";
+            QLOGI("Received: {} KB/s", float(xxx_data)/r/1024.f);
             xxx_data = 0;
             xxx_last_tp = now;
         }
@@ -389,6 +389,23 @@ auto RCP_RFMON_Socket::start() -> bool
                 {
                     send_callback(result);
                 }
+
+#ifdef DEBUG_THROUGHPUT
+                {
+                    static int xxx_data = 0;
+                    static std::chrono::system_clock::time_point xxx_last_tp = std::chrono::system_clock::now();
+                    xxx_data += isize;
+                    auto now = std::chrono::system_clock::now();
+                    if (now - xxx_last_tp >= std::chrono::seconds(1))
+                    {
+                        float r = std::chrono::duration<float>(now - xxx_last_tp).count();
+                        QLOGI("Sent: {} KB/s", float(xxx_data)/r/1024.f);
+                        xxx_data = 0;
+                        xxx_last_tp = now;
+                    }
+                }
+#endif
+
             }
 
             boost::this_thread::sleep_for(boost::chrono::milliseconds(1));

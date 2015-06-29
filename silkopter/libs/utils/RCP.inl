@@ -86,7 +86,7 @@ inline auto RCP::TX::acquire_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
     datagram->data.resize(data_size);
     datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
-    datagram->send_count = 1;
+    datagram->sent_count = 0;
     return datagram;
 }
 inline auto RCP::RX::acquire_datagram(size_t data_size) -> RCP::RX::Datagram_ptr
@@ -344,27 +344,27 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
     auto id = ++m_last_id[channel_idx];
 
     //cancel all previous transient packets if needed
-    if (params.cancel_previous_data)
-    {
-        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
-        auto& queue = m_tx.transit_queue;
+//    if (params.cancel_previous_data)
+//    {
+//        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
+//        auto& queue = m_tx.transit_queue;
 
-        //eliminate old datagrams
-        for (auto it = queue.begin(); it != queue.end();)
-        {
-            auto const& header = get_header<Header>((*it)->data);
-            if (header.type == TYPE_PACKET)
-            {
-                auto const& pheader = get_header<Packet_Header>((*it)->data);
-                if (pheader.channel_idx == channel_idx && pheader.id < id)
-                {
-                    erase_unordered(queue, it);
-                    continue;
-                }
-            }
-            ++it;
-        }
-    }
+//        //eliminate old datagrams
+//        for (auto it = queue.begin(); it != queue.end();)
+//        {
+//            auto const& header = get_header<Header>((*it)->data);
+//            if (header.type == TYPE_PACKET)
+//            {
+//                auto const& pheader = get_header<Packet_Header>((*it)->data);
+//                if (pheader.channel_idx == channel_idx && pheader.id < id)
+//                {
+//                    erase_unordered(queue, it);
+//                    continue;
+//                }
+//            }
+//            ++it;
+//        }
+//    }
 
     {
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
@@ -401,7 +401,7 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             auto& header = get_header<Packet_Header>(fragment->data);
             header.id = id;
             header.channel_idx = channel_idx;
-            header.flag_needs_confirmation = params.is_reliable;
+            header.flag_needs_confirmation = params.is_reliable || params.unreliable_retransmit_count > 0;
             header.flag_is_compressed = is_compressed;
             header.type = TYPE_PACKET;
             header.fragment_idx = i;
@@ -751,7 +751,12 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
 
     auto best = queue.begin();
     auto best_priority = MIN_PRIORITY;
-    uint32_t best_id = static_cast<uint32_t>(-1);
+
+    constexpr uint32_t no_id = std::numeric_limits<uint32_t>::max();
+    uint32_t best_id = no_id;
+
+    constexpr size_t no_sent_count = std::numeric_limits<size_t>::max();
+    size_t best_sent_count = no_sent_count;
 
     //calculate priorities
     for (auto it = queue.begin(); it != queue.end();)
@@ -766,8 +771,9 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
             continue;
         }
 
-        if (!datagram->is_in_transit &&
-                now - datagram->sent_tp > min_resend_duration)
+        bool can_be_resent = params.is_reliable ? now - datagram->sent_tp > min_resend_duration : true;
+
+        if (!datagram->is_in_transit && can_be_resent)
         {
             int priority = params.importance;
             if (params.bump_priority_after.count() > 0 && now - datagram->added_tp >= params.bump_priority_after)
@@ -777,20 +783,28 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
 
             auto const& header = get_header<Packet_Header>(datagram->data);
 
-            if (best_id == static_cast<uint32_t>(-1) ||
-                (priority > best_priority) ||                                                                                       //most important first
-                (priority == best_priority && header.id < best_id))   //smaller ids first
+            if (best_id == no_id ||
+                (priority > best_priority) ||                           //most important first
+                (priority == best_priority && header.id < best_id) ||   //smaller ids first
+                (priority == best_priority && header.id == best_id && datagram->sent_count < best_sent_count))
             {
                 best = it;
                 best_priority = priority;
                 best_id = header.id;
+                best_sent_count = datagram->sent_count;
             }
         }
 
         ++it;
     }
 
-    return best_id == static_cast<uint32_t>(-1) ? queue.end() : best;
+    if (best_id != no_id)
+    {
+        auto const& header = get_header<Packet_Header>((*best)->data);
+        //QLOGI("P{} F{}, {}", header.id, header.fragment_idx, (*best)->sent_count);
+    }
+
+    return best_id == no_id ? queue.end() : best;
 }
 
 inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
@@ -861,32 +875,22 @@ inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
             //if the datagram is not reliable and it's out of retries, remove it from the queue. Otherwise leave it there to be resent
             if ((*it)->params.is_reliable == false)
             {
-                datagram = std::move(*it);
-                datagram->send_count = datagram->params.unreliable_retransmit_count + 1;
-
-                erase_unordered(m_tx.packet_queue, it);
+                if ((*it)->sent_count++ >= (*it)->params.unreliable_retransmit_count)
+                {
+                    datagram = std::move(*it);
+                    erase_unordered(m_tx.packet_queue, it);
+                }
+                else
+                {
+                    datagram = *it;
+                }
             }
             else
             {
                 datagram = *it;
-                datagram->send_count = 1; //try it only once
             }
             //auto& header = get_header<Packet_Header>(datagram->data);
             //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
-        }
-
-        //compute the confirmation flag
-        if (datagram)
-        {
-            auto& header = get_header<Packet_Header>(datagram->data);
-            bool old_flag = header.flag_needs_confirmation;
-            header.flag_needs_confirmation = datagram->params.is_reliable || datagram->send_count > 1;
-            if (old_flag != header.flag_needs_confirmation)
-            {
-                //recompute crc if the flag changed
-                header.crc = 0; //so it doesnt take the crc into account
-                header.crc = compute_crc(datagram->data.data(), datagram->data.size());
-            }
         }
     }
     QASSERT(!datagram || !datagram->is_in_transit);
@@ -902,85 +906,34 @@ inline void RCP::send_datagram()
         return;
     }
 
-    std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
-
-    auto& queue = m_tx.transit_queue;
-
-    auto now = q::Clock::now();
-
-    //eliminate old datagrams
-    for (auto it = queue.begin(); it != queue.end();)
-    {
-        auto& datagram = *it;
-        auto const& params = datagram->params;
-        if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
-        {
-            erase_unordered(queue, it);
-            continue;
-        }
-        ++it;
-    }
-
-    //make sure we have the transit queue full
-    while (queue.size() < MAX_IN_TRANSIT_DATAGRAMS)
-    {
-        TX::Datagram_ptr datagram = get_next_transit_datagram();
-        if (!datagram)
-        {
-            break;
-        }
-        QASSERT(datagram->send_count > 0);
-        datagram->is_in_transit = true;
-        queue.push_back(datagram);
-    }
-
-    //nothing to send??
-    if (queue.empty())
+    TX::Datagram_ptr datagram = get_next_transit_datagram();
+    if (!datagram)
     {
         m_is_sending = false;
         return;
     }
 
-    //make sure we're in bounds
-    if (m_tx.transit_queue_idx >= queue.size())
-    {
-        m_tx.transit_queue_idx = m_tx.transit_queue_idx % queue.size();
-    }
-
-    //fetch the next one
-    TX::Datagram_ptr datagram = queue[m_tx.transit_queue_idx];
-    QASSERT(datagram);
-    datagram->send_count--;
-
-    //remove the crt datagram if we're done, or advance to next transit datagram
-    if (datagram->send_count <= 0)
-    {
-        datagram->is_in_transit = false;
-        queue.erase(queue.begin() + m_tx.transit_queue_idx);
-    }
-    else
-    {
-        m_tx.transit_queue_idx++;
-    }
+    datagram->is_in_transit = true;
 
     update_stats(m_global_stats, *datagram);
 
     xxx_on_air++;
 
     //mark it as being the one sent
-    m_tx.crt_in_transit_datagram = std::move(datagram);
+    m_tx.in_transit_datagram = std::move(datagram);
 
-    m_socket.async_send(m_tx.crt_in_transit_datagram->data.data(), m_tx.crt_in_transit_datagram->data.size());
+    m_socket.async_send(m_tx.in_transit_datagram->data.data(), m_tx.in_transit_datagram->data.size());
 }
 
 inline void RCP::handle_send(RCP_Socket::Result result)
 {
-    QASSERT(m_tx.crt_in_transit_datagram);
+    QASSERT(m_tx.in_transit_datagram);
 
-    auto datagram = std::move(m_tx.crt_in_transit_datagram);
+    auto datagram = std::move(m_tx.in_transit_datagram);
     QASSERT(datagram);
     if (datagram)
     {
+        datagram->is_in_transit = false;
         datagram->sent_tp = q::Clock::now();
 
         xxx_on_air--;
@@ -1339,7 +1292,7 @@ inline void RCP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
             auto lb = std::lower_bound(conf, conf_end, key);
             if (lb != conf_end && *lb == key)
             {
-//                QLOGI("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+                //QLOGI("Confirming fragment {} for packet {}", hdr.fragment_idx, hdr.id);
                 erase_unordered(m_tx.packet_queue, it);
 //                    count--;
 //                    if (count == 0)
@@ -1360,39 +1313,39 @@ inline void RCP::process_packets_confirmed_datagram(RX::Datagram_ptr& datagram)
     }
 
     //confirm in-transit packet datagrams
-    {
-        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
-        for (auto it = m_tx.transit_queue.begin(); it != m_tx.transit_queue.end();)
-        {
-            auto const& header = get_header<Header>((*it)->data);
-            if (header.type == TYPE_PACKET)
-            {
-                auto const& hdr = get_header<Packet_Header>((*it)->data);
-                uint32_t id = hdr.id;
-                //update the key
-                k[0] = hdr.channel_idx;
-                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
-                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
-                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
-                k[4] = hdr.fragment_idx;
+//    {
+//        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
+//        for (auto it = m_tx.transit_queue.begin(); it != m_tx.transit_queue.end();)
+//        {
+//            auto const& header = get_header<Header>((*it)->data);
+//            if (header.type == TYPE_PACKET)
+//            {
+//                auto const& hdr = get_header<Packet_Header>((*it)->data);
+//                uint32_t id = hdr.id;
+//                //update the key
+//                k[0] = hdr.channel_idx;
+//                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+//                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+//                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+//                k[4] = hdr.fragment_idx;
 
-                auto lb = std::lower_bound(conf, conf_end, key);
-                if (lb != conf_end && *lb == key)
-                {
-//                    QLOGI("Confirming transit fragment {} for packet {}", hdr.fragment_idx, hdr.id);
-                    erase_unordered(m_tx.transit_queue, it);
-    //                count--;
-    //                if (count == 0)
-    //                {
-    //                    break;
-    //                }
-                    //TODO - eliminate the element from conf as well
-                    continue;
-                }
-            }
-            ++it;
-        }
-    }
+//                auto lb = std::lower_bound(conf, conf_end, key);
+//                if (lb != conf_end && *lb == key)
+//                {
+////                    QLOGI("Confirming transit fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                    erase_unordered(m_tx.transit_queue, it);
+//    //                count--;
+//    //                if (count == 0)
+//    //                {
+//    //                    break;
+//    //                }
+//                    //TODO - eliminate the element from conf as well
+//                    continue;
+//                }
+//            }
+//            ++it;
+//        }
+//    }
 }
 inline void RCP::process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
 {
@@ -1463,34 +1416,34 @@ inline void RCP::process_packets_cancelled_datagram(RX::Datagram_ptr& datagram)
         }
     }
 
-    {
-        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
-        for (auto it = m_tx.transit_queue.begin(); it != m_tx.transit_queue.end();)
-        {
-            auto const& header = get_header<Header>((*it)->data);
-            if (header.type == TYPE_PACKET)
-            {
-                auto const& hdr = get_header<Packet_Header>((*it)->data);
-                uint32_t id = hdr.id;
-                //update the key
-                uint32_t key = 0;
-                uint8_t* k = reinterpret_cast<uint8_t*>(&key);
-                k[0] = hdr.channel_idx;
-                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
-                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
-                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+//    {
+//        std::lock_guard<std::mutex> lg(m_tx.transit_queue_mutex);
+//        for (auto it = m_tx.transit_queue.begin(); it != m_tx.transit_queue.end();)
+//        {
+//            auto const& header = get_header<Header>((*it)->data);
+//            if (header.type == TYPE_PACKET)
+//            {
+//                auto const& hdr = get_header<Packet_Header>((*it)->data);
+//                uint32_t id = hdr.id;
+//                //update the key
+//                uint32_t key = 0;
+//                uint8_t* k = reinterpret_cast<uint8_t*>(&key);
+//                k[0] = hdr.channel_idx;
+//                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+//                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+//                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
 
-                auto lb = std::lower_bound(conf, conf_end, key);
-                if (lb != conf_end && *lb == key)
-                {
-                    QLOGI("Cancelling transit fragment {} for packet {}", hdr.fragment_idx, hdr.id);
-                    erase_unordered(m_tx.transit_queue, it);
-                    continue;
-                }
-            }
-            ++it;
-        }
-    }
+//                auto lb = std::lower_bound(conf, conf_end, key);
+//                if (lb != conf_end && *lb == key)
+//                {
+//                    QLOGI("Cancelling transit fragment {} for packet {}", hdr.fragment_idx, hdr.id);
+//                    erase_unordered(m_tx.transit_queue, it);
+//                    continue;
+//                }
+//            }
+//            ++it;
+//        }
+//    }
 }
 inline void RCP::process_ping_datagram(RX::Datagram_ptr& datagram)
 {

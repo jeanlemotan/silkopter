@@ -188,7 +188,7 @@ namespace util
         static const int MAX_PRIORITY = 127;
         static const int MIN_PRIORITY = -127;
 
-        static const size_t MAX_IN_TRANSIT_DATAGRAMS = 5;
+        //static const size_t MAX_IN_TRANSIT_DATAGRAMS = 5;
 
         struct TX
         {
@@ -205,7 +205,7 @@ namespace util
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 std::atomic_bool is_in_transit = {false};
-                int send_count = 1; //how many times to send it
+                size_t sent_count = 0; //how many times it was sent - for unreliable only
                 Buffer_t data;
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
@@ -236,11 +236,11 @@ namespace util
             std::mutex packet_queue_mutex;
             Send_Queue packet_queue;
 
-            std::mutex transit_queue_mutex;
-            Send_Queue transit_queue; //immediate queue to send
-            size_t transit_queue_idx = 0;
+//            std::mutex transit_queue_mutex;
+//            Send_Queue transit_queue; //immediate queue to send
+//            size_t transit_queue_idx = 0;
 
-            Datagram_ptr crt_in_transit_datagram;
+            Datagram_ptr in_transit_datagram;
         } m_tx;
 
         struct RX
