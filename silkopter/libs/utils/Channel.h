@@ -230,6 +230,15 @@ namespace util
             }
         }
 
+        auto get_tx_buffer() -> detail::TX_Buffer_t const&
+        {
+            return m_tx_buffer;
+        }
+        void clear_tx_buffer()
+        {
+            m_tx_buffer.clear();
+        }
+
         //////////////////////////////////////////////////////////////////////////
 
 		//returns the nest message or nothing.

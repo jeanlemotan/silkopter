@@ -20,6 +20,7 @@ public:
         };
 
         Type type;
+        bool is_keyframe = false;
         math::vec2u32 resolution;
         std::vector<uint8_t> data;
     };

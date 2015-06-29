@@ -98,7 +98,7 @@ void Comms::configure_channels()
         params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = false;
-        params.cancel_on_new_data = true;
+        params.cancel_previous_data = true;
         params.importance = 127;
         m_rcp->set_send_params(INPUT_CHANNEL, params);
     }
@@ -116,13 +116,13 @@ void Comms::configure_channels()
 
     {
         util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(50);
+        params.max_receive_time = std::chrono::milliseconds(500);
         m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
     }
 
     {
         util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(150);
+        params.max_receive_time = std::chrono::milliseconds(300);
         m_rcp->set_receive_params(VIDEO_CHANNEL, params);
     }
 

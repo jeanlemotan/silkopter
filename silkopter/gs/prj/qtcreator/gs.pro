@@ -48,6 +48,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/QMapControl/lib/$${DEST_FOLDER} -lqmapcontrol
 
 LIBS += -lfreetype -lboost_system -lavcodec -lavformat -lswscale -lfftw3 -lz
 LIBS += -lboost_thread
+LIBS += -lpcap
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}
@@ -170,7 +171,6 @@ SOURCES += \
     ../../src/Multi_Config_Window.cpp \
     ../../src/Axis.cpp \
     ../../src/Video_Viewer.cpp \
-    ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP.inl
 

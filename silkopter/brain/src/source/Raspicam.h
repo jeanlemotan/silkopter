@@ -49,7 +49,7 @@ public:
     struct Impl;
     void process();
 
-    typedef std::function<void(uint8_t const* data, size_t size, math::vec2u32 const& resolution)> Data_Available_Callback;
+    typedef std::function<void(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)> Data_Available_Callback;
 
 private:
     HAL& m_hal;
@@ -63,8 +63,8 @@ private:
 
     std::shared_ptr<Impl> m_impl;
 
-    void streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution);
-    void file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution);
+    void streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
+    void file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
     void create_file_sink();
 
     std::shared_ptr<q::data::File_Sink> m_file_sink;

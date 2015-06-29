@@ -29,6 +29,7 @@
 #include "common/node/IPilot.h"
 
 #include "utils/RCP_UDP_Socket.h"
+#include "utils/RCP_RFMON_Socket.h"
 
 
 #include "sz_math.hpp"
@@ -45,9 +46,8 @@ constexpr uint8_t VIDEO_CHANNEL = 4;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
-Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
-    : m_io_service(io_service)
-    , m_hal(hal)
+Comms::Comms(HAL& hal)
+    : m_hal(hal)
     , m_setup_channel(SETUP_CHANNEL)
     , m_input_channel(INPUT_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
@@ -61,16 +61,17 @@ Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
     m_init_params.reset(new sz::Comms::Source::Init_Params);
 }
 
-auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
+auto Comms::start_udp(boost::asio::io_service& io_service, uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        auto s = new util::RCP_UDP_Socket(m_io_service);
+        auto s = new util::RCP_UDP_Socket(io_service);
         m_socket.reset(s);
         m_rcp.reset(new util::RCP(*m_socket));
 
         s->open(send_port, receive_port);
         s->start_listening();
+        s->set_send_endpoint(ip::udp::endpoint(ip::address::from_string("127.0.0.1"), send_port));
     }
     catch(std::exception e)
     {
@@ -83,6 +84,35 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     m_is_connected = true;
     QLOGI("Started sending on ports s:{} r:{}", send_port, receive_port);
 
+    configure_channels();
+
+    return true;
+}
+
+auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
+{
+    try
+    {
+        auto s = new util::RCP_RFMON_Socket(interface, id);
+        m_socket.reset(s);
+        m_rcp.reset(new util::RCP(*m_socket));
+
+        m_is_connected = s->start();
+    }
+    catch(std::exception e)
+    {
+        m_is_connected = false;
+    }
+
+    if (!m_is_connected)
+    {
+        m_socket.reset();
+        m_rcp.reset();
+        QLOGW("Cannot start comms on interface {}", interface);
+        return false;
+    }
+
+    QLOGI("Started sending on interface {}", interface);
     configure_channels();
 
     return true;
@@ -109,22 +139,23 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1450;
-        params.is_compressed = true;
+        params.mtu = 1000;
+        params.is_compressed = false;
         params.is_reliable = false;
-        params.importance = 0;
-        params.cancel_on_new_data = true;
-        params.cancel_after = std::chrono::milliseconds(200);
+        params.importance = 10;
+        //params.cancel_previous_data = true;
+        //params.cancel_after = std::chrono::milliseconds(200);
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
     }
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1450;
+        params.mtu = 1400;
         params.is_compressed = false;
         params.is_reliable = false;
         params.importance = 10;
-//        params.cancel_on_new_data = true;
+        params.unreliable_retransmit_count = 10;
+//        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(100);
         m_rcp->set_send_params(VIDEO_CHANNEL, params);
     }
@@ -208,6 +239,23 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
         m_video_channel.pack_param(static_cast<uint32_t>(s.value.data.size()));
         m_video_channel.pack_data(s.value.data.data(), s.value.data.size());
         m_video_channel.end_pack();
+
+        if (s.value.is_keyframe)
+        {
+            QLOGI("Keyframe");
+            auto params = m_rcp->get_send_params(VIDEO_CHANNEL);
+            //params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
+            //params.cancel_after = std::chrono::milliseconds(200);
+            //params.is_reliable = true;
+            //params.unreliable_retransmit_count = 1;
+            auto const& tx_buffer = m_video_channel.get_tx_buffer();
+            m_rcp->try_sending(VIDEO_CHANNEL, params, tx_buffer.data(), tx_buffer.size());
+            m_video_channel.clear_tx_buffer();
+        }
+        else
+        {
+            m_video_channel.try_sending(*m_rcp);
+        }
     }
 
     return true;
@@ -954,8 +1002,6 @@ void Comms::process()
         m_input_channel.send(*m_rcp);
         m_telemetry_channel.try_sending(*m_rcp);
     }
-
-    m_video_channel.try_sending(*m_rcp);
 
 //    static std::vector<uint8_t> buf;
 //    if (buf.empty())

@@ -75,6 +75,8 @@ LIBS += -lrt
 LIBS += -lz
 LIBS += -lpcap
 rpi {
+    LIBS += -lnl-3
+    LIBS += -lnl-genl-3
     LIBS += -lpigpio
     LIBS += -lmmal_core
     LIBS += -lmmal_util
@@ -121,8 +123,9 @@ SOURCES += \
     ../../src/generator/Oscillator.cpp \
     ../../src/processor/Comp_ECEF_Position.cpp \
     ../../../libs/utils/RCP.inl \
+    ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
-    ../../../libs/utils/RCP_UDP_Socket.cpp
+    ../../../libs/utils/radiotap/radiotap.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -238,8 +241,8 @@ HEADERS += \
     ../../../libs/common/node/stream/IGPS_Info.h \
     ../../../libs/common/node/stream/Stream_Base.h \
     ../../../libs/utils/RCP.h \
-    ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/radiotap/radiotap.h
+    ../../../libs/utils/radiotap/radiotap.h \
+    ../../../libs/utils/RCP_RFMON_Socket.h
 

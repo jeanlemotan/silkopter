@@ -862,6 +862,7 @@ void HAL::generate_settings_file()
 
 #else
 
+
 #endif
 
     save_settings();

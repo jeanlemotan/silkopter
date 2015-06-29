@@ -124,9 +124,9 @@ Raspicam::Raspicam(HAL& hal)
     m_impl->high.is_active = false;
     m_impl->low.is_active = false;
 
-    m_impl->recording.callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    m_impl->recording.callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 #endif
 
     m_init_params->fps = 30;
@@ -215,7 +215,7 @@ auto Raspicam::init() -> bool
         return true;
     }
 
-    m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 30);
+    m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
     m_stream = std::make_shared<Stream>();
     m_stream->rate = m_init_params->fps;
 
@@ -290,10 +290,11 @@ void Raspicam::process()
 
     std::swap(m_stream->samples, m_temp_samples.samples);
     m_temp_samples.samples.clear();
+//    m_temp_samples.samples.resize(1);
 }
 
 
-void Raspicam::file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution)
+void Raspicam::file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
@@ -307,7 +308,7 @@ void Raspicam::file_callback(uint8_t const* data, size_t size, math::vec2u32 con
     sink->write(data, size);
 }
 
-void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution)
+void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
@@ -316,9 +317,11 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
 
     std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
 
-    m_temp_samples.samples.resize(m_temp_samples.samples.size() + 1);
+    //m_temp_samples.samples.resize(m_temp_samples.samples.size() + 1);
+    m_temp_samples.samples.resize(1);
     auto& sample = m_temp_samples.samples.back();
     sample.value.type = Stream::Value::Type::H264;
+    sample.value.is_keyframe = is_keyframe;
     sample.dt = std::chrono::microseconds(1000000 / m_stream->rate);
     sample.tp = q::Clock::now();
     sample.value.resolution = resolution;
@@ -756,7 +759,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         param.hdr.id = MMAL_PARAMETER_PROFILE;
         param.hdr.size = sizeof(param);
 
-        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_BASELINE;//MMAL_VIDEO_PROFILE_H264_HIGH;
+        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_HIGH;//MMAL_VIDEO_PROFILE_H264_HIGH;
         param.profile[0].level = MMAL_VIDEO_LEVEL_H264_4; // This is the only value supported
 
         MMAL_STATUS_T status;
@@ -791,43 +794,43 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_AU_DELIMITERS");
         return Component_ptr();
     }
-    if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS, 1) != MMAL_SUCCESS)
-    {
-        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS");
-        return Component_ptr();
-    }
-    if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE, 1) != MMAL_SUCCESS)
-    {
-        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE");
-        return Component_ptr();
-    }
-
+//    if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS, 1) != MMAL_SUCCESS)
 //    {
-//        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
-//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
-//        {
-//            LOG_WARNING("failed to set MMAL_PARAMETER_INTRAPERIOD");
-//            return Component_ptr();
-//        }
+//        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_H264_VCL_HRD_PARAMETERS");
+//        return Component_ptr();
+//    }
+//    if (mmal_port_parameter_set_boolean(output, MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE, 1) != MMAL_SUCCESS)
+//    {
+//        QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_SEI_ENABLE");
+//        return Component_ptr();
 //    }
 
     {
-        MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
-        param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
-        param.hdr.size = sizeof(param);
-
-        param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
-        param.cir_mbs = 20;
-        param.air_mbs = 5;
-        param.air_ref = 5;
-        param.pir_mbs = 5;
-
+        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
         if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
         {
-            QLOGW("failed to set INTRA REFRESH HEADER FLAG parameters");
+            QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
             return Component_ptr();
         }
     }
+
+//    {
+//        MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
+//        param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
+//        param.hdr.size = sizeof(param);
+
+//        param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
+//        param.cir_mbs = 100;
+//        param.air_mbs = 5;
+//        param.air_ref = 5;
+//        param.pir_mbs = 5;
+
+//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+//        {
+//            QLOGW("failed to set INTRA REFRESH HEADER FLAG parameters");
+//            return Component_ptr();
+//        }
+//    }
 
     if (!enable_component(encoder))
     {
@@ -973,6 +976,7 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 
     auto mmal_flags = buffer->flags;
     bool is_end_frame = (mmal_flags == MMAL_BUFFER_HEADER_FLAG_FRAME_END || mmal_flags == (MMAL_BUFFER_HEADER_FLAG_FRAME_END | MMAL_BUFFER_HEADER_FLAG_KEYFRAME));
+    bool is_keyframe = (mmal_flags & MMAL_BUFFER_HEADER_FLAG_KEYFRAME) != 0;
 
     impl.frame_idx++;
 
@@ -985,7 +989,7 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
         {
             if (encoder_data.is_active)
             {
-                encoder_data.callback(buffer->data, buffer->length, encoder_data.quality->resolution);
+                encoder_data.callback(buffer->data, buffer->length, encoder_data.quality->resolution, is_keyframe);
             }
             sent = true;
         }
@@ -1006,7 +1010,7 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
         std::lock_guard<std::mutex> lg(encoder_data.data_mutex);
         if (encoder_data.is_active)
         {
-            encoder_data.callback(encoder_data.data.data(), encoder_data.data.size(), encoder_data.quality->resolution);
+            encoder_data.callback(encoder_data.data.data(), encoder_data.data.size(), encoder_data.quality->resolution, is_keyframe);
         }
         encoder_data.data.clear();
     }

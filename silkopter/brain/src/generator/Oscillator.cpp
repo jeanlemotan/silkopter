@@ -76,7 +76,14 @@ void Oscillator::process()
 
     float amplitude = m_config->amplitude;
 
+    constexpr size_t MAX_SAMPLES_NEEDED = 10000;
+
     size_t samples_needed = m_output_stream->compute_samples_needed();
+    if (samples_needed > MAX_SAMPLES_NEEDED)
+    {
+        QLOGW("Too many samples needed: {}. Clamping to an arbitrary MAX: {}", samples_needed, MAX_SAMPLES_NEEDED);
+        samples_needed = MAX_SAMPLES_NEEDED;
+    }
     while (samples_needed > 0)
     {
        float value = 0;

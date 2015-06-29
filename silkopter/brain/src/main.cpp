@@ -98,6 +98,9 @@ int main(int argc, char const* argv[])
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
     signal(SIGKILL, signal_handler);
     signal(SIGUSR1, signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGABRT, signal_handler);
+    signal(SIGSTOP, signal_handler);
 
     //set the new_handler
     std::set_new_handler(out_of_memory_handler);
@@ -139,18 +142,16 @@ int main(int argc, char const* argv[])
 
     QLOGI("Creating io_service thread");
 
-    std::string xxx("x");
-
-    boost::asio::io_service io_service;
-    auto io_thread = boost::thread([&io_service]()
-    {
-        while (!s_exit)
-        {
-            io_service.run();
-            io_service.reset();
-            boost::this_thread::sleep_for(boost::chrono::microseconds(500));
-        }
-    });
+//    boost::asio::io_service io_service;
+//    auto io_thread = boost::thread([&io_service]()
+//    {
+//        while (!s_exit)
+//        {
+//            io_service.run();
+//            io_service.reset();
+//            boost::this_thread::sleep_for(boost::chrono::microseconds(500));
+//        }
+//    });
 
     auto async_thread = boost::thread([]()
     {
@@ -181,13 +182,13 @@ int main(int argc, char const* argv[])
 ////        }
 //    }
 
-    uint16_t send_port = 9011;
-    uint16_t receive_port = 9010;
+    uint16_t send_port = 9001;
+    uint16_t receive_port = 9000;
 
     try
     {
         silk::HAL hal;
-        silk::Comms comms(io_service, hal);
+        silk::Comms comms(hal);
 
         if (!hal.init(comms))
         {
@@ -196,7 +197,12 @@ int main(int argc, char const* argv[])
         }
 
         //start listening for a remote system
-        if (!comms.start_udp(send_port, receive_port))
+//        if (!comms.start_udp(io_service, send_port, receive_port))
+//        {
+//            QLOGE("Cannot start communication channel! Aborting");
+//            abort();
+//        }
+        if (!comms.start_rfmon("mon0", 5))
         {
             QLOGE("Cannot start communication channel! Aborting");
             abort();
@@ -228,17 +234,20 @@ int main(int argc, char const* argv[])
                 hal.process();
             }
             //boost::this_thread::yield();
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+            boost::this_thread::sleep_for(boost::chrono::microseconds(1));
         }
 
         QLOGI("Stopping everything");
 
+//        io_service.stop();
+        s_async_io_service.stop();
+
         //stop threads
-        if (io_thread.joinable())
-        {
-            boost::this_thread::yield();
-            io_thread.join();
-        }
+//        if (io_thread.joinable())
+//        {
+//            boost::this_thread::yield();
+//            io_thread.join();
+//        }
         if (async_thread.joinable())
         {
             boost::this_thread::yield();

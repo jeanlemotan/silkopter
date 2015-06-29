@@ -27,9 +27,10 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(boost::asio::io_service& io_service, HAL& hal);
+    Comms(HAL& hal);
 
-    auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_udp(boost::asio::io_service& io_service, uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
 
     auto is_connected() const -> bool;
     auto get_remote_clock() const -> Manual_Clock const&;
@@ -58,8 +59,6 @@ public:
     auto get_source() -> std::shared_ptr<Source>;
 
 private:
-    boost::asio::io_service& m_io_service;
-
     void configure_channels();
 
     struct Commands : public node::stream::ICommands

@@ -68,12 +68,13 @@ namespace util
             int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             bool is_compressed = true;
-            bool cancel_on_new_data = false; //if true, new packets cancel old-unsent packets
+            bool cancel_previous_data = false; //if true, new packets cancel old-unsent packets
             uint8_t unreliable_retransmit_count = 0; //for unreliable channels, retransmit data this many times to increase the chances of arrival. Zero means just the main transmission and no retransmit
             q::Clock::duration bump_priority_after = q::Clock::duration{0}; //zero means never
             q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
         };
         void set_send_params(uint8_t channel_idx, Send_Params const& params);
+        auto get_send_params(uint8_t channel_idx) const -> Send_Params const&;
 
         struct Receive_Params
         {
@@ -82,8 +83,13 @@ namespace util
         void set_receive_params(uint8_t channel_idx, Receive_Params const& params);
         void set_global_receive_params(Receive_Params const& params);
 
+        //sending with default params
         auto send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
         auto try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
+
+        //sending with overriden params
+        auto send(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
+        auto try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
 
         auto receive(uint8_t channel_idx, std::vector<uint8_t>& data) -> bool;
 
@@ -91,7 +97,7 @@ namespace util
 
     private:
 
-        auto _send_locked(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
+        auto _send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
 
         static const uint8_t VERSION = 1;
         const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(500);
@@ -123,7 +129,7 @@ namespace util
         {
             uint32_t id : 24;
             uint32_t channel_idx : 5;
-            uint32_t flag_is_reliable : 1;
+            uint32_t flag_needs_confirmation : 1;
             uint32_t flag_is_compressed : 1;
             uint8_t fragment_idx;
         };
@@ -182,6 +188,8 @@ namespace util
         static const int MAX_PRIORITY = 127;
         static const int MIN_PRIORITY = -127;
 
+        static const size_t MAX_IN_TRANSIT_DATAGRAMS = 5;
+
         struct TX
         {
             struct Channel_Data
@@ -197,6 +205,7 @@ namespace util
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 std::atomic_bool is_in_transit = {false};
+                int send_count = 1; //how many times to send it
                 Buffer_t data;
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
@@ -227,7 +236,11 @@ namespace util
             std::mutex packet_queue_mutex;
             Send_Queue packet_queue;
 
-            Datagram_ptr in_transit_datagram;
+            std::mutex transit_queue_mutex;
+            Send_Queue transit_queue; //immediate queue to send
+            size_t transit_queue_idx = 0;
+
+            Datagram_ptr crt_in_transit_datagram;
         } m_tx;
 
         struct RX
@@ -320,7 +333,7 @@ namespace util
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
         const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(60);
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
@@ -346,6 +359,7 @@ namespace util
         void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram);
 
         auto process_packet_queue() -> TX::Send_Queue::iterator;
+        auto get_next_transit_datagram() -> TX::Datagram_ptr;
         void send_datagram();
 
         void handle_send(RCP_Socket::Result reult);

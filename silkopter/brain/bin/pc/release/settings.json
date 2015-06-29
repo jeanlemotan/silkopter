@@ -1,24 +1,172 @@
 {
     "hal": {
-        "buses": {
-            "UART_Linux": {
-                "name": "uart0",
-                "dev": "/dev/ttyUSB0",
-                "baud": 115200
-            }
-        },
+        "buses": {},
         "nodes": {
-            "UBLOX": {
-                "name": "gps0",
-                "bus": "uart0",
-                "rate": 5
+            "ADC Ammeter": {
+                "output_calibration": [
+                    {
+                        "bias": 0.0,
+                        "scale": 1.0
+                    }
+                ],
+                "type": "ADC Ammeter",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {},
+                "input_paths": [
+                    ""
+                ]
             },
-            "Location_Resampler": {
-                "name": "gps0_resampler",
-                "input_stream": "gps0/stream",
-                "output_rate": 20,
-                "cutoff_frequency": 1,
-                "poles": 2
+            "Acceleration (Local->ENU)": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Acceleration (Local->ENU)",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {},
+                "input_paths": [
+                    "",
+                    ""
+                ]
+            },
+            "Rate Controller": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Feedback": {
+                        "Weight (0-1)": 0.0,
+                        "Combined XY PID": true,
+                        "XY PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        },
+                        "Z PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        }
+                    },
+                    "Feedforward": {
+                        "Weight (0-1)": 1.0,
+                        "Max Torque (N)": 0.0
+                    }
+                },
+                "input_paths": [
+                    "",
+                    ""
+                ]
+            },
+            "Gravity Filter": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Gravity Filter",
+                "init_params": {
+                    "Rate (Hz)": 44
+                },
+                "config": {},
+                "input_paths": [
+                    "",
+                    ""
+                ]
+            },
+            "Comms Source": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Comms Source",
+                "init_params": {},
+                "config": {},
+                "input_paths": []
+            },
+            "Oscillator": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Oscillator",
+                "init_params": {
+                    "Rate (Hz)": 20000,
+                    "Component Count": 1
+                },
+                "config": {
+                    "Amplitude": 1.0,
+                    "Noise": 0.0,
+                    "Square": false,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 0.5,
+                            "Amplitude": 1.0
+                        }
+                    ]
+                },
+                "input_paths": []
+            },
+            "Oscillator 0": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Oscillator",
+                "init_params": {
+                    "Rate (Hz)": 10000,
+                    "Component Count": 1
+                },
+                "config": {
+                    "Amplitude": 1.0,
+                    "Noise": 0.0,
+                    "Square": false,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 1000.0,
+                            "Amplitude": 1.0
+                        }
+                    ]
+                },
+                "input_paths": []
+            },
+            "Float LPF": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Float LPF",
+                "init_params": {
+                    "Rate (Hz)": 20000
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 100.0
+                },
+                "input_paths": [
+                    "Oscillator/Output"
+                ]
+            },
+            "Float LPF 0": {
+                "output_calibration": [
+                    {}
+                ],
+                "type": "Float LPF",
+                "init_params": {
+                    "Rate (Hz)": 20000
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 100.0
+                },
+                "input_paths": [
+                    "Oscillator/Output"
+                ]
             }
         }
     }
