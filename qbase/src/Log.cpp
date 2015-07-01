@@ -26,6 +26,8 @@ namespace detail
     static q::logging::Level s_level = q::logging::Level::DBG;
     static std::mutex s_mutex;
     static __thread std::vector<char const*>* s_topic_stack = nullptr;
+
+    static q::Clock::time_point s_start_tp = q::Clock::now();
 }
 }
 }
@@ -150,28 +152,6 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 		}
 	}
 
-    if (decorations.test(Decoration::TOPIC) && detail::s_topic_stack && !detail::s_topic_stack->empty())
-	{
-        str.append('[');
-        for (size_t i = 0; i + 1 < detail::s_topic_stack->size(); i++)
-        {
-            str.append((*detail::s_topic_stack)[i]);
-            str.append('/');
-        }
-        str.append(detail::s_topic_stack->back());
-        str.append(']');
-	}
-
-	if (decorations.test(Decoration::LOCATION) && file)
-	{
-		str.push_back('[');
-		str.append(file);
-		str.push_back(':');
-		char mbstr[100];
-		sprintf(mbstr, "%d]", line);
-		str.append(mbstr);
-	}
-
 	if (decorations.test(Decoration::DATE) && decorations.test(Decoration::TIME))
 	{
 		char mbstr[100];
@@ -180,7 +160,7 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 		{
 			str.append(mbstr);
 		}
-	}
+    }
 	else if (decorations.test(Decoration::DATE))
 	{
 		char mbstr[100];
@@ -199,8 +179,43 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 			str.append(mbstr);
 		}
 	}
+    if (decorations.test(Decoration::TIMESTAMP))
+    {
+        char mbstr[100];
+        auto d = q::Clock::now() - detail::s_start_tp;
+        uint32_t us = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
+        uint32_t _us = us % 1000;
+        uint32_t ms = us / 1000;
+        uint32_t _ms = ms % 1000;
+        uint32_t _s = ms / 1000;
+        sprintf(mbstr, "[%u.%03u.%03u]", _s, _ms, _us);
+        str.append(mbstr);
+    }
 
-	str.append(message);
+    if (decorations.test(Decoration::TOPIC) && detail::s_topic_stack && !detail::s_topic_stack->empty())
+    {
+        str.append('[');
+        for (size_t i = 0; i + 1 < detail::s_topic_stack->size(); i++)
+        {
+            str.append((*detail::s_topic_stack)[i]);
+            str.append('/');
+        }
+        str.append(detail::s_topic_stack->back());
+        str.append(']');
+    }
+
+    if (decorations.test(Decoration::LOCATION) && file)
+    {
+        str.push_back('[');
+        str.append(file);
+        str.push_back(':');
+        char mbstr[100];
+        sprintf(mbstr, "%d]", line);
+        str.append(mbstr);
+    }
+
+
+    str.append(message);
 
 	//send to loggers
     QASSERT(!detail::s_loggers.empty());

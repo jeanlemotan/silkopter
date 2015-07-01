@@ -30,18 +30,18 @@ namespace logging
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Decoration
-//	By default, the decoration is TOPIC | LEVEL | LOCATION | TIME
 // 	You can specify the decoration per topic. If none is defined, the default one is used
-//	All decorations appear in square paranthesis []. The order is of the decorations is the one in the enum: LEVEL, TOPIC, LOCATION, DATE, TIME
+//	All decorations appear in square paranthesis []. The order is of the decorations is the one in the enum.
 
 	enum class Decoration : uint8_t
 	{
 		LEVEL		= 1 << 0,	//the level of the log
-		TOPIC		= 1 << 1,	//the topic of the log.
-		LOCATION 	= 1 << 2,	//the [file:line] where the log occured
-		DATE 		= 1 << 3,	//the date in [day-month-year] format
-		TIME		= 1 << 4	//the time in [HH:mm:ss] format
-	};
+        DATE 		= 1 << 1,	//the date in [day-month-year] format
+        TIME		= 1 << 2,	//the time in [HH:mm:ss] format
+        TIMESTAMP	= 1 << 3,	//the time since program start in [micro seconds] format
+        TOPIC		= 1 << 4,	//the topic of the log.
+        LOCATION 	= 1 << 5,	//the [file:line] where the log occured
+    };
 	typedef q::util::Flag_Set<Decoration, uint8_t> Decorations;
 
 	extern void set_decorations(Decorations decorations);

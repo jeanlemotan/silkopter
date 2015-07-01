@@ -106,7 +106,7 @@ int main(int argc, char const* argv[])
     std::set_new_handler(out_of_memory_handler);
 
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
-    q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIME, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
+    q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
     QLOG_TOPIC("silk");
 

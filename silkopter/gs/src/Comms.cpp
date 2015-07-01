@@ -871,7 +871,7 @@ void Comms::handle_frame_data()
     auto _stream = m_hal.get_streams().find_by_name(stream_name);
     if (!_stream || _stream->type != node::stream::IVideo::TYPE)
     {
-        QLOGE("Cannot find stream '{}'", stream_name);
+        QLOGW("Cannot find stream '{}'", stream_name);
         return;
     }
     auto& stream = static_cast<node::stream::Video&>(*_stream);

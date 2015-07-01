@@ -71,8 +71,8 @@ struct Comms::Channels
 
 Comms::Comms(HAL& hal)
     : m_hal(hal)
-    , m_comms_start_tp(q::Clock::now())
     , m_channels(new Channels())
+    , m_comms_start_tp(q::Clock::now())
 {
     m_source.reset(new Source(*this));
     m_commands_stream.reset(new Commands);
@@ -170,11 +170,11 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1400;
-        params.is_compressed = false;
-        params.is_reliable = false;
+        params.mtu = 1450;
+        params.is_compressed = true;
+        params.is_reliable = true;
         params.importance = 10;
-        params.unreliable_retransmit_count = 5;
+        params.unreliable_retransmit_count = 1;
 //        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(VIDEO_CHANNEL, params);
@@ -265,7 +265,7 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
             //QLOGI("Keyframe");
             auto params = m_rcp->get_send_params(VIDEO_CHANNEL);
             //params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
-            //params.cancel_after = std::chrono::milliseconds(200);
+            params.cancel_after = std::chrono::milliseconds(150);
             //params.is_reliable = true;
             //params.unreliable_retransmit_count = 3;
             auto const& tx_buffer = m_channels->video.get_tx_buffer();

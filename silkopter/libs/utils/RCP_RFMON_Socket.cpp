@@ -216,98 +216,101 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
     uint8_t payload_buffer[MAX_PACKET_SIZE];
     uint8_t* payload = payload_buffer;
 
-    int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
-    if (retval < 0)
+    while (true)
     {
-        std::cout << "Socket broken: " << pcap_geterr(m_impl->pcap) << "\n";
-        return false;
-    }
-    if (retval != 1)
-    {
-        return true;
-    }
-
-    size_t header_len = (payload[2] + (payload[3] << 8));
-    if (pcap_packet_header->len < (header_len + m_impl->_80211_header_length))
-    {
-        std::cout << "packet too small\n";
-        return true;
-    }
-
-    size_t bytes = pcap_packet_header->len - (header_len + m_impl->_80211_header_length);
-
-    ieee80211_radiotap_iterator rti;
-    if (ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)payload, pcap_packet_header->len) < 0)
-    {
-        std::cout << "iterator null\n";
-        return true;
-    }
-
-    int n = 0;
-    Penumbra_Radiotap_Header prh;
-    while ((n = ieee80211_radiotap_iterator_next(&rti)) == 0)
-    {
-
-        switch (rti.this_arg_index)
+        int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
+        if (retval < 0)
         {
-        case IEEE80211_RADIOTAP_RATE:
-            prh.rate = (*rti.this_arg);
-            break;
-
-        case IEEE80211_RADIOTAP_CHANNEL:
-            prh.channel = (*((uint16_t *)rti.this_arg));
-            prh.channel_flags = (*((uint16_t *)(rti.this_arg + 2)));
-            break;
-
-        case IEEE80211_RADIOTAP_ANTENNA:
-            prh.antenna = (*rti.this_arg) + 1;
-            break;
-
-        case IEEE80211_RADIOTAP_FLAGS:
-            prh.radiotap_flags = *rti.this_arg;
+            std::cout << "Socket broken: " << pcap_geterr(m_impl->pcap) << "\n";
+            return false;
+        }
+        if (retval != 1)
+        {
             break;
         }
-    }
-    payload += header_len + m_impl->_80211_header_length;
 
-    if (prh.radiotap_flags & IEEE80211_RADIOTAP_F_FCS)
-    {
-        bytes -= 4;
-    }
+        size_t header_len = (payload[2] + (payload[3] << 8));
+        if (pcap_packet_header->len < (header_len + m_impl->_80211_header_length))
+        {
+            std::cout << "packet too small\n";
+            return true;
+        }
 
-    bool checksum_correct = (prh.radiotap_flags & 0x40) == 0;
+        size_t bytes = pcap_packet_header->len - (header_len + m_impl->_80211_header_length);
 
-//    block_num = seq_nr / param_retransmission_block_size;//if retr_block_size would be limited to powers of two, this could be replaced by a logical AND operation
+        ieee80211_radiotap_iterator rti;
+        if (ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)payload, pcap_packet_header->len) < 0)
+        {
+            std::cout << "iterator null\n";
+            return true;
+        }
 
-    //printf("rec %x bytes %d crc %d\n", seq_nr, bytes, checksum_correct);
+        int n = 0;
+        Penumbra_Radiotap_Header prh;
+        while ((n = ieee80211_radiotap_iterator_next(&rti)) == 0)
+        {
+
+            switch (rti.this_arg_index)
+            {
+            case IEEE80211_RADIOTAP_RATE:
+                prh.rate = (*rti.this_arg);
+                break;
+
+            case IEEE80211_RADIOTAP_CHANNEL:
+                prh.channel = (*((uint16_t *)rti.this_arg));
+                prh.channel_flags = (*((uint16_t *)(rti.this_arg + 2)));
+                break;
+
+            case IEEE80211_RADIOTAP_ANTENNA:
+                prh.antenna = (*rti.this_arg) + 1;
+                break;
+
+            case IEEE80211_RADIOTAP_FLAGS:
+                prh.radiotap_flags = *rti.this_arg;
+                break;
+            }
+        }
+        payload += header_len + m_impl->_80211_header_length;
+
+        if (prh.radiotap_flags & IEEE80211_RADIOTAP_F_FCS)
+        {
+            bytes -= 4;
+        }
+
+        bool checksum_correct = (prh.radiotap_flags & 0x40) == 0;
+
+        //    block_num = seq_nr / param_retransmission_block_size;//if retr_block_size would be limited to powers of two, this could be replaced by a logical AND operation
+
+        //printf("rec %x bytes %d crc %d\n", seq_nr, bytes, checksum_correct);
 
 #ifdef DEBUG_PCAP
-    std::cout << "PCAP RX>>";
-    std::copy(payload, payload + bytes, std::ostream_iterator<uint8_t>(std::cout));
-    std::cout << "<<PCAP RX";
+        std::cout << "PCAP RX>>";
+        std::copy(payload, payload + bytes, std::ostream_iterator<uint8_t>(std::cout));
+        std::cout << "<<PCAP RX";
 #endif
 
-    //m_impl->rx_queue.enqueue(payload, bytes);
-    if (receive_callback && bytes > 0)
-    {
-        receive_callback(payload, bytes);
-    }
+        //m_impl->rx_queue.enqueue(payload, bytes);
+        if (receive_callback && bytes > 0)
+        {
+            receive_callback(payload, bytes);
+        }
 
 #ifdef DEBUG_THROUGHPUT
-    {
-        static int xxx_data = 0;
-        static std::chrono::system_clock::time_point xxx_last_tp = std::chrono::system_clock::now();
-        xxx_data += bytes;
-        auto now = std::chrono::system_clock::now();
-        if (now - xxx_last_tp >= std::chrono::seconds(1))
         {
-            float r = std::chrono::duration<float>(now - xxx_last_tp).count();
-            QLOGI("Received: {} KB/s", float(xxx_data)/r/1024.f);
-            xxx_data = 0;
-            xxx_last_tp = now;
+            static int xxx_data = 0;
+            static std::chrono::system_clock::time_point xxx_last_tp = std::chrono::system_clock::now();
+            xxx_data += bytes;
+            auto now = std::chrono::system_clock::now();
+            if (now - xxx_last_tp >= std::chrono::seconds(1))
+            {
+                float r = std::chrono::duration<float>(now - xxx_last_tp).count();
+                QLOGI("Received: {} KB/s", float(xxx_data)/r/1024.f);
+                xxx_data = 0;
+                xxx_last_tp = now;
+            }
         }
-    }
 #endif
+    }
 
     return true;
 }
@@ -331,11 +334,11 @@ auto RCP_RFMON_Socket::start() -> bool
         return false;
     }
 
-    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
-    {
-        QLOGE("Error setting {} to nonblocking mode: {}", m_interface, pcap_error);
-        return false;
-    }
+//    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
+//    {
+//        QLOGE("Error setting {} to nonblocking mode: {}", m_interface, pcap_error);
+//        return false;
+//    }
 
     if (!prepare_filter())
     {

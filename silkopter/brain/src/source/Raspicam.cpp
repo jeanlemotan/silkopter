@@ -404,25 +404,25 @@ static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
     QLOGI("{}color_space: {}", prefix, color_space);
 }
 
-static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
-{
-    //    SCOPED_PINS_GUARD;;
+//static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
+//{
+//    //    SCOPED_PINS_GUARD;;
 
-    QASSERT(port);
-    std::string prefix(tabs, '\t');
-    QLOGI("{}name: {}", prefix, port->name);
-    QLOGI("{}type: {}", prefix, port->type);
-    QLOGI("{}index: {} / index_all: {}", prefix, port->index, port->index_all);
-    QLOGI("{}is_enabled: {}", prefix, port->is_enabled);
-    QLOGI("{}buffer_num_min: {} / buffer_size_min: {} / buffer_alignment_min: {}",
-               prefix, port->buffer_num_min, port->buffer_size_min, port->buffer_alignment_min);
-    QLOGI("{}buffer_num_recommended: {} / buffer_size_recommended: {}",
-               prefix, port->buffer_num_recommended, port->buffer_size_recommended);
-    QLOGI("{}buffer_num: {} / buffer_size: {}", prefix, port->buffer_num, port->buffer_size);
-    QLOGI("{}capabilities: {}", prefix, port->capabilities);
-    QLOGI("{}format:", prefix);
-    dump_format_info(tabs + 1, port->format);
-}
+//    QASSERT(port);
+//    std::string prefix(tabs, '\t');
+//    QLOGI("{}name: {}", prefix, port->name);
+//    QLOGI("{}type: {}", prefix, port->type);
+//    QLOGI("{}index: {} / index_all: {}", prefix, port->index, port->index_all);
+//    QLOGI("{}is_enabled: {}", prefix, port->is_enabled);
+//    QLOGI("{}buffer_num_min: {} / buffer_size_min: {} / buffer_alignment_min: {}",
+//               prefix, port->buffer_num_min, port->buffer_size_min, port->buffer_alignment_min);
+//    QLOGI("{}buffer_num_recommended: {} / buffer_size_recommended: {}",
+//               prefix, port->buffer_num_recommended, port->buffer_size_recommended);
+//    QLOGI("{}buffer_num: {} / buffer_size: {}", prefix, port->buffer_num, port->buffer_size);
+//    QLOGI("{}capabilities: {}", prefix, port->capabilities);
+//    QLOGI("{}format:", prefix);
+//    dump_format_info(tabs + 1, port->format);
+//}
 
 static Connection_ptr connect_ports(MMAL_PORT_T* output, MMAL_PORT_T* input)
 {

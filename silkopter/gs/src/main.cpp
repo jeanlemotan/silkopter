@@ -7,6 +7,8 @@ boost::asio::io_service s_async_io_service(4);
 int main(int argc, char *argv[])
 {
 	q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
+    q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
+
 
     boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(s_async_io_service));
     boost::thread_group worker_threads;

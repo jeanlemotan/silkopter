@@ -124,7 +124,7 @@ void HAL::set_stream_telemetry_active(std::string const& stream_name, bool activ
     auto stream = m_streams.find_by_name(stream_name);
     if (!stream)
     {
-        QLOGE("Cannot find stream '{}'", stream_name);
+        QLOGW("Cannot find stream '{}'", stream_name);
         return;
     }
     if (stream->telemetry_active_req == 0 && !active)

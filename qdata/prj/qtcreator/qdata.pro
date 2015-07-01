@@ -23,6 +23,7 @@ rpi {
 }
 
 rpi {
+    QMAKE_MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
     } else {
@@ -30,6 +31,7 @@ rpi {
         DEFINES += NDEBUG
     }
 } else {
+    QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
     } else {

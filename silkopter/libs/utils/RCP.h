@@ -105,8 +105,8 @@ namespace util
         enum Type
         {
             TYPE_PACKET             =   0,
-            TYPE_PACKETS_CONFIRMED  =   1,
-            TYPE_PACKETS_CANCELLED  =   2,
+            TYPE_FRAGMENTS_RES      =   1,
+            TYPE_PACKETS_RES        =   2,
             TYPE_PING               =   3,
             TYPE_PONG               =   4,
             TYPE_CONNECT_REQ        =   5,
@@ -114,6 +114,7 @@ namespace util
         };
 
         static const size_t MAX_CHANNELS = 32;
+        static const size_t MAX_FRAGMENTS = 250;
 
         const q::Clock::duration PING_TIMEOUT = std::chrono::milliseconds(500);
         static const size_t PING_MIN_AVERAGE_SAMPLES = 4;
@@ -140,15 +141,15 @@ namespace util
             uint32_t fragment_count : 8;
         };
 
-        struct Packets_Confirmed_Header : public Header
+        struct Fragments_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 20;
+            static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 
-        struct Packets_Cancelled_Header : public Header
+        struct Packets_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 20;
+            static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 
@@ -213,11 +214,30 @@ namespace util
             detail::Pool<Datagram> datagram_pool;
             Datagram_ptr acquire_datagram(size_t data_size);
 
-            std::mutex crt_confirmations_mutex;
-            Datagram_ptr crt_confirmations;
+            //this is a list of fragment and packet responses
+            //they are accumulated in a vector and then sent repeatedly for a number of times
+            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 4;
+            struct Fragment_Res
+            {
+                uint32_t id = 0;
+                uint8_t channel_idx = 0;
+                uint8_t fragment_idx = 0;
+                uint8_t sent_count = 0;
+            };
+            std::mutex fragments_res_mutex;
+            std::deque<Fragment_Res> fragments_res;
 
-            std::mutex crt_cancellations_mutex;
-            Datagram_ptr crt_cancellations;
+            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 4;
+            struct Packet_Res
+            {
+                uint32_t id = 0;
+                uint8_t channel_idx = 0;
+                uint8_t sent_count = 0;
+            };
+            std::mutex packets_res_mutex;
+            std::deque<Packet_Res> packets_res;
+            //--------------------------------------------
+
 
             typedef std::vector<Datagram_ptr> Send_Queue;
 
@@ -229,16 +249,12 @@ namespace util
                 Datagram_ptr ping;
                 Datagram_ptr pong;
 
-                Send_Queue comfirmations;
-                Send_Queue cancellations;
+                Send_Queue fragments_res;
+                Send_Queue packets_res;
             } internal_queues;
 
             std::mutex packet_queue_mutex;
             Send_Queue packet_queue;
-
-//            std::mutex transit_queue_mutex;
-//            Send_Queue transit_queue; //immediate queue to send
-//            size_t transit_queue_idx = 0;
 
             Datagram_ptr in_transit_datagram;
         } m_tx;
@@ -295,9 +311,9 @@ namespace util
         struct Stats
         {
             size_t tx_datagrams = 0;
-            size_t tx_cancelled_datagrams = 0;
-            size_t tx_confirmed_datagrams = 0;
-            size_t tx_cancelled_packets = 0;
+            //size_t tx_cancelled_datagrams = 0;
+            size_t tx_confirmed_fragments = 0;
+            size_t tx_confirmed_packets = 0;
             size_t tx_packets = 0;
             size_t tx_bytes = 0;
             size_t tx_pings = 0;
@@ -365,11 +381,11 @@ namespace util
         void handle_send(RCP_Socket::Result reult);
         void handle_receive(uint8_t const* data, size_t size);
 
-        void send_pending_confirmations();
-        void add_packet_confirmation(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx);
+        void send_pending_fragments_res();
+        void add_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx);
 
-        void send_pending_cancellations();
-        void add_packet_cancellation(uint8_t channel_idx, uint32_t id);
+        void send_pending_packets_res();
+        void add_packet_res(uint8_t channel_idx, uint32_t id);
 
         void send_packet_ping();
         void send_packet_pong(Ping_Header const& ping);
@@ -381,8 +397,8 @@ namespace util
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram);
         void process_packet_datagram(RX::Datagram_ptr& datagram);
-        void process_packets_confirmed_datagram(RX::Datagram_ptr& datagram);
-        void process_packets_cancelled_datagram(RX::Datagram_ptr& datagram);
+        void process_fragments_res_datagram(RX::Datagram_ptr& datagram);
+        void process_packets_res_datagram(RX::Datagram_ptr& datagram);
         void process_ping_datagram(RX::Datagram_ptr& datagram);
         void process_pong_datagram(RX::Datagram_ptr& datagram);
         void process_connect_req_datagram(RX::Datagram_ptr& datagram);

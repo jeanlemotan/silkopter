@@ -79,7 +79,6 @@ HEADERS += \
     ../../src/qnodeseditor/qneconnection.h \
     ../../src/qnodeseditor/qneport.h \
     ../../src/qnodeseditor/qnodeseditor.h \
-    ../../src/qnodeseditor/ui_qnemainwindow.h \
     ../../src/HAL_Window.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/allocators.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/document.h \
@@ -112,7 +111,6 @@ HEADERS += \
     ../../../libs/common/node/stream/ICommands.h \
     ../../../libs/common/node/stream/ICurrent.h \
     ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/IFactor.h \
     ../../../libs/common/node/stream/IForce.h \
     ../../../libs/common/node/stream/IFrame.h \
     ../../../libs/common/node/stream/ILinear_Acceleration.h \
