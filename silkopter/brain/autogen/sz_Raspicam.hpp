@@ -759,7 +759,7 @@ case 3:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13))
+            else if (utility::string_equal(str, length, "\x46\x50\x53", 3))
 						 { state=0; has_fps = true; }
 else if (utility::string_equal(str, length, "\x6c\x6f\x77", 3))
 						 { state=1; has_low = true; }
@@ -952,7 +952,7 @@ struct Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8
     {
         w.StartObject();
 
-        w.Key("\x42\x69\x74\x72\x61\x74\x65\x20\x28\x62\x70\x73\x29", 13, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, uint32_t >()(w, value.fps);
+        w.Key("\x46\x50\x53", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, uint32_t >()(w, value.fps);
 w.Key("\x6c\x6f\x77", 3, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.low);
 w.Key("\x68\x69\x67\x68", 4, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.high);
 w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f7494beb64bdd4dc07af765ab73cd4280202f3f2736288caf44f8cb93f612a, sz::Raspicam::Quality >()(w, value.recording);

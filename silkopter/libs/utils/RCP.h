@@ -216,7 +216,7 @@ namespace util
 
             //this is a list of fragment and packet responses
             //they are accumulated in a vector and then sent repeatedly for a number of times
-            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 4;
+            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 8;
             struct Fragment_Res
             {
                 uint32_t id = 0;
@@ -227,7 +227,7 @@ namespace util
             std::mutex fragments_res_mutex;
             std::deque<Fragment_Res> fragments_res;
 
-            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 4;
+            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 8;
             struct Packet_Res
             {
                 uint32_t id = 0;

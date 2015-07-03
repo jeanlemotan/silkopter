@@ -16,16 +16,18 @@ inline uint32_t compute_murmur_hash32(uint8_t const* data, size_t size, uint32_t
 	// They're not really 'magic', they just happen to work well.
 
 	const uint32_t m = 0x5bd1e995;
-	const size_t r = 24;
+    const uint8_t r = 24;
 
 	// Initialize the hash to a 'random' value
 
     uint32_t h = seed ^ size;
 
+    size_t size32 = size >> 2;
+
 	// Mix 4 bytes at a time into the hash
-    while (size >= 4)
+    while (size32 > 0)
 	{
-		uint32_t k = *(uint32_t *)data;
+        uint32_t k = *(uint32_t *)data;
 
 		k *= m; 
 		k ^= k >> r; 
@@ -34,17 +36,17 @@ inline uint32_t compute_murmur_hash32(uint8_t const* data, size_t size, uint32_t
 		h *= m; 
 		h ^= k;
 
-		data += 4;
-        size -= 4;
-	}
+        data += 4;
+        size32--;
+    }
 	
 	// Handle the last few bytes of the input array
 
-    switch (size)
+    switch (size & 3)
 	{
-	case 3: h ^= uint32_t(data[2]) << 16;
-	case 2: h ^= uint32_t(data[1]) << 8;
-	case 1: h ^= uint32_t(data[0]);
+    case 3: h ^= uint32_t(data[2]) << 16;
+    case 2: h ^= uint32_t(data[1]) << 8;
+    case 1: h ^= uint32_t(data[0]);
 	        h *= m;
 	};
 

@@ -171,7 +171,7 @@ void Comms::configure_channels()
     {
         util::RCP::Send_Params params;
         params.mtu = 1450;
-        params.is_compressed = true;
+        params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 10;
         params.unreliable_retransmit_count = 1;

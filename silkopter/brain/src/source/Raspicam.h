@@ -86,6 +86,7 @@ private:
     {
         std::mutex mutex;
         std::vector<Stream::Sample> samples;
+        size_t count = 0;
     } m_temp_samples;
 };
 

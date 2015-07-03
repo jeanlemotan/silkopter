@@ -122,10 +122,10 @@ SOURCES += \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
     ../../src/processor/Comp_ECEF_Position.cpp \
-    ../../../libs/utils/RCP.inl \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
-    ../../../libs/utils/radiotap/radiotap.cpp
+    ../../../libs/utils/radiotap/radiotap.cpp \
+    ../../../libs/utils/RCP.inl
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -245,4 +245,6 @@ HEADERS += \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/utils/RCP_RFMON_Socket.h
+
+DISTFILES +=
 

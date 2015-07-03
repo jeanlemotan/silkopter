@@ -288,9 +288,22 @@ void Raspicam::process()
 
     std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
 
-    std::swap(m_stream->samples, m_temp_samples.samples);
-    m_temp_samples.samples.clear();
-//    m_temp_samples.samples.resize(1);
+    //put the samples back
+    for (auto& sample: m_stream->samples)
+    {
+        m_temp_samples.samples.push_back(std::move(sample));
+    }
+
+    m_stream->samples.resize(m_temp_samples.count);
+    if (m_temp_samples.count > 0)
+    {
+        for (size_t i = 0; i < m_temp_samples.count; i++)
+        {
+            m_stream->samples[i] = std::move(m_temp_samples.samples[i]);
+        }
+        m_temp_samples.samples.erase(m_temp_samples.samples.begin(), m_temp_samples.samples.begin() + m_temp_samples.count);
+        m_temp_samples.count = 0;
+    }
 }
 
 
@@ -317,9 +330,14 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
 
     std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
 
-    //m_temp_samples.samples.resize(m_temp_samples.samples.size() + 1);
-    m_temp_samples.samples.resize(1);
-    auto& sample = m_temp_samples.samples.back();
+    //m_temp_samples.count = 0;
+
+    if (m_temp_samples.samples.size() <= m_temp_samples.count)
+    {
+        m_temp_samples.samples.resize(m_temp_samples.samples.size() + m_temp_samples.count + 1);
+    }
+
+    auto& sample = m_temp_samples.samples[m_temp_samples.count];
     sample.value.type = Stream::Value::Type::H264;
     sample.value.is_keyframe = is_keyframe;
     sample.dt = std::chrono::microseconds(1000000 / m_stream->rate);
@@ -327,6 +345,8 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     sample.value.resolution = resolution;
     sample.value.data.resize(size);
     std::copy(data, data + size, sample.value.data.begin());
+
+    m_temp_samples.count++;
 }
 
 void Raspicam::set_active_streams(bool recording, uint32_t quality)
@@ -759,7 +779,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         param.hdr.id = MMAL_PARAMETER_PROFILE;
         param.hdr.size = sizeof(param);
 
-        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_HIGH;//MMAL_VIDEO_PROFILE_H264_HIGH;
+        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_BASELINE;//MMAL_VIDEO_PROFILE_H264_HIGH;
         param.profile[0].level = MMAL_VIDEO_LEVEL_H264_4; // This is the only value supported
 
         MMAL_STATUS_T status;
@@ -805,32 +825,50 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 //        return Component_ptr();
 //    }
 
-    {
-        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
-        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
-        {
-            QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
-            return Component_ptr();
-        }
-    }
-
 //    {
-//        MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
-//        param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
-//        param.hdr.size = sizeof(param);
-
-//        param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
-//        param.cir_mbs = 100;
-//        param.air_mbs = 5;
-//        param.air_ref = 5;
-//        param.pir_mbs = 5;
-
+//        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
 //        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
 //        {
-//            QLOGW("failed to set INTRA REFRESH HEADER FLAG parameters");
+//            QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
 //            return Component_ptr();
 //        }
 //    }
+
+//    {
+//        MMAL_PARAMETER_VIDEO_RATECONTROL_T param = {{ MMAL_PARAMETER_RATECONTROL, sizeof(param)}, MMAL_VIDEO_RATECONTROL_VARIABLE_SKIP_FRAMES};
+//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+//        {
+//            QLOGW("failed to set MMAL_PARAMETER_RATECONTROL");
+//            return Component_ptr();
+//        }
+//    }
+
+//    {
+//        MMAL_PARAMETER_VIDEO_ENCODE_RC_MODEL_T param = {{ MMAL_PARAMETER_VIDEO_ENCODE_RC_MODEL, sizeof(param)}, MMAL_VIDEO_ENCODER_RC_MODEL_VOWIFI};
+//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+//        {
+//            QLOGW("failed to set MMAL_PARAMETER_VIDEO_ENCODE_RC_MODEL");
+//            return Component_ptr();
+//        }
+//    }
+
+    {
+        MMAL_PARAMETER_VIDEO_INTRA_REFRESH_T  param;
+        param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
+        param.hdr.size = sizeof(param);
+
+        param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
+        param.cir_mbs = 5;
+        param.air_mbs = 5;
+        param.air_ref = 5;
+        param.pir_mbs = 5;
+
+        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+        {
+            QLOGW("failed to set INTRA REFRESH HEADER FLAG parameters");
+            return Component_ptr();
+        }
+    }
 
     if (!enable_component(encoder))
     {

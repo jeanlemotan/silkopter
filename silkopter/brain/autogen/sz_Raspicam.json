@@ -15,7 +15,7 @@
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "fps", {"required": true, "default" : 30, "json_key" : "Bitrate (bps)"}],
+        ["uint32_t", "fps", {"required": true, "default" : 30, "json_key" : "FPS"}],
         ["sz::Raspicam::Quality", "low", {"required": true}],
         ["sz::Raspicam::Quality", "high", {"required": true}],
         ["sz::Raspicam::Quality", "recording", {"required": true}]
