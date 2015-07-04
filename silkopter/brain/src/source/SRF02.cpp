@@ -97,6 +97,7 @@ auto SRF02::init() -> bool
     {
         uint8_t rev = 0, test = 0;
         auto ret = i2c->read_register_u8(ADDR, SW_REV_CMD, rev);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ret &= i2c->read_register_u8(ADDR, UNUSED, test);
         if (ret && rev != 0 && rev != 255 && test != 0 && test != 255)
         {
@@ -104,6 +105,7 @@ auto SRF02::init() -> bool
             break;
         }
         QLOGW("\tFailed {} try to initialize SRF02: i2c {}, rev {}, test {}", tries, ret, rev, test);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     if (tries > max_tries)

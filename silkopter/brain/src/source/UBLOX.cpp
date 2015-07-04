@@ -475,7 +475,7 @@ void UBLOX::process()
         return;
     }
 
-    QLOGI("Process... {}", now - m_last_tp);
+    //QLOGI("Process... {}", now - m_last_tp);
 
     m_last_tp = now;
 
@@ -510,29 +510,8 @@ void UBLOX::process()
 
     read_data(buses);
 
-    size_t samples_needed = m_position_stream->compute_samples_needed();
-    while (samples_needed > 0)
-    {
-        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
-        samples_needed--;
-    }
-
-    samples_needed = m_velocity_stream->compute_samples_needed();
-    while (samples_needed > 0)
-    {
-        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
-        samples_needed--;
-    }
-
-    samples_needed = m_gps_info_stream->compute_samples_needed();
-    while (samples_needed > 0)
-    {
-        m_gps_info_stream->push_sample(m_last_gps_info_value, true);
-        samples_needed--;
-    }
-
-
     //watchdog
+    bool is_healthy = true;
     if (m_has_nav_status && m_has_pollh && m_has_sol)
     {
         m_last_complete_tp = now;
@@ -540,8 +519,31 @@ void UBLOX::process()
     }
     else if (now - m_last_complete_tp >= REINIT_WATCHDOG_TIMEOUT)
     {
+        QLOGW("No packets for {}", now - m_last_complete_tp);
+        is_healthy = false;
         //check if we need to reset
         //m_setup_state = Setup_State::UNKNOWN;
+    }
+
+    size_t samples_needed = m_position_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_healthy);
+        samples_needed--;
+    }
+
+    samples_needed = m_velocity_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_healthy);
+        samples_needed--;
+    }
+
+    samples_needed = m_gps_info_stream->compute_samples_needed();
+    while (samples_needed > 0)
+    {
+        m_gps_info_stream->push_sample(m_last_gps_info_value, is_healthy);
+        samples_needed--;
     }
 }
 
@@ -730,7 +732,7 @@ void UBLOX::process_packet(Buses& buses, Packet& packet)
 {
     QLOG_TOPIC("ublox::process_packet");
 
-    QLOGI("packet class {}, message {}, size {}", static_cast<int>(packet.cls), static_cast<int>(packet.message) >> 8, packet.payload.size());
+    //QLOGI("packet class {}, message {}, size {}", static_cast<int>(packet.cls), static_cast<int>(packet.message) >> 8, packet.payload.size());
 
     switch (packet.message)
     {
