@@ -160,11 +160,11 @@ auto MS5611::init() -> bool
 
     QLOGI("Probing MS5611 on {}", m_init_params->bus);
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+    std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     bus_write(buses, CMD_MS5611_RESET, nullptr, 0);
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // We read the factory calibration
     // The on-chip CRC is not used

@@ -6,7 +6,8 @@
 #include <sys/resource.h>
 
 #include <boost/program_options.hpp>
-#include <boost/thread.hpp>
+#include <thread>
+#include <iostream>
 
 size_t s_test = 0;
 bool s_exit = false;
@@ -88,7 +89,6 @@ void signal_handler(int signum)
 
 void out_of_memory_handler()
 {
-    std::cout << "Out of memory\n";
     QLOGE("Out of memory");
     std::abort();
 }
@@ -133,7 +133,7 @@ int main(int argc, char const* argv[])
 
 	if (vm.count("help")) 
 	{
-		std::cout << desc << "\n";
+        std::cout << desc << "\n";
 		return 1;
 	}
 
@@ -143,23 +143,23 @@ int main(int argc, char const* argv[])
     QLOGI("Creating io_service thread");
 
 //    boost::asio::io_service io_service;
-//    auto io_thread = boost::thread([&io_service]()
+//    auto io_thread = std::thread([&io_service]()
 //    {
 //        while (!s_exit)
 //        {
 //            io_service.run();
 //            io_service.reset();
-//            boost::this_thread::sleep_for(boost::chrono::microseconds(500));
+//            std::this_thread::sleep_for(std::chrono::microseconds(500));
 //        }
 //    });
 
-    auto async_thread = boost::thread([]()
+    auto async_thread = std::thread([]()
     {
         while (!s_exit)
         {
             s_async_io_service.run();
             s_async_io_service.reset();
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     });
 
@@ -210,7 +210,7 @@ int main(int argc, char const* argv[])
 
         while (!s_exit)
         {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             QLOGI("Waiting for comms to connect...");
             if (comms.is_connected())
             {
@@ -233,8 +233,8 @@ int main(int argc, char const* argv[])
                 comms.process();
                 hal.process();
             }
-            //boost::this_thread::yield();
-            boost::this_thread::sleep_for(boost::chrono::microseconds(1));
+            //std::this_thread::yield();
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
 
         QLOGI("Stopping everything");
@@ -245,12 +245,12 @@ int main(int argc, char const* argv[])
         //stop threads
 //        if (io_thread.joinable())
 //        {
-//            boost::this_thread::yield();
+//            std::this_thread::yield();
 //            io_thread.join();
 //        }
         if (async_thread.joinable())
         {
-            boost::this_thread::yield();
+            std::this_thread::yield();
             async_thread.join();
         }
         hal.shutdown();

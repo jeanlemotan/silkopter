@@ -2,11 +2,10 @@
 
 #include <type_traits>
 #include <typeinfo>
+#include <future>
 
 #include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <boost/optional.hpp>
-#include <boost/noncopyable.hpp>
 
 #define RAPIDJSON_HAS_STDSTRING 1
 

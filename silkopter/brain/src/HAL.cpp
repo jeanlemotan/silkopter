@@ -220,7 +220,7 @@ void HAL::save_settings()
         }
     }
 
-    silk::async([=]()
+    silk::async(std::function<void()>([=]()
     {
         TIMED_FUNCTION();
 
@@ -236,7 +236,7 @@ void HAL::save_settings()
         {
             QLOGE("Cannot open '{}' to save settings.", k_settings_path);
         }
-    });
+    }));
 
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }

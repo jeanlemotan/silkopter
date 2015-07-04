@@ -445,13 +445,15 @@ void UBLOX::process()
 
     if (!m_is_setup)
     {
-        if (!m_setup_future.valid() || //first time we're starting this
-             m_setup_future.get_state() == boost::future_state::ready) //the previous async setup failed
+        if (!m_setup_future.valid()) //the previous async setup failed
         {
             if (!m_is_setup) //check again to avoid a rare race condition
             {
                 //start the async setup
-                m_setup_future = silk::async([this]() { setup(); });
+                m_setup_future = silk::async(std::function<void()>([this]()
+                {
+                    setup();
+                }));
             }
         }
         return;

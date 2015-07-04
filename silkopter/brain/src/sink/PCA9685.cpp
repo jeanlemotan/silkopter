@@ -126,7 +126,7 @@ auto PCA9685::init() -> bool
 
     //set sleep mode so we can change the prescaler
     i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     uint8_t prescale = math::round(24576000.f / 4096.f / m_init_params->rate) - 1;
     res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, prescale);
@@ -168,11 +168,11 @@ auto PCA9685::init() -> bool
 auto PCA9685::restart(bus::II2C& i2c) -> bool
 {
     bool res = i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     return res;
 }
 

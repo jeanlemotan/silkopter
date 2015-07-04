@@ -383,7 +383,7 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) 
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size);
     return res;
 }
@@ -411,7 +411,7 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + sizeof(dst));
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst);
     return res;
 }
@@ -587,16 +587,16 @@ auto MPU9250::init() -> bool
 
 
     auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+    std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0); //wakeup
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+    std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     res &= mpu_write_u8(buses, MPU_REG_SIGNAL_PATH_RESET, MPU_BIT_GYRO_RST | MPU_BIT_ACCEL_RST | MPU_BIT_TEMP_RST);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(120));
+    std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     uint8_t who_am_i;
     res &= mpu_read_u8(buses, MPU_REG_WHO_AM_I, who_am_i);
@@ -609,16 +609,16 @@ auto MPU9250::init() -> bool
     }
     QLOGI("Found MPU9250 id: {x}", who_am_i);
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_2, 0);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     res &= mpu_write_u8(buses, MPU_REG_GYRO_CONFIG, gyro_range);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG, accel_range);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     //compute the rate
     uint8_t g_dlpf = 0;
@@ -638,13 +638,13 @@ auto MPU9250::init() -> bool
     }
 
     res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
     res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | a_dlpf);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
     res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
     m_fifo_sample_size = 12;
@@ -658,7 +658,7 @@ auto MPU9250::init() -> bool
     {
         res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_I2C_IF_DIS | MPU_BIT_SIG_COND_RST);
     }
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     QLOGI("Probing Magnetometer");
 
@@ -679,7 +679,7 @@ auto MPU9250::init() -> bool
     }
 
     res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     if (!res)
     {
@@ -730,10 +730,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     {
         m_user_ctrl_value &= ~MPU_BIT_I2C_MST;
         mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
 
         mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_BYPASS_EN);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
 
     // Find magnetometer. Possible addresses range from 0x0C to 0x0F.
@@ -756,10 +756,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     QLOGI("\tMagnetometer found at 0x{X}", m_akm_address);
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
@@ -770,10 +770,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 #endif
 
@@ -793,11 +793,11 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     {
         // Enable I2C master mode if magnetometer is being used.
         res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         m_user_ctrl_value |= MPU_BIT_I2C_MST;
         res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_I2C_MST_RST);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //  0 348 kHz
         //  1 333 kHz
@@ -816,23 +816,23 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
         // 14 381 kHz
         // 15 364 kHz
         res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 13); //i2c speed
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //how often to read the magnetometer
         int delay = m_init_params->acceleration_angular_velocity_rate / m_init_params->magnetic_field_rate;
         delay = math::clamp(delay - 1, 0, 31);
 
         res &= mpu_write_u8(buses, MPU_REG_I2C_SLV4_CTRL, delay); //i2c slave delay
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         res &= mpu_write_u8(buses, MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_DELAY_ES_SHADOW | MPU_BIT_I2C_SLV0_DLY_EN); //i2c slave delay enable
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     m_akm_address = 0;
 
     res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     {
         uint8_t data;
@@ -845,7 +845,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     }
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
@@ -856,7 +856,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     //now request the transfer again
     constexpr uint8_t READ_FLAG = 0x80;
@@ -885,7 +885,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 //        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
 //        tmp &= ~MPU_BIT_I2C_MST;
 //        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
-//        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+//        std::this_thread::sleep_for(std::chrono::milliseconds(3));
 //        tmp = MPU_BIT_BYPASS_EN;
 //        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
 //    }
@@ -896,7 +896,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 //        mpu_read_u8(buses, MPU_REG_USER_CTRL, tmp);
 //        tmp |= MPU_BIT_I2C_MST;
 //        mpu_write_u8(buses, MPU_REG_USER_CTRL, tmp);
-//        boost::this_thread::sleep_for(boost::chrono::milliseconds(3));
+//        std::this_thread::sleep_for(std::chrono::milliseconds(3));
 //        tmp = 0;
 //        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
 //    }
@@ -907,11 +907,11 @@ void MPU9250::reset_fifo(Buses& buses)
     QLOG_TOPIC("mpu9250::reset_fifo");
 
     mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_FIFO_EN, 0);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
 }
 

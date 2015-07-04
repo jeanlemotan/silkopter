@@ -107,7 +107,7 @@ private:
 
 
     std::atomic_bool m_is_setup = {false};
-    boost::unique_future<void> m_setup_future;
+    std::future<void> m_setup_future;
 
 
     std::array<uint8_t, 1024> m_temp_buffer;

@@ -97,31 +97,31 @@ auto RCP_RFMON_Socket::prepare_filter() -> bool
     switch (link_encap)
     {
     case DLT_PRISM_HEADER:
-        std::cout << "DLT_PRISM_HEADER Encap\n";
+        QLOGI("DLT_PRISM_HEADER Encap");
         m_impl->_80211_header_length = 0x20; // ieee80211 comes after this
         sprintf(program_src, "radio[0x4a:4]==0x13223344 && radio[0x4e:2] != 0x55%.2x", m_id);
         break;
 
     case DLT_IEEE802_11_RADIO:
-        std::cout << "DLT_IEEE802_11_RADIO Encap\n";
+        QLOGI("DLT_IEEE802_11_RADIO Encap");
         m_impl->_80211_header_length = 0x18; // ieee80211 comes after this
         sprintf(program_src, "ether[0x0a:4]==0x13223344 && ether[0x0e:2] != 0x55%.2x", m_id);
         break;
 
     default:
-        std::cout << "!!! unknown encapsulation\n";
+        QLOGE("!!! unknown encapsulation");
         return false;
     }
 
     if (pcap_compile(m_impl->pcap, &program, program_src, 1, 0) == -1)
     {
-        std::cout << "Failed to compile program: " << program_src << ": " << pcap_geterr(m_impl->pcap) << "\n";
+        QLOGE("Failed to compile program: {} : {}", program_src, pcap_geterr(m_impl->pcap));
         return false;
     }
     if (pcap_setfilter(m_impl->pcap, &program) == -1)
     {
         pcap_freecode(&program);
-        std::cout << "Failed to set program: " << program_src << ": " << pcap_geterr(m_impl->pcap) << "\n";
+        QLOGE("Failed to set program: {} : {}", program_src, pcap_geterr(m_impl->pcap));
         return false;
     }
     pcap_freecode(&program);
@@ -221,7 +221,7 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
         int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
         if (retval < 0)
         {
-            std::cout << "Socket broken: " << pcap_geterr(m_impl->pcap) << "\n";
+            QLOGE("Socket broken: {}", pcap_geterr(m_impl->pcap));
             return false;
         }
         if (retval != 1)
@@ -232,7 +232,7 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
         size_t header_len = (payload[2] + (payload[3] << 8));
         if (pcap_packet_header->len < (header_len + m_impl->_80211_header_length))
         {
-            std::cout << "packet too small\n";
+            QLOGW("packet too small");
             return true;
         }
 
@@ -241,7 +241,7 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
         ieee80211_radiotap_iterator rti;
         if (ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)payload, pcap_packet_header->len) < 0)
         {
-            std::cout << "iterator null\n";
+            QLOGE("iterator null");
             return true;
         }
 
@@ -354,7 +354,7 @@ auto RCP_RFMON_Socket::start() -> bool
     m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
     prepare_tx_packet_header(m_impl->tx_buffer.data());
 
-    m_rx_thread = boost::thread([this]()
+    m_rx_thread = std::thread([this]()
     {
         while (!m_exit)
         {
@@ -378,7 +378,7 @@ auto RCP_RFMON_Socket::start() -> bool
         }
     });
 
-    m_tx_thread = boost::thread([this]()
+    m_tx_thread = std::thread([this]()
     {
         while (!m_exit)
         {

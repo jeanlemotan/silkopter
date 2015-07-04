@@ -152,7 +152,7 @@ Raspicam::~Raspicam()
     }
 
     //wait for the callbacks to die
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     std::lock_guard<std::mutex> lg(m_impl->mutex);
     m_impl->low.resizer_connection.reset();
