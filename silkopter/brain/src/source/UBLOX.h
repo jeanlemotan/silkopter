@@ -105,8 +105,15 @@ private:
     auto wait_for_ack(Buses& buses, q::Clock::duration d) -> bool;
     boost::optional<bool> m_ack;
 
+    enum class Setup_State
+    {
+        UNKNOWN,
+        RUNNING,
+        FAILED,
+        DONE
+    };
 
-    std::atomic_bool m_is_setup = {false};
+    std::atomic<Setup_State> m_setup_state = {Setup_State::UNKNOWN};
     std::future<void> m_setup_future;
 
 
@@ -129,6 +136,8 @@ private:
     Position_Stream::Value m_last_position_value;
     Velocity_Stream::Value m_last_velocity_value;
     GPS_Info_Stream::Value m_last_gps_info_value;
+
+    q::Clock::time_point m_last_tp;
 };
 
 

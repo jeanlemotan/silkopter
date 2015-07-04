@@ -31,18 +31,8 @@ namespace silk
 
     struct At_Exit : q::util::Noncopyable
     {
-    public:
-        At_Exit(std::function<void()> at_exit)
-            : m_at_exit(at_exit)
-        {
-        }
-        ~At_Exit()
-        {
-            if (m_at_exit)
-            {
-                m_at_exit();
-            }
-        }
+        At_Exit(std::function<void()> at_exit) : m_at_exit(at_exit) {}
+        ~At_Exit() { QASSERT(m_at_exit); m_at_exit(); }
     private:
         std::function<void()> m_at_exit;
     };

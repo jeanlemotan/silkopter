@@ -14,34 +14,43 @@ constexpr uint8_t PREAMBLE1 = 0xB5;
 constexpr uint8_t PREAMBLE2 = 0x62;
 
 constexpr uint16_t MIN_PACKET_SIZE = 8;
-constexpr uint16_t MAX_PAYLOAD_SIZE = 256;
+constexpr uint16_t MAX_PAYLOAD_SIZE = 1024;
 
 constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
 
 constexpr std::chrono::seconds REINIT_WATCHDOG_TIMEOUT(5);
 
+enum Class : uint16_t
+{
+    CLASS_NAV   = 0x01,
+    CLASS_INF   = 0x04,
+    CLASS_ACK   = 0x05,
+    CLASS_CFG   = 0x06,
+    CLASS_MON   = 0x0A,
+};
 
 
 enum Message : uint16_t
 {
-    MESSAGE_ACK_ACK     = (0x01 << 8) | 0x05,
-    MESSAGE_ACK_NACK    = (0x00 << 8) | 0x05,
+    MESSAGE_ACK_ACK     = (0x01 << 8) | CLASS_ACK,
+    MESSAGE_ACK_NACK    = (0x00 << 8) | CLASS_ACK,
 
-    MESSAGE_CFG_PRT     = (0x00 << 8) | 0x06,
-    MESSAGE_CFG_MSG     = (0x01 << 8) | 0x06,
-    MESSAGE_CFG_RATE    = (0x08 << 8) | 0x06,
-    MESSAGE_CFG_ANT     = (0x13 << 8) | 0x06,
-    MESSAGE_CFG_SBAS    = (0x16 << 8) | 0x06,
+    MESSAGE_CFG_PRT     = (0x00 << 8) | CLASS_CFG,
+    MESSAGE_CFG_MSG     = (0x01 << 8) | CLASS_CFG,
+    MESSAGE_CFG_RATE    = (0x08 << 8) | CLASS_CFG,
+    MESSAGE_CFG_ANT     = (0x13 << 8) | CLASS_CFG,
+    MESSAGE_CFG_SBAS    = (0x16 << 8) | CLASS_CFG,
+    MESSAGE_CFG_RST     = (0x04 << 8) | CLASS_CFG,
 
-    MESSAGE_NAV_POLLH   = (0x02 << 8) | 0x01,
-    MESSAGE_NAV_STATUS  = (0x03 << 8) | 0x01,
-    MESSAGE_NAV_SOL     = (0x06 << 8) | 0x01,
-    MESSAGE_NAV_VELNED  = (0x12 << 8) | 0x01,
+    MESSAGE_NAV_POLLH   = (0x02 << 8) | CLASS_NAV,
+    MESSAGE_NAV_STATUS  = (0x03 << 8) | CLASS_NAV,
+    MESSAGE_NAV_SOL     = (0x06 << 8) | CLASS_NAV,
+    MESSAGE_NAV_VELNED  = (0x12 << 8) | CLASS_NAV,
 
-    MESSAGE_INF_NOTICE  = (0x02 << 8) | 0x04,
+    MESSAGE_INF_NOTICE  = (0x02 << 8) | CLASS_INF,
 
-    MESSAGE_MON_HW      = (0x09 << 8) | 0x0A,
-    MESSAGE_MON_VER     = (0x04 << 8) | 0x0A,
+    MESSAGE_MON_HW      = (0x09 << 8) | CLASS_MON,
+    MESSAGE_MON_VER     = (0x04 << 8) | CLASS_MON,
 };
 
 
@@ -109,6 +118,13 @@ struct CFG_ITFM
 {
     X4 config = 0;
     X4 config2 = 0;
+};
+
+struct CFG_RST
+{
+    X2 navBbrMask = 0;
+    U1 resetMode = 0;
+    U1 reserved1 = 0;
 };
 
 struct CFG_PRT
@@ -317,7 +333,7 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     }
     else if (buses.spi)
     {
-        max_size = math::min<size_t>(max_size, 32);
+        max_size = math::min<size_t>(max_size, 128);
         return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
@@ -378,18 +394,15 @@ auto UBLOX::setup() -> bool
         }
     }
 
-    {
-        QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
-        CFG_RATE data;
-        data.measRate = std::chrono::milliseconds(1000 / m_init_params->rate).count();
-        data.timeRef = 0;//UTC time
-        data.navRate = 1;
-        if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 3))
-        {
-            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-            return false;
-        }
-    }
+//    {
+//        QLOGI("Resseting the receiver");
+//        CFG_RST data;
+//        data.navBbrMask = 0x0; //HOT START
+//        data.resetMode = 0x0; //HW reset
+//        send_packet(buses, MESSAGE_CFG_RST, data);
+//        std::this_thread::sleep_for(std::chrono::seconds(5));
+//    }
+
     {
         std::array<std::pair<Message, size_t>, 4> msgs = {{
                                                               {MESSAGE_NAV_POLLH, 1},
@@ -415,6 +428,19 @@ auto UBLOX::setup() -> bool
         }
     }
 
+    {
+        QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
+        CFG_RATE data;
+        data.measRate = std::chrono::milliseconds(1000 / m_init_params->rate).count();
+        data.timeRef = 0;//UTC time
+        data.navRate = 1;
+        if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 3))
+        {
+            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
+            return false;
+        }
+    }
+
     QLOGI("Requesting configs");
     {
         //ask for configs
@@ -431,7 +457,7 @@ auto UBLOX::setup() -> bool
     m_gps_info_stream->set_tp(q::Clock::now());
 
     m_last_complete_tp = q::Clock::now();
-    m_is_setup = true;
+    m_last_tp = q::Clock::now();
     return true;
 }
 
@@ -443,21 +469,32 @@ void UBLOX::process()
     m_velocity_stream->clear();
     m_gps_info_stream->clear();
 
-    if (!m_is_setup)
+    auto now = q::Clock::now();
+    if (now - m_last_tp < m_position_stream->get_dt())
     {
-        if (!m_setup_future.valid()) //the previous async setup failed
-        {
-            if (!m_is_setup) //check again to avoid a rare race condition
-            {
-                //start the async setup
-                m_setup_future = silk::async(std::function<void()>([this]()
-                {
-                    setup();
-                }));
-            }
-        }
         return;
     }
+
+    QLOGI("Process... {}", now - m_last_tp);
+
+    m_last_tp = now;
+
+
+//    if (m_setup_state != Setup_State::DONE)
+//    {
+//        if (m_setup_state == Setup_State::UNKNOWN || m_setup_state == Setup_State::FAILED)
+//        {
+//            m_setup_state = Setup_State::RUNNING;
+
+//            //start the async setup
+//            silk::async(std::function<void()>([this]()
+//            {
+//                bool res = setup();
+//                m_setup_state = res ? Setup_State::DONE : Setup_State::FAILED;
+//            }));
+//        }
+//        return;
+//    }
 
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
@@ -472,8 +509,6 @@ void UBLOX::process()
     });
 
     read_data(buses);
-
-    auto now = q::Clock::now();
 
     size_t samples_needed = m_position_stream->compute_samples_needed();
     while (samples_needed > 0)
@@ -506,41 +541,64 @@ void UBLOX::process()
     else if (now - m_last_complete_tp >= REINIT_WATCHDOG_TIMEOUT)
     {
         //check if we need to reset
-        m_is_setup = false;
+        //m_setup_state = Setup_State::UNKNOWN;
     }
 }
 
 void UBLOX::read_data(Buses& buses)
 {
-    auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
-    if (res > 0)
-    {
-        std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+    auto start = q::Clock::now();
+    constexpr std::chrono::milliseconds MAX_DURATION(5);
 
-        //spi marker for 'no data available'
-        while (!m_buffer.empty() && m_buffer.front() == 0xFF)
+    while (q::Clock::now() - start < MAX_DURATION)
+    {
+        auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+        if (res > 0)
         {
-            m_buffer.pop_front();
-        }
-        if (!m_buffer.empty())
-        {
-            bool found = false;
-            do
+            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+
+            //remove SPI no-data markers
+            auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
+            if (it != m_buffer.begin())
             {
-                found = decode_packet(m_packet, m_buffer);
-                if (found)
+                m_buffer.erase(m_buffer.begin(), it);
+            }
+
+            if (!m_buffer.empty())
+            {
+                bool found = false;
+                do
                 {
-                    process_packet(buses, m_packet);
-                    m_packet.payload.clear();
-                }
-            } while(found);
+                    found = decode_packet(m_packet, m_buffer);
+                    if (found)
+                    {
+                        process_packet(buses, m_packet);
+                        m_packet.payload.clear();
+
+                        //remove SPI no-data markers
+                        auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
+                        if (it != m_buffer.begin())
+                        {
+                            m_buffer.erase(m_buffer.begin(), it);
+                        }
+                    }
+                } while(found);
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            break;
         }
     }
 }
 
 auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
 {
-    while (buffer.size() >= MIN_PACKET_SIZE)
+    while (buffer.size() >= 2)//MIN_PACKET_SIZE)
     {
         size_t step = 0;
         size_t payload_size = 0;
@@ -550,7 +608,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
 
         packet.payload.clear();
 
-        for (auto it = buffer.begin(); it != buffer.end(); ++it)
+        for (auto it = buffer.begin(); it != buffer.end() && is_invalid == false; ++it)
         {
             auto const d = *it;
             //QLOGI("step: {}, d: {}", step, d);
@@ -627,13 +685,9 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 }
 
                 //consume all the data from the buffer
-                buffer.erase(buffer.begin(), it);
+                buffer.erase(buffer.begin(), it + 1);
                 // a valid UBlox packet
                 return true;
-            }
-            if (is_invalid)
-            {
-                break;
             }
         }
 
@@ -665,6 +719,7 @@ auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
         {
             return true;
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     } while (q::Clock::now() - start < d);
 
     return false;
@@ -674,6 +729,8 @@ auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
 void UBLOX::process_packet(Buses& buses, Packet& packet)
 {
     QLOG_TOPIC("ublox::process_packet");
+
+    QLOGI("packet class {}, message {}, size {}", static_cast<int>(packet.cls), static_cast<int>(packet.message) >> 8, packet.payload.size());
 
     switch (packet.message)
     {
@@ -697,12 +754,15 @@ void UBLOX::process_packet(Buses& buses, Packet& packet)
 
     default:
     {
-        CFG_MSG data;
-        data.msgClass = packet.cls;
-        data.msgID = static_cast<int>(packet.message) >> 8;
-        data.rate = 0;
-        send_packet(buses, MESSAGE_CFG_MSG, data);
-        QLOGI("Sending stop request for packet class {}, message {}", static_cast<int>(packet.cls), static_cast<int>(packet.message));
+        //if (packet.cls == CLASS_NAV)
+        {
+            CFG_MSG data;
+            data.msgClass = packet.cls;
+            data.msgID = static_cast<int>(packet.message) >> 8;
+            data.rate = 0;
+            send_packet(buses, MESSAGE_CFG_MSG, data);
+            QLOGI("Sending stop request for packet class {}, message {}, size {}", static_cast<int>(packet.cls), static_cast<int>(data.msgID), packet.payload.size());
+        }
     }
     break;
     }
@@ -950,6 +1010,7 @@ template<class T> auto UBLOX::send_packet(Buses& buses, uint16_t msg, T const& d
 
 template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
 {
+    m_ack.reset();
     for (size_t i = 0; i <= retries; i++)
     {
         send_packet(buses, msg, data);
