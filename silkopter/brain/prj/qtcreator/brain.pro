@@ -125,7 +125,8 @@ SOURCES += \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
-    ../../../libs/utils/RCP.inl
+    ../../../libs/utils/RCP.inl \
+    ../../../libs/lz4/lz4.c
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -244,7 +245,8 @@ HEADERS += \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
-    ../../../libs/utils/RCP_RFMON_Socket.h
+    ../../../libs/utils/RCP_RFMON_Socket.h \
+    ../../../libs/lz4/lz4.h
 
 DISTFILES +=
 

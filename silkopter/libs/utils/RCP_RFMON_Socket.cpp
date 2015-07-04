@@ -340,6 +340,12 @@ auto RCP_RFMON_Socket::start() -> bool
 //        return false;
 //    }
 
+    if (pcap_setdirection(m_impl->pcap, PCAP_D_IN) < 0)
+    {
+        QLOGE("Error setting {} to IN capture only: {}", m_interface, pcap_geterr(m_impl->pcap));
+        return false;
+    }
+
     if (!prepare_filter())
     {
         return false;

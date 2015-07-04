@@ -159,12 +159,12 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1000;
-        params.is_compressed = false;
-        params.is_reliable = false;
+        params.mtu = 1450;
+        params.is_compressed = true;
+        params.is_reliable = true;
         params.importance = 10;
         //params.cancel_previous_data = true;
-        //params.cancel_after = std::chrono::milliseconds(200);
+        params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
     }
 

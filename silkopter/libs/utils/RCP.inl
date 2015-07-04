@@ -2,6 +2,7 @@
 
 
 #include "utils/Timed_Scope.h"
+#include "lz4/lz4.h"
 
 namespace util
 {
@@ -196,6 +197,11 @@ inline RCP::RCP(RCP_Socket& socket)
 
     m_init_tp = q::Clock::now();
     //m_ping.rtts.set_capacity(100);
+
+    for (auto& ch: m_tx.channel_data)
+    {
+        ch.lz4_state.resize(LZ4_sizeofState());
+    }
 }
 
 inline void RCP::set_send_params(uint8_t channel_idx, Send_Params const& params)
@@ -313,19 +319,24 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
     {
         auto start = q::Clock::now();
 
-        auto comp_size = compressBound(static_cast<uLong>(size));
+        auto comp_size = LZ4_compressBound(static_cast<int>(size));
         channel_data.compression_buffer.resize(comp_size);
-        int ret = compress(channel_data.compression_buffer.data(), &comp_size, data, static_cast<uLong>(size));
-        if (ret == Z_OK && comp_size < uncompressed_size)
+        int ret = LZ4_compress_fast_extState(channel_data.lz4_state.data(),
+                                             reinterpret_cast<const char*>(data),
+                                             reinterpret_cast<char*>(channel_data.compression_buffer.data()),
+                                             static_cast<int>(size),
+                                             comp_size,
+                                             5);
+        if (ret > 0 && static_cast<size_t>(ret) < uncompressed_size)
         {
-//            QLOGI("Compressed {}KB -> {}KB. {}%", static_cast<int>(uncompressed_size), static_cast<int>(comp_size), comp_size * 100.f / uncompressed_size);
-            channel_data.compression_buffer.resize(comp_size);
+//            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
+            channel_data.compression_buffer.resize(ret);
             data = channel_data.compression_buffer.data();
-            size = comp_size;
+            size = ret;
         }
         else
         {
-            if (ret != Z_OK)
+            if (ret <= 0)
             {
                 QLOGW("Cannot compress data: {}. Sending uncompressed", ret);
             }
@@ -514,7 +525,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         }
         QASSERT(packet->fragments[0]);
 
-        QLOGI("Received packet {}", id);
+//        QLOGI("Received packet {}", id);
 
         queue.packets.erase(queue.packets.begin());
         last_packet_id = id;
@@ -535,9 +546,10 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         if (main_header.flag_is_compressed)
         {
             data.resize(main_header.packet_size);
-            auto ds = static_cast<unsigned long>(data.size());
-            int ret = uncompress(data.data(), &ds, m_rx.compression_buffer.data(), static_cast<uLong>(m_rx.compression_buffer.size()));
-            if (ret != Z_OK)
+            int ret = LZ4_decompress_fast(reinterpret_cast<const char*>(m_rx.compression_buffer.data()),
+                                          reinterpret_cast<char*>(data.data()),
+                                          static_cast<int>(main_header.packet_size));
+            if (ret < 0)
             {
                 QLOGW("Decompression error: {}", ret);
                 data.clear();
@@ -603,7 +615,7 @@ inline void RCP::process_pings()
     if (m_ping.is_done)
     {
         if (m_ping.rtts.empty() ||
-                now - m_ping.rtts.back().first > std::chrono::milliseconds(100))
+                now - m_ping.rtts.back().first > std::chrono::milliseconds(500))
         {
             send_packet_ping();
         }
@@ -731,7 +743,7 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
     }
 
     auto now = q::Clock::now();
-    auto min_resend_duration = MIN_RESEND_DURATION;//math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
+    //auto min_resend_duration = MIN_RESEND_DURATION;//math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
 
     auto best = queue.begin();
     auto best_priority = MIN_PRIORITY;
@@ -1402,17 +1414,15 @@ inline void RCP::process_pong_datagram(RX::Datagram_ptr& datagram)
 
     m_global_stats.rx_pongs++;
 
-    auto seq = header.seq;
-    auto now = q::Clock::now();
-
     std::lock_guard<std::mutex> lg(m_ping.mutex);
 
-    if (header.seq != m_ping.last_seq || m_ping.is_done)
+    if (header.seq != m_ping.last_seq)
     {
-        QLOGW("invalid ping seq received: {}", seq);
+        QLOGW("invalid ping seq received: {}, {}, {}", header.seq, m_ping.last_seq, m_ping.is_done);
     }
     else
     {
+        auto now = q::Clock::now();
         auto rtt = now - m_ping.rtts.back().first;
         m_ping.rtts.back().second = rtt;
     }

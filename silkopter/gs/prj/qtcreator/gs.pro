@@ -145,7 +145,8 @@ HEADERS += \
     ../../src/Custom_Item_Delegate.h \
     ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
-    ../../../libs/utils/RCP.h
+    ../../../libs/utils/RCP.h \
+    ../../../libs/lz4/lz4.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -170,7 +171,8 @@ SOURCES += \
     ../../src/Axis.cpp \
     ../../src/Video_Viewer.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
-    ../../../libs/utils/RCP.inl
+    ../../../libs/utils/RCP.inl \
+    ../../../libs/lz4/lz4.c
 
 FORMS += \
     ../../src/New_Node.ui \

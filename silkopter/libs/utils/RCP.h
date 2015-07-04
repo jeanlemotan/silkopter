@@ -1,7 +1,6 @@
 #pragma once
 
 #include <deque>
-#include <zlib.h>
 #include <boost/intrusive_ptr.hpp>
 
 namespace util
@@ -143,13 +142,13 @@ namespace util
 
         struct Fragments_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 100;
+            static const size_t MAX_PACKED = 200;
             uint8_t count;
         };
 
         struct Packets_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 100;
+            static const size_t MAX_PACKED = 200;
             uint8_t count;
         };
 
@@ -197,6 +196,7 @@ namespace util
             {
                 std::mutex send_mutex;
                 std::vector<uint8_t> compression_buffer;
+                std::vector<uint8_t> lz4_state;
             };
             std::array<Channel_Data, MAX_CHANNELS> channel_data;
 
@@ -216,7 +216,7 @@ namespace util
 
             //this is a list of fragment and packet responses
             //they are accumulated in a vector and then sent repeatedly for a number of times
-            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 8;
+            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 3;
             struct Fragment_Res
             {
                 uint32_t id = 0;
@@ -227,7 +227,7 @@ namespace util
             std::mutex fragments_res_mutex;
             std::deque<Fragment_Res> fragments_res;
 
-            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 8;
+            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 4;
             struct Packet_Res
             {
                 uint32_t id = 0;

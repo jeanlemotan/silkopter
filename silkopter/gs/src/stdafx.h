@@ -1,3 +1,5 @@
+#if defined __cplusplus
+
 #include <memory>
 #include <chrono>
 #include <thread>
@@ -88,3 +90,4 @@ namespace silk
 }
 
 
+#endif

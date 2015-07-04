@@ -1,3 +1,5 @@
+#if defined __cplusplus
+
 #include <type_traits>
 #include <typeinfo>
 
@@ -16,3 +18,5 @@
 #include "utils/Json_Util.h"
 
 #include "Globals.h"
+
+#endif

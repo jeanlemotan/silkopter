@@ -98,9 +98,9 @@ int main(int argc, char const* argv[])
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
     signal(SIGKILL, signal_handler);
     signal(SIGUSR1, signal_handler);
-    signal(SIGQUIT, signal_handler);
-    signal(SIGABRT, signal_handler);
-    signal(SIGSTOP, signal_handler);
+//    signal(SIGQUIT, signal_handler);
+//    signal(SIGABRT, signal_handler);
+//    signal(SIGSTOP, signal_handler);
 
     //set the new_handler
     std::set_new_handler(out_of_memory_handler);
