@@ -153,15 +153,8 @@ int main(int argc, char const* argv[])
 //        }
 //    });
 
-    auto async_thread = std::thread([]()
-    {
-        while (!s_exit)
-        {
-            s_async_io_service.run();
-            s_async_io_service.reset();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-    });
+    boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
+    auto async_thread = std::thread([]() { s_async_io_service.run(); });
 
 //    {
 //        int policy = SCHED_FIFO;
@@ -208,15 +201,15 @@ int main(int argc, char const* argv[])
             abort();
         }
 
-        while (!s_exit)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            QLOGI("Waiting for comms to connect...");
-            if (comms.is_connected())
-            {
-                break;
-            }
-        }
+//        while (!s_exit)
+//        {
+//            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//            QLOGI("Waiting for comms to connect...");
+//            if (comms.is_connected())
+//            {
+//                break;
+//            }
+//        }
 
         QLOGI("All systems up. Ready to fly...");
 
@@ -225,22 +218,29 @@ int main(int argc, char const* argv[])
         auto last = q::Clock::now();
         while (!s_exit)
         {
-            auto now = q::Clock::now();
-            if (now - last >= PERIOD)
+            auto start = q::Clock::now();
+            if (start - last >= PERIOD)
             {
-                last = now;
+                last = start;
 
                 comms.process();
                 hal.process();
             }
-            //std::this_thread::yield();
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+
+            //don't sleep too much if we're late
+//            if (q::Clock::now() - start < PERIOD)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+//            else
+//            {
+//                std::this_thread::yield();
+//            }
         }
 
         QLOGI("Stopping everything");
 
 //        io_service.stop();
-        s_async_io_service.stop();
 
         //stop threads
 //        if (io_thread.joinable())
@@ -248,6 +248,8 @@ int main(int argc, char const* argv[])
 //            std::this_thread::yield();
 //            io_thread.join();
 //        }
+        async_work.reset();
+        s_async_io_service.stop();
         if (async_thread.joinable())
         {
             std::this_thread::yield();

@@ -362,7 +362,7 @@ auto RCP_RFMON_Socket::start() -> bool
             struct timeval to;
 
             to.tv_sec = 0;
-            to.tv_usec = 1e3;
+            to.tv_usec = 1e5;
 
             FD_ZERO(&readset);
             FD_SET(m_impl->rx_pcap_selectable_fd, &readset);
@@ -388,7 +388,10 @@ auto RCP_RFMON_Socket::start() -> bool
             {
                 //wait for data
                 std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
-                m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_ready; });
+                if (!m_impl->tx_buffer_ready)
+                {
+                    m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_ready; });
+                }
 
                 //inject packets
                 if (m_impl->tx_buffer_ready)
@@ -426,6 +429,8 @@ auto RCP_RFMON_Socket::start() -> bool
                 {
                     send_callback(result);
                 }
+                //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                std::this_thread::yield();
 
 #ifdef DEBUG_THROUGHPUT
                 {
