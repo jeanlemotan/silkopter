@@ -222,12 +222,17 @@ if (idx == IDX)\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_init_params->channel_##CH.rate)\
     {\
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->channel_##CH.rate, rate);\
+        if (input_stream)\
+        {\
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->channel_##CH.rate, rate);\
+        }\
         m_pwm_channels[IDX].stream.reset();\
+        m_pwm_channels[IDX].stream_path = q::Path();\
     }\
     else\
     {\
         m_pwm_channels[IDX].stream = input_stream;\
+        m_pwm_channels[IDX].stream_path = path;\
     }\
 }
 

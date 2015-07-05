@@ -25,6 +25,7 @@ class PCA9685 : public ISink
 {
 public:
     PCA9685(HAL& hal);
+    ~PCA9685();
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
@@ -43,6 +44,12 @@ public:
 
 private:
     auto init() -> bool;
+
+    static std::mutex s_pwm_enabled_mutex;
+    static size_t s_pwm_enabled_count;
+    bool m_has_enabled_all_pwm = false;
+
+    auto set_all_pwm_enabled(bool val) -> bool;
 
     auto restart(bus::II2C& i2c) -> bool;
 

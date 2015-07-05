@@ -4,6 +4,13 @@
 #include "sz_math.hpp"
 #include "sz_PCA9685.hpp"
 
+#ifdef RASPBERRY_PI
+extern "C"
+{
+    #include "pigpio.h"
+}
+#endif
+
 
 namespace silk
 {
@@ -38,6 +45,9 @@ constexpr uint8_t PCA9685_MODE2_OUTDRV_BIT    = 1 << 2;
 constexpr uint8_t PCA9685_MODE2_OUTNE1_BIT    = 1 << 1;
 constexpr uint8_t PCA9685_MODE2_OUTNE0_BIT    = 1 << 0;
 
+std::mutex PCA9685::s_pwm_enabled_mutex;
+size_t PCA9685::s_pwm_enabled_count = 0;
+
 
 PCA9685::PCA9685(HAL& hal)
     : m_hal(hal)
@@ -45,6 +55,11 @@ PCA9685::PCA9685(HAL& hal)
     , m_config(new sz::PCA9685::Config())
 {
     m_pwm_channels.resize(16);
+}
+
+PCA9685::~PCA9685()
+{
+    set_all_pwm_enabled(false);
 }
 
 auto PCA9685::get_inputs() const -> std::vector<Input>
@@ -162,6 +177,42 @@ auto PCA9685::init() -> bool
         set_pwm_value(i, boost::none);
     }
 
+    if (!set_all_pwm_enabled(true))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+auto PCA9685::set_all_pwm_enabled(bool val) -> bool
+{
+    if (val == m_has_enabled_all_pwm)
+    {
+        return true;
+    }
+    m_has_enabled_all_pwm = val;
+
+    std::lock_guard<std::mutex> lg(s_pwm_enabled_mutex);
+
+    s_pwm_enabled_count += val ? 1 : -1;
+    bool is_enabled = s_pwm_enabled_count > 0;
+
+    if (gpioGetMode(27) == PI_NOT_INITIALISED)
+    {
+        QLOGI("Initializing pigpio");
+        if (gpioInitialise() < 0)
+        {
+            QLOGE("PIGPIO library initialization failed");
+            return false;
+        }
+    }
+
+    QLOGI("Setting all pwm to {}", is_enabled ? "enabled" : "disabled");
+
+    gpioSetMode(27, PI_OUTPUT);
+    gpioWrite(27, is_enabled ? 0 : 1); //inverted output
+
     return true;
 }
 
@@ -189,9 +240,9 @@ void PCA9685::set_pwm_value(size_t idx, boost::optional<float> _value)
     float value = 0;
     if (_value)
     {
-        value = math::clamp(value, 0.f, 1.f);
+        value = math::clamp(*_value, 0.f, 1.f);
         float range = ch.config->max - ch.config->min;
-        value = (*_value) * range + ch.config->min;
+        value = value * range + ch.config->min;
 
         if (ch.config->servo_signal)
         {
@@ -267,15 +318,32 @@ void PCA9685::process()
 }
 
 #define FIND_STREAM(CH)\
-if (idx == CH - 1)\
+if (idx == CH)\
 {\
     auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
-    m_pwm_channels[CH - 1].stream = input_stream;\
-    m_pwm_channels[CH - 1].config = &m_config->channel_##CH;\
+    auto rate = input_stream ? input_stream->get_rate() : 0u;\
+    if (rate != m_init_params->rate)\
+    {\
+        if (input_stream)\
+        {\
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->rate, rate);\
+        }\
+        m_pwm_channels[CH].stream.reset();\
+        m_pwm_channels[CH].stream_path = q::Path();\
+    }\
+    else\
+    {\
+        QLOGI("Input stream '{}'", path, m_init_params->rate, rate);\
+        m_pwm_channels[CH].stream = input_stream;\
+        m_pwm_channels[CH].stream_path = path;\
+    }\
 }
 
 void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 {
+    QLOG_TOPIC("PCA9685::set_input_stream_path");
+
+    FIND_STREAM(0);
     FIND_STREAM(1);
     FIND_STREAM(2);
     FIND_STREAM(3);
@@ -291,7 +359,6 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
     FIND_STREAM(13);
     FIND_STREAM(14);
     FIND_STREAM(15);
-    FIND_STREAM(16);
 }
 
 
