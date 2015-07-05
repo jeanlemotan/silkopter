@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <map>
 #include <boost/intrusive_ptr.hpp>
 
 namespace util
@@ -213,6 +214,7 @@ namespace util
 
             detail::Pool<Datagram> datagram_pool;
             Datagram_ptr acquire_datagram(size_t data_size);
+            Datagram_ptr acquire_datagram(size_t zero_size, size_t data_size);
 
             //this is a list of fragment and packet responses
             //they are accumulated in a vector and then sent repeatedly for a number of times
@@ -272,6 +274,7 @@ namespace util
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
             detail::Pool<Datagram> datagram_pool;
             Datagram_ptr acquire_datagram(size_t data_size);
+            Datagram_ptr acquire_datagram(size_t zero_size, size_t data_size);
 
             struct Packet : public detail::Pool_Item_Base
             {

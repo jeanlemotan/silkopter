@@ -81,20 +81,32 @@ namespace detail
 
 inline auto RCP::TX::acquire_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
 {
+    return acquire_datagram(data_size, data_size);
+}
+
+inline auto RCP::TX::acquire_datagram(size_t zero_size, size_t data_size) -> RCP::TX::Datagram_ptr
+{
     auto datagram = datagram_pool.acquire();
     QASSERT(!datagram->is_in_transit);
-    datagram->data.resize(0); //this will force zero-ing the data
+    QASSERT(zero_size <= data_size);
     datagram->data.resize(data_size);
+    std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
     datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->sent_count = 0;
     return datagram;
 }
+
 inline auto RCP::RX::acquire_datagram(size_t data_size) -> RCP::RX::Datagram_ptr
 {
+    return acquire_datagram(data_size, data_size);
+}
+inline auto RCP::RX::acquire_datagram(size_t zero_size, size_t data_size) -> RCP::RX::Datagram_ptr
+{
     auto datagram = datagram_pool.acquire();
-    datagram->data.resize(0); //this will force zero-ing the data
+    QASSERT(zero_size <= data_size);
     datagram->data.resize(data_size);
+    std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
     return datagram;
 }
 inline auto RCP::RX::acquire_packet() -> RCP::RX::Packet_ptr
@@ -386,8 +398,8 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             QASSERT(left > 0);
             auto fragment_size = math::min(max_fragment_size, left);
 
-            auto datagram_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header)) + fragment_size;
-            auto fragment = m_tx.acquire_datagram(datagram_size);
+            auto header_size = (i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header);
+            auto fragment = m_tx.acquire_datagram(header_size, header_size + fragment_size);
 
             fragment->params = params;
 
@@ -534,13 +546,15 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         //copy the data
         auto const& main_header = packet->main_header;
         m_rx.compression_buffer.clear();
-        m_rx.compression_buffer.reserve(main_header.packet_size);
+        m_rx.compression_buffer.resize(main_header.packet_size);
+        size_t offset = 0;
         for (size_t i = 0; i < main_header.fragment_count; i++)
         {
             auto const& fragment = packet->fragments[i];
             auto header_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
             QASSERT(fragment->data.size() > header_size);
-            std::copy(fragment->data.begin() + header_size, fragment->data.end(), std::back_inserter(m_rx.compression_buffer));
+            std::copy(fragment->data.begin() + header_size, fragment->data.end(), m_rx.compression_buffer.begin() + offset);
+            offset += fragment->data.size() - header_size;
         }
 
         if (main_header.flag_is_compressed)
@@ -961,7 +975,7 @@ inline void RCP::handle_receive(uint8_t const* data, size_t size)
 {
     if (size > 0)
     {
-        RX::Datagram_ptr datagram = m_rx.acquire_datagram(size);
+        RX::Datagram_ptr datagram = m_rx.acquire_datagram(0, size);
         std::copy(data, data + size, datagram->data.begin());
         process_incoming_datagram(datagram);
     }
@@ -1456,11 +1470,16 @@ inline void RCP::purge()
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
         m_tx.internal_queues.ping.reset();
         m_tx.internal_queues.pong.reset();
+        m_tx.internal_queues.connection_req.reset();
+        m_tx.internal_queues.connection_res.reset();
+        m_tx.internal_queues.fragments_res.clear();
+        m_tx.internal_queues.packets_res.clear();
     }
 
     {
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
         m_tx.packet_queue.clear();
+//        m_tx.in_transit_datagram.reset();
     }
 
     for (size_t i = 0; i < MAX_CHANNELS; i++)
