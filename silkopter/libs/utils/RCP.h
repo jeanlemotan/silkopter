@@ -385,10 +385,14 @@ namespace util
         void handle_receive(uint8_t const* data, size_t size);
 
         void send_pending_fragments_res();
-        void add_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx);
+
+        void send_pending_fragments_res_locked();
+        void add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx);
 
         void send_pending_packets_res();
-        void add_packet_res(uint8_t channel_idx, uint32_t id);
+
+        void send_pending_packets_res_locked();
+        void add_and_send_packet_res(uint8_t channel_idx, uint32_t id);
 
         void send_packet_ping();
         void send_packet_pong(Ping_Header const& ping);

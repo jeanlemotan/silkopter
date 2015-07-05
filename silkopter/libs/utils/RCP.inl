@@ -512,7 +512,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             m_global_stats.rx_zombie_datagrams++;
             if (packet->any_header.flag_needs_confirmation)
             {
-                add_packet_res(channel_idx, id);
+                add_and_send_packet_res(channel_idx, id);
             }
             queue.packets.erase(queue.packets.begin());
             m_global_stats.rx_dropped_packets++;
@@ -534,7 +534,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
             //waited enough, cancel the pending packet
             QLOGW("Canceling ghost packet {}", next_expected_id);
-            add_packet_res(channel_idx, next_expected_id);
+            add_and_send_packet_res(channel_idx, next_expected_id);
             last_packet_id = next_expected_id;
             m_global_stats.rx_dropped_packets++;
             continue;
@@ -549,7 +549,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             }
 
             QLOGW("Canceling late packet {}. {} / {}", id, packet->received_fragment_count, packet->fragments[0] ? packet->main_header.fragment_count : 0);
-            add_packet_res(channel_idx, id);
+            add_and_send_packet_res(channel_idx, id);
             queue.packets.erase(queue.packets.begin());
             last_packet_id = id;
             m_global_stats.rx_dropped_packets++;
@@ -1022,6 +1022,12 @@ inline void RCP::handle_receive(uint8_t const* data, size_t size)
 inline void RCP::send_pending_fragments_res()
 {
     std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
+    send_pending_fragments_res_locked();
+}
+
+inline void RCP::send_pending_fragments_res_locked()
+{
+    //std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
 
     //first throw away the ones we sent enough times
     while (!m_tx.fragments_res.empty() && m_tx.fragments_res.front().sent_count >= TX::MAX_FRAGMENT_RES_SEND_COUNT)
@@ -1061,7 +1067,7 @@ inline void RCP::send_pending_fragments_res()
     }
 }
 
-inline void RCP::add_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx)
+inline void RCP::add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx)
 {
     std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
 
@@ -1070,10 +1076,17 @@ inline void RCP::add_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t frag
     res.id = id;
     res.fragment_idx = fragment_idx;
     m_tx.fragments_res.push_back(res);
+
+    send_pending_fragments_res_locked();
 }
 inline void RCP::send_pending_packets_res()
 {
     std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
+    send_pending_packets_res_locked();
+}
+inline void RCP::send_pending_packets_res_locked()
+{
+    //std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
 
     //first throw away the ones we sent enough times
     while (!m_tx.packets_res.empty() && m_tx.packets_res.front().sent_count >= TX::MAX_PACKET_RES_SEND_COUNT)
@@ -1112,7 +1125,7 @@ inline void RCP::send_pending_packets_res()
     }
 }
 
-inline void RCP::add_packet_res(uint8_t channel_idx, uint32_t id)
+inline void RCP::add_and_send_packet_res(uint8_t channel_idx, uint32_t id)
 {
     std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
 
@@ -1120,6 +1133,8 @@ inline void RCP::add_packet_res(uint8_t channel_idx, uint32_t id)
     res.channel_idx = channel_idx;
     res.id = id;
     m_tx.packets_res.push_back(res);
+
+    send_pending_packets_res_locked();
 }
 
 inline void RCP::send_packet_ping()
@@ -1262,7 +1277,7 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         m_global_stats.rx_zombie_datagrams++;
         if (header.flag_needs_confirmation)
         {
-            add_packet_res(channel_idx, id);
+            add_and_send_packet_res(channel_idx, id);
         }
         m_global_stats.rx_dropped_packets++;
         return;
@@ -1295,11 +1310,11 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         //if we received everything, tell the sender to stop sending this packet
         if (packet->fragments[0] && packet->received_fragment_count == packet->main_header.fragment_count)
         {
-            add_packet_res(channel_idx, id);
+            add_and_send_packet_res(channel_idx, id);
         }
         else
         {
-            add_fragment_res(channel_idx, id, fragment_idx);
+            add_and_send_fragment_res(channel_idx, id, fragment_idx);
         }
     }
 
