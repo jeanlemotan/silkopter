@@ -88,7 +88,7 @@ void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& inp
         return;
     }
 
-    uint32_t input_idx = static_cast<uint32_t>(std::distance(it, node->inputs.begin()));
+    uint32_t input_idx = static_cast<uint32_t>(std::distance(node->inputs.begin(), it));
 
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);

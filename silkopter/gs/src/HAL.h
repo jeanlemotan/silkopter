@@ -438,6 +438,9 @@ public:
     template<class T> auto add(std::shared_ptr<T> node) -> bool;
     void remove(std::shared_ptr<Base> node);
     void remove_all();
+
+    mutable q::util::Signal<void(std::shared_ptr<Base>)> item_added_signal;
+    mutable q::util::Signal<void(std::shared_ptr<Base>)> item_will_be_removed_signal;
 private:
     std::vector<std::shared_ptr<Base>> m_nodes;
 };
@@ -473,10 +476,6 @@ public:
     void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
     void set_stream_telemetry_active(std::string const& stream_name, bool active);
     void send_node_message(node::Node_ptr node, rapidjson::Document const& json);
-
-    q::util::Signal<void()> node_defs_refreshed_signal;
-    q::util::Signal<void(node::Node_ptr)> node_added_signal;
-    q::util::Signal<void(node::Node_ptr)> node_removed_signal;
 
     auto get_remote_clock() const -> Manual_Clock const&;
 
@@ -522,7 +521,8 @@ auto Registry<Base>::add(std::shared_ptr<T> node) -> bool
         QLOGE("Duplicated name in node {}", node->name);
         return false;
     }
-    m_nodes.push_back(std::move(node));
+    m_nodes.push_back(node);
+    item_added_signal.execute(node);
     return true;
 }
 template<class Base>
@@ -534,6 +534,7 @@ void Registry<Base>::remove(std::shared_ptr<Base> node)
         QLOGE("Cannot find node {}", node->name);
         return;
     }
+    item_will_be_removed_signal.execute(node);
     m_nodes.erase(it);
 }
 template<class Base>
