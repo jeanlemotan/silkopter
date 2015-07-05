@@ -70,7 +70,6 @@ namespace util
             bool is_compressed = true;
             bool cancel_previous_data = false; //if true, new packets cancel old-unsent packets
             uint8_t unreliable_retransmit_count = 0; //for unreliable channels, retransmit data this many times to increase the chances of arrival. Zero means just the main transmission and no retransmit
-            q::Clock::duration bump_priority_after = q::Clock::duration{0}; //zero means never
             q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
         };
         void set_send_params(uint8_t channel_idx, Send_Params const& params);
@@ -241,7 +240,7 @@ namespace util
             //--------------------------------------------
 
 
-            typedef std::vector<Datagram_ptr> Send_Queue;
+            typedef std::deque<Datagram_ptr> Send_Queue;
 
             struct Internal_Queues
             {
@@ -377,6 +376,7 @@ namespace util
         void prepare_to_send_datagram(TX::Datagram& datagram);
         void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram);
 
+        static auto tx_packet_datagram_predicate(TX::Datagram_ptr const& datagram1, TX::Datagram_ptr const& datagram2) -> bool;
         auto process_packet_queue() -> TX::Send_Queue::iterator;
         auto get_next_transit_datagram() -> TX::Datagram_ptr;
         void send_datagram();

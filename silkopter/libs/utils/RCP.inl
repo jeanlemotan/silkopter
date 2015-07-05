@@ -372,24 +372,25 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
     auto id = ++m_last_id[channel_idx];
 
     {
+        auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
         //cancel all previous packets if needed
         if (params.cancel_previous_data)
         {
-            for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
+            for (auto it = queue.begin(); it != queue.end();)
             {
                 auto const& hdr = get_header<Packet_Header>((*it)->data);
                 if (hdr.channel_idx == channel_idx && hdr.id < id)
                 {
-                    erase_unordered(m_tx.packet_queue, it);
+                    queue.erase(it);
                     continue;
                 }
                 ++it;
             }
         }
 
-        //QLOGI("crt {}, +{}", m_tx.packet_queue.size(), fragment_count);
+//        QLOGI("crt {}, +{}", queue.size(), fragment_count);
 
 
         //add the new fragments
@@ -430,7 +431,12 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             fragment->added_tp = now;
             prepare_to_send_datagram(*fragment);
 
-            m_tx.packet_queue.push_back(fragment);
+            //queue.push_back(fragment);
+            queue.insert
+                    (
+                       std::upper_bound(queue.begin(), queue.end(), fragment, tx_packet_datagram_predicate),
+                       std::move(fragment)
+                    );
 
             if (!m_is_sending)
             {
@@ -439,11 +445,27 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
                 m_tx.packet_queue_mutex.lock();
             }
         }
+//        for (auto const& d: queue)
+//        {
+//            QLOGI("{}, id: {}, f: {}, sc: {}", &d - &queue.front(), int(get_header<Packet_Header>(d->data).id), int(get_header<Packet_Header>(d->data).fragment_idx), d->sent_count);
+//        }
     }
 
     send_datagram();
 
     return true;
+}
+
+inline auto RCP::tx_packet_datagram_predicate(TX::Datagram_ptr const& AA, TX::Datagram_ptr const& BB) -> bool
+{
+    int priority_AA = AA->params.importance;
+    int priority_BB = BB->params.importance;
+    int sent_count_AA = AA->sent_count;
+    int sent_count_BB = BB->sent_count;
+
+    return priority_AA > priority_BB ||
+            (priority_AA == priority_BB && sent_count_AA < sent_count_BB) ||
+            (priority_AA == priority_BB && sent_count_AA == sent_count_BB && get_header<Packet_Header>(AA->data).id < get_header<Packet_Header>(BB->data).id);
 }
 
 inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
@@ -667,6 +689,16 @@ inline void RCP::process()
     //            QLOGI("{}: queue:{}   on_air:{}   sent:{}", size_t(this), m_tx.packet_queue.size(), xxx_on_air, xxx_sent);
     //        }
 
+    {
+        static q::Clock::time_point tp = q::Clock::now();
+        if (q::Clock::now() - tp > std::chrono::seconds(1))
+        {
+            tp = q::Clock::now();
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            QLOGI("{}: tx {} / rx {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.rx_datagrams);
+        }
+    }
+
     if (!m_connection.is_connected)
     {
         process_connection();
@@ -750,65 +782,75 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
 {
 //            std::lock_guard<std::mutex> lg(m_tx.to_send_mutex);
 
-    auto& queue = m_tx.packet_queue;
-    if (queue.empty())
-    {
-        return queue.end();
-    }
-
     auto now = q::Clock::now();
-    //auto min_resend_duration = MIN_RESEND_DURATION;//math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
 
-    auto best = queue.begin();
-    auto best_priority = MIN_PRIORITY;
-
-    constexpr uint32_t no_id = std::numeric_limits<uint32_t>::max();
-    uint32_t best_id = no_id;
-
-    constexpr size_t no_sent_count = std::numeric_limits<size_t>::max();
-    size_t best_sent_count = no_sent_count;
-
-    //calculate priorities
-    for (auto it = queue.begin(); it != queue.end();)
+    auto& queue = m_tx.packet_queue;
+    while (!queue.empty())
     {
-        auto& datagram = *it;
+        auto& datagram = *queue.begin();
         auto const& params = datagram->params;
 
         //eliminate old datagrams
         if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
         {
-            auto const& header = get_header<Packet_Header>(datagram->data);
+            //auto const& header = get_header<Packet_Header>(datagram->data);
             //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
-            erase_unordered(queue, it);
+            queue.erase(queue.begin());
             continue;
         }
 
-        bool can_be_resent = true;//params.is_reliable ? now - datagram->sent_tp > min_resend_duration : true;
-
-        if (!datagram->is_in_transit && can_be_resent)
-        {
-            int priority = params.importance;
-            if (params.bump_priority_after.count() > 0 && now - datagram->added_tp >= params.bump_priority_after)
-            {
-                priority += 63; //bump it by half
-            }
-
-            auto const& header = get_header<Packet_Header>(datagram->data);
-
-            if (best_id == no_id ||
-                (priority > best_priority) ||                           //most important first
-                (priority == best_priority && datagram->sent_count < best_sent_count) ||   //least sent ones next
-                (priority == best_priority && datagram->sent_count == best_sent_count && header.id < best_id)) //oldest ones next
-            {
-                best = it;
-                best_priority = priority;
-                best_id = header.id;
-                best_sent_count = datagram->sent_count;
-            }
-        }
-
-        ++it;
+        return queue.begin();
     }
+    return queue.end();
+
+
+    //auto min_resend_duration = MIN_RESEND_DURATION;//math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
+
+//    auto best = queue.begin();
+//    auto best_priority = MIN_PRIORITY;
+
+//    constexpr uint32_t no_id = std::numeric_limits<uint32_t>::max();
+//    uint32_t best_id = no_id;
+
+//    constexpr size_t no_sent_count = std::numeric_limits<size_t>::max();
+//    size_t best_sent_count = no_sent_count;
+
+//    //calculate priorities
+//    for (auto it = queue.begin(); it != queue.end();)
+//    {
+//        auto& datagram = *it;
+//        auto const& params = datagram->params;
+
+//        //eliminate old datagrams
+//        if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
+//        {
+//            auto const& header = get_header<Packet_Header>(datagram->data);
+//            //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
+//            erase_unordered(queue, it);
+//            continue;
+//        }
+
+//        bool can_be_resent = true;//params.is_reliable ? now - datagram->sent_tp > min_resend_duration : true;
+
+//        if (!datagram->is_in_transit && can_be_resent)
+//        {
+//            int priority = params.importance;
+//            auto const& header = get_header<Packet_Header>(datagram->data);
+
+//            if (best_id == no_id ||
+//                (priority > best_priority) ||                           //most important first
+//                (priority == best_priority && datagram->sent_count < best_sent_count) ||   //least sent ones next
+//                (priority == best_priority && datagram->sent_count == best_sent_count && header.id < best_id)) //oldest ones next
+//            {
+//                best = it;
+//                best_priority = priority;
+//                best_id = header.id;
+//                best_sent_count = datagram->sent_count;
+//            }
+//        }
+
+//        ++it;
+//    }
 
 //    if (best_id != no_id)
 //    {
@@ -819,7 +861,7 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
 //        }
 //    }
 
-    return best_id == no_id ? queue.end() : best;
+//    return best_id == no_id ? queue.end() : best;
 }
 
 inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
@@ -862,7 +904,7 @@ inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
             {
                 datagram = std::move(queue.front());
 //                    QLOGI("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
-                erase_unordered(queue, queue.begin());
+                queue.pop_front();
             }
         }
         //next the cancels
@@ -873,7 +915,7 @@ inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
             {
                 datagram = std::move(queue.front());
 //                    QLOGI("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
-                erase_unordered(queue, queue.begin());
+                queue.pop_front();
             }
         }
     }
@@ -887,23 +929,19 @@ inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
         auto it = process_packet_queue();
         if (it != queue.end())
         {
-            //if the datagram is not reliable and it's out of retries, remove it from the queue. Otherwise leave it there to be resent
-            if ((*it)->params.is_reliable == false)
+            datagram = std::move(*it);
+            datagram->sent_count++;
+
+            queue.erase(it);//erase as the order changed due to the sent_count increase
+
+            //do I have to insert it back?
+            if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
             {
-                if ((*it)->sent_count++ >= (*it)->params.unreliable_retransmit_count)
-                {
-                    datagram = std::move(*it);
-                    erase_unordered(m_tx.packet_queue, it);
-                }
-                else
-                {
-                    datagram = *it;
-                }
-            }
-            else
-            {
-                (*it)->sent_count++;
-                datagram = *it;
+                queue.insert
+                        (
+                           std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate),
+                           datagram
+                        );
             }
             //auto& header = get_header<Packet_Header>(datagram->data);
             //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
@@ -1306,9 +1344,10 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
 
     //confirm packet datagrams
     {
+        auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-        auto size_before = m_tx.packet_queue.size();
-        for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
+        auto size_before = queue.size();
+        for (auto it = queue.begin(); it != queue.end();)
         {
             auto const& hdr = get_header<Packet_Header>((*it)->data);
             uint32_t id = hdr.id;
@@ -1326,7 +1365,7 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
 //                {
 //                    QLOGI("Confirming fragment {} for packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
 //                }
-                erase_unordered(m_tx.packet_queue, it);
+                it = queue.erase(it);
 //                    count--;
 //                    if (count == 0)
 //                    {
@@ -1338,7 +1377,7 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
             ++it;
         }
 
-        auto size_after = m_tx.packet_queue.size();
+        auto size_after = queue.size();
         if (size_before >= size_after)
         {
             m_global_stats.tx_confirmed_fragments += size_before - size_after;
@@ -1376,9 +1415,10 @@ inline void RCP::process_packets_res_datagram(RX::Datagram_ptr& datagram)
     std::sort(conf, conf_end);
 
     {
+        auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-        auto size_before = m_tx.packet_queue.size();
-        for (auto it = m_tx.packet_queue.begin(); it != m_tx.packet_queue.end();)
+        auto size_before = queue.size();
+        for (auto it = queue.begin(); it != queue.end();)
         {
             auto const& hdr = get_header<Packet_Header>((*it)->data);
             uint32_t id = hdr.id;
@@ -1397,13 +1437,13 @@ inline void RCP::process_packets_res_datagram(RX::Datagram_ptr& datagram)
 //                {
 //                    QLOGI("Confirming fragment {} for whole packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
 //                }
-                erase_unordered(m_tx.packet_queue, it);
+                it = queue.erase(it);
                 continue;
             }
             ++it;
         }
 
-        auto size_after = m_tx.packet_queue.size();
+        auto size_after = queue.size();
         QASSERT(size_before >= size_after);
         if (size_before > size_after)
         {
