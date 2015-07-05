@@ -11,7 +11,7 @@ namespace util
     void encode_base_64(_II first, _II last, _OI result)
     {
         size_t i = 0;
-        auto src_size = std::distance(last, first);
+        auto src_size = std::distance(first, last);
         if (src_size > 3)
         {
             // for each 3 bytes, create 4 encoded chars
@@ -64,7 +64,7 @@ namespace util
     template <typename _II, typename _OI>
     void decode_base_64(_II first, _II last, _OI result)
     {
-        auto src_size = std::distance(last, first);
+        auto src_size = std::distance(first, last);
         QASSERT(src_size % 4 == 0);
 
         // for each 4 encoded chars, create 3 bytes
