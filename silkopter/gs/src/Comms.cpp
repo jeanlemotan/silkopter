@@ -407,8 +407,6 @@ void Comms::handle_enumerate_node_defs()
     }
 
     m_setup_channel.end_unpack();
-
-    m_hal.node_defs_refreshed_signal.execute();
 }
 
 auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::stream::Stream>
@@ -531,6 +529,7 @@ void Comms::handle_enumerate_nodes()
 
     QLOGI("Req Id: {}, Received {} nodes", req_id, node_count);
 
+    std::vector<silk::node::Node_ptr> nodes;
     for (uint32_t i = 0; i < node_count; i++)
     {
         auto node = std::make_shared<node::Node>();
@@ -542,10 +541,10 @@ void Comms::handle_enumerate_nodes()
             return;
         }
         QLOGI("\tNode: {}", node->name);
-        m_hal.m_nodes.add(node);
+        nodes.push_back(node);
     }
 
-    auto nodes = m_hal.get_nodes().get_all();
+    //first register the streams, so that when I add the nodes they cna find their inputs
     for (auto& n: nodes)
     {
         if (!publish_outputs(n))
@@ -553,6 +552,7 @@ void Comms::handle_enumerate_nodes()
             return;
         }
     }
+    //now link the input. This will search in the previously added streams
     for (auto& n: nodes)
     {
         if (!link_inputs(n))
@@ -560,13 +560,20 @@ void Comms::handle_enumerate_nodes()
             return;
         }
     }
-
-    m_setup_channel.end_unpack();
-
+    //now finally add the nodes
+    //the order doesn't matter as nodes only depend on streams, not other nodes.
     for (auto& n: nodes)
     {
-        m_hal.node_added_signal.execute(n);
+        m_hal.m_nodes.add(n);
     }
+
+    //emit the changed signal so the UI can link nodes together
+    for (auto& n: nodes)
+    {
+        n->changed_signal.execute();
+    }
+
+    m_setup_channel.end_unpack();
 }
 
 
@@ -711,12 +718,12 @@ void Comms::handle_add_node()
     }
 
     node->name = name;
-    m_hal.m_nodes.add(node);
 
     publish_outputs(node);
     link_inputs(node);
 
-    m_hal.node_added_signal.execute(node);
+    m_hal.m_nodes.add(node);
+    node->changed_signal.execute();
 }
 
 void Comms::handle_remove_node()
@@ -741,8 +748,6 @@ void Comms::handle_remove_node()
 
     unpublish_outputs(node);
     m_hal.m_nodes.remove(node);
-
-    m_hal.node_removed_signal.execute(node);
 
     request_all_node_configs();
 }
