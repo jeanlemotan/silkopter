@@ -10,7 +10,7 @@ namespace util
     namespace detail
     {
         typedef std::vector<uint8_t> TX_Buffer_t;
-        typedef std::deque<uint8_t> RX_Buffer_t;
+        typedef std::vector<uint8_t> RX_Buffer_t;
 
         template<class T> auto get_value_fixed(T& val, RX_Buffer_t const& t, size_t off) -> bool
         {
@@ -126,6 +126,10 @@ namespace util
     template<class MESSAGE_T, class MESSAGE_SIZE_T>
     class Channel : q::util::Noncopyable
 	{
+        static const size_t MESSAGE_OFFSET = 0;
+        static const size_t SIZE_OFFSET = MESSAGE_OFFSET + sizeof(MESSAGE_T);
+        static const size_t HEADER_SIZE = SIZE_OFFSET + sizeof(MESSAGE_SIZE_T);
+
 	public:
 		typedef MESSAGE_T Message_t;
         typedef MESSAGE_SIZE_T Message_Size_t;
@@ -256,9 +260,9 @@ namespace util
 
         auto begin_unpack() -> bool
         {
-            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == 0, "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == HEADER_SIZE, "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             //q::quick_logf("begin_decode: {}, {}", m_decoded.data_size, m_rx_buffer.size());
-            return (m_decoded.data_size != 0 && m_decoded.offset == 0);
+            return (m_decoded.data_size > HEADER_SIZE && m_decoded.offset == HEADER_SIZE);
         }
         template<class Param> auto unpack_param(Param& p) -> bool
         {
@@ -325,15 +329,11 @@ namespace util
         }
 
         auto get_remaining_message_size() const -> size_t { return m_decoded.data_size - m_decoded.offset; }
-        auto get_message_size() const -> size_t { return m_decoded.data_size; }
+        auto get_message_size() const -> size_t { return m_decoded.data_size - HEADER_SIZE; }
 
 		//////////////////////////////////////////////////////////////////////////
 
 	private:
-        static const size_t MESSAGE_OFFSET = 0;
-        static const size_t SIZE_OFFSET = MESSAGE_OFFSET + sizeof(Message_t);
-        static const size_t HEADER_SIZE = SIZE_OFFSET + sizeof(Message_Size_t);
-
         struct Decoded
 		{
             bool is_valid = false;
@@ -427,11 +427,13 @@ namespace util
                 return false;
             }
 
-            pop_front(HEADER_SIZE);
+            //pop_front(HEADER_SIZE);
+
+            m_decoded.offset = HEADER_SIZE;
+            m_decoded.data_size = m_decoded.offset + size;
 
             m_decoded.is_valid = true;
             m_decoded.message = message;
-            m_decoded.data_size = size;
 
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             return true;
