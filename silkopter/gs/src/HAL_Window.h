@@ -25,7 +25,6 @@ public:
     void process();
 
 private:
-    void on_node_factories_refreshed();
     void on_nodes_refreshed();
     void on_config_changed(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
 
@@ -46,6 +45,8 @@ private:
     void do_magnetic_field_calibration(silk::node::stream::Stream_ptr stream);
     void do_angular_velocity_calibration(silk::node::stream::Stream_ptr stream);
 
+    void add_stream(silk::node::stream::Stream_ptr stream);
+    void remove_stream(silk::node::stream::Stream_ptr stream);
 
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node);
@@ -72,32 +73,32 @@ private:
         JSON_Model* config_model = nullptr;
     } m_selection;
 
-    struct Stream_Data
+    struct UI_Stream
     {
         silk::node::stream::Stream_wptr stream;
         QNEPort* port = nullptr;
         QNEBlock* block = nullptr;
     };
 
-    struct Node_Data
+    struct UI_Node
     {
         silk::node::Node_wptr node;
 
         QNEBlock* block = nullptr;
-        struct Input_Data
+        struct UI_Input
         {
             QNEPort* port = nullptr;
         };
-        struct Output_Data
+        struct UI_Output
         {
             QNEPort* port = nullptr;
         };
-        std::map<std::string, Input_Data> inputs;
-        std::map<std::string, Output_Data> outputs;
+        std::map<std::string, UI_Input> ui_inputs;
+        std::map<std::string, UI_Output> ui_outputs;
     };
 
-    std::map<std::string, Stream_Data> m_streams;
-    std::map<std::string, Node_Data> m_nodes;
+    std::map<std::string, UI_Stream> m_ui_streams;
+    std::map<std::string, UI_Node> m_ui_nodes;
 
     Render_Context& m_context;
     Sim_Window* m_sim_window = nullptr;

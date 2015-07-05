@@ -98,15 +98,23 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
     connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 
-    m_hal.node_defs_refreshed_signal.connect(std::bind(&HAL_Window::on_node_factories_refreshed, this));
-    m_hal.node_added_signal.connect([this](silk::node::Node_ptr node)
+    m_hal.get_nodes().item_added_signal.connect([this](silk::node::Node_ptr item)
     {
-        add_node(node);
+        add_node(item);
     });
-    m_hal.node_removed_signal.connect([this](silk::node::Node_ptr node)
+    m_hal.get_nodes().item_will_be_removed_signal.connect([this](silk::node::Node_ptr item)
     {
-        remove_node(node);
+        remove_node(item);
     });
+    m_hal.get_streams().item_added_signal.connect([this](silk::node::stream::Stream_ptr item)
+    {
+        add_stream(item);
+    });
+    m_hal.get_streams().item_will_be_removed_signal.connect([this](silk::node::stream::Stream_ptr item)
+    {
+        remove_stream(item);
+    });
+
 
 
 //    refresh_nodes();
@@ -114,12 +122,8 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
 
 HAL_Window::~HAL_Window()
 {
-    m_streams.clear();
-    m_nodes.clear();
-}
-
-void HAL_Window::on_node_factories_refreshed()
-{
+    m_ui_streams.clear();
+    m_ui_nodes.clear();
 }
 
 //void HAL_Window::refresh_nodes()
@@ -246,8 +250,8 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
     auto* block = input_port->block();
     QASSERT(block);
 
-    auto it = m_nodes.find(block->id().toLatin1().data());
-    if (it == m_nodes.end())
+    auto it = m_ui_nodes.find(block->id().toLatin1().data());
+    if (it == m_ui_nodes.end())
     {
         return;
     }
@@ -278,8 +282,8 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
 
     QMenu menu(this);
 
-    auto it = m_nodes.find(block->id().toLatin1().data());
-    if (it != m_nodes.end())
+    auto it = m_ui_nodes.find(block->id().toLatin1().data());
+    if (it != m_ui_nodes.end())
     {
         auto node = it->second.node.lock();
         if (node && node->type == silk::node::IMulti_Simulator::TYPE)
@@ -468,7 +472,7 @@ void HAL_Window::set_config_editor_node(silk::node::Node_ptr node)
 std::string HAL_Window::compute_unique_name(std::string const& name) const
 {
     std::string new_name = name.empty() ? "Node" : name;
-    if (m_nodes.find(new_name) == m_nodes.end())
+    if (m_ui_nodes.find(new_name) == m_ui_nodes.end())
     {
         return new_name;
     }
@@ -499,7 +503,7 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
     {
         sprintf(nstr, " %d", number);
         result = new_name + nstr;
-        if (m_nodes.find(result) == m_nodes.end())
+        if (m_ui_nodes.find(result) == m_ui_nodes.end())
         {
             return result;
         }
@@ -541,10 +545,19 @@ void HAL_Window::do_angular_velocity_calibration(silk::node::stream::Stream_ptr 
 
 }
 
+void HAL_Window::add_stream(silk::node::stream::Stream_ptr stream)
+{
+}
+
+void HAL_Window::remove_stream(silk::node::stream::Stream_ptr stream)
+{
+
+}
+
 
 void HAL_Window::refresh_node(silk::node::Node& node)
 {
-    auto& data = m_nodes[node.name];
+    auto& data = m_ui_nodes[node.name];
 
 //    QPointF pos;
 //    auto* positionj = jsonutil::find_value(node->config, q::Path("__gs/position"));
@@ -564,44 +577,55 @@ void HAL_Window::refresh_node(silk::node::Node& node)
 
     for (auto const& i: node.inputs)
     {
-        auto& id = data.inputs[i.name];
-        QASSERT(id.port);
+        auto& ui_input = data.ui_inputs[i.name];
+        QASSERT(ui_input.port);
         if (i.rate > 0)
         {
-            id.port->setName(q::util::format2<std::string>("{} {}Hz", i.name, i.rate).c_str());
+            ui_input.port->setName(q::util::format2<std::string>("{} {}Hz", i.name, i.rate).c_str());
         }
         else
         {
-            id.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
+            ui_input.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
         }
-        id.port->setPortType(static_cast<int>(i.type));
-        id.port->setPortRate(i.rate);
-        id.port->disconnectAll();
+        ui_input.port->setPortType(static_cast<int>(i.type));
+        ui_input.port->setPortRate(i.rate);
+        ui_input.port->disconnectAll();
 
+        //get the hal stream this input is connected to
         auto stream = i.stream.lock();
         if (!stream)
         {
             continue;
         }
-        auto it_stream = m_streams.find(stream->name);
-        QASSERT(it_stream != m_streams.end());
-        if (it_stream != m_streams.end())
+
+        //find the hal node this stream originates from
+        auto stream_node = stream->node.lock();
+        QASSERT(stream_node);
+        if (!stream_node)
+        {
+            continue;
+        }
+
+        auto it_stream = m_ui_streams.find(stream->name);
+        QASSERT(it_stream != m_ui_streams.end());
+        if (it_stream != m_ui_streams.end())
         {
             auto connection = new QNEConnection(0);
             m_scene->addItem(connection);
-            connection->setPort1((QNEPort*)id.port);
+            connection->setPort1((QNEPort*)ui_input.port);
             connection->setPort2(it_stream->second.port);
             connection->updatePath();
         }
+
     }
 
     for (auto const& o: node.outputs)
     {
-        auto& od = data.outputs[o.name];
-        QASSERT(od.port);
-        od.port->setName(q::util::format2<std::string>("{} {}Hz", o.name, o.rate).c_str());
-        od.port->setPortType(static_cast<int>(o.type));
-        od.port->setPortRate(o.rate);
+        auto& ui_output = data.ui_outputs[o.name];
+        QASSERT(ui_output.port);
+        ui_output.port->setName(q::util::format2<std::string>("{} {}Hz", o.name, o.rate).c_str());
+        ui_output.port->setPortType(static_cast<int>(o.type));
+        ui_output.port->setPortRate(o.rate);
     }
     data.block->refreshGeometry();
 
@@ -631,8 +655,8 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         pos.setY(position.y);
     }
 
-    auto& data = m_nodes[node->name];
-    data = Node_Data();
+    auto& data = m_ui_nodes[node->name];
+    data = UI_Node();
 
     QNEBlock *b = new QNEBlock();
     m_scene->addItem(b);
@@ -664,7 +688,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
             m_hal.set_node_input_stream_path(node, input_name, stream_path);
         });
 
-        auto& port_data = data.inputs[i.name];
+        auto& port_data = data.ui_inputs[i.name];
         port_data.port = port;
     }
     for (auto const& o: node->outputs)
@@ -673,10 +697,10 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
         port->setBrush(QBrush(QColor(0x9b59b6)));
         port->setId(o.name.c_str());
 
-        auto& port_data = data.outputs[o.name];
+        auto& port_data = data.ui_outputs[o.name];
         port_data.port = port;
 
-        auto& stream_data = m_streams[o.stream->name];
+        auto& stream_data = m_ui_streams[o.stream->name];
         stream_data.stream = o.stream;
         stream_data.port = port_data.port;
         stream_data.block = data.block;
@@ -687,8 +711,6 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
     {
         refresh_node(*node_ptr);
     }) );
-
-    refresh_node(*node);
 }
 
 void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
@@ -724,13 +746,13 @@ void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
 
 void HAL_Window::remove_node(silk::node::Node_ptr node)
 {
-    auto it = m_nodes.find(node->name);
-    if (it != m_nodes.end())
+    auto it = m_ui_nodes.find(node->name);
+    if (it != m_ui_nodes.end())
     {
-        Node_Data& nd = it->second;
+        UI_Node& nd = it->second;
         m_scene->removeItem(nd.block);
         delete nd.block;
-        m_nodes.erase(it);
+        m_ui_nodes.erase(it);
     }
 }
 
