@@ -205,7 +205,6 @@ namespace util
                 Send_Params params;
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
-                std::atomic_bool is_in_transit = {false};
                 size_t sent_count = 0; //how many times it was sent - for unreliable only
                 Buffer_t data;
             };
@@ -289,7 +288,8 @@ namespace util
 
             struct Packet_Queue
             {
-                std::map<uint32_t, Packet_ptr> packets;
+                typedef std::pair<uint32_t, Packet_ptr> Item;
+                std::deque<Item> packets;
                 std::mutex mutex;
             };
 
@@ -378,7 +378,7 @@ namespace util
 
         static auto tx_packet_datagram_predicate(TX::Datagram_ptr const& datagram1, TX::Datagram_ptr const& datagram2) -> bool;
         auto process_packet_queue() -> TX::Send_Queue::iterator;
-        auto get_next_transit_datagram() -> TX::Datagram_ptr;
+        void compute_next_transit_datagram();
         void send_datagram();
 
         void handle_send(RCP_Socket::Result reult);
@@ -401,6 +401,9 @@ namespace util
         void send_packet_connect_req();
         void send_packet_connect_res(Connect_Res_Header::Response response);
         void process_connection();
+
+        //static auto rx_packet_predicate(RX::Packet_Queue::Item const& item1, RX::Packet_Queue::Item const& item2) -> bool;
+        static auto rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool;
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram);
         void process_packet_datagram(RX::Datagram_ptr& datagram);

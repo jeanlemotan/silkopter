@@ -87,7 +87,6 @@ inline auto RCP::TX::acquire_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
 inline auto RCP::TX::acquire_datagram(size_t zero_size, size_t data_size) -> RCP::TX::Datagram_ptr
 {
     auto datagram = datagram_pool.acquire();
-    QASSERT(!datagram->is_in_transit);
     QASSERT(zero_size <= data_size);
     datagram->data.resize(data_size);
     std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
@@ -329,7 +328,7 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
     size_t uncompressed_size = size;
     if (is_compressed)
     {
-        auto start = q::Clock::now();
+        //auto start = q::Clock::now();
 
         auto comp_size = LZ4_compressBound(static_cast<int>(size));
         channel_data.compression_buffer.resize(comp_size);
@@ -383,7 +382,7 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
                 auto const& hdr = get_header<Packet_Header>((*it)->data);
                 if (hdr.channel_idx == channel_idx && hdr.id < id)
                 {
-                    queue.erase(it);
+                    it = queue.erase(it);
                     continue;
                 }
                 ++it;
@@ -417,13 +416,8 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
                 auto& f_header = get_header<Packet_Main_Header>(fragment->data);
                 f_header.packet_size = uncompressed_size;
                 f_header.fragment_count = fragment_count;
-
-                std::copy(data, data + fragment_size, fragment->data.begin() + sizeof(Packet_Main_Header));
             }
-            else
-            {
-                std::copy(data, data + fragment_size, fragment->data.begin() + sizeof(Packet_Header));
-            }
+            std::copy(data, data + fragment_size, fragment->data.begin() + header_size);
 
             data += fragment_size;
             left -= fragment_size;
@@ -484,6 +478,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
     }
 
     auto& queue = m_rx.packet_queues[channel_idx];
+    auto& packets = queue.packets;
     std::lock_guard<std::mutex> lg(queue.mutex);
 
     auto const& params = m_receive_params[channel_idx];
@@ -493,11 +488,11 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
     while (true)
     {
-        if (queue.packets.empty())
+        if (packets.empty())
         {
             break;
         }
-        auto packet = queue.packets.begin()->second;
+        RX::Packet_ptr const& packet = packets.front().second;
         QASSERT(packet);
 
         auto next_expected_id = last_packet_id + 1;
@@ -514,7 +509,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             {
                 add_and_send_packet_res(channel_idx, id);
             }
-            queue.packets.erase(queue.packets.begin());
+            packets.pop_front();
             m_global_stats.rx_dropped_packets++;
             continue;
         }
@@ -550,7 +545,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
             QLOGW("Canceling late packet {}. {} / {}", id, packet->received_fragment_count, packet->fragments[0] ? packet->main_header.fragment_count : 0);
             add_and_send_packet_res(channel_idx, id);
-            queue.packets.erase(queue.packets.begin());
+            packets.pop_front();
             last_packet_id = id;
             m_global_stats.rx_dropped_packets++;
 
@@ -561,7 +556,6 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
 //        QLOGI("Received packet {}", id);
 
-        queue.packets.erase(queue.packets.begin());
         last_packet_id = id;
         m_global_stats.rx_packets++;
 
@@ -597,6 +591,9 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             QASSERT(m_rx.compression_buffer.size() == main_header.packet_size);
             std::swap(data, m_rx.compression_buffer);
         }
+
+        packets.pop_front();
+
         break;
     }
 
@@ -780,8 +777,6 @@ inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
 
 inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
 {
-//            std::lock_guard<std::mutex> lg(m_tx.to_send_mutex);
-
     auto now = q::Clock::now();
 
     auto& queue = m_tx.packet_queue;
@@ -795,78 +790,18 @@ inline auto RCP::process_packet_queue() -> TX::Send_Queue::iterator
         {
             //auto const& header = get_header<Packet_Header>(datagram->data);
             //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
-            queue.erase(queue.begin());
+            queue.pop_front();
             continue;
         }
 
         return queue.begin();
     }
     return queue.end();
-
-
-    //auto min_resend_duration = MIN_RESEND_DURATION;//math::clamp(m_ping.rtt, MIN_RESEND_DURATION, MAX_RESEND_DURATION);
-
-//    auto best = queue.begin();
-//    auto best_priority = MIN_PRIORITY;
-
-//    constexpr uint32_t no_id = std::numeric_limits<uint32_t>::max();
-//    uint32_t best_id = no_id;
-
-//    constexpr size_t no_sent_count = std::numeric_limits<size_t>::max();
-//    size_t best_sent_count = no_sent_count;
-
-//    //calculate priorities
-//    for (auto it = queue.begin(); it != queue.end();)
-//    {
-//        auto& datagram = *it;
-//        auto const& params = datagram->params;
-
-//        //eliminate old datagrams
-//        if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
-//        {
-//            auto const& header = get_header<Packet_Header>(datagram->data);
-//            //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
-//            erase_unordered(queue, it);
-//            continue;
-//        }
-
-//        bool can_be_resent = true;//params.is_reliable ? now - datagram->sent_tp > min_resend_duration : true;
-
-//        if (!datagram->is_in_transit && can_be_resent)
-//        {
-//            int priority = params.importance;
-//            auto const& header = get_header<Packet_Header>(datagram->data);
-
-//            if (best_id == no_id ||
-//                (priority > best_priority) ||                           //most important first
-//                (priority == best_priority && datagram->sent_count < best_sent_count) ||   //least sent ones next
-//                (priority == best_priority && datagram->sent_count == best_sent_count && header.id < best_id)) //oldest ones next
-//            {
-//                best = it;
-//                best_priority = priority;
-//                best_id = header.id;
-//                best_sent_count = datagram->sent_count;
-//            }
-//        }
-
-//        ++it;
-//    }
-
-//    if (best_id != no_id)
-//    {
-//        auto const& header = get_header<Packet_Header>((*best)->data);
-//        if (header.channel_idx == 4)
-//        {
-//            QLOGI("P{} F{}, {}", header.id, header.fragment_idx, (*best)->sent_count);
-//        }
-//    }
-
-//    return best_id == no_id ? queue.end() : best;
 }
 
-inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
+inline void RCP::compute_next_transit_datagram()
 {
-    TX::Datagram_ptr datagram;
+    TX::Datagram_ptr& datagram = m_tx.in_transit_datagram;
 
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
@@ -947,8 +882,6 @@ inline auto RCP::get_next_transit_datagram() -> TX::Datagram_ptr
             //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
         }
     }
-    QASSERT(!datagram || !datagram->is_in_transit);
-    return std::move(datagram);
 }
 
 inline void RCP::send_datagram()
@@ -960,23 +893,18 @@ inline void RCP::send_datagram()
         return;
     }
 
-    TX::Datagram_ptr datagram = get_next_transit_datagram();
-    if (!datagram)
+    compute_next_transit_datagram();
+    if (!m_tx.in_transit_datagram)
     {
         m_is_sending = false;
         return;
     }
 
-    datagram->is_in_transit = true;
-
-    update_stats(m_global_stats, *datagram);
+    update_stats(m_global_stats, *m_tx.in_transit_datagram);
 
     xxx_on_air++;
 
     //QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
-
-    //mark it as being the one sent
-    m_tx.in_transit_datagram = std::move(datagram);
 
     m_socket.async_send(m_tx.in_transit_datagram->data.data(), m_tx.in_transit_datagram->data.size());
 }
@@ -989,7 +917,6 @@ inline void RCP::handle_send(RCP_Socket::Result result)
     QASSERT(datagram);
     if (datagram)
     {
-        datagram->is_in_transit = false;
         datagram->sent_tp = q::Clock::now();
 
         xxx_on_air--;
@@ -1259,6 +1186,11 @@ inline void RCP::process_incoming_datagram(RX::Datagram_ptr& datagram)
     //m_rx.release_datagram(std::move(datagram));
 }
 
+inline auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool
+{
+    return item1.first < id;
+}
+
 inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
 {
     QASSERT(datagram);
@@ -1270,6 +1202,8 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
 
     auto& queue = m_rx.packet_queues[channel_idx];
     std::lock_guard<std::mutex> lg(queue.mutex);
+
+    auto& packets = queue.packets;
 
     auto last_packet_id = m_rx.last_packet_ids[channel_idx];
     if (id <= last_packet_id)
@@ -1283,10 +1217,17 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         return;
     }
 
-    auto& packet = queue.packets[id];
-    if (!packet)
+    RX::Packet_ptr packet;
+
+    auto iter = std::lower_bound(packets.begin(), packets.end(), id, rx_packet_id_predicate);
+    if (iter != packets.end() && iter->first == id)
+    {
+        packet = iter->second;
+    }
+    else
     {
         packet = m_rx.acquire_packet();
+        packets.insert(iter, std::make_pair(id, packet));
     }
 
     if (packet->fragments[fragment_idx]) //we already have the fragment
