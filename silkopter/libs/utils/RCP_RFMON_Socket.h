@@ -17,6 +17,8 @@ public:
 
     void async_send(uint8_t const* data, size_t size);
 
+    size_t prepare_buffer(std::vector<uint8_t>& buffer);
+
 private:
 
     auto prepare_filter() -> bool;

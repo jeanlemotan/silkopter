@@ -67,6 +67,12 @@ void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::si
     }
 }
 
+size_t RCP_UDP_Socket::prepare_buffer(std::vector<uint8_t>& buffer)
+{
+    //no header needed
+    return 0;
+}
+
 auto RCP_UDP_Socket::process() -> Result
 {
     if (m_tx_endpoint.address().is_unspecified() && !m_rx_endpoint.address().is_unspecified())

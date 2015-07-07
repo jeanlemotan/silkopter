@@ -51,6 +51,8 @@ namespace util
         std::function<void(Result)> send_callback;
 
         virtual void async_send(uint8_t const* data, size_t size) = 0;
+
+        virtual size_t prepare_buffer(std::vector<uint8_t>& buffer) = 0;
     };
 
     //Reliable Channel Protocol
@@ -206,13 +208,15 @@ namespace util
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 size_t sent_count = 0; //how many times it was sent - for unreliable only
-                Buffer_t data;
+
+                Buffer_t socket_packet_data;
+                size_t socket_header_size = 0;
+                uint8_t* data_ptr = nullptr;
+                size_t data_size = 0;
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
 
             detail::Pool<Datagram> datagram_pool;
-            Datagram_ptr acquire_datagram(size_t data_size);
-            Datagram_ptr acquire_datagram(size_t zero_size, size_t data_size);
 
             //this is a list of fragment and packet responses
             //they are accumulated in a vector and then sent repeatedly for a number of times
@@ -259,6 +263,9 @@ namespace util
             Datagram_ptr in_transit_datagram;
         } m_tx;
 
+        TX::Datagram_ptr acquire_tx_datagram(size_t data_size);
+        TX::Datagram_ptr acquire_tx_datagram(size_t zero_size, size_t data_size);
+
         struct RX
         {
             std::vector<uint8_t> compression_buffer;
@@ -271,8 +278,6 @@ namespace util
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
             detail::Pool<Datagram> datagram_pool;
-            Datagram_ptr acquire_datagram(size_t data_size);
-            Datagram_ptr acquire_datagram(size_t zero_size, size_t data_size);
 
             struct Packet : public detail::Pool_Item_Base
             {
@@ -297,6 +302,9 @@ namespace util
             std::array<Packet_Queue, MAX_CHANNELS> packet_queues;
             std::array<uint32_t, MAX_CHANNELS> last_packet_ids;
         } m_rx;
+
+        RX::Datagram_ptr acquire_rx_datagram(size_t data_size);
+        RX::Datagram_ptr acquire_rx_datagram(size_t zero_size, size_t data_size);
 
         struct Ping
         {
@@ -358,12 +366,8 @@ namespace util
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
         Receive_Params m_global_receive_params;
 
-        int xxx_queued = 0;
-        int xxx_on_air = 0;
-        int xxx_sent = 0;
-
-        template<class H> static auto get_header(Buffer_t const& data) -> H const&;
-        template<class H> static auto get_header(Buffer_t& data) -> H&;
+        template<class H> static auto get_header(uint8_t const* data) -> H const&;
+        template<class H> static auto get_header(uint8_t* data) -> H&;
         static auto get_header_size(Buffer_t& data) -> size_t;
         auto compute_crc(uint8_t const* data, size_t size) -> uint32_t;
         //to avoid popping front in vectors
@@ -377,7 +381,6 @@ namespace util
         void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram);
 
         static auto tx_packet_datagram_predicate(TX::Datagram_ptr const& datagram1, TX::Datagram_ptr const& datagram2) -> bool;
-        auto process_packet_queue() -> TX::Send_Queue::iterator;
         void compute_next_transit_datagram();
         void send_datagram();
 
