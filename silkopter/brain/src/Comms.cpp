@@ -762,61 +762,6 @@ void Comms::handle_node_input_stream_path()
     channel.end_pack();
 }
 
-void Comms::handle_node_output_calibration_data()
-{
-    auto& channel = m_channels->setup;
-
-    channel.begin_unpack();
-    uint32_t req_id = 0;
-    std::string name;
-    uint32_t output_idx = 0;
-    std::string path;
-    if (!channel.unpack_param(req_id) ||
-        !channel.unpack_param(name) ||
-        !channel.unpack_param(output_idx))
-    {
-        QLOGE("Error in unpacking input stream path request");
-        return;
-    }
-
-    QLOGI("Req Id: {} - node input stream path", req_id);
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Req Id: {} - cannot find node '{}'", req_id, name);
-        return;
-    }
-
-    auto outputs = node->get_outputs();
-    if (output_idx >= outputs.size())
-    {
-        QLOGE("Req Id: {} - output stream idx {} is out of range", req_id, output_idx);
-        return;
-    }
-    auto stream = outputs[output_idx].stream;
-    if (!stream)
-    {
-        QLOGE("Req Id: {} - output stream idx {} is null", req_id, output_idx);
-        return;
-    }
-
-    std::vector<uint8_t> data;
-    if (!channel.unpack_remaining_data(data) ||
-        !stream->deserialize_calibration_data(data))
-    {
-        QLOGE("Req Id: {} - cannot deserialize calibration data", req_id);
-        return;
-    }
-
-    m_hal.save_settings();
-
-    channel.begin_pack(comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA);
-    channel.pack_param(req_id);
-    channel.pack_param(name);
-    pack_node_data(m_channels->setup, *node);
-    channel.end_pack();
-}
-
 void Comms::handle_add_node()
 {
     auto& channel = m_channels->setup;
@@ -1015,7 +960,6 @@ void Comms::process()
         case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
         case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
         case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
-        case comms::Setup_Message::NODE_OUTPUT_CALIBRATION_DATA: handle_node_output_calibration_data(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
         case comms::Setup_Message::HAL_TELEMETRY_ACTIVE: handle_hal_telemetry_active(); break;

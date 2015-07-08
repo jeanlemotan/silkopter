@@ -115,7 +115,6 @@ private:
     void handle_node_config();
     void handle_node_message();
     void handle_node_input_stream_path();
-    void handle_node_output_calibration_data();
 
     void handle_add_node();
     void handle_remove_node();

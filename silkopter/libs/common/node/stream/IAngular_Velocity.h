@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class IAngular_Velocity : public ISpatial_Stream<Type::ANGULAR_VELOCITY, Space::LOCAL, Bias_Scale_Calibration_Data<math::vec3f>>
+class IAngular_Velocity : public ISpatial_Stream<Type::ANGULAR_VELOCITY, Space::LOCAL>
 {
 public:
     typedef math::vec3f       Value; //radians per second

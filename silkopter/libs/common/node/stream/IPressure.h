@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class IPressure : public IScalar_Stream<Type::PRESSURE, Bias_Scale_Calibration_Data<float>>
+class IPressure : public IScalar_Stream<Type::PRESSURE>
 {
 public:
     typedef float                   Value; //??

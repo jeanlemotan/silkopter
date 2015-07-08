@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class ITemperature : public IScalar_Stream<Type::TEMPERATURE, Bias_Scale_Calibration_Data<float>>
+class ITemperature : public IScalar_Stream<Type::TEMPERATURE>
 {
 public:
     typedef float                   Value; //degrees celsius

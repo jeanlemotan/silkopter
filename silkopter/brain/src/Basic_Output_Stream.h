@@ -66,7 +66,7 @@ public:
             QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
         }
 
-        m_last_sample.value = apply(Base::calibration_data, value);
+        m_last_sample.value = value;
         m_last_sample.sample_idx++;
         m_last_sample.dt = m_dt;
         m_last_sample.tp = m_tp;

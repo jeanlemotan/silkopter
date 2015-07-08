@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class IADC : public IScalar_Stream<Type::ADC, Bias_Scale_Calibration_Data<float>>
+class IADC : public IScalar_Stream<Type::ADC>
 {
 public:
     typedef float                   Value; //0 .. 1

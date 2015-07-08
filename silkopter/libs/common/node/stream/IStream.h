@@ -57,11 +57,6 @@ class IStream : q::util::Noncopyable
 public:
     virtual auto get_rate() const -> uint32_t = 0;
     virtual auto get_type() const -> Type = 0;
-
-    virtual auto deserialize_calibration_data(rapidjson::Value const& json) -> bool = 0;
-    virtual auto serialize_calibration_data(rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) const -> bool = 0;
-    virtual auto deserialize_calibration_data(std::vector<uint8_t> const& binary) -> bool = 0;
-    virtual auto serialize_calibration_data(std::vector<uint8_t>& binary) const -> bool = 0;
 };
 DECLARE_CLASS_PTR(IStream);
 

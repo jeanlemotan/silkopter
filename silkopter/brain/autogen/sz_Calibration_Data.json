@@ -1,0 +1,40 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Bias_vec3f",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Bias_float",
+    "members":
+    [
+        ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Bias_Scale_vec3f",
+    "members":
+    [
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}],
+        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Bias_Scale_float",
+    "members":
+    [
+        ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0}],
+        ["float", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
+    ]
+}
+]

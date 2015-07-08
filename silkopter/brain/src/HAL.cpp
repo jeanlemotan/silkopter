@@ -78,53 +78,6 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
     std::unique_ptr<T> node;
 };
 
-
-static bool read_node_outputs_calibration_datas(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
-{
-    auto* output_calibrationj = jsonutil::find_value(value, std::string("output_calibration"));
-    if (!output_calibrationj || !output_calibrationj->IsArray())
-    {
-        QLOGE("Node {} is missing the output calibration data", node_name);
-        return false;
-    }
-    auto outputs = node.get_outputs();
-    size_t output_idx = 0;
-    for (auto it = output_calibrationj->Begin(); it != output_calibrationj->End(); ++it, output_idx++)
-    {
-        auto stream = outputs[output_idx].stream;
-        if (stream)
-        {
-            stream->deserialize_calibration_data(*it);
-        }
-    }
-    return true;
-}
-
-
-static bool write_node_outputs_calibration_datas(std::string const& node_name, silk::node::INode& node, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator)
-{
-    auto* output_calibrationj = jsonutil::get_or_add_value(json, std::string("output_calibration"), rapidjson::kArrayType, allocator);
-    if (!output_calibrationj)
-    {
-        QLOGE("Cannot add calibration data in node {}", node_name);
-        return false;
-    }
-    auto outputs = node.get_outputs();
-    for (auto const& o: outputs)
-    {
-        rapidjson::Document dataj;
-        auto stream = o.stream;
-        if (stream)
-        {
-            stream->serialize_calibration_data(dataj, allocator);
-        }
-        output_calibrationj->PushBack(std::move(dataj), allocator);
-    }
-
-    return true;
-}
-
-
 ///////////////////////////////////////////////////////////////
 
 HAL::HAL()
@@ -201,12 +154,6 @@ void HAL::save_settings()
                 {
                     input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
                 }
-            }
-
-            if (!write_node_outputs_calibration_datas(n.name, *n.node, *nodej, allocator))
-            {
-                QLOGE("Cannot open create settings calibration data node.");
-                return;
             }
 
             if (!jsonutil::add_value(*nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
@@ -481,11 +428,6 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         QASSERT(node);
 
         if (!read_input_stream_paths(name, *node, it->value))
-        {
-            return false;
-        }
-
-        if (!read_node_outputs_calibration_datas(name, *node, it->value))
         {
             return false;
         }

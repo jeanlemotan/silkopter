@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class ICurrent : public IScalar_Stream<Type::CURRENT, Bias_Scale_Calibration_Data<float>>
+class ICurrent : public IScalar_Stream<Type::CURRENT>
 {
 public:
     typedef float             Value; //amperes

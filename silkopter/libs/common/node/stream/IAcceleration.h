@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class IAcceleration : public ISpatial_Stream<Type::ACCELERATION, Space::LOCAL, Bias_Scale_Calibration_Data<math::vec3f>>
+class IAcceleration : public ISpatial_Stream<Type::ACCELERATION, Space::LOCAL>
 {
 public:
     typedef math::vec3f             Value; //meters per second^2
@@ -24,8 +24,6 @@ public:
     typedef math::vec3f             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IENU_Acceleration);
 
@@ -35,8 +33,6 @@ public:
     typedef math::vec3f             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    typedef void Calibration_Data;
 };
 DECLARE_CLASS_PTR(IECEF_Acceleration);
 

@@ -10,7 +10,7 @@ namespace stream
 {
 
 
-class IVoltage : public IScalar_Stream<Type::VOLTAGE, Bias_Scale_Calibration_Data<float>>
+class IVoltage : public IScalar_Stream<Type::VOLTAGE>
 {
 public:
     typedef float                   Value; //volts

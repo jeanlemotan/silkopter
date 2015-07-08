@@ -9,7 +9,7 @@ namespace node
 namespace stream
 {
 
-class IMagnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::LOCAL, Bias_Scale_Calibration_Data<math::vec3f>>
+class IMagnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::LOCAL>
 {
 public:
     typedef math::vec3f       Value; //??
