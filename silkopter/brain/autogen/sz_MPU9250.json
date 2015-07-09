@@ -16,42 +16,12 @@
 {
     "definition" : true,
     "namespace" : "sz::MPU9250",
-    "name": "Acceleration_Calibration_Data",
+    "name": "Calibration",
     "members":
     [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["sz::calibration::Bias_Scale_vec3f", "data", {"required": true, "json_key" : "Data"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Angular_Velocity_Calibration_Data",
-    "members":
-    [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["sz::calibration::Bias_vec3f", "data", {"required": true, "json_key" : "Data"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Magnetic_Field_Calibration_Data",
-    "members":
-    [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["sz::calibration::Bias_vec3f", "data", {"required": true, "json_key" : "Data"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::MPU9250",
-    "name": "Calibration_Data",
-    "members":
-    [
-        ["std::vector<sz::MPU9250::Acceleration_Calibration_Data>", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["std::vector<sz::MPU9250::Angular_Velocity_Calibration_Data>", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["std::vector<sz::MPU9250::Magnetic_Field_Calibration_Data>", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}]
+        ["sz::calibration::Acceleration_Points", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["sz::calibration::Angular_Velocity_Points", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["sz::calibration::Magnetic_Field_Points", "magnetic_field", {"required": true, "json_key" : "Magnetic Field"}]
     ]
 },
 {
@@ -60,7 +30,7 @@
     "name": "Config",
     "members":
     [
-        ["sz::MPU9250::Calibration_Data", "calibration_data", {"required": true, "json_key" : "Calibration Data"}]
+        ["sz::MPU9250::Calibration", "calibration", {"required": true, "json_key" : "Calibration"}]
     ]
 }
 ]

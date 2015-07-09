@@ -922,18 +922,18 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
     auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {
-        return points.back().data.scale;
+        return points.back().scale;
     }
     if (it == points.begin()) //temp is too small, use the first point
     {
-        return points.front().data.scale;
+        return points.front().scale;
     }
     auto const& prev = *(it - 1);
     auto const& next = *(it);
     QASSERT(temperature >= prev.temperature && temperature < next.temperature);
     float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
     QASSERT(mu >= 0.f && mu < 1.f);
-    return math::lerp(prev.data.scale, next.data.scale, mu);
+    return math::lerp(prev.scale, next.scale, mu);
 }
 
 template<class Calibration_Data>
@@ -942,18 +942,18 @@ auto get_calibration_bias(Calibration_Data const& points, float temperature) -> 
     auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {
-        return points.back().data.bias;
+        return points.back().bias;
     }
     if (it == points.begin()) //temp is too small, use the first point
     {
-        return points.front().data.bias;
+        return points.front().bias;
     }
     auto const& prev = *(it - 1);
     auto const& next = *(it);
     QASSERT(temperature >= prev.temperature && temperature < next.temperature);
     float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
     QASSERT(mu >= 0.f && mu < 1.f);
-    return math::lerp(prev.data.bias, next.data.bias, mu);
+    return math::lerp(prev.bias, next.bias, mu);
 }
 
 void MPU9250::process()
@@ -1021,9 +1021,9 @@ void MPU9250::process()
 
                 float temperature = 28.f;
 
-                math::vec3f acceleration_bias = get_calibration_bias(m_config->calibration_data.acceleration, temperature);
-                math::vec3f acceleration_scale = math::vec3f(m_acceleration_sensor_scale) * get_calibration_scale(m_config->calibration_data.acceleration, temperature);
-                math::vec3f angular_velocity_bias = get_calibration_bias(m_config->calibration_data.angular_velocity, temperature);
+                math::vec3f acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temperature);
+                math::vec3f acceleration_scale = math::vec3f(m_acceleration_sensor_scale) * get_calibration_scale(m_config->calibration.acceleration.points, temperature);
+                math::vec3f angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temperature);
 
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
@@ -1118,7 +1118,7 @@ void MPU9250::process_magnetometer(Buses& buses)
 
         float temperature = 28.f;
 
-        math::vec3f magnetic_field_bias = get_calibration_bias(m_config->calibration_data.magnetic_field, temperature);
+        math::vec3f magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temperature);
         data = data * m_magnetic_field_sensor_scale + magnetic_field_bias;
 
         //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
@@ -1154,20 +1154,20 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    std::sort(m_config->calibration_data.acceleration.begin(), m_config->calibration_data.acceleration.end(),
-              [](const sz::MPU9250::Acceleration_Calibration_Data& a, const sz::MPU9250::Acceleration_Calibration_Data& b)
+    std::sort(m_config->calibration.acceleration.points.begin(), m_config->calibration.acceleration.points.end(),
+              [](const sz::calibration::Acceleration& a, const sz::calibration::Acceleration& b)
     {
         return a.temperature < b.temperature;
     });
 
-    std::sort(m_config->calibration_data.angular_velocity.begin(), m_config->calibration_data.angular_velocity.end(),
-              [](const sz::MPU9250::Angular_Velocity_Calibration_Data& a, const sz::MPU9250::Angular_Velocity_Calibration_Data& b)
+    std::sort(m_config->calibration.angular_velocity.points.begin(), m_config->calibration.angular_velocity.points.end(),
+              [](const sz::calibration::Angular_Velocity& a, const sz::calibration::Angular_Velocity& b)
     {
         return a.temperature < b.temperature;
     });
 
-    std::sort(m_config->calibration_data.magnetic_field.begin(), m_config->calibration_data.magnetic_field.end(),
-              [](const sz::MPU9250::Magnetic_Field_Calibration_Data& a, const sz::MPU9250::Magnetic_Field_Calibration_Data& b)
+    std::sort(m_config->calibration.magnetic_field.points.begin(), m_config->calibration.magnetic_field.points.end(),
+              [](const sz::calibration::Magnetic_Field& a, const sz::calibration::Magnetic_Field& b)
     {
         return a.temperature < b.temperature;
     });

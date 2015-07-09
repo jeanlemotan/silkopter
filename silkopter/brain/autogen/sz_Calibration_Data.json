@@ -2,27 +2,10 @@
 {
     "definition" : true,
     "namespace" : "sz::calibration",
-    "name": "Bias_vec3f",
+    "name": "Acceleration",
     "members":
     [
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::calibration",
-    "name": "Bias_float",
-    "members":
-    [
-        ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::calibration",
-    "name": "Bias_Scale_vec3f",
-    "members":
-    [
+        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
         ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}],
         ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
     ]
@@ -30,11 +13,51 @@
 {
     "definition" : true,
     "namespace" : "sz::calibration",
-    "name": "Bias_Scale_float",
+    "name": "Acceleration_Points",
     "members":
     [
-        ["float", "bias", {"required": true, "json_key" : "Bias", "default" : 0}],
-        ["float", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
+        ["std::vector<sz::calibration::Acceleration>", "points", {"required": true, "json_key" : "Points"}]
+    ]
+},
+
+
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Angular_Velocity",
+    "members":
+    [
+        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Angular_Velocity_Points",
+    "members":
+    [
+        ["std::vector<sz::calibration::Angular_Velocity>", "points", {"required": true, "json_key" : "Points"}]
+    ]
+},
+
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Magnetic_Field",
+    "members":
+    [
+        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::calibration",
+    "name": "Magnetic_Field_Points",
+    "members":
+    [
+        ["std::vector<sz::calibration::Magnetic_Field>", "points", {"required": true, "json_key" : "Points"}]
     ]
 }
 ]
