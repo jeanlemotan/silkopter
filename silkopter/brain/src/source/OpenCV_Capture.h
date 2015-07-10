@@ -8,7 +8,7 @@
 
 namespace sz
 {
-namespace Raspicam
+namespace OpenCV_Capture
 {
 struct Init_Params;
 struct Config;
@@ -22,11 +22,11 @@ namespace silk
 namespace node
 {
 
-class Raspicam : public ISource
+class OpenCV_Capture : public ISource
 {
 public:
-    Raspicam(HAL& hal);
-    ~Raspicam();
+    OpenCV_Capture(HAL& hal);
+    ~OpenCV_Capture();
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -56,8 +56,8 @@ private:
 
     auto init() -> bool;
 
-    std::shared_ptr<sz::Raspicam::Init_Params> m_init_params;
-    std::shared_ptr<sz::Raspicam::Config> m_config;
+    std::shared_ptr<sz::OpenCV_Capture::Init_Params> m_init_params;
+    std::shared_ptr<sz::OpenCV_Capture::Config> m_config;
 
     void set_active_streams(bool recording, uint32_t quality);
 
