@@ -11,6 +11,8 @@
 #include "qneport.h"
 
 #include "sz_math.hpp"
+#include "sz_Calibration_Data.hpp"
+
 
 #include <QGraphicsScene>
 #include <QFileDialog>
@@ -276,6 +278,60 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
     menu.exec(event->screenPos());
 }
 
+auto HAL_Window::supports_acceleration_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+{
+    if (output.type != silk::node::stream::Type::ACCELERATION)
+    {
+        return false;
+    }
+    q::Path path("Calibration");
+    path += output.name;
+    auto const* calibrationj = jsonutil::find_value(node.config, path);
+    if (!calibrationj)
+    {
+        return false;
+    }
+    sz::calibration::Acceleration_Points calibration;
+    autojsoncxx::error::ErrorStack result;
+    return autojsoncxx::from_value(calibration, *calibrationj, result);
+}
+
+auto HAL_Window::supports_angular_velocity_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+{
+    if (output.type != silk::node::stream::Type::ANGULAR_VELOCITY)
+    {
+        return false;
+    }
+    q::Path path("Calibration");
+    path += output.name;
+    auto const* calibrationj = jsonutil::find_value(node.config, path);
+    if (!calibrationj)
+    {
+        return false;
+    }
+    sz::calibration::Angular_Velocity_Points calibration;
+    autojsoncxx::error::ErrorStack result;
+    return autojsoncxx::from_value(calibration, *calibrationj, result);
+}
+
+auto HAL_Window::supports_magnetic_field_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+{
+    if (output.type != silk::node::stream::Type::MAGNETIC_FIELD)
+    {
+        return false;
+    }
+    q::Path path("Calibration");
+    path += output.name;
+    auto const* calibrationj = jsonutil::find_value(node.config, path);
+    if (!calibrationj)
+    {
+        return false;
+    }
+    sz::calibration::Magnetic_Field_Points calibration;
+    autojsoncxx::error::ErrorStack result;
+    return autojsoncxx::from_value(calibration, *calibrationj, result);
+}
+
 void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
 {
     QASSERT(block);
@@ -299,7 +355,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
 
         for (auto const& os: node->outputs)
         {
-            if (os.type == silk::node::stream::IAcceleration::TYPE)
+            if (supports_acceleration_calibration(*node, os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
@@ -307,7 +363,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                     do_acceleration_calibration(os.stream);
                 });
             }
-            if (os.type == silk::node::stream::IAngular_Velocity::TYPE)
+            if (supports_angular_velocity_calibration(*node, os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
@@ -317,7 +373,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
 
                 continue;
             }
-            if (os.type == silk::node::stream::IMagnetic_Field::TYPE)
+            if (supports_magnetic_field_calibration(*node, os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)

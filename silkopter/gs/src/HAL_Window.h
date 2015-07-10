@@ -41,6 +41,10 @@ private:
 
     void open_stream_viewer(std::string const& stream_name);
 
+    auto supports_acceleration_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
+    auto supports_angular_velocity_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
+    auto supports_magnetic_field_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
+
     void do_acceleration_calibration(silk::node::stream::Stream_ptr stream);
     void do_magnetic_field_calibration(silk::node::stream::Stream_ptr stream);
     void do_angular_velocity_calibration(silk::node::stream::Stream_ptr stream);
