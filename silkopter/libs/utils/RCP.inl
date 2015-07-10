@@ -382,26 +382,29 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
     auto id = ++m_last_id[channel_idx];
 
     {
-        auto& queue = m_tx.packet_queue;
-        std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-
         //cancel all previous packets if needed
         if (params.cancel_previous_data)
         {
-            for (auto it = queue.begin(); it != queue.end();)
+            auto& queue = m_tx.packet_queue;
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+
+            for (auto it = queue.begin(); it != queue.end(); ++it)
             {
-                auto const& hdr = get_header<Packet_Header>((*it)->data_ptr);
-                if (hdr.channel_idx == channel_idx && hdr.id < id)
+                if (*it)
                 {
-                    it = queue.erase(it);
-                    continue;
+                    auto const& hdr = get_header<Packet_Header>((*it)->data_ptr);
+                    if (hdr.channel_idx == channel_idx && hdr.id < id)
+                    {
+                        (*it).reset();
+                    }
                 }
-                ++it;
             }
         }
 
 //        QLOGI("crt {}, +{}", queue.size(), fragment_count);
 
+        channel_data.fragments_to_insert.resize(0);
+        channel_data.fragments_to_insert.reserve(fragment_count);
 
         //add the new fragments
         for (size_t i = 0; i < fragment_count; i++)
@@ -436,20 +439,24 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             fragment->added_tp = now;
             prepare_to_send_datagram(*fragment);
 
-            //queue.push_back(fragment);
-            queue.insert(std::upper_bound(queue.begin(), queue.end(), fragment, tx_packet_datagram_predicate), std::move(fragment));
-
-            if (!m_is_sending)
-            {
-                m_tx.packet_queue_mutex.unlock();
-                send_datagram();
-                m_tx.packet_queue_mutex.lock();
-            }
+            channel_data.fragments_to_insert.push_back(fragment);
         }
 //        for (auto const& d: queue)
 //        {
 //            QLOGI("{}, id: {}, f: {}, sc: {}", &d - &queue.front(), int(get_header<Packet_Header>(d->data).id), int(get_header<Packet_Header>(d->data).fragment_idx), d->sent_count);
 //        }
+
+        if (!channel_data.fragments_to_insert.empty())
+        {
+            auto& queue = m_tx.packet_queue;
+            std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+            while (!queue.empty() && !queue.front()) queue.pop_front();
+
+            queue.insert(std::upper_bound(queue.begin(), queue.end(), channel_data.fragments_to_insert[0], tx_packet_datagram_predicate),
+                    channel_data.fragments_to_insert.begin(),
+                    channel_data.fragments_to_insert.end());
+        }
+
     }
 
     send_datagram();
@@ -459,6 +466,14 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
 
 inline auto RCP::tx_packet_datagram_predicate(TX::Datagram_ptr const& AA, TX::Datagram_ptr const& BB) -> bool
 {
+    if (!AA)
+    {
+        return true;
+    }
+    if (!BB)
+    {
+        return false;
+    }
     int priority_AA = AA->params.importance;
     int priority_BB = BB->params.importance;
     int sent_count_AA = AA->sent_count;
@@ -843,11 +858,9 @@ inline void RCP::compute_next_transit_datagram()
 
         while (!queue.empty())
         {
-            auto& datagram = *queue.begin();
-            auto const& params = datagram->params;
-
-            //eliminate old datagrams
-            if (params.cancel_after.count() > 0 && now - datagram->added_tp >= params.cancel_after)
+            auto& datagram = queue.front();
+            //eliminate empty / old datagrams
+            if (!datagram || datagram->params.cancel_after.count() > 0 && now - datagram->added_tp >= datagram->params.cancel_after)
             {
                 //auto const& header = get_header<Packet_Header>(datagram->data);
                 //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
@@ -1287,35 +1300,38 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
     {
         auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-        auto size_before = queue.size();
-        for (auto it = queue.begin(); it != queue.end();)
-        {
-            auto const& hdr = get_header<Packet_Header>((*it)->data_ptr);
-            uint32_t id = hdr.id;
-            //update the key
-            k[0] = hdr.channel_idx;
-            k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
-            k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
-            k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
-            k[4] = hdr.fragment_idx;
+        while (!queue.empty() && !queue.front()) queue.pop_front();
 
-            auto lb = std::lower_bound(conf, conf_end, key);
-            if (lb != conf_end && *lb == key)
+        auto size_before = queue.size();
+        for (auto& datagram: queue)
+        {
+            if (datagram)
             {
-//                if (hdr.channel_idx == 4)
-//                {
-//                    QLOGI("Confirming fragment {} for packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
-//                }
-                it = queue.erase(it);
-//                    count--;
-//                    if (count == 0)
-//                    {
-//                        break;
-//                    }
-                //TODO - eliminate the element from conf as well
-                continue;
+                auto const& hdr = get_header<Packet_Header>(datagram->data_ptr);
+                uint32_t id = hdr.id;
+                //update the key
+                k[0] = hdr.channel_idx;
+                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+                k[4] = hdr.fragment_idx;
+
+                auto lb = std::lower_bound(conf, conf_end, key);
+                if (lb != conf_end && *lb == key)
+                {
+                    //                if (hdr.channel_idx == 4)
+                    //                {
+                    //                    QLOGI("Confirming fragment {} for packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
+                    //                }
+                    datagram.reset();
+                    //                    count--;
+                    //                    if (count == 0)
+                    //                    {
+                    //                        break;
+                    //                    }
+                    //TODO - eliminate the element from conf as well
+                }
             }
-            ++it;
         }
 
         auto size_after = queue.size();
@@ -1358,30 +1374,33 @@ inline void RCP::process_packets_res_datagram(RX::Datagram_ptr& datagram)
     {
         auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-        auto size_before = queue.size();
-        for (auto it = queue.begin(); it != queue.end();)
-        {
-            auto const& hdr = get_header<Packet_Header>((*it)->data_ptr);
-            uint32_t id = hdr.id;
-            //update the key
-            uint32_t key = 0;
-            uint8_t* k = reinterpret_cast<uint8_t*>(&key);
-            k[0] = hdr.channel_idx;
-            k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
-            k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
-            k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+        while (!queue.empty() && !queue.front()) queue.pop_front();
 
-            auto lb = std::lower_bound(conf, conf_end, key);
-            if (lb != conf_end && *lb == key)
+        auto size_before = queue.size();
+        for (auto& datagram: queue)
+        {
+            if (datagram)
             {
-//                if (hdr.channel_idx == 4)
-//                {
-//                    QLOGI("Confirming fragment {} for whole packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
-//                }
-                it = queue.erase(it);
-                continue;
+                auto const& hdr = get_header<Packet_Header>(datagram->data_ptr);
+                uint32_t id = hdr.id;
+                //update the key
+                uint32_t key = 0;
+                uint8_t* k = reinterpret_cast<uint8_t*>(&key);
+                k[0] = hdr.channel_idx;
+                k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
+                k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
+                k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
+
+                auto lb = std::lower_bound(conf, conf_end, key);
+                if (lb != conf_end && *lb == key)
+                {
+                    //                if (hdr.channel_idx == 4)
+                    //                {
+                    //                    QLOGI("Confirming fragment {} for whole packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - (*it)->added_tp);
+                    //                }
+                    datagram.reset();
+                }
             }
-            ++it;
         }
 
         auto size_after = queue.size();

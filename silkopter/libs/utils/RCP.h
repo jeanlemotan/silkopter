@@ -194,14 +194,6 @@ namespace util
 
         struct TX
         {
-            struct Channel_Data
-            {
-                std::mutex send_mutex;
-                std::vector<uint8_t> compression_buffer;
-                std::vector<uint8_t> lz4_state;
-            };
-            std::array<Channel_Data, MAX_CHANNELS> channel_data;
-
             struct Datagram : public detail::Pool_Item_Base
             {
                 Send_Params params;
@@ -261,6 +253,17 @@ namespace util
             Send_Queue packet_queue;
 
             Datagram_ptr in_transit_datagram;
+
+
+            struct Channel_Data
+            {
+                std::mutex send_mutex;
+                std::vector<uint8_t> compression_buffer;
+                std::vector<uint8_t> lz4_state;
+                std::vector<Datagram_ptr> fragments_to_insert;
+            };
+            std::array<Channel_Data, MAX_CHANNELS> channel_data;
+
         } m_tx;
 
         TX::Datagram_ptr acquire_tx_datagram(size_t data_size);
