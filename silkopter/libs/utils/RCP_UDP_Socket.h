@@ -9,7 +9,7 @@ namespace util
 class RCP_UDP_Socket : public RCP_Socket
 {
 public:
-    RCP_UDP_Socket(boost::asio::io_service& io_service);
+    RCP_UDP_Socket();
     ~RCP_UDP_Socket();
 
     auto process() -> Result;
@@ -28,6 +28,10 @@ private:
 
     boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_send_callback;
     boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_receive_callback;
+
+    boost::asio::io_service m_io_service;
+    std::thread m_io_thread;
+    std::unique_ptr<boost::asio::io_service::work> m_io_work;
 
     boost::asio::ip::udp::endpoint m_tx_endpoint;
     boost::asio::ip::udp::endpoint m_rx_endpoint;

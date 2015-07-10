@@ -3,16 +3,26 @@
 namespace util
 {
 
-RCP_UDP_Socket::RCP_UDP_Socket(boost::asio::io_service& io_service)
-    : m_socket(io_service)
+RCP_UDP_Socket::RCP_UDP_Socket()
+    : m_io_work(new boost::asio::io_service::work(m_io_service))
+    , m_socket(m_io_service)
 {
     m_buffer.resize(100 * 1024);
     m_asio_send_callback = boost::bind(&RCP_UDP_Socket::handle_send, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
     m_asio_receive_callback = boost::bind(&RCP_UDP_Socket::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
+
+    m_io_thread = std::thread([this]() { m_io_service.run(); });
 }
 
 RCP_UDP_Socket::~RCP_UDP_Socket()
 {
+    m_io_work.reset();
+    m_io_service.stop();
+    if (m_io_thread.joinable())
+    {
+        std::this_thread::yield();
+        m_io_thread.join();
+    }
 }
 
 void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)

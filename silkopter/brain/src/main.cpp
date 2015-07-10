@@ -142,17 +142,6 @@ int main(int argc, char const* argv[])
 
     QLOGI("Creating io_service thread");
 
-//    boost::asio::io_service io_service;
-//    auto io_thread = std::thread([&io_service]()
-//    {
-//        while (!s_exit)
-//        {
-//            io_service.run();
-//            io_service.reset();
-//            std::this_thread::sleep_for(std::chrono::microseconds(500));
-//        }
-//    });
-
     boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
     auto async_thread = std::thread([]() { s_async_io_service.run(); });
 
@@ -175,8 +164,6 @@ int main(int argc, char const* argv[])
 ////        }
 //    }
 
-    uint16_t send_port = 9001;
-    uint16_t receive_port = 9000;
 
     try
     {
@@ -189,17 +176,19 @@ int main(int argc, char const* argv[])
             abort();
         }
 
-        //start listening for a remote system
-//        if (!comms.start_udp(io_service, send_port, receive_port))
-//        {
-//            QLOGE("Cannot start communication channel! Aborting");
-//            abort();
-//        }
+#if defined RASPBERRY_PI
         if (!comms.start_rfmon("mon0", 5))
         {
             QLOGE("Cannot start communication channel! Aborting");
             abort();
         }
+#else
+        if (!comms.start_udp(8000, 8001))
+        {
+            QLOGE("Cannot start communication channel! Aborting");
+            abort();
+        }
+#endif
 
 //        while (!s_exit)
 //        {
@@ -240,14 +229,7 @@ int main(int argc, char const* argv[])
 
         QLOGI("Stopping everything");
 
-//        io_service.stop();
-
         //stop threads
-//        if (io_thread.joinable())
-//        {
-//            std::this_thread::yield();
-//            io_thread.join();
-//        }
         async_work.reset();
         s_async_io_service.stop();
         if (async_thread.joinable())

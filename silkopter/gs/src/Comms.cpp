@@ -29,7 +29,7 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
 {
     try
     {
-        auto s = new util::RCP_UDP_Socket(m_io_service);
+        auto s = new util::RCP_UDP_Socket();
         m_socket.reset(s);
         m_rcp.reset(new util::RCP(*m_socket));
 

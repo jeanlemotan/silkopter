@@ -33,7 +33,7 @@ class Comms : q::util::Noncopyable
 public:
     Comms(HAL& hal);
 
-    auto start_udp(boost::asio::io_service& io_service, uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
 
     auto is_connected() const -> bool;

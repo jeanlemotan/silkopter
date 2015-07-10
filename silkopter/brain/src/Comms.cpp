@@ -81,11 +81,11 @@ Comms::Comms(HAL& hal)
     m_init_params.reset(new sz::Comms::Source::Init_Params);
 }
 
-auto Comms::start_udp(boost::asio::io_service& io_service, uint16_t send_port, uint16_t receive_port) -> bool
+auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        auto s = new util::RCP_UDP_Socket(io_service);
+        auto s = new util::RCP_UDP_Socket();
         m_socket.reset(s);
         m_rcp.reset(new util::RCP(*m_socket));
 
@@ -159,8 +159,8 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1450;
-        params.is_compressed = true;
+        params.mtu = 200;
+        params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 10;
         //params.cancel_previous_data = true;
