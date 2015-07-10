@@ -198,6 +198,7 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     s_pwm_enabled_count += val ? 1 : -1;
     bool is_enabled = s_pwm_enabled_count > 0;
 
+#if defined RASPBERRY_PI
     if (gpioGetMode(27) == PI_NOT_INITIALISED)
     {
         QLOGI("Initializing pigpio");
@@ -212,6 +213,7 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
 
     gpioSetMode(27, PI_OUTPUT);
     gpioWrite(27, is_enabled ? 0 : 1); //inverted output
+#endif
 
     return true;
 }

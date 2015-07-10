@@ -51,6 +51,7 @@ private:
     float m_period = 0;
     std::uniform_real_distribution<float> m_rnd_distribution;
     std::mt19937 m_rnd_engine;
+    bool m_has_noise = false;
 
     typedef Basic_Output_Stream<stream::IFloat> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

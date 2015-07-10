@@ -86,7 +86,7 @@ rpi {
     LIBS += -lGLESv2
     LIBS += -lEGL
 } else {
-    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath
+    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video
 }
 
 SOURCES += \
@@ -126,7 +126,8 @@ SOURCES += \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
     ../../../libs/utils/RCP.inl \
-    ../../../libs/lz4/lz4.c
+    ../../../libs/lz4/lz4.c \
+    ../../src/source/OpenCV_Capture.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -246,7 +247,8 @@ HEADERS += \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/utils/RCP_RFMON_Socket.h \
-    ../../../libs/lz4/lz4.h
+    ../../../libs/lz4/lz4.h \
+    ../../src/source/OpenCV_Capture.h
 
 DISTFILES +=
 

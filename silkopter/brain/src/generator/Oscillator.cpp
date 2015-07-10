@@ -84,12 +84,14 @@ void Oscillator::process()
         QLOGW("Too many samples needed: {}. Clamping to an arbitrary MAX: {}", samples_needed, MAX_SAMPLES_NEEDED);
         samples_needed = MAX_SAMPLES_NEEDED;
     }
+
+    float period = q::Seconds(m_output_stream->get_dt()).count();
+
     while (samples_needed > 0)
     {
        float value = 0;
 
-       m_period += q::Seconds(m_output_stream->get_dt()).count();
-       //m_period = std::fmod(m_period, 1.f);
+       m_period += period;
 
        float a = m_period * math::anglef::_2pi;
        for (auto& c: m_config->components)
@@ -100,7 +102,10 @@ void Oscillator::process()
        {
            value = value < 0.f ? -0.5f : 0.5f;
        }
-       value += m_rnd_distribution(m_rnd_engine);
+       if (m_has_noise)
+       {
+           value += m_rnd_distribution(m_rnd_engine);
+       }
 
        value *= amplitude;
 
@@ -131,6 +136,7 @@ auto Oscillator::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
 
     m_rnd_distribution = std::uniform_real_distribution<float>(-m_config->noise*0.5f, m_config->noise*0.5f);
+    m_has_noise = !math::is_zero(m_config->noise, math::epsilon<float>());
 
     return true;
 }
