@@ -24,10 +24,6 @@ private:
 
     void init_graphics();
 
-	boost::asio::io_service m_io_service;
-    std::atomic<bool> m_stop_io_service_thread{ false };
-	std::thread m_io_service_thread;
-
     q::Clock::time_point m_last_tp;
     //q::Clock::duration m_duration;
 

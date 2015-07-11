@@ -71,6 +71,7 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
 }
 void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
+    std::this_thread::yield();
     if (send_callback)
     {
         send_callback(!error ? Result::OK : Result::ERROR);

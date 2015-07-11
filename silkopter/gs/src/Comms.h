@@ -15,7 +15,7 @@ class Comms : q::util::Noncopyable
 {
     friend class HAL;
 public:
-    Comms(boost::asio::io_service& io_service, HAL& hal);
+    Comms(HAL& hal);
 
     auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
     auto start_rfmon(std::string const& interface) -> bool;
@@ -47,8 +47,6 @@ private:
     void reset();
     void request_data();
     bool m_did_request_data = false;
-
-    boost::asio::io_service& m_io_service;
 
     std::shared_ptr<util::RCP_Socket> m_socket;
     std::shared_ptr<util::RCP> m_rcp;

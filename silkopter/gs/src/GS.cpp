@@ -6,7 +6,7 @@
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
     , m_hal(m_comms)
-    , m_comms(m_io_service, m_hal)
+    , m_comms(m_hal)
 {
     m_ui.setupUi(this);
 
@@ -20,16 +20,6 @@ GS::GS(QWidget *parent)
 	show();
 
 //    m_input_mgr.reset(new qinput::Input_Mgr(q::util::format2<q::String>("{}", uint64_t(winId()))));
-
-    m_io_service_thread = std::thread([this]()
-    {
-		while (!m_stop_io_service_thread)
-		{
-            m_io_service.run();
-            m_io_service.reset();
-            std::this_thread::yield();
-        }
-	});
 
     //m_comm_channel.connect(boost::asio::ip::address::from_string("127.0.0.1"), 52524);
 
@@ -65,13 +55,6 @@ GS::GS(QWidget *parent)
 GS::~GS()
 {
 //    m_comms.disconnect();
-
-	m_stop_io_service_thread = true;
-    m_io_service.stop();
-    if (m_io_service_thread.joinable())
-    {
-        m_io_service_thread.join();
-    }
 }
 
 void GS::init_graphics()
@@ -108,9 +91,6 @@ void GS::init_graphics()
 
 void GS::closeEvent(QCloseEvent* event)
 {
-    m_stop_io_service_thread = true;
-    m_io_service.stop();
-
     QSettings settings;
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());

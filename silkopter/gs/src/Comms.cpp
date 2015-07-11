@@ -15,9 +15,8 @@ constexpr uint8_t INPUT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 constexpr uint8_t VIDEO_CHANNEL = 4;
 
-Comms::Comms(boost::asio::io_service& io_service, HAL& hal)
+Comms::Comms(HAL& hal)
     : m_hal(hal)
-    , m_io_service(io_service)
     , m_setup_channel(SETUP_CHANNEL)
     , m_input_channel(INPUT_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
