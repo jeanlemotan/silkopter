@@ -2,48 +2,63 @@
 
 #include <QDialog>
 
+#include "sz_math.hpp"
+#include "sz_Calibration_Data.hpp"
+
 #include "HAL.h"
 #include "Comms.h"
 
 class Acceleration_Calibration_Wizard : public QDialog
 {
 public:
-    explicit Acceleration_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::stream::Acceleration_ptr stream, QWidget* parent = 0);
+    Acceleration_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::Node_ptr node, size_t output_idx, QWidget* parent = 0);
 
 private:
     void advance();
     void cancel();
 
-    silk::node::stream::Acceleration_ptr m_stream;
-    silk::node::Node_ptr m_node;
+    void prepare_step();
+
+    void on_node_changed();
+    void on_samples_received(silk::node::stream::Acceleration& stream);
+
+    void set_calibration_points(sz::calibration::Acceleration_Points const& data);
+    auto get_calibration_points() const -> sz::calibration::Acceleration_Points;
+
+    auto compute_calibration_data(std::array<math::vec3<double>, 6> const& samples, math::vec3<double>& bias, math::vec3<double>& scale) -> bool;
+    void calibrate_update_matrices(double dS[6], double JS[6][6], double beta[6], double data[3]);
+    void calibrate_reset_matrices(double dS[6], double JS[6][6]);
+    void calibrate_find_delta(double dS[6], double JS[6][6], double delta[6]);
+
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;
+    silk::node::Node_ptr m_node;
+    silk::node::Node::Output m_output;
+    silk::node::stream::Acceleration_ptr m_stream;
 
     QWidget* m_content = nullptr;
+
+    sz::calibration::Acceleration_Points m_initial_calibration;
 
 
     enum class Step
     {
         INTRO,
-        START,
         RESET,
-        COLLECT_DATA,
+        COLLECT,
         SHOW_INSTRUCTIONS,
-        SET,
+        DONE,
     };
 
     Step m_step = Step::INTRO;
+
+    q::util::Connection m_connection;
 
     q::Clock::time_point m_step_timepoint;
     uint32_t m_last_sample_idx = 0;
 
     std::vector<math::vec3f> m_samples;
-
-    math::vec3f m_new_bias;
-    math::vec3f m_new_scale;
-    math::vec3f m_received_bias;
-    math::vec3f m_received_scale;
 
     uint8_t m_collect_data_step = 0;
     std::array<math::vec3<double>, 6> m_averages;
