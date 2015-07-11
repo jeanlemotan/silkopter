@@ -1,14 +1,52 @@
 {
     "hal": {
+        "multi_config": {
+            "Name": "silkopter",
+            "Mass (Kg)": 0.699999988079071,
+            "Height (m)": 0.10000000149011612,
+            "Radius (m)": 0.30000001192092898,
+            "Motor Thrust @ 100% (N)": 5.0,
+            "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
+            "Motor Acceleration (s)": 0.10000000149011612,
+            "Motor Deceleration (s)": 0.20000000298023225,
+            "Motors": [
+                {
+                    "Position": {
+                        "x": -0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": 0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                },
+                {
+                    "Position": {
+                        "x": 0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": -0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                }
+            ]
+        },
         "buses": {},
         "nodes": {
             "ADC Ammeter": {
-                "output_calibration": [
-                    {
-                        "bias": 0.0,
-                        "scale": 1.0
-                    }
-                ],
                 "type": "ADC Ammeter",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -19,9 +57,6 @@
                 ]
             },
             "Acceleration (Local->ENU)": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Acceleration (Local->ENU)",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -33,9 +68,6 @@
                 ]
             },
             "Rate Controller": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Rate Controller",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -70,9 +102,6 @@
                 ]
             },
             "Gravity Filter": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Gravity Filter",
                 "init_params": {
                     "Rate (Hz)": 44
@@ -84,18 +113,12 @@
                 ]
             },
             "Comms Source": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Comms Source",
                 "init_params": {},
                 "config": {},
                 "input_paths": []
             },
             "Oscillator": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Oscillator",
                 "init_params": {
                     "Rate (Hz)": 20000,
@@ -115,9 +138,6 @@
                 "input_paths": []
             },
             "Oscillator 0": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Oscillator",
                 "init_params": {
                     "Rate (Hz)": 10000,
@@ -129,12 +149,37 @@
                     "Square": false,
                     "Components": [
                         {
-                            "Frequency (Hz)": 1000.0,
+                            "Frequency (Hz)": 3.0,
                             "Amplitude": 1.0
                         }
                     ]
                 },
                 "input_paths": []
+            },
+            "Multi Simulator": {
+                "type": "Multi Simulator",
+                "init_params": {
+                    "Throttle Rate (Hz)": 100,
+                    "Acceleration Rate (Hz)": 1000,
+                    "Angular Velocity Rate (Hz)": 1000,
+                    "Magnetic Field Rate (Hz)": 100,
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate (Hz)": 10,
+                    "Distance Rate (Hz)": 12,
+                    "GPS Rate (Hz)": 5
+                },
+                "config": {
+                    "Simulation Enabled": true,
+                    "Drag Enabled": true,
+                    "Ground Enabled": true,
+                    "Gravity Enabled": true
+                },
+                "input_paths": [
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
             }
         }
     }

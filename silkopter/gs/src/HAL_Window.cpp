@@ -36,6 +36,10 @@
 
 #include "ui_New_Node.h"
 
+#include "calibration/Acceleration_Calibration_Wizard.h"
+#include "calibration/Angular_Velocity_Calibration_Wizard.h"
+#include "calibration/Magnetic_Field_Calibration_Wizard.h"
+
 static const q::Path k_settings_path("settings.json");
 
 
@@ -360,7 +364,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_acceleration_calibration(os.stream);
+                    do_acceleration_calibration(std::static_pointer_cast<silk::node::stream::Acceleration>(os.stream));
                 });
             }
             if (supports_angular_velocity_calibration(*node, os))
@@ -368,7 +372,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_angular_velocity_calibration(os.stream);
+                    do_angular_velocity_calibration(std::static_pointer_cast<silk::node::stream::Angular_Velocity>(os.stream));
                 });
 
                 continue;
@@ -378,7 +382,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_magnetic_field_calibration(os.stream);
+                    do_magnetic_field_calibration(std::static_pointer_cast<silk::node::stream::Magnetic_Field>(os.stream));
                 });
 
                 continue;
@@ -586,19 +590,22 @@ void HAL_Window::open_stream_viewer(std::string const& stream_name)
     //dock->show();
 }
 
-void HAL_Window::do_acceleration_calibration(silk::node::stream::Stream_ptr stream)
+void HAL_Window::do_acceleration_calibration(silk::node::stream::Acceleration_ptr stream)
 {
-
+    Acceleration_Calibration_Wizard wizard(m_hal, m_comms, stream, this);
+    wizard.exec();
 }
 
-void HAL_Window::do_magnetic_field_calibration(silk::node::stream::Stream_ptr stream)
+void HAL_Window::do_magnetic_field_calibration(silk::node::stream::Magnetic_Field_ptr stream)
 {
-
+//    Magnetic_Field_Calibration_Dialog dialog(this);
+//    dialog.exec();
 }
 
-void HAL_Window::do_angular_velocity_calibration(silk::node::stream::Stream_ptr stream)
+void HAL_Window::do_angular_velocity_calibration(silk::node::stream::Angular_Velocity_ptr stream)
 {
-
+//    Angular_Velocity_Calibration_Dialog dialog(this);
+//    dialog.exec();
 }
 
 void HAL_Window::add_stream(silk::node::stream::Stream_ptr stream)

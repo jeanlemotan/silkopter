@@ -3,12 +3,6 @@
         "buses": {},
         "nodes": {
             "ADC Ammeter": {
-                "output_calibration": [
-                    {
-                        "bias": 0.0,
-                        "scale": 1.0
-                    }
-                ],
                 "type": "ADC Ammeter",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -19,9 +13,6 @@
                 ]
             },
             "Acceleration (Local->ENU)": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Acceleration (Local->ENU)",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -33,9 +24,6 @@
                 ]
             },
             "Rate Controller": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Rate Controller",
                 "init_params": {
                     "Rate (Hz)": 100
@@ -70,9 +58,6 @@
                 ]
             },
             "Gravity Filter": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Gravity Filter",
                 "init_params": {
                     "Rate (Hz)": 44
@@ -84,18 +69,12 @@
                 ]
             },
             "Comms Source": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Comms Source",
                 "init_params": {},
                 "config": {},
                 "input_paths": []
             },
             "Oscillator": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Oscillator",
                 "init_params": {
                     "Rate (Hz)": 20000,
@@ -115,9 +94,6 @@
                 "input_paths": []
             },
             "Oscillator 0": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Oscillator",
                 "init_params": {
                     "Rate (Hz)": 10000,
@@ -137,9 +113,6 @@
                 "input_paths": []
             },
             "Float LPF": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Float LPF",
                 "init_params": {
                     "Rate (Hz)": 20000
@@ -149,13 +122,10 @@
                     "Cutoff Frequency (Hz)": 100.0
                 },
                 "input_paths": [
-                    "Oscillator/Output"
+                    ""
                 ]
             },
             "Float LPF 0": {
-                "output_calibration": [
-                    {}
-                ],
                 "type": "Float LPF",
                 "init_params": {
                     "Rate (Hz)": 20000
@@ -165,7 +135,7 @@
                     "Cutoff Frequency (Hz)": 100.0
                 },
                 "input_paths": [
-                    "Oscillator/Output"
+                    ""
                 ]
             }
         }

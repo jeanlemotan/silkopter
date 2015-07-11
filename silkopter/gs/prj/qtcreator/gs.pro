@@ -146,7 +146,10 @@ HEADERS += \
     ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/RCP.h \
-    ../../../libs/lz4/lz4.h
+    ../../../libs/lz4/lz4.h \
+    ../../src/calibration/Acceleration_Calibration_Wizard.h \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -172,14 +175,18 @@ SOURCES += \
     ../../src/Video_Viewer.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP.inl \
-    ../../../libs/lz4/lz4.c
+    ../../../libs/lz4/lz4.c \
+    ../../src/calibration/Acceleration_Calibration_Wizard.cpp \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
     ../../src/Numeric_Viewer.ui \
     ../../src/GS.ui \
     ../../src/Sim_Window.ui \
-    ../../src/Multi_Config_Window.ui
+    ../../src/Multi_Config_Window.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Intro.ui
 
 DISTFILES += \
     ../../src/node.png \
