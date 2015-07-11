@@ -52,9 +52,15 @@ auto HAL::get_multi_config() const -> boost::optional<config::Multi>
 }
 void HAL::set_multi_config(config::Multi const& config)
 {
-//    Set_Multi_Config_Queue_Item item;
-//    autojsoncxx::to_document(config, item.config);
-//    m_multi_set_config_queue.push_back(std::move(item));
+    rapidjson::Document configj;
+    configj.SetObject();
+    autojsoncxx::to_document(config, configj);
+
+    auto& channel = m_comms.get_setup_channel();
+    channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
+    channel.pack_param(m_comms.get_new_req_id());
+    channel.pack_param(configj);
+    channel.end_pack();
 }
 
 void HAL::add_node(std::string const& def_name,

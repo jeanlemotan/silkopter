@@ -860,7 +860,7 @@ inline void RCP::compute_next_transit_datagram()
         {
             auto& datagram = queue.front();
             //eliminate empty / old datagrams
-            if (!datagram || datagram->params.cancel_after.count() > 0 && now - datagram->added_tp >= datagram->params.cancel_after)
+            if (!datagram || (datagram->params.cancel_after.count() > 0 && now - datagram->added_tp >= datagram->params.cancel_after))
             {
                 //auto const& header = get_header<Packet_Header>(datagram->data);
                 //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
