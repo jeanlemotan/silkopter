@@ -209,8 +209,6 @@ void RCP_RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
 
 auto RCP_RFMON_Socket::process_rx_packet() -> bool
 {
-    std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
-
     struct pcap_pkthdr* pcap_packet_header = nullptr;
 
     uint8_t payload_buffer[MAX_PACKET_SIZE];
@@ -218,15 +216,18 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
 
     while (true)
     {
-        int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
-        if (retval < 0)
         {
-            QLOGE("Socket broken: {}", pcap_geterr(m_impl->pcap));
-            return false;
-        }
-        if (retval != 1)
-        {
-            break;
+            std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
+            int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
+            if (retval < 0)
+            {
+                QLOGE("Socket broken: {}", pcap_geterr(m_impl->pcap));
+                return false;
+            }
+            if (retval != 1)
+            {
+                break;
+            }
         }
 
         size_t header_len = (payload[2] + (payload[3] << 8));
@@ -373,6 +374,7 @@ auto RCP_RFMON_Socket::start() -> bool
                 if (FD_ISSET(m_impl->rx_pcap_selectable_fd, &readset))
                 {
                     process_rx_packet();
+                    std::this_thread::yield();
                 }
             }
         }
@@ -399,11 +401,11 @@ auto RCP_RFMON_Socket::start() -> bool
                     std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
                     int isize = static_cast<int>(m_impl->tx_buffer_size);
                     int r = pcap_inject(m_impl->pcap, m_impl->tx_buffer, isize);
-                    if (r <= 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
-                    {
-                        break;
-                    }
-                    else
+//                    if (r <= 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+//                    {
+//                        break;
+//                    }
+//                    else
                     {
                         if (r <= 0)
                         {
@@ -415,10 +417,9 @@ auto RCP_RFMON_Socket::start() -> bool
                             QLOGW("Incomplete packet sent: {} / {}", r, isize);
                             result = Result::ERROR;
                         }
-
-                        sent = true;
                     }
 
+                    sent = true;
                     m_impl->tx_buffer = nullptr;
                 }
             }
@@ -430,7 +431,7 @@ auto RCP_RFMON_Socket::start() -> bool
                     send_callback(result);
                 }
                 //std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                //std::this_thread::yield();
+                std::this_thread::yield();
 
 #ifdef DEBUG_THROUGHPUT
                 {
