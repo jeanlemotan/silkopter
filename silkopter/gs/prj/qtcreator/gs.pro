@@ -186,7 +186,11 @@ FORMS += \
     ../../src/GS.ui \
     ../../src/Sim_Window.ui \
     ../../src/Multi_Config_Window.ui \
-    ../../src/calibration/Acceleration_Calibration_Wizard_Intro.ui
+    ../../src/calibration/Acceleration_Calibration_Wizard_Intro.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Reset.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Done.ui
 
 DISTFILES += \
     ../../src/node.png \

@@ -919,6 +919,10 @@ void MPU9250::reset_fifo(Buses& buses)
 template<class Calibration_Data>
 auto get_calibration_scale(Calibration_Data const& points, float temperature) -> math::vec3f
 {
+    if (points.empty())
+    {
+        return math::vec3f::one;
+    }
     auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {
@@ -939,6 +943,10 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
 template<class Calibration_Data>
 auto get_calibration_bias(Calibration_Data const& points, float temperature) -> math::vec3f
 {
+    if (points.empty())
+    {
+        return math::vec3f::zero;
+    }
     auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {

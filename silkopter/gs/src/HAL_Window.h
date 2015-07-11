@@ -45,9 +45,9 @@ private:
     auto supports_angular_velocity_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
     auto supports_magnetic_field_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
 
-    void do_acceleration_calibration(silk::node::stream::Acceleration_ptr stream);
-    void do_magnetic_field_calibration(silk::node::stream::Magnetic_Field_ptr stream);
-    void do_angular_velocity_calibration(silk::node::stream::Angular_Velocity_ptr stream);
+    void do_acceleration_calibration(silk::node::Node_ptr node, size_t output_idx);
+    void do_magnetic_field_calibration(silk::node::Node_ptr node, size_t output_idx);
+    void do_angular_velocity_calibration(silk::node::Node_ptr node, size_t output_idx);
 
     void add_stream(silk::node::stream::Stream_ptr stream);
     void remove_stream(silk::node::stream::Stream_ptr stream);
