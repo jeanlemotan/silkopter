@@ -75,6 +75,8 @@ private:
 
     void reset_fifo(Buses& buses);
 
+    void process_thermometer(Buses& buses);
+
     auto setup_magnetometer(Buses& buses) -> bool;
     auto setup_magnetometer_i2c(Buses& buses) -> bool;
     auto setup_magnetometer_spi(Buses& buses) -> bool;

@@ -1060,9 +1060,37 @@ void MPU9250::process()
         }
     }
 
+    process_thermometer(buses);
     process_magnetometer(buses);
 
 //    LOG_INFO("fc {} / {}", fifo_count, fc2);
+}
+
+void MPU9250::process_thermometer(Buses& buses)
+{
+    QLOG_TOPIC("mpu9250::process_thermometer");
+
+    size_t samples_needed = m_temperature->compute_samples_needed();
+    if (samples_needed == 0)
+    {
+        return;
+    }
+
+    uint16_t data = 0;
+    auto res = mpu_read_u16(buses, MPU_REG_TEMP_OUT_H, data);
+    if (!res)
+    {
+        return;
+    }
+
+    int16_t itemp = static_cast<int16_t>(data);
+    float temp = itemp / 333.87f + 21.f;
+
+    while (samples_needed > 0)
+    {
+        m_temperature->push_sample(temp, true);
+        samples_needed--;
+    }
 }
 
 void MPU9250::process_magnetometer(Buses& buses)
