@@ -6,7 +6,6 @@
 #include "common/node/stream/IBool.h"
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICommands.h"
 #include "common/node/stream/ICurrent.h"
 #include "common/node/stream/IDistance.h"
 #include "common/node/stream/IForce.h"
@@ -23,6 +22,9 @@
 #include "common/node/stream/IVelocity.h"
 #include "common/node/stream/IVideo.h"
 #include "common/node/stream/IVoltage.h"
+#include "common/node/stream/IProximity.h"
+#include "common/node/stream/IMulti_Input.h"
+#include "common/node/stream/IMulti_State.h"
 
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
@@ -121,14 +123,6 @@ struct Battery_State : public Stream
     q::util::Signal<void(Battery_State&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Battery_State);
-
-struct Commands : public Stream
-{
-    typedef ICommands::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Commands&)> samples_available_signal;
-};
-DECLARE_CLASS_PTR(Commands);
 
 struct Current : public Stream
 {
@@ -364,6 +358,30 @@ struct Video : public Stream
     q::util::Signal<void(Video&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Video);
+
+struct Multi_State : public Stream
+{
+    typedef IMulti_State::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Multi_State&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Multi_State);
+
+struct Multi_Input : public Stream
+{
+    typedef IMulti_Input::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Multi_Input&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Multi_Input);
+
+struct Proximity : public Stream
+{
+    typedef IProximity::Sample Sample;
+    std::vector<Sample> samples;
+    q::util::Signal<void(Proximity&)> samples_available_signal;
+};
+DECLARE_CLASS_PTR(Proximity);
 
 }
 

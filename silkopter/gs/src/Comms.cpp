@@ -420,7 +420,6 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
 //        case node::stream::IENU_Angular_Velocity::TYPE:     return std::make_shared<node::stream::ENU_Angular_Velocity>();
 //        case node::stream::IECEF_Angular_Velocity::TYPE:    return std::make_shared<node::stream::ECEF_Angular_Velocity>();
         case node::stream::IBattery_State::TYPE:            return std::make_shared<node::stream::Battery_State>();
-        case node::stream::ICommands::TYPE:                 return std::make_shared<node::stream::Commands>();
         case node::stream::ICurrent::TYPE:                  return std::make_shared<node::stream::Current>();
         case node::stream::IDistance::TYPE:                 return std::make_shared<node::stream::Distance>();
 //        case node::stream::IENU_Distance::TYPE:             return std::make_shared<node::stream::ENU_Distance>();
@@ -451,6 +450,9 @@ auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::s
 //        case node::stream::IECEF_Velocity::TYPE:            return std::make_shared<node::stream::ECEF_Velocity>();
         case node::stream::IVoltage::TYPE:                  return std::make_shared<node::stream::Voltage>();
         case node::stream::IVideo::TYPE:                    return std::make_shared<node::stream::Video>();
+        case node::stream::IMulti_Input::TYPE:              return std::make_shared<node::stream::Multi_Input>();
+        case node::stream::IMulti_State::TYPE:              return std::make_shared<node::stream::Multi_State>();
+        case node::stream::IProximity::TYPE:                return std::make_shared<node::stream::Proximity>();
     }
 
     QASSERT(0);
@@ -832,7 +834,6 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<IADC, ADC>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IAngular_Velocity, Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ICommands, Commands>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IFloat, Float>(m_telemetry_channel, sample_count, *stream) &&
@@ -850,6 +851,9 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<ITorque, Torque>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVelocity, Velocity>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IMulti_Input, Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IMulti_State, Multi_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<IProximity, Proximity>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
     {
         QASSERT(0);

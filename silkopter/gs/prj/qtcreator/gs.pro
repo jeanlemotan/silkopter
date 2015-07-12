@@ -108,7 +108,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IADC.h \
     ../../../libs/common/node/stream/IAngular_Velocity.h \
     ../../../libs/common/node/stream/IBattery_State.h \
-    ../../../libs/common/node/stream/ICommands.h \
     ../../../libs/common/node/stream/ICurrent.h \
     ../../../libs/common/node/stream/IDistance.h \
     ../../../libs/common/node/stream/IForce.h \
@@ -149,7 +148,12 @@ HEADERS += \
     ../../../libs/lz4/lz4.h \
     ../../src/calibration/Acceleration_Calibration_Wizard.h \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
-    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h \
+    ../../../libs/common/node/stream/IFloat.h \
+    ../../../libs/common/node/stream/IMulti_Input.h \
+    ../../../libs/common/node/stream/IMulti_State.h \
+    ../../../libs/common/node/stream/IProximity.h \
+    ../../../libs/common/node/stream/Stream_Base.h
 
 SOURCES += \
     ../../src/GS.cpp \
