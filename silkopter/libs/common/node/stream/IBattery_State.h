@@ -14,6 +14,8 @@ namespace stream
 class IBattery_State : public IScalar_Stream<Type::BATTERY_STATE>
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     struct Value
     {
         float charge_used = 0; //Amperes-Hour (Ah)

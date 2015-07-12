@@ -539,8 +539,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<LPF<stream::IECEF_Magnetic_Field>>("Magnetic Field LPF (ECEF)", *this);
     m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
     m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature LPF", *this);
-    m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
+//    m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
+//    m_node_factory.register_node<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IPWM>>("PWM LPF", *this);
     m_node_factory.register_node<LPF<stream::IFloat>>("Float LPF", *this);
     m_node_factory.register_node<LPF<stream::IForce>>("Force LPF", *this);
@@ -587,6 +587,9 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IVelocity>>("Velocity RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Velocity>>("Velocity RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Velocity>>("Velocity RS (ECEF)", *this);
+    m_node_factory.register_node<Resampler<stream::IMulti_Input>>("Multi Input", *this);
+    m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
+    m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity", *this);
 
     m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Acceleration, stream::IAcceleration, stream::IFrame>>("Acceleration (ENU->Local)", *this);

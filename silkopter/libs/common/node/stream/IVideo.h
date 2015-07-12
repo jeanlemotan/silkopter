@@ -12,6 +12,8 @@ namespace stream
 class IVideo : public IScalar_Stream<Type::VIDEO>
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     struct Value
     {
         enum class Type : uint8_t

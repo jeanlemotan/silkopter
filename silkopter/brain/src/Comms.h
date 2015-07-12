@@ -5,7 +5,7 @@
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/ICommands.h"
+#include "common/node/stream/IMulti_Input.h"
 
 namespace sz
 {
@@ -62,7 +62,7 @@ public:
 private:
     void configure_channels();
 
-    struct Commands : public node::stream::ICommands
+    struct Commands : public node::stream::IMulti_Input
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }

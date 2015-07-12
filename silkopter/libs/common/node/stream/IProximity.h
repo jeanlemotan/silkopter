@@ -9,18 +9,23 @@ namespace node
 namespace stream
 {
 
-class IADC : public IScalar_Stream<Type::ADC>
+class IProximity : public IScalar_Stream<Type::PROXIMITY>
 {
 public:
-    typedef std::true_type can_be_filtered_t;
+    typedef std::false_type can_be_filtered_t;
 
-    typedef float                   Value; //0 .. 1
+    struct Value
+    {
+        std::vector<math::vec3f> distances;
+    };
+
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IADC);
+DECLARE_CLASS_PTR(IProximity);
+
+}
+}
+}
 
 
-}
-}
-}

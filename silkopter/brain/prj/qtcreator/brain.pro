@@ -176,7 +176,6 @@ HEADERS += \
     ../../../libs/common/node/stream/IADC.h \
     ../../../libs/common/node/stream/IAngular_Velocity.h \
     ../../../libs/common/node/stream/IBattery_State.h \
-    ../../../libs/common/node/stream/ICommands.h \
     ../../../libs/common/node/stream/ICurrent.h \
     ../../../libs/common/node/stream/IDistance.h \
     ../../../libs/common/node/stream/IForce.h \
@@ -248,7 +247,10 @@ HEADERS += \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/lz4/lz4.h \
-    ../../src/source/OpenCV_Capture.h
+    ../../src/source/OpenCV_Capture.h \
+    ../../../libs/common/node/stream/IMulti_Input.h \
+    ../../../libs/common/node/stream/IMulti_State.h \
+    ../../../libs/common/node/stream/IProximity.h
 
 DISTFILES +=
 

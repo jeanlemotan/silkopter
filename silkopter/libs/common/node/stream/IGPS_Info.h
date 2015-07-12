@@ -15,6 +15,8 @@ namespace stream
 class IGPS_Info : public IScalar_Stream<Type::GPS_INFO>
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     struct Value
     {
         enum class Fix

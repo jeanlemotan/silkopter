@@ -58,7 +58,42 @@ private:
 
     std::deque<typename Stream_t::Sample> m_input_samples;
 
-    util::Butterworth<typename Stream_t::Value> m_dsp;
+    template<class T, bool>
+    struct Butterworth
+    {
+        auto setup(size_t order, float rate, float cutoff_frequency) -> bool
+        {
+            return true;
+        }
+        void reset(typename T::Value const& t) {}
+        void reset() {}
+        void process(typename T::Value& t) {}
+    };
+
+    template<class T>
+    struct Butterworth<T, true>
+    {
+        util::Butterworth<typename T::Value> dsp;
+
+        auto setup(size_t order, float rate, float cutoff_frequency) -> bool
+        {
+            return dsp.setup(order, rate, cutoff_frequency);
+        }
+        void reset(typename T::Value const& t)
+        {
+            dsp.reset(t);
+        }
+        void reset()
+        {
+            dsp.reset();
+        }
+        void process(typename T::Value& t)
+        {
+            dsp.process(t);
+        }
+    };
+
+    Butterworth<Stream_t, Stream_t::can_be_filtered_t::value> m_dsp;
 
     struct Stream : public Stream_t
     {

@@ -13,6 +13,8 @@ namespace stream
 class IFrame_Base
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     struct Value
     {
         math::quatf rotation; //local to parent. vec local * rotation == vec parent
@@ -24,6 +26,8 @@ public:
 class IFrame : public ISpatial_Stream<Type::FRAME, Space::LOCAL>, public IFrame_Base
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     static constexpr Space PARENT_SPACE = Space::ENU;
 };
 DECLARE_CLASS_PTR(IFrame);
@@ -31,31 +35,13 @@ DECLARE_CLASS_PTR(IFrame);
 class IENU_Frame : public ISpatial_Stream<Type::FRAME, Space::ENU>, public IFrame_Base
 {
 public:
+    typedef std::false_type can_be_filtered_t;
+
     static constexpr Space PARENT_SPACE = Space::ECEF;
 };
 DECLARE_CLASS_PTR(IENU_Frame);
 
 
 }
-}
-}
-
-
-namespace util
-{
-namespace dsp
-{
-
-template<> inline bool equals(silk::node::stream::IFrame_Base::Value const& a, silk::node::stream::IFrame_Base::Value const& b)
-{
-    return math::equals(a.rotation, b.rotation);
-}
-template<> inline void apply_coefficients(silk::node::stream::IFrame_Base::Value& x,
-                                   silk::node::stream::IFrame_Base::Value& w0,
-                                   silk::node::stream::IFrame_Base::Value& w1,
-                                   silk::node::stream::IFrame_Base::Value& w2, float d1, float d2, float A)
-{
-}
-
 }
 }

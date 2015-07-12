@@ -25,6 +25,9 @@
 #include "common/node/stream/IThrottle.h"
 #include "common/node/stream/ITorque.h"
 #include "common/node/stream/IVoltage.h"
+#include "common/node/stream/IProximity.h"
+#include "common/node/stream/IMulti_State.h"
+#include "common/node/stream/IMulti_Input.h"
 
 #include "common/node/IPilot.h"
 
@@ -358,6 +361,9 @@ void Comms::gather_telemetry_data()
                 gather_telemetry_stream<node::stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::IThrottle>(ts, *stream) ||
                 gather_telemetry_stream<node::stream::ITorque>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IMulti_Input>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IMulti_State>(ts, *stream) ||
+                gather_telemetry_stream<node::stream::IProximity>(ts, *stream) ||
                 send_video_stream(ts, *stream)
                 )
             {
@@ -1059,7 +1065,7 @@ auto Comms::Source::get_config() const -> rapidjson::Document
 auto Comms::Source::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = node::stream::ICommands::TYPE;
+    outputs[0].type = node::stream::IMulti_Input::TYPE;
     outputs[0].name = "Multirotor Input";
     outputs[0].stream = m_comms.m_commands_stream;
     return outputs;
