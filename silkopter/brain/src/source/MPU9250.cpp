@@ -1030,17 +1030,17 @@ void MPU9250::process()
                 float temperature = 28.f;
 
                 math::vec3f acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temperature);
-                math::vec3f acceleration_scale = math::vec3f(m_acceleration_sensor_scale) * get_calibration_scale(m_config->calibration.acceleration.points, temperature);
+                math::vec3f acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temperature);
                 math::vec3f angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temperature);
 
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
-                    short x = (data[0] << 8) | data[1]; data += 2;
-                    short y = (data[0] << 8) | data[1]; data += 2;
-                    short z = (data[0] << 8) | data[1]; data += 2;
+                    int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                    int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                    int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     math::vec3f value(x, y, z);
-                    value = value * acceleration_scale + acceleration_bias;
+                    value = (value * m_acceleration_sensor_scale - acceleration_bias) * acceleration_scale;
                     m_acceleration->push_sample(value, true);
 
                     x = (data[0] << 8) | data[1]; data += 2;
@@ -1048,7 +1048,7 @@ void MPU9250::process()
                     z = (data[0] << 8) | data[1]; data += 2;
 
                     value.set(x, y, z);
-                    value = value * m_angular_velocity_sensor_scale + angular_velocity_bias;
+                    value = value * m_angular_velocity_sensor_scale - angular_velocity_bias;
                     m_angular_velocity->push_sample(value, true);
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
@@ -1120,20 +1120,22 @@ void MPU9250::process_magnetometer(Buses& buses)
             return;
         }
 
-        math::vec3f data((tmp[2] << 8) | tmp[1],
-                         (tmp[4] << 8) | tmp[3],
-                         (tmp[6] << 8) | tmp[5]);
+        math::vec3f data(static_cast<int16_t>((tmp[2] << 8) | tmp[1]),
+                         static_cast<int16_t>((tmp[4] << 8) | tmp[3]),
+                         static_cast<int16_t>((tmp[6] << 8) | tmp[5]));
 
         float temperature = 28.f;
 
         math::vec3f magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temperature);
-        data = data * m_magnetic_field_sensor_scale + magnetic_field_bias;
+        math::vec3f magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temperature);
+        data = data * m_magnetic_field_sensor_scale;
 
         //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
         static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
                 math::quatf::from_axis_z(math::radians(90.f));
 
-        m_last_magnetic_field_value = math::rotate(rot, data);
+        data = math::rotate(rot, data);
+        m_last_magnetic_field_value = (data - magnetic_field_bias) * magnetic_field_scale;
     }
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();

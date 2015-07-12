@@ -190,7 +190,15 @@ FORMS += \
     ../../src/calibration/Acceleration_Calibration_Wizard_Reset.ui \
     ../../src/calibration/Acceleration_Calibration_Wizard_Instructions.ui \
     ../../src/calibration/Acceleration_Calibration_Wizard_Collect.ui \
-    ../../src/calibration/Acceleration_Calibration_Wizard_Done.ui
+    ../../src/calibration/Acceleration_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Reset.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui
 
 DISTFILES += \
     ../../src/node.png \

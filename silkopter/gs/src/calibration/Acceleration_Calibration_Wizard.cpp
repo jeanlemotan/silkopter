@@ -1,4 +1,5 @@
 #include "calibration/Acceleration_Calibration_Wizard.h"
+#include <QPushButton>
 
 #include "sz_math.hpp"
 #include "sz_Calibration_Data.hpp"
@@ -24,6 +25,7 @@ Acceleration_Calibration_Wizard::Acceleration_Calibration_Wizard(silk::HAL& hal,
     m_hal.set_stream_telemetry_active(m_output.stream->name, true);
 
     m_initial_calibration = get_calibration_points();
+    set_calibration_points(sz::calibration::Acceleration_Points());
 
     m_step = Step::INTRO;
 
@@ -43,7 +45,6 @@ void Acceleration_Calibration_Wizard::advance()
     }
     else if (m_step == Step::RESET)
     {
-        m_connection.disconnect();
         m_step = Step::SHOW_INSTRUCTIONS;
     }
     else if (m_step == Step::SHOW_INSTRUCTIONS)
@@ -97,12 +98,25 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         Ui::Acceleration_Calibration_Wizard_Reset ui;
         ui.setupUi(m_content);
-        ui.info->setText("Resetting previous calibration data...");
+        if (m_initial_calibration.points.size() > 0)
+        {
+            ui.info->setText(q::util::format2<std::string>("There are currently {} calibration points.\n"
+                                                           "Do you want to clear these points or keep them?", m_initial_calibration.points.size()).c_str());
+            auto* clear = ui.buttonBox->addButton("Clear", QDialogButtonBox::ResetRole);
+            QObject::connect(clear, &QPushButton::released, [this]() { advance(); });
+
+            auto* keep = ui.buttonBox->addButton("Keep", QDialogButtonBox::AcceptRole);
+            QObject::connect(keep, &QPushButton::released, [this]() { m_crt_calibration = m_initial_calibration; advance(); });
+        }
+        else
+        {
+            ui.info->setText("There are no existing calibration data points.\nLet's add one");
+            auto* ok = ui.buttonBox->addButton("Keep", QDialogButtonBox::AcceptRole);
+            QObject::connect(ok, &QPushButton::released, [this]() { advance(); });
+        }
+
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
-        m_connection = m_node->changed_signal.connect([this]() { on_node_changed(); }); //this will advance
-
-        set_calibration_points(sz::calibration::Acceleration_Points());
     }
     else if (m_step == Step::SHOW_INSTRUCTIONS)
     {
@@ -174,16 +188,20 @@ void Acceleration_Calibration_Wizard::prepare_step()
         ui.bias->setText(q::util::format2<std::string>("{}", bias).c_str());
         ui.scale->setText(q::util::format2<std::string>("{}", scale).c_str());
 
-        sz::calibration::Acceleration_Points points;
         sz::calibration::Acceleration point;
         point.temperature = 0;
         point.bias = math::vec3f(bias);
         point.scale = math::vec3f(scale);
-        points.points.push_back(point);
+        m_crt_calibration.points.push_back(point);
 
-        QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this, points]()
+        QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this](double value)
         {
-            set_calibration_points(points);
+            m_crt_calibration.points.back().temperature = static_cast<float>(value);
+        });
+
+        QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()
+        {
+            set_calibration_points(m_crt_calibration);
             this->accept();
         });
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
@@ -235,14 +253,6 @@ auto Acceleration_Calibration_Wizard::get_calibration_points() const -> sz::cali
     return calibration;
 }
 
-void Acceleration_Calibration_Wizard::on_node_changed()
-{
-    auto calibration = get_calibration_points();
-    if (calibration.points.empty())
-    {
-        advance();
-    }
-}
 
 void Acceleration_Calibration_Wizard::on_samples_received(silk::node::stream::Acceleration& stream)
 {

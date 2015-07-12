@@ -1693,8 +1693,9 @@ struct Serializer< Writerf769641e30dc589310ee1597fcdda5144e604f381c0a39a2d7a529d
 namespace sz { namespace calibration { struct Magnetic_Field {
  float temperature;
 math::vec3f bias;
+math::vec3f scale;
 
-explicit Magnetic_Field():temperature(0), bias() {  }
+explicit Magnetic_Field():temperature(0), bias(), scale(1) {  }
 
 
  
@@ -1712,8 +1713,10 @@ private:
     int depth;
 
     SAXEventHandler< float > handler_0;
-SAXEventHandler< math::vec3f > handler_1;bool has_temperature;
+SAXEventHandler< math::vec3f > handler_1;
+SAXEventHandler< math::vec3f > handler_2;bool has_temperature;
 bool has_bias;
+bool has_scale;
 
     bool check_depth(const char* type)
     {
@@ -1731,6 +1734,8 @@ bool has_bias;
     return "temperature";
 case 1:
     return "bias";
+case 2:
+    return "scale";
         default:
             break;
         }
@@ -1759,6 +1764,7 @@ case 1:
     {
         has_temperature = false;
 has_bias = false;
+has_scale = false;
     }
 
 public:
@@ -1767,6 +1773,7 @@ public:
         , depth(0)
         , handler_0(&obj->temperature)
 , handler_1(&obj->bias)
+, handler_2(&obj->scale)
     {
         reset_flags();
     }
@@ -1783,6 +1790,9 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -1803,6 +1813,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -1821,6 +1834,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -1841,6 +1857,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -1859,6 +1878,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -1879,6 +1901,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -1897,6 +1922,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -1917,6 +1945,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -1935,6 +1966,8 @@ case 1:
 						 { state=0; has_temperature = true; }
 else if (utility::string_equal(str, length, "\x42\x69\x61\x73", 4))
 						 { state=1; has_bias = true; }
+else if (utility::string_equal(str, length, "\x53\x63\x61\x6c\x65", 5))
+						 { state=2; has_scale = true; }
             else {
                 state = -1;
                 return true;
@@ -1948,6 +1981,9 @@ else if (utility::string_equal(str, length, "\x42\x69\x61\x73", 4))
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -1969,6 +2005,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -1988,6 +2027,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -2006,6 +2048,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -2027,12 +2072,16 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_temperature) set_missing_required("temperature");
 if (!has_bias) set_missing_required("bias");
+if (!has_scale) set_missing_required("scale");
         }
         return the_error.empty();
     }
@@ -2055,6 +2104,8 @@ if (!has_bias) set_missing_required("bias");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -2071,6 +2122,7 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
@@ -2084,8 +2136,9 @@ struct Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea4
 
         w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, float >()(w, value.temperature);
 w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3f >()(w, value.bias);
+w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3f >()(w, value.scale);
 
-        w.EndObject(2);
+        w.EndObject(3);
     }
 
 };

@@ -48,7 +48,8 @@
     "members":
     [
         ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
+        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}],
+        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
     ]
 },
 {

@@ -598,14 +598,14 @@ void HAL_Window::do_acceleration_calibration(silk::node::Node_ptr node, size_t o
 
 void HAL_Window::do_magnetic_field_calibration(silk::node::Node_ptr node, size_t output_idx)
 {
-//    Magnetic_Field_Calibration_Dialog dialog(this);
-//    dialog.exec();
+    Magnetic_Field_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
+    wizard.exec();
 }
 
 void HAL_Window::do_angular_velocity_calibration(silk::node::Node_ptr node, size_t output_idx)
 {
-//    Angular_Velocity_Calibration_Dialog dialog(this);
-//    dialog.exec();
+    Angular_Velocity_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
+    wizard.exec();
 }
 
 void HAL_Window::add_stream(silk::node::stream::Stream_ptr stream)

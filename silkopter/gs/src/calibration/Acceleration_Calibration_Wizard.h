@@ -19,7 +19,6 @@ private:
 
     void prepare_step();
 
-    void on_node_changed();
     void on_samples_received(silk::node::stream::Acceleration& stream);
 
     void set_calibration_points(sz::calibration::Acceleration_Points const& data);
@@ -40,23 +39,21 @@ private:
     QWidget* m_content = nullptr;
 
     sz::calibration::Acceleration_Points m_initial_calibration;
+    sz::calibration::Acceleration_Points m_crt_calibration;
 
 
     enum class Step
     {
         INTRO,
         RESET,
-        COLLECT,
         SHOW_INSTRUCTIONS,
+        COLLECT,
         DONE,
     };
 
     Step m_step = Step::INTRO;
 
     q::util::Connection m_connection;
-
-    q::Clock::time_point m_step_timepoint;
-    uint32_t m_last_sample_idx = 0;
 
     std::vector<math::vec3f> m_samples;
 
