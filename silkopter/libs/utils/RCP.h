@@ -52,7 +52,9 @@ namespace util
 
         virtual void async_send(uint8_t const* data, size_t size) = 0;
 
-        virtual size_t prepare_buffer(std::vector<uint8_t>& buffer) = 0;
+        virtual auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t = 0;
+
+        virtual auto get_mtu() const -> size_t = 0;
     };
 
     //Reliable Channel Protocol
@@ -66,7 +68,6 @@ namespace util
 
         struct Send_Params
         {
-            size_t mtu = 1420;
             int8_t importance = 0; //Higher means higher priority. Can be negative
             bool is_reliable = true;
             bool is_compressed = true;
@@ -108,17 +109,12 @@ namespace util
             TYPE_PACKET             =   0,
             TYPE_FRAGMENTS_RES      =   1,
             TYPE_PACKETS_RES        =   2,
-            TYPE_PING               =   3,
-            TYPE_PONG               =   4,
-            TYPE_CONNECT_REQ        =   5,
-            TYPE_CONNECT_RES        =   6,
+            TYPE_CONNECT_REQ        =   3,
+            TYPE_CONNECT_RES        =   4,
         };
 
         static const size_t MAX_CHANNELS = 32;
-        static const size_t MAX_FRAGMENTS = 250;
-
-        const q::Clock::duration PING_TIMEOUT = std::chrono::milliseconds(500);
-        static const size_t PING_MIN_AVERAGE_SAMPLES = 4;
+        static const size_t MAX_FRAGMENTS = 65000;
 
 #pragma pack(push, 1)
         struct Header
@@ -133,35 +129,25 @@ namespace util
             uint32_t channel_idx : 5;
             uint32_t flag_needs_confirmation : 1;
             uint32_t flag_is_compressed : 1;
-            uint8_t fragment_idx;
+            uint16_t fragment_idx;
         };
 
         struct Packet_Main_Header : public Packet_Header
         {
-            uint32_t packet_size : 24;
-            uint32_t fragment_count : 8;
+            uint32_t packet_size;
+            uint16_t fragment_count;
         };
 
         struct Fragments_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 200;
+            static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 
         struct Packets_Res_Header : public Header
         {
-            static const size_t MAX_PACKED = 200;
+            static const size_t MAX_PACKED = 100;
             uint8_t count;
-        };
-
-        struct Ping_Header : public Header
-        {
-            uint16_t seq;
-        };
-
-        struct Pong_Header : public Header
-        {
-            uint16_t seq;
         };
 
         struct Connect_Req_Header : public Header
@@ -216,8 +202,8 @@ namespace util
             struct Fragment_Res
             {
                 uint32_t id = 0;
+                uint16_t fragment_idx = 0;
                 uint8_t channel_idx = 0;
-                uint8_t fragment_idx = 0;
                 uint8_t sent_count = 0;
             };
             std::mutex fragments_res_mutex;
@@ -242,8 +228,6 @@ namespace util
                 std::mutex mutex;
                 Datagram_ptr connection_req;
                 Datagram_ptr connection_res;
-                Datagram_ptr ping;
-                Datagram_ptr pong;
 
                 Send_Queue fragments_res;
                 Send_Queue packets_res;
@@ -288,7 +272,7 @@ namespace util
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
                 Packet_Main_Header main_header;
                 Packet_Header any_header;
-                std::array<Datagram_ptr, 256> fragments;
+                std::map<uint16_t, Datagram_ptr> fragments;
             };
             typedef detail::Pool<Packet>::Ptr Packet_ptr;
             detail::Pool<Packet> packet_pool;
@@ -309,18 +293,6 @@ namespace util
         RX::Datagram_ptr acquire_rx_datagram(size_t data_size);
         RX::Datagram_ptr acquire_rx_datagram(size_t zero_size, size_t data_size);
 
-        struct Ping
-        {
-            std::mutex mutex;
-            uint16_t last_seq = 0;
-            bool is_done = true;
-
-            static constexpr size_t MAX_RTTS = 20;
-            std::deque<std::pair<q::Clock::time_point, q::Clock::duration>> rtts;
-            q::Clock::duration rtt = q::Clock::duration{0};
-        } m_ping;
-
-
         struct Stats
         {
             size_t tx_datagrams = 0;
@@ -329,8 +301,6 @@ namespace util
             size_t tx_confirmed_packets = 0;
             size_t tx_packets = 0;
             size_t tx_bytes = 0;
-            size_t tx_pings = 0;
-            size_t tx_pongs = 0;
 
             size_t rx_datagrams = 0;
             size_t rx_corrupted_datagrams = 0;
@@ -340,8 +310,6 @@ namespace util
             size_t rx_packets = 0;
             size_t rx_dropped_packets = 0;
             size_t rx_bytes = 0;
-            size_t rx_pings = 0;
-            size_t rx_pongs = 0;
         };
 
         struct Connection
@@ -393,16 +361,12 @@ namespace util
         void send_pending_fragments_res();
 
         void send_pending_fragments_res_locked();
-        void add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx);
+        void add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
 
         void send_pending_packets_res();
 
         void send_pending_packets_res_locked();
         void add_and_send_packet_res(uint8_t channel_idx, uint32_t id);
-
-        void send_packet_ping();
-        void send_packet_pong(Ping_Header const& ping);
-        void process_pings();
 
         void send_packet_connect_req();
         void send_packet_connect_res(Connect_Res_Header::Response response);
@@ -415,8 +379,6 @@ namespace util
         void process_packet_datagram(RX::Datagram_ptr& datagram);
         void process_fragments_res_datagram(RX::Datagram_ptr& datagram);
         void process_packets_res_datagram(RX::Datagram_ptr& datagram);
-        void process_ping_datagram(RX::Datagram_ptr& datagram);
-        void process_pong_datagram(RX::Datagram_ptr& datagram);
         void process_connect_req_datagram(RX::Datagram_ptr& datagram);
         void process_connect_res_datagram(RX::Datagram_ptr& datagram);
    };

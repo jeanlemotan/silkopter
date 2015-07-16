@@ -156,8 +156,6 @@ inline auto RCP::get_header_size(Buffer_t& data) -> size_t
     }
     case Type::TYPE_FRAGMENTS_RES: return sizeof(Fragments_Res_Header);
     case Type::TYPE_PACKETS_RES: return sizeof(Packets_Res_Header);
-    case Type::TYPE_PING: return sizeof(Ping_Header);
-    case Type::TYPE_PONG: return sizeof(Pong_Header);
     case Type::TYPE_CONNECT_REQ: return sizeof(Connect_Req_Header);
     case Type::TYPE_CONNECT_RES: return sizeof(Connect_Res_Header);
     }
@@ -197,17 +195,13 @@ inline RCP::RCP(RCP_Socket& socket)
 //        hsz =sizeof(Packet_Header);
 
 //        hsz =sizeof(Packets_Confirmed_Header);
-//        hsz =sizeof(Ping_Header);
 
     m_socket.receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
     m_socket.send_callback = std::bind(&RCP::handle_send, this, std::placeholders::_1);
 
     m_rx.packet_pool.release = [](RX::Packet& p)
     {
-        for (auto& f: p.fragments)
-        {
-            f.reset();
-        }
+        p.fragments.clear();
     };
 
 //        m_rx.temp_buffer.resize(100 * 1024);
@@ -218,7 +212,6 @@ inline RCP::RCP(RCP_Socket& socket)
     m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
     m_init_tp = q::Clock::now();
-    //m_ping.rtts.set_capacity(100);
 
     for (auto& ch: m_tx.channel_data)
     {
@@ -366,15 +359,14 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
         }
     }
 
-    size_t max_fragment_size = params.mtu;
+    size_t max_fragment_size = m_socket.get_mtu() - sizeof(Packet_Main_Header);
     size_t left = size;
     size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
     if (fragment_count > MAX_FRAGMENTS)
     {
-        QLOGW("Too many fragments: {}. Ignoring mtu.", fragment_count);
-        fragment_count = MAX_FRAGMENTS;
-        max_fragment_size = ((size - 1) / fragment_count) + 1;
-        fragment_count = ((size - 1) / max_fragment_size) + 1;
+        auto max = MAX_FRAGMENTS;
+        QLOGE("Too many fragments: {} / {}.", fragment_count, max);
+        return false;
     }
 
     auto now = q::Clock::now();
@@ -466,13 +458,9 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
 
 inline auto RCP::tx_packet_datagram_predicate(TX::Datagram_ptr const& AA, TX::Datagram_ptr const& BB) -> bool
 {
-    if (!AA)
+    if (!AA || !BB)
     {
         return true;
-    }
-    if (!BB)
-    {
-        return false;
     }
     int priority_AA = AA->params.importance;
     int priority_BB = BB->params.importance;
@@ -586,14 +574,15 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         m_rx.compression_buffer.clear();
         m_rx.compression_buffer.resize(main_header.packet_size);
         size_t offset = 0;
-        for (size_t i = 0; i < main_header.fragment_count; i++)
+        for (auto it = packet->fragments.begin(); it != packet->fragments.end(); ++it)
         {
-            auto const& fragment = packet->fragments[i];
-            auto header_size = ((i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
+            auto const& fragment = it->second;
+            auto header_size = ((it == packet->fragments.begin()) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
             QASSERT(fragment->data.size() > header_size);
             std::copy(fragment->data.begin() + header_size, fragment->data.end(), m_rx.compression_buffer.begin() + offset);
             offset += fragment->data.size() - header_size;
         }
+        packet->fragments.clear();
 
         if (main_header.flag_is_compressed)
         {
@@ -629,7 +618,7 @@ inline void RCP::process_connection()
         return;
     }
 
-    std::lock_guard<std::mutex> lg(m_ping.mutex);
+    std::lock_guard<std::mutex> lg(m_connection.mutex);
 
     auto now = q::Clock::now();
     if (now - m_connection.last_sent_tp < RECONNECT_BEACON_TIMEOUT)
@@ -640,65 +629,6 @@ inline void RCP::process_connection()
 
     QLOGI("Sending reconnect request");
     send_packet_connect_req();
-}
-
-inline void RCP::process_pings()
-{
-    std::lock_guard<std::mutex> lg(m_ping.mutex);
-
-    auto now = q::Clock::now();
-
-    //process current ping
-    if (!m_ping.is_done)
-    {
-        QASSERT(!m_ping.rtts.empty());
-        q::Clock::duration tt = now - m_ping.rtts.back().first;
-        if (tt >= PING_TIMEOUT)
-        {
-            //timeout
-            m_ping.is_done = true;
-//                QLOGW("Ping {} timeout", m_ping.last_seq);
-        }
-        else
-        {
-            //still ongoing, put the crt duration in the rtts
-            m_ping.rtts.back().second = tt;
-        }
-    }
-
-    //send another ping, but not too often
-    if (m_ping.is_done)
-    {
-        if (m_ping.rtts.empty() ||
-                now - m_ping.rtts.back().first > std::chrono::milliseconds(500))
-        {
-            send_packet_ping();
-        }
-    }
-
-    //calculate average rtt
-    {
-        q::Clock::duration total_rtt{0};
-        size_t total = 0;
-        for (size_t i = 0, sz = m_ping.rtts.size(); i < sz; i++)
-        {
-            size_t idx = sz - i - 1;
-            auto const& rtt = m_ping.rtts[idx];
-            auto const& sent_tp = rtt.first;
-            auto const& duration = rtt.second;
-            //we have a few samples of at most one second total?
-            if (total >= PING_MIN_AVERAGE_SAMPLES && now - sent_tp > std::chrono::seconds(1))
-            {
-                //erase the old ones
-                m_ping.rtts.erase(m_ping.rtts.begin(), m_ping.rtts.begin() + idx);
-                break;
-            }
-            total_rtt += duration;
-            total++;
-        }
-        m_ping.rtt = (total > 0) ? q::Clock::duration(total_rtt / total) : PING_TIMEOUT;
-        //QLOGI("RTT: {}", m_ping.rtt);
-    }
 }
 
 inline void RCP::process()
@@ -721,7 +651,6 @@ inline void RCP::process()
     {
         send_pending_fragments_res();
         send_pending_packets_res();
-        process_pings();
     }
 
     send_datagram();
@@ -782,14 +711,6 @@ inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
             stats.tx_packets++;
         }
     }
-    else if (header.type == TYPE_PING)
-    {
-        stats.tx_pings++;
-    }
-    else if (header.type == TYPE_PONG)
-    {
-        stats.tx_pongs++;
-    }
 }
 
 inline void RCP::compute_next_transit_datagram()
@@ -798,7 +719,6 @@ inline void RCP::compute_next_transit_datagram()
 
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-        //first try the ping and pong
         if (m_tx.internal_queues.connection_res)
         {
             datagram = std::move(m_tx.internal_queues.connection_res);
@@ -810,18 +730,6 @@ inline void RCP::compute_next_transit_datagram()
             datagram = std::move(m_tx.internal_queues.connection_req);
             m_tx.internal_queues.connection_req.reset();
 //                QLOGI("Sending connection_req datagram {}", static_cast<int>(get_header<connection_req_Header>(datagram->data).seq));
-        }
-        else if (m_tx.internal_queues.pong)
-        {
-            datagram = std::move(m_tx.internal_queues.pong);
-            m_tx.internal_queues.pong.reset();
-//                QLOGI("Sending pong datagram {}", static_cast<int>(get_header<Pong_Header>(datagram->data).seq));
-        }
-        else if (m_tx.internal_queues.ping)
-        {
-            datagram = std::move(m_tx.internal_queues.ping);
-            m_tx.internal_queues.ping.reset();
-//                QLOGI("Sending ping datagram {}", static_cast<int>(get_header<Ping_Header>(datagram->data).seq));
         }
 
         //next the confirmations
@@ -923,14 +831,6 @@ inline void RCP::handle_send(RCP_Socket::Result result)
     if (datagram)
     {
         datagram->sent_tp = q::Clock::now();
-
-        auto& header = get_header<Header>(datagram->data_ptr);
-        if (header.type == TYPE_PING)
-        {
-            std::lock_guard<std::mutex> lg(m_ping.mutex);
-            QASSERT(!m_ping.rtts.empty());
-            m_ping.rtts.back().first = q::Clock::now();
-        }
     }
 
     m_is_sending = false;
@@ -971,7 +871,7 @@ inline void RCP::send_pending_fragments_res_locked()
         size_t count = math::min(m_tx.fragments_res.size() - pidx, Fragments_Res_Header::MAX_PACKED);
 
         size_t header_size = sizeof(Fragments_Res_Header);
-        TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * (1 + 3 + 1)); //channel_idx:1 + id:3 + fragment_idx:1
+        TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * (1 + 3 + 2)); //channel_idx:1 + id:3 + fragment_idx:2
 
         auto& header = get_header<Fragments_Res_Header>(datagram->data_ptr);
         header.type = TYPE_FRAGMENTS_RES;
@@ -987,14 +887,15 @@ inline void RCP::send_pending_fragments_res_locked()
             *data_ptr++ = reinterpret_cast<uint8_t const*>(&res.id)[0];
             *data_ptr++ = reinterpret_cast<uint8_t const*>(&res.id)[1];
             *data_ptr++ = reinterpret_cast<uint8_t const*>(&res.id)[2];
-            *data_ptr++ = res.fragment_idx;
+            *data_ptr++ = reinterpret_cast<uint8_t const*>(&res.fragment_idx)[0];
+            *data_ptr++ = reinterpret_cast<uint8_t const*>(&res.fragment_idx)[1];
         }
 
         add_and_send_datagram(m_tx.internal_queues.fragments_res, m_tx.internal_queues.mutex, datagram);
     }
 }
 
-inline void RCP::add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint8_t fragment_idx)
+inline void RCP::add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx)
 {
     std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
 
@@ -1060,44 +961,6 @@ inline void RCP::add_and_send_packet_res(uint8_t channel_idx, uint32_t id)
     m_tx.packets_res.push_back(res);
 
     send_pending_packets_res_locked();
-}
-
-inline void RCP::send_packet_ping()
-{
-    {
-        std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-
-        m_tx.internal_queues.ping = acquire_tx_datagram(sizeof(Ping_Header));
-        auto& header = get_header<Ping_Header>(m_tx.internal_queues.ping->data_ptr);
-        header.seq = ++m_ping.last_seq;
-        header.type = TYPE_PING;
-
-        prepare_to_send_datagram(*m_tx.internal_queues.ping);
-
-        m_ping.is_done = false;
-        //the time will get overwritten when the pack actually gets sent
-        m_ping.rtts.push_back(std::make_pair(q::Clock::now(), std::chrono::milliseconds(0)));
-        if (m_ping.rtts.size() > Ping::MAX_RTTS)
-        {
-            m_ping.rtts.erase(m_ping.rtts.begin(), m_ping.rtts.begin() + m_ping.rtts.size() - Ping::MAX_RTTS);
-        }
-    }
-
-    send_datagram();
-}
-inline void RCP::send_packet_pong(Ping_Header const& ping)
-{
-    {
-        std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-
-        m_tx.internal_queues.pong = acquire_tx_datagram(sizeof(Pong_Header));
-        auto& header = get_header<Pong_Header>(m_tx.internal_queues.pong->data_ptr);
-        header.seq = ping.seq;
-        header.type = TYPE_PONG;
-
-        prepare_to_send_datagram(*m_tx.internal_queues.pong);
-    }
-    send_datagram();
 }
 
 inline void RCP::send_packet_connect_req()
@@ -1174,8 +1037,6 @@ inline void RCP::process_incoming_datagram(RX::Datagram_ptr& datagram)
         case Type::TYPE_PACKET: process_packet_datagram(datagram); break;
         case Type::TYPE_FRAGMENTS_RES: process_fragments_res_datagram(datagram); break;
         case Type::TYPE_PACKETS_RES: process_packets_res_datagram(datagram); break;
-        case Type::TYPE_PING: process_ping_datagram(datagram); break;
-        case Type::TYPE_PONG: process_pong_datagram(datagram); break;
         case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(datagram); break;
         case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
         default: QASSERT(0); break;
@@ -1228,7 +1089,7 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         packets.insert(iter, std::make_pair(id, packet));
     }
 
-    if (packet->fragments[fragment_idx]) //we already have the fragment
+    if (packet->fragments.find(fragment_idx) != packet->fragments.end()) //we already have the fragment
     {
         m_global_stats.rx_duplicated_datagrams++;
         //QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
@@ -1241,7 +1102,7 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         {
             packet->main_header = get_header<Packet_Main_Header>(datagram->data.data());
         }
-        packet->fragments[fragment_idx] = std::move(datagram);
+        packet->fragments.emplace(fragment_idx, std::move(datagram));
     }
 
     if (header.flag_needs_confirmation)
@@ -1287,6 +1148,7 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
         c[2] = *src++;//id
         c[3] = *src++;//id
         c[4] = *src++;//fragment_idx
+        c[5] = *src++;//fragment_idx
     }
     auto conf_end = conf + count;
 
@@ -1314,7 +1176,8 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
                 k[1] = reinterpret_cast<uint8_t const*>(&id)[0];
                 k[2] = reinterpret_cast<uint8_t const*>(&id)[1];
                 k[3] = reinterpret_cast<uint8_t const*>(&id)[2];
-                k[4] = hdr.fragment_idx;
+                k[4] = reinterpret_cast<uint8_t const*>(&hdr.fragment_idx)[0];
+                k[5] = reinterpret_cast<uint8_t const*>(&hdr.fragment_idx)[1];
 
                 auto lb = std::lower_bound(conf, conf_end, key);
                 if (lb != conf_end && *lb == key)
@@ -1413,45 +1276,6 @@ inline void RCP::process_packets_res_datagram(RX::Datagram_ptr& datagram)
         }
     }
 }
-inline void RCP::process_ping_datagram(RX::Datagram_ptr& datagram)
-{
-    QASSERT(datagram);
-    auto& header = get_header<Ping_Header>(datagram->data.data());
-
-    m_global_stats.rx_pings++;
-    send_packet_pong(header);
-}
-inline void RCP::process_pong_datagram(RX::Datagram_ptr& datagram)
-{
-    QASSERT(datagram);
-    auto& header = get_header<Pong_Header>(datagram->data.data());
-
-    m_global_stats.rx_pongs++;
-
-    std::lock_guard<std::mutex> lg(m_ping.mutex);
-
-    if (header.seq != m_ping.last_seq)
-    {
-        QLOGW("invalid ping seq received: {}, {}, {}", header.seq, m_ping.last_seq, m_ping.is_done);
-    }
-    else
-    {
-        auto now = q::Clock::now();
-        auto rtt = now - m_ping.rtts.back().first;
-        m_ping.rtts.back().second = rtt;
-    }
-
-    m_ping.is_done = true;
-
-////        QLOGI("RTT: {}", m_ping.rtt);
-
-//        static q::Clock::time_point xxx = q::Clock::now();
-////                if (q::Clock::now() - xxx > std::chrono::milliseconds(1000))
-//        {
-//            xxx = q::Clock::now();
-//            //QLOGI("RTT: {}", m_ping.rtt);
-//        }
-}
 
 inline void RCP::purge()
 {
@@ -1468,8 +1292,6 @@ inline void RCP::purge()
 
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-        m_tx.internal_queues.ping.reset();
-        m_tx.internal_queues.pong.reset();
         m_tx.internal_queues.connection_req.reset();
         m_tx.internal_queues.connection_res.reset();
         m_tx.internal_queues.fragments_res.clear();
@@ -1490,14 +1312,6 @@ inline void RCP::purge()
         queue.packets.clear();
 
         m_rx.last_packet_ids[i] = 0;
-    };
-
-    {
-        std::lock_guard<std::mutex> lg(m_ping.mutex);
-        m_ping.last_seq = 0;
-        m_ping.is_done = true;
-        m_ping.rtts.clear();
-        m_ping.rtt = q::Clock::duration{0};
     };
 
     std::fill(m_last_id.begin(), m_last_id.end(), 0);

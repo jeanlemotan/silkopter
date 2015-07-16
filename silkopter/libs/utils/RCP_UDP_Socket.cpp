@@ -83,6 +83,10 @@ size_t RCP_UDP_Socket::prepare_buffer(std::vector<uint8_t>& buffer)
     //no header needed
     return 0;
 }
+auto RCP_UDP_Socket::get_mtu() const -> size_t
+{
+    return 1450;
+}
 
 auto RCP_UDP_Socket::process() -> Result
 {

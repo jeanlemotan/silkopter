@@ -18,7 +18,8 @@ public:
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
 
-    size_t prepare_buffer(std::vector<uint8_t>& buffer);
+    auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t;
+    auto get_mtu() const -> size_t;
 
 private:
     void async_send(uint8_t const* data, size_t size);

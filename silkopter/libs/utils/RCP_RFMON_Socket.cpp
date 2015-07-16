@@ -478,6 +478,11 @@ size_t RCP_RFMON_Socket::prepare_buffer(std::vector<uint8_t>& buffer)
     return m_impl->tx_packet_header_length;
 }
 
+auto RCP_RFMON_Socket::get_mtu() const -> size_t
+{
+    return MAX_USER_PACKET_SIZE;
+}
+
 auto RCP_RFMON_Socket::process() -> Result
 {
     return Result::OK;

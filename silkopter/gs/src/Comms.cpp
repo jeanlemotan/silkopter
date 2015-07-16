@@ -86,7 +86,6 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 126;
@@ -94,7 +93,6 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = false;
         params.cancel_previous_data = true;
@@ -767,16 +765,6 @@ void Comms::handle_streams_telemetry_active()
     }
 }
 
-#pragma pack(push, 1)
-struct Sample_Data
-{
-    uint64_t dt : 24; //10us
-    uint64_t tp : 40; //1us
-    uint16_t sample_idx : 15;
-    uint16_t is_healthy : 1;
-};
-#pragma pack(pop)
-
 template<class IStream, class Stream>
 auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
 {
@@ -784,22 +772,13 @@ auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_co
     {
         auto& stream = static_cast<Stream&>(_stream);
         typename Stream::Sample sample;
-        Sample_Data data;
         for (uint32_t i = 0; i < sample_count; i++)
         {
-            uint32_t dt = 0;
-            bool ok = channel.unpack_param(sample.value);
-            ok &= channel.unpack_param(data);
-            if (!ok)
+            if (!channel.unpack_param(sample))
             {
                 QLOGE("Error unpacking samples!!!");
                 return false;
             }
-
-            sample.sample_idx = data.sample_idx;
-            sample.dt = std::chrono::microseconds(data.dt << 3);
-            sample.tp = Manual_Clock::time_point(std::chrono::microseconds(data.tp));
-            sample.is_healthy = data.is_healthy ? true : false;
             stream.samples.push_back(sample);
         }
         stream.samples_available_signal.execute(stream);
@@ -865,12 +844,10 @@ void Comms::handle_stream_data()
 void Comms::handle_frame_data()
 {
     std::string stream_name;
-    node::stream::IVideo::Value::Type type;
-    math::vec2u32 resolution;
+    node::stream::Video::Sample sample;
     bool ok = m_video_channel.begin_unpack() &&
               m_video_channel.unpack_param(stream_name) &&
-              m_video_channel.unpack_param(type) &&
-              m_video_channel.unpack_param(resolution);
+              m_video_channel.unpack_param(sample);
     if (!ok)
     {
         QLOGE("Failed to unpack video stream");
@@ -884,27 +861,6 @@ void Comms::handle_frame_data()
     }
     auto& stream = static_cast<node::stream::Video&>(*_stream);
 
-    Sample_Data data;
-    uint32_t size = 0;
-    ok &= m_video_channel.unpack_param(data);
-    ok &= m_video_channel.unpack_param(size);
-    if (!ok)
-    {
-        QLOGE("Error unpacking header!!!");
-        return;
-    }
-
-    node::stream::Video::Sample sample;
-    sample.sample_idx = data.sample_idx;
-    sample.dt = std::chrono::microseconds(data.dt << 3);
-    sample.tp = Manual_Clock::time_point(std::chrono::microseconds(data.tp));
-    sample.is_healthy = data.is_healthy ? true : false;
-    sample.value.data.resize(size);
-    if (!m_video_channel.unpack_data(sample.value.data.data(), size))
-    {
-        QLOGE("Error unpacking frame data!!!");
-        return;
-    }
     stream.samples.push_back(std::move(sample));
     stream.samples_available_signal.execute(stream);
     stream.samples.clear();

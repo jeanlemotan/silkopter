@@ -145,7 +145,6 @@ void Comms::configure_channels()
 {
     {
         util::RCP::Send_Params params;
-        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 126;
@@ -153,7 +152,6 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.mtu = 100;
         params.is_compressed = true;
         params.is_reliable = false;
         params.importance = 127;
@@ -162,7 +160,6 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 200;
         params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 10;
@@ -173,7 +170,6 @@ void Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.mtu = 1450;
         params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 10;
@@ -211,16 +207,6 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
-#pragma pack(push, 1)
-struct Sample_Data
-{
-    uint64_t dt : 24; //10us
-    uint64_t tp : 40; //1us
-    uint16_t sample_idx : 15;
-    uint16_t is_healthy : 1;
-};
-#pragma pack(pop)
-
 auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() != node::stream::IVideo::TYPE)
@@ -231,54 +217,13 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
     auto const& stream = static_cast<node::stream::IVideo const&>(_stream);
     auto const& samples = stream.get_samples();
 
-    Sample_Data data;
-
     for (auto const& s: samples)
     {
         m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
         m_channels->video.pack_param(ts.stream_name);
-        m_channels->video.pack_param(s.value.type);
-        m_channels->video.pack_param(s.value.resolution);
-
-        auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
-        if (dt >= (1 << 24))
-        {
-            QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
-            dt = (1 << 24) - 1;
-        }
-        auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
-        if (tp >= (uint64_t(1) << 40))
-        {
-            QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
-            tp = (uint64_t(1) << 40) - 1;
-        }
-
-        data.sample_idx = s.sample_idx;
-        data.is_healthy = s.is_healthy;
-        data.dt = dt;
-        data.tp = tp;
-
-        m_channels->video.pack_param(data);
-        m_channels->video.pack_param(static_cast<uint32_t>(s.value.data.size()));
-        m_channels->video.pack_data(s.value.data.data(), s.value.data.size());
+        m_channels->video.pack_param(s);
         m_channels->video.end_pack();
-
-        if (s.value.is_keyframe)
-        {
-            //QLOGI("Keyframe");
-            auto params = m_rcp->get_send_params(VIDEO_CHANNEL);
-            //params.cancel_previous_data = true; //cancel all I-frames still pending to make room for this P whale
-            params.cancel_after = std::chrono::milliseconds(150);
-            //params.is_reliable = true;
-            //params.unreliable_retransmit_count = 3;
-            auto const& tx_buffer = m_channels->video.get_tx_buffer();
-            m_rcp->try_sending(VIDEO_CHANNEL, params, tx_buffer.data(), tx_buffer.size());
-            m_channels->video.clear_tx_buffer();
-        }
-        else
-        {
-            m_channels->video.try_sending(*m_rcp);
-        }
+        m_channels->video.try_sending(*m_rcp);
     }
 
     return true;
@@ -296,29 +241,9 @@ template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data
             ts.sample_count += static_cast<uint32_t>(samples.size());
             size_t off = ts.data.size();
 
-            Sample_Data data;
             for (auto const& s: samples)
             {
-                util::detail::set_value(ts.data, s.value, off);
-
-                auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.dt).count()) >> 3;
-                if (dt >= (1 << 24))
-                {
-                    QLOGE("Sample dt is too big!!! {} > {}", dt, 1 << 24);
-                    dt = (1 << 24) - 1;
-                }
-                auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(s.tp - m_comms_start_tp).count());
-                if (tp >= (uint64_t(1) << 40))
-                {
-                    QLOGE("Sample tp is too big!!! {} > {}", tp, uint64_t(1) << 40);
-                    tp = (uint64_t(1) << 40) - 1;
-                }
-
-                data.sample_idx = s.sample_idx;
-                data.is_healthy = s.is_healthy;
-                data.dt = dt;
-                data.tp = tp;
-                util::detail::set_value(ts.data, data, off);
+                util::serialization::serialize(ts.data, s, off);
             }
         }
         else
@@ -386,19 +311,19 @@ void Comms::gather_telemetry_data()
         size_t off = m_hal_telemetry_data.data.size();
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
-        util::detail::set_value(m_hal_telemetry_data.data, dt, off);
-        util::detail::set_value(m_hal_telemetry_data.data, telemetry_data.rate, off);
-        util::detail::set_value(m_hal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
+        util::serialization::serialize(m_hal_telemetry_data.data, dt, off);
+        util::serialization::serialize(m_hal_telemetry_data.data, telemetry_data.rate, off);
+        util::serialization::serialize(m_hal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
 
         for (auto const& nt: telemetry_data.nodes)
         {
             auto const& node_name = nt.first;
             auto const& node_telemetry_data = nt.second;
 
-            util::detail::set_value(m_hal_telemetry_data.data, node_name, off);
+            util::serialization::serialize(m_hal_telemetry_data.data, node_name, off);
             auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
-            util::detail::set_value(m_hal_telemetry_data.data, dt, off);
-            util::detail::set_value(m_hal_telemetry_data.data, node_telemetry_data.process_percentage, off);
+            util::serialization::serialize(m_hal_telemetry_data.data, dt, off);
+            util::serialization::serialize(m_hal_telemetry_data.data, node_telemetry_data.process_percentage, off);
         }
     }
 }
