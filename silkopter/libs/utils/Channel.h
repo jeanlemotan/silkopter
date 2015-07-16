@@ -1,127 +1,10 @@
 #pragma once
 
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
 #include <boost/optional.hpp>
+#include "utils/Serialization.h"
 
 namespace util
 {
-    namespace detail
-    {
-        typedef std::vector<uint8_t> TX_Buffer_t;
-        typedef std::vector<uint8_t> RX_Buffer_t;
-
-        template<class T> auto get_value_fixed(T& val, RX_Buffer_t const& t, size_t off) -> bool
-        {
-            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
-            if (off + sizeof(T) > t.size())
-            {
-                return false;
-            }
-            std::copy(t.begin() + off, t.begin() + off + sizeof(T), reinterpret_cast<uint8_t*>(&val));
-            return true;
-        }
-        template<> inline auto get_value_fixed(std::string& val, RX_Buffer_t const& t, size_t off) -> bool
-        {
-            uint32_t size;
-            if (!get_value_fixed(size, t, off))
-            {
-                return false;
-            }
-            if (off + sizeof(uint32_t) + size > t.size())
-            {
-                return false;
-            }
-            off += sizeof(uint32_t);
-            val.resize(size);
-            std::copy(t.begin() + off, t.begin() + off + size, val.begin());
-            return true;
-        }
-        template<class T> auto get_value(T& val, RX_Buffer_t const& t, size_t& off) -> bool
-        {
-            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
-            if (!get_value_fixed(val, t, off))
-            {
-                return false;
-            }
-            off += sizeof(T);
-            return true;
-        }
-        template<> inline auto get_value(std::string& val, RX_Buffer_t const& t, size_t& off) -> bool
-        {
-            if (!get_value_fixed(val, t, off))
-            {
-                return false;
-            }
-            off += sizeof(uint32_t) + val.size();
-            return true;
-        }
-        template<class T> inline auto get_value(std::vector<T>& val, RX_Buffer_t const& t, size_t& off) -> bool
-        {
-            val.clear();
-            uint32_t size = 0;
-            if (!get_value(size, t, off))
-            {
-                return false;
-            }
-            //sanity check
-            if (off + size > t.size())
-            {
-                return false;
-            }
-            val.resize(size);
-            for (auto& i: val)
-            {
-                if (!get_value(i, t, off))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        template<class T> void set_value_fixed(TX_Buffer_t& t, T const& val, size_t off)
-        {
-            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
-            QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, sizeof(T), t.size(), t.capacity());
-            auto const* src = reinterpret_cast<uint8_t const*>(&val);
-            std::copy(src, src + sizeof(T), t.data() + off);
-        }
-        template<> inline void set_value_fixed(TX_Buffer_t& t, std::string const& val, size_t off)
-        {
-            set_value_fixed(t, static_cast<uint32_t>(val.size()), off);
-            off += sizeof(uint32_t);
-            QASSERT_MSG(off + val.size() <= t.size(), "off {}, sizet {}, t.size {}, t.capacity {}", off, val.size(), t.size(), t.capacity());
-            std::copy(val.begin(), val.end(), t.data() + off);
-        }
-        template<class T> void set_value(TX_Buffer_t& t, T const& val, size_t& off)
-        {
-            static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
-            if (off + sizeof(T) > t.size())
-            {
-                t.resize(off + sizeof(T));
-            }
-            set_value_fixed(t, val, off);
-            off += sizeof(T);
-        }
-        template<> inline void set_value(TX_Buffer_t& t, std::string const& val, size_t& off)
-        {
-            if (off + sizeof(uint32_t) + val.size() > t.size())
-            {
-                t.resize(off + sizeof(uint32_t) + val.size());
-            }
-            set_value_fixed(t, val, off);
-            off += val.size();
-        }
-        template<class T> inline void set_value(TX_Buffer_t& t, std::vector<T> const& val, size_t& off)
-        {
-            set_value(t, static_cast<uint32_t>(val.size()), off);
-            for (auto const& i: val)
-            {
-                set_value(t, i, off);
-            }
-        }
-    }
 
     template<class MESSAGE_T, class MESSAGE_SIZE_T>
     class Channel : q::util::Noncopyable
@@ -133,7 +16,9 @@ namespace util
 	public:
 		typedef MESSAGE_T Message_t;
         typedef MESSAGE_SIZE_T Message_Size_t;
-        typedef Channel<MESSAGE_T, MESSAGE_SIZE_T> This_t;
+
+        typedef std::vector<uint8_t> TX_Buffer_t;
+        typedef std::vector<uint8_t> RX_Buffer_t;
 
         Channel(uint8_t channel_idx) : m_channel_idx(channel_idx) {}
 
@@ -151,31 +36,23 @@ namespace util
         void begin_pack(Message_t message)
         {
             auto off = m_tx_buffer.size();
-            detail::set_value(m_tx_buffer, message, off);
+            serialization::serialize(m_tx_buffer, message, off);
             m_size_off = off;
-            detail::set_value(m_tx_buffer, Message_Size_t(0), off);
+            serialization::serialize(m_tx_buffer, Message_Size_t(0), off);
             m_data_start_off = off;
         }
         template<class Param> void pack_param_at(size_t off, Param const& p)
         {
             QASSERT(m_tx_buffer.size() >= m_data_start_off + off + sizeof(p));
             QASSERT(m_data_start_off > m_size_off);
-            detail::set_value_fixed(m_tx_buffer, p, m_data_start_off + off);
+            serialization::serialize(m_tx_buffer, p, m_data_start_off + off);
         }
         template<class Param> void pack_param(Param const& p)
         {
             QASSERT(m_tx_buffer.size() >= m_data_start_off);
             QASSERT(m_data_start_off > m_size_off);
             auto off = m_tx_buffer.size();
-            detail::set_value(m_tx_buffer, p, off);
-        }
-        void pack_param(rapidjson::Document const& json)
-        {
-            rapidjson::StringBuffer buffer;
-            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-            json.Accept(writer);
-            std::string str(buffer.GetString(), buffer.GetSize());
-            pack_param(str);
+            serialization::serialize(m_tx_buffer, p, off);
         }
         void pack_data(uint8_t const* src, size_t size)
         {
@@ -192,7 +69,7 @@ namespace util
             QASSERT(m_data_start_off > m_size_off);
             size_t data_size = m_tx_buffer.size() - m_data_start_off;
             //header
-            detail::set_value_fixed(m_tx_buffer, Message_Size_t(data_size), m_size_off);
+            serialization::serialize(m_tx_buffer, Message_Size_t(data_size), m_size_off);
 
             //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
             m_size_off = 0;
@@ -233,7 +110,7 @@ namespace util
             }
         }
 
-        auto get_tx_buffer() -> detail::TX_Buffer_t const&
+        auto get_tx_buffer() -> TX_Buffer_t const&
         {
             return m_tx_buffer;
         }
@@ -273,22 +150,7 @@ namespace util
 //            {
 //                return false;
 //            }
-            return detail::get_value(p, m_rx_buffer, m_decoded.offset);
-        }
-        auto unpack_param(rapidjson::Document& json) -> bool
-        {
-            std::string str;
-            if (!unpack_param(str))
-            {
-                return false;
-            }
-            json.SetObject();
-            if (!str.empty() && json.Parse(str.c_str()).HasParseError())
-            {
-                QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
-                return false;
-            }
-            return true;
+            return serialization::deserialize(m_rx_buffer, p, m_decoded.offset);
         }
         inline auto unpack_data(uint8_t* dst, size_t size) -> bool
         {
@@ -395,7 +257,7 @@ namespace util
 //            {
 //                return false;
 //            }
-            if (!detail::get_value(p, m_rx_buffer, m_decoded.offset))
+            if (!serialization::deserialize(m_rx_buffer, p, m_decoded.offset))
             {
                 return false;
             }
@@ -417,8 +279,10 @@ namespace util
             //try to decode a message HEADER
             Message_t message;
             Message_Size_t size;
-            if (!detail::get_value_fixed(message, m_rx_buffer, MESSAGE_OFFSET) ||
-                !detail::get_value_fixed(size, m_rx_buffer, SIZE_OFFSET))
+            size_t message_offset = MESSAGE_OFFSET;
+            size_t size_offset = SIZE_OFFSET;
+            if (!serialization::deserialize(m_rx_buffer, message, message_offset) ||
+                !serialization::deserialize(m_rx_buffer, size, size_offset))
             {
                 return false;
             }
@@ -449,16 +313,16 @@ namespace util
         void _pack(Param const& param, Params&&... params)
 		{
             auto off = m_tx_buffer.size();
-            detail::set_value(m_tx_buffer, param, off);
+            serialization::serialize(m_tx_buffer, param, off);
             return _pack(std::forward<Params>(params)...);
 		}
 
         //////////////////////////////////////////////////////////////////////////
 
         uint8_t m_channel_idx = 0;
-        detail::RX_Buffer_t m_rx_buffer;
+        RX_Buffer_t m_rx_buffer;
         std::vector<uint8_t> m_temp_rx_buffer;
-        detail::TX_Buffer_t m_tx_buffer;
+        TX_Buffer_t m_tx_buffer;
         size_t m_size_off = 0;
         size_t m_data_start_off = 0;
     };
