@@ -127,13 +127,13 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
     auto const& last_sample = m_output_stream->get_last_sample();
 
     //wait to get a good voltage average
-    if (last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
-    {
-        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples",
-              last_sample.value.average_voltage,
-              last_sample.sample_idx);
-        return boost::none;
-    }
+//    if (last_sample.sample_idx < CELL_COUNT_DETECTION_MIN_SAMPLES)
+//    {
+//        QLOGW("Skipping cell count detection: the voltage is not healthy: {}V from {} samples",
+//              last_sample.value.average_voltage,
+//              last_sample.sample_idx);
+//        return boost::none;
+//    }
 
     //detect the cell count only if the current consumption is not too big, otherwise the voltage drop will be significant
     if (last_sample.value.average_current > CELL_COUNT_DETECTION_MAX_CURRENT)

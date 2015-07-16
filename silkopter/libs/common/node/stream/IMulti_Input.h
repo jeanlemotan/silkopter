@@ -22,7 +22,7 @@ public:
             {
                 uint8_t take_off    : 1;
                 uint8_t land        : 1;
-                uint8_t lights_on   : 1;
+                uint8_t return_home : 1;
             };
             uint8_t _all = 0;
         };
@@ -34,23 +34,40 @@ public:
         ARMED,
     };
 
-    enum class Throttle_Mode : uint8_t
+    enum class Vertical_Mode : uint8_t
     {
-        RATE,       //throttle rate of change, per second. 1 means full throttle in one second
-        OFFSET,     //-1 .. 1 are offsets from current throttle. Zero means keep same throttle
-        ASSISTED,   //climb speed, meters per second
+        THRUST_RATE,
+        THRUST_OFFSET,
+        CLIMB_RATE,
+    };
+    struct Vertical_Mode_Params
+    {
+        float thrust_rate = 0;      //thrust change rate in N/s. 1 means full thrust in one second
+        float thrust_offset = 0;    //offset applied to the current thrust
+        float climb_rate = 0;       //climb speed, meters per second
     };
 
-    enum class Pitch_Roll_Mode : uint8_t
+    enum class Horizontal_Mode : uint8_t
     {
-        RATE,       //angle rate of change - radians per second
-        HORIZONTAL, //angle from horizontal. zero means horizontal
-        ASSISTED,   //speed, meters per second
+        ANGLE_RATE,
+        ANGLE,
+        VELOCITY,
+    };
+    struct Horizontal_Mode_Params
+    {
+        math::vec2f angle_rate;   //angle rate of change - radians per second
+        math::vec2f angle;        //angle from horizontal. zero means horizontal
+        math::vec2f velocity;     //speed, meters per second
     };
 
     enum class Yaw_Mode : uint8_t
     {
-        RATE,
+        ANGLE_RATE,
+    };
+
+    struct Yaw_Mode_Params
+    {
+        math::vec2f angle_rate;   //angle rate of change - radians per second
     };
 
     //the reference frame for the user controls
@@ -60,31 +77,22 @@ public:
         USER,	//simple mode - back means towards the user, front away from her.
     };
 
-    struct Assists
+    struct Helpers
     {
         union
         {
             struct
             {
-                uint8_t stay_in_radio_range     : 1; //avoid out of radio range situations. Configured by Params::max_radio_distance
+                uint8_t stay_in_range           : 1; //avoid out of range situations.
                 uint8_t stay_in_battery_range   : 1; //avoid going too far considering current battery.
                 uint8_t stay_in_perimeter       : 1; //stay in a configured perimeter.
-                uint8_t avoid_altitude_drop     : 1; //avoid dropping too much altitude too fast. Controlled by Params::min_time_to_ground parameter.
-                uint8_t avoid_the_user          : 1; //avoid being too low around the home position. Needs sonar and GPS. Controlled by the Params::home_radius
-                uint8_t avoid_the_ground        : 1; //maintains a min distance from the ground. Needs sonar. Configured by Params::min_ground_distance parameter
+                uint8_t avoid_altitude_drop     : 1; //avoid dropping too much altitude too fast.
+                uint8_t avoid_the_user          : 1; //avoid getting too close to the launch position (the user).
+                uint8_t avoid_proximity         : 1; //maintains a min distance from all objects around.
             };
             uint8_t _all = 0;
         };
     };
-
-    struct Sticks
-    {
-        float throttle = 0;
-        float yaw = 0;
-        float pitch = 0;
-        float roll = 0;
-    };
-
 
     ///////////////////////////////
     /// Data
@@ -92,14 +100,19 @@ public:
 
     struct Value
     {
+        q::Clock::time_point time_point; //when it was generated. This is written and read by the GS.
+
         Toggles toggles;
-        Sticks sticks;
         Mode mode = Mode::IDLE;
-        Throttle_Mode throttle_mode = Throttle_Mode::OFFSET;
-        Pitch_Roll_Mode pitch_roll_mode = Pitch_Roll_Mode::HORIZONTAL;
-        Yaw_Mode yaw_mode = Yaw_Mode::RATE;
+        Vertical_Mode vertical_mode = Vertical_Mode::THRUST_OFFSET;
+        Horizontal_Mode horizontal_mode = Horizontal_Mode::ANGLE;
+        Yaw_Mode yaw_mode = Yaw_Mode::ANGLE_RATE;
         Reference_Frame reference_frame = Reference_Frame::LOCAL;
-        Assists assists;
+        Helpers assists;
+
+        Vertical_Mode_Params vertical_mode_params;
+        Horizontal_Mode_Params horizontal_mode_params;
+        Yaw_Mode_Params yaw_mode_params;
     };
 
     typedef stream::Sample<Value>     Sample;

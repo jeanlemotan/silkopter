@@ -215,7 +215,6 @@ void Multi_Simulator::process()
             {
                 stream.accumulated_dt -= stream.last_sample.dt;
                 stream.last_sample.tp += stream.last_sample.dt;
-                stream.last_sample.sample_idx++;
                 stream.last_sample.value = uav_state.angular_velocity;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -227,7 +226,6 @@ void Multi_Simulator::process()
             {
                 stream.accumulated_dt -= stream.last_sample.dt;
                 stream.last_sample.tp += stream.last_sample.dt;
-                stream.last_sample.sample_idx++;
                 stream.last_sample.value = uav_state.acceleration;
                 stream.samples.push_back(stream.last_sample);
             }

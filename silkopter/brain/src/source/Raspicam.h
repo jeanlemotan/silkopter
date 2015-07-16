@@ -77,7 +77,6 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
 
         uint32_t rate = 0;
-        uint32_t sample_idx = 0;
         std::vector<Sample> samples;
     };
     mutable std::shared_ptr<Stream> m_stream;

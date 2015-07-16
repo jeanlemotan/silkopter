@@ -250,7 +250,8 @@ HEADERS += \
     ../../src/source/OpenCV_Capture.h \
     ../../../libs/common/node/stream/IMulti_Input.h \
     ../../../libs/common/node/stream/IMulti_State.h \
-    ../../../libs/common/node/stream/IProximity.h
+    ../../../libs/common/node/stream/IProximity.h \
+    ../../../libs/utils/Serialization.h
 
 DISTFILES +=
 

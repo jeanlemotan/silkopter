@@ -10,6 +10,7 @@
 #include "IPosition.h"
 #include "IVelocity.h"
 #include "IProximity.h"
+#include "IForce.h"
 
 #include "IMulti_Input.h"
 
@@ -27,21 +28,16 @@ public:
 
     struct Value
     {
-        IFrame::Value frame;
         IBattery_State::Value battery_state;
+        IFrame::Value frame;
         IMagnetic_Field::Value magnetic_field;
         IECEF_Linear_Acceleration::Value ecef_linear_acceleration;
         IECEF_Position::Value ecef_position;
         IECEF_Velocity::Value ecef_velocity;
         IProximity::Value proximity;
+        IForce::Value thrust;
 
-        IMulti_Input::Toggles toggles;
-        IMulti_Input::Mode mode = IMulti_Input::Mode::IDLE;
-        IMulti_Input::Throttle_Mode throttle_mode = IMulti_Input::Throttle_Mode::OFFSET;
-        IMulti_Input::Pitch_Roll_Mode pitch_roll_mode = IMulti_Input::Pitch_Roll_Mode::HORIZONTAL;
-        IMulti_Input::Yaw_Mode yaw_mode = IMulti_Input::Yaw_Mode::RATE;
-        IMulti_Input::Reference_Frame reference_frame = IMulti_Input::Reference_Frame::LOCAL;
-        IMulti_Input::Assists assists;
+        IMulti_Input::Sample last_input_sample;
     };
 
     typedef stream::Sample<Value>     Sample;

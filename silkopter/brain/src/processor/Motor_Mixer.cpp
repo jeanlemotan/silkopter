@@ -142,7 +142,6 @@ void Motor_Mixer::process()
             sample.dt = dt;
             sample.tp = tp;
             sample.value = m_outputs[mi]->throttle;
-            sample.sample_idx++;
             m_outputs[mi]->samples.push_back(sample);
         }
     });

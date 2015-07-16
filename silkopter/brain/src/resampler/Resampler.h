@@ -102,7 +102,6 @@ private:
 
         uint32_t rate = 0;
         std::vector<typename Stream_t::Sample> samples;
-        uint32_t sample_idx = 0;
     };
     mutable std::shared_ptr<Stream> m_output_stream;
 };
@@ -284,7 +283,6 @@ void Resampler<Stream_t>::downsample()
     while (m_input_accumulated_dt >= m_dt)
     {
         s.value = m_input_samples.front().value;
-        s.sample_idx = ++m_output_stream->sample_idx;
         s.tp = tp;
         tp += m_dt;
 
@@ -332,7 +330,6 @@ void Resampler<Stream_t>::upsample()
         auto const& is = m_input_samples.front();
         s.value = is.value;
         s.is_healthy = is.is_healthy;
-        s.sample_idx = ++m_output_stream->sample_idx;
         s.tp = tp;
         tp += m_dt;
 

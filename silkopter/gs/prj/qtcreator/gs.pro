@@ -153,7 +153,10 @@ HEADERS += \
     ../../../libs/common/node/stream/IMulti_Input.h \
     ../../../libs/common/node/stream/IMulti_State.h \
     ../../../libs/common/node/stream/IProximity.h \
-    ../../../libs/common/node/stream/Stream_Base.h
+    ../../../libs/common/node/stream/Stream_Base.h \
+    ../../src/hud/HUD_Multi.h \
+    ../../src/input/Gamepad_Multi.h \
+    ../../src/input/Multi.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -182,7 +185,9 @@ SOURCES += \
     ../../../libs/lz4/lz4.c \
     ../../src/calibration/Acceleration_Calibration_Wizard.cpp \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
-    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
+    ../../src/hud/HUD_Multi.cpp \
+    ../../src/input/Gamepad_Multi.cpp
 
 FORMS += \
     ../../src/New_Node.ui \

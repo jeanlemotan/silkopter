@@ -48,7 +48,6 @@ public:
 //    void push_sample(Value const& value, q::Clock::duration dt, q::Clock::time_point tp, bool is_healthy)
 //    {
 //        m_last_sample.value = value;
-//        m_last_sample.sample_idx++;
 //        m_last_sample.dt = dt;
 //        m_last_sample.tp = tp;
 //        m_last_sample.is_healthy = is_healthy;
@@ -67,7 +66,6 @@ public:
         }
 
         m_last_sample.value = value;
-        m_last_sample.sample_idx++;
         m_last_sample.dt = m_dt;
         m_last_sample.tp = m_tp;
         m_last_sample.is_healthy = is_healthy;
