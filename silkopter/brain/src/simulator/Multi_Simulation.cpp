@@ -313,6 +313,41 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         //QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
     }
 
+    {
+        math::vec3f enu_magnetic_field(0, 1, 0);
+        m_uav.state.magnetic_field = math::rotate(enu_to_local, enu_magnetic_field);
+    }
+
+    {
+        //https://en.wikipedia.org/wiki/Atmospheric_pressure
+        float h = m_uav.state.enu_position.z; //height
+        float p0 = 101325.f; //sea level standard atmospheric pressure
+        float M = 0.0289644f; //molar mass of dry air
+        float R = 8.31447f; //universal gas constant
+        float T0 = 288.15f; //sea level standard temperature (K)
+        m_uav.state.pressure = p0 * std::exp(-(physics::constants::g * M * h) / (R * T0));
+    }
+
+    {
+        float h = m_uav.state.enu_position.z; //height
+        m_uav.state.temperature = 20.f + h / 1000.f;
+    }
+
+    {
+        math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
+        math::vec3f down_vector = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
+        float h = math::max(m_uav.state.enu_position.z, 0.14f);
+        math::vec3f point;
+        if (ground.get_intersection_with_line(math::vec3f(0, 0, h), down_vector, point))
+        {
+            m_uav.state.proximity_distance = point;
+        }
+        else
+        {
+            m_uav.state.proximity_distance = math::vec3f::zero;
+        }
+    }
+
     math::mat3f local_to_enu_mat;
     math::mat3f enu_to_local_mat;
     m_uav.state.local_to_enu_rotation.get_as_mat3_and_inv<math::fast>(local_to_enu_mat, enu_to_local_mat);

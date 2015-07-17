@@ -1133,7 +1133,7 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
     size_t count = header.count;
     QASSERT(count > 0);
 
-    QASSERT(datagram->data.size() == sizeof(Fragments_Res_Header) + (1 + 3 + 1)*count);
+    QASSERT(datagram->data.size() == sizeof(Fragments_Res_Header) + (1 + 3 + 2)*count);
 
     //first unpack the confirmations in an array
     uint8_t const* src = datagram->data.data() + sizeof(Fragments_Res_Header);

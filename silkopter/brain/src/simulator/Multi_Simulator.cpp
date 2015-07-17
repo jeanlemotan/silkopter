@@ -5,6 +5,7 @@
 
 #include "sz_math.hpp"
 #include "sz_Multi_Simulator.hpp"
+#include "sz_Multi_Simulator_Structs.hpp"
 
 namespace silk
 {
@@ -227,6 +228,51 @@ void Multi_Simulator::process()
                 stream.accumulated_dt -= stream.last_sample.dt;
                 stream.last_sample.tp += stream.last_sample.dt;
                 stream.last_sample.value = uav_state.acceleration;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_magnetic_field_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.value = uav_state.magnetic_field;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_pressure_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.value = uav_state.pressure;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_temperature_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.value = uav_state.temperature;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_distance_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.value = uav_state.proximity_distance;
+                stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<float>::epsilon());
                 stream.samples.push_back(stream.last_sample);
             }
         }

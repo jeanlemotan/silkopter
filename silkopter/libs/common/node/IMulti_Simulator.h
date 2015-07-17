@@ -25,6 +25,10 @@ public:
         math::vec3f acceleration;
         math::quatf local_to_enu_rotation;
         math::vec3f angular_velocity;
+        math::vec3f magnetic_field;
+        float pressure = 0;
+        float temperature = 0;
+        math::vec3f proximity_distance;
         std::vector<Motor_State> motors;
     };
 
