@@ -30,8 +30,9 @@ struct trans2d
 	///////////////////////////////////////////////////////////////////////////////
 	trans2d();
 	trans2d(math::ZUninitialized);
-	trans2d(trans2d<T> const& other);
-	template<typename U> explicit trans2d(trans2d<U> const& v);
+    trans2d(trans2d<T> const&) = default;
+    trans2d(trans2d<T>&&) = default;
+    template<typename U> explicit trans2d(trans2d<U> const& v);
 
 	//casting from trans3d
 	explicit trans2d(trans3d<T> const& v);
@@ -81,6 +82,9 @@ public:
 
 	bool operator==(trans2d<T> const& v) const;
 	bool operator!=(trans2d<T> const& v) const;
+
+    trans2d<T>& operator=(trans2d<T> const&) = default;
+    trans2d<T>& operator=(trans2d<T>&&) = default;
 
 	//casting from trans2d
 	trans2d<T>& operator=(trans3d<T> const& m);

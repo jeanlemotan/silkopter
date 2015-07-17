@@ -15,11 +15,6 @@ template<typename T> inline trans3d<T>::trans3d(math::ZUninitialized)
 	: mat(math::uninitialized)
 {
 }
-template<typename T> inline trans3d<T>::trans3d(trans3d<T> const& other)
-	: mat(other.mat)
-{
-    QASSERT(is_valid());
-}
 template<typename T> template<typename U> inline trans3d<T>::trans3d(trans3d<U> const& other)
 	: mat(other.mat)
 {

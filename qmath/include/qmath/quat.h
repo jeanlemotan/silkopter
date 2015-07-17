@@ -21,7 +21,8 @@ struct quat
     constexpr quat();
     constexpr quat(math::ZUninitialized);
     constexpr quat(T x, T y, T z, T w);
-    constexpr quat(quat const&);
+    constexpr quat(quat<T> const&) = default;
+    constexpr quat(quat<T>&&) = default;
     template<typename U> explicit constexpr quat(quat<U> const&);
 
     template<class Policy = standard> static quat<T> look_at(vec3<T> const& front, vec3<T> const& up);
@@ -101,7 +102,8 @@ struct quat
 	bool operator!=(quat<T> const& v) const;
 
 	//! Assignment operator
-	quat& operator=(quat const& other);
+    quat& operator=(quat<T> const&) = default;
+    quat& operator=(quat<T>&&) = default;
 
 	//! Add operator
 	quat operator+(quat const& other) const;

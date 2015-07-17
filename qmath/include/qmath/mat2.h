@@ -37,7 +37,8 @@ struct mat2
     mat2(math::ZUninitialized);
     mat2(angle<T> const& rotation);
     explicit mat2(T value);
-    mat2(mat2<T> const& other);
+    mat2(mat2<T> const&) = default;
+    mat2(mat2<T>&&) = default;
     template<typename U> explicit mat2(mat2<U> const& v);
 
 	//casting
@@ -84,8 +85,10 @@ public:
 	bool operator==(mat2<T> const& v) const;
 	bool operator!=(mat2<T> const& v) const;
 
-	//casting
-    mat2<T>& operator=(mat2<T> const& m);
+    mat2<T>& operator=(mat2<T> const&) = default;
+    mat2<T>& operator=(mat2<T>&&) = default;
+
+	//casting    
     mat2<T>& operator=(mat4<T> const& m);
 	mat2<T>& operator=(mat3<T> const& m);
 

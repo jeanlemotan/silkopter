@@ -12,7 +12,6 @@ template<typename T> quat<T> const quat<T>::identity;																		   \
 template <typename T> inline constexpr quat<T>::quat() : x(0), y(0), z(0), w(1) {}
 template <typename T> inline constexpr quat<T>::quat(math::ZUninitialized) {}
 template <typename T> inline constexpr quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
-template <typename T> inline constexpr quat<T>::quat(quat<T> const& q) : x(q.x), y(q.y), z(q.z), w(q.w) {}
 template <typename T> template <typename U>
 inline constexpr quat<T>::quat(quat<U> const& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w)) {}
 
@@ -592,15 +591,6 @@ template<typename T> inline bool quat<T>::operator==(quat<T> const& v) const
 template<typename T> inline bool quat<T>::operator!=(quat<T> const& v) const
 {
 	return !operator==(v);
-}
-
-template<typename T> inline quat<T>& quat<T>::operator=(quat<T> const& other)
-{
-	x = other.x;
-	y = other.y;
-	z = other.z;
-	w = other.w;
-	return *this;
 }
 
 template<typename T> inline quat<T> quat<T>::operator+(quat<T> const& b) const

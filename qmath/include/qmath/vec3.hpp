@@ -7,7 +7,6 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));
     template<typename T> inline constexpr vec3<T>::vec3(math::ZUninitialized) {}
     template<typename T> inline constexpr vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
     template<typename T> inline constexpr vec3<T>::vec3(T v) : x(v), y(v), z(v) {}
-    template<typename T> inline constexpr vec3<T>::vec3(vec3<T> const& v) : x(v.x), y(v.y), z(v.z) {}
     template<typename T> inline constexpr vec3<T>::vec3(vec2<T> const& v) : x(v.x), y(v.y), z(0) {}
     template<typename T> inline constexpr vec3<T>::vec3(vec2<T> const& v, T z) : x(v.x), y(v.y), z(z) {}
     template<typename T> inline constexpr vec3<T>::vec3(vec4<T> const& v) : x(v.x), y(v.y), z(v.z) {}
@@ -98,14 +97,6 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));
         QASSERT(s != float(0));
 		float ts = float(1) / s;
 		return vec3<float>(x * ts, y * ts, z * ts);
-	}
-
-	template<typename T> inline vec3<T>& vec3<T>::operator=(vec3<T> const& v)
-	{
-		x = v.x;
-		y = v.y;
-		z = v.z;
-		return *this;
 	}
 
 	template<typename T> inline vec3<T>& vec3<T>::operator=(vec2<T> const& v)
@@ -222,18 +213,3 @@ template<typename T> vec3<T> const vec3<T>::one(T(1));
 
 } //math
 
-#if !defined ARDUINO
-
-template<typename T> inline std::ostream& operator<<(std::ostream& stream, math::vec3<T> const& v)
-{
-	stream << v.x << ',' << v.y << ',' << v.z;
-	return stream;
-}
-template<typename T> inline std::istream& operator>>(std::istream& stream, math::vec3<T>& v)
-{
-	char comma;
-	stream >> v.x >> comma >> v.y >> comma >> v.z;
-	return stream;
-}
-
-#endif

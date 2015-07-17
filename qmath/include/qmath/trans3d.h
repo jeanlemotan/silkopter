@@ -35,8 +35,9 @@ struct trans3d
 	///////////////////////////////////////////////////////////////////////////////
 	trans3d();
 	trans3d(math::ZUninitialized);
-	trans3d(trans3d<T> const& other);
-	template<typename U> explicit trans3d(trans3d<U> const& v);
+    trans3d(trans3d<T> const&) = default;
+    trans3d(trans3d<T>&&) = default;
+    template<typename U> explicit trans3d(trans3d<U> const& v);
 
 	//casting from trans2d
 	explicit trans3d(trans2d<T> const& v);
@@ -89,6 +90,9 @@ public:
 
 	bool operator==(trans3d<T> const& v) const;
 	bool operator!=(trans3d<T> const& v) const;
+
+    trans3d<T>& operator=(trans3d<T> const&) = default;
+    trans3d<T>& operator=(trans3d<T>&&) = default;
 
 	//casting from trans2d
 	trans3d<T>& operator=(trans2d<T> const& m);

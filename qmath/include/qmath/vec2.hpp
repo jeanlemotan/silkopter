@@ -7,7 +7,6 @@ template<typename T> inline constexpr vec2<T>::vec2() : x(T(0)), y(T(0)) {}
 template<typename T> inline constexpr vec2<T>::vec2(math::ZUninitialized) {}
 template<typename T> inline constexpr vec2<T>::vec2(T _x, T _y) : x(_x), y(_y) {}
 template<typename T> inline constexpr vec2<T>::vec2(T v) : x(v), y(v) {}
-template<typename T> inline constexpr vec2<T>::vec2(vec2<T> const& v) : x(v.x), y(v.y) {}
 
 template<typename T>
 template<typename U>
@@ -123,14 +122,6 @@ inline vec2<float> vec2<float>::operator/(float s) const
 }
 
 template<typename T>
-inline vec2<T>& vec2<T>::operator=(vec2<T> const& v)
-{
-	x = v.x;
-	y = v.y;
-	return *this;
-}
-
-template<typename T>
 inline vec2<T>& vec2<T>::operator+=(T s)
 {
 	x += s;
@@ -230,20 +221,3 @@ inline vec2<T> operator/(vec2<T> const& u, vec2<T> const& v)
 } //math
 
 
-#if !defined ARDUINO
-template<typename T> 
-inline std::ostream& operator<<(std::ostream& stream, math::vec2<T> const& v)
-{
-	stream << v.x << ',' << v.y;
-	return stream;
-}
-
-template<typename T> 
-inline std::istream& operator>>(std::istream& stream, math::vec2<T>& v)
-{
-	char comma;
-	stream >> v.x >> comma >> v.y;
-	return stream;
-}
-
-#endif

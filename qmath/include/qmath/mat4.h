@@ -40,8 +40,9 @@ struct mat4
 	mat4();
 	mat4(math::ZUninitialized);
 	explicit mat4(T value);
-	mat4(mat4<T> const& other);
-	template<typename U> explicit mat4(mat4<U> const& v);
+    mat4(mat4<T> const&) = default;
+    mat4(mat4<T>&&) = default;
+    template<typename U> explicit mat4(mat4<U> const& v);
 
 	//casting from mat3
 	explicit mat4(mat3<T> const& v);
@@ -112,7 +113,8 @@ public:
 	//casting from mat3
     mat4<T>& operator=(mat2<T> const& m);
     mat4<T>& operator=(mat3<T> const& m);
-    mat4<T>& operator=(mat4<T> const& m);
+    mat4<T>& operator=(mat4<T> const&) = default;
+    mat4<T>& operator=(mat4<T>&) = default;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// indexing operators

@@ -37,15 +37,6 @@ inline mat3<T>::mat3(T value)
 	m[6] = m[7] = m[8] = value;
 }
 
-template <typename T>
-inline mat3<T>::mat3(mat3<T> const& other)
-: column0(math::uninitialized)
-, column1(math::uninitialized)
-, column2(math::uninitialized)
-{
-	*this = other;
-}
-
 template<typename T>
 template<typename U>
 inline mat3<T>::mat3(mat3<U> const& other)
@@ -335,13 +326,6 @@ inline T const& mat3<T>::operator()(uint8_t column, uint8_t row) const
 {
     QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
-}
-
-template <typename T>
-inline mat3<T>& mat3<T>::operator=(mat3<T> const& m)
-{
-    memcpy(this->m, m.m, sizeof(mat3<T>));
-    return *this;
 }
 
 template <typename T>

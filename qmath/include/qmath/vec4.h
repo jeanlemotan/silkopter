@@ -34,8 +34,10 @@ struct vec4
     explicit constexpr vec4(T s);
 
 	//copy constructor
-    constexpr vec4(vec4<T> const& v);
-	
+    constexpr vec4(vec4<T> const& v) = default;
+    //move constructor
+    constexpr vec4(vec4<T>&& v) = default;
+
 	// Conversion vector constructors
     template<typename U> explicit constexpr vec4(vec4<U> const& v);
 
@@ -82,7 +84,9 @@ struct vec4
 	vec4<T> operator*(T s) const;
 	vec4<T> operator/(T s) const;
 
-	vec4<T>& operator=(vec4<T> const& v);
+    vec4<T>& operator=(vec4<T> const& v) = default;
+    vec4<T>& operator=(vec4<T>&& v) = default;
+
 	vec4<T>& operator=(vec3<T> const& v);
 	vec4<T>& operator=(vec2<T> const& v);
 
@@ -110,7 +114,3 @@ template <typename T> math::vec4<T> operator/(math::vec4<T> const&, math::vec4<T
 
 } //math
 
-#if !defined ARDUINO
-template <typename T> std::ostream& operator<<(std::ostream& stream, math::vec4<T> const& v);
-template <typename T> std::istream& operator>>(std::istream& stream, math::vec4<T>& v);
-#endif

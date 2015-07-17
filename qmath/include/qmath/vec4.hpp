@@ -7,7 +7,6 @@ namespace math
     template<typename T> inline constexpr vec4<T>::vec4(math::ZUninitialized) {}
     template<typename T> inline constexpr vec4<T>::vec4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
     template<typename T> inline constexpr vec4<T>::vec4(T v) : x(v), y(v), z(v), w(v) {}
-    template<typename T> inline constexpr vec4<T>::vec4(vec4<T> const& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
     template<typename T> inline constexpr vec4<T>::vec4(vec2<T> const& v) : x(v.x), y(v.y), z(0), w(0) {}
     template<typename T> inline constexpr vec4<T>::vec4(vec2<T> const& v, T z, T w) : x(v.x), y(v.y), z(z), w(w) {}
     template<typename T> inline constexpr vec4<T>::vec4(vec3<T> const& v) : x(v.x), y(v.y), z(v.z), w(0) {}
@@ -109,15 +108,6 @@ namespace math
         QASSERT(s != float(0));
 		float ts = float(1) / s;
 		return vec4<float>(x * ts, y * ts, z * ts, w * ts);
-	}
-
-	template<typename T> inline vec4<T>& vec4<T>::operator=(vec4<T> const& v)
-	{
-		x = v.x;
-		y = v.y;
-		z = v.z;
-		w = v.w;
-		return *this;
 	}
 
 	template<typename T> inline vec4<T>& vec4<T>::operator=(vec2<T> const& v)
@@ -246,19 +236,3 @@ namespace math
 } //math
 
 
-#if !defined ARDUINO
-
-template<typename T> std::ostream& operator<<(std::ostream& stream, math::vec4<T> const& v)
-{
-	stream << v.x << ',' << v.y << ',' << v.z << ',' << v.w;
-	return stream;
-}
-
-template<typename T> std::istream& operator>>(std::istream& stream, math::vec4<T>& v)
-{
-	char comma;
-	stream >> v.x >> comma >> v.y >> comma >> v.z >> comma >> v.w;
-	return stream;
-}
-
-#endif

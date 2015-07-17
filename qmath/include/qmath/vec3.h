@@ -34,8 +34,10 @@ struct vec3
     explicit constexpr vec3(T s);
 
 	//copy constructor
-    constexpr vec3(vec3<T> const& v);
-	
+    constexpr vec3(vec3<T> const& v) = default;
+    //move constructor
+    constexpr vec3(vec3<T>&& v) = default;
+
 	// Conversion vector constructors
     template<typename U> explicit constexpr vec3(vec3<U> const& v);
 
@@ -80,7 +82,8 @@ struct vec3
 	vec3<T> operator*(T s) const;
 	vec3<T> operator/(T s) const;
 
-	vec3<T>& operator=(vec3<T> const& v);
+    vec3<T>& operator=(vec3<T> const& v) = default;
+    vec3<T>& operator=(vec3<T>&& v) = default;
 
 	//cast
 	//implementation is in cast.inl
@@ -109,8 +112,4 @@ template<typename T> vec3<T> operator/(vec3<T> const& v0, vec3<T> const& v1);
 
 } //math
 
-#if !defined ARDUINO
-template<typename T> std::ostream& operator<<(std::ostream& stream, math::vec3<T> const& v);
-template<typename T> std::istream& operator>>(std::istream& stream, math::vec3<T>& v);
-#endif
 

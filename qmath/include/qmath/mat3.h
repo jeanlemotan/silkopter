@@ -37,8 +37,9 @@ struct mat3
 	mat3();
 	mat3(math::ZUninitialized);
 	explicit mat3(T value);
-	mat3(mat3<T> const& other);
-	template<typename U> explicit mat3(mat3<U> const& v);
+    mat3(mat3<T> const&) = default;
+    mat3(mat3<T>&&) = default;
+    template<typename U> explicit mat3(mat3<U> const& v);
 
 	//casting
 	explicit mat3(mat2<T> const& v);
@@ -92,8 +93,10 @@ public:
 	bool operator!=(mat3<T> const& v) const;
 
 	mat3<T>& operator=(mat2<T> const& m);
-    mat3<T>& operator=(mat3<T> const& m);
 	mat3<T>& operator=(mat4<T> const& m);
+
+    mat3<T>& operator=(mat3<T> const&) = default;
+    mat3<T>& operator=(mat3<T>&&) = default;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// indexing operators

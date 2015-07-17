@@ -33,8 +33,11 @@ struct vec2
     explicit constexpr vec2(T s);
 
 	//copy constructor
-    constexpr vec2(vec2<T> const& v);
-	
+    constexpr vec2(vec2<T> const& v) = default;
+
+    //move constructor
+    constexpr vec2(vec2<T>&& v) = default;
+
 	// Conversion vector constructors
     template<typename U> explicit constexpr vec2(vec2<U> const& v);
 
@@ -73,7 +76,9 @@ struct vec2
 
 	vec2<T> operator*(T s) const;
 	vec2<T> operator/(T s) const;
-	vec2<T>& operator=(vec2<T> const& v);
+
+    vec2<T>& operator=(vec2<T> const& v) = default;
+    vec2<T>& operator=(vec2<T>&& v) = default;
 
 	//casting
 	//implementation is in cast.inl
@@ -103,8 +108,4 @@ template<typename T> vec2<T> operator/(vec2<T> const& v0, vec2<T> const& v2);
 
 } //math
 
-#if !defined ARDUINO
-template<typename T> std::ostream& operator<<(std::ostream& stream, math::vec2<T> const& v);
-template<typename T> std::istream& operator>>(std::istream& stream, math::vec2<T>& v);
-#endif
 

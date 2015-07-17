@@ -47,14 +47,6 @@ inline mat2<T>::mat2(T value)
 	m[2] = m[3] = value;
 }
 
-template <typename T>
-inline mat2<T>::mat2(mat2<T> const& other)
-: column0(math::uninitialized)
-, column1(math::uninitialized)
-{
-	*this = other;
-}
-
 template<typename T>
 template<typename U>
 inline mat2<T>::mat2(mat2<U> const& other)
@@ -238,12 +230,6 @@ inline T const& mat2<T>::operator()(uint8_t column, uint8_t row) const
 {
     QASSERT(column < column_count && row < row_count);
 	return m[column*row_count + row];
-}
-
-template <typename T>
-inline mat2<T>& mat2<T>::operator=(mat2<T> const& m)
-{
-    memcpy(this->m, m.m, sizeof(mat2<T>));
 }
 
 template <typename T>
