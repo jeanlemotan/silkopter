@@ -46,116 +46,6 @@
         },
         "buses": {},
         "nodes": {
-            "ADC Ammeter": {
-                "type": "ADC Ammeter",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {},
-                "input_paths": [
-                    ""
-                ]
-            },
-            "Acceleration (Local->ENU)": {
-                "type": "Acceleration (Local->ENU)",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {},
-                "input_paths": [
-                    "",
-                    ""
-                ]
-            },
-            "Rate Controller": {
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Feedback": {
-                        "Weight (0-1)": 0.0,
-                        "Combined XY PID": true,
-                        "XY PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        },
-                        "Z PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        }
-                    },
-                    "Feedforward": {
-                        "Weight (0-1)": 1.0,
-                        "Max Torque (N)": 0.0
-                    }
-                },
-                "input_paths": [
-                    "",
-                    ""
-                ]
-            },
-            "Gravity Filter": {
-                "type": "Gravity Filter",
-                "init_params": {
-                    "Rate (Hz)": 44
-                },
-                "config": {},
-                "input_paths": [
-                    "",
-                    ""
-                ]
-            },
-            "Comms Source": {
-                "type": "Comms Source",
-                "init_params": {},
-                "config": {},
-                "input_paths": []
-            },
-            "Oscillator": {
-                "type": "Oscillator",
-                "init_params": {
-                    "Rate (Hz)": 20000,
-                    "Component Count": 1
-                },
-                "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.0,
-                    "Square": false,
-                    "Components": [
-                        {
-                            "Frequency (Hz)": 1.0,
-                            "Amplitude": 1.0
-                        }
-                    ]
-                },
-                "input_paths": []
-            },
-            "Oscillator 0": {
-                "type": "Oscillator",
-                "init_params": {
-                    "Rate (Hz)": 10000,
-                    "Component Count": 1
-                },
-                "config": {
-                    "Amplitude": 1.0,
-                    "Noise": 0.0,
-                    "Square": false,
-                    "Components": [
-                        {
-                            "Frequency (Hz)": 3.0,
-                            "Amplitude": 1.0
-                        }
-                    ]
-                },
-                "input_paths": []
-            },
             "Multi Simulator": {
                 "type": "Multi Simulator",
                 "init_params": {
@@ -170,14 +60,26 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": true,
+                    "Drag Enabled": false,
                     "Ground Enabled": true,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
-                    "",
-                    "",
-                    "",
+                    "Throttle Generator/Output",
+                    "Throttle Generator/Output",
+                    "Throttle Generator/Output",
+                    "Throttle Generator/Output"
+                ]
+            },
+            "Throttle Generator": {
+                "type": "Throttle Generator",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Value": 0.699999988079071
+                },
+                "input_paths": [
                     ""
                 ]
             }

@@ -24,13 +24,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
     {
         silk::node::IMulti_Simulator::UAV_State state;
         autojsoncxx::error::ErrorStack result;
-        if (!autojsoncxx::from_value(state, message, result))
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Cannot deserialize position data: {}", ss.str());
-        }
-        else
+        if (autojsoncxx::from_value(state, message, result))
         {
             m_uav.state = state;
 //                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
