@@ -18,12 +18,12 @@ class Storage
 {
 public:
     template<size_t N>
-    auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal) -> bool
+    auto set_stream_path(size_t, q::Path const&, uint32_t, HAL&) -> bool
     {
         return false;
     }
     template<size_t N>
-    auto get_stream_path(size_t idx) const -> q::Path const&
+    auto get_stream_path(size_t) const -> q::Path const&
     {
         return q::Path::null;
     }
@@ -51,7 +51,7 @@ public:
     {
         return std::numeric_limits<size_t>::max();
     }
-    auto get_params(size_t idx) -> decltype(std::make_tuple())
+    auto get_params(size_t) -> decltype(std::make_tuple())
     {
         return std::make_tuple();
     }

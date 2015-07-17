@@ -389,7 +389,7 @@ auto UBLOX::setup() -> bool
         QLOGI("Flushing GPS buffers");
         for (size_t i = 0; i < 100; i++)
         {
-            auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+            read(buses, m_temp_buffer.data(), m_temp_buffer.size());
             //QLOGI("\t{}: {} bytes", i, res);
         }
     }

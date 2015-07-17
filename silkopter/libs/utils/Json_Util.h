@@ -191,7 +191,7 @@ namespace jsonutil
         }
         if (!json.IsObject())
         {
-            return nullptr;
+            return false;
         }
 
         rapidjson::Value n(name.c_str(), name.size(), allocator);

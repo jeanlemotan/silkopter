@@ -164,7 +164,7 @@ void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
     m_output_stream->clear();
 
     m_accumulator.process([this](
-                          size_t idx,
+                          size_t,
                           typename In_Stream_t::Sample const& in_sample,
                           typename Frame_Stream_t::Sample const& f_sample)
     {

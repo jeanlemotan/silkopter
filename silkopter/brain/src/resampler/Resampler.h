@@ -61,13 +61,13 @@ private:
     template<class T, bool>
     struct Butterworth
     {
-        auto setup(size_t order, float rate, float cutoff_frequency) -> bool
+        auto setup(size_t, float, float) -> bool
         {
             return true;
         }
-        void reset(typename T::Value const& t) {}
+        void reset(typename T::Value const&) {}
         void reset() {}
-        void process(typename T::Value& t) {}
+        void process(typename T::Value&) {}
     };
 
     template<class T>

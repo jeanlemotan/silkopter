@@ -183,7 +183,7 @@ void LPF<Stream_t>::process()
     }
 
     m_accumulator.process([this](
-                          size_t idx,
+                          size_t,
                           typename Stream_t::Sample const& i_sample)
     {
         auto value = i_sample.value;
