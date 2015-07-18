@@ -59,6 +59,8 @@ struct RCP_RFMON_Socket::Impl
     size_t _80211_header_length = 0;
     size_t tx_packet_header_length = 0;
 
+    std::vector<uint8_t> tx_buffer_storage;
+
     uint8_t const* tx_buffer = nullptr;
     size_t tx_buffer_size = 0;
     std::mutex tx_buffer_mutex;
@@ -352,6 +354,9 @@ auto RCP_RFMON_Socket::start() -> bool
         return false;
     }
 
+    m_impl->tx_buffer_storage.resize(MAX_PACKET_SIZE);
+    prepare_tx_packet_header(m_impl->tx_buffer_storage.data());
+
 //    m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
 //    prepare_tx_packet_header(m_impl->tx_buffer.data());
 
@@ -436,14 +441,17 @@ auto RCP_RFMON_Socket::start() -> bool
 #ifdef DEBUG_THROUGHPUT
                 {
                     static size_t xxx_data = 0;
+                    static size_t xxx_real_data = 0;
                     static std::chrono::system_clock::time_point xxx_last_tp = std::chrono::system_clock::now();
                     xxx_data += m_impl->tx_buffer_size;
+                    xxx_real_data += MAX_USER_PACKET_SIZE;
                     auto now = std::chrono::system_clock::now();
                     if (now - xxx_last_tp >= std::chrono::seconds(1))
                     {
                         float r = std::chrono::duration<float>(now - xxx_last_tp).count();
-                        QLOGI("Sent: {} KB/s", float(xxx_data)/r/1024.f);
+                        QLOGI("Sent: {} KB/s / {} KB/s", float(xxx_data)/r/1024.f, float(xxx_real_data)/r/1024.f);
                         xxx_data = 0;
+                        xxx_real_data = 0;
                         xxx_last_tp = now;
                     }
                 }
@@ -458,24 +466,19 @@ auto RCP_RFMON_Socket::start() -> bool
 
 void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
 {
-    QASSERT(size < m_impl->tx_packet_header_length + MAX_USER_PACKET_SIZE);
+    QASSERT(size <= MAX_USER_PACKET_SIZE);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
 
+        std::copy(data, data + size, m_impl->tx_buffer_storage.data() + m_impl->tx_packet_header_length);
+
         QASSERT(!m_impl->tx_buffer);
-        m_impl->tx_buffer = data;
-        m_impl->tx_buffer_size = size;
+        m_impl->tx_buffer = m_impl->tx_buffer_storage.data();
+        m_impl->tx_buffer_size = m_impl->tx_packet_header_length + size;
     }
 
     m_impl->tx_buffer_cv.notify_all();
-}
-
-size_t RCP_RFMON_Socket::prepare_buffer(std::vector<uint8_t>& buffer)
-{
-    buffer.resize(MAX_PACKET_SIZE);
-    prepare_tx_packet_header(buffer.data());
-    return m_impl->tx_packet_header_length;
 }
 
 auto RCP_RFMON_Socket::get_mtu() const -> size_t
