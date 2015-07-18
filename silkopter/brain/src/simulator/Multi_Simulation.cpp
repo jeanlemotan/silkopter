@@ -291,6 +291,9 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     btTransform wt;
     m_uav.motion_state->getWorldTransform(wt);
 
+    math::trans3df local_to_enu_trans(bt_to_vec3f(wt.getOrigin()), bt_to_quatf(wt.getRotation()), math::vec3f::one);
+    math::trans3df enu_to_local_trans = math::inverse(local_to_enu_trans);
+
     {
         auto rotation = bt_to_quatf(wt.getRotation());
         auto delta = (~m_uav.state.local_to_enu_rotation) * rotation;
@@ -301,7 +304,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         m_uav.state.angular_velocity = euler / dts;
     }
 
-    auto enu_to_local = math::inverse(m_uav.state.local_to_enu_rotation);
+    auto enu_to_local_rotation = math::inverse(m_uav.state.local_to_enu_rotation);
 
     {
         auto new_position = bt_to_vec3f(wt.getOrigin());
@@ -309,13 +312,13 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         m_uav.state.enu_position = new_position;
         m_uav.state.enu_linear_acceleration = (new_velocity - m_uav.state.enu_velocity) / dts;
         m_uav.state.enu_velocity = new_velocity;
-        m_uav.state.acceleration = math::rotate(enu_to_local, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
+        m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
         //QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
     }
 
     {
         math::vec3f enu_magnetic_field(0, 1, 0);
-        m_uav.state.magnetic_field = math::rotate(enu_to_local, enu_magnetic_field);
+        m_uav.state.magnetic_field = math::rotate(enu_to_local_rotation, enu_magnetic_field);
     }
 
     {
@@ -335,12 +338,14 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     {
         math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
-        math::vec3f down_vector = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
         float h = math::max(m_uav.state.enu_position.z, 0.14f);
-        math::vec3f point;
-        if (ground.get_intersection_with_line(math::vec3f(0, 0, h), down_vector, point))
+        math::vec3f start_point(0, 0, h);
+        math::vec3f ray_dir = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
+        float t = 0;
+        if (math::ray_intersect_plane(start_point, ray_dir, ground, t) && t > 0.f)
         {
-            m_uav.state.proximity_distance = point;
+            math::vec3f point = start_point + ray_dir * t;
+            m_uav.state.proximity_distance = math::transform(enu_to_local_trans, point);
         }
         else
         {
@@ -348,12 +353,9 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         }
     }
 
-    math::mat3f local_to_enu_mat;
-    math::mat3f enu_to_local_mat;
-    m_uav.state.local_to_enu_rotation.get_as_mat3_and_inv<math::fast>(local_to_enu_mat, enu_to_local_mat);
 
     auto velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
-    float air_speed = math::dot(local_to_enu_mat.get_axis_z(), velocity);
+    float air_speed = math::dot(local_to_enu_trans.get_axis_z(), velocity);
 
     //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
     //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
@@ -364,7 +366,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     math::vec3f z_torque;
     float total_force = 0.f;
     {
-        const auto dir = local_to_enu_mat.get_axis_z();
+        const auto dir = local_to_enu_trans.get_axis_z();
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
             auto& m = m_uav.state.motors[i];
@@ -387,7 +389,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
             total_force += m.thrust;
             math::vec3f local_pos = mc.position;
-            auto pos = math::transform(local_to_enu_mat, local_pos);
+            auto pos = math::rotate(local_to_enu_trans, local_pos);
             m_uav.body->applyForce(vec3f_to_bt(dir * m.thrust), vec3f_to_bt(pos));
         }
     }
@@ -396,7 +398,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     //yaw
     {
-        auto torque = math::transform(local_to_enu_mat, z_torque);
+        auto torque = math::rotate(local_to_enu_trans, z_torque);
         m_uav.body->applyTorque(vec3f_to_bt(torque));
     }
 
@@ -410,7 +412,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         {
             float drag_factor = 0.05f;
 
-            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), velocity_normalized));
+            float intensity = math::abs(math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized));
             float drag = intensity * drag_factor;
             auto force = -velocity_normalized * drag * speed2;
             m_uav.body->applyForce(vec3f_to_bt(force), btVector3(0, 0, 0));
@@ -421,12 +423,12 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
             auto& m = m_uav.state.motors[i];
             auto& mc = m_uav.config.motors[i];
 
-            float intensity = math::abs(math::dot(local_to_enu_mat.get_axis_z(), velocity_normalized));
+            float intensity = math::abs(math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized));
             float drag = intensity * m.drag_factor;
             auto force = -velocity_normalized * drag * speed2;
 
             math::vec3f local_pos(mc.position);
-            auto pos = math::transform(local_to_enu_mat, local_pos);
+            auto pos = math::rotate(local_to_enu_trans, local_pos);
             m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
         }
     }
