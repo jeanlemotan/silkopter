@@ -52,8 +52,6 @@ namespace util
 
         virtual void async_send(uint8_t const* data, size_t size) = 0;
 
-        virtual auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t = 0;
-
         virtual auto get_mtu() const -> size_t = 0;
     };
 
@@ -140,12 +138,37 @@ namespace util
 
         struct Fragments_Res_Header : public Header
         {
+            union Data
+            {
+                struct
+                {
+                    uint64_t id : 24;
+                    uint64_t fragment_idx : 16;
+                    uint64_t channel_idx : 8;
+                };
+                uint64_t all = 0;
+                bool operator<(Data const& other) const { return all < other.all; }
+                bool operator==(Data const& other) const { return all == other.all; }
+            };
+
             static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 
         struct Packets_Res_Header : public Header
         {
+            union Data
+            {
+                struct
+                {
+                    uint32_t id : 24;
+                    uint32_t channel_idx : 8;
+                };
+                uint32_t all = 0;
+                bool operator<(Data const& other) const { return all < other.all; }
+                bool operator==(Data const& other) const { return all == other.all; }
+            };
+
             static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
@@ -187,10 +210,7 @@ namespace util
                 q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 size_t sent_count = 0; //how many times it was sent - for unreliable only
 
-                Buffer_t socket_packet_data;
-                size_t socket_header_size = 0;
-                uint8_t* data_ptr = nullptr;
-                size_t data_size = 0;
+                Buffer_t data;
             };
             typedef detail::Pool<Datagram>::Ptr Datagram_ptr;
 
@@ -213,6 +233,7 @@ namespace util
             struct Packet_Res
             {
                 uint32_t id = 0;
+                uint16_t fragment_idx = 0;
                 uint8_t channel_idx = 0;
                 uint8_t sent_count = 0;
             };
