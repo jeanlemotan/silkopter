@@ -338,8 +338,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     {
         math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
-        float h = math::max(m_uav.state.enu_position.z, 0.14f);
-        math::vec3f start_point(0, 0, h);
+        math::vec3f start_point = m_uav.state.enu_position;
         math::vec3f ray_dir = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
         float t = 0;
         if (math::ray_intersect_plane(start_point, ray_dir, ground, t) && t > 0.f)

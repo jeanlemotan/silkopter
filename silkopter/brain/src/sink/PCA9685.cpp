@@ -202,6 +202,7 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     if (gpioGetMode(27) == PI_NOT_INITIALISED)
     {
         QLOGI("Initializing pigpio");
+        gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
         if (gpioInitialise() < 0)
         {
             QLOGE("PIGPIO library initialization failed");
