@@ -34,10 +34,13 @@ private:
     std::thread m_io_thread;
     std::unique_ptr<boost::asio::io_service::work> m_io_work;
 
+    std::atomic_bool m_send_in_progress = {false};
+    std::vector<uint8_t> m_tx_buffer;
+
     boost::asio::ip::udp::endpoint m_tx_endpoint;
     boost::asio::ip::udp::endpoint m_rx_endpoint;
     boost::asio::ip::udp::socket m_socket;
-    std::vector<uint8_t> m_buffer;
+    std::vector<uint8_t> m_rx_buffer;
 
     uint16_t m_send_port = 0;
     uint16_t m_receive_port = 0;
