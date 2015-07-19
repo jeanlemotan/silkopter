@@ -217,14 +217,14 @@ int main(int argc, char const* argv[])
             }
 
             //don't sleep too much if we're late
-//            if (q::Clock::now() - start < PERIOD)
+            if (q::Clock::now() - start < PERIOD)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-//            else
-//            {
-//                std::this_thread::yield();
-//            }
+            else
+            {
+                std::this_thread::yield();
+            }
         }
 
         QLOGI("Stopping everything");
