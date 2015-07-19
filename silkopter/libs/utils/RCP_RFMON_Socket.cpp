@@ -330,24 +330,77 @@ auto RCP_RFMON_Socket::start() -> bool
 
     char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
-    m_impl->pcap = pcap_open_live(m_interface.c_str(), 2048, 1, -1, pcap_error);
-    if (m_impl->pcap == nullptr)
-    {
-        QLOGE("Unable to open interface {} in pcap: {}", m_interface, pcap_error);
-        return false;
-    }
-
-//    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
+//    m_impl->pcap = pcap_open_live(m_interface.c_str(), 2048, 1, -1, pcap_error);
+//    if (m_impl->pcap == nullptr)
 //    {
-//        QLOGE("Error setting {} to nonblocking mode: {}", m_interface, pcap_error);
+//        QLOGE("Unable to open interface {} in pcap: {}", m_interface, pcap_error);
 //        return false;
 //    }
 
+////    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
+////    {
+////        QLOGE("Error setting {} to nonblocking mode: {}", m_interface, pcap_error);
+////        return false;
+////    }
+
+//    if (pcap_setdirection(m_impl->pcap, PCAP_D_IN) < 0)
+//    {
+//        QLOGE("Error setting {} to IN capture only: {}", m_interface, pcap_geterr(m_impl->pcap));
+//        return false;
+//    }
+
+    m_impl->pcap = pcap_create(m_interface.c_str(), pcap_error);
+    if (m_impl->pcap == nullptr)
+    {
+        QLOGE("Unable to open interface {}", m_interface);
+        return (1);
+    }
+    if (pcap_set_snaplen(m_impl->pcap, 1800) < 0)
+    {
+        QLOGE("Error setting pcap_set_snaplen");
+        return 1;
+    }
+    if (pcap_set_promisc(m_impl->pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_promisc");
+        return 1;
+    }
+    if (pcap_set_rfmon(m_impl->pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_rfmon");
+        return 1;
+    }
+    if (pcap_set_timeout(m_impl->pcap, -1) < 0)
+    {
+        QLOGE("Error setting pcap_set_timeout");
+        return 1;
+    }
+    if (pcap_set_immediate_mode(m_impl->pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_immediate_mode");
+        return 1;
+    }
+    if (pcap_set_buffer_size(m_impl->pcap, 16000000) < 0)
+    {
+        QLOGE("Error setting pcap_set_buffer_size");
+        return 1;
+    }
+    if (pcap_activate(m_impl->pcap) < 0)
+    {
+        QLOGE("Error in pcap_activate");
+        return 1;
+    }
+//    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
+//    {
+//        QLOGE("Error setting pcap_set_snaplen");
+//        return 1;
+//    }
     if (pcap_setdirection(m_impl->pcap, PCAP_D_IN) < 0)
     {
-        QLOGE("Error setting {} to IN capture only: {}", m_interface, pcap_geterr(m_impl->pcap));
-        return false;
+        QLOGE("Error setting pcap_setdirection");
+        return 1;
     }
+
 
     if (!prepare_filter())
     {
@@ -460,6 +513,25 @@ auto RCP_RFMON_Socket::start() -> bool
             }
         }
     });
+
+
+#if defined RASPBERRY_PI
+    {
+        int policy = SCHED_OTHER;
+        struct sched_param param;
+        param.sched_priority = 0;
+        if (pthread_setschedparam(m_tx_thread.native_handle(), policy, &param) != 0)
+        {
+            perror("tx_thread sched_setscheduler");
+            return false;
+        }
+        if (pthread_setschedparam(m_rx_thread.native_handle(), policy, &param) != 0)
+        {
+            perror("rx_thread sched_setscheduler");
+            return false;
+        }
+    }
+#endif
 
     return true;
 }

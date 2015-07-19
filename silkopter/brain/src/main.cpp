@@ -145,25 +145,25 @@ int main(int argc, char const* argv[])
     boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
     auto async_thread = std::thread([]() { s_async_io_service.run(); });
 
-//    {
-//        int policy = SCHED_FIFO;
-//        struct sched_param param;
-//        param.sched_priority = 10;
-
-//        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
-//        {
-//            perror("main sched_setscheduler");
-//            exit(EXIT_FAILURE);
-//        }
-
-////        param.sched_priority = 4;
-////        if (pthread_setschedparam(io_thread.native_handle(), policy, &param) != 0)
-////        {
-////            perror("io sched_setscheduler");
-////            exit(EXIT_FAILURE);
-////        }
-//    }
-
+#if defined RASPBERRY_PI
+    {
+        int policy = SCHED_FIFO;
+        struct sched_param param;
+        param.sched_priority = sched_get_priority_max(policy);
+        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
+        {
+            perror("main sched_setscheduler");
+            exit(EXIT_FAILURE);
+        }
+        policy = SCHED_IDLE;
+        param.sched_priority = sched_get_priority_min(policy);
+        if (pthread_setschedparam(async_thread.native_handle(), policy, &param) != 0)
+        {
+            perror("async_thread sched_setscheduler");
+            exit(EXIT_FAILURE);
+        }
+    }
+#endif
 
     try
     {

@@ -32,10 +32,10 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
     std::string m_interface;
-    uint8_t m_id = 0;
     bool m_exit = false;
     std::thread m_rx_thread;
     std::thread m_tx_thread;
+    uint8_t m_id = 0;
 };
 
 }
