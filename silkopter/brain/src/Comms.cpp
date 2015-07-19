@@ -146,14 +146,14 @@ void Comms::configure_channels()
         util::RCP::Send_Params params;
         params.is_compressed = true;
         params.is_reliable = true;
-        params.importance = 126;
+        params.importance = 100;
         m_rcp->set_send_params(SETUP_CHANNEL, params);
     }
     {
         util::RCP::Send_Params params;
         params.is_compressed = true;
         params.is_reliable = false;
-        params.importance = 127;
+        params.importance = 100;
         m_rcp->set_send_params(INPUT_CHANNEL, params);
     }
 
@@ -171,7 +171,7 @@ void Comms::configure_channels()
         util::RCP::Send_Params params;
         params.is_compressed = false;
         params.is_reliable = true;
-        params.importance = 10;
+        params.importance = 100;
         params.unreliable_retransmit_count = 1;
 //        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
@@ -844,16 +844,19 @@ void Comms::handle_hal_telemetry_active()
     channel.end_pack();
 }
 
-void Comms::handle_simulator_stop_motion()
+void Comms::handle_multi_input()
 {
+    auto& channel = m_channels->input;
 
+    uint32_t req_id = 0;
+    if (!channel.unpack_all(req_id, m_commands_stream->last_sample))
+    {
+        QLOGE("Error in unpacking stream telemetry");
+        return;
+    }
+
+    m_commands_stream->samples.push_back(m_commands_stream->last_sample);
 }
-
-void Comms::handle_simulator_reset()
-{
-
-}
-
 
 void Comms::process()
 {
@@ -866,7 +869,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        //case comms::Input_Message::MULTIROTOR_INPUT: handle_multirotor_input(); break;
+        case comms::Input_Message::MULTI_INPUT: handle_multi_input(); break;
 
         default: QLOGE("Received unrecognised input message: {}", static_cast<int>(msg.get())); break;
         }

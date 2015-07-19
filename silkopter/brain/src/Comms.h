@@ -105,9 +105,6 @@ private:
 
     void handle_clock();
 
-    void handle_simulator_stop_motion();
-    void handle_simulator_reset();
-
     void handle_enumerate_node_defs();
     void handle_enumerate_nodes();
     void handle_get_node_data();
@@ -120,9 +117,11 @@ private:
     void handle_remove_node();
 
     void handle_multi_config();
+    void handle_multi_input();
 
     void handle_streams_telemetry_active();
     void handle_hal_telemetry_active();
+
 
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();

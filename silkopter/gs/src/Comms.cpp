@@ -80,7 +80,7 @@ void Comms::configure_channels()
         util::RCP::Send_Params params;
         params.is_compressed = true;
         params.is_reliable = false;
-        params.importance = 64;
+        params.importance = 10;
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
     }
 
@@ -88,15 +88,15 @@ void Comms::configure_channels()
         util::RCP::Send_Params params;
         params.is_compressed = true;
         params.is_reliable = true;
-        params.importance = 126;
+        params.importance = 100;
         m_rcp->set_send_params(SETUP_CHANNEL, params);
     }
     {
         util::RCP::Send_Params params;
         params.is_compressed = true;
-        params.is_reliable = false;
-        params.cancel_previous_data = true;
-        params.importance = 127;
+        params.is_reliable = true;
+        params.importance = 100;
+        params.cancel_after = std::chrono::milliseconds(100);
         m_rcp->set_send_params(INPUT_CHANNEL, params);
     }
 
@@ -128,6 +128,10 @@ void Comms::configure_channels()
 auto Comms::get_setup_channel() -> Setup_Channel&
 {
     return m_setup_channel;
+}
+auto Comms::get_input_channel() -> Input_Channel&
+{
+    return m_input_channel;
 }
 
 uint32_t Comms::get_new_req_id()

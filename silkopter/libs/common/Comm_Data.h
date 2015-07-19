@@ -48,7 +48,7 @@ enum class Setup_Message : uint8_t
 
 enum class Input_Message : uint8_t
 {
-    MULTIROTOR_INPUT,
+    MULTI_INPUT,
     AIRPLANE_INPUT,
     ROVER_INPUT,
     BOAT_INPUT,

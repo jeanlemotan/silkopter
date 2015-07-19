@@ -145,6 +145,9 @@ void GS::process()
     m_hal_window->process();
     m_multi_config_window->process();
 
+    silk::node::stream::IMulti_Input::Sample input;
+    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), input);
+
 
 //	m_render_widget->begin_rendering();
 //    m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_render_widget->width(), m_render_widget->height())));

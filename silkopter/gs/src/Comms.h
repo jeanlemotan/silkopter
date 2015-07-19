@@ -35,6 +35,7 @@ public:
     typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
 
     auto get_setup_channel() -> Setup_Channel&;
+    auto get_input_channel() -> Input_Channel&;
     uint32_t get_new_req_id();
 
 private:
