@@ -103,7 +103,7 @@ void Video_Viewer::add_sample(silk::node::stream::Video::Sample const& sample)
         int len = avcodec_decode_video2(m_ffmpeg.context, m_ffmpeg.frame_yuv, &got_frame, &packet);
         if (len < 0)
         {
-            QLOGE("Error while decoding frame");
+            QLOGW("Error while decoding frame");
             return;
         }
         if (got_frame)
@@ -112,7 +112,7 @@ void Video_Viewer::add_sample(silk::node::stream::Video::Sample const& sample)
             int frame_h = m_ffmpeg.frame_yuv->height;
 
             float ar = (float)frame_w / frame_h;
-            int img_w = width();
+            int img_w = math::max(16, width());
             int img_h = img_w / ar;
             if (img_h > height())
             {
