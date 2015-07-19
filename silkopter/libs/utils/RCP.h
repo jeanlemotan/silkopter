@@ -50,6 +50,8 @@ namespace util
         std::function<void(uint8_t const* data, size_t size)> receive_callback;
         std::function<void(Result)> send_callback;
 
+        virtual auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t = 0;
+
         virtual void async_send(uint8_t const* data, size_t size) = 0;
 
         virtual auto get_mtu() const -> size_t = 0;
@@ -206,8 +208,7 @@ namespace util
             {
                 Send_Params params;
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
-                q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
-                size_t sent_count = 0; //how many times it was sent - for unreliable only
+                uint32_t sent_count = 0; //how many times it was sent - for unreliable only
 
                 Buffer_t data;
             };
@@ -256,8 +257,8 @@ namespace util
             std::mutex packet_queue_mutex;
             Send_Queue packet_queue;
 
-            Datagram_ptr in_transit_datagram;
-
+            std::vector<uint8_t> send_buffer;
+            size_t send_buffer_header_size = 0;
 
             struct Channel_Data
             {
@@ -345,6 +346,8 @@ namespace util
 
         void purge();
 
+        size_t m_mtu = 0;
+
         q::Clock::time_point m_init_tp = q::Clock::time_point(q::Clock::duration{0});
         std::array<std::atomic_int, MAX_CHANNELS> m_last_id;
         Stats m_global_stats;
@@ -372,21 +375,16 @@ namespace util
         void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram);
 
         static auto tx_packet_datagram_predicate(TX::Datagram_ptr const& datagram1, TX::Datagram_ptr const& datagram2) -> bool;
-        void compute_next_transit_datagram();
+        auto add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool;
+        auto compute_next_transit_datagram() -> bool;
         void send_datagram();
 
         void handle_send(RCP_Socket::Result reult);
         void handle_receive(uint8_t const* data, size_t size);
 
-        void send_pending_fragments_res();
-
-        void send_pending_fragments_res_locked();
-        void add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
-
-        void send_pending_packets_res();
-
-        void send_pending_packets_res_locked();
-        void add_and_send_packet_res(uint8_t channel_idx, uint32_t id);
+        void add_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
+        void add_packet_res(uint8_t channel_idx, uint32_t id);
+        void send_pending_fragments_and_packet_res();
 
         void send_packet_connect_req();
         void send_packet_connect_res(Connect_Res_Header::Response response);

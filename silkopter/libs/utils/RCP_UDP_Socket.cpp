@@ -29,6 +29,8 @@ void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 {
     m_socket.open(boost::asio::ip::udp::v4());
     m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+    m_socket.set_option(boost::asio::socket_base::receive_buffer_size(get_mtu() + 200));
+    m_socket.set_option(boost::asio::socket_base::send_buffer_size(get_mtu() + 200));
     m_socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), receive_port));
 
     m_send_port = send_port;
@@ -71,7 +73,11 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
 }
 void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
-    std::this_thread::yield();
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    if (error)
+    {
+        QLOGE("Error on socket send: {}", error.message());
+    }
     if (send_callback)
     {
         send_callback(!error ? Result::OK : Result::ERROR);

@@ -94,7 +94,6 @@ inline auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP:
     std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
 
     datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
-    datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->sent_count = 0;
 
     return datagram;
@@ -188,6 +187,9 @@ inline RCP::RCP(RCP_Socket& socket)
 //        hsz =sizeof(Packet_Header);
 
 //        hsz =sizeof(Packets_Confirmed_Header);
+
+    m_mtu = m_socket.get_mtu();
+    m_tx.send_buffer_header_size = m_socket.prepare_buffer(m_tx.send_buffer);
 
     m_socket.receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
     m_socket.send_callback = std::bind(&RCP::handle_send, this, std::placeholders::_1);
@@ -352,7 +354,7 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
         }
     }
 
-    size_t max_fragment_size = m_socket.get_mtu() - sizeof(Packet_Main_Header);
+    size_t max_fragment_size = m_mtu - sizeof(Packet_Main_Header);
     size_t left = size;
     size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
     if (fragment_count > MAX_FRAGMENTS)
@@ -386,7 +388,7 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             }
         }
 
-//        QLOGI("crt {}, +{}", queue.size(), fragment_count);
+        //QLOGI("crt +{}", fragment_count);
 
         channel_data.fragments_to_insert.resize(0);
         channel_data.fragments_to_insert.reserve(fragment_count);
@@ -514,7 +516,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             m_global_stats.rx_zombie_datagrams++;
             if (packet->any_header.flag_needs_confirmation)
             {
-                add_and_send_packet_res(channel_idx, id);
+                add_packet_res(channel_idx, id);
             }
             packets.pop_front();
             m_global_stats.rx_dropped_packets++;
@@ -536,7 +538,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
             //waited enough, cancel the pending packet
             QLOGW("Canceling ghost packet {}", next_expected_id);
-            add_and_send_packet_res(channel_idx, next_expected_id);
+            add_packet_res(channel_idx, next_expected_id);
             last_packet_id = next_expected_id;
             m_global_stats.rx_dropped_packets++;
             continue;
@@ -551,7 +553,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             }
 
             //QLOGW("Canceling late packet {}. {} / {}", id, packet->received_fragment_count, packet->fragments[0] ? packet->main_header.fragment_count : 0);
-            add_and_send_packet_res(channel_idx, id);
+            add_packet_res(channel_idx, id);
             packets.pop_front();
             last_packet_id = id;
             m_global_stats.rx_dropped_packets++;
@@ -648,8 +650,7 @@ inline void RCP::process()
     }
     else
     {
-        send_pending_fragments_res();
-        send_pending_packets_res();
+        send_pending_fragments_and_packet_res();
     }
 
     send_datagram();
@@ -667,7 +668,6 @@ inline void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
     {
         datagram.added_tp = q::Clock::now();
     }
-    datagram.sent_tp = q::Clock::time_point(q::Clock::duration{0});
 
 //            if (header.crc == 0)
 //            {
@@ -714,51 +714,63 @@ inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
     }
 }
 
-inline void RCP::compute_next_transit_datagram()
+inline auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool
 {
-    TX::Datagram_ptr& datagram = m_tx.in_transit_datagram;
+    QASSERT(datagram);
+    size_t max_size = m_mtu + m_tx.send_buffer_header_size;
+    if (datagram->data.size() + m_tx.send_buffer.size() <= max_size)
+    {
+        update_stats(m_global_stats, *datagram);
+        std::copy(datagram->data.begin(), datagram->data.end(), std::back_inserter(m_tx.send_buffer));
+        return true;
+    }
+    return false;
+}
+
+
+inline auto RCP::compute_next_transit_datagram() -> bool
+{
+    size_t merged = 0;
+    m_tx.send_buffer.resize(m_tx.send_buffer_header_size);
 
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-        if (m_tx.internal_queues.connection_res)
+        if (m_tx.internal_queues.connection_res && add_datagram_to_send_buffer(m_tx.internal_queues.connection_res))
         {
-            datagram = std::move(m_tx.internal_queues.connection_res);
             m_tx.internal_queues.connection_res.reset();
+            merged++;
 //                QLOGI("Sending connection res datagram {}", static_cast<int>(get_header<Con_Header>(datagram->data).seq));
         }
-        else if (m_tx.internal_queues.connection_req)
+        else if (m_tx.internal_queues.connection_req && add_datagram_to_send_buffer(m_tx.internal_queues.connection_req))
         {
-            datagram = std::move(m_tx.internal_queues.connection_req);
             m_tx.internal_queues.connection_req.reset();
+            merged++;
 //                QLOGI("Sending connection_req datagram {}", static_cast<int>(get_header<connection_req_Header>(datagram->data).seq));
         }
 
         //next the confirmations
-        if (!datagram)
         {
             auto& queue = m_tx.internal_queues.fragments_res;
-            if (!queue.empty())
+            while (!queue.empty() && add_datagram_to_send_buffer(queue.front()))
             {
-                datagram = std::move(queue.front());
 //                    QLOGI("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
+                merged++;
                 queue.pop_front();
             }
         }
         //next the cancels
-        if (!datagram)
         {
             auto& queue = m_tx.internal_queues.packets_res;
-            if (!queue.empty())
+            while (!queue.empty() && add_datagram_to_send_buffer(queue.front()))
             {
-                datagram = std::move(queue.front());
 //                    QLOGI("Sending cancellation for {} datagrams", static_cast<int>(get_header<Packets_Cancelled_Header>(datagram->data).count));
+                merged++;
                 queue.pop_front();
             }
         }
     }
 
     //next normal packets
-    if (!datagram)
     {
         auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
@@ -782,9 +794,10 @@ inline void RCP::compute_next_transit_datagram()
                 break;
             }
         }
-        if (!queue.empty())
+        while (!queue.empty() && queue.front() && add_datagram_to_send_buffer(queue.front()))
         {
-            datagram = std::move(queue.front());
+            merged++;
+            auto datagram = std::move(queue.front());
             queue.pop_front();//erase as the order changed due to the sent_count increase
 
             datagram->sent_count++;
@@ -792,12 +805,19 @@ inline void RCP::compute_next_transit_datagram()
             //do I have to insert it back?
             if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
             {
-                queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), datagram);
+                queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), std::move(datagram));
             }
-            //auto& header = get_header<Packet_Header>(datagram->data);
-            //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
         }
+        //auto& header = get_header<Packet_Header>(datagram->data);
+        //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
     }
+
+//    if (merged)
+//    {
+//        QLOGI("Merged: {}", merged);
+//    }
+
+    return m_tx.send_buffer.size() > m_tx.send_buffer_header_size;
 }
 
 inline void RCP::send_datagram()
@@ -809,31 +829,19 @@ inline void RCP::send_datagram()
         return;
     }
 
-    compute_next_transit_datagram();
-    if (!m_tx.in_transit_datagram)
+    if (!compute_next_transit_datagram())
     {
         m_is_sending = false;
         return;
     }
 
-    update_stats(m_global_stats, *m_tx.in_transit_datagram);
-
     //QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
 
-    m_socket.async_send(m_tx.in_transit_datagram->data.data(), m_tx.in_transit_datagram->data.size());
+    m_socket.async_send(m_tx.send_buffer.data(), m_tx.send_buffer.size());
 }
 
-inline void RCP::handle_send(RCP_Socket::Result result)
+inline void RCP::handle_send(RCP_Socket::Result)
 {
-    QASSERT(m_tx.in_transit_datagram);
-
-    auto datagram = std::move(m_tx.in_transit_datagram);
-    QASSERT(datagram);
-    if (datagram)
-    {
-        datagram->sent_tp = q::Clock::now();
-    }
-
     m_is_sending = false;
 
     send_datagram();
@@ -849,52 +857,7 @@ inline void RCP::handle_receive(uint8_t const* data, size_t size)
     }
 }
 
-inline void RCP::send_pending_fragments_res()
-{
-    std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
-    send_pending_fragments_res_locked();
-}
-
-inline void RCP::send_pending_fragments_res_locked()
-{
-    //std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
-
-    //first throw away the ones we sent enough times
-    while (!m_tx.fragments_res.empty() && m_tx.fragments_res.front().sent_count >= TX::MAX_FRAGMENT_RES_SEND_COUNT)
-    {
-        m_tx.fragments_res.pop_front();
-    }
-
-    size_t header_size = sizeof(Fragments_Res_Header);
-    size_t max_count = (m_socket.get_mtu() - header_size) / sizeof(Fragments_Res_Header::Data);
-
-    //now take them and pack them in a datagram
-    size_t pidx = 0;
-    while (pidx < m_tx.fragments_res.size())
-    {
-        size_t count = math::min(m_tx.fragments_res.size() - pidx, max_count);
-
-        TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Fragments_Res_Header::Data)); //channel_idx:1 + id:3 + fragment_idx:2
-
-        auto& header = get_header<Fragments_Res_Header>(datagram->data.data());
-        header.type = TYPE_FRAGMENTS_RES;
-        header.count = static_cast<uint8_t>(count);
-
-        Fragments_Res_Header::Data* data_ptr = reinterpret_cast<Fragments_Res_Header::Data*>(datagram->data.data() + header_size);
-        for (size_t i = 0; i < count; i++, pidx++, data_ptr++)
-        {
-            auto& res = m_tx.fragments_res[pidx];
-            res.sent_count++;
-            data_ptr->id = res.id;
-            data_ptr->fragment_idx = res.fragment_idx;
-            data_ptr->channel_idx = res.channel_idx;
-        }
-
-        add_and_send_datagram(m_tx.internal_queues.fragments_res, m_tx.internal_queues.mutex, std::move(datagram));
-    }
-}
-
-inline void RCP::add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx)
+inline void RCP::add_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx)
 {
     std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
 
@@ -903,54 +866,9 @@ inline void RCP::add_and_send_fragment_res(uint8_t channel_idx, uint32_t id, uin
     res.id = id;
     res.fragment_idx = fragment_idx;
     m_tx.fragments_res.push_back(res);
-
-    send_pending_fragments_res_locked();
-}
-inline void RCP::send_pending_packets_res()
-{
-    std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
-    send_pending_packets_res_locked();
-}
-inline void RCP::send_pending_packets_res_locked()
-{
-    //std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
-
-    //first throw away the ones we sent enough times
-    while (!m_tx.packets_res.empty() && m_tx.packets_res.front().sent_count >= TX::MAX_PACKET_RES_SEND_COUNT)
-    {
-        m_tx.packets_res.pop_front();
-    }
-
-    size_t header_size = sizeof(Packets_Res_Header);
-
-    size_t max_count = (m_socket.get_mtu() - header_size) / sizeof(Packets_Res_Header::Data);
-
-    //now take them and pack them in a datagram
-    size_t pidx = 0;
-    while (pidx < m_tx.packets_res.size())
-    {
-        size_t count = math::min(m_tx.packets_res.size() - pidx, max_count);
-
-        TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Packets_Res_Header::Data)); //channel_idx:1 + id:3);
-
-        auto& header = get_header<Packets_Res_Header>(datagram->data.data());
-        header.type = TYPE_PACKETS_RES;
-        header.count = static_cast<uint8_t>(count);
-
-        Packets_Res_Header::Data* data_ptr = reinterpret_cast<Packets_Res_Header::Data*>(datagram->data.data() + header_size);
-        for (size_t i = 0; i < count; i++, pidx++, data_ptr++)
-        {
-            auto& res = m_tx.packets_res[pidx];
-            res.sent_count++;
-            data_ptr->id = res.id;
-            data_ptr->channel_idx = res.channel_idx;
-        }
-
-        add_and_send_datagram(m_tx.internal_queues.packets_res, m_tx.internal_queues.mutex, std::move(datagram));
-    }
 }
 
-inline void RCP::add_and_send_packet_res(uint8_t channel_idx, uint32_t id)
+inline void RCP::add_packet_res(uint8_t channel_idx, uint32_t id)
 {
     std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
 
@@ -958,8 +876,93 @@ inline void RCP::add_and_send_packet_res(uint8_t channel_idx, uint32_t id)
     res.channel_idx = channel_idx;
     res.id = id;
     m_tx.packets_res.push_back(res);
+}
 
-    send_pending_packets_res_locked();
+inline void RCP::send_pending_fragments_and_packet_res()
+{
+    {
+        std::lock_guard<std::mutex> ilg(m_tx.internal_queues.mutex);
+
+        {
+            std::lock_guard<std::mutex> lg(m_tx.packets_res_mutex);
+
+            //first throw away the ones we sent enough times
+            while (!m_tx.packets_res.empty() && m_tx.packets_res.front().sent_count >= TX::MAX_PACKET_RES_SEND_COUNT)
+            {
+                m_tx.packets_res.pop_front();
+            }
+
+            size_t header_size = sizeof(Packets_Res_Header);
+
+            size_t max_count = (m_mtu - header_size) / sizeof(Packets_Res_Header::Data);
+
+            //now take them and pack them in a datagram
+            size_t pidx = 0;
+            while (pidx < m_tx.packets_res.size())
+            {
+                size_t count = math::min(m_tx.packets_res.size() - pidx, max_count);
+
+                TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Packets_Res_Header::Data)); //channel_idx:1 + id:3);
+
+                auto& header = get_header<Packets_Res_Header>(datagram->data.data());
+                header.type = TYPE_PACKETS_RES;
+                header.count = static_cast<uint8_t>(count);
+
+                Packets_Res_Header::Data* data_ptr = reinterpret_cast<Packets_Res_Header::Data*>(datagram->data.data() + header_size);
+                for (size_t i = 0; i < count; i++, pidx++, data_ptr++)
+                {
+                    auto& res = m_tx.packets_res[pidx];
+                    res.sent_count++;
+                    data_ptr->id = res.id;
+                    data_ptr->channel_idx = res.channel_idx;
+                }
+
+                prepare_to_send_datagram(*datagram);
+                m_tx.internal_queues.packets_res.push_back(datagram);
+            }
+        }
+
+        {
+            std::lock_guard<std::mutex> lg(m_tx.fragments_res_mutex);
+
+            //first throw away the ones we sent enough times
+            while (!m_tx.fragments_res.empty() && m_tx.fragments_res.front().sent_count >= TX::MAX_FRAGMENT_RES_SEND_COUNT)
+            {
+                m_tx.fragments_res.pop_front();
+            }
+
+            size_t header_size = sizeof(Fragments_Res_Header);
+            size_t max_count = (m_mtu - header_size) / sizeof(Fragments_Res_Header::Data);
+
+            //now take them and pack them in a datagram
+            size_t pidx = 0;
+            while (pidx < m_tx.fragments_res.size())
+            {
+                size_t count = math::min(m_tx.fragments_res.size() - pidx, max_count);
+
+                TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Fragments_Res_Header::Data)); //channel_idx:1 + id:3 + fragment_idx:2
+
+                auto& header = get_header<Fragments_Res_Header>(datagram->data.data());
+                header.type = TYPE_FRAGMENTS_RES;
+                header.count = static_cast<uint8_t>(count);
+
+                Fragments_Res_Header::Data* data_ptr = reinterpret_cast<Fragments_Res_Header::Data*>(datagram->data.data() + header_size);
+                for (size_t i = 0; i < count; i++, pidx++, data_ptr++)
+                {
+                    auto& res = m_tx.fragments_res[pidx];
+                    res.sent_count++;
+                    data_ptr->id = res.id;
+                    data_ptr->fragment_idx = res.fragment_idx;
+                    data_ptr->channel_idx = res.channel_idx;
+                }
+
+                prepare_to_send_datagram(*datagram);
+                m_tx.internal_queues.fragments_res.push_back(datagram);
+            }
+        }
+    }
+
+    send_datagram();
 }
 
 inline void RCP::send_packet_connect_req()
@@ -1010,7 +1013,7 @@ inline void RCP::process_incoming_datagram(RX::Datagram_ptr& datagram)
 
         auto& header = get_header<Header>(start_ptr);
         size_t size = header.size;
-        if (size > end_ptr - start_ptr)
+        if (size > size_t(end_ptr - start_ptr))
         {
             QLOGW("Wrong size in the header: {} out of max {} bytes.", size, end_ptr - start_ptr);
             return;
@@ -1084,56 +1087,58 @@ inline void RCP::process_packet_datagram(uint8_t* data_ptr, size_t data_size)
         m_global_stats.rx_zombie_datagrams++;
         if (header.flag_needs_confirmation)
         {
-            add_and_send_packet_res(channel_idx, id);
+            add_packet_res(channel_idx, id);
         }
         m_global_stats.rx_dropped_packets++;
-        return;
-    }
-
-    RX::Packet_ptr packet;
-
-    auto iter = std::lower_bound(packets.begin(), packets.end(), id, rx_packet_id_predicate);
-    if (iter != packets.end() && iter->first == id)
-    {
-        packet = iter->second;
     }
     else
     {
-        packet = m_rx.acquire_packet();
-        packets.insert(iter, std::make_pair(id, packet));
-    }
+        RX::Packet_ptr packet;
 
-    if (packet->fragments[fragment_idx]) //we already have the fragment
-    {
-        m_global_stats.rx_duplicated_datagrams++;
-        //QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
-    }
-    else
-    {
-        packet->received_fragment_count++;
-        packet->any_header = header;
-        if (fragment_idx == 0)
+        auto iter = std::lower_bound(packets.begin(), packets.end(), id, rx_packet_id_predicate);
+        if (iter != packets.end() && iter->first == id)
         {
-            packet->main_header = get_header<Packet_Main_Header>(data_ptr);
-        }
-        auto datagram = acquire_rx_datagram(data_size);
-        std::copy(data_ptr, data_ptr + data_size, datagram->data.begin());
-        packet->fragments[fragment_idx] = std::move(datagram);
-    }
-
-    if (header.flag_needs_confirmation)
-    {
-        //if we received everything, tell the sender to stop sending this packet
-        if (packet->fragments[0] && packet->received_fragment_count == packet->main_header.fragment_count)
-        {
-            add_and_send_packet_res(channel_idx, id);
+            packet = iter->second;
         }
         else
         {
-            add_and_send_fragment_res(channel_idx, id, fragment_idx);
+            packet = m_rx.acquire_packet();
+            packets.insert(iter, std::make_pair(id, packet));
+        }
+
+        if (packet->fragments[fragment_idx]) //we already have the fragment
+        {
+            m_global_stats.rx_duplicated_datagrams++;
+            //QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
+        }
+        else
+        {
+            packet->received_fragment_count++;
+            packet->any_header = header;
+            if (fragment_idx == 0)
+            {
+                packet->main_header = get_header<Packet_Main_Header>(data_ptr);
+            }
+            auto datagram = acquire_rx_datagram(data_size);
+            std::copy(data_ptr, data_ptr + data_size, datagram->data.begin());
+            packet->fragments[fragment_idx] = std::move(datagram);
+        }
+
+        if (header.flag_needs_confirmation)
+        {
+            //if we received everything, tell the sender to stop sending this packet
+            if (packet->fragments[0] && packet->received_fragment_count == packet->main_header.fragment_count)
+            {
+                add_packet_res(channel_idx, id);
+            }
+            else
+            {
+                add_fragment_res(channel_idx, id, fragment_idx);
+            }
         }
     }
 
+    send_pending_fragments_and_packet_res();
 
 //    if (channel_idx == 4)
 //    {

@@ -59,8 +59,6 @@ struct RCP_RFMON_Socket::Impl
     size_t _80211_header_length = 0;
     size_t tx_packet_header_length = 0;
 
-    std::vector<uint8_t> tx_buffer_storage;
-
     uint8_t const* tx_buffer = nullptr;
     size_t tx_buffer_size = 0;
     std::mutex tx_buffer_mutex;
@@ -74,6 +72,13 @@ RCP_RFMON_Socket::RCP_RFMON_Socket(std::string const& interface, uint8_t id)
     , m_id(id)
 {
     m_impl.reset(new Impl);
+
+    IEEE_HEADER[SRC_MAC_LASTBYTE] = m_id;
+    IEEE_HEADER[DST_MAC_LASTBYTE] = m_id;
+
+    prepare_radiotap_header(DEFAULT_RATE_HZ);
+    m_impl->tx_packet_header_length = RADIOTAP_HEADER.size() + sizeof(IEEE_HEADER);
+    QLOGI("Radiocap header size: {}, IEEE header size: {}", RADIOTAP_HEADER.size(), sizeof(IEEE_HEADER));
 }
 
 RCP_RFMON_Socket::~RCP_RFMON_Socket()
@@ -321,13 +326,6 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
 
 auto RCP_RFMON_Socket::start() -> bool
 {
-    IEEE_HEADER[SRC_MAC_LASTBYTE] = m_id;
-    IEEE_HEADER[DST_MAC_LASTBYTE] = m_id;
-
-    prepare_radiotap_header(DEFAULT_RATE_HZ);
-    m_impl->tx_packet_header_length = RADIOTAP_HEADER.size() + sizeof(IEEE_HEADER);
-    QLOGI("Radiocap header size: {}, IEEE header size: {}", RADIOTAP_HEADER.size(), sizeof(IEEE_HEADER));
-
     char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
 //    m_impl->pcap = pcap_open_live(m_interface.c_str(), 2048, 1, -1, pcap_error);
@@ -406,9 +404,6 @@ auto RCP_RFMON_Socket::start() -> bool
     {
         return false;
     }
-
-    m_impl->tx_buffer_storage.resize(MAX_PACKET_SIZE);
-    prepare_tx_packet_header(m_impl->tx_buffer_storage.data());
 
 //    m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
 //    prepare_tx_packet_header(m_impl->tx_buffer.data());
@@ -538,19 +533,24 @@ auto RCP_RFMON_Socket::start() -> bool
 
 void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
 {
-    QASSERT(size <= MAX_USER_PACKET_SIZE);
+    QASSERT(size <= m_impl->tx_packet_header_length + MAX_USER_PACKET_SIZE);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
 
-        std::copy(data, data + size, m_impl->tx_buffer_storage.data() + m_impl->tx_packet_header_length);
-
         QASSERT(!m_impl->tx_buffer);
-        m_impl->tx_buffer = m_impl->tx_buffer_storage.data();
-        m_impl->tx_buffer_size = m_impl->tx_packet_header_length + size;
+        m_impl->tx_buffer = data;
+        m_impl->tx_buffer_size = size;
     }
 
     m_impl->tx_buffer_cv.notify_all();
+}
+
+auto RCP_RFMON_Socket::prepare_buffer(std::vector<uint8_t>& buffer) -> size_t
+{
+    buffer.resize(MAX_PACKET_SIZE);
+    prepare_tx_packet_header(buffer.data());
+    return m_impl->tx_packet_header_length;
 }
 
 auto RCP_RFMON_Socket::get_mtu() const -> size_t
