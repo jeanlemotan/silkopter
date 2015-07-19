@@ -323,12 +323,8 @@ void Comms::handle_clock()
 {
     uint64_t us;
     uint32_t req_id = 0;
-    if (m_setup_channel.begin_unpack() &&
-        m_setup_channel.unpack_param(req_id) &&
-        m_setup_channel.unpack_param(us))
+    if (m_setup_channel.unpack_all(req_id, us))
     {
-        m_setup_channel.end_unpack();
-
         m_hal.m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
     }
     else

@@ -75,7 +75,6 @@ struct Comms::Channels
 Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_channels(new Channels())
-    , m_comms_start_tp(q::Clock::now())
 {
     m_source.reset(new Source(*this));
     m_commands_stream.reset(new Commands);
@@ -433,7 +432,7 @@ void Comms::handle_clock()
     {
         QLOGI("Req Id: {} - clock", req_id);
 
-        auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now() - m_comms_start_tp).count());
+        auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
         channel.pack_all(comms::Setup_Message::CLOCK, req_id, tp);
     }
 }

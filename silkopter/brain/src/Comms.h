@@ -136,8 +136,6 @@ private:
 
     std::shared_ptr<Channels> m_channels;
 
-    q::Clock::time_point m_comms_start_tp;
-
     bool m_is_connected = false;
 
 };
