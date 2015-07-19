@@ -151,7 +151,6 @@ namespace util
                 bool operator==(Data const& other) const { return all == other.all; }
             };
 
-            static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 
@@ -169,7 +168,6 @@ namespace util
                 bool operator==(Data const& other) const { return all == other.all; }
             };
 
-            static const size_t MAX_PACKED = 100;
             uint8_t count;
         };
 

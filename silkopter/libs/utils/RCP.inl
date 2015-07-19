@@ -863,13 +863,15 @@ inline void RCP::send_pending_fragments_res_locked()
         m_tx.fragments_res.pop_front();
     }
 
+    size_t header_size = sizeof(Fragments_Res_Header);
+    size_t max_count = (m_socket.get_mtu() - header_size) / sizeof(Fragments_Res_Header::Data);
+
     //now take them and pack them in a datagram
     size_t pidx = 0;
     while (pidx < m_tx.fragments_res.size())
     {
-        size_t count = math::min(m_tx.fragments_res.size() - pidx, Fragments_Res_Header::MAX_PACKED);
+        size_t count = math::min(m_tx.fragments_res.size() - pidx, max_count);
 
-        size_t header_size = sizeof(Fragments_Res_Header);
         TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Fragments_Res_Header::Data)); //channel_idx:1 + id:3 + fragment_idx:2
 
         auto& header = get_header<Fragments_Res_Header>(datagram->data.data());
@@ -886,7 +888,7 @@ inline void RCP::send_pending_fragments_res_locked()
             data_ptr->channel_idx = res.channel_idx;
         }
 
-        add_and_send_datagram(m_tx.internal_queues.fragments_res, m_tx.internal_queues.mutex, datagram);
+        add_and_send_datagram(m_tx.internal_queues.fragments_res, m_tx.internal_queues.mutex, std::move(datagram));
     }
 }
 
@@ -917,13 +919,16 @@ inline void RCP::send_pending_packets_res_locked()
         m_tx.packets_res.pop_front();
     }
 
+    size_t header_size = sizeof(Packets_Res_Header);
+
+    size_t max_count = (m_socket.get_mtu() - header_size) / sizeof(Packets_Res_Header::Data);
+
     //now take them and pack them in a datagram
     size_t pidx = 0;
     while (pidx < m_tx.packets_res.size())
     {
-        size_t count = math::min(m_tx.packets_res.size() - pidx, Packets_Res_Header::MAX_PACKED);
+        size_t count = math::min(m_tx.packets_res.size() - pidx, max_count);
 
-        size_t header_size = sizeof(Packets_Res_Header);
         TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Packets_Res_Header::Data)); //channel_idx:1 + id:3);
 
         auto& header = get_header<Packets_Res_Header>(datagram->data.data());
@@ -939,7 +944,7 @@ inline void RCP::send_pending_packets_res_locked()
             data_ptr->channel_idx = res.channel_idx;
         }
 
-        add_and_send_datagram(m_tx.internal_queues.packets_res, m_tx.internal_queues.mutex, datagram);
+        add_and_send_datagram(m_tx.internal_queues.packets_res, m_tx.internal_queues.mutex, std::move(datagram));
     }
 }
 
