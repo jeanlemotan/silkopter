@@ -126,13 +126,6 @@ namespace util
         auto get_next_message(util::RCP& rcp) -> boost::optional<Message_t>  { return _get_next_message(rcp); }
         auto get_next_message(Message_t& message, util::RCP& rcp) -> bool {  auto res = _get_next_message(rcp); message = res ? *res : message; return res.is_initialized(); }
 
-		//decodes the next message
-		template<typename... Params>
-        auto unpack_all(Params&... params) -> bool
-        {
-            return _unpack(size_t(0), params...);
-        }
-
         //////////////////////////////////////////////////////////////////////////
 
         auto begin_unpack() -> bool
@@ -190,6 +183,16 @@ namespace util
             }
         }
 
+        //decodes the next message
+        template<typename... Params>
+        auto unpack_all(Params&... params) -> bool
+        {
+            auto res = begin_unpack() && _unpack(params...);
+            end_unpack();
+            return res;
+        }
+
+
         auto get_remaining_message_size() const -> size_t { return m_decoded.data_size - m_decoded.offset; }
         auto get_message_size() const -> size_t { return m_decoded.data_size - HEADER_SIZE; }
 
@@ -236,21 +239,14 @@ namespace util
 		}
 
 		//decodes the next message
-        auto _unpack(size_t /*off*/) -> bool
+        auto _unpack() -> bool
 		{
-            if (m_decoded.data_size > 0)
-			{
-                pop_front(m_decoded.data_size);
-                m_decoded.data_size = 0;
-                m_decoded.is_valid = false;
-			}
-
             return true;
 		}
 
 		//decodes the next message
 		template<typename Param, typename... Params>
-        auto _unpack(size_t off, Param& p, Params&... params) -> bool
+        auto _unpack(Param& p, Params&... params) -> bool
 		{
 //            QASSERT(m_decoded.offset + sizeof(p) <= m_decoded.data_size && m_decoded.data_size <= m_rx_buffer.size());
 //            if (m_decoded.offset + sizeof(p) > m_decoded.data_size || m_decoded.data_size > m_rx_buffer.size())
@@ -261,7 +257,7 @@ namespace util
             {
                 return false;
             }
-            return _unpack(off, params...);
+            return _unpack(params...);
 		}
 
 		bool decode_message()
