@@ -21,6 +21,7 @@ INCLUDEPATH += ../../../../qinput/include
 INCLUDEPATH += ../../../../q/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
+INCLUDEPATH += /usr/include/ffmpeg
 INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
