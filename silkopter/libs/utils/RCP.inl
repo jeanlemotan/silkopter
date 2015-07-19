@@ -93,6 +93,7 @@ inline auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP:
 
     std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
 
+    datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
     datagram->sent_count = 0;
 
@@ -794,10 +795,14 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                 break;
             }
         }
-        while (!queue.empty() && queue.front() && add_datagram_to_send_buffer(queue.front()))
+        while (!queue.empty() &&
+               queue.front() &&
+               now - queue.front()->sent_tp >= MIN_RESEND_DURATION &&
+               add_datagram_to_send_buffer(queue.front()))
         {
             merged++;
             auto datagram = std::move(queue.front());
+            datagram->sent_tp = now;
             queue.pop_front();//erase as the order changed due to the sent_count increase
 
             datagram->sent_count++;
@@ -812,7 +817,7 @@ inline auto RCP::compute_next_transit_datagram() -> bool
         //QLOGI("{}: fr {}, ch {}, {}", queue.size(), header.fragment_idx, static_cast<int>(header.channel_idx), header.flag_is_reliable ? "R" : "NR");
     }
 
-//    if (merged)
+//    if (merged > 1)
 //    {
 //        QLOGI("Merged: {}", merged);
 //    }

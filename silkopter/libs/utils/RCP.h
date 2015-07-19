@@ -208,6 +208,7 @@ namespace util
             {
                 Send_Params params;
                 q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
+                q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
                 uint32_t sent_count = 0; //how many times it was sent - for unreliable only
 
                 Buffer_t data;
@@ -354,7 +355,6 @@ namespace util
 
         std::atomic_bool m_is_sending = {false};
         const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
-        const q::Clock::duration MAX_RESEND_DURATION = std::chrono::milliseconds(60);
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
