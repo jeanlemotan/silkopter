@@ -133,18 +133,18 @@ template<class H> auto RCP::get_header(uint8_t* data) -> H&
     return h;
 }
 
-inline auto RCP::get_header_size(Buffer_t& data) -> size_t
+inline auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t
 {
-    if (data.size() < sizeof(Header))
+    if (data_size < sizeof(Header))
     {
         return 0;
     }
-    auto const& header = get_header<Header>(data.data());
+    auto const& header = get_header<Header>(data_ptr);
     switch (header.type)
     {
     case Type::TYPE_PACKET:
     {
-        auto const& pheader = get_header<Packet_Header>(data.data());
+        auto const& pheader = get_header<Packet_Header>(data_ptr);
         return (pheader.fragment_idx == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header);
     }
     case Type::TYPE_FRAGMENTS_RES: return sizeof(Fragments_Res_Header);
@@ -658,6 +658,8 @@ inline void RCP::process()
 inline void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 {
     auto& header = get_header<Header>(datagram.data.data());
+    header.size = datagram.data.size();
+    header.crc = 0;
     auto crc = compute_crc(datagram.data.data(), datagram.data.size());
     header.crc = crc;
 
@@ -994,52 +996,67 @@ inline void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
 inline void RCP::process_incoming_datagram(RX::Datagram_ptr& datagram)
 {
     QASSERT(datagram);
-    size_t h_size = get_header_size(datagram->data);
-    if (h_size == 0)
+    uint8_t* start_ptr = datagram->data.data();
+    uint8_t const* end_ptr = start_ptr + datagram->data.size();
+    QASSERT(start_ptr);
+    while (start_ptr + sizeof(Header) < end_ptr)
     {
-        QLOGW("Unknonw header.");
-        return;
-    }
-
-    auto& header = get_header<Header>(datagram->data.data());
-
-    m_global_stats.rx_datagrams++;
-
-    auto crc1 = header.crc;
-    header.crc = 0;
-    auto crc2 = compute_crc(datagram->data.data(), datagram->data.size());
-    if (crc1 != crc2)
-    {
-        m_global_stats.rx_corrupted_datagrams++;
-        auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
-
-        QLOGW("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
-        return;
-    }
-    m_global_stats.rx_good_datagrams++;
-
-    if (!m_connection.is_connected)
-    {
-        switch (header.type)
+        size_t h_size = get_header_size(start_ptr, end_ptr - start_ptr);
+        if (h_size == 0)
         {
-        case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(datagram); break;
-        case Type::TYPE_CONNECT_RES: process_connect_res_datagram(datagram); break;
-        default: QLOGI("Disconnected: Ignoring datagram type {}", static_cast<int>(header.type)); break;
+            QLOGW("Unknown header.");
+            return;
         }
-    }
-    else
-    {
-        switch (header.type)
+
+        auto& header = get_header<Header>(start_ptr);
+        size_t size = header.size;
+        if (size > end_ptr - start_ptr)
         {
-        case Type::TYPE_PACKET: process_packet_datagram(datagram); break;
-        case Type::TYPE_FRAGMENTS_RES: process_fragments_res_datagram(datagram); break;
-        case Type::TYPE_PACKETS_RES: process_packets_res_datagram(datagram); break;
-        case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(datagram); break;
-        case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
-        default: QASSERT(0); break;
+            QLOGW("Wrong size in the header: {} out of max {} bytes.", size, end_ptr - start_ptr);
+            return;
         }
+
+        m_global_stats.rx_datagrams++;
+
+        auto crc1 = header.crc;
+        header.crc = 0;
+        auto crc2 = compute_crc(start_ptr, size);
+        if (crc1 != crc2)
+        {
+            m_global_stats.rx_corrupted_datagrams++;
+            auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
+
+            QLOGW("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
+        }
+        else
+        {
+            m_global_stats.rx_good_datagrams++;
+
+            if (!m_connection.is_connected)
+            {
+                switch (header.type)
+                {
+                case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(start_ptr, size); break;
+                case Type::TYPE_CONNECT_RES: process_connect_res_datagram(start_ptr, size); break;
+                default: QLOGI("Disconnected: Ignoring datagram type {}", static_cast<int>(header.type)); break;
+                }
+            }
+            else
+            {
+                switch (header.type)
+                {
+                case Type::TYPE_PACKET: process_packet_datagram(start_ptr, size); break;
+                case Type::TYPE_FRAGMENTS_RES: process_fragments_res_datagram(start_ptr, size); break;
+                case Type::TYPE_PACKETS_RES: process_packets_res_datagram(start_ptr, size); break;
+                case Type::TYPE_CONNECT_REQ: process_connect_req_datagram(start_ptr, size); break;
+                case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
+                default: QASSERT(0); break;
+                }
+            }
+        }
+
+        start_ptr += size;
     }
-    //m_rx.release_datagram(std::move(datagram));
 }
 
 inline auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool
@@ -1047,10 +1064,10 @@ inline auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uin
     return item1.first < id;
 }
 
-inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
+inline void RCP::process_packet_datagram(uint8_t* data_ptr, size_t data_size)
 {
-    QASSERT(datagram);
-    auto const& header = get_header<Packet_Header>(datagram->data.data());
+    QASSERT(data_ptr && data_size > 0);
+    auto const& header = get_header<Packet_Header>(data_ptr);
 
     auto channel_idx = header.channel_idx;
     auto fragment_idx = header.fragment_idx;
@@ -1097,8 +1114,10 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
         packet->any_header = header;
         if (fragment_idx == 0)
         {
-            packet->main_header = get_header<Packet_Main_Header>(datagram->data.data());
+            packet->main_header = get_header<Packet_Main_Header>(data_ptr);
         }
+        auto datagram = acquire_rx_datagram(data_size);
+        std::copy(data_ptr, data_ptr + data_size, datagram->data.begin());
         packet->fragments[fragment_idx] = std::move(datagram);
     }
 
@@ -1122,17 +1141,17 @@ inline void RCP::process_packet_datagram(RX::Datagram_ptr& datagram)
 //              packet->fragments[0] ? static_cast<size_t>(packet->main_header.fragment_count) : 0u);
 //    }
 }
-inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
+inline void RCP::process_fragments_res_datagram(uint8_t* data_ptr, size_t data_size)
 {
-    QASSERT(datagram);
-    auto const& header = get_header<Fragments_Res_Header>(datagram->data.data());
+    QASSERT(data_ptr && data_size > 0);
+    auto const& header = get_header<Fragments_Res_Header>(data_ptr);
 
     size_t count = header.count;
     QASSERT(count > 0);
 
-    QASSERT(datagram->data.size() == sizeof(Fragments_Res_Header) + sizeof(Fragments_Res_Header::Data)*count);
+    QASSERT(data_size == sizeof(Fragments_Res_Header) + sizeof(Fragments_Res_Header::Data)*count);
 
-    Fragments_Res_Header::Data* conf = reinterpret_cast<Fragments_Res_Header::Data*>(datagram->data.data() + sizeof(Fragments_Res_Header));
+    Fragments_Res_Header::Data* conf = reinterpret_cast<Fragments_Res_Header::Data*>(data_ptr + sizeof(Fragments_Res_Header));
     Fragments_Res_Header::Data* conf_end = conf + count;
 
     //sort the confirmations ascending so we can search fast
@@ -1175,17 +1194,17 @@ inline void RCP::process_fragments_res_datagram(RX::Datagram_ptr& datagram)
         }
     }
 }
-inline void RCP::process_packets_res_datagram(RX::Datagram_ptr& datagram)
+inline void RCP::process_packets_res_datagram(uint8_t* data_ptr, size_t data_size)
 {
-    QASSERT(datagram);
-    auto const& header = get_header<Packets_Res_Header>(datagram->data.data());
+    QASSERT(data_ptr && data_size > 0);
+    auto const& header = get_header<Packets_Res_Header>(data_ptr);
 
     auto count = header.count;
     QASSERT(count > 0);
 
-    QASSERT(datagram->data.size() == sizeof(Packets_Res_Header) + sizeof(Packets_Res_Header::Data)*count);
+    QASSERT(data_size == sizeof(Packets_Res_Header) + sizeof(Packets_Res_Header::Data)*count);
 
-    Packets_Res_Header::Data* conf = reinterpret_cast<Packets_Res_Header::Data*>(datagram->data.data() + sizeof(Fragments_Res_Header));
+    Packets_Res_Header::Data* conf = reinterpret_cast<Packets_Res_Header::Data*>(data_ptr + sizeof(Fragments_Res_Header));
     Packets_Res_Header::Data* conf_end = conf + count;
 
     //sort the confirmations ascending so we can search fast
@@ -1290,10 +1309,10 @@ inline void RCP::connect()
     //...
 }
 
-inline void RCP::process_connect_req_datagram(RX::Datagram_ptr& datagram)
+inline void RCP::process_connect_req_datagram(uint8_t* data_ptr, size_t data_size)
 {
-    QASSERT(datagram);
-    auto& header = get_header<Connect_Req_Header>(datagram->data.data());
+    QASSERT(data_ptr && data_size > 0);
+    auto& header = get_header<Connect_Req_Header>(data_ptr);
 
     Connect_Res_Header::Response response;
     if (header.version != VERSION)
@@ -1313,7 +1332,7 @@ inline void RCP::process_connect_req_datagram(RX::Datagram_ptr& datagram)
 
     send_packet_connect_res(response);
 }
-inline void RCP::process_connect_res_datagram(RX::Datagram_ptr& datagram)
+inline void RCP::process_connect_res_datagram(uint8_t* data_ptr, size_t data_size)
 {
     if (m_connection.is_connected)
     {
@@ -1321,8 +1340,8 @@ inline void RCP::process_connect_res_datagram(RX::Datagram_ptr& datagram)
         return;
     }
 
-    QASSERT(datagram);
-    auto& header = get_header<Connect_Res_Header>(datagram->data.data());
+    QASSERT(data_ptr && data_size > 0);
+    auto& header = get_header<Connect_Res_Header>(data_ptr);
 
     if (header.response == Connect_Res_Header::Response::OK)
     {

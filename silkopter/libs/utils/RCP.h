@@ -118,7 +118,8 @@ namespace util
         struct Header
         {
             uint32_t crc;
-            uint8_t type : 4;
+            uint32_t size : 16;
+            uint32_t type : 4;
         };
 
         struct Packet_Header : public Header
@@ -358,7 +359,7 @@ namespace util
 
         template<class H> static auto get_header(uint8_t const* data) -> H const&;
         template<class H> static auto get_header(uint8_t* data) -> H&;
-        static auto get_header_size(Buffer_t& data) -> size_t;
+        static auto get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t;
         auto compute_crc(uint8_t const* data, size_t size) -> uint32_t;
         //to avoid popping front in vectors
         //Note - I use a vector instead of a deque because the deque is too slow at iterating.
@@ -395,11 +396,11 @@ namespace util
         static auto rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool;
 
         void process_incoming_datagram(RX::Datagram_ptr& datagram);
-        void process_packet_datagram(RX::Datagram_ptr& datagram);
-        void process_fragments_res_datagram(RX::Datagram_ptr& datagram);
-        void process_packets_res_datagram(RX::Datagram_ptr& datagram);
-        void process_connect_req_datagram(RX::Datagram_ptr& datagram);
-        void process_connect_res_datagram(RX::Datagram_ptr& datagram);
+        void process_packet_datagram(uint8_t* data_ptr, size_t data_size);
+        void process_fragments_res_datagram(uint8_t* data_ptr, size_t data_size);
+        void process_packets_res_datagram(uint8_t* data_ptr, size_t data_size);
+        void process_connect_req_datagram(uint8_t* data_ptr, size_t data_size);
+        void process_connect_res_datagram(uint8_t* data_ptr, size_t data_size);
    };
 
 }
