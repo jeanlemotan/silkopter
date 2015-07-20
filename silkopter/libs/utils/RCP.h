@@ -47,7 +47,7 @@ namespace util
 
         virtual auto process() -> Result = 0;
 
-        std::function<void(uint8_t const* data, size_t size)> receive_callback;
+        std::function<void(uint8_t* data, size_t size)> receive_callback;
         std::function<void(Result)> send_callback;
 
         virtual auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t = 0;
@@ -107,10 +107,9 @@ namespace util
         enum Type
         {
             TYPE_PACKET             =   0,
-            TYPE_FRAGMENTS_RES      =   1,
-            TYPE_PACKETS_RES        =   2,
-            TYPE_CONNECT_REQ        =   3,
-            TYPE_CONNECT_RES        =   4,
+            TYPE_CONFIRMATIONS      =   1,
+            TYPE_CONNECT_REQ        =   2,
+            TYPE_CONNECT_RES        =   3,
         };
 
         static const size_t MAX_CHANNELS = 32;
@@ -139,7 +138,7 @@ namespace util
             uint16_t fragment_count;
         };
 
-        struct Fragments_Res_Header : public Header
+        struct Confirmations_Header : public Header
         {
             union Data
             {
@@ -153,24 +152,6 @@ namespace util
                 bool operator<(Data const& other) const { return all < other.all; }
                 bool operator==(Data const& other) const { return all == other.all; }
             };
-
-            uint8_t count;
-        };
-
-        struct Packets_Res_Header : public Header
-        {
-            union Data
-            {
-                struct
-                {
-                    uint32_t id : 24;
-                    uint32_t channel_idx : 8;
-                };
-                uint32_t all = 0;
-                bool operator<(Data const& other) const { return all < other.all; }
-                bool operator==(Data const& other) const { return all == other.all; }
-            };
-
             uint8_t count;
         };
 
@@ -200,7 +181,7 @@ namespace util
         static const int MAX_PRIORITY = 127;
         static const int MIN_PRIORITY = -127;
 
-        //static const size_t MAX_IN_TRANSIT_DATAGRAMS = 5;
+        static const uint16_t FRAGMENT_IDX_ALL = 65535;
 
         struct TX
         {
@@ -219,27 +200,17 @@ namespace util
 
             //this is a list of fragment and packet responses
             //they are accumulated in a vector and then sent repeatedly for a number of times
-            static const uint8_t MAX_FRAGMENT_RES_SEND_COUNT = 3;
-            struct Fragment_Res
+            static const uint8_t MAX_CONFIRMATION_SEND_COUNT = 3;
+            struct Confirmation
             {
                 uint32_t id = 0;
                 uint16_t fragment_idx = 0;
                 uint8_t channel_idx = 0;
                 uint8_t sent_count = 0;
             };
-            std::mutex fragments_res_mutex;
-            std::deque<Fragment_Res> fragments_res;
+            std::mutex confirmations_mutex;
+            std::deque<Confirmation> confirmations;
 
-            static const uint8_t MAX_PACKET_RES_SEND_COUNT = 4;
-            struct Packet_Res
-            {
-                uint32_t id = 0;
-                uint16_t fragment_idx = 0;
-                uint8_t channel_idx = 0;
-                uint8_t sent_count = 0;
-            };
-            std::mutex packets_res_mutex;
-            std::deque<Packet_Res> packets_res;
             //--------------------------------------------
 
 
@@ -250,9 +221,7 @@ namespace util
                 std::mutex mutex;
                 Datagram_ptr connection_req;
                 Datagram_ptr connection_res;
-
-                Send_Queue fragments_res;
-                Send_Queue packets_res;
+                Send_Queue confirmations;
             } internal_queues;
 
             std::mutex packet_queue_mutex;
@@ -380,11 +349,11 @@ namespace util
         void send_datagram();
 
         void handle_send(RCP_Socket::Result reult);
-        void handle_receive(uint8_t const* data, size_t size);
+        void handle_receive(uint8_t* data, size_t size);
 
-        void add_fragment_res(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
-        void add_packet_res(uint8_t channel_idx, uint32_t id);
-        void send_pending_fragments_and_packet_res();
+        void add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
+        void add_packet_confirmation(uint8_t channel_idx, uint32_t id);
+        void send_pending_confirmations();
 
         void send_packet_connect_req();
         void send_packet_connect_res(Connect_Res_Header::Response response);
@@ -393,12 +362,11 @@ namespace util
         //static auto rx_packet_predicate(RX::Packet_Queue::Item const& item1, RX::Packet_Queue::Item const& item2) -> bool;
         static auto rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool;
 
-        void process_incoming_datagram(RX::Datagram_ptr& datagram);
-        void process_packet_datagram(uint8_t* data_ptr, size_t data_size);
-        void process_fragments_res_datagram(uint8_t* data_ptr, size_t data_size);
-        void process_packets_res_datagram(uint8_t* data_ptr, size_t data_size);
-        void process_connect_req_datagram(uint8_t* data_ptr, size_t data_size);
-        void process_connect_res_datagram(uint8_t* data_ptr, size_t data_size);
+        void process_incoming_data(uint8_t* data_ptr, size_t data_size);
+        void process_packet_data(uint8_t* data_ptr, size_t data_size);
+        void process_confirmations_data(uint8_t* data_ptr, size_t data_size);
+        void process_connect_req_data(uint8_t* data_ptr, size_t data_size);
+        void process_connect_res_data(uint8_t* data_ptr, size_t data_size);
    };
 
 }

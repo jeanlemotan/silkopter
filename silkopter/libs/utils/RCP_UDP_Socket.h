@@ -35,7 +35,18 @@ private:
     std::unique_ptr<boost::asio::io_service::work> m_io_work;
 
     std::atomic_bool m_send_in_progress = {false};
-    std::vector<uint8_t> m_tx_buffer;
+
+    typedef std::shared_ptr<std::vector<uint8_t>> Buffer;
+
+    auto acquire_tx_buffer_locked(size_t size) -> Buffer;
+
+    void send_next_packet_locked();
+
+    std::mutex m_tx_buffer_mutex;
+    std::vector<Buffer> m_tx_buffer_pool;
+    std::deque<Buffer> m_tx_buffer_queue; //to send
+
+    Buffer m_tx_buffer_in_transit;
 
     boost::asio::ip::udp::endpoint m_tx_endpoint;
     boost::asio::ip::udp::endpoint m_rx_endpoint;

@@ -32,8 +32,6 @@ void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 {
     m_socket.open(boost::asio::ip::udp::v4());
     m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_socket.set_option(boost::asio::socket_base::receive_buffer_size(get_mtu() + 200));
-    m_socket.set_option(boost::asio::socket_base::send_buffer_size(get_mtu() + 200));
     m_socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), receive_port));
 
     m_send_port = send_port;
@@ -50,15 +48,49 @@ void RCP_UDP_Socket::set_send_endpoint(boost::asio::ip::udp::endpoint endpoint)
     m_tx_endpoint = endpoint;
 }
 
+auto RCP_UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
+{
+    Buffer buffer;
+    if (m_tx_buffer_pool.empty())
+    {
+        buffer = std::make_shared<Buffer::element_type>(size);
+    }
+    else
+    {
+        buffer = std::move(m_tx_buffer_pool.back());
+        m_tx_buffer_pool.pop_back();
+        buffer->resize(size);
+    }
+
+    return buffer;
+}
+
 void RCP_UDP_Socket::async_send(uint8_t const* data, size_t size)
 {
     QASSERT(!m_send_in_progress);
     m_send_in_progress = true;
 
-    m_tx_buffer.resize(size + 1);
-    m_tx_buffer[0] = MARKER_DATA;
-    std::copy(data, data + size, m_tx_buffer.data() + 1);
-    m_socket.async_send_to(boost::asio::buffer(m_tx_buffer), m_tx_endpoint, m_asio_send_callback);
+    std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+
+    auto buffer = acquire_tx_buffer_locked(size + 1);
+
+    buffer->front() = MARKER_DATA;
+    std::copy(data, data + size, buffer->data() + 1);
+
+    m_tx_buffer_queue.push_back(std::move(buffer));
+
+    send_next_packet_locked();
+}
+
+void RCP_UDP_Socket::send_next_packet_locked()
+{
+    if (!m_tx_buffer_queue.empty() && !m_tx_buffer_in_transit)
+    {
+        //std::cout << "sending\n";
+        m_tx_buffer_in_transit = std::move(m_tx_buffer_queue.front());
+        m_tx_buffer_queue.pop_front();
+        m_socket.async_send_to(boost::asio::buffer(*m_tx_buffer_in_transit), m_tx_endpoint, m_asio_send_callback);
+    }
 }
 
 void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
@@ -75,9 +107,21 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
     {
         if (bytes_transferred > 0)
         {
-            if (m_rx_buffer[0] == MARKER_DATA && receive_callback)
+            if (m_rx_buffer[0] == MARKER_DATA)
             {
-                receive_callback(m_rx_buffer.data() + 1, bytes_transferred - 1);
+                if (receive_callback)
+                {
+                    receive_callback(m_rx_buffer.data() + 1, bytes_transferred - 1);
+                }
+
+                //send ack
+                {
+                    std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+                    auto buffer = acquire_tx_buffer_locked(1);
+                    buffer->front() = MARKER_ACK;
+                    m_tx_buffer_queue.push_back(std::move(buffer));
+                    send_next_packet_locked();
+                }
             }
             else if (m_rx_buffer[0] == MARKER_ACK)
             {
@@ -95,15 +139,25 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
 }
 void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
-    //std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    if (error)
+    //put it back in the pool
+    if (m_tx_buffer_in_transit)
     {
-        QLOGE("Error on socket send: {}", error.message());
-        if (send_callback)
-        {
-            send_callback(Result::ERROR);
-        }
+        std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+        m_tx_buffer_pool.push_back(std::move(m_tx_buffer_in_transit));
+
+        m_tx_buffer_in_transit.reset();
+
+        //send the next one
+        send_next_packet_locked();
     }
+//    if (error)
+//    {
+//        QLOGE("Error on socket send: {}", error.message());
+//        if (send_callback)
+//        {
+//            send_callback(Result::ERROR);
+//        }
+//    }
 }
 
 size_t RCP_UDP_Socket::prepare_buffer(std::vector<uint8_t>& buffer)
