@@ -2,6 +2,7 @@
 
 #include "HAL_Window.h"
 #include "Multi_Config_Window.h"
+#include "hud/Multi_HUD.h"
 
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
@@ -19,7 +20,7 @@ GS::GS(QWidget *parent)
 
 	show();
 
-//    m_input_mgr.reset(new qinput::Input_Mgr(q::util::format2<q::String>("{}", uint64_t(winId()))));
+    m_input_mgr.reset(new qinput::Input_Mgr(q::util::format2<q::String>("{}", uint64_t(winId()))));
 
     //m_comm_channel.connect(boost::asio::ip::address::from_string("127.0.0.1"), 52524);
 
@@ -47,6 +48,13 @@ GS::GS(QWidget *parent)
 
     connect(m_ui.action_hal_editor, &QAction::triggered, [this](bool) { m_hal_window->show(); });
     connect(m_ui.action_multi_config_window, &QAction::triggered, [this](bool) { m_multi_config_window->show(); });
+    connect(m_ui.action_multi_hud, &QAction::triggered, [this](bool)
+    {
+        delete m_hud;
+        m_hud = new Multi_HUD(this);
+        m_ui.centralwidget->layout()->addWidget(m_hud);
+        m_ui.label->hide();
+    });
 
 
     read_settings();
@@ -137,6 +145,8 @@ void GS::process()
     auto now = q::Clock::now();
     auto dt = now - m_last_tp;
     m_last_tp = now;
+
+    m_input_mgr->update(dt);
 
     m_comms.process();
 

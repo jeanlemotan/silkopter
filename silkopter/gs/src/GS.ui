@@ -70,7 +70,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -89,6 +89,11 @@
     </property>
     <addaction name="action_hal_editor"/>
     <addaction name="action_multi_config_window"/>
+    <addaction name="separator"/>
+    <addaction name="action_multi_hud"/>
+    <addaction name="action_heli_hud"/>
+    <addaction name="action_plane_hud"/>
+    <addaction name="action_rover_hud"/>
    </widget>
    <addaction name="menuConnect"/>
    <addaction name="menuView"/>
@@ -131,6 +136,26 @@
    </property>
    <property name="toolTip">
     <string>Multirotor Configuration</string>
+   </property>
+  </action>
+  <action name="action_multi_hud">
+   <property name="text">
+    <string>Multi HUD</string>
+   </property>
+  </action>
+  <action name="action_heli_hud">
+   <property name="text">
+    <string>Heli HUD</string>
+   </property>
+  </action>
+  <action name="action_plane_hud">
+   <property name="text">
+    <string>Plane HUD</string>
+   </property>
+  </action>
+  <action name="action_rover_hud">
+   <property name="text">
+    <string>Rover HUD</string>
    </property>
   </action>
  </widget>

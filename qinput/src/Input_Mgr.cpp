@@ -58,6 +58,29 @@ Input_Mgr::Input_Mgr(q::String const& /*window_handle*/)
         buttons[8] = Gamepad::Button::LEFT_TRIGGER;
         buttons[9] = Gamepad::Button::RIGHT_TRIGGER;
     }
+    {
+        auto& buttons = m_ps4_mapping.buttons;
+        buttons[0] = Gamepad::Button::PS_SQUARE;
+        buttons[1] = Gamepad::Button::PS_X;
+        buttons[2] = Gamepad::Button::PS_CIRCLE;
+        buttons[3] = Gamepad::Button::PS_TRIANGLE;
+
+//        buttons[4] = Gamepad::Button::LPAD_UP;
+//        buttons[5] = Gamepad::Button::LPAD_RIGHT;
+//        buttons[6] = Gamepad::Button::LPAD_DOWN;
+//        buttons[7] = Gamepad::Button::LPAD_LEFT;
+
+        buttons[4] = Gamepad::Button::LEFT_BUMPER;
+        buttons[5] = Gamepad::Button::RIGHT_BUMPER;
+
+        buttons[6] = Gamepad::Button::LEFT_TRIGGER;
+        buttons[7] = Gamepad::Button::RIGHT_TRIGGER;
+
+        buttons[10] = Gamepad::Button::LEFT_STICK;
+        buttons[11] = Gamepad::Button::RIGHT_STICK;
+
+        buttons[12] = Gamepad::Button::HOME;
+    }
 }
 
 Input_Mgr::~Input_Mgr()
@@ -118,7 +141,7 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
         auto it = m_ouya_mapping.buttons.find(ev.number);
         if (it == m_ouya_mapping.buttons.end())
         {
-            QLOGE("unhandled ouya button {}", ev.number);
+            QLOGW("unhandled ouya button {}", ev.number);
             return;
         }
         if (ev.value)
@@ -132,45 +155,55 @@ void Input_Mgr::process_ouya_gamepad_event(Gamepad_Data const& data, js_event co
     }
     else if (type == JS_EVENT_AXIS)
     {
-        if (ev.number == 0)
+        switch (ev.number)
         {
-            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
-            stick.value.x = ev.value / 32767.f;
-            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
-        }
-        else if (ev.number == 1)
-        {
-            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
-            stick.value.y = -ev.value / 32767.f;
-            data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
-        }
-        else if (ev.number == 3)
-        {
-            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
-            stick.value.x = ev.value / 32767.f;
-            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
-        }
-        else if (ev.number == 4)
-        {
-            auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
-            stick.value.y = -ev.value / 32767.f;
-            data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
-        }
-        else if (ev.number == 2)
-        {
-            Gamepad::Axis_Data v;
-            v.value = ev.value / 32767.f;
-            data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
-        }
-        else if (ev.number == 5)
-        {
-            Gamepad::Axis_Data v;
-            v.value = ev.value / 32767.f;
-            data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
-        }
-        else
-        {
-            QLOGE("unknown ouya axis {}", ev.number);
+            case 0:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+                stick.value.x = ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+            }
+            break;
+            case 1:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+                stick.value.y = -ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+            }
+            break;
+            case 3:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+                stick.value.x = ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+            }
+            break;
+            case 4:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+                stick.value.y = -ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+            }
+            break;
+            case 2:
+            {
+                Gamepad::Axis_Data v;
+                v.value = ev.value / 32767.f;
+                data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
+            }
+            break;
+            case 5:
+            {
+                Gamepad::Axis_Data v;
+                v.value = ev.value / 32767.f;
+                data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
+            }
+            break;
+            default:
+            {
+                QLOGW("unknown ouya axis {}", ev.number);
+            }
+            break;
         }
     }
 }
@@ -183,7 +216,7 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         auto it = m_ps3_mapping.buttons.find(ev.number);
         if (it == m_ps3_mapping.buttons.end())
         {
-            QLOGE("unhandled ps3 button {}", ev.number);
+            QLOGW("unhandled ps3 button {}", ev.number);
             return;
         }
         if (ev.value)
@@ -235,11 +268,119 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         }
         else
         {
-            //QLOGE("unknown ps3 axis {}", ev.number);
+            //QLOGW("unknown ps3 axis {}", ev.number);
         }
     }
 }
 
+void Input_Mgr::process_ps4_gamepad_event(Gamepad_Data const& data, js_event const& ev)
+{
+    uint8_t type = ev.type & ~JS_EVENT_INIT;
+    if (type == JS_EVENT_BUTTON)
+    {
+        auto it = m_ps4_mapping.buttons.find(ev.number);
+        if (it == m_ps4_mapping.buttons.end())
+        {
+            QLOGW("unhandled ps4 button {}", ev.number);
+            return;
+        }
+        if (ev.value)
+        {
+            data.gamepad->set_button_pressed(it->second);
+        }
+        else
+        {
+            data.gamepad->set_button_released(it->second);
+        }
+    }
+    else if (type == JS_EVENT_AXIS)
+    {
+        switch (ev.number)
+        {
+            case 0:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+                stick.value.x = ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+            }
+            break;
+            case 1:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::LEFT);
+                stick.value.y = -ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::LEFT, stick);
+            }
+            break;
+            case 2:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+                stick.value.x = ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+            }
+            break;
+            case 5:
+            {
+                auto stick = data.gamepad->get_stick_data(Gamepad::Stick::RIGHT);
+                stick.value.y = -ev.value / 32767.f;
+                data.gamepad->set_stick_data(Gamepad::Stick::RIGHT, stick);
+            }
+            break;
+            case 3:
+            {
+                Gamepad::Axis_Data v;
+                v.value = ev.value / 32767.f;
+                data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
+            }
+            break;
+            case 4:
+            {
+                Gamepad::Axis_Data v;
+                v.value = ev.value / 32767.f;
+                data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
+            }
+            break;
+            case 6:
+            {
+                if (ev.value < -15000)
+                {
+                    data.gamepad->set_button_pressed(Gamepad::Button::LPAD_LEFT);
+                }
+                else if (ev.value > 15000)
+                {
+                    data.gamepad->set_button_pressed(Gamepad::Button::LPAD_RIGHT);
+                }
+                else
+                {
+                    data.gamepad->set_button_released(Gamepad::Button::LPAD_LEFT);
+                    data.gamepad->set_button_released(Gamepad::Button::LPAD_RIGHT);
+                }
+            }
+            break;
+            case 7:
+            {
+                if (ev.value < -15000)
+                {
+                    data.gamepad->set_button_pressed(Gamepad::Button::LPAD_UP);
+                }
+                else if (ev.value > 15000)
+                {
+                    data.gamepad->set_button_pressed(Gamepad::Button::LPAD_DOWN);
+                }
+                else
+                {
+                    data.gamepad->set_button_released(Gamepad::Button::LPAD_UP);
+                    data.gamepad->set_button_released(Gamepad::Button::LPAD_DOWN);
+                }
+            }
+            break;
+            default:
+            {
+                QLOGW("unknown ps4 axis {} / {}", ev.number, ev.value / 32767.f);
+            }
+            break;
+        }
+    }
+}
 
 void Input_Mgr::update_gamepads(q::Clock::duration dt)
 {
@@ -256,6 +397,7 @@ void Input_Mgr::update_gamepads(q::Clock::duration dt)
             {
             case Gamepad::Type::OUYA: process_ouya_gamepad_event(g, ev); break;
             case Gamepad::Type::PS3: process_ps3_gamepad_event(g, ev); break;
+            case Gamepad::Type::PS4: process_ps4_gamepad_event(g, ev); break;
             default: break;
             }
         }
@@ -319,6 +461,10 @@ static boost::optional<Gamepad_Info> get_gamepad_info(int device_id)
     else if (info.name.find("sony playstation(r)3") != q::String::npos)
     {
         info.type = Gamepad::Type::PS3;
+    }
+    else if (info.name.find("Wireless Controller") != q::String::npos)
+    {
+        info.type = Gamepad::Type::PS4;
     }
     else
     {

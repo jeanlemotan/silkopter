@@ -107,8 +107,12 @@ void Gamepad::set_button_pressed(Button button)
 }
 void Gamepad::set_button_released(Button button)
 {
-    m_buttons_pressed.erase(button);
-    m_buttons_released.insert(button);
+    auto it = m_buttons_pressed.find(button);
+    if (it != m_buttons_pressed.end())
+    {
+        m_buttons_pressed.erase(it);
+        m_buttons_released.insert(button);
+    }
 }
 
 void Gamepad::set_connected(bool yes)

@@ -68,7 +68,8 @@ namespace qinput
         enum class Type
         {
             OUYA,
-            PS3
+            PS3,
+            PS4
         };
 
         Gamepad(q::String const& name, Type type);
