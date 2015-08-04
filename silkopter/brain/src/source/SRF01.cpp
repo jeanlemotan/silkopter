@@ -1,10 +1,10 @@
 #include "BrainStdAfx.h"
-#include "SRF02.h"
+#include "SRF01.h"
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
 #include "sz_math.hpp"
-#include "sz_SRF02.hpp"
+#include "sz_SRF01.hpp"
 
 namespace silk
 {
@@ -36,15 +36,15 @@ constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(100);
 
 
-SRF02::SRF02(HAL& hal)
+SRF01::SRF01(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::SRF02::Init_Params())
-    , m_config(new sz::SRF02::Config())
+    , m_init_params(new sz::SRF01::Init_Params())
+    , m_config(new sz::SRF01::Config())
 {
     m_config->direction = math::vec3f(0, 0, -1); //pointing down
 }
 
-auto SRF02::get_outputs() const -> std::vector<Output>
+auto SRF01::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
     outputs[0].type = stream::IDistance::TYPE;
@@ -52,26 +52,26 @@ auto SRF02::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF02::init(rapidjson::Value const& init_params) -> bool
+auto SRF01::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("srf02::init");
+    QLOG_TOPIC("SRF01::init");
 
-    sz::SRF02::Init_Params sz;
+    sz::SRF01::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize SRF02 data: {}", ss.str());
+        QLOGE("Cannot deserialize SRF01 data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
 
-auto SRF02::init() -> bool
+auto SRF01::init() -> bool
 {
-    m_bus = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_bus = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -89,7 +89,7 @@ auto SRF02::init() -> bool
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 
-    QLOGI("Probing SRF02 on {}...", m_init_params->bus);
+    QLOGI("Probing SRF01 on {}...", m_init_params->bus);
 
     uint32_t tries = 0;
     constexpr uint32_t max_tries = 10;
@@ -101,16 +101,16 @@ auto SRF02::init() -> bool
         ret &= bus->read_register_u8(ADDR, UNUSED, test);
         if (ret && rev != 0 && rev != 255 && test != 0 && test != 255)
         {
-            QLOGI("Found SRF02 rev {} after {} tries", rev, tries);//rev is 6 so far
+            QLOGI("Found SRF01 rev {} after {} tries", rev, tries);//rev is 6 so far
             break;
         }
-        QLOGW("\tFailed {} try to initialize SRF02: bus {}, rev {}, test {}", tries, ret, rev, test);
+        QLOGW("\tFailed {} try to initialize SRF01: bus {}, rev {}, test {}", tries, ret, rev, test);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     if (tries > max_tries)
     {
-        QLOGE("Failed to initialize SRF02");
+        QLOGE("Failed to initialize SRF01");
         return false;
     }
 
@@ -122,15 +122,15 @@ auto SRF02::init() -> bool
     return true;
 }
 
-void SRF02::trigger(bus::II2C& bus)
+void SRF01::trigger(bus::IUART& bus)
 {
     m_last_trigger_tp = q::Clock::now();
     bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
-void SRF02::process()
+void SRF01::process()
 {
-    QLOG_TOPIC("srf02::process");
+    QLOG_TOPIC("SRF01::process");
 
     m_output_stream->clear();
 
@@ -184,17 +184,17 @@ void SRF02::process()
     }
 }
 
-auto SRF02::set_config(rapidjson::Value const& json) -> bool
+auto SRF01::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("srf02::set_config");
+    QLOG_TOPIC("SRF01::set_config");
 
-    sz::SRF02::Config sz;
+    sz::SRF01::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize SRF02 config data: {}", ss.str());
+        QLOGE("Cannot deserialize SRF01 config data: {}", ss.str());
         return false;
     }
 
@@ -209,21 +209,21 @@ auto SRF02::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto SRF02::get_config() const -> rapidjson::Document
+auto SRF01::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto SRF02::get_init_params() const -> rapidjson::Document
+auto SRF01::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
 
-auto SRF02::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto SRF01::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

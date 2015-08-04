@@ -3,13 +3,13 @@
 #include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/node/stream/IDistance.h"
-#include "common/node/bus/II2C.h"
+#include "common/node/bus/IUART.h"
 
 #include "Basic_Output_Stream.h"
 
 namespace sz
 {
-namespace SRF02
+namespace SRF01
 {
 struct Init_Params;
 struct Config;
@@ -22,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class SRF02 : public ISource
+class SRF01 : public ISource
 {
 public:
-    SRF02(HAL& hal);
+    SRF01(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -42,14 +42,14 @@ public:
 private:
     auto init() -> bool;
 
-    void trigger(bus::II2C& bus);
+    void trigger(bus::IUART& bus);
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::II2C> m_bus;
+    std::weak_ptr<bus::IUART> m_bus;
 
-    std::shared_ptr<sz::SRF02::Init_Params> m_init_params;
-    std::shared_ptr<sz::SRF02::Config> m_config;
+    std::shared_ptr<sz::SRF01::Init_Params> m_init_params;
+    std::shared_ptr<sz::SRF01::Config> m_config;
 
     typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
