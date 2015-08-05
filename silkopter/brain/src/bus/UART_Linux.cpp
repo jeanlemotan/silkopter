@@ -140,6 +140,12 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
     return static_cast<size_t>(res) == size;
 }
 
+auto UART_Linux::send_break() -> bool
+{
+    tcsendbreak(m_fd, 1);
+    return true;
+}
+
 auto UART_Linux::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("uart_linux::set_config");

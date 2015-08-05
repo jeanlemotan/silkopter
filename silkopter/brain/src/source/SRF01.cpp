@@ -12,25 +12,11 @@ namespace node
 {
 
 
-constexpr uint8_t ADDR = 0x70;
+constexpr uint8_t ADDR = 0x01;
 
-//Registers
-constexpr uint8_t SW_REV_CMD        = 0x0;
-constexpr uint8_t UNUSED            = 0x1;
-constexpr uint8_t RANGE_H           = 0x2;
-constexpr uint8_t RANGE_L           = 0x3;
-constexpr uint8_t AUTOTUNE_MIN_H	= 0x4;
-constexpr uint8_t AUTOTUNE_MIN_L	= 0x5;
+constexpr uint8_t SW_REV        = 0x5D;
+constexpr uint8_t REAL_RANGING_CM_TX    = 0x54;
 
-//Commands
-constexpr uint8_t REAL_RAGING_MODE_IN       = 0x50;
-constexpr uint8_t REAL_RAGING_MODE_CM       = 0x51;
-constexpr uint8_t REAL_RAGING_MODE_US       = 0x52;
-constexpr uint8_t FAKE_RAGING_MODE_IN       = 0x56;
-constexpr uint8_t FAKE_RAGING_MODE_CM       = 0x57;
-constexpr uint8_t FAKE_RAGING_MODE_US       = 0x58;
-constexpr uint8_t BURST                     = 0x5C;
-constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 
 
 constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(100);
@@ -95,16 +81,19 @@ auto SRF01::init() -> bool
     constexpr uint32_t max_tries = 10;
     while (++tries <= max_tries)
     {
-        uint8_t rev = 0, test = 0;
-        auto ret = bus->read_register_u8(ADDR, SW_REV_CMD, rev);
+        std::array<uint8_t, 2> buf;
+        buf[0] = ADDR;											//SRF01 address
+        buf[1] = SW_REV;
+        bus->send_break();
+        auto ret = bus->write(buf.data(), buf.size());
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        ret &= bus->read_register_u8(ADDR, UNUSED, test);
-        if (ret && rev != 0 && rev != 255 && test != 0 && test != 255)
+        ret &= bus->read(buf.data(), 1) == 1;
+        if (ret && buf[0] != 0 && buf[0] != 255)
         {
-            QLOGI("Found SRF01 rev {} after {} tries", rev, tries);//rev is 6 so far
+            QLOGI("Found SRF01 rev {} after {} tries", buf[0], tries);
             break;
         }
-        QLOGW("\tFailed {} try to initialize SRF01: bus {}, rev {}, test {}", tries, ret, rev, test);
+        QLOGW("\tFailed {} try to initialize SRF01: bus {}, rev {}", tries, ret, buf[0]);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
@@ -125,7 +114,13 @@ auto SRF01::init() -> bool
 void SRF01::trigger(bus::IUART& bus)
 {
     m_last_trigger_tp = q::Clock::now();
-    bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+
+    std::array<uint8_t, 2> buf;
+    buf[0] = ADDR;											//SRF01 address
+    buf[1] = REAL_RANGING_CM_TX;
+
+    bus.send_break();
+    bus.write(buf.data(), buf.size());
 }
 
 void SRF01::process()
@@ -154,22 +149,22 @@ void SRF01::process()
         bus->unlock();
     });
 
-    std::array<uint8_t, 4> buf;
-    bool res = bus->read_register(ADDR, RANGE_H, buf.data(), buf.size());
+    std::array<uint8_t, 2> buf;
+    size_t res = bus->read(buf.data(), buf.size());
 
     //trigger immediately
     trigger(*bus);
 
-    if (res)
+    if (res == buf.size())
     {
         int d = (unsigned int)(buf[0] << 8) | buf[1];
-        int min_d = (unsigned int)(buf[2] << 8) | buf[3];
+        //int min_d = (unsigned int)(buf[2] << 8) | buf[3];
 
-        //QLOGI("d = {}, min_d = {}", d, min_d);
+        QLOGI("d = {}", d);
 
         float distance = static_cast<float>(d) / 100.f; //meters
 
-        float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
+        float min_distance = m_config->min_distance;//math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
         float max_distance = m_config->max_distance;
         auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
         auto is_healthy = distance >= min_distance && distance <= max_distance;

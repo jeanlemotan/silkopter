@@ -16,6 +16,7 @@
 #include "source/MS5611.h"
 #include "source/RC5T619.h"
 #include "source/ADS1115.h"
+#include "source/SRF01.h"
 #include "source/SRF02.h"
 #include "source/UBLOX.h"
 #include "sink/PIGPIO.h"
@@ -466,6 +467,7 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<MPU9250>("MPU9250", *this);
     m_node_factory.register_node<MS5611>("MS5611", *this);
+    m_node_factory.register_node<SRF01>("SRF01", *this);
     m_node_factory.register_node<SRF02>("SRF02", *this);
     m_node_factory.register_node<Raspicam>("Raspicam", *this);
     m_node_factory.register_node<RC5T619>("RC5T619", *this);

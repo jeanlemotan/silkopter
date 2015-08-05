@@ -20,13 +20,11 @@ QMAKE_CFLAGS += -Wno-unused-variable
 
 rpi {
     DEFINES+=RASPBERRY_PI
-}
-
-rpi {
     QMAKE_MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
-    } else {
+    }
+    CONFIG(release, debug|release) {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
@@ -34,11 +32,13 @@ rpi {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
-    } else {
+    }
+    CONFIG(release, debug|release) {
         DEST_FOLDER = pc/release
         DEFINES += NDEBUG
     }
 }
+
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}

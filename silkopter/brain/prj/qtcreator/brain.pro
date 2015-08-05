@@ -19,19 +19,18 @@ CONFIG *= precompile_header
 
 rpi {
     DEFINES+=RASPBERRY_PI
-}
-
-rpi {
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
-    } else {
+    }
+    CONFIG(release, debug|release) {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
 } else {
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
-    } else {
+    }
+    CONFIG(release, debug|release) {
         DEST_FOLDER = pc/release
         DEFINES += NDEBUG
     }
@@ -127,7 +126,8 @@ SOURCES += \
     ../../../libs/utils/radiotap/radiotap.cpp \
     ../../../libs/utils/RCP.inl \
     ../../../libs/lz4/lz4.c \
-    ../../src/source/OpenCV_Capture.cpp
+    ../../src/source/OpenCV_Capture.cpp \
+    ../../src/source/SRF01.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -251,7 +251,8 @@ HEADERS += \
     ../../../libs/common/node/stream/IMulti_Input.h \
     ../../../libs/common/node/stream/IMulti_State.h \
     ../../../libs/common/node/stream/IProximity.h \
-    ../../../libs/utils/Serialization.h
+    ../../../libs/utils/Serialization.h \
+    ../../src/source/SRF01.h
 
 DISTFILES +=
 
