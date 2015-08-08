@@ -1,3 +1,5 @@
 *.q
 *.pro.user
 /.obj/
+/Makefile.rpi
+/Makefile

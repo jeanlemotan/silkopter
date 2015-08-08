@@ -2,3 +2,4 @@
 *.qdata
 /Makefile
 /.obj/
+/Makefile.rpi

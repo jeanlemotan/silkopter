@@ -2,3 +2,4 @@
 *.qmath
 /Makefile
 /.obj/
+/Makefile.rpi
