@@ -40,7 +40,7 @@ public:
     auto read(uint8_t* data, size_t max_size) -> size_t;
     auto write(uint8_t const* data, size_t size) -> bool;
 
-    auto send_break() -> bool;
+    void send_break();
 
 private:
     auto init() -> bool;

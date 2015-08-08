@@ -119,7 +119,10 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
     auto res = ::read(m_fd, data, max_size);
     if (res < 0)
     {
-//        QLOGE("error reading from {}: {}", m_params.dev, strerror(errno));
+        if (errno != EWOULDBLOCK && errno != EAGAIN)
+        {
+            QLOGE("error reading from {}: {}", m_init_params->dev, strerror(errno));
+        }
         return 0;
     }
     return res;
@@ -140,10 +143,9 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
     return static_cast<size_t>(res) == size;
 }
 
-auto UART_Linux::send_break() -> bool
+void UART_Linux::send_break()
 {
     tcsendbreak(m_fd, 1);
-    return true;
 }
 
 auto UART_Linux::set_config(rapidjson::Value const& json) -> bool

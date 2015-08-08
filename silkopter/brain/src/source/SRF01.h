@@ -42,6 +42,11 @@ public:
 private:
     auto init() -> bool;
 
+    auto send_command(bus::IUART& bus, uint8_t command) -> bool;
+    auto read_response(bus::IUART& bus, uint8_t sent_command, uint8_t* response, size_t size) -> bool;
+    auto read_response_u8(bus::IUART& bus, uint8_t sent_command, uint8_t& response) -> bool;
+    auto read_response_u16(bus::IUART& bus, uint8_t sent_command, uint16_t& response) -> bool;
+
     void trigger(bus::IUART& bus);
 
     HAL& m_hal;
@@ -54,6 +59,8 @@ private:
     typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
     q::Clock::time_point m_last_trigger_tp;
+
+    std::deque<uint8_t> m_read_data;
 
 };
 
