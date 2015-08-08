@@ -62,6 +62,8 @@ private:
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;
+    Render_Context& m_context;
+
     QNodesEditor* m_nodes_editor;
     QGraphicsView* m_view;
     QGraphicsScene* m_scene;
@@ -104,7 +106,6 @@ private:
     std::map<std::string, UI_Stream> m_ui_streams;
     std::map<std::string, UI_Node> m_ui_nodes;
 
-    Render_Context& m_context;
     Sim_Window* m_sim_window = nullptr;
 
     auto compute_unique_name(std::string const& name) const -> std::string;

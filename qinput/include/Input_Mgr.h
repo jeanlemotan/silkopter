@@ -29,7 +29,7 @@ namespace qinput
         void add_event(Sensor_Event const& event);
 //        void add_event(Gamepad_Event const& event);
 
-        void update(q::Clock::duration dt);
+        void process(q::Clock::duration dt);
 
 	private:
 

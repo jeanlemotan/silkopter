@@ -404,7 +404,7 @@ void Input_Mgr::update_gamepads(q::Clock::duration dt)
 	}
 }
 
-void Input_Mgr::update(q::Clock::duration dt)
+void Input_Mgr::process(q::Clock::duration dt)
 {
 	m_touchscreen.update(dt);
 	m_keyboard.update(dt);

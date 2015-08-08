@@ -37,7 +37,7 @@ public:
         IProximity::Value proximity;
         IForce::Value thrust;
 
-        IMulti_Input::Sample last_input_sample;
+        IMulti_Input::Value last_input;
     };
 
     typedef stream::Sample<Value>     Sample;

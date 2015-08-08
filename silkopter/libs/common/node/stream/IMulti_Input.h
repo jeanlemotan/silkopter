@@ -12,6 +12,8 @@ namespace stream
 
 template<class T> struct Input_Value
 {
+    typedef T Value;
+
     Input_Value() = default;
     Input_Value(T value) : value(value) {}
     uint32_t version = 0;
@@ -19,6 +21,8 @@ template<class T> struct Input_Value
 };
 template<> struct Input_Value<bool>
 {
+    typedef bool Value;
+
     Input_Value() : version(0), value(0) {}
     Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
     uint32_t version : 31;
@@ -44,9 +48,9 @@ public:
         ARMED,
     };
 
-    struct Vertical_Mode
+    struct Vertical
     {
-        Vertical_Mode() : thrust_rate() {}
+        Vertical() : thrust_rate() {}
 
         enum Mode : uint8_t
         {
@@ -64,9 +68,9 @@ public:
         };
     };
 
-    struct Horizontal_Mode
+    struct Horizontal
     {
-        Horizontal_Mode() : angle_rate() {}
+        Horizontal() : angle_rate() {}
 
         enum Mode : uint8_t
         {
@@ -84,7 +88,7 @@ public:
         };
     };
 
-    struct Yaw_Mode
+    struct Yaw
     {
         enum Mode : uint8_t
         {
@@ -119,9 +123,9 @@ public:
     struct Value
     {
         Toggles toggles;
-        Vertical_Mode vertical_mode;
-        Horizontal_Mode horizontal_mode;
-        Yaw_Mode yaw_mode;
+        Vertical vertical;
+        Horizontal horizontal;
+        Yaw yaw;
 
         Input_Value<Mode> mode = Mode::IDLE;
         Input_Value<Reference_Frame> reference_frame = Reference_Frame::LOCAL;

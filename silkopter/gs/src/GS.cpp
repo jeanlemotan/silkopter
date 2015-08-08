@@ -2,7 +2,7 @@
 
 #include "HAL_Window.h"
 #include "Multi_Config_Window.h"
-#include "hud/Multi_HUD.h"
+#include "hud/Multi_HUD_Widget.h"
 
 GS::GS(QWidget *parent)
 	: QMainWindow(parent)
@@ -51,7 +51,7 @@ GS::GS(QWidget *parent)
     connect(m_ui.action_multi_hud, &QAction::triggered, [this](bool)
     {
         delete m_hud;
-        m_hud = new Multi_HUD(this);
+        m_hud = new Multi_HUD_Widget(m_hal, m_comms, *m_input_mgr, m_context, this);
         m_ui.centralwidget->layout()->addWidget(m_hud);
         m_ui.label->hide();
     });
@@ -146,7 +146,7 @@ void GS::process()
     auto dt = now - m_last_tp;
     m_last_tp = now;
 
-    m_input_mgr->update(dt);
+    m_input_mgr->process(dt);
 
     m_comms.process();
 
@@ -155,8 +155,13 @@ void GS::process()
     m_hal_window->process();
     m_multi_config_window->process();
 
-    silk::node::stream::IMulti_Input::Sample input;
-    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), input);
+    if (m_hud)
+    {
+        m_hud->process();
+    }
+
+//    silk::node::stream::IMulti_Input::Sample input;
+//    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), input);
 
 
 //	m_render_widget->begin_rendering();
