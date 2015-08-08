@@ -11,7 +11,7 @@ namespace sz
 {
 namespace Comms
 {
-namespace Source
+namespace Multi_Comms
 {
 struct Init_Params;
 struct Config;
@@ -41,22 +41,6 @@ public:
 
     void process();
 
-    struct Source : public node::ISource
-    {
-        Source(Comms& comms) : m_comms(comms) {}
-        auto init(rapidjson::Value const& init_params) -> bool;
-        auto get_init_params() const -> rapidjson::Document;
-        auto set_config(rapidjson::Value const& json) -> bool;
-        auto get_config() const -> rapidjson::Document;
-        auto send_message(rapidjson::Value const& json) -> rapidjson::Document { return rapidjson::Document(); }
-        auto get_outputs() const -> std::vector<Output>;
-        void process();
-    private:
-        Comms& m_comms;
-    };
-
-    auto get_source() -> std::shared_ptr<Source>;
-
     struct Channels;
 
 private:
@@ -72,10 +56,6 @@ private:
         uint32_t rate = 0;
     };
     mutable std::shared_ptr<Commands> m_commands_stream;
-
-    std::shared_ptr<sz::Comms::Source::Init_Params> m_init_params;
-    std::shared_ptr<sz::Comms::Source::Config> m_config;
-    std::shared_ptr<Source> m_source;
 
     void handle_accept(boost::system::error_code const& error);
 

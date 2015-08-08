@@ -29,7 +29,7 @@
 #include "common/node/stream/IMulti_State.h"
 #include "common/node/stream/IMulti_Input.h"
 
-#include "common/node/IPilot.h"
+#include "common/node/IBrain.h"
 
 
 #include "utils/RCP.h"
@@ -76,11 +76,7 @@ Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_channels(new Channels())
 {
-    m_source.reset(new Source(*this));
     m_commands_stream.reset(new Commands);
-
-    m_config.reset(new sz::Comms::Source::Config);
-    m_init_params.reset(new sz::Comms::Source::Init_Params);
 }
 
 auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
@@ -944,61 +940,3 @@ void Comms::process()
 //    }
 }
 
-
-auto Comms::Source::init(rapidjson::Value const& init_params) -> bool
-{
-    QLOG_TOPIC("comms::source::init");
-
-    sz::Comms::Source::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Comms::Source data: {}", ss.str());
-        return false;
-    }
-    *m_comms.m_init_params = sz;
-    m_comms.m_commands_stream->rate = 50;
-    return true;
-}
-auto Comms::Source::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_comms.m_init_params, json);
-    return std::move(json);
-}
-auto Comms::Source::set_config(rapidjson::Value const& json) -> bool
-{
-    sz::Comms::Source::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Comms::Source config data: {}", ss.str());
-        return false;
-    }
-
-    *m_comms.m_config = sz;
-    return true;
-}
-auto Comms::Source::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_comms.m_config, json);
-    return std::move(json);
-}
-auto Comms::Source::get_outputs() const -> std::vector<Output>
-{
-    std::vector<Output> outputs(1);
-    outputs[0].type = node::stream::IMulti_Input::TYPE;
-    outputs[0].name = "Multirotor Input";
-    outputs[0].stream = m_comms.m_commands_stream;
-    return outputs;
-}
-
-void Comms::Source::process()
-{
-
-}

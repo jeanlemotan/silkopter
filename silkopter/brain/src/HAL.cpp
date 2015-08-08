@@ -33,6 +33,7 @@
 
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
+#include "brain/Multi_Brain.h"
 #include "pilot/Multi_Pilot.h"
 
 #include "controller/Rate_Controller.h"
@@ -473,12 +474,12 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<RC5T619>("RC5T619", *this);
     m_node_factory.register_node<ADS1115>("ADS1115", *this);
     m_node_factory.register_node<UBLOX>("UBLOX", *this);
-    m_node_factory.register_node<Comms::Source>("Comms Source", comms);
 
     m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
-   m_node_factory.register_node<PCA9685>("PCA9685", *this);
+    m_node_factory.register_node<PCA9685>("PCA9685", *this);
 
-    m_node_factory.register_node<Multi_Pilot>("Multi Pilot", *this);
+    m_node_factory.register_node<Multi_Brain>("Multi Brain", *this);
+    m_node_factory.register_node<Multi_Pilot>("Multi Pilot", *this, comms);
 
     m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);

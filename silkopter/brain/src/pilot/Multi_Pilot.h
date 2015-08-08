@@ -2,16 +2,6 @@
 
 #include "common/node/IPilot.h"
 
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IProximity.h"
-
 #include "common/node/stream/IMulti_Input.h"
 #include "common/node/stream/IMulti_State.h"
 
@@ -39,7 +29,7 @@ namespace node
 class Multi_Pilot : public IPilot
 {
 public:
-    Multi_Pilot(HAL& hal);
+    Multi_Pilot(HAL& hal, Comms& comms);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -59,29 +49,15 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
+    Comms& m_comms;
 
     std::shared_ptr<sz::Multi_Pilot::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Pilot::Config> m_config;
 
-    Sample_Accumulator<
-        stream::IAngular_Velocity,
-        stream::IFrame,
-        stream::IBattery_State,
-        stream::IMagnetic_Field,
-        stream::IECEF_Linear_Acceleration,
-        stream::IECEF_Position,
-        stream::IECEF_Velocity,
-        stream::IProximity,
-        stream::IMulti_Input> m_accumulator;
+    Sample_Accumulator<stream::IMulti_State> m_accumulator;
 
-    typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
-    mutable std::shared_ptr<State_Output_Stream> m_state_output_stream;
-
-    typedef Basic_Output_Stream<stream::IAngular_Velocity> Rate_Output_Stream;
-    mutable std::shared_ptr<Rate_Output_Stream> m_rate_output_stream;
-
-    typedef Basic_Output_Stream<stream::IAngular_Velocity> Stability_Output_Stream;
-    mutable std::shared_ptr<Stability_Output_Stream> m_stability_output_stream;
+    typedef Basic_Output_Stream<stream::IMulti_Input> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 

@@ -14,6 +14,7 @@ enum class Type : uint8_t
     SINK,
     SOURCE,
     LPF,
+    BRAIN,
     PILOT,
     RESAMPLER,
     TRANSFORMER,

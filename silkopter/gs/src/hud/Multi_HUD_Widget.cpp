@@ -243,6 +243,8 @@ void Multi_HUD_Widget::sync_input()
     SYNC(assists.avoid_the_user);
     SYNC(assists.avoid_proximity);
 }
+#undef SYNC
+
 
 void Multi_HUD_Widget::process()
 {

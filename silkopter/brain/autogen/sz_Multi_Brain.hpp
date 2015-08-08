@@ -27,10 +27,11 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Pilot { struct Init_Params {
+namespace sz { namespace Multi_Brain { struct Init_Params {
  uint32_t rate;
+uint32_t state_rate;
 
-explicit Init_Params():rate(20) {  }
+explicit Init_Params():rate(0), state_rate(20) {  }
 
 
  
@@ -41,13 +42,15 @@ explicit Init_Params():rate(20) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Pilot::Init_Params > {
+class SAXEventHandler< ::sz::Multi_Brain::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;bool has_rate;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< uint32_t > handler_1;bool has_rate;
+bool has_state_rate;
 
     bool check_depth(const char* type)
     {
@@ -63,6 +66,8 @@ private:
         switch (state) {
             case 0:
     return "rate";
+case 1:
+    return "state_rate";
         default:
             break;
         }
@@ -90,13 +95,15 @@ private:
     void reset_flags()
     {
         has_rate = false;
+has_state_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Pilot::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Multi_Brain::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
+, handler_1(&obj->state_rate)
     {
         reset_flags();
     }
@@ -110,6 +117,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -127,6 +137,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -142,6 +155,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -159,6 +175,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -174,6 +193,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -191,6 +213,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -206,6 +231,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -223,6 +251,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -239,6 +270,8 @@ public:
             }
             else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=0; has_rate = true; }
+else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
+						 { state=1; has_state_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -249,6 +282,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -267,6 +303,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -283,6 +322,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
         default:
             break;
         }
@@ -298,6 +340,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -316,11 +361,15 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_rate) set_missing_required("rate");
+if (!has_state_rate) set_missing_required("state_rate");
         }
         return the_error.empty();
     }
@@ -341,6 +390,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -356,20 +407,22 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
 
-template < class Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12 >
-struct Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, ::sz::Multi_Pilot::Init_Params > {
+template < class Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c >
+struct Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, ::sz::Multi_Brain::Init_Params > {
 
-    void operator()( Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12& w, const ::sz::Multi_Pilot::Init_Params& value) const
+    void operator()( Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c& w, const ::sz::Multi_Brain::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.rate);
+w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.state_rate);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };
@@ -403,7 +456,7 @@ struct Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Pilot { struct Config {
+namespace sz { namespace Multi_Brain { struct Config {
  
 
 explicit Config() {  }
@@ -417,7 +470,7 @@ explicit Config() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Pilot::Config > {
+class SAXEventHandler< ::sz::Multi_Brain::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -468,7 +521,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Pilot::Config * obj)
+    explicit SAXEventHandler( ::sz::Multi_Brain::Config * obj)
         : state(-1)
         , depth(0)
         
@@ -719,10 +772,10 @@ public:
     }
 };
 
-template < class Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f >
-struct Serializer< Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f, ::sz::Multi_Pilot::Config > {
+template < class Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad >
+struct Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, ::sz::Multi_Brain::Config > {
 
-    void operator()( Writerc839261b0d8544796dd261f64e038ef0f9e68df9b2e1876433eec0b25df6f03f& w, const ::sz::Multi_Pilot::Config& value) const
+    void operator()( Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad& w, const ::sz::Multi_Brain::Config& value) const
     {
         w.StartObject();
 

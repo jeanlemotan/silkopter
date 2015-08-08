@@ -34,7 +34,7 @@ template<> struct Input_Value<bool>
     Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
 
     void set(Value const& v) { value = v; version++; }
-    bool const& get() const { return value != 0; }
+    bool get() const { return value != 0; }
 };
 
 

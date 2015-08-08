@@ -112,7 +112,6 @@ SOURCES += \
     ../../src/controller/Rate_Controller.cpp \
     ../../src/controller/Stability_Controller.cpp \
     ../../src/controller/Velocity_Controller.cpp \
-    ../../src/pilot/Multi_Pilot.cpp \
     ../../src/simulator/Multi_Simulation.cpp \
     ../../src/simulator/Multi_Simulator.cpp \
     ../../src/processor/Servo_Gimbal.cpp \
@@ -127,7 +126,9 @@ SOURCES += \
     ../../../libs/utils/RCP.inl \
     ../../../libs/lz4/lz4.c \
     ../../src/source/OpenCV_Capture.cpp \
-    ../../src/source/SRF01.cpp
+    ../../src/source/SRF01.cpp \
+    ../../src/brain/Multi_Brain.cpp \
+    ../../src/pilot/Multi_Pilot.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -197,7 +198,6 @@ HEADERS += \
     ../../../libs/common/node/IController.h \
     ../../../libs/common/node/IGenerator.h \
     ../../../libs/common/node/ILPF.h \
-    ../../../libs/common/node/IPilot.h \
     ../../../libs/common/node/IResampler.h \
     ../../../libs/common/node/ITransformer.h \
     ../../src/controller/Rate_Controller.h \
@@ -207,7 +207,6 @@ HEADERS += \
     ../../src/resampler/Resampler.h \
     ../../src/transformer/Transformer.h \
     ../../src/transformer/Transformer_Inv.h \
-    ../../src/pilot/Multi_Pilot.h \
     ../../src/simulator/Multi_Simulation.h \
     ../../src/simulator/Multi_Simulator.h \
     ../../../libs/common/node/IConfig.h \
@@ -252,7 +251,11 @@ HEADERS += \
     ../../../libs/common/node/stream/IMulti_State.h \
     ../../../libs/common/node/stream/IProximity.h \
     ../../../libs/utils/Serialization.h \
-    ../../src/source/SRF01.h
+    ../../src/source/SRF01.h \
+    ../../src/brain/Multi_Brain.h \
+    ../../../libs/common/node/IBrain.h \
+    ../../src/pilot/Multi_Pilot.h \
+    ../../../libs/common/node/IPilot.h
 
 DISTFILES +=
 
