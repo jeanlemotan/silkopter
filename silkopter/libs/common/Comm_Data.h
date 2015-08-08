@@ -46,12 +46,19 @@ enum class Setup_Message : uint8_t
     COUNT //keep last
 };
 
-enum class Input_Message : uint8_t
+enum class Pilot_Message : uint8_t
 {
     MULTI_INPUT,
+    MULTI_STATE,
+
     AIRPLANE_INPUT,
+    AIRPLANE_STATE,
+
     ROVER_INPUT,
+    ROVER_STATE,
+
     BOAT_INPUT,
+    BOAT_STATE,
 
     COUNT //keep last
 };

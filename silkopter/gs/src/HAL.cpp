@@ -58,7 +58,6 @@ void HAL::set_multi_config(config::Multi const& config)
 
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(configj);
     channel.end_pack();
 }
@@ -69,7 +68,6 @@ void HAL::add_node(std::string const& def_name,
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(def_name);
     channel.pack_param(name);
     channel.pack_param(init_params);
@@ -80,7 +78,6 @@ void HAL::remove_node(node::Node_ptr node)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(node->name);
     channel.end_pack();
 }
@@ -98,7 +95,6 @@ void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& inp
 
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(node->name);
     channel.pack_param(input_idx);
     channel.pack_param(stream_path.get_as<std::string>());
@@ -109,7 +105,6 @@ void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(node->name);
     channel.pack_param(config);
     channel.end_pack();
@@ -119,7 +114,6 @@ void HAL::send_node_message(node::Node_ptr node, rapidjson::Document const& json
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(node->name);
     channel.pack_param(json);
     channel.end_pack();
@@ -150,7 +144,6 @@ void HAL::set_stream_telemetry_active(std::string const& stream_name, bool activ
 
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
-    channel.pack_param(m_comms.get_new_req_id());
     channel.pack_param(stream_name);
     channel.pack_param(new_active);
     channel.end_pack();

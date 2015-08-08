@@ -11,14 +11,14 @@ using namespace silk;
 using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
-constexpr uint8_t INPUT_CHANNEL = 15;
+constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 constexpr uint8_t VIDEO_CHANNEL = 4;
 
 Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_setup_channel(SETUP_CHANNEL)
-    , m_input_channel(INPUT_CHANNEL)
+    , m_pilot_channel(PILOT_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
     , m_video_channel(VIDEO_CHANNEL)
 {
@@ -97,7 +97,7 @@ void Comms::configure_channels()
         params.is_reliable = true;
         params.importance = 100;
         params.cancel_after = std::chrono::milliseconds(100);
-        m_rcp->set_send_params(INPUT_CHANNEL, params);
+        m_rcp->set_send_params(PILOT_CHANNEL, params);
     }
 
     {
@@ -108,7 +108,7 @@ void Comms::configure_channels()
     {
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(200);
-        m_rcp->set_receive_params(INPUT_CHANNEL, params);
+        m_rcp->set_receive_params(PILOT_CHANNEL, params);
     }
 
     {
@@ -129,15 +129,6 @@ auto Comms::get_setup_channel() -> Setup_Channel&
 {
     return m_setup_channel;
 }
-auto Comms::get_input_channel() -> Input_Channel&
-{
-    return m_input_channel;
-}
-
-uint32_t Comms::get_new_req_id()
-{
-    return ++m_last_req_id;
-}
 
 void Comms::reset()
 {
@@ -147,10 +138,10 @@ void Comms::reset()
 
 void Comms::request_data()
 {
-    m_setup_channel.pack_all(comms::Setup_Message::CLOCK, ++m_last_req_id);
-    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS, ++m_last_req_id);
-    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES, ++m_last_req_id);
-    m_setup_channel.pack_all(comms::Setup_Message::MULTI_CONFIG, ++m_last_req_id);
+    m_setup_channel.pack_all(comms::Setup_Message::CLOCK);
+    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS);
+    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES);
+    m_setup_channel.pack_all(comms::Setup_Message::MULTI_CONFIG);
 }
 
 void Comms::request_all_node_configs()
@@ -158,7 +149,7 @@ void Comms::request_all_node_configs()
     auto nodes = m_hal.get_nodes().get_all();
     for (auto const& n: nodes)
     {
-        m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, ++m_last_req_id, n->name);
+        m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, n->name);
     }
 }
 
@@ -169,7 +160,7 @@ auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
     json->SetObject();
     if (!str.empty() && json->Parse(str.c_str()).HasParseError())
     {
-        //            QLOGE("Failed to parse config: {}:{}", req_id, name, node->config.GetParseError(), node->config.GetErrorOffset());
+        //            QLOGE("Failed to parse config: {}:{}", name, node->config.GetParseError(), node->config.GetErrorOffset());
         return nullptr;
     }
     return std::move(json);
@@ -326,8 +317,7 @@ auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) ->
 void Comms::handle_clock()
 {
     uint64_t us;
-    uint32_t req_id = 0;
-    if (m_setup_channel.unpack_all(req_id, us))
+    if (m_setup_channel.unpack_all(us))
     {
         m_hal.m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
     }
@@ -339,10 +329,8 @@ void Comms::handle_clock()
 
 void Comms::handle_multi_config()
 {
-    uint32_t req_id = 0;
     bool success = false;
     bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(req_id) &&
               m_setup_channel.unpack_param(success);
     if (!ok)
     {
@@ -350,14 +338,14 @@ void Comms::handle_multi_config()
         return;
     }
 
-    QLOGI("Req Id: {} - multi config received", req_id);
+    QLOGI("Multi config received");
 
     if (success)
     {
         rapidjson::Document configj;
         if (!m_setup_channel.unpack_param(configj))
         {
-            QLOGE("Req Id: {} - failed to unpack config json", req_id);
+            QLOGE("Failed to unpack config json");
         }
 
         config::Multi config;
@@ -379,17 +367,15 @@ void Comms::handle_multi_config()
 
 void Comms::handle_enumerate_node_defs()
 {
-    uint32_t req_id = 0;
     uint32_t node_count = 0;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(node_count))
     {
         QLOGE("Error in enumerating node defs");
         return;
     }
 
-    QLOGI("Req Id: {}, Received defs for {} nodes", req_id, node_count);
+    QLOGI("Received defs for {} nodes", node_count);
 
     for (uint32_t i = 0; i < node_count; i++)
     {
@@ -516,17 +502,15 @@ auto Comms::link_inputs(node::Node_ptr node) -> bool
 
 void Comms::handle_enumerate_nodes()
 {
-    uint32_t req_id = 0;
     uint32_t node_count = 0;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(node_count))
     {
         QLOGE("Error in unpacking enumerate nodes message");
         return;
     }
 
-    QLOGI("Req Id: {}, Received {} nodes", req_id, node_count);
+    QLOGI("Received {} nodes", node_count);
 
     std::vector<silk::node::Node_ptr> nodes;
     for (uint32_t i = 0; i < node_count; i++)
@@ -578,10 +562,8 @@ void Comms::handle_enumerate_nodes()
 
 void Comms::handle_node_message()
 {
-    uint32_t req_id = 0;
     std::string name;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(name))
     {
         QLOGE("Failed to unpack node message");
@@ -591,16 +573,16 @@ void Comms::handle_node_message()
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        QLOGE("Cannot find node '{}'", name);
         return;
     }
 
-    QLOGI("Req Id: {}, node '{}' - message received", req_id, name);
+    QLOGI("Node '{}' - message received", name);
 
     rapidjson::Document json;
     if (!m_setup_channel.unpack_param(json))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to unpack message", req_id, name);
+        QLOGE("Node '{}' - failed to unpack message", name);
     }
 
     node->message_received_signal.execute(json);
@@ -608,11 +590,9 @@ void Comms::handle_node_message()
 
 void Comms::handle_node_config()
 {
-    uint32_t req_id = 0;
     std::string name;
     rapidjson::Document json;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(name) ||
         !m_setup_channel.unpack_param(json))
     {
@@ -623,7 +603,7 @@ void Comms::handle_node_config()
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        QLOGE("Cannot find node '{}'", name);
         return;
     }
     node->config.SetObject();
@@ -634,10 +614,8 @@ void Comms::handle_node_config()
 
 void Comms::handle_get_node_data()
 {
-    uint32_t req_id = 0;
     std::string name;
     bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(req_id) &&
               m_setup_channel.unpack_param(name);
     if (!ok)
     {
@@ -648,15 +626,15 @@ void Comms::handle_get_node_data()
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        QLOGE("Cannot find node '{}'", name);
         return;
     }
 
-    QLOGI("Req Id: {}, node '{}' - config received", req_id, name);
+    QLOGI("Node '{}' - config received", name);
 
     if (!unpack_node_data(m_setup_channel, *node))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
+        QLOGE("Node '{}' - failed to unpack config", name);
     }
     link_inputs(node);
 
@@ -665,10 +643,8 @@ void Comms::handle_get_node_data()
 
 void Comms::handle_node_input_stream_path()
 {
-    uint32_t req_id = 0;
     std::string name;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(name))
     {
         QLOGE("Failed to unpack node input stream path");
@@ -678,15 +654,15 @@ void Comms::handle_node_input_stream_path()
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        QLOGE("Cannot find node '{}'", name);
         return;
     }
 
-    QLOGI("Req Id: {}, node '{}' - message received", req_id, name);
+    QLOGI("Node '{}' - message received", name);
 
     if (!unpack_node_data(m_setup_channel, *node))
     {
-        QLOGE("Req Id: {}, node '{}' - failed to unpack config", req_id, name);
+        QLOGE("Node '{}' - failed to unpack config", name);
     }
     link_inputs(node);
 
@@ -695,10 +671,8 @@ void Comms::handle_node_input_stream_path()
 
 void Comms::handle_add_node()
 {
-    uint32_t req_id = 0;
     std::string name;
     if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(req_id) ||
         !m_setup_channel.unpack_param(name))
     {
         QLOGE("Failed to unpack add node request");
@@ -727,10 +701,8 @@ void Comms::handle_add_node()
 
 void Comms::handle_remove_node()
 {
-    uint32_t req_id = 0;
     std::string name;
     bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(req_id) &&
               m_setup_channel.unpack_param(name);
     if (!ok)
     {
@@ -741,7 +713,7 @@ void Comms::handle_remove_node()
     auto node = m_hal.get_nodes().find_by_name(name);
     if (!node)
     {
-        QLOGE("Req Id: {}, cannot find node '{}'", req_id, name);
+        QLOGE("Cannot find node '{}'", name);
         return;
     }
 
@@ -754,9 +726,7 @@ void Comms::handle_remove_node()
 void Comms::handle_streams_telemetry_active()
 {
     bool is_active = false;
-    uint32_t req_id = 0;
     bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(req_id) &&
               m_setup_channel.unpack_param(is_active);
     if (!ok)
     {
@@ -866,11 +836,44 @@ void Comms::handle_frame_data()
     stream.samples.clear();
  }
 
+void Comms::handle_multi_state()
+{
+    auto& channel = m_pilot_channel;
+
+    node::stream::IMulti_State::Sample sample;
+    if (!channel.unpack_all(sample))
+    {
+        QLOGE("Error in unpacking multi state");
+        return;
+    }
+
+    m_multi_state_samples.push_back(sample);
+}
+
+auto Comms::get_multi_state_samples() const -> std::vector<node::stream::IMulti_State::Sample> const&
+{
+    return m_multi_state_samples;
+}
+void Comms::send_multi_input_value(node::stream::IMulti_Input::Value const& value)
+{
+    m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTI_INPUT, value);
+}
+
 void Comms::process()
 {
     if (!is_connected())
     {
         return;
+    }
+
+    m_multi_state_samples.clear();
+
+    while (auto msg = m_pilot_channel.get_next_message(*m_rcp))
+    {
+        switch (msg.get())
+        {
+        case comms::Pilot_Message::MULTI_STATE : handle_multi_state(); break;
+        }
     }
 
     while (auto msg = m_video_channel.get_next_message(*m_rcp))
@@ -934,6 +937,6 @@ void Comms::process()
 
     m_setup_channel.send(*m_rcp);
     m_telemetry_channel.try_sending(*m_rcp);
-    m_input_channel.try_sending(*m_rcp);
+    m_pilot_channel.try_sending(*m_rcp);
 }
 

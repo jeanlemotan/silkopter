@@ -192,7 +192,7 @@ void Multi_HUD_Widget::process_gamepad()
 
     process_mode();
 
-    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), m_multi_input);
+    m_comms.send_multi_input_value(m_multi_input);
 }
 
 #define SYNC(x) \
@@ -249,6 +249,12 @@ void Multi_HUD_Widget::sync_input()
 void Multi_HUD_Widget::process()
 {
     QLOG_TOPIC("input");
+
+    auto const& samples = m_comms.get_multi_state_samples();
+    if (!samples.empty())
+    {
+        m_multi_state = samples.back().value;
+    }
 
     process_gamepad();
 

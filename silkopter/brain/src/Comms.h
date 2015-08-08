@@ -6,6 +6,7 @@
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
 #include "common/node/stream/IMulti_Input.h"
+#include "common/node/stream/IMulti_State.h"
 
 namespace sz
 {
@@ -41,21 +42,12 @@ public:
 
     void process();
 
-    struct Channels;
+    auto get_multi_input_values() const -> std::vector<node::stream::IMulti_Input::Value> const&;
+    void add_multi_state_sample(node::stream::IMulti_State::Sample const& sample);
 
+    struct Channels; //this needs to be public...
 private:
     void configure_channels();
-
-    struct Commands : public node::stream::IMulti_Input
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
-
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<Commands> m_commands_stream;
 
     void handle_accept(boost::system::error_code const& error);
 
@@ -107,6 +99,10 @@ private:
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
 
     Manual_Clock m_remote_clock;
+
+    std::vector<node::stream::IMulti_Input::Value> m_multi_input_values;
+    std::vector<node::stream::IMulti_State::Sample> m_multi_state_samples;
+
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 

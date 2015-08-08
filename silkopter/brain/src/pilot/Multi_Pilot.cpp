@@ -71,11 +71,21 @@ void Multi_Pilot::process()
     QLOG_TOPIC("Multi_Pilot::process");
 
     m_output_stream->clear();
+    auto const& input_values = m_comms.get_multi_input_values();
+    size_t samples_needed = m_output_stream->compute_samples_needed();
+    if (!input_values.empty())
+    {
+        for (size_t i = 0; i < samples_needed; i++)
+        {
+            m_output_stream->push_sample(input_values.back(), true);
+        }
+    }
 
     m_accumulator.process([this](
                           size_t idx,
                           stream::IMulti_State::Sample const& i_state)
     {
+        m_comms.add_multi_state_sample(i_state);
     });
 }
 

@@ -30,17 +30,17 @@ public:
     //----------------------------------------------------------------------
 
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Input_Message, uint16_t> Input_Channel;
+    typedef util::Channel<comms::Pilot_Message, uint16_t> Pilot_Channel;
     typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
     typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
 
     auto get_setup_channel() -> Setup_Channel&;
-    auto get_input_channel() -> Input_Channel&;
-    uint32_t get_new_req_id();
+
+    auto get_multi_state_samples() const -> std::vector<node::stream::IMulti_State::Sample> const&;
+    void send_multi_input_value(node::stream::IMulti_Input::Value const& value);
 
 private:
     HAL& m_hal;
-    uint32_t m_last_req_id = 0;
 
     void configure_channels();
 
@@ -53,9 +53,11 @@ private:
     std::shared_ptr<util::RCP> m_rcp;
 
     mutable Setup_Channel m_setup_channel;
-    mutable Input_Channel m_input_channel;
+    mutable Pilot_Channel m_pilot_channel;
     mutable Telemetry_Channel m_telemetry_channel;
     mutable Video_Channel m_video_channel;
+
+    std::vector<node::stream::IMulti_State::Sample> m_multi_state_samples;
 
     auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool;
     auto link_inputs(node::Node_ptr node) -> bool;
@@ -66,6 +68,7 @@ private:
     void handle_frame_data();
 
     void handle_multi_config();
+    void handle_multi_state();
 
     void handle_clock();
     void handle_enumerate_nodes();
