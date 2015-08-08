@@ -46,7 +46,12 @@ auto Gamepad::get_axis_data(Axis id) const -> Gamepad::Axis_Data
 bool Gamepad::is_button_inactive(Button button) const
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	return m_buttons_pressed.find(button) == m_buttons_pressed.end() && m_buttons_released.find(button) == m_buttons_released.end();
+    return m_buttons_held.find(button) == m_buttons_held.end() && m_buttons_released.find(button) == m_buttons_released.end();
+}
+bool Gamepad::is_button_held(Button button) const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_buttons_held.find(button) != m_buttons_held.end();
 }
 bool Gamepad::is_button_pressed(Button button) const
 {
@@ -89,8 +94,9 @@ void Gamepad::update(q::Clock::duration/* dt*/)
 {
 	{
 		std::lock_guard<std::mutex> sm(m_mutex);
-		m_buttons_released.clear();
-	}
+        m_buttons_pressed.clear();
+        m_buttons_released.clear();
+    }
 }
 
 void Gamepad::set_stick_data(Stick stick, Stick_Data const& data)
@@ -104,13 +110,14 @@ void Gamepad::set_axis_data(Axis axis, Axis_Data const& data)
 void Gamepad::set_button_pressed(Button button)
 {
     m_buttons_pressed.insert(button);
+    m_buttons_held.insert(button);
 }
 void Gamepad::set_button_released(Button button)
 {
-    auto it = m_buttons_pressed.find(button);
-    if (it != m_buttons_pressed.end())
+    auto it = m_buttons_held.find(button);
+    if (it != m_buttons_held.end())
     {
-        m_buttons_pressed.erase(it);
+        m_buttons_held.erase(it);
         m_buttons_released.insert(button);
     }
 }

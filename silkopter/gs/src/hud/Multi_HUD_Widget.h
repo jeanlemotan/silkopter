@@ -20,16 +20,10 @@ private:
 
     qinput::Gamepad_cptr m_gamepad;
 
-    uint32_t m_input_version = 0;
-
-    template<class T> void set_input_value(T& input, typename T::Value const& value)
-    {
-        input.value = value;
-        input.version = m_input_version;
-    }
-
     silk::node::stream::IMulti_Input::Value m_multi_input;
     silk::node::stream::IMulti_State::Value m_multi_state;
+
+    q::Clock::time_point m_arm_start_tp = q::Clock::now();
 
     void process_vertical_thrust_rate();
     void process_vertical_thrust_offset();
@@ -47,6 +41,8 @@ private:
     void process_mode_idle();
     void process_mode_armed();
     void process_mode();
+
+    void sync_input();
 
     void acquire_gamepad();
     void process_gamepad();

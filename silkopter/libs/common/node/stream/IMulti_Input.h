@@ -14,19 +14,27 @@ template<class T> struct Input_Value
 {
     typedef T Value;
 
-    Input_Value() = default;
-    Input_Value(T value) : value(value) {}
     uint32_t version = 0;
     T value = T();
+
+    Input_Value() = default;
+    Input_Value(T value) : value(value) {}
+
+    void set(Value const& v) { value = v; version++; }
+    T const& get() const { return value; }
 };
 template<> struct Input_Value<bool>
 {
     typedef bool Value;
 
-    Input_Value() : version(0), value(0) {}
-    Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
     uint32_t version : 31;
     uint32_t value : 1;
+
+    Input_Value() : version(0), value(0) {}
+    Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
+
+    void set(Value const& v) { value = v; version++; }
+    bool const& get() const { return value != 0; }
 };
 
 
@@ -52,49 +60,43 @@ public:
     {
         Vertical() : thrust_rate() {}
 
-        enum Mode : uint8_t
+        enum class Mode : uint8_t
         {
             THRUST_RATE,
             THRUST_OFFSET,
             CLIMB_RATE,
         };
-        Input_Value<Mode> mode = THRUST_OFFSET;
+        Input_Value<Mode> mode = Mode::THRUST_OFFSET;
 
-        union
-        {
-            Input_Value<float> thrust_rate;
-            Input_Value<float> thrust_offset;
-            Input_Value<float> climb_rate;
-        };
+        Input_Value<float> thrust_rate;
+        Input_Value<float> thrust_offset;
+        Input_Value<float> climb_rate;
     };
 
     struct Horizontal
     {
         Horizontal() : angle_rate() {}
 
-        enum Mode : uint8_t
+        enum class Mode : uint8_t
         {
             ANGLE_RATE,
             ANGLE,
             VELOCITY,
         };
-        Input_Value<Mode> mode = ANGLE_RATE;
+        Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        union
-        {
-            Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
-            Input_Value<math::vec2f> angle;        //angle from horizontal. zero means horizontal
-            Input_Value<math::vec2f> velocity;     //speed, meters per second
-        };
+        Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
+        Input_Value<math::vec2f> angle;        //angle from horizontal. zero means horizontal
+        Input_Value<math::vec2f> velocity;     //speed, meters per second
     };
 
     struct Yaw
     {
-        enum Mode : uint8_t
+        enum class Mode : uint8_t
         {
             ANGLE_RATE,
         };
-        Input_Value<Mode> mode = ANGLE_RATE;
+        Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
         Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
     };

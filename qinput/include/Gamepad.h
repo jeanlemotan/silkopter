@@ -92,9 +92,11 @@ namespace qinput
         auto get_axis_data(Axis id) const -> Axis_Data;
 
         bool is_button_inactive(Button button) const;
+        bool is_button_held(Button button) const;
         bool is_button_pressed(Button button) const;
         bool is_button_released(Button button) const;
 
+        auto get_all_held_buttons() const -> std::vector<Button>;
         auto get_all_pressed_buttons() const -> std::vector<Button>;
         auto get_all_released_buttons() const -> std::vector<Button>;
 
@@ -126,6 +128,7 @@ namespace qinput
         std::array<Axis_Data, 2> m_axes;
         std::set<Button>	m_buttons_pressed;
         std::set<Button>	m_buttons_released;
+        std::set<Button>	m_buttons_held;
 
 		Sensors				m_sensors;
 	};
