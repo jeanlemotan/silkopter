@@ -257,13 +257,13 @@ void Input_Mgr::process_ps3_gamepad_event(Gamepad_Data const& data, js_event con
         else if (ev.number == 12)
         {
             Gamepad::Axis_Data v;
-            v.value = ev.value / 32767.f;
+            v.value = ev.value / 65535.f + 0.5f;
             data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
         }
         else if (ev.number == 13)
         {
             Gamepad::Axis_Data v;
-            v.value = ev.value / 32767.f;
+            v.value = ev.value / 65535.f + 0.5f;
             data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
         }
         else
@@ -328,14 +328,14 @@ void Input_Mgr::process_ps4_gamepad_event(Gamepad_Data const& data, js_event con
             case 3:
             {
                 Gamepad::Axis_Data v;
-                v.value = ev.value / 32767.f;
+                v.value = ev.value / 65535.f + 0.5f;
                 data.gamepad->set_axis_data(Gamepad::Axis::LEFT_TRIGGER, v);
             }
             break;
             case 4:
             {
                 Gamepad::Axis_Data v;
-                v.value = ev.value / 32767.f;
+                v.value = ev.value / 65535.f + 0.5f;
                 data.gamepad->set_axis_data(Gamepad::Axis::RIGHT_TRIGGER, v);
             }
             break;
