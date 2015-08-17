@@ -406,7 +406,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 3> data;
             for (auto const& s: stream.samples)
             {
-                math::mat3f mat = s.value.rotation.get_as_mat3();
+                math::mat3f mat = s.value.get_as_mat3();
                 data = { math::dot(mat.get_axis_x(), math::vec3f(1, 0, 0)), math::dot(mat.get_axis_y(), math::vec3f(0, 1, 0)), math::dot(mat.get_axis_z(), math::vec3f(0, 0, 1)) };
                 viewer->add_samples(s.tp, data.data(), s.is_healthy);
             }

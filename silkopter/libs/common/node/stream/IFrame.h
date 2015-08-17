@@ -15,10 +15,7 @@ class IFrame_Base
 public:
     typedef std::false_type can_be_filtered_t;
 
-    struct Value
-    {
-        math::quatf rotation; //local to parent. vec local * rotation == vec parent
-    };
+    typedef math::quatf Value; //local to parent. vec local * rotation == vec parent
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };

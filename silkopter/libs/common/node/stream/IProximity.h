@@ -29,3 +29,22 @@ DECLARE_CLASS_PTR(IProximity);
 }
 
 
+namespace util
+{
+namespace serialization
+{
+
+template<> inline void serialize(Buffer_t& buffer, silk::node::stream::IProximity::Value const& value, size_t& off)
+{
+    serialize(buffer, value.distances, off);
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::IProximity::Value& value, size_t& off) -> bool
+{
+    return deserialize(buffer, value.distances, off);
+}
+
+
+}
+}
+

@@ -31,6 +31,7 @@
 #include "processor/Comp_ECEF_Position.h"
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
+#include "processor/Throttle_To_PWM.h"
 
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
@@ -489,6 +490,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Comp_ECEF_Position>("Comp ECEF Position", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
+    m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);
 
     m_node_factory.register_node<Oscillator>("Oscillator", *this);
 

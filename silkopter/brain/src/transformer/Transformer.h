@@ -169,7 +169,7 @@ void Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
                           typename In_Stream_t::Sample const& in_sample,
                           typename Frame_Stream_t::Sample const& f_sample)
     {
-        m_output_stream->push_sample(math::rotate(math::inverse(f_sample.value.rotation), in_sample.value), in_sample.is_healthy & f_sample.is_healthy);
+        m_output_stream->push_sample(math::rotate(math::inverse(f_sample.value), in_sample.value), in_sample.is_healthy & f_sample.is_healthy);
     });
 }
 

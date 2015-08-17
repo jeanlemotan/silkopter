@@ -11,7 +11,7 @@
 using namespace q;
 using namespace logging;
 
-void Console_Logger::log(Level level, const String& message)
+void Console_Logger::log(Level level, const std::string& message)
 {
 	(void)level;
 #if defined(Q_WINDOWS) || defined(Q_IOS) || defined(Q_LINUX)

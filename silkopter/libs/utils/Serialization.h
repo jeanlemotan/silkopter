@@ -13,6 +13,7 @@ typedef std::vector<uint8_t> Buffer_t;
 
 template<class T> auto deserialize(Buffer_t const& buffer, T& val, size_t& off) -> bool
 {
+    static_assert(std::is_pod<T>::value, "you need a specialized packer/unpacker for T");
     static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
     static_assert(!std::is_pointer<T>::value, "you cannot pack/unpack a pointer");
     if (off + sizeof(T) > buffer.size())
@@ -38,6 +39,24 @@ template<> inline auto deserialize(Buffer_t const& buffer, std::string& val, siz
     std::copy(buffer.begin() + off, buffer.begin() + off + size, val.begin());
     off += size;
     return true;
+}
+template<class T> inline auto deserialize(Buffer_t const& buffer, math::vec2<T>& val, size_t& off) -> bool
+{
+    return deserialize(buffer, val.x, off) &&
+           deserialize(buffer, val.y, off);
+}
+template<class T> inline auto deserialize(Buffer_t const& buffer, math::vec3<T>& val, size_t& off) -> bool
+{
+    return deserialize(buffer, val.x, off) &&
+           deserialize(buffer, val.y, off) &&
+           deserialize(buffer, val.z, off);
+}
+template<class T> inline auto deserialize(Buffer_t const& buffer, math::quat<T>& val, size_t& off) -> bool
+{
+    return deserialize(buffer, val.x, off) &&
+           deserialize(buffer, val.y, off) &&
+           deserialize(buffer, val.z, off) &&
+           deserialize(buffer, val.w, off);
 }
 template<> inline auto deserialize(Buffer_t const& buffer, rapidjson::Document& json, size_t& off) -> bool
 {
@@ -76,6 +95,7 @@ template<class T> inline auto deserialize(Buffer_t const& buffer, std::vector<T>
 
 template<class T> void serialize(Buffer_t& buffer, T const& val, size_t& off)
 {
+    static_assert(std::is_pod<T>::value, "you need a specialized packer/unpacker for T");
     static_assert(std::is_standard_layout<T>::value, "you need a specialized packer/unpacker for T");
     static_assert(!std::is_pointer<T>::value, "you cannot pack/unpack a pointer");
     if (off + sizeof(T) > buffer.size())
@@ -95,6 +115,24 @@ template<> inline void serialize(Buffer_t& buffer, std::string const& val, size_
     }
     std::copy(val.begin(), val.end(), buffer.data() + off);
     off += val.size();
+}
+template<class T> inline void serialize(Buffer_t& buffer, math::vec2<T> const& val, size_t& off)
+{
+    serialize(buffer, val.x, off);
+    serialize(buffer, val.y, off);
+}
+template<class T> inline void serialize(Buffer_t& buffer, math::vec3<T> const& val, size_t& off)
+{
+    serialize(buffer, val.x, off);
+    serialize(buffer, val.y, off);
+    serialize(buffer, val.z, off);
+}
+template<class T> inline void serialize(Buffer_t& buffer, math::quat<T> const& val, size_t& off)
+{
+    serialize(buffer, val.x, off);
+    serialize(buffer, val.y, off);
+    serialize(buffer, val.z, off);
+    serialize(buffer, val.w, off);
 }
 template<> inline void serialize(Buffer_t& buffer, rapidjson::Document const& json, size_t& off)
 {

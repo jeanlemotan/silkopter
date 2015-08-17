@@ -86,7 +86,7 @@ void Servo_Gimbal::process()
                           size_t idx,
                           stream::IFrame::Sample const& i_sample)
     {
-        auto rotation = i_sample.value.rotation;
+        auto rotation = i_sample.value;
 
         math::vec3f rotation_euler;
         rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);

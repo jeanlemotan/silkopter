@@ -100,7 +100,7 @@ void q::logging::set_level(const String& topic, Level level)
 
     detail::s_topics[topic].level = level;
 }
-void q::log(logging::Level level, const char* file, int line, const String& message)
+void q::log(logging::Level level, const char* file, int line, const std::string& message)
 {
 	using namespace logging;
 
@@ -137,7 +137,7 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 	}
 
 	//build the final string from the decorations and the message
-	String str;
+    std::string str;
 	//str.reserve(message.size() + 128);
 
 	if (decorations.test(Decoration::LEVEL))
@@ -194,14 +194,14 @@ void q::log(logging::Level level, const char* file, int line, const String& mess
 
     if (decorations.test(Decoration::TOPIC) && detail::s_topic_stack && !detail::s_topic_stack->empty())
     {
-        str.append('[');
+        str.push_back('[');
         for (size_t i = 0; i + 1 < detail::s_topic_stack->size(); i++)
         {
             str.append((*detail::s_topic_stack)[i]);
-            str.append('/');
+            str.push_back('/');
         }
         str.append(detail::s_topic_stack->back());
-        str.append(']');
+        str.push_back(']');
     }
 
     if (decorations.test(Decoration::LOCATION) && file)

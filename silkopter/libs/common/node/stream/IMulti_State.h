@@ -53,3 +53,41 @@ DECLARE_CLASS_PTR(IMulti_State);
 }
 }
 
+
+
+namespace util
+{
+namespace serialization
+{
+
+template<> inline void serialize(Buffer_t& buffer, silk::node::stream::IMulti_State::Value const& value, size_t& off)
+{
+    serialize(buffer, value.battery_state, off);
+    serialize(buffer, value.frame, off);
+    serialize(buffer, value.magnetic_field, off);
+    serialize(buffer, value.ecef_linear_acceleration, off);
+    serialize(buffer, value.ecef_position, off);
+    serialize(buffer, value.ecef_velocity, off);
+    serialize(buffer, value.proximity, off);
+    serialize(buffer, value.thrust, off);
+    serialize(buffer, value.last_input, off);
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::IMulti_State::Value& value, size_t& off) -> bool
+{
+    return deserialize(buffer, value.battery_state, off) &&
+            deserialize(buffer, value.frame, off) &&
+            deserialize(buffer, value.magnetic_field, off) &&
+            deserialize(buffer, value.ecef_linear_acceleration, off) &&
+            deserialize(buffer, value.ecef_position, off) &&
+            deserialize(buffer, value.ecef_velocity, off) &&
+            deserialize(buffer, value.proximity, off) &&
+            deserialize(buffer, value.thrust, off) &&
+            deserialize(buffer, value.last_input, off);
+}
+
+
+}
+}
+
+

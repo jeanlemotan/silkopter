@@ -88,6 +88,7 @@ void MaxSonar::process()
         bus->unlock();
     });
 
+    //accumulate data from the serial port
     std::array<uint8_t, 32> buf;
     size_t count = bus->read(buf.data(), buf.size());
     if (count > 0)
@@ -95,20 +96,25 @@ void MaxSonar::process()
         std::copy(buf.begin(), buf.begin() + count, std::back_inserter(m_read_data));
     }
 
+    //ignore bad data
     while (!m_read_data.empty() && m_read_data.front() != 'R')
     {
         m_read_data.pop_front();
     }
 
-    if (m_read_data.size() >= 5) //R + XXX + New Line
+    //parse the entire buffer to get the latest data
+    int d = -1;
+    while (m_read_data.size() >= 5) //R + XXX + New Line
     {
         char const* str = reinterpret_cast<char const*>(&m_read_data[1]);
         m_read_data[4] = 0; //replace newline with zero so we can convert this to a string
-
-        int d = atoi(str);
-
+        d = atoi(str);
         m_read_data.erase(m_read_data.begin(), m_read_data.begin() + 5);
+    }
 
+    //use the latest data only
+    if (d >= 0)
+    {
         float distance = static_cast<float>(d) / 100.f; //meters
 
         float min_distance = m_config->min_distance;

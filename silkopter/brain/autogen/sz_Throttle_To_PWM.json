@@ -1,0 +1,19 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::Throttle_To_PWM",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Throttle_To_PWM",
+    "name": "Config",
+    "members":
+    [
+    ]
+}
+]

@@ -129,7 +129,8 @@ SOURCES += \
     ../../src/source/SRF01.cpp \
     ../../src/brain/Multi_Brain.cpp \
     ../../src/pilot/Multi_Pilot.cpp \
-    ../../src/source/MaxSonar.cpp
+    ../../src/source/MaxSonar.cpp \
+    ../../src/processor/Throttle_To_PWM.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -172,7 +173,6 @@ HEADERS += \
     ../../../libs/common/node/ISource.h \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
-    ../../src/processor/Throttle_PWM.h \
     ../../../libs/common/node/data/IData.h \
     ../../../libs/common/node/stream/IAcceleration.h \
     ../../../libs/common/node/stream/IADC.h \
@@ -257,7 +257,8 @@ HEADERS += \
     ../../../libs/common/node/IBrain.h \
     ../../src/pilot/Multi_Pilot.h \
     ../../../libs/common/node/IPilot.h \
-    ../../src/source/MaxSonar.h
+    ../../src/source/MaxSonar.h \
+    ../../src/processor/Throttle_To_PWM.h
 
 DISTFILES +=
 

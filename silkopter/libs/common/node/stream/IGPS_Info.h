@@ -19,7 +19,7 @@ public:
 
     struct Value
     {
-        enum class Fix
+        enum class Fix : uint8_t
         {
             INVALID,
             FIX_2D,
@@ -43,3 +43,39 @@ DECLARE_CLASS_PTR(IGPS_Info);
 }
 }
 }
+
+
+
+namespace util
+{
+namespace serialization
+{
+
+template<> inline void serialize(Buffer_t& buffer, silk::node::stream::IGPS_Info::Value const& value, size_t& off)
+{
+    serialize(buffer, value.fix, off);
+    serialize(buffer, value.visible_satellites, off);
+    serialize(buffer, value.fix_satellites, off);
+    serialize(buffer, value.position_accuracy, off);
+    serialize(buffer, value.velocity_accuracy, off);
+    serialize(buffer, value.hdop, off);
+    serialize(buffer, value.vdop, off);
+    serialize(buffer, value.pdop, off);
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::IGPS_Info::Value& value, size_t& off) -> bool
+{
+    return deserialize(buffer, value.fix, off) &&
+            deserialize(buffer, value.visible_satellites, off) &&
+            deserialize(buffer, value.fix_satellites, off) &&
+            deserialize(buffer, value.position_accuracy, off) &&
+            deserialize(buffer, value.velocity_accuracy, off) &&
+            deserialize(buffer, value.hdop, off) &&
+            deserialize(buffer, value.vdop, off) &&
+            deserialize(buffer, value.pdop, off);
+}
+
+
+}
+}
+

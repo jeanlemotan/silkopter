@@ -5,11 +5,12 @@
 #include "common/node/stream/IPWM.h"
 #include "common/node/IProcessor.h"
 
+#include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
 namespace sz
 {
-namespace Throttle_PWM
+namespace Throttle_To_PWM
 {
 struct Init_Params;
 struct Config;
@@ -21,10 +22,10 @@ namespace silk
 namespace node
 {
 
-class Throttle_PWM : public IProcessor
+class Throttle_To_PWM : public IProcessor
 {
 public:
-    Throttle_PWM(HAL& hal);
+    Throttle_To_PWM(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -45,10 +46,10 @@ private:
 
     HAL& m_hal;
 
-    std::shared_ptr<sz::Throttle_PWM::Init_Params> m_init_params;
-    std::shared_ptr<sz::Throttle_PWM::Config> m_config;
+    std::shared_ptr<sz::Throttle_To_PWM::Init_Params> m_init_params;
+    std::shared_ptr<sz::Throttle_To_PWM::Config> m_config;
 
-    IThrottle_wptr m_input_stream;
+    Sample_Accumulator<stream::IThrottle> m_accumulator;
 
     typedef Basic_Output_Stream<stream::IPWM> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

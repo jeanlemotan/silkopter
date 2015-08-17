@@ -93,12 +93,12 @@ namespace logging
 
 }
 
-    extern void log(logging::Level level, const char* file, int line, const String& message);
+    extern void log(logging::Level level, const char* file, int line, const std::string& message);
 
 	template<class Fmt, typename... Params>
     void logf(logging::Level level, char const* file, int line, Fmt const& fmt, Params&&... params)
 	{
-		String message;
+        std::string message;
         q::util::format_emplace(message, fmt, std::forward<Params>(params)...);
         log(level, file, line, message);
 	}
@@ -106,7 +106,7 @@ namespace logging
 	template<class Fmt, typename... Params>
     void quick_logf(Fmt const& fmt, Params&&... params)
 	{
-		String message;
+        std::string message;
         q::util::format_emplace(message, fmt, std::forward<Params>(params)...);
         printf("%s\n", message.c_str());
         fflush(stdout);

@@ -148,3 +148,91 @@ DECLARE_CLASS_PTR(IMulti_Input);
 }
 
 
+namespace util
+{
+namespace serialization
+{
+
+template<class T> inline void serialize(Buffer_t& buffer, silk::node::stream::Input_Value<T> const& value, size_t& off)
+{
+    serialize(buffer, value.get(), off);
+    serialize(buffer, value.version, off);
+}
+template<> inline void serialize(Buffer_t& buffer, silk::node::stream::Input_Value<bool> const& value, size_t& off)
+{
+    uint32_t x = value.version;
+    x |= value.value << 31;
+    serialize(buffer, x, off);
+}
+
+template<class T> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::Input_Value<T>& value, size_t& off) -> bool
+{
+    return  deserialize(buffer, value.value, off) &&
+        deserialize(buffer, value.version, off);
+}
+template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::Input_Value<bool>& value, size_t& off) -> bool
+{
+    uint32_t x = 0;
+    if (!deserialize(buffer, x, off))
+    {
+        return false;
+    }
+    value.version = x & 0x7FFFFFFF;
+    value.value = x >> 31;
+    return true;
+}
+
+
+template<> inline void serialize(Buffer_t& buffer, silk::node::stream::IMulti_Input::Value const& value, size_t& off)
+{
+    serialize(buffer, value.toggles.land, off);
+    serialize(buffer, value.toggles.return_home, off);
+    serialize(buffer, value.toggles.take_off, off);
+    serialize(buffer, value.vertical.mode, off);
+    serialize(buffer, value.vertical.thrust_rate, off);
+    serialize(buffer, value.vertical.thrust_offset, off);
+    serialize(buffer, value.vertical.climb_rate, off);
+    serialize(buffer, value.horizontal.mode, off);
+    serialize(buffer, value.horizontal.angle_rate, off);
+    serialize(buffer, value.horizontal.angle, off);
+    serialize(buffer, value.horizontal.velocity, off);
+    serialize(buffer, value.yaw.mode, off);
+    serialize(buffer, value.yaw.angle_rate, off);
+    serialize(buffer, value.mode, off);
+    serialize(buffer, value.reference_frame, off);
+    serialize(buffer, value.assists.stay_in_battery_range, off);
+    serialize(buffer, value.assists.stay_in_perimeter, off);
+    serialize(buffer, value.assists.stay_in_range, off);
+    serialize(buffer, value.assists.avoid_altitude_drop, off);
+    serialize(buffer, value.assists.avoid_proximity, off);
+    serialize(buffer, value.assists.avoid_the_user, off);
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::IMulti_Input::Value& value, size_t& off) -> bool
+{
+    return  deserialize(buffer, value.toggles.land, off) &&
+        deserialize(buffer, value.toggles.return_home, off) &&
+        deserialize(buffer, value.toggles.take_off, off) &&
+        deserialize(buffer, value.vertical.mode, off) &&
+        deserialize(buffer, value.vertical.thrust_rate, off) &&
+        deserialize(buffer, value.vertical.thrust_offset, off) &&
+        deserialize(buffer, value.vertical.climb_rate, off) &&
+        deserialize(buffer, value.horizontal.mode, off) &&
+        deserialize(buffer, value.horizontal.angle_rate, off) &&
+        deserialize(buffer, value.horizontal.angle, off) &&
+        deserialize(buffer, value.horizontal.velocity, off) &&
+        deserialize(buffer, value.yaw.mode, off) &&
+        deserialize(buffer, value.yaw.angle_rate, off) &&
+        deserialize(buffer, value.mode, off) &&
+        deserialize(buffer, value.reference_frame, off) &&
+        deserialize(buffer, value.assists.stay_in_battery_range, off) &&
+        deserialize(buffer, value.assists.stay_in_perimeter, off) &&
+        deserialize(buffer, value.assists.stay_in_range, off) &&
+        deserialize(buffer, value.assists.avoid_altitude_drop, off) &&
+        deserialize(buffer, value.assists.avoid_proximity, off) &&
+        deserialize(buffer, value.assists.avoid_the_user, off);
+}
+
+
+}
+}
