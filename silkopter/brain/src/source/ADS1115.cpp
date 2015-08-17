@@ -104,16 +104,20 @@ ADS1115::ADS1115(HAL& hal)
     , m_init_params(new sz::ADS1115::Init_Params())
     , m_config(new sz::ADS1115::Config())
 {
+    for (auto& adc: m_adcs)
+    {
+        adc = std::make_shared<Output_Stream>();
+    }
 }
 
 auto ADS1115::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { stream::IADC::TYPE, "ADC0", m_adcs[0] },
-        { stream::IADC::TYPE, "ADC1", m_adcs[1] },
-        { stream::IADC::TYPE, "ADC2", m_adcs[2] },
-        { stream::IADC::TYPE, "ADC3", m_adcs[3] }
+        { "ADC0", m_adcs[0] },
+        { "ADC1", m_adcs[1] },
+        { "ADC2", m_adcs[2] },
+        { "ADC3", m_adcs[3] }
      }};
     return outputs;
 }
@@ -157,10 +161,6 @@ auto ADS1115::init() -> bool
     m_init_params->adc2_rate = math::clamp<size_t>(m_init_params->adc2_rate, 1, 500);
     m_init_params->adc3_rate = math::clamp<size_t>(m_init_params->adc3_rate, 1, 500);
 
-    for (auto& adc: m_adcs)
-    {
-        adc = std::make_shared<Output_Stream>();
-    }
 
     m_adcs[0]->set_rate(m_init_params->adc0_rate);
     m_adcs[1]->set_rate(m_init_params->adc1_rate);

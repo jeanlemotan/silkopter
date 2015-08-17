@@ -300,6 +300,10 @@ MPU9250::MPU9250(HAL& hal)
     , m_init_params(new sz::MPU9250::Init_Params())
     , m_config(new sz::MPU9250::Config())
 {
+    m_acceleration = std::make_shared<Acceleration_Stream>();
+    m_angular_velocity = std::make_shared<Angular_Velocity_Stream>();
+    m_magnetic_field = std::make_shared<Magnetic_Field_Stream>();
+    m_temperature = std::make_shared<Temperature_Stream>();
 }
 
 MPU9250::~MPU9250()
@@ -442,16 +446,12 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
 auto MPU9250::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(4);
-    outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity;
-    outputs[1].type = stream::IAcceleration::TYPE;
     outputs[1].name = "Acceleration";
     outputs[1].stream = m_acceleration;
-    outputs[2].type = stream::IMagnetic_Field::TYPE;
     outputs[2].name = "Magnetic Field";
     outputs[2].stream = m_magnetic_field;
-    outputs[3].type = stream::ITemperature::TYPE;
     outputs[3].name = "Temperature";
     outputs[3].stream = m_temperature;
     return outputs;
@@ -492,11 +492,6 @@ auto MPU9250::init() -> bool
         unlock(buses);
     });
 
-
-    m_acceleration = std::make_shared<Acceleration_Stream>();
-    m_angular_velocity = std::make_shared<Angular_Velocity_Stream>();
-    m_magnetic_field = std::make_shared<Magnetic_Field_Stream>();
-    m_temperature = std::make_shared<Temperature_Stream>();
 
     std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
     std::vector<size_t> a_ranges = { 2, 4, 8, 16 };

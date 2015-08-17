@@ -360,8 +360,8 @@ void pack_outputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
     for (auto const& i: io)
     {
         channel.pack_param(i.name);
-        channel.pack_param(i.type);
-        channel.pack_param(i.stream ? i.stream->get_rate() : 0);
+        channel.pack_param(i.stream->get_type());
+        channel.pack_param(i.stream->get_rate());
     }
 }
 
@@ -590,7 +590,7 @@ void Comms::handle_node_message()
         return;
     }
 
-    QLOGI("Node message");
+//    QLOGI("Node message");
     auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {

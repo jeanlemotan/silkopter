@@ -25,6 +25,7 @@ LiPo_Battery::LiPo_Battery(HAL& hal)
     , m_init_params(new sz::LiPo_Battery::Init_Params())
     , m_config(new sz::LiPo_Battery::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
@@ -45,7 +46,6 @@ auto LiPo_Battery::init(rapidjson::Value const& init_params) -> bool
 }
 auto LiPo_Battery::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -73,7 +73,7 @@ auto LiPo_Battery::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::IBattery_State::TYPE, "Battery State", m_output_stream }
+         { "Battery State", m_output_stream }
     }};
     return outputs;
 }

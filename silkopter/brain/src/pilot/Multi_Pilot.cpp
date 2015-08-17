@@ -15,6 +15,7 @@ Multi_Pilot::Multi_Pilot(HAL& hal, Comms& comms)
     , m_init_params(new sz::Multi_Pilot::Init_Params())
     , m_config(new sz::Multi_Pilot::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
@@ -36,8 +37,6 @@ auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
 
 auto Multi_Pilot::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
-
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -61,26 +60,43 @@ auto Multi_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::IMulti_Input::TYPE,      "Input",        m_output_stream },
+         { "Input",        m_output_stream },
     }};
     return outputs;
 }
+
+static constexpr std::chrono::milliseconds INPUT_HEALTHY_TIMEOUT(200);
 
 void Multi_Pilot::process()
 {
     QLOG_TOPIC("Multi_Pilot::process");
 
     m_output_stream->clear();
-    auto const& input_values = m_comms.get_multi_input_values();
-    size_t samples_needed = m_output_stream->compute_samples_needed();
-    if (!input_values.empty())
+
+    //process inputs
     {
+        auto const& input_values = m_comms.get_multi_input_values();
+        size_t samples_needed = m_output_stream->compute_samples_needed();
+
+        auto now = q::Clock::now();
+
+        stream::IMulti_Input::Value input_value = m_output_stream->get_last_sample().value;
+        if (!input_values.empty())
+        {
+            input_value = input_values.back();
+            m_last_received_input_value_tp = now;
+        }
+
+        bool is_healthy = now - m_last_received_input_value_tp < INPUT_HEALTHY_TIMEOUT;
+
         for (size_t i = 0; i < samples_needed; i++)
         {
-            m_output_stream->push_sample(input_values.back(), true);
+            m_output_stream->push_sample(input_value, is_healthy);
         }
     }
 
+
+    //write back the state
     m_accumulator.process([this](
                           size_t idx,
                           stream::IMulti_State::Sample const& i_state)

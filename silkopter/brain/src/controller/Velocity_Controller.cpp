@@ -14,6 +14,8 @@ Velocity_Controller::Velocity_Controller(HAL& hal)
     , m_init_params(new sz::Velocity_Controller::Init_Params())
     , m_config(new sz::Velocity_Controller::Config())
 {
+    m_output_frame_stream = std::make_shared<Output_Frame_Stream>();
+    m_output_force_stream = std::make_shared<Output_Force_Stream>();
 }
 
 auto Velocity_Controller::init(rapidjson::Value const& init_params) -> bool
@@ -34,8 +36,6 @@ auto Velocity_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Velocity_Controller::init() -> bool
 {
-    m_output_frame_stream = std::make_shared<Output_Frame_Stream>();
-    m_output_force_stream = std::make_shared<Output_Force_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -60,10 +60,8 @@ auto Velocity_Controller::get_inputs() const -> std::vector<Input>
 auto Velocity_Controller::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].type = stream::IFrame::TYPE;
     outputs[0].name = "Frame";
     outputs[0].stream = m_output_frame_stream;
-    outputs[1].type = stream::IForce::TYPE;
     outputs[1].name = "Collective Frame";
     outputs[1].stream = m_output_force_stream;
     return outputs;

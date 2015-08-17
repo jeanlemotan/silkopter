@@ -47,6 +47,7 @@ private:
     std::deque<Buffer> m_tx_buffer_queue; //to send
 
     Buffer m_tx_buffer_in_transit;
+    q::Clock::time_point m_tx_data_sent_tp;
 
     boost::asio::ip::udp::endpoint m_tx_endpoint;
     boost::asio::ip::udp::endpoint m_rx_endpoint;

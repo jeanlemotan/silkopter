@@ -200,6 +200,24 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
+    else if (type == IForce::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("N", stream->rate, this);
+        viewer->add_graph("X", "N", QColor(0xe74c3c));
+        viewer->add_graph("Y", "N", QColor(0x2ecc71));
+        viewer->add_graph("Z", "N", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<Torque>(stream)->samples_available_signal.connect([this, viewer](Torque& stream)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: stream.samples)
+            {
+                data = { s.value.x, s.value.y, s.value.z };
+                viewer->add_samples(s.tp, data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
+    }
     else if (type == IVelocity::TYPE)
     {
         auto viewer = new Numeric_Viewer("m/s", stream->rate, this);

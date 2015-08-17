@@ -17,6 +17,13 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     , m_init_params(new sz::Multi_Simulator::Init_Params())
     , m_config(new sz::Multi_Simulator::Config())
 {
+    m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
+    m_acceleration_stream = std::make_shared<Acceleration>();
+    m_magnetic_field_stream = std::make_shared<Magnetic_Field>();
+    m_pressure_stream = std::make_shared<Pressure>();
+    m_temperature_stream = std::make_shared<Temperature>();
+    m_distance_stream = std::make_shared<Distance>();
+    m_ecef_position_stream = std::make_shared<ECEF_Position>();
 }
 
 auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
@@ -37,13 +44,6 @@ auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
 }
 auto Multi_Simulator::init() -> bool
 {
-    m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
-    m_acceleration_stream = std::make_shared<Acceleration>();
-    m_magnetic_field_stream = std::make_shared<Magnetic_Field>();
-    m_pressure_stream = std::make_shared<Pressure>();
-    m_temperature_stream = std::make_shared<Temperature>();
-    m_distance_stream = std::make_shared<Distance>();
-    m_ecef_position_stream = std::make_shared<ECEF_Position>();
     if (m_init_params->angular_velocity_rate == 0)
     {
         QLOGE("Bad angular velocity rate: {}Hz", m_init_params->angular_velocity_rate);
@@ -150,25 +150,18 @@ auto Multi_Simulator::get_inputs() const -> std::vector<Input>
 auto Multi_Simulator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(7);
-    outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_angular_velocity_stream;
-    outputs[1].type = stream::IAcceleration::TYPE;
     outputs[1].name = "Acceleration";
     outputs[1].stream = m_acceleration_stream;
-    outputs[2].type = stream::IMagnetic_Field::TYPE;
     outputs[2].name = "Magnetic Field";
     outputs[2].stream = m_magnetic_field_stream;
-    outputs[3].type = stream::IPressure::TYPE;
     outputs[3].name = "Pressure";
     outputs[3].stream = m_pressure_stream;
-    outputs[4].type = stream::ITemperature::TYPE;
     outputs[4].name = "Temperature";
     outputs[4].stream = m_temperature_stream;
-    outputs[5].type = stream::IDistance::TYPE;
     outputs[5].name = "Sonar Distance";
     outputs[5].stream = m_distance_stream;
-    outputs[6].type = stream::IECEF_Position::TYPE;
     outputs[6].name = "Position (ecef)";
     outputs[6].stream = m_ecef_position_stream;
     return outputs;

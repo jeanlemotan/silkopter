@@ -65,22 +65,163 @@
                     "Gravity Enabled": true
                 },
                 "input_paths": [
-                    "Throttle Generator/Output",
-                    "Throttle Generator/Output",
-                    "Throttle Generator/Output",
-                    "Throttle Generator/Output"
+                    "Motor Mixer/Throttle 0",
+                    "Motor Mixer/Throttle 1",
+                    "Motor Mixer/Throttle 2",
+                    "Motor Mixer/Throttle 3"
                 ]
             },
-            "Throttle Generator": {
-                "type": "Throttle Generator",
+            "Multi Brain": {
+                "type": "Multi Brain",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "State Rate (Hz)": 20
+                },
+                "config": {},
+                "input_paths": [
+                    "Multi Input/Output",
+                    "Angular Velocity RS/Output",
+                    "Frame RS/Output",
+                    "Multi Simulator/Magnetic Field"
+                ]
+            },
+            "Multi Pilot": {
+                "type": "Multi Pilot",
+                "init_params": {
+                    "Rate (Hz)": 20
+                },
+                "config": {},
+                "input_paths": [
+                    "Multi Brain/State"
+                ]
+            },
+            "Angular Velocity RS": {
+                "type": "Angular Velocity RS",
+                "init_params": {
+                    "Input Rate (Hz)": 1000,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Angular Velocity"
+                ]
+            },
+            "Acceleration RS": {
+                "type": "Acceleration RS",
+                "init_params": {
+                    "Input Rate (Hz)": 1000,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Acceleration"
+                ]
+            },
+            "Comp AHRS": {
+                "type": "Comp AHRS",
+                "init_params": {
+                    "Rate (Hz)": 1000
+                },
+                "config": {},
+                "input_paths": [
+                    "Multi Simulator/Angular Velocity",
+                    "Multi Simulator/Acceleration",
+                    "Magnetic Field RS/Output"
+                ]
+            },
+            "Magnetic Field RS": {
+                "type": "Magnetic Field RS",
+                "init_params": {
+                    "Input Rate (Hz)": 100,
+                    "Rate (Hz)": 1000
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Magnetic Field"
+                ]
+            },
+            "Frame RS": {
+                "type": "Frame RS",
+                "init_params": {
+                    "Input Rate (Hz)": 1000,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "input_paths": [
+                    "Comp AHRS/Frame"
+                ]
+            },
+            "Multi Input": {
+                "type": "Multi Input",
+                "init_params": {
+                    "Input Rate (Hz)": 20,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 10.0
+                },
+                "input_paths": [
+                    "Multi Pilot/Input"
+                ]
+            },
+            "Motor Mixer": {
+                "type": "Motor Mixer",
                 "init_params": {
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Value": 0.699999988079071
+                    "Armed Throttle": 0.0
                 },
                 "input_paths": [
-                    ""
+                    "Rate Controller/Torque",
+                    "Multi Brain/Thrust"
+                ]
+            },
+            "Rate Controller": {
+                "type": "Rate Controller",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Feedback": {
+                        "Weight (0-1)": 0.0,
+                        "Combined XY PID": true,
+                        "XY PID": {
+                            "kP": 1.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        },
+                        "Z PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        }
+                    },
+                    "Feedforward": {
+                        "Weight (0-1)": 1.0,
+                        "Max Torque (N)": 1.5
+                    }
+                },
+                "input_paths": [
+                    "Angular Velocity RS/Output",
+                    "Multi Brain/Rate"
                 ]
             }
         }

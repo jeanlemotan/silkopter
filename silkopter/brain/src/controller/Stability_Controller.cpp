@@ -14,6 +14,7 @@ Stability_Controller::Stability_Controller(HAL& hal)
     , m_init_params(new sz::Stability_Controller::Init_Params())
     , m_config(new sz::Stability_Controller::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Stability_Controller::init(rapidjson::Value const& init_params) -> bool
@@ -34,7 +35,6 @@ auto Stability_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Stability_Controller::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -58,7 +58,6 @@ auto Stability_Controller::get_inputs() const -> std::vector<Input>
 auto Stability_Controller::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IAngular_Velocity::TYPE;
     outputs[0].name = "Angular Velocity";
     outputs[0].stream = m_output_stream;
     return outputs;

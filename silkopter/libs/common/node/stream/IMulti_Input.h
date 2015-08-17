@@ -98,7 +98,7 @@ public:
         };
         Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
+        Input_Value<float> angle_rate;   //angle rate of change - radians per second
     };
 
     //the reference frame for the user controls

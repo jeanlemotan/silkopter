@@ -14,6 +14,7 @@ Comp_AHRS::Comp_AHRS(HAL& hal)
     , m_init_params(new sz::Comp_AHRS::Init_Params())
     , m_config(new sz::Comp_AHRS::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
@@ -35,7 +36,6 @@ auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
 
 auto Comp_AHRS::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -59,7 +59,6 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IFrame::TYPE;
     outputs[0].name = "Frame";
     outputs[0].stream = m_output_stream;
     return outputs;

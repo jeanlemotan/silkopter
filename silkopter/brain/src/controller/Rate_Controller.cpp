@@ -14,6 +14,7 @@ Rate_Controller::Rate_Controller(HAL& hal)
     , m_init_params(new sz::Rate_Controller::Init_Params())
     , m_config(new sz::Rate_Controller::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Rate_Controller::init(rapidjson::Value const& init_params) -> bool
@@ -34,7 +35,6 @@ auto Rate_Controller::init(rapidjson::Value const& init_params) -> bool
 }
 auto Rate_Controller::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -59,7 +59,7 @@ auto Rate_Controller::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::ITorque::TYPE, "Torque", m_output_stream }
+         { "Torque", m_output_stream }
     }};
     return outputs;
 }

@@ -33,6 +33,7 @@
 #include "common/node/ITransformer.h"
 #include "common/node/IGenerator.h"
 #include "common/node/IMulti_Simulator.h"
+#include "common/node/IBrain.h"
 
 #include "ui_New_Node.h"
 
@@ -52,9 +53,10 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IResampler::TYPE, QColor(0xEB974E) },
     { silk::node::IPilot::TYPE, QColor(0xBE90D4) },
     { silk::node::IController::TYPE, QColor(0x9B59B6) },
-    { silk::node::ITransformer::TYPE, QColor(0xF1C40F) },
-    { silk::node::IGenerator::TYPE, QColor(0xF1C40F) },
+    { silk::node::ITransformer::TYPE, QColor(0xF10FC4) },
+    { silk::node::IGenerator::TYPE, QColor(0xC40FF1) },
     { silk::node::IMulti_Simulator::TYPE, QColor(0xF1C40F) },
+    { silk::node::IBrain::TYPE, QColor(0xC4F10F) },
 }};
 
 
@@ -726,11 +728,18 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
     b->setName(node->name.c_str());
     b->setId(node->name.c_str());
     b->setPos(pos);
-    b->setBrush(QBrush(s_node_colors[node->type]));
+
+    b->setBrush(QBrush(Qt::white));
+    auto it = s_node_colors.find(node->type);
+    if (it != s_node_colors.end())
+    {
+        b->setBrush(it->second);
+    }
+
     b->positionChangedSignal.connect([this, node](const QPointF& pos)
-        {
-            set_node_position(node->name, pos);
-        });
+    {
+        set_node_position(node->name, pos);
+    });
 
     data.node = node;
     data.block = b;
@@ -854,7 +863,7 @@ auto HAL_Window::get_node_position(std::string const& node_name) -> QPointF
         {
             std::ostringstream ss;
             ss << result;
-            QLOGE("Cannot deserialize node {} position: {}", node_name, ss.str());
+            QLOGW("Cannot deserialize node {} position: {}", node_name, ss.str());
         }
     }
     return QPointF(sz.x, sz.y);

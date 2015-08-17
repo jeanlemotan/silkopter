@@ -14,6 +14,9 @@ Servo_Gimbal::Servo_Gimbal(HAL& hal)
     , m_init_params(new sz::Servo_Gimbal::Init_Params())
     , m_config(new sz::Servo_Gimbal::Config())
 {
+    m_x_output_stream = std::make_shared<Output_Stream>();
+    m_y_output_stream = std::make_shared<Output_Stream>();
+    m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
@@ -35,9 +38,6 @@ auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
 
 auto Servo_Gimbal::init() -> bool
 {
-    m_x_output_stream = std::make_shared<Output_Stream>();
-    m_y_output_stream = std::make_shared<Output_Stream>();
-    m_z_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -67,9 +67,9 @@ auto Servo_Gimbal::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::IPWM::TYPE, "X PWM", m_x_output_stream },
-         { stream::IPWM::TYPE, "Y PWM", m_y_output_stream },
-         { stream::IPWM::TYPE, "Z PWM", m_z_output_stream }
+         { "X PWM", m_x_output_stream },
+         { "Y PWM", m_y_output_stream },
+         { "Z PWM", m_z_output_stream }
     }};
     return outputs;
 }

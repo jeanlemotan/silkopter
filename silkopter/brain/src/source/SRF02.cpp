@@ -42,12 +42,13 @@ SRF02::SRF02(HAL& hal)
     , m_config(new sz::SRF02::Config())
 {
     m_config->direction = math::vec3f(0, 0, -1); //pointing down
+
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto SRF02::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IDistance::TYPE;
     outputs[0].name = "Distance";
     outputs[0].stream = m_output_stream;
     return outputs;
@@ -84,8 +85,6 @@ auto SRF02::init() -> bool
     {
         bus->unlock();
     });
-
-    m_output_stream = std::make_shared<Output_Stream>();
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 

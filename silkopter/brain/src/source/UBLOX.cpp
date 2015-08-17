@@ -230,6 +230,9 @@ UBLOX::UBLOX(HAL& hal)
     , m_init_params(new sz::UBLOX::Init_Params())
     , m_config(new sz::UBLOX::Config())
 {
+    m_position_stream = std::make_shared<Position_Stream>();
+    m_velocity_stream = std::make_shared<Velocity_Stream>();
+    m_gps_info_stream = std::make_shared<GPS_Info_Stream>();
 }
 
 UBLOX::~UBLOX()
@@ -278,9 +281,9 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::IECEF_Position::TYPE, "Position", m_position_stream },
-         { stream::IECEF_Velocity::TYPE, "Velocity", m_velocity_stream },
-         { stream::IGPS_Info::TYPE, "GPS Info", m_gps_info_stream },
+         { "Position", m_position_stream },
+         { "Velocity", m_velocity_stream },
+         { "GPS Info", m_gps_info_stream },
     }};
     return outputs;
 }
@@ -306,10 +309,6 @@ auto UBLOX::init() -> bool
     m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
     m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
     m_uart = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
-
-    m_position_stream = std::make_shared<Position_Stream>();
-    m_velocity_stream = std::make_shared<Velocity_Stream>();
-    m_gps_info_stream = std::make_shared<GPS_Info_Stream>();
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 

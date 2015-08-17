@@ -577,7 +577,7 @@ void Comms::handle_node_message()
         return;
     }
 
-    QLOGI("Node '{}' - message received", name);
+//    QLOGI("Node '{}' - message received", name);
 
     rapidjson::Document json;
     if (!m_setup_channel.unpack_param(json))

@@ -14,6 +14,7 @@ ADC_Voltmeter::ADC_Voltmeter(HAL& hal)
     , m_init_params(new sz::ADC_Voltmeter::Init_Params())
     , m_config(new sz::ADC_Voltmeter::Config())
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto ADC_Voltmeter::init(rapidjson::Value const& init_params) -> bool
@@ -34,7 +35,6 @@ auto ADC_Voltmeter::init(rapidjson::Value const& init_params) -> bool
 }
 auto ADC_Voltmeter::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -56,7 +56,6 @@ auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IVoltage::TYPE;
     outputs[0].name = "Voltage";
     outputs[0].stream = m_output_stream;
     return outputs;

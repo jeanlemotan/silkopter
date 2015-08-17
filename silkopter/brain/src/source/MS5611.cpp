@@ -40,6 +40,8 @@ MS5611::MS5611(HAL& hal)
     , m_init_params(new sz::MS5611::Init_Params())
     , m_config(new sz::MS5611::Config())
 {
+    m_pressure = std::make_shared<Pressure_Stream>();
+    m_temperature = std::make_shared<Temperature_Stream>();
 }
 
 auto MS5611::lock(Buses& buses) -> bool
@@ -110,10 +112,8 @@ auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& t) -> bool
 auto MS5611::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].type = stream::IPressure::TYPE;
     outputs[0].name = "Pressure";
     outputs[0].stream = m_pressure;
-    outputs[1].type = stream::ITemperature::TYPE;
     outputs[1].name = "Temperature";
     outputs[1].stream = m_temperature;
     return outputs;
@@ -151,9 +151,6 @@ auto MS5611::init() -> bool
     {
         unlock(buses);
     });
-
-    m_pressure = std::make_shared<Pressure_Stream>();
-    m_temperature = std::make_shared<Temperature_Stream>();
 
     m_init_params->pressure_rate = math::clamp<size_t>(m_init_params->pressure_rate, 10, 100);
     m_init_params->temperature_rate_ratio = math::clamp<size_t>(m_init_params->temperature_rate_ratio, 1, 10);

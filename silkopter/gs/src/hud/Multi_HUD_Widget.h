@@ -21,6 +21,7 @@ private:
     qinput::Gamepad_cptr m_gamepad;
 
     silk::node::stream::IMulti_Input::Value m_multi_input;
+    silk::node::stream::IMulti_State::Value m_prev_multi_state;
     silk::node::stream::IMulti_State::Value m_multi_state;
 
     q::Clock::time_point m_arm_start_tp = q::Clock::now();

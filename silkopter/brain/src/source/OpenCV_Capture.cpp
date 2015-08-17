@@ -88,12 +88,13 @@ OpenCV_Capture::~OpenCV_Capture()
 #if !defined RASPBERRY_PI
 
 #endif
+
+    m_stream = std::make_shared<Stream>();
 }
 
 auto OpenCV_Capture::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IVideo::TYPE;
     outputs[0].name = "Video";
     outputs[0].stream = m_stream;
     return outputs;
@@ -125,7 +126,6 @@ auto OpenCV_Capture::init() -> bool
     }
 
     m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
-    m_stream = std::make_shared<Stream>();
     m_stream->rate = m_init_params->fps;
 
     m_impl->recording.quality = &m_init_params->recording;

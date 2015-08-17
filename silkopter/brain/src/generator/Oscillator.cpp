@@ -15,6 +15,7 @@ Oscillator::Oscillator(HAL& hal)
     , m_config(new sz::Oscillator::Config())
     , m_rnd_distribution(0, 0)
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 auto Oscillator::init(rapidjson::Value const& init_params) -> bool
@@ -35,7 +36,6 @@ auto Oscillator::init(rapidjson::Value const& init_params) -> bool
 }
 auto Oscillator::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -63,7 +63,7 @@ auto Oscillator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { stream::IFloat::TYPE, "Output", m_output_stream }
+         { "Output", m_output_stream }
     }};
     return outputs;
 }

@@ -139,6 +139,8 @@ Raspicam::Raspicam(HAL& hal)
 
     m_init_params->recording.resolution.set(1280, 960);
     m_init_params->recording.bitrate = 8000000;
+
+    m_stream = std::make_shared<Stream>();
 }
 Raspicam::~Raspicam()
 {
@@ -184,7 +186,6 @@ Raspicam::~Raspicam()
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IVideo::TYPE;
     outputs[0].name = "Video";
     outputs[0].stream = m_stream;
     return outputs;
@@ -216,7 +217,7 @@ auto Raspicam::init() -> bool
     }
 
     m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
-    m_stream = std::make_shared<Stream>();
+
     m_stream->rate = m_init_params->fps;
 
     m_impl->recording.quality = &m_init_params->recording;

@@ -63,16 +63,21 @@ private:
     std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Brain::Config> m_config;
 
+    stream::IMulti_State::Value m_state;
+
+    void process_input(stream::IMulti_Input::Value const& input);
+
     Sample_Accumulator<
+        stream::IMulti_Input,
         stream::IAngular_Velocity,
         stream::IFrame,
-        stream::IBattery_State,
-        stream::IMagnetic_Field,
-        stream::IECEF_Linear_Acceleration,
-        stream::IECEF_Position,
-        stream::IECEF_Velocity,
-        stream::IProximity,
-        stream::IMulti_Input> m_accumulator;
+        stream::IMagnetic_Field
+//        stream::IBattery_State,
+//        stream::IECEF_Linear_Acceleration,
+//        stream::IECEF_Position,
+//        stream::IECEF_Velocity,
+//        stream::IProximity,
+        > m_accumulator;
 
     typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
     mutable std::shared_ptr<State_Output_Stream> m_state_output_stream;
@@ -80,8 +85,9 @@ private:
     typedef Basic_Output_Stream<stream::IAngular_Velocity> Rate_Output_Stream;
     mutable std::shared_ptr<Rate_Output_Stream> m_rate_output_stream;
 
-    typedef Basic_Output_Stream<stream::IAngular_Velocity> Stability_Output_Stream;
-    mutable std::shared_ptr<Stability_Output_Stream> m_stability_output_stream;
+    typedef Basic_Output_Stream<stream::IForce> Thrust_Output_Stream;
+    mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
+    float m_reference_thrust = 0;
 };
 
 

@@ -15,25 +15,39 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
 void Multi_HUD_Widget::process_vertical_thrust_rate()
 {
     float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
-    m_multi_state.last_input.vertical.thrust_rate.set(v);
+
+    auto config = m_hal.get_multi_config();
+    if (config)
+    {
+        v *= config->motor_thrust * config->motors.size();
+        m_multi_input.vertical.thrust_rate.set(v);
+    }
 }
 
 void Multi_HUD_Widget::process_vertical_thrust_offset()
 {
     float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
-    m_multi_state.last_input.vertical.thrust_offset.set(v);
+
+    auto config = m_hal.get_multi_config();
+    if (config)
+    {
+        v *= config->motor_thrust * config->motors.size();
+        m_multi_input.vertical.thrust_offset.set(v);
+    }
 }
 
 void Multi_HUD_Widget::process_vertical_climb_rate()
 {
     float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+
     v *= 5.f;
-    m_multi_state.last_input.vertical.climb_rate.set(v);
+
+    m_multi_input.vertical.climb_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_vertical()
 {
-    switch (m_multi_state.last_input.vertical.mode.value)
+    switch (m_multi_input.vertical.mode.value)
     {
     case silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
         process_vertical_thrust_rate();
@@ -48,19 +62,19 @@ void Multi_HUD_Widget::process_vertical()
 
     if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
     {
-        int v = math::clamp(static_cast<int>(m_multi_state.last_input.vertical.mode.get()) - 1,
+        int v = math::clamp(static_cast<int>(m_multi_input.vertical.mode.get()) - 1,
                             static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
                             static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
 
-        m_multi_state.last_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
+        m_multi_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
     }
     else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
     {
-        int v = math::clamp(static_cast<int>(m_multi_state.last_input.vertical.mode.get()) + 1,
+        int v = math::clamp(static_cast<int>(m_multi_input.vertical.mode.get()) + 1,
                             static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
                             static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
 
-        m_multi_state.last_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
+        m_multi_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
     }
 
 }
@@ -68,26 +82,31 @@ void Multi_HUD_Widget::process_vertical()
 void Multi_HUD_Widget::process_horizontal_angle_rate()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
-    m_multi_state.last_input.horizontal.angle_rate.set(v);
+
+    v *= math::vec2f(math::anglef::_2pi);
+
+    m_multi_input.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_angle()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+
     v *= math::vec2f(math::anglef::pi / 4.f);
-    m_multi_state.last_input.horizontal.angle_rate.set(v);
+
+    m_multi_input.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_velocity()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
     v *= 5.f;
-    m_multi_state.last_input.horizontal.angle_rate.set(v);
+    m_multi_input.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal()
 {
-    switch (m_multi_state.last_input.horizontal.mode.value)
+    switch (m_multi_input.horizontal.mode.value)
     {
     case silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
         process_horizontal_angle_rate();
@@ -102,19 +121,19 @@ void Multi_HUD_Widget::process_horizontal()
 
     if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_LEFT))
     {
-        int v = math::clamp(static_cast<int>(m_multi_state.last_input.horizontal.mode.get()) - 1,
+        int v = math::clamp(static_cast<int>(m_multi_input.horizontal.mode.get()) - 1,
                             static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
                             static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_multi_state.last_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
+        m_multi_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
     }
     else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_RIGHT))
     {
-        int v = math::clamp(static_cast<int>(m_multi_state.last_input.horizontal.mode.get()) + 1,
+        int v = math::clamp(static_cast<int>(m_multi_input.horizontal.mode.get()) + 1,
                             static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
                             static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_multi_state.last_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
+        m_multi_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
     }
 }
 
@@ -124,7 +143,7 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
 
 void Multi_HUD_Widget::process_yaw()
 {
-    switch (m_multi_state.last_input.yaw.mode.value)
+    switch (m_multi_input.yaw.mode.value)
     {
     case silk::node::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
@@ -158,7 +177,7 @@ void Multi_HUD_Widget::process_mode_armed()
 
 void Multi_HUD_Widget::process_mode()
 {
-    switch (m_multi_state.last_input.mode.value)
+    switch (m_multi_input.mode.value)
     {
     case silk::node::stream::IMulti_Input::Mode::IDLE:
         process_mode_idle();
@@ -197,9 +216,10 @@ void Multi_HUD_Widget::process_gamepad()
 
 #define SYNC(x) \
 {\
+    auto& prev_remote = m_prev_multi_state.last_input.x;\
     auto& remote = m_multi_state.last_input.x;\
     auto& local = m_multi_input.x;\
-    if (remote.version >= local.version)\
+    if (prev_remote.version != local.version && remote.version >= local.version)\
     {\
         if (local.value == remote.value)\
         {\
@@ -259,6 +279,8 @@ void Multi_HUD_Widget::process()
     process_gamepad();
 
     sync_input();
+
+    m_prev_multi_state = m_multi_state;
 }
 
 

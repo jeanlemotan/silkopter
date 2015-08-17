@@ -128,7 +128,8 @@ SOURCES += \
     ../../src/source/OpenCV_Capture.cpp \
     ../../src/source/SRF01.cpp \
     ../../src/brain/Multi_Brain.cpp \
-    ../../src/pilot/Multi_Pilot.cpp
+    ../../src/pilot/Multi_Pilot.cpp \
+    ../../src/source/MaxSonar.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -255,7 +256,8 @@ HEADERS += \
     ../../src/brain/Multi_Brain.h \
     ../../../libs/common/node/IBrain.h \
     ../../src/pilot/Multi_Pilot.h \
-    ../../../libs/common/node/IPilot.h
+    ../../../libs/common/node/IPilot.h \
+    ../../src/source/MaxSonar.h
 
 DISTFILES +=
 

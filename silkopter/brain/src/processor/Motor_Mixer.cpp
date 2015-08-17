@@ -94,7 +94,6 @@ auto Motor_Mixer::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(m_outputs.size());
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
-        outputs[i].type = stream::IThrottle::TYPE;
         outputs[i].name = q::util::format2<std::string>("Throttle {}", i);
         outputs[i].stream = m_outputs[i];
     }
@@ -225,7 +224,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         {
             if (math::equals(crt, old_crt, math::epsilon<float>()))
             {
-                QLOGI("{}: Stabilized in {} iterations: {} - {}", STEP, iteration, crt, target);
+//                QLOGI("{}: Stabilized in {} iterations: {} - {}", STEP, iteration, crt, target);
                 break;
             }
         }
@@ -234,7 +233,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         //check if we're done
         if (math::equals(crt, target, 0.01f))
         {
-            QLOGI("{}: Done in {} iterations", STEP, iteration);
+//            QLOGI("{}: Done in {} iterations", STEP, iteration);
             break;
         }
 

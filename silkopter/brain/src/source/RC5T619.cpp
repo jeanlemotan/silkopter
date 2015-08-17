@@ -128,15 +128,15 @@ RC5T619::RC5T619(HAL& hal)
     , m_init_params(new sz::RC5T619::Init_Params())
     , m_config(new sz::RC5T619::Config())
 {
+    m_adc[0] = std::make_shared<Stream>();
+    m_adc[1] = std::make_shared<Stream>();
 }
 
 auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].type = stream::IADC::TYPE;
     outputs[0].name = "ADC0";
     outputs[0].stream = m_adc[0];
-    outputs[1].type = stream::IADC::TYPE;
     outputs[1].name = "ADC1";
     outputs[1].stream = m_adc[1];
     return outputs;
@@ -168,10 +168,6 @@ auto RC5T619::init() -> bool
         QLOGE("No bus configured");
         return false;
     }
-
-    m_adc[0] = std::make_shared<Stream>();
-    m_adc[1] = std::make_shared<Stream>();
-
 
     m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 50);
     m_init_params->adc1_rate_ratio = math::clamp<size_t>(m_init_params->adc1_rate_ratio, 1, 100);

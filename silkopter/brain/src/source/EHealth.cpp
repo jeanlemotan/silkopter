@@ -11,6 +11,7 @@ namespace node
 EHealth::EHealth(HAL& hal)
     : m_hal(hal)
 {
+    m_stream = std::make_shared<Stream>();
 }
 
 EHealth::~EHealth()
@@ -20,7 +21,6 @@ EHealth::~EHealth()
 auto EHealth::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = stream::IAcceleration::TYPE;
     outputs[0].name = "EKG";
     outputs[0].stream = m_stream;
     return outputs;
@@ -43,7 +43,6 @@ auto EHealth::init() -> bool
         return false;
     }
 
-    m_stream = std::make_shared<Stream>();
     m_stream->rate = 100;
 
     return true;

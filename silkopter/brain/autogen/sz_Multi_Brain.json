@@ -5,8 +5,8 @@
     "name": "Init_Params",
     "members":
     [
-        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 0}],
-        ["uint32_t", "state_rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 20}]
+        ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 100}],
+        ["uint32_t", "state_rate", {"required": true, "json_key" : "State Rate (Hz)", "default" : 20}]
     ]
 },
 {

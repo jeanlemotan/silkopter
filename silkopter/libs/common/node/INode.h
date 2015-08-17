@@ -51,7 +51,6 @@ public:
 
     struct Output
     {
-        stream::Type type;
         std::string name;
         stream::IStream_ptr stream;
     };

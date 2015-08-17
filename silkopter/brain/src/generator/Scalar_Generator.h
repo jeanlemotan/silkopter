@@ -54,6 +54,7 @@ template<class Stream_t>
 Scalar_Generator<Stream_t>::Scalar_Generator(HAL& hal)
     : m_hal(hal)
 {
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class Stream_t>
@@ -77,7 +78,6 @@ auto Scalar_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bo
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
@@ -158,7 +158,6 @@ template<class Stream_t>
 auto Scalar_Generator<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;
     return outputs;

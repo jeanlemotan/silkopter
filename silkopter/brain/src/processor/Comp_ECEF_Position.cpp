@@ -14,6 +14,8 @@ Comp_ECEF_Position::Comp_ECEF_Position(HAL& hal)
     , m_init_params(new sz::Comp_ECEF_Position::Init_Params())
     , m_config(new sz::Comp_ECEF_Position::Config())
 {
+    m_position_output_stream = std::make_shared<ECEF_Position_Stream>();
+    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
 auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
@@ -34,7 +36,6 @@ auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
 }
 auto Comp_ECEF_Position::init() -> bool
 {
-    m_position_output_stream = std::make_shared<ECEF_Position_Stream>();
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -59,8 +60,8 @@ auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { stream::IECEF_Position::TYPE, "Position", m_position_output_stream },
-        { stream::IENU_Frame::TYPE, "ENU Frame", m_enu_frame_output_stream },
+        { "Position", m_position_output_stream },
+        { "ENU Frame", m_enu_frame_output_stream },
     }};
     return outputs;
 }

@@ -375,7 +375,7 @@ void Input_Mgr::process_ps4_gamepad_event(Gamepad_Data const& data, js_event con
             break;
             default:
             {
-                QLOGW("unknown ps4 axis {} / {}", ev.number, ev.value / 32767.f);
+                //QLOGW("unknown ps4 axis {} / {}", ev.number, ev.value / 32767.f);
             }
             break;
         }

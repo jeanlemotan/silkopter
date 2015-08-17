@@ -57,6 +57,8 @@ Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(HAL&
     static_assert(In_Stream_t::TYPE == Out_Stream_t::TYPE, "Both streams need to be of the same type");
     static_assert(In_Stream_t::SPACE == Frame_Stream_t::SPACE, "Bad Input stream or Frame");
     static_assert(Out_Stream_t::SPACE == Frame_Stream_t::PARENT_SPACE, "Bad Output stream or Frame");
+
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
@@ -80,7 +82,6 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(rapidjson:
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 {
-    m_output_stream = std::make_shared<Output_Stream>();
     if (m_init_params.rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params.rate);
@@ -150,7 +151,6 @@ template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].type = Out_Stream_t::TYPE;
     outputs[0].name = "Output";
     outputs[0].stream = m_output_stream;
     return outputs;
