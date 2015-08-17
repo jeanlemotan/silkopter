@@ -76,11 +76,10 @@ void Multi_Pilot::process()
     //process inputs
     {
         auto const& input_values = m_comms.get_multi_input_values();
-        size_t samples_needed = m_output_stream->compute_samples_needed();
 
         auto now = q::Clock::now();
 
-        stream::IMulti_Input::Value input_value = m_output_stream->get_last_sample().value;
+        stream::IMulti_Input::Value& input_value = m_last_input_value;
         if (!input_values.empty())
         {
             input_value = input_values.back();
@@ -89,6 +88,7 @@ void Multi_Pilot::process()
 
         bool is_healthy = now - m_last_received_input_value_tp < INPUT_HEALTHY_TIMEOUT;
 
+        size_t samples_needed = m_output_stream->compute_samples_needed();
         for (size_t i = 0; i < samples_needed; i++)
         {
             m_output_stream->push_sample(input_value, is_healthy);

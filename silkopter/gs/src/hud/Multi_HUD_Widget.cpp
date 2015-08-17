@@ -16,6 +16,9 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
 {
     float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
 
+    constexpr float expo = 2.f;
+    v = math::sgn(v) * std::pow(v, expo); //some expo
+
     auto config = m_hal.get_multi_config();
     if (config)
     {
@@ -27,6 +30,9 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
 void Multi_HUD_Widget::process_vertical_thrust_offset()
 {
     float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+
+    constexpr float expo = 2.f;
+    v = math::sgn(v) * std::pow(v, expo); //some expo
 
     auto config = m_hal.get_multi_config();
     if (config)
@@ -82,6 +88,11 @@ void Multi_HUD_Widget::process_vertical()
 void Multi_HUD_Widget::process_horizontal_angle_rate()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+
+    v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
+
+    constexpr float expo = 2.f;
+    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
     v *= math::vec2f(math::anglef::_2pi);
 
@@ -139,6 +150,16 @@ void Multi_HUD_Widget::process_horizontal()
 
 void Multi_HUD_Widget::process_yaw_angle_rate()
 {
+    float v = 0;
+    v += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
+    v -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
+
+    constexpr float expo = 2.f;
+    v = math::sgn(v) * std::pow(v, expo); //some expo
+
+    v *= math::anglef::pi2;
+
+    m_multi_input.yaw.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_yaw()

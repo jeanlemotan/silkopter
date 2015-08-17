@@ -65,6 +65,9 @@ private:
 
     stream::IMulti_State::Value m_state;
 
+    void process_input_mode_idle(stream::IMulti_Input::Value& input);
+    void process_input_mode_armed(stream::IMulti_Input::Value& input);
+
     void process_input(stream::IMulti_Input::Value const& input);
 
     Sample_Accumulator<

@@ -51,6 +51,7 @@ private:
     HAL& m_hal;
     Comms& m_comms;
 
+    stream::IMulti_Input::Value m_last_input_value;
     q::Clock::time_point m_last_received_input_value_tp = q::Clock::now();
 
     std::shared_ptr<sz::Multi_Pilot::Init_Params> m_init_params;

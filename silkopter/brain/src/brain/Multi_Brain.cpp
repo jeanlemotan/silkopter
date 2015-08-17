@@ -82,6 +82,77 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
+void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& input)
+{
+    QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
+
+    if (input.vertical.thrust_rate.value != 0)
+    {
+        input.vertical.thrust_rate.set(0);
+    }
+    if (input.vertical.thrust_offset.value != 0)
+    {
+        input.vertical.thrust_rate.set(0);
+    }
+    if (input.vertical.climb_rate.value != 0)
+    {
+        input.vertical.climb_rate.set(0);
+    }
+
+    if (!math::is_zero(input.horizontal.angle_rate.value))
+    {
+        input.horizontal.angle_rate.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(input.horizontal.angle.value))
+    {
+        input.horizontal.angle.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(input.horizontal.velocity.value))
+    {
+        input.horizontal.velocity.set(math::vec2f::zero);
+    }
+
+    if (input.yaw.angle_rate.value != 0)
+    {
+        input.yaw.angle_rate.set(0);
+    }
+
+    m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
+    m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
+}
+
+void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& input)
+{
+    QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
+
+    stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+
+    if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
+    {
+        thrust.z += input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
+        m_reference_thrust = thrust.z;
+    }
+    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
+    {
+        thrust.z = m_reference_thrust + input.vertical.thrust_offset.value;
+        //QLOGI("Thrust: {}", thrust.z);
+    }
+
+    if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
+    {
+        rate = input.horizontal.angle_rate.value;
+    }
+
+    if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
+    {
+        rate.z = input.yaw.angle_rate.value;
+    }
+
+    m_rate_output_stream->push_sample(rate, true);
+    m_thrust_output_stream->push_sample(thrust, true);
+}
+
 void Multi_Brain::process_input(stream::IMulti_Input::Value const& req_input)
 {
     auto& input = m_state.last_input;
@@ -89,68 +160,11 @@ void Multi_Brain::process_input(stream::IMulti_Input::Value const& req_input)
 
     if (input.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        if (input.vertical.thrust_rate.value != 0)
-        {
-            input.vertical.thrust_rate.set(0);
-        }
-        if (input.vertical.thrust_offset.value != 0)
-        {
-            input.vertical.thrust_rate.set(0);
-        }
-        if (input.vertical.climb_rate.value != 0)
-        {
-            input.vertical.climb_rate.set(0);
-        }
-
-        if (!math::is_zero(input.horizontal.angle_rate.value))
-        {
-            input.horizontal.angle_rate.set(math::vec2f::zero);
-        }
-        if (!math::is_zero(input.horizontal.angle.value))
-        {
-            input.horizontal.angle.set(math::vec2f::zero);
-        }
-        if (!math::is_zero(input.horizontal.velocity.value))
-        {
-            input.horizontal.velocity.set(math::vec2f::zero);
-        }
-
-        if (input.yaw.angle_rate.value != 0)
-        {
-            input.yaw.angle_rate.set(0);
-        }
-
-        m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
-        m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
+        process_input_mode_idle(input);
     }
-    else
+    else if (input.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
-        stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
-        stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
-
-
-        if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
-        {
-            thrust.z += input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
-            m_reference_thrust = thrust.z;
-        }
-        else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
-        {
-            thrust.z = m_reference_thrust + input.vertical.thrust_offset.value;
-        }
-
-        if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
-        {
-            rate = input.horizontal.angle_rate.value;
-        }
-
-        if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
-        {
-            rate.z = input.yaw.angle_rate.value;
-        }
-
-        m_rate_output_stream->push_sample(rate, true);
-        m_thrust_output_stream->push_sample(thrust, true);
+        process_input_mode_armed(input);
     }
 }
 

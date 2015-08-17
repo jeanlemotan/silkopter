@@ -164,7 +164,8 @@ static float compute_throttle_from_thrust(float max_thrust, float thrust)
 //    return thrust;
 //}
 
-constexpr float MIN_THRUST = 0.01f;
+constexpr float MIN_THRUST = 0.0f;
+constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
 
 
 void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& _target)
@@ -199,7 +200,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         }
 
         float dyn_range = math::min(th - MIN_THRUST, multi_config.motor_thrust - th);
-        dyn_range *= 1.5f; //allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
+        dyn_range *= DYN_RANGE_FACTOR;
         min_thrust = math::max(th - dyn_range, MIN_THRUST);
         max_thrust = math::min(th + dyn_range, multi_config.motor_thrust);
     }

@@ -197,17 +197,17 @@
                 },
                 "config": {
                     "Feedback": {
-                        "Weight (0-1)": 0.0,
+                        "Weight (0-1)": 1.0,
                         "Combined XY PID": true,
                         "XY PID": {
                             "kP": 1.0,
-                            "kI": 0.0,
+                            "kI": 0.5,
                             "kD": 0.0,
-                            "Max I": 0.0,
+                            "Max I": 1.0,
                             "D Filter": 0.0
                         },
                         "Z PID": {
-                            "kP": 0.0,
+                            "kP": 1.0,
                             "kI": 0.0,
                             "kD": 0.0,
                             "Max I": 0.0,
@@ -215,7 +215,7 @@
                         }
                     },
                     "Feedforward": {
-                        "Weight (0-1)": 1.0,
+                        "Weight (0-1)": 0.0,
                         "Max Torque (N)": 1.5
                     }
                 },
