@@ -3,7 +3,7 @@
 		<uniform desc="Viewport" name="uViewportSize" link="viewport/size"/>
 		<attribute desc="Positions" name="aPos" link="positions" count="3"/>
 		<attribute desc="Colors" name="aCol" link="colors" count="4"/>
-		<attribute desc="TexCoords0" name="aTexCoord0" link="texCoords0" count="2"/>
+		<attribute desc="TexCoords0" name="aTexCoord0" link="tex_coords_0" count="2"/>
 		<sampler name="diffuse" filter="bilinear" wraps="clamp" wrapt="clamp" mipmap="true"/>
 
 		<renderstate>

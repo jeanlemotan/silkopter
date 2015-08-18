@@ -92,9 +92,13 @@ void GS::init_graphics()
     technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/font.technique"));
     QASSERT(technique);
     m_context.materials.font.set_technique(technique);
-    m_context.materials.font.get_render_state(0).set_depth_test(true);
-    m_context.materials.font.get_render_state(0).set_depth_write(true);
+    m_context.materials.font.get_render_state(0).set_depth_test(false);
+    m_context.materials.font.get_render_state(0).set_depth_write(false);
     m_context.materials.font.get_render_state(0).set_culling(false);
+    m_context.materials.font.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+
+    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/DroidSans.ttf"));
+    QASSERT(m_context.font);
 }
 
 void GS::closeEvent(QCloseEvent* event)

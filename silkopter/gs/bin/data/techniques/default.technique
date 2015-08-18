@@ -7,7 +7,7 @@
 		
 		<attribute name="aPos" link="positions" count="3" />
 		<attribute name="aNormal" link="normals" count="3" />
-		<attribute name="aTexCoord0" link="texCoords0" count="2"/>
+		<attribute name="aTexCoord0" link="tex_coords_0" count="2"/>
 		
 		<shader>
 			<vshader><![CDATA[

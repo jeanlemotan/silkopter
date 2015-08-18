@@ -20,11 +20,13 @@ private:
 
     qinput::Gamepad_cptr m_gamepad;
 
-    silk::node::stream::IMulti_Input::Value m_multi_input;
-    silk::node::stream::IMulti_State::Value m_prev_multi_state;
-    silk::node::stream::IMulti_State::Value m_multi_state;
+    silk::node::stream::IMulti_Input::Value m_input;
+    silk::node::stream::IMulti_State::Value m_prev_state;
+    silk::node::stream::IMulti_State::Value m_state;
 
     q::Clock::time_point m_arm_start_tp = q::Clock::now();
+
+    Render_Widget* m_render_widget = nullptr;
 
     void process_vertical_thrust_rate();
     void process_vertical_thrust_offset();
@@ -47,5 +49,9 @@ private:
 
     void acquire_gamepad();
     void process_gamepad();
+
+    //////////////////////////
+
+    void render();
 };
 
