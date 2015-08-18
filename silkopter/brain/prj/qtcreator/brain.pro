@@ -130,7 +130,8 @@ SOURCES += \
     ../../src/brain/Multi_Brain.cpp \
     ../../src/pilot/Multi_Pilot.cpp \
     ../../src/source/MaxSonar.cpp \
-    ../../src/processor/Throttle_To_PWM.cpp
+    ../../src/processor/Throttle_To_PWM.cpp \
+    ../../../libs/utils/Coordinates.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -258,7 +259,8 @@ HEADERS += \
     ../../src/pilot/Multi_Pilot.h \
     ../../../libs/common/node/IPilot.h \
     ../../src/source/MaxSonar.h \
-    ../../src/processor/Throttle_To_PWM.h
+    ../../src/processor/Throttle_To_PWM.h \
+    ../../../libs/utils/Coordinates.h
 
 DISTFILES +=
 

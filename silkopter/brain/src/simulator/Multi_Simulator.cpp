@@ -270,6 +270,25 @@ void Multi_Simulator::process()
                 stream.samples.push_back(stream.last_sample);
             }
         }
+        {
+            static const util::coordinates::LLA origin_lla(math::radians(40.7833f), math::radians(-73.9667), 0.f);
+            auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
+
+            q::util::Rand noise;
+            double noise_magnitude = 1.0;
+
+            auto& stream = *m_ecef_position_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.last_sample.dt)
+            {
+                stream.accumulated_dt -= stream.last_sample.dt;
+                stream.last_sample.tp += stream.last_sample.dt;
+                stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
+                                                math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
+                stream.last_sample.is_healthy = 0;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
     });
 }
 

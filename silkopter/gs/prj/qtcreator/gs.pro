@@ -158,7 +158,8 @@ HEADERS += \
     ../../src/input/Gamepad_Multi.h \
     ../../src/input/Multi.h \
     ../../src/hud/Multi_HUD_Widget.h \
-    ../../src/hud/IHUD_Widget.h
+    ../../src/hud/IHUD_Widget.h \
+    ../../../libs/utils/Coordinates.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -189,7 +190,8 @@ SOURCES += \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
     ../../src/input/Gamepad_Multi.cpp \
-    ../../src/hud/Multi_HUD_Widget.cpp
+    ../../src/hud/Multi_HUD_Widget.cpp \
+    ../../../libs/utils/Coordinates.cpp
 
 FORMS += \
     ../../src/New_Node.ui \

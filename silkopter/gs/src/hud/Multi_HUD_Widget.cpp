@@ -189,6 +189,8 @@ void Multi_HUD_Widget::process_mode_idle()
         m_input.mode.set(silk::node::stream::IMulti_Input::Mode::ARMED);
         QLOGI("Trying to ARM");
     }
+
+    m_ecef_home = m_state.ecef_position;
 }
 
 void Multi_HUD_Widget::process_mode_armed()
@@ -325,6 +327,21 @@ void Multi_HUD_Widget::render()
     q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
+    util::coordinates::LLA lla;
+    lla.latitude = 0.59341195;
+    lla.longitude = -2.0478571;
+    lla.altitude = 251.702;
+
+    auto N = util::coordinates::normal_distance(lla.latitude);
+    auto ecef = util::coordinates::lla_to_ecef(lla);
+    auto trans = util::coordinates::enu_to_ecef_transform(lla);
+    auto axis_x = trans.get_axis_x();
+    auto axis_y = trans.get_axis_y();
+    auto axis_z = trans.get_axis_z();
+
+    math::vec3d g(0, 0, -1);
+    auto G = math::rotate(trans, g);
+
 //    {
 //        auto delta = m_uav.state.enu_position - m_camera_position_target;
 //        delta *= 0.9f;
@@ -335,6 +352,65 @@ void Multi_HUD_Widget::render()
 
     m_context.painter.set_camera(m_context.camera);
 
+    render_ground();
+    render_hud();
+
+    m_context.painter.flush();
+
+    m_render_widget->end_rendering();
+    m_render_widget->update();
+}
+
+void Multi_HUD_Widget::render_ground()
+{
+    if (!m_ecef_home)
+    {
+        return;
+    }
+    math::vec3d home = *m_ecef_home;
+
+    //m_state.frame
+
+    math::vec3s32 offset(home);
+    offset.z = 0;
+
+    math::trans3df trans;
+    trans.set_translation(math::vec3f(offset));
+    m_context.painter.push_post_clip_transform(trans);
+
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+    m_context.painter.set_material(mat);
+
+    const float k_size = 10000;
+    const int k_line_count = 300;
+    const int k_half_line_size = k_line_count / 2;
+
+    //m_context.painter.fill_rectangle(q::draw::Vertex(math::vec3f(-k_size, -k_size, 0), 0x20FFFFFF), q::draw::Vertex(math::vec3f(k_size, k_size, 0), 0x20FFFFFF));
+
+    float max_alpha = 20.f;
+    float color_inc = 2.f / float(k_line_count);
+    for (int i = 0; i < k_line_count; i++)
+    {
+        float x = float(i) - k_half_line_size;
+        uint32_t color = 0x00FFFFFF;
+        uint32_t color2 = color | static_cast<int>((1.f - math::abs(x) * color_inc) * max_alpha) << 24;
+
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(-k_half_line_size, x, 0), color), q::draw::Vertex(math::vec3f(0, x, 0), color2));
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(0, x, 0), color2), q::draw::Vertex(math::vec3f(k_half_line_size, x, 0), color));
+
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(x, -k_half_line_size, 0), color), q::draw::Vertex(math::vec3f(x, 0, 0), color2));
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(x, 0, 0), color2), q::draw::Vertex(math::vec3f(x, k_half_line_size, 0), color));
+    }
+
+    m_context.painter.pop_post_clip_transform();
+}
+
+void Multi_HUD_Widget::render_hud()
+{
     m_context.painter.set_material(m_context.materials.font);
     q::text::Texter texter;
     q::text::Style style;
@@ -374,11 +450,4 @@ void Multi_HUD_Widget::render()
         texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 100));
         break;
     }
-
-
-
-    m_context.painter.flush();
-
-    m_render_widget->end_rendering();
-    m_render_widget->update();
 }

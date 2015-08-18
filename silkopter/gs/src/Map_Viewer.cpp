@@ -122,7 +122,7 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
             if (yes && !m_samples.empty())
             {
                 auto const& ecef = m_samples.back().position;
-                auto lla = silk::node::stream::ecef_to_lla(ecef);
+                auto lla = util::coordinates::ecef_to_lla(ecef);
                 m_map_control->setView(QPointF(math::degrees(lla.longitude), math::degrees(lla.latitude)));
             }
         });
@@ -160,7 +160,7 @@ void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position
         return;
     }
 
-    auto lla = silk::node::stream::ecef_to_lla(position);
+    auto lla = util::coordinates::ecef_to_lla(position);
 
     if (!m_map_control->isPanning() && m_is_following_sample)
     {

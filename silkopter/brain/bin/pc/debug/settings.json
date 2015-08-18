@@ -60,8 +60,8 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": false,
-                    "Ground Enabled": false,
+                    "Drag Enabled": true,
+                    "Ground Enabled": true,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
@@ -197,7 +197,7 @@
                 },
                 "config": {
                     "Feedback": {
-                        "Weight (0-1)": 1.0,
+                        "Weight (0-1)": 0.0,
                         "Combined XY PID": true,
                         "XY PID": {
                             "kP": 1.0,
@@ -215,7 +215,7 @@
                         }
                     },
                     "Feedforward": {
-                        "Weight (0-1)": 0.0,
+                        "Weight (0-1)": 1.0,
                         "Max Torque (N)": 1.5
                     }
                 },

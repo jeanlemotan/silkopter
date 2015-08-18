@@ -68,16 +68,16 @@ private:
     };
     mutable std::shared_ptr<ECEF_Position_Stream> m_position_output_stream;
 
-    struct ENU_Frame_Stream : public stream::IENU_Frame
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+//    struct ENU_Frame_Stream : public stream::IENU_Frame
+//    {
+//        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+//        auto get_rate() const -> uint32_t { return rate; }
 
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<ENU_Frame_Stream> m_enu_frame_output_stream;
+//        Sample last_sample;
+//        std::vector<Sample> samples;
+//        uint32_t rate = 0;
+//    };
+//    mutable std::shared_ptr<ENU_Frame_Stream> m_enu_frame_output_stream;
 };
 
 

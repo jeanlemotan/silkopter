@@ -199,13 +199,13 @@ struct Frame : public Stream
     q::util::Signal<void(Frame&)> samples_available_signal;
 };
 DECLARE_CLASS_PTR(Frame);
-struct ENU_Frame : public Stream
-{
-    typedef IENU_Frame::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Frame&)> samples_available_signal;
-};
-DECLARE_CLASS_PTR(ENU_Frame);
+//struct ENU_Frame : public Stream
+//{
+//    typedef IENU_Frame::Sample Sample;
+//    std::vector<Sample> samples;
+//    q::util::Signal<void(ENU_Frame&)> samples_available_signal;
+//};
+//DECLARE_CLASS_PTR(ENU_Frame);
 
 struct GPS_Info : public Stream
 {

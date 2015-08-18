@@ -15,7 +15,7 @@ Comp_ECEF_Position::Comp_ECEF_Position(HAL& hal)
     , m_config(new sz::Comp_ECEF_Position::Config())
 {
     m_position_output_stream = std::make_shared<ECEF_Position_Stream>();
-    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
+//    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
 auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
@@ -61,7 +61,7 @@ auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs =
     {{
         { "Position", m_position_output_stream },
-        { "ENU Frame", m_enu_frame_output_stream },
+       // { "ENU Frame", m_enu_frame_output_stream },
     }};
     return outputs;
 }

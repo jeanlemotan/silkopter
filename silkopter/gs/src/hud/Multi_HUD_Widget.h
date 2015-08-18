@@ -28,6 +28,8 @@ private:
 
     Render_Widget* m_render_widget = nullptr;
 
+    boost::optional<math::vec3d> m_ecef_home;
+
     void process_vertical_thrust_rate();
     void process_vertical_thrust_offset();
     void process_vertical_climb_rate();
@@ -53,5 +55,7 @@ private:
     //////////////////////////
 
     void render();
+    void render_ground();
+    void render_hud();
 };
 

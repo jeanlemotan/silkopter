@@ -582,7 +582,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);
     m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature RS", *this);
     m_node_factory.register_node<Resampler<stream::IFrame>>("Frame RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
+//    m_node_factory.register_node<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IPWM>>("PWM RS", *this);
     m_node_factory.register_node<Resampler<stream::IFloat>>("Float RS", *this);
     m_node_factory.register_node<Resampler<stream::IForce>>("Force RS", *this);
@@ -598,44 +598,44 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
     m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Acceleration, stream::IAcceleration, stream::IFrame>>("Acceleration (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Acceleration, stream::IECEF_Acceleration, stream::IENU_Frame>>("Acceleration (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Acceleration, stream::IECEF_Acceleration, stream::IENU_Frame>>("Acceleration (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IAcceleration, stream::IENU_Acceleration, stream::IFrame>>("Acceleration (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Angular_Velocity, stream::IENU_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Angular_Velocity, stream::IENU_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Angular_Velocity, stream::IAngular_Velocity, stream::IFrame>>("Angular Velocity (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Angular_Velocity, stream::IECEF_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Angular_Velocity, stream::IECEF_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IAngular_Velocity, stream::IENU_Angular_Velocity, stream::IFrame>>("Angular Velocity (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Magnetic_Field, stream::IENU_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Magnetic_Field, stream::IENU_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Magnetic_Field, stream::IMagnetic_Field, stream::IFrame>>("Magnetic Field (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Magnetic_Field, stream::IECEF_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Magnetic_Field, stream::IECEF_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IMagnetic_Field, stream::IENU_Magnetic_Field, stream::IFrame>>("Magnetic Field (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Linear_Acceleration, stream::IENU_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Linear_Acceleration, stream::IENU_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Linear_Acceleration, stream::ILinear_Acceleration, stream::IFrame>>("Linear Acceleration (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Linear_Acceleration, stream::IECEF_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Linear_Acceleration, stream::IECEF_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::ILinear_Acceleration, stream::IENU_Linear_Acceleration, stream::IFrame>>("Linear Acceleration (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Distance, stream::IENU_Distance, stream::IENU_Frame>>("Distance (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Distance, stream::IENU_Distance, stream::IENU_Frame>>("Distance (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Distance, stream::IDistance, stream::IFrame>>("Distance (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Distance, stream::IECEF_Distance, stream::IENU_Frame>>("Distance (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Distance, stream::IECEF_Distance, stream::IENU_Frame>>("Distance (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IDistance, stream::IENU_Distance, stream::IFrame>>("Distance (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Force, stream::IENU_Force, stream::IENU_Frame>>("Force (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Force, stream::IENU_Force, stream::IENU_Frame>>("Force (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Force, stream::IForce, stream::IFrame>>("Force (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Force, stream::IECEF_Force, stream::IENU_Frame>>("Force (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Force, stream::IECEF_Force, stream::IENU_Frame>>("Force (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IForce, stream::IENU_Force, stream::IFrame>>("Force (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Torque, stream::IENU_Torque, stream::IENU_Frame>>("Torque (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Torque, stream::IENU_Torque, stream::IENU_Frame>>("Torque (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Torque, stream::ITorque, stream::IFrame>>("Torque (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Torque, stream::IECEF_Torque, stream::IENU_Frame>>("Torque (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Torque, stream::IECEF_Torque, stream::IENU_Frame>>("Torque (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::ITorque, stream::IENU_Torque, stream::IFrame>>("Torque (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Velocity, stream::IENU_Velocity, stream::IENU_Frame>>("Velocity (ECEF->ENU)", *this);
+//    m_node_factory.register_node<Transformer<stream::IECEF_Velocity, stream::IENU_Velocity, stream::IENU_Frame>>("Velocity (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Velocity, stream::IVelocity, stream::IFrame>>("Velocity (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Velocity, stream::IECEF_Velocity, stream::IENU_Frame>>("Velocity (ENU->ECEF)", *this);
+//    m_node_factory.register_node<Transformer_Inv<stream::IENU_Velocity, stream::IECEF_Velocity, stream::IENU_Frame>>("Velocity (ENU->ECEF)", *this);
     m_node_factory.register_node<Transformer_Inv<stream::IVelocity, stream::IENU_Velocity, stream::IFrame>>("Velocity (Local->ENU)", *this);
 
     m_node_factory.register_node<Motor_Mixer>("Motor Mixer", *this);
