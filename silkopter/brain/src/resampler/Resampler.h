@@ -6,6 +6,7 @@
 #include <deque>
 
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 
 #include "sz_math.hpp"
@@ -52,9 +53,9 @@ private:
     Sample_Accumulator<Stream_t> m_accumulator;
 
     q::Clock::duration m_input_stream_dt;
-    q::Clock::duration m_dt = q::Clock::duration(0);
-    q::Clock::duration m_input_accumulated_dt = q::Clock::duration(0);
     q::Clock::duration m_processed_dt = q::Clock::duration(0);
+
+    typename Stream_t::Sample m_last_input_sample;
 
     std::deque<typename Stream_t::Sample> m_input_samples;
 
@@ -95,15 +96,16 @@ private:
 
     Butterworth<Stream_t, Stream_t::can_be_filtered_t::value> m_dsp;
 
-    struct Stream : public Stream_t
-    {
-        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<Stream_t> Output_Stream;
+//    struct Stream : public Stream_t
+//    {
+//        auto get_samples() const -> std::vector<typename Stream_t::Sample> const& { return samples; }
+//        auto get_rate() const -> uint32_t { return rate; }
 
-        uint32_t rate = 0;
-        std::vector<typename Stream_t::Sample> samples;
-    };
-    mutable std::shared_ptr<Stream> m_output_stream;
+//        uint32_t rate = 0;
+//        std::vector<typename Stream_t::Sample> samples;
+//    };
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
 
@@ -111,7 +113,7 @@ template<class Stream_t>
 Resampler<Stream_t>::Resampler(HAL& hal)
     : m_hal(hal)
 {
-    m_output_stream = std::make_shared<Stream>();
+    m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class Stream_t>
@@ -144,9 +146,9 @@ auto Resampler<Stream_t>::init() -> bool
         QLOGE("Bad input rate: {}Hz", m_init_params.input_rate);
         return false;
     }
-    m_output_stream->rate = m_init_params.rate;
+    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_tp(q::Clock::now());
 
-    m_dt = std::chrono::microseconds(1000000 / m_init_params.rate);
     m_input_stream_dt = std::chrono::microseconds(1000000 / m_init_params.input_rate);
 
     return true;
@@ -236,7 +238,7 @@ void Resampler<Stream_t>::process()
 {
     QLOG_TOPIC("resampler::process");
 
-    m_output_stream->samples.clear();
+    m_output_stream->clear();
 
     if (m_config.cutoff_frequency == 0)
     {
@@ -246,10 +248,9 @@ void Resampler<Stream_t>::process()
     if (m_init_params.rate <= m_init_params.input_rate)
     {
         m_accumulator.process([this](
-                              size_t idx,
+                              size_t,
                               typename Stream_t::Sample const& i_sample)
         {
-            m_input_accumulated_dt += m_input_stream_dt;
             m_input_samples.push_back(i_sample);
             m_dsp.process(m_input_samples.back().value);
         });
@@ -258,10 +259,9 @@ void Resampler<Stream_t>::process()
     else
     {
         m_accumulator.process([this](
-                              size_t idx,
+                              size_t,
                               typename Stream_t::Sample const& i_sample)
         {
-            m_input_accumulated_dt += m_input_stream_dt;
             m_input_samples.push_back(i_sample);
         });
 
@@ -272,70 +272,68 @@ void Resampler<Stream_t>::process()
 template<class Stream_t>
 void Resampler<Stream_t>::downsample()
 {
-    m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
-
-    typename Stream_t::Sample s;
-    while (m_input_accumulated_dt >= m_dt)
+    auto dt = m_output_stream->get_dt();
+    size_t samples_needed = m_output_stream->compute_samples_needed();
+    for (size_t i = 0; i < samples_needed; i++)
     {
-        s.value = m_input_samples.front().value;
-
-        m_output_stream->samples.push_back(s);
-
-        m_input_accumulated_dt -= m_dt;
-
-        m_processed_dt += m_dt;
-        while (m_processed_dt >= m_input_stream_dt)
+        //consume input samples
+        m_processed_dt += dt;
+        while (!m_input_samples.empty() && m_processed_dt >= m_input_stream_dt)
         {
             m_processed_dt -= m_input_stream_dt;
+            m_last_input_sample = m_input_samples.front();
             m_input_samples.pop_front();
-            if (m_input_samples.empty())
-            {
-                m_input_accumulated_dt = q::Clock::duration(0);
-                break;
-            }
         }
+
+        auto const& is = m_last_input_sample;
+        m_output_stream->push_sample(is.value, is.is_healthy);
     }
+
+    //m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
+
+//    auto dt = m_output_stream->get_dt();
+//    while (m_input_accumulated_dt >= dt)
+//    {
+//        auto const& is = m_input_samples.front();
+
+//        m_output_stream->push_sample(is.value, is.is_healthy);
+
+//        m_input_accumulated_dt -= dt;
+
+//        m_processed_dt += dt;
+//        while (m_processed_dt >= m_input_stream_dt)
+//        {
+//            m_processed_dt -= m_input_stream_dt;
+//            m_input_samples.pop_front();
+//            if (m_input_samples.empty())
+//            {
+//                m_input_accumulated_dt = q::Clock::duration(0);
+//                break;
+//            }
+//        }
+//    }
 
 }
 template<class Stream_t>
 void Resampler<Stream_t>::upsample()
 {
-    if (m_input_samples.empty())
+    auto dt = m_output_stream->get_dt();
+    size_t samples_needed = m_output_stream->compute_samples_needed();
+    for (size_t i = 0; i < samples_needed; i++)
     {
-        return;
-    }
-
-//        if (!m_has_started)
-//        {
-//            m_last_input_time_point = m_input_samples.front().time_point - m_dt;
-//            m_has_started = true;
-//        }
-
-    m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
-
-    typename Stream_t::Sample s;
-    while (m_input_accumulated_dt >= m_dt)
-    {
-        auto const& is = m_input_samples.front();
-        s.value = is.value;
-        s.is_healthy = is.is_healthy;
-
-        m_dsp.process(s.value);
-        m_output_stream->samples.push_back(s);
-
-        m_input_accumulated_dt -= m_dt;
-
-        m_processed_dt += m_dt;
-        while (m_processed_dt >= m_input_stream_dt)
+        //consume input samples
+        m_processed_dt += dt;
+        while (!m_input_samples.empty() && m_processed_dt >= m_input_stream_dt)
         {
             m_processed_dt -= m_input_stream_dt;
+            m_last_input_sample = m_input_samples.front();
             m_input_samples.pop_front();
-            if (m_input_samples.empty())
-            {
-                m_input_accumulated_dt = q::Clock::duration(0);
-                break;
-            }
         }
+
+
+        auto is = m_last_input_sample;
+        m_dsp.process(is.value);
+        m_output_stream->push_sample(is.value, is.is_healthy);
     }
 }
 

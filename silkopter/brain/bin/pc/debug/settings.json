@@ -55,13 +55,13 @@
                     "Magnetic Field Rate (Hz)": 100,
                     "Pressure Rate (Hz)": 100,
                     "Temperature Rate (Hz)": 10,
-                    "Distance Rate (Hz)": 12,
+                    "Distance Rate (Hz)": 10,
                     "GPS Rate (Hz)": 5
                 },
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": false,
-                    "Ground Enabled": true,
+                    "Ground Enabled": false,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
@@ -80,8 +80,8 @@
                 "config": {},
                 "input_paths": [
                     "Multi Input/Output",
-                    "",
-                    ""
+                    "Frame RS/Output",
+                    "Position RS (ECEF)/Output"
                 ]
             },
             "Multi Pilot": {
@@ -230,8 +230,8 @@
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Poles": 4,
-                    "Cutoff Frequency (Hz)": 0.1
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 2.0
                 },
                 "input_paths": [
                     "Multi Simulator/Position (ecef)"
