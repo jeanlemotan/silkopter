@@ -80,7 +80,7 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& new_input)
+void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config)
 {
     auto& crt_input = m_state.last_input;
     QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::IDLE);
@@ -124,7 +124,7 @@ void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& new_input
     m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
 }
 
-void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_input)
+void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config)
 {
     auto& crt_input = m_state.last_input;
     QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::ARMED);
@@ -135,12 +135,15 @@ void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_inpu
     if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
         thrust.z += crt_input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
+        thrust.z = math::clamp(thrust.z, 0.f, multi_config.motor_thrust * multi_config.motors.size());
+
         m_reference_thrust = thrust.z;
     }
     else if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
         thrust.z = m_reference_thrust + crt_input.vertical.thrust_offset.value;
-        QLOGI("Thrust: {}", thrust.z);
+        thrust.z = math::clamp(thrust.z, 0.f, multi_config.motor_thrust * multi_config.motors.size());
+        //QLOGI("Thrust: {}", thrust.z);
     }
 
     if (crt_input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
@@ -157,17 +160,17 @@ void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_inpu
     m_thrust_output_stream->push_sample(thrust, true);
 }
 
-void Multi_Brain::process_input(stream::IMulti_Input::Value const& new_input)
+void Multi_Brain::process_input(stream::IMulti_Input::Value const& new_input, silk::config::Multi const& multi_config)
 {
     stream::IMulti_Input::Value new_input_copy = new_input;
 
     if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        process_input_mode_idle(new_input_copy);
+        process_input_mode_idle(new_input_copy, multi_config);
     }
     else if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
-        process_input_mode_armed(new_input_copy);
+        process_input_mode_armed(new_input_copy, multi_config);
     }
 
     m_state.last_input = new_input_copy;
@@ -188,11 +191,17 @@ void Multi_Brain::process()
 {
     QLOG_TOPIC("multi_Brain::process");
 
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        return;
+    }
+
     m_state_output_stream->clear();
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_accumulator.process([this](
+    m_accumulator.process([this, &multi_config](
                           size_t idx,
                           stream::IMulti_Input::Sample const& i_input,
                           stream::IFrame::Sample const& i_frame,
@@ -204,7 +213,7 @@ void Multi_Brain::process()
                           )
     {
         acquire_home_position(i_position);
-        process_input(i_input.value);
+        process_input(i_input.value, *multi_config);
 
         m_state.ecef_position = i_position.value;
         m_state.ecef_home_position = m_home.ecef_position;

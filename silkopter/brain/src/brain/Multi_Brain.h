@@ -84,10 +84,10 @@ private:
 
     stream::IMulti_State::Value m_state;
 
-    void process_input_mode_idle(stream::IMulti_Input::Value& new_input);
-    void process_input_mode_armed(stream::IMulti_Input::Value& new_input);
+    void process_input_mode_idle(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config);
+    void process_input_mode_armed(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config);
 
-    void process_input(stream::IMulti_Input::Value const& new_input);
+    void process_input(stream::IMulti_Input::Value const& new_input, silk::config::Multi const& multi_config);
 
     void acquire_home_position(stream::IECEF_Position::Sample const& position);
     struct Home
