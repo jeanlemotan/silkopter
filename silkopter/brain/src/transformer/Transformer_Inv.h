@@ -143,7 +143,7 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() co
     std::vector<Input> inputs =
     {{
         { In_Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) },
-        { Out_Stream_t::TYPE, m_init_params.rate, "Frame", m_accumulator.get_stream_path(1) }
+        { Frame_Stream_t::TYPE, m_init_params.rate, "Frame", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
