@@ -533,7 +533,7 @@ namespace math
 
 	template <typename T> inline bool is_negative(T v)
 	{
-		return v > T(0);
+        return v < T(0);
 	}
 	template <> inline bool is_negative(float v)
 	{
