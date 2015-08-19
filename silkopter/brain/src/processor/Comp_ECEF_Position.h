@@ -9,6 +9,7 @@
 #include "HAL.h"
 
 #include "Sample_Accumulator.h"
+#include "Basic_Output_Stream.h"
 
 
 namespace sz
@@ -55,18 +56,12 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    Sample_Accumulator<stream::IECEF_Position, stream::ILinear_Acceleration, stream::IPressure> m_accumulator;
+    Sample_Accumulator<stream::IECEF_Position, stream::IENU_Linear_Acceleration, stream::IPressure> m_accumulator;
 
-    struct ECEF_Position_Stream : public stream::IECEF_Position
-    {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+    typedef Basic_Output_Stream<stream::IECEF_Position> Output_Stream;
+    mutable std::shared_ptr<Output_Stream> m_output_stream;
 
-        Sample last_sample;
-        std::vector<Sample> samples;
-        uint32_t rate = 0;
-    };
-    mutable std::shared_ptr<ECEF_Position_Stream> m_position_output_stream;
+    util::coordinates::ECEF m_velocity;
 
 //    struct ENU_Frame_Stream : public stream::IENU_Frame
 //    {
