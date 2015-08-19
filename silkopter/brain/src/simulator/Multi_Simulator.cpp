@@ -258,7 +258,7 @@ void Multi_Simulator::process()
             }
         }
         {
-            static const util::coordinates::LLA origin_lla(math::radians(40.7833f), math::radians(-73.9667), 0.f);
+            static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.f);
             auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
 
             q::util::Rand noise;
