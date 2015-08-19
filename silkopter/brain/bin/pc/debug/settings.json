@@ -60,7 +60,7 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": true,
+                    "Drag Enabled": false,
                     "Ground Enabled": true,
                     "Gravity Enabled": true
                 },
@@ -82,7 +82,8 @@
                     "Multi Input/Output",
                     "Angular Velocity RS/Output",
                     "Frame RS/Output",
-                    "Multi Simulator/Magnetic Field"
+                    "Multi Simulator/Magnetic Field",
+                    "Position RS (ECEF)/Output"
                 ]
             },
             "Multi Pilot": {
@@ -222,6 +223,20 @@
                 "input_paths": [
                     "Angular Velocity RS/Output",
                     "Multi Brain/Rate"
+                ]
+            },
+            "Position RS (ECEF)": {
+                "type": "Position RS (ECEF)",
+                "init_params": {
+                    "Input Rate (Hz)": 5,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 4,
+                    "Cutoff Frequency (Hz)": 0.1
+                },
+                "input_paths": [
+                    "Multi Simulator/Position (ecef)"
                 ]
             }
         }

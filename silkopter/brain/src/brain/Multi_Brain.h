@@ -63,21 +63,14 @@ private:
     std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Brain::Config> m_config;
 
-    stream::IMulti_State::Value m_state;
-
-    void process_input_mode_idle(stream::IMulti_Input::Value& input);
-    void process_input_mode_armed(stream::IMulti_Input::Value& input);
-
-    void process_input(stream::IMulti_Input::Value const& input);
-
     Sample_Accumulator<
         stream::IMulti_Input,
         stream::IAngular_Velocity,
         stream::IFrame,
-        stream::IMagnetic_Field
+        stream::IMagnetic_Field,
+        stream::IECEF_Position
 //        stream::IBattery_State,
 //        stream::IECEF_Linear_Acceleration,
-//        stream::IECEF_Position,
 //        stream::IECEF_Velocity,
 //        stream::IProximity,
         > m_accumulator;
@@ -91,6 +84,23 @@ private:
     typedef Basic_Output_Stream<stream::IForce> Thrust_Output_Stream;
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
     float m_reference_thrust = 0;
+
+
+    stream::IMulti_State::Value m_state;
+
+    void process_input_mode_idle(stream::IMulti_Input::Value& new_input);
+    void process_input_mode_armed(stream::IMulti_Input::Value& new_input);
+
+    void process_input(stream::IMulti_Input::Value const& new_input);
+
+    void acquire_home_position(stream::IECEF_Position::Sample const& position);
+    struct Home
+    {
+        util::coordinates::LLA lla_position;
+        util::coordinates::ECEF ecef_position;
+        math::trans3dd enu_to_ecef_trans;
+        math::trans3dd ecef_to_enu_trans;
+    } m_home;
 };
 
 

@@ -275,7 +275,7 @@ void Multi_Simulator::process()
             auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
 
             q::util::Rand noise;
-            double noise_magnitude = 1.0;
+            double noise_magnitude = 4.0;
 
             auto& stream = *m_ecef_position_stream;
             stream.accumulated_dt += simulation_dt;

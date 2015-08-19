@@ -63,9 +63,9 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
         { stream::IAngular_Velocity::TYPE,  m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(1) },
         { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_accumulator.get_stream_path(2) },
         { stream::IMagnetic_Field::TYPE,    m_init_params->rate, "Magnetic Field", m_accumulator.get_stream_path(3) },
+        { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(4) },
 //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
 //        { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(4) },
-//        { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(5) },
 //        { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(6) },
 //        { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_accumulator.get_stream_path(7) },
     }};
@@ -82,89 +82,107 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& input)
+void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& new_input)
 {
-    QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
+    auto& crt_input = m_state.last_input;
+    QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
-    if (input.vertical.thrust_rate.value != 0)
+    if (crt_input.vertical.thrust_rate.value != 0)
     {
-        input.vertical.thrust_rate.set(0);
+        crt_input.vertical.thrust_rate.set(0);
     }
-    if (input.vertical.thrust_offset.value != 0)
+    if (crt_input.vertical.thrust_offset.value != 0)
     {
-        input.vertical.thrust_rate.set(0);
+        crt_input.vertical.thrust_rate.set(0);
     }
-    if (input.vertical.climb_rate.value != 0)
+    if (crt_input.vertical.climb_rate.value != 0)
     {
-        input.vertical.climb_rate.set(0);
-    }
-
-    if (!math::is_zero(input.horizontal.angle_rate.value))
-    {
-        input.horizontal.angle_rate.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(input.horizontal.angle.value))
-    {
-        input.horizontal.angle.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(input.horizontal.velocity.value))
-    {
-        input.horizontal.velocity.set(math::vec2f::zero);
+        crt_input.vertical.climb_rate.set(0);
     }
 
-    if (input.yaw.angle_rate.value != 0)
+    if (!math::is_zero(crt_input.horizontal.angle_rate.value))
     {
-        input.yaw.angle_rate.set(0);
+        crt_input.horizontal.angle_rate.set(math::vec2f::zero);
     }
+    if (!math::is_zero(crt_input.horizontal.angle.value))
+    {
+        crt_input.horizontal.angle.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(crt_input.horizontal.velocity.value))
+    {
+        crt_input.horizontal.velocity.set(math::vec2f::zero);
+    }
+
+    if (crt_input.yaw.angle_rate.value != 0)
+    {
+        crt_input.yaw.angle_rate.set(0);
+    }
+
+    auto new_mode = new_input.mode;
+    new_input = crt_input;
+    new_input.mode = new_mode;
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
 }
 
-void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& input)
+void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_input)
 {
-    QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
+    auto& crt_input = m_state.last_input;
+    QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
     stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
     stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
 
-    if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
+    if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
-        thrust.z += input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
+        thrust.z += crt_input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
         m_reference_thrust = thrust.z;
     }
-    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
+    else if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
-        thrust.z = m_reference_thrust + input.vertical.thrust_offset.value;
-        //QLOGI("Thrust: {}", thrust.z);
+        thrust.z = m_reference_thrust + crt_input.vertical.thrust_offset.value;
+        QLOGI("Thrust: {}", thrust.z);
     }
 
-    if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
+    if (crt_input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
     {
-        rate = input.horizontal.angle_rate.value;
+        rate = crt_input.horizontal.angle_rate.value;
     }
 
-    if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
+    if (crt_input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
     {
-        rate.z = input.yaw.angle_rate.value;
+        rate.z = crt_input.yaw.angle_rate.value;
     }
 
     m_rate_output_stream->push_sample(rate, true);
     m_thrust_output_stream->push_sample(thrust, true);
 }
 
-void Multi_Brain::process_input(stream::IMulti_Input::Value const& req_input)
+void Multi_Brain::process_input(stream::IMulti_Input::Value const& new_input)
 {
-    auto& input = m_state.last_input;
-    input = req_input;
+    stream::IMulti_Input::Value new_input_copy = new_input;
 
-    if (input.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        process_input_mode_idle(input);
+        process_input_mode_idle(new_input_copy);
     }
-    else if (input.mode.value == stream::IMulti_Input::Mode::ARMED)
+    else if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
-        process_input_mode_armed(input);
+        process_input_mode_armed(new_input_copy);
+    }
+
+    m_state.last_input = new_input_copy;
+}
+
+void Multi_Brain::acquire_home_position(stream::IECEF_Position::Sample const& sample)
+{
+    if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::IDLE)
+    {
+        m_home.ecef_position = sample.value;
+        m_home.lla_position = util::coordinates::ecef_to_lla(m_home.ecef_position);
+        m_home.enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(m_home.lla_position);
+        m_home.ecef_to_enu_trans = math::inverse(m_home.enu_to_ecef_trans);
     }
 }
 
@@ -181,14 +199,15 @@ void Multi_Brain::process()
                           stream::IMulti_Input::Sample const& i_input,
                           stream::IAngular_Velocity::Sample const& i_angular_velocity,
                           stream::IFrame::Sample const& i_frame,
-                          stream::IMagnetic_Field::Sample const& i_magneic_field
+                          stream::IMagnetic_Field::Sample const& i_magnetic_field,
+                          stream::IECEF_Position::Sample const& i_position
 //                          stream::IBattery_State::Sample const& i_battery_state,
 //                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-//                          stream::IECEF_Position::Sample const& i_position,
 //                          stream::IECEF_Velocity::Sample const& i_velocity,
 //                          stream::IProximity::Sample const& i_proximity,
                           )
     {
+        acquire_home_position(i_position);
         process_input(i_input.value);
     });
 
