@@ -271,7 +271,6 @@ void Multi_Simulator::process()
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
                                                 math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
-                stream.last_sample.is_healthy = 0;
                 stream.samples.push_back(stream.last_sample);
             }
         }

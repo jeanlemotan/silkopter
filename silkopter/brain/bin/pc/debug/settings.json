@@ -61,7 +61,7 @@
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": false,
-                    "Ground Enabled": false,
+                    "Ground Enabled": true,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
@@ -106,20 +106,6 @@
                 },
                 "input_paths": [
                     "Multi Simulator/Angular Velocity"
-                ]
-            },
-            "Acceleration RS": {
-                "type": "Acceleration RS",
-                "init_params": {
-                    "Input Rate (Hz)": 1000,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 50.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Acceleration"
                 ]
             },
             "Comp AHRS": {
@@ -235,6 +221,54 @@
                 },
                 "input_paths": [
                     "Multi Simulator/Position (ecef)"
+                ]
+            },
+            "Comp ECEF Position": {
+                "type": "Comp ECEF Position",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {},
+                "input_paths": [
+                    "Position RS (ECEF)/Output",
+                    "Linear Acceleration (Local->ENU)/Output",
+                    "Multi Simulator/Pressure"
+                ]
+            },
+            "Linear Acceleration (Local->ENU)": {
+                "type": "Linear Acceleration (Local->ENU)",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {},
+                "input_paths": [
+                    "Gravity Filter/Linear Acceleration",
+                    "Frame RS/Output"
+                ]
+            },
+            "Gravity Filter": {
+                "type": "Gravity Filter",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {},
+                "input_paths": [
+                    "Frame RS/Output",
+                    "Acceleration RS/Output"
+                ]
+            },
+            "Acceleration RS": {
+                "type": "Acceleration RS",
+                "init_params": {
+                    "Input Rate (Hz)": 1000,
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 50.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Acceleration"
                 ]
             }
         }

@@ -202,7 +202,7 @@ void Multi_Brain::process()
     m_thrust_output_stream->clear();
 
     m_accumulator.process([this, &multi_config](
-                          size_t idx,
+                          size_t,
                           stream::IMulti_Input::Sample const& i_input,
                           stream::IFrame::Sample const& i_frame,
                           stream::IECEF_Position::Sample const& i_position

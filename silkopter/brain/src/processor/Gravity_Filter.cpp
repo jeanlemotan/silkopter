@@ -70,7 +70,7 @@ void Gravity_Filter::process()
     m_output_stream->clear();
 
     m_accumulator.process([this](
-                          size_t idx,
+                          size_t,
                           stream::IFrame::Sample const& f_sample,
                           stream::IAcceleration::Sample const& a_sample)
     {
