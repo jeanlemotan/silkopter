@@ -60,10 +60,8 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs =
     {{
         { stream::IMulti_Input::TYPE,       m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
-        { stream::IAngular_Velocity::TYPE,  m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(1) },
-        { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_accumulator.get_stream_path(2) },
-        { stream::IMagnetic_Field::TYPE,    m_init_params->rate, "Magnetic Field", m_accumulator.get_stream_path(3) },
-        { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(4) },
+        { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_accumulator.get_stream_path(1) },
+        { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(2) },
 //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
 //        { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(4) },
 //        { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(6) },
@@ -197,9 +195,7 @@ void Multi_Brain::process()
     m_accumulator.process([this](
                           size_t idx,
                           stream::IMulti_Input::Sample const& i_input,
-                          stream::IAngular_Velocity::Sample const& i_angular_velocity,
                           stream::IFrame::Sample const& i_frame,
-                          stream::IMagnetic_Field::Sample const& i_magnetic_field,
                           stream::IECEF_Position::Sample const& i_position
 //                          stream::IBattery_State::Sample const& i_battery_state,
 //                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
@@ -209,6 +205,10 @@ void Multi_Brain::process()
     {
         acquire_home_position(i_position);
         process_input(i_input.value);
+
+        m_state.ecef_position = i_position.value;
+        m_state.ecef_home_position = m_home.ecef_position;
+        m_state.frame = i_frame.value;
     });
 
 

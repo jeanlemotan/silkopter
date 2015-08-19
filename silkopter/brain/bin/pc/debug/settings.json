@@ -80,10 +80,8 @@
                 "config": {},
                 "input_paths": [
                     "Multi Input/Output",
-                    "Angular Velocity RS/Output",
-                    "Frame RS/Output",
-                    "Multi Simulator/Magnetic Field",
-                    "Position RS (ECEF)/Output"
+                    "",
+                    ""
                 ]
             },
             "Multi Pilot": {

@@ -5,8 +5,6 @@
 #include "common/node/stream/IAngular_Velocity.h"
 #include "common/node/stream/IFrame.h"
 #include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/IBattery_State.h"
 #include "common/node/stream/IPosition.h"
 #include "common/node/stream/IVelocity.h"
@@ -65,9 +63,7 @@ private:
 
     Sample_Accumulator<
         stream::IMulti_Input,
-        stream::IAngular_Velocity,
         stream::IFrame,
-        stream::IMagnetic_Field,
         stream::IECEF_Position
 //        stream::IBattery_State,
 //        stream::IECEF_Linear_Acceleration,

@@ -4,7 +4,6 @@
 
 #include "IFrame.h"
 #include "ILinear_Acceleration.h"
-#include "IMagnetic_Field.h"
 #include "IBattery_State.h"
 #include "IBattery_State.h"
 #include "IPosition.h"
@@ -30,8 +29,8 @@ public:
     {
         IBattery_State::Value battery_state;
         IFrame::Value frame;
-        IMagnetic_Field::Value magnetic_field;
         IECEF_Linear_Acceleration::Value ecef_linear_acceleration;
+        IECEF_Position::Value ecef_home_position;
         IECEF_Position::Value ecef_position;
         IECEF_Velocity::Value ecef_velocity;
         IProximity::Value proximity;
@@ -64,9 +63,9 @@ template<> inline void serialize(Buffer_t& buffer, silk::node::stream::IMulti_St
 {
     serialize(buffer, value.battery_state, off);
     serialize(buffer, value.frame, off);
-    serialize(buffer, value.magnetic_field, off);
     serialize(buffer, value.ecef_linear_acceleration, off);
     serialize(buffer, value.ecef_position, off);
+    serialize(buffer, value.ecef_home_position, off);
     serialize(buffer, value.ecef_velocity, off);
     serialize(buffer, value.proximity, off);
     serialize(buffer, value.thrust, off);
@@ -77,9 +76,9 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::node::stream::I
 {
     return deserialize(buffer, value.battery_state, off) &&
             deserialize(buffer, value.frame, off) &&
-            deserialize(buffer, value.magnetic_field, off) &&
             deserialize(buffer, value.ecef_linear_acceleration, off) &&
             deserialize(buffer, value.ecef_position, off) &&
+            deserialize(buffer, value.ecef_home_position, off) &&
             deserialize(buffer, value.ecef_velocity, off) &&
             deserialize(buffer, value.proximity, off) &&
             deserialize(buffer, value.thrust, off) &&
