@@ -7,6 +7,7 @@ Numeric_Viewer::Numeric_Viewer(std::string const& unit, uint32_t sample_rate, QW
     : QWidget(parent)
 {
     m_sample_rate = sample_rate;
+    m_dts = q::Seconds(1.f / float(sample_rate)).count();
 
     m_ui.setupUi(this);
 
@@ -166,23 +167,16 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
     graph.fft_plot = fft_plot;
 }
 
-void Numeric_Viewer::add_samples(q::Clock::time_point tp, double const* src, bool is_healthy)
+void Numeric_Viewer::add_samples(double const* src, bool is_healthy)
 {
-    double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
-    if (tpd < m_tp)
-    {
-        //QLOGE("Sample from the past!!");
-        return;
-    }
-
     Sample sample;
-    sample.tp = tpd;
+    sample.tp = m_tp;
     sample.is_healthy = is_healthy;
     size_t off = m_values.size();
     m_values.resize(m_values.size() + m_graphs.size());
     std::copy(src, src + m_graphs.size(), m_values.begin() + off);
     m_temp_samples.emplace_back(std::move(sample));
-    m_tp = tpd;
+    m_tp += m_dts;
 }
 
 void Numeric_Viewer::process()

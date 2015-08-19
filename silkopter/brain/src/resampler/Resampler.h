@@ -249,7 +249,7 @@ void Resampler<Stream_t>::process()
                               size_t idx,
                               typename Stream_t::Sample const& i_sample)
         {
-            m_input_accumulated_dt += i_sample.dt;
+            m_input_accumulated_dt += m_input_stream_dt;
             m_input_samples.push_back(i_sample);
             m_dsp.process(m_input_samples.back().value);
         });
@@ -261,7 +261,7 @@ void Resampler<Stream_t>::process()
                               size_t idx,
                               typename Stream_t::Sample const& i_sample)
         {
-            m_input_accumulated_dt += i_sample.dt;
+            m_input_accumulated_dt += m_input_stream_dt;
             m_input_samples.push_back(i_sample);
         });
 
@@ -274,16 +274,10 @@ void Resampler<Stream_t>::downsample()
 {
     m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
 
-    auto tp = q::Clock::now() - m_input_accumulated_dt;
-    tp += m_dt;
-
     typename Stream_t::Sample s;
-    s.dt = m_dt;
     while (m_input_accumulated_dt >= m_dt)
     {
         s.value = m_input_samples.front().value;
-        s.tp = tp;
-        tp += m_dt;
 
         m_output_stream->samples.push_back(s);
 
@@ -319,18 +313,12 @@ void Resampler<Stream_t>::upsample()
 
     m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
 
-    auto tp = q::Clock::now() - m_input_accumulated_dt;
-    tp += m_dt;
-
     typename Stream_t::Sample s;
-    s.dt = m_dt;
     while (m_input_accumulated_dt >= m_dt)
     {
         auto const& is = m_input_samples.front();
         s.value = is.value;
         s.is_healthy = is.is_healthy;
-        s.tp = tp;
-        tp += m_dt;
 
         m_dsp.process(s.value);
         m_output_stream->samples.push_back(s);

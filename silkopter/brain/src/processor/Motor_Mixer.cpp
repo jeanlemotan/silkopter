@@ -132,14 +132,9 @@ void Motor_Mixer::process()
     {
         compute_throttles(*multi_config, f_sample.value, t_sample.value);
 
-        auto dt = t_sample.dt;
-        auto tp = t_sample.tp;
-
         for (size_t mi = 0; mi < m_outputs.size(); mi++)
         {
             auto& sample = m_outputs[mi]->last_sample;
-            sample.dt = dt;
-            sample.tp = tp;
             sample.value = m_outputs[mi]->throttle;
             m_outputs[mi]->samples.push_back(sample);
         }

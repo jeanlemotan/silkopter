@@ -151,15 +151,8 @@ void Map_Viewer::show_context_menu(QPoint const& pos)
     menu.exec(pos);
 }
 
-void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position)
+void Map_Viewer::add_sample(math::vec3d const& position)
 {
-    double tpd = std::chrono::duration<double>(tp.time_since_epoch()).count();
-    if (tpd < m_tp)
-    {
-        QLOGE("Sample from the past!!");
-        return;
-    }
-
     auto lla = util::coordinates::ecef_to_lla(position);
 
     if (!m_map_control->isPanning() && m_is_following_sample)
@@ -172,7 +165,6 @@ void Map_Viewer::add_sample(q::Clock::time_point tp, math::vec3d const& position
     }
     Sample s;
     s.position = position;
-    s.tp = tpd;
     m_samples.push_back(s);
 }
 

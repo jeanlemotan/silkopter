@@ -256,8 +256,6 @@ void RC5T619::process()
 
             Stream::Sample& sample = m_adc[1]->last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[1]->last_tp;
-            sample.tp = now;
             m_adc[1]->samples.push_back(sample);
 
             m_adc[1]->last_tp = now;
@@ -280,8 +278,6 @@ void RC5T619::process()
 
             Stream::Sample& sample = m_adc[0]->last_sample;
             sample.value = result;
-            sample.dt = now - m_adc[0]->last_tp;
-            sample.tp = now;
             m_adc[0]->samples.push_back(sample);
 
             m_adc[0]->last_tp = now;

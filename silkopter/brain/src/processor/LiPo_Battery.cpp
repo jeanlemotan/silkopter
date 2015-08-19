@@ -84,12 +84,14 @@ void LiPo_Battery::process()
 
     m_output_stream->clear();
 
-    m_accumulator.process([this](size_t idx, stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
+    float current_factor = (q::Seconds(m_output_stream->get_dt()).count() / 3600.f);
+
+    m_accumulator.process([this, current_factor](size_t idx, stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
     {
         Output_Stream::Value value = m_output_stream->get_last_sample().value;
 
         {
-            value.charge_used += current_sample.value * (q::Seconds(current_sample.dt).count() / 3600.f);
+            value.charge_used += current_sample.value * current_factor;
             stream::ICurrent::Value current = current_sample.value;
             m_current_filter.process(current);
             value.average_current = current;

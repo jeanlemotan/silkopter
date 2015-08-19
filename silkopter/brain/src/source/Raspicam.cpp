@@ -341,8 +341,6 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     auto& sample = m_temp_samples.samples[m_temp_samples.count];
     sample.value.type = Stream::Value::Type::H264;
     sample.value.is_keyframe = is_keyframe;
-    sample.dt = std::chrono::microseconds(1000000 / m_stream->rate);
-    sample.tp = q::Clock::now();
     sample.value.resolution = resolution;
     sample.value.data.resize(size);
     std::copy(data, data + size, sample.value.data.begin());

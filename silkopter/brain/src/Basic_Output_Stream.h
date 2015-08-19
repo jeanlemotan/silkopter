@@ -66,8 +66,6 @@ public:
         }
 
         m_last_sample.value = value;
-        m_last_sample.dt = m_dt;
-        m_last_sample.tp = m_tp;
         m_last_sample.is_healthy = is_healthy;
         m_samples.push_back(m_last_sample);
     }

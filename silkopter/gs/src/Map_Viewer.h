@@ -18,7 +18,7 @@ class Map_Viewer : public QWidget
 public:
     Map_Viewer(QWidget *parent);
     ~Map_Viewer();
-    void add_sample(q::Clock::time_point tp, math::vec3d const& position);
+    void add_sample(math::vec3d const& position);
     void process();
 
 private:
@@ -47,11 +47,11 @@ private:
     {
         math::vec3d position;
         double accuracy;
-        double tp;
+//        double tp;
     };
 
     std::vector<Sample> m_samples;
-    double m_tp = 0;
+//    double m_tp = 0;
 
     bool m_is_following_sample = true;
 };

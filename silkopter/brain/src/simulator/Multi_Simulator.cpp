@@ -103,32 +103,25 @@ auto Multi_Simulator::init() -> bool
     m_input_throttle_stream_paths.resize(multi_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
-    m_angular_velocity_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
-    m_angular_velocity_stream->last_sample.tp = m_last_tp;
+    m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
 
     m_acceleration_stream->rate = m_init_params->acceleration_rate;
-    m_acceleration_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_acceleration_stream->rate);
-    m_acceleration_stream->last_sample.tp = m_last_tp;
+    m_acceleration_stream->dt = std::chrono::microseconds(1000000 / m_acceleration_stream->rate);
 
     m_magnetic_field_stream->rate = m_init_params->magnetic_field_rate;
-    m_magnetic_field_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_magnetic_field_stream->rate);
-    m_magnetic_field_stream->last_sample.tp = m_last_tp;
+    m_magnetic_field_stream->dt = std::chrono::microseconds(1000000 / m_magnetic_field_stream->rate);
 
     m_pressure_stream->rate = m_init_params->pressure_rate;
-    m_pressure_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_pressure_stream->rate);
-    m_pressure_stream->last_sample.tp = m_last_tp;
+    m_pressure_stream->dt = std::chrono::microseconds(1000000 / m_pressure_stream->rate);
 
     m_temperature_stream->rate = m_init_params->temperature_rate;
-    m_temperature_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_temperature_stream->rate);
-    m_temperature_stream->last_sample.tp = m_last_tp;
+    m_temperature_stream->dt = std::chrono::microseconds(1000000 / m_temperature_stream->rate);
 
     m_distance_stream->rate = m_init_params->distance_rate;
-    m_distance_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
-    m_distance_stream->last_sample.tp = m_last_tp;
+    m_distance_stream->dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
 
     m_ecef_position_stream->rate = m_init_params->gps_rate;
-    m_ecef_position_stream->last_sample.dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
-    m_ecef_position_stream->last_sample.tp = m_last_tp;
+    m_ecef_position_stream->dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
 
 
 
@@ -206,10 +199,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_angular_velocity_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.angular_velocity;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -217,10 +209,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_acceleration_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.acceleration;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -228,10 +219,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_magnetic_field_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.magnetic_field;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -239,10 +229,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_pressure_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.pressure;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -250,10 +239,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_temperature_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.temperature;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -261,10 +249,9 @@ void Multi_Simulator::process()
         {
             auto& stream = *m_distance_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.proximity_distance;
                 stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<float>::epsilon());
                 stream.samples.push_back(stream.last_sample);
@@ -279,10 +266,9 @@ void Multi_Simulator::process()
 
             auto& stream = *m_ecef_position_stream;
             stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.last_sample.dt)
+            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.last_sample.dt;
-                stream.last_sample.tp += stream.last_sample.dt;
+                stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
                                                 math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
                 stream.last_sample.is_healthy = 0;

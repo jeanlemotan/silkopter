@@ -70,7 +70,9 @@ void Comp_AHRS::process()
 
     m_output_stream->clear();
 
-    m_accumulator.process([this](
+    auto dts = q::Seconds(m_output_stream->get_dt()).count();
+
+    m_accumulator.process([this, dts](
                           size_t idx,
                           stream::IAngular_Velocity::Sample const& av_sample,
                           stream::IAcceleration::Sample const& a_sample,
@@ -82,7 +84,6 @@ void Comp_AHRS::process()
 
         {
             auto omega = av_sample.value;
-            auto dts = q::Seconds(av_sample.dt).count();
 
             auto theta = omega * dts;
             auto theta_magnitude = math::length(theta);

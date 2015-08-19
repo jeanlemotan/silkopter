@@ -80,7 +80,6 @@ void Comp_ECEF_Position::process()
                           stream::IPressure::Sample const& p_sample)
     {
         auto& sample = m_position_output_stream->last_sample;
-        sample.dt = m_dt;
         sample.value = pos_sample.value;
 
         m_position_output_stream->samples.push_back(sample);

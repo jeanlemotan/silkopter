@@ -93,8 +93,6 @@ void EHealth::process()
         }
 
         Stream::Sample s;
-        s.dt = m_dt;
-        s.tp = tp;
         auto str = m_buffer.substr(start, end - start);
         if (str.size() != 3)
         {

@@ -63,6 +63,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -72,6 +73,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -81,6 +83,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -90,6 +93,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -99,6 +103,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -108,6 +113,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -117,6 +123,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
         q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
