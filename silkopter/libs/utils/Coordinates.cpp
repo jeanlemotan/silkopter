@@ -100,5 +100,37 @@ auto enu_to_ecef_transform(LLA const& lla) -> math::trans3dd
     return trans;
 }
 
+auto enu_to_ecef_rotation(LLA const& lla) -> math::mat3d
+{
+    double cos_long, sin_long;
+    math::sin_cos(lla.longitude, sin_long, cos_long);
+    double cos_lat, sin_lat;
+    math::sin_cos(lla.latitude, sin_lat, cos_lat);
+
+
+//ecef to enu
+//    -sin_long               cos_long                0
+//    -cos_long*sin_lat       -sin_lat*sin_long       cos_lat
+//    cos_long*cos_lat        cos_lat*sin_long        sin_lat
+
+//transpose - enu to ecef
+//    -sin_long               -cos_long*sin_lat       cos_long*cos_lat
+//    cos_long                -sin_lat*sin_long       cos_lat*sin_long
+//    0                       cos_lat                 sin_lat
+
+    math::mat3d mat;
+
+    mat.set_axis_x(math::vec3d(-sin_long,
+                                  cos_long,
+                                  0));
+    mat.set_axis_y(math::vec3d(-cos_long*sin_lat,
+                                 -sin_lat*sin_long,
+                                  cos_lat));
+    mat.set_axis_z(math::vec3d( cos_long*cos_lat,
+                                  cos_lat*sin_long,
+                                  sin_lat));
+
+    return mat;
+}
 }
 }

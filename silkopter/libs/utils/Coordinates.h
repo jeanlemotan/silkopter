@@ -31,6 +31,7 @@ auto normal_distance(double latitude) -> double;
 auto ecef_to_lla(ECEF const& ecef) -> LLA;
 auto lla_to_ecef(LLA const& lla) -> ECEF;
 auto enu_to_ecef_transform(LLA const& lla) -> math::trans3dd;
+auto enu_to_ecef_rotation(LLA const& lla) -> math::mat3d;
 
 }
 }
