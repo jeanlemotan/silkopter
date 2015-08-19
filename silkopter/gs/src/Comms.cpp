@@ -920,6 +920,12 @@ void Comms::process()
     }
     //    QLOGI("*********** LOOP: {}", xxx);
 
+    auto result = m_socket->process();
+    if (result != util::RCP_Socket::Result::OK)
+    {
+        m_rcp->reconnect();
+    }
+
     m_rcp->process();
 
     if (m_rcp->is_connected())
