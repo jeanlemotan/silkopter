@@ -15,6 +15,8 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
 {
     QASSERT(sim_node);
 
+    auto state_streams = hal.get_streams().get_all_of_type<silk::node::stream::gs::Multi_State>();
+
     setWindowTitle("Simulator");
     setMouseTracking(true);
 

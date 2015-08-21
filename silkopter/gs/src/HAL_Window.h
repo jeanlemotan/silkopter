@@ -49,8 +49,8 @@ private:
     void do_magnetic_field_calibration(silk::node::Node_ptr node, size_t output_idx);
     void do_angular_velocity_calibration(silk::node::Node_ptr node, size_t output_idx);
 
-    void add_stream(silk::node::stream::Stream_ptr stream);
-    void remove_stream(silk::node::stream::Stream_ptr stream);
+    void add_stream(silk::node::stream::gs::Stream_ptr stream);
+    void remove_stream(silk::node::stream::gs::Stream_ptr stream);
 
     void refresh_node(silk::node::Node& node);
     void add_node(silk::node::Node_ptr node);
@@ -81,7 +81,7 @@ private:
 
     struct UI_Stream
     {
-        silk::node::stream::Stream_wptr stream;
+        silk::node::stream::gs::Stream_wptr stream;
         QNEPort* port = nullptr;
         QNEBlock* block = nullptr;
     };

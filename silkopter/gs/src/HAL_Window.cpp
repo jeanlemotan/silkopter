@@ -114,11 +114,11 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     {
         remove_node(item);
     });
-    m_hal.get_streams().item_added_signal.connect([this](silk::node::stream::Stream_ptr item)
+    m_hal.get_streams().item_added_signal.connect([this](silk::node::stream::gs::Stream_ptr item)
     {
         add_stream(item);
     });
-    m_hal.get_streams().item_will_be_removed_signal.connect([this](silk::node::stream::Stream_ptr item)
+    m_hal.get_streams().item_will_be_removed_signal.connect([this](silk::node::stream::gs::Stream_ptr item)
     {
         remove_stream(item);
     });
@@ -610,11 +610,11 @@ void HAL_Window::do_angular_velocity_calibration(silk::node::Node_ptr node, size
     wizard.exec();
 }
 
-void HAL_Window::add_stream(silk::node::stream::Stream_ptr stream)
+void HAL_Window::add_stream(silk::node::stream::gs::Stream_ptr stream)
 {
 }
 
-void HAL_Window::remove_stream(silk::node::stream::Stream_ptr stream)
+void HAL_Window::remove_stream(silk::node::stream::gs::Stream_ptr stream)
 {
 
 }

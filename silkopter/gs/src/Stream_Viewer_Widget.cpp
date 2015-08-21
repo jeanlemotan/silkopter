@@ -82,7 +82,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "m/s^2", QColor(0x2ecc71));
         viewer->add_graph("Z", "m/s^2", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Acceleration>(stream)->samples_available_signal.connect([this, viewer](Acceleration::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Acceleration>(stream)->samples_available_signal.connect([this, viewer](gs::Acceleration::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -100,7 +100,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "°/s", QColor(0x2ecc71));
         viewer->add_graph("Z", "°/s", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Angular_Velocity>(stream)->samples_available_signal.connect([this, viewer](Angular_Velocity::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Angular_Velocity>(stream)->samples_available_signal.connect([this, viewer](gs::Angular_Velocity::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -118,7 +118,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "Teslas", QColor(0x2ecc71));
         viewer->add_graph("Z", "Teslas", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](Magnetic_Field::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](gs::Magnetic_Field::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -134,7 +134,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("Pascals", stream->rate, this);
         viewer->add_graph("Pressure", "Pascals", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Pressure>(stream)->samples_available_signal.connect([this, viewer](Pressure::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Pressure>(stream)->samples_available_signal.connect([this, viewer](gs::Pressure::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -153,7 +153,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Average Current", "A", QColor(0x3498db));
         viewer->add_graph("Average Voltage", "V", QColor(0x9834db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Battery_State>(stream)->samples_available_signal.connect([this, viewer](Battery_State::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Battery_State>(stream)->samples_available_signal.connect([this, viewer](gs::Battery_State::Samples const& samples)
         {
             std::array<double, 4> data;
             for (auto const& s: samples)
@@ -171,7 +171,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "m/s^2", QColor(0x2ecc71));
         viewer->add_graph("Z", "m/s^2", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Linear_Acceleration>(stream)->samples_available_signal.connect([this, viewer](Linear_Acceleration::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Linear_Acceleration>(stream)->samples_available_signal.connect([this, viewer](gs::Linear_Acceleration::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -189,7 +189,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "Nm", QColor(0x2ecc71));
         viewer->add_graph("Z", "Nm", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Torque>(stream)->samples_available_signal.connect([this, viewer](Torque::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Torque>(stream)->samples_available_signal.connect([this, viewer](gs::Torque::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -207,7 +207,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "N", QColor(0x2ecc71));
         viewer->add_graph("Z", "N", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Torque>(stream)->samples_available_signal.connect([this, viewer](Torque::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Torque>(stream)->samples_available_signal.connect([this, viewer](gs::Torque::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -225,7 +225,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "m/s", QColor(0x2ecc71));
         viewer->add_graph("Z", "m/s", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Velocity>(stream)->samples_available_signal.connect([this, viewer](Velocity::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Velocity>(stream)->samples_available_signal.connect([this, viewer](gs::Velocity::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -241,7 +241,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("%", stream->rate, this);
         viewer->add_graph("Throttle", "%", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Throttle>(stream)->samples_available_signal.connect([this, viewer](Throttle::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Throttle>(stream)->samples_available_signal.connect([this, viewer](gs::Throttle::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -257,7 +257,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("A", stream->rate, this);
         viewer->add_graph("Current", "A", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Current>(stream)->samples_available_signal.connect([this, viewer](Current::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Current>(stream)->samples_available_signal.connect([this, viewer](gs::Current::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -273,7 +273,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("V", stream->rate, this);
         viewer->add_graph("Voltage", "V", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Voltage>(stream)->samples_available_signal.connect([this, viewer](Voltage::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Voltage>(stream)->samples_available_signal.connect([this, viewer](gs::Voltage::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -289,7 +289,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("m", stream->rate, this);
         viewer->add_graph("Distance", "m", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Distance>(stream)->samples_available_signal.connect([this, viewer](Distance::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Distance>(stream)->samples_available_signal.connect([this, viewer](gs::Distance::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -304,7 +304,7 @@ void Stream_Viewer_Widget::create_viewer()
     {
         auto viewer = new Map_Viewer(this);
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<ECEF_Position>(stream)->samples_available_signal.connect([this, viewer](ECEF_Position::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::ECEF_Position>(stream)->samples_available_signal.connect([this, viewer](gs::ECEF_Position::Samples const& samples)
         {
             for (auto const& s: samples)
             {
@@ -321,7 +321,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("PAcc", "m", QColor(0x3498db));
         viewer->add_graph("VAcc", "m/s", QColor(0x9834db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<GPS_Info>(stream)->samples_available_signal.connect([this, viewer](GPS_Info::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::GPS_Info>(stream)->samples_available_signal.connect([this, viewer](gs::GPS_Info::Samples const& samples)
         {
             std::array<double, 4> data;
             for (auto const& s: samples)
@@ -337,7 +337,7 @@ void Stream_Viewer_Widget::create_viewer()
 //    {
 //        auto viewer = new Map_Viewer(this);
 //        layout()->addWidget(viewer);
-//        m_connection = std::static_pointer_cast<ECEF>(stream)->samples_available_signal.connect([this, viewer](ECEF& samples)
+//        m_connection = std::static_pointer_cast<gs::ECEF>(stream)->samples_available_signal.connect([this, viewer](gs::ECEF& samples)
 //        {
 //            for (auto const& s: samples)
 //            {
@@ -351,7 +351,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("pwm", stream->rate, this);
         viewer->add_graph("PWM", "pwm", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<PWM>(stream)->samples_available_signal.connect([this, viewer](PWM::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::PWM>(stream)->samples_available_signal.connect([this, viewer](gs::PWM::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -367,7 +367,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("f", stream->rate, this);
         viewer->add_graph("Float", "f", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Float>(stream)->samples_available_signal.connect([this, viewer](Float::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Float>(stream)->samples_available_signal.connect([this, viewer](gs::Float::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -383,7 +383,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("v", stream->rate, this);
         viewer->add_graph("Bool", "v", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Bool>(stream)->samples_available_signal.connect([this, viewer](Bool::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Bool>(stream)->samples_available_signal.connect([this, viewer](gs::Bool::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -401,7 +401,7 @@ void Stream_Viewer_Widget::create_viewer()
         viewer->add_graph("Y", "", QColor(0x2ecc71));
         viewer->add_graph("Z", "", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Frame>(stream)->samples_available_signal.connect([this, viewer](Frame::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Frame>(stream)->samples_available_signal.connect([this, viewer](gs::Frame::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
@@ -418,7 +418,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("°C", stream->rate, this);
         viewer->add_graph("Temperature", "°C", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Temperature>(stream)->samples_available_signal.connect([this, viewer](Temperature::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Temperature>(stream)->samples_available_signal.connect([this, viewer](gs::Temperature::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -434,7 +434,7 @@ void Stream_Viewer_Widget::create_viewer()
         auto viewer = new Numeric_Viewer("adc", stream->rate, this);
         viewer->add_graph("ADC", "adc", QColor(0xe74c3c));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<ADC>(stream)->samples_available_signal.connect([this, viewer](ADC::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::ADC>(stream)->samples_available_signal.connect([this, viewer](gs::ADC::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
@@ -449,7 +449,7 @@ void Stream_Viewer_Widget::create_viewer()
     {
         auto viewer = new Video_Viewer(this);
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<Video>(stream)->samples_available_signal.connect([this, viewer](Video::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::Video>(stream)->samples_available_signal.connect([this, viewer](gs::Video::Samples const& samples)
         {
             for (auto const& s: samples)
             {

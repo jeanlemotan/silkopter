@@ -52,6 +52,8 @@ DECLARE_CLASS_PTR(Node);
 
 namespace stream
 {
+namespace gs
+{
 
 struct Stream : public IStream
 {
@@ -78,7 +80,6 @@ struct Typed_Stream : public Stream
     virtual auto get_rate() const -> uint32_t override { return rate; }
     virtual auto get_type() const -> Type override { return TYPE; }
 };
-DECLARE_CLASS_PTR(IStream);
 
 using Acceleration = Typed_Stream<IAcceleration>;
 DECLARE_CLASS_PTR(Acceleration);
@@ -166,7 +167,7 @@ using Proximity = Typed_Stream<IProximity>;
 DECLARE_CLASS_PTR(Proximity);
 
 }
-
+}
 
 
 
@@ -205,7 +206,7 @@ struct Node
     struct Input
     {
         q::Path stream_path;
-        stream::Stream_wptr stream;
+        stream::gs::Stream_wptr stream;
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
@@ -213,7 +214,7 @@ struct Node
     std::vector<Input> inputs;
     struct Output
     {
-        stream::Stream_ptr stream;
+        stream::gs::Stream_ptr stream;
         stream::Type type;
         std::string name;
         uint32_t rate = 0;
@@ -262,7 +263,7 @@ public:
 
     auto get_node_defs() const      -> Registry<node::Node_Def> const&;
     auto get_nodes() const          -> Registry<node::Node> const&;
-    auto get_streams() const        -> Registry<node::stream::Stream> const&;
+    auto get_streams() const        -> Registry<node::stream::gs::Stream> const&;
 
     enum class Result
     {
@@ -291,7 +292,7 @@ protected:
 
     Registry<node::Node_Def> m_node_defs;
     Registry<node::Node> m_nodes;
-    Registry<node::stream::Stream> m_streams;
+    Registry<node::stream::gs::Stream> m_streams;
 
 private:
 

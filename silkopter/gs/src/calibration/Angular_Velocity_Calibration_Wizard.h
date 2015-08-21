@@ -19,7 +19,7 @@ private:
 
     void prepare_step();
 
-    void on_samples_received(silk::node::stream::Angular_Velocity::Samples const& samples);
+    void on_samples_received(silk::node::stream::gs::Angular_Velocity::Samples const& samples);
 
     void set_calibration_points(sz::calibration::Angular_Velocity_Points const& data);
     auto get_calibration_points() const -> sz::calibration::Angular_Velocity_Points;
@@ -28,7 +28,7 @@ private:
     silk::Comms& m_comms;
     silk::node::Node_ptr m_node;
     silk::node::Node::Output m_output;
-    silk::node::stream::Angular_Velocity_ptr m_stream;
+    silk::node::stream::gs::Angular_Velocity_ptr m_stream;
 
     QWidget* m_content = nullptr;
 

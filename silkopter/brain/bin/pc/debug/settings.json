@@ -61,8 +61,8 @@
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": false,
-                    "Ground Enabled": true,
-                    "Gravity Enabled": true
+                    "Ground Enabled": false,
+                    "Gravity Enabled": false
                 },
                 "input_paths": [
                     "Motor Mixer/Throttle 0",

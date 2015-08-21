@@ -392,55 +392,55 @@ void Comms::handle_enumerate_node_defs()
     m_setup_channel.end_unpack();
 }
 
-auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::stream::Stream>
+auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::stream::gs::Stream>
 {
     switch (type)
     {
-        case node::stream::IAcceleration::TYPE:             return std::make_shared<node::stream::Acceleration>();
-//        case node::stream::IENU_Acceleration::TYPE:         return std::make_shared<node::stream::ENU_Acceleration>();
-//        case node::stream::IECEF_Acceleration::TYPE:        return std::make_shared<node::stream::ECEF_Acceleration>();
-        case node::stream::IADC::TYPE:                      return std::make_shared<node::stream::ADC>();
-        case node::stream::IAngular_Velocity::TYPE:         return std::make_shared<node::stream::Angular_Velocity>();
-//        case node::stream::IENU_Angular_Velocity::TYPE:     return std::make_shared<node::stream::ENU_Angular_Velocity>();
-//        case node::stream::IECEF_Angular_Velocity::TYPE:    return std::make_shared<node::stream::ECEF_Angular_Velocity>();
-        case node::stream::IBattery_State::TYPE:            return std::make_shared<node::stream::Battery_State>();
-        case node::stream::ICurrent::TYPE:                  return std::make_shared<node::stream::Current>();
-        case node::stream::IDistance::TYPE:                 return std::make_shared<node::stream::Distance>();
-//        case node::stream::IENU_Distance::TYPE:             return std::make_shared<node::stream::ENU_Distance>();
-//        case node::stream::IECEF_Distance::TYPE:            return std::make_shared<node::stream::ECEF_Distance>();
-        case node::stream::IFloat::TYPE:                    return std::make_shared<node::stream::Float>();
-        case node::stream::IBool::TYPE:                     return std::make_shared<node::stream::Bool>();
-        case node::stream::IForce::TYPE:                    return std::make_shared<node::stream::Force>();
-//        case node::stream::IENU_Force::TYPE:                return std::make_shared<node::stream::ENU_Force>();
-//        case node::stream::IECEF_Force::TYPE:               return std::make_shared<node::stream::ECEF_Force>();
-        case node::stream::IFrame::TYPE:                    return std::make_shared<node::stream::Frame>();
-        case node::stream::IGPS_Info::TYPE:                 return std::make_shared<node::stream::GPS_Info>();
-        case node::stream::ILinear_Acceleration::TYPE:      return std::make_shared<node::stream::Linear_Acceleration>();
-//        case node::stream::IENU_Linear_Acceleration::TYPE:  return std::make_shared<node::stream::ENU_Linear_Acceleration>();
-//        case node::stream::IECEF_Linear_Acceleration::TYPE: return std::make_shared<node::stream::ECEF_Linear_Acceleration>();
-        case node::stream::IECEF_Position::TYPE:            return std::make_shared<node::stream::ECEF_Position>();
-        case node::stream::IMagnetic_Field::TYPE:           return std::make_shared<node::stream::ECEF_Magnetic_Field>();
-//        case node::stream::IENU_Magnetic_Field::TYPE:       return std::make_shared<node::stream::ENU_Magnetic_Field>();
-//        case node::stream::IECEF_Magnetic_Field::TYPE:      return std::make_shared<node::stream::ECEF_Magnetic_Field>();
-        case node::stream::IPressure::TYPE:                 return std::make_shared<node::stream::Pressure>();
-        case node::stream::IPWM::TYPE:                      return std::make_shared<node::stream::PWM>();
-        case node::stream::ITemperature::TYPE:              return std::make_shared<node::stream::Temperature>();
-        case node::stream::IThrottle::TYPE:                 return std::make_shared<node::stream::Throttle>();
-        case node::stream::ITorque::TYPE:                   return std::make_shared<node::stream::Torque>();
-//        case node::stream::IENU_Torque::TYPE:               return std::make_shared<node::stream::ENU_Torque>();
-//        case node::stream::IECEF_Torque::TYPE:              return std::make_shared<node::stream::ECEF_Torque>();
-        case node::stream::IVelocity::TYPE:                 return std::make_shared<node::stream::Velocity>();
-//        case node::stream::IENU_Velocity::TYPE:             return std::make_shared<node::stream::ENU_Velocity>();
-//        case node::stream::IECEF_Velocity::TYPE:            return std::make_shared<node::stream::ECEF_Velocity>();
-        case node::stream::IVoltage::TYPE:                  return std::make_shared<node::stream::Voltage>();
-        case node::stream::IVideo::TYPE:                    return std::make_shared<node::stream::Video>();
-        case node::stream::IMulti_Input::TYPE:              return std::make_shared<node::stream::Multi_Input>();
-        case node::stream::IMulti_State::TYPE:              return std::make_shared<node::stream::Multi_State>();
-        case node::stream::IProximity::TYPE:                return std::make_shared<node::stream::Proximity>();
+        case node::stream::gs::Acceleration::TYPE:             return std::make_shared<node::stream::gs::Acceleration>();
+//        case node::stream::gs::ENU_Acceleration::TYPE:         return std::make_shared<node::stream::gs::ENU_Acceleration>();
+//        case node::stream::gs::ECEF_Acceleration::TYPE:        return std::make_shared<node::stream::gs::ECEF_Acceleration>();
+        case node::stream::gs::ADC::TYPE:                      return std::make_shared<node::stream::gs::ADC>();
+        case node::stream::gs::Angular_Velocity::TYPE:         return std::make_shared<node::stream::gs::Angular_Velocity>();
+//        case node::stream::gs::ENU_Angular_Velocity::TYPE:     return std::make_shared<node::stream::gs::ENU_Angular_Velocity>();
+//        case node::stream::gs::ECEF_Angular_Velocity::TYPE:    return std::make_shared<node::stream::gs::ECEF_Angular_Velocity>();
+        case node::stream::gs::Battery_State::TYPE:            return std::make_shared<node::stream::gs::Battery_State>();
+        case node::stream::gs::Current::TYPE:                  return std::make_shared<node::stream::gs::Current>();
+        case node::stream::gs::Distance::TYPE:                 return std::make_shared<node::stream::gs::Distance>();
+//        case node::stream::gs::ENU_Distance::TYPE:             return std::make_shared<node::stream::gs::ENU_Distance>();
+//        case node::stream::gs::ECEF_Distance::TYPE:            return std::make_shared<node::stream::gs::ECEF_Distance>();
+        case node::stream::gs::Float::TYPE:                    return std::make_shared<node::stream::gs::Float>();
+        case node::stream::gs::Bool::TYPE:                     return std::make_shared<node::stream::gs::Bool>();
+        case node::stream::gs::Force::TYPE:                    return std::make_shared<node::stream::gs::Force>();
+//        case node::stream::gs::ENU_Force::TYPE:                return std::make_shared<node::stream::gs::ENU_Force>();
+//        case node::stream::gs::ECEF_Force::TYPE:               return std::make_shared<node::stream::gs::ECEF_Force>();
+        case node::stream::gs::Frame::TYPE:                    return std::make_shared<node::stream::gs::Frame>();
+        case node::stream::gs::GPS_Info::TYPE:                 return std::make_shared<node::stream::gs::GPS_Info>();
+        case node::stream::gs::Linear_Acceleration::TYPE:      return std::make_shared<node::stream::gs::Linear_Acceleration>();
+//        case node::stream::gs::ENU_Linear_Acceleration::TYPE:  return std::make_shared<node::stream::gs::ENU_Linear_Acceleration>();
+//        case node::stream::gs::ECEF_Linear_Acceleration::TYPE: return std::make_shared<node::stream::gs::ECEF_Linear_Acceleration>();
+        case node::stream::gs::ECEF_Position::TYPE:            return std::make_shared<node::stream::gs::ECEF_Position>();
+        case node::stream::gs::Magnetic_Field::TYPE:           return std::make_shared<node::stream::gs::ECEF_Magnetic_Field>();
+//        case node::stream::gs::ENU_Magnetic_Field::TYPE:       return std::make_shared<node::stream::gs::ENU_Magnetic_Field>();
+//        case node::stream::gs::ECEF_Magnetic_Field::TYPE:      return std::make_shared<node::stream::gs::ECEF_Magnetic_Field>();
+        case node::stream::gs::Pressure::TYPE:                 return std::make_shared<node::stream::gs::Pressure>();
+        case node::stream::gs::PWM::TYPE:                      return std::make_shared<node::stream::gs::PWM>();
+        case node::stream::gs::Temperature::TYPE:              return std::make_shared<node::stream::gs::Temperature>();
+        case node::stream::gs::Throttle::TYPE:                 return std::make_shared<node::stream::gs::Throttle>();
+        case node::stream::gs::Torque::TYPE:                   return std::make_shared<node::stream::gs::Torque>();
+//        case node::stream::gs::ENU_Torque::TYPE:               return std::make_shared<node::stream::gs::ENU_Torque>();
+//        case node::stream::gs::ECEF_Torque::TYPE:              return std::make_shared<node::stream::gs::ECEF_Torque>();
+        case node::stream::gs::Velocity::TYPE:                 return std::make_shared<node::stream::gs::Velocity>();
+//        case node::stream::gs::ENU_Velocity::TYPE:             return std::make_shared<node::stream::gs::ENU_Velocity>();
+//        case node::stream::gs::ECEF_Velocity::TYPE:            return std::make_shared<node::stream::gs::ECEF_Velocity>();
+        case node::stream::gs::Voltage::TYPE:                  return std::make_shared<node::stream::gs::Voltage>();
+        case node::stream::gs::Video::TYPE:                    return std::make_shared<node::stream::gs::Video>();
+        case node::stream::gs::Multi_Input::TYPE:              return std::make_shared<node::stream::gs::Multi_Input>();
+        case node::stream::gs::Multi_State::TYPE:              return std::make_shared<node::stream::gs::Multi_State>();
+        case node::stream::gs::Proximity::TYPE:                return std::make_shared<node::stream::gs::Proximity>();
     }
 
     QASSERT(0);
-    return std::shared_ptr<node::stream::Stream>();
+    return std::shared_ptr<node::stream::gs::Stream>();
 }
 
 auto Comms::publish_outputs(node::Node_ptr node) -> bool
@@ -735,7 +735,7 @@ void Comms::handle_streams_telemetry_active()
 }
 
 template<class Stream>
-auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
+auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::gs::Stream& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
     {
@@ -778,31 +778,31 @@ void Comms::handle_stream_data()
 
     using namespace silk::node::stream;
 
-    if (!unpack_stream_samples<Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ADC>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Battery_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Current>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Float>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Bool>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Force>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Frame>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Pressure>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<PWM>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Temperature>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Throttle>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Torque>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Velocity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Voltage>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Multi_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Proximity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<Video>(m_telemetry_channel, sample_count, *stream))
+    if (!unpack_stream_samples<gs::Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::ADC>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Battery_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Current>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Distance>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Float>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Bool>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Force>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Pressure>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::PWM>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Temperature>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Throttle>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Torque>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Voltage>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Multi_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Proximity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Video>(m_telemetry_channel, sample_count, *stream))
     {
         QASSERT(0);
         QLOGE("Cannot unpack stream '{}'", stream_name);
@@ -813,7 +813,7 @@ void Comms::handle_stream_data()
 void Comms::handle_frame_data()
 {
     std::string stream_name;
-    node::stream::Video::Sample sample;
+    node::stream::gs::Video::Sample sample;
     bool ok = m_video_channel.begin_unpack() &&
               m_video_channel.unpack_param(stream_name) &&
               m_video_channel.unpack_param(sample);
@@ -823,12 +823,12 @@ void Comms::handle_frame_data()
         return;
     }
     auto _stream = m_hal.get_streams().find_by_name(stream_name);
-    if (!_stream || _stream->get_type() != node::stream::Video::TYPE)
+    if (!_stream || _stream->get_type() != node::stream::gs::Video::TYPE)
     {
         QLOGW("Cannot find stream '{}'", stream_name);
         return;
     }
-    auto& stream = static_cast<node::stream::Video&>(*_stream);
+    auto& stream = static_cast<node::stream::gs::Video&>(*_stream);
 
     stream.samples.push_back(std::move(sample));
     stream.samples_available_signal.execute(stream.samples);

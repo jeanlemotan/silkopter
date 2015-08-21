@@ -41,7 +41,7 @@ auto HAL::get_nodes() const  -> Registry<node::Node> const&
 {
     return m_nodes;
 }
-auto HAL::get_streams() const  -> Registry<node::stream::Stream> const&
+auto HAL::get_streams() const  -> Registry<node::stream::gs::Stream> const&
 {
     return m_streams;
 }
