@@ -60,7 +60,7 @@ void Stream_Viewer_Widget::set_stream_name(std::string const& stream_name)
 
 void Stream_Viewer_Widget::create_viewer()
 {
-    using namespace silk::node::stream;
+    using namespace silk::stream;
 
     //removing all widgets
     setLayout(new QVBoxLayout(this));

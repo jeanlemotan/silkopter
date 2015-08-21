@@ -164,7 +164,7 @@ void GS::process()
         m_hud->process();
     }
 
-//    silk::node::stream::IMulti_Input::Sample input;
+//    silk::stream::IMulti_Input::Sample input;
 //    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), input);
 
 

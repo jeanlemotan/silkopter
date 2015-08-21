@@ -33,15 +33,15 @@ auto HAL::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
-auto HAL::get_node_defs() const  -> Registry<node::Node_Def> const&
+auto HAL::get_node_defs() const  -> Registry<node::gs::Node_Def> const&
 {
     return m_node_defs;
 }
-auto HAL::get_nodes() const  -> Registry<node::Node> const&
+auto HAL::get_nodes() const  -> Registry<node::gs::Node> const&
 {
     return m_nodes;
 }
-auto HAL::get_streams() const  -> Registry<node::stream::gs::Stream> const&
+auto HAL::get_streams() const  -> Registry<stream::gs::Stream> const&
 {
     return m_streams;
 }
@@ -74,7 +74,7 @@ void HAL::add_node(std::string const& def_name,
     channel.end_pack();
 }
 
-void HAL::remove_node(node::Node_ptr node)
+void HAL::remove_node(node::gs::Node_ptr node)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
@@ -82,9 +82,9 @@ void HAL::remove_node(node::Node_ptr node)
     channel.end_pack();
 }
 
-void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path)
+void HAL::set_node_input_stream_path(node::gs::Node_ptr node, std::string const& input_name, q::Path const& stream_path)
 {
-    auto it = std::find_if(node->inputs.begin(), node->inputs.end(), [input_name](node::Node::Input const& is) { return is.name == input_name; });
+    auto it = std::find_if(node->inputs.begin(), node->inputs.end(), [input_name](node::gs::Node::Input const& is) { return is.name == input_name; });
     if (it == node->inputs.end())
     {
         QLOGE("Cannot find input stream '{}' for node '{}'", input_name, node->name);
@@ -101,7 +101,7 @@ void HAL::set_node_input_stream_path(node::Node_ptr node, std::string const& inp
     channel.end_pack();
 }
 
-void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config)
+void HAL::set_node_config(node::gs::Node_ptr node, rapidjson::Document const& config)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
@@ -110,7 +110,7 @@ void HAL::set_node_config(node::Node_ptr node, rapidjson::Document const& config
     channel.end_pack();
 }
 
-void HAL::send_node_message(node::Node_ptr node, rapidjson::Document const& json)
+void HAL::send_node_message(node::gs::Node_ptr node, rapidjson::Document const& json)
 {
     auto& channel = m_comms.get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);

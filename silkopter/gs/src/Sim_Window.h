@@ -12,7 +12,7 @@
 class Sim_Window : public QMainWindow
 {
 public:
-    explicit Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget* parent = 0);
+    explicit Sim_Window(silk::HAL& hal, silk::node::gs::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget* parent = 0);
     ~Sim_Window();
 
     void process();
@@ -32,7 +32,7 @@ private:
     std::vector<q::util::Connection> m_connections;
 
     silk::HAL& m_hal;
-    silk::node::Node_ptr m_sim_node;
+    silk::node::gs::Node_ptr m_sim_node;
     silk::Comms& m_comms;
     Render_Context& m_context;
     Camera_Controller_3D m_camera_controller;

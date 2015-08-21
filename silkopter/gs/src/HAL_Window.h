@@ -37,26 +37,26 @@ private:
     void connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
 
     void selection_changed();
-    void set_config_editor_node(silk::node::Node_ptr node);
+    void set_config_editor_node(silk::node::gs::Node_ptr node);
 
     void open_stream_viewer(std::string const& stream_name);
 
-    auto supports_acceleration_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
-    auto supports_angular_velocity_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
-    auto supports_magnetic_field_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool;
+    auto supports_acceleration_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool;
+    auto supports_angular_velocity_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool;
+    auto supports_magnetic_field_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool;
 
-    void do_acceleration_calibration(silk::node::Node_ptr node, size_t output_idx);
-    void do_magnetic_field_calibration(silk::node::Node_ptr node, size_t output_idx);
-    void do_angular_velocity_calibration(silk::node::Node_ptr node, size_t output_idx);
+    void do_acceleration_calibration(silk::node::gs::Node_ptr node, size_t output_idx);
+    void do_magnetic_field_calibration(silk::node::gs::Node_ptr node, size_t output_idx);
+    void do_angular_velocity_calibration(silk::node::gs::Node_ptr node, size_t output_idx);
 
-    void add_stream(silk::node::stream::gs::Stream_ptr stream);
-    void remove_stream(silk::node::stream::gs::Stream_ptr stream);
+    void add_stream(silk::stream::gs::Stream_ptr stream);
+    void remove_stream(silk::stream::gs::Stream_ptr stream);
 
-    void refresh_node(silk::node::Node& node);
-    void add_node(silk::node::Node_ptr node);
-    void remove_node(silk::node::Node_ptr node);
-    void try_add_node(silk::node::Node_Def_ptr def, QPointF pos);
-    void try_remove_node(silk::node::Node_ptr node);
+    void refresh_node(silk::node::gs::Node& node);
+    void add_node(silk::node::gs::Node_ptr node);
+    void remove_node(silk::node::gs::Node_ptr node);
+    void try_add_node(silk::node::gs::Node_Def_ptr def, QPointF pos);
+    void try_remove_node(silk::node::gs::Node_ptr node);
 
     std::vector<q::util::Connection> m_connections;
 
@@ -72,7 +72,7 @@ private:
 
     struct Selection
     {
-        silk::node::Node_ptr node;
+        silk::node::gs::Node_ptr node;
         QDockWidget* config_dock = nullptr;
         QTreeView* config_view = nullptr;
         rapidjson::Document config_json;
@@ -81,14 +81,14 @@ private:
 
     struct UI_Stream
     {
-        silk::node::stream::gs::Stream_wptr stream;
+        silk::stream::gs::Stream_wptr stream;
         QNEPort* port = nullptr;
         QNEBlock* block = nullptr;
     };
 
     struct UI_Node
     {
-        silk::node::Node_wptr node;
+        silk::node::gs::Node_wptr node;
 
         QNEBlock* block = nullptr;
         struct UI_Input

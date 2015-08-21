@@ -5,7 +5,7 @@
 
 #include "Axis.h"
 
-Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget *parent)
+Sim_Window::Sim_Window(silk::HAL& hal, silk::node::gs::Node_ptr sim_node, silk::Comms& comms, Render_Context& context, QWidget *parent)
     : QMainWindow(parent)
     , m_hal(hal)
     , m_sim_node(sim_node)
@@ -15,7 +15,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
 {
     QASSERT(sim_node);
 
-    auto state_streams = hal.get_streams().get_all_of_type<silk::node::stream::gs::Multi_State>();
+    auto state_streams = hal.get_streams().get_all_of_type<silk::stream::gs::Multi_State>();
 
     setWindowTitle("Simulator");
     setMouseTracking(true);

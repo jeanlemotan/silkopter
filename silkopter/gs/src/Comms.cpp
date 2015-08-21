@@ -257,7 +257,7 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 //    }
 //}
 
-static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& node_def) -> bool
+static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::gs::Node_Def& node_def) -> bool
 {
     bool ok = channel.unpack_param(node_def.name);
     ok &= channel.unpack_param(node_def.type);
@@ -267,7 +267,7 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, node::Node_Def& 
     return ok;
 }
 
-auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool
+auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::gs::Node& node) -> bool
 {
     bool ok = channel.unpack_param(node.type);
     ok &= unpack_inputs(channel, node.inputs);
@@ -304,7 +304,7 @@ auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) ->
 //        {
 //            return false;
 //        }
-//        i.stream = hal.get_streams().find_by_name<node::stream::Stream>(name);
+//        i.stream = hal.get_streams().find_by_name<stream::Stream>(name);
 //        if (!i.stream)
 //        {
 //            QLOGE("Cannot find stream name {}", i.name);
@@ -379,7 +379,7 @@ void Comms::handle_enumerate_node_defs()
 
     for (uint32_t i = 0; i < node_count; i++)
     {
-        auto def = std::make_shared<node::Node_Def>();
+        auto def = std::make_shared<node::gs::Node_Def>();
         if (!unpack_node_def_data(m_setup_channel, *def))
         {
             QLOGE("\t\tBad node");
@@ -392,58 +392,58 @@ void Comms::handle_enumerate_node_defs()
     m_setup_channel.end_unpack();
 }
 
-auto create_stream_from_type(node::stream::Type type) -> std::shared_ptr<node::stream::gs::Stream>
+auto create_stream_from_type(stream::Type type) -> std::shared_ptr<stream::gs::Stream>
 {
     switch (type)
     {
-        case node::stream::gs::Acceleration::TYPE:             return std::make_shared<node::stream::gs::Acceleration>();
-//        case node::stream::gs::ENU_Acceleration::TYPE:         return std::make_shared<node::stream::gs::ENU_Acceleration>();
-//        case node::stream::gs::ECEF_Acceleration::TYPE:        return std::make_shared<node::stream::gs::ECEF_Acceleration>();
-        case node::stream::gs::ADC::TYPE:                      return std::make_shared<node::stream::gs::ADC>();
-        case node::stream::gs::Angular_Velocity::TYPE:         return std::make_shared<node::stream::gs::Angular_Velocity>();
-//        case node::stream::gs::ENU_Angular_Velocity::TYPE:     return std::make_shared<node::stream::gs::ENU_Angular_Velocity>();
-//        case node::stream::gs::ECEF_Angular_Velocity::TYPE:    return std::make_shared<node::stream::gs::ECEF_Angular_Velocity>();
-        case node::stream::gs::Battery_State::TYPE:            return std::make_shared<node::stream::gs::Battery_State>();
-        case node::stream::gs::Current::TYPE:                  return std::make_shared<node::stream::gs::Current>();
-        case node::stream::gs::Distance::TYPE:                 return std::make_shared<node::stream::gs::Distance>();
-//        case node::stream::gs::ENU_Distance::TYPE:             return std::make_shared<node::stream::gs::ENU_Distance>();
-//        case node::stream::gs::ECEF_Distance::TYPE:            return std::make_shared<node::stream::gs::ECEF_Distance>();
-        case node::stream::gs::Float::TYPE:                    return std::make_shared<node::stream::gs::Float>();
-        case node::stream::gs::Bool::TYPE:                     return std::make_shared<node::stream::gs::Bool>();
-        case node::stream::gs::Force::TYPE:                    return std::make_shared<node::stream::gs::Force>();
-//        case node::stream::gs::ENU_Force::TYPE:                return std::make_shared<node::stream::gs::ENU_Force>();
-//        case node::stream::gs::ECEF_Force::TYPE:               return std::make_shared<node::stream::gs::ECEF_Force>();
-        case node::stream::gs::Frame::TYPE:                    return std::make_shared<node::stream::gs::Frame>();
-        case node::stream::gs::GPS_Info::TYPE:                 return std::make_shared<node::stream::gs::GPS_Info>();
-        case node::stream::gs::Linear_Acceleration::TYPE:      return std::make_shared<node::stream::gs::Linear_Acceleration>();
-//        case node::stream::gs::ENU_Linear_Acceleration::TYPE:  return std::make_shared<node::stream::gs::ENU_Linear_Acceleration>();
-//        case node::stream::gs::ECEF_Linear_Acceleration::TYPE: return std::make_shared<node::stream::gs::ECEF_Linear_Acceleration>();
-        case node::stream::gs::ECEF_Position::TYPE:            return std::make_shared<node::stream::gs::ECEF_Position>();
-        case node::stream::gs::Magnetic_Field::TYPE:           return std::make_shared<node::stream::gs::ECEF_Magnetic_Field>();
-//        case node::stream::gs::ENU_Magnetic_Field::TYPE:       return std::make_shared<node::stream::gs::ENU_Magnetic_Field>();
-//        case node::stream::gs::ECEF_Magnetic_Field::TYPE:      return std::make_shared<node::stream::gs::ECEF_Magnetic_Field>();
-        case node::stream::gs::Pressure::TYPE:                 return std::make_shared<node::stream::gs::Pressure>();
-        case node::stream::gs::PWM::TYPE:                      return std::make_shared<node::stream::gs::PWM>();
-        case node::stream::gs::Temperature::TYPE:              return std::make_shared<node::stream::gs::Temperature>();
-        case node::stream::gs::Throttle::TYPE:                 return std::make_shared<node::stream::gs::Throttle>();
-        case node::stream::gs::Torque::TYPE:                   return std::make_shared<node::stream::gs::Torque>();
-//        case node::stream::gs::ENU_Torque::TYPE:               return std::make_shared<node::stream::gs::ENU_Torque>();
-//        case node::stream::gs::ECEF_Torque::TYPE:              return std::make_shared<node::stream::gs::ECEF_Torque>();
-        case node::stream::gs::Velocity::TYPE:                 return std::make_shared<node::stream::gs::Velocity>();
-//        case node::stream::gs::ENU_Velocity::TYPE:             return std::make_shared<node::stream::gs::ENU_Velocity>();
-//        case node::stream::gs::ECEF_Velocity::TYPE:            return std::make_shared<node::stream::gs::ECEF_Velocity>();
-        case node::stream::gs::Voltage::TYPE:                  return std::make_shared<node::stream::gs::Voltage>();
-        case node::stream::gs::Video::TYPE:                    return std::make_shared<node::stream::gs::Video>();
-        case node::stream::gs::Multi_Input::TYPE:              return std::make_shared<node::stream::gs::Multi_Input>();
-        case node::stream::gs::Multi_State::TYPE:              return std::make_shared<node::stream::gs::Multi_State>();
-        case node::stream::gs::Proximity::TYPE:                return std::make_shared<node::stream::gs::Proximity>();
+        case stream::gs::Acceleration::TYPE:             return std::make_shared<stream::gs::Acceleration>();
+//        case stream::gs::ENU_Acceleration::TYPE:         return std::make_shared<stream::gs::ENU_Acceleration>();
+//        case stream::gs::ECEF_Acceleration::TYPE:        return std::make_shared<stream::gs::ECEF_Acceleration>();
+        case stream::gs::ADC::TYPE:                      return std::make_shared<stream::gs::ADC>();
+        case stream::gs::Angular_Velocity::TYPE:         return std::make_shared<stream::gs::Angular_Velocity>();
+//        case stream::gs::ENU_Angular_Velocity::TYPE:     return std::make_shared<stream::gs::ENU_Angular_Velocity>();
+//        case stream::gs::ECEF_Angular_Velocity::TYPE:    return std::make_shared<stream::gs::ECEF_Angular_Velocity>();
+        case stream::gs::Battery_State::TYPE:            return std::make_shared<stream::gs::Battery_State>();
+        case stream::gs::Current::TYPE:                  return std::make_shared<stream::gs::Current>();
+        case stream::gs::Distance::TYPE:                 return std::make_shared<stream::gs::Distance>();
+//        case stream::gs::ENU_Distance::TYPE:             return std::make_shared<stream::gs::ENU_Distance>();
+//        case stream::gs::ECEF_Distance::TYPE:            return std::make_shared<stream::gs::ECEF_Distance>();
+        case stream::gs::Float::TYPE:                    return std::make_shared<stream::gs::Float>();
+        case stream::gs::Bool::TYPE:                     return std::make_shared<stream::gs::Bool>();
+        case stream::gs::Force::TYPE:                    return std::make_shared<stream::gs::Force>();
+//        case stream::gs::ENU_Force::TYPE:                return std::make_shared<stream::gs::ENU_Force>();
+//        case stream::gs::ECEF_Force::TYPE:               return std::make_shared<stream::gs::ECEF_Force>();
+        case stream::gs::Frame::TYPE:                    return std::make_shared<stream::gs::Frame>();
+        case stream::gs::GPS_Info::TYPE:                 return std::make_shared<stream::gs::GPS_Info>();
+        case stream::gs::Linear_Acceleration::TYPE:      return std::make_shared<stream::gs::Linear_Acceleration>();
+//        case stream::gs::ENU_Linear_Acceleration::TYPE:  return std::make_shared<stream::gs::ENU_Linear_Acceleration>();
+//        case stream::gs::ECEF_Linear_Acceleration::TYPE: return std::make_shared<stream::gs::ECEF_Linear_Acceleration>();
+        case stream::gs::ECEF_Position::TYPE:            return std::make_shared<stream::gs::ECEF_Position>();
+        case stream::gs::Magnetic_Field::TYPE:           return std::make_shared<stream::gs::ECEF_Magnetic_Field>();
+//        case stream::gs::ENU_Magnetic_Field::TYPE:       return std::make_shared<stream::gs::ENU_Magnetic_Field>();
+//        case stream::gs::ECEF_Magnetic_Field::TYPE:      return std::make_shared<stream::gs::ECEF_Magnetic_Field>();
+        case stream::gs::Pressure::TYPE:                 return std::make_shared<stream::gs::Pressure>();
+        case stream::gs::PWM::TYPE:                      return std::make_shared<stream::gs::PWM>();
+        case stream::gs::Temperature::TYPE:              return std::make_shared<stream::gs::Temperature>();
+        case stream::gs::Throttle::TYPE:                 return std::make_shared<stream::gs::Throttle>();
+        case stream::gs::Torque::TYPE:                   return std::make_shared<stream::gs::Torque>();
+//        case stream::gs::ENU_Torque::TYPE:               return std::make_shared<stream::gs::ENU_Torque>();
+//        case stream::gs::ECEF_Torque::TYPE:              return std::make_shared<stream::gs::ECEF_Torque>();
+        case stream::gs::Velocity::TYPE:                 return std::make_shared<stream::gs::Velocity>();
+//        case stream::gs::ENU_Velocity::TYPE:             return std::make_shared<stream::gs::ENU_Velocity>();
+//        case stream::gs::ECEF_Velocity::TYPE:            return std::make_shared<stream::gs::ECEF_Velocity>();
+        case stream::gs::Voltage::TYPE:                  return std::make_shared<stream::gs::Voltage>();
+        case stream::gs::Video::TYPE:                    return std::make_shared<stream::gs::Video>();
+        case stream::gs::Multi_Input::TYPE:              return std::make_shared<stream::gs::Multi_Input>();
+        case stream::gs::Multi_State::TYPE:              return std::make_shared<stream::gs::Multi_State>();
+        case stream::gs::Proximity::TYPE:                return std::make_shared<stream::gs::Proximity>();
     }
 
     QASSERT(0);
-    return std::shared_ptr<node::stream::gs::Stream>();
+    return std::shared_ptr<stream::gs::Stream>();
 }
 
-auto Comms::publish_outputs(node::Node_ptr node) -> bool
+auto Comms::publish_outputs(node::gs::Node_ptr node) -> bool
 {
     for (auto& os: node->outputs)
     {
@@ -463,7 +463,7 @@ auto Comms::publish_outputs(node::Node_ptr node) -> bool
     return true;
 }
 
-auto Comms::unpublish_outputs(node::Node_ptr node) -> bool
+auto Comms::unpublish_outputs(node::gs::Node_ptr node) -> bool
 {
     for (auto& os: node->outputs)
     {
@@ -473,7 +473,7 @@ auto Comms::unpublish_outputs(node::Node_ptr node) -> bool
     return true;
 }
 
-auto Comms::link_inputs(node::Node_ptr node) -> bool
+auto Comms::link_inputs(node::gs::Node_ptr node) -> bool
 {
     for (auto& i: node->inputs)
     {
@@ -511,10 +511,10 @@ void Comms::handle_enumerate_nodes()
 
     QLOGI("Received {} nodes", node_count);
 
-    std::vector<silk::node::Node_ptr> nodes;
+    std::vector<silk::node::gs::Node_ptr> nodes;
     for (uint32_t i = 0; i < node_count; i++)
     {
-        auto node = std::make_shared<node::Node>();
+        auto node = std::make_shared<node::gs::Node>();
         bool ok = m_setup_channel.unpack_param(node->name);
         ok &= unpack_node_data(m_setup_channel, *node);
         if (!ok)
@@ -678,7 +678,7 @@ void Comms::handle_add_node()
         return;
     }
 
-    auto node = std::make_shared<node::Node>();
+    auto node = std::make_shared<node::gs::Node>();
     bool ok = unpack_node_data(m_setup_channel, *node);
     if (!ok)
     {
@@ -735,7 +735,7 @@ void Comms::handle_streams_telemetry_active()
 }
 
 template<class Stream>
-auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::gs::Stream& _stream) -> bool
+auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::stream::gs::Stream& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
     {
@@ -776,7 +776,7 @@ void Comms::handle_stream_data()
         return;
     }
 
-    using namespace silk::node::stream;
+    using namespace silk::stream;
 
     if (!unpack_stream_samples<gs::Acceleration>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::ADC>(m_telemetry_channel, sample_count, *stream) &&
@@ -813,7 +813,7 @@ void Comms::handle_stream_data()
 void Comms::handle_frame_data()
 {
     std::string stream_name;
-    node::stream::gs::Video::Sample sample;
+    stream::gs::Video::Sample sample;
     bool ok = m_video_channel.begin_unpack() &&
               m_video_channel.unpack_param(stream_name) &&
               m_video_channel.unpack_param(sample);
@@ -823,12 +823,12 @@ void Comms::handle_frame_data()
         return;
     }
     auto _stream = m_hal.get_streams().find_by_name(stream_name);
-    if (!_stream || _stream->get_type() != node::stream::gs::Video::TYPE)
+    if (!_stream || _stream->get_type() != stream::gs::Video::TYPE)
     {
         QLOGW("Cannot find stream '{}'", stream_name);
         return;
     }
-    auto& stream = static_cast<node::stream::gs::Video&>(*_stream);
+    auto& stream = static_cast<stream::gs::Video&>(*_stream);
 
     stream.samples.push_back(std::move(sample));
     stream.samples_available_signal.execute(stream.samples);
@@ -839,7 +839,7 @@ void Comms::handle_multi_state()
 {
     auto& channel = m_pilot_channel;
 
-    node::stream::IMulti_State::Sample sample;
+    stream::IMulti_State::Sample sample;
     if (!channel.unpack_all(sample))
     {
         QLOGE("Error in unpacking multi state");
@@ -849,11 +849,11 @@ void Comms::handle_multi_state()
     m_multi_state_samples.push_back(sample);
 }
 
-auto Comms::get_multi_state_samples() const -> std::vector<node::stream::IMulti_State::Sample> const&
+auto Comms::get_multi_state_samples() const -> std::vector<stream::IMulti_State::Sample> const&
 {
     return m_multi_state_samples;
 }
-void Comms::send_multi_input_value(node::stream::IMulti_Input::Value const& value)
+void Comms::send_multi_input_value(stream::IMulti_Input::Value const& value)
 {
     m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTI_INPUT, value);
 }

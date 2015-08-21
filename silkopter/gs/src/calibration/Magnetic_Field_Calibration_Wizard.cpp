@@ -11,14 +11,14 @@
 
 constexpr std::chrono::seconds DATA_COLLECTION_DURATION(60);
 
-Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::Node_ptr node, size_t output_idx, QWidget* parent)
+Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::gs::Node_ptr node, size_t output_idx, QWidget* parent)
     : QDialog(parent)
     , m_hal(hal)
     , m_comms(comms)
     , m_node(node)
     , m_output(node->outputs[output_idx])
 {
-    m_stream = std::static_pointer_cast<silk::node::stream::gs::Magnetic_Field>(m_output.stream);
+    m_stream = std::static_pointer_cast<silk::stream::gs::Magnetic_Field>(m_output.stream);
 
     m_hal.set_stream_telemetry_active(m_output.stream->name, true);
 
@@ -126,7 +126,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
 
-        m_connection = m_stream->samples_available_signal.connect([this, info, progress, bias, scale](silk::node::stream::gs::Magnetic_Field::Samples const& samples)
+        m_connection = m_stream->samples_available_signal.connect([this, info, progress, bias, scale](silk::stream::gs::Magnetic_Field::Samples const& samples)
         {
             on_samples_received(samples);
             info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
@@ -230,7 +230,7 @@ auto Magnetic_Field_Calibration_Wizard::get_calibration_points() const -> sz::ca
 }
 
 
-void Magnetic_Field_Calibration_Wizard::on_samples_received(silk::node::stream::gs::Magnetic_Field::Samples const& samples)
+void Magnetic_Field_Calibration_Wizard::on_samples_received(silk::stream::gs::Magnetic_Field::Samples const& samples)
 {
     m_samples.reserve(m_samples.size() + samples.size());
     for (auto const& s: samples)

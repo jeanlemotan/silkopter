@@ -1,30 +1,30 @@
 #pragma once
 
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IADC.h"
-#include "common/node/stream/IFloat.h"
-#include "common/node/stream/IBool.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/stream/IForce.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IGPS_Info.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/IPWM.h"
-#include "common/node/stream/ITemperature.h"
-#include "common/node/stream/IThrottle.h"
-#include "common/node/stream/ITorque.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IVideo.h"
-#include "common/node/stream/IVoltage.h"
-#include "common/node/stream/IProximity.h"
-#include "common/node/stream/IMulti_Input.h"
-#include "common/node/stream/IMulti_State.h"
+#include "common/stream/IAcceleration.h"
+#include "common/stream/IADC.h"
+#include "common/stream/IFloat.h"
+#include "common/stream/IBool.h"
+#include "common/stream/IAngular_Velocity.h"
+#include "common/stream/IBattery_State.h"
+#include "common/stream/ICurrent.h"
+#include "common/stream/IDistance.h"
+#include "common/stream/IForce.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/IGPS_Info.h"
+#include "common/stream/ILinear_Acceleration.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/IMagnetic_Field.h"
+#include "common/stream/IPressure.h"
+#include "common/stream/IPWM.h"
+#include "common/stream/ITemperature.h"
+#include "common/stream/IThrottle.h"
+#include "common/stream/ITorque.h"
+#include "common/stream/IVelocity.h"
+#include "common/stream/IVideo.h"
+#include "common/stream/IVoltage.h"
+#include "common/stream/IProximity.h"
+#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_State.h"
 
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
@@ -46,8 +46,12 @@ class Comms;
 
 namespace node
 {
+namespace gs
+{
 struct Node;
 DECLARE_CLASS_PTR(Node);
+}
+}
 
 
 namespace stream
@@ -57,7 +61,7 @@ namespace gs
 
 struct Stream : public IStream
 {
-    Node_wptr node;
+    node::gs::Node_wptr node;
     std::string name;
     uint32_t rate = 0;
     int telemetry_active_req = 0;
@@ -171,6 +175,11 @@ DECLARE_CLASS_PTR(Proximity);
 
 
 
+namespace node
+{
+namespace gs
+{
+
 struct Node_Def
 {
     std::string name;
@@ -227,6 +236,7 @@ struct Node
 DECLARE_CLASS_PTR(Node);
 
 }
+}
 
 
 
@@ -261,9 +271,9 @@ public:
     q::util::Signal<void()> multi_config_refreshed_signal;
 
 
-    auto get_node_defs() const      -> Registry<node::Node_Def> const&;
-    auto get_nodes() const          -> Registry<node::Node> const&;
-    auto get_streams() const        -> Registry<node::stream::gs::Stream> const&;
+    auto get_node_defs() const      -> Registry<node::gs::Node_Def> const&;
+    auto get_nodes() const          -> Registry<node::gs::Node> const&;
+    auto get_streams() const        -> Registry<stream::gs::Stream> const&;
 
     enum class Result
     {
@@ -273,11 +283,11 @@ public:
     };
 
     void add_node(std::string const& def_name, std::string const& name, rapidjson::Document const& init_params);
-    void remove_node(node::Node_ptr node);
-    void set_node_input_stream_path(node::Node_ptr node, std::string const& input_name, q::Path const& stream_path);
-    void set_node_config(node::Node_ptr node, rapidjson::Document const& config);
+    void remove_node(node::gs::Node_ptr node);
+    void set_node_input_stream_path(node::gs::Node_ptr node, std::string const& input_name, q::Path const& stream_path);
+    void set_node_config(node::gs::Node_ptr node, rapidjson::Document const& config);
     void set_stream_telemetry_active(std::string const& stream_name, bool active);
-    void send_node_message(node::Node_ptr node, rapidjson::Document const& json);
+    void send_node_message(node::gs::Node_ptr node, rapidjson::Document const& json);
 
     auto get_remote_clock() const -> Manual_Clock const&;
 
@@ -290,9 +300,9 @@ protected:
         boost::optional<config::Multi> multi;
     } m_configs;
 
-    Registry<node::Node_Def> m_node_defs;
-    Registry<node::Node> m_nodes;
-    Registry<node::stream::gs::Stream> m_streams;
+    Registry<node::gs::Node_Def> m_node_defs;
+    Registry<node::gs::Node> m_nodes;
+    Registry<stream::gs::Stream> m_streams;
 
 private:
 

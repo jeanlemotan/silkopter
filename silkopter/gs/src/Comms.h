@@ -36,8 +36,8 @@ public:
 
     auto get_setup_channel() -> Setup_Channel&;
 
-    auto get_multi_state_samples() const -> std::vector<node::stream::IMulti_State::Sample> const&;
-    void send_multi_input_value(node::stream::IMulti_Input::Value const& value);
+    auto get_multi_state_samples() const -> std::vector<stream::IMulti_State::Sample> const&;
+    void send_multi_input_value(stream::IMulti_Input::Value const& value);
 
 private:
     HAL& m_hal;
@@ -57,12 +57,12 @@ private:
     mutable Telemetry_Channel m_telemetry_channel;
     mutable Video_Channel m_video_channel;
 
-    std::vector<node::stream::IMulti_State::Sample> m_multi_state_samples;
+    std::vector<stream::IMulti_State::Sample> m_multi_state_samples;
 
-    auto unpack_node_data(Comms::Setup_Channel& channel, node::Node& node) -> bool;
-    auto link_inputs(node::Node_ptr node) -> bool;
-    auto publish_outputs(node::Node_ptr node) -> bool;
-    auto unpublish_outputs(node::Node_ptr node) -> bool;
+    auto unpack_node_data(Comms::Setup_Channel& channel, node::gs::Node& node) -> bool;
+    auto link_inputs(node::gs::Node_ptr node) -> bool;
+    auto publish_outputs(node::gs::Node_ptr node) -> bool;
+    auto unpublish_outputs(node::gs::Node_ptr node) -> bool;
 
     void handle_stream_data();
     void handle_frame_data();

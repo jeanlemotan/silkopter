@@ -72,10 +72,10 @@ HEADERS += \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Serial_Channel.h \
     ../../../libs/utils/Timed_Scope.h \
-    ../../../libs/common/node/bus/IBus.h \
-    ../../../libs/common/node/bus/II2C.h \
-    ../../../libs/common/node/bus/ISPI.h \
-    ../../../libs/common/node/bus/IUART.h \
+    ../../../libs/common/bus/IBus.h \
+    ../../../libs/common/bus/II2C.h \
+    ../../../libs/common/bus/ISPI.h \
+    ../../../libs/common/bus/IUART.h \
     ../../src/qnodeseditor/qneblock.h \
     ../../src/qnodeseditor/qneconnection.h \
     ../../src/qnodeseditor/qneport.h \
@@ -105,26 +105,26 @@ HEADERS += \
     ../../src/Camera_Controller_3D.h \
     ../../../libs/utils/Json_Util.h \
     ../../../libs/common/config/Multi.h \
-    ../../../libs/common/node/stream/IAcceleration.h \
-    ../../../libs/common/node/stream/IADC.h \
-    ../../../libs/common/node/stream/IAngular_Velocity.h \
-    ../../../libs/common/node/stream/IBattery_State.h \
-    ../../../libs/common/node/stream/ICurrent.h \
-    ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/IForce.h \
-    ../../../libs/common/node/stream/IFrame.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/IMagnetic_Field.h \
-    ../../../libs/common/node/stream/IPhysical_State.h \
-    ../../../libs/common/node/stream/IPressure.h \
-    ../../../libs/common/node/stream/IPWM.h \
-    ../../../libs/common/node/stream/IStream.h \
-    ../../../libs/common/node/stream/ITemperature.h \
-    ../../../libs/common/node/stream/IThrottle.h \
-    ../../../libs/common/node/stream/ITorque.h \
-    ../../../libs/common/node/stream/IVelocity.h \
-    ../../../libs/common/node/stream/IVideo.h \
-    ../../../libs/common/node/stream/IVoltage.h \
+    ../../../libs/common/stream/IAcceleration.h \
+    ../../../libs/common/stream/IADC.h \
+    ../../../libs/common/stream/IAngular_Velocity.h \
+    ../../../libs/common/stream/IBattery_State.h \
+    ../../../libs/common/stream/ICurrent.h \
+    ../../../libs/common/stream/IDistance.h \
+    ../../../libs/common/stream/IForce.h \
+    ../../../libs/common/stream/IFrame.h \
+    ../../../libs/common/stream/ILinear_Acceleration.h \
+    ../../../libs/common/stream/IMagnetic_Field.h \
+    ../../../libs/common/stream/IPhysical_State.h \
+    ../../../libs/common/stream/IPressure.h \
+    ../../../libs/common/stream/IPWM.h \
+    ../../../libs/common/stream/IStream.h \
+    ../../../libs/common/stream/ITemperature.h \
+    ../../../libs/common/stream/IThrottle.h \
+    ../../../libs/common/stream/ITorque.h \
+    ../../../libs/common/stream/IVelocity.h \
+    ../../../libs/common/stream/IVideo.h \
+    ../../../libs/common/stream/IVoltage.h \
     ../../../libs/common/node/IController.h \
     ../../../libs/common/node/IGenerator.h \
     ../../../libs/common/node/ILPF.h \
@@ -139,9 +139,9 @@ HEADERS += \
     ../../src/Multi_Config_Window.h \
     ../../src/Axis.h \
     ../../src/Video_Viewer.h \
-    ../../../libs/common/node/stream/IBool.h \
-    ../../../libs/common/node/stream/IPosition.h \
-    ../../../libs/common/node/stream/IGPS_Info.h \
+    ../../../libs/common/stream/IBool.h \
+    ../../../libs/common/stream/IPosition.h \
+    ../../../libs/common/stream/IGPS_Info.h \
     ../../src/Custom_Item_Delegate.h \
     ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
@@ -150,11 +150,11 @@ HEADERS += \
     ../../src/calibration/Acceleration_Calibration_Wizard.h \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.h \
-    ../../../libs/common/node/stream/IFloat.h \
-    ../../../libs/common/node/stream/IMulti_Input.h \
-    ../../../libs/common/node/stream/IMulti_State.h \
-    ../../../libs/common/node/stream/IProximity.h \
-    ../../../libs/common/node/stream/Stream_Base.h \
+    ../../../libs/common/stream/IFloat.h \
+    ../../../libs/common/stream/IMulti_Input.h \
+    ../../../libs/common/stream/IMulti_State.h \
+    ../../../libs/common/stream/IProximity.h \
+    ../../../libs/common/stream/Stream_Base.h \
     ../../src/input/Gamepad_Multi.h \
     ../../src/input/Multi.h \
     ../../src/hud/Multi_HUD_Widget.h \

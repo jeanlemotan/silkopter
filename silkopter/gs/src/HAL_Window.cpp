@@ -106,19 +106,19 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
     connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 
-    m_hal.get_nodes().item_added_signal.connect([this](silk::node::Node_ptr item)
+    m_hal.get_nodes().item_added_signal.connect([this](silk::node::gs::Node_ptr item)
     {
         add_node(item);
     });
-    m_hal.get_nodes().item_will_be_removed_signal.connect([this](silk::node::Node_ptr item)
+    m_hal.get_nodes().item_will_be_removed_signal.connect([this](silk::node::gs::Node_ptr item)
     {
         remove_node(item);
     });
-    m_hal.get_streams().item_added_signal.connect([this](silk::node::stream::gs::Stream_ptr item)
+    m_hal.get_streams().item_added_signal.connect([this](silk::stream::gs::Stream_ptr item)
     {
         add_stream(item);
     });
-    m_hal.get_streams().item_will_be_removed_signal.connect([this](silk::node::stream::gs::Stream_ptr item)
+    m_hal.get_streams().item_will_be_removed_signal.connect([this](silk::stream::gs::Stream_ptr item)
     {
         remove_stream(item);
     });
@@ -186,7 +186,7 @@ static auto prettify_name(std::string const& name) -> std::string
     return new_name;
 }
 
-static auto get_icon(std::string const& node_icon_name, silk::node::Node_Def& node_def) -> QIcon
+static auto get_icon(std::string const& node_icon_name, silk::node::gs::Node_Def& node_def) -> QIcon
 {
     auto name = prettify_name(node_def.name);
     QString icon_name(q::util::format2<std::string>(":/icons/{}.png", name).c_str());
@@ -284,9 +284,9 @@ void HAL_Window::connection_context_menu(QGraphicsSceneMouseEvent* event, QNECon
     menu.exec(event->screenPos());
 }
 
-auto HAL_Window::supports_acceleration_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+auto HAL_Window::supports_acceleration_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool
 {
-    if (output.type != silk::node::stream::Type::ACCELERATION)
+    if (output.type != silk::stream::Type::ACCELERATION)
     {
         return false;
     }
@@ -302,9 +302,9 @@ auto HAL_Window::supports_acceleration_calibration(silk::node::Node const& node,
     return autojsoncxx::from_value(calibration, *calibrationj, result);
 }
 
-auto HAL_Window::supports_angular_velocity_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+auto HAL_Window::supports_angular_velocity_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool
 {
-    if (output.type != silk::node::stream::Type::ANGULAR_VELOCITY)
+    if (output.type != silk::stream::Type::ANGULAR_VELOCITY)
     {
         return false;
     }
@@ -320,9 +320,9 @@ auto HAL_Window::supports_angular_velocity_calibration(silk::node::Node const& n
     return autojsoncxx::from_value(calibration, *calibrationj, result);
 }
 
-auto HAL_Window::supports_magnetic_field_calibration(silk::node::Node const& node, silk::node::Node::Output const& output) const -> bool
+auto HAL_Window::supports_magnetic_field_calibration(silk::node::gs::Node const& node, silk::node::gs::Node::Output const& output) const -> bool
 {
-    if (output.type != silk::node::stream::Type::MAGNETIC_FIELD)
+    if (output.type != silk::stream::Type::MAGNETIC_FIELD)
     {
         return false;
     }
@@ -495,7 +495,7 @@ void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
 
 void HAL_Window::selection_changed()
 {
-    set_config_editor_node(silk::node::Node_ptr());
+    set_config_editor_node(silk::node::gs::Node_ptr());
 
     auto items = m_scene->selectedItems();
     if (items.empty())
@@ -516,7 +516,7 @@ void HAL_Window::selection_changed()
     set_config_editor_node(node);
 }
 
-void HAL_Window::set_config_editor_node(silk::node::Node_ptr node)
+void HAL_Window::set_config_editor_node(silk::node::gs::Node_ptr node)
 {
     if (node)
     {
@@ -592,35 +592,35 @@ void HAL_Window::open_stream_viewer(std::string const& stream_name)
     //dock->show();
 }
 
-void HAL_Window::do_acceleration_calibration(silk::node::Node_ptr node, size_t output_idx)
+void HAL_Window::do_acceleration_calibration(silk::node::gs::Node_ptr node, size_t output_idx)
 {
     Acceleration_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
     wizard.exec();
 }
 
-void HAL_Window::do_magnetic_field_calibration(silk::node::Node_ptr node, size_t output_idx)
+void HAL_Window::do_magnetic_field_calibration(silk::node::gs::Node_ptr node, size_t output_idx)
 {
     Magnetic_Field_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
     wizard.exec();
 }
 
-void HAL_Window::do_angular_velocity_calibration(silk::node::Node_ptr node, size_t output_idx)
+void HAL_Window::do_angular_velocity_calibration(silk::node::gs::Node_ptr node, size_t output_idx)
 {
     Angular_Velocity_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
     wizard.exec();
 }
 
-void HAL_Window::add_stream(silk::node::stream::gs::Stream_ptr stream)
+void HAL_Window::add_stream(silk::stream::gs::Stream_ptr stream)
 {
 }
 
-void HAL_Window::remove_stream(silk::node::stream::gs::Stream_ptr stream)
+void HAL_Window::remove_stream(silk::stream::gs::Stream_ptr stream)
 {
 
 }
 
 
-void HAL_Window::refresh_node(silk::node::Node& node)
+void HAL_Window::refresh_node(silk::node::gs::Node& node)
 {
     auto& data = m_ui_nodes[node.name];
 
@@ -701,7 +701,7 @@ void HAL_Window::refresh_node(silk::node::Node& node)
     }
 }
 
-void HAL_Window::add_node(silk::node::Node_ptr node)
+void HAL_Window::add_node(silk::node::gs::Node_ptr node)
 {
     QPointF pos = get_node_position(node->name);
 
@@ -785,7 +785,7 @@ void HAL_Window::add_node(silk::node::Node_ptr node)
     }) );
 }
 
-void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
+void HAL_Window::try_add_node(silk::node::gs::Node_Def_ptr def, QPointF pos)
 {
     auto init_paramsj = jsonutil::clone_value(def->default_init_params);
 
@@ -816,7 +816,7 @@ void HAL_Window::try_add_node(silk::node::Node_Def_ptr def, QPointF pos)
     }
 }
 
-void HAL_Window::remove_node(silk::node::Node_ptr node)
+void HAL_Window::remove_node(silk::node::gs::Node_ptr node)
 {
     auto it = m_ui_nodes.find(node->name);
     if (it != m_ui_nodes.end())
@@ -828,7 +828,7 @@ void HAL_Window::remove_node(silk::node::Node_ptr node)
     }
 }
 
-void HAL_Window::try_remove_node(silk::node::Node_ptr node)
+void HAL_Window::try_remove_node(silk::node::gs::Node_ptr node)
 {
     std::string nodeName = node->name;
 

@@ -11,7 +11,7 @@
 class Acceleration_Calibration_Wizard : public QDialog
 {
 public:
-    Acceleration_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::Node_ptr node, size_t output_idx, QWidget* parent = 0);
+    Acceleration_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::gs::Node_ptr node, size_t output_idx, QWidget* parent = 0);
 
 private:
     void advance();
@@ -19,7 +19,7 @@ private:
 
     void prepare_step();
 
-    void on_samples_received(silk::node::stream::gs::Acceleration::Samples const& samples);
+    void on_samples_received(silk::stream::gs::Acceleration::Samples const& samples);
 
     void set_calibration_points(sz::calibration::Acceleration_Points const& data);
     auto get_calibration_points() const -> sz::calibration::Acceleration_Points;
@@ -32,9 +32,9 @@ private:
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;
-    silk::node::Node_ptr m_node;
-    silk::node::Node::Output m_output;
-    silk::node::stream::gs::Acceleration_ptr m_stream;
+    silk::node::gs::Node_ptr m_node;
+    silk::node::gs::Node::Output m_output;
+    silk::stream::gs::Acceleration_ptr m_stream;
 
     QWidget* m_content = nullptr;
 

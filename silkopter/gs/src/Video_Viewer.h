@@ -18,7 +18,7 @@ class Video_Viewer : public QWidget
 public:
     Video_Viewer(QWidget *parent);
     virtual ~Video_Viewer();
-    void add_sample(silk::node::stream::gs::Video::Sample const& sample);
+    void add_sample(silk::stream::gs::Video::Sample const& sample);
 
 private:
     void paintEvent(QPaintEvent* ev);

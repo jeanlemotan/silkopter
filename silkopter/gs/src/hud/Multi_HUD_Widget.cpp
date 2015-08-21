@@ -64,13 +64,13 @@ void Multi_HUD_Widget::process_vertical()
 {
     switch (m_input.vertical.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
         process_vertical_thrust_rate();
         break;
-    case silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         process_vertical_thrust_offset();
         break;
-    case silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
         process_vertical_climb_rate();
         break;
     }
@@ -78,18 +78,18 @@ void Multi_HUD_Widget::process_vertical()
     if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
     {
         int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
-                            static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
 
-        m_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
+        m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
     }
     else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
     {
         int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
-                            static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
 
-        m_input.vertical.mode.set(static_cast<silk::node::stream::IMulti_Input::Vertical::Mode>(v));
+        m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
     }
 
 }
@@ -128,13 +128,13 @@ void Multi_HUD_Widget::process_horizontal()
 {
     switch (m_input.horizontal.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
+    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
         process_horizontal_angle_rate();
         break;
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE:
+    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
         process_horizontal_angle();
         break;
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
+    case silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
         process_horizontal_velocity();
         break;
     }
@@ -142,18 +142,18 @@ void Multi_HUD_Widget::process_horizontal()
     if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_LEFT))
     {
         int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) - 1,
-                            static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                            static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
+                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
+        m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
     }
     else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_RIGHT))
     {
         int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) + 1,
-                            static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                            static_cast<int>(silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
+                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_input.horizontal.mode.set(static_cast<silk::node::stream::IMulti_Input::Horizontal::Mode>(v));
+        m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
     }
 }
 
@@ -175,7 +175,7 @@ void Multi_HUD_Widget::process_yaw()
 {
     switch (m_input.yaw.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
         break;
     }
@@ -186,7 +186,7 @@ void Multi_HUD_Widget::process_mode_idle()
     if (m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) &&
         m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X))
     {
-        m_input.mode.set(silk::node::stream::IMulti_Input::Mode::ARMED);
+        m_input.mode.set(silk::stream::IMulti_Input::Mode::ARMED);
         QLOGI("Trying to ARM");
     }
 
@@ -198,7 +198,7 @@ void Multi_HUD_Widget::process_mode_armed()
     if (m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) &&
         m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X))
     {
-        m_input.mode.set(silk::node::stream::IMulti_Input::Mode::IDLE);
+        m_input.mode.set(silk::stream::IMulti_Input::Mode::IDLE);
         QLOGI("Trying to DISARM");
     }
 
@@ -211,10 +211,10 @@ void Multi_HUD_Widget::process_mode()
 {
     switch (m_input.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Mode::IDLE:
+    case silk::stream::IMulti_Input::Mode::IDLE:
         process_mode_idle();
         break;
-    case silk::node::stream::IMulti_Input::Mode::ARMED:
+    case silk::stream::IMulti_Input::Mode::ARMED:
         process_mode_armed();
         break;
     }
@@ -419,34 +419,34 @@ void Multi_HUD_Widget::render_hud()
     texter.set_style(style);
     switch (m_input.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Mode::IDLE:
+    case silk::stream::IMulti_Input::Mode::IDLE:
         texter.draw_string(m_context.painter, "Idle", math::vec2f(0, 20));
         break;
-    case silk::node::stream::IMulti_Input::Mode::ARMED:
+    case silk::stream::IMulti_Input::Mode::ARMED:
         texter.draw_string(m_context.painter, "Armed", math::vec2f(0, 20));
         break;
     }
     switch (m_input.vertical.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
         texter.draw_string(m_context.painter, "Thrust Rate", math::vec2f(0, 60));
         break;
-    case silk::node::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         texter.draw_string(m_context.painter, "Thrust Offset", math::vec2f(0, 60));
         break;
-    case silk::node::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
         texter.draw_string(m_context.painter, "Climb Rate", math::vec2f(0, 60));
         break;
     }
     switch (m_input.horizontal.mode.value)
     {
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
+    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
         texter.draw_string(m_context.painter, "Angle Rate", math::vec2f(0, 100));
         break;
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::ANGLE:
+    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
         texter.draw_string(m_context.painter, "Angle", math::vec2f(0, 100));
         break;
-    case silk::node::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
+    case silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
         texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 100));
         break;
     }

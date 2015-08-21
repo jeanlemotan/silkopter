@@ -88,7 +88,7 @@ Video_Viewer::~Video_Viewer()
 }
 
 
-void Video_Viewer::add_sample(silk::node::stream::gs::Video::Sample const& sample)
+void Video_Viewer::add_sample(silk::stream::gs::Video::Sample const& sample)
 {
     {
         AVPacket packet;
