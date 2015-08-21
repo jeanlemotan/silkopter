@@ -101,8 +101,11 @@ void Comp_ECEF_Position::process()
                 last_pos_sample.value += m_velocity * dts;
                 m_velocity += ecef_la * dts;
 
-                auto v = (pos_sample.value - last_pos_sample.value) / dts;
-                m_velocity = math::lerp(m_velocity, v, 0.0001);
+                auto v = (pos_sample.value - m_last_gps_position) / dts;
+                m_last_gps_position = pos_sample.value;
+
+                m_velocity = math::lerp(m_velocity, v, 0.01 * dts);
+                //QLOGI("a: {}, v: {}, vt: {}", ecef_la * dts, m_velocity, v);
             }
         }
 

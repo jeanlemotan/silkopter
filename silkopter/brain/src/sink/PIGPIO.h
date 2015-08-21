@@ -2,7 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ISink.h"
-#include "common/node/stream/IPWM.h"
+#include "common/stream/IPWM.h"
 
 namespace sz
 {

@@ -150,9 +150,6 @@ HEADERS += \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
     ../../src/bus/UART_Linux.h \ 
-    ../../../libs/common/node/bus/II2C.h \
-    ../../../libs/common/node/bus/ISPI.h \
-    ../../../libs/common/node/bus/IUART.h \
     ../../../libs/common/node/source/IInertial.h \
     ../../src/sink/PIGPIO.h \
     ../../src/source/MPU9250.h \
@@ -161,8 +158,6 @@ HEADERS += \
     ../../src/source/RC5T619.h \
     ../../src/source/SRF02.h \
     ../../src/source/UBLOX.h \
-    ../../../libs/common/node/bus/IBus.h \
-    ../../../libs/common/node/stream/IStream.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/ADC_Ammeter.h \
     ../../src/processor/LiPo_Battery.h \
@@ -175,24 +170,6 @@ HEADERS += \
     ../../src/processor/Gravity_Filter.h \
     ../../src/Globals.h \
     ../../../libs/common/node/data/IData.h \
-    ../../../libs/common/node/stream/IAcceleration.h \
-    ../../../libs/common/node/stream/IADC.h \
-    ../../../libs/common/node/stream/IAngular_Velocity.h \
-    ../../../libs/common/node/stream/IBattery_State.h \
-    ../../../libs/common/node/stream/ICurrent.h \
-    ../../../libs/common/node/stream/IDistance.h \
-    ../../../libs/common/node/stream/IForce.h \
-    ../../../libs/common/node/stream/IFrame.h \
-    ../../../libs/common/node/stream/ILinear_Acceleration.h \
-    ../../../libs/common/node/stream/IMagnetic_Field.h \
-    ../../../libs/common/node/stream/IPressure.h \
-    ../../../libs/common/node/stream/IPWM.h \
-    ../../../libs/common/node/stream/ITemperature.h \
-    ../../../libs/common/node/stream/ITorque.h \
-    ../../../libs/common/node/stream/IVelocity.h \
-    ../../../libs/common/node/stream/IVideo.h \
-    ../../../libs/common/node/stream/IVoltage.h \
-    ../../../libs/common/node/stream/IThrottle.h \
     ../../../libs/common/node/IProcessor.h \
     ../../src/generator/Vec3_Generator.h \
     ../../src/generator/Scalar_Generator.h \
@@ -232,16 +209,11 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../src/source/ADS1115.h \
     ../../src/sink/PCA9685.h \
-    ../../../libs/common/node/stream/IFloat.h \
     ../../src/generator/Oscillator.h \
-    ../../../libs/common/node/stream/IBool.h \
     ../../src/Sample_Accumulator.h \
     ../../src/MPL_Helper.h \
     ../../src/Basic_Output_Stream.h \
-    ../../../libs/common/node/stream/IPosition.h \
     ../../src/processor/Comp_ECEF_Position.h \
-    ../../../libs/common/node/stream/IGPS_Info.h \
-    ../../../libs/common/node/stream/Stream_Base.h \
     ../../../libs/utils/RCP.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
@@ -249,9 +221,6 @@ HEADERS += \
     ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/lz4/lz4.h \
     ../../src/source/OpenCV_Capture.h \
-    ../../../libs/common/node/stream/IMulti_Input.h \
-    ../../../libs/common/node/stream/IMulti_State.h \
-    ../../../libs/common/node/stream/IProximity.h \
     ../../../libs/utils/Serialization.h \
     ../../src/source/SRF01.h \
     ../../src/brain/Multi_Brain.h \
@@ -260,7 +229,38 @@ HEADERS += \
     ../../../libs/common/node/IPilot.h \
     ../../src/source/MaxSonar.h \
     ../../src/processor/Throttle_To_PWM.h \
-    ../../../libs/utils/Coordinates.h
+    ../../../libs/utils/Coordinates.h \
+    ../../../libs/common/stream/IAcceleration.h \
+    ../../../libs/common/stream/IADC.h \
+    ../../../libs/common/stream/IAngular_Velocity.h \
+    ../../../libs/common/stream/IBattery_State.h \
+    ../../../libs/common/stream/IBool.h \
+    ../../../libs/common/stream/ICurrent.h \
+    ../../../libs/common/stream/IDistance.h \
+    ../../../libs/common/stream/IFloat.h \
+    ../../../libs/common/stream/IForce.h \
+    ../../../libs/common/stream/IFrame.h \
+    ../../../libs/common/stream/IGPS_Info.h \
+    ../../../libs/common/stream/ILinear_Acceleration.h \
+    ../../../libs/common/stream/IMagnetic_Field.h \
+    ../../../libs/common/stream/IMulti_Input.h \
+    ../../../libs/common/stream/IMulti_State.h \
+    ../../../libs/common/stream/IPosition.h \
+    ../../../libs/common/stream/IPressure.h \
+    ../../../libs/common/stream/IProximity.h \
+    ../../../libs/common/stream/IPWM.h \
+    ../../../libs/common/stream/IStream.h \
+    ../../../libs/common/stream/ITemperature.h \
+    ../../../libs/common/stream/IThrottle.h \
+    ../../../libs/common/stream/ITorque.h \
+    ../../../libs/common/stream/IVelocity.h \
+    ../../../libs/common/stream/IVideo.h \
+    ../../../libs/common/stream/IVoltage.h \
+    ../../../libs/common/stream/Stream_Base.h \
+    ../../../libs/common/bus/IBus.h \
+    ../../../libs/common/bus/II2C.h \
+    ../../../libs/common/bus/ISPI.h \
+    ../../../libs/common/bus/IUART.h
 
 DISTFILES +=
 

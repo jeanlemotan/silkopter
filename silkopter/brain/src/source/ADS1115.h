@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IADC.h"
-#include "common/node/bus/II2C.h"
+#include "common/stream/IADC.h"
+#include "common/bus/II2C.h"
 
 #include "Basic_Output_Stream.h"
 

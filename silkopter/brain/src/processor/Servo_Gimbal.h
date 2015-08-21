@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IFloat.h"
-#include "common/node/stream/IPWM.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/IFloat.h"
+#include "common/stream/IPWM.h"
 #include "HAL.h"
 
 #include "Sample_Accumulator.h"

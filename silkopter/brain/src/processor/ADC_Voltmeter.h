@@ -1,8 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IADC.h"
-#include "common/node/stream/IVoltage.h"
+#include "common/stream/IADC.h"
+#include "common/stream/IVoltage.h"
 #include "common/node/IProcessor.h"
 
 #include "Sample_Accumulator.h"

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "rapidjson/document.h"
-#include "common/node/bus/IBus.h"
+#include "common/bus/IBus.h"
 #include "common/node/INode.h"
-#include "common/node/stream/IStream.h"
+#include "common/stream/IStream.h"
 #include "common/config/Multi.h"
 
 #include "MPL_Helper.h"
@@ -80,12 +80,12 @@ public:
 //    auto get_rover_config() const   -> boost::optional<config::Rover const&>;
 //    auto get_boat_config() const    -> boost::optional<config::Boat const&>;
 
-    auto get_bus_factory()          -> Factory<node::bus::IBus>&;
+    auto get_bus_factory()          -> Factory<bus::IBus>&;
     auto get_node_factory()         -> Factory<node::INode>&;
 
-    auto get_buses()        -> Registry<node::bus::IBus>&;
+    auto get_buses()        -> Registry<bus::IBus>&;
     auto get_nodes()        -> Registry<node::INode>&;
-    auto get_streams()      -> Registry<node::stream::IStream>&;
+    auto get_streams()      -> Registry<stream::IStream>&;
 
 protected:
     auto set_multi_config(config::Multi const& config) -> bool;
@@ -109,7 +109,7 @@ private:
 
     auto create_bus(std::string const& type,
                     std::string const& name,
-                    rapidjson::Value const& init_params) -> node::bus::IBus_ptr;
+                    rapidjson::Value const& init_params) -> bus::IBus_ptr;
     auto create_buses(rapidjson::Value& json) -> bool;
 
     auto create_node(std::string const& type,
@@ -122,11 +122,11 @@ private:
         boost::optional<config::Multi> multi;
     } m_configs;
 
-    Registry<node::bus::IBus> m_buses;
+    Registry<bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
-    Registry<node::stream::IStream> m_streams;
+    Registry<stream::IStream> m_streams;
 
-    Factory<node::bus::IBus> m_bus_factory;
+    Factory<bus::IBus> m_bus_factory;
     Factory<node::INode> m_node_factory;
 
     q::Clock::time_point m_last_process_tp = q::Clock::now();

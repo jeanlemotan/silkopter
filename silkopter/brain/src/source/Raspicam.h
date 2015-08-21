@@ -3,7 +3,7 @@
 #include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
-#include "common/node/stream/IVideo.h"
+#include "common/stream/IVideo.h"
 
 
 namespace sz

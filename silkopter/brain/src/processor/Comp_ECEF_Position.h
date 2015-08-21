@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/IFrame.h"
+#include "common/stream/ILinear_Acceleration.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/IPressure.h"
+#include "common/stream/IFrame.h"
 
 #include "HAL.h"
 
@@ -61,6 +61,7 @@ private:
     typedef Basic_Output_Stream<stream::IECEF_Position> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
 
+    util::coordinates::ECEF m_last_gps_position;
     util::coordinates::ECEF m_velocity;
 
 //    struct ENU_Frame_Stream : public stream::IENU_Frame

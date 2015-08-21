@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IFloat.h"
+#include "common/stream/IFloat.h"
 #include "common/node/IGenerator.h"
 
 #include "Basic_Output_Stream.h"

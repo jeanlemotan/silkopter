@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/bus/IUART.h"
+#include "common/bus/IUART.h"
 
 namespace sz
 {
@@ -13,8 +13,6 @@ struct Config;
 
 
 namespace silk
-{
-namespace node
 {
 namespace bus
 {
@@ -53,6 +51,5 @@ private:
     std::vector<uint8_t> m_buffer;
 };
 
-}
 }
 }

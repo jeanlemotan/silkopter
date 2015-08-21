@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/bus/IUART.h"
+#include "common/stream/IAcceleration.h"
+#include "common/bus/IUART.h"
 
 
 namespace silk

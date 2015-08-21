@@ -488,7 +488,14 @@ namespace math
 		uv += uv;
 		uuv = cross(qvec, uv);
 
-		return vect + q.w * uv + uuv;
+        auto res = vect + q.w * uv + uuv;
+        return res;
+
+//        quat<T> qconj(-q.x, -q.y, -q.z, q.w);
+//        auto res1 = q * quat<T>(vect.x, vect.y, vect.z, T(0)) * qconj;
+//        QASSERT(std::abs(res.x - res1.x) < 0.0001f && std::abs(res.y - res1.y) < 0.0001f && std::abs(res.z - res1.z) < 0.0001f);
+
+//        return vec3<T>(res1.x, res1.y, res1.z);
 	}
 	template<typename T> inline vec3<T> project(mat4<T> const& m, vec3<T> const& v)
 	{

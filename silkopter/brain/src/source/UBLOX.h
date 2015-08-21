@@ -2,12 +2,12 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IGPS_Info.h"
-#include "common/node/bus/II2C.h"
-#include "common/node/bus/ISPI.h"
-#include "common/node/bus/IUART.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/IVelocity.h"
+#include "common/stream/IGPS_Info.h"
+#include "common/bus/II2C.h"
+#include "common/bus/ISPI.h"
+#include "common/bus/IUART.h"
 
 #include "Basic_Output_Stream.h"
 

@@ -5,8 +5,8 @@
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IMulti_Input.h"
-#include "common/node/stream/IMulti_State.h"
+#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_State.h"
 
 namespace sz
 {
@@ -42,8 +42,8 @@ public:
 
     void process();
 
-    auto get_multi_input_values() const -> std::vector<node::stream::IMulti_Input::Value> const&;
-    void add_multi_state_sample(node::stream::IMulti_State::Sample const& sample);
+    auto get_multi_input_values() const -> std::vector<stream::IMulti_Input::Value> const&;
+    void add_multi_state_sample(stream::IMulti_State::Sample const& sample);
 
     struct Channels; //this needs to be public...
 private:
@@ -55,7 +55,7 @@ private:
     struct Stream_Telemetry_Data
     {
         std::string stream_name;
-        node::stream::IStream_wptr stream;
+        stream::IStream_wptr stream;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
     };
@@ -69,9 +69,9 @@ private:
     } m_hal_telemetry_data;
 
 
-    auto send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool;
+    auto send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
 
-    template<class Stream> auto gather_telemetry_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool;
+    template<class Stream> auto gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
     void gather_telemetry_data();
     void pack_telemetry_data();
 
@@ -100,8 +100,8 @@ private:
 
     Manual_Clock m_remote_clock;
 
-    std::vector<node::stream::IMulti_Input::Value> m_multi_input_values;
-    std::vector<node::stream::IMulti_State::Sample> m_multi_state_samples;
+    std::vector<stream::IMulti_Input::Value> m_multi_input_values;
+    std::vector<stream::IMulti_State::Sample> m_multi_state_samples;
 
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();

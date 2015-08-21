@@ -7,8 +7,6 @@
 
 namespace silk
 {
-namespace node
-{
 namespace bus
 {
 
@@ -180,6 +178,5 @@ auto UART_Linux::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

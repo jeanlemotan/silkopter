@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/stream/IStream.h"
+#include "common/stream/IStream.h"
 
 namespace silk
 {

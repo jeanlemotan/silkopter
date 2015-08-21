@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/node/IController.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IAngular_Velocity.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/IAngular_Velocity.h"
 #include "HAL.h"
 
 #include "utils/PID.h"

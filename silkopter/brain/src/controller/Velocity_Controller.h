@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/node/IController.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IForce.h"
+#include "common/stream/IVelocity.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/IForce.h"
 #include "HAL.h"
 
 #include "Sample_Accumulator.h"

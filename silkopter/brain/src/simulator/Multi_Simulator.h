@@ -1,14 +1,14 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/ITemperature.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IThrottle.h"
+#include "common/stream/IAngular_Velocity.h"
+#include "common/stream/IAcceleration.h"
+#include "common/stream/IMagnetic_Field.h"
+#include "common/stream/IPressure.h"
+#include "common/stream/ITemperature.h"
+#include "common/stream/IDistance.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/IThrottle.h"
 #include "common/node/IMulti_Simulator.h"
 
 #include "Multi_Simulation.h"

@@ -2,16 +2,16 @@
 
 #include "common/node/IBrain.h"
 
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IProximity.h"
+#include "common/stream/IAngular_Velocity.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/ILinear_Acceleration.h"
+#include "common/stream/IBattery_State.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/IVelocity.h"
+#include "common/stream/IProximity.h"
 
-#include "common/node/stream/IMulti_Input.h"
-#include "common/node/stream/IMulti_State.h"
+#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_State.h"
 
 #include "Comms.h"
 #include "HAL.h"

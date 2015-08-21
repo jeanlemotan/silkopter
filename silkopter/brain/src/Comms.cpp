@@ -3,31 +3,31 @@
 #include "utils/Timed_Scope.h"
 #include "utils/Json_Util.h"
 
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IADC.h"
-#include "common/node/stream/IFloat.h"
-#include "common/node/stream/IBool.h"
-#include "common/node/stream/IBattery_State.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/stream/IPosition.h"
-#include "common/node/stream/ILinear_Acceleration.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/IPressure.h"
-#include "common/node/stream/IPWM.h"
-#include "common/node/stream/IFrame.h"
-#include "common/node/stream/IGPS_Info.h"
-#include "common/node/stream/ITemperature.h"
-#include "common/node/stream/IVideo.h"
-#include "common/node/stream/IForce.h"
-#include "common/node/stream/IVelocity.h"
-#include "common/node/stream/IThrottle.h"
-#include "common/node/stream/ITorque.h"
-#include "common/node/stream/IVoltage.h"
-#include "common/node/stream/IProximity.h"
-#include "common/node/stream/IMulti_State.h"
-#include "common/node/stream/IMulti_Input.h"
+#include "common/stream/IAcceleration.h"
+#include "common/stream/IAngular_Velocity.h"
+#include "common/stream/IADC.h"
+#include "common/stream/IFloat.h"
+#include "common/stream/IBool.h"
+#include "common/stream/IBattery_State.h"
+#include "common/stream/ICurrent.h"
+#include "common/stream/IDistance.h"
+#include "common/stream/IPosition.h"
+#include "common/stream/ILinear_Acceleration.h"
+#include "common/stream/IMagnetic_Field.h"
+#include "common/stream/IPressure.h"
+#include "common/stream/IPWM.h"
+#include "common/stream/IFrame.h"
+#include "common/stream/IGPS_Info.h"
+#include "common/stream/ITemperature.h"
+#include "common/stream/IVideo.h"
+#include "common/stream/IForce.h"
+#include "common/stream/IVelocity.h"
+#include "common/stream/IThrottle.h"
+#include "common/stream/ITorque.h"
+#include "common/stream/IVoltage.h"
+#include "common/stream/IProximity.h"
+#include "common/stream/IMulti_State.h"
+#include "common/stream/IMulti_Input.h"
 
 #include "common/node/IBrain.h"
 
@@ -201,14 +201,14 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
-auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool
+auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
 {
-    if (_stream.get_type() != node::stream::IVideo::TYPE)
+    if (_stream.get_type() != stream::IVideo::TYPE)
     {
         return false;
     }
 
-    auto const& stream = static_cast<node::stream::IVideo const&>(_stream);
+    auto const& stream = static_cast<stream::IVideo const&>(_stream);
     auto const& samples = stream.get_samples();
 
     for (auto const& s: samples)
@@ -223,7 +223,7 @@ auto Comms::send_video_stream(Stream_Telemetry_Data& ts, node::stream::IStream c
     return true;
 }
 
-template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, node::stream::IStream const& _stream) -> bool
+template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
     {
@@ -258,31 +258,31 @@ void Comms::gather_telemetry_data()
         auto stream = ts.stream.lock();
         if (stream)
         {
-            if (gather_telemetry_stream<node::stream::IAcceleration>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IAngular_Velocity>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IMagnetic_Field>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IPressure>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IBattery_State>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ILinear_Acceleration>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ICurrent>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IVoltage>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IECEF_Position>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IECEF_Velocity>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IPWM>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IFrame>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IGPS_Info>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ITemperature>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IADC>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IFloat>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IBool>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IForce>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IVelocity>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IThrottle>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::ITorque>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IMulti_Input>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IMulti_State>(ts, *stream) ||
-                gather_telemetry_stream<node::stream::IProximity>(ts, *stream) ||
+            if (gather_telemetry_stream<stream::IAcceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::IAngular_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMagnetic_Field>(ts, *stream) ||
+                gather_telemetry_stream<stream::IPressure>(ts, *stream) ||
+                gather_telemetry_stream<stream::IBattery_State>(ts, *stream) ||
+                gather_telemetry_stream<stream::ILinear_Acceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::ICurrent>(ts, *stream) ||
+                gather_telemetry_stream<stream::IVoltage>(ts, *stream) ||
+                gather_telemetry_stream<stream::IDistance>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Position>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IPWM>(ts, *stream) ||
+                gather_telemetry_stream<stream::IFrame>(ts, *stream) ||
+                gather_telemetry_stream<stream::IGPS_Info>(ts, *stream) ||
+                gather_telemetry_stream<stream::ITemperature>(ts, *stream) ||
+                gather_telemetry_stream<stream::IADC>(ts, *stream) ||
+                gather_telemetry_stream<stream::IFloat>(ts, *stream) ||
+                gather_telemetry_stream<stream::IBool>(ts, *stream) ||
+                gather_telemetry_stream<stream::IForce>(ts, *stream) ||
+                gather_telemetry_stream<stream::IVelocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IThrottle>(ts, *stream) ||
+                gather_telemetry_stream<stream::ITorque>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMulti_Input>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMulti_State>(ts, *stream) ||
+                gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
                 send_video_stream(ts, *stream)
                 )
             {
@@ -737,7 +737,7 @@ void Comms::handle_streams_telemetry_active()
 
     if (is_active)
     {
-        auto stream = m_hal.get_streams().find_by_name<node::stream::IStream>(stream_name);
+        auto stream = m_hal.get_streams().find_by_name<stream::IStream>(stream_name);
         if (stream)
         {
             //add the stream to the telemetry list
@@ -786,11 +786,11 @@ void Comms::handle_hal_telemetry_active()
     channel.end_pack();
 }
 
-auto Comms::get_multi_input_values() const -> std::vector<node::stream::IMulti_Input::Value> const&
+auto Comms::get_multi_input_values() const -> std::vector<stream::IMulti_Input::Value> const&
 {
     return m_multi_input_values;
 }
-void Comms::add_multi_state_sample(node::stream::IMulti_State::Sample const& sample)
+void Comms::add_multi_state_sample(stream::IMulti_State::Sample const& sample)
 {
     m_multi_state_samples.push_back(sample);
 }
@@ -799,7 +799,7 @@ void Comms::handle_multi_input()
 {
     auto& channel = m_channels->pilot;
 
-    node::stream::IMulti_Input::Value value;
+    stream::IMulti_Input::Value value;
     if (!channel.unpack_all(value))
     {
         QLOGE("Error in unpacking multi input");

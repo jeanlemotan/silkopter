@@ -2,8 +2,8 @@
 
 #include "common/node/IPilot.h"
 
-#include "common/node/stream/IMulti_Input.h"
-#include "common/node/stream/IMulti_State.h"
+#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_State.h"
 
 #include "Comms.h"
 #include "HAL.h"

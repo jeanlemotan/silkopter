@@ -51,7 +51,7 @@
 #include "generator/Vec3_Generator.h"
 #include "generator/Scalar_Generator.h"
 
-#include "common/node/stream/IThrottle.h"
+#include "common/stream/IThrottle.h"
 
 //#include "source/EHealth.h"
 
@@ -197,7 +197,7 @@ auto HAL::get_telemetry_data() const -> Telemetry_Data const&
     return m_telemetry_data;
 }
 
-auto HAL::get_bus_factory()    -> Factory<node::bus::IBus>&
+auto HAL::get_bus_factory()    -> Factory<bus::IBus>&
 {
     return m_bus_factory;
 }
@@ -205,7 +205,7 @@ auto HAL::get_node_factory()  -> Factory<node::INode>&
 {
     return m_node_factory;
 }
-auto HAL::get_buses()    -> Registry<node::bus::IBus>&
+auto HAL::get_buses()    -> Registry<bus::IBus>&
 {
     return m_buses;
 }
@@ -213,7 +213,7 @@ auto HAL::get_nodes()  -> Registry<node::INode>&
 {
     return m_nodes;
 }
-auto HAL::get_streams()  -> Registry<node::stream::IStream>&
+auto HAL::get_streams()  -> Registry<stream::IStream>&
 {
     return m_streams;
 }
@@ -294,12 +294,12 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 auto HAL::create_bus(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> node::bus::IBus_ptr
+        rapidjson::Value const& init_params) -> bus::IBus_ptr
 {
-    if (m_buses.find_by_name<node::bus::IBus>(name))
+    if (m_buses.find_by_name<bus::IBus>(name))
     {
         QLOGE("Bus '{}' already exist", name);
-        return node::bus::IBus_ptr();
+        return bus::IBus_ptr();
     }
     auto node = m_bus_factory.create_node(type);
     if (node && node->init(init_params))
@@ -308,7 +308,7 @@ auto HAL::create_bus(
         QASSERT(res);
         return node;
     }
-    return node::bus::IBus_ptr();
+    return bus::IBus_ptr();
 }
 auto HAL::create_node(
         std::string const& type,

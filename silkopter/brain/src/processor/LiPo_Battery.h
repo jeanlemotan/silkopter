@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/node/IProcessor.h"
-#include "common/node/stream/IVoltage.h"
-#include "common/node/stream/ICurrent.h"
-#include "common/node/stream/IBattery_State.h"
+#include "common/stream/IVoltage.h"
+#include "common/stream/ICurrent.h"
+#include "common/stream/IBattery_State.h"
 
 #include "HAL.h"
 #include "utils/Butterworth.h"

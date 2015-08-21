@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/stream/IDistance.h"
-#include "common/node/bus/IUART.h"
+#include "common/stream/IDistance.h"
+#include "common/bus/IUART.h"
 
 #include "Basic_Output_Stream.h"
 

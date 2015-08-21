@@ -8,8 +8,6 @@
 
 namespace silk
 {
-namespace node
-{
 namespace bus
 {
 
@@ -191,6 +189,5 @@ auto SPI_Linux::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

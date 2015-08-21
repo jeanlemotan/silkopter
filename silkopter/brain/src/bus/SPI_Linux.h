@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/bus/ISPI.h"
+#include "common/bus/ISPI.h"
 
 namespace sz
 {
@@ -13,8 +13,6 @@ struct Config;
 
 
 namespace silk
-{
-namespace node
 {
 namespace bus
 {
@@ -58,6 +56,5 @@ private:
     std::vector<uint8_t> m_rx_buffer;
 };
 
-}
 }
 }

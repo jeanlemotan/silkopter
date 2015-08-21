@@ -30,8 +30,6 @@ struct i2c_msg
 
 namespace silk
 {
-namespace node
-{
 namespace bus
 {
 
@@ -248,6 +246,5 @@ auto I2C_Linux::get_init_params() const -> rapidjson::Document
 }
 
 
-}
 }
 }

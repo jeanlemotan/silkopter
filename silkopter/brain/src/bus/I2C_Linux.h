@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/node/bus/II2C.h"
+#include "common/bus/II2C.h"
 
 namespace sz
 {
@@ -13,8 +13,6 @@ struct Config;
 
 
 namespace silk
-{
-namespace node
 {
 namespace bus
 {
@@ -54,6 +52,5 @@ private:
     std::vector<uint8_t> m_buffer;
 };
 
-}
 }
 }

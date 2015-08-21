@@ -2,12 +2,12 @@
 
 #include "HAL.h"
 #include "common/node/ISource.h"
-#include "common/node/bus/II2C.h"
-#include "common/node/bus/ISPI.h"
-#include "common/node/stream/IAcceleration.h"
-#include "common/node/stream/IAngular_Velocity.h"
-#include "common/node/stream/IMagnetic_Field.h"
-#include "common/node/stream/ITemperature.h"
+#include "common/bus/II2C.h"
+#include "common/bus/ISPI.h"
+#include "common/stream/IAcceleration.h"
+#include "common/stream/IAngular_Velocity.h"
+#include "common/stream/IMagnetic_Field.h"
+#include "common/stream/ITemperature.h"
 
 #include "Basic_Output_Stream.h"
 

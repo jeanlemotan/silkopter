@@ -2,8 +2,8 @@
 
 #include "HAL.h"
 #include "common/node/ISink.h"
-#include "common/node/stream/IPWM.h"
-#include "common/node/bus/II2C.h"
+#include "common/stream/IPWM.h"
+#include "common/bus/II2C.h"
 
 namespace sz
 {

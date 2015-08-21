@@ -1,8 +1,8 @@
 #pragma once
 
 #include "HAL.h"
-#include "common/node/stream/IThrottle.h"
-#include "common/node/stream/IPWM.h"
+#include "common/stream/IThrottle.h"
+#include "common/stream/IPWM.h"
 #include "common/node/IProcessor.h"
 
 #include "Sample_Accumulator.h"
