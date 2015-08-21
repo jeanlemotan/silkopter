@@ -457,7 +457,6 @@ auto Comms::publish_outputs(node::Node_ptr node) -> bool
 
         stream->node = node;
         stream->name = node->name + "/" + os.name;
-        stream->type = os.type;
         stream->rate = os.rate;
         m_hal.m_streams.add(stream);
     }
@@ -735,10 +734,10 @@ void Comms::handle_streams_telemetry_active()
     }
 }
 
-template<class IStream, class Stream>
+template<class Stream>
 auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_count, silk::node::stream::Stream& _stream) -> bool
 {
-    if (_stream.type == IStream::TYPE)
+    if (_stream.get_type() == Stream::TYPE)
     {
         auto& stream = static_cast<Stream&>(_stream);
         typename Stream::Sample sample;
@@ -751,7 +750,7 @@ auto unpack_stream_samples(Comms::Telemetry_Channel& channel, uint32_t sample_co
             }
             stream.samples.push_back(sample);
         }
-        stream.samples_available_signal.execute(stream);
+        stream.samples_available_signal.execute(stream.samples);
         stream.samples.clear();
         return true;
     }
@@ -779,31 +778,31 @@ void Comms::handle_stream_data()
 
     using namespace silk::node::stream;
 
-    if (!unpack_stream_samples<IAcceleration, Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IADC, ADC>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IAngular_Velocity, Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IBattery_State, Battery_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ICurrent, Current>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IDistance, Distance>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IFloat, Float>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IBool, Bool>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IForce, Force>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IFrame, Frame>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IGPS_Info, GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ILinear_Acceleration, Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IECEF_Position, ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IMagnetic_Field, Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IPressure, Pressure>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IPWM, PWM>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ITemperature, Temperature>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IThrottle, Throttle>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<ITorque, Torque>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IVelocity, Velocity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IVoltage, Voltage>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IMulti_Input, Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IMulti_State, Multi_State>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IProximity, Proximity>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<IVideo, Video>(m_telemetry_channel, sample_count, *stream))
+    if (!unpack_stream_samples<Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ADC>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Angular_Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Battery_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Current>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Distance>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Float>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Bool>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Force>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Magnetic_Field>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Pressure>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<PWM>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Temperature>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Throttle>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Torque>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Velocity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Voltage>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Multi_State>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Proximity>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<Video>(m_telemetry_channel, sample_count, *stream))
     {
         QASSERT(0);
         QLOGE("Cannot unpack stream '{}'", stream_name);
@@ -824,7 +823,7 @@ void Comms::handle_frame_data()
         return;
     }
     auto _stream = m_hal.get_streams().find_by_name(stream_name);
-    if (!_stream || _stream->type != node::stream::IVideo::TYPE)
+    if (!_stream || _stream->get_type() != node::stream::Video::TYPE)
     {
         QLOGW("Cannot find stream '{}'", stream_name);
         return;
@@ -832,7 +831,7 @@ void Comms::handle_frame_data()
     auto& stream = static_cast<node::stream::Video&>(*_stream);
 
     stream.samples.push_back(std::move(sample));
-    stream.samples_available_signal.execute(stream);
+    stream.samples_available_signal.execute(stream.samples);
     stream.samples.clear();
  }
 

@@ -19,7 +19,7 @@ private:
 
     void prepare_step();
 
-    void on_samples_received(silk::node::stream::Magnetic_Field& stream);
+    void on_samples_received(silk::node::stream::Magnetic_Field::Samples const& samples);
 
     void set_calibration_points(sz::calibration::Magnetic_Field_Points const& data);
     auto get_calibration_points() const -> sz::calibration::Magnetic_Field_Points;

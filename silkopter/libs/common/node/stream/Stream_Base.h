@@ -18,7 +18,7 @@ class IScalar_Stream : public IStream
 {
 public:
     static constexpr Type TYPE = TYPE_VALUE;
-    virtual auto get_type() const -> Type { return TYPE; }
+    virtual auto get_type() const -> Type override { return TYPE; }
 };
 
 //for vectorial streams of data with a fixed sample rate
@@ -28,7 +28,7 @@ class ISpatial_Stream : public IStream
 public:
     static constexpr Type TYPE = TYPE_VALUE;
     static constexpr Space SPACE = SPACE_VALUE;
-    virtual auto get_type() const -> Type { return TYPE; }
+    virtual auto get_type() const -> Type override { return TYPE; }
 };
 
 

@@ -53,334 +53,116 @@ DECLARE_CLASS_PTR(Node);
 namespace stream
 {
 
-struct Stream
+struct Stream : public IStream
 {
     Node_wptr node;
     std::string name;
-    stream::Type type;
     uint32_t rate = 0;
     int telemetry_active_req = 0;
     bool is_telemetry_active = false;
 };
 DECLARE_CLASS_PTR(Stream);
 
-struct Acceleration : public Stream
+
+template<class Base>
+struct Typed_Stream : public Stream
 {
-    typedef IAcceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Acceleration&)> samples_available_signal;
+    static constexpr Type TYPE = Base::TYPE;
+
+    typedef typename Base::Sample Sample;
+    typedef std::vector<Sample> Samples;
+
+    Samples samples;
+    q::util::Signal<void(Samples const&)> samples_available_signal;
+
+    virtual auto get_rate() const -> uint32_t override { return rate; }
+    virtual auto get_type() const -> Type override { return TYPE; }
 };
+DECLARE_CLASS_PTR(IStream);
+
+using Acceleration = Typed_Stream<IAcceleration>;
 DECLARE_CLASS_PTR(Acceleration);
-struct ENU_Acceleration : public Stream
-{
-    typedef IENU_Acceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Acceleration&)> samples_available_signal;
-};
+using ENU_Acceleration = Typed_Stream<IENU_Acceleration>;
 DECLARE_CLASS_PTR(ENU_Acceleration);
-struct ECEF_Acceleration : public Stream
-{
-    typedef IECEF_Acceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Acceleration&)> samples_available_signal;
-};
+using ECEF_Acceleration = Typed_Stream<IECEF_Acceleration>;
 DECLARE_CLASS_PTR(ECEF_Acceleration);
-
-struct ADC : public Stream
-{
-    typedef IADC::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ADC&)> samples_available_signal;
-};
+using ADC = Typed_Stream<IADC>;
 DECLARE_CLASS_PTR(ADC);
-
-struct Angular_Velocity : public Stream
-{
-    typedef IAngular_Velocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Angular_Velocity&)> samples_available_signal;
-};
+using Angular_Velocity = Typed_Stream<IAngular_Velocity>;
 DECLARE_CLASS_PTR(Angular_Velocity);
-struct ENU_Angular_Velocity : public Stream
-{
-    typedef IENU_Angular_Velocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Angular_Velocity&)> samples_available_signal;
-};
+using ENU_Angular_Velocity = Typed_Stream<IENU_Angular_Velocity>;
 DECLARE_CLASS_PTR(ENU_Angular_Velocity);
-struct ECEF_Angular_Velocity : public Stream
-{
-    typedef IECEF_Angular_Velocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Angular_Velocity&)> samples_available_signal;
-};
+using ECEF_Angular_Velocity = Typed_Stream<IECEF_Angular_Velocity>;
 DECLARE_CLASS_PTR(ECEF_Angular_Velocity);
-
-struct Battery_State : public Stream
-{
-    typedef IBattery_State::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Battery_State&)> samples_available_signal;
-};
+using Battery_State = Typed_Stream<IBattery_State>;
 DECLARE_CLASS_PTR(Battery_State);
-
-struct Current : public Stream
-{
-    typedef ICurrent::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Current&)> samples_available_signal;
-};
+using Current = Typed_Stream<ICurrent>;
 DECLARE_CLASS_PTR(Current);
-
-struct Distance : public Stream
-{
-    typedef IDistance::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Distance&)> samples_available_signal;
-};
+using Distance = Typed_Stream<IDistance>;
 DECLARE_CLASS_PTR(Distance);
-struct ENU_Distance : public Stream
-{
-    typedef IENU_Distance::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Distance&)> samples_available_signal;
-};
+using ENU_Distance = Typed_Stream<IENU_Distance>;
 DECLARE_CLASS_PTR(ENU_Distance);
-struct ECEF_Distance : public Stream
-{
-    typedef IECEF_Distance::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Distance&)> samples_available_signal;
-};
+using ECEF_Distance = Typed_Stream<IECEF_Distance>;
 DECLARE_CLASS_PTR(ECEF_Distance);
-
-struct Float : public Stream
-{
-    typedef IFloat::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Float&)> samples_available_signal;
-};
+using Float = Typed_Stream<IFloat>;
 DECLARE_CLASS_PTR(Float);
-
-struct Bool : public Stream
-{
-    typedef IBool::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Bool&)> samples_available_signal;
-};
+using Bool = Typed_Stream<IBool>;
 DECLARE_CLASS_PTR(Float);
-
-struct Force : public Stream
-{
-    typedef IForce::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Force&)> samples_available_signal;
-};
+using Force = Typed_Stream<IForce>;
 DECLARE_CLASS_PTR(Force);
-struct ENU_Force : public Stream
-{
-    typedef IENU_Force::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Force&)> samples_available_signal;
-};
+using ENU_Force = Typed_Stream<IENU_Force>;
 DECLARE_CLASS_PTR(ENU_Force);
-struct ECEF_Force : public Stream
-{
-    typedef IECEF_Force::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Force&)> samples_available_signal;
-};
+using ECEF_Force = Typed_Stream<IECEF_Force>;
 DECLARE_CLASS_PTR(ECEF_Force);
-
-struct Frame : public Stream
-{
-    typedef IFrame::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Frame&)> samples_available_signal;
-};
+using Frame = Typed_Stream<IFrame>;
 DECLARE_CLASS_PTR(Frame);
-//struct ENU_Frame : public Stream
-//{
-//    typedef IENU_Frame::Sample Sample;
-//    std::vector<Sample> samples;
-//    q::util::Signal<void(ENU_Frame&)> samples_available_signal;
-//};
+//using ENU_Frame = GS_Stream<IENU_Frame>;
 //DECLARE_CLASS_PTR(ENU_Frame);
-
-struct GPS_Info : public Stream
-{
-    typedef IGPS_Info::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(GPS_Info&)> samples_available_signal;
-};
+using GPS_Info = Typed_Stream<IGPS_Info>;
 DECLARE_CLASS_PTR(GPS_Info);
-
-struct Linear_Acceleration : public Stream
-{
-    typedef ILinear_Acceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Linear_Acceleration&)> samples_available_signal;
-};
+using Linear_Acceleration = Typed_Stream<ILinear_Acceleration>;
 DECLARE_CLASS_PTR(Linear_Acceleration);
-struct ENU_Linear_Acceleration : public Stream
-{
-    typedef IENU_Linear_Acceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Linear_Acceleration&)> samples_available_signal;
-};
+using ENU_Linear_Acceleration = Typed_Stream<IENU_Linear_Acceleration>;
 DECLARE_CLASS_PTR(ENU_Linear_Acceleration);
-struct ECEF_Linear_Acceleration : public Stream
-{
-    typedef IECEF_Linear_Acceleration::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Linear_Acceleration&)> samples_available_signal;
-};
+using ECEF_Linear_Acceleration = Typed_Stream<IECEF_Linear_Acceleration>;
 DECLARE_CLASS_PTR(ECEF_Linear_Acceleration);
-
-struct ECEF_Position : public Stream
-{
-    typedef IECEF_Position::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Position&)> samples_available_signal;
-};
+using ECEF_Position = Typed_Stream<IECEF_Position>;
 DECLARE_CLASS_PTR(ECEF_Position);
-
-struct Magnetic_Field : public Stream
-{
-    typedef IMagnetic_Field::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Magnetic_Field&)> samples_available_signal;
-};
+using Magnetic_Field = Typed_Stream<IMagnetic_Field>;
 DECLARE_CLASS_PTR(Magnetic_Field);
-struct ENU_Magnetic_Field : public Stream
-{
-    typedef IENU_Magnetic_Field::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Magnetic_Field&)> samples_available_signal;
-};
+using ENU_Magnetic_Field = Typed_Stream<IENU_Magnetic_Field>;
 DECLARE_CLASS_PTR(ENU_Magnetic_Field);
-struct ECEF_Magnetic_Field : public Stream
-{
-    typedef IECEF_Magnetic_Field::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Magnetic_Field&)> samples_available_signal;
-};
+using ECEF_Magnetic_Field = Typed_Stream<IECEF_Magnetic_Field>;
 DECLARE_CLASS_PTR(ECEF_Magnetic_Field);
-
-struct Pressure : public Stream
-{
-    typedef IPressure::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Pressure&)> samples_available_signal;
-};
+using Pressure = Typed_Stream<IPressure>;
 DECLARE_CLASS_PTR(Pressure);
-
-struct PWM : public Stream
-{
-    typedef IPWM::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(PWM&)> samples_available_signal;
-};
+using PWM = Typed_Stream<IPWM>;
 DECLARE_CLASS_PTR(PWM);
-
-struct Temperature : public Stream
-{
-    typedef ITemperature::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Temperature&)> samples_available_signal;
-};
+using Temperature = Typed_Stream<ITemperature>;
 DECLARE_CLASS_PTR(Temperature);
-
-struct Throttle : public Stream
-{
-    typedef IThrottle::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Throttle&)> samples_available_signal;
-};
+using Throttle = Typed_Stream<IThrottle>;
 DECLARE_CLASS_PTR(Throttle);
-
-struct Torque : public Stream
-{
-    typedef ITorque::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Torque&)> samples_available_signal;
-};
+using Torque = Typed_Stream<ITorque>;
 DECLARE_CLASS_PTR(Torque);
-struct ENU_Torque : public Stream
-{
-    typedef IENU_Torque::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Torque&)> samples_available_signal;
-};
+using ENU_Torque = Typed_Stream<IENU_Torque>;
 DECLARE_CLASS_PTR(ENU_Torque);
-struct ECEF_Torque : public Stream
-{
-    typedef IECEF_Torque::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Torque&)> samples_available_signal;
-};
+using ECEF_Torque = Typed_Stream<IECEF_Torque>;
 DECLARE_CLASS_PTR(ECEF_Torque);
-
-struct Velocity : public Stream
-{
-    typedef IVelocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Velocity&)> samples_available_signal;
-};
+using Velocity = Typed_Stream<IVelocity>;
 DECLARE_CLASS_PTR(Velocity);
-struct ENU_Velocity : public Stream
-{
-    typedef IENU_Velocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ENU_Velocity&)> samples_available_signal;
-};
+using ENU_Velocity = Typed_Stream<IENU_Velocity>;
 DECLARE_CLASS_PTR(ENU_Velocity);
-struct ECEF_Velocity : public Stream
-{
-    typedef IECEF_Velocity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(ECEF_Velocity&)> samples_available_signal;
-};
+using ECEF_Velocity = Typed_Stream<IECEF_Velocity>;
 DECLARE_CLASS_PTR(ECEF_Velocity);
-
-struct Voltage : public Stream
-{
-    typedef IVoltage::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Voltage&)> samples_available_signal;
-};
+using Voltage = Typed_Stream<IVoltage>;
 DECLARE_CLASS_PTR(Voltage);
-
-struct Video : public Stream
-{
-    typedef IVideo::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Video&)> samples_available_signal;
-};
+using Video = Typed_Stream<IVideo>;
 DECLARE_CLASS_PTR(Video);
-
-struct Multi_State : public Stream
-{
-    typedef IMulti_State::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Multi_State&)> samples_available_signal;
-};
+using Multi_State = Typed_Stream<IMulti_State>;
 DECLARE_CLASS_PTR(Multi_State);
-
-struct Multi_Input : public Stream
-{
-    typedef IMulti_Input::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Multi_Input&)> samples_available_signal;
-};
+using Multi_Input = Typed_Stream<IMulti_Input>;
 DECLARE_CLASS_PTR(Multi_Input);
-
-struct Proximity : public Stream
-{
-    typedef IProximity::Sample Sample;
-    std::vector<Sample> samples;
-    q::util::Signal<void(Proximity&)> samples_available_signal;
-};
+using Proximity = Typed_Stream<IProximity>;
 DECLARE_CLASS_PTR(Proximity);
 
 }
@@ -452,6 +234,7 @@ class Registry : q::util::Noncopyable
 {
 public:
     auto get_all() const -> std::vector<std::shared_ptr<Base>> const&;
+    template<class T> auto get_all_of_type() const -> std::vector<std::shared_ptr<T>>;
     auto find_by_name(std::string const& name) const -> std::shared_ptr<Base>;
     template<class T> auto add(std::shared_ptr<T> node) -> bool;
     void remove(std::shared_ptr<Base> node);
@@ -522,6 +305,20 @@ template<class Base>
 auto Registry<Base>::get_all() const -> std::vector<std::shared_ptr<Base>> const&
 {
     return m_nodes;
+}
+template<class Base>
+template<class T>
+auto Registry<Base>::get_all_of_type() const -> std::vector<std::shared_ptr<T>>
+{
+    std::vector<std::shared_ptr<T>> res;
+    for (auto const& s: m_nodes)
+    {
+        if (s->get_type() == T::TYPE)
+        {
+            res.push_back(std::static_pointer_cast<T>(s));
+        }
+    }
+    return res;
 }
 template<class Base>
 auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<Base>

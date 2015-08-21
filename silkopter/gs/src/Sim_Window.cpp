@@ -20,7 +20,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
 
     m_ui.setupUi(this);
 
-    sim_node->message_received_signal.connect([this](rapidjson::Document const& message)
+    m_connections.push_back(sim_node->message_received_signal.connect([this](rapidjson::Document const& message)
     {
         silk::node::IMulti_Simulator::UAV_State state;
         autojsoncxx::error::ErrorStack result;
@@ -30,7 +30,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::Node_ptr sim_node, silk::Comm
 //                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
         }
         m_state_requests++;
-    });
+    }));
 
     //m_ui.action_simulation_on->setChecked(m_config.environment.is_simulation_enabled);
     QObject::connect(m_ui.action_simulation, &QAction::toggled, [this](bool v)

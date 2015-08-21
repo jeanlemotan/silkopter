@@ -19,7 +19,7 @@ private:
 
     void prepare_step();
 
-    void on_samples_received(silk::node::stream::Acceleration& stream);
+    void on_samples_received(silk::node::stream::Acceleration::Samples const& samples);
 
     void set_calibration_points(sz::calibration::Acceleration_Points const& data);
     auto get_calibration_points() const -> sz::calibration::Acceleration_Points;

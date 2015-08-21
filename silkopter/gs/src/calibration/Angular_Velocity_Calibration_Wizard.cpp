@@ -124,9 +124,9 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
 
-        m_connection = m_stream->samples_available_signal.connect([this, info, progress](silk::node::stream::Angular_Velocity& stream)
+        m_connection = m_stream->samples_available_signal.connect([this, info, progress](silk::node::stream::Angular_Velocity::Samples const& samples)
         {
-            on_samples_received(stream);
+            on_samples_received(samples);
             info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
             progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
@@ -216,10 +216,10 @@ auto Angular_Velocity_Calibration_Wizard::get_calibration_points() const -> sz::
 }
 
 
-void Angular_Velocity_Calibration_Wizard::on_samples_received(silk::node::stream::Angular_Velocity& stream)
+void Angular_Velocity_Calibration_Wizard::on_samples_received(silk::node::stream::Angular_Velocity::Samples const& samples)
 {
-    m_samples.reserve(m_samples.size() + stream.samples.size());
-    for (auto const& s: stream.samples)
+    m_samples.reserve(m_samples.size() + samples.size());
+    for (auto const& s: samples)
     {
         m_samples.push_back(s.value);
     }
