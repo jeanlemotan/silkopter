@@ -24,6 +24,7 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     m_temperature_stream = std::make_shared<Temperature>();
     m_distance_stream = std::make_shared<Distance>();
     m_ecef_position_stream = std::make_shared<ECEF_Position>();
+    m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
 auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
@@ -123,6 +124,8 @@ auto Multi_Simulator::init() -> bool
     m_ecef_position_stream->rate = m_init_params->gps_rate;
     m_ecef_position_stream->dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
 
+    m_ecef_velocity_stream->rate = m_init_params->gps_rate;
+    m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
 
     return true;
@@ -142,21 +145,17 @@ auto Multi_Simulator::get_inputs() const -> std::vector<Input>
 }
 auto Multi_Simulator::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(7);
-    outputs[0].name = "Angular Velocity";
-    outputs[0].stream = m_angular_velocity_stream;
-    outputs[1].name = "Acceleration";
-    outputs[1].stream = m_acceleration_stream;
-    outputs[2].name = "Magnetic Field";
-    outputs[2].stream = m_magnetic_field_stream;
-    outputs[3].name = "Pressure";
-    outputs[3].stream = m_pressure_stream;
-    outputs[4].name = "Temperature";
-    outputs[4].stream = m_temperature_stream;
-    outputs[5].name = "Sonar Distance";
-    outputs[5].stream = m_distance_stream;
-    outputs[6].name = "Position (ecef)";
-    outputs[6].stream = m_ecef_position_stream;
+    std::vector<Output> outputs =
+    {
+        {"Angular Velocity", m_angular_velocity_stream},
+        {"Acceleration", m_acceleration_stream},
+        {"Magnetic Field", m_magnetic_field_stream},
+        {"Pressure", m_pressure_stream},
+        {"Temperature", m_temperature_stream},
+        {"Sonar Distance", m_distance_stream},
+        {"Position (ecef)", m_ecef_position_stream},
+        {"Velocity (ecef)", m_ecef_velocity_stream},
+    };
     return outputs;
 }
 
@@ -192,8 +191,13 @@ void Multi_Simulator::process()
     m_temperature_stream->samples.clear();
     m_distance_stream->samples.clear();
     m_ecef_position_stream->samples.clear();
+    m_ecef_velocity_stream->samples.clear();
 
-    m_simulation.process(dt, [this](Multi_Simulation& simulation, q::Clock::duration simulation_dt)
+    static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.f);
+    auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
+    auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
+
+    m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multi_Simulation& simulation, q::Clock::duration simulation_dt)
     {
         auto const& uav_state = simulation.get_uav_state();
         {
@@ -257,21 +261,35 @@ void Multi_Simulator::process()
                 stream.samples.push_back(stream.last_sample);
             }
         }
+
         {
-            static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.f);
-            auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
-
-            q::util::Rand noise;
-            double noise_magnitude = 4.0;
-
-            auto& stream = *m_ecef_position_stream;
-            stream.accumulated_dt += simulation_dt;
-            while (stream.accumulated_dt >= stream.dt)
             {
-                stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
-                                                math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
-                stream.samples.push_back(stream.last_sample);
+                q::util::Rand noise;
+                double noise_magnitude = 0.1;
+
+                auto& stream = *m_ecef_position_stream;
+                stream.accumulated_dt += simulation_dt;
+                while (stream.accumulated_dt >= stream.dt)
+                {
+                    stream.accumulated_dt -= stream.dt;
+                    stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
+                            math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
+                    stream.samples.push_back(stream.last_sample);
+                }
+            }
+            {
+                q::util::Rand noise;
+                double noise_magnitude = 0.5;
+
+                auto& stream = *m_ecef_velocity_stream;
+                stream.accumulated_dt += simulation_dt;
+                while (stream.accumulated_dt >= stream.dt)
+                {
+                    stream.accumulated_dt -= stream.dt;
+                    stream.last_sample.value = math::transform(math::mat3f(enu_to_ecef_rotation), uav_state.enu_velocity) +
+                            math::vec3f(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
+                    stream.samples.push_back(stream.last_sample);
+                }
             }
         }
     });

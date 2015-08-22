@@ -313,7 +313,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         m_uav.state.enu_linear_acceleration = (new_velocity - m_uav.state.enu_velocity) / dts;
         m_uav.state.enu_velocity = new_velocity;
         m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
-        QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
+        //QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
     }
 
     {
