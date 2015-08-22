@@ -73,29 +73,29 @@ void Comp_AHRS::process()
     auto dts = q::Seconds(m_output_stream->get_dt()).count();
 
     m_accumulator.process([this, dts](
-                          size_t idx,
+                          size_t,
                           stream::IAngular_Velocity::Sample const& av_sample,
                           stream::IAcceleration::Sample const& a_sample,
                           stream::IMagnetic_Field::Sample const& m_sample)
     {
-        double av_length = 0;
+        float av_length = 0;
 
-        math::quatd rotation(m_output_stream->get_last_sample().value);
+        math::quatf rotation(m_output_stream->get_last_sample().value);
 
         {
             math::vec3d omega(av_sample.value);
 
             math::vec3d theta = omega * dts;
-            double theta_magnitude = math::length(theta);
-            if (theta_magnitude > std::numeric_limits<double>::epsilon())
+            float theta_magnitude = math::length(theta);
+            if (theta_magnitude > std::numeric_limits<float>::epsilon())
             {
-                auto av = theta*0.5;
+                auto av = theta*0.5f;
                 av_length = theta_magnitude;
                 auto& a = rotation;
-                double w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
-                double x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
-                double y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
-                double z = (av.z * a.w) /*+ (av.w * a.z)*/ + (av.y * a.x) - (av.x * a.y);
+                float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
+                float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
+                float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);
+                float z = (av.z * a.w) /*+ (av.w * a.z)*/ + (av.y * a.x) - (av.x * a.y);
 
                 a.x += x;
                 a.y += y;
@@ -107,18 +107,17 @@ void Comp_AHRS::process()
         }
 
         {
-            m_noisy_up_w = math::normalized<double, math::safe>(math::vec3d(a_sample.value)); //acceleration points opposite of gravity - so up
-            m_noisy_front_w = math::normalized<double, math::safe>(math::vec3d(m_sample.value)); //this is always good
-            m_noisy_right_w = math::normalized<double, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
-            m_noisy_front_w = math::cross(m_noisy_right_w, m_noisy_up_w);
-            //m_earth_frame_up = math::cross(m_earth_frame_right, m_earth_frame_front);
+            m_noisy_up_w = math::normalized<float, math::safe>(a_sample.value); //acceleration points opposite of gravity - so up
+            m_noisy_front_w = math::normalized<float, math::safe>(m_sample.value); //this is always good
+            m_noisy_right_w = math::normalized<float, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
+            m_noisy_front_w = math::cross(m_noisy_up_w, m_noisy_right_w);
 
-            math::mat3d mat(m_noisy_front_w, m_noisy_right_w, m_noisy_up_w);
-            math::quatd noisy_quat;
+            math::mat3f mat(m_noisy_right_w /* X */, m_noisy_front_w /* Y */, m_noisy_up_w /* Z */);
+            math::quatf noisy_quat;
             noisy_quat.set_from_mat3(mat);
             noisy_quat.invert();
 
-            math::quatd& rot = rotation;
+            math::quatf& rot = rotation;
 
             //cancel drift
             static int xxx = 50;
@@ -131,10 +130,10 @@ void Comp_AHRS::process()
             {
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
-                double mu = q::Seconds(m_output_stream->get_dt()).count() * 0.5 + av_length;
-                rot = math::nlerp<double, math::safe>(rot, noisy_quat, mu);
+                float mu = dts * 0.5f + av_length;
+                rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
-            rot = math::normalized<double, math::safe>(rot);
+            rot = math::normalized<float, math::safe>(rot);
         }
 
         m_output_stream->push_sample(math::quatf(rotation), av_sample.is_healthy & a_sample.is_healthy & m_sample.is_healthy);

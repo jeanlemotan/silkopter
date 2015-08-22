@@ -56,9 +56,9 @@ private:
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAcceleration, stream::IMagnetic_Field> m_accumulator;
 
-    math::vec3d m_noisy_front_w;
-    math::vec3d m_noisy_right_w;
-    math::vec3d m_noisy_up_w;
+    math::vec3f m_noisy_front_w;
+    math::vec3f m_noisy_right_w;
+    math::vec3f m_noisy_up_w;
 
     typedef Basic_Output_Stream<stream::IFrame> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
