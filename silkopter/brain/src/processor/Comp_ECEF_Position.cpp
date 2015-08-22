@@ -14,7 +14,8 @@ Comp_ECEF_Position::Comp_ECEF_Position(HAL& hal)
     , m_init_params(new sz::Comp_ECEF_Position::Init_Params())
     , m_config(new sz::Comp_ECEF_Position::Config())
 {
-    m_output_stream = std::make_shared<Output_Stream>();
+    m_position_output_stream = std::make_shared<Position_Output_Stream>();
+    m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
@@ -41,8 +42,11 @@ auto Comp_ECEF_Position::init() -> bool
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
+    m_position_output_stream->set_rate(m_init_params->rate);
+    m_position_output_stream->set_tp(q::Clock::now());
+
+    m_velocity_output_stream->set_rate(m_init_params->rate);
+    m_velocity_output_stream->set_tp(q::Clock::now());
 
     return true;
 }
@@ -51,9 +55,10 @@ auto Comp_ECEF_Position::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position", m_accumulator.get_stream_path(0) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(1) },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(2) }
+        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
+        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(3) }
     }};
     return inputs;
 }
@@ -61,8 +66,8 @@ auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { "Position", m_output_stream },
-       // { "ENU Frame", m_enu_frame_output_stream },
+        { "Position (ecef)", m_position_output_stream },
+        { "Velocity (ecef)", m_velocity_output_stream },
     }};
     return outputs;
 }
@@ -72,17 +77,19 @@ void Comp_ECEF_Position::process()
     QLOG_TOPIC("comp_position::process");
 
 
-    m_output_stream->clear();
+    m_position_output_stream->clear();
+    m_velocity_output_stream->clear();
 
-    double dts = q::Seconds(m_output_stream->get_dt()).count();
+    double dts = q::Seconds(m_position_output_stream->get_dt()).count();
 
     m_accumulator.process([this, dts](
                           size_t,
                           stream::IECEF_Position::Sample const& pos_sample,
+                          stream::IECEF_Velocity::Sample const& vel_sample,
                           stream::IENU_Linear_Acceleration::Sample const& la_sample,
                           stream::IPressure::Sample const& p_sample)
     {
-        auto last_pos_sample = m_output_stream->get_last_sample();
+        auto last_pos_sample = m_position_output_stream->get_last_sample();
 
         if (pos_sample.is_healthy)
         {
@@ -106,7 +113,8 @@ void Comp_ECEF_Position::process()
             }
         }
 
-        m_output_stream->push_sample(last_pos_sample.value, last_pos_sample.is_healthy);
+        m_position_output_stream->push_sample(last_pos_sample.value, last_pos_sample.is_healthy);
+        m_velocity_output_stream->push_sample(m_velocity, last_pos_sample.is_healthy);
     });
 }
 

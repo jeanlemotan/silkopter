@@ -3,6 +3,7 @@
 #include "common/node/IProcessor.h"
 #include "common/stream/ILinear_Acceleration.h"
 #include "common/stream/IPosition.h"
+#include "common/stream/IVelocity.h"
 #include "common/stream/IPressure.h"
 #include "common/stream/IFrame.h"
 
@@ -56,13 +57,19 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    Sample_Accumulator<stream::IECEF_Position, stream::IENU_Linear_Acceleration, stream::IPressure> m_accumulator;
+    Sample_Accumulator<stream::IECEF_Position,
+                        stream::IECEF_Velocity,
+                        stream::IENU_Linear_Acceleration,
+                        stream::IPressure> m_accumulator;
 
-    typedef Basic_Output_Stream<stream::IECEF_Position> Output_Stream;
-    mutable std::shared_ptr<Output_Stream> m_output_stream;
+    typedef Basic_Output_Stream<stream::IECEF_Position> Position_Output_Stream;
+    mutable std::shared_ptr<Position_Output_Stream> m_position_output_stream;
+
+    typedef Basic_Output_Stream<stream::IECEF_Velocity> Velocity_Output_Stream;
+    mutable std::shared_ptr<Velocity_Output_Stream> m_velocity_output_stream;
 
     util::coordinates::ECEF m_last_gps_position;
-    util::coordinates::ECEF m_velocity;
+    math::vec3f m_velocity;
 
 //    struct ENU_Frame_Stream : public stream::IENU_Frame
 //    {
