@@ -15,24 +15,12 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::gs::Node_ptr sim_node, silk::
 {
     QASSERT(sim_node);
 
-    auto state_streams = hal.get_streams().get_all_of_type<silk::stream::gs::Multi_State>();
-
     setWindowTitle("Simulator");
     setMouseTracking(true);
 
     m_ui.setupUi(this);
 
-    m_connections.push_back(sim_node->message_received_signal.connect([this](rapidjson::Document const& message)
-    {
-        silk::node::IMulti_Simulator::UAV_State state;
-        autojsoncxx::error::ErrorStack result;
-        if (autojsoncxx::from_value(state, message, result))
-        {
-            m_uav.state = state;
-//                    QASSERT(m_uav.state.motors.size() == m_uav.config.motors.size());
-        }
-        m_state_requests++;
-    }));
+    m_connections.push_back(sim_node->message_received_signal.connect(std::bind(&Sim_Window::sim_message_received, this, std::placeholders::_1)));
 
     //m_ui.action_simulation_on->setChecked(m_config.environment.is_simulation_enabled);
     QObject::connect(m_ui.action_simulation, &QAction::toggled, [this](bool v)
@@ -142,7 +130,7 @@ void Sim_Window::read_config()
 
 void Sim_Window::render_ground()
 {
-    math::vec3s32 offset(m_uav.state.enu_position);
+    math::vec3s32 offset(m_uav.sim_state.enu_position);
     offset.z = 0;
 
     math::trans3df trans;
@@ -180,11 +168,11 @@ void Sim_Window::render_ground()
     m_context.painter.pop_post_clip_transform();
 }
 
-void Sim_Window::render_uav()
+void Sim_Window::render_uav(math::trans3df const& trans)
 {
-    math::trans3df trans;
-    trans.set_rotation(m_uav.state.local_to_enu_rotation);
-    trans.set_translation(m_uav.state.enu_position);
+//    math::trans3df trans;
+//    trans.set_rotation(m_uav.state.local_to_enu_rotation);
+//    trans.set_translation(m_uav.state.enu_position);
     m_context.painter.push_post_clip_transform(trans);
 
     auto mat = m_context.materials.primitive;
@@ -197,7 +185,7 @@ void Sim_Window::render_uav()
 
     //render motors
     auto config = m_hal.get_multi_config();
-    if (config && m_uav.state.motors.size() == config->motors.size())
+    if (config && m_uav.sim_state.motors.size() == config->motors.size())
     {
         //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
         //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
@@ -208,10 +196,10 @@ void Sim_Window::render_uav()
 
         const float propeller_radius = 0.12f;
         const float motor_radius = 0.02f;
-        for (size_t i = 0; i < m_uav.state.motors.size(); i++)
+        for (size_t i = 0; i < m_uav.sim_state.motors.size(); i++)
         {
             auto const& mc = config->motors[i];
-            auto const& m = m_uav.state.motors[i];
+            auto const& m = m_uav.sim_state.motors[i];
 
             m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(mc.position, 0xFFFFFFFF));
             m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0xFFFFFFFF), motor_radius, 16); //motor
@@ -233,7 +221,7 @@ void Sim_Window::render_uav()
     //render altitude meter
     if (m_ui.action_show_altitude->isChecked())
     {
-        auto p0 = m_uav.state.enu_position;
+        auto p0 = m_uav.sim_state.enu_position;
         auto p1 = p0;
         p0.z = 0;
         auto p2 = p1 + math::normalized<float, math::safe>(p1 - p0) * 2.f;
@@ -241,6 +229,59 @@ void Sim_Window::render_uav()
         m_context.painter.draw_line(q::draw::Vertex(p1, 0x50FFFFFF), q::draw::Vertex(p2, 0x00FFFFFF));
         m_context.painter.fill_circle(q::draw::Vertex(p0, 0x50FFFFFF), 0.05, 16);
         m_context.painter.fill_sphere(q::draw::Vertex(p1, 0x50FFFFFF), 0.05, 4);
+    }
+}
+
+void Sim_Window::render_brain_state()
+{
+    if (!m_uav.brain_state)
+    {
+        return;
+    }
+
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+
+    m_context.painter.set_material(mat);
+
+    {
+        math::trans3df trans;
+        trans.set_rotation(m_uav.brain_state->value.frame);
+        trans.set_translation(m_uav.sim_state.enu_position);
+        m_context.painter.push_post_clip_transform(trans);
+
+        //render axis
+        if (m_ui.action_show_axis->isChecked())
+        {
+            render_axis(m_context.painter, 1.f, 0.15f);
+        }
+
+        m_context.painter.pop_post_clip_transform();
+    }
+
+    {
+        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state->value.ecef_home_position);
+        auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
+        auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
+        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state->value.ecef_position));
+
+        math::trans3df trans;
+        trans.set_rotation(m_uav.brain_state->value.frame);
+        trans.set_translation(enu_position);
+        m_context.painter.push_post_clip_transform(trans);
+
+        //render axis
+        if (m_ui.action_show_axis->isChecked())
+        {
+            render_axis(m_context.painter, 1.f, 0.15f);
+        }
+
+        m_context.painter.pop_post_clip_transform();
+
+        m_context.painter.fill_sphere(q::draw::Vertex(enu_position, 0x50FFFFFF), 0.05, 4);
     }
 }
 
@@ -299,7 +340,7 @@ void Sim_Window::process()
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
     {
-        auto delta = m_uav.state.enu_position - m_camera_position_target;
+        auto delta = m_uav.sim_state.enu_position - m_camera_position_target;
         delta *= 0.9f;
         m_camera_position_target += delta;
         m_context.camera.set_position(m_context.camera.get_position() + delta);
@@ -311,7 +352,21 @@ void Sim_Window::process()
 //    m_context.painter.set_material(m_context.materials.primitive);
 //    m_context.painter.fill_sphere(q::draw::Vertex(math::vec3f(0, 0, 0), 0xFF00FF), 0.1, 0);
     render_ground();
-    render_uav();
+
+    {
+        math::trans3df trans;
+        trans.set_rotation(m_uav.sim_state.local_to_enu_rotation);
+        trans.set_translation(m_uav.sim_state.enu_position);
+        render_uav(trans);
+    }
+    {
+        auto const& samples = m_comms.get_multi_state_samples();
+        if (!samples.empty())
+        {
+            m_uav.brain_state = samples.back();
+        }
+        render_brain_state();
+    }
 
     render_enu_axis();
 
@@ -351,4 +406,17 @@ void Sim_Window::wheelEvent(QWheelEvent* event)
 {
     QWidget::wheelEvent(event);
     m_camera_controller.wheel_event(event);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Sim_Window::sim_message_received(rapidjson::Document const& message)
+{
+    silk::node::IMulti_Simulator::UAV_State state;
+    autojsoncxx::error::ErrorStack result;
+    if (autojsoncxx::from_value(state, message, result))
+    {
+        m_uav.sim_state = state;
+    }
+    m_state_requests++;
 }

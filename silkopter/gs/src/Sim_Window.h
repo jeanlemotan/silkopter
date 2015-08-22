@@ -37,15 +37,18 @@ private:
     Render_Context& m_context;
     Camera_Controller_3D m_camera_controller;
 
-    void render_uav();
+    void render_uav(math::trans3df const& trans);
+    void render_brain_state();
     void render_ground();
     void render_enu_axis();
 
+    void sim_message_received(rapidjson::Document const& message);
 
     struct UAV
     {
-        //silk::node::ISimulator::UAV_Config config;
-        silk::node::IMulti_Simulator::UAV_State state;
+        boost::optional<silk::stream::gs::Multi_State::Sample> brain_state;
+
+        silk::node::IMulti_Simulator::UAV_State sim_state;
     } m_uav;
 
     q::Clock::time_point m_last_state_request_tp = q::Clock::now();
