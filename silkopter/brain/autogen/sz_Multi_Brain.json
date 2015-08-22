@@ -12,9 +12,23 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Brain",
+    "name": "Horizontal_Angle",
+    "members":
+    [
+        ["float", "max_speed_deg", {"required": true, "json_key" : "Max Speed (deg/s)", "default" : 180}],
+        ["bool", "combined_pids", {"required": true, "json_key" : "Combined PIDs", "default" : true}],
+        ["sz::PID", "pids", {"required": false, "json_key" : "PIDs"}],
+        ["sz::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
+        ["sz::PID", "y_pid", {"required": false, "json_key" : "Y PID"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multi_Brain",
     "name": "Config",
     "members":
     [
+        ["sz::Multi_Brain::Horizontal_Angle", "horizontal_angle", {"required": false, "json_key" : "Horizontal Angle"}]
     ]
 }
 ]

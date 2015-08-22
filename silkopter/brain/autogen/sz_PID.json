@@ -1,0 +1,15 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PID",
+    "members":
+    [
+        ["double", "kp", {"required": true, "json_key" : "kP"}],
+        ["double", "ki", {"required": true, "json_key" : "kI"}],
+        ["double", "kd", {"required": true, "json_key" : "kD"}],
+        ["double", "max_i", {"required": true, "json_key" : "Max I"}],
+        ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
+    ]
+}
+]
