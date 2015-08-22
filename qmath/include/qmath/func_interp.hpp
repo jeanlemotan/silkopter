@@ -87,10 +87,6 @@ namespace math
 		{
 			result = lerp(a, b, t);
 		}
-		else if (angle <= -0.9999)
-		{
-			result = t < T(0.5) ? a : b;
-		}
 		else
 		{
 			result = lerp(a, -b, t);
@@ -106,11 +102,9 @@ namespace math
 
 		T scale;
 		T invscale;
-		if (angle > T(0.998))
+        if (angle > T(0.9999))
 		{
-			scale = T(1) - t;
-			invscale = t;
-			return quat<T>((a*scale) + (b*invscale));
+            return lerp(a, b, t);
 		}
 		else 
 		{
@@ -118,8 +112,8 @@ namespace math
 			{
 				if (angle <= T(-0.9999))
 				{
-					return quat<T>(t < T(0.5) ? a : b);
-				}
+                    return lerp(a, -b, t);
+                }
 				else
 				{
 					quat<T> qa(-a);
