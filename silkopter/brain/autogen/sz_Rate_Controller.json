@@ -11,28 +11,15 @@
 {
     "definition" : true,
     "namespace" : "sz::Rate_Controller",
-    "name": "PID",
-    "members":
-    [
-        ["double", "kp", {"required": true, "json_key" : "kP"}],
-        ["double", "ki", {"required": true, "json_key" : "kI"}],
-        ["double", "kd", {"required": true, "json_key" : "kD"}],
-        ["double", "max_i", {"required": true, "json_key" : "Max I"}],
-        ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
-    ]
-},
-{
-    "definition" : true,
-    "namespace" : "sz::Rate_Controller",
     "name": "Feedback",
     "members":
     [
         ["float", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 0}],
         ["bool", "combined_xy_pid", {"required": true, "json_key" : "Combined XY PID", "default" : true}],
-        ["sz::Rate_Controller::PID", "xy_pid", {"required": false, "json_key" : "XY PID"}],
-        ["sz::Rate_Controller::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
-        ["sz::Rate_Controller::PID", "y_pid", {"required": false, "json_key" : "Y PID"}],
-        ["sz::Rate_Controller::PID", "z_pid", {"required": true, "json_key" : "Z PID"}]
+        ["sz::PID", "xy_pid", {"required": false, "json_key" : "XY PID"}],
+        ["sz::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
+        ["sz::PID", "y_pid", {"required": false, "json_key" : "Y PID"}],
+        ["sz::PID", "z_pid", {"required": true, "json_key" : "Z PID"}]
     ]
 },
 {

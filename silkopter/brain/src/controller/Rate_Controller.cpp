@@ -2,6 +2,7 @@
 #include "Rate_Controller.h"
 
 #include "sz_math.hpp"
+#include "sz_PID.hpp"
 #include "sz_Rate_Controller.hpp"
 
 namespace silk
@@ -140,7 +141,7 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
 
     m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
 
-    auto fill_params = [this](PID::Params& dst, sz::Rate_Controller::PID const& src)
+    auto fill_params = [this](PID::Params& dst, sz::PID const& src)
     {
         dst.kp = src.kp;
         dst.ki = src.ki;
