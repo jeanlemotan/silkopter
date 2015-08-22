@@ -422,13 +422,12 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
             auto& m = m_uav.state.motors[i];
             auto& mc = m_uav.config.motors[i];
 
-            float intensity = math::abs(math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized));
+            float intensity = -math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized);
             float drag = intensity * m.drag_factor;
-            auto force = -velocity_normalized * drag * speed2;
+            auto force = local_to_enu_trans.get_axis_z() * drag * speed2;
 
             math::vec3f local_pos(mc.position);
-            auto pos = math::rotate(local_to_enu_trans, local_pos);
-            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(pos));
+            m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(local_pos));
         }
     }
 }
