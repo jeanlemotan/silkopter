@@ -112,16 +112,21 @@ void Multi_HUD_Widget::process_horizontal_angle()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
 
+    v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
+
+    constexpr float expo = 2.f;
+    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
+
     v *= math::vec2f(math::anglef::pi / 4.f);
 
-    m_input.horizontal.angle_rate.set(v);
+    m_input.horizontal.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_velocity()
 {
     math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
     v *= 5.f;
-    m_input.horizontal.angle_rate.set(v);
+    m_input.horizontal.velocity.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal()

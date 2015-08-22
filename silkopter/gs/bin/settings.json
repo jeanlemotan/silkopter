@@ -211,8 +211,8 @@
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -230.0,
-                    "y": -23.0
+                    "x": -210.0,
+                    "y": 6.0
                 }
             }
         },
@@ -235,8 +235,8 @@
         "Comp ECEF Position": {
             "hal_editor": {
                 "position": {
-                    "x": 183.0,
-                    "y": 126.0
+                    "x": 180.0,
+                    "y": 129.0
                 }
             }
         }

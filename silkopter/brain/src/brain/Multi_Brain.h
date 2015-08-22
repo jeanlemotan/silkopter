@@ -15,6 +15,7 @@
 
 #include "Comms.h"
 #include "HAL.h"
+#include "utils/PID.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -82,14 +83,29 @@ private:
     float m_reference_thrust = 0;
 
 
-    stream::IMulti_State::Value m_state;
+    struct Valid_State
+    {
+        template<class T> struct Data
+        {
+            T value;
+            q::Clock::time_point last_updated_tp;
+        };
 
-    void process_input_mode_idle(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config);
-    void process_input_mode_armed(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config);
+        Data<stream::IMulti_Input::Value> input;
+        Data<stream::IFrame::Value> frame;
+        Data<stream::IECEF_Position::Value> position;
 
-    void process_input(stream::IMulti_Input::Value const& new_input, silk::config::Multi const& multi_config);
+        silk::config::Multi config;
+    } m_state;
+    void refresh_state(stream::IMulti_Input::Sample const& input,
+                            stream::IFrame::Sample const& frame,
+                            stream::IECEF_Position::Sample const& position);
 
-    void acquire_home_position(stream::IECEF_Position::Sample const& position);
+    void process_state_mode_idle();
+    void process_state_mode_armed();
+    void process_state();
+
+    void acquire_home_position();
     struct Home
     {
         util::coordinates::LLA lla_position;
@@ -97,6 +113,14 @@ private:
         math::trans3dd enu_to_ecef_trans;
         math::trans3dd ecef_to_enu_trans;
     } m_home;
+
+    typedef util::PID<float, float, float> PID;
+
+    struct Horizontal_Angle_Data
+    {
+        PID x_pid;
+        PID y_pid;
+    } m_horizontal_angle_data;
 };
 
 

@@ -130,7 +130,7 @@ void Comp_AHRS::process()
             {
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
-                float mu = dts * 0.5f + av_length;
+                float mu = (dts + av_length) * 0.3f;
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);

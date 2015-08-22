@@ -60,9 +60,9 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": false,
-                    "Ground Enabled": false,
-                    "Gravity Enabled": false
+                    "Drag Enabled": true,
+                    "Ground Enabled": true,
+                    "Gravity Enabled": true
                 },
                 "input_paths": [
                     "Motor Mixer/Throttle 0",
@@ -77,11 +77,37 @@
                     "Rate (Hz)": 100,
                     "State Rate (Hz)": 20
                 },
-                "config": {},
+                "config": {
+                    "Horizontal Angle": {
+                        "Max Speed (deg/s)": 180.0,
+                        "Combined PIDs": true,
+                        "PIDs": {
+                            "kP": 4.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        },
+                        "X PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        },
+                        "Y PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        }
+                    }
+                },
                 "input_paths": [
                     "Multi Input/Output",
                     "Frame RS/Output",
-                    "Position RS (ECEF)/Output"
+                    "Comp ECEF Position/Position"
                 ]
             },
             "Multi Pilot": {
@@ -182,7 +208,7 @@
                 },
                 "config": {
                     "Feedback": {
-                        "Weight (0-1)": 0.0,
+                        "Weight (0-1)": 1.0,
                         "Combined XY PID": true,
                         "XY PID": {
                             "kP": 1.0,
@@ -192,15 +218,15 @@
                             "D Filter": 0.0
                         },
                         "Z PID": {
-                            "kP": 1.0,
-                            "kI": 0.0,
+                            "kP": 1.5,
+                            "kI": 0.5,
                             "kD": 0.0,
-                            "Max I": 0.0,
+                            "Max I": 0.5,
                             "D Filter": 0.0
                         }
                     },
                     "Feedforward": {
-                        "Weight (0-1)": 1.0,
+                        "Weight (0-1)": 0.0,
                         "Max Torque (N)": 1.5
                     }
                 },
@@ -216,8 +242,8 @@
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 2.0
+                    "Poles": 2,
+                    "Cutoff Frequency (Hz)": 0.5
                 },
                 "input_paths": [
                     "Multi Simulator/Position (ecef)"

@@ -2,6 +2,7 @@
 #include "Multi_Brain.h"
 
 #include "sz_math.hpp"
+#include "sz_PID.hpp"
 #include "sz_Multi_Brain.hpp"
 
 namespace silk
@@ -38,6 +39,14 @@ auto Multi_Brain::init(rapidjson::Value const& init_params) -> bool
 
 auto Multi_Brain::init() -> bool
 {
+    auto multi_config = m_hal.get_multi_config();
+    if (!multi_config)
+    {
+        QLOGE("No multi config found");
+        return false;
+    }
+    m_state.config = *multi_config;
+
     if (m_init_params->rate == 0)
     {
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
@@ -80,110 +89,150 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multi_Brain::process_input_mode_idle(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config)
+void Multi_Brain::process_state_mode_idle()
 {
-    auto& crt_input = m_state.last_input;
-    QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::IDLE);
+    auto& input = m_state.input.value;
+    QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
-    if (crt_input.vertical.thrust_rate.value != 0)
+    if (input.vertical.thrust_rate.value != 0)
     {
-        crt_input.vertical.thrust_rate.set(0);
+        input.vertical.thrust_rate.set(0);
     }
-    if (crt_input.vertical.thrust_offset.value != 0)
+    if (input.vertical.thrust_offset.value != 0)
     {
-        crt_input.vertical.thrust_rate.set(0);
+        input.vertical.thrust_rate.set(0);
     }
-    if (crt_input.vertical.climb_rate.value != 0)
+    if (input.vertical.climb_rate.value != 0)
     {
-        crt_input.vertical.climb_rate.set(0);
-    }
-
-    if (!math::is_zero(crt_input.horizontal.angle_rate.value))
-    {
-        crt_input.horizontal.angle_rate.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(crt_input.horizontal.angle.value))
-    {
-        crt_input.horizontal.angle.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(crt_input.horizontal.velocity.value))
-    {
-        crt_input.horizontal.velocity.set(math::vec2f::zero);
+        input.vertical.climb_rate.set(0);
     }
 
-    if (crt_input.yaw.angle_rate.value != 0)
+    if (!math::is_zero(input.horizontal.angle_rate.value))
     {
-        crt_input.yaw.angle_rate.set(0);
+        input.horizontal.angle_rate.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(input.horizontal.angle.value))
+    {
+        input.horizontal.angle.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(input.horizontal.velocity.value))
+    {
+        input.horizontal.velocity.set(math::vec2f::zero);
     }
 
-    auto new_mode = new_input.mode;
-    new_input = crt_input;
-    new_input.mode = new_mode;
+    if (input.yaw.angle_rate.value != 0)
+    {
+        input.yaw.angle_rate.set(0);
+    }
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
 }
 
-void Multi_Brain::process_input_mode_armed(stream::IMulti_Input::Value& new_input, silk::config::Multi const& multi_config)
+void Multi_Brain::process_state_mode_armed()
 {
-    auto& crt_input = m_state.last_input;
-    QASSERT(crt_input.mode.value == stream::IMulti_Input::Mode::ARMED);
+    auto& input = m_state.input.value;
+    QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
     stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
     stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
 
-    if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
+    if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
-        thrust.z += crt_input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
-        thrust.z = math::clamp(thrust.z, 0.f, multi_config.motor_thrust * multi_config.motors.size());
+        thrust.z += input.vertical.thrust_rate.value * q::Seconds(m_thrust_output_stream->get_dt()).count();
+        thrust.z = math::clamp(thrust.z, 0.f, m_state.config.motor_thrust * m_state.config.motors.size());
 
         m_reference_thrust = thrust.z;
     }
-    else if (crt_input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
+    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
-        thrust.z = m_reference_thrust + crt_input.vertical.thrust_offset.value;
-        thrust.z = math::clamp(thrust.z, 0.f, multi_config.motor_thrust * multi_config.motors.size());
+        thrust.z = m_reference_thrust + input.vertical.thrust_offset.value;
+        thrust.z = math::clamp(thrust.z, 0.f, m_state.config.motor_thrust * m_state.config.motors.size());
         //QLOGI("Thrust: {}", thrust.z);
     }
 
-    if (crt_input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
+    if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
     {
-        rate = crt_input.horizontal.angle_rate.value;
+        rate = input.horizontal.angle_rate.value;
+    }
+    else if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE)
+    {
+        float fx, fy, fz;
+        m_state.frame.value.get_as_euler_xyz(fx, fy, fz);
+
+        math::quatf target;
+        target.set_from_euler_zxy(input.horizontal.angle.value.x, input.horizontal.angle.value.y, fz);
+        math::quatf diff = math::inverse(m_state.frame.value) * target;
+        float diff_x, diff_y, _z;
+        diff.get_as_euler_zxy(diff_x, diff_y, _z);
+
+        float max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
+
+        float x = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
+        x = math::clamp(x, -max_speed, max_speed);
+        float y = m_horizontal_angle_data.y_pid.process(-diff_y, 0.f);
+        y = math::clamp(y, -max_speed, max_speed);
+
+        rate.set(x, y, 0);
     }
 
-    if (crt_input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
+
+    if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
     {
-        rate.z = crt_input.yaw.angle_rate.value;
+        rate.z = input.yaw.angle_rate.value;
     }
 
     m_rate_output_stream->push_sample(rate, true);
     m_thrust_output_stream->push_sample(thrust, true);
 }
 
-void Multi_Brain::process_input(stream::IMulti_Input::Value const& new_input, silk::config::Multi const& multi_config)
+void Multi_Brain::process_state()
 {
-    stream::IMulti_Input::Value new_input_copy = new_input;
-
-    if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        process_input_mode_idle(new_input_copy, multi_config);
+        process_state_mode_idle();
     }
-    else if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::ARMED)
+    else if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
-        process_input_mode_armed(new_input_copy, multi_config);
+        process_state_mode_armed();
     }
-
-    m_state.last_input = new_input_copy;
 }
 
-void Multi_Brain::acquire_home_position(stream::IECEF_Position::Sample const& sample)
-{
-    if (m_state.last_input.mode.value == stream::IMulti_Input::Mode::IDLE)
+void Multi_Brain::acquire_home_position()
+{    auto multi_config = m_hal.get_multi_config();
+     if (!multi_config)
+     {
+         return;
+     }
+    if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        m_home.ecef_position = sample.value;
+        m_home.ecef_position = m_state.position.value;
         m_home.lla_position = util::coordinates::ecef_to_lla(m_home.ecef_position);
         m_home.enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(m_home.lla_position);
         m_home.ecef_to_enu_trans = math::inverse(m_home.enu_to_ecef_trans);
+    }
+}
+
+void Multi_Brain::refresh_state(stream::IMulti_Input::Sample const& input,
+                                     stream::IFrame::Sample const& frame,
+                                     stream::IECEF_Position::Sample const& position)
+{
+    auto now = q::Clock::now();
+
+    if (input.is_healthy)
+    {
+        m_state.input.value = input.value;
+        m_state.input.last_updated_tp = now;
+    }
+    if (frame.is_healthy)
+    {
+        m_state.frame.value = frame.value;
+        m_state.frame.last_updated_tp = now;
+    }
+    if (position.is_healthy)
+    {
+        m_state.position.value = position.value;
+        m_state.position.last_updated_tp = now;
     }
 }
 
@@ -191,17 +240,11 @@ void Multi_Brain::process()
 {
     QLOG_TOPIC("multi_Brain::process");
 
-    auto multi_config = m_hal.get_multi_config();
-    if (!multi_config)
-    {
-        return;
-    }
-
     m_state_output_stream->clear();
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_accumulator.process([this, &multi_config](
+    m_accumulator.process([this](
                           size_t,
                           stream::IMulti_Input::Sample const& i_input,
                           stream::IFrame::Sample const& i_frame,
@@ -212,19 +255,23 @@ void Multi_Brain::process()
 //                          stream::IProximity::Sample const& i_proximity,
                           )
     {
-        acquire_home_position(i_position);
-        process_input(i_input.value, *multi_config);
-
-        m_state.ecef_position = i_position.value;
-        m_state.ecef_home_position = m_home.ecef_position;
-        m_state.frame = i_frame.value;
+        refresh_state(i_input, i_frame, i_position);
+        acquire_home_position();
+        process_state();
     });
 
 
-    size_t samples_needed = m_state_output_stream->compute_samples_needed();
-    for (size_t i = 0; i < samples_needed; i++)
     {
-        m_state_output_stream->push_sample(m_state, true);
+        stream::IMulti_State::Value state;
+        state.ecef_position = m_state.position.value;
+        state.ecef_home_position = m_home.ecef_position;
+        state.frame = m_state.frame.value;
+
+        size_t samples_needed = m_state_output_stream->compute_samples_needed();
+        for (size_t i = 0; i < samples_needed; i++)
+        {
+            m_state_output_stream->push_sample(state, true);
+        }
     }
 }
 
@@ -248,6 +295,40 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
+    m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 0.f, 180.f);
+
+    auto fill_params = [this](PID::Params& dst, sz::PID const& src)
+    {
+        dst.kp = src.kp;
+        dst.ki = src.ki;
+        dst.kd = src.kd;
+        dst.max_i = src.max_i;
+        dst.d_filter = src.d_filter;
+        dst.rate = m_rate_output_stream->get_rate();
+    };
+
+    {
+        PID::Params x_params, y_params;
+        if (m_config->horizontal_angle.combined_pids)
+        {
+            fill_params(x_params, m_config->horizontal_angle.pids);
+            fill_params(y_params, m_config->horizontal_angle.pids);
+        }
+        else
+        {
+            fill_params(x_params, m_config->horizontal_angle.x_pid);
+            fill_params(y_params, m_config->horizontal_angle.y_pid);
+        }
+
+        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
+                !m_horizontal_angle_data.y_pid.set_params(y_params))
+        {
+            QLOGE("Bad PID params");
+            return false;
+        }
+    }
+
 
     return true;
 }
