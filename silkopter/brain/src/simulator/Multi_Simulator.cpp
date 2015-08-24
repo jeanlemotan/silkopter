@@ -16,6 +16,10 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::Multi_Simulator::Init_Params())
     , m_config(new sz::Multi_Simulator::Config())
+    , m_ecef_pos_distribution(0, 2.0)
+    , m_ecef_vel_distribution(0, 0.5)
+//    , m_ecef_pos_distribution(0, 0.0)
+//    , m_ecef_vel_distribution(0, 0.0)
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -264,30 +268,24 @@ void Multi_Simulator::process()
 
         {
             {
-                q::util::Rand noise;
-                double noise_magnitude = 0.1;
-
                 auto& stream = *m_ecef_position_stream;
                 stream.accumulated_dt += simulation_dt;
                 while (stream.accumulated_dt >= stream.dt)
                 {
+                    math::vec3d noise(m_ecef_pos_distribution(m_generator), m_ecef_pos_distribution(m_generator), m_ecef_pos_distribution(m_generator));
                     stream.accumulated_dt -= stream.dt;
-                    stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) +
-                            math::vec3d(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
+                    stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
                     stream.samples.push_back(stream.last_sample);
                 }
             }
             {
-                q::util::Rand noise;
-                double noise_magnitude = 0.5;
-
                 auto& stream = *m_ecef_velocity_stream;
                 stream.accumulated_dt += simulation_dt;
                 while (stream.accumulated_dt >= stream.dt)
                 {
+                    math::vec3f noise(m_ecef_vel_distribution(m_generator), m_ecef_vel_distribution(m_generator), m_ecef_vel_distribution(m_generator));
                     stream.accumulated_dt -= stream.dt;
-                    stream.last_sample.value = math::transform(math::mat3f(enu_to_ecef_rotation), uav_state.enu_velocity) +
-                            math::vec3f(noise.get_float(), noise.get_float(), noise.get_float()) * noise_magnitude;
+                    stream.last_sample.value = math::transform(math::mat3f(enu_to_ecef_rotation), uav_state.enu_velocity) + noise;
                     stream.samples.push_back(stream.last_sample);
                 }
             }

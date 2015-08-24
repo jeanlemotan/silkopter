@@ -58,6 +58,10 @@ private:
 
     q::Clock::time_point m_last_tp;
 
+    std::default_random_engine m_generator;
+    std::normal_distribution<double> m_ecef_pos_distribution;
+    std::normal_distribution<double> m_ecef_vel_distribution;
+
     struct Angular_Velocity : public stream::IAngular_Velocity
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
