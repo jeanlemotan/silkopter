@@ -308,7 +308,11 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
     {
         auto new_position = bt_to_vec3f(wt.getOrigin());
-        auto new_velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());//(new_position - m_uav.enu_position) / dts;
+
+        //For some reason linear velocity is twice as big.
+        //auto new_velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
+        auto new_velocity = (new_position - m_uav.state.enu_position) / dts;
+
         m_uav.state.enu_position = new_position;
         m_uav.state.enu_linear_acceleration = (new_velocity - m_uav.state.enu_velocity) / dts;
         m_uav.state.enu_velocity = new_velocity;
@@ -353,7 +357,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     }
 
 
-    auto velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
+    auto velocity = m_uav.state.enu_velocity;
     float air_speed = math::dot(local_to_enu_trans.get_axis_z(), velocity);
 
     //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
