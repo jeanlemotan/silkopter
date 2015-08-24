@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Comp_ECEF_Position",
+    "namespace" : "sz::EKF_ECEF",
     "name": "Init_Params",
     "members":
     [
@@ -10,7 +10,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Comp_ECEF_Position",
+    "namespace" : "sz::EKF_ECEF",
     "name": "Config",
     "members":
     [

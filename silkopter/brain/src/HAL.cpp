@@ -28,7 +28,8 @@
 #include "processor/LiPo_Battery.h"
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
-#include "processor/Comp_ECEF_Position.h"
+#include "processor/Comp_ECEF.h"
+#include "processor/EKF_ECEF.h"
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
 #include "processor/Throttle_To_PWM.h"
@@ -39,8 +40,6 @@
 #include "pilot/Multi_Pilot.h"
 
 #include "controller/Rate_Controller.h"
-#include "controller/Stability_Controller.h"
-#include "controller/Velocity_Controller.h"
 
 #include "simulator/Multi_Simulator.h"
 
@@ -487,7 +486,8 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
-    m_node_factory.register_node<Comp_ECEF_Position>("Comp ECEF Position", *this);
+    m_node_factory.register_node<Comp_ECEF>("Comp ECEF", *this);
+    m_node_factory.register_node<EKF_ECEF>("EKF ECEF", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
     m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);
@@ -642,8 +642,6 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Servo_Gimbal>("Servo Gimbal", *this);
 
     m_node_factory.register_node<Rate_Controller>("Rate Controller", *this);
-    m_node_factory.register_node<Stability_Controller>("Stability Controller", *this);
-    m_node_factory.register_node<Velocity_Controller>("Velocity Controller", *this);
 
 
     get_streams().remove_all();

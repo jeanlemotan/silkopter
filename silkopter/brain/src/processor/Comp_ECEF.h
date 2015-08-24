@@ -15,7 +15,7 @@
 
 namespace sz
 {
-namespace Comp_ECEF_Position
+namespace Comp_ECEF
 {
 struct Init_Params;
 struct Config;
@@ -28,10 +28,10 @@ namespace silk
 namespace node
 {
 
-class Comp_ECEF_Position : public IProcessor
+class Comp_ECEF : public IProcessor
 {
 public:
-    Comp_ECEF_Position(HAL& hal);
+    Comp_ECEF(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -52,8 +52,8 @@ private:
 
     HAL& m_hal;
 
-    std::shared_ptr<sz::Comp_ECEF_Position::Init_Params> m_init_params;
-    std::shared_ptr<sz::Comp_ECEF_Position::Config> m_config;
+    std::shared_ptr<sz::Comp_ECEF::Init_Params> m_init_params;
+    std::shared_ptr<sz::Comp_ECEF::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 

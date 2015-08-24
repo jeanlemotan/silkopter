@@ -57,6 +57,7 @@ INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
+INCLUDEPATH += ../../../../eigen
 
 LIBS += -L=/opt/vc/lib/
 
@@ -110,8 +111,6 @@ SOURCES += \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/source/EHealth.cpp \
     ../../src/controller/Rate_Controller.cpp \
-    ../../src/controller/Stability_Controller.cpp \
-    ../../src/controller/Velocity_Controller.cpp \
     ../../src/simulator/Multi_Simulation.cpp \
     ../../src/simulator/Multi_Simulator.cpp \
     ../../src/processor/Servo_Gimbal.cpp \
@@ -119,7 +118,6 @@ SOURCES += \
     ../../src/source/ADS1115.cpp \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
-    ../../src/processor/Comp_ECEF_Position.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
@@ -131,7 +129,9 @@ SOURCES += \
     ../../src/pilot/Multi_Pilot.cpp \
     ../../src/source/MaxSonar.cpp \
     ../../src/processor/Throttle_To_PWM.cpp \
-    ../../../libs/utils/Coordinates.cpp
+    ../../../libs/utils/Coordinates.cpp \
+    ../../src/processor/Comp_ECEF.cpp \
+    ../../src/processor/EKF_ECEF.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -180,8 +180,6 @@ HEADERS += \
     ../../../libs/common/node/IResampler.h \
     ../../../libs/common/node/ITransformer.h \
     ../../src/controller/Rate_Controller.h \
-    ../../src/controller/Stability_Controller.h \
-    ../../src/controller/Velocity_Controller.h \
     ../../src/lpf/LPF.h \
     ../../src/resampler/Resampler.h \
     ../../src/transformer/Transformer.h \
@@ -213,7 +211,6 @@ HEADERS += \
     ../../src/Sample_Accumulator.h \
     ../../src/MPL_Helper.h \
     ../../src/Basic_Output_Stream.h \
-    ../../src/processor/Comp_ECEF_Position.h \
     ../../../libs/utils/RCP.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
@@ -260,7 +257,18 @@ HEADERS += \
     ../../../libs/common/bus/IBus.h \
     ../../../libs/common/bus/II2C.h \
     ../../../libs/common/bus/ISPI.h \
-    ../../../libs/common/bus/IUART.h
+    ../../../libs/common/bus/IUART.h \
+    ../../../libs/kalman/ekfilter.hpp \
+    ../../../libs/kalman/ekfilter_impl.hpp \
+    ../../../libs/kalman/kfilter.hpp \
+    ../../../libs/kalman/kfilter_impl.hpp \
+    ../../../libs/kalman/kmatrix.hpp \
+    ../../../libs/kalman/kmatrix_impl.hpp \
+    ../../../libs/kalman/ktypes.hpp \
+    ../../../libs/kalman/kvector.hpp \
+    ../../../libs/kalman/kvector_impl.hpp \
+    ../../src/processor/Comp_ECEF.h \
+    ../../src/processor/EKF_ECEF.h
 
 DISTFILES +=
 

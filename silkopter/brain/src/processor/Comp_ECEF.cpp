@@ -1,41 +1,41 @@
 #include "BrainStdAfx.h"
-#include "Comp_ECEF_Position.h"
+#include "Comp_ECEF.h"
 
 #include "sz_math.hpp"
-#include "sz_Comp_ECEF_Position.hpp"
+#include "sz_Comp_ECEF.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Comp_ECEF_Position::Comp_ECEF_Position(HAL& hal)
+Comp_ECEF::Comp_ECEF(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Comp_ECEF_Position::Init_Params())
-    , m_config(new sz::Comp_ECEF_Position::Config())
+    , m_init_params(new sz::Comp_ECEF::Init_Params())
+    , m_config(new sz::Comp_ECEF::Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
-auto Comp_ECEF_Position::init(rapidjson::Value const& init_params) -> bool
+auto Comp_ECEF::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("comp_position::init");
+    QLOG_TOPIC("Comp_ECEF::init");
 
-    sz::Comp_ECEF_Position::Init_Params sz;
+    sz::Comp_ECEF::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Comp_Position data: {}", ss.str());
+        QLOGE("Cannot deserialize Comp_ECEF data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
-auto Comp_ECEF_Position::init() -> bool
+auto Comp_ECEF::init() -> bool
 {
     if (m_init_params->rate == 0)
     {
@@ -51,7 +51,7 @@ auto Comp_ECEF_Position::init() -> bool
     return true;
 }
 
-auto Comp_ECEF_Position::get_inputs() const -> std::vector<Input>
+auto Comp_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
@@ -62,7 +62,7 @@ auto Comp_ECEF_Position::get_inputs() const -> std::vector<Input>
     }};
     return inputs;
 }
-auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
+auto Comp_ECEF::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
@@ -72,9 +72,9 @@ auto Comp_ECEF_Position::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Comp_ECEF_Position::process()
+void Comp_ECEF::process()
 {
-    QLOG_TOPIC("comp_position::process");
+    QLOG_TOPIC("Comp_ECEF::process");
 
 
     m_position_output_stream->clear();
@@ -118,22 +118,22 @@ void Comp_ECEF_Position::process()
     });
 }
 
-void Comp_ECEF_Position::set_input_stream_path(size_t idx, q::Path const& path)
+void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 
-auto Comp_ECEF_Position::set_config(rapidjson::Value const& json) -> bool
+auto Comp_ECEF::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("comp_position::set_config");
+    QLOG_TOPIC("Comp_ECEF::set_config");
 
-    sz::Comp_ECEF_Position::Config sz;
+    sz::Comp_ECEF::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Comp_Position config data: {}", ss.str());
+        QLOGE("Cannot deserialize config data: {}", ss.str());
         return false;
     }
 
@@ -141,21 +141,21 @@ auto Comp_ECEF_Position::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Comp_ECEF_Position::get_config() const -> rapidjson::Document
+auto Comp_ECEF::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Comp_ECEF_Position::get_init_params() const -> rapidjson::Document
+auto Comp_ECEF::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
 
-auto Comp_ECEF_Position::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Comp_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

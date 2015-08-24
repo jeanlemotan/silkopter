@@ -19,8 +19,8 @@
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -225.0,
-                    "y": 90.0
+                    "x": -205.0,
+                    "y": 78.0
                 }
             }
         },
@@ -83,8 +83,8 @@
         "Linear Acceleration (Local->ENU)": {
             "hal_editor": {
                 "position": {
-                    "x": 177.0,
-                    "y": 22.0
+                    "x": 171.0,
+                    "y": 17.0
                 }
             }
         },
@@ -211,8 +211,8 @@
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -210.0,
-                    "y": 6.0
+                    "x": -197.0,
+                    "y": -5.0
                 }
             }
         },
@@ -237,6 +237,30 @@
                 "position": {
                     "x": 180.0,
                     "y": 129.0
+                }
+            }
+        },
+        "Comp ECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": 421.0,
+                    "y": -54.0
+                }
+            }
+        },
+        "EKF ECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": 155.0,
+                    "y": 124.0
+                }
+            }
+        },
+        "Velocity RS (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": -41.0,
+                    "y": -4.0
                 }
             }
         }

@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_ECEF_Position { struct Init_Params {
+namespace sz { namespace Comp_ECEF { struct Init_Params {
  uint32_t rate;
 
 explicit Init_Params():rate(0) {  }
@@ -41,7 +41,7 @@ explicit Init_Params():rate(0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_ECEF_Position::Init_Params > {
+class SAXEventHandler< ::sz::Comp_ECEF::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_ECEF_Position::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writer40dd43c40139fe0c234ed1d9029e817e62d3c62b53c1e19b0c3397721442ac62 >
-struct Serializer< Writer40dd43c40139fe0c234ed1d9029e817e62d3c62b53c1e19b0c3397721442ac62, ::sz::Comp_ECEF_Position::Init_Params > {
+template < class Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85 >
+struct Serializer< Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85, ::sz::Comp_ECEF::Init_Params > {
 
-    void operator()( Writer40dd43c40139fe0c234ed1d9029e817e62d3c62b53c1e19b0c3397721442ac62& w, const ::sz::Comp_ECEF_Position::Init_Params& value) const
+    void operator()( Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85& w, const ::sz::Comp_ECEF::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer40dd43c40139fe0c234ed1d9029e817e62d3c62b53c1e19b0c3397721442ac62, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer54b97d60b82658602e8424da59b548d4bca077ed72bee735e158ea025738ef85, uint32_t >()(w, value.rate);
 
         w.EndObject(1);
     }
@@ -403,7 +403,7 @@ struct Serializer< Writer40dd43c40139fe0c234ed1d9029e817e62d3c62b53c1e19b0c33977
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Comp_ECEF_Position { struct Config {
+namespace sz { namespace Comp_ECEF { struct Config {
  
 
 explicit Config() {  }
@@ -417,7 +417,7 @@ explicit Config() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Comp_ECEF_Position::Config > {
+class SAXEventHandler< ::sz::Comp_ECEF::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -468,7 +468,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Comp_ECEF_Position::Config * obj)
+    explicit SAXEventHandler( ::sz::Comp_ECEF::Config * obj)
         : state(-1)
         , depth(0)
         
@@ -719,10 +719,10 @@ public:
     }
 };
 
-template < class Writerd869e493ff65473a92519290be5bdbf7d1e8f32500a12cd78664c0ae6f9e4bb4 >
-struct Serializer< Writerd869e493ff65473a92519290be5bdbf7d1e8f32500a12cd78664c0ae6f9e4bb4, ::sz::Comp_ECEF_Position::Config > {
+template < class Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df >
+struct Serializer< Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df, ::sz::Comp_ECEF::Config > {
 
-    void operator()( Writerd869e493ff65473a92519290be5bdbf7d1e8f32500a12cd78664c0ae6f9e4bb4& w, const ::sz::Comp_ECEF_Position::Config& value) const
+    void operator()( Writer962003b60dd9ce7cb767619fba0e51e5ae57f15a938fada4c8cdb95fd744d0df& w, const ::sz::Comp_ECEF::Config& value) const
     {
         w.StartObject();
 
