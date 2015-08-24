@@ -29,8 +29,6 @@ private:
 
     Ui::Sim_Window m_ui;
 
-    std::vector<q::util::Connection> m_connections;
-
     silk::HAL& m_hal;
     silk::node::gs::Node_ptr m_sim_node;
     silk::Comms& m_comms;
@@ -40,13 +38,13 @@ private:
     void render_uav(math::trans3df const& trans);
     void render_brain_state();
     void render_ground();
-    void render_enu_axis();
+    void render_world_axis();
 
     void sim_message_received(rapidjson::Document const& message);
 
     struct UAV
     {
-        boost::optional<silk::stream::gs::Multi_State::Sample> brain_state;
+        silk::stream::gs::Multi_State::Sample brain_state;
 
         silk::node::IMulti_Simulator::UAV_State sim_state;
     } m_uav;
@@ -55,5 +53,7 @@ private:
     int m_state_requests = 10;
 
     math::vec3f m_camera_position_target;
+
+    std::vector<q::util::Connection> m_connections;
 };
 

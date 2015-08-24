@@ -234,11 +234,6 @@ void Sim_Window::render_uav(math::trans3df const& trans)
 
 void Sim_Window::render_brain_state()
 {
-    if (!m_uav.brain_state)
-    {
-        return;
-    }
-
     auto mat = m_context.materials.primitive;
     mat.get_render_state(0).set_depth_test(true);
     mat.get_render_state(0).set_depth_write(false);
@@ -247,9 +242,17 @@ void Sim_Window::render_brain_state()
 
     m_context.painter.set_material(mat);
 
+    auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position);
+    auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
+    auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
+
+    auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position);
+    QLOGI("LAT: {}, LON: {}, ALT: {}", lla_position.latitude, lla_position.longitude, lla_position.altitude);
+
+    //render what the brain _thinks_ the orientation is
     {
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state->value.frame);
+        trans.set_rotation(m_uav.brain_state.value.frame);
         trans.set_translation(m_uav.sim_state.enu_position);
         m_context.painter.push_post_clip_transform(trans);
 
@@ -262,14 +265,12 @@ void Sim_Window::render_brain_state()
         m_context.painter.pop_post_clip_transform();
     }
 
+    //render where the brain _thinks_ it is
     {
-        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state->value.ecef_home_position);
-        auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
-        auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
-        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state->value.ecef_position));
+        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state.value.ecef_position));
 
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state->value.frame);
+        trans.set_rotation(m_uav.brain_state.value.frame);
         trans.set_translation(enu_position);
         m_context.painter.push_post_clip_transform(trans);
 
@@ -285,18 +286,8 @@ void Sim_Window::render_brain_state()
     }
 }
 
-void Sim_Window::render_enu_axis()
+void Sim_Window::render_world_axis()
 {
-    q::scene::Camera camera;
-    camera.set_parallel_zoom(4.f);
-    camera.set_transform(math::rotate(m_context.camera.get_rotation(), math::vec3f(0, 5, 0)), m_context.camera.get_rotation());
-    camera.set_viewport(q::video::Viewport(math::vec2u32(0, 0), math::vec2u32(150, 150)));
-    camera.set_near_distance(-100.0f);
-    camera.set_far_distance( 100.0f);
-
-    math::trans3df trans;
-    m_context.painter.set_post_clip_transform(trans);
-
     auto mat = m_context.materials.primitive;
     mat.get_render_state(0).set_depth_test(true);
     mat.get_render_state(0).set_depth_write(false);
@@ -304,10 +295,41 @@ void Sim_Window::render_enu_axis()
     mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
 
     m_context.painter.set_material(mat);
-    m_context.painter.set_camera(camera);
 
-    render_axis(m_context.painter, 1.f, 1.5f);
+    math::trans3df trans;
+    m_context.painter.push_post_clip_transform(trans);
 
+    q::scene::Camera camera;
+    camera.set_parallel_zoom(4.f);
+    camera.set_viewport(q::video::Viewport(math::vec2u32(0, 0), math::vec2u32(150, 150)));
+    camera.set_near_distance(-100.0f);
+    camera.set_far_distance( 100.0f);
+
+    //ENU
+    {
+        math::quatf rot(m_context.camera.get_rotation());
+
+        camera.set_transform(math::rotate(rot, math::vec3f(0, 5, 0)), rot);
+        m_context.painter.set_camera(camera);
+        render_axis(m_context.painter, 1.f, 1.5f);
+    }
+
+    //ECEF
+    {
+        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position);
+        auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(home_lla_position);
+        math::quatd rotd;
+        rotd.set_from_mat3(enu_to_ecef_rotation);
+        math::quatf rot(rotd);
+        rot = rot * m_context.camera.get_rotation();
+
+        camera.set_viewport(q::video::Viewport(math::vec2u32(0, 150), math::vec2u32(150, 150)));
+        camera.set_transform(math::rotate(rot, math::vec3f(0, 5, 0)), rot);
+        m_context.painter.set_camera(camera);
+        render_axis(m_context.painter, 1.f, 1.5f);
+    }
+
+    m_context.painter.pop_post_clip_transform();
     m_context.painter.set_camera(m_context.camera);
 }
 
@@ -349,6 +371,13 @@ void Sim_Window::process()
 
     m_context.painter.set_camera(m_context.camera);
 
+    //setup ENU space
+    {
+//        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position);
+//        auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(home_lla_position);
+//        auto ecef_to_enu_rotation = math::inverse(enu_to_ecef_rotation);
+//        m_context.painter.push_post_clip_transform(math::trans3df(math::vec3f::zero, math::mat3f(ecef_to_enu_rotation), math::vec3f::one));
+    }
 //    m_context.painter.set_material(m_context.materials.primitive);
 //    m_context.painter.fill_sphere(q::draw::Vertex(math::vec3f(0, 0, 0), 0xFF00FF), 0.1, 0);
     render_ground();
@@ -368,8 +397,9 @@ void Sim_Window::process()
         render_brain_state();
     }
 
-    render_enu_axis();
+    render_world_axis();
 
+//    m_context.painter.pop_post_clip_transform();
     m_context.painter.flush();
 
     m_ui.render_widget->end_rendering();
