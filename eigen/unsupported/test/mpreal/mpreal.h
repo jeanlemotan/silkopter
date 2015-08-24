@@ -57,7 +57,8 @@
 #include <limits>
 
 // Options
-#define MPREAL_HAVE_INT64_SUPPORT               // Enable int64_t support if possible. Available only for MSVC 2010 & GCC. 
+// FIXME HAVE_INT64_SUPPORT leads to clashes with long int and int64_t on some systems.
+//#define MPREAL_HAVE_INT64_SUPPORT               // Enable int64_t support if possible. Available only for MSVC 2010 & GCC.
 #define MPREAL_HAVE_MSVC_DEBUGVIEW              // Enable Debugger Visualizer for "Debug" builds in MSVC.
 #define MPREAL_HAVE_DYNAMIC_STD_NUMERIC_LIMITS  // Enable extended std::numeric_limits<mpfr::mpreal> specialization.
                                                 // Meaning that "digits", "round_style" and similar members are defined as functions, not constants.
@@ -71,13 +72,13 @@
 
 // Detect compiler using signatures from http://predef.sourceforge.net/
 #if defined(__GNUC__) && defined(__INTEL_COMPILER)
-    #define IsInf(x) isinf(x)                   // Intel ICC compiler on Linux 
+    #define IsInf(x) (isinf)(x)                   // Intel ICC compiler on Linux 
 
 #elif defined(_MSC_VER)                         // Microsoft Visual C++ 
     #define IsInf(x) (!_finite(x))                           
 
 #else
-    #define IsInf(x) std::isinf(x)              // GNU C/C++ (and/or other compilers), just hope for C99 conformance
+    #define IsInf(x) (std::isinf)(x)              // GNU C/C++ (and/or other compilers), just hope for C99 conformance
 #endif
 
 // A Clang feature extension to determine compiler features.
@@ -333,10 +334,10 @@ public:
 
 #if defined (MPREAL_HAVE_EXPLICIT_CONVERTERS)
     explicit operator bool               () const { return toBool();       }
-    explicit operator int                () const { return toLong();       }
+    explicit operator int                () const { return int(toLong());  }
     explicit operator long               () const { return toLong();       }
     explicit operator long long          () const { return toLong();       }
-    explicit operator unsigned           () const { return toULong();      }
+    explicit operator unsigned           () const { return unsigned(toULong()); }
     explicit operator unsigned long      () const { return toULong();      }
     explicit operator unsigned long long () const { return toULong();      }
     explicit operator float              () const { return toFloat();      }
@@ -529,9 +530,9 @@ public:
 #endif
 
     // Instance Checkers
-    friend bool isnan    (const mpreal& v);
-    friend bool isinf    (const mpreal& v);
-    friend bool isfinite (const mpreal& v);
+    friend bool (isnan)    (const mpreal& v);
+    friend bool (isinf)    (const mpreal& v);
+    friend bool (isfinite) (const mpreal& v);
 
     friend bool isnum    (const mpreal& v);
     friend bool iszero   (const mpreal& v);
@@ -1686,9 +1687,9 @@ inline bool operator == (const mpreal& a, const long double b       ){    return
 inline bool operator == (const mpreal& a, const double b            ){    return (mpfr_cmp_d (a.mpfr_srcptr(),b) == 0 );    }
 
 
-inline bool isnan    (const mpreal& op){    return (mpfr_nan_p    (op.mpfr_srcptr()) != 0 );    }
-inline bool isinf    (const mpreal& op){    return (mpfr_inf_p    (op.mpfr_srcptr()) != 0 );    }
-inline bool isfinite (const mpreal& op){    return (mpfr_number_p (op.mpfr_srcptr()) != 0 );    }
+inline bool (isnan)    (const mpreal& op){    return (mpfr_nan_p    (op.mpfr_srcptr()) != 0 );    }
+inline bool (isinf)    (const mpreal& op){    return (mpfr_inf_p    (op.mpfr_srcptr()) != 0 );    }
+inline bool (isfinite) (const mpreal& op){    return (mpfr_number_p (op.mpfr_srcptr()) != 0 );    }
 inline bool iszero   (const mpreal& op){    return (mpfr_zero_p   (op.mpfr_srcptr()) != 0 );    }
 inline bool isint    (const mpreal& op){    return (mpfr_integer_p(op.mpfr_srcptr()) != 0 );    }
 

@@ -12,25 +12,9 @@
 #undef EIGEN_DEFAULT_TO_ROW_MAJOR
 #endif
 
-static int nb_temporaries;
-
-inline void on_temporary_creation(int) {
-  // here's a great place to set a breakpoint when debugging failures in this test!
-  nb_temporaries++;
-}
-  
-
-#define EIGEN_DENSE_STORAGE_CTOR_PLUGIN { on_temporary_creation(size); }
+#define TEST_ENABLE_TEMPORARY_TRACKING
 
 #include "main.h"
-
-#define VERIFY_EVALUATION_COUNT(XPR,N) {\
-    nb_temporaries = 0; \
-    XPR; \
-    if(nb_temporaries!=N) std::cerr << "nb_temporaries == " << nb_temporaries << "\n"; \
-    VERIFY( (#XPR) && nb_temporaries==N ); \
-  }
-
 
 // test Ref.h
 
@@ -229,6 +213,37 @@ void call_ref()
   VERIFY_EVALUATION_COUNT( call_ref_7(c,c), 0);
 }
 
+typedef Matrix<double,Dynamic,Dynamic,RowMajor> RowMatrixXd;
+int test_ref_overload_fun1(Ref<MatrixXd> )       { return 1; }
+int test_ref_overload_fun1(Ref<RowMatrixXd> )    { return 2; }
+int test_ref_overload_fun1(Ref<MatrixXf> )       { return 3; }
+
+int test_ref_overload_fun2(Ref<const MatrixXd> ) { return 4; }
+int test_ref_overload_fun2(Ref<const MatrixXf> ) { return 5; }
+
+void test_ref_ambiguous(const Ref<const ArrayXd> &A, Ref<ArrayXd> B)
+{
+  B = A;
+  B = A - A;
+}
+
+// See also bug 969
+void test_ref_overloads()
+{
+  MatrixXd Ad, Bd;
+  RowMatrixXd rAd, rBd;
+  VERIFY( test_ref_overload_fun1(Ad)==1 );
+  VERIFY( test_ref_overload_fun1(rAd)==2 );
+  
+  MatrixXf Af, Bf;
+  VERIFY( test_ref_overload_fun2(Ad)==4 );
+  VERIFY( test_ref_overload_fun2(Ad+Bd)==4 );
+  VERIFY( test_ref_overload_fun2(Af+Bf)==5 );
+  
+  ArrayXd A, B;
+  test_ref_ambiguous(A, B);
+}
+
 void test_ref()
 {
   for(int i = 0; i < g_repeat; i++) {
@@ -249,4 +264,6 @@ void test_ref()
     CALL_SUBTEST_5( ref_matrix(MatrixXi(internal::random<int>(1,10),internal::random<int>(1,10))) );
     CALL_SUBTEST_6( call_ref() );
   }
+  
+  CALL_SUBTEST_7( test_ref_overloads() );
 }
