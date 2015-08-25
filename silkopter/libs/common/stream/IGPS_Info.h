@@ -26,8 +26,9 @@ public:
 
         uint32_t visible_satellites = 0; //how many satellites are visible
         uint32_t fix_satellites = 0;     //how many satellites are tracked (participate in the fix)
-        float position_accuracy = std::numeric_limits<float>::infinity(); //accuracy of the position, in meters
-        float velocity_accuracy = std::numeric_limits<float>::infinity(); //accuracy of the velocity in meters
+        float pacc = std::numeric_limits<float>::infinity(); //position accuracy (standard deviation)
+        float vacc = std::numeric_limits<float>::infinity(); //velocity accuracy (standard deviation)
+
         float hdop = std::numeric_limits<float>::infinity(); //horizontal dillution of precision (the minimum precision obtainable form the sats in view)
         float vdop = std::numeric_limits<float>::infinity(); //vertical dillution of precision
         float pdop = std::numeric_limits<float>::infinity(); //position dillution of precision
@@ -53,8 +54,8 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IGPS_Info::Valu
     serialize(buffer, value.fix, off);
     serialize(buffer, value.visible_satellites, off);
     serialize(buffer, value.fix_satellites, off);
-    serialize(buffer, value.position_accuracy, off);
-    serialize(buffer, value.velocity_accuracy, off);
+    serialize(buffer, value.pacc, off);
+    serialize(buffer, value.vacc, off);
     serialize(buffer, value.hdop, off);
     serialize(buffer, value.vdop, off);
     serialize(buffer, value.pdop, off);
@@ -65,8 +66,8 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IGPS_In
     return deserialize(buffer, value.fix, off) &&
             deserialize(buffer, value.visible_satellites, off) &&
             deserialize(buffer, value.fix_satellites, off) &&
-            deserialize(buffer, value.position_accuracy, off) &&
-            deserialize(buffer, value.velocity_accuracy, off) &&
+            deserialize(buffer, value.pacc, off) &&
+            deserialize(buffer, value.vacc, off) &&
             deserialize(buffer, value.hdop, off) &&
             deserialize(buffer, value.vdop, off) &&
             deserialize(buffer, value.pdop, off);

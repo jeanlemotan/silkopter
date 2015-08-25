@@ -839,8 +839,8 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 
         m_last_gps_info_value.visible_satellites = data.numSV;
         m_last_gps_info_value.fix_satellites = data.numSV;
-        m_last_gps_info_value.position_accuracy = data.pAcc / 100.f;
-        m_last_gps_info_value.velocity_accuracy = data.sAcc / 100.f;
+        m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
+        m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
         m_last_gps_info_value.pdop = data.pDOP / 100.f;
         if (data.gpsFix == 0x02)
         {

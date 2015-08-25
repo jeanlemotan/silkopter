@@ -2,6 +2,7 @@
 
 #include "common/node/IProcessor.h"
 #include "common/stream/ILinear_Acceleration.h"
+#include "common/stream/IGPS_Info.h"
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
 #include "common/stream/IPressure.h"
@@ -60,10 +61,11 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    Sample_Accumulator<stream::IECEF_Position,
-                        stream::IECEF_Velocity,
-                        stream::IENU_Linear_Acceleration,
-                        stream::IPressure> m_accumulator;
+    Sample_Accumulator<stream::IGPS_Info,
+                       stream::IECEF_Position,
+                       stream::IECEF_Velocity,
+                       stream::IENU_Linear_Acceleration,
+                       stream::IPressure> m_accumulator;
 
     typedef Basic_Output_Stream<stream::IECEF_Position> Position_Output_Stream;
     mutable std::shared_ptr<Position_Output_Stream> m_position_output_stream;

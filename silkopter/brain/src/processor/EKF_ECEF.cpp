@@ -86,28 +86,15 @@ auto EKF_ECEF::init() -> bool
 
     m_kf_x.B = Eigen::Matrix3d::Identity();
     m_kf_x.K = Eigen::Matrix3d::Identity();
-    m_kf_x.P << 10000000, 10000000, 10000000,
-                10000000, 10000000, 10000000,
-                10000000, 10000000, 10000000;
     m_kf_x.P = Eigen::Matrix3d::Identity();
     m_kf_x.G = Eigen::Matrix3d::Identity();
 
-    double pos_r = math::square(2.0);
-    double vel_r = math::square(0.5);
-    double acc_r = math::square(3.0);
-    m_kf_x.R << pos_r,    0,        0,
-                0,        vel_r,    0,
-                0,        0,        acc_r;
-
-//    double pn = 0.001;
-//    m_kf_x.Q << pn*1,           pn*dt,         pn*0.5*dt*dt,
-//                pn*dt,          pn*0.1,        pn*dt,
-//                pn*0.5*dt*dt,   pn*dt,         pn*0.01;
-
-//    double pn = 0.01;
-//    m_kf_x.Q << pn*0.01,     0,          0,
-//                0,      pn * 0.01,   0,
-//                0,      0,          pn * 0.01;
+    double pacc = math::square(2.0);
+    double vacc = math::square(0.2);
+    double aacc = math::square(3.0);
+    m_kf_x.R << pacc,    0,       0,
+                0,       vacc,    0,
+                0,       0,       aacc;
 
     double pn = 0.01;
     double dt4 = dt*dt*dt*dt;
@@ -127,10 +114,11 @@ auto EKF_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(0) },
-        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(1) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(3) }
+        { stream::IGPS_Info::TYPE, m_init_params->rate, "GPS Info", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Position::TYPE, m_init_params->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(2) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(3) },
+        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(4) }
     }};
     return inputs;
 }
@@ -156,15 +144,33 @@ void EKF_ECEF::process()
 
     m_accumulator.process([this, dts](
                           size_t,
+                          stream::IGPS_Info::Sample const& gi_sample,
                           stream::IECEF_Position::Sample const& pos_sample,
                           stream::IECEF_Velocity::Sample const& vel_sample,
                           stream::IENU_Linear_Acceleration::Sample const& la_sample,
                           stream::IPressure::Sample const& p_sample)
     {
-        //auto last_pos_sample = m_position_output_stream->get_last_sample();
-
-        if (pos_sample.is_healthy)
+        if (gi_sample.is_healthy)
         {
+            double pacc = gi_sample.value.pacc;
+            double vacc = gi_sample.value.vacc;
+            double aacc = math::square(3.0);
+            m_kf_x.R << pacc,    0,       0,
+                        0,       vacc,    0,
+                        0,       0,       aacc;
+        }
+
+        auto last_pos_sample = m_position_output_stream->get_last_sample();
+
+        if (pos_sample.is_healthy && vel_sample.is_healthy)
+        {
+            if (math::distance_sq(pos_sample.value, last_pos_sample.value) > math::square(20))
+            {
+                m_kf_x.x(0) = pos_sample.value.x;
+                m_kf_y.x(0) = pos_sample.value.y;
+                m_kf_z.x(0) = pos_sample.value.z;
+            }
+
             m_kf_x.z(0) = pos_sample.value.x;
             m_kf_y.z(0) = pos_sample.value.y;
             m_kf_z.z(0) = pos_sample.value.z;

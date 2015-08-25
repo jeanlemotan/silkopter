@@ -12,14 +12,20 @@ namespace silk
 namespace node
 {
 
+static constexpr double POSITION_STD_DEV = 2.0;
+static constexpr double VELOCITY_STD_DEV = 0.2;
+static constexpr double PACC_STD_DEV = 0.5;
+static constexpr double VACC_STD_DEV = 0.1;
+
+
 Multi_Simulator::Multi_Simulator(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::Multi_Simulator::Init_Params())
     , m_config(new sz::Multi_Simulator::Config())
-    , m_ecef_pos_distribution(0, 2.0)
-    , m_ecef_vel_distribution(0, 0.5)
-//    , m_ecef_pos_distribution(0, 0.0)
-//    , m_ecef_vel_distribution(0, 0.0)
+    , m_ecef_position_dist(0, POSITION_STD_DEV)
+    , m_ecef_velocity_dist(0, VELOCITY_STD_DEV)
+    , m_ecef_pacc_dist(0, PACC_STD_DEV)
+    , m_ecef_vacc_dist(0, VACC_STD_DEV)
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -27,6 +33,7 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     m_pressure_stream = std::make_shared<Pressure>();
     m_temperature_stream = std::make_shared<Temperature>();
     m_distance_stream = std::make_shared<Distance>();
+    m_gps_info_stream = std::make_shared<GPS_Info>();
     m_ecef_position_stream = std::make_shared<ECEF_Position>();
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
@@ -125,6 +132,9 @@ auto Multi_Simulator::init() -> bool
     m_distance_stream->rate = m_init_params->distance_rate;
     m_distance_stream->dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
 
+    m_gps_info_stream->rate = m_init_params->gps_rate;
+    m_gps_info_stream->dt = std::chrono::microseconds(1000000 / m_gps_info_stream->rate);
+
     m_ecef_position_stream->rate = m_init_params->gps_rate;
     m_ecef_position_stream->dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
 
@@ -157,8 +167,9 @@ auto Multi_Simulator::get_outputs() const -> std::vector<Output>
         {"Pressure", m_pressure_stream},
         {"Temperature", m_temperature_stream},
         {"Sonar Distance", m_distance_stream},
-        {"Position (ecef)", m_ecef_position_stream},
-        {"Velocity (ecef)", m_ecef_velocity_stream},
+        {"GPS Info", m_gps_info_stream},
+        {"GPS Position (ecef)", m_ecef_position_stream},
+        {"GPS Velocity (ecef)", m_ecef_velocity_stream},
     };
     return outputs;
 }
@@ -194,6 +205,7 @@ void Multi_Simulator::process()
     m_pressure_stream->samples.clear();
     m_temperature_stream->samples.clear();
     m_distance_stream->samples.clear();
+    m_gps_info_stream->samples.clear();
     m_ecef_position_stream->samples.clear();
     m_ecef_velocity_stream->samples.clear();
 
@@ -267,27 +279,39 @@ void Multi_Simulator::process()
         }
 
         {
+            auto& stream = *m_gps_info_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.dt)
             {
-                auto& stream = *m_ecef_position_stream;
-                stream.accumulated_dt += simulation_dt;
-                while (stream.accumulated_dt >= stream.dt)
-                {
-                    math::vec3d noise(m_ecef_pos_distribution(m_generator), m_ecef_pos_distribution(m_generator), m_ecef_pos_distribution(m_generator));
-                    stream.accumulated_dt -= stream.dt;
-                    stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
-                    stream.samples.push_back(stream.last_sample);
-                }
+                stream.accumulated_dt -= stream.dt;
+                stream.last_sample.value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
+                stream.last_sample.value.visible_satellites = 4;
+                stream.last_sample.value.fix_satellites = 4;
+                stream.last_sample.value.pacc = m_ecef_pacc_dist(m_generator);
+                stream.last_sample.value.vacc = m_ecef_vacc_dist(m_generator);
+                stream.samples.push_back(stream.last_sample);
             }
+        }
+        {
+            auto& stream = *m_ecef_position_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.dt)
             {
-                auto& stream = *m_ecef_velocity_stream;
-                stream.accumulated_dt += simulation_dt;
-                while (stream.accumulated_dt >= stream.dt)
-                {
-                    math::vec3f noise(m_ecef_vel_distribution(m_generator), m_ecef_vel_distribution(m_generator), m_ecef_vel_distribution(m_generator));
-                    stream.accumulated_dt -= stream.dt;
-                    stream.last_sample.value = math::transform(math::mat3f(enu_to_ecef_rotation), uav_state.enu_velocity) + noise;
-                    stream.samples.push_back(stream.last_sample);
-                }
+                math::vec3d noise(m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator));
+                stream.accumulated_dt -= stream.dt;
+                stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
+                stream.samples.push_back(stream.last_sample);
+            }
+        }
+        {
+            auto& stream = *m_ecef_velocity_stream;
+            stream.accumulated_dt += simulation_dt;
+            while (stream.accumulated_dt >= stream.dt)
+            {
+                math::vec3f noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
+                stream.accumulated_dt -= stream.dt;
+                stream.last_sample.value = math::transform(math::mat3f(enu_to_ecef_rotation), uav_state.enu_velocity) + noise;
+                stream.samples.push_back(stream.last_sample);
             }
         }
     });

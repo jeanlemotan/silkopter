@@ -8,6 +8,7 @@
 #include "common/stream/ITemperature.h"
 #include "common/stream/IDistance.h"
 #include "common/stream/IPosition.h"
+#include "common/stream/IGPS_Info.h"
 #include "common/stream/IVelocity.h"
 #include "common/stream/IThrottle.h"
 #include "common/node/IMulti_Simulator.h"
@@ -59,8 +60,10 @@ private:
     q::Clock::time_point m_last_tp;
 
     std::default_random_engine m_generator;
-    std::normal_distribution<double> m_ecef_pos_distribution;
-    std::normal_distribution<double> m_ecef_vel_distribution;
+    std::normal_distribution<double> m_ecef_position_dist;
+    std::normal_distribution<double> m_ecef_velocity_dist;
+    std::normal_distribution<double> m_ecef_pacc_dist;
+    std::normal_distribution<double> m_ecef_vacc_dist;
 
     struct Angular_Velocity : public stream::IAngular_Velocity
     {
@@ -122,6 +125,16 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
     };
+    struct GPS_Info : public stream::IGPS_Info
+    {
+        auto get_samples() const -> std::vector<Sample> const& { return samples; }
+        auto get_rate() const -> uint32_t { return rate; }
+        uint32_t rate = 0;
+        q::Clock::duration accumulated_dt = q::Clock::duration{0};
+        q::Clock::duration dt = q::Clock::duration{0};
+        std::vector<Sample> samples;
+        Sample last_sample;
+    };
     struct ECEF_Position : public stream::IECEF_Position
     {
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
@@ -149,6 +162,7 @@ private:
     mutable std::shared_ptr<Pressure> m_pressure_stream;
     mutable std::shared_ptr<Temperature> m_temperature_stream;
     mutable std::shared_ptr<Distance> m_distance_stream;
+    mutable std::shared_ptr<GPS_Info> m_gps_info_stream;
     mutable std::shared_ptr<ECEF_Position> m_ecef_position_stream;
     mutable std::shared_ptr<ECEF_Velocity> m_ecef_velocity_stream;
 
