@@ -246,7 +246,7 @@
                     "Cutoff Frequency (Hz)": 2.4
                 },
                 "input_paths": [
-                    "Multi Simulator/Position (ecef)"
+                    "Multi Simulator/GPS Position (ecef)"
                 ]
             },
             "Linear Acceleration (Local->ENU)": {
@@ -285,19 +285,6 @@
                     "Multi Simulator/Acceleration"
                 ]
             },
-            "EKF ECEF": {
-                "type": "EKF ECEF",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {},
-                "input_paths": [
-                    "Position RS (ECEF)/Output",
-                    "Velocity RS (ECEF)/Output",
-                    "Linear Acceleration (Local->ENU)/Output",
-                    "Multi Simulator/Pressure"
-                ]
-            },
             "Velocity RS (ECEF)": {
                 "type": "Velocity RS (ECEF)",
                 "init_params": {
@@ -309,7 +296,28 @@
                     "Cutoff Frequency (Hz)": 2.4
                 },
                 "input_paths": [
-                    "Multi Simulator/Velocity (ecef)"
+                    "Multi Simulator/GPS Velocity (ecef)"
+                ]
+            },
+            "EKF ECEF": {
+                "type": "EKF ECEF",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Position Accuracy (CEP m)": 1.0,
+                    "Velocity Lag (s)": 0.0,
+                    "Velocity Accuracy (m/s)": 0.20000000298023225,
+                    "Acceleration Lag (s)": 0.10999999940395355,
+                    "Acceleration Accuracy (m/s^2)": 2.0,
+                    "Pressure Altitude Lag (s)": 0.10000000149011612,
+                    "Pressure Altitude Accuracy (m)": 0.20000000298023225
+                },
+                "input_paths": [
+                    "Position RS (ECEF)/Output",
+                    "Velocity RS (ECEF)/Output",
+                    "Linear Acceleration (Local->ENU)/Output",
+                    "Multi Simulator/Pressure"
                 ]
             }
         }

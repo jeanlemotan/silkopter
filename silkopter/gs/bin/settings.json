@@ -211,8 +211,8 @@
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -197.0,
-                    "y": -5.0
+                    "x": -179.0,
+                    "y": 3.0
                 }
             }
         },
@@ -251,16 +251,24 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": 155.0,
-                    "y": 124.0
+                    "x": 164.0,
+                    "y": 134.0
                 }
             }
         },
         "Velocity RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -41.0,
-                    "y": -4.0
+                    "x": -35.0,
+                    "y": 7.0
+                }
+            }
+        },
+        "GPS Info RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -377.0,
+                    "y": -24.0
                 }
             }
         }
