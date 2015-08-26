@@ -11,29 +11,87 @@ namespace silk
 namespace node
 {
 
- EKF_ECEF::KF::KF()
+template<size_t St, size_t Me>
+EKF_ECEF::KF<St, Me>::KF()
 {
+    A.setIdentity();
+    x.setZero();
+
+    B.setIdentity();
+    u.setZero();
+
+    H.setIdentity();
+    z.setZero();
+
+    //error
+    P.setIdentity();
+    Q.setIdentity();
+
+    K.setIdentity();
+    R.setIdentity();
+
     I.setIdentity();
+
+    I.setIdentity();
+    B.setIdentity();
+    H.setIdentity();
+    P.setIdentity();
+    K.setIdentity();
 }
 
-void EKF_ECEF::KF::predict()
+template<size_t St, size_t Me>
+void EKF_ECEF::KF<St, Me>::predict()
 {
-    Eigen::Vector3d x_new = A * x + B * u;
-    Eigen::Matrix3d P_new = A * P * A.transpose() + Q;
-    x = x_new;
-    P = P_new;
+    x = A * x + B * u; //state prediction
+    P = A * P * A.transpose() + Q; //covariance prediction
 }
 
-void EKF_ECEF::KF::update()
+template<size_t St, size_t Me>
+void EKF_ECEF::KF<St, Me>::update()
 {
-    Eigen::Matrix3d KT = K.transpose();
+    auto HT = H.transpose();
 
-    G = P * KT * (K * P * KT + R).inverse();
-    Eigen::Vector3d x_new = x + G * (z - K * x);
-    Eigen::Matrix3d P_new = (I - G * K) * P;
+    Measurement_Vector y = z - H * x; //innovation
 
-    x = x_new;
-    P = P_new;
+    auto S = H * P * HT + R; //innovation covariance
+
+    K = P * HT * S.inverse(); //gain
+    x = x + K * y; // state
+    P = (I - K * H) * P; //covariance
+}
+
+template<size_t St, size_t Me>
+void EKF_ECEF::KF<St, Me>::process()
+{
+    predict();
+    update();
+}
+
+///////////////////////////////////////////////////////////////////////
+
+template<class Value>
+void EKF_ECEF::Delayer<Value>::init(float dt, float lag)
+{
+    QASSERT(dt > 0.f && lag >= 0.f);
+    min_value_count = math::max(static_cast<size_t>(math::round(lag / dt)), size_t(1));
+    values.clear();
+}
+
+template<class Value>
+auto EKF_ECEF::Delayer<Value>::get_value() -> Value const&
+{
+    QASSERT(!values.empty());
+    return values.front();
+}
+
+template<class Value>
+void EKF_ECEF::Delayer<Value>::push_back(Value const& value)
+{
+    values.push_back(value);
+    while (values.size() > min_value_count)
+    {
+        values.pop_front();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -78,34 +136,42 @@ auto EKF_ECEF::init() -> bool
     m_velocity_output_stream->set_tp(q::Clock::now());
 
 
-    double dt = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
+    m_dts = q::Seconds(m_position_output_stream->get_dt()).count();
+    double dt = m_dts;
 
-    m_kf_x.A << 1, dt, 0.5*dt*dt,
-                0,  1, dt,
-                0,  0, 1;
-
-    m_kf_x.B = Eigen::Matrix3d::Identity();
-    m_kf_x.K = Eigen::Matrix3d::Identity();
-    m_kf_x.P = Eigen::Matrix3d::Identity();
-    m_kf_x.G = Eigen::Matrix3d::Identity();
-
-    double pacc = math::square(2.0);
-    double vacc = math::square(0.2);
-    double aacc = math::square(3.0);
-    m_kf_x.R << pacc,    0,       0,
-                0,       vacc,    0,
-                0,       0,       aacc;
-
-    double pn = 0.01;
-    double dt4 = dt*dt*dt*dt;
-    double dt3 = dt*dt*dt;
-    double dt2 = dt*dt;
-    m_kf_x.Q << pn*0.25*dt4,    pn*0.5*dt3, pn*0.5*dt2,
+    {
+        m_kf_x.A << 1, dt, 0.5*dt*dt,
+                    0,  1, dt,
+                    0,  0, 1;
+        double pn = 0.01;
+        double dt4 = dt*dt*dt*dt;
+        double dt3 = dt*dt*dt;
+        double dt2 = dt*dt;
+        m_kf_x.Q << pn*0.25*dt4,    pn*0.5*dt3, pn*0.5*dt2,
                 pn*0.5*dt3,     pn*dt2,     pn*dt,
                 pn*0.5*dt2,     pn*dt,      pn*1.0;
+    }
+    {
+        double vc = 1; //how many velocity sensors we have
+        m_kf_z.A << 1,  dt/vc,  0.5*dt*dt,
+                    0,  1,      dt*vc,
+                    0,  0,      1;
+        m_kf_z.H << 1,  0,  0,
+                    0,  1,  0,
+                    0,  0,  1,
+                    0,  0,  0;
+
+        double pn = 0.01;
+        double dt4 = dt*dt*dt*dt;
+        double dt3 = dt*dt*dt;
+        double dt2 = dt*dt;
+        m_kf_z.Q << pn*0.25*dt4,    pn*0.5*dt3, pn*0.5*dt2,
+                    pn*0.5*dt3,     pn*dt2,     pn*dt,
+                    pn*0.5*dt2,     pn*dt,      pn*1.0;
+    }
 
     m_kf_y = m_kf_x;
-    m_kf_z = m_kf_x;
+//    m_kf_z = m_kf_x;
 
     return true;
 }
@@ -114,11 +180,10 @@ auto EKF_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IGPS_Info::TYPE, m_init_params->rate, "GPS Info", m_accumulator.get_stream_path(0) },
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(1) },
-        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(2) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(3) },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(4) }
+        { stream::IECEF_Position::TYPE, m_init_params->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
+        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(3) }
     }};
     return inputs;
 }
@@ -140,32 +205,25 @@ void EKF_ECEF::process()
     m_position_output_stream->clear();
     m_velocity_output_stream->clear();
 
-    double dts = q::Seconds(m_position_output_stream->get_dt()).count();
-
-    m_accumulator.process([this, dts](
+    m_accumulator.process([this](
                           size_t,
-                          stream::IGPS_Info::Sample const& gi_sample,
                           stream::IECEF_Position::Sample const& pos_sample,
                           stream::IECEF_Velocity::Sample const& vel_sample,
                           stream::IENU_Linear_Acceleration::Sample const& la_sample,
                           stream::IPressure::Sample const& p_sample)
     {
-        if (gi_sample.is_healthy)
-        {
-            double pacc = gi_sample.value.pacc;
-            double vacc = gi_sample.value.vacc;
-            double aacc = math::square(3.0);
-            m_kf_x.R << pacc,    0,       0,
-                        0,       vacc,    0,
-                        0,       0,       aacc;
-        }
-
-        auto last_pos_sample = m_position_output_stream->get_last_sample();
-
         if (pos_sample.is_healthy && vel_sample.is_healthy)
         {
+            auto lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
+            auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
+            auto ecef_la = math::transform(math::mat3f(enu_to_ecef_rotation), la_sample.value);
+
+            auto last_pos_sample = m_position_output_stream->get_last_sample();
             if (math::distance_sq(pos_sample.value, last_pos_sample.value) > math::square(20))
             {
+                m_kf_x.x.setZero();
+                m_kf_y.x.setZero();
+                m_kf_z.x.setZero();
                 m_kf_x.x(0) = pos_sample.value.x;
                 m_kf_y.x(0) = pos_sample.value.y;
                 m_kf_z.x(0) = pos_sample.value.z;
@@ -175,33 +233,48 @@ void EKF_ECEF::process()
             m_kf_y.z(0) = pos_sample.value.y;
             m_kf_z.z(0) = pos_sample.value.z;
 
-            m_kf_x.z(1) = vel_sample.value.x;
-            m_kf_y.z(1) = vel_sample.value.y;
-            m_kf_z.z(1) = vel_sample.value.z;
+            m_velocity_delayer.push_back(vel_sample.value);
+            m_linear_acceleration_delayer.push_back(ecef_la);
 
-            auto lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
-            auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
-            auto ecef_la = math::transform(enu_to_ecef_rotation, math::vec3d(la_sample.value));
+            auto const& vel = m_velocity_delayer.get_value();
+            m_kf_x.z(1) = vel.x;
+            m_kf_y.z(1) = vel.y;
+            m_kf_z.z(1) = vel.z;
 
-            m_kf_x.z(2) = ecef_la.x;
-            m_kf_y.z(2) = ecef_la.y;
-            m_kf_z.z(2) = ecef_la.z;
+            //baro velocity. in case the baro is not healthy
+            m_kf_z.z(3) = vel.z;
 
-            m_kf_x.predict();
-            m_kf_x.update();
-
-            m_kf_y.predict();
-            m_kf_y.update();
-
-            m_kf_z.predict();
-            m_kf_z.update();
+            auto const& acc = m_linear_acceleration_delayer.get_value();
+            m_kf_x.z(2) = acc.x;
+            m_kf_y.z(2) = acc.y;
+            m_kf_z.z(2) = acc.z;
         }
+
+        if (p_sample.is_healthy)
+        {
+            double alt = (1.f - std::pow((p_sample.value / 1013.25f), 0.190284f)) * 44307.69396f;
+            if (m_last_baro_altitude)
+            {
+                m_pressure_alt_delayer.push_back((alt - *m_last_baro_altitude) / m_dts);
+
+                auto const& alt = m_pressure_alt_delayer.get_value();
+                m_kf_z.z(3) = alt;
+
+//                QLOGI("{}", (crt_alt - last_alt) / dts);
+            }
+            m_last_baro_altitude = alt;
+        }
+
+        m_kf_x.process();
+        m_kf_y.process();
+        m_kf_z.process();
 
         math::vec3d pos(m_kf_x.x(0), m_kf_y.x(0), m_kf_z.x(0));
         math::vec3f vel(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1));
 
         m_position_output_stream->push_sample(pos, true);
         m_velocity_output_stream->push_sample(vel, true);
+
     });
 }
 
@@ -225,6 +298,33 @@ auto EKF_ECEF::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
+    m_config->position_accuracy = math::max(m_config->position_accuracy, 0.f);
+    m_config->velocity_lag = math::max(m_config->velocity_lag, 0.f);
+    m_config->velocity_accuracy = math::max(m_config->velocity_accuracy, 0.f);
+    m_config->acceleration_lag = math::max(m_config->acceleration_lag, 0.f);
+    m_config->acceleration_accuracy = math::max(m_config->acceleration_accuracy, 0.f);
+    m_config->pressure_alt_lag = math::max(m_config->pressure_alt_lag, 0.f);
+    m_config->pressure_alt_accuracy = math::max(m_config->pressure_alt_accuracy, 0.f);
+
+
+    double pacc = math::square(m_config->position_accuracy);
+    double vacc = math::square(m_config->velocity_accuracy);
+    double aacc = math::square(m_config->acceleration_accuracy);
+    double bacc = math::square(m_config->pressure_alt_accuracy);
+
+    m_kf_x.R << pacc,    0,       0,
+                0,       vacc,    0,
+                0,       0,       aacc;
+    m_kf_y.R = m_kf_x.R;
+    m_kf_z.R << pacc,   0,      0,      0,
+                0,      vacc,   0,      0,
+                0,      0,      aacc,   0,
+                0,      0,      0,      bacc;
+
+    m_velocity_delayer.init(m_dts, m_config->velocity_lag);
+    m_linear_acceleration_delayer.init(m_dts, m_config->acceleration_lag);
+    m_pressure_alt_delayer.init(m_dts, m_config->pressure_alt_lag);
 
     return true;
 }

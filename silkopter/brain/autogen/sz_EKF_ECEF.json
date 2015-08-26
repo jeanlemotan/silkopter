@@ -14,6 +14,13 @@
     "name": "Config",
     "members":
     [
+        ["float", "position_accuracy", {"required": true, "json_key" : "Position Accuracy (CEP m)", "default" : 2.0}],
+        ["float", "velocity_lag", {"required": true, "json_key" : "Velocity Lag (s)", "default" : 0}],
+        ["float", "velocity_accuracy", {"required": true, "json_key" : "Velocity Accuracy (m/s)", "default" : 0.2}],
+        ["float", "acceleration_lag", {"required": true, "json_key" : "Acceleration Lag (s)", "default" : 0}],
+        ["float", "acceleration_accuracy", {"required": true, "json_key" : "Acceleration Accuracy (m/s^2)", "default" : 2.0}],
+        ["float", "pressure_alt_lag", {"required": true, "json_key" : "Pressure Altitude Lag (s)", "default" : 0}],
+        ["float", "pressure_alt_accuracy", {"required": true, "json_key" : "Pressure Altitude Accuracy (m)", "default" : 0.5}]
     ]
 }
 ]

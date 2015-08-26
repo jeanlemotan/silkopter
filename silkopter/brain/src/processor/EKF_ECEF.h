@@ -2,7 +2,6 @@
 
 #include "common/node/IProcessor.h"
 #include "common/stream/ILinear_Acceleration.h"
-#include "common/stream/IGPS_Info.h"
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
 #include "common/stream/IPressure.h"
@@ -61,8 +60,7 @@ private:
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
-    Sample_Accumulator<stream::IGPS_Info,
-                       stream::IECEF_Position,
+    Sample_Accumulator<stream::IECEF_Position,
                        stream::IECEF_Velocity,
                        stream::IENU_Linear_Acceleration,
                        stream::IPressure> m_accumulator;
@@ -73,40 +71,64 @@ private:
     typedef Basic_Output_Stream<stream::IECEF_Velocity> Velocity_Output_Stream;
     mutable std::shared_ptr<Velocity_Output_Stream> m_velocity_output_stream;
 
-    util::coordinates::ECEF m_last_gps_position;
-    math::vec3f m_velocity;
+    boost::optional<float> m_last_baro_altitude;
 
+    template<size_t St, size_t Me>
     class KF
     {
     public:
         KF();
 
         //state
-        Eigen::Matrix3d A;
-        Eigen::Vector3d x;
+        Eigen::Matrix<double, St, St> A; //State transition matrix.
+        typedef Eigen::Matrix<double, St, 1> State_Vector;
+        State_Vector x; //State estimate
 
         //input
-        Eigen::Matrix3d B;
-        Eigen::Vector3d u;
+        Eigen::Matrix<double, St, St> B; //Control matrix. This is used to define linear equations for any control factors.
+        typedef Eigen::Matrix<double, St, 1> Input_Vector;
+        Input_Vector u;
 
-        //measurement
-        Eigen::Matrix3d K;
-        Eigen::Vector3d z;
+        Eigen::Matrix<double, Me, St> H; //Observation matrix. Multiply a state vector by H to translate it to a measurement vector.
+
+        typedef Eigen::Matrix<double, Me, 1> Measurement_Vector;
+        Measurement_Vector z; //measurement data
 
         //error
-        Eigen::Matrix3d P;
-        Eigen::Matrix3d G;
-        Eigen::Matrix3d R;
-        Eigen::Matrix3d Q;
+        Eigen::Matrix<double, St, St> P; //state error
+        Eigen::Matrix<double, St, St> Q; //estimated process error covariance
 
-        Eigen::Matrix3d I;
+        Eigen::Matrix<double, St, Me> K; //kalman gain
+        Eigen::Matrix<double, Me, Me> R; //measurement error covariance
+
+        Eigen::Matrix<double, St, St> I; //identity
 
         void predict();
         void update();
+
+        void process();
     };
-    KF m_kf_x;
-    KF m_kf_y;
-    KF m_kf_z;
+    KF<3, 3> m_kf_x;
+    KF<3, 3> m_kf_y;
+    KF<3, 4> m_kf_z;
+    //KF<3, 3> m_kf_z;
+
+    float m_dts = 0;
+
+    template<class Value>
+    struct Delayer
+    {
+        void init(float dt, float lag);
+        void push_back(Value const& value);
+        auto get_value() -> Value const&;
+
+        std::deque<Value> values;
+        size_t min_value_count = 0;
+    };
+
+    Delayer<stream::IECEF_Velocity::Value> m_velocity_delayer;
+    Delayer<stream::IENU_Linear_Acceleration::Value> m_linear_acceleration_delayer;
+    Delayer<stream::IPressure::Value> m_pressure_alt_delayer;
 };
 
 
