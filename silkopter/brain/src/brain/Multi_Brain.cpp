@@ -94,6 +94,13 @@ void Multi_Brain::process_state_mode_idle()
     auto& input = m_state.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
+    if (m_state.input.last_value.mode.value != stream::IMulti_Input::Mode::IDLE)
+    {
+        QLOGI("Reacquiring Home");
+        m_home.is_acquired = false;
+        m_home.ecef_position_history.clear();
+    }
+
     if (input.vertical.thrust_rate.value != 0)
     {
         input.vertical.thrust_rate.set(0);
@@ -133,6 +140,13 @@ void Multi_Brain::process_state_mode_armed()
 {
     auto& input = m_state.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
+
+    if (!m_home.is_acquired)
+    {
+        QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
+        input.mode.set(stream::IMulti_Input::Mode::IDLE);
+        return;
+    }
 
     stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
     stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
@@ -206,7 +220,27 @@ void Multi_Brain::acquire_home_position()
      }
     if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        m_home.ecef_position = m_state.position.value;
+        auto& history = m_home.ecef_position_history;
+        auto per_second = static_cast<size_t>(std::chrono::seconds(1) / m_thrust_output_stream->get_dt());
+        history.push_back(m_state.position.value);
+#ifdef NDEBUG
+        while (history.size() > 10 * per_second + 1)
+#else
+        while (history.size() > 3 * per_second + 1)
+#endif
+        {
+            if (!m_home.is_acquired)
+            {
+                QLOGI("Home acquired!!!");
+                m_home.is_acquired = true;
+            }
+
+            history.pop_front();
+        }
+        auto avg = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
+        avg /= double(history.size());
+
+        m_home.ecef_position = avg;
         m_home.lla_position = util::coordinates::ecef_to_lla(m_home.ecef_position);
         m_home.enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(m_home.lla_position);
         m_home.ecef_to_enu_trans = math::inverse(m_home.enu_to_ecef_trans);
@@ -221,16 +255,19 @@ void Multi_Brain::refresh_state(stream::IMulti_Input::Sample const& input,
 
     if (input.is_healthy)
     {
+        m_state.input.last_value = m_state.input.value;
         m_state.input.value = input.value;
         m_state.input.last_updated_tp = now;
     }
     if (frame.is_healthy)
     {
+        m_state.frame.last_value = m_state.frame.value;
         m_state.frame.value = frame.value;
         m_state.frame.last_updated_tp = now;
     }
     if (position.is_healthy)
     {
+        m_state.position.last_value = m_state.position.value;
         m_state.position.value = position.value;
         m_state.position.last_updated_tp = now;
     }
@@ -266,6 +303,7 @@ void Multi_Brain::process()
         state.ecef_position = m_state.position.value;
         state.ecef_home_position = m_home.ecef_position;
         state.frame = m_state.frame.value;
+        state.last_input = m_state.input.value;
 
         size_t samples_needed = m_state_output_stream->compute_samples_needed();
         for (size_t i = 0; i < samples_needed; i++)

@@ -87,6 +87,7 @@ private:
     {
         template<class T> struct Data
         {
+            T last_value;
             T value;
             q::Clock::time_point last_updated_tp;
         };
@@ -108,8 +109,10 @@ private:
     void acquire_home_position();
     struct Home
     {
+        bool is_acquired = false;
         util::coordinates::LLA lla_position;
         util::coordinates::ECEF ecef_position;
+        std::deque<util::coordinates::ECEF> ecef_position_history;
         math::trans3dd enu_to_ecef_trans;
         math::trans3dd ecef_to_enu_trans;
     } m_home;
