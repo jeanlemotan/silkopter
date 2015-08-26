@@ -322,6 +322,7 @@ auto HAL::create_node(
     auto node = m_node_factory.create_node(type);
     if (node && node->init(init_params))
     {
+        node->set_config(node->get_config());//apply default config
         auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
         auto outputs = node->get_outputs();
@@ -597,6 +598,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IMulti_Input>>("Multi Input", *this);
     m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
     m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity", *this);
+    m_node_factory.register_node<Resampler<stream::IGPS_Info>>("GPS Info RS", *this);
 
 //    m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
     m_node_factory.register_node<Transformer<stream::IENU_Acceleration, stream::IAcceleration, stream::IFrame>>("Acceleration (ENU->Local)", *this);
