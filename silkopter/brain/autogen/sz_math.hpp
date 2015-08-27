@@ -27,19 +27,19 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct vec2d;
+//struct vec2f;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::math::vec2d > {
+class SAXEventHandler< ::math::vec2f > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;bool has_x;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;bool has_x;
 bool has_y;
 
     bool check_depth(const char* type)
@@ -89,7 +89,7 @@ has_y = false;
     }
 
 public:
-    explicit SAXEventHandler( ::math::vec2d * obj)
+    explicit SAXEventHandler( ::math::vec2f * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x)
@@ -402,15 +402,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer71d20747894600d75b9a11779d797962183f71d6a08cf13902ac3ee992d61e44 >
-struct Serializer< Writer71d20747894600d75b9a11779d797962183f71d6a08cf13902ac3ee992d61e44, ::math::vec2d > {
+template < class Writerd8a8ebf64b47df81a83d43e2a741e9452edf18337ea554a0c673ad6a7b81b00a >
+struct Serializer< Writerd8a8ebf64b47df81a83d43e2a741e9452edf18337ea554a0c673ad6a7b81b00a, ::math::vec2f > {
 
-    void operator()( Writer71d20747894600d75b9a11779d797962183f71d6a08cf13902ac3ee992d61e44& w, const ::math::vec2d& value) const
+    void operator()( Writerd8a8ebf64b47df81a83d43e2a741e9452edf18337ea554a0c673ad6a7b81b00a& w, const ::math::vec2f& value) const
     {
         w.StartObject();
 
-        w.Key("\x78", 1, false); Serializer< Writer71d20747894600d75b9a11779d797962183f71d6a08cf13902ac3ee992d61e44, double >()(w, value.x);
-w.Key("\x79", 1, false); Serializer< Writer71d20747894600d75b9a11779d797962183f71d6a08cf13902ac3ee992d61e44, double >()(w, value.y);
+        w.Key("\x78", 1, false); Serializer< Writerd8a8ebf64b47df81a83d43e2a741e9452edf18337ea554a0c673ad6a7b81b00a, float >()(w, value.x);
+w.Key("\x79", 1, false); Serializer< Writerd8a8ebf64b47df81a83d43e2a741e9452edf18337ea554a0c673ad6a7b81b00a, float >()(w, value.y);
 
         w.EndObject(2);
     }
@@ -865,20 +865,20 @@ w.Key("\x79", 1, false); Serializer< Writerd18ca0617c5d231cd0f5b5db6dcb4d9ce2fcf
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct vec3d;
+//struct vec3f;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::math::vec3d > {
+class SAXEventHandler< ::math::vec3f > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;bool has_x;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_x;
 bool has_y;
 bool has_z;
 
@@ -932,7 +932,7 @@ has_z = false;
     }
 
 public:
-    explicit SAXEventHandler( ::math::vec3d * obj)
+    explicit SAXEventHandler( ::math::vec3f * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x)
@@ -1291,16 +1291,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2 >
-struct Serializer< Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2, ::math::vec3d > {
+template < class Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32 >
+struct Serializer< Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32, ::math::vec3f > {
 
-    void operator()( Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2& w, const ::math::vec3d& value) const
+    void operator()( Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32& w, const ::math::vec3f& value) const
     {
         w.StartObject();
 
-        w.Key("\x78", 1, false); Serializer< Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2, double >()(w, value.x);
-w.Key("\x79", 1, false); Serializer< Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2, double >()(w, value.y);
-w.Key("\x7a", 1, false); Serializer< Writer542c42b3021fcf0625278317fd5243ff3cc46ce4f173265ff4b9395328c0d1a2, double >()(w, value.z);
+        w.Key("\x78", 1, false); Serializer< Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32, float >()(w, value.x);
+w.Key("\x79", 1, false); Serializer< Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32, float >()(w, value.y);
+w.Key("\x7a", 1, false); Serializer< Writer5146f2c6029cd9c9e4260554d290ab5e02c1987aeabb87ac5edc74c50396de32, float >()(w, value.z);
 
         w.EndObject(3);
     }
@@ -1807,21 +1807,21 @@ w.Key("\x7a", 1, false); Serializer< Writerf9ed1e68f60fac21d981a4db3c94db658d6d0
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct vec4d;
+//struct vec4f;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::math::vec4d > {
+class SAXEventHandler< ::math::vec4f > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;
-SAXEventHandler< double > handler_3;bool has_x;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;bool has_x;
 bool has_y;
 bool has_z;
 bool has_w;
@@ -1879,7 +1879,7 @@ has_w = false;
     }
 
 public:
-    explicit SAXEventHandler( ::math::vec4d * obj)
+    explicit SAXEventHandler( ::math::vec4f * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x)
@@ -2284,17 +2284,17 @@ handler_3.PrepareForReuse();
     }
 };
 
-template < class Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130 >
-struct Serializer< Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130, ::math::vec4d > {
+template < class Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0 >
+struct Serializer< Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0, ::math::vec4f > {
 
-    void operator()( Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130& w, const ::math::vec4d& value) const
+    void operator()( Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0& w, const ::math::vec4f& value) const
     {
         w.StartObject();
 
-        w.Key("\x78", 1, false); Serializer< Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130, double >()(w, value.x);
-w.Key("\x79", 1, false); Serializer< Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130, double >()(w, value.y);
-w.Key("\x7a", 1, false); Serializer< Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130, double >()(w, value.z);
-w.Key("\x77", 1, false); Serializer< Writer711fa1ace2eaaf8de9b5a3f84e013423112dfe55312511634829527f87ff9130, double >()(w, value.w);
+        w.Key("\x78", 1, false); Serializer< Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0, float >()(w, value.x);
+w.Key("\x79", 1, false); Serializer< Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0, float >()(w, value.y);
+w.Key("\x7a", 1, false); Serializer< Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0, float >()(w, value.z);
+w.Key("\x77", 1, false); Serializer< Writer9086f025b823c61a8ee0978e05075fb2080f9f9878b3bd21c0561d94d4f157b0, float >()(w, value.w);
 
         w.EndObject(4);
     }
@@ -2853,21 +2853,21 @@ w.Key("\x77", 1, false); Serializer< Writera4b36482041c58f5e36f364fa2231edd8d953
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct quatd;
+//struct quatf;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::math::quatd > {
+class SAXEventHandler< ::math::quatf > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;
-SAXEventHandler< double > handler_3;bool has_x;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;bool has_x;
 bool has_y;
 bool has_z;
 bool has_w;
@@ -2925,7 +2925,7 @@ has_w = false;
     }
 
 public:
-    explicit SAXEventHandler( ::math::quatd * obj)
+    explicit SAXEventHandler( ::math::quatf * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->x)
@@ -3330,17 +3330,17 @@ handler_3.PrepareForReuse();
     }
 };
 
-template < class Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2 >
-struct Serializer< Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2, ::math::quatd > {
+template < class Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686 >
+struct Serializer< Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686, ::math::quatf > {
 
-    void operator()( Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2& w, const ::math::quatd& value) const
+    void operator()( Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686& w, const ::math::quatf& value) const
     {
         w.StartObject();
 
-        w.Key("\x78", 1, false); Serializer< Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2, double >()(w, value.x);
-w.Key("\x79", 1, false); Serializer< Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2, double >()(w, value.y);
-w.Key("\x7a", 1, false); Serializer< Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2, double >()(w, value.z);
-w.Key("\x77", 1, false); Serializer< Writer3e72f85d76e35a7f323d57a38377ac8edf000e6e61c925cb78087628c009b1e2, double >()(w, value.w);
+        w.Key("\x78", 1, false); Serializer< Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686, float >()(w, value.x);
+w.Key("\x79", 1, false); Serializer< Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686, float >()(w, value.y);
+w.Key("\x7a", 1, false); Serializer< Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686, float >()(w, value.z);
+w.Key("\x77", 1, false); Serializer< Writerb9988c3fa2a81f5a116fe3997524a93700098cb447e1cde0d3a237379bb5c686, float >()(w, value.w);
 
         w.EndObject(4);
     }

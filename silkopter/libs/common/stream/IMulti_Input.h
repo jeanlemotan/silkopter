@@ -66,9 +66,9 @@ public:
         };
         Input_Value<Mode> mode = Mode::THRUST_OFFSET;
 
-        Input_Value<double> thrust_rate;
-        Input_Value<double> thrust_offset;
-        Input_Value<double> velocity;
+        Input_Value<float> thrust_rate;
+        Input_Value<float> thrust_offset;
+        Input_Value<float> velocity;
     };
 
     struct Horizontal
@@ -83,9 +83,9 @@ public:
         };
         Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        Input_Value<math::vec2d> angle_rate;   //angle rate of change - radians per second
-        Input_Value<math::vec2d> angle;        //angle from horizontal. zero means horizontal
-        Input_Value<math::vec2d> velocity;     //speed, meters per second
+        Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
+        Input_Value<math::vec2f> angle;        //angle from horizontal. zero means horizontal
+        Input_Value<math::vec2f> velocity;     //speed, meters per second
     };
 
     struct Yaw
@@ -96,7 +96,7 @@ public:
         };
         Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        Input_Value<double> angle_rate;   //angle rate of change - radians per second
+        Input_Value<float> angle_rate;   //angle rate of change - radians per second
     };
 
     //the reference frame for the user controls

@@ -174,13 +174,13 @@ auto PIGPIO::init() -> bool
 #endif
 }
 
-void PIGPIO::set_pwm_value(size_t idx, double value)
+void PIGPIO::set_pwm_value(size_t idx, float value)
 {
     QLOG_TOPIC("pigpio::set_pwm_value");
 
 #if defined RASPBERRY_PI
     auto const& ch = *m_pwm_channels[idx].config;
-    value = math::clamp(value, 0.0, 1.0);
+    value = math::clamp(value, 0.f, 1.f);
     int pulse = value * (ch.max - ch.min);
     gpioPWM(m_pwm_channels[idx].gpio, ch.min + pulse);
 #else

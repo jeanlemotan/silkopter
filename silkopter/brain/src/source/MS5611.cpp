@@ -296,8 +296,8 @@ void MS5611::process()
             SENS = SENS - SENS2;
         }
 
-        auto t = static_cast<double>(TEMP) * 0.01;
-        auto p = static_cast<double>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
+        auto t = static_cast<float>(TEMP) * 0.01f;
+        auto p = static_cast<float>((m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125 * 0.01);
 
         {
             auto samples_needed = m_pressure->compute_samples_needed();

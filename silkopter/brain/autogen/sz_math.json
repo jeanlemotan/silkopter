@@ -2,11 +2,11 @@
 {
 	"definition" : false,
 	"namespace" : "math",
-    "name": "vec2d",
+    "name": "vec2f",
     "members":
     [
-        ["double", "x", {"required": true}],
-        ["double", "y", {"required": true}]
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}]
     ]
 },
 {
@@ -22,12 +22,12 @@
 {
     "definition" : false,
     "namespace" : "math",
-    "name": "vec3d",
+    "name": "vec3f",
     "members":
     [
-        ["double", "x", {"required": true}],
-        ["double", "y", {"required": true}],
-        ["double", "z", {"required": true}]
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}]
     ]
 },
 {
@@ -44,13 +44,13 @@
 {
     "definition" : false,
     "namespace" : "math",
-    "name": "vec4d",
+    "name": "vec4f",
     "members":
     [
-        ["double", "x", {"required": true}],
-        ["double", "y", {"required": true}],
-        ["double", "z", {"required": true}],
-        ["double", "w", {"required": true}]
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}],
+        ["float", "w", {"required": true}]
     ]
 },
 {
@@ -68,13 +68,13 @@
 {
     "definition" : false,
     "namespace" : "math",
-    "name": "quatd",
+    "name": "quatf",
     "members":
     [
-        ["double", "x", {"required": true}],
-        ["double", "y", {"required": true}],
-        ["double", "z", {"required": true}],
-        ["double", "w", {"required": true}]
+        ["float", "x", {"required": true}],
+        ["float", "y", {"required": true}],
+        ["float", "z", {"required": true}],
+        ["float", "w", {"required": true}]
     ]
 }
 ]

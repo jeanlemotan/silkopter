@@ -80,7 +80,7 @@ void Comp_ECEF::process()
     m_position_output_stream->clear();
     m_velocity_output_stream->clear();
 
-    double dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
+    float dts = std::chrono::duration<float>(m_position_output_stream->get_dt()).count();
 
     m_accumulator.process([this, dts](
                           size_t,
@@ -94,7 +94,7 @@ void Comp_ECEF::process()
         if (pos_sample.is_healthy)
         {
             //if too far away, reset
-            if (math::distance_sq(m_last_gps_position, pos_sample.value) > math::square(10.0))
+            if (math::distance_sq(m_last_gps_position, pos_sample.value) > math::square(10.f))
             {
                 last_pos_sample.value = pos_sample.value;
                 m_last_gps_position = pos_sample.value;
@@ -106,10 +106,10 @@ void Comp_ECEF::process()
                 auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
                 auto ecef_la = math::transform(enu_to_ecef_rotation, math::vec3d(la_sample.value));
 
-                last_pos_sample.value = math::lerp(last_pos_sample.value, pos_sample.value, 3.0 * dts) + ecef_la * dts * dts * 0.5;
+                last_pos_sample.value = math::lerp(last_pos_sample.value, pos_sample.value, 3.f * dts) + ecef_la * dts * dts * 0.5f;
                 //m_last_gps_position = last_pos_sample.value;
 
-                QLOGI("acc: {}", ecef_la * dts * dts * 0.5);
+                //QLOGI("acc: {}", ecef_la * dts * dts * 0.5);
             }
         }
 

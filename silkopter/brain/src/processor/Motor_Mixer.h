@@ -69,14 +69,14 @@ private:
 
         struct Config
         {
-            math::vec3d position;
-            math::vec3d max_torque;
-            math::vec3d torque_vector;
+            math::vec3f position;
+            math::vec3f max_torque;
+            math::vec3f torque_vector;
         } config;
 
-        double throttle = 0;
-        double thrust = 0;
-        math::vec3d torque;
+        float throttle = 0;
+        float thrust = 0;
+        math::vec3f torque;
     };
 
     mutable std::vector<std::shared_ptr<Stream>> m_outputs;

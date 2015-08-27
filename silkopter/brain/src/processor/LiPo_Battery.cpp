@@ -12,13 +12,13 @@ namespace node
 constexpr uint32_t MIN_RATE = 50;
 
 constexpr size_t CELL_COUNT_DETECTION_MIN_SAMPLES = 5;
-constexpr double CELL_COUNT_DETECTION_MAX_CURRENT = 0.8;
+constexpr float CELL_COUNT_DETECTION_MAX_CURRENT = 0.8f;
 
 constexpr size_t CAPACITY_DETECTION_MIN_SAMPLES = 5;
-constexpr double CAPACITY_DETECTION_MAX_CURRENT = 0.4;
+constexpr float CAPACITY_DETECTION_MAX_CURRENT = 0.4f;
 
-constexpr double MIN_CELL_VOLTAGE = 2.9;
-constexpr double MAX_CELL_VOLTAGE = 4.1;
+constexpr float MIN_CELL_VOLTAGE = 2.9f;
+constexpr float MAX_CELL_VOLTAGE = 4.1f;
 
 LiPo_Battery::LiPo_Battery(HAL& hal)
     : m_hal(hal)
@@ -54,8 +54,8 @@ auto LiPo_Battery::init() -> bool
     m_output_stream->set_rate(m_init_params->rate);
     m_output_stream->set_tp(q::Clock::now());
 
-    m_current_filter.setup(2, m_init_params->rate, 10.0);
-    m_voltage_filter.setup(2, m_init_params->rate, 2.0);
+    m_current_filter.setup(2, m_init_params->rate, 10.f);
+    m_voltage_filter.setup(2, m_init_params->rate, 2.f);
 
     return true;
 }
@@ -84,7 +84,7 @@ void LiPo_Battery::process()
 
     m_output_stream->clear();
 
-    double current_factor = (std::chrono::duration<double>(m_output_stream->get_dt()).count() / 3600.0);
+    float current_factor = (std::chrono::duration<float>(m_output_stream->get_dt()).count() / 3600.f);
 
     m_accumulator.process([this, current_factor](size_t idx, stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
     {
@@ -101,7 +101,7 @@ void LiPo_Battery::process()
             m_voltage_filter.process(voltage);
             value.average_voltage = voltage;
         }
-        value.capacity_left = 1.0 - math::clamp(value.charge_used / m_config->full_charge, 0.0, 1.0);
+        value.capacity_left = 1.f - math::clamp(value.charge_used / m_config->full_charge, 0.f, 1.f);
 
         m_output_stream->push_sample(value, current_sample.is_healthy & voltage_sample.is_healthy);
     });
@@ -144,13 +144,13 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
         return boost::none;
     }
 
-    double v = last_sample.value.average_voltage;
+    float v = last_sample.value.average_voltage;
 
     //probably the is a faster, analytical way to find this without counting, but i'm not a mathematician!
     for (uint8_t i = 1; i < 30; i++)
     {
-        double min_v = MIN_CELL_VOLTAGE * i;
-        double max_v = MAX_CELL_VOLTAGE * i;
+        float min_v = MIN_CELL_VOLTAGE * i;
+        float max_v = MAX_CELL_VOLTAGE * i;
         if (v >= min_v && v <= max_v)
         {
             return i;

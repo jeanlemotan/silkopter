@@ -14,7 +14,7 @@
     "name": "Config",
     "members":
     [
-        ["double", "value", {"required": true, "json_key" : "Value", "default" : 0}]
+        ["float", "value", {"required": true, "json_key" : "Value", "default" : 0}]
     ]
 }
 ]

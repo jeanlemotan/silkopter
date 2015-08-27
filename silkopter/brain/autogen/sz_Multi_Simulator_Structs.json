@@ -5,9 +5,9 @@
     "name": "Motor_State",
     "members":
     [
-        ["double", "drag_factor", {"required": true, "json_key" : "Drag Factor (0-1)"}],
-        ["double", "throttle", {"required": true, "json_key" : "Throttle (0-1)"}],
-        ["double", "thrust", {"required": true, "json_key" : "Thrust (N)"}]
+        ["float", "drag_factor", {"required": true, "json_key" : "Drag Factor (0-1)"}],
+        ["float", "throttle", {"required": true, "json_key" : "Throttle (0-1)"}],
+        ["float", "thrust", {"required": true, "json_key" : "Thrust (N)"}]
     ]
 },
 {
@@ -16,12 +16,12 @@
     "name": "UAV_State",
     "members":
     [
-        ["math::vec3d", "enu_position", {"required": true, "json_key" : "Position (ENU)"}],
-        ["math::vec3d", "enu_velocity", {"required": true, "json_key" : "Velocity (ENU)"}],
-        ["math::vec3d", "enu_linear_acceleration", {"required": true, "json_key" : "Linear Acceleration (ENU)"}],
-        ["math::vec3d", "acceleration", {"required": true, "json_key" : "Acceleration"}],
-        ["math::quatd", "local_to_enu_rotation", {"required": true, "json_key" : "Rotation (Local->ENU)"}],
-        ["math::vec3d", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
+        ["math::vec3f", "enu_position", {"required": true, "json_key" : "Position (ENU)"}],
+        ["math::vec3f", "enu_velocity", {"required": true, "json_key" : "Velocity (ENU)"}],
+        ["math::vec3f", "enu_linear_acceleration", {"required": true, "json_key" : "Linear Acceleration (ENU)"}],
+        ["math::vec3f", "acceleration", {"required": true, "json_key" : "Acceleration"}],
+        ["math::quatf", "local_to_enu_rotation", {"required": true, "json_key" : "Rotation (Local->ENU)"}],
+        ["math::vec3f", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
         ["std::vector<silk::node::IMulti_Simulator::Motor_State>", "motors", {"required": true, "json_key" : "Motors"}]
     ]
 }

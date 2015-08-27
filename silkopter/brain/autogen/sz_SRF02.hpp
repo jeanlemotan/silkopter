@@ -457,9 +457,9 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer507b2
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace SRF02 { struct Config {
- math::vec3d direction;
-double min_distance;
-double max_distance;
+ math::vec3f direction;
+float min_distance;
+float max_distance;
 
 explicit Config():direction(), min_distance(0.2), max_distance(6) {  }
 
@@ -478,9 +478,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< math::vec3d > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;bool has_direction;
+    SAXEventHandler< math::vec3f > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_direction;
 
     bool check_depth(const char* type)
     {
@@ -896,9 +896,9 @@ struct Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d03
     {
         w.StartObject();
 
-        w.Key("\x44\x69\x72\x65\x63\x74\x69\x6f\x6e\x20\x28\x6e\x6f\x72\x6d\x61\x6c\x69\x7a\x65\x64\x20\x76\x65\x63\x74\x6f\x72\x29", 29, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, math::vec3d >()(w, value.direction);
-w.Key("\x4d\x69\x6e\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, double >()(w, value.min_distance);
-w.Key("\x4d\x61\x78\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, double >()(w, value.max_distance);
+        w.Key("\x44\x69\x72\x65\x63\x74\x69\x6f\x6e\x20\x28\x6e\x6f\x72\x6d\x61\x6c\x69\x7a\x65\x64\x20\x76\x65\x63\x74\x6f\x72\x29", 29, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, math::vec3f >()(w, value.direction);
+w.Key("\x4d\x69\x6e\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.min_distance);
+w.Key("\x4d\x61\x78\x69\x6d\x75\x6d\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x28\x6d\x29", 20, false); Serializer< Writer3a2f091b9e92a2dd9670883716135220b20d22376e417a1e6508d032e068cac9, float >()(w, value.max_distance);
 
         w.EndObject(3);
     }

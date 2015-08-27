@@ -14,7 +14,7 @@
     "name": "Config",
     "members":
     [
-        ["math::vec3d", "value", {"required": true, "json_key" : "Value"}]
+        ["math::vec3f", "value", {"required": true, "json_key" : "Value"}]
     ]
 }
 ]

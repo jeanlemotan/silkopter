@@ -28,11 +28,11 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct PID {
- double kp;
-double ki;
-double kd;
-double max_i;
-double d_filter;
+ float kp;
+float ki;
+float kd;
+float max_i;
+float d_filter;
 
 explicit PID():kp(), ki(), kd(), max_i(), d_filter() {  }
 
@@ -50,11 +50,11 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;
-SAXEventHandler< double > handler_3;
-SAXEventHandler< double > handler_4;bool has_kp;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;
+SAXEventHandler< float > handler_4;bool has_kp;
 bool has_ki;
 bool has_kd;
 bool has_max_i;
@@ -574,11 +574,11 @@ struct Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76e
     {
         w.StartObject();
 
-        w.Key("\x6b\x50", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, double >()(w, value.kp);
-w.Key("\x6b\x49", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, double >()(w, value.ki);
-w.Key("\x6b\x44", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, double >()(w, value.kd);
-w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, double >()(w, value.max_i);
-w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, double >()(w, value.d_filter);
+        w.Key("\x6b\x50", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, float >()(w, value.kp);
+w.Key("\x6b\x49", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, float >()(w, value.ki);
+w.Key("\x6b\x44", 2, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, float >()(w, value.kd);
+w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, float >()(w, value.max_i);
+w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writercc21eaf41aabeae5dfa81963bd7b7e8fa069138387bf1386cf9f76edb2bc4a47, float >()(w, value.d_filter);
 
         w.EndObject(5);
     }
@@ -615,9 +615,9 @@ w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writercc21eaf41
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct PI {
- double kp;
-double ki;
-double max_i;
+ float kp;
+float ki;
+float max_i;
 
 explicit PI():kp(), ki(), max_i() {  }
 
@@ -635,9 +635,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;bool has_kp;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_kp;
 bool has_ki;
 bool has_max_i;
 
@@ -1057,9 +1057,9 @@ struct Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644
     {
         w.StartObject();
 
-        w.Key("\x6b\x50", 2, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, double >()(w, value.kp);
-w.Key("\x6b\x49", 2, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, double >()(w, value.ki);
-w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, double >()(w, value.max_i);
+        w.Key("\x6b\x50", 2, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, float >()(w, value.kp);
+w.Key("\x6b\x49", 2, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, float >()(w, value.ki);
+w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writerc7e7ee8d94d43d3e674e4a5fa792cd6988473f0302d5bf1bd6e8644a68adcab8, float >()(w, value.max_i);
 
         w.EndObject(3);
     }
@@ -1096,7 +1096,7 @@ w.Key("\x4d\x61\x78\x20\x49", 5, false); Serializer< Writerc7e7ee8d94d43d3e674e4
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct P {
- double kp;
+ float kp;
 
 explicit P():kp() {  }
 
@@ -1114,7 +1114,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;bool has_kp;
+    SAXEventHandler< float > handler_0;bool has_kp;
 
     bool check_depth(const char* type)
     {
@@ -1434,7 +1434,7 @@ struct Serializer< Writer07c8a5962d391fed167560abef869b3dfc530ac4ff45e9aa72535e5
     {
         w.StartObject();
 
-        w.Key("\x6b\x50", 2, false); Serializer< Writer07c8a5962d391fed167560abef869b3dfc530ac4ff45e9aa72535e58e7340b8a, double >()(w, value.kp);
+        w.Key("\x6b\x50", 2, false); Serializer< Writer07c8a5962d391fed167560abef869b3dfc530ac4ff45e9aa72535e58e7340b8a, float >()(w, value.kp);
 
         w.EndObject(1);
     }
@@ -1471,9 +1471,9 @@ struct Serializer< Writer07c8a5962d391fed167560abef869b3dfc530ac4ff45e9aa72535e5
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { struct PD {
- double kp;
-double kd;
-double d_filter;
+ float kp;
+float kd;
+float d_filter;
 
 explicit PD():kp(), kd(), d_filter() {  }
 
@@ -1491,9 +1491,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;bool has_kp;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_kp;
 bool has_kd;
 bool has_d_filter;
 
@@ -1913,9 +1913,9 @@ struct Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3
     {
         w.StartObject();
 
-        w.Key("\x6b\x50", 2, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, double >()(w, value.kp);
-w.Key("\x6b\x44", 2, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, double >()(w, value.kd);
-w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, double >()(w, value.d_filter);
+        w.Key("\x6b\x50", 2, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, float >()(w, value.kp);
+w.Key("\x6b\x44", 2, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, float >()(w, value.kd);
+w.Key("\x44\x20\x46\x69\x6c\x74\x65\x72", 8, false); Serializer< Writer9dbe6db7d7baf32e4db4eacc62352043b8ae4d36651dede244644b3c979cec4f, float >()(w, value.d_filter);
 
         w.EndObject(3);
     }

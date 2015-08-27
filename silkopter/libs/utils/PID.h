@@ -40,8 +40,8 @@ public:
 
 private:
     Params m_params;
-    double m_dts = 0;
-    double m_dts_inv = 0;
+    float m_dts = 0;
+    float m_dts_inv = 0;
     bool m_has_ki = false;
     bool m_has_kd = false;
     Value_t m_integrator;
@@ -122,8 +122,8 @@ auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
     m_params = params;
     m_has_ki = !math::is_zero(params.ki, math::epsilon<Scalar>());
     m_has_kd = !math::is_zero(params.kd, math::epsilon<Scalar>());
-    m_dts = 1.0 / params.rate;
-    m_dts_inv = 1.0 / m_dts;
+    m_dts = 1.f / params.rate;
+    m_dts_inv = 1.f / m_dts;
     return true;
 }
 

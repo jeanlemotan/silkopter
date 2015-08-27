@@ -138,7 +138,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
     }
     else if (m_step == Step::DONE)
     {
-        math::vec3d bias = std::accumulate(m_samples.begin(), m_samples.end(), math::vec3d());
+        math::vec3f bias = std::accumulate(m_samples.begin(), m_samples.end(), math::vec3f());
         bias /= static_cast<float>(m_samples.size());
 
         m_content = new QWidget(this);
@@ -153,7 +153,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
 
         sz::calibration::Angular_Velocity point;
         point.temperature = 0;
-        point.bias = math::vec3d(bias);
+        point.bias = math::vec3f(bias);
         m_crt_calibration.points.push_back(point);
 
         QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this](double value)

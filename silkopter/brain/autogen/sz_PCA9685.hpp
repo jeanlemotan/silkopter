@@ -511,8 +511,8 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerbb7c1
 
 namespace sz { namespace PCA9685 { struct PWM_Channel {
  bool servo_signal;
-double min;
-double max;
+float min;
+float max;
 
 explicit PWM_Channel():servo_signal(false), min(0), max(1) {  }
 
@@ -532,8 +532,8 @@ private:
     int depth;
 
     SAXEventHandler< bool > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;bool has_min;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_min;
 bool has_max;
 
     bool check_depth(const char* type)
@@ -952,8 +952,8 @@ struct Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db
         w.StartObject();
 
         w.Key("\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, bool >()(w, value.servo_signal);
-w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, double >()(w, value.min);
-w.Key("\x4d\x61\x78", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, double >()(w, value.max);
+w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min);
+w.Key("\x4d\x61\x78", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.max);
 
         w.EndObject(3);
     }

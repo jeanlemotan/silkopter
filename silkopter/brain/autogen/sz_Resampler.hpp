@@ -458,7 +458,7 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer1575f
 
 namespace sz { namespace Resampler { struct Config {
  uint32_t poles;
-double cutoff_frequency;
+float cutoff_frequency;
 
 explicit Config():poles(1), cutoff_frequency(0) {  }
 
@@ -478,7 +478,7 @@ private:
     int depth;
 
     SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< double > handler_1;bool has_poles;
+SAXEventHandler< float > handler_1;bool has_poles;
 
     bool check_depth(const char* type)
     {
@@ -847,7 +847,7 @@ struct Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bcca
         w.StartObject();
 
         w.Key("\x50\x6f\x6c\x65\x73", 5, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, uint32_t >()(w, value.poles);
-w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, double >()(w, value.cutoff_frequency);
+w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer0a8ab478dd7a259163a4a15d37f7d55064f3cdb4a38e01686d0bccab6d689e06, float >()(w, value.cutoff_frequency);
 
         w.EndObject(2);
     }

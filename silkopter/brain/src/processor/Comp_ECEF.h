@@ -69,7 +69,7 @@ private:
     mutable std::shared_ptr<Velocity_Output_Stream> m_velocity_output_stream;
 
     util::coordinates::ECEF m_last_gps_position;
-    math::vec3d m_velocity;
+    math::vec3f m_velocity;
 
 //    struct ENU_Frame_Stream : public stream::IENU_Frame
 //    {

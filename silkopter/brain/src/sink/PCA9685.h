@@ -73,7 +73,10 @@ private:
 
     std::vector<PWM_Channel> m_pwm_channels;
 
-    void set_pwm_value(size_t idx, boost::optional<double> value);
+    void set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> value);
+    std::array<uint8_t, 16 * 4> m_i2c_data;
+    size_t m_i2c_data_first = 0;
+    size_t m_i2c_data_last = 0;
 };
 
 }

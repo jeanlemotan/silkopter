@@ -457,8 +457,8 @@ w.Key("\x43\x6f\x6d\x70\x6f\x6e\x65\x6e\x74\x20\x43\x6f\x75\x6e\x74", 15, false)
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Oscillator { struct Component {
- double frequency;
-double amplitude;
+ float frequency;
+float amplitude;
 
 explicit Component():frequency(), amplitude(1) {  }
 
@@ -477,8 +477,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;bool has_frequency;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;bool has_frequency;
 bool has_amplitude;
 
     bool check_depth(const char* type)
@@ -848,8 +848,8 @@ struct Serializer< Writer6f981acd920fa912ce5e6435a2b1465e3e9f00801c43dfc0ad82df2
     {
         w.StartObject();
 
-        w.Key("\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 14, false); Serializer< Writer6f981acd920fa912ce5e6435a2b1465e3e9f00801c43dfc0ad82df28caa362b1, double >()(w, value.frequency);
-w.Key("\x41\x6d\x70\x6c\x69\x74\x75\x64\x65", 9, false); Serializer< Writer6f981acd920fa912ce5e6435a2b1465e3e9f00801c43dfc0ad82df28caa362b1, double >()(w, value.amplitude);
+        w.Key("\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 14, false); Serializer< Writer6f981acd920fa912ce5e6435a2b1465e3e9f00801c43dfc0ad82df28caa362b1, float >()(w, value.frequency);
+w.Key("\x41\x6d\x70\x6c\x69\x74\x75\x64\x65", 9, false); Serializer< Writer6f981acd920fa912ce5e6435a2b1465e3e9f00801c43dfc0ad82df28caa362b1, float >()(w, value.amplitude);
 
         w.EndObject(2);
     }
@@ -886,8 +886,8 @@ w.Key("\x41\x6d\x70\x6c\x69\x74\x75\x64\x65", 9, false); Serializer< Writer6f981
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Oscillator { struct Config {
- double amplitude;
-double noise;
+ float amplitude;
+float noise;
 bool square;
 std::vector<sz::Oscillator::Component> components;
 
@@ -908,8 +908,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< double > handler_1;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
 SAXEventHandler< bool > handler_2;
 SAXEventHandler< std::vector<sz::Oscillator::Component> > handler_3;bool has_amplitude;
 bool has_noise;
@@ -1381,8 +1381,8 @@ struct Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba60
     {
         w.StartObject();
 
-        w.Key("\x41\x6d\x70\x6c\x69\x74\x75\x64\x65", 9, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, double >()(w, value.amplitude);
-w.Key("\x4e\x6f\x69\x73\x65", 5, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, double >()(w, value.noise);
+        w.Key("\x41\x6d\x70\x6c\x69\x74\x75\x64\x65", 9, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, float >()(w, value.amplitude);
+w.Key("\x4e\x6f\x69\x73\x65", 5, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, float >()(w, value.noise);
 w.Key("\x53\x71\x75\x61\x72\x65", 6, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, bool >()(w, value.square);
 w.Key("\x43\x6f\x6d\x70\x6f\x6e\x65\x6e\x74\x73", 10, false); Serializer< Writer94a5520ff1814fc986239f633c5dec77b4ac5e39d353aee042fba6018b085494, std::vector<sz::Oscillator::Component> >()(w, value.components);
 

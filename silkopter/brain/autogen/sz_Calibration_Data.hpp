@@ -28,9 +28,9 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace calibration { struct Acceleration {
- double temperature;
-math::vec3d bias;
-math::vec3d scale;
+ float temperature;
+math::vec3f bias;
+math::vec3f scale;
 
 explicit Acceleration():temperature(0), bias(), scale(1) {  }
 
@@ -49,9 +49,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< math::vec3d > handler_1;
-SAXEventHandler< math::vec3d > handler_2;bool has_temperature;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< math::vec3f > handler_1;
+SAXEventHandler< math::vec3f > handler_2;bool has_temperature;
 bool has_bias;
 bool has_scale;
 
@@ -471,9 +471,9 @@ struct Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef
     {
         w.StartObject();
 
-        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, double >()(w, value.temperature);
-w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, math::vec3d >()(w, value.bias);
-w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, math::vec3d >()(w, value.scale);
+        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, float >()(w, value.temperature);
+w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, math::vec3f >()(w, value.bias);
+w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer9e5315053059ad61be74ef5a385691ae34e06e8303a2737bec784ef55b195e2c, math::vec3f >()(w, value.scale);
 
         w.EndObject(3);
     }
@@ -886,8 +886,8 @@ struct Serializer< Writera4e57f46ad300bdbf2194524f7b238de155d0ad084b0d733fd8a83d
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace calibration { struct Angular_Velocity {
- double temperature;
-math::vec3d bias;
+ float temperature;
+math::vec3f bias;
 
 explicit Angular_Velocity():temperature(0), bias() {  }
 
@@ -906,8 +906,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< math::vec3d > handler_1;bool has_temperature;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< math::vec3f > handler_1;bool has_temperature;
 bool has_bias;
 
     bool check_depth(const char* type)
@@ -1277,8 +1277,8 @@ struct Serializer< Writer9d57d580fafb62efe90d09c25a3467d36b11f66318fa6f37b9f92bf
     {
         w.StartObject();
 
-        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer9d57d580fafb62efe90d09c25a3467d36b11f66318fa6f37b9f92bf4b734e642, double >()(w, value.temperature);
-w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer9d57d580fafb62efe90d09c25a3467d36b11f66318fa6f37b9f92bf4b734e642, math::vec3d >()(w, value.bias);
+        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer9d57d580fafb62efe90d09c25a3467d36b11f66318fa6f37b9f92bf4b734e642, float >()(w, value.temperature);
+w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer9d57d580fafb62efe90d09c25a3467d36b11f66318fa6f37b9f92bf4b734e642, math::vec3f >()(w, value.bias);
 
         w.EndObject(2);
     }
@@ -1691,9 +1691,9 @@ struct Serializer< Writerf769641e30dc589310ee1597fcdda5144e604f381c0a39a2d7a529d
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace calibration { struct Magnetic_Field {
- double temperature;
-math::vec3d bias;
-math::vec3d scale;
+ float temperature;
+math::vec3f bias;
+math::vec3f scale;
 
 explicit Magnetic_Field():temperature(0), bias(), scale(1) {  }
 
@@ -1712,9 +1712,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;
-SAXEventHandler< math::vec3d > handler_1;
-SAXEventHandler< math::vec3d > handler_2;bool has_temperature;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< math::vec3f > handler_1;
+SAXEventHandler< math::vec3f > handler_2;bool has_temperature;
 bool has_bias;
 bool has_scale;
 
@@ -2134,9 +2134,9 @@ struct Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea4
     {
         w.StartObject();
 
-        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, double >()(w, value.temperature);
-w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3d >()(w, value.bias);
-w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3d >()(w, value.scale);
+        w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, float >()(w, value.temperature);
+w.Key("\x42\x69\x61\x73", 4, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3f >()(w, value.bias);
+w.Key("\x53\x63\x61\x6c\x65", 5, false); Serializer< Writer12d2ff68e51df99cc4c8cdbd3ad5c337902fc2332c704753594dea48b42ed30c, math::vec3f >()(w, value.scale);
 
         w.EndObject(3);
     }

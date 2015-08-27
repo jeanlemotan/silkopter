@@ -405,7 +405,7 @@ struct Serializer< Writerff21023490bfa4bf168109b93771b34f46b4912e27b7c4545a1906c
 
 namespace sz { namespace LPF { struct Config {
  uint32_t poles;
-double cutoff_frequency;
+float cutoff_frequency;
 
 explicit Config():poles(1), cutoff_frequency() {  }
 
@@ -425,7 +425,7 @@ private:
     int depth;
 
     SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< double > handler_1;bool has_poles;
+SAXEventHandler< float > handler_1;bool has_poles;
 bool has_cutoff_frequency;
 
     bool check_depth(const char* type)
@@ -796,7 +796,7 @@ struct Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59a
         w.StartObject();
 
         w.Key("\x50\x6f\x6c\x65\x73", 5, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, uint32_t >()(w, value.poles);
-w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, double >()(w, value.cutoff_frequency);
+w.Key("\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 21, false); Serializer< Writerbb0be6ff4d79b8323406db0a4f6e0f7c95b097ffe535a4cd5b4d59ac243411b2, float >()(w, value.cutoff_frequency);
 
         w.EndObject(2);
     }

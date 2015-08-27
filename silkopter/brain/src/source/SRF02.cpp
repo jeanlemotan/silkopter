@@ -41,7 +41,7 @@ SRF02::SRF02(HAL& hal)
     , m_init_params(new sz::SRF02::Init_Params())
     , m_config(new sz::SRF02::Config())
 {
-    m_config->direction = math::vec3d(0, 0, -1); //pointing down
+    m_config->direction = math::vec3f(0, 0, -1); //pointing down
 
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -166,12 +166,12 @@ void SRF02::process()
 
         //QLOGI("d = {}, min_d = {}", d, min_d);
 
-        double distance = static_cast<double>(d) / 100.0; //meters
+        float distance = static_cast<float>(d) / 100.f; //meters
 
-        double min_distance = math::max(m_config->min_distance, static_cast<double>(min_d) / 100.0); //meters
-        double max_distance = m_config->max_distance;
-        auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
-        auto is_healthy = distance >= min_distance && distance <= max_distance;
+        float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
+        float max_distance = m_config->max_distance;
+        math::vec3f value = m_config->direction * math::clamp(distance, min_distance, max_distance);
+        bool is_healthy = distance >= min_distance && distance <= max_distance;
 
         m_output_stream->clear();
         auto samples_needed = m_output_stream->compute_samples_needed();
@@ -198,11 +198,11 @@ auto SRF02::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
-    m_config->min_distance = math::max(m_config->min_distance, 0.1);
-    m_config->max_distance = math::min(m_config->max_distance, 12.0);
-    if (math::is_zero(math::length(m_config->direction), math::epsilon<double>()))
+    m_config->min_distance = math::max(m_config->min_distance, 0.1f);
+    m_config->max_distance = math::min(m_config->max_distance, 12.f);
+    if (math::is_zero(math::length(m_config->direction), math::epsilon<float>()))
     {
-        m_config->direction = math::vec3d(0, 0, -1); //pointing down
+        m_config->direction = math::vec3f(0, 0, -1); //pointing down
     }
     m_config->direction.normalize<math::safe>();
 

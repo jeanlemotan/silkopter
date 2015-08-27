@@ -47,14 +47,14 @@ constexpr uint16_t ADS1115_PGA_256             = 0x05 << ADS1115_PGA_SHIFT;
 constexpr uint16_t ADS1115_PGA_256B            = 0x06 << ADS1115_PGA_SHIFT;
 constexpr uint16_t ADS1115_PGA_256C            = 0x07 << ADS1115_PGA_SHIFT;
 
-constexpr double ADS1115_MV_6144                = 0.000187500;
-constexpr double ADS1115_MV_4096                = 0.000125000;
-constexpr double ADS1115_MV_2048                = 0.000062500; // default
-constexpr double ADS1115_MV_1024                = 0.000031250;
-constexpr double ADS1115_MV_512                 = 0.000015625;
-constexpr double ADS1115_MV_256                 = 0.000007813;
-constexpr double ADS1115_MV_256B                = 0.000007813;
-constexpr double ADS1115_MV_256C                = 0.000007813;
+constexpr float ADS1115_MV_6144                = 0.000187500f;
+constexpr float ADS1115_MV_4096                = 0.000125000f;
+constexpr float ADS1115_MV_2048                = 0.000062500f; // default
+constexpr float ADS1115_MV_1024                = 0.000031250f;
+constexpr float ADS1115_MV_512                 = 0.000015625f;
+constexpr float ADS1115_MV_256                 = 0.000007813f;
+constexpr float ADS1115_MV_256B                = 0.000007813f;
+constexpr float ADS1115_MV_256C                = 0.000007813f;
 
 constexpr uint16_t ADS1115_MODE_SHIFT          = 8;
 constexpr uint16_t ADS1115_MODE_CONTINUOUS     = 0x00 << ADS1115_MODE_SHIFT;
@@ -257,7 +257,7 @@ void ADS1115::process()
     }
     int16_t fvalue = reinterpret_cast<int16_t&>(ufvalue);
 
-    double value = 0;
+    float value = 0;
     switch (m_config_register.gain)
     {
     case ADS1115_PGA_6144:
@@ -285,7 +285,7 @@ void ADS1115::process()
     }
 
     //scale 0..3.3v to 0..1
-    value = math::clamp(value / 3.3, 0.0, 1.0);
+    value = math::clamp(value / 3.3f, 0.f, 1.f);
 
     //add samples up to the sample rate
     while (samples_needed > 0)

@@ -14,10 +14,10 @@ namespace node
 
 static constexpr double POSITION_STD_DEV = 2.0;
 //static constexpr double POSITION_STD_DEV = 0.0;
-static constexpr double VELOCITY_STD_DEV = 0.2;
-//static constexpr double VELOCITY_STD_DEV = 0.0;
-static constexpr double PACC_STD_DEV = 0.5;
-static constexpr double VACC_STD_DEV = 0.1;
+static constexpr float VELOCITY_STD_DEV = 0.2f;
+//static constexpr float VELOCITY_STD_DEV = 0.f;
+static constexpr float PACC_STD_DEV = 0.5f;
+static constexpr float VACC_STD_DEV = 0.1f;
 
 
 Multi_Simulator::Multi_Simulator(HAL& hal)
@@ -275,7 +275,7 @@ void Multi_Simulator::process()
             {
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.proximity_distance;
-                stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<double>::epsilon());
+                stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<float>::epsilon());
                 stream.samples.push_back(stream.last_sample);
             }
         }
@@ -310,7 +310,7 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
-                math::vec3d noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
+                math::vec3f noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::transform(enu_to_ecef_rotation, uav_state.enu_velocity) + noise;
                 stream.samples.push_back(stream.last_sample);

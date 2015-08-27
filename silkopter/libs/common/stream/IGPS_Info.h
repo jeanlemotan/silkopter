@@ -26,12 +26,12 @@ public:
 
         uint32_t visible_satellites = 0; //how many satellites are visible
         uint32_t fix_satellites = 0;     //how many satellites are tracked (participate in the fix)
-        double pacc = std::numeric_limits<double>::infinity(); //position accuracy (standard deviation)
-        double vacc = std::numeric_limits<double>::infinity(); //velocity accuracy (standard deviation)
+        float pacc = std::numeric_limits<float>::infinity(); //position accuracy (standard deviation)
+        float vacc = std::numeric_limits<float>::infinity(); //velocity accuracy (standard deviation)
 
-        double hdop = std::numeric_limits<double>::infinity(); //horizontal dillution of precision (the minimum precision obtainable form the sats in view)
-        double vdop = std::numeric_limits<double>::infinity(); //vertical dillution of precision
-        double pdop = std::numeric_limits<double>::infinity(); //position dillution of precision
+        float hdop = std::numeric_limits<float>::infinity(); //horizontal dillution of precision (the minimum precision obtainable form the sats in view)
+        float vdop = std::numeric_limits<float>::infinity(); //vertical dillution of precision
+        float pdop = std::numeric_limits<float>::infinity(); //position dillution of precision
     };
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;

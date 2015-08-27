@@ -61,7 +61,7 @@ auto Multi_Brain::init() -> bool
     m_thrust_output_stream->set_rate(m_init_params->rate);
     m_thrust_output_stream->set_tp(q::Clock::now());
 
-    m_dts = std::chrono::duration<double>(m_thrust_output_stream->get_dt()).count();
+    m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
 
     m_config->altitude.lpf_cutoff_frequency = 1;
 
@@ -122,15 +122,15 @@ void Multi_Brain::process_state_mode_idle()
 
     if (!math::is_zero(input.horizontal.angle_rate.value))
     {
-        input.horizontal.angle_rate.set(math::vec2d::zero);
+        input.horizontal.angle_rate.set(math::vec2f::zero);
     }
     if (!math::is_zero(input.horizontal.angle.value))
     {
-        input.horizontal.angle.set(math::vec2d::zero);
+        input.horizontal.angle.set(math::vec2f::zero);
     }
     if (!math::is_zero(input.horizontal.velocity.value))
     {
-        input.horizontal.velocity.set(math::vec2d::zero);
+        input.horizontal.velocity.set(math::vec2f::zero);
     }
 
     if (input.yaw.angle_rate.value != 0)
@@ -160,7 +160,7 @@ void Multi_Brain::process_state_mode_armed()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    math::vec3d enu_position = math::transform(m_home.ecef_to_enu_transform, m_state.position.last_value);
+    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_state.position.last_value));
 
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
@@ -172,21 +172,21 @@ void Multi_Brain::process_state_mode_armed()
     }
     else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::VELOCITY)
     {
-        double input_velocity = input.vertical.velocity.value;
+        float input_velocity = input.vertical.velocity.value;
         m_altitude_data.reference_altitude += input_velocity * m_dts;
 
-        double target_alt = m_altitude_data.reference_altitude;
+        float target_alt = m_altitude_data.reference_altitude;
 
-        double crt_alt = enu_position.z;
-        double target_vel = m_altitude_data.velocity_pd.process(crt_alt, target_alt);
+        float crt_alt = enu_position.z;
+        float target_vel = m_altitude_data.velocity_pd.process(crt_alt, target_alt);
 
-        double crt_vel = math::transform(m_home.ecef_to_enu_rotation, m_state.velocity.last_value).z;
-        double target_acc = m_altitude_data.velocity_pd.process(crt_vel, target_vel);
+        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_state.velocity.last_value)).z;
+        float target_acc = m_altitude_data.velocity_pd.process(crt_vel, target_vel);
 
-        double crt_acc = math::transform(m_home.ecef_to_enu_rotation, m_state.acceleration.last_value).z;
+        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_state.acceleration.last_value)).z;
 
-        double half_thrust = (m_config->max_thrust + m_config->min_thrust) * 0.5;
-        double t =  half_thrust + m_altitude_data.acceleration_pid.process(crt_acc, target_acc);
+        float half_thrust = (m_config->max_thrust + m_config->min_thrust) * 0.5f;
+        float t =  half_thrust + m_altitude_data.acceleration_pid.process(crt_acc, target_acc);
         m_altitude_data.dsp.process(t);
         thrust.z = t;
     }
@@ -211,20 +211,20 @@ void Multi_Brain::process_state_mode_armed()
     }
     else if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE)
     {
-        double fx, fy, fz;
+        float fx, fy, fz;
         m_state.frame.value.get_as_euler_xyz(fx, fy, fz);
 
-        math::quatd target;
+        math::quatf target;
         target.set_from_euler_zxy(input.horizontal.angle.value.x, input.horizontal.angle.value.y, fz);
-        math::quatd diff = math::inverse(m_state.frame.value) * target;
-        double diff_x, diff_y, _z;
+        math::quatf diff = math::inverse(m_state.frame.value) * target;
+        float diff_x, diff_y, _z;
         diff.get_as_euler_zxy(diff_x, diff_y, _z);
 
-        double max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
+        float max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
 
-        double x = m_horizontal_angle_data.x_pid.process(-diff_x, 0.0);
+        float x = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
         x = math::clamp(x, -max_speed, max_speed);
-        double y = m_horizontal_angle_data.y_pid.process(-diff_y, 0.0);
+        float y = m_horizontal_angle_data.y_pid.process(-diff_y, 0.f);
         y = math::clamp(y, -max_speed, max_speed);
 
         rate.set(x, y, 0);
@@ -253,20 +253,14 @@ void Multi_Brain::process_state()
 
 void Multi_Brain::acquire_home_position()
 {
-    auto multi_config = m_hal.get_multi_config();
-    if (!multi_config)
-    {
-        return;
-    }
     if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
         auto& history = m_home.ecef_position_history;
-        auto per_second = static_cast<size_t>(1.0 / m_dts);
-        history.push_back(m_state.position.value);
+        auto per_second = static_cast<size_t>(1.f / m_dts);
 #ifdef NDEBUG
-        while (history.size() > 10 * per_second + 1)
+        while (history.size() > 5 * per_second + 1)
 #else
-        while (history.size() > 3 * per_second + 1)
+        while (history.size() > 5 * per_second + 1)
 #endif
         {
             if (!m_home.is_acquired)
@@ -283,15 +277,13 @@ void Multi_Brain::acquire_home_position()
         {
             avg += h * mul;
         }
-        auto avg_ = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
-        avg_ /= double(history.size());
+        //auto avg_ = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
+        //avg_ /= double(history.size());
 
         m_home.ecef_position = avg;
         m_home.lla_position = util::coordinates::ecef_to_lla(m_home.ecef_position);
-        m_home.enu_to_ecef_transform = util::coordinates::enu_to_ecef_transform(m_home.lla_position);
-        m_home.ecef_to_enu_transform = math::inverse(m_home.enu_to_ecef_transform);
-        m_home.enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(m_home.lla_position);
-        m_home.ecef_to_enu_rotation = math::inverse(m_home.enu_to_ecef_rotation);
+        util::coordinates::enu_to_ecef_transform_and_inv(m_home.lla_position, m_home.enu_to_ecef_transform, m_home.ecef_to_enu_transform);
+        util::coordinates::enu_to_ecef_rotation_and_inv(m_home.lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
     }
 }
 
@@ -302,6 +294,8 @@ void Multi_Brain::refresh_state(stream::IMulti_Input::Sample const& input,
                                 stream::IECEF_Acceleration::Sample const& acceleration)
 {
     auto now = q::Clock::now();
+
+    m_home.ecef_position_history.push_back(position.value);
 
     if (input.is_healthy)
     {
@@ -382,10 +376,10 @@ void Multi_Brain::process()
                           )
     {
         refresh_state(i_input, i_frame, i_position, i_velocity, i_acceleration);
-        acquire_home_position();
         process_state();
     });
 
+    acquire_home_position();
 
     {
         stream::IMulti_State::Value state;
@@ -425,11 +419,11 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     auto output_rate = m_rate_output_stream->get_rate();
 
-    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.0, m_state.config.motor_thrust * m_state.config.motors.size() * 0.5);
+    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_state.config.motor_thrust * m_state.config.motors.size() * 0.5f);
     m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_state.config.motor_thrust * m_state.config.motors.size());
 
 
-    m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 0.0, 180.0);
+    m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 0.f, 180.f);
 
     auto fill_pid_params = [output_rate](PID::Params& dst, sz::PID const& src)
     {
@@ -474,7 +468,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         }
     }
 
-    m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.0, 10.0);
+    m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
     {
         PID::Params params;
         fill_pid_params(params, m_config->altitude.acceleration_pid);
@@ -489,7 +483,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         }
     }
 
-    m_config->altitude.lpf_cutoff_frequency = math::clamp(m_config->altitude.lpf_cutoff_frequency, 0.1, output_rate / 2.0);
+    m_config->altitude.lpf_cutoff_frequency = math::clamp(m_config->altitude.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);
     m_config->altitude.lpf_poles = math::max<uint32_t>(m_config->altitude.lpf_poles, 1);
     if (!m_altitude_data.dsp.setup(m_config->altitude.lpf_poles, output_rate, m_config->altitude.lpf_cutoff_frequency))
     {

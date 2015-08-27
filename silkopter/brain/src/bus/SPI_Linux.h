@@ -44,6 +44,8 @@ public:
 private:
     auto init() -> bool;
 
+    auto open() -> bool;
+
     auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) -> bool;
 
 
@@ -51,9 +53,9 @@ private:
     std::shared_ptr<sz::SPI_Linux::Config> m_config;
 
     int m_fd = -1;
-    std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_tx_buffer;
     std::vector<uint8_t> m_rx_buffer;
+    //std::vector<uint8_t> m_dummy_buffer;
 };
 
 }

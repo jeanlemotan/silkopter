@@ -15,8 +15,8 @@
     "name": "Component",
     "members":
     [
-        ["double", "frequency", {"required": true, "json_key" : "Frequency (Hz)"}],
-        ["double", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}]
+        ["float", "frequency", {"required": true, "json_key" : "Frequency (Hz)"}],
+        ["float", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}]
     ]
 },
 {
@@ -25,8 +25,8 @@
     "name": "Config",
     "members":
     [
-        ["double", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}],
-        ["double", "noise", {"required": true, "json_key" : "Noise"}],
+        ["float", "amplitude", {"required": true, "json_key" : "Amplitude", "default" : 1}],
+        ["float", "noise", {"required": true, "json_key" : "Noise"}],
         ["bool", "square", {"required": true, "json_key" : "Square"}],
         ["std::vector<sz::Oscillator::Component>", "components", {"required": true, "json_key" : "Components"}]
      ]

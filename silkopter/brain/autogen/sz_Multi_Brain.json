@@ -15,7 +15,7 @@
     "name": "Horizontal_Angle",
     "members":
     [
-        ["double", "max_speed_deg", {"required": true, "json_key" : "Max Speed (deg/s)", "default" : 180}],
+        ["float", "max_speed_deg", {"required": true, "json_key" : "Max Speed (deg/s)", "default" : 180}],
         ["bool", "combined_pids", {"required": true, "json_key" : "Combined PIDs", "default" : true}],
         ["sz::PID", "pids", {"required": false, "json_key" : "PIDs"}],
         ["sz::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
@@ -28,9 +28,9 @@
     "name": "Altitude",
     "members":
     [
-        ["double", "max_speed", {"required": true, "json_key" : "Max Speed (m/s)", "default" : 2}],
+        ["float", "max_speed", {"required": true, "json_key" : "Max Speed (m/s)", "default" : 2}],
         ["uint32_t", "lpf_poles", {"required": true, "json_key" : "LPF Poles", "default" : 1}],
-        ["double", "lpf_cutoff_frequency", {"required": true, "json_key" : "LPF Cutoff Frequency (Hz)"}],        
+        ["float", "lpf_cutoff_frequency", {"required": true, "json_key" : "LPF Cutoff Frequency (Hz)"}],        
         ["sz::PID", "acceleration_pid", {"required": true, "json_key" : "Acceleration PID"}],
         ["sz::PD", "velocity_pd", {"required": true, "json_key" : "Velocity PD"}],
         ["sz::P", "altitude_p", {"required": true, "json_key" : "Altitude P"}]
@@ -42,8 +42,8 @@
     "name": "Config",
     "members":
     [
-        ["double", "max_thrust", {"required": false, "json_key" : "Max Thrust (N)", "default" : 2}],
-        ["double", "min_thrust", {"required": false, "json_key" : "Min Thrust (N)", "default" : 1}],
+        ["float", "max_thrust", {"required": false, "json_key" : "Max Thrust (N)", "default" : 2}],
+        ["float", "min_thrust", {"required": false, "json_key" : "Min Thrust (N)", "default" : 1}],
         ["sz::Multi_Brain::Horizontal_Angle", "horizontal_angle", {"required": true, "json_key" : "Horizontal Angle"}],
         ["sz::Multi_Brain::Altitude", "altitude", {"required": false, "json_key" : "Altitude"}]
     ]

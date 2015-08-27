@@ -35,12 +35,12 @@ void signal_handler(int signum)
     QLOGI("Exitting due to signal {}", signum);
 }
 
-//void test_mm(math::vec3d const& target, double step)
+//void test_mm(math::vec3f const& target, float step)
 //{
 //    struct Motor
 //    {
-//        math::vec3d torque; //precomputed maximum torque
-//        double factor;
+//        math::vec3f torque; //precomputed maximum torque
+//        float factor;
 //    };
 
 //    //some test configuration with random data
@@ -56,7 +56,7 @@ void signal_handler(int signum)
 //    while (true)
 //    {
 //        //first calculate the crt torque
-//        math::vec3d crt;
+//        math::vec3f crt;
 //        for (auto& m: motors)
 //        {
 //            crt += m.torque * m.factor;
@@ -71,7 +71,7 @@ void signal_handler(int signum)
 
 //        //how far are we for the target?
 //        //divide by motor count because I want to distribute the difference to all motors
-//        auto diff = (target - crt) / double(motors.size());
+//        auto diff = (target - crt) / float(motors.size());
 
 //        //distribute the diff to all motors
 //        for (auto& m: motors)
@@ -113,7 +113,7 @@ int main(int argc, char const* argv[])
 //    q::util::Rand rnd;
 //    while (true)
 //    {
-//        math::vec3d target(rnd.get_float() * 40.0, rnd.get_float() * 40.0, rnd.get_float() * 10.0);
+//        math::vec3f target(rnd.get_float() * 40.0, rnd.get_float() * 40.0, rnd.get_float() * 10.0);
 //        test_mm(target, 0.01);
 //        test_mm(target, 0.1);
 //        test_mm(target, 0.5);
@@ -202,7 +202,7 @@ int main(int argc, char const* argv[])
 
         QLOGI("All systems up. Ready to fly...");
 
-        constexpr std::chrono::milliseconds PERIOD(3);
+        constexpr std::chrono::milliseconds PERIOD(6);
 
         auto last = q::Clock::now();
         while (!s_exit)

@@ -404,7 +404,7 @@ struct Serializer< Writer64c884d5a9b5b62fdffb20c5f27c4783f5eb5d64027166653e59ff8
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Scalar_Generator { struct Config {
- double value;
+ float value;
 
 explicit Config():value(0) {  }
 
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;bool has_value;
+    SAXEventHandler< float > handler_0;bool has_value;
 
     bool check_depth(const char* type)
     {
@@ -743,7 +743,7 @@ struct Serializer< Writer79831ccba1185f9e254c8ca3a5916edc5351558dc77844c7d820251
     {
         w.StartObject();
 
-        w.Key("\x56\x61\x6c\x75\x65", 5, false); Serializer< Writer79831ccba1185f9e254c8ca3a5916edc5351558dc77844c7d820251c0796d5c1, double >()(w, value.value);
+        w.Key("\x56\x61\x6c\x75\x65", 5, false); Serializer< Writer79831ccba1185f9e254c8ca3a5916edc5351558dc77844c7d820251c0796d5c1, float >()(w, value.value);
 
         w.EndObject(1);
     }

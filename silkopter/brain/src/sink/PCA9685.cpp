@@ -174,7 +174,7 @@ auto PCA9685::init() -> bool
     //reseet all channels
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        set_pwm_value(i, boost::none);
+        set_pwm_value(*i2c, i, boost::none);
     }
 
     if (!set_all_pwm_enabled(true))
@@ -231,27 +231,27 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 }
 
 
-constexpr double MIN_SERVO_MS = 0.5;
-constexpr double MAX_SERVO_MS = 2.49;
+constexpr float MIN_SERVO_MS = 0.5f;
+constexpr float MAX_SERVO_MS = 2.49f;
 
-void PCA9685::set_pwm_value(size_t idx, boost::optional<double> _value)
+void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
     auto& ch = m_pwm_channels[idx];
 
-    double value = 0;
+    float value = 0;
     if (_value)
     {
-        value = math::clamp(*_value, 0.0, 1.0);
-        double range = ch.config->max - ch.config->min;
+        value = math::clamp(*_value, 0.f, 1.f);
+        float range = ch.config->max - ch.config->min;
         value = value * range + ch.config->min;
 
         if (ch.config->servo_signal)
         {
             //servo signals vary between 1ms and 2ms
-            double period_ms = 1000.0 / m_init_params->rate;
-            double servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
+            float period_ms = 1000.f / m_init_params->rate;
+            float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
             value = servo_ms / period_ms;
         }
     }
@@ -287,19 +287,18 @@ void PCA9685::set_pwm_value(size_t idx, boost::optional<double> _value)
     }
     ch.last_data.pulse = pulse;
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
-    {
-        QLOGE("Bus not found");
-        return;
-    }
-
-    i2c->write_register(m_init_params->address, PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
+    i2c.write_register(m_init_params->address, PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
 }
 
 void PCA9685::process()
 {
     QLOG_TOPIC("PCA9685::process");
+
+    auto i2c = m_i2c.lock();
+    if (!i2c)
+    {
+        return;
+    }
 
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
@@ -310,12 +309,8 @@ void PCA9685::process()
             auto const& samples = stream->get_samples();
             if (!samples.empty())
             {
-                set_pwm_value(i, samples.back().value);
+                set_pwm_value(*i2c, i, samples.back().value);
             }
-        }
-        else
-        {
-            set_pwm_value(i, boost::none);
         }
     }
 }
@@ -340,11 +335,18 @@ if (idx == CH)\
         m_pwm_channels[CH].stream = input_stream;\
         m_pwm_channels[CH].stream_path = path;\
     }\
+    set_pwm_value(*i2c, idx, boost::none);\
 }
 
 void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 {
     QLOG_TOPIC("PCA9685::set_input_stream_path");
+
+    auto i2c = m_i2c.lock();
+    if (!i2c)
+    {
+        return;
+    }
 
     FIND_STREAM(0);
     FIND_STREAM(1);

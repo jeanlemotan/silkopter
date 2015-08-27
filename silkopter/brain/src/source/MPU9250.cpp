@@ -537,19 +537,19 @@ auto MPU9250::init() -> bool
     {
     case 250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
-        m_angular_velocity_sensor_scale = math::radians(1.0) / (131.0);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f);
         break;
     case 500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
-        m_angular_velocity_sensor_scale = math::radians(1.0) / (131.0 / 2.0);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 2.f);
         break;
     case 1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-        m_angular_velocity_sensor_scale = math::radians(1.0) / (131.0 / 4.0);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 4.f);
         break;
     case 2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
-        m_angular_velocity_sensor_scale = math::radians(1.0) / (131.0 / 8.0);
+        m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
         QLOGE("Invalid angular velocity range: {}", m_init_params->angular_velocity_range);
@@ -562,27 +562,43 @@ auto MPU9250::init() -> bool
     {
     case 2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
-        m_acceleration_sensor_scale = physics::constants::g / 16384.0;
+        m_acceleration_sensor_scale = physics::constants::g / 16384.f;
         break;
     case 4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
-        m_acceleration_sensor_scale = physics::constants::g / 8192.0;
+        m_acceleration_sensor_scale = physics::constants::g / 8192.f;
         break;
     case 8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-        m_acceleration_sensor_scale = physics::constants::g / 4096.0;
+        m_acceleration_sensor_scale = physics::constants::g / 4096.f;
         break;
     case 16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
-        m_acceleration_sensor_scale = physics::constants::g / 2048.0;
+        m_acceleration_sensor_scale = physics::constants::g / 2048.f;
         break;
     default:
         QLOGE("Invalid acceleration range: {}", m_init_params->acceleration_range);
         return false;
     }
 
+    // First disable the master I2C to avoid hanging the slaves on the aulixiliar I2C bus
+    {
+        uint8_t user_ctrl = 0;
+        mpu_read_u8(buses, MPU_REG_USER_CTRL, user_ctrl);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        QLOGI("i2c master is: {}", (user_ctrl & MPU_BIT_I2C_MST) ? "enabled" : "disabled");
+        if (user_ctrl & MPU_BIT_I2C_MST)
+        {
+            mpu_write_u8(buses, MPU_REG_USER_CTRL, (user_ctrl & ~MPU_BIT_I2C_MST));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
 
     auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
+    std::this_thread::sleep_for(std::chrono::milliseconds(120));
+
+    // disable I2C as recommended by the datasheet
+    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, MPU_BIT_I2C_IF_DIS);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0); //wakeup
@@ -760,10 +776,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale *= 0.15;//16 bit mode
+    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -792,7 +808,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         m_user_ctrl_value |= MPU_BIT_I2C_MST;
-        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_I2C_MST_RST);
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //  0 348 kHz
@@ -827,8 +843,8 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 
     m_akm_address = 0;
 
-    res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//    res &= akm_write_u8(buses, AKM_REG_CNTL2, AKM_CNTL2_RESET);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     {
         uint8_t data;
@@ -846,10 +862,10 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
     res &= akm_read(buses, AKM_REG_ASAX, data, 3);
-    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5 / 128.0 + 1.0;
-    m_magnetic_field_sensor_scale *= 0.15;//16 bit mode
+    m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
+    m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
     res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -912,13 +928,13 @@ void MPU9250::reset_fifo(Buses& buses)
 }
 
 template<class Calibration_Data>
-auto get_calibration_scale(Calibration_Data const& points, double temperature) -> math::vec3d
+auto get_calibration_scale(Calibration_Data const& points, float temperature) -> math::vec3f
 {
     if (points.empty())
     {
-        return math::vec3d::one;
+        return math::vec3f::one;
     }
-    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, double t) { return t < x.temperature; });
+    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {
         return points.back().scale;
@@ -930,19 +946,19 @@ auto get_calibration_scale(Calibration_Data const& points, double temperature) -
     auto const& prev = *(it - 1);
     auto const& next = *(it);
     QASSERT(temperature >= prev.temperature && temperature < next.temperature);
-    double mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
-    QASSERT(mu >= 0.0 && mu < 1.0);
+    float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
+    QASSERT(mu >= 0.f && mu < 1.f);
     return math::lerp(prev.scale, next.scale, mu);
 }
 
 template<class Calibration_Data>
-auto get_calibration_bias(Calibration_Data const& points, double temperature) -> math::vec3d
+auto get_calibration_bias(Calibration_Data const& points, float temperature) -> math::vec3f
 {
     if (points.empty())
     {
-        return math::vec3d::zero;
+        return math::vec3f::zero;
     }
-    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, double t) { return t < x.temperature; });
+    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
     if (it == points.end()) //temp is too big, use the last point
     {
         return points.back().bias;
@@ -954,8 +970,8 @@ auto get_calibration_bias(Calibration_Data const& points, double temperature) ->
     auto const& prev = *(it - 1);
     auto const& next = *(it);
     QASSERT(temperature >= prev.temperature && temperature < next.temperature);
-    double mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
-    QASSERT(mu >= 0.0 && mu < 1.0);
+    float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
+    QASSERT(mu >= 0.f && mu < 1.f);
     return math::lerp(prev.bias, next.bias, mu);
 }
 
@@ -988,7 +1004,7 @@ void MPU9250::process()
     uint16_t fifo_count;
     auto res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count);
 
-   // double xxx = (double(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
+   // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // LOG_INFO("{.2}b/ms", xxx);
 
     //uint16_t fc2 = 0;
@@ -1022,31 +1038,25 @@ void MPU9250::process()
 //                m_angular_velocity->samples.resize(sample_count);
 //                m_acceleration->samples.resize(sample_count);
 
-                double temperature = 28.0;
-
-                math::vec3d acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temperature);
-                math::vec3d acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temperature);
-                math::vec3d angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temperature);
-
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    math::vec3d value(x, y, z);
-                    value = (value * m_acceleration_sensor_scale - acceleration_bias) * acceleration_scale;
+                    math::vec3f value(x, y, z);
+                    value = value * m_acceleration_scale - m_acceleration_bias;
                     m_acceleration->push_sample(value, true);
 
-                    x = (data[0] << 8) | data[1]; data += 2;
-                    y = (data[0] << 8) | data[1]; data += 2;
-                    z = (data[0] << 8) | data[1]; data += 2;
+                    x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                    y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                    z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
 
                     value.set(x, y, z);
-                    value = value * m_angular_velocity_sensor_scale - angular_velocity_bias;
+                    value = value * m_angular_velocity_sensor_scale - m_angular_velocity_bias;
                     m_angular_velocity->push_sample(value, true);
 
-//                    if (math::length(m_samples.angular_velocity[i]) > 1.0)
+//                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
 //                    {
 //                        LOG_ERR("XXX::: gyro: {}, acc: {}", m_samples.angular_velocity[i], m_samples.acceleration[i]);
 //                    }
@@ -1079,7 +1089,17 @@ void MPU9250::process_thermometer(Buses& buses)
     }
 
     int16_t itemp = static_cast<int16_t>(data);
-    double temp = itemp / 333.87 + 21.0;
+    float temp = itemp / 333.87f + 21.f;
+
+    m_acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temp);
+    m_acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temp) * m_acceleration_scale;
+    m_acceleration_scale *= m_acceleration_sensor_scale;
+
+    m_angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temp);
+
+    m_magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temp);
+    m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
+    m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
 
     while (samples_needed > 0)
     {
@@ -1143,22 +1163,16 @@ void MPU9250::process_magnetometer(Buses& buses)
             return;
         }
 
-        math::vec3d data(static_cast<int16_t>((tmp[2] << 8) | tmp[1]),
+        math::vec3f data(static_cast<int16_t>((tmp[2] << 8) | tmp[1]),
                          static_cast<int16_t>((tmp[4] << 8) | tmp[3]),
                          static_cast<int16_t>((tmp[6] << 8) | tmp[5]));
 
-        double temperature = 28.0;
-
-        math::vec3d magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temperature);
-        math::vec3d magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temperature);
-        data = data * m_magnetic_field_sensor_scale;
-
         //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
-        static const math::quatd rot = math::quatd::from_axis_y(math::radians(180.0)) *
-                math::quatd::from_axis_z(math::radians(90.0));
+        static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
+                math::quatf::from_axis_z(math::radians(90.f));
 
         data = math::rotate(rot, data);
-        m_last_magnetic_field_value = (data - magnetic_field_bias) * magnetic_field_scale;
+        m_last_magnetic_field_value = data * m_magnetic_field_scale - m_magnetic_field_bias;
     }
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();

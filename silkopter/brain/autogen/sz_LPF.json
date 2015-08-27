@@ -15,7 +15,7 @@
     "members":
     [
         ["uint32_t", "poles", {"required": true, "json_key" : "Poles", "default" : 1}],
-        ["double", "cutoff_frequency", {"required": true, "json_key" : "Cutoff Frequency (Hz)"}]
+        ["float", "cutoff_frequency", {"required": true, "json_key" : "Cutoff Frequency (Hz)"}]
     ]
 }
 ]

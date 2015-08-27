@@ -48,5 +48,5 @@ private:
 
     q::util::Connection m_connection;
 
-    std::vector<math::vec3d> m_samples;
+    std::vector<math::vec3f> m_samples;
 };

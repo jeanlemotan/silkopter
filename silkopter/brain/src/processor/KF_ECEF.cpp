@@ -70,9 +70,9 @@ void KF_ECEF::KF<St, Me>::process()
 ///////////////////////////////////////////////////////////////////////
 
 template<class Value>
-void KF_ECEF::Delayer<Value>::init(double dt, double lag)
+void KF_ECEF::Delayer<Value>::init(float dt, float lag)
 {
-    QASSERT(dt > 0.0 && lag >= 0.0);
+    QASSERT(dt > 0.f && lag >= 0.f);
     min_value_count = math::max(static_cast<size_t>(math::round(lag / dt)), size_t(1));
     values.clear();
 }
@@ -218,9 +218,9 @@ void KF_ECEF::process()
     {
         if (pos_sample.is_healthy && vel_sample.is_healthy)
         {
-            auto lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
-            auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
-            auto ecef_la = math::transform(enu_to_ecef_rotation, la_sample.value);
+            util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
+            math::mat3d enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
+            math::vec3f ecef_la = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(la_sample.value)));
 
             auto last_pos_sample = m_position_output_stream->get_last_sample();
             if (math::distance_sq(pos_sample.value, last_pos_sample.value) > math::square(20))
@@ -274,8 +274,8 @@ void KF_ECEF::process()
         m_kf_z.process();
 
         math::vec3d pos(m_kf_x.x(0), m_kf_y.x(0), m_kf_z.x(0));
-        math::vec3d vel(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1));
-        math::vec3d acc(m_kf_x.x(2), m_kf_y.x(2), m_kf_z.x(2));
+        math::vec3f vel(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1));
+        math::vec3f acc(m_kf_x.x(2), m_kf_y.x(2), m_kf_z.x(2));
 
         m_position_output_stream->push_sample(pos, true);
         m_velocity_output_stream->push_sample(vel, true);
@@ -304,13 +304,13 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    m_config->position_accuracy = math::max(m_config->position_accuracy, 0.0);
-    m_config->velocity_lag = math::max(m_config->velocity_lag, 0.0);
-    m_config->velocity_accuracy = math::max(m_config->velocity_accuracy, 0.0);
-    m_config->acceleration_lag = math::max(m_config->acceleration_lag, 0.0);
-    m_config->acceleration_accuracy = math::max(m_config->acceleration_accuracy, 0.0);
-    m_config->pressure_alt_lag = math::max(m_config->pressure_alt_lag, 0.0);
-    m_config->pressure_alt_accuracy = math::max(m_config->pressure_alt_accuracy, 0.0);
+    m_config->position_accuracy = math::max(m_config->position_accuracy, 0.f);
+    m_config->velocity_lag = math::max(m_config->velocity_lag, 0.f);
+    m_config->velocity_accuracy = math::max(m_config->velocity_accuracy, 0.f);
+    m_config->acceleration_lag = math::max(m_config->acceleration_lag, 0.f);
+    m_config->acceleration_accuracy = math::max(m_config->acceleration_accuracy, 0.f);
+    m_config->pressure_alt_lag = math::max(m_config->pressure_alt_lag, 0.f);
+    m_config->pressure_alt_accuracy = math::max(m_config->pressure_alt_accuracy, 0.f);
 
 
     double pacc = math::square(m_config->position_accuracy);

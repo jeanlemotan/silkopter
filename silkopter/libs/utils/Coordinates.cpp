@@ -64,17 +64,6 @@ auto enu_to_ecef_transform(LLA const& lla) -> math::trans3dd
     double cos_lat, sin_lat;
     math::sin_cos(lla.latitude, sin_lat, cos_lat);
 
-
-//ecef to enu
-//    -sin_long               cos_long                0
-//    -cos_long*sin_lat       -sin_lat*sin_long       cos_lat
-//    cos_long*cos_lat        cos_lat*sin_long        sin_lat
-
-//transpose - enu to ecef
-//    -sin_long               -cos_long*sin_lat       cos_long*cos_lat
-//    cos_long                -sin_lat*sin_long       cos_lat*sin_long
-//    0                       cos_lat                 sin_lat
-
     math::trans3dd trans;
 
     trans.set_axis_x(math::vec3d(-sin_long,
@@ -103,23 +92,85 @@ auto enu_to_ecef_transform(LLA const& lla) -> math::trans3dd
     return trans;
 }
 
-auto enu_to_ecef_rotation(LLA const& lla) -> math::mat3d
+auto ecef_to_enu_transform(LLA const& lla) -> math::trans3dd
 {
     double cos_long, sin_long;
     math::sin_cos(lla.longitude, sin_long, cos_long);
     double cos_lat, sin_lat;
     math::sin_cos(lla.latitude, sin_lat, cos_lat);
 
+    math::trans3dd trans;
 
-//ecef to enu
-//    -sin_long               cos_long                0
-//    -cos_long*sin_lat       -sin_lat*sin_long       cos_lat
-//    cos_long*cos_lat        cos_lat*sin_long        sin_lat
+    trans.set_axis_x(math::vec3d(-sin_long,
+                                  cos_long,
+                                  0));
+    trans.set_axis_y(math::vec3d(-cos_long*sin_lat,
+                                 -sin_lat*sin_long,
+                                  cos_lat));
+    trans.set_axis_z(math::vec3d( cos_long*cos_lat,
+                                  cos_lat*sin_long,
+                                  sin_lat));
 
-//transpose - enu to ecef
-//    -sin_long               -cos_long*sin_lat       cos_long*cos_lat
-//    cos_long                -sin_lat*sin_long       cos_lat*sin_long
-//    0                       cos_lat                 sin_lat
+    trans.mat = math::transposed(trans.mat);
+
+    math::vec3d ecef_p0;
+    {
+        double N = constants::radius/( math::sqrt(1-constants::eccentricity_sq*math::square(sin_lat)) );
+        ecef_p0.x = (lla.altitude + N) * cos_lat * cos_long;
+        ecef_p0.y = (lla.altitude + N) * cos_lat * sin_long;
+        ecef_p0.z = (lla.altitude + ((1.0 - constants::eccentricity_sq) * N)) * sin_lat;
+
+//        auto lla_ = ecef_to_lla(ecef_p0);
+//        int a = 0;
+    }
+
+    trans.set_translation(-ecef_p0);
+
+    return trans;
+}
+
+void enu_to_ecef_transform_and_inv(LLA const& lla, math::trans3dd& enu_to_ecef, math::trans3dd& ecef_to_enu)
+{
+    double cos_long, sin_long;
+    math::sin_cos(lla.longitude, sin_long, cos_long);
+    double cos_lat, sin_lat;
+    math::sin_cos(lla.latitude, sin_lat, cos_lat);
+
+    enu_to_ecef.set_axis_x(math::vec3d(-sin_long,
+                                  cos_long,
+                                  0));
+    enu_to_ecef.set_axis_y(math::vec3d(-cos_long*sin_lat,
+                                 -sin_lat*sin_long,
+                                  cos_lat));
+    enu_to_ecef.set_axis_z(math::vec3d( cos_long*cos_lat,
+                                  cos_lat*sin_long,
+                                  sin_lat));
+
+    ecef_to_enu.mat = math::transposed(enu_to_ecef.mat);
+
+    math::vec3d ecef_p0;
+    {
+        double N = constants::radius/( math::sqrt(1-constants::eccentricity_sq*math::square(sin_lat)) );
+        ecef_p0.x = (lla.altitude + N) * cos_lat * cos_long;
+        ecef_p0.y = (lla.altitude + N) * cos_lat * sin_long;
+        ecef_p0.z = (lla.altitude + ((1.0 - constants::eccentricity_sq) * N)) * sin_lat;
+
+//        auto lla_ = ecef_to_lla(ecef_p0);
+//        int a = 0;
+    }
+
+    enu_to_ecef.set_translation(ecef_p0);
+    ecef_to_enu.set_translation(-ecef_p0);
+}
+
+
+
+auto enu_to_ecef_rotation(LLA const& lla) -> math::mat3d
+{
+    double cos_long, sin_long;
+    math::sin_cos(lla.longitude, sin_long, cos_long);
+    double cos_lat, sin_lat;
+    math::sin_cos(lla.latitude, sin_lat, cos_lat);
 
     math::mat3d mat;
 
@@ -135,5 +186,48 @@ auto enu_to_ecef_rotation(LLA const& lla) -> math::mat3d
 
     return mat;
 }
+
+auto ecef_to_enu_rotation(LLA const& lla) -> math::mat3d
+{
+    double cos_long, sin_long;
+    math::sin_cos(lla.longitude, sin_long, cos_long);
+    double cos_lat, sin_lat;
+    math::sin_cos(lla.latitude, sin_lat, cos_lat);
+
+    math::mat3d mat;
+
+    mat.set_axis_x(math::vec3d(-sin_long,
+                                  cos_long,
+                                  0));
+    mat.set_axis_y(math::vec3d(-cos_long*sin_lat,
+                                 -sin_lat*sin_long,
+                                  cos_lat));
+    mat.set_axis_z(math::vec3d( cos_long*cos_lat,
+                                  cos_lat*sin_long,
+                                  sin_lat));
+
+    return math::transposed(mat);
+}
+
+void enu_to_ecef_rotation_and_inv(LLA const& lla, math::mat3d& enu_to_ecef, math::mat3d& ecef_to_enu)
+{
+    double cos_long, sin_long;
+    math::sin_cos(lla.longitude, sin_long, cos_long);
+    double cos_lat, sin_lat;
+    math::sin_cos(lla.latitude, sin_lat, cos_lat);
+
+    enu_to_ecef.set_axis_x(math::vec3d(-sin_long,
+                                  cos_long,
+                                  0));
+    enu_to_ecef.set_axis_y(math::vec3d(-cos_long*sin_lat,
+                                 -sin_lat*sin_long,
+                                  cos_lat));
+    enu_to_ecef.set_axis_z(math::vec3d( cos_long*cos_lat,
+                                  cos_lat*sin_long,
+                                  sin_lat));
+
+    ecef_to_enu = math::transposed(enu_to_ecef);
+}
+
 }
 }

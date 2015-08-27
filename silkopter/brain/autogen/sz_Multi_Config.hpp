@@ -38,7 +38,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< math::vec3d > handler_0;
+    SAXEventHandler< math::vec3f > handler_0;
 SAXEventHandler< bool > handler_1;bool has_position;
 bool has_clockwise;
 
@@ -409,7 +409,7 @@ struct Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfec
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3d >()(w, value.position);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3f >()(w, value.position);
 w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, bool >()(w, value.clockwise);
 
         w.EndObject(2);
@@ -458,13 +458,13 @@ private:
     int depth;
 
     SAXEventHandler< std::string > handler_0;
-SAXEventHandler< double > handler_1;
-SAXEventHandler< double > handler_2;
-SAXEventHandler< double > handler_3;
-SAXEventHandler< double > handler_4;
-SAXEventHandler< double > handler_5;
-SAXEventHandler< double > handler_6;
-SAXEventHandler< double > handler_7;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;
+SAXEventHandler< float > handler_4;
+SAXEventHandler< float > handler_5;
+SAXEventHandler< float > handler_6;
+SAXEventHandler< float > handler_7;
 SAXEventHandler< std::vector<silk::config::Multi::Motor> > handler_8;bool has_name;
 bool has_mass;
 bool has_height;
@@ -1186,13 +1186,13 @@ struct Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402
         w.StartObject();
 
         w.Key("\x4e\x61\x6d\x65", 4, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, std::string >()(w, value.name);
-w.Key("\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.mass);
-w.Key("\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.height);
-w.Key("\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.radius);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.motor_thrust);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.motor_z_torque);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.motor_acceleration);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, double >()(w, value.motor_deceleration);
+w.Key("\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.mass);
+w.Key("\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.height);
+w.Key("\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.radius);
+w.Key("\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_thrust);
+w.Key("\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_z_torque);
+w.Key("\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_acceleration);
+w.Key("\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_deceleration);
 w.Key("\x4d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, std::vector<silk::config::Multi::Motor> >()(w, value.motors);
 
         w.EndObject(9);

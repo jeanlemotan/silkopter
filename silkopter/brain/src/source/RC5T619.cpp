@@ -252,7 +252,7 @@ void RC5T619::process()
         if (i2c->read_register(ADDR, RC5T619_AIN1_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
-            auto result =  math::clamp(static_cast<double>(r) / 4095.0, 0.0, 1.0);
+            auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
             Stream::Sample& sample = m_adc[1]->last_sample;
             sample.value = result;
@@ -274,7 +274,7 @@ void RC5T619::process()
         if (i2c->read_register(ADDR, RC5T619_AIN0_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
-            auto result =  math::clamp(static_cast<double>(r) / 4095.0, 0.0, 1.0);
+            auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
 
             Stream::Sample& sample = m_adc[0]->last_sample;
             sample.value = result;

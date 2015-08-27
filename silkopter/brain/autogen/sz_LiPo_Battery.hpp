@@ -404,7 +404,7 @@ struct Serializer< Writer098d9ba6f14e68cc76cea515d045d9a1df9f3e3849b889ad381a47d
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace LiPo_Battery { struct Config {
- double full_charge;
+ float full_charge;
 
 explicit Config():full_charge(2.2) {  }
 
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< double > handler_0;bool has_full_charge;
+    SAXEventHandler< float > handler_0;bool has_full_charge;
 
     bool check_depth(const char* type)
     {
@@ -743,7 +743,7 @@ struct Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b
     {
         w.StartObject();
 
-        w.Key("\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, double >()(w, value.full_charge);
+        w.Key("\x46\x75\x6c\x6c\x20\x43\x68\x61\x72\x67\x65\x20\x28\x41\x68\x29", 16, false); Serializer< Writer0985599c119605528657b434d34f15f437a12186c225f5d2c8c6c1b481fdfac6, float >()(w, value.full_charge);
 
         w.EndObject(1);
     }

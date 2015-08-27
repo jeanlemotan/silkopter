@@ -62,7 +62,7 @@ private:
     template<class T, bool>
     struct Butterworth
     {
-        auto setup(size_t, double, double) -> bool
+        auto setup(size_t, float, float) -> bool
         {
             return true;
         }
@@ -76,7 +76,7 @@ private:
     {
         util::Butterworth<typename T::Value> dsp;
 
-        auto setup(size_t order, double rate, double cutoff_frequency) -> bool
+        auto setup(size_t order, float rate, float cutoff_frequency) -> bool
         {
             return dsp.setup(order, rate, cutoff_frequency);
         }
@@ -186,7 +186,7 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
     auto output_rate = m_init_params.rate;
 
     uint32_t filter_rate = math::max(output_rate, input_rate);
-    double max_cutoff = math::min(output_rate / 2.0, input_rate / 2.0);
+    float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
     m_config.cutoff_frequency = m_config.cutoff_frequency > 0 ? m_config.cutoff_frequency : max_cutoff;
     if (m_config.cutoff_frequency > max_cutoff)
     {

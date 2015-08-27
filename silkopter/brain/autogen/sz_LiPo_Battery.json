@@ -14,7 +14,7 @@
     "name": "Config",
     "members":
     [
-        ["double", "full_charge", {"required": true, "json_key" : "Full Charge (Ah)", "default" : 2.2}]
+        ["float", "full_charge", {"required": true, "json_key" : "Full Charge (Ah)", "default" : 2.2}]
     ]
 }
 ]

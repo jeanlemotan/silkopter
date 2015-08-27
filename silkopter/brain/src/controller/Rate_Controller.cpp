@@ -82,8 +82,8 @@ void Rate_Controller::process()
                           stream::IAngular_Velocity::Sample const& i_sample,
                           stream::IAngular_Velocity::Sample const& t_sample)
     {
-        math::vec3d ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
-        math::vec3d fb = compute_feedback(i_sample.value, t_sample.value);
+        math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+        math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
         Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
@@ -92,27 +92,27 @@ void Rate_Controller::process()
 }
 
 
-math::vec3d Rate_Controller::compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
-    math::vec3d v = target - input;
-    double vm = math::length(v) * config.moment_of_inertia;
+    math::vec3f v = target - input;
+    float vm = math::length(v) * config.moment_of_inertia;
 
-    double max_T = m_config->feedforward.max_torque;
+    float max_T = m_config->feedforward.max_torque;
 
-    double A = config.motor_acceleration;
-    double C = config.motor_deceleration;
+    float A = config.motor_acceleration;
+    float C = config.motor_deceleration;
 
-    double x_sq = vm / ((A + C) * max_T / 2.0);
-    double x = math::min(1.0, math::sqrt(x_sq));
+    float x_sq = vm / ((A + C) * max_T / 2.f);
+    float x = math::min(1.f, math::sqrt(x_sq));
 
-    return math::normalized<double, math::safe>(v) * max_T * x;
+    return math::normalized<float, math::safe>(v) * max_T * x;
 }
-math::vec3d Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
-    double x = m_x_pid.process(input.x, target.x);
-    double y = m_y_pid.process(input.y, target.y);
-    double z = m_z_pid.process(input.z, target.z);
-    return math::vec3d(x, y, z);
+    float x = m_x_pid.process(input.x, target.x);
+    float y = m_y_pid.process(input.y, target.y);
+    float z = m_z_pid.process(input.z, target.z);
+    return math::vec3f(x, y, z);
 }
 
 void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
@@ -136,10 +136,10 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.0, 1.0);
-    m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.0, 1.0);
+    m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);
+    m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.f, 1.f);
 
-    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.0);
+    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
 
     auto fill_params = [this](PID::Params& dst, sz::PID const& src)
     {

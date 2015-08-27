@@ -5,11 +5,11 @@
     "name": "PID",
     "members":
     [
-        ["double", "kp", {"required": true, "json_key" : "kP"}],
-        ["double", "ki", {"required": true, "json_key" : "kI"}],
-        ["double", "kd", {"required": true, "json_key" : "kD"}],
-        ["double", "max_i", {"required": true, "json_key" : "Max I"}],
-        ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
+        ["float", "kp", {"required": true, "json_key" : "kP"}],
+        ["float", "ki", {"required": true, "json_key" : "kI"}],
+        ["float", "kd", {"required": true, "json_key" : "kD"}],
+        ["float", "max_i", {"required": true, "json_key" : "Max I"}],
+        ["float", "d_filter", {"required": true, "json_key" : "D Filter"}]
     ]
 },
 {
@@ -18,9 +18,9 @@
     "name": "PI",
     "members":
     [
-        ["double", "kp", {"required": true, "json_key" : "kP"}],
-        ["double", "ki", {"required": true, "json_key" : "kI"}],
-        ["double", "max_i", {"required": true, "json_key" : "Max I"}]
+        ["float", "kp", {"required": true, "json_key" : "kP"}],
+        ["float", "ki", {"required": true, "json_key" : "kI"}],
+        ["float", "max_i", {"required": true, "json_key" : "Max I"}]
     ]
 },
 {
@@ -29,7 +29,7 @@
     "name": "P",
     "members":
     [
-        ["double", "kp", {"required": true, "json_key" : "kP"}]
+        ["float", "kp", {"required": true, "json_key" : "kP"}]
     ]
 },
 {
@@ -38,9 +38,9 @@
     "name": "PD",
     "members":
     [
-        ["double", "kp", {"required": true, "json_key" : "kP"}],
-        ["double", "kd", {"required": true, "json_key" : "kD"}],
-        ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
+        ["float", "kp", {"required": true, "json_key" : "kP"}],
+        ["float", "kd", {"required": true, "json_key" : "kD"}],
+        ["float", "d_filter", {"required": true, "json_key" : "D Filter"}]
     ]
 }
 ]

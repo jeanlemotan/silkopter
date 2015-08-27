@@ -61,9 +61,9 @@ private:
 
     std::default_random_engine m_generator;
     std::normal_distribution<double> m_ecef_position_dist;
-    std::normal_distribution<double> m_ecef_velocity_dist;
-    std::normal_distribution<double> m_ecef_pacc_dist;
-    std::normal_distribution<double> m_ecef_vacc_dist;
+    std::normal_distribution<float> m_ecef_velocity_dist;
+    std::normal_distribution<float> m_ecef_pacc_dist;
+    std::normal_distribution<float> m_ecef_vacc_dist;
 
     struct Angular_Velocity : public stream::IAngular_Velocity
     {

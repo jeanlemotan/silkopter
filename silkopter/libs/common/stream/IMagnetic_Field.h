@@ -12,7 +12,7 @@ class IMagnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::LOCA
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3d       Value; //??
+    typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -23,7 +23,7 @@ class IENU_Magnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3d       Value; //??
+    typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -34,7 +34,7 @@ class IECEF_Magnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space:
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3d       Value; //??
+    typedef math::vec3f       Value; //??
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };

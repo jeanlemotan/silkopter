@@ -55,8 +55,8 @@ private:
 
     q::util::Connection m_connection;
 
-    std::vector<math::vec3d> m_samples;
+    std::vector<math::vec3f> m_samples;
 
     uint8_t m_collect_data_step = 0;
-    std::array<math::vec3d, 6> m_averages;
+    std::array<math::vec3<double>, 6> m_averages;
 };

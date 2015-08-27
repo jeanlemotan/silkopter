@@ -131,11 +131,11 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
             on_samples_received(samples);
             info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
-            progress->setValue(double(m_samples.size() * 100.0) / double(needed_samples));
+            progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
             bias->setText(q::util::format2<std::string>("{}", m_box.get_center()).c_str());
 
-            auto extent = math::max(m_box.get_extent(), math::vec3d(1.0));
-            double avg = (extent.x + extent.y + extent.z) / 3.0;
+            auto extent = math::max(m_box.get_extent(), math::vec3f(1.f));
+            float avg = (extent.x + extent.y + extent.z) / 3.f;
 
             scale->setText(q::util::format2<std::string>("{}", avg / extent).c_str());
 
@@ -147,11 +147,11 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
     }
     else if (m_step == Step::DONE)
     {
-        math::vec3d bias = m_box.get_center();
+        math::vec3f bias = m_box.get_center();
 
-        auto extent = math::max(m_box.get_extent(), math::vec3d(1.0));
-        double avg = (extent.x + extent.y + extent.z) / 3.0;
-        math::vec3d scale = avg / extent;
+        auto extent = math::max(m_box.get_extent(), math::vec3f(1.f));
+        float avg = (extent.x + extent.y + extent.z) / 3.f;
+        math::vec3f scale = avg / extent;
 
         m_content = new QWidget(this);
         layout()->addWidget(m_content);
@@ -172,7 +172,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this](double value)
         {
-            m_crt_calibration.points.back().temperature = static_cast<double>(value);
+            m_crt_calibration.points.back().temperature = static_cast<float>(value);
         });
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()

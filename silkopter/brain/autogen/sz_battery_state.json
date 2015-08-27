@@ -4,7 +4,7 @@
     "name": "Persistent_State",
     "members":
     [
-        ["double", "capacity_used", {"required": true}],
+        ["float", "capacity_used", {"required": true}],
         ["size_t", "cell_count", {"required": true}]
     ]
 }
