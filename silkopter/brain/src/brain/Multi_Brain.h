@@ -8,6 +8,7 @@
 #include "common/stream/IBattery_State.h"
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
+#include "common/stream/IAcceleration.h"
 #include "common/stream/IProximity.h"
 
 #include "common/stream/IMulti_Input.h"
@@ -16,6 +17,7 @@
 #include "Comms.h"
 #include "HAL.h"
 #include "utils/PID.h"
+#include "utils/Butterworth.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -65,7 +67,9 @@ private:
     Sample_Accumulator<
         stream::IMulti_Input,
         stream::IFrame,
-        stream::IECEF_Position
+        stream::IECEF_Position,
+        stream::IECEF_Velocity,
+        stream::IECEF_Acceleration
 //        stream::IBattery_State,
 //        stream::IECEF_Linear_Acceleration,
 //        stream::IECEF_Velocity,
@@ -82,6 +86,7 @@ private:
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
     float m_reference_thrust = 0;
 
+    float m_dts = 0;
 
     struct Valid_State
     {
@@ -95,12 +100,16 @@ private:
         Data<stream::IMulti_Input::Value> input;
         Data<stream::IFrame::Value> frame;
         Data<stream::IECEF_Position::Value> position;
+        Data<stream::IECEF_Velocity::Value> velocity;
+        Data<stream::IECEF_Acceleration::Value> acceleration;
 
         silk::config::Multi config;
     } m_state;
     void refresh_state(stream::IMulti_Input::Sample const& input,
                             stream::IFrame::Sample const& frame,
-                            stream::IECEF_Position::Sample const& position);
+                            stream::IECEF_Position::Sample const& position,
+                            stream::IECEF_Velocity::Sample const& velocity,
+                            stream::IECEF_Acceleration::Sample const& acceleration);
 
     void process_state_mode_idle();
     void process_state_mode_armed();
@@ -118,6 +127,17 @@ private:
     } m_home;
 
     typedef util::PID<float, float, float> PID;
+
+    struct Altitude_Data
+    {
+        float reference_altitude = 0.f;
+        util::Butterworth<float> velocity_dsp;
+        util::Butterworth<float> acceleration_dsp;
+
+        PID acceleration_pid;
+        PID velocity_pd;
+        PID altitude_p;
+    } m_altitude_data;
 
     struct Horizontal_Angle_Data
     {

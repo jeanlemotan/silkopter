@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::EKF_ECEF",
+    "namespace" : "sz::KF_ECEF",
     "name": "Init_Params",
     "members":
     [
@@ -10,7 +10,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::EKF_ECEF",
+    "namespace" : "sz::KF_ECEF",
     "name": "Config",
     "members":
     [

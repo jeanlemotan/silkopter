@@ -4,6 +4,7 @@
 #include "common/stream/ILinear_Acceleration.h"
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
+#include "common/stream/IAcceleration.h"
 #include "common/stream/IPressure.h"
 #include "common/stream/IFrame.h"
 
@@ -12,13 +13,12 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-//#include "kalman/ekfilter.hpp"
 #include "Eigen/Core"
 
 
 namespace sz
 {
-namespace EKF_ECEF
+namespace KF_ECEF
 {
 struct Init_Params;
 struct Config;
@@ -31,10 +31,10 @@ namespace silk
 namespace node
 {
 
-class EKF_ECEF : public IProcessor
+class KF_ECEF : public IProcessor
 {
 public:
-    EKF_ECEF(HAL& hal);
+    KF_ECEF(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -55,8 +55,8 @@ private:
 
     HAL& m_hal;
 
-    std::shared_ptr<sz::EKF_ECEF::Init_Params> m_init_params;
-    std::shared_ptr<sz::EKF_ECEF::Config> m_config;
+    std::shared_ptr<sz::KF_ECEF::Init_Params> m_init_params;
+    std::shared_ptr<sz::KF_ECEF::Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
@@ -70,6 +70,9 @@ private:
 
     typedef Basic_Output_Stream<stream::IECEF_Velocity> Velocity_Output_Stream;
     mutable std::shared_ptr<Velocity_Output_Stream> m_velocity_output_stream;
+
+    typedef Basic_Output_Stream<stream::IECEF_Acceleration> Acceleration_Output_Stream;
+    mutable std::shared_ptr<Acceleration_Output_Stream> m_acceleration_output_stream;
 
     boost::optional<float> m_last_baro_altitude;
 
@@ -108,10 +111,10 @@ private:
 
         void process();
     };
+
     KF<3, 3> m_kf_x;
     KF<3, 3> m_kf_y;
     KF<3, 4> m_kf_z;
-    //KF<3, 3> m_kf_z;
 
     float m_dts = 0;
 

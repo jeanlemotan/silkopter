@@ -62,13 +62,13 @@ public:
         {
             THRUST_RATE,
             THRUST_OFFSET,
-            CLIMB_RATE,
+            ALTITUDE,
         };
         Input_Value<Mode> mode = Mode::THRUST_OFFSET;
 
         Input_Value<float> thrust_rate;
         Input_Value<float> thrust_offset;
-        Input_Value<float> climb_rate;
+        Input_Value<float> altitude;
     };
 
     struct Horizontal
@@ -188,7 +188,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::V
     serialize(buffer, value.vertical.mode, off);
     serialize(buffer, value.vertical.thrust_rate, off);
     serialize(buffer, value.vertical.thrust_offset, off);
-    serialize(buffer, value.vertical.climb_rate, off);
+    serialize(buffer, value.vertical.altitude, off);
     serialize(buffer, value.horizontal.mode, off);
     serialize(buffer, value.horizontal.angle_rate, off);
     serialize(buffer, value.horizontal.angle, off);
@@ -213,7 +213,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_
         deserialize(buffer, value.vertical.mode, off) &&
         deserialize(buffer, value.vertical.thrust_rate, off) &&
         deserialize(buffer, value.vertical.thrust_offset, off) &&
-        deserialize(buffer, value.vertical.climb_rate, off) &&
+        deserialize(buffer, value.vertical.altitude, off) &&
         deserialize(buffer, value.horizontal.mode, off) &&
         deserialize(buffer, value.horizontal.angle_rate, off) &&
         deserialize(buffer, value.horizontal.angle, off) &&

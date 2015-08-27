@@ -131,7 +131,7 @@ SOURCES += \
     ../../src/processor/Throttle_To_PWM.cpp \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/processor/Comp_ECEF.cpp \
-    ../../src/processor/EKF_ECEF.cpp
+    ../../src/processor/KF_ECEF.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -268,7 +268,7 @@ HEADERS += \
     ../../../libs/kalman/kvector.hpp \
     ../../../libs/kalman/kvector_impl.hpp \
     ../../src/processor/Comp_ECEF.h \
-    ../../src/processor/EKF_ECEF.h
+    ../../src/processor/KF_ECEF.h
 
 DISTFILES +=
 

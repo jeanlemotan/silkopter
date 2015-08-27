@@ -29,7 +29,7 @@
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_ECEF.h"
-#include "processor/EKF_ECEF.h"
+#include "processor/KF_ECEF.h"
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
 #include "processor/Throttle_To_PWM.h"
@@ -488,7 +488,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
     m_node_factory.register_node<Comp_ECEF>("Comp ECEF", *this);
-    m_node_factory.register_node<EKF_ECEF>("EKF ECEF", *this);
+    m_node_factory.register_node<KF_ECEF>("EKF ECEF", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
     m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);

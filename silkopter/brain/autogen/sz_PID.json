@@ -11,5 +11,36 @@
         ["double", "max_i", {"required": true, "json_key" : "Max I"}],
         ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
     ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PI",
+    "members":
+    [
+        ["double", "kp", {"required": true, "json_key" : "kP"}],
+        ["double", "ki", {"required": true, "json_key" : "kI"}],
+        ["double", "max_i", {"required": true, "json_key" : "Max I"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "P",
+    "members":
+    [
+        ["double", "kp", {"required": true, "json_key" : "kP"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz",
+    "name": "PD",
+    "members":
+    [
+        ["double", "kp", {"required": true, "json_key" : "kP"}],
+        ["double", "kd", {"required": true, "json_key" : "kD"}],
+        ["double", "d_filter", {"required": true, "json_key" : "D Filter"}]
+    ]
 }
 ]

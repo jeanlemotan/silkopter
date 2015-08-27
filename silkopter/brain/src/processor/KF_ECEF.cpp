@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
-#include "EKF_ECEF.h"
+#include "KF_ECEF.h"
 
 #include "sz_math.hpp"
-#include "sz_EKF_ECEF.hpp"
+#include "sz_KF_ECEF.hpp"
 
 #include "Eigen/Dense"
 
@@ -12,7 +12,7 @@ namespace node
 {
 
 template<size_t St, size_t Me>
-EKF_ECEF::KF<St, Me>::KF()
+KF_ECEF::KF<St, Me>::KF()
 {
     A.setIdentity();
     x.setZero();
@@ -40,14 +40,14 @@ EKF_ECEF::KF<St, Me>::KF()
 }
 
 template<size_t St, size_t Me>
-void EKF_ECEF::KF<St, Me>::predict()
+void KF_ECEF::KF<St, Me>::predict()
 {
     x = A * x + B * u; //state prediction
     P = A * P * A.transpose() + Q; //covariance prediction
 }
 
 template<size_t St, size_t Me>
-void EKF_ECEF::KF<St, Me>::update()
+void KF_ECEF::KF<St, Me>::update()
 {
     auto HT = H.transpose();
 
@@ -61,7 +61,7 @@ void EKF_ECEF::KF<St, Me>::update()
 }
 
 template<size_t St, size_t Me>
-void EKF_ECEF::KF<St, Me>::process()
+void KF_ECEF::KF<St, Me>::process()
 {
     predict();
     update();
@@ -70,7 +70,7 @@ void EKF_ECEF::KF<St, Me>::process()
 ///////////////////////////////////////////////////////////////////////
 
 template<class Value>
-void EKF_ECEF::Delayer<Value>::init(float dt, float lag)
+void KF_ECEF::Delayer<Value>::init(float dt, float lag)
 {
     QASSERT(dt > 0.f && lag >= 0.f);
     min_value_count = math::max(static_cast<size_t>(math::round(lag / dt)), size_t(1));
@@ -78,14 +78,14 @@ void EKF_ECEF::Delayer<Value>::init(float dt, float lag)
 }
 
 template<class Value>
-auto EKF_ECEF::Delayer<Value>::get_value() -> Value const&
+auto KF_ECEF::Delayer<Value>::get_value() -> Value const&
 {
     QASSERT(!values.empty());
     return values.front();
 }
 
 template<class Value>
-void EKF_ECEF::Delayer<Value>::push_back(Value const& value)
+void KF_ECEF::Delayer<Value>::push_back(Value const& value)
 {
     values.push_back(value);
     while (values.size() > min_value_count)
@@ -96,33 +96,33 @@ void EKF_ECEF::Delayer<Value>::push_back(Value const& value)
 
 ///////////////////////////////////////////////////////////////////////
 
-EKF_ECEF::EKF_ECEF(HAL& hal)
+KF_ECEF::KF_ECEF(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::EKF_ECEF::Init_Params())
-    , m_config(new sz::EKF_ECEF::Config())
+    , m_init_params(new sz::KF_ECEF::Init_Params())
+    , m_config(new sz::KF_ECEF::Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
-//    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
+    m_acceleration_output_stream = std::make_shared<Acceleration_Output_Stream>();
 }
 
-auto EKF_ECEF::init(rapidjson::Value const& init_params) -> bool
+auto KF_ECEF::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("EKF_ECEF::init");
+    QLOG_TOPIC("KF_ECEF::init");
 
-    sz::EKF_ECEF::Init_Params sz;
+    sz::KF_ECEF::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize EKF_ECEF data: {}", ss.str());
+        QLOGE("Cannot deserialize KF_ECEF data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
-auto EKF_ECEF::init() -> bool
+auto KF_ECEF::init() -> bool
 {
     if (m_init_params->rate == 0)
     {
@@ -135,6 +135,8 @@ auto EKF_ECEF::init() -> bool
     m_velocity_output_stream->set_rate(m_init_params->rate);
     m_velocity_output_stream->set_tp(q::Clock::now());
 
+    m_acceleration_output_stream->set_rate(m_init_params->rate);
+    m_acceleration_output_stream->set_tp(q::Clock::now());
 
     m_dts = q::Seconds(m_position_output_stream->get_dt()).count();
     double dt = m_dts;
@@ -176,7 +178,7 @@ auto EKF_ECEF::init() -> bool
     return true;
 }
 
-auto EKF_ECEF::get_inputs() const -> std::vector<Input>
+auto KF_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
@@ -187,23 +189,25 @@ auto EKF_ECEF::get_inputs() const -> std::vector<Input>
     }};
     return inputs;
 }
-auto EKF_ECEF::get_outputs() const -> std::vector<Output>
+auto KF_ECEF::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
         { "Position (ecef)", m_position_output_stream },
         { "Velocity (ecef)", m_velocity_output_stream },
+        { "Acceleration (ecef)", m_acceleration_output_stream },
     }};
     return outputs;
 }
 
-void EKF_ECEF::process()
+void KF_ECEF::process()
 {
-    QLOG_TOPIC("EKF_ECEF::process");
+    QLOG_TOPIC("KF_ECEF::process");
 
 
     m_position_output_stream->clear();
     m_velocity_output_stream->clear();
+    m_acceleration_output_stream->clear();
 
     m_accumulator.process([this](
                           size_t,
@@ -271,23 +275,24 @@ void EKF_ECEF::process()
 
         math::vec3d pos(m_kf_x.x(0), m_kf_y.x(0), m_kf_z.x(0));
         math::vec3f vel(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1));
+        math::vec3f acc(m_kf_x.x(2), m_kf_y.x(2), m_kf_z.x(2));
 
         m_position_output_stream->push_sample(pos, true);
         m_velocity_output_stream->push_sample(vel, true);
-
+        m_acceleration_output_stream->push_sample(acc, true);
     });
 }
 
-void EKF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
+void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
     m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 
-auto EKF_ECEF::set_config(rapidjson::Value const& json) -> bool
+auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("EKF_ECEF::set_config");
+    QLOG_TOPIC("KF_ECEF::set_config");
 
-    sz::EKF_ECEF::Config sz;
+    sz::KF_ECEF::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
@@ -328,21 +333,21 @@ auto EKF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto EKF_ECEF::get_config() const -> rapidjson::Document
+auto KF_ECEF::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto EKF_ECEF::get_init_params() const -> rapidjson::Document
+auto KF_ECEF::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
 
-auto EKF_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto KF_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

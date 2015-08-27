@@ -71,45 +71,6 @@
                     "Motor Mixer/Throttle 3"
                 ]
             },
-            "Multi Brain": {
-                "type": "Multi Brain",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "State Rate (Hz)": 20
-                },
-                "config": {
-                    "Horizontal Angle": {
-                        "Max Speed (deg/s)": 180.0,
-                        "Combined PIDs": true,
-                        "PIDs": {
-                            "kP": 4.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        },
-                        "X PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        },
-                        "Y PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        }
-                    }
-                },
-                "input_paths": [
-                    "Multi Input/Output",
-                    "Frame RS/Output",
-                    "EKF ECEF/Position (ecef)"
-                ]
-            },
             "Multi Pilot": {
                 "type": "Multi Pilot",
                 "init_params": {
@@ -305,11 +266,11 @@
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Position Accuracy (CEP m)": 1.0,
+                    "Position Accuracy (CEP m)": 2.0,
                     "Velocity Lag (s)": 0.0,
-                    "Velocity Accuracy (m/s)": 0.20000000298023225,
+                    "Velocity Accuracy (m/s)": 0.10000000149011612,
                     "Acceleration Lag (s)": 0.10999999940395355,
-                    "Acceleration Accuracy (m/s^2)": 2.0,
+                    "Acceleration Accuracy (m/s^2)": 1.0,
                     "Pressure Altitude Lag (s)": 0.10000000149011612,
                     "Pressure Altitude Accuracy (m)": 0.20000000298023225
                 },
@@ -318,6 +279,68 @@
                     "Velocity RS (ECEF)/Output",
                     "Linear Acceleration (Local->ENU)/Output",
                     "Multi Simulator/Pressure"
+                ]
+            },
+            "Multi Brain": {
+                "type": "Multi Brain",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "State Rate (Hz)": 20
+                },
+                "config": {
+                    "Max Thrust (N)": 16.0,
+                    "Min Thrust (N)": 3.0,
+                    "Horizontal Angle": {
+                        "Max Speed (deg/s)": 180.0,
+                        "Combined PIDs": true,
+                        "PIDs": {
+                            "kP": 3.0,
+                            "kI": 2.0,
+                            "kD": 0.0,
+                            "Max I": 2.0,
+                            "D Filter": 0.0
+                        }
+                    },
+                    "Altitude": {
+                        "Max Speed (m/s)": 2.0,
+                        "LPF Poles": 1,
+                        "LPF Cutoff Frequency (Hz)": 0.1,
+                        "Acceleration PID": {
+                            "kP": 0.7,
+                            "kI": 0.2,
+                            "kD": 0.0,
+                            "Max I": 0.2,
+                            "D Filter": 0.0
+                        },
+                        "Velocity PD": {
+                            "kP": 2.0,
+                            "kD": 0.0,
+                            "D Filter": 0.0
+                        },
+                        "Altitude P": {
+                            "kP": 2.0
+                        }
+                    }
+                },
+                "input_paths": [
+                    "Multi Input/Output",
+                    "Frame RS/Output",
+                    "EKF ECEF/Position (ecef)",
+                    "EKF ECEF/Velocity (ecef)",
+                    "Acceleration LPF (ECEF)/Output"
+                ]
+            },
+            "Acceleration LPF (ECEF)": {
+                "type": "Acceleration LPF (ECEF)",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 20.0
+                },
+                "input_paths": [
+                    "EKF ECEF/Acceleration (ecef)"
                 ]
             }
         }

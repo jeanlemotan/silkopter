@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace EKF_ECEF { struct Init_Params {
+namespace sz { namespace KF_ECEF { struct Init_Params {
  uint32_t rate;
 
 explicit Init_Params():rate(0) {  }
@@ -41,7 +41,7 @@ explicit Init_Params():rate(0) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::EKF_ECEF::Init_Params > {
+class SAXEventHandler< ::sz::KF_ECEF::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -93,7 +93,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::EKF_ECEF::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::KF_ECEF::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -360,14 +360,14 @@ public:
     }
 };
 
-template < class Writer6e872fae6ba8fd99a783f2983652cea678c63a4b1fe9a5a4fcdc016d0a6709be >
-struct Serializer< Writer6e872fae6ba8fd99a783f2983652cea678c63a4b1fe9a5a4fcdc016d0a6709be, ::sz::EKF_ECEF::Init_Params > {
+template < class Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54388046a71 >
+struct Serializer< Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54388046a71, ::sz::KF_ECEF::Init_Params > {
 
-    void operator()( Writer6e872fae6ba8fd99a783f2983652cea678c63a4b1fe9a5a4fcdc016d0a6709be& w, const ::sz::EKF_ECEF::Init_Params& value) const
+    void operator()( Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54388046a71& w, const ::sz::KF_ECEF::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer6e872fae6ba8fd99a783f2983652cea678c63a4b1fe9a5a4fcdc016d0a6709be, uint32_t >()(w, value.rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54388046a71, uint32_t >()(w, value.rate);
 
         w.EndObject(1);
     }
@@ -403,7 +403,7 @@ struct Serializer< Writer6e872fae6ba8fd99a783f2983652cea678c63a4b1fe9a5a4fcdc016
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace EKF_ECEF { struct Config {
+namespace sz { namespace KF_ECEF { struct Config {
  float position_accuracy;
 float velocity_lag;
 float velocity_accuracy;
@@ -423,7 +423,7 @@ explicit Config():position_accuracy(2.0), velocity_lag(0), velocity_accuracy(0.2
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::EKF_ECEF::Config > {
+class SAXEventHandler< ::sz::KF_ECEF::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -505,7 +505,7 @@ has_pressure_alt_accuracy = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::EKF_ECEF::Config * obj)
+    explicit SAXEventHandler( ::sz::KF_ECEF::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->position_accuracy)
@@ -1048,20 +1048,20 @@ handler_6.PrepareForReuse();
     }
 };
 
-template < class Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be >
-struct Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, ::sz::EKF_ECEF::Config > {
+template < class Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f >
+struct Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, ::sz::KF_ECEF::Config > {
 
-    void operator()( Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be& w, const ::sz::EKF_ECEF::Config& value) const
+    void operator()( Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f& w, const ::sz::KF_ECEF::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.position_accuracy);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.velocity_lag);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.velocity_accuracy);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.acceleration_lag);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x5e\x32\x29", 29, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.acceleration_accuracy);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.pressure_alt_lag);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30, false); Serializer< Writer112939efa71500f21e6eb812f45ff49c79b112d5387a5f1021b39c4e5b8cb9be, float >()(w, value.pressure_alt_accuracy);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.position_accuracy);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_lag);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_accuracy);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.acceleration_lag);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x5e\x32\x29", 29, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.acceleration_accuracy);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_lag);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_accuracy);
 
         w.EndObject(7);
     }

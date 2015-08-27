@@ -19,8 +19,8 @@
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -205.0,
-                    "y": 78.0
+                    "x": -226.0,
+                    "y": 102.0
                 }
             }
         },
@@ -99,8 +99,8 @@
         "Multi Input": {
             "hal_editor": {
                 "position": {
-                    "x": -373.0,
-                    "y": 75.0
+                    "x": -374.0,
+                    "y": 142.0
                 }
             }
         },
@@ -269,6 +269,14 @@
                 "position": {
                     "x": -377.0,
                     "y": -24.0
+                }
+            }
+        },
+        "Acceleration LPF (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": 3.0,
+                    "y": 262.0
                 }
             }
         }
