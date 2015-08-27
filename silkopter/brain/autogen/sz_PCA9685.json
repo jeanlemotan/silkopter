@@ -17,8 +17,8 @@
     "members":
     [
         ["bool", "servo_signal", {"required": false, "default" : false, "json_key" : "Servo Signal"}],
-        ["float", "min", {"required": true, "default" : 0, "json_key" : "Min"}],
-        ["float", "max", {"required": true, "default" : 1, "json_key" : "Max"}]
+        ["double", "min", {"required": true, "default" : 0, "json_key" : "Min"}],
+        ["double", "max", {"required": true, "default" : 1, "json_key" : "Max"}]
     ]
 },
 {

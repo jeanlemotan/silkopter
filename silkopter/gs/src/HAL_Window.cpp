@@ -708,7 +708,7 @@ void HAL_Window::add_node(silk::node::gs::Node_ptr node)
     auto* positionj = jsonutil::find_value(node->config, q::Path("__gs/position"));
     if (positionj)
     {
-        math::vec2f position;
+        math::vec2d position;
         autojsoncxx::error::ErrorStack result;
         if (!autojsoncxx::from_value(position, *positionj, result))
         {
@@ -846,14 +846,14 @@ void HAL_Window::set_node_position(std::string const& node_name, QPointF const& 
     if (positionj)
     {
         rapidjson::Document doc;
-        autojsoncxx::to_document(math::vec2f(pos.x(), pos.y()), doc);
+        autojsoncxx::to_document(math::vec2d(pos.x(), pos.y()), doc);
         jsonutil::clone_value(*positionj, doc, m_editor_data.GetAllocator());
     }
     save_editor_data();
 }
 auto HAL_Window::get_node_position(std::string const& node_name) -> QPointF
 {
-    math::vec2f sz;
+    math::vec2d sz;
     q::Path path("nodes/" + node_name + "/hal_editor/position");
     auto* positionj = jsonutil::get_or_add_value(m_editor_data, path, rapidjson::kObjectType, m_editor_data.GetAllocator());
     if (positionj)

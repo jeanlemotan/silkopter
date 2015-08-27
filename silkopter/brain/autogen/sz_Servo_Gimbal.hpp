@@ -404,10 +404,10 @@ struct Serializer< Writer257ededf43beca45e514ae35e310a145a92619b350442eca4b1c41c
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Servo_Gimbal { struct PWM {
- float min_angle;
-float min_pwm;
-float max_angle;
-float max_pwm;
+ double min_angle;
+double min_pwm;
+double max_angle;
+double max_pwm;
 
 explicit PWM():min_angle(-179), min_pwm(0), max_angle(179), max_pwm(1) {  }
 
@@ -426,10 +426,10 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;
-SAXEventHandler< float > handler_3;bool has_min_angle;
+    SAXEventHandler< double > handler_0;
+SAXEventHandler< double > handler_1;
+SAXEventHandler< double > handler_2;
+SAXEventHandler< double > handler_3;bool has_min_angle;
 bool has_min_pwm;
 bool has_max_angle;
 bool has_max_pwm;
@@ -899,10 +899,10 @@ struct Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c300411
     {
         w.StartObject();
 
-        w.Key("\x4d\x69\x6e\x20\x41\x6e\x67\x6c\x65\x20\x28\xc2\xb0\x29", 14, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, float >()(w, value.min_angle);
-w.Key("\x4d\x69\x6e\x20\x50\x57\x4d", 7, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, float >()(w, value.min_pwm);
-w.Key("\x4d\x61\x78\x20\x41\x6e\x67\x6c\x65\x20\x28\xc2\xb0\x29", 14, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, float >()(w, value.max_angle);
-w.Key("\x4d\x61\x78\x20\x50\x57\x4d", 7, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, float >()(w, value.max_pwm);
+        w.Key("\x4d\x69\x6e\x20\x41\x6e\x67\x6c\x65\x20\x28\xc2\xb0\x29", 14, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, double >()(w, value.min_angle);
+w.Key("\x4d\x69\x6e\x20\x50\x57\x4d", 7, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, double >()(w, value.min_pwm);
+w.Key("\x4d\x61\x78\x20\x41\x6e\x67\x6c\x65\x20\x28\xc2\xb0\x29", 14, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, double >()(w, value.max_angle);
+w.Key("\x4d\x61\x78\x20\x50\x57\x4d", 7, false); Serializer< Writeraa8e14d05224873eb02d8efb1eda26776db384db1655a6e4c30041149a9f0720, double >()(w, value.max_pwm);
 
         w.EndObject(4);
     }

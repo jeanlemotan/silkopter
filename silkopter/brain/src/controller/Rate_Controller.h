@@ -54,10 +54,10 @@ private:
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
-    math::vec3f compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
-    math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3d compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3d compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
-    typedef util::PID<float, float, float> PID;
+    typedef util::PID<double, double, double> PID;
     PID m_x_pid;
     PID m_y_pid;
     PID m_z_pid;

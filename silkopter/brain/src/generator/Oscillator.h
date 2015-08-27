@@ -48,8 +48,8 @@ private:
     std::shared_ptr<sz::Oscillator::Init_Params> m_init_params;
     std::shared_ptr<sz::Oscillator::Config> m_config;
 
-    float m_period = 0;
-    std::uniform_real_distribution<float> m_rnd_distribution;
+    double m_period = 0;
+    std::uniform_real_distribution<double> m_rnd_distribution;
     std::mt19937 m_rnd_engine;
     bool m_has_noise = false;
 

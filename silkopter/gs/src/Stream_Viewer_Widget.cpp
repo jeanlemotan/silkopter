@@ -326,7 +326,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 4> data;
             for (auto const& s: samples)
             {
-                data = { s.value.fix_satellites, s.value.pdop, s.value.position_accuracy, s.value.velocity_accuracy };
+                data = { s.value.fix_satellites, s.value.pdop, s.value.pacc, s.value.vacc };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();
@@ -406,8 +406,8 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 3> data;
             for (auto const& s: samples)
             {
-                math::mat3f mat = s.value.get_as_mat3();
-                data = { math::dot(mat.get_axis_x(), math::vec3f(1, 0, 0)), math::dot(mat.get_axis_y(), math::vec3f(0, 1, 0)), math::dot(mat.get_axis_z(), math::vec3f(0, 0, 1)) };
+                math::mat3d mat = s.value.get_as_mat3();
+                data = { math::dot(mat.get_axis_x(), math::vec3d(1, 0, 0)), math::dot(mat.get_axis_y(), math::vec3d(0, 1, 0)), math::dot(mat.get_axis_z(), math::vec3d(0, 0, 1)) };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();

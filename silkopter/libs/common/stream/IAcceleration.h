@@ -12,7 +12,7 @@ class IAcceleration : public ISpatial_Stream<Type::ACCELERATION, Space::LOCAL>
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f             Value; //meters per second^2
+    typedef math::vec3d             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -23,7 +23,7 @@ class IENU_Acceleration : public ISpatial_Stream<Type::ACCELERATION, Space::ENU>
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f             Value; //meters per second^2
+    typedef math::vec3d             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -34,7 +34,7 @@ class IECEF_Acceleration : public ISpatial_Stream<Type::ACCELERATION, Space::ECE
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f             Value; //meters per second^2
+    typedef math::vec3d             Value; //meters per second^2
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };

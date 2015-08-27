@@ -15,9 +15,9 @@
     "name": "Config",
     "members":
     [
-       ["math::vec3f", "direction", {"required": true, "json_key" : "Direction (normalized vector)"}],
-       ["float", "min_distance", {"required": false, "json_key" : "Minimum Distance (m)", "default" : 0.20}],
-       ["float", "max_distance", {"required": false, "json_key" : "Maximum Distance (m)", "default" : 6}]
+       ["math::vec3d", "direction", {"required": true, "json_key" : "Direction (normalized vector)"}],
+       ["double", "min_distance", {"required": false, "json_key" : "Minimum Distance (m)", "default" : 0.20}],
+       ["double", "max_distance", {"required": false, "json_key" : "Maximum Distance (m)", "default" : 6}]
     ]
 }
 ]

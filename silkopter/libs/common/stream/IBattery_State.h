@@ -16,10 +16,10 @@ public:
 
     struct Value
     {
-        float charge_used = 0; //Amperes-Hour (Ah)
+        double charge_used = 0; //Amperes-Hour (Ah)
         IVoltage::Value average_voltage = 0; //Volts, averaged over one second
         ICurrent::Value average_current = 0; //Amperes, averaged over one second
-        float capacity_left = 0; //0 is Empty, 1 is Full
+        double capacity_left = 0; //0 is Empty, 1 is Full
     };
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;

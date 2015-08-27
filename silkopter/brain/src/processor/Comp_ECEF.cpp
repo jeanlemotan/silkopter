@@ -80,7 +80,7 @@ void Comp_ECEF::process()
     m_position_output_stream->clear();
     m_velocity_output_stream->clear();
 
-    double dts = q::Seconds(m_position_output_stream->get_dt()).count();
+    double dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
 
     m_accumulator.process([this, dts](
                           size_t,

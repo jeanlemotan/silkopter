@@ -23,9 +23,9 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
 
 void Multi_HUD_Widget::process_vertical_thrust_rate()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    double v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
 
-    constexpr float expo = 2.f;
+    constexpr double expo = 2.f;
     v = math::sgn(v) * std::pow(v, expo); //some expo
 
     auto config = m_hal.get_multi_config();
@@ -38,9 +38,9 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
 
 void Multi_HUD_Widget::process_vertical_thrust_offset()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    double v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
 
-    constexpr float expo = 2.f;
+    constexpr double expo = 2.f;
     v = math::sgn(v) * std::pow(v, expo); //some expo
 
     auto config = m_hal.get_multi_config();
@@ -53,11 +53,11 @@ void Multi_HUD_Widget::process_vertical_thrust_offset()
 
 void Multi_HUD_Widget::process_vertical_climb_rate()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    double v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
 
     v *= 5.f;
 
-    m_input.vertical.climb_rate.set(v);
+    m_input.vertical.velocity.set(v);
 }
 
 void Multi_HUD_Widget::process_vertical()
@@ -70,7 +70,7 @@ void Multi_HUD_Widget::process_vertical()
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         process_vertical_thrust_offset();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::VELOCITY:
         process_vertical_climb_rate();
         break;
     }
@@ -79,7 +79,7 @@ void Multi_HUD_Widget::process_vertical()
     {
         int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
                             static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
 
         m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
     }
@@ -87,7 +87,7 @@ void Multi_HUD_Widget::process_vertical()
     {
         int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
                             static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE));
+                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
 
         m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
     }
@@ -96,35 +96,35 @@ void Multi_HUD_Widget::process_vertical()
 
 void Multi_HUD_Widget::process_horizontal_angle_rate()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+    math::vec2d v(m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value);
 
     v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
+    constexpr double expo = 2.f;
+    v = math::sgn(v) * math::vec2d(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
-    v *= math::vec2f(math::anglef::_2pi);
+    v *= math::vec2d(math::anglef::_2pi);
 
     m_input.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_angle()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+    math::vec2d v(m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value);
 
     v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
+    constexpr double expo = 2.f;
+    v = math::sgn(v) * math::vec2d(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
-    v *= math::vec2f(math::anglef::pi / 4.f);
+    v *= math::vec2d(math::anglef::pi / 4.f);
 
     m_input.horizontal.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_velocity()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+    math::vec2d v(m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value);
     v *= 5.f;
     m_input.horizontal.velocity.set(v);
 }
@@ -164,11 +164,11 @@ void Multi_HUD_Widget::process_horizontal()
 
 void Multi_HUD_Widget::process_yaw_angle_rate()
 {
-    float v = 0;
+    double v = 0;
     v += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
     v -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
 
-    constexpr float expo = 2.f;
+    constexpr double expo = 2.f;
     v = math::sgn(v) * std::pow(v, expo); //some expo
 
     v *= math::anglef::pi2;
@@ -280,7 +280,7 @@ void Multi_HUD_Widget::sync_input()
     SYNC(vertical.mode);
     SYNC(vertical.thrust_rate);
     SYNC(vertical.thrust_offset);
-    SYNC(vertical.climb_rate);
+    SYNC(vertical.velocity);
 
     SYNC(horizontal.mode);
     SYNC(horizontal.angle_rate);
@@ -439,7 +439,7 @@ void Multi_HUD_Widget::render_hud()
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         texter.draw_string(m_context.painter, "Thrust Offset", math::vec2f(0, 60));
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::CLIMB_RATE:
+    case silk::stream::IMulti_Input::Vertical::Mode::VELOCITY:
         texter.draw_string(m_context.painter, "Climb Rate", math::vec2f(0, 60));
         break;
     }

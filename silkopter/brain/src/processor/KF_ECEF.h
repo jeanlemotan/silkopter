@@ -74,7 +74,7 @@ private:
     typedef Basic_Output_Stream<stream::IECEF_Acceleration> Acceleration_Output_Stream;
     mutable std::shared_ptr<Acceleration_Output_Stream> m_acceleration_output_stream;
 
-    boost::optional<float> m_last_baro_altitude;
+    boost::optional<double> m_last_baro_altitude;
 
     template<size_t St, size_t Me>
     class KF
@@ -116,12 +116,12 @@ private:
     KF<3, 3> m_kf_y;
     KF<3, 4> m_kf_z;
 
-    float m_dts = 0;
+    double m_dts = 0;
 
     template<class Value>
     struct Delayer
     {
-        void init(float dt, float lag);
+        void init(double dt, double lag);
         void push_back(Value const& value);
         auto get_value() -> Value const&;
 

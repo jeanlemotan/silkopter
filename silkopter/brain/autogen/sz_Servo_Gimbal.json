@@ -14,10 +14,10 @@
     "name": "PWM",
     "members":
     [
-        ["float", "min_angle", {"required": true, "json_key" : "Min Angle (°)", "default" : -179}],
-        ["float", "min_pwm", {"required": true, "json_key" : "Min PWM", "default" : 0}],
-        ["float", "max_angle", {"required": true, "json_key" : "Max Angle (°)", "default" : 179}],
-        ["float", "max_pwm", {"required": true, "json_key" : "Max PWM", "default" : 1}]
+        ["double", "min_angle", {"required": true, "json_key" : "Min Angle (°)", "default" : -179}],
+        ["double", "min_pwm", {"required": true, "json_key" : "Min PWM", "default" : 0}],
+        ["double", "max_angle", {"required": true, "json_key" : "Max Angle (°)", "default" : 179}],
+        ["double", "max_pwm", {"required": true, "json_key" : "Max PWM", "default" : 1}]
     ]
 },
 {

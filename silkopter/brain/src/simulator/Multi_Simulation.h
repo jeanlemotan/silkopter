@@ -43,7 +43,7 @@ public:
 
     auto get_uav_state() const -> IMulti_Simulator::UAV_State const&;
 
-    void set_motor_throttle(size_t motor, float throttle);
+    void set_motor_throttle(size_t motor, double throttle);
 
 private:
     void process_world(q::Clock::duration dt);

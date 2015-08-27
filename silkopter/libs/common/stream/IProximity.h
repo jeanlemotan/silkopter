@@ -14,7 +14,7 @@ public:
 
     struct Value
     {
-        std::vector<math::vec3f> distances;
+        std::vector<math::vec3d> distances;
     };
 
     typedef stream::Sample<Value>     Sample;

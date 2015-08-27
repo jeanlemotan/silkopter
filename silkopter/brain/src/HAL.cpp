@@ -229,39 +229,39 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
         QLOGE("Bad motor count: {}", config.motors.size());
         return false;
     }
-    if (config.height < math::epsilon<float>())
+    if (config.height < math::epsilon<double>())
     {
         QLOGE("Bad height: {}", config.height);
         return false;
     }
-    if (config.radius < math::epsilon<float>())
+    if (config.radius < math::epsilon<double>())
     {
         QLOGE("Bad radius: {}", config.radius);
         return false;
     }
-    if (config.mass < math::epsilon<float>())
+    if (config.mass < math::epsilon<double>())
     {
         QLOGE("Bad mass: {}", config.mass);
         return false;
     }
-    if (config.motor_thrust < math::epsilon<float>())
+    if (config.motor_thrust < math::epsilon<double>())
     {
         QLOGE("Bad motor thrust thrust: {}", config.motor_thrust);
         return false;
     }
-    if (config.motor_acceleration < math::epsilon<float>())
+    if (config.motor_acceleration < math::epsilon<double>())
     {
         QLOGE("Bad acceleration: {}", config.motor_acceleration);
         return false;
     }
-    if (config.motor_deceleration < math::epsilon<float>())
+    if (config.motor_deceleration < math::epsilon<double>())
     {
         QLOGE("Bad deceleration: {}", config.motor_deceleration);
         return false;
     }
     for (auto const& m: config.motors)
     {
-        if (math::is_zero(m.position, math::epsilon<float>()))
+        if (math::is_zero(m.position, math::epsilon<double>()))
         {
             QLOGE("Bad motor position: {}", m.position);
             return false;
@@ -271,7 +271,7 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
     m_configs.multi = config;
 
     //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    m_configs.multi->moment_of_inertia = (1.f / 12.f) * config.mass * (3.f * math::square(config.radius) + math::square(config.height));
+    m_configs.multi->moment_of_inertia = (1.0 / 12.0) * config.mass * (3.0 * math::square(config.radius) + math::square(config.height));
 
     return true;
 }
@@ -670,12 +670,12 @@ auto HAL::init(Comms& comms) -> bool
 
 //    {
 //        const size_t elements = 1000;
-//        const float noise = 0.3f;
+//        const float noise = 0.3;
 //        std::vector<std::pair<float, float>> freq =
 //        {{
-//             { 10.f, 1.f },
-//             { 70.f, 1.f/7.f },
-//             { 130.f, 1.f/5.f }
+//             { 10.0, 1.0 },
+//             { 70.0, 1.0/7.0 },
+//             { 130.0, 1.0/5.0 }
 //         }};
 //        samples.resize(elements);
 //        std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
@@ -684,7 +684,7 @@ auto HAL::init(Comms& comms) -> bool
 //        for (size_t i = 0; i < samples.size(); i++)
 //        {
 //            float a = float(i) * math::anglef::_2pi / float(rate);
-//            float output = 0.f;
+//            float output = 0.0;
 //            for (auto& f: freq)
 //            {
 //                output += math::sin(a * f.first) * f.second;
@@ -832,7 +832,7 @@ void HAL::process()
 
     auto now = q::Clock::now();
     auto dt = now - m_last_process_tp;
-    m_telemetry_data.rate = dt.count() > 0 ? 1.f / std::chrono::duration<float>(dt).count() : 0.f;
+    m_telemetry_data.rate = dt.count() > 0 ? 1.0 / std::chrono::duration<double>(dt).count() : 0.0;
 
 
     auto total_start = now;
@@ -851,7 +851,7 @@ void HAL::process()
     //calculate percentages
     for (auto& nt: m_telemetry_data.nodes)
     {
-        nt.second.process_percentage = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
+        nt.second.process_percentage = std::chrono::duration<double>(nt.second.process_duration).count() / std::chrono::duration<double>(m_telemetry_data.total_duration).count();
     }
 
 //    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");

@@ -12,7 +12,7 @@ class IAngular_Velocity : public ISpatial_Stream<Type::ANGULAR_VELOCITY, Space::
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f       Value; //radians per second
+    typedef math::vec3d       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -23,7 +23,7 @@ class IENU_Angular_Velocity : public ISpatial_Stream<Type::ANGULAR_VELOCITY, Spa
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f       Value; //radians per second
+    typedef math::vec3d       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
@@ -34,7 +34,7 @@ class IECEF_Angular_Velocity : public ISpatial_Stream<Type::ANGULAR_VELOCITY, Sp
 public:
     typedef std::true_type can_be_filtered_t;
 
-    typedef math::vec3f       Value; //radians per second
+    typedef math::vec3d       Value; //radians per second
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };

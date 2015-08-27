@@ -88,7 +88,7 @@ void Servo_Gimbal::process()
     {
         auto rotation = i_sample.value;
 
-        math::vec3f rotation_euler;
+        math::vec3d rotation_euler;
         rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
 
         bool is_healthy = i_sample.is_healthy;
@@ -96,28 +96,28 @@ void Servo_Gimbal::process()
         {
             auto const& config = m_config->x_pwm;
 
-            math::anglef angle(rotation_euler.x);
+            math::angled angle(rotation_euler.x);
             angle.normalize();
-            float a = angle.radians;
-            if (a > math::anglef::pi)
+            double a = angle.radians;
+            if (a > math::angled::pi)
             {
-                a = a - math::anglef::_2pi;
+                a = a - math::angled::_2pi;
             }
             auto min_a = math::radians(config.min_angle);
             auto max_a = math::radians(config.max_angle);
             auto mu = (a - min_a) / (max_a - min_a);
-            mu = math::clamp(mu, 0.f, 1.f);
+            mu = math::clamp(mu, 0.0, 1.0);
 
             m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
             auto const& config = m_config->y_pwm;
-            float mu = 0;
+            double mu = 0;
             m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
         {
             auto const& config = m_config->z_pwm;
-            float mu = 0;
+            double mu = 0;
             m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
         }
     });

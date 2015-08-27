@@ -48,6 +48,6 @@ private:
 
     q::util::Connection m_connection;
 
-    std::vector<math::vec3f> m_samples;
-    math::aabb3f m_box;
+    std::vector<math::vec3d> m_samples;
+    math::aabb3d m_box;
 };

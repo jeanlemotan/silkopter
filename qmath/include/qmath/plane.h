@@ -130,5 +130,6 @@ struct plane
 };
 
 typedef plane<float>  planef;
+typedef plane<double>  planed;
 
 }

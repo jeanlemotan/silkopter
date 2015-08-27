@@ -10,19 +10,19 @@ class Multi
 public:
     struct Motor
     {
-        math::vec3f position;
+        math::vec3d position;
         bool clockwise = false;
     };
 
     std::string name;
-    float radius = 0; //m
-    float height = 0; //m
-    float mass = 0; //Kg
-    float moment_of_inertia; //computed
-    float motor_z_torque = 0; //Nm
-    float motor_thrust = 0; //N
-    float motor_acceleration = 0; //rpm/s
-    float motor_deceleration = 0; //rpm/s
+    double radius = 0; //m
+    double height = 0; //m
+    double mass = 0; //Kg
+    double moment_of_inertia; //computed
+    double motor_z_torque = 0; //Nm
+    double motor_thrust = 0; //N
+    double motor_acceleration = 0; //rpm/s
+    double motor_deceleration = 0; //rpm/s
     std::vector<Motor> motors;
 };
 

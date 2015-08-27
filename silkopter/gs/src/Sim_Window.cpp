@@ -201,12 +201,12 @@ void Sim_Window::render_uav(math::trans3df const& trans)
             auto const& mc = config->motors[i];
             auto const& m = m_uav.sim_state.motors[i];
 
-            m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(mc.position, 0xFFFFFFFF));
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0xFFFFFFFF), motor_radius, 16); //motor
+            m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(math::vec3f(mc.position), 0xFFFFFFFF));
+            m_context.painter.fill_circle(q::draw::Vertex(math::vec3f(mc.position), 0xFFFFFFFF), motor_radius, 16); //motor
 
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0x40FFFFFF), propeller_radius, 32); //motor + prop
+            m_context.painter.fill_circle(q::draw::Vertex(math::vec3f(mc.position), 0x40FFFFFF), propeller_radius, 32); //motor + prop
             float ratio = m.thrust / float(config->motor_thrust);
-            m_context.painter.fill_circle(q::draw::Vertex(mc.position, 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
+            m_context.painter.fill_circle(q::draw::Vertex(math::vec3f(mc.position), 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
         }
     }
 
@@ -221,8 +221,8 @@ void Sim_Window::render_uav(math::trans3df const& trans)
     //render altitude meter
     if (m_ui.action_show_altitude->isChecked())
     {
-        auto p0 = m_uav.sim_state.enu_position;
-        auto p1 = p0;
+        math::vec3f p0 = math::vec3f(m_uav.sim_state.enu_position);
+        math::vec3f p1 = p0;
         p0.z = 0;
         auto p2 = p1 + math::normalized<float, math::safe>(p1 - p0) * 2.f;
         m_context.painter.draw_line(q::draw::Vertex(p0, 0x50FFFFFF), q::draw::Vertex(p1, 0x50FFFFFF));
@@ -252,8 +252,8 @@ void Sim_Window::render_brain_state()
     //render what the brain _thinks_ the orientation is
     {
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state.value.frame);
-        trans.set_translation(m_uav.sim_state.enu_position);
+        trans.set_rotation(math::quatf(m_uav.brain_state.value.frame));
+        trans.set_translation(math::vec3f(m_uav.sim_state.enu_position));
         m_context.painter.push_post_clip_transform(trans);
 
         //render axis
@@ -270,7 +270,7 @@ void Sim_Window::render_brain_state()
         auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state.value.ecef_position));
 
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state.value.frame);
+        trans.set_rotation(math::quatf(m_uav.brain_state.value.frame));
         trans.set_translation(enu_position);
         m_context.painter.push_post_clip_transform(trans);
 
@@ -365,8 +365,8 @@ void Sim_Window::process()
         auto delta = m_uav.sim_state.enu_position - m_camera_position_target;
         delta *= 0.9f;
         m_camera_position_target += delta;
-        m_context.camera.set_position(m_context.camera.get_position() + delta);
-        m_camera_controller.set_focus_point(m_camera_position_target);
+        m_context.camera.set_position(m_context.camera.get_position() + math::vec3f(delta));
+        m_camera_controller.set_focus_point(math::vec3f(m_camera_position_target));
     }
 
     m_context.painter.set_camera(m_context.camera);
@@ -384,8 +384,8 @@ void Sim_Window::process()
 
     {
         math::trans3df trans;
-        trans.set_rotation(m_uav.sim_state.local_to_enu_rotation);
-        trans.set_translation(m_uav.sim_state.enu_position);
+        trans.set_rotation(math::quatf(m_uav.sim_state.local_to_enu_rotation));
+        trans.set_translation(math::vec3f(m_uav.sim_state.enu_position));
         render_uav(trans);
     }
     {

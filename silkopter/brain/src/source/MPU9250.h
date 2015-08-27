@@ -94,18 +94,18 @@ private:
 
     typedef Basic_Output_Stream<stream::IAcceleration> Acceleration_Stream;
     mutable std::shared_ptr<Acceleration_Stream> m_acceleration;
-    float m_acceleration_sensor_scale = 1.f;
+    double m_acceleration_sensor_scale = 1.0;
 
     typedef Basic_Output_Stream<stream::IAngular_Velocity> Angular_Velocity_Stream;
     mutable std::shared_ptr<Angular_Velocity_Stream> m_angular_velocity;
-    float m_angular_velocity_sensor_scale = 1.f;
+    double m_angular_velocity_sensor_scale = 1.0;
 
     typedef Basic_Output_Stream<stream::IMagnetic_Field> Magnetic_Field_Stream;
     mutable std::shared_ptr<Magnetic_Field_Stream> m_magnetic_field;
     uint8_t m_akm_address = 0;
-    math::vec3f m_magnetic_field_sensor_scale;
+    math::vec3d m_magnetic_field_sensor_scale;
 
-    math::vec3f m_last_magnetic_field_value;
+    math::vec3d m_last_magnetic_field_value;
 
     typedef Basic_Output_Stream<stream::ITemperature> Temperature_Stream;
     mutable std::shared_ptr<Temperature_Stream> m_temperature;

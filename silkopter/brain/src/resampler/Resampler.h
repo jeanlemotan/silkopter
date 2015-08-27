@@ -62,7 +62,7 @@ private:
     template<class T, bool>
     struct Butterworth
     {
-        auto setup(size_t, float, float) -> bool
+        auto setup(size_t, double, double) -> bool
         {
             return true;
         }
@@ -76,7 +76,7 @@ private:
     {
         util::Butterworth<typename T::Value> dsp;
 
-        auto setup(size_t order, float rate, float cutoff_frequency) -> bool
+        auto setup(size_t order, double rate, double cutoff_frequency) -> bool
         {
             return dsp.setup(order, rate, cutoff_frequency);
         }

@@ -5,9 +5,9 @@
     "name": "Acceleration",
     "members":
     [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}],
-        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
+        ["double", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
+        ["math::vec3d", "bias", {"required": true, "json_key" : "Bias"}],
+        ["math::vec3d", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
     ]
 },
 {
@@ -27,8 +27,8 @@
     "name": "Angular_Velocity",
     "members":
     [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}]
+        ["double", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
+        ["math::vec3d", "bias", {"required": true, "json_key" : "Bias"}]
     ]
 },
 {
@@ -47,9 +47,9 @@
     "name": "Magnetic_Field",
     "members":
     [
-        ["float", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
-        ["math::vec3f", "bias", {"required": true, "json_key" : "Bias"}],
-        ["math::vec3f", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
+        ["double", "temperature", {"required": true, "json_key" : "Temperature", "default" : 0}],
+        ["math::vec3d", "bias", {"required": true, "json_key" : "Bias"}],
+        ["math::vec3d", "scale", {"required": true, "json_key" : "Scale", "default" : 1}]
     ]
 },
 {

@@ -93,11 +93,11 @@ protected:
     struct Telemetry_Data
     {
         q::Clock::duration total_duration;
-        float rate = 0;
+        double rate = 0;
         struct Node
         {
             q::Clock::duration process_duration;
-            float process_percentage = 0;
+            double process_percentage = 0;
         };
         std::map<std::string, Node> nodes;
     };

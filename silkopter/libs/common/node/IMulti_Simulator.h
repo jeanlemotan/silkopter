@@ -12,23 +12,23 @@ class IMulti_Simulator : public Node_Base<Type::SIMULATOR>
 public:
     struct Motor_State
     {
-        float drag_factor = 0;
-        float throttle = 0;
-        float thrust = 0;
+        double drag_factor = 0;
+        double throttle = 0;
+        double thrust = 0;
     };
 
     struct UAV_State
     {
-        math::vec3f enu_position;
-        math::vec3f enu_velocity;
-        math::vec3f enu_linear_acceleration;
-        math::vec3f acceleration;
-        math::quatf local_to_enu_rotation;
-        math::vec3f angular_velocity;
-        math::vec3f magnetic_field;
-        float pressure = 0;
-        float temperature = 0;
-        math::vec3f proximity_distance;
+        math::vec3d enu_position;
+        math::vec3d enu_velocity;
+        math::vec3d enu_linear_acceleration;
+        math::vec3d acceleration;
+        math::quatd local_to_enu_rotation;
+        math::vec3d angular_velocity;
+        math::vec3d magnetic_field;
+        double pressure = 0;
+        double temperature = 0;
+        math::vec3d proximity_distance;
         std::vector<Motor_State> motors;
     };
 

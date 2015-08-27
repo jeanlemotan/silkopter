@@ -35,12 +35,12 @@ void signal_handler(int signum)
     QLOGI("Exitting due to signal {}", signum);
 }
 
-//void test_mm(math::vec3f const& target, float step)
+//void test_mm(math::vec3d const& target, double step)
 //{
 //    struct Motor
 //    {
-//        math::vec3f torque; //precomputed maximum torque
-//        float factor;
+//        math::vec3d torque; //precomputed maximum torque
+//        double factor;
 //    };
 
 //    //some test configuration with random data
@@ -56,14 +56,14 @@ void signal_handler(int signum)
 //    while (true)
 //    {
 //        //first calculate the crt torque
-//        math::vec3f crt;
+//        math::vec3d crt;
 //        for (auto& m: motors)
 //        {
 //            crt += m.torque * m.factor;
 //        }
 
 //        //check if we're done
-//        if (math::equals(crt, target, 0.0001f))
+//        if (math::equals(crt, target, 0.0001))
 //        {
 //            QLOGI("{}: Done in {} iterations", step, iteration);
 //            break;
@@ -71,7 +71,7 @@ void signal_handler(int signum)
 
 //        //how far are we for the target?
 //        //divide by motor count because I want to distribute the difference to all motors
-//        auto diff = (target - crt) / float(motors.size());
+//        auto diff = (target - crt) / double(motors.size());
 
 //        //distribute the diff to all motors
 //        for (auto& m: motors)
@@ -113,7 +113,7 @@ int main(int argc, char const* argv[])
 //    q::util::Rand rnd;
 //    while (true)
 //    {
-//        math::vec3f target(rnd.get_float() * 40.f, rnd.get_float() * 40.f, rnd.get_float() * 10.f);
+//        math::vec3d target(rnd.get_float() * 40.0, rnd.get_float() * 40.0, rnd.get_float() * 10.0);
 //        test_mm(target, 0.01);
 //        test_mm(target, 0.1);
 //        test_mm(target, 0.5);

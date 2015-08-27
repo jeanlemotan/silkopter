@@ -404,7 +404,7 @@ struct Serializer< Writer69485d8908c27f42ccac06fad0ed25329779895a1c15b903b1d7cba
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Vec3_Generator { struct Config {
- math::vec3f value;
+ math::vec3d value;
 
 explicit Config():value() {  }
 
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< math::vec3f > handler_0;bool has_value;
+    SAXEventHandler< math::vec3d > handler_0;bool has_value;
 
     bool check_depth(const char* type)
     {
@@ -743,7 +743,7 @@ struct Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c3
     {
         w.StartObject();
 
-        w.Key("\x56\x61\x6c\x75\x65", 5, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, math::vec3f >()(w, value.value);
+        w.Key("\x56\x61\x6c\x75\x65", 5, false); Serializer< Writer0e3754d60c0823056f2888d74fc9a3573cd2b5ce0e0ca67080753c395f781eed, math::vec3d >()(w, value.value);
 
         w.EndObject(1);
     }

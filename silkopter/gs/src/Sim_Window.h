@@ -52,7 +52,7 @@ private:
     q::Clock::time_point m_last_state_request_tp = q::Clock::now();
     int m_state_requests = 10;
 
-    math::vec3f m_camera_position_target;
+    math::vec3d m_camera_position_target;
 
     std::vector<q::util::Connection> m_connections;
 };

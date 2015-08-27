@@ -43,10 +43,10 @@ namespace dsp
 template<> inline void apply_coefficients(silk::stream::IECEF_Position::Value& x,
                                    silk::stream::IECEF_Position::Value& w0,
                                    silk::stream::IECEF_Position::Value& w1,
-                                   silk::stream::IECEF_Position::Value& w2, float d1, float d2, float A)
+                                   silk::stream::IECEF_Position::Value& w2, double d1, double d2, double A)
 {
-    w0 = double(d1)*w1 + double(d2)*w2 + x;
-    x = double(A)*(w0 + 2.0*w1 + w2);
+    w0 = d1*w1 + d2*w2 + x;
+    x = A*(w0 + 2.0*w1 + w2);
     w2 = w1;
     w1 = w0;
 }

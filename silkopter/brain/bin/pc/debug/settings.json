@@ -12,32 +12,32 @@
             "Motors": [
                 {
                     "Position": {
-                        "x": -0.25999999046325686,
-                        "y": -0.25999999046325686,
+                        "x": -0.2599999904632569,
+                        "y": -0.2599999904632569,
                         "z": 0.0
                     },
                     "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": 0.25999999046325686,
-                        "y": -0.25999999046325686,
+                        "x": 0.2599999904632569,
+                        "y": -0.2599999904632569,
                         "z": 0.0
                     },
                     "Clockwise": true
                 },
                 {
                     "Position": {
-                        "x": 0.25999999046325686,
-                        "y": 0.25999999046325686,
+                        "x": 0.2599999904632569,
+                        "y": 0.2599999904632569,
                         "z": 0.0
                     },
                     "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": -0.25999999046325686,
-                        "y": 0.25999999046325686,
+                        "x": -0.2599999904632569,
+                        "y": 0.2599999904632569,
                         "z": 0.0
                     },
                     "Clockwise": true
@@ -204,7 +204,7 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 2.4
+                    "Cutoff Frequency (Hz)": 2.5
                 },
                 "input_paths": [
                     "Multi Simulator/GPS Position (ecef)"
@@ -254,7 +254,7 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 2.4
+                    "Cutoff Frequency (Hz)": 2.5
                 },
                 "input_paths": [
                     "Multi Simulator/GPS Velocity (ecef)"
@@ -266,10 +266,10 @@
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Position Accuracy (CEP m)": 2.0,
+                    "Position Accuracy (CEP m)": 1.0,
                     "Velocity Lag (s)": 0.0,
                     "Velocity Accuracy (m/s)": 0.10000000149011612,
-                    "Acceleration Lag (s)": 0.10999999940395355,
+                    "Acceleration Lag (s)": 0.10999999940395357,
                     "Acceleration Accuracy (m/s^2)": 1.0,
                     "Pressure Altitude Lag (s)": 0.10000000149011612,
                     "Pressure Altitude Accuracy (m)": 0.20000000298023225
@@ -304,21 +304,21 @@
                     "Altitude": {
                         "Max Speed (m/s)": 2.0,
                         "LPF Poles": 1,
-                        "LPF Cutoff Frequency (Hz)": 0.1,
+                        "LPF Cutoff Frequency (Hz)": 5.0,
                         "Acceleration PID": {
-                            "kP": 0.7,
+                            "kP": 1.0,
                             "kI": 0.2,
                             "kD": 0.0,
                             "Max I": 0.2,
                             "D Filter": 0.0
                         },
                         "Velocity PD": {
-                            "kP": 2.0,
+                            "kP": 1.0,
                             "kD": 0.0,
-                            "D Filter": 0.0
+                            "D Filter": 1.0
                         },
                         "Altitude P": {
-                            "kP": 2.0
+                            "kP": 1.5
                         }
                     }
                 },
@@ -337,7 +337,7 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 20.0
+                    "Cutoff Frequency (Hz)": 10.0
                 },
                 "input_paths": [
                     "EKF ECEF/Acceleration (ecef)"

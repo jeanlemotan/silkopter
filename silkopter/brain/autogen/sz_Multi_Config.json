@@ -5,7 +5,7 @@
     "name": "Motor",
     "members":
     [
-        ["math::vec3f", "position", {"required": true, "json_key" : "Position"}],
+        ["math::vec3d", "position", {"required": true, "json_key" : "Position"}],
         ["bool", "clockwise", {"required": true, "json_key" : "Clockwise"}]
     ]
 },
@@ -16,13 +16,13 @@
     "members":
     [
         ["std::string", "name", {"required": true, "json_key" : "Name"}],
-        ["float", "mass", {"required": true, "json_key" : "Mass (Kg)", "default" : 0.7}],
-        ["float", "height", {"required": true, "json_key" : "Height (m)", "default" : 0.1}],
-        ["float", "radius", {"required": true, "json_key" : "Radius (m)", "default" : 0.4}],
-        ["float", "motor_thrust", {"required": true, "json_key" : "Motor Thrust @ 100% (N)"}],
-        ["float", "motor_z_torque", {"required": true, "json_key" : "Motor Z Torque @ 100% (Nm)"}],
-        ["float", "motor_acceleration", {"required": true, "json_key" : "Motor Acceleration (s)"}],
-        ["float", "motor_deceleration", {"required": true, "json_key" : "Motor Deceleration (s)"}],
+        ["double", "mass", {"required": true, "json_key" : "Mass (Kg)", "default" : 0.7}],
+        ["double", "height", {"required": true, "json_key" : "Height (m)", "default" : 0.1}],
+        ["double", "radius", {"required": true, "json_key" : "Radius (m)", "default" : 0.4}],
+        ["double", "motor_thrust", {"required": true, "json_key" : "Motor Thrust @ 100% (N)"}],
+        ["double", "motor_z_torque", {"required": true, "json_key" : "Motor Z Torque @ 100% (Nm)"}],
+        ["double", "motor_acceleration", {"required": true, "json_key" : "Motor Acceleration (s)"}],
+        ["double", "motor_deceleration", {"required": true, "json_key" : "Motor Deceleration (s)"}],
         ["std::vector<silk::config::Multi::Motor>", "motors", {"required": true, "json_key" : "Motors"}]
     ]
 }

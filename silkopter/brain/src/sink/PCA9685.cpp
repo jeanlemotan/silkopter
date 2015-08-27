@@ -143,7 +143,7 @@ auto PCA9685::init() -> bool
     i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    uint8_t prescale = math::round(24576000.f / 4096.f / m_init_params->rate) - 1;
+    uint8_t prescale = math::round(24576000.0 / 4096.0 / m_init_params->rate) - 1;
     res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, prescale);
 
     //restart to activate the new prescaler
@@ -231,27 +231,27 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 }
 
 
-constexpr float MIN_SERVO_MS = 0.5f;
-constexpr float MAX_SERVO_MS = 2.49f;
+constexpr double MIN_SERVO_MS = 0.5;
+constexpr double MAX_SERVO_MS = 2.49;
 
-void PCA9685::set_pwm_value(size_t idx, boost::optional<float> _value)
+void PCA9685::set_pwm_value(size_t idx, boost::optional<double> _value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
     auto& ch = m_pwm_channels[idx];
 
-    float value = 0;
+    double value = 0;
     if (_value)
     {
-        value = math::clamp(*_value, 0.f, 1.f);
-        float range = ch.config->max - ch.config->min;
+        value = math::clamp(*_value, 0.0, 1.0);
+        double range = ch.config->max - ch.config->min;
         value = value * range + ch.config->min;
 
         if (ch.config->servo_signal)
         {
             //servo signals vary between 1ms and 2ms
-            float period_ms = 1000.f / m_init_params->rate;
-            float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
+            double period_ms = 1000.0 / m_init_params->rate;
+            double servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
             value = servo_ms / period_ms;
         }
     }

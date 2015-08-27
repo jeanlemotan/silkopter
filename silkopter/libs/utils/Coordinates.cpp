@@ -93,6 +93,9 @@ auto enu_to_ecef_transform(LLA const& lla) -> math::trans3dd
         ecef_p0.x = (lla.altitude + N) * cos_lat * cos_long;
         ecef_p0.y = (lla.altitude + N) * cos_lat * sin_long;
         ecef_p0.z = (lla.altitude + ((1.0 - constants::eccentricity_sq) * N)) * sin_lat;
+
+//        auto lla_ = ecef_to_lla(ecef_p0);
+//        int a = 0;
     }
 
     trans.set_translation(ecef_p0);

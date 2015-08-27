@@ -404,7 +404,7 @@ struct Serializer< Writer0342c3801b8b0238b08f55c3707a04052ce24dc24fadc55ba5c7a57
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Motor_Mixer { struct Config {
- float armed_throttle;
+ double armed_throttle;
 
 explicit Config():armed_throttle() {  }
 
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;bool has_armed_throttle;
+    SAXEventHandler< double > handler_0;bool has_armed_throttle;
 
     bool check_depth(const char* type)
     {
@@ -743,7 +743,7 @@ struct Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746
     {
         w.StartObject();
 
-        w.Key("\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, float >()(w, value.armed_throttle);
+        w.Key("\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, double >()(w, value.armed_throttle);
 
         w.EndObject(1);
     }

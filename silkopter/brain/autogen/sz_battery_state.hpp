@@ -38,7 +38,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
+    SAXEventHandler< double > handler_0;
 SAXEventHandler< size_t > handler_1;bool has_capacity_used;
 bool has_cell_count;
 
@@ -409,7 +409,7 @@ struct Serializer< Writer999c25f69af3db18040527a60aeb9a30ffe276f2f008400c7f1759f
     {
         w.StartObject();
 
-        w.Key("\x63\x61\x70\x61\x63\x69\x74\x79\x5f\x75\x73\x65\x64", 13, false); Serializer< Writer999c25f69af3db18040527a60aeb9a30ffe276f2f008400c7f1759f6bd263fe1, float >()(w, value.capacity_used);
+        w.Key("\x63\x61\x70\x61\x63\x69\x74\x79\x5f\x75\x73\x65\x64", 13, false); Serializer< Writer999c25f69af3db18040527a60aeb9a30ffe276f2f008400c7f1759f6bd263fe1, double >()(w, value.capacity_used);
 w.Key("\x63\x65\x6c\x6c\x5f\x63\x6f\x75\x6e\x74", 10, false); Serializer< Writer999c25f69af3db18040527a60aeb9a30ffe276f2f008400c7f1759f6bd263fe1, size_t >()(w, value.cell_count);
 
         w.EndObject(2);

@@ -84,9 +84,9 @@ private:
 
     typedef Basic_Output_Stream<stream::IForce> Thrust_Output_Stream;
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
-    float m_reference_thrust = 0;
+    double m_reference_thrust = 0;
 
-    float m_dts = 0;
+    double m_dts = 0;
 
     struct Valid_State
     {
@@ -122,21 +122,23 @@ private:
         util::coordinates::LLA lla_position;
         util::coordinates::ECEF ecef_position;
         std::deque<util::coordinates::ECEF> ecef_position_history;
-        math::trans3dd enu_to_ecef_trans;
-        math::trans3dd ecef_to_enu_trans;
+        math::trans3dd enu_to_ecef_transform;
+        math::trans3dd ecef_to_enu_transform;
+        math::mat3d enu_to_ecef_rotation;
+        math::mat3d ecef_to_enu_rotation;
     } m_home;
 
-    typedef util::PID<float, float, float> PID;
+    typedef util::PID<double, double, double> PID;
 
     struct Altitude_Data
     {
-        float reference_altitude = 0.f;
-        util::Butterworth<float> velocity_dsp;
-        util::Butterworth<float> acceleration_dsp;
+        double reference_altitude = 0.0;
 
         PID acceleration_pid;
         PID velocity_pd;
         PID altitude_p;
+
+        util::Butterworth<double> dsp;
     } m_altitude_data;
 
     struct Horizontal_Angle_Data

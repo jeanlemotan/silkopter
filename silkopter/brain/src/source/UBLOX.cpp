@@ -775,13 +775,13 @@ void UBLOX::process_nav_pollh_packet(Buses& buses, Packet& packet)
     QASSERT(packet.payload.size() == sizeof(NAV_POLLH));
     NAV_POLLH& data = reinterpret_cast<NAV_POLLH&>(*packet.payload.data());
 
-    //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.f, data.lat / 10000000.f, data.hMSL / 1000.f, data.hAcc / 1000.f, data.vAcc / 1000.f);
+    //LOG_INFO("POLLH: iTOW:{}, Lon:{}, Lat:{}, H:{}, HAcc:{}, VAcc:{}", data.iTOW, data.lon / 10000000.0, data.lat / 10000000.0, data.hMSL / 1000.0, data.hAcc / 1000.0, data.vAcc / 1000.0);
 
     {
 //        m_wgs84_location_stream->last_sample.value.lat_lon.set(math::radians(data.lat / 10000000.0), math::radians(data.lon / 10000000.0));
-//        m_wgs84_location_stream->last_sample.value.lat_lon_accuracy = data.hAcc / 100.f;
-//        m_wgs84_location_stream->last_sample.value.altitude = data.height / 100.f;
-//        m_wgs84_location_stream->last_sample.value.altitude_accuracy = data.vAcc / 100.f;
+//        m_wgs84_location_stream->last_sample.value.lat_lon_accuracy = data.hAcc / 100.0;
+//        m_wgs84_location_stream->last_sample.value.altitude = data.height / 100.0;
+//        m_wgs84_location_stream->last_sample.value.altitude_accuracy = data.vAcc / 100.0;
         m_has_pollh = true;
     }
 }
@@ -816,10 +816,10 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
     {
         QLOGI("SOL: iTOW:{}, Fix:{}, flags:{}, ecef:{}, 3dacc:{}, vel:{}, velacc:{}, sv:{}", data.iTOW, data.gpsFix,
                   data.flags,
-                  math::vec3f(data.ecefX, data.ecefY, data.ecefZ) / 100.f,
-                  data.pAcc / 100.f,
-                  math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f,
-                  data.sAcc / 100.f,
+                  math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0,
+                  data.pAcc / 100.0,
+                  math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0,
+                  data.sAcc / 100.0,
                   data.numSV);
     }
 
@@ -835,13 +835,13 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
     {
         //m_ecef_stream->last_sample.value.sattelite_count = data.numSV;
         m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
-        m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+        m_last_velocity_value = math::vec3d(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.0;
 
         m_last_gps_info_value.visible_satellites = data.numSV;
         m_last_gps_info_value.fix_satellites = data.numSV;
-        m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
-        m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
-        m_last_gps_info_value.pdop = data.pDOP / 100.f;
+        m_last_gps_info_value.pacc = (data.pAcc / 100.0) / 1.18; //converting to cm and then to std dev
+        m_last_gps_info_value.vacc = (data.sAcc / 100.0) / 1.18; //converting to cm and then to std dev
+        m_last_gps_info_value.pdop = data.pDOP / 100.0;
         if (data.gpsFix == 0x02)
         {
             m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_2D;

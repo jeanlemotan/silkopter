@@ -162,10 +162,10 @@ void Acceleration_Calibration_Wizard::prepare_step()
             on_samples_received(samples);
             info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
-            progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
+            progress->setValue(double(m_samples.size() * 100.f) / double(needed_samples));
             if (m_samples.size() >= needed_samples)
             {
-                m_averages[m_collect_data_step].set(std::accumulate(m_samples.begin(), m_samples.end(), math::vec3f()));
+                m_averages[m_collect_data_step].set(std::accumulate(m_samples.begin(), m_samples.end(), math::vec3d()));
                 m_averages[m_collect_data_step] /= static_cast<double>(m_samples.size());
 
                 advance();
@@ -190,13 +190,13 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         sz::calibration::Acceleration point;
         point.temperature = 0;
-        point.bias = math::vec3f(bias);
-        point.scale = math::vec3f(scale);
+        point.bias = math::vec3d(bias);
+        point.scale = math::vec3d(scale);
         m_crt_calibration.points.push_back(point);
 
         QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this](double value)
         {
-            m_crt_calibration.points.back().temperature = static_cast<float>(value);
+            m_crt_calibration.points.back().temperature = static_cast<double>(value);
         });
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()

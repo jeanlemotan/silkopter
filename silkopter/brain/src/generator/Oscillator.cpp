@@ -74,7 +74,7 @@ void Oscillator::process()
 
     m_output_stream->clear();
 
-    float amplitude = m_config->amplitude;
+    double amplitude = m_config->amplitude;
 
     constexpr size_t MAX_SAMPLES_NEEDED = 10000;
 
@@ -85,22 +85,22 @@ void Oscillator::process()
         samples_needed = MAX_SAMPLES_NEEDED;
     }
 
-    float period = q::Seconds(m_output_stream->get_dt()).count();
+    double period = std::chrono::duration<double>(m_output_stream->get_dt()).count();
 
     while (samples_needed > 0)
     {
-       float value = 0;
+       double value = 0;
 
        m_period += period;
 
-       float a = m_period * math::anglef::_2pi;
+       double a = m_period * math::angled::_2pi;
        for (auto& c: m_config->components)
        {
-           value += math::sin(a * c.frequency) * 0.5f * c.amplitude;
+           value += math::sin(a * c.frequency) * 0.5 * c.amplitude;
        }
        if (m_config->square)
        {
-           value = value < 0.f ? -0.5f : 0.5f;
+           value = value < 0.0 ? -0.5 : 0.5;
        }
        if (m_has_noise)
        {
@@ -135,8 +135,8 @@ auto Oscillator::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    m_rnd_distribution = std::uniform_real_distribution<float>(-m_config->noise*0.5f, m_config->noise*0.5f);
-    m_has_noise = !math::is_zero(m_config->noise, math::epsilon<float>());
+    m_rnd_distribution = std::uniform_real_distribution<double>(-m_config->noise*0.5, m_config->noise*0.5);
+    m_has_noise = !math::is_zero(m_config->noise, math::epsilon<double>());
 
     return true;
 }

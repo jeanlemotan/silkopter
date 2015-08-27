@@ -19,8 +19,8 @@
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -226.0,
-                    "y": 102.0
+                    "x": -212.0,
+                    "y": 95.0
                 }
             }
         },
@@ -211,7 +211,7 @@
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -179.0,
+                    "x": -180.0,
                     "y": 3.0
                 }
             }
@@ -277,6 +277,14 @@
                 "position": {
                     "x": 3.0,
                     "y": 262.0
+                }
+            }
+        },
+        "Position LPF (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": -137.0,
+                    "y": 278.0
                 }
             }
         }

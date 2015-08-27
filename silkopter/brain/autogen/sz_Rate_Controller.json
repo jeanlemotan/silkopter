@@ -14,7 +14,7 @@
     "name": "Feedback",
     "members":
     [
-        ["float", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 0}],
+        ["double", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 0}],
         ["bool", "combined_xy_pid", {"required": true, "json_key" : "Combined XY PID", "default" : true}],
         ["sz::PID", "xy_pid", {"required": false, "json_key" : "XY PID"}],
         ["sz::PID", "x_pid", {"required": false, "json_key" : "X PID"}],
@@ -28,8 +28,8 @@
     "name": "Feedforward",
     "members":
     [
-        ["float", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 1}],
-        ["float", "max_torque", {"required": true, "json_key" : "Max Torque (N)", "default" : 0}]
+        ["double", "weight", {"required": true, "json_key" : "Weight (0-1)", "default" : 1}],
+        ["double", "max_torque", {"required": true, "json_key" : "Max Torque (N)", "default" : 0}]
     ]
 },
 {

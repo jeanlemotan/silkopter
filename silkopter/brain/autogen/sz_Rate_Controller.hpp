@@ -404,7 +404,7 @@ struct Serializer< Writer86b0f57ac06d768c3734cbec9bab61e448e65ce45fec61e08ff7872
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Feedback {
- float weight;
+ double weight;
 bool combined_xy_pid;
 sz::PID xy_pid;
 sz::PID x_pid;
@@ -428,7 +428,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
+    SAXEventHandler< double > handler_0;
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< sz::PID > handler_2;
 SAXEventHandler< sz::PID > handler_3;
@@ -997,7 +997,7 @@ struct Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf3781
     {
         w.StartObject();
 
-        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, float >()(w, value.weight);
+        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, double >()(w, value.weight);
 w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x58\x59\x20\x50\x49\x44", 15, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, bool >()(w, value.combined_xy_pid);
 w.Key("\x58\x59\x20\x50\x49\x44", 6, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::PID >()(w, value.xy_pid);
 w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f8044455b9806e6a82642255c6b7f1c249cf37810b8603a2d, sz::PID >()(w, value.x_pid);
@@ -1039,8 +1039,8 @@ w.Key("\x5a\x20\x50\x49\x44", 5, false); Serializer< Writer52b61de57470ac9f80444
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Rate_Controller { struct Feedforward {
- float weight;
-float max_torque;
+ double weight;
+double max_torque;
 
 explicit Feedforward():weight(1), max_torque(0) {  }
 
@@ -1059,8 +1059,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< float > handler_1;bool has_weight;
+    SAXEventHandler< double > handler_0;
+SAXEventHandler< double > handler_1;bool has_weight;
 bool has_max_torque;
 
     bool check_depth(const char* type)
@@ -1430,8 +1430,8 @@ struct Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7
     {
         w.StartObject();
 
-        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.weight);
-w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x29", 14, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, float >()(w, value.max_torque);
+        w.Key("\x57\x65\x69\x67\x68\x74\x20\x28\x30\x2d\x31\x29", 12, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, double >()(w, value.weight);
+w.Key("\x4d\x61\x78\x20\x54\x6f\x72\x71\x75\x65\x20\x28\x4e\x29", 14, false); Serializer< Writer241a68a69da3b44a7a6be35332f8f40a96e50a5158a001fa147acc7430fd2146, double >()(w, value.max_torque);
 
         w.EndObject(2);
     }

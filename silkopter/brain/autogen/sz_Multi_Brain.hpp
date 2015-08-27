@@ -457,7 +457,7 @@ w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false)
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Brain { struct Horizontal_Angle {
- float max_speed_deg;
+ double max_speed_deg;
 bool combined_pids;
 sz::PID pids;
 sz::PID x_pid;
@@ -480,7 +480,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
+    SAXEventHandler< double > handler_0;
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< sz::PID > handler_2;
 SAXEventHandler< sz::PID > handler_3;
@@ -998,7 +998,7 @@ struct Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, float >()(w, value.max_speed_deg);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, double >()(w, value.max_speed_deg);
 w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x50\x49\x44\x73", 13, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, bool >()(w, value.combined_pids);
 w.Key("\x50\x49\x44\x73", 4, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, sz::PID >()(w, value.pids);
 w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, sz::PID >()(w, value.x_pid);
@@ -1039,7 +1039,7 @@ w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Brain { struct Altitude {
- float max_speed;
+ double max_speed;
 uint32_t lpf_poles;
 double lpf_cutoff_frequency;
 sz::PID acceleration_pid;
@@ -1063,7 +1063,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
+    SAXEventHandler< double > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< double > handler_2;
 SAXEventHandler< sz::PID > handler_3;
@@ -1638,7 +1638,7 @@ struct Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b8
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.max_speed);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, double >()(w, value.max_speed);
 w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, uint32_t >()(w, value.lpf_poles);
 w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, double >()(w, value.lpf_cutoff_frequency);
 w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x50\x49\x44", 16, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PID >()(w, value.acceleration_pid);
@@ -1680,8 +1680,8 @@ w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x50", 10, false); Serializer< Writer
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Brain { struct Config {
- float max_thrust;
-float min_thrust;
+ double max_thrust;
+double min_thrust;
 sz::Multi_Brain::Horizontal_Angle horizontal_angle;
 sz::Multi_Brain::Altitude altitude;
 
@@ -1702,8 +1702,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< float > handler_1;
+    SAXEventHandler< double > handler_0;
+SAXEventHandler< double > handler_1;
 SAXEventHandler< sz::Multi_Brain::Horizontal_Angle > handler_2;
 SAXEventHandler< sz::Multi_Brain::Altitude > handler_3;bool has_horizontal_angle;
 
@@ -2169,8 +2169,8 @@ struct Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb165
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.max_thrust);
-w.Key("\x4d\x69\x6e\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.min_thrust);
+        w.Key("\x4d\x61\x78\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, double >()(w, value.max_thrust);
+w.Key("\x4d\x69\x6e\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, double >()(w, value.min_thrust);
 w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x41\x6e\x67\x6c\x65", 16, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Horizontal_Angle >()(w, value.horizontal_angle);
 w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65", 8, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Altitude >()(w, value.altitude);
 

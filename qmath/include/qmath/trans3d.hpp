@@ -23,7 +23,7 @@ template<typename T> template<typename U> inline trans3d<T>::trans3d(trans3d<U> 
 template<typename T> inline trans3d<T>::trans3d(vec3<T> const& translation, quat<T> const& rotation, vec3<T> const& scale)
 {
 	set_translation(translation);
-	math::mat3f rot(math::uninitialized);
+    math::mat3<T> rot(math::uninitialized);
 	rotation.get_as_mat3(rot);
 	set_rotation(rot);
 	post_scale(scale);

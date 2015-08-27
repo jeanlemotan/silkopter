@@ -404,13 +404,13 @@ struct Serializer< Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace KF_ECEF { struct Config {
- float position_accuracy;
-float velocity_lag;
-float velocity_accuracy;
-float acceleration_lag;
-float acceleration_accuracy;
-float pressure_alt_lag;
-float pressure_alt_accuracy;
+ double position_accuracy;
+double velocity_lag;
+double velocity_accuracy;
+double acceleration_lag;
+double acceleration_accuracy;
+double pressure_alt_lag;
+double pressure_alt_accuracy;
 
 explicit Config():position_accuracy(2.0), velocity_lag(0), velocity_accuracy(0.2), acceleration_lag(0), acceleration_accuracy(2.0), pressure_alt_lag(0), pressure_alt_accuracy(0.5) {  }
 
@@ -429,13 +429,13 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;
-SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;
-SAXEventHandler< float > handler_3;
-SAXEventHandler< float > handler_4;
-SAXEventHandler< float > handler_5;
-SAXEventHandler< float > handler_6;bool has_position_accuracy;
+    SAXEventHandler< double > handler_0;
+SAXEventHandler< double > handler_1;
+SAXEventHandler< double > handler_2;
+SAXEventHandler< double > handler_3;
+SAXEventHandler< double > handler_4;
+SAXEventHandler< double > handler_5;
+SAXEventHandler< double > handler_6;bool has_position_accuracy;
 bool has_velocity_lag;
 bool has_velocity_accuracy;
 bool has_acceleration_lag;
@@ -1055,13 +1055,13 @@ struct Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.position_accuracy);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_lag);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_accuracy);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.acceleration_lag);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x5e\x32\x29", 29, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.acceleration_accuracy);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_lag);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_accuracy);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.position_accuracy);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.velocity_lag);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.velocity_accuracy);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.acceleration_lag);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x5e\x32\x29", 29, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.acceleration_accuracy);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.pressure_alt_lag);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, double >()(w, value.pressure_alt_accuracy);
 
         w.EndObject(7);
     }
