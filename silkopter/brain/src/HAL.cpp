@@ -9,6 +9,7 @@
 
 #include "bus/I2C_Linux.h"
 #include "bus/SPI_Linux.h"
+#include "bus/I2C_RPI.h"
 #include "bus/SPI_RPI.h"
 #include "bus/UART_Linux.h"
 
@@ -462,6 +463,7 @@ auto HAL::init(Comms& comms) -> bool
     m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
+    m_bus_factory.register_node<bus::I2C_RPI>("I2C RPI");
     m_bus_factory.register_node<bus::SPI_RPI>("SPI RPI");
 
 #if !defined RASPBERRY_PI
@@ -873,7 +875,7 @@ void HAL::process()
     {
         float p = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
         nt.second.process_percentage = math::lerp(nt.second.process_percentage, p, 0.1f);
-        QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
+//        QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
     }
 
 //    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");

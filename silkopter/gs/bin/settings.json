@@ -203,8 +203,8 @@
         "Throttle To PWM": {
             "hal_editor": {
                 "position": {
-                    "x": -831.0,
-                    "y": -406.0
+                    "x": -1024.0,
+                    "y": -678.0
                 }
             }
         },
