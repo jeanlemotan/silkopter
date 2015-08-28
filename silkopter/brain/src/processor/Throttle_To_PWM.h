@@ -49,10 +49,10 @@ private:
     std::shared_ptr<sz::Throttle_To_PWM::Init_Params> m_init_params;
     std::shared_ptr<sz::Throttle_To_PWM::Config> m_config;
 
-    Sample_Accumulator<stream::IThrottle> m_accumulator;
+    std::vector<Sample_Accumulator<stream::IThrottle>> m_accumulators;
 
     typedef Basic_Output_Stream<stream::IPWM> Output_Stream;
-    mutable std::shared_ptr<Output_Stream> m_output_stream;
+    mutable std::vector<std::shared_ptr<Output_Stream>> m_output_streams;
 };
 
 
