@@ -97,9 +97,8 @@ void SPI_Linux::unlock()
 //    close();
 }
 
-auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) -> bool
+auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("spi_linux::transfer");
     QASSERT(m_fd >= 0 && size > 0);
     if (m_fd < 0 || size == 0)
     {
@@ -112,7 +111,7 @@ auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) 
     spi_transfer.tx_buf = (unsigned long)tx_data;
     spi_transfer.rx_buf = (unsigned long)rx_data;
     spi_transfer.len = size;
-    spi_transfer.speed_hz = m_init_params->speed;
+    spi_transfer.speed_hz = speed ? speed : m_init_params->speed;
     spi_transfer.bits_per_word = 8;
     spi_transfer.delay_usecs = 0;
 
@@ -126,20 +125,20 @@ auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size) 
     return true;
 }
 
-auto SPI_Linux::read(uint8_t* data, size_t size) -> bool
+auto SPI_Linux::read(uint8_t* data, size_t size, size_t speed) -> bool
 {
     QLOG_TOPIC("spi_linux::read");
 
-    return transfer(nullptr, data, size);
+    return transfer(nullptr, data, size, speed);
 }
-auto SPI_Linux::write(uint8_t const* data, size_t size) -> bool
+auto SPI_Linux::write(uint8_t const* data, size_t size, size_t speed) -> bool
 {
     QLOG_TOPIC("spi_linux::write");
 
-    return transfer(data, nullptr, size);
+    return transfer(data, nullptr, size, speed);
 }
 
-auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
+auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size, size_t speed) -> bool
 {
     QLOG_TOPIC("spi_linux::read_register");
     QASSERT(m_fd >= 0);
@@ -153,7 +152,7 @@ auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
     m_tx_buffer[0] = reg | READ_FLAG;
 
     m_rx_buffer.resize(size + 1);
-    if (!transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1))
+    if (!transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
     {
         return false;
     }
@@ -161,7 +160,7 @@ auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size) -> bool
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), data);
     return true;
 }
-auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) -> bool
+auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size, size_t speed) -> bool
 {
     QLOG_TOPIC("spi_linux::write_register");
     QASSERT(m_fd >= 0);
@@ -176,7 +175,7 @@ auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size) ->
     std::copy(data, data + size, m_tx_buffer.begin() + 1);
 
     m_rx_buffer.resize(size + 1);
-    return transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1);
+    return transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed);
 }
 
 auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool

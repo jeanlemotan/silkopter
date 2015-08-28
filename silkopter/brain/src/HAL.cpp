@@ -9,6 +9,7 @@
 
 #include "bus/I2C_Linux.h"
 #include "bus/SPI_Linux.h"
+#include "bus/SPI_RPI.h"
 #include "bus/UART_Linux.h"
 
 #include "source/Raspicam.h"
@@ -461,6 +462,7 @@ auto HAL::init(Comms& comms) -> bool
     m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
+    m_bus_factory.register_node<bus::SPI_RPI>("SPI RPI");
 
 #if !defined RASPBERRY_PI
     m_node_factory.register_node<Multi_Simulator>("Multi Simulator", *this);
@@ -760,21 +762,39 @@ void HAL::generate_settings_file()
 {
 #if defined RASPBERRY_PI
 
+//    for (size_t i = 0; i < 2; i++)
+//    {
+//        auto node = m_bus_factory.create_node("SPI Linux");
+//        QASSERT(node);
+//        rapidjson::Document json;
+//        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+//        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetString(q::util::format2<std::string>("/dev/spidev0.{}", i), json.GetAllocator());
+//        valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetInt(1000000);
+//        if (node->init(json))
+//        {
+//            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI Linux", node);
+//            QASSERT(res);
+//        }
+//    }
     for (size_t i = 0; i < 2; i++)
     {
-        auto node = m_bus_factory.create_node("SPI Linux");
+        auto node = m_bus_factory.create_node("SPI RPI");
         QASSERT(node);
         rapidjson::Document json;
         jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
-        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kNumberType, json.GetAllocator());
         QASSERT(valj);
-        valj->SetString(q::util::format2<std::string>("/dev/spidev0.{}", i), json.GetAllocator());
+        valj->SetInt(i);
         valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
         QASSERT(valj);
         valj->SetInt(1000000);
         if (node->init(json))
         {
-            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI Linux", node);
+            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI RPI", node);
             QASSERT(res);
         }
     }
@@ -853,7 +873,7 @@ void HAL::process()
     {
         float p = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
         nt.second.process_percentage = math::lerp(nt.second.process_percentage, p, 0.1f);
-//        QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
+        QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
     }
 
 //    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");

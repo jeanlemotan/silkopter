@@ -1,0 +1,21 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::SPI_RPI",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "dev", {"required": true}],
+        ["uint32_t", "mode", {"required": true}],
+        ["uint32_t", "speed", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::SPI_RPI",
+    "name": "Config",
+    "members":
+    [
+    ]
+}
+]
