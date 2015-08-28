@@ -78,6 +78,9 @@ private:
     } m_packet;
 
     auto setup() -> bool;
+    void pool_for_data(Buses& buses);
+    void reset(Buses& buses);
+
     void read_data(Buses& buses);
 
     auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool;
@@ -132,12 +135,13 @@ private:
     bool m_has_nav_status = false;
     bool m_has_pollh = false;
     bool m_has_sol = false;
-    q::Clock::time_point m_last_complete_tp;
+    q::Clock::time_point m_last_complete_tp = q::Clock::now();
     Position_Stream::Value m_last_position_value;
     Velocity_Stream::Value m_last_velocity_value;
     GPS_Info_Stream::Value m_last_gps_info_value;
 
-    q::Clock::time_point m_last_tp;
+    q::Clock::time_point m_last_tp = q::Clock::time_point(q::Clock::duration::zero());
+    q::Clock::time_point m_last_reset_tp = q::Clock::time_point(q::Clock::duration::zero());
 };
 
 
