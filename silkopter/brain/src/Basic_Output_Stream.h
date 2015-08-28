@@ -63,6 +63,7 @@ public:
         {
             m_future_warning = true;
             QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
+            m_tp = q::Clock::now();
         }
 
         m_last_sample.value = value;
