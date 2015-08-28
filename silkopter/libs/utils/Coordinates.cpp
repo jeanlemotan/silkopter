@@ -136,17 +136,17 @@ void enu_to_ecef_transform_and_inv(LLA const& lla, math::trans3dd& enu_to_ecef, 
     double cos_lat, sin_lat;
     math::sin_cos(lla.latitude, sin_lat, cos_lat);
 
-    enu_to_ecef.set_axis_x(math::vec3d(-sin_long,
+    math::mat3d mat;
+
+    mat.set_axis_x(math::vec3d(-sin_long,
                                   cos_long,
                                   0));
-    enu_to_ecef.set_axis_y(math::vec3d(-cos_long*sin_lat,
+    mat.set_axis_y(math::vec3d(-cos_long*sin_lat,
                                  -sin_lat*sin_long,
                                   cos_lat));
-    enu_to_ecef.set_axis_z(math::vec3d( cos_long*cos_lat,
+    mat.set_axis_z(math::vec3d( cos_long*cos_lat,
                                   cos_lat*sin_long,
                                   sin_lat));
-
-    ecef_to_enu.mat = math::transposed(enu_to_ecef.mat);
 
     math::vec3d ecef_p0;
     {
@@ -159,7 +159,10 @@ void enu_to_ecef_transform_and_inv(LLA const& lla, math::trans3dd& enu_to_ecef, 
 //        int a = 0;
     }
 
+    enu_to_ecef.set_rotation(mat);
     enu_to_ecef.set_translation(ecef_p0);
+
+    ecef_to_enu.set_rotation(math::transposed(mat));
     ecef_to_enu.set_translation(-ecef_p0);
 }
 

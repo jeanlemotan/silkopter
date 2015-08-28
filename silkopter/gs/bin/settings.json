@@ -19,32 +19,32 @@
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -1191.0,
-                    "y": -109.0
+                    "x": -949.0,
+                    "y": -685.0
                 }
             }
         },
         "Multi Pilot": {
             "hal_editor": {
                 "position": {
-                    "x": -1348.0,
-                    "y": -112.0
+                    "x": -994.0,
+                    "y": -527.0
                 }
             }
         },
         "Angular Velocity RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1451.0,
-                    "y": -648.0
+                    "x": -1210.0,
+                    "y": -1031.0
                 }
             }
         },
         "Acceleration RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1459.0,
-                    "y": -365.0
+                    "x": -1045.0,
+                    "y": -1059.0
                 }
             }
         },
@@ -67,24 +67,24 @@
         "Frame RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1323.0,
-                    "y": -377.0
+                    "x": -1067.0,
+                    "y": -845.0
                 }
             }
         },
         "Gravity Filter": {
             "hal_editor": {
                 "position": {
-                    "x": -1221.0,
-                    "y": -281.0
+                    "x": -915.0,
+                    "y": -860.0
                 }
             }
         },
         "Linear Acceleration (Local->ENU)": {
             "hal_editor": {
                 "position": {
-                    "x": -1004.0,
-                    "y": -141.0
+                    "x": -949.0,
+                    "y": -768.0
                 }
             }
         },
@@ -99,48 +99,48 @@
         "Multi Input": {
             "hal_editor": {
                 "position": {
-                    "x": -1328.0,
-                    "y": -201.0
+                    "x": -864.0,
+                    "y": -514.0
                 }
             }
         },
         "Motor Mixer": {
             "hal_editor": {
                 "position": {
-                    "x": -970.0,
-                    "y": -289.0
+                    "x": -880.0,
+                    "y": -995.0
                 }
             }
         },
         "Rate Controller": {
             "hal_editor": {
                 "position": {
-                    "x": -1168.0,
-                    "y": -427.0
+                    "x": -1037.0,
+                    "y": -978.0
                 }
             }
         },
         "PCA9685": {
             "hal_editor": {
                 "position": {
-                    "x": -962.0,
-                    "y": -780.0
+                    "x": -547.0,
+                    "y": -970.0
                 }
             }
         },
         "Oscillator": {
             "hal_editor": {
                 "position": {
-                    "x": -741.0,
-                    "y": -527.0
+                    "x": -743.0,
+                    "y": -643.0
                 }
             }
         },
         "PWM Generator": {
             "hal_editor": {
                 "position": {
-                    "x": -693.0,
-                    "y": -465.0
+                    "x": -712.0,
+                    "y": -789.0
                 }
             }
         },
@@ -179,8 +179,8 @@
         "Raspicam": {
             "hal_editor": {
                 "position": {
-                    "x": -946.0,
-                    "y": -44.0
+                    "x": -1252.0,
+                    "y": -575.0
                 }
             }
         },
@@ -203,16 +203,16 @@
         "Throttle To PWM": {
             "hal_editor": {
                 "position": {
-                    "x": -1024.0,
-                    "y": -678.0
+                    "x": -708.0,
+                    "y": -1021.0
                 }
             }
         },
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -1603.0,
-                    "y": -236.0
+                    "x": -1401.0,
+                    "y": -792.0
                 }
             }
         },
@@ -251,16 +251,16 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": -1468.0,
-                    "y": -29.0
+                    "x": -1233.0,
+                    "y": -757.0
                 }
             }
         },
         "Velocity RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -1613.0,
-                    "y": -165.0
+                    "x": -1399.0,
+                    "y": -723.0
                 }
             }
         },
@@ -291,8 +291,8 @@
         "Throttle To PWM 0": {
             "hal_editor": {
                 "position": {
-                    "x": -841.0,
-                    "y": -342.0
+                    "x": -609.0,
+                    "y": -612.0
                 }
             }
         },

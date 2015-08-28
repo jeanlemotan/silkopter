@@ -62,8 +62,8 @@ auto I2C_RPI::init() -> bool
     {
         return false;
     }
-    bcm2835_i2c_begin();
     bcm2835_i2c_set_baudrate(400000);
+    bcm2835_i2c_begin();
 
     return true;
 }
@@ -87,7 +87,12 @@ auto I2C_RPI::read(uint8_t address, uint8_t* data, size_t size) -> bool
     QLOG_TOPIC("i2c_RPI::read");
 
     bcm2835_i2c_setSlaveAddress(address);
-    bcm2835_i2c_read(reinterpret_cast<char*>(data), size);
+    int res = bcm2835_i2c_read(reinterpret_cast<char*>(data), size);
+    if (res != BCM2835_I2C_REASON_OK)
+    {
+        QLOGW("read {} failed: {}", res);
+        return false;
+    }
 
     return true;
 }
@@ -96,7 +101,12 @@ auto I2C_RPI::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     QLOG_TOPIC("i2c_RPI::write");
 
     bcm2835_i2c_setSlaveAddress(address);
-    bcm2835_i2c_write(reinterpret_cast<const char*>(data), size);
+    int res = bcm2835_i2c_write(reinterpret_cast<const char*>(data), size);
+    if (res != BCM2835_I2C_REASON_OK)
+    {
+        QLOGW("write {} failed: {}", res);
+        return false;
+    }
 
     return true;
 }
@@ -106,7 +116,12 @@ auto I2C_RPI::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
     QLOG_TOPIC("i2c_RPI::read_register");
 
     bcm2835_i2c_setSlaveAddress(address);
-    bcm2835_i2c_read_register_rs(reinterpret_cast<char*>(&reg), reinterpret_cast<char*>(data), size);
+    int res = bcm2835_i2c_read_register_rs(reinterpret_cast<char*>(&reg), reinterpret_cast<char*>(data), size);
+    if (res != BCM2835_I2C_REASON_OK)
+    {
+        QLOGW("read register {} failed: {}", reg, res);
+        return false;
+    }
 
     return true;
 }
@@ -123,7 +138,12 @@ auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     }
 
     bcm2835_i2c_setSlaveAddress(address);
-    bcm2835_i2c_write(reinterpret_cast<const char*>(m_buffer.data()), size);
+    int res = bcm2835_i2c_write(reinterpret_cast<const char*>(m_buffer.data()), size);
+    if (res != BCM2835_I2C_REASON_OK)
+    {
+        QLOGW("write register {} failed: {}", reg, res);
+        return false;
+    }
 
     return true;
 }

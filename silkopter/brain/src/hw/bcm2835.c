@@ -22,6 +22,9 @@
 //#define BCK2835_LIBRARY_BUILD
 #include "bcm2835.h"
 
+
+#define TIMEOUT_US      100000
+
 /* This define enables a little test program (by default a blinking output on pin RPI_GPIO_PIN_11)
 // You can do some safe, non-destructive testing on any platform with:
 // gcc bcm2835.c -D BCM2835_TEST
@@ -847,6 +850,10 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
     /* Enable device and start transfer */
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST);
     
+    int start = bcm2835_st_read();
+    int clock_ticker = 100;
+
+
     /* Transfer is over when BCM2835_BSC_S_DONE */
     while(!(bcm2835_peri_read_nb(status) & BCM2835_BSC_S_DONE ))
     {
@@ -857,6 +864,13 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
         	i++;
         	remaining--;
     	}
+
+        if (clock_ticker-- < 0 && bcm2835_st_read() > start + TIMEOUT_US)
+        {
+            clock_ticker = 100;
+            reason = BCM2835_I2C_REASON_ERROR_TIMEOUT;
+            goto done;
+        }
     }
 
     /* Received a NACK */
@@ -877,6 +891,7 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
 	reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
+done:
     bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
 
     return reason;
@@ -910,17 +925,47 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
     /* Start read */
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST | BCM2835_BSC_C_READ);
     
+    int start =  bcm2835_st_read();
+    int clock_ticker = 100;
+
     /* wait for transfer to complete */
     while (!(bcm2835_peri_read_nb(status) & BCM2835_BSC_S_DONE))
     {
         /* we must empty the FIFO as it is populated and not use any delay */
         while (bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
     	{
-	    /* Read from FIFO, no barrier */
-	    buf[i] = bcm2835_peri_read_nb(fifo);
-	    i++;
-	    remaining--;
-    	}
+            if (remaining)
+            {
+                /* Read from FIFO, no barrier */
+                buf[i] = bcm2835_peri_read_nb(fifo);
+                i++;
+                remaining--;
+            }
+            else if (bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
+            {
+                /* we have received more data than we asked for (noise on bus?), */
+                /* assume all the data is bad as we do not know where the extra */
+                /* clocks occurred! */
+
+                /* do the read anyway to clear BCM2835_BSC_S_RXD and thus set BCM2835_BSC_S_DONE */
+                bcm2835_peri_read_nb(fifo);
+
+                /* return an error code (maybe make a new one?) so we know not to trust buf[] */
+                reason = BCM2835_I2C_REASON_ERROR_DATA;
+                goto done;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (clock_ticker-- < 0 && bcm2835_st_read() > start + TIMEOUT_US)
+        {
+            clock_ticker = 100;
+            reason = BCM2835_I2C_REASON_ERROR_TIMEOUT;
+            goto done;
+        }
     }
     
     /* transfer has finished - grab any remaining stuff in FIFO */
@@ -950,6 +995,7 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
 	reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
+done:
     bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
 
     return reason;
@@ -986,12 +1032,24 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
     bcm2835_peri_write_nb(fifo, regaddr[0]);
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST);
     
+    int start = bcm2835_st_read();
+    int clock_ticker = 100;
+
     /* poll for transfer has started */
     while ( !( bcm2835_peri_read_nb(status) & BCM2835_BSC_S_TA ) )
     {
         /* Linux may cause us to miss entire transfer stage */
         if(bcm2835_peri_read(status) & BCM2835_BSC_S_DONE)
+        {
             break;
+        }
+
+        if (clock_ticker-- < 0 && bcm2835_st_read() > start + TIMEOUT_US)
+        {
+            clock_ticker = 100;
+            reason = BCM2835_I2C_REASON_ERROR_TIMEOUT;
+            goto done;
+        }
     }
     
     /* Send a repeated start with read bit set in address */
@@ -1001,17 +1059,46 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
     /* Wait for write to complete and first byte back. */
     bcm2835_delayMicroseconds(i2c_byte_wait_us * 3);
     
+    start = bcm2835_st_read();
+    clock_ticker = 100;
+
     /* wait for transfer to complete */
     while (!(bcm2835_peri_read_nb(status) & BCM2835_BSC_S_DONE))
     {
         /* we must empty the FIFO as it is populated and not use any delay */
-        while (remaining && bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
+        while (bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
     	{
-	    /* Read from FIFO, no barrier */
-	    buf[i] = bcm2835_peri_read_nb(fifo);
-	    i++;
-	    remaining--;
-    	}
+            if (remaining)
+            {
+                /* Read from FIFO, no barrier */
+                buf[i] = bcm2835_peri_read_nb(fifo);
+                i++;
+                remaining--;
+            }
+            else if (bcm2835_peri_read_nb(status) & BCM2835_BSC_S_RXD)
+            {
+                /* we have received more data than we asked for (noise on bus?), */
+                /* assume all the data is bad as we do not know where the extra */
+                /* clocks occurred! */
+
+                /* do the read anyway to clear BCM2835_BSC_S_RXD and thus set BCM2835_BSC_S_DONE */
+                bcm2835_peri_read_nb(fifo);
+
+                /* return an error code (maybe make a new one?) so we know not to trust buf[] */
+                reason = BCM2835_I2C_REASON_ERROR_DATA;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (clock_ticker-- < 0 && bcm2835_st_read() > start + TIMEOUT_US)
+        {
+            clock_ticker = 100;
+            reason = BCM2835_I2C_REASON_ERROR_TIMEOUT;
+            goto done;
+        }
     }
     
     /* transfer has finished - grab any remaining stuff in FIFO */
@@ -1041,6 +1128,7 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
 	reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
+done:
     bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
 
     return reason;
@@ -1049,6 +1137,7 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
 /* Sending an arbitrary number of bytes before issuing a repeated start 
 // (with no prior stop) and reading a response. Some devices require this behavior.
 */
+#if 0
 uint8_t bcm2835_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint32_t buf_len)
 {   
 #ifdef I2C_V1
@@ -1092,7 +1181,9 @@ uint8_t bcm2835_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint
     {
         /* Linux may cause us to miss entire transfer stage */
         if(bcm2835_peri_read(status) & BCM2835_BSC_S_DONE)
+        {
             break;
+        }
     }
     
     remaining = buf_len;
@@ -1149,6 +1240,7 @@ uint8_t bcm2835_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint
 
     return reason;
 }
+#endif
 
 /* Read the System Timer Counter (64-bits) */
 uint64_t bcm2835_st_read(void)
