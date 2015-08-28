@@ -295,6 +295,12 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 
 #endif
 
+
+constexpr size_t CONFIG_REGISTER_SPEED = 500000;
+constexpr size_t MISC_REGISTER_SPEED = 1000000;
+constexpr size_t SENSOR_REGISTER_SPEED = 2000000;
+
+
 MPU9250::MPU9250(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::MPU9250::Init_Params())
@@ -338,37 +344,37 @@ void MPU9250::unlock(Buses& buses)
     }
 }
 
-auto MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool
+auto MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool
 {
     return buses.i2c ? buses.i2c->read_register(ADDR_MPU9250, reg, data, size)
-         : buses.spi ? buses.spi->read_register(reg, data, size)
+         : buses.spi ? buses.spi->read_register(reg, data, size, speed)
          : false;
 }
-auto MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool
+auto MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool
 {
     return buses.i2c ? buses.i2c->read_register_u8(ADDR_MPU9250, reg, dst)
-         : buses.spi ? buses.spi->read_register_u8(reg, dst)
+         : buses.spi ? buses.spi->read_register_u8(reg, dst, speed)
          : false;
 }
-auto MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
+auto MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool
 {
     return buses.i2c ? buses.i2c->read_register_u16(ADDR_MPU9250, reg, dst)
-         : buses.spi ? buses.spi->read_register_u16(reg, dst)
+         : buses.spi ? buses.spi->read_register_u16(reg, dst, speed)
          : false;
 }
-auto MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
+auto MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool
 {
     return buses.i2c ? buses.i2c->write_register_u8(ADDR_MPU9250, reg, t)
-         : buses.spi ? buses.spi->write_register_u8(reg, t)
+         : buses.spi ? buses.spi->write_register_u8(reg, t, speed)
          : false;
 }
-auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool
+auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t, size_t speed) -> bool
 {
     return buses.i2c ? buses.i2c->write_register_u16(ADDR_MPU9250, reg, t)
-         : buses.spi ? buses.spi->write_register_u16(reg, t)
+         : buses.spi ? buses.spi->write_register_u16(reg, t, speed)
          : false;
 }
-auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool
+auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool
 {
     if (buses.i2c)
     {
@@ -382,21 +388,21 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) 
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
     if (m_akm_address != akm_address)
     {
-        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address, speed);
         m_akm_address = akm_address;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG, reg, speed);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size, speed);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size);
+    res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size, speed);
     return res;
 }
-auto MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool
+auto MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool
 {
-    return akm_read(buses, reg, &dst, sizeof(dst));
+    return akm_read(buses, reg, &dst, sizeof(dst), speed);
 }
-auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
+auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool
 {
     if (buses.i2c)
     {
@@ -410,17 +416,17 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
     if (m_akm_address != akm_address)
     {
-        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address, speed);
         m_akm_address = akm_address;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + sizeof(dst));
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg, speed);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + sizeof(dst), speed);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst);
+    res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst, speed);
     return res;
 }
-auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
+auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool
 {
     if (buses.i2c)
     {
@@ -433,13 +439,13 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool
     constexpr uint8_t akm_address = 0x0C;
     if (m_akm_address != akm_address)
     {
-        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address, speed);
         m_akm_address = akm_address;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg);
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_DO,   t);
-    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 1); //one byte
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  reg, speed);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_DO,   t, speed);
+    res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 1, speed); //one byte
     return res;
 }
 
@@ -584,34 +590,34 @@ auto MPU9250::init() -> bool
     // First disable the master I2C to avoid hanging the slaves on the aulixiliar I2C bus
     {
         uint8_t user_ctrl = 0;
-        mpu_read_u8(buses, MPU_REG_USER_CTRL, user_ctrl);
+        mpu_read_u8(buses, MPU_REG_USER_CTRL, user_ctrl, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         QLOGI("i2c master is: {}", (user_ctrl & MPU_BIT_I2C_MST) ? "enabled" : "disabled");
         if (user_ctrl & MPU_BIT_I2C_MST)
         {
-            mpu_write_u8(buses, MPU_REG_USER_CTRL, (user_ctrl & ~MPU_BIT_I2C_MST));
+            mpu_write_u8(buses, MPU_REG_USER_CTRL, (user_ctrl & ~MPU_BIT_I2C_MST), CONFIG_REGISTER_SPEED);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
-    auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET);
+    auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     // disable I2C as recommended by the datasheet
-    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, MPU_BIT_I2C_IF_DIS);
+    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, MPU_BIT_I2C_IF_DIS, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
-    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0); //wakeup
+    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0, CONFIG_REGISTER_SPEED); //wakeup
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
-    res &= mpu_write_u8(buses, MPU_REG_SIGNAL_PATH_RESET, MPU_BIT_GYRO_RST | MPU_BIT_ACCEL_RST | MPU_BIT_TEMP_RST);
+    res &= mpu_write_u8(buses, MPU_REG_SIGNAL_PATH_RESET, MPU_BIT_GYRO_RST | MPU_BIT_ACCEL_RST | MPU_BIT_TEMP_RST, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
-    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO);
+    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_CLKSEL_AUTO, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     uint8_t who_am_i;
-    res &= mpu_read_u8(buses, MPU_REG_WHO_AM_I, who_am_i);
+    res &= mpu_read_u8(buses, MPU_REG_WHO_AM_I, who_am_i, CONFIG_REGISTER_SPEED);
     if (!res || who_am_i != 0x71)
     {
         QLOGE("Cannot find mpu9250");
@@ -623,13 +629,13 @@ auto MPU9250::init() -> bool
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_2, 0);
+    res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_2, 0, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    res &= mpu_write_u8(buses, MPU_REG_GYRO_CONFIG, gyro_range);
+    res &= mpu_write_u8(buses, MPU_REG_GYRO_CONFIG, gyro_range, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG, accel_range);
+    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG, accel_range, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     //compute the rate
@@ -649,26 +655,26 @@ auto MPU9250::init() -> bool
         div = 0;//8000 / m_init_params->acceleration_angular_velocity_rate - 1;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf);
+    res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-    res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div);
+    res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | a_dlpf);
+    res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | a_dlpf, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-    res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
+    res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL, CONFIG_REGISTER_SPEED);
     m_fifo_sample_size = 12;
 
     m_user_ctrl_value = MPU_BIT_FIFO_EN;
     if (buses.i2c)
     {
-        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_SIG_COND_RST);
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_SIG_COND_RST, CONFIG_REGISTER_SPEED);
     }
     else
     {
-        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_I2C_IF_DIS | MPU_BIT_SIG_COND_RST);
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST | MPU_BIT_I2C_IF_DIS | MPU_BIT_SIG_COND_RST, CONFIG_REGISTER_SPEED);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -690,7 +696,7 @@ auto MPU9250::init() -> bool
         return false;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
+    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     if (!res)
@@ -741,10 +747,10 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
 #ifdef USE_AK8963
     {
         m_user_ctrl_value &= ~MPU_BIT_I2C_MST;
-        mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
+        mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(3));
 
-        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_BYPASS_EN);
+        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_BYPASS_EN, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
 
@@ -752,7 +758,7 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     for (m_akm_address = 0x0C; m_akm_address <= 0x0F; m_akm_address++)
     {
         uint8_t data;
-        auto res = akm_read_u8(buses, AKM_REG_WHOAMI, data);
+        auto res = akm_read_u8(buses, AKM_REG_WHOAMI, data, CONFIG_REGISTER_SPEED);
         if (res && data == AKM_WHOAMI)
         {
             break;
@@ -767,24 +773,24 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
 
     QLOGI("\tMagnetometer found at 0x{X}", m_akm_address);
 
-    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
-    akm_read(buses, AKM_REG_ASAX, data, 3);
+    akm_read(buses, AKM_REG_ASAX, data, 3, CONFIG_REGISTER_SPEED);
     m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
-    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_POWER_DOWN, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
+    akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 #endif
@@ -804,11 +810,11 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 
     {
         // Enable I2C master mode if magnetometer is being used.
-        res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR);
+        res &= mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, MPU_BIT_LATCH_INT_EN | MPU_BIT_INT_ANYRD_2CLEAR, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         m_user_ctrl_value |= MPU_BIT_I2C_MST;
-        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value);
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //  0 348 kHz
@@ -827,17 +833,19 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
         // 13 400 kHz
         // 14 381 kHz
         // 15 364 kHz
-        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 13); //i2c speed
+        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_CTRL, 13, CONFIG_REGISTER_SPEED); //i2c speed
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //how often to read the magnetometer
         int delay = m_init_params->acceleration_angular_velocity_rate / m_init_params->magnetic_field_rate;
         delay = math::clamp(delay - 1, 0, 31);
 
-        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV4_CTRL, delay); //i2c slave delay
+        //i2c slave delay
+        res &= mpu_write_u8(buses, MPU_REG_I2C_SLV4_CTRL, delay, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_DELAY_ES_SHADOW | MPU_BIT_I2C_SLV0_DLY_EN); //i2c slave delay enable
+        //i2c slave delay enable
+        res &= mpu_write_u8(buses, MPU_REG_I2C_MST_DELAY_CTRL, MPU_BIT_DELAY_ES_SHADOW | MPU_BIT_I2C_SLV0_DLY_EN, CONFIG_REGISTER_SPEED);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
@@ -848,7 +856,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 
     {
         uint8_t data;
-        res &= akm_read_u8(buses, AKM_REG_WHOAMI, data);
+        res &= akm_read_u8(buses, AKM_REG_WHOAMI, data, CONFIG_REGISTER_SPEED);
         if (!res || data != AKM_WHOAMI)
         {
             QLOGW("\tMagnetometer not found ({}, {})!!", res, data);
@@ -856,18 +864,18 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
         }
     }
 
-    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS);
+    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_FUSE_ROM_ACCESS, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // Get sensitivity adjustment data from fuse ROM.
     uint8_t data[4] = {0};
-    res &= akm_read(buses, AKM_REG_ASAX, data, 3);
+    res &= akm_read(buses, AKM_REG_ASAX, data, 3, CONFIG_REGISTER_SPEED);
     m_magnetic_field_sensor_scale.x = (long)(data[0] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale.y = (long)(data[1] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale.z = (long)(data[2] - 128)*0.5f / 128.f + 1.f;
     m_magnetic_field_sensor_scale *= 0.15f;//16 bit mode
 
-    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE);
+    res &= akm_write_u8(buses, AKM_REG_CNTL1, AKM_CNTL1_CONTINUOUS2_MEASUREMENT | AKM_CNTL1_16_BIT_MODE, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     //now request the transfer again
@@ -875,11 +883,11 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
     if (m_akm_address != akm_address)
     {
-        mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+        mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address, CONFIG_REGISTER_SPEED);
         m_akm_address = akm_address;
     }
-    mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
-    mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 8);
+    mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1, CONFIG_REGISTER_SPEED);
+    mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + 8, CONFIG_REGISTER_SPEED);
 
 #endif
 
@@ -918,13 +926,13 @@ void MPU9250::reset_fifo(Buses& buses)
 {
     QLOG_TOPIC("mpu9250::reset_fifo");
 
-    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
+    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    mpu_write_u8(buses, MPU_REG_FIFO_EN, 0);
+    mpu_write_u8(buses, MPU_REG_FIFO_EN, 0, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST);
+    mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL);
+    mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL, CONFIG_REGISTER_SPEED);
 }
 
 template<class Calibration_Data>
@@ -1002,7 +1010,7 @@ void MPU9250::process()
    // last_timestamp = now;
 
     uint16_t fifo_count;
-    auto res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count);
+    auto res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count, MISC_REGISTER_SPEED);
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // LOG_INFO("{.2}b/ms", xxx);
@@ -1023,7 +1031,7 @@ void MPU9250::process()
             QASSERT(sample_count >= 1);
 
             m_fifo_buffer.resize(to_read);
-            if (mpu_read(buses, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size()))
+            if (mpu_read(buses, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size(), MISC_REGISTER_SPEED))
             {
 //                static q::Clock::time_point s_last_stat_tp = q::Clock::now();
 //                static size_t s_sample_count = 0;
@@ -1046,7 +1054,10 @@ void MPU9250::process()
                     int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     math::vec3f value(x, y, z);
                     value = value * m_acceleration_scale - m_acceleration_bias;
+                    value = math::transform(m_imu_rotation, value);
                     m_acceleration->push_sample(value, true);
+
+
 
                     x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
@@ -1054,6 +1065,7 @@ void MPU9250::process()
 
                     value.set(x, y, z);
                     value = value * m_angular_velocity_sensor_scale - m_angular_velocity_bias;
+                    value = math::transform(m_imu_rotation, value);
                     m_angular_velocity->push_sample(value, true);
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
@@ -1082,7 +1094,7 @@ void MPU9250::process_thermometer(Buses& buses)
     }
 
     uint16_t data = 0;
-    auto res = mpu_read_u16(buses, MPU_REG_TEMP_OUT_H, data);
+    auto res = mpu_read_u16(buses, MPU_REG_TEMP_OUT_H, data, SENSOR_REGISTER_SPEED);
     if (!res)
     {
         return;
@@ -1130,7 +1142,7 @@ void MPU9250::process_magnetometer(Buses& buses)
             return;
         }
 
-        if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size()))
+        if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size(), SENSOR_REGISTER_SPEED))
         {
             return;
         }
@@ -1138,7 +1150,7 @@ void MPU9250::process_magnetometer(Buses& buses)
     else //spi
     {
         //first read what is in the ext registers (so the previous reading)
-        if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size()))
+        if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size(), SENSOR_REGISTER_SPEED))
         {
             return;
         }
@@ -1167,11 +1179,7 @@ void MPU9250::process_magnetometer(Buses& buses)
                          static_cast<int16_t>((tmp[4] << 8) | tmp[3]),
                          static_cast<int16_t>((tmp[6] << 8) | tmp[5]));
 
-        //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
-        static const math::quatf rot = math::quatf::from_axis_y(math::radians(180.f)) *
-                math::quatf::from_axis_z(math::radians(90.f));
-
-        data = math::rotate(rot, data);
+        data = math::transform(m_magnetometer_rotation, data);
         m_last_magnetic_field_value = data * m_magnetic_field_scale - m_magnetic_field_bias;
     }
 
@@ -1218,6 +1226,18 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
     {
         return a.temperature < b.temperature;
     });
+
+
+    //compute chip rotation
+    math::quatf imu_rot;
+    imu_rot.set_from_euler_xyz(math::radians(m_config->rotation));
+    m_imu_rotation = imu_rot.get_as_mat3();
+
+    //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
+    static const math::quatf mag_rot = math::quatf::from_axis_y(math::radians(180.f)) *
+                    math::quatf::from_axis_z(math::radians(90.f));
+
+    m_magnetometer_rotation = (imu_rot * mag_rot).get_as_mat3();
 
     return true;
 }

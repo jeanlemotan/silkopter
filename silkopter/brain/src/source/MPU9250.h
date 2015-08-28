@@ -59,16 +59,16 @@ private:
         bus::ISPI_ptr spi;
     };
 
-    auto mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool;
-    auto mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
-    auto mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
-    auto mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool;
-    auto mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t) -> bool;
+    auto mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool;
+    auto mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool;
+    auto mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool;
+    auto mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool;
+    auto mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t, size_t speed) -> bool;
 
-    auto akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool;
-    auto akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
-    auto akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
-    auto akm_write_u8(Buses& buses, uint8_t reg, uint8_t t) -> bool;
+    auto akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool;
+    auto akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool;
+    auto akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool;
+    auto akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool;
 
     auto lock(Buses& buses) -> bool;
     void unlock(Buses& buses);
@@ -103,12 +103,16 @@ private:
     float m_angular_velocity_sensor_scale = 1.0f;
     math::vec3f m_angular_velocity_bias;
 
+    math::mat3f m_imu_rotation;
+
     typedef Basic_Output_Stream<stream::IMagnetic_Field> Magnetic_Field_Stream;
     mutable std::shared_ptr<Magnetic_Field_Stream> m_magnetic_field;
     uint8_t m_akm_address = 0;
     math::vec3f m_magnetic_field_sensor_scale;
     math::vec3f m_magnetic_field_scale = math::vec3f::one;
     math::vec3f m_magnetic_field_bias;
+
+    math::mat3f m_magnetometer_rotation;
 
     math::vec3f m_last_magnetic_field_value;
 
