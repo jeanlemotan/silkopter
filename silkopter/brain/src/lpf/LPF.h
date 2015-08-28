@@ -119,6 +119,8 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
 
     auto output_rate = m_output_stream->get_rate();
 
+    float max_cutoff = output_rate / 2.f;
+    m_config.cutoff_frequency = m_config.cutoff_frequency > 0 ? m_config.cutoff_frequency : max_cutoff;
     if (m_config.cutoff_frequency > output_rate / 2)
     {
         QLOGE("Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",

@@ -51,16 +51,16 @@
         "Comp AHRS": {
             "hal_editor": {
                 "position": {
-                    "x": -1176.0,
-                    "y": -525.0
+                    "x": -1231.0,
+                    "y": -936.0
                 }
             }
         },
         "Magnetic Field RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1451.0,
-                    "y": -435.0
+                    "x": -1373.0,
+                    "y": -885.0
                 }
             }
         },
@@ -75,16 +75,16 @@
         "Gravity Filter": {
             "hal_editor": {
                 "position": {
-                    "x": -1231.0,
-                    "y": -294.0
+                    "x": -1221.0,
+                    "y": -281.0
                 }
             }
         },
         "Linear Acceleration (Local->ENU)": {
             "hal_editor": {
                 "position": {
-                    "x": -1179.0,
-                    "y": -203.0
+                    "x": -1004.0,
+                    "y": -141.0
                 }
             }
         },
@@ -123,8 +123,8 @@
         "PCA9685": {
             "hal_editor": {
                 "position": {
-                    "x": -626.0,
-                    "y": -345.0
+                    "x": -836.0,
+                    "y": -793.0
                 }
             }
         },
@@ -147,40 +147,40 @@
         "MPU9250": {
             "hal_editor": {
                 "position": {
-                    "x": -1648.0,
-                    "y": -509.0
+                    "x": -1564.0,
+                    "y": -888.0
                 }
             }
         },
         "Acceleration LPF": {
             "hal_editor": {
                 "position": {
-                    "x": -1452.0,
-                    "y": -504.0
+                    "x": -1375.0,
+                    "y": -962.0
                 }
             }
         },
         "Angular Velocity LPF": {
             "hal_editor": {
                 "position": {
-                    "x": -1453.0,
-                    "y": -574.0
+                    "x": -1379.0,
+                    "y": -1033.0
                 }
             }
         },
         "MS5611": {
             "hal_editor": {
                 "position": {
-                    "x": -1466.0,
-                    "y": -282.0
+                    "x": -1557.0,
+                    "y": -677.0
                 }
             }
         },
         "Raspicam": {
             "hal_editor": {
                 "position": {
-                    "x": 11.0,
-                    "y": -39.0
+                    "x": -946.0,
+                    "y": -44.0
                 }
             }
         },
@@ -195,8 +195,8 @@
         "MaxSonar": {
             "hal_editor": {
                 "position": {
-                    "x": -250.0,
-                    "y": -4.0
+                    "x": -1542.0,
+                    "y": -599.0
                 }
             }
         },
@@ -251,8 +251,8 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": -1463.0,
-                    "y": 12.0
+                    "x": -1468.0,
+                    "y": -29.0
                 }
             }
         },
@@ -315,8 +315,16 @@
         "UBLOX": {
             "hal_editor": {
                 "position": {
-                    "x": -1635.0,
-                    "y": -340.0
+                    "x": -1560.0,
+                    "y": -770.0
+                }
+            }
+        },
+        "ADS1115": {
+            "hal_editor": {
+                "position": {
+                    "x": -1536.0,
+                    "y": -524.0
                 }
             }
         }

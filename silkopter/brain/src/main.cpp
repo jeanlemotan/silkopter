@@ -173,20 +173,20 @@ int main(int argc, char const* argv[])
         if (!hal.init(comms))
         {
             QLOGE("Hardware failure! Aborting");
-            abort();
+            goto exit;
         }
 
 #if defined RASPBERRY_PI
         if (!comms.start_rfmon("mon0", 5))
         {
             QLOGE("Cannot start communication channel! Aborting");
-            abort();
+            goto exit;
         }
 #else
         if (!comms.start_udp(8000, 8001))
         {
             QLOGE("Cannot start communication channel! Aborting");
-            abort();
+            goto exit;
         }
 #endif
 
@@ -202,31 +202,33 @@ int main(int argc, char const* argv[])
 
         QLOGI("All systems up. Ready to fly...");
 
-        constexpr std::chrono::milliseconds PERIOD(6);
-
-        auto last = q::Clock::now();
-        while (!s_exit)
         {
-            auto start = q::Clock::now();
-            if (start - last >= PERIOD)
+            constexpr std::chrono::milliseconds PERIOD(6);
+            auto last = q::Clock::now();
+            while (!s_exit)
             {
-                last = start;
+                auto start = q::Clock::now();
+                if (start - last >= PERIOD)
+                {
+                    last = start;
 
-                comms.process();
-                hal.process();
-            }
+                    comms.process();
+                    hal.process();
+                }
 
-            //don't sleep too much if we're late
-            if (q::Clock::now() - start < PERIOD)
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
-            else
-            {
-                std::this_thread::yield();
+                //don't sleep too much if we're late
+                if (q::Clock::now() - start < PERIOD)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
+                else
+                {
+                    std::this_thread::yield();
+                }
             }
         }
 
+exit:
         QLOGI("Stopping everything");
 
         //stop threads

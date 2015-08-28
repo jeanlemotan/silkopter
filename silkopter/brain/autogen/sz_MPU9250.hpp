@@ -1151,9 +1151,10 @@ w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Se
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace MPU9250 { struct Config {
- sz::MPU9250::Calibration calibration;
+ math::vec3f rotation;
+sz::MPU9250::Calibration calibration;
 
-explicit Config():calibration() {  }
+explicit Config():rotation(), calibration() {  }
 
 
  
@@ -1170,7 +1171,8 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< sz::MPU9250::Calibration > handler_0;bool has_calibration;
+    SAXEventHandler< math::vec3f > handler_0;
+SAXEventHandler< sz::MPU9250::Calibration > handler_1;bool has_calibration;
 
     bool check_depth(const char* type)
     {
@@ -1185,6 +1187,8 @@ private:
     {
         switch (state) {
             case 0:
+    return "rotation";
+case 1:
     return "calibration";
         default:
             break;
@@ -1212,14 +1216,16 @@ private:
 
     void reset_flags()
     {
-        has_calibration = false;
+        
+has_calibration = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::MPU9250::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->calibration)
+        , handler_0(&obj->rotation)
+, handler_1(&obj->calibration)
     {
         reset_flags();
     }
@@ -1233,6 +1239,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -1250,6 +1259,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -1265,6 +1277,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -1282,6 +1297,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -1297,6 +1315,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -1314,6 +1335,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -1329,6 +1353,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -1346,6 +1373,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -1360,8 +1390,10 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x43\x61\x6c\x69\x62\x72\x61\x74\x69\x6f\x6e", 11))
-						 { state=0; has_calibration = true; }
+            else if (utility::string_equal(str, length, "\x52\x6f\x74\x61\x74\x69\x6f\x6e\x20\x28\x64\x65\x67\x29", 14))
+						 { state=0;  }
+else if (utility::string_equal(str, length, "\x43\x61\x6c\x69\x62\x72\x61\x74\x69\x6f\x6e", 11))
+						 { state=1; has_calibration = true; }
             else {
                 state = -1;
                 return true;
@@ -1372,6 +1404,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -1390,6 +1425,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -1405,6 +1443,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
 
         default:
             break;
@@ -1422,6 +1463,9 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
             default:
                 break;
             }
@@ -1438,6 +1482,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
 
             default:
                 break;
@@ -1464,6 +1511,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -1479,6 +1528,7 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
@@ -1490,9 +1540,10 @@ struct Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33
     {
         w.StartObject();
 
-        w.Key("\x43\x61\x6c\x69\x62\x72\x61\x74\x69\x6f\x6e", 11, false); Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33437b52104, sz::MPU9250::Calibration >()(w, value.calibration);
+        w.Key("\x52\x6f\x74\x61\x74\x69\x6f\x6e\x20\x28\x64\x65\x67\x29", 14, false); Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33437b52104, math::vec3f >()(w, value.rotation);
+w.Key("\x43\x61\x6c\x69\x62\x72\x61\x74\x69\x6f\x6e", 11, false); Serializer< Writerfbb8c20a39f169884b6e77892439ebe63b038af1a9681c53a345f33437b52104, sz::MPU9250::Calibration >()(w, value.calibration);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };

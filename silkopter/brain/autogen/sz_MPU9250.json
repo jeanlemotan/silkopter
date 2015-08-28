@@ -30,6 +30,7 @@
     "name": "Config",
     "members":
     [
+        ["math::vec3f", "rotation", {"required": false, "json_key" : "Rotation (deg)"}],
         ["sz::MPU9250::Calibration", "calibration", {"required": true, "json_key" : "Calibration"}]
     ]
 }

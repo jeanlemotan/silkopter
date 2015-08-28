@@ -9,6 +9,9 @@ extern "C"
 {
     #include "pigpio.h"
 }
+
+extern auto initialize_pigpio() -> bool;
+
 #endif
 
 
@@ -199,15 +202,10 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     bool is_enabled = s_pwm_enabled_count > 0;
 
 #if defined RASPBERRY_PI
-    if (gpioGetMode(27) == PI_NOT_INITIALISED)
+    auto ok = initialize_pigpio();
+    if (!ok)
     {
-        QLOGI("Initializing pigpio");
-        gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
-        if (gpioInitialise() < 0)
-        {
-            QLOGE("PIGPIO library initialization failed");
-            return false;
-        }
+        return false;
     }
 
     QLOGI("Setting all pwm to {}", is_enabled ? "enabled" : "disabled");
