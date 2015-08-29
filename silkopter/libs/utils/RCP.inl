@@ -909,6 +909,7 @@ inline void RCP::send_pending_confirmations()
             {
                 auto& res = m_tx.confirmations[pidx];
                 res.sent_count++;
+                data_ptr->all = 0;
                 data_ptr->id = res.id;
                 data_ptr->fragment_idx = res.fragment_idx;
                 data_ptr->channel_idx = res.channel_idx;
@@ -1137,6 +1138,7 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             auto const& hdr = get_header<Packet_Header>(datagram->data.data());
             Confirmations_Header::Data key;
 
+            key.all = 0;
             key.channel_idx = hdr.channel_idx;
             key.id = hdr.id;
             key.fragment_idx = hdr.fragment_idx;
@@ -1156,7 +1158,7 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             key.fragment_idx = FRAGMENT_IDX_ALL;
 
             lb = std::lower_bound(conf, conf_end, key);
-            if (lb != conf_end && *lb == key)
+            if (lb != conf_end && lb->channel_idx == key.channel_idx && lb->id == key.id)
             {
 //                if (hdr.channel_idx == 20)
 //                {

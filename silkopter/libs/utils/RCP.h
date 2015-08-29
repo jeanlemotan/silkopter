@@ -142,6 +142,7 @@ namespace util
         {
             union Data
             {
+                Data() : all(0) {}
                 struct
                 {
                     uint64_t id : 24;
