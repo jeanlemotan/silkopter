@@ -14,7 +14,7 @@ constexpr uint8_t PREAMBLE1 = 0xB5;
 constexpr uint8_t PREAMBLE2 = 0x62;
 
 constexpr uint16_t MIN_PACKET_SIZE = 8;
-constexpr uint16_t MAX_PAYLOAD_SIZE = 16384;
+constexpr uint16_t MAX_PAYLOAD_SIZE = 512;
 
 constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
 
@@ -332,7 +332,8 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     }
     else if (buses.spi)
     {
-        max_size = math::min<size_t>(max_size, 128);
+        max_size = math::min<size_t>(max_size, 4);
+        std::fill(data, data + max_size, 0xFF);
         return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
@@ -570,10 +571,11 @@ void UBLOX::read_data(Buses& buses)
 
     while (q::Clock::now() - start < MAX_DURATION)
     {
-        auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
-        if (res > 0)
+        m_state = decode_packet(m_packet, m_buffer);
+        if (m_state == Decode_State::FOUND_PACKET)
         {
-            std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+            process_packet(buses, m_packet);
+            m_packet.payload.clear();
 
             //remove SPI no-data markers
             auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
@@ -581,42 +583,36 @@ void UBLOX::read_data(Buses& buses)
             {
                 m_buffer.erase(m_buffer.begin(), it);
             }
+        }
 
-            if (!m_buffer.empty())
+        //remove SPI no-data markers
+        if (m_state == Decode_State::NEEDS_DATA || m_state == Decode_State::DONE)
+        {
+            auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+            if (res > 0)
             {
-                bool found = false;
-                do
+                std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
+                if (m_state == Decode_State::DONE)
                 {
-                    found = decode_packet(m_packet, m_buffer);
-                    if (found)
+                    //remove SPI no-data markers
+                    auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
+                    if (it != m_buffer.begin())
                     {
-                        process_packet(buses, m_packet);
-                        m_packet.payload.clear();
-
-                        //remove SPI no-data markers
-                        auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
-                        if (it != m_buffer.begin())
-                        {
-                            m_buffer.erase(m_buffer.begin(), it);
-                        }
+                        m_buffer.erase(m_buffer.begin(), it);
                     }
-                } while(found);
+                }
             }
             else
             {
                 break;
             }
         }
-        else
-        {
-            break;
-        }
     }
 }
 
-auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
+auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode_State
 {
-    while (buffer.size() >= 2)//MIN_PACKET_SIZE)
+    while (!buffer.empty())//MIN_PACKET_SIZE)
     {
         size_t step = 0;
         size_t payload_size = 0;
@@ -629,9 +625,9 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
         for (auto it = buffer.begin(); it != buffer.end() && is_invalid == false; ++it)
         {
             auto const d = *it;
-//            if (d != 0)
+            if (d != 0)
             {
-//                QLOGI("step: {}, d: {}", step, d);
+               // QLOGI("step: {}, d: {}", step, d);
             }
             switch (step)
             {
@@ -677,6 +673,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                 //QLOGI("step: {}, d: {}, size", step, d, payload_size);
                 if (payload_size > MAX_PAYLOAD_SIZE)
                 {
+                    //QLOGI("step: {}, d: {}, invalid", step, d);
                     is_invalid = true;
                     break;
                 }
@@ -714,11 +711,11 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
                     break;
                 }
 
-                //QLOGI("step: {}, d: {}", step, d);
+                QLOGI("step MSG: {}, d: {} - {}", step, d, m_packet.message);
                 //consume all the data from the buffer
                 buffer.erase(buffer.begin(), it + 1);
                 // a valid UBlox packet
-                return true;
+                return Decode_State::FOUND_PACKET;
             }
         }
 
@@ -729,11 +726,11 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool
         }
         else
         {
-            //we need more data
-            return false;
+            //so far so good but we need more data
+            return Decode_State::NEEDS_DATA;
         }
     }
-    return false;
+    return Decode_State::DONE;
 }
 
 
@@ -750,7 +747,7 @@ auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
         {
             return true;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     } while (q::Clock::now() - start < d);
 
     return false;
@@ -785,7 +782,7 @@ void UBLOX::process_packet(Buses& buses, Packet& packet)
 
     default:
     {
-        //if (packet.cls == CLASS_NAV)
+        if (packet.cls == CLASS_NAV)
         {
             CFG_MSG data;
             data.msgClass = packet.cls;

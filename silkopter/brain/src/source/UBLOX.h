@@ -83,7 +83,15 @@ private:
 
     void read_data(Buses& buses);
 
-    auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> bool;
+    enum class Decode_State
+    {
+        FOUND_PACKET,
+        NEEDS_DATA,
+        DONE
+    };
+    Decode_State m_state;
+
+    auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode_State;
     void process_packet(Buses& buses, Packet& packet);
 
     void process_nav_sol_packet(Buses& buses, Packet& packet);
@@ -141,7 +149,7 @@ private:
     GPS_Info_Stream::Value m_last_gps_info_value;
 
     q::Clock::time_point m_last_tp = q::Clock::time_point(q::Clock::duration::zero());
-    q::Clock::time_point m_last_reset_tp = q::Clock::time_point(q::Clock::duration::zero());
+    q::Clock::time_point m_last_reset_tp = q::Clock::now() - std::chrono::seconds(1000);
 };
 
 
