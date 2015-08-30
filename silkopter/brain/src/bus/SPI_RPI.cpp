@@ -14,27 +14,27 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////
 
-auto initialize_pigpio() -> bool
-{
-    static bool initialized = false;
-    if (initialized)
-    {
-        return true;
-    }
+//auto initialize_pigpio() -> bool
+//{
+//    static bool initialized = false;
+//    if (initialized)
+//    {
+//        return true;
+//    }
 
-    if (gpioGetMode(27) == PI_NOT_INITIALISED)
-    {
-        QLOGI("Initializing pigpio");
-        gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
-        if (gpioInitialise() < 0)
-        {
-            QLOGE("PIGPIO library initialization failed");
-            return false;
-        }
-    }
-    initialized = true;
-    return true;
-}
+//    if (gpioGetMode(27) == PI_NOT_INITIALISED)
+//    {
+//        QLOGI("Initializing pigpio");
+//        gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
+//        if (gpioInitialise() < 0)
+//        {
+//            QLOGE("PIGPIO library initialization failed");
+//            return false;
+//        }
+//    }
+//    initialized = true;
+//    return true;
+//}
 
 auto initialize_bcm() -> bool
 {
