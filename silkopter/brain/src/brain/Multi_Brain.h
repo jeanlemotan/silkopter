@@ -69,11 +69,11 @@ private:
         stream::IFrame,
         stream::IECEF_Position,
         stream::IECEF_Velocity,
-        stream::IECEF_Acceleration
+        stream::IECEF_Linear_Acceleration,
+        stream::IProximity
 //        stream::IBattery_State,
 //        stream::IECEF_Linear_Acceleration,
 //        stream::IECEF_Velocity,
-//        stream::IProximity,
         > m_accumulator;
 
     typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
@@ -88,11 +88,13 @@ private:
 
     float m_dts = 0;
 
-    struct Valid_State
+    silk::config::Multi m_multi_config;
+
+    struct Sensors
     {
         template<class T> struct Data
         {
-            T last_value;
+            T previous_value;
             T value;
             q::Clock::time_point last_updated_tp;
         };
@@ -101,15 +103,15 @@ private:
         Data<stream::IFrame::Value> frame;
         Data<stream::IECEF_Position::Value> position;
         Data<stream::IECEF_Velocity::Value> velocity;
-        Data<stream::IECEF_Acceleration::Value> acceleration;
-
-        silk::config::Multi config;
-    } m_state;
-    void refresh_state(stream::IMulti_Input::Sample const& input,
+        Data<stream::IECEF_Linear_Acceleration::Value> linear_acceleration;
+        Data<stream::IProximity::Value> proximity;
+    } m_sensors;
+    void refresh_sensors(stream::IMulti_Input::Sample const& input,
                             stream::IFrame::Sample const& frame,
                             stream::IECEF_Position::Sample const& position,
                             stream::IECEF_Velocity::Sample const& velocity,
-                            stream::IECEF_Acceleration::Sample const& acceleration);
+                            stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
+                            stream::IProximity::Sample const& proximity);
 
     void process_state_mode_idle();
     void process_state_mode_armed();

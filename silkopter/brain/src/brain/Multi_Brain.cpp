@@ -45,7 +45,7 @@ auto Multi_Brain::init() -> bool
         QLOGE("No multi config found");
         return false;
     }
-    m_state.config = *multi_config;
+    m_multi_config = *multi_config;
 
     if (m_init_params->rate == 0)
     {
@@ -76,11 +76,9 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
          { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_accumulator.get_stream_path(1) },
          { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(2) },
          { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(3) },
-         { stream::IECEF_Acceleration::TYPE, m_init_params->rate, "Acceleration (ecef)", m_accumulator.get_stream_path(4) },
+         { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(4) },
+         { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_accumulator.get_stream_path(5) },
          //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
-         //        { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(4) },
-         //        { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(6) },
-         //        { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_accumulator.get_stream_path(7) },
      }};
     return inputs;
 }
@@ -97,10 +95,10 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    auto& input = m_state.input.value;
+    auto& input = m_sensors.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
-    if (m_state.input.last_value.mode.value != stream::IMulti_Input::Mode::IDLE)
+    if (m_sensors.input.previous_value.mode.value != stream::IMulti_Input::Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
@@ -144,7 +142,7 @@ void Multi_Brain::process_state_mode_idle()
 
 void Multi_Brain::process_state_mode_armed()
 {
-    auto& input = m_state.input.value;
+    auto& input = m_sensors.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
     if (!m_home.is_acquired)
@@ -160,7 +158,7 @@ void Multi_Brain::process_state_mode_armed()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_state.position.last_value));
+    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_sensors.position.previous_value));
 
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
@@ -180,10 +178,10 @@ void Multi_Brain::process_state_mode_armed()
         float crt_alt = enu_position.z;
         float target_vel = m_altitude_data.velocity_pd.process(crt_alt, target_alt);
 
-        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_state.velocity.last_value)).z;
+        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_sensors.velocity.previous_value)).z;
         float target_acc = m_altitude_data.velocity_pd.process(crt_vel, target_vel);
 
-        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_state.acceleration.last_value)).z;
+        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_sensors.linear_acceleration.previous_value)).z;
 
         float half_thrust = (m_config->max_thrust + m_config->min_thrust) * 0.5f;
         float t =  half_thrust + m_altitude_data.acceleration_pid.process(crt_acc, target_acc);
@@ -212,11 +210,11 @@ void Multi_Brain::process_state_mode_armed()
     else if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE)
     {
         float fx, fy, fz;
-        m_state.frame.value.get_as_euler_xyz(fx, fy, fz);
+        m_sensors.frame.value.get_as_euler_xyz(fx, fy, fz);
 
         math::quatf target;
         target.set_from_euler_zxy(input.horizontal.angle.value.x, input.horizontal.angle.value.y, fz);
-        math::quatf diff = math::inverse(m_state.frame.value) * target;
+        math::quatf diff = math::inverse(m_sensors.frame.value) * target;
         float diff_x, diff_y, _z;
         diff.get_as_euler_zxy(diff_x, diff_y, _z);
 
@@ -241,11 +239,11 @@ void Multi_Brain::process_state_mode_armed()
 
 void Multi_Brain::process_state()
 {
-    if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
         process_state_mode_idle();
     }
-    else if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::ARMED)
+    else if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
         process_state_mode_armed();
     }
@@ -253,7 +251,7 @@ void Multi_Brain::process_state()
 
 void Multi_Brain::acquire_home_position()
 {
-    if (m_state.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
         auto& history = m_home.ecef_position_history;
         auto per_second = static_cast<size_t>(1.f / m_dts);
@@ -287,11 +285,12 @@ void Multi_Brain::acquire_home_position()
     }
 }
 
-void Multi_Brain::refresh_state(stream::IMulti_Input::Sample const& input,
+void Multi_Brain::refresh_sensors(stream::IMulti_Input::Sample const& input,
                                 stream::IFrame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
-                                stream::IECEF_Acceleration::Sample const& acceleration)
+                                stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
+                                stream::IProximity::Sample const& proximity)
 {
     auto now = q::Clock::now();
 
@@ -299,33 +298,39 @@ void Multi_Brain::refresh_state(stream::IMulti_Input::Sample const& input,
 
     if (input.is_healthy)
     {
-        m_state.input.last_value = m_state.input.value;
-        m_state.input.value = input.value;
-        m_state.input.last_updated_tp = now;
+        m_sensors.input.previous_value = m_sensors.input.value;
+        m_sensors.input.value = input.value;
+        m_sensors.input.last_updated_tp = now;
     }
     if (frame.is_healthy)
     {
-        m_state.frame.last_value = m_state.frame.value;
-        m_state.frame.value = frame.value;
-        m_state.frame.last_updated_tp = now;
+        m_sensors.frame.previous_value = m_sensors.frame.value;
+        m_sensors.frame.value = frame.value;
+        m_sensors.frame.last_updated_tp = now;
     }
     if (position.is_healthy)
     {
-        m_state.position.last_value = m_state.position.value;
-        m_state.position.value = position.value;
-        m_state.position.last_updated_tp = now;
+        m_sensors.position.previous_value = m_sensors.position.value;
+        m_sensors.position.value = position.value;
+        m_sensors.position.last_updated_tp = now;
     }
     if (velocity.is_healthy)
     {
-        m_state.velocity.last_value = m_state.velocity.value;
-        m_state.velocity.value = velocity.value;
-        m_state.velocity.last_updated_tp = now;
+        m_sensors.velocity.previous_value = m_sensors.velocity.value;
+        m_sensors.velocity.value = velocity.value;
+        m_sensors.velocity.last_updated_tp = now;
     }
-    if (acceleration.is_healthy)
+    if (linear_acceleration.is_healthy)
     {
-        m_state.acceleration.last_value = m_state.acceleration.value;
-        m_state.acceleration.value = acceleration.value;
-        m_state.acceleration.last_updated_tp = now;
+        m_sensors.linear_acceleration.previous_value = m_sensors.linear_acceleration.value;
+        m_sensors.linear_acceleration.value = linear_acceleration.value;
+        m_sensors.linear_acceleration.last_updated_tp = now;
+    }
+    if (proximity.is_healthy)
+    {
+        m_sensors.proximity.previous_value = m_sensors.proximity.value;
+        m_sensors.proximity.value = proximity.value;
+        m_sensors.proximity.last_updated_tp = now;
     }
 }
 
@@ -368,14 +373,14 @@ void Multi_Brain::process()
                           stream::IFrame::Sample const& i_frame,
                           stream::IECEF_Position::Sample const& i_position,
                           stream::IECEF_Velocity::Sample const& i_velocity,
-                          stream::IECEF_Acceleration::Sample const& i_acceleration
+                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
+                          stream::IProximity::Sample const& i_proximity
                           //                          stream::IBattery_State::Sample const& i_battery_state,
                           //                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
                           //                          stream::IECEF_Velocity::Sample const& i_velocity,
-                          //                          stream::IProximity::Sample const& i_proximity,
                           )
     {
-        refresh_state(i_input, i_frame, i_position, i_velocity, i_acceleration);
+        refresh_sensors(i_input, i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
         process_state();
     });
 
@@ -383,10 +388,11 @@ void Multi_Brain::process()
 
     {
         stream::IMulti_State::Value state;
-        state.ecef_position = m_state.position.value;
+        state.ecef_position = m_sensors.position.value;
         state.ecef_home_position = m_home.ecef_position;
-        state.frame = m_state.frame.value;
-        state.last_input = m_state.input.value;
+        state.frame = m_sensors.frame.value;
+        state.last_input = m_sensors.input.value;
+        state.proximity = m_sensors.proximity.value;
 
         size_t samples_needed = m_state_output_stream->compute_samples_needed();
         for (size_t i = 0; i < samples_needed; i++)
@@ -419,8 +425,8 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     auto output_rate = m_rate_output_stream->get_rate();
 
-    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_state.config.motor_thrust * m_state.config.motors.size() * 0.5f);
-    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_state.config.motor_thrust * m_state.config.motors.size());
+    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multi_config.motor_thrust * m_multi_config.motors.size() * 0.5f);
+    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multi_config.motor_thrust * m_multi_config.motors.size());
 
 
     m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 0.f, 180.f);
