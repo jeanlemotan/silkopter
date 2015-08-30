@@ -138,7 +138,7 @@ auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     }
 
     bcm2835_i2c_setSlaveAddress(address);
-    int res = bcm2835_i2c_write(reinterpret_cast<const char*>(m_buffer.data()), size);
+    int res = bcm2835_i2c_write(reinterpret_cast<const char*>(m_buffer.data()), size + 1);
     if (res != BCM2835_I2C_REASON_OK)
     {
         QLOGW("write register {} failed: {}", reg, res);
