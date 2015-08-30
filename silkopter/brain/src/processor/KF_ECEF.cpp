@@ -103,7 +103,7 @@ KF_ECEF::KF_ECEF(HAL& hal)
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
-    m_acceleration_output_stream = std::make_shared<Acceleration_Output_Stream>();
+    m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
 auto KF_ECEF::init(rapidjson::Value const& init_params) -> bool
@@ -135,8 +135,8 @@ auto KF_ECEF::init() -> bool
     m_velocity_output_stream->set_rate(m_init_params->rate);
     m_velocity_output_stream->set_tp(q::Clock::now());
 
-    m_acceleration_output_stream->set_rate(m_init_params->rate);
-    m_acceleration_output_stream->set_tp(q::Clock::now());
+    m_linear_acceleration_output_stream->set_rate(m_init_params->rate);
+    m_linear_acceleration_output_stream->set_tp(q::Clock::now());
 
     m_dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
     double dt = m_dts;
@@ -195,7 +195,7 @@ auto KF_ECEF::get_outputs() const -> std::vector<Output>
     {{
         { "Position (ecef)", m_position_output_stream },
         { "Velocity (ecef)", m_velocity_output_stream },
-        { "Acceleration (ecef)", m_acceleration_output_stream },
+        { "Linear Acceleration (ecef)", m_linear_acceleration_output_stream },
     }};
     return outputs;
 }
@@ -207,7 +207,7 @@ void KF_ECEF::process()
 
     m_position_output_stream->clear();
     m_velocity_output_stream->clear();
-    m_acceleration_output_stream->clear();
+    m_linear_acceleration_output_stream->clear();
 
     m_accumulator.process([this](
                           size_t,
@@ -279,7 +279,7 @@ void KF_ECEF::process()
 
         m_position_output_stream->push_sample(pos, true);
         m_velocity_output_stream->push_sample(vel, true);
-        m_acceleration_output_stream->push_sample(acc, true);
+        m_linear_acceleration_output_stream->push_sample(acc, true);
     });
 }
 

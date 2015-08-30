@@ -71,8 +71,8 @@ private:
     typedef Basic_Output_Stream<stream::IECEF_Velocity> Velocity_Output_Stream;
     mutable std::shared_ptr<Velocity_Output_Stream> m_velocity_output_stream;
 
-    typedef Basic_Output_Stream<stream::IECEF_Acceleration> Acceleration_Output_Stream;
-    mutable std::shared_ptr<Acceleration_Output_Stream> m_acceleration_output_stream;
+    typedef Basic_Output_Stream<stream::IECEF_Linear_Acceleration> Linear_Acceleration_Output_Stream;
+    mutable std::shared_ptr<Linear_Acceleration_Output_Stream> m_linear_acceleration_output_stream;
 
     boost::optional<float> m_last_baro_altitude;
 
@@ -130,7 +130,7 @@ private:
     };
 
     Delayer<stream::IECEF_Velocity::Value> m_velocity_delayer;
-    Delayer<stream::IENU_Linear_Acceleration::Value> m_linear_acceleration_delayer;
+    Delayer<stream::IECEF_Linear_Acceleration::Value> m_linear_acceleration_delayer;
     Delayer<stream::IPressure::Value> m_pressure_alt_delayer;
 };
 
