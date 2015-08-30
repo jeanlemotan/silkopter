@@ -826,7 +826,7 @@ private:
 
         // Parse 64bit int
         bool useDouble = false;
-        double d = 0.0;
+        double d = 0.f;
         if (use64bit) {
             if (minus) 
                 while (s.Peek() >= '0' && s.Peek() <= '9') {                    
