@@ -1,0 +1,36 @@
+#pragma once
+
+#include "HAL.h"
+#include "Comms.h"
+
+extern "C"
+{
+struct AVCodec;
+struct AVCodecContext;
+struct SwsContext;
+struct AVFrame;
+struct AVPicture;
+}
+
+
+class Video_Decoder : public QWidget
+{
+public:
+    Video_Decoder();
+    virtual ~Video_Decoder();
+
+    auto decode_frame(silk::stream::gs::Video::Sample const& frame, std::vector<uint8_t>& rgb_data) -> bool;
+
+private:
+    static bool s_codecs_registered;
+
+    struct FFMPEG
+    {
+        AVCodec* codec = nullptr;
+        AVCodecContext* context = nullptr;
+        SwsContext* sws_context = nullptr;
+        AVFrame* frame_yuv = nullptr;
+        AVFrame* frame_rgb = nullptr;
+        std::shared_ptr<AVPicture> rgb;
+    } m_ffmpeg;
+};
