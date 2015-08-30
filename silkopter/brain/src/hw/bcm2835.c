@@ -643,22 +643,22 @@ void bcm2835_spi_transfernb(char* tbuf, char* rbuf, uint32_t len)
     */
 
     /* Clear TX and RX fifos */
-    bcm2835_peri_set_bits(paddr, BCM2835_SPI0_CS_CLEAR, BCM2835_SPI0_CS_CLEAR);
+    bcm2835_peri_set_bits(paddr, 0, BCM2835_SPI0_CS_INTD | BCM2835_SPI0_CS_INTR);
 
     /* Set TA = 1 */
-    bcm2835_peri_set_bits(paddr, BCM2835_SPI0_CS_TA, BCM2835_SPI0_CS_TA);
+    bcm2835_peri_set_bits(paddr, BCM2835_SPI0_CS_TA | BCM2835_SPI0_CS_CLEAR, BCM2835_SPI0_CS_TA | BCM2835_SPI0_CS_CLEAR);
 
     /* Use the FIFO's to reduce the interbyte times */
     while((TXCnt < len)||(RXCnt < len))
     {
         /* TX fifo not full, so add some more bytes */
-        while(((bcm2835_peri_read(paddr) & BCM2835_SPI0_CS_TXD)) && (TXCnt < len))
+        while (((bcm2835_peri_read(paddr) & BCM2835_SPI0_CS_TXD)) && (TXCnt < len))
         {
             bcm2835_peri_write_nb(fifo, tbuf[TXCnt]);
             TXCnt++;
         }
         /* Rx fifo not empty, so get the next received bytes */
-        while(((bcm2835_peri_read(paddr) & BCM2835_SPI0_CS_RXD)) && (RXCnt < len))
+        while (((bcm2835_peri_read(paddr) & BCM2835_SPI0_CS_RXD)) && (RXCnt < len))
         {
             rbuf[RXCnt] = bcm2835_peri_read_nb(fifo);
             RXCnt++;
@@ -862,7 +862,7 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
     /* Enable device and start transfer */
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST);
     
-    uint32_t start = bcm2835_st_read();
+    uint64_t start = bcm2835_st_read();
     int timeout_checker = TIMEOUT_CHECKER;
 
 
@@ -903,7 +903,9 @@ uint8_t bcm2835_i2c_write(const char * buf, uint32_t len)
         reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
-    bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
+    //reset
+    bcm2835_peri_write(control, 0);
+    bcm2835_peri_write(status, BCM2835_BSC_S_CLKT | BCM2835_BSC_S_ERR | BCM2835_BSC_S_DONE);
 
     return reason;
 }
@@ -936,7 +938,7 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
     /* Start read */
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST | BCM2835_BSC_C_READ);
     
-    uint32_t start =  bcm2835_st_read();
+    uint64_t start =  bcm2835_st_read();
     int timeout_checker = TIMEOUT_CHECKER;
 
     /* wait for transfer to complete */
@@ -992,7 +994,9 @@ uint8_t bcm2835_i2c_read(char* buf, uint32_t len)
         reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
-    bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
+    //reset
+    bcm2835_peri_write(control, 0);
+    bcm2835_peri_write(status, BCM2835_BSC_S_CLKT | BCM2835_BSC_S_ERR | BCM2835_BSC_S_DONE);
 
     return reason;
 }
@@ -1028,7 +1032,7 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
     bcm2835_peri_write_nb(fifo, regaddr[0]);
     bcm2835_peri_write_nb(control, BCM2835_BSC_C_I2CEN | BCM2835_BSC_C_ST);
     
-    uint32_t start = bcm2835_st_read();
+    uint64_t start = bcm2835_st_read();
     int timeout_checker = TIMEOUT_CHECKER;
 
     /* poll for transfer has started or already finished */
@@ -1111,7 +1115,9 @@ uint8_t bcm2835_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
         reason = BCM2835_I2C_REASON_ERROR_DATA;
     }
 
-    bcm2835_peri_set_bits(control, BCM2835_BSC_S_DONE , BCM2835_BSC_S_DONE);
+    //reset
+    bcm2835_peri_write(control, 0);
+    bcm2835_peri_write(status, BCM2835_BSC_S_CLKT | BCM2835_BSC_S_ERR | BCM2835_BSC_S_DONE);
 
     return reason;
 }
