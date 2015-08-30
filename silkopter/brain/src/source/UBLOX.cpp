@@ -16,7 +16,7 @@ constexpr uint8_t PREAMBLE2 = 0x62;
 constexpr uint16_t MIN_PACKET_SIZE = 8;
 constexpr uint16_t MAX_PAYLOAD_SIZE = 512;
 
-constexpr std::chrono::milliseconds ACK_TIMEOUT(2000);
+constexpr std::chrono::milliseconds ACK_TIMEOUT(500);
 
 constexpr std::chrono::seconds REINIT_WATCHDOG_TIMEOUT(5);
 
@@ -332,8 +332,8 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     }
     else if (buses.spi)
     {
-        max_size = math::min<size_t>(max_size, 4);
-        std::fill(data, data + max_size, 0xFF);
+        max_size = math::min<size_t>(max_size, MAX_PAYLOAD_SIZE + 6);
+        std::fill(data, data + max_size, 0);
         return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
@@ -413,10 +413,10 @@ auto UBLOX::setup() -> bool
             data.msgClass = static_cast<int>(m.first) & 255;
             data.msgID = static_cast<int>(m.first) >> 8;
             data.rate = m.second;
-            if (!send_packet_with_retry(buses, MESSAGE_CFG_MSG, data, ACK_TIMEOUT, 3))
+            if (!send_packet_with_retry(buses, MESSAGE_CFG_MSG, data, ACK_TIMEOUT, 2))
             {
-                QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-                //return false;
+                QLOGW("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
+                return false;
             }
         }
     }
@@ -427,10 +427,10 @@ auto UBLOX::setup() -> bool
         data.measRate = std::chrono::milliseconds(1000 / m_init_params->rate).count();
         data.timeRef = 0;//UTC time
         data.navRate = 1;
-        if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 3))
+        if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 2))
         {
-            QLOGE("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-            //return false;
+            QLOGW("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
+            return false;
         }
     }
 
@@ -571,8 +571,8 @@ void UBLOX::read_data(Buses& buses)
 
     while (q::Clock::now() - start < MAX_DURATION)
     {
-        m_state = decode_packet(m_packet, m_buffer);
-        if (m_state == Decode_State::FOUND_PACKET)
+        auto result = decode_packet(m_packet, m_buffer);
+        if (result == Decoder_State::Result::FOUND_PACKET)
         {
             process_packet(buses, m_packet);
             m_packet.payload.clear();
@@ -586,13 +586,13 @@ void UBLOX::read_data(Buses& buses)
         }
 
         //remove SPI no-data markers
-        if (m_state == Decode_State::NEEDS_DATA || m_state == Decode_State::DONE)
+        if (result == Decoder_State::Result::NEEDS_DATA || result == Decoder_State::Result::DONE)
         {
             auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
             if (res > 0)
             {
                 std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
-                if (m_state == Decode_State::DONE)
+                if (result == Decoder_State::Result::DONE)
                 {
                     //remove SPI no-data markers
                     auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
@@ -610,37 +610,31 @@ void UBLOX::read_data(Buses& buses)
     }
 }
 
-auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode_State
+auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decoder_State::Result
 {
     while (!buffer.empty())//MIN_PACKET_SIZE)
     {
-        size_t step = 0;
-        size_t payload_size = 0;
-        uint8_t ck_a = 0;
-        uint8_t ck_b = 0;
         bool is_invalid = false;
 
-        packet.payload.clear();
-
-        for (auto it = buffer.begin(); it != buffer.end() && is_invalid == false; ++it)
+        for (; m_state.data_idx < buffer.size() && is_invalid == false; ++m_state.data_idx)
         {
-            auto const d = *it;
+            auto const d = buffer[m_state.data_idx];
             if (d != 0)
             {
                // QLOGI("step: {}, d: {}", step, d);
             }
-            switch (step)
+            switch (m_state.step)
             {
             case 0:
-                packet.payload.clear();
                 if (d != PREAMBLE1)
                 {
                     //QLOGI("step: {}, d: {}, invalid", step, d);
                     is_invalid = true;
                     break;
                 }
+                packet.payload.clear();
                 //QLOGI("step: {}, d: {}", step, d);
-                step++;
+                m_state.step++;
                 break;
             case 1:
                 if (d != PREAMBLE2)
@@ -650,87 +644,92 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
                     break;
                 }
                 //QLOGI("step: {}, d: {}", step, d);
-                step++;
+                m_state.step++;
                 break;
             case 2:
                 packet.cls = d;
-                step++;
-                ck_b = ck_a = d;
+                m_state.step++;
+                m_state.ck_b = m_state.ck_a = d;
                 break;
             case 3:
                 //QLOGI("step: {}, d: {}, cls {}, msg {}", step, d, packet.cls, d);
                 packet.message = static_cast<Message>((d << 8) | packet.cls);
-                step++;
-                ck_b += (ck_a += d);
+                m_state.step++;
+                m_state.ck_b += (m_state.ck_a += d);
                 break;
             case 4:
-                payload_size = d;
-                step++;
-                ck_b += (ck_a += d);
+                m_state.payload_size = d;
+                m_state.step++;
+                m_state.ck_b += (m_state.ck_a += d);
                 break;
             case 5:
-                payload_size = (d << 8) | payload_size;
+                m_state.payload_size = (d << 8) | m_state.payload_size;
                 //QLOGI("step: {}, d: {}, size", step, d, payload_size);
-                if (payload_size > MAX_PAYLOAD_SIZE)
+                if (m_state.payload_size > MAX_PAYLOAD_SIZE)
                 {
                     //QLOGI("step: {}, d: {}, invalid", step, d);
                     is_invalid = true;
                     break;
                 }
-                if (payload_size > 0)
+                if (m_state.payload_size > 0)
                 {
-                    packet.payload.reserve(payload_size);
-                    step++;
+                    packet.payload.reserve(m_state.payload_size);
+                    m_state.step++;
                 }
                 else
                 {
-                    step += 2; //go directly to checksum
+                    m_state.step += 2; //go directly to checksum
                 }
-                ck_b += (ck_a += d);
+                m_state.ck_b += (m_state.ck_a += d);
                 break;
             case 6:
-                ck_b += (ck_a += d);
+                m_state.ck_b += (m_state.ck_a += d);
                 packet.payload.push_back(d);
-                step = (packet.payload.size() == payload_size) ? step + 1 : step;
+                m_state.step = (packet.payload.size() == m_state.payload_size) ? m_state.step + 1 : m_state.step;
                 break;
             case 7:
-                if (ck_a != d)
+                if (m_state.ck_a != d)
                 {
                     //QLOGI("step: {}, d: {}, invalid", step, d);
                     is_invalid = true;
                     break;
                 }
                 //QLOGI("step: {}, d: {}", step, d);
-                step++;
+                m_state.step++;
                 break;
             case 8:
-                if (ck_b != d)
+                if (m_state.ck_b != d)
                 {
                     //QLOGI("step: {}, d: {}, invalid", step, d);
                     is_invalid = true;
                     break;
                 }
 
-                QLOGI("step MSG: {}, d: {} - {}", step, d, m_packet.message);
+                //QLOGI("step MSG: {}, d: {} - {}", m_state.step, d, m_packet.message);
                 //consume all the data from the buffer
-                buffer.erase(buffer.begin(), it + 1);
+                buffer.erase(buffer.begin(), buffer.begin() + m_state.data_idx + 1);
+
+                m_state = Decoder_State();
                 // a valid UBlox packet
-                return Decode_State::FOUND_PACKET;
+                return Decoder_State::Result::FOUND_PACKET;
             }
         }
 
         if (is_invalid)
         {
+            m_state = Decoder_State();
             //remove the preamble and start again
             buffer.pop_front();
         }
         else
         {
             //so far so good but we need more data
-            return Decode_State::NEEDS_DATA;
+            return Decoder_State::Result::NEEDS_DATA;
         }
     }
-    return Decode_State::DONE;
+
+    m_state = Decoder_State();
+    return Decoder_State::Result::DONE;
 }
 
 

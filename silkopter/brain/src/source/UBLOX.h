@@ -83,15 +83,24 @@ private:
 
     void read_data(Buses& buses);
 
-    enum class Decode_State
+    struct Decoder_State
     {
-        FOUND_PACKET,
-        NEEDS_DATA,
-        DONE
-    };
-    Decode_State m_state;
+        enum class Result
+        {
+            FOUND_PACKET,
+            NEEDS_DATA,
+            DONE
+        };
 
-    auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode_State;
+        size_t data_idx = 0;
+        size_t step = 0;
+        size_t payload_size = 0;
+        uint8_t ck_a = 0;
+        uint8_t ck_b = 0;
+    };
+    Decoder_State m_state;
+
+    auto decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decoder_State::Result;
     void process_packet(Buses& buses, Packet& packet);
 
     void process_nav_sol_packet(Buses& buses, Packet& packet);
