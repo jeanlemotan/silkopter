@@ -115,7 +115,6 @@ HEADERS += \
     ../../../libs/common/stream/IFrame.h \
     ../../../libs/common/stream/ILinear_Acceleration.h \
     ../../../libs/common/stream/IMagnetic_Field.h \
-    ../../../libs/common/stream/IPhysical_State.h \
     ../../../libs/common/stream/IPressure.h \
     ../../../libs/common/stream/IPWM.h \
     ../../../libs/common/stream/IStream.h \
@@ -159,7 +158,8 @@ HEADERS += \
     ../../src/input/Multi.h \
     ../../src/hud/Multi_HUD_Widget.h \
     ../../src/hud/IHUD_Widget.h \
-    ../../../libs/utils/Coordinates.h
+    ../../../libs/utils/Coordinates.h \
+    ../../src/Video_Decoder.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -191,7 +191,8 @@ SOURCES += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
     ../../src/input/Gamepad_Multi.cpp \
     ../../src/hud/Multi_HUD_Widget.cpp \
-    ../../../libs/utils/Coordinates.cpp
+    ../../../libs/utils/Coordinates.cpp \
+    ../../src/Video_Decoder.cpp
 
 FORMS += \
     ../../src/New_Node.ui \
