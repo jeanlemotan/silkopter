@@ -11,8 +11,8 @@
         "Throttle Generator": {
             "hal_editor": {
                 "position": {
-                    "x": -260.0,
-                    "y": 126.0
+                    "x": -896.0,
+                    "y": -1061.0
                 }
             }
         },
@@ -35,8 +35,8 @@
         "Angular Velocity RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1210.0,
-                    "y": -1031.0
+                    "x": -1226.0,
+                    "y": -1035.0
                 }
             }
         },
@@ -51,8 +51,8 @@
         "Comp AHRS": {
             "hal_editor": {
                 "position": {
-                    "x": -1231.0,
-                    "y": -936.0
+                    "x": -1219.0,
+                    "y": -941.0
                 }
             }
         },
@@ -83,8 +83,8 @@
         "Linear Acceleration (Local->ENU)": {
             "hal_editor": {
                 "position": {
-                    "x": -949.0,
-                    "y": -768.0
+                    "x": -1012.0,
+                    "y": -749.0
                 }
             }
         },
@@ -131,8 +131,8 @@
         "Oscillator": {
             "hal_editor": {
                 "position": {
-                    "x": -743.0,
-                    "y": -643.0
+                    "x": -845.0,
+                    "y": -835.0
                 }
             }
         },
@@ -140,15 +140,15 @@
             "hal_editor": {
                 "position": {
                     "x": -712.0,
-                    "y": -789.0
+                    "y": -791.0
                 }
             }
         },
         "MPU9250": {
             "hal_editor": {
                 "position": {
-                    "x": -1564.0,
-                    "y": -888.0
+                    "x": -1542.0,
+                    "y": -803.0
                 }
             }
         },
@@ -163,24 +163,24 @@
         "Angular Velocity LPF": {
             "hal_editor": {
                 "position": {
-                    "x": -1379.0,
-                    "y": -1033.0
+                    "x": -1388.0,
+                    "y": -1042.0
                 }
             }
         },
         "MS5611": {
             "hal_editor": {
                 "position": {
-                    "x": -1557.0,
-                    "y": -677.0
+                    "x": -1552.0,
+                    "y": -679.0
                 }
             }
         },
         "Raspicam": {
             "hal_editor": {
                 "position": {
-                    "x": -1252.0,
-                    "y": -575.0
+                    "x": -1536.0,
+                    "y": -979.0
                 }
             }
         },
@@ -203,8 +203,8 @@
         "Throttle To PWM": {
             "hal_editor": {
                 "position": {
-                    "x": -708.0,
-                    "y": -1021.0
+                    "x": -726.0,
+                    "y": -1011.0
                 }
             }
         },
@@ -251,8 +251,8 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": -1233.0,
-                    "y": -757.0
+                    "x": -1232.0,
+                    "y": -737.0
                 }
             }
         },
@@ -315,8 +315,8 @@
         "UBLOX": {
             "hal_editor": {
                 "position": {
-                    "x": -1560.0,
-                    "y": -770.0
+                    "x": -1550.0,
+                    "y": -893.0
                 }
             }
         },

@@ -509,7 +509,7 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<Vec3_Generator<stream::IAcceleration>>("Acceleration Generator", *this);
     m_node_factory.register_node<Vec3_Generator<stream::IENU_Acceleration>>("Acceleration Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Acceleration>>("Acceleration Generator (ECEF)", *this);
+//    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Acceleration>>("Acceleration Generator (ECEF)", *this);
     m_node_factory.register_node<Vec3_Generator<stream::ILinear_Acceleration>>("Linear Acceleration Generator", *this);
     m_node_factory.register_node<Vec3_Generator<stream::IENU_Linear_Acceleration>>("Linear Acceleration Generator (ENU)", *this);
     m_node_factory.register_node<Vec3_Generator<stream::IECEF_Linear_Acceleration>>("Linear Acceleration Generator (ECEF)", *this);
@@ -532,7 +532,7 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Acceleration>>("Acceleration LPF (ECEF)", *this);
+//    m_node_factory.register_node<LPF<stream::IECEF_Acceleration>>("Acceleration LPF (ECEF)", *this);
     m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Linear_Acceleration>>("Linear Acceleration LPF (ENU)", *this);
     m_node_factory.register_node<LPF<stream::IECEF_Linear_Acceleration>>("Linear Acceleration LPF (ECEF)", *this);
@@ -567,7 +567,7 @@ auto HAL::init(Comms& comms) -> bool
 
     m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Acceleration>>("Acceleration RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Acceleration>>("Acceleration RS (ECEF)", *this);
+//    m_node_factory.register_node<Resampler<stream::IECEF_Acceleration>>("Acceleration RS (ECEF)", *this);
     m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Linear_Acceleration>>("Linear Acceleration RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Linear_Acceleration>>("Linear Acceleration RS (ECEF)", *this);
