@@ -89,6 +89,13 @@ void GS::init_graphics()
     m_context.materials.primitive_2d.get_render_state(0).set_depth_write(true);
     m_context.materials.primitive_2d.get_render_state(0).set_culling(false);
 
+    technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/textured_2d.technique"));
+    QASSERT(technique);
+    m_context.materials.textured_2d.set_technique(technique);
+    m_context.materials.textured_2d.get_render_state(0).set_depth_test(true);
+    m_context.materials.textured_2d.get_render_state(0).set_depth_write(true);
+    m_context.materials.textured_2d.get_render_state(0).set_culling(false);
+
     technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/font.technique"));
     QASSERT(technique);
     m_context.materials.font.set_technique(technique);
