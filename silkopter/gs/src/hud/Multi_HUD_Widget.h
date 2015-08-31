@@ -35,6 +35,7 @@ private:
     {
         silk::stream::gs::Video_wptr stream;
         Video_Decoder decoder;
+        math::vec2u32 size;
         q::video::Texture_ptr texture;
         q::util::Connection connection;
         std::vector<uint8_t> data;
@@ -67,9 +68,14 @@ private:
 
     //////////////////////////
 
+    q::text::Style m_border_text_style;
+
     void render();
     void render_ground();
     void render_hud();
+    void render_modes();
+    void render_horizon();
+    void render_altitude();
     void render_video();
 };
 

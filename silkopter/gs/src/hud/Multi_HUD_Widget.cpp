@@ -18,6 +18,13 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     layout()->setContentsMargins(4, 4, 4, 4);
     layout()->addWidget(m_render_widget);
 
+    m_border_text_style.font = m_context.font;
+    m_border_text_style.height = 20;
+    m_border_text_style.decoration = q::text::Decoration::OUTLINE;
+    m_border_text_style.decoration_color = 0x77000000;
+    m_border_text_style.decoration_thickness = 1;
+
+
     //find video stream
     auto video_streams = m_hal.get_streams().get_all_of_type<silk::stream::gs::Video>();
     if (!video_streams.empty())
@@ -40,7 +47,7 @@ void Multi_HUD_Widget::video_samples_available(silk::stream::gs::Video::Samples 
     }
     auto const& sample = samples.back();
 
-    if (m_video.decoder.decode_frame(sample, sample.value.resolution, m_video.data))
+    if (m_video.decoder.decode_frame(sample, sample.value.resolution, m_video.data, Video_Decoder::Format::RGBA))
     {
         if (!m_video.texture)
         {
@@ -55,6 +62,7 @@ void Multi_HUD_Widget::video_samples_available(silk::stream::gs::Video::Samples 
         }
 
         m_video.texture->upload_data(0, m_video.data.data());
+        m_video.size = sample.value.resolution;
     }
 }
 
@@ -425,11 +433,51 @@ void Multi_HUD_Widget::render_video()
     mat.set_sampler(0, 0, sampler);
     m_context.painter.set_material(mat);
 
-//    float ar = float(width()) / height();
-//    math::vec2f uv0, uv1;
-//    uv1.y =
+    //float margin = 500;
+    float widget_ar = float(width()) / height();
+    float video_ar = float(m_video.size.x) / m_video.size.y;
+    if (widget_ar < 1.f)
+    {
+        //width smaller than height
+        //top and bottom bars
+        //show full width
 
-    m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, 0), math::vec2f(0, 0)), q::draw::Vertex(math::vec2f(width(), height()), math::vec2f(1, 1)));
+        float middle_height = width() / video_ar;
+        float bar_height = (height() - middle_height) / 2.f;
+
+        //top
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, 0), math::vec2f(0, 0)),
+                                         q::draw::Vertex(math::vec2f(width(), bar_height), math::vec2f(1, 0)));
+
+        //middle
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, bar_height), math::vec2f(0, 0)),
+                                         q::draw::Vertex(math::vec2f(width(), bar_height + middle_height), math::vec2f(1, 1)));
+
+        //bottom
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, bar_height + middle_height), math::vec2f(0, 1)),
+                                         q::draw::Vertex(math::vec2f(width(), bar_height + middle_height + bar_height), math::vec2f(1, 1)));
+    }
+    else
+    {
+        //height smaller than width
+        //left and right bars
+        //show full height
+
+        float middle_width = height() * video_ar;
+        float bar_width = (width() - middle_width) / 2.f;
+
+        //top
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, 0), math::vec2f(0, 0)),
+                                         q::draw::Vertex(math::vec2f(bar_width, height()), math::vec2f(0, 1)));
+
+        //middle
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(bar_width, 0), math::vec2f(0, 0)),
+                                         q::draw::Vertex(math::vec2f(bar_width + middle_width, height()), math::vec2f(1, 1)));
+
+        //bottom
+        m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(bar_width + middle_width, 0), math::vec2f(1, 0)),
+                                         q::draw::Vertex(math::vec2f(bar_width + middle_width + bar_width, height()), math::vec2f(1, 1)));
+    }
 }
 
 void Multi_HUD_Widget::render_ground()
@@ -482,12 +530,15 @@ void Multi_HUD_Widget::render_ground()
 
 void Multi_HUD_Widget::render_hud()
 {
+    render_modes();
+    render_horizon();
+}
+
+void Multi_HUD_Widget::render_modes()
+{
     m_context.painter.set_material(m_context.materials.font);
     q::text::Texter texter;
-    q::text::Style style;
-    style.font = m_context.font;
-    style.height = 12;
-    texter.set_style(style);
+    texter.set_style(m_border_text_style);
     switch (m_input.mode.value)
     {
     case silk::stream::IMulti_Input::Mode::IDLE:
@@ -500,19 +551,19 @@ void Multi_HUD_Widget::render_hud()
     switch (m_input.vertical.mode.value)
     {
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
-        texter.draw_string(m_context.painter, "Thrust Rate", math::vec2f(0, 60));
+        texter.draw_string(m_context.painter, "Rate", math::vec2f(0, 60));
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
-        texter.draw_string(m_context.painter, "Thrust Offset", math::vec2f(0, 60));
+        texter.draw_string(m_context.painter, "Offset", math::vec2f(0, 60));
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::VELOCITY:
-        texter.draw_string(m_context.painter, "Climb Rate", math::vec2f(0, 60));
+        texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 60));
         break;
     }
     switch (m_input.horizontal.mode.value)
     {
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
-        texter.draw_string(m_context.painter, "Angle Rate", math::vec2f(0, 100));
+        texter.draw_string(m_context.painter, "Rate", math::vec2f(0, 100));
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
         texter.draw_string(m_context.painter, "Angle", math::vec2f(0, 100));
@@ -521,4 +572,43 @@ void Multi_HUD_Widget::render_hud()
         texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 100));
         break;
     }
+}
+
+void Multi_HUD_Widget::render_horizon()
+{
+    float yaw, pitch, roll;
+    m_state.frame.get_as_euler_zxy(pitch, roll, yaw);
+
+    m_context.painter.push_post_clip_transform(math::trans3df());
+
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+    m_context.painter.set_material(mat);
+
+    const float k_length = 0.5f;
+    const float k_big_length = 1.3f;
+    const float k_distance_from_camera = 5.f;
+    const float k_step = math::radians(5.f);
+    const int k_line_count = math::radians(360.f) / k_step;
+    //const int k_half_line_size = k_line_count / 2;
+//    float max_alpha = 20.f;
+//    float color_inc = 2.f / float(k_line_count);
+    float angle = 0.f;
+    for (int i = 0; i < k_line_count; i++, angle += k_step)
+    {
+        float length = i == 0 ? k_big_length : k_length;
+        math::quatf rot;
+        rot.set_from_euler_zyx(pitch + angle, roll, 0);
+        math::vec3f p1 = math::rotate(rot, math::vec3f(-length, k_distance_from_camera, 0));
+        math::vec3f p2 = math::rotate(rot, math::vec3f( length, k_distance_from_camera, 0));
+
+        uint32_t color = 0x88FFFFFF;
+
+        m_context.painter.draw_line(q::draw::Vertex(p1, color), q::draw::Vertex(p2, color));
+    }
+
+    m_context.painter.pop_post_clip_transform();
 }
