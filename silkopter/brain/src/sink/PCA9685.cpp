@@ -229,9 +229,6 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 }
 
 
-constexpr float MIN_SERVO_MS = 0.5f;
-constexpr float MAX_SERVO_MS = 2.49f;
-
 void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
@@ -242,15 +239,16 @@ void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _
     if (_value)
     {
         value = math::clamp(*_value, 0.f, 1.f);
-        float range = ch.config->max - ch.config->min;
-        value = value * range + ch.config->min;
 
         if (ch.config->servo_signal)
         {
-            //servo signals vary between 1ms and 2ms
             float period_ms = 1000.f / m_init_params->rate;
-            float servo_ms = math::lerp(MIN_SERVO_MS, MAX_SERVO_MS, value);
+            float servo_ms = math::lerp(ch.config->min_servo, ch.config->max_servo, value);
             value = servo_ms / period_ms;
+        }
+        else
+        {
+            value = math::lerp(ch.config->min_pwm, ch.config->max_pwm, value);
         }
     }
 
@@ -365,6 +363,9 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 
+constexpr float MIN_SERVO_MS = 0.5f;
+constexpr float MAX_SERVO_MS = 2.4f;
+
 auto PCA9685::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("PCA9685::set_config");
@@ -381,8 +382,25 @@ auto PCA9685::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    for (size_t i = 0; i < 16; i++)
+    {
+        if (m_pwm_channels[i].config->servo_signal)
+        {
+            m_pwm_channels[i].config->min_servo = math::clamp(m_pwm_channels[i].config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
+            m_pwm_channels[i].config->max_servo = math::clamp(m_pwm_channels[i].config->max_servo, m_pwm_channels[i].config->min_servo, MAX_SERVO_MS);
+        }
+        else
+        {
+            m_pwm_channels[i].config->min_pwm = math::clamp(m_pwm_channels[i].config->min_pwm, 0.f, 1.f);
+            m_pwm_channels[i].config->max_pwm = math::clamp(m_pwm_channels[i].config->max_pwm, m_pwm_channels[i].config->min_pwm, 1.f);
+        }
+    }
+
     return true;
 }
+
+
+
 auto PCA9685::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
@@ -391,22 +409,36 @@ auto PCA9685::get_config() const -> rapidjson::Document
     //rates lower than 50 and higher than 400Hz don't support servo signals
     if (m_init_params->rate > 400 || m_init_params->rate < 50)
     {
-        jsonutil::remove_value(json, q::Path("Channels/Channel 1/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 2/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 3/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 4/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 5/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 6/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 7/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 8/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 9/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 10/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 11/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 12/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 13/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 14/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 15/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channels/Channel 16/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 1/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 2/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 3/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 4/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 5/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 6/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 7/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 8/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 9/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 10/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 11/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 12/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 13/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 14/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 15/Servo Signal"));
+        jsonutil::remove_value(json, q::Path("Channel 16/Servo Signal"));
+    }
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        if (m_pwm_channels[i].config->servo_signal)
+        {
+            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Min PWM", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Max PWM", i + 1)));
+        }
+        else
+        {
+            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Min Servo (ms)", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Max Servo (ms)", i + 1)));
+        }
     }
 
 
