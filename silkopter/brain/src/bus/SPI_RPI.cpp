@@ -55,6 +55,15 @@ auto initialize_bcm() -> bool
     return true;
 }
 
+auto shutdown_bcm() -> bool
+{
+    QLOGI("Shutting down bcm2835");
+    bcm2835_spi_end();
+    bcm2835_i2c_end();
+    bcm2835_close();
+    return true;
+}
+
 ///////////////////////////////////////////////////////////////////
 
 namespace silk

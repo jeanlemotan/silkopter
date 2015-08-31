@@ -9,6 +9,10 @@
 #include <thread>
 #include <iostream>
 
+#ifdef RASPBERRY_PI
+extern auto shutdown_bcm() -> bool;
+#endif
+
 size_t s_test = 0;
 bool s_exit = false;
 boost::asio::io_service s_async_io_service;
@@ -35,58 +39,6 @@ void signal_handler(int signum)
     QLOGI("Exitting due to signal {}", signum);
 }
 
-//void test_mm(math::vec3f const& target, float step)
-//{
-//    struct Motor
-//    {
-//        math::vec3f torque; //precomputed maximum torque
-//        float factor;
-//    };
-
-//    //some test configuration with random data
-//    std::vector<Motor> motors = {{
-//                                     {{2, 3, 0.1}, 0},
-//                                     {{5, -1, -0.1}, 0},
-//                                     {{-1, -7, 0.1}, 0},
-//                                     {{-4, 2, -0.1}, 0},
-//                                     {{-0.1, .2, -1}, 0},
-//                                }};
-
-//    size_t iteration = 0;
-//    while (true)
-//    {
-//        //first calculate the crt torque
-//        math::vec3f crt;
-//        for (auto& m: motors)
-//        {
-//            crt += m.torque * m.factor;
-//        }
-
-//        //check if we're done
-//        if (math::equals(crt, target, 0.0001))
-//        {
-//            QLOGI("{}: Done in {} iterations", step, iteration);
-//            break;
-//        }
-
-//        //how far are we for the target?
-//        //divide by motor count because I want to distribute the difference to all motors
-//        auto diff = (target - crt) / float(motors.size());
-
-//        //distribute the diff to all motors
-//        for (auto& m: motors)
-//        {
-//            //figure out how much each motor can influence the target torque
-//            //  by doing a dot product with the normalized torque vector
-//            auto t = math::normalized(m.torque);
-//            auto f = math::dot(t, diff) * step; //go toqards the difference in small steps so we can converge
-//            m.factor += f;
-//        }
-
-//        iteration++;
-//    }
-//}
-
 void out_of_memory_handler()
 {
     QLOGE("Out of memory");
@@ -98,9 +50,9 @@ int main(int argc, char const* argv[])
     signal(SIGINT, signal_handler); // Trap basic signals (exit cleanly)
     signal(SIGKILL, signal_handler);
     signal(SIGUSR1, signal_handler);
-//    signal(SIGQUIT, signal_handler);
+    signal(SIGQUIT, signal_handler);
 //    signal(SIGABRT, signal_handler);
-//    signal(SIGSTOP, signal_handler);
+    signal(SIGTERM, signal_handler);
 
     //set the new_handler
     std::set_new_handler(out_of_memory_handler);
@@ -230,6 +182,10 @@ int main(int argc, char const* argv[])
 
 exit:
         QLOGI("Stopping everything");
+
+#ifdef RASPBERRY_PI
+        shutdown_bcm();
+#endif
 
         //stop threads
         async_work.reset();
