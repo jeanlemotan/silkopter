@@ -17,8 +17,46 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     layout()->setSpacing(0);
     layout()->setContentsMargins(4, 4, 4, 4);
     layout()->addWidget(m_render_widget);
+
+    //find video stream
+    auto video_streams = m_hal.get_streams().get_all_of_type<silk::stream::gs::Video>();
+    if (!video_streams.empty())
+    {
+        m_video.stream = video_streams[0];
+        auto vs = m_video.stream.lock();
+        m_hal.set_stream_telemetry_active(vs->name, true);
+        m_video.connection = vs->samples_available_signal.connect([this](silk::stream::gs::Video::Samples const& samples)
+        {
+            video_samples_available(samples);
+        });
+    }
 }
 
+void Multi_HUD_Widget::video_samples_available(silk::stream::gs::Video::Samples const& samples)
+{
+    if (samples.empty())
+    {
+        return;
+    }
+    auto const& sample = samples.back();
+
+    if (m_video.decoder.decode_frame(sample, sample.value.resolution, m_video.data))
+    {
+        if (!m_video.texture)
+        {
+            m_video.texture = q::video::Texture::create(q::Path("video/texture"));
+        }
+        if (m_video.texture->get_size() != sample.value.resolution)
+        {
+            if (!m_video.texture->allocate(q::video::Texture::Format::RGBA_8, sample.value.resolution))
+            {
+                return;
+            }
+        }
+
+        m_video.texture->upload_data(0, m_video.data.data());
+    }
+}
 
 
 void Multi_HUD_Widget::process_vertical_thrust_rate()
@@ -332,6 +370,10 @@ void Multi_HUD_Widget::render()
     q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
+
+    render_video();
+
+
     util::coordinates::LLA lla;
     lla.latitude = 0.59341195;
     lla.longitude = -2.0478571;
@@ -364,6 +406,30 @@ void Multi_HUD_Widget::render()
 
     m_render_widget->end_rendering();
     m_render_widget->update();
+}
+
+void Multi_HUD_Widget::render_video()
+{
+    if (!m_video.texture)
+    {
+        return;
+    }
+
+    auto mat = m_context.materials.textured_2d;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::SOLID);
+    auto sampler = mat.get_sampler(0, 0);
+    sampler.set_texture(m_video.texture);
+    mat.set_sampler(0, 0, sampler);
+    m_context.painter.set_material(mat);
+
+//    float ar = float(width()) / height();
+//    math::vec2f uv0, uv1;
+//    uv1.y =
+
+    m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(0, 0), math::vec2f(0, 0)), q::draw::Vertex(math::vec2f(width(), height()), math::vec2f(1, 1)));
 }
 
 void Multi_HUD_Widget::render_ground()

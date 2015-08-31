@@ -4,6 +4,7 @@
 #include "HAL.h"
 #include "Comms.h"
 #include "IHUD_Widget.h"
+#include "Video_Decoder.h"
 
 class Multi_HUD_Widget : public IHUD_Widget
 {
@@ -29,6 +30,18 @@ private:
     Render_Widget* m_render_widget = nullptr;
 
     boost::optional<math::vec3d> m_ecef_home;
+
+    struct Video
+    {
+        silk::stream::gs::Video_wptr stream;
+        Video_Decoder decoder;
+        q::video::Texture_ptr texture;
+        q::util::Connection connection;
+        std::vector<uint8_t> data;
+    } m_video;
+
+    void video_samples_available(silk::stream::gs::Video::Samples const& samples);
+
 
     void process_vertical_thrust_rate();
     void process_vertical_thrust_offset();
@@ -57,5 +70,6 @@ private:
     void render();
     void render_ground();
     void render_hud();
+    void render_video();
 };
 
