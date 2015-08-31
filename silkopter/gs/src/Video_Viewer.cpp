@@ -24,7 +24,7 @@ void Video_Viewer::add_sample(silk::stream::gs::Video::Sample const& sample)
         img_w = img_h * ar;
     }
 
-    if (m_decoder.decode_frame(sample, math::vec2u32(img_w, img_h), m_data))
+    if (m_decoder.decode_frame(sample, math::vec2u32(img_w, img_h), m_data, Video_Decoder::Format::BGRA))
     {
         m_image = QImage(m_data.data(), img_w, img_h, QImage::Format_ARGB32_Premultiplied);
         m_image_flipped = m_image;//.mirrored(false, false);

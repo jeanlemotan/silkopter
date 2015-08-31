@@ -19,7 +19,13 @@ public:
     Video_Decoder();
     virtual ~Video_Decoder();
 
-    auto decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& rgb_data) -> bool;
+    enum class Format
+    {
+        RGBA,
+        BGRA
+    };
+
+    auto decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& out_data, Format format) -> bool;
 
 private:
     static bool s_codecs_registered;

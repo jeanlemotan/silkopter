@@ -99,7 +99,7 @@ Video_Decoder::~Video_Decoder()
 }
 
 
-auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& rgb_data) -> bool
+auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& data, Format format) -> bool
 {
     AVPacket packet;
     av_init_packet(&packet);
@@ -125,7 +125,7 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, m
                                                     frame_w, frame_h,
                                                     m_ffmpeg.context->pix_fmt,
                                                     size.x, size.y,
-                                                    PIX_FMT_RGB32,
+                                                    format == Format::BGRA ? PIX_FMT_RGB32 : PIX_FMT_BGR32, //inverted for some reason
                                                     SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
         if (m_ffmpeg.sws_context)
@@ -134,10 +134,10 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, m
             if (line_size != m_ffmpeg.rgb->linesize[0])
             {
                 m_ffmpeg.rgb->linesize[0] = line_size;
-                rgb_data.resize(line_size * size.y);
+                data.resize(line_size * size.y);
 //                delete[] m_ffmpeg.rgb->data[0];
 //                m_ffmpeg.rgb->data[0] = new uint8_t[(m_ffmpeg.rgb->linesize[0] + 1) * (img_h + 1)];
-                m_ffmpeg.rgb->data[0] = rgb_data.data();
+                m_ffmpeg.rgb->data[0] = data.data();
             }
 
             sws_scale(m_ffmpeg.sws_context,
