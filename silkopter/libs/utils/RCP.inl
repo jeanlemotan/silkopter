@@ -767,6 +767,7 @@ inline auto RCP::compute_next_transit_datagram() -> bool
 
         auto now = q::Clock::now();
 
+        //clean up the queue, front only
         while (!queue.empty())
         {
             auto& datagram = queue.front();
@@ -784,8 +785,12 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                 break;
             }
         }
-        for (auto& d: queue)
+
+        //now go through the queue and see what we can pack together and send
+        size_t size = queue.size(); //store the size as it will change due to reinserting datagrams at the end.
+        for (size_t i = 0; i < size; i++)
         {
+            auto& d = queue[i];
             if (d &&
                 now - d->sent_tp >= MIN_RESEND_DURATION &&
                 (d->params.cancel_after.count() == 0 || now - d->added_tp < d->params.cancel_after) &&
@@ -795,7 +800,9 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                 auto datagram = std::move(d);
                 datagram->sent_tp = now;
 
-                d.reset(); //erase as the order changed due to the sent_count increase
+                //park it as null, as the order changed due to the sent_count increase
+                //it will be erased some time later
+                d.reset();
 
                 datagram->sent_count++;
 
@@ -807,7 +814,8 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                 {
                     queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), std::move(datagram));
                 }
-                break;
+
+                break; //commenting this results in lots of wrong crc's at the other end
             }
         }
     }
@@ -964,18 +972,24 @@ inline void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
     uint8_t* start_ptr = data_ptr;
     uint8_t const* end_ptr = start_ptr + data_size;
     QASSERT(start_ptr);
-    while (start_ptr + sizeof(Header) < end_ptr)
+    while (start_ptr + sizeof(Header) <= end_ptr)
     {
-        size_t h_size = get_header_size(start_ptr, end_ptr - start_ptr);
+        size_t available_size = size_t(end_ptr - start_ptr);
+        size_t h_size = get_header_size(start_ptr, available_size);
         if (h_size == 0)
         {
             QLOGW("Unknown header.");
             return;
         }
+        if (h_size > available_size)
+        {
+            QLOGW("Not enough data for header: {} / {}.", h_size, available_size);
+            return;
+        }
 
         auto& header = get_header<Header>(start_ptr);
         size_t size = header.size;
-        if (size > size_t(end_ptr - start_ptr))
+        if (size < h_size || size > available_size)
         {
             QLOGW("Wrong size in the header: {} out of max {} bytes.", size, end_ptr - start_ptr);
             return;
