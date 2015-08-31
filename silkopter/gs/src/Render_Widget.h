@@ -12,7 +12,7 @@ struct Render_Context
     {
         q::video::Material primitive_2d;
         q::video::Material primitive;
-        q::video::Material textured;
+        q::video::Material textured_2d;
         q::video::Material font;
     } materials;
 };

@@ -99,7 +99,7 @@ Video_Decoder::~Video_Decoder()
 }
 
 
-auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, std::vector<uint8_t>& rgb_data) -> bool
+auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& rgb_data) -> bool
 {
     AVPacket packet;
     av_init_packet(&packet);
@@ -121,29 +121,20 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, s
         int frame_w = m_ffmpeg.frame_yuv->width;
         int frame_h = m_ffmpeg.frame_yuv->height;
 
-        float ar = (float)frame_w / frame_h;
-        int img_w = math::max(16, width());
-        int img_h = img_w / ar;
-        if (img_h > height())
-        {
-            img_h = height();
-            img_w = img_h * ar;
-        }
-
         m_ffmpeg.sws_context = sws_getCachedContext(m_ffmpeg.sws_context,
                                                     frame_w, frame_h,
                                                     m_ffmpeg.context->pix_fmt,
-                                                    img_w, img_h,
+                                                    size.x, size.y,
                                                     PIX_FMT_RGB32,
                                                     SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
         if (m_ffmpeg.sws_context)
         {
-            if (img_w * 4 != m_ffmpeg.rgb->linesize[0])
+            auto line_size = size.x * 4;
+            if (line_size != m_ffmpeg.rgb->linesize[0])
             {
-                m_ffmpeg.rgb->linesize[0] = img_w * 4;
-                auto line_size = m_ffmpeg.rgb->linesize[0];
-                rgb_data.resize(line_size * img_h);
+                m_ffmpeg.rgb->linesize[0] = line_size;
+                rgb_data.resize(line_size * size.y);
 //                delete[] m_ffmpeg.rgb->data[0];
 //                m_ffmpeg.rgb->data[0] = new uint8_t[(m_ffmpeg.rgb->linesize[0] + 1) * (img_h + 1)];
                 m_ffmpeg.rgb->data[0] = rgb_data.data();

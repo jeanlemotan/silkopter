@@ -13,13 +13,13 @@ struct AVPicture;
 }
 
 
-class Video_Decoder : public QWidget
+class Video_Decoder : q::util::Noncopyable
 {
 public:
     Video_Decoder();
     virtual ~Video_Decoder();
 
-    auto decode_frame(silk::stream::gs::Video::Sample const& frame, std::vector<uint8_t>& rgb_data) -> bool;
+    auto decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& rgb_data) -> bool;
 
 private:
     static bool s_codecs_registered;

@@ -511,10 +511,12 @@ w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerbb7c1
 
 namespace sz { namespace PCA9685 { struct PWM_Channel {
  bool servo_signal;
-float min;
-float max;
+float min_servo;
+float max_servo;
+float min_pwm;
+float max_pwm;
 
-explicit PWM_Channel():servo_signal(false), min(0), max(1) {  }
+explicit PWM_Channel():servo_signal(false), min_servo(1), max_servo(2), min_pwm(0), max_pwm(1) {  }
 
 
  
@@ -533,8 +535,9 @@ private:
 
     SAXEventHandler< bool > handler_0;
 SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;bool has_min;
-bool has_max;
+SAXEventHandler< float > handler_2;
+SAXEventHandler< float > handler_3;
+SAXEventHandler< float > handler_4;
 
     bool check_depth(const char* type)
     {
@@ -551,9 +554,13 @@ bool has_max;
             case 0:
     return "servo_signal";
 case 1:
-    return "min";
+    return "min_servo";
 case 2:
-    return "max";
+    return "max_servo";
+case 3:
+    return "min_pwm";
+case 4:
+    return "max_pwm";
         default:
             break;
         }
@@ -581,8 +588,10 @@ case 2:
     void reset_flags()
     {
         
-has_min = false;
-has_max = false;
+
+
+
+
     }
 
 public:
@@ -590,8 +599,10 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->servo_signal)
-, handler_1(&obj->min)
-, handler_2(&obj->max)
+, handler_1(&obj->min_servo)
+, handler_2(&obj->max_servo)
+, handler_3(&obj->min_pwm)
+, handler_4(&obj->max_pwm)
     {
         reset_flags();
     }
@@ -611,6 +622,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
 
         default:
             break;
@@ -634,6 +651,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
         default:
             break;
         }
@@ -655,6 +678,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
 
         default:
             break;
@@ -678,6 +707,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
         default:
             break;
         }
@@ -699,6 +734,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
 
         default:
             break;
@@ -722,6 +763,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
         default:
             break;
         }
@@ -743,6 +790,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
 
         default:
             break;
@@ -766,6 +819,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
         default:
             break;
         }
@@ -782,10 +841,14 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12))
 						 { state=0;  }
-else if (utility::string_equal(str, length, "\x4d\x69\x6e", 3))
-						 { state=1; has_min = true; }
-else if (utility::string_equal(str, length, "\x4d\x61\x78", 3))
-						 { state=2; has_max = true; }
+else if (utility::string_equal(str, length, "\x4d\x69\x6e\x20\x53\x65\x72\x76\x6f\x20\x28\x6d\x73\x29", 14))
+						 { state=1;  }
+else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x53\x65\x72\x76\x6f\x20\x28\x6d\x73\x29", 14))
+						 { state=2;  }
+else if (utility::string_equal(str, length, "\x4d\x69\x6e\x20\x50\x57\x4d", 7))
+						 { state=3;  }
+else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x50\x57\x4d", 7))
+						 { state=4;  }
             else {
                 state = -1;
                 return true;
@@ -802,6 +865,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
 
             default:
                 break;
@@ -826,6 +895,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
         default:
             break;
         }
@@ -848,6 +923,12 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
         default:
             break;
         }
@@ -869,6 +950,12 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
+
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
 
             default:
                 break;
@@ -893,12 +980,17 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
 
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_min) set_missing_required("min");
-if (!has_max) set_missing_required("max");
+            
         }
         return the_error.empty();
     }
@@ -923,6 +1015,10 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
 
         default:
             break;
@@ -940,6 +1036,8 @@ case 2:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
 
     }
 };
@@ -952,10 +1050,12 @@ struct Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db
         w.StartObject();
 
         w.Key("\x53\x65\x72\x76\x6f\x20\x53\x69\x67\x6e\x61\x6c", 12, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, bool >()(w, value.servo_signal);
-w.Key("\x4d\x69\x6e", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min);
-w.Key("\x4d\x61\x78", 3, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.max);
+w.Key("\x4d\x69\x6e\x20\x53\x65\x72\x76\x6f\x20\x28\x6d\x73\x29", 14, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min_servo);
+w.Key("\x4d\x61\x78\x20\x53\x65\x72\x76\x6f\x20\x28\x6d\x73\x29", 14, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.max_servo);
+w.Key("\x4d\x69\x6e\x20\x50\x57\x4d", 7, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.min_pwm);
+w.Key("\x4d\x61\x78\x20\x50\x57\x4d", 7, false); Serializer< Writer601111eadf11165f127ec047ead24eca14d4adb1d811f80872a79db2b46e225f, float >()(w, value.max_pwm);
 
-        w.EndObject(3);
+        w.EndObject(5);
     }
 
 };
@@ -1039,7 +1139,22 @@ SAXEventHandler< sz::PCA9685::PWM_Channel > handler_11;
 SAXEventHandler< sz::PCA9685::PWM_Channel > handler_12;
 SAXEventHandler< sz::PCA9685::PWM_Channel > handler_13;
 SAXEventHandler< sz::PCA9685::PWM_Channel > handler_14;
-SAXEventHandler< sz::PCA9685::PWM_Channel > handler_15;
+SAXEventHandler< sz::PCA9685::PWM_Channel > handler_15;bool has_channel_1;
+bool has_channel_2;
+bool has_channel_3;
+bool has_channel_4;
+bool has_channel_5;
+bool has_channel_6;
+bool has_channel_7;
+bool has_channel_8;
+bool has_channel_9;
+bool has_channel_10;
+bool has_channel_11;
+bool has_channel_12;
+bool has_channel_13;
+bool has_channel_14;
+bool has_channel_15;
+bool has_channel_16;
 
     bool check_depth(const char* type)
     {
@@ -1111,22 +1226,22 @@ case 15:
 
     void reset_flags()
     {
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        has_channel_1 = false;
+has_channel_2 = false;
+has_channel_3 = false;
+has_channel_4 = false;
+has_channel_5 = false;
+has_channel_6 = false;
+has_channel_7 = false;
+has_channel_8 = false;
+has_channel_9 = false;
+has_channel_10 = false;
+has_channel_11 = false;
+has_channel_12 = false;
+has_channel_13 = false;
+has_channel_14 = false;
+has_channel_15 = false;
+has_channel_16 = false;
     }
 
 public:
@@ -1650,37 +1765,37 @@ case 15:
             if (0) {
             }
             else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31", 9))
-						 { state=0;  }
+						 { state=0; has_channel_1 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x32", 9))
-						 { state=1;  }
+						 { state=1; has_channel_2 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x33", 9))
-						 { state=2;  }
+						 { state=2; has_channel_3 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x34", 9))
-						 { state=3;  }
+						 { state=3; has_channel_4 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x35", 9))
-						 { state=4;  }
+						 { state=4; has_channel_5 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x36", 9))
-						 { state=5;  }
+						 { state=5; has_channel_6 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x37", 9))
-						 { state=6;  }
+						 { state=6; has_channel_7 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x38", 9))
-						 { state=7;  }
+						 { state=7; has_channel_8 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x39", 9))
-						 { state=8;  }
+						 { state=8; has_channel_9 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x30", 10))
-						 { state=9;  }
+						 { state=9; has_channel_10 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x31", 10))
-						 { state=10;  }
+						 { state=10; has_channel_11 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x32", 10))
-						 { state=11;  }
+						 { state=11; has_channel_12 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x33", 10))
-						 { state=12;  }
+						 { state=12; has_channel_13 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x34", 10))
-						 { state=13;  }
+						 { state=13; has_channel_14 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x35", 10))
-						 { state=14;  }
+						 { state=14; has_channel_15 = true; }
 else if (utility::string_equal(str, length, "\x43\x68\x61\x6e\x6e\x65\x6c\x20\x31\x36", 10))
-						 { state=15;  }
+						 { state=15; has_channel_16 = true; }
             else {
                 state = -1;
                 return true;
@@ -1987,7 +2102,22 @@ case 15:
                 break;
             }
         } else {
-            
+            if (!has_channel_1) set_missing_required("channel_1");
+if (!has_channel_2) set_missing_required("channel_2");
+if (!has_channel_3) set_missing_required("channel_3");
+if (!has_channel_4) set_missing_required("channel_4");
+if (!has_channel_5) set_missing_required("channel_5");
+if (!has_channel_6) set_missing_required("channel_6");
+if (!has_channel_7) set_missing_required("channel_7");
+if (!has_channel_8) set_missing_required("channel_8");
+if (!has_channel_9) set_missing_required("channel_9");
+if (!has_channel_10) set_missing_required("channel_10");
+if (!has_channel_11) set_missing_required("channel_11");
+if (!has_channel_12) set_missing_required("channel_12");
+if (!has_channel_13) set_missing_required("channel_13");
+if (!has_channel_14) set_missing_required("channel_14");
+if (!has_channel_15) set_missing_required("channel_15");
+if (!has_channel_16) set_missing_required("channel_16");
         }
         return the_error.empty();
     }

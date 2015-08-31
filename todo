@@ -44,7 +44,7 @@
 
 * motor mixer specialized configurator
 
-- check why servo input of 1 stops the motors
+* check why servo input of 1 stops the motors
 - HUD: added altitude and proximity readings 
 - Brain & HUD: compute the ground proximity from the proximity values, show them on the hud
 - add autolanding
