@@ -146,9 +146,10 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.is_compressed = true;
-        params.is_reliable = false;
+        params.is_compressed = false;
+        params.is_reliable = true;
         params.importance = 100;
+        params.cancel_after = std::chrono::milliseconds(50);
         m_rcp->set_send_params(PILOT_CHANNEL, params);
     }
 

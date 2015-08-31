@@ -107,7 +107,7 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::seconds(200);
+        params.max_receive_time = std::chrono::milliseconds(200);
         m_rcp->set_receive_params(PILOT_CHANNEL, params);
     }
 
