@@ -58,12 +58,11 @@ public:
     {
         m_tp += m_dt;
 
-        auto future = q::Clock::now() + std::chrono::milliseconds(10);
+        auto future = q::Clock::now() + m_dt * 5;
         if (m_tp > future && !m_future_warning)
         {
             m_future_warning = true;
             QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
-            m_tp = q::Clock::now();
         }
 
         m_last_sample.value = value;
