@@ -134,7 +134,8 @@ SOURCES += \
     ../../src/processor/KF_ECEF.cpp \
     ../../src/bus/SPI_RPI.cpp \
     ../../src/hw/bcm2835.c \
-    ../../src/bus/I2C_RPI.cpp
+    ../../src/bus/I2C_RPI.cpp \
+    ../../src/processor/Proximity.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -274,7 +275,8 @@ HEADERS += \
     ../../src/processor/KF_ECEF.h \
     ../../src/bus/SPI_RPI.h \
     ../../src/hw/bcm2835.h \
-    ../../src/bus/I2C_RPI.h
+    ../../src/bus/I2C_RPI.h \
+    ../../src/processor/Proximity.h
 
 DISTFILES +=
 

@@ -333,7 +333,7 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     else if (buses.spi)
     {
         max_size = math::min<size_t>(max_size, MAX_PAYLOAD_SIZE + 6);
-        std::fill(data, data + max_size, 0);
+        std::fill(data, data + max_size, 0xFF);
         return buses.spi->read(data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
