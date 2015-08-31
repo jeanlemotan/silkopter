@@ -35,6 +35,7 @@
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
 #include "processor/Throttle_To_PWM.h"
+#include "processor/Proximity.h"
 
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
@@ -496,6 +497,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
     m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);
+    m_node_factory.register_node<Proximity>("Proximity", *this);
 
     m_node_factory.register_node<Oscillator>("Oscillator", *this);
 
@@ -601,7 +603,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IECEF_Velocity>>("Velocity RS (ECEF)", *this);
     m_node_factory.register_node<Resampler<stream::IMulti_Input>>("Multi Input", *this);
     m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
-    m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity", *this);
+    m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity RS", *this);
     m_node_factory.register_node<Resampler<stream::IGPS_Info>>("GPS Info RS", *this);
 
 //    m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
