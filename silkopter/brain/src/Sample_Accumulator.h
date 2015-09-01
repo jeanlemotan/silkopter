@@ -217,7 +217,7 @@ public:
     {
         m_storage.unlock();
     }
-    auto process(std::function<void(size_t idx, typename Streams::Sample const&...)> const& func) -> bool
+    auto process(std::function<void(typename Streams::Sample const&...)> const& func) -> bool
     {
         if (!m_storage.lock())
         {
@@ -230,8 +230,7 @@ public:
         for (size_t i = 0; i < count; i++)
         {
             auto params = m_storage.get_params(i);
-            auto i_params = std::tuple_cat(std::make_tuple(i), params);
-            detail::call(func, i_params);
+            detail::call(func, params);
         }
 
         m_storage.consume(count);

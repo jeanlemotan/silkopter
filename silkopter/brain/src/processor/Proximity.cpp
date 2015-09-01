@@ -81,9 +81,7 @@ void Proximity::process()
 
     for (size_t i = 0; i < m_init_params->channels; i++)
     {
-        m_accumulators[i].process([this, i](
-                              size_t,
-                              stream::IDistance::Sample const& i_sample)
+        m_accumulators[i].process([this, i](stream::IDistance::Sample const& i_sample)
         {
             m_last_input_samples[i] = i_sample;
         });

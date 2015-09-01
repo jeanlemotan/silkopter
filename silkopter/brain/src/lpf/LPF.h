@@ -183,9 +183,7 @@ void LPF<Stream_t>::process()
         return;
     }
 
-    m_accumulator.process([this](
-                          size_t,
-                          typename Stream_t::Sample const& i_sample)
+    m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
     {
         auto value = i_sample.value;
         m_dsp.process(value);

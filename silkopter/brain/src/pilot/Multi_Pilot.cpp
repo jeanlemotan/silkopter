@@ -97,9 +97,7 @@ void Multi_Pilot::process()
 
 
     //write back the state
-    m_accumulator.process([this](
-                          size_t idx,
-                          stream::IMulti_State::Sample const& i_state)
+    m_accumulator.process([this](stream::IMulti_State::Sample const& i_state)
     {
         m_comms.add_multi_state_sample(i_state);
     });

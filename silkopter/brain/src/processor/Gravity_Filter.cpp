@@ -69,10 +69,8 @@ void Gravity_Filter::process()
 
     m_output_stream->clear();
 
-    m_accumulator.process([this](
-                          size_t,
-                          stream::IFrame::Sample const& f_sample,
-                          stream::IAcceleration::Sample const& a_sample)
+    m_accumulator.process([this](stream::IFrame::Sample const& f_sample,
+                                stream::IAcceleration::Sample const& a_sample)
     {
         auto p2l = math::inverse<float, math::safe>(f_sample.value);
         auto gravity_local = math::rotate(p2l, physics::constants::world_gravity);

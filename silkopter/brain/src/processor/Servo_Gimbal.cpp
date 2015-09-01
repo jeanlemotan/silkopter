@@ -82,9 +82,7 @@ void Servo_Gimbal::process()
     m_y_output_stream->clear();
     m_z_output_stream->clear();
 
-    m_accumulator.process([this](
-                          size_t idx,
-                          stream::IFrame::Sample const& i_sample)
+    m_accumulator.process([this](stream::IFrame::Sample const& i_sample)
     {
         auto rotation = i_sample.value;
 

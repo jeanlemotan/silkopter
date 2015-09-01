@@ -86,7 +86,7 @@ void LiPo_Battery::process()
 
     float current_factor = (std::chrono::duration<float>(m_output_stream->get_dt()).count() / 3600.f);
 
-    m_accumulator.process([this, current_factor](size_t idx, stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
+    m_accumulator.process([this, current_factor](stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
     {
         Output_Stream::Value value = m_output_stream->get_last_sample().value;
 

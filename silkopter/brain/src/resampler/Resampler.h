@@ -247,9 +247,7 @@ void Resampler<Stream_t>::process()
 
     if (m_init_params.rate <= m_init_params.input_rate)
     {
-        m_accumulator.process([this](
-                              size_t,
-                              typename Stream_t::Sample const& i_sample)
+        m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
         {
             m_input_samples.push_back(i_sample);
             m_dsp.process(m_input_samples.back().value);
@@ -258,9 +256,7 @@ void Resampler<Stream_t>::process()
     }
     else
     {
-        m_accumulator.process([this](
-                              size_t,
-                              typename Stream_t::Sample const& i_sample)
+        m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
         {
             m_input_samples.push_back(i_sample);
         });

@@ -72,11 +72,9 @@ void Comp_AHRS::process()
 
     auto dts = std::chrono::duration<float>(m_output_stream->get_dt()).count();
 
-    m_accumulator.process([this, dts](
-                          size_t,
-                          stream::IAngular_Velocity::Sample const& av_sample,
-                          stream::IAcceleration::Sample const& a_sample,
-                          stream::IMagnetic_Field::Sample const& m_sample)
+    m_accumulator.process([this, dts](stream::IAngular_Velocity::Sample const& av_sample,
+                                      stream::IAcceleration::Sample const& a_sample,
+                                      stream::IMagnetic_Field::Sample const& m_sample)
     {
         float av_length = 0;
 

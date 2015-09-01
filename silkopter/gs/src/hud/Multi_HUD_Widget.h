@@ -29,8 +29,6 @@ private:
 
     Render_Widget* m_render_widget = nullptr;
 
-    boost::optional<math::vec3d> m_ecef_home;
-
     struct Video
     {
         Video_Decoder decoder;
@@ -40,6 +38,7 @@ private:
     } m_video;
 
     void decode_video(silk::stream::gs::Video::Value const& frame);
+    void upload_video_frame();
 
 
     void process_vertical_thrust_rate();

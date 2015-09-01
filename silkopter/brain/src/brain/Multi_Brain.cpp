@@ -361,9 +361,7 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_input_accumulator.process([this](
-                          size_t,
-                          stream::IMulti_Input::Sample const& i_input)
+    m_input_accumulator.process([this](stream::IMulti_Input::Sample const& i_input)
     {
         if (i_input.is_healthy)
         {
@@ -373,20 +371,16 @@ void Multi_Brain::process()
         }
     });
 
-    m_video_accumulator.process([this](
-                          size_t,
-                          stream::IVideo::Sample const& i_video)
+    m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
     {
         m_last_video_sample = i_video;
     });
 
-    m_sensor_accumulator.process([this](
-                          size_t,
-                          stream::IFrame::Sample const& i_frame,
-                          stream::IECEF_Position::Sample const& i_position,
-                          stream::IECEF_Velocity::Sample const& i_velocity,
-                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-                          stream::IProximity::Sample const& i_proximity)
+    m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
+                                      stream::IECEF_Position::Sample const& i_position,
+                                      stream::IECEF_Velocity::Sample const& i_velocity,
+                                      stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
+                                      stream::IProximity::Sample const& i_proximity)
     {
         refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
         process_state();
@@ -402,24 +396,43 @@ void Multi_Brain::process()
         state.ecef_position = m_inputs.position.value;
         state.ecef_home_position = m_home.ecef_position;
         state.frame = m_inputs.frame.value;
-        state.last_input = m_inputs.input.value;
+        state.input = m_inputs.input.value;
         state.proximity = m_inputs.proximity.value;
 
-        state.video = std::move(m_last_video_sample.value);
-        m_last_video_sample.is_healthy = false;
+        //state.video = std::move(m_last_video_sample.value);
+        state.video = m_last_video_sample.value;
+        //m_last_video_sample.is_healthy = false;
 
         for (size_t i = 0; i < samples_needed; i++)
         {
             m_state_output_stream->push_sample(state, true);
-
-            state.video = stream::IVideo::Value();
+            //state.video = stream::IVideo::Value();
         }
     }
 }
 
 void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_sensor_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+//    { stream::IMulti_Input::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
+//    { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
+//    { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
+//    { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
+//    { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
+//    { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
+//    { stream::IVideo::TYPE,            m_init_params->state_rate, "Video", m_video_accumulator.get_stream_path(0) },
+
+    if (idx == 0)
+    {
+        m_input_accumulator.set_stream_path(0, path, m_init_params->input_rate, m_hal);
+    }
+    else if (idx >= 1 && idx <= 5)
+    {
+        m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_hal);
+    }
+    else
+    {
+        m_video_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_hal);
+    }
 }
 
 auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool

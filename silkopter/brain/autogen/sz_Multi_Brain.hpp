@@ -301,7 +301,7 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=0; has_rate = true; }
-else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
+else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
 						 { state=1; has_input_rate = true; }
 else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
 						 { state=2; has_state_rate = true; }
@@ -472,7 +472,7 @@ struct Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff419
         w.StartObject();
 
         w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.rate);
-w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.input_rate);
+w.Key("\x49\x6e\x70\x75\x74\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.input_rate);
 w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.state_rate);
 
         w.EndObject(3);

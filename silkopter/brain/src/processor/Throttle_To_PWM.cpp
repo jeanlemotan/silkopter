@@ -84,9 +84,7 @@ void Throttle_To_PWM::process()
     {
         m_output_streams[i]->clear();
 
-        m_accumulators[i].process([this, i](
-                              size_t,
-                              stream::IThrottle::Sample const& i_sample)
+        m_accumulators[i].process([this, i](stream::IThrottle::Sample const& i_sample)
         {
             m_output_streams[i]->push_sample(i_sample.value, i_sample.is_healthy);
         });

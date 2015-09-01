@@ -209,12 +209,10 @@ void KF_ECEF::process()
     m_velocity_output_stream->clear();
     m_linear_acceleration_output_stream->clear();
 
-    m_accumulator.process([this](
-                          size_t,
-                          stream::IECEF_Position::Sample const& pos_sample,
-                          stream::IECEF_Velocity::Sample const& vel_sample,
-                          stream::IENU_Linear_Acceleration::Sample const& la_sample,
-                          stream::IPressure::Sample const& p_sample)
+    m_accumulator.process([this](stream::IECEF_Position::Sample const& pos_sample,
+                                  stream::IECEF_Velocity::Sample const& vel_sample,
+                                  stream::IENU_Linear_Acceleration::Sample const& la_sample,
+                                  stream::IPressure::Sample const& p_sample)
     {
         if (pos_sample.is_healthy && vel_sample.is_healthy)
         {

@@ -11,24 +11,24 @@
         "Throttle Generator": {
             "hal_editor": {
                 "position": {
-                    "x": -513.0,
-                    "y": -669.0
+                    "x": -493.0,
+                    "y": -671.0
                 }
             }
         },
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -866.0,
-                    "y": -724.0
+                    "x": -886.0,
+                    "y": -690.0
                 }
             }
         },
         "Multi Pilot": {
             "hal_editor": {
                 "position": {
-                    "x": -643.0,
-                    "y": -502.0
+                    "x": -860.0,
+                    "y": -454.0
                 }
             }
         },
@@ -107,16 +107,16 @@
         "Motor Mixer": {
             "hal_editor": {
                 "position": {
-                    "x": -541.0,
-                    "y": -572.0
+                    "x": -540.0,
+                    "y": -571.0
                 }
             }
         },
         "Rate Controller": {
             "hal_editor": {
                 "position": {
-                    "x": -635.0,
-                    "y": -805.0
+                    "x": -637.0,
+                    "y": -806.0
                 }
             }
         },
@@ -179,8 +179,8 @@
         "Raspicam": {
             "hal_editor": {
                 "position": {
-                    "x": -1182.0,
-                    "y": -488.0
+                    "x": -1066.0,
+                    "y": -484.0
                 }
             }
         },

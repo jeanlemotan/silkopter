@@ -7,6 +7,7 @@ struct Render_Context
     q::scene::Camera camera;
     q::scene::Scene scene;
     q::draw::Painter painter;
+    q::text::Texter texter;
     q::text::Font_ptr font;
     struct Materials
     {

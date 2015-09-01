@@ -82,12 +82,10 @@ void Comp_ECEF::process()
 
     float dts = std::chrono::duration<float>(m_position_output_stream->get_dt()).count();
 
-    m_accumulator.process([this, dts](
-                          size_t,
-                          stream::IECEF_Position::Sample const& pos_sample,
-                          stream::IECEF_Velocity::Sample const& vel_sample,
-                          stream::IENU_Linear_Acceleration::Sample const& la_sample,
-                          stream::IPressure::Sample const& p_sample)
+    m_accumulator.process([this, dts](stream::IECEF_Position::Sample const& pos_sample,
+                                      stream::IECEF_Velocity::Sample const& vel_sample,
+                                      stream::IENU_Linear_Acceleration::Sample const& la_sample,
+                                      stream::IPressure::Sample const& p_sample)
     {
         auto last_pos_sample = m_position_output_stream->get_last_sample();
 

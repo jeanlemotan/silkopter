@@ -77,10 +77,8 @@ void Rate_Controller::process()
         return;
     }
 
-    m_accumulator.process([this, &multi_config](
-                          size_t idx,
-                          stream::IAngular_Velocity::Sample const& i_sample,
-                          stream::IAngular_Velocity::Sample const& t_sample)
+    m_accumulator.process([this, &multi_config](stream::IAngular_Velocity::Sample const& i_sample,
+                                                stream::IAngular_Velocity::Sample const& t_sample)
     {
         math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
         math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);

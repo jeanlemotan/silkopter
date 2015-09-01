@@ -68,9 +68,7 @@ void ADC_Voltmeter::process()
 
     m_output_stream->clear();
 
-    m_accumulator.process([this](
-                          size_t idx,
-                          stream::IADC::Sample const& i_sample)
+    m_accumulator.process([this](stream::IADC::Sample const& i_sample)
     {
         m_output_stream->push_sample(i_sample.value, i_sample.is_healthy);
     });
