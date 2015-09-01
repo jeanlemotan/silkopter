@@ -125,10 +125,8 @@ void Motor_Mixer::process()
 //        os->samples.resize(count);
 //    }
 
-    m_accumulator.process([this, &multi_config](
-                          size_t idx,
-                          stream::ITorque::Sample const& t_sample,
-                          stream::IForce::Sample const& f_sample)
+    m_accumulator.process([this, &multi_config](stream::ITorque::Sample const& t_sample,
+                                                stream::IForce::Sample const& f_sample)
     {
         compute_throttles(*multi_config, f_sample.value, t_sample.value);
 
@@ -153,11 +151,11 @@ static float compute_throttle_from_thrust(float max_thrust, float thrust)
     auto throttle = math::sqrt<float, math::safe>(ratio);
     return throttle;
 }
-//static float compute_thrust_from_throttle(float max_thrust, float throttle)
-//{
-//    auto thrust = math::square(throttle * max_thrust);
-//    return thrust;
-//}
+static float compute_thrust_from_throttle(float max_thrust, float throttle)
+{
+    auto thrust = math::square(throttle * max_thrust);
+    return thrust;
+}
 
 constexpr float MIN_THRUST = 0.f;
 constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
@@ -186,17 +184,17 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
     float min_thrust = MIN_THRUST;
     float max_thrust = MIN_THRUST;
     float target_thrust = math::dot(collective_thrust, THRUST_VECTOR);
-    if (target_thrust >= 0)
+    if (target_thrust >= 0.01f)
     {
-        auto th = math::clamp(target_thrust / float(m_outputs.size()), MIN_THRUST, multi_config.motor_thrust);
+        auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->armed_thrust, multi_config.motor_thrust);
         for (auto& out: m_outputs)
         {
             out->thrust = th; //take into account only motors that produce useful thrust
         }
 
-        float dyn_range = math::min(th - MIN_THRUST, multi_config.motor_thrust - th);
+        float dyn_range = math::min(th - m_config->armed_thrust, multi_config.motor_thrust - th);
         dyn_range *= DYN_RANGE_FACTOR;
-        min_thrust = math::max(th - dyn_range, MIN_THRUST);
+        min_thrust = math::max(th - dyn_range, m_config->armed_thrust);
         max_thrust = math::min(th + dyn_range, multi_config.motor_thrust);
     }
 

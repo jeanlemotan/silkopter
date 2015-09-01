@@ -14,7 +14,7 @@
     "name": "Config",
     "members":
     [
-        ["float", "armed_throttle", {"required": true, "json_key" : "Armed Throttle"}]
+        ["float", "armed_thrust", {"required": false, "json_key" : "Armed Thrust"}]
     ]
 }
 ]

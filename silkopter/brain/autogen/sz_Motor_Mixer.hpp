@@ -404,9 +404,9 @@ struct Serializer< Writer0342c3801b8b0238b08f55c3707a04052ce24dc24fadc55ba5c7a57
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Motor_Mixer { struct Config {
- float armed_throttle;
+ float armed_thrust;
 
-explicit Config():armed_throttle() {  }
+explicit Config():armed_thrust() {  }
 
 
  
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< float > handler_0;bool has_armed_throttle;
+    SAXEventHandler< float > handler_0;
 
     bool check_depth(const char* type)
     {
@@ -438,7 +438,7 @@ private:
     {
         switch (state) {
             case 0:
-    return "armed_throttle";
+    return "armed_thrust";
         default:
             break;
         }
@@ -465,14 +465,14 @@ private:
 
     void reset_flags()
     {
-        has_armed_throttle = false;
+        
     }
 
 public:
     explicit SAXEventHandler( ::sz::Motor_Mixer::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->armed_throttle)
+        , handler_0(&obj->armed_thrust)
     {
         reset_flags();
     }
@@ -613,8 +613,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14))
-						 { state=0; has_armed_throttle = true; }
+            else if (utility::string_equal(str, length, "\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x75\x73\x74", 12))
+						 { state=0;  }
             else {
                 state = -1;
                 return true;
@@ -696,7 +696,7 @@ public:
                 break;
             }
         } else {
-            if (!has_armed_throttle) set_missing_required("armed_throttle");
+            
         }
         return the_error.empty();
     }
@@ -743,7 +743,7 @@ struct Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746
     {
         w.StartObject();
 
-        w.Key("\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x6f\x74\x74\x6c\x65", 14, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, float >()(w, value.armed_throttle);
+        w.Key("\x41\x72\x6d\x65\x64\x20\x54\x68\x72\x75\x73\x74", 12, false); Serializer< Writer37a871ef854d2451c3bbb0bf531b0cc4a48046ebf6a7099fe1e3746669cfaf0e, float >()(w, value.armed_thrust);
 
         w.EndObject(1);
     }
