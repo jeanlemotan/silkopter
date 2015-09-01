@@ -23,49 +23,33 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     m_border_text_style.decoration = q::text::Decoration::OUTLINE;
     m_border_text_style.decoration_color = 0x77000000;
     m_border_text_style.decoration_thickness = 1;
-
-
-    //find video stream
-    auto video_streams = m_hal.get_streams().get_all_of_type<silk::stream::gs::Video>();
-    if (!video_streams.empty())
-    {
-        m_video.stream = video_streams[0];
-        auto vs = m_video.stream.lock();
-        m_hal.set_stream_telemetry_active(vs->name, true);
-        m_video.connection = vs->samples_available_signal.connect([this](silk::stream::gs::Video::Samples const& samples)
-        {
-            video_samples_available(samples);
-        });
-    }
 }
 
-void Multi_HUD_Widget::video_samples_available(silk::stream::gs::Video::Samples const& samples)
+void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
 {
-    if (samples.empty())
+    if (frame.data.empty())
     {
         return;
     }
-    auto const& sample = samples.back();
 
-    if (m_video.decoder.decode_frame(sample, sample.value.resolution, m_video.data, Video_Decoder::Format::RGBA))
+    if (m_video.decoder.decode_frame(frame, frame.resolution, m_video.data, Video_Decoder::Format::RGBA))
     {
         if (!m_video.texture)
         {
             m_video.texture = q::video::Texture::create(q::Path("video/texture"));
         }
-        if (m_video.texture->get_size() != sample.value.resolution)
+        if (m_video.texture->get_size() != frame.resolution)
         {
-            if (!m_video.texture->allocate(q::video::Texture::Format::RGBA_8, sample.value.resolution))
+            if (!m_video.texture->allocate(q::video::Texture::Format::RGBA_8, frame.resolution))
             {
                 return;
             }
         }
 
         m_video.texture->upload_data(0, m_video.data.data());
-        m_video.size = sample.value.resolution;
+        m_video.size = frame.resolution;
     }
 }
-
 
 void Multi_HUD_Widget::process_vertical_thrust_rate()
 {
@@ -357,6 +341,7 @@ void Multi_HUD_Widget::process()
     if (!samples.empty())
     {
         m_state = samples.back().value;
+        decode_video(m_state.video);
     }
 
     process_gamepad();

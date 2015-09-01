@@ -13,14 +13,12 @@ using namespace boost::asio;
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
-constexpr uint8_t VIDEO_CHANNEL = 4;
 
 Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_setup_channel(SETUP_CHANNEL)
     , m_pilot_channel(PILOT_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
-    , m_video_channel(VIDEO_CHANNEL)
 {
 }
 
@@ -107,7 +105,7 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(200);
+        params.max_receive_time = std::chrono::milliseconds(300);
         m_rcp->set_receive_params(PILOT_CHANNEL, params);
     }
 
@@ -115,12 +113,6 @@ void Comms::configure_channels()
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::milliseconds(500);
         m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
-    }
-
-    {
-        util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(300);
-        m_rcp->set_receive_params(VIDEO_CHANNEL, params);
     }
 
 }
@@ -810,30 +802,30 @@ void Comms::handle_stream_data()
     }
 }
 
-void Comms::handle_frame_data()
-{
-    std::string stream_name;
-    stream::gs::Video::Sample sample;
-    bool ok = m_video_channel.begin_unpack() &&
-              m_video_channel.unpack_param(stream_name) &&
-              m_video_channel.unpack_param(sample);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack video stream");
-        return;
-    }
-    auto _stream = m_hal.get_streams().find_by_name(stream_name);
-    if (!_stream || _stream->get_type() != stream::gs::Video::TYPE)
-    {
-        QLOGW("Cannot find stream '{}'", stream_name);
-        return;
-    }
-    auto& stream = static_cast<stream::gs::Video&>(*_stream);
+//void Comms::handle_frame_data()
+//{
+//    std::string stream_name;
+//    stream::gs::Video::Sample sample;
+//    bool ok = m_video_channel.begin_unpack() &&
+//              m_video_channel.unpack_param(stream_name) &&
+//              m_video_channel.unpack_param(sample);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack video stream");
+//        return;
+//    }
+//    auto _stream = m_hal.get_streams().find_by_name(stream_name);
+//    if (!_stream || _stream->get_type() != stream::gs::Video::TYPE)
+//    {
+//        QLOGW("Cannot find stream '{}'", stream_name);
+//        return;
+//    }
+//    auto& stream = static_cast<stream::gs::Video&>(*_stream);
 
-    stream.samples.push_back(std::move(sample));
-    stream.samples_available_signal.execute(stream.samples);
-    stream.samples.clear();
- }
+//    stream.samples.push_back(std::move(sample));
+//    stream.samples_available_signal.execute(stream.samples);
+//    stream.samples.clear();
+// }
 
 void Comms::handle_multi_state()
 {
@@ -872,14 +864,6 @@ void Comms::process()
         switch (msg.get())
         {
         case comms::Pilot_Message::MULTI_STATE : handle_multi_state(); break;
-        }
-    }
-
-    while (auto msg = m_video_channel.get_next_message(*m_rcp))
-    {
-        switch (msg.get())
-        {
-        case comms::Video_Message::FRAME_DATA : handle_frame_data(); break;
         }
     }
 

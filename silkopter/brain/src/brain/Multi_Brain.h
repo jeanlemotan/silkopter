@@ -10,6 +10,7 @@
 #include "common/stream/IVelocity.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IProximity.h"
+#include "common/stream/IVideo.h"
 
 #include "common/stream/IMulti_Input.h"
 #include "common/stream/IMulti_State.h"
@@ -64,8 +65,10 @@ private:
     std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Brain::Config> m_config;
 
+    Sample_Accumulator<stream::IMulti_Input> m_input_accumulator;
+    Sample_Accumulator<stream::IVideo> m_video_accumulator;
+
     Sample_Accumulator<
-        stream::IMulti_Input,
         stream::IFrame,
         stream::IECEF_Position,
         stream::IECEF_Velocity,
@@ -74,7 +77,7 @@ private:
 //        stream::IBattery_State,
 //        stream::IECEF_Linear_Acceleration,
 //        stream::IECEF_Velocity,
-        > m_accumulator;
+        > m_sensor_accumulator;
 
     typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
     mutable std::shared_ptr<State_Output_Stream> m_state_output_stream;
@@ -90,7 +93,7 @@ private:
 
     silk::config::Multi m_multi_config;
 
-    struct Sensors
+    struct Inputs
     {
         template<class T> struct Data
         {
@@ -105,13 +108,15 @@ private:
         Data<stream::IECEF_Velocity::Value> velocity;
         Data<stream::IECEF_Linear_Acceleration::Value> linear_acceleration;
         Data<stream::IProximity::Value> proximity;
-    } m_sensors;
-    void refresh_sensors(stream::IMulti_Input::Sample const& input,
-                            stream::IFrame::Sample const& frame,
-                            stream::IECEF_Position::Sample const& position,
-                            stream::IECEF_Velocity::Sample const& velocity,
-                            stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
-                            stream::IProximity::Sample const& proximity);
+    } m_inputs;
+
+    void refresh_inputs(stream::IFrame::Sample const& frame,
+                        stream::IECEF_Position::Sample const& position,
+                        stream::IECEF_Velocity::Sample const& velocity,
+                        stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
+                        stream::IProximity::Sample const& proximity);
+
+    stream::IVideo::Sample m_last_video_sample;
 
     void process_state_mode_idle();
     void process_state_mode_armed();

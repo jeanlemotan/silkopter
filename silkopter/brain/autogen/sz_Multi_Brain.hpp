@@ -29,9 +29,10 @@
 
 namespace sz { namespace Multi_Brain { struct Init_Params {
  uint32_t rate;
+uint32_t input_rate;
 uint32_t state_rate;
 
-explicit Init_Params():rate(100), state_rate(20) {  }
+explicit Init_Params():rate(100), input_rate(20), state_rate(30) {  }
 
 
  
@@ -49,7 +50,9 @@ private:
     int depth;
 
     SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< uint32_t > handler_1;bool has_rate;
+SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< uint32_t > handler_2;bool has_rate;
+bool has_input_rate;
 bool has_state_rate;
 
     bool check_depth(const char* type)
@@ -67,6 +70,8 @@ bool has_state_rate;
             case 0:
     return "rate";
 case 1:
+    return "input_rate";
+case 2:
     return "state_rate";
         default:
             break;
@@ -95,6 +100,7 @@ case 1:
     void reset_flags()
     {
         has_rate = false;
+has_input_rate = false;
 has_state_rate = false;
     }
 
@@ -103,7 +109,8 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
-, handler_1(&obj->state_rate)
+, handler_1(&obj->input_rate)
+, handler_2(&obj->state_rate)
     {
         reset_flags();
     }
@@ -120,6 +127,9 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -140,6 +150,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -158,6 +171,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -178,6 +194,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -196,6 +215,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -216,6 +238,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -234,6 +259,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -254,6 +282,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -271,7 +302,9 @@ case 1:
             else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=0; has_rate = true; }
 else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
-						 { state=1; has_state_rate = true; }
+						 { state=1; has_input_rate = true; }
+else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
+						 { state=2; has_state_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -285,6 +318,9 @@ else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x7
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -306,6 +342,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -325,6 +364,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -343,6 +385,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -364,11 +409,15 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_rate) set_missing_required("rate");
+if (!has_input_rate) set_missing_required("input_rate");
 if (!has_state_rate) set_missing_required("state_rate");
         }
         return the_error.empty();
@@ -392,6 +441,8 @@ if (!has_state_rate) set_missing_required("state_rate");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -408,6 +459,7 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
@@ -420,9 +472,10 @@ struct Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff419
         w.StartObject();
 
         w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.rate);
+w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.input_rate);
 w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.state_rate);
 
-        w.EndObject(2);
+        w.EndObject(3);
     }
 
 };

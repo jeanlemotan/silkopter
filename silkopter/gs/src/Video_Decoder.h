@@ -25,7 +25,7 @@ public:
         BGRA
     };
 
-    auto decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& out_data, Format format) -> bool;
+    auto decode_frame(silk::stream::gs::Video::Value const& frame, math::vec2u32 const& size, std::vector<uint8_t>& out_data, Format format) -> bool;
 
 private:
     static bool s_codecs_registered;

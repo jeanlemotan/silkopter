@@ -99,15 +99,15 @@ Video_Decoder::~Video_Decoder()
 }
 
 
-auto Video_Decoder::decode_frame(silk::stream::gs::Video::Sample const& frame, math::vec2u32 const& size, std::vector<uint8_t>& data, Format format) -> bool
+auto Video_Decoder::decode_frame(silk::stream::gs::Video::Value const& frame, math::vec2u32 const& size, std::vector<uint8_t>& data, Format format) -> bool
 {
     AVPacket packet;
     av_init_packet(&packet);
 
     packet.pts = AV_NOPTS_VALUE;
     packet.dts = AV_NOPTS_VALUE;
-    packet.data = const_cast<uint8_t*>(frame.value.data.data());
-    packet.size = frame.value.data.size();
+    packet.data = const_cast<uint8_t*>(frame.data.data());
+    packet.size = frame.data.size();
 
     int got_frame = 0;
     int len = avcodec_decode_video2(m_ffmpeg.context, m_ffmpeg.frame_yuv, &got_frame, &packet);

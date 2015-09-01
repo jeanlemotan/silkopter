@@ -48,7 +48,6 @@ using namespace boost::asio;
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
-constexpr uint8_t VIDEO_CHANNEL = 4;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
@@ -57,19 +56,16 @@ struct Comms::Channels
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup;
     typedef util::Channel<comms::Pilot_Message, uint16_t> Pilot;
     typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry;
-    typedef util::Channel<comms::Video_Message, uint32_t> Video;
 
     Channels()
         : setup(SETUP_CHANNEL)
         , pilot(PILOT_CHANNEL)
         , telemetry(TELEMETRY_CHANNEL)
-        , video(VIDEO_CHANNEL)
     {}
 
     Setup setup;
     Pilot pilot;
     Telemetry telemetry;
-    Video video;
 };
 
 Comms::Comms(HAL& hal)
@@ -148,21 +144,11 @@ void Comms::configure_channels()
         util::RCP::Send_Params params;
         params.is_compressed = false;
         params.is_reliable = true;
-        params.importance = 100;
-        params.cancel_after = std::chrono::milliseconds(50);
-        m_rcp->set_send_params(PILOT_CHANNEL, params);
-    }
-
-    {
-        util::RCP::Send_Params params;
-        params.is_compressed = false;
-        params.is_reliable = true;
         params.importance = 10;
         //params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
     }
-
     {
         util::RCP::Send_Params params;
         params.is_compressed = false;
@@ -171,7 +157,7 @@ void Comms::configure_channels()
         params.unreliable_retransmit_count = 1;
 //        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
-        m_rcp->set_send_params(VIDEO_CHANNEL, params);
+        m_rcp->set_send_params(PILOT_CHANNEL, params);
     }
 
     {
@@ -184,7 +170,6 @@ void Comms::configure_channels()
         params.max_receive_time = std::chrono::milliseconds(100);
         m_rcp->set_receive_params(PILOT_CHANNEL, params);
     }
-
     {
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::milliseconds(500);
@@ -202,27 +187,26 @@ auto Comms::get_remote_clock() const -> Manual_Clock const&
     return m_remote_clock;
 }
 
-auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
-{
-    if (_stream.get_type() != stream::IVideo::TYPE)
-    {
-        return false;
-    }
+//auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
+//{
+//    if (_stream.get_type() != stream::IVideo::TYPE)
+//    {
+//        return false;
+//    }
 
-    auto const& stream = static_cast<stream::IVideo const&>(_stream);
-    auto const& samples = stream.get_samples();
+//    auto const& stream = static_cast<stream::IVideo const&>(_stream);
+//    auto const& samples = stream.get_samples();
 
-    for (auto const& s: samples)
-    {
-        m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
-        m_channels->video.pack_param(ts.stream_name);
-        m_channels->video.pack_param(s);
-        m_channels->video.end_pack();
-        m_channels->video.try_sending(*m_rcp);
-    }
-
-    return true;
-}
+//    for (auto const& s: samples)
+//    {
+//        m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
+//        m_channels->video.pack_param(ts.stream_name);
+//        m_channels->video.pack_param(s);
+//        m_channels->video.end_pack();
+//        m_channels->video.try_sending(*m_rcp);
+//    }
+//    return true;
+//}
 
 template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
 {
@@ -253,7 +237,6 @@ template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data
 void Comms::gather_telemetry_data()
 {
     //first we gather samples and we send them at 30Hz. This improves bandwidth by reducing header overhead and allowing for better compression
-    //Except for video which is always sent directly as it comes
     for (auto& ts: m_stream_telemetry_data)
     {
         auto stream = ts.stream.lock();
@@ -284,8 +267,7 @@ void Comms::gather_telemetry_data()
                 gather_telemetry_stream<stream::IMulti_Input>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMulti_State>(ts, *stream) ||
                 gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
-                send_video_stream(ts, *stream)
-                )
+                gather_telemetry_stream<stream::IVideo>(ts, *stream))
             {
                 ;//nothing
             }

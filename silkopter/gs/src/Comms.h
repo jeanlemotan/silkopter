@@ -32,7 +32,6 @@ public:
     typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
     typedef util::Channel<comms::Pilot_Message, uint16_t> Pilot_Channel;
     typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
-    typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
 
     auto get_setup_channel() -> Setup_Channel&;
 
@@ -55,7 +54,6 @@ private:
     mutable Setup_Channel m_setup_channel;
     mutable Pilot_Channel m_pilot_channel;
     mutable Telemetry_Channel m_telemetry_channel;
-    mutable Video_Channel m_video_channel;
 
     std::vector<stream::IMulti_State::Sample> m_multi_state_samples;
 

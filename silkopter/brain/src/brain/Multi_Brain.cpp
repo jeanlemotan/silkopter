@@ -22,7 +22,7 @@ Multi_Brain::Multi_Brain(HAL& hal)
 
 auto Multi_Brain::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("multi_Brain::init");
+    QLOG_TOPIC("Multi_Brain::init");
 
     sz::Multi_Brain::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
@@ -72,12 +72,13 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMulti_Input::TYPE,       m_init_params->rate, "Input", m_accumulator.get_stream_path(0) },
-         { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_accumulator.get_stream_path(1) },
-         { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(2) },
-         { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(3) },
-         { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_accumulator.get_stream_path(4) },
-         { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_accumulator.get_stream_path(5) },
+         { stream::IMulti_Input::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
+         { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
+         { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
+         { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
+         { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
+         { stream::IVideo::TYPE,            m_init_params->state_rate, "Video", m_video_accumulator.get_stream_path(0) },
          //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
      }};
     return inputs;
@@ -95,10 +96,10 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    auto& input = m_sensors.input.value;
+    auto& input = m_inputs.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
-    if (m_sensors.input.previous_value.mode.value != stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.input.previous_value.mode.value != stream::IMulti_Input::Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
@@ -142,7 +143,7 @@ void Multi_Brain::process_state_mode_idle()
 
 void Multi_Brain::process_state_mode_armed()
 {
-    auto& input = m_sensors.input.value;
+    auto& input = m_inputs.input.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
     if (!m_home.is_acquired)
@@ -158,7 +159,7 @@ void Multi_Brain::process_state_mode_armed()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_sensors.position.previous_value));
+    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.previous_value));
 
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
@@ -178,10 +179,10 @@ void Multi_Brain::process_state_mode_armed()
         float crt_alt = enu_position.z;
         float target_vel = m_altitude_data.velocity_pd.process(crt_alt, target_alt);
 
-        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_sensors.velocity.previous_value)).z;
+        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_inputs.velocity.previous_value)).z;
         float target_acc = m_altitude_data.velocity_pd.process(crt_vel, target_vel);
 
-        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_sensors.linear_acceleration.previous_value)).z;
+        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_inputs.linear_acceleration.previous_value)).z;
 
         float half_thrust = (m_config->max_thrust + m_config->min_thrust) * 0.5f;
         float t =  half_thrust + m_altitude_data.acceleration_pid.process(crt_acc, target_acc);
@@ -210,11 +211,11 @@ void Multi_Brain::process_state_mode_armed()
     else if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE)
     {
         float fx, fy, fz;
-        m_sensors.frame.value.get_as_euler_xyz(fx, fy, fz);
+        m_inputs.frame.value.get_as_euler_xyz(fx, fy, fz);
 
         math::quatf target;
         target.set_from_euler_zxy(input.horizontal.angle.value.x, input.horizontal.angle.value.y, fz);
-        math::quatf diff = math::inverse(m_sensors.frame.value) * target;
+        math::quatf diff = math::inverse(m_inputs.frame.value) * target;
         float diff_x, diff_y, _z;
         diff.get_as_euler_zxy(diff_x, diff_y, _z);
 
@@ -239,11 +240,11 @@ void Multi_Brain::process_state_mode_armed()
 
 void Multi_Brain::process_state()
 {
-    if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
         process_state_mode_idle();
     }
-    else if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::ARMED)
+    else if (m_inputs.input.value.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
         process_state_mode_armed();
     }
@@ -251,7 +252,7 @@ void Multi_Brain::process_state()
 
 void Multi_Brain::acquire_home_position()
 {
-    if (m_sensors.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.input.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
         auto& history = m_home.ecef_position_history;
         auto per_second = static_cast<size_t>(1.f / m_dts);
@@ -285,8 +286,7 @@ void Multi_Brain::acquire_home_position()
     }
 }
 
-void Multi_Brain::refresh_sensors(stream::IMulti_Input::Sample const& input,
-                                stream::IFrame::Sample const& frame,
+void Multi_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
                                 stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
@@ -296,47 +296,41 @@ void Multi_Brain::refresh_sensors(stream::IMulti_Input::Sample const& input,
 
     m_home.ecef_position_history.push_back(position.value);
 
-    if (input.is_healthy)
-    {
-        m_sensors.input.previous_value = m_sensors.input.value;
-        m_sensors.input.value = input.value;
-        m_sensors.input.last_updated_tp = now;
-    }
     if (frame.is_healthy)
     {
-        m_sensors.frame.previous_value = m_sensors.frame.value;
-        m_sensors.frame.value = frame.value;
-        m_sensors.frame.last_updated_tp = now;
+        m_inputs.frame.previous_value = m_inputs.frame.value;
+        m_inputs.frame.value = frame.value;
+        m_inputs.frame.last_updated_tp = now;
     }
     if (position.is_healthy)
     {
-        m_sensors.position.previous_value = m_sensors.position.value;
-        m_sensors.position.value = position.value;
-        m_sensors.position.last_updated_tp = now;
+        m_inputs.position.previous_value = m_inputs.position.value;
+        m_inputs.position.value = position.value;
+        m_inputs.position.last_updated_tp = now;
     }
     if (velocity.is_healthy)
     {
-        m_sensors.velocity.previous_value = m_sensors.velocity.value;
-        m_sensors.velocity.value = velocity.value;
-        m_sensors.velocity.last_updated_tp = now;
+        m_inputs.velocity.previous_value = m_inputs.velocity.value;
+        m_inputs.velocity.value = velocity.value;
+        m_inputs.velocity.last_updated_tp = now;
     }
     if (linear_acceleration.is_healthy)
     {
-        m_sensors.linear_acceleration.previous_value = m_sensors.linear_acceleration.value;
-        m_sensors.linear_acceleration.value = linear_acceleration.value;
-        m_sensors.linear_acceleration.last_updated_tp = now;
+        m_inputs.linear_acceleration.previous_value = m_inputs.linear_acceleration.value;
+        m_inputs.linear_acceleration.value = linear_acceleration.value;
+        m_inputs.linear_acceleration.last_updated_tp = now;
     }
     if (proximity.is_healthy)
     {
-        m_sensors.proximity.previous_value = m_sensors.proximity.value;
-        m_sensors.proximity.value = proximity.value;
-        m_sensors.proximity.last_updated_tp = now;
+        m_inputs.proximity.previous_value = m_inputs.proximity.value;
+        m_inputs.proximity.value = proximity.value;
+        m_inputs.proximity.last_updated_tp = now;
     }
 }
 
 void Multi_Brain::process()
 {
-    QLOG_TOPIC("multi_Brain::process");
+    QLOG_TOPIC("Multi_Brain::process");
 
     {
         static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -367,49 +361,70 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_accumulator.process([this](
+    m_input_accumulator.process([this](
                           size_t,
-                          stream::IMulti_Input::Sample const& i_input,
+                          stream::IMulti_Input::Sample const& i_input)
+    {
+        if (i_input.is_healthy)
+        {
+            m_inputs.input.previous_value = m_inputs.input.value;
+            m_inputs.input.value = i_input.value;
+            m_inputs.input.last_updated_tp = q::Clock::now();
+        }
+    });
+
+    m_video_accumulator.process([this](
+                          size_t,
+                          stream::IVideo::Sample const& i_video)
+    {
+        m_last_video_sample = i_video;
+    });
+
+    m_sensor_accumulator.process([this](
+                          size_t,
                           stream::IFrame::Sample const& i_frame,
                           stream::IECEF_Position::Sample const& i_position,
                           stream::IECEF_Velocity::Sample const& i_velocity,
                           stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-                          stream::IProximity::Sample const& i_proximity
-                          //                          stream::IBattery_State::Sample const& i_battery_state,
-                          //                          stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-                          //                          stream::IECEF_Velocity::Sample const& i_velocity,
-                          )
+                          stream::IProximity::Sample const& i_proximity)
     {
-        refresh_sensors(i_input, i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
+        refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
         process_state();
     });
 
     acquire_home_position();
 
+    size_t samples_needed = m_state_output_stream->compute_samples_needed();
+    if ((samples_needed > 0 && m_last_video_sample.is_healthy) ||
+         samples_needed >= 2)
     {
         stream::IMulti_State::Value state;
-        state.ecef_position = m_sensors.position.value;
+        state.ecef_position = m_inputs.position.value;
         state.ecef_home_position = m_home.ecef_position;
-        state.frame = m_sensors.frame.value;
-        state.last_input = m_sensors.input.value;
-        state.proximity = m_sensors.proximity.value;
+        state.frame = m_inputs.frame.value;
+        state.last_input = m_inputs.input.value;
+        state.proximity = m_inputs.proximity.value;
 
-        size_t samples_needed = m_state_output_stream->compute_samples_needed();
+        state.video = std::move(m_last_video_sample.value);
+        m_last_video_sample.is_healthy = false;
+
         for (size_t i = 0; i < samples_needed; i++)
         {
             m_state_output_stream->push_sample(state, true);
+
+            state.video = stream::IVideo::Value();
         }
     }
 }
 
 void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+    m_sensor_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
 }
 
 auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("multi_Brain::set_config");
+    QLOG_TOPIC("Multi_Brain::set_config");
 
     sz::Multi_Brain::Config sz;
     autojsoncxx::error::ErrorStack result;

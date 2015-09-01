@@ -75,6 +75,7 @@ struct Typed_Stream : public Stream
 {
     static constexpr Type TYPE = Base::TYPE;
 
+    typedef typename Base::Value Value;
     typedef typename Base::Sample Sample;
     typedef std::vector<Sample> Samples;
 

@@ -67,6 +67,11 @@ template<class T> struct Sample
     typedef T Value;
 
     Sample() : value() {}
+    Sample(Sample const& other) = default;
+    Sample(Sample&& other) = default;
+    Sample& operator=(Sample const& other) = default;
+    Sample& operator=(Sample&& other) = default;
+
     T value;
     bool is_healthy = true;
 };

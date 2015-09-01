@@ -69,7 +69,7 @@ private:
     } m_hal_telemetry_data;
 
 
-    auto send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
+//    auto send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
 
     template<class Stream> auto gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
     void gather_telemetry_data();

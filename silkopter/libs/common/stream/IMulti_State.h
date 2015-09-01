@@ -10,6 +10,7 @@
 #include "IVelocity.h"
 #include "IProximity.h"
 #include "IForce.h"
+#include "IVideo.h"
 
 #include "IMulti_Input.h"
 
@@ -33,6 +34,7 @@ public:
         IECEF_Velocity::Value ecef_velocity;
         IProximity::Value proximity;
         IForce::Value thrust;
+        IVideo::Value video;
 
         IMulti_Input::Value last_input;
     };

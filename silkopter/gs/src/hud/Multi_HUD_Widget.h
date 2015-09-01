@@ -33,15 +33,13 @@ private:
 
     struct Video
     {
-        silk::stream::gs::Video_wptr stream;
         Video_Decoder decoder;
         math::vec2u32 size;
         q::video::Texture_ptr texture;
-        q::util::Connection connection;
         std::vector<uint8_t> data;
     } m_video;
 
-    void video_samples_available(silk::stream::gs::Video::Samples const& samples);
+    void decode_video(silk::stream::gs::Video::Value const& frame);
 
 
     void process_vertical_thrust_rate();
