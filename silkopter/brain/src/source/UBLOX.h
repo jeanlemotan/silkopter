@@ -149,8 +149,8 @@ private:
     typedef Basic_Output_Stream<stream::IGPS_Info> GPS_Info_Stream;
     mutable std::shared_ptr<GPS_Info_Stream> m_gps_info_stream;
 
-    bool m_has_nav_status = false;
-    bool m_has_pollh = false;
+    //bool m_has_nav_status = false;
+    //bool m_has_pollh = false;
     bool m_has_sol = false;
     q::Clock::time_point m_last_complete_tp = q::Clock::now();
     Position_Stream::Value m_last_position_value;

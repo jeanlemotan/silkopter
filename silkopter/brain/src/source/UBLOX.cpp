@@ -385,23 +385,23 @@ auto UBLOX::setup() -> bool
     });
 
     //read some data from the port to make sure the GPS doesn't have pending data
-    {
-        QLOGI("Flushing GPS buffers");
-        for (size_t i = 0; i < 100; i++)
-        {
-            read(buses, m_temp_buffer.data(), m_temp_buffer.size());
-            //QLOGI("\t{}: {} bytes", i, res);
-        }
-    }
+//    {
+//        QLOGI("Flushing GPS buffers");
+//        for (size_t i = 0; i < 100; i++)
+//        {
+//            read(buses, m_temp_buffer.data(), m_temp_buffer.size());
+//            //QLOGI("\t{}: {} bytes", i, res);
+//        }
+//    }
 
     reset(buses);
 
     {
-        std::array<std::pair<Message, size_t>, 4> msgs = {{
-                                                              {MESSAGE_NAV_POLLH, 1},
+        std::vector<std::pair<Message, size_t>> msgs = {{
+                                                              //{MESSAGE_NAV_POLLH, 1},
                                                               {MESSAGE_NAV_SOL, 1},
-                                                              {MESSAGE_NAV_STATUS, 1},
-                                                              {MESSAGE_MON_HW, 1},
+                                                              //{MESSAGE_NAV_STATUS, 1},
+                                                              {MESSAGE_MON_HW, 4},
                                                           }};
         for (auto const& m: msgs)
         {
@@ -416,7 +416,7 @@ auto UBLOX::setup() -> bool
             if (!send_packet_with_retry(buses, MESSAGE_CFG_MSG, data, ACK_TIMEOUT, 2))
             {
                 QLOGW("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-                return false;
+                //return false;
             }
         }
     }
@@ -430,7 +430,7 @@ auto UBLOX::setup() -> bool
         if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 2))
         {
             QLOGW("\t\t\t...{}", m_ack ? "FAILED" : "TIMEOUT");
-            return false;
+            //return false;
         }
     }
 
@@ -456,9 +456,9 @@ auto UBLOX::setup() -> bool
 
 void UBLOX::pool_for_data(Buses& buses)
 {
-    send_packet(buses, MESSAGE_NAV_POLLH, nullptr, 0);
+//    send_packet(buses, MESSAGE_NAV_POLLH, nullptr, 0);
     send_packet(buses, MESSAGE_NAV_SOL, nullptr, 0);
-    send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
+//    send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
     send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
 }
 
@@ -485,7 +485,7 @@ void UBLOX::process()
     m_gps_info_stream->clear();
 
     auto now = q::Clock::now();
-    if (now - m_last_tp < m_position_stream->get_dt())
+    if (now - m_last_tp < m_position_stream->get_dt() / 2)
     {
         return;
     }
@@ -527,10 +527,10 @@ void UBLOX::process()
 
     //watchdog
     bool is_healthy = true;
-    if (m_has_nav_status && m_has_pollh && m_has_sol)
+    if (/*m_has_nav_status && m_has_pollh && */m_has_sol)
     {
         m_last_complete_tp = now;
-        m_has_nav_status = m_has_pollh = m_has_sol = false;
+        /*m_has_nav_status = m_has_pollh = */m_has_sol = false;
     }
     else if (now - m_last_complete_tp >= REINIT_WATCHDOG_TIMEOUT)
     {
@@ -746,7 +746,7 @@ auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
         {
             return true;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     } while (q::Clock::now() - start < d);
 
     return false;
@@ -808,8 +808,9 @@ void UBLOX::process_nav_pollh_packet(Buses& buses, Packet& packet)
 //        m_wgs84_location_stream->last_sample.value.lat_lon_accuracy = data.hAcc / 100.f;
 //        m_wgs84_location_stream->last_sample.value.altitude = data.height / 100.f;
 //        m_wgs84_location_stream->last_sample.value.altitude_accuracy = data.vAcc / 100.f;
-        m_has_pollh = true;
     }
+
+//    m_has_pollh = true;
 }
 
 void UBLOX::process_nav_status_packet(Buses& buses, Packet& packet)
@@ -828,9 +829,7 @@ void UBLOX::process_nav_status_packet(Buses& buses, Packet& packet)
 //    - 0x05 = Time only fix
 //    - 0x06..0xff = reserved
 
-    {
-        m_has_nav_status = true;
-    }
+//    m_has_nav_status = true;
 }
 
 void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
