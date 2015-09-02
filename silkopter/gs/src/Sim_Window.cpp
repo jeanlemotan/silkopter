@@ -101,6 +101,7 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::gs::Node_ptr sim_node, silk::
 
 Sim_Window::~Sim_Window()
 {
+    m_connections.clear();
 }
 
 void Sim_Window::read_config()
