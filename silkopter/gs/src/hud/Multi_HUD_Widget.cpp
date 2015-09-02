@@ -293,8 +293,8 @@ void Multi_HUD_Widget::process_gamepad()
 
 #define SYNC(x) \
 {\
-    auto& prev_remote = m_prev_state.input.x;\
-    auto& remote = m_state.input.x;\
+    auto& prev_remote = m_prev_state.input.value.x;\
+    auto& remote = m_state.input.value.x;\
     auto& local = m_input.x;\
     if (prev_remote.version != local.version && remote.version >= local.version)\
     {\
@@ -351,7 +351,7 @@ void Multi_HUD_Widget::process()
     for (auto const& s: samples)
     {
         m_state = s.value;
-        decode_video(m_state.video);
+        decode_video(m_state.video.value);
     }
     upload_video_frame();
 
@@ -483,7 +483,7 @@ void Multi_HUD_Widget::render_ground()
 {
     return;
 
-    math::vec3d home = m_state.ecef_home_position;
+    math::vec3d home = m_state.ecef_home_position.value;
 
     //m_state.frame
 
@@ -575,7 +575,7 @@ void Multi_HUD_Widget::render_modes()
 void Multi_HUD_Widget::render_horizon()
 {
     float yaw, pitch, roll;
-    m_state.frame.get_as_euler_zxy(pitch, roll, yaw);
+    m_state.frame.value.get_as_euler_zxy(pitch, roll, yaw);
 
     m_context.painter.push_post_clip_transform(math::trans3df());
 
@@ -638,10 +638,10 @@ void Multi_HUD_Widget::render_horizon()
 void Multi_HUD_Widget::render_altitude()
 {
     float yaw, pitch, roll;
-    m_state.frame.get_as_euler_zxy(pitch, roll, yaw);
+    m_state.frame.value.get_as_euler_zxy(pitch, roll, yaw);
 
-    auto ecef_to_enu_transform = util::coordinates::ecef_to_enu_transform(util::coordinates::ecef_to_lla(m_state.ecef_home_position));
-    auto enu_position = math::transform(ecef_to_enu_transform, m_state.ecef_position);
+    auto ecef_to_enu_transform = util::coordinates::ecef_to_enu_transform(util::coordinates::ecef_to_lla(m_state.ecef_home_position.value));
+    auto enu_position = math::transform(ecef_to_enu_transform, m_state.ecef_position.value);
 
 
     auto mat = m_context.materials.font;

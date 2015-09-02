@@ -185,9 +185,16 @@ void LPF<Stream_t>::process()
 
     m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
     {
-        auto value = i_sample.value;
-        m_dsp.process(value);
-        m_output_stream->push_sample(value, i_sample.is_healthy);
+        if (i_sample.is_healthy)
+        {
+            auto value = i_sample.value;
+            m_dsp.process(value);
+            m_output_stream->push_sample(value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     });
 }
 

@@ -88,22 +88,27 @@ void LiPo_Battery::process()
 
     m_accumulator.process([this, current_factor](stream::ICurrent::Sample const& current_sample, stream::IVoltage::Sample const& voltage_sample)
     {
-        Output_Stream::Value value = m_output_stream->get_last_sample().value;
-
+        if (current_sample.is_healthy & voltage_sample.is_healthy)
         {
+            Output_Stream::Value value = m_output_stream->get_last_sample().value;
+
             value.charge_used += current_sample.value * current_factor;
             stream::ICurrent::Value current = current_sample.value;
             m_current_filter.process(current);
             value.average_current = current;
-        }
-        {
+
             stream::IVoltage::Value voltage = voltage_sample.value;
             m_voltage_filter.process(voltage);
             value.average_voltage = voltage;
-        }
-        value.capacity_left = 1.f - math::clamp(value.charge_used / m_config->full_charge, 0.f, 1.f);
 
-        m_output_stream->push_sample(value, current_sample.is_healthy & voltage_sample.is_healthy);
+            value.capacity_left = 1.f - math::clamp(value.charge_used / m_config->full_charge, 0.f, 1.f);
+
+            m_output_stream->push_sample(value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     });
 
     //compute cell count

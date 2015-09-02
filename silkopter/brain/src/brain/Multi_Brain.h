@@ -97,17 +97,17 @@ private:
     {
         template<class T> struct Data
         {
-            T previous_value;
-            T value;
-            q::Clock::time_point last_updated_tp;
+            T previous_sample;
+            T sample;
+            q::Clock::time_point last_valid_tp;
         };
 
-        Data<stream::IMulti_Input::Value> input;
-        Data<stream::IFrame::Value> frame;
-        Data<stream::IECEF_Position::Value> position;
-        Data<stream::IECEF_Velocity::Value> velocity;
-        Data<stream::IECEF_Linear_Acceleration::Value> linear_acceleration;
-        Data<stream::IProximity::Value> proximity;
+        Data<stream::IMulti_Input::Sample> input;
+        Data<stream::IFrame::Sample> frame;
+        Data<stream::IECEF_Position::Sample> position;
+        Data<stream::IECEF_Velocity::Sample> velocity;
+        Data<stream::IECEF_Linear_Acceleration::Sample> linear_acceleration;
+        Data<stream::IProximity::Sample> proximity;
     } m_inputs;
 
     void refresh_inputs(stream::IFrame::Sample const& frame,

@@ -282,7 +282,14 @@ void Resampler<Stream_t>::downsample()
         }
 
         auto const& is = m_last_input_sample;
-        m_output_stream->push_sample(is.value, is.is_healthy);
+        if (is.is_healthy)
+        {
+            m_output_stream->push_sample(is.value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     }
 
     //m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
@@ -329,7 +336,14 @@ void Resampler<Stream_t>::upsample()
 
         auto is = m_last_input_sample;
         m_dsp.process(is.value);
-        m_output_stream->push_sample(is.value, is.is_healthy);
+        if (is.is_healthy)
+        {
+            m_output_stream->push_sample(is.value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     }
 }
 

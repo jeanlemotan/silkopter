@@ -54,6 +54,11 @@ public:
 //        m_samples.push_back(m_last_sample);
 //    }
 
+    void push_last_sample(bool is_healthy)
+    {
+        push_sample(m_last_sample.value, is_healthy);
+    }
+
     void push_sample(Value const& value, bool is_healthy)
     {
         m_tp += m_dt;

@@ -69,7 +69,14 @@ void ADC_Ammeter::process()
 
     m_accumulator.process([this](stream::IADC::Sample const& i_sample)
     {
-        m_output_stream->push_sample(i_sample.value, i_sample.is_healthy);
+        if (i_sample.is_healthy)
+        {
+            m_output_stream->push_sample(i_sample.value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     });
 }
 

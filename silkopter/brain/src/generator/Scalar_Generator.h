@@ -176,7 +176,14 @@ void Scalar_Generator<Stream_t>::process()
         auto const& samples = modulation_stream->get_samples();
         for (auto const& s: samples)
         {
-            m_output_stream->push_sample(m_config.value + s.value, s.is_healthy);
+            if (s.is_healthy)
+            {
+                m_output_stream->push_sample(m_config.value + s.value, true);
+            }
+            else
+            {
+                m_output_stream->push_last_sample(false);
+            }
         }
     }
     else

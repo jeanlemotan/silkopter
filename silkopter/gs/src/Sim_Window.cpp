@@ -242,17 +242,17 @@ void Sim_Window::render_brain_state()
 
     m_context.painter.set_material(mat);
 
-    auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position);
+    auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position.value);
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
     auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
 
-    auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position);
+    auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position.value);
     QLOGI("LAT: {}, LON: {}, ALT: {}", lla_position.latitude, lla_position.longitude, lla_position.altitude);
 
     //render what the brain _thinks_ the orientation is
     {
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state.value.frame);
+        trans.set_rotation(m_uav.brain_state.value.frame.value);
         trans.set_translation(m_uav.sim_state.enu_position);
         m_context.painter.push_post_clip_transform(trans);
 
@@ -267,10 +267,10 @@ void Sim_Window::render_brain_state()
 
     //render where the brain _thinks_ it is
     {
-        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state.value.ecef_position));
+        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, m_uav.brain_state.value.ecef_position.value));
 
         math::trans3df trans;
-        trans.set_rotation(m_uav.brain_state.value.frame);
+        trans.set_rotation(m_uav.brain_state.value.frame.value);
         trans.set_translation(enu_position);
         m_context.painter.push_post_clip_transform(trans);
 
@@ -316,7 +316,7 @@ void Sim_Window::render_world_axis()
 
     //ECEF
     {
-        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position);
+        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position.value);
         auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(home_lla_position);
         math::quatd rotd;
         rotd.set_from_mat3(enu_to_ecef_rotation);

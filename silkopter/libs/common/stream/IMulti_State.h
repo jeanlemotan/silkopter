@@ -26,17 +26,17 @@ public:
 
     struct Value
     {
-        IBattery_State::Value battery_state;
-        IFrame::Value frame;
-        IECEF_Linear_Acceleration::Value ecef_linear_acceleration;
-        IECEF_Position::Value ecef_home_position;
-        IECEF_Position::Value ecef_position;
-        IECEF_Velocity::Value ecef_velocity;
-        IProximity::Value proximity;
-        IForce::Value thrust;
-        IVideo::Value video;
+        IBattery_State::Sample battery_state;
+        IFrame::Sample frame;
+        IECEF_Linear_Acceleration::Sample ecef_linear_acceleration;
+        IECEF_Position::Sample ecef_home_position;
+        IECEF_Position::Sample ecef_position;
+        IECEF_Velocity::Sample ecef_velocity;
+        IProximity::Sample proximity;
+        IForce::Sample thrust;
+        IVideo::Sample video;
 
-        IMulti_Input::Value input;
+        IMulti_Input::Sample input;
     };
 
     typedef stream::Sample<Value>     Sample;

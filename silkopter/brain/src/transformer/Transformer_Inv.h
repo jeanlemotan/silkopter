@@ -166,7 +166,14 @@ void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::process()
     m_accumulator.process([this](typename In_Stream_t::Sample const& in_sample,
                                   typename Frame_Stream_t::Sample const& f_sample)
     {
-        m_output_stream->push_sample(math::rotate(f_sample.value, in_sample.value), in_sample.is_healthy & f_sample.is_healthy);
+        if (in_sample.is_healthy & f_sample.is_healthy)
+        {
+            m_output_stream->push_sample(math::rotate(f_sample.value, in_sample.value), true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     });
 }
 

@@ -46,6 +46,8 @@ enum Message : uint16_t
     MESSAGE_NAV_STATUS  = (0x03 << 8) | CLASS_NAV,
     MESSAGE_NAV_SOL     = (0x06 << 8) | CLASS_NAV,
     MESSAGE_NAV_VELNED  = (0x12 << 8) | CLASS_NAV,
+    MESSAGE_NAV_POSECEF = (0x01 << 8) | CLASS_NAV,
+    MESSAGE_NAV_VELECEF = (0x11 << 8) | CLASS_NAV,
 
     MESSAGE_INF_NOTICE  = (0x02 << 8) | CLASS_INF,
 
@@ -114,6 +116,23 @@ struct NAV_SOL
     U4 reserved2 = 0;
 };
 
+struct NAV_POSECEF
+{
+    U4 iTOW = 0; //ms
+    I4 ecefX = 0;//cm
+    I4 ecefY = 0;//cm
+    I4 ecefZ = 0;//cm
+    U4 pAcc = 0;//cm
+};
+struct NAV_VELECEF
+{
+    U4 iTOW = 0; //ms
+    I4 ecefVX = 0;//cm/s
+    I4 ecefVY = 0;//cm/s
+    I4 ecefVZ = 0;//cm/s
+    U4 sAcc = 0;//cm/s
+};
+
 struct CFG_ITFM
 {
     X4 config = 0;
@@ -170,7 +189,7 @@ struct CFG_MSG
 
 struct INF_NOTICE
 {
-    char start;
+    char start = 0;
 };
 
 struct MON_HW_6
@@ -196,23 +215,23 @@ struct MON_HW_6
 
 struct MON_HW_7
 {
-    X4 pinSel;
-    X4 pinBank;
-    X4 pinDir;
-    X4 pinVal;
-    U2 noisePerMS;
-    U2 agcCnt;
-    U1 aStatus;
-    U1 aPower;
-    X1 flags;
-    U1 reserved1;
-    X4 usedMask;
-    U1 VP[17];
-    U1 jamInd;
-    U2 reserved3;
-    X4 pinIrq;
-    X4 pullH;
-    X4 pullL;
+    X4 pinSel = 0;
+    X4 pinBank = 0;
+    X4 pinDir = 0;
+    X4 pinVal = 0;
+    U2 noisePerMS = 0;
+    U2 agcCnt = 0;
+    U1 aStatus = 0;
+    U1 aPower = 0;
+    X1 flags = 0;
+    U1 reserved1 = 0;
+    X4 usedMask = 0;
+    U1 VP[17] = { 0 };
+    U1 jamInd = 0;
+    U2 reserved3 = 0;
+    X4 pinIrq = 0;
+    X4 pullH = 0;
+    X4 pullL = 0;
 };
 
 struct MON_VER
@@ -398,9 +417,10 @@ auto UBLOX::setup() -> bool
 
     {
         std::vector<std::pair<Message, size_t>> msgs = {{
-                                                              //{MESSAGE_NAV_POLLH, 1},
+                                                              {MESSAGE_NAV_POSECEF, 1},
+                                                              {MESSAGE_NAV_VELECEF, 1},
                                                               {MESSAGE_NAV_SOL, 1},
-                                                              //{MESSAGE_NAV_STATUS, 1},
+                                                              {MESSAGE_NAV_STATUS, 1},
                                                               {MESSAGE_MON_HW, 4},
                                                           }};
         for (auto const& m: msgs)
@@ -445,21 +465,29 @@ auto UBLOX::setup() -> bool
         send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
     }
 
+    util::coordinates::LLA default_coords(0, 0, 0);
+    m_last_position_value = util::coordinates::lla_to_ecef(default_coords);
+
     m_position_stream->set_tp(q::Clock::now());
     m_velocity_stream->set_tp(q::Clock::now());
     m_gps_info_stream->set_tp(q::Clock::now());
 
-    m_last_complete_tp = q::Clock::now();
-    m_last_tp = q::Clock::now();
+    m_last_process_tp = q::Clock::now();
     return true;
 }
 
-void UBLOX::pool_for_data(Buses& buses)
+void UBLOX::poll_for_data(Buses& buses)
 {
-//    send_packet(buses, MESSAGE_NAV_POLLH, nullptr, 0);
-    send_packet(buses, MESSAGE_NAV_SOL, nullptr, 0);
-//    send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
-    send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
+    auto now = q::Clock::now();
+    if (now - m_last_poll_tp > std::chrono::milliseconds(200))
+    {
+        m_last_poll_tp = now;
+        send_packet(buses, MESSAGE_NAV_POSECEF, nullptr, 0);
+        send_packet(buses, MESSAGE_NAV_VELECEF, nullptr, 0);
+        send_packet(buses, MESSAGE_NAV_SOL, nullptr, 0);
+        send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
+        send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
+    }
 }
 
 void UBLOX::reset(Buses& buses)
@@ -485,14 +513,14 @@ void UBLOX::process()
     m_gps_info_stream->clear();
 
     auto now = q::Clock::now();
-    if (now - m_last_tp < m_position_stream->get_dt() / 2)
+    if (now - m_last_process_tp < m_position_stream->get_dt() / 2)
     {
         return;
     }
 
     //QLOGI("Process... {}", now - m_last_tp);
 
-    m_last_tp = now;
+    m_last_process_tp = now;
 
 
 //    if (m_setup_state != Setup_State::DONE)
@@ -525,41 +553,50 @@ void UBLOX::process()
 
     read_data(buses);
 
-    //watchdog
-    bool is_healthy = true;
-    if (/*m_has_nav_status && m_has_pollh && */m_has_sol)
+    //poll for data so the reeiver doesn't disable the SPI interface.
+    //see section: 8.2 Extended TX timeout
+    poll_for_data(buses);
+
+    bool is_gps_info_healthy = true;
+    if (now - m_last_gps_info_tp > REINIT_WATCHDOG_TIMEOUT)
     {
-        m_last_complete_tp = now;
-        /*m_has_nav_status = m_has_pollh = */m_has_sol = false;
+        QLOGW("No GPS Info packets for {}", now - m_last_gps_info_tp);
+        poll_for_data(buses);
+        is_gps_info_healthy = false;
     }
-    else if (now - m_last_complete_tp >= REINIT_WATCHDOG_TIMEOUT)
+    bool is_position_healthy = true;
+    if (now - m_last_position_tp > REINIT_WATCHDOG_TIMEOUT)
     {
-        QLOGW("No packets for {}", now - m_last_complete_tp);
-        is_healthy = false;
-        pool_for_data(buses);
-        //reset(buses);
-        //check if we need to reset
-        //m_setup_state = Setup_State::UNKNOWN;
+        QLOGW("No GPS Position packets for {}", now - m_last_position_tp);
+        poll_for_data(buses);
+        is_position_healthy = false;
+    }
+    bool is_velocity_healthy = true;
+    if (now - m_last_velocity_tp > REINIT_WATCHDOG_TIMEOUT)
+    {
+        QLOGW("No GPS Velocity packets for {}", now - m_last_velocity_tp);
+        poll_for_data(buses);
+        is_velocity_healthy = false;
     }
 
     size_t samples_needed = m_position_stream->compute_samples_needed();
     while (samples_needed > 0)
     {
-        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_healthy);
+        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_position_healthy);
         samples_needed--;
     }
 
     samples_needed = m_velocity_stream->compute_samples_needed();
     while (samples_needed > 0)
     {
-        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_healthy);
+        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_velocity_healthy);
         samples_needed--;
     }
 
     samples_needed = m_gps_info_stream->compute_samples_needed();
     while (samples_needed > 0)
     {
-        m_gps_info_stream->push_sample(m_last_gps_info_value, is_healthy);
+        m_gps_info_stream->push_sample(m_last_gps_info_value, is_gps_info_healthy);
         samples_needed--;
     }
 }
@@ -765,6 +802,8 @@ void UBLOX::process_packet(Buses& buses, Packet& packet)
     case MESSAGE_ACK_NACK: m_ack = false; break;
 
     case MESSAGE_NAV_SOL: process_nav_sol_packet(buses, packet); break;
+    case MESSAGE_NAV_POSECEF: process_nav_posecef_packet(buses, packet); break;
+    case MESSAGE_NAV_VELECEF: process_nav_velecef_packet(buses, packet); break;
     case MESSAGE_NAV_STATUS: process_nav_status_packet(buses, packet); break;
     case MESSAGE_NAV_POLLH: process_nav_pollh_packet(buses, packet); break;
 
@@ -820,16 +859,21 @@ void UBLOX::process_nav_status_packet(Buses& buses, Packet& packet)
 
     //QLOGI("STATUS: iTOW:{}, Fix:{}, flags:{}, fs:{}, flags2:{}", data.iTOW, data.gpsFix, data.flags, data.fixStat, data.flags2);
 
-    //gpsFix
-//    - 0x00 = no fix
-//    - 0x01 = dead reckoning only
-//    - 0x02 = 2D-fix
-//    - 0x03 = 3D-fix
-//    - 0x04 = GPS + dead reckoning combined
-//    - 0x05 = Time only fix
-//    - 0x06..0xff = reserved
-
-//    m_has_nav_status = true;
+    {
+        if (data.gpsFix == 0x02)
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_2D;
+        }
+        else if (data.gpsFix == 0x03)
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
+        }
+        else
+        {
+            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
+        }
+    }
+    m_last_gps_info_tp = q::Clock::now();
 }
 
 void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
@@ -857,30 +901,52 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
 //    0x05 = Time only fix
 
 
-    {
-        //m_ecef_stream->last_sample.value.sattelite_count = data.numSV;
-        m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
-        m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+    m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
+    m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
 
-        m_last_gps_info_value.visible_satellites = data.numSV;
-        m_last_gps_info_value.fix_satellites = data.numSV;
-        m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
-        m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
-        m_last_gps_info_value.pdop = data.pDOP / 100.f;
-        if (data.gpsFix == 0x02)
-        {
-            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_2D;
-        }
-        else if (data.gpsFix == 0x03)
-        {
-            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
-        }
-        else
-        {
-            m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
-        }
-        m_has_sol = true;
+    m_last_gps_info_value.visible_satellites = data.numSV;
+    m_last_gps_info_value.fix_satellites = data.numSV;
+    m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
+    m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
+    m_last_gps_info_value.pdop = data.pDOP / 100.f;
+    if (data.gpsFix == 0x02)
+    {
+        m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_2D;
     }
+    else if (data.gpsFix == 0x03)
+    {
+        m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
+    }
+    else
+    {
+        m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
+    }
+
+    m_last_position_tp = q::Clock::now();
+    m_last_velocity_tp = q::Clock::now();
+    m_last_gps_info_tp = q::Clock::now();
+}
+
+void UBLOX::process_nav_posecef_packet(Buses& buses, Packet& packet)
+{
+    QASSERT(packet.payload.size() == sizeof(NAV_POSECEF));
+    NAV_POSECEF& data = reinterpret_cast<NAV_POSECEF&>(*packet.payload.data());
+
+    m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
+    m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
+
+    m_last_position_tp = q::Clock::now();
+}
+
+void UBLOX::process_nav_velecef_packet(Buses& buses, Packet& packet)
+{
+    QASSERT(packet.payload.size() == sizeof(NAV_VELECEF));
+    NAV_VELECEF& data = reinterpret_cast<NAV_VELECEF&>(*packet.payload.data());
+
+    m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
+    m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
+
+    m_last_velocity_tp = q::Clock::now();
 }
 
 void UBLOX::process_cfg_prt_packet(Buses& buses, Packet& packet)

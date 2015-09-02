@@ -214,7 +214,7 @@ void KF_ECEF::process()
                                   stream::IENU_Linear_Acceleration::Sample const& la_sample,
                                   stream::IPressure::Sample const& p_sample)
     {
-        if (pos_sample.is_healthy && vel_sample.is_healthy)
+        if (pos_sample.is_healthy & vel_sample.is_healthy & la_sample.is_healthy & p_sample.is_healthy)
         {
             util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
             math::mat3d enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
@@ -243,17 +243,12 @@ void KF_ECEF::process()
             m_kf_y.z(1) = vel.y;
             m_kf_z.z(1) = vel.z;
 
-            //baro velocity. in case the baro is not healthy
-            m_kf_z.z(3) = vel.z;
-
             auto const& acc = m_linear_acceleration_delayer.get_value();
             m_kf_x.z(2) = acc.x;
             m_kf_y.z(2) = acc.y;
             m_kf_z.z(2) = acc.z;
-        }
 
-        if (p_sample.is_healthy)
-        {
+            //pressure
             double alt = (1.0 - std::pow((p_sample.value / 1013.25), 0.190284)) * 44307.69396;
             if (m_last_baro_altitude)
             {
@@ -265,19 +260,21 @@ void KF_ECEF::process()
 //                QLOGI("{}", (crt_alt - last_alt) / dts);
             }
             m_last_baro_altitude = alt;
+
+            m_kf_x.process();
+            m_kf_y.process();
+            m_kf_z.process();
+
+            m_position_output_stream->push_sample(math::vec3d(m_kf_x.x(0), m_kf_y.x(0), m_kf_z.x(0)), true);
+            m_velocity_output_stream->push_sample(math::vec3f(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1)), true);
+            m_linear_acceleration_output_stream->push_sample(math::vec3f(m_kf_x.x(2), m_kf_y.x(2), m_kf_z.x(2)), true);
         }
-
-        m_kf_x.process();
-        m_kf_y.process();
-        m_kf_z.process();
-
-        math::vec3d pos(m_kf_x.x(0), m_kf_y.x(0), m_kf_z.x(0));
-        math::vec3f vel(m_kf_x.x(1), m_kf_y.x(1), m_kf_z.x(1));
-        math::vec3f acc(m_kf_x.x(2), m_kf_y.x(2), m_kf_z.x(2));
-
-        m_position_output_stream->push_sample(pos, true);
-        m_velocity_output_stream->push_sample(vel, true);
-        m_linear_acceleration_output_stream->push_sample(acc, true);
+        else
+        {
+            m_position_output_stream->push_last_sample(false);
+            m_velocity_output_stream->push_last_sample(false);
+            m_linear_acceleration_output_stream->push_last_sample(false);
+        }
     });
 }
 

@@ -80,12 +80,19 @@ void Rate_Controller::process()
     m_accumulator.process([this, &multi_config](stream::IAngular_Velocity::Sample const& i_sample,
                                                 stream::IAngular_Velocity::Sample const& t_sample)
     {
-        math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
-        math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
+        if (i_sample.is_healthy & t_sample.is_healthy)
+        {
+            math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+            math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
-        Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
+            Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
 
-        m_output_stream->push_sample(value, i_sample.is_healthy & t_sample.is_healthy);
+            m_output_stream->push_sample(value, true);
+        }
+        else
+        {
+            m_output_stream->push_last_sample(false);
+        }
     });
 }
 

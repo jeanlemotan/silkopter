@@ -80,6 +80,7 @@ void Comp_AHRS::process()
 
         math::quatf rotation(m_output_stream->get_last_sample().value);
 
+        if (av_sample.is_healthy)
         {
             math::vec3f omega(av_sample.value);
 
@@ -104,6 +105,7 @@ void Comp_AHRS::process()
             }
         }
 
+        if (a_sample.is_healthy && m_sample.is_healthy)
         {
             m_noisy_up_w = math::normalized<float, math::safe>(a_sample.value); //acceleration points opposite of gravity - so up
             m_noisy_front_w = math::normalized<float, math::safe>(m_sample.value); //this is always good

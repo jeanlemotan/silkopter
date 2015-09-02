@@ -78,7 +78,7 @@ private:
     } m_packet;
 
     auto setup() -> bool;
-    void pool_for_data(Buses& buses);
+    void poll_for_data(Buses& buses);
     void reset(Buses& buses);
 
     void read_data(Buses& buses);
@@ -104,6 +104,8 @@ private:
     void process_packet(Buses& buses, Packet& packet);
 
     void process_nav_sol_packet(Buses& buses, Packet& packet);
+    void process_nav_velecef_packet(Buses& buses, Packet& packet);
+    void process_nav_posecef_packet(Buses& buses, Packet& packet);
     void process_nav_pollh_packet(Buses& buses, Packet& packet);
     void process_nav_status_packet(Buses& buses, Packet& packet);
 
@@ -149,16 +151,18 @@ private:
     typedef Basic_Output_Stream<stream::IGPS_Info> GPS_Info_Stream;
     mutable std::shared_ptr<GPS_Info_Stream> m_gps_info_stream;
 
-    //bool m_has_nav_status = false;
-    //bool m_has_pollh = false;
-    bool m_has_sol = false;
-    q::Clock::time_point m_last_complete_tp = q::Clock::now();
     Position_Stream::Value m_last_position_value;
-    Velocity_Stream::Value m_last_velocity_value;
-    GPS_Info_Stream::Value m_last_gps_info_value;
+    q::Clock::time_point m_last_position_tp = q::Clock::time_point(q::Clock::duration::zero());
 
-    q::Clock::time_point m_last_tp = q::Clock::time_point(q::Clock::duration::zero());
+    Velocity_Stream::Value m_last_velocity_value;
+    q::Clock::time_point m_last_velocity_tp = q::Clock::time_point(q::Clock::duration::zero());
+
+    GPS_Info_Stream::Value m_last_gps_info_value;
+    q::Clock::time_point m_last_gps_info_tp = q::Clock::time_point(q::Clock::duration::zero());
+
+    q::Clock::time_point m_last_process_tp = q::Clock::time_point(q::Clock::duration::zero());
     q::Clock::time_point m_last_reset_tp = q::Clock::now() - std::chrono::seconds(1000);
+    q::Clock::time_point m_last_poll_tp = q::Clock::now() - std::chrono::seconds(1000);
 };
 
 
