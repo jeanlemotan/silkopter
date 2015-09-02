@@ -5,39 +5,39 @@
             "Mass (Kg)": 0.699999988079071,
             "Height (m)": 0.10000000149011612,
             "Radius (m)": 0.30000001192092898,
-            "Motor Thrust @ 100% (N)": 5.0,
+            "Motor Thrust @ 100% (N)": 3.5,
             "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
-            "Motor Acceleration (s)": 0.10000000149011612,
-            "Motor Deceleration (s)": 0.20000000298023225,
+            "Motor Acceleration (s)": 0.30000001192092898,
+            "Motor Deceleration (s)": 1.0,
             "Motors": [
                 {
                     "Position": {
-                        "x": -0.2599999904632569,
-                        "y": -0.2599999904632569,
+                        "x": -0.25999999046325686,
+                        "y": -0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": 0.2599999904632569,
-                        "y": -0.2599999904632569,
+                        "x": 0.25999999046325686,
+                        "y": -0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": true
                 },
                 {
                     "Position": {
-                        "x": 0.2599999904632569,
-                        "y": 0.2599999904632569,
+                        "x": 0.25999999046325686,
+                        "y": 0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": false
                 },
                 {
                     "Position": {
-                        "x": -0.2599999904632569,
-                        "y": 0.2599999904632569,
+                        "x": -0.25999999046325686,
+                        "y": 0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": true
@@ -69,16 +69,6 @@
                     "Motor Mixer/Throttle 1",
                     "Motor Mixer/Throttle 2",
                     "Motor Mixer/Throttle 3"
-                ]
-            },
-            "Multi Pilot": {
-                "type": "Multi Pilot",
-                "init_params": {
-                    "Rate (Hz)": 20
-                },
-                "config": {},
-                "input_paths": [
-                    "Multi Brain/State"
                 ]
             },
             "Angular Velocity RS": {
@@ -135,27 +125,13 @@
                     "Comp AHRS/Frame"
                 ]
             },
-            "Multi Input": {
-                "type": "Multi Input",
-                "init_params": {
-                    "Input Rate (Hz)": 20,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 10.0
-                },
-                "input_paths": [
-                    "Multi Pilot/Input"
-                ]
-            },
             "Motor Mixer": {
                 "type": "Motor Mixer",
                 "init_params": {
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Armed Throttle": 0.0
+                    "Armed Thrust": 0.20000000298023225
                 },
                 "input_paths": [
                     "Rate Controller/Torque",
@@ -169,26 +145,26 @@
                 },
                 "config": {
                     "Feedback": {
-                        "Weight (0-1)": 0.0,
+                        "Weight (0-1)": 1.0,
                         "Combined XY PID": true,
                         "XY PID": {
-                            "kP": 1.0,
-                            "kI": 0.5,
-                            "kD": 0.0,
-                            "Max I": 1.0,
+                            "kP": 0.20000000298023225,
+                            "kI": 0.0,
+                            "kD": 0.009999999776482582,
+                            "Max I": 0.05000000074505806,
                             "D Filter": 0.0
                         },
                         "Z PID": {
-                            "kP": 1.5,
-                            "kI": 0.5,
+                            "kP": 0.4000000059604645,
+                            "kI": 0.10000000149011612,
                             "kD": 0.0,
-                            "Max I": 0.5,
+                            "Max I": 0.10000000149011612,
                             "D Filter": 0.0
                         }
                     },
                     "Feedforward": {
-                        "Weight (0-1)": 1.0,
-                        "Max Torque (N)": 1.5
+                        "Weight (0-1)": 0.0,
+                        "Max Torque (N)": 0.8999999761581421
                     }
                 },
                 "input_paths": [
@@ -269,7 +245,7 @@
                     "Position Accuracy (CEP m)": 1.0,
                     "Velocity Lag (s)": 0.0,
                     "Velocity Accuracy (m/s)": 0.10000000149011612,
-                    "Acceleration Lag (s)": 0.10999999940395357,
+                    "Acceleration Lag (s)": 0.10999999940395355,
                     "Acceleration Accuracy (m/s^2)": 1.0,
                     "Pressure Altitude Lag (s)": 0.10000000149011612,
                     "Pressure Altitude Accuracy (m)": 0.20000000298023225
@@ -285,62 +261,87 @@
                 "type": "Multi Brain",
                 "init_params": {
                     "Rate (Hz)": 100,
-                    "State Rate (Hz)": 20
+                    "Input Rate (Hz)": 30,
+                    "State Rate (Hz)": 30
                 },
                 "config": {
-                    "Max Thrust (N)": 16.0,
-                    "Min Thrust (N)": 3.0,
+                    "Max Thrust (N)": 11.0,
+                    "Min Thrust (N)": 2.0,
                     "Horizontal Angle": {
-                        "Max Speed (deg/s)": 180.0,
+                        "Max Speed (deg/s)": 170.0,
                         "Combined PIDs": true,
                         "PIDs": {
-                            "kP": 3.0,
-                            "kI": 2.0,
+                            "kP": 2.0,
+                            "kI": 0.30000001192092898,
                             "kD": 0.0,
-                            "Max I": 2.0,
+                            "Max I": 0.30000001192092898,
                             "D Filter": 0.0
                         }
                     },
                     "Altitude": {
                         "Max Speed (m/s)": 2.0,
                         "LPF Poles": 1,
-                        "LPF Cutoff Frequency (Hz)": 5.0,
+                        "LPF Cutoff Frequency (Hz)": 1.0,
                         "Acceleration PID": {
-                            "kP": 1.0,
-                            "kI": 0.2,
+                            "kP": 0.699999988079071,
+                            "kI": 0.0,
                             "kD": 0.0,
-                            "Max I": 0.2,
+                            "Max I": 0.0,
                             "D Filter": 0.0
                         },
                         "Velocity PD": {
                             "kP": 1.0,
                             "kD": 0.0,
-                            "D Filter": 1.0
+                            "D Filter": 0.0
                         },
                         "Altitude P": {
-                            "kP": 1.5
+                            "kP": 1.0
                         }
                     }
                 },
                 "input_paths": [
-                    "Multi Input/Output",
+                    "Multi Pilot/Input",
                     "Frame RS/Output",
                     "EKF ECEF/Position (ecef)",
                     "EKF ECEF/Velocity (ecef)",
-                    "Acceleration LPF (ECEF)/Output"
+                    "EKF ECEF/Linear Acceleration (ecef)",
+                    "Proximity/Proximity",
+                    ""
                 ]
             },
-            "Acceleration LPF (ECEF)": {
-                "type": "Acceleration LPF (ECEF)",
+            "Multi Pilot": {
+                "type": "Multi Pilot",
                 "init_params": {
+                    "Rate (Hz)": 30
+                },
+                "config": {},
+                "input_paths": [
+                    "Multi Brain/State"
+                ]
+            },
+            "Proximity": {
+                "type": "Proximity",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "Channels": 1
+                },
+                "config": {},
+                "input_paths": [
+                    "Distance RS/Output"
+                ]
+            },
+            "Distance RS": {
+                "type": "Distance RS",
+                "init_params": {
+                    "Input Rate (Hz)": 10,
                     "Rate (Hz)": 100
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 10.0
+                    "Cutoff Frequency (Hz)": 5.0
                 },
                 "input_paths": [
-                    "EKF ECEF/Acceleration (ecef)"
+                    "Multi Simulator/Sonar Distance"
                 ]
             }
         }

@@ -124,7 +124,7 @@ auto ecef_to_enu_transform(LLA const& lla) -> math::trans3dd
 //        int a = 0;
     }
 
-    trans.set_translation(-ecef_p0);
+    trans.set_translation(-math::rotate(trans, ecef_p0));
 
     return trans;
 }
@@ -163,7 +163,7 @@ void enu_to_ecef_transform_and_inv(LLA const& lla, math::trans3dd& enu_to_ecef, 
     enu_to_ecef.set_translation(ecef_p0);
 
     ecef_to_enu.set_rotation(math::transposed(mat));
-    ecef_to_enu.set_translation(-ecef_p0);
+    ecef_to_enu.set_translation(-math::rotate(ecef_to_enu, ecef_p0));
 }
 
 

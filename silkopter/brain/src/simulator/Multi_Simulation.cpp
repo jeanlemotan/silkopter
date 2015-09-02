@@ -341,7 +341,7 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     }
 
     {
-        math::planed ground(math::vec3f::zero, math::vec3f(0, 0, 1));
+        math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
         math::vec3f start_point = m_uav.state.enu_position;
         math::vec3f ray_dir = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
         float t = 0;

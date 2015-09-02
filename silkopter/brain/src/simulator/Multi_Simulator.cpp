@@ -312,7 +312,7 @@ void Multi_Simulator::process()
             {
                 math::vec3f noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = math::transform(enu_to_ecef_rotation, uav_state.enu_velocity) + noise;
+                stream.last_sample.value = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(uav_state.enu_velocity))) + noise;
                 stream.samples.push_back(stream.last_sample);
             }
         }

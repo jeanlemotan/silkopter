@@ -8,9 +8,11 @@ extern "C"
     #include "hw/bcm2835.h"
 }
 
-#include "sz_I2C_RPI.hpp"
-
 extern auto initialize_bcm() -> bool;
+
+#endif
+
+#include "sz_I2C_RPI.hpp"
 
 
 namespace silk
@@ -57,13 +59,18 @@ auto I2C_RPI::init() -> bool
         return false;
     }
 
+#ifdef RASPBERRY_PI
+
     auto ok = initialize_bcm();
     if (!ok)
     {
         return false;
     }
+
     bcm2835_i2c_set_baudrate(400000);
     bcm2835_i2c_begin();
+
+#endif
 
     return true;
 }
@@ -86,6 +93,8 @@ auto I2C_RPI::read(uint8_t address, uint8_t* data, size_t size) -> bool
 {
     QLOG_TOPIC("i2c_RPI::read");
 
+#ifdef RASPBERRY_PI
+
     bcm2835_i2c_setSlaveAddress(address);
     int res = bcm2835_i2c_read(reinterpret_cast<char*>(data), size);
     if (res != BCM2835_I2C_REASON_OK)
@@ -94,11 +103,15 @@ auto I2C_RPI::read(uint8_t address, uint8_t* data, size_t size) -> bool
         return false;
     }
 
+#endif
+
     return true;
 }
 auto I2C_RPI::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("i2c_RPI::write");
+
+#ifdef RASPBERRY_PI
 
     bcm2835_i2c_setSlaveAddress(address);
     int res = bcm2835_i2c_write(reinterpret_cast<const char*>(data), size);
@@ -108,12 +121,16 @@ auto I2C_RPI::write(uint8_t address, uint8_t const* data, size_t size) -> bool
         return false;
     }
 
+#endif
+
     return true;
 }
 
 auto I2C_RPI::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
 {
     QLOG_TOPIC("i2c_RPI::read_register");
+
+#ifdef RASPBERRY_PI
 
     bcm2835_i2c_setSlaveAddress(address);
     int res = bcm2835_i2c_read_register_rs(reinterpret_cast<char*>(&reg), reinterpret_cast<char*>(data), size);
@@ -122,6 +139,8 @@ auto I2C_RPI::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
         QLOGW("read register {} failed: {}", reg, res);
         return false;
     }
+
+#endif
 
     return true;
 }
@@ -137,6 +156,8 @@ auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
         std::copy(data, data + size, m_buffer.begin() + 1);
     }
 
+#ifdef RASPBERRY_PI
+
     bcm2835_i2c_setSlaveAddress(address);
     int res = bcm2835_i2c_write(reinterpret_cast<const char*>(m_buffer.data()), size + 1);
     if (res != BCM2835_I2C_REASON_OK)
@@ -144,6 +165,8 @@ auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
         QLOGW("write register {} failed: {}", reg, res);
         return false;
     }
+
+#endif
 
     return true;
 }
@@ -182,5 +205,3 @@ auto I2C_RPI::get_init_params() const -> rapidjson::Document
 
 }
 }
-
-#endif

@@ -3,8 +3,8 @@
         "Multi Simulator": {
             "hal_editor": {
                 "position": {
-                    "x": -246.0,
-                    "y": -243.0
+                    "x": -1536.0,
+                    "y": -782.0
                 }
             }
         },
@@ -19,16 +19,16 @@
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -886.0,
-                    "y": -690.0
+                    "x": -1150.0,
+                    "y": -441.0
                 }
             }
         },
         "Multi Pilot": {
             "hal_editor": {
                 "position": {
-                    "x": -860.0,
-                    "y": -454.0
+                    "x": -1085.0,
+                    "y": -235.0
                 }
             }
         },
@@ -99,24 +99,24 @@
         "Multi Input": {
             "hal_editor": {
                 "position": {
-                    "x": -943.0,
-                    "y": -493.0
+                    "x": -1123.0,
+                    "y": -348.0
                 }
             }
         },
         "Motor Mixer": {
             "hal_editor": {
                 "position": {
-                    "x": -540.0,
-                    "y": -571.0
+                    "x": -1579.0,
+                    "y": -931.0
                 }
             }
         },
         "Rate Controller": {
             "hal_editor": {
                 "position": {
-                    "x": -637.0,
-                    "y": -806.0
+                    "x": -1235.0,
+                    "y": -704.0
                 }
             }
         },
@@ -211,8 +211,8 @@
         "Position RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -1352.0,
-                    "y": -678.0
+                    "x": -1326.0,
+                    "y": -625.0
                 }
             }
         },
@@ -251,16 +251,16 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": -1186.0,
-                    "y": -748.0
+                    "x": -1456.0,
+                    "y": -467.0
                 }
             }
         },
         "Velocity RS (ECEF)": {
             "hal_editor": {
                 "position": {
-                    "x": -1352.0,
-                    "y": -611.0
+                    "x": -1345.0,
+                    "y": -548.0
                 }
             }
         },
@@ -331,16 +331,16 @@
         "Proximity": {
             "hal_editor": {
                 "position": {
-                    "x": -1198.0,
-                    "y": -563.0
+                    "x": -1337.0,
+                    "y": -277.0
                 }
             }
         },
         "Distance RS": {
             "hal_editor": {
                 "position": {
-                    "x": -1339.0,
-                    "y": -543.0
+                    "x": -1510.0,
+                    "y": -291.0
                 }
             }
         }
