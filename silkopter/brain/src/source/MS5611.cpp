@@ -35,6 +35,9 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
+constexpr uint8_t READ_FLAG = 0x80;
+
+
 MS5611::MS5611(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::MS5611::Init_Params())
@@ -72,40 +75,46 @@ void MS5611::unlock(Buses& buses)
     }
 }
 
-auto MS5611::bus_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size) -> bool
+auto MS5611::bus_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register(ADDR_MS5611, reg, data, size)
-         : buses.spi ? buses.spi->read_register(reg, data, size)
+    m_dummy_tx_data.resize(size);
+    return buses.i2c ? buses.i2c->read_register(ADDR_MS5611, reg, rx_data, size)
+         : buses.spi ? buses.spi->transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size)
          : false;
 }
-auto MS5611::bus_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool
+auto MS5611::bus_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u8(ADDR_MS5611, reg, dst)
-         : buses.spi ? buses.spi->read_register_u8(reg, dst)
+    uint8_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->read_register_u8(ADDR_MS5611, reg, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data)
          : false;
 }
-auto MS5611::bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool
+auto MS5611::bus_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u16(ADDR_MS5611, reg, dst)
-         : buses.spi ? buses.spi->read_register_u16(reg, dst)
+    uint16_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->read_register_u16(ADDR_MS5611, reg, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data)
          : false;
 }
-auto MS5611::bus_write(Buses& buses, uint8_t reg, uint8_t const* data, uint32_t size) -> bool
+auto MS5611::bus_write(Buses& buses, uint8_t reg, uint8_t const* tx_data, uint32_t size) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register(ADDR_MS5611, reg, data, size)
-         : buses.spi ? buses.spi->write_register(reg, data, size)
+    m_dummy_rx_data.resize(size);
+    return buses.i2c ? buses.i2c->write_register(ADDR_MS5611, reg, tx_data, size)
+         : buses.spi ? buses.spi->transfer_register(reg, tx_data, m_dummy_rx_data.data(), size)
          : false;
 }
-auto MS5611::bus_write_u8(Buses& buses, uint8_t reg, uint8_t const& t) -> bool
+auto MS5611::bus_write_u8(Buses& buses, uint8_t reg, uint8_t const& tx_data) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register_u8(ADDR_MS5611, reg, t)
-         : buses.spi ? buses.spi->write_register_u8(reg, t)
+    uint8_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->write_register_u8(ADDR_MS5611, reg, tx_data)
+         : buses.spi ? buses.spi->transfer_register_u8(reg, tx_data, dummy_data)
          : false;
 }
-auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& t) -> bool
+auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& tx_data) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register_u16(ADDR_MS5611, reg, t)
-         : buses.spi ? buses.spi->write_register_u16(reg, t)
+    uint16_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->write_register_u16(ADDR_MS5611, reg, tx_data)
+         : buses.spi ? buses.spi->transfer_register_u16(reg, tx_data, dummy_data)
          : false;
 }
 

@@ -35,18 +35,15 @@ public:
     auto try_lock() -> bool;
     void unlock();
 
-    auto read(uint8_t* data, size_t size, size_t speed = 0) -> bool;
-    auto write(uint8_t const* data, size_t size, size_t speed = 0) -> bool;
-
-    auto read_register(uint8_t reg, uint8_t* data, size_t size, size_t speed = 0) -> bool;
-    auto write_register(uint8_t reg, uint8_t const* data, size_t size, size_t speed = 0) -> bool;
+    virtual auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
+    virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
 
 private:
     auto init() -> bool;
 
     auto open() -> bool;
 
-    auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
+    auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
 
 
     std::shared_ptr<sz::SPI_Linux::Init_Params> m_init_params;
@@ -55,7 +52,6 @@ private:
     int m_fd = -1;
     std::vector<uint8_t> m_tx_buffer;
     std::vector<uint8_t> m_rx_buffer;
-    //std::vector<uint8_t> m_dummy_buffer;
 };
 
 }

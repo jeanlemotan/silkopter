@@ -13,8 +13,6 @@ extern "C"
 
 #include "sz_SPI_RPI.hpp"
 
-#define READ_FLAG   0x80
-
 #ifdef RASPBERRY_PI
 
 ///////////////////////////////////////////////////////////////////
@@ -175,7 +173,7 @@ auto SPI_RPI::get_divider(uint32_t speed) const -> uint32_t
 #endif
 }
 
-auto SPI_RPI::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_RPI::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
     QASSERT(size > 0);
     if (size == 0)
@@ -187,9 +185,9 @@ auto SPI_RPI::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, si
 
     uint32_t divider = get_divider(speed ? speed : m_init_params->speed);
 
+    bcm2835_spi_chipSelect(m_init_params->dev);
     bcm2835_spi_setDataMode(m_init_params->mode);
     bcm2835_spi_setClockDivider(divider);
-    bcm2835_spi_chipSelect(m_init_params->dev);
 
     if (!tx_data)
     {
@@ -207,47 +205,28 @@ auto SPI_RPI::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, si
     return true;
 }
 
-auto SPI_RPI::read(uint8_t* data, size_t size, size_t speed) -> bool
+auto SPI_RPI::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::read");
-
-    return transfer(nullptr, data, size, speed);
-}
-auto SPI_RPI::write(uint8_t const* data, size_t size, size_t speed) -> bool
-{
-    QLOG_TOPIC("SPI_RPI::write");
-
-    return transfer(data, nullptr, size, speed);
+    QLOG_TOPIC("SPI_RPI::transfer");
+    return do_transfer(tx_data, rx_data, size, speed);
 }
 
-auto SPI_RPI::read_register(uint8_t reg, uint8_t* data, size_t size, size_t speed) -> bool
+auto SPI_RPI::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::read_register");
+    QLOG_TOPIC("SPI_RPI::transfer_register");
 
-    m_tx_buffer.clear();
     m_tx_buffer.resize(size + 1);
-    m_tx_buffer[0] = reg | READ_FLAG;
+    m_tx_buffer[0] = reg;
+    std::copy(tx_data, tx_data + size, m_tx_buffer.begin() + 1);
 
     m_rx_buffer.resize(size + 1);
-    if (!transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
+    if (!do_transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
     {
         return false;
     }
 
-    std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), data);
+    std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), rx_data);
     return true;
-}
-auto SPI_RPI::write_register(uint8_t reg, uint8_t const* data, size_t size, size_t speed) -> bool
-{
-    QLOG_TOPIC("SPI_RPI::write_register");
-
-    m_tx_buffer.clear();
-    m_tx_buffer.resize(size + 1);
-    m_tx_buffer[0] = reg;
-    std::copy(data, data + size, m_tx_buffer.begin() + 1);
-
-    m_rx_buffer.resize(size + 1);
-    return transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed);
 }
 
 auto SPI_RPI::set_config(rapidjson::Value const& json) -> bool

@@ -58,6 +58,7 @@ private:
         bus::II2C_ptr i2c;
         bus::ISPI_ptr spi;
     };
+    std::vector<uint8_t> m_dummy_tx_data;
 
     auto mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool;
     auto mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool;

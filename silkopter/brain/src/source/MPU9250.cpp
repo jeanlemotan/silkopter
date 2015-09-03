@@ -296,6 +296,9 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 #endif
 
 
+constexpr uint8_t READ_FLAG = 0x80;
+
+
 constexpr size_t CONFIG_REGISTER_SPEED = 500000;
 constexpr size_t MISC_REGISTER_SPEED = 1000000;
 constexpr size_t SENSOR_REGISTER_SPEED = 2000000;
@@ -344,41 +347,46 @@ void MPU9250::unlock(Buses& buses)
     }
 }
 
-auto MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool
+auto MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register(ADDR_MPU9250, reg, data, size)
-         : buses.spi ? buses.spi->read_register(reg, data, size, speed)
+    m_dummy_tx_data.resize(size);
+    return buses.i2c ? buses.i2c->read_register(ADDR_MPU9250, reg, rx_data, size)
+         : buses.spi ? buses.spi->transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size, speed)
          : false;
 }
-auto MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool
+auto MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data, size_t speed) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u8(ADDR_MPU9250, reg, dst)
-         : buses.spi ? buses.spi->read_register_u8(reg, dst, speed)
+    uint8_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->read_register_u8(ADDR_MPU9250, reg, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
-auto MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool
+auto MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data, size_t speed) -> bool
 {
-    return buses.i2c ? buses.i2c->read_register_u16(ADDR_MPU9250, reg, dst)
-         : buses.spi ? buses.spi->read_register_u16(reg, dst, speed)
+    uint16_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->read_register_u16(ADDR_MPU9250, reg, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
-auto MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool
+auto MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t tx_data, size_t speed) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register_u8(ADDR_MPU9250, reg, t)
-         : buses.spi ? buses.spi->write_register_u8(reg, t, speed)
+    uint8_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->write_register_u8(ADDR_MPU9250, reg, tx_data)
+         : buses.spi ? buses.spi->transfer_register_u8(reg, tx_data, dummy_data, speed)
          : false;
 }
-auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t, size_t speed) -> bool
+auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t tx_data, size_t speed) -> bool
 {
-    return buses.i2c ? buses.i2c->write_register_u16(ADDR_MPU9250, reg, t)
-         : buses.spi ? buses.spi->write_register_u16(reg, t, speed)
+    uint16_t dummy_data = 0;
+    return buses.i2c ? buses.i2c->write_register_u16(ADDR_MPU9250, reg, tx_data)
+         : buses.spi ? buses.spi->transfer_register_u16(reg, tx_data, dummy_data, speed)
          : false;
 }
-auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool
+auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed) -> bool
 {
     if (buses.i2c)
     {
-        return buses.i2c->read_register(m_akm_address, reg, data, size);
+        return buses.i2c->read_register(m_akm_address, reg, rx_data, size);
     }
 
     //spi read
@@ -395,7 +403,7 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, 
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG, reg, speed);
     res &= mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + size, speed);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data, size, speed);
+    res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, rx_data, size, speed);
     return res;
 }
 auto MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool
@@ -412,7 +420,6 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t spee
     //spi read
 
     bool res = true;
-    constexpr uint8_t READ_FLAG = 0x80;
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
     if (m_akm_address != akm_address)
     {
@@ -879,7 +886,6 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     //now request the transfer again
-    constexpr uint8_t READ_FLAG = 0x80;
     constexpr uint8_t akm_address = 0x0C | READ_FLAG;
     if (m_akm_address != akm_address)
     {

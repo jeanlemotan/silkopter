@@ -33,18 +33,15 @@ public:
     auto try_lock() -> bool;
     void unlock();
 
-    auto read(uint8_t* data, size_t size, size_t speed = 0) -> bool;
-    auto write(uint8_t const* data, size_t size, size_t speed = 0) -> bool;
-
-    auto read_register(uint8_t reg, uint8_t* data, size_t size, size_t speed = 0) -> bool;
-    auto write_register(uint8_t reg, uint8_t const* data, size_t size, size_t speed = 0) -> bool;
+    virtual auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
+    virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
 
 private:
     auto init() -> bool;
 
     auto get_divider(uint32_t speed) const -> uint32_t;
 
-    auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
+    auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
 
 
     std::shared_ptr<sz::SPI_RPI::Init_Params> m_init_params;

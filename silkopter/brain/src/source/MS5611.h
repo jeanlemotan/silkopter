@@ -53,6 +53,9 @@ private:
         bus::II2C_ptr i2c;
         bus::ISPI_ptr spi;
     };
+    //i use 2 vectors to avoid memsetting the tx_data to zero all the time
+    std::vector<uint8_t> m_dummy_tx_data;
+    std::vector<uint8_t> m_dummy_rx_data;
 
     auto lock(Buses& buses) -> bool;
     void unlock(Buses& buses);

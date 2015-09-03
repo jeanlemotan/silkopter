@@ -343,17 +343,17 @@ auto UBLOX::init() -> bool
     return setup();
 }
 
-auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
+auto UBLOX::read(Buses& buses, uint8_t* rx_data, size_t max_size) -> size_t
 {
     if (buses.uart)
     {
-        return buses.uart->read(data, max_size);
+        return buses.uart->read(rx_data, max_size);
     }
     else if (buses.spi)
     {
-        max_size = math::min<size_t>(max_size, MAX_PAYLOAD_SIZE + 6);
-        std::fill(data, data + max_size, 0xFF);
-        return buses.spi->read(data, max_size) ? max_size : 0;
+        max_size = math::min<size_t>(max_size, 32u);
+        m_dummy_tx_data.resize(max_size, 0);
+        return buses.spi->transfer(m_dummy_tx_data.data(), rx_data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
     {
@@ -363,15 +363,16 @@ auto UBLOX::read(Buses& buses, uint8_t* data, size_t max_size) -> size_t
     QASSERT(0);
     return 0;
 }
-auto UBLOX::write(Buses& buses, uint8_t const* data, size_t size) -> bool
+auto UBLOX::write(Buses& buses, uint8_t const* tx_data, size_t size) -> bool
 {
     if (buses.uart)
     {
-        return buses.uart->write(data, size);
+        return buses.uart->write(tx_data, size);
     }
     else if (buses.spi)
     {
-        return buses.spi->write(data, size);
+        m_dummy_rx_data.resize(size);
+        return buses.spi->transfer(tx_data, m_dummy_rx_data.data(), size);
     }
     else if (buses.i2c)
     {
@@ -417,11 +418,11 @@ auto UBLOX::setup() -> bool
 
     {
         std::vector<std::pair<Message, size_t>> msgs = {{
-                                                              {MESSAGE_NAV_POSECEF, 1},
-                                                              {MESSAGE_NAV_VELECEF, 1},
-                                                              {MESSAGE_NAV_SOL, 1},
-                                                              {MESSAGE_NAV_STATUS, 1},
-                                                              {MESSAGE_MON_HW, 4},
+                                                              {MESSAGE_NAV_POSECEF, 0},
+                                                              {MESSAGE_NAV_VELECEF, 0},
+                                                              {MESSAGE_NAV_SOL, 0},
+                                                              {MESSAGE_NAV_STATUS, 0},
+                                                              {MESSAGE_MON_HW, 0},
                                                           }};
         for (auto const& m: msgs)
         {
@@ -479,13 +480,13 @@ auto UBLOX::setup() -> bool
 void UBLOX::poll_for_data(Buses& buses)
 {
     auto now = q::Clock::now();
-    if (now - m_last_poll_tp > std::chrono::milliseconds(200))
+    //if (now - m_last_poll_tp > std::chrono::milliseconds(200))
     {
         m_last_poll_tp = now;
-        send_packet(buses, MESSAGE_NAV_POSECEF, nullptr, 0);
-        send_packet(buses, MESSAGE_NAV_VELECEF, nullptr, 0);
+        //send_packet(buses, MESSAGE_NAV_POSECEF, nullptr, 0);
+        //send_packet(buses, MESSAGE_NAV_VELECEF, nullptr, 0);
         send_packet(buses, MESSAGE_NAV_SOL, nullptr, 0);
-        send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
+        //send_packet(buses, MESSAGE_NAV_STATUS, nullptr, 0);
         send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
     }
 }
@@ -513,7 +514,7 @@ void UBLOX::process()
     m_gps_info_stream->clear();
 
     auto now = q::Clock::now();
-    if (now - m_last_process_tp < m_position_stream->get_dt() / 2)
+    if (now - m_last_process_tp < m_position_stream->get_dt())
     {
         return;
     }

@@ -2,7 +2,6 @@
 #include "bus/SPI_Linux.h"
 
 #include <linux/spi/spidev.h>
-#define READ_FLAG   0x80
 
 #include "sz_SPI_Linux.hpp"
 
@@ -97,7 +96,7 @@ void SPI_Linux::unlock()
 //    close();
 }
 
-auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_Linux::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
     QASSERT(m_fd >= 0 && size > 0);
     if (m_fd < 0 || size == 0)
@@ -125,57 +124,28 @@ auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, 
     return true;
 }
 
-auto SPI_Linux::read(uint8_t* data, size_t size, size_t speed) -> bool
+auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("spi_linux::read");
-
-    return transfer(nullptr, data, size, speed);
-}
-auto SPI_Linux::write(uint8_t const* data, size_t size, size_t speed) -> bool
-{
-    QLOG_TOPIC("spi_linux::write");
-
-    return transfer(data, nullptr, size, speed);
+    QLOG_TOPIC("SPI_Linux::transfer");
+    return do_transfer(tx_data, rx_data, size, speed);
 }
 
-auto SPI_Linux::read_register(uint8_t reg, uint8_t* data, size_t size, size_t speed) -> bool
+auto SPI_Linux::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("spi_linux::read_register");
-    QASSERT(m_fd >= 0);
-    if (m_fd < 0)
-    {
-        return false;
-    }
+    QLOG_TOPIC("SPI_Linux::transfer_register");
 
-    m_tx_buffer.clear();
-    m_tx_buffer.resize(size + 1);
-    m_tx_buffer[0] = reg | READ_FLAG;
-
-    m_rx_buffer.resize(size + 1);
-    if (!transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
-    {
-        return false;
-    }
-
-    std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), data);
-    return true;
-}
-auto SPI_Linux::write_register(uint8_t reg, uint8_t const* data, size_t size, size_t speed) -> bool
-{
-    QLOG_TOPIC("spi_linux::write_register");
-    QASSERT(m_fd >= 0);
-    if (m_fd < 0)
-    {
-        return false;
-    }
-
-    m_tx_buffer.clear();
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;
-    std::copy(data, data + size, m_tx_buffer.begin() + 1);
+    std::copy(tx_data, tx_data + size, m_tx_buffer.begin() + 1);
 
     m_rx_buffer.resize(size + 1);
-    return transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed);
+    if (!do_transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
+    {
+        return false;
+    }
+
+    std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), rx_data);
+    return true;
 }
 
 auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool
