@@ -53,9 +53,9 @@ constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
 struct Comms::Channels
 {
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup;
-    typedef util::Channel<comms::Pilot_Message, uint16_t> Pilot;
-    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry;
+    typedef util::Channel<comms::Setup_Message, uint32_t> Setup;
+    typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot;
+    typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry;
 
     Channels()
         : setup(SETUP_CHANNEL)

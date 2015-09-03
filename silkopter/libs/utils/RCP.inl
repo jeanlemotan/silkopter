@@ -815,7 +815,7 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                     queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), std::move(datagram));
                 }
 
-                break; //commenting this results in lots of wrong crc's at the other end
+               // break; //commenting this results in lots of wrong crc's at the other end
             }
         }
     }

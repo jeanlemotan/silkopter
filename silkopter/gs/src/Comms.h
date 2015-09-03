@@ -29,9 +29,9 @@ public:
 
     //----------------------------------------------------------------------
 
-    typedef util::Channel<comms::Setup_Message, uint16_t> Setup_Channel;
-    typedef util::Channel<comms::Pilot_Message, uint16_t> Pilot_Channel;
-    typedef util::Channel<comms::Telemetry_Message, uint16_t> Telemetry_Channel;
+    typedef util::Channel<comms::Setup_Message, uint32_t> Setup_Channel;
+    typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot_Channel;
+    typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry_Channel;
 
     auto get_setup_channel() -> Setup_Channel&;
 
