@@ -427,7 +427,7 @@ auto RCP_RFMON_Socket::start() -> bool
                 if (FD_ISSET(m_impl->rx_pcap_selectable_fd, &readset))
                 {
                     process_rx_packet();
-                    std::this_thread::yield();
+                    //std::this_thread::yield();
                 }
             }
         }
@@ -484,7 +484,7 @@ auto RCP_RFMON_Socket::start() -> bool
                     send_callback(result);
                 }
                 //std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                std::this_thread::yield();
+                //std::this_thread::yield();
 
 #ifdef DEBUG_THROUGHPUT
                 {
@@ -512,9 +512,12 @@ auto RCP_RFMON_Socket::start() -> bool
 
 #if defined RASPBERRY_PI
     {
-        int policy = SCHED_OTHER;
+//        int policy = SCHED_OTHER;
+//        struct sched_param param;
+//        param.sched_priority = 0;
+        int policy = SCHED_FIFO;
         struct sched_param param;
-        param.sched_priority = 0;
+        param.sched_priority = sched_get_priority_max(policy);
         if (pthread_setschedparam(m_tx_thread.native_handle(), policy, &param) != 0)
         {
             perror("tx_thread sched_setscheduler");
@@ -534,6 +537,7 @@ auto RCP_RFMON_Socket::start() -> bool
 void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
 {
     QASSERT(size <= m_impl->tx_packet_header_length + MAX_USER_PACKET_SIZE);
+    QASSERT(size >= m_impl->tx_packet_header_length);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
