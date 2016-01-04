@@ -41,9 +41,7 @@ public:
 
 private:
     auto init() -> bool;
-    void downsample();
-    void upsample();
-
+    void resample();
 
     HAL& m_hal;
 
@@ -245,53 +243,18 @@ void Resampler<Stream_t>::process()
         return;
     }
 
-    if (m_init_params.rate <= m_init_params.input_rate)
+    m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
     {
-        m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
-        {
-            m_input_samples.push_back(i_sample);
-            m_dsp.process(m_input_samples.back().value);
-        });
-        downsample();
-    }
-    else
-    {
-        m_accumulator.process([this](typename Stream_t::Sample const& i_sample)
-        {
-            m_input_samples.push_back(i_sample);
-        });
+        m_input_samples.push_back(i_sample);
+    });
 
-        upsample();
-    }
+
+    resample();
 }
 
 template<class Stream_t>
-void Resampler<Stream_t>::downsample()
+void Resampler<Stream_t>::resample()
 {
-    auto dt = m_output_stream->get_dt();
-    size_t samples_needed = m_output_stream->compute_samples_needed();
-    for (size_t i = 0; i < samples_needed; i++)
-    {
-        //consume input samples
-        m_processed_dt += dt;
-        while (!m_input_samples.empty() && m_processed_dt >= m_input_stream_dt)
-        {
-            m_processed_dt -= m_input_stream_dt;
-            m_last_input_sample = m_input_samples.front();
-            m_input_samples.pop_front();
-        }
-
-        auto const& is = m_last_input_sample;
-        if (is.is_healthy)
-        {
-            m_output_stream->push_sample(is.value, true);
-        }
-        else
-        {
-            m_output_stream->push_last_sample(false);
-        }
-    }
-
     //m_output_stream->samples.reserve(m_input_samples.size() * (m_dt / m_input_stream_dt));
 
 //    auto dt = m_output_stream->get_dt();
@@ -316,10 +279,8 @@ void Resampler<Stream_t>::downsample()
 //        }
 //    }
 
-}
-template<class Stream_t>
-void Resampler<Stream_t>::upsample()
-{
+    bool is_downsampling = m_init_params.rate <= m_init_params.input_rate;
+
     auto dt = m_output_stream->get_dt();
     size_t samples_needed = m_output_stream->compute_samples_needed();
     for (size_t i = 0; i < samples_needed; i++)
@@ -330,21 +291,32 @@ void Resampler<Stream_t>::upsample()
         {
             m_processed_dt -= m_input_stream_dt;
             m_last_input_sample = m_input_samples.front();
+
+            if (is_downsampling && m_last_input_sample.is_healthy)
+            {
+                //upsampling, filter at the input stream sample rate
+                m_dsp.process(m_input_samples.back().value);
+            }
             m_input_samples.pop_front();
         }
 
-
-        auto is = m_last_input_sample;
-        m_dsp.process(is.value);
-        if (is.is_healthy)
+        if (m_last_input_sample.is_healthy)
         {
-            m_output_stream->push_sample(is.value, true);
+            auto value = m_last_input_sample.value;
+            if (!is_downsampling)
+            {
+                //upsampling, filter at the output stream sample rate
+                m_dsp.process(value);
+            }
+
+            m_output_stream->push_sample(value, true);
         }
         else
         {
             m_output_stream->push_last_sample(false);
         }
     }
+
 }
 
 
