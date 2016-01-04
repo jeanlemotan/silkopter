@@ -98,7 +98,7 @@ Touchscreen const& Input_Mgr::get_touchscreen() const
 {
 	return m_touchscreen;
 }
-Keyboard const& Input_Mgr::get_keybard() const
+Keyboard const& Input_Mgr::get_keyboard() const
 {
 	return m_keyboard;
 }
@@ -424,7 +424,7 @@ void Input_Mgr::add_event(Touchscreen_Event const& event)
 }
 void Input_Mgr::add_event(Keyboard_Event const& event)
 {
-	m_keyboard.add_event(event);
+    m_keyboard.add_event(event);
 }
 void Input_Mgr::add_event(Sensor_Event const& event)
 {

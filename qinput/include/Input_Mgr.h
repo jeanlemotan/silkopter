@@ -15,7 +15,7 @@ namespace qinput
         ~Input_Mgr();
 
         auto get_touchscreen() const -> Touchscreen const&;
-        auto get_keybard() const -> Keyboard const&;
+        auto get_keyboard() const -> Keyboard const&;
         auto get_sensors() const -> Sensors const&;
 
         auto get_all_gamepads() const -> std::vector<Gamepad_cptr>;
