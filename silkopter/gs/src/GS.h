@@ -20,6 +20,10 @@ public:
 private:
 	void process();
 
+    qinput::Keyboard_Event get_keyboard_event(QKeyEvent* event) const;
+
+    void keyPressEvent(QKeyEvent* event);
+    void keyReleaseEvent(QKeyEvent* event);
     void closeEvent(QCloseEvent* event);
     void read_settings();
 

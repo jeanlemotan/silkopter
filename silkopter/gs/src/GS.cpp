@@ -108,6 +108,61 @@ void GS::init_graphics()
     QASSERT(m_context.font);
 }
 
+qinput::Keyboard_Event GS::get_keyboard_event(QKeyEvent* event) const
+{
+    qinput::Keyboard_Event ev;
+    ev.timestamp = q::Clock::now();
+    int key = event->key();
+
+         if (key == Qt::Key_Escape) { ev.key_code = qinput::Key_Code::ESCAPE; }
+    else if (key == Qt::Key_Control) { ev.key_code = qinput::Key_Code::CONTROL; }
+    else if (key == Qt::Key_Alt) { ev.key_code = qinput::Key_Code::ALT; }
+    else if (key == Qt::Key_Shift) { ev.key_code = qinput::Key_Code::SHIFT; }
+    else if (key == Qt::Key_Insert) { ev.key_code = qinput::Key_Code::INSERT; }
+    else if (key == Qt::Key_Home) { ev.key_code = qinput::Key_Code::HOME; }
+    else if (key == Qt::Key_End) { ev.key_code = qinput::Key_Code::END; }
+    else if (key == Qt::Key_PageUp) { ev.key_code = qinput::Key_Code::PAGE_UP; }
+    else if (key == Qt::Key_PageDown) { ev.key_code = qinput::Key_Code::PAGE_DOWN; }
+    else if (key == Qt::Key_Delete) { ev.key_code = qinput::Key_Code::DEL; }
+    else if (key == Qt::Key_Backspace) { ev.key_code = qinput::Key_Code::BACKSPACE; }
+
+    else if (key == Qt::Key_F1) { ev.key_code = qinput::Key_Code::F1; }
+    else if (key == Qt::Key_F2) { ev.key_code = qinput::Key_Code::F2; }
+    else if (key == Qt::Key_F3) { ev.key_code = qinput::Key_Code::F3; }
+    else if (key == Qt::Key_F4) { ev.key_code = qinput::Key_Code::F4; }
+    else if (key == Qt::Key_F5) { ev.key_code = qinput::Key_Code::F5; }
+    else if (key == Qt::Key_F6) { ev.key_code = qinput::Key_Code::F6; }
+    else if (key == Qt::Key_F7) { ev.key_code = qinput::Key_Code::F7; }
+    else if (key == Qt::Key_F8) { ev.key_code = qinput::Key_Code::F8; }
+    else if (key == Qt::Key_F9) { ev.key_code = qinput::Key_Code::F9; }
+    else if (key == Qt::Key_F10) { ev.key_code = qinput::Key_Code::F10; }
+    else if (key == Qt::Key_F11) { ev.key_code = qinput::Key_Code::F11; }
+    else if (key == Qt::Key_F12) { ev.key_code = qinput::Key_Code::F12; }
+
+    else if (key == Qt::Key_Up) { ev.key_code = qinput::Key_Code::UP; }
+    else if (key == Qt::Key_Down) { ev.key_code = qinput::Key_Code::DOWN; }
+    else if (key == Qt::Key_Left) { ev.key_code = qinput::Key_Code::LEFT; }
+    else if (key == Qt::Key_Right) { ev.key_code = qinput::Key_Code::RIGHT; }
+
+    else ev.key_code = key;
+
+    return ev;
+}
+
+void GS::keyPressEvent(QKeyEvent* event)
+{
+    qinput::Keyboard_Event ev = get_keyboard_event(event);
+    ev.type = qinput::Keyboard_Event::Type::PRESS;
+    m_input_mgr->add_event(ev);
+}
+
+void GS::keyReleaseEvent(QKeyEvent* event)
+{
+    qinput::Keyboard_Event ev = get_keyboard_event(event);
+    ev.type = qinput::Keyboard_Event::Type::RELEASE;
+    m_input_mgr->add_event(ev);
+}
+
 void GS::closeEvent(QCloseEvent* event)
 {
     QSettings settings;
