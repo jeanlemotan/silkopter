@@ -243,7 +243,7 @@ void Sim_Window::render_brain_state()
 
     m_context.painter.set_material(mat);
 
-    auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position.value);
+    auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.home_ecef_position.value);
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
     auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
 
@@ -317,7 +317,7 @@ void Sim_Window::render_world_axis()
 
     //ECEF
     {
-        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_home_position.value);
+        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.home_ecef_position.value);
         auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(home_lla_position);
         math::quatd rotd;
         rotd.set_from_mat3(enu_to_ecef_rotation);

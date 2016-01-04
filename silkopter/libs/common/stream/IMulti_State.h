@@ -29,7 +29,7 @@ public:
         IBattery_State::Sample battery_state;
         IFrame::Sample frame;
         IECEF_Linear_Acceleration::Sample ecef_linear_acceleration;
-        IECEF_Position::Sample ecef_home_position;
+        IECEF_Position::Sample home_ecef_position;
         IECEF_Position::Sample ecef_position;
         IECEF_Velocity::Sample ecef_velocity;
         IProximity::Sample proximity;
@@ -64,7 +64,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_State::V
     serialize(buffer, value.frame, off);
     serialize(buffer, value.ecef_linear_acceleration, off);
     serialize(buffer, value.ecef_position, off);
-    serialize(buffer, value.ecef_home_position, off);
+    serialize(buffer, value.home_ecef_position, off);
     serialize(buffer, value.ecef_velocity, off);
     serialize(buffer, value.proximity, off);
     serialize(buffer, value.thrust, off);
@@ -78,7 +78,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_
             deserialize(buffer, value.frame, off) &&
             deserialize(buffer, value.ecef_linear_acceleration, off) &&
             deserialize(buffer, value.ecef_position, off) &&
-            deserialize(buffer, value.ecef_home_position, off) &&
+            deserialize(buffer, value.home_ecef_position, off) &&
             deserialize(buffer, value.ecef_velocity, off) &&
             deserialize(buffer, value.proximity, off) &&
             deserialize(buffer, value.thrust, off) &&
