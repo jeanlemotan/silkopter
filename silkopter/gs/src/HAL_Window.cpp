@@ -874,21 +874,33 @@ void HAL_Window::save_editor_data()
     rapidjson::StringBuffer s;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
     m_editor_data.Accept(writer);
-    q::data::File_Sink fs(k_settings_path);
+
+    q::Path path = k_settings_path;
+    if (m_hal.get_multi_config())
+    {
+        path = "settings" + m_hal.get_multi_config()->name + ".json";
+    }
+    q::data::File_Sink fs(path);
     if (fs.is_open())
     {
         fs.write(reinterpret_cast<uint8_t const*>(s.GetString()), s.GetSize());
     }
     else
     {
-        QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+        QLOGE("Cannot open '{}' to save settings.", path);
     }
 }
 void HAL_Window::load_editor_data()
 {
     m_editor_data.SetObject();
 
-    q::data::File_Source fs(k_settings_path);
+    q::Path path = k_settings_path;
+    if (m_hal.get_multi_config())
+    {
+        path = "settings" + m_hal.get_multi_config()->name + ".json";
+    }
+
+    q::data::File_Source fs(path);
     if (!fs.is_open())
     {
         return;
@@ -897,7 +909,7 @@ void HAL_Window::load_editor_data()
     auto data = q::data::read_whole_source_as_string<std::string>(fs);
     if (m_editor_data.Parse(data.c_str()).HasParseError())
     {
-        QLOGE("Failed to load '{}': {}:{}", k_settings_path, m_editor_data.GetParseError(), m_editor_data.GetErrorOffset());
+        QLOGE("Failed to load '{}': {}:{}", path, m_editor_data.GetParseError(), m_editor_data.GetErrorOffset());
     }
 }
 
