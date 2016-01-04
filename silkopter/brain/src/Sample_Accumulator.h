@@ -85,6 +85,18 @@ public:
         m_stream = stream;
     }
 
+    template<size_t N, class T>
+    typename std::enable_if<N != 0, std::shared_ptr<T>>::type get_stream()
+    {
+        return Parent_t::template get_stream<N - 1, T>();
+    }
+
+    template<size_t N, class T>
+    typename std::enable_if<N == 0, std::shared_ptr<T>>::type get_stream()
+    {
+        return m_stream.lock();
+    }
+
     template<size_t N>
     auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal) -> bool
     {
@@ -153,9 +165,11 @@ public:
         if (m_samples.size() > 30)
         {
             //crop to parent count
-            auto crop = math::min(parent_count, m_samples.size());
-            QLOGW("Stream is out of sync: {} samples pending. Cropping {} samples", m_samples.size(), crop);
-            m_samples.erase(m_samples.begin(), m_samples.end() - crop);
+            size_t crop = math::min(parent_count, m_samples.size());
+            auto begin = m_samples.begin();
+            auto end = m_samples.end() - crop;
+            QLOGW("Stream is out of sync: {} samples pending. Cropping {} samples", m_samples.size(), std::distance(begin, end));
+            m_samples.erase(begin, end);
         }
 
         return m_samples.size();
@@ -207,6 +221,12 @@ public:
     void set_stream(std::shared_ptr<T> stream)
     {
         m_storage.set_stream<N>(stream);
+    }
+
+    template<size_t N, class T>
+    auto get_stream() -> std::shared_ptr<T>
+    {
+        return m_storage.get_stream<N>();
     }
 
     auto lock() -> bool
