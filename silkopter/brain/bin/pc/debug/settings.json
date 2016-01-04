@@ -1,13 +1,13 @@
 {
     "hal": {
         "multi_config": {
-            "Name": "silkopter",
+            "Name": "silkopter sim",
             "Mass (Kg)": 0.699999988079071,
             "Height (m)": 0.10000000149011612,
             "Radius (m)": 0.30000001192092898,
-            "Motor Thrust @ 100% (N)": 3.5,
+            "Motor Thrust @ 100% (N)": 3.799999952316284,
             "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
-            "Motor Acceleration (s)": 0.30000001192092898,
+            "Motor Acceleration (s)": 0.4000000059604645,
             "Motor Deceleration (s)": 1.0,
             "Motors": [
                 {
@@ -61,7 +61,7 @@
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": true,
-                    "Ground Enabled": true,
+                    "Ground Enabled": false,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
@@ -148,17 +148,17 @@
                         "Weight (0-1)": 1.0,
                         "Combined XY PID": true,
                         "XY PID": {
-                            "kP": 0.20000000298023225,
+                            "kP": 0.30000001192092898,
                             "kI": 0.0,
-                            "kD": 0.009999999776482582,
+                            "kD": 0.029999999329447748,
                             "Max I": 0.05000000074505806,
                             "D Filter": 0.0
                         },
                         "Z PID": {
                             "kP": 0.4000000059604645,
-                            "kI": 0.10000000149011612,
-                            "kD": 0.0,
-                            "Max I": 0.10000000149011612,
+                            "kI": 0.03999999910593033,
+                            "kD": 0.004000000189989805,
+                            "Max I": 0.03999999910593033,
                             "D Filter": 0.0
                         }
                     },
@@ -265,33 +265,33 @@
                     "State Rate (Hz)": 30
                 },
                 "config": {
-                    "Max Thrust (N)": 11.0,
+                    "Max Thrust (N)": 12.0,
                     "Min Thrust (N)": 2.0,
                     "Horizontal Angle": {
-                        "Max Speed (deg/s)": 170.0,
+                        "Max Speed (deg/s)": 180.0,
                         "Combined PIDs": true,
                         "PIDs": {
                             "kP": 2.0,
-                            "kI": 0.30000001192092898,
-                            "kD": 0.0,
-                            "Max I": 0.30000001192092898,
+                            "kI": 0.5,
+                            "kD": 0.05000000074505806,
+                            "Max I": 0.5,
                             "D Filter": 0.0
                         }
                     },
                     "Altitude": {
                         "Max Speed (m/s)": 2.0,
-                        "LPF Poles": 1,
-                        "LPF Cutoff Frequency (Hz)": 1.0,
+                        "LPF Poles": 5,
+                        "LPF Cutoff Frequency (Hz)": 3.0,
                         "Acceleration PID": {
-                            "kP": 0.699999988079071,
+                            "kP": 1.0,
                             "kI": 0.0,
-                            "kD": 0.0,
+                            "kD": 0.03999999910593033,
                             "Max I": 0.0,
                             "D Filter": 0.0
                         },
                         "Velocity PD": {
-                            "kP": 1.0,
-                            "kD": 0.0,
+                            "kP": 2.0,
+                            "kD": 0.05999999865889549,
                             "D Filter": 0.0
                         },
                         "Altitude P": {

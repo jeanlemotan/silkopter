@@ -11,16 +11,16 @@
         "Throttle Generator": {
             "hal_editor": {
                 "position": {
-                    "x": -493.0,
-                    "y": -671.0
+                    "x": -531.0,
+                    "y": -684.0
                 }
             }
         },
         "Multi Brain": {
             "hal_editor": {
                 "position": {
-                    "x": -1150.0,
-                    "y": -441.0
+                    "x": -1010.0,
+                    "y": -517.0
                 }
             }
         },
@@ -115,8 +115,8 @@
         "Rate Controller": {
             "hal_editor": {
                 "position": {
-                    "x": -1235.0,
-                    "y": -704.0
+                    "x": -1174.0,
+                    "y": -711.0
                 }
             }
         },
@@ -179,8 +179,8 @@
         "Raspicam": {
             "hal_editor": {
                 "position": {
-                    "x": -1032.0,
-                    "y": -500.0
+                    "x": -1105.0,
+                    "y": -546.0
                 }
             }
         },
@@ -251,7 +251,7 @@
         "EKF ECEF": {
             "hal_editor": {
                 "position": {
-                    "x": -1390.0,
+                    "x": -1389.0,
                     "y": -471.0
                 }
             }
@@ -323,8 +323,8 @@
         "ADS1115": {
             "hal_editor": {
                 "position": {
-                    "x": -1536.0,
-                    "y": -524.0
+                    "x": -1612.0,
+                    "y": -533.0
                 }
             }
         },
@@ -341,6 +341,22 @@
                 "position": {
                     "x": -1510.0,
                     "y": -291.0
+                }
+            }
+        },
+        "ADC Ammeter": {
+            "hal_editor": {
+                "position": {
+                    "x": -1489.0,
+                    "y": -551.0
+                }
+            }
+        },
+        "Raspicam1": {
+            "hal_editor": {
+                "position": {
+                    "x": -1035.0,
+                    "y": -570.0
                 }
             }
         }

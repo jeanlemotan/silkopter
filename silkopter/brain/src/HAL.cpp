@@ -877,7 +877,7 @@ void HAL::process()
     {
         float p = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
         nt.second.process_percentage = math::lerp(nt.second.process_percentage, p, 0.1f);
-//        QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
+        //QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
     }
 
 //    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");
