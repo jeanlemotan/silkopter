@@ -180,6 +180,16 @@ void Multi_Simulator::process()
 {
     QLOG_TOPIC("multi_simulator::process");
 
+    m_angular_velocity_stream->samples.clear();
+    m_acceleration_stream->samples.clear();
+    m_magnetic_field_stream->samples.clear();
+    m_pressure_stream->samples.clear();
+    m_temperature_stream->samples.clear();
+    m_distance_stream->samples.clear();
+    m_gps_info_stream->samples.clear();
+    m_ecef_position_stream->samples.clear();
+    m_ecef_velocity_stream->samples.clear();
+
     auto now = q::Clock::now();
     auto dt = now - m_last_tp;
     if (dt < std::chrono::milliseconds(1))
@@ -200,16 +210,6 @@ void Multi_Simulator::process()
             }
         }
     }
-
-    m_angular_velocity_stream->samples.clear();
-    m_acceleration_stream->samples.clear();
-    m_magnetic_field_stream->samples.clear();
-    m_pressure_stream->samples.clear();
-    m_temperature_stream->samples.clear();
-    m_distance_stream->samples.clear();
-    m_gps_info_stream->samples.clear();
-    m_ecef_position_stream->samples.clear();
-    m_ecef_velocity_stream->samples.clear();
 
     static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.0);
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
