@@ -18,12 +18,22 @@ private:
     silk::Comms& m_comms;
     qinput::Input_Mgr& m_input_mgr;
     Render_Context& m_context;
+    q::scene::Camera m_camera;
 
     qinput::Gamepad_cptr m_gamepad;
 
     silk::stream::IMulti_Input::Value m_input;
     silk::stream::IMulti_State::Value m_prev_state;
     silk::stream::IMulti_State::Value m_state;
+
+    struct UAV
+    {
+        math::trans3dd enu_to_ecef_transform; //relative to home
+        math::trans3dd ecef_to_enu_transform; //relative to home
+        math::vec3f enu_position; //this is in the home enu space
+        math::quatf local_to_enu_quat; //the uav rotation basically.
+    } m_uav;
+
 
     q::Clock::time_point m_arm_start_tp = q::Clock::now();
 

@@ -23,6 +23,10 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     m_border_text_style.decoration = q::text::Decoration::OUTLINE;
     m_border_text_style.decoration_color = 0x77000000;
     m_border_text_style.decoration_thickness = 1;
+
+    m_camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
+    m_camera.set_near_distance(0.05f);
+    m_camera.set_far_distance(20000.f);
 }
 
 void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
@@ -65,10 +69,20 @@ void Multi_HUD_Widget::upload_video_frame()
 }
 void Multi_HUD_Widget::process_vertical_thrust_rate()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    float v = 0;
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * std::pow(v, expo); //some expo
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+
+        constexpr float expo = 2.f;
+        v = math::sgn(v) * std::pow(v, expo); //some expo
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 0.5f : 0.1f;
+    v += kb.is_key_pressed('=') ? kb_value : 0;
+    v -= kb.is_key_pressed('-') ? kb_value : 0;
 
     auto config = m_hal.get_multi_config();
     if (config)
@@ -80,10 +94,20 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
 
 void Multi_HUD_Widget::process_vertical_thrust_offset()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    float v = 0;
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * std::pow(v, expo); //some expo
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+
+        constexpr float expo = 2.f;
+        v = math::sgn(v) * std::pow(v, expo); //some expo
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 0.5f : 0.2f;
+    v += kb.is_key_pressed('=') ? kb_value : 0;
+    v -= kb.is_key_pressed('-') ? kb_value : 0;
 
     auto config = m_hal.get_multi_config();
     if (config)
@@ -95,9 +119,18 @@ void Multi_HUD_Widget::process_vertical_thrust_offset()
 
 void Multi_HUD_Widget::process_vertical_climb_rate()
 {
-    float v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+    float v = 0;
 
-    v *= 5.f;
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+        v *= 5.f;
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 3.f : 1.f;
+    v += kb.is_key_pressed('=') ? kb_value : 0;
+    v -= kb.is_key_pressed('-') ? kb_value : 0;
 
     m_input.vertical.velocity.set(v);
 }
@@ -117,57 +150,106 @@ void Multi_HUD_Widget::process_vertical()
         break;
     }
 
-    if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
+    if (m_gamepad)
     {
-        int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
+        {
+            int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
 
-        m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+            m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+        }
+        else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
+        {
+            int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
+
+            m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+        }
     }
-    else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if (kb.is_key_pressed('V') && kb.is_key_released('1'))
     {
-        int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
-
-        m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE);
+    }
+    else if (kb.is_key_pressed('V') && kb.is_key_released('2'))
+    {
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
+    }
+    else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
+    {
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY);
     }
 
 }
 
 void Multi_HUD_Widget::process_horizontal_angle_rate()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+    math::vec2f v;
 
-    v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+        v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
+        constexpr float expo = 2.f;
+        v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
-    v *= math::vec2f(math::anglef::_2pi);
+        v *= math::vec2f(math::anglef::_2pi);
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(120.f) : math::radians(45.f);
+    v.y += kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
+    v.x -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
+    v.x += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
 
     m_input.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_angle()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+    math::vec2f v;
 
-    v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+        v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
+        constexpr float expo = 2.f;
+        v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
-    v *= math::vec2f(math::anglef::pi / 4.f);
+        v *= math::vec2f(math::anglef::pi / 4.f);
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(40.f) : math::radians(20.f);
+    v.y += kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
+    v.x -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
+    v.x += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
 
     m_input.horizontal.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_velocity()
 {
-    math::vec2f v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
-    v *= 5.f;
+    math::vec2f v;
+    if (m_gamepad)
+    {
+        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+        v *= 5.f;
+    }
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(5.f) : math::radians(1.f);
+    v.x -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
+    v.x += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
+    v.y += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+
     m_input.horizontal.velocity.set(v);
 }
 
@@ -186,34 +268,59 @@ void Multi_HUD_Widget::process_horizontal()
         break;
     }
 
-    if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_LEFT))
+    if (m_gamepad)
     {
-        int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) - 1,
-                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+        if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_LEFT))
+        {
+            int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) - 1,
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+            m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+        }
+        else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_RIGHT))
+        {
+            int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) + 1,
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+
+            m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+        }
     }
-    else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_RIGHT))
-    {
-        int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) + 1,
-                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                            static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
 
-        m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if (kb.is_key_pressed('H') && kb.is_key_released('1'))
+    {
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
+    }
+    else if (kb.is_key_pressed('H') && kb.is_key_released('2'))
+    {
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE);
+    }
+    else if (kb.is_key_pressed('H') && kb.is_key_released('3'))
+    {
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY);
     }
 }
 
 void Multi_HUD_Widget::process_yaw_angle_rate()
 {
     float v = 0;
-    v += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
-    v -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
+    if (m_gamepad)
+    {
+        v += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
+        v -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
 
-    constexpr float expo = 2.f;
-    v = math::sgn(v) * std::pow(v, expo); //some expo
+        constexpr float expo = 2.f;
+        v = math::sgn(v) * std::pow(v, expo); //some expo
 
-    v *= math::anglef::pi2;
+        v *= math::anglef::pi2;
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(30.f) : math::radians(15.f);
+    v += kb.is_key_pressed(',') ? kb_value : 0;
+    v -= kb.is_key_pressed('.') ? kb_value : 0;
 
     m_input.yaw.angle_rate.set(v);
 }
@@ -230,8 +337,9 @@ void Multi_HUD_Widget::process_yaw()
 
 void Multi_HUD_Widget::process_mode_idle()
 {
-    if (m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) &&
-        m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X))
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if ((m_gamepad && m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) && m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X)) ||
+        (kb.is_key_pressed(qinput::Key_Code::SHIFT) && kb.is_key_released('A')))
     {
         m_input.mode.set(silk::stream::IMulti_Input::Mode::ARMED);
         QLOGI("Trying to ARM");
@@ -240,8 +348,9 @@ void Multi_HUD_Widget::process_mode_idle()
 
 void Multi_HUD_Widget::process_mode_armed()
 {
-    if (m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) &&
-        m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X))
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if ((m_gamepad && m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) && m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X)) ||
+        (kb.is_key_pressed(qinput::Key_Code::SHIFT) && kb.is_key_released('A')))
     {
         m_input.mode.set(silk::stream::IMulti_Input::Mode::IDLE);
         QLOGI("Trying to DISARM");
@@ -281,11 +390,6 @@ void Multi_HUD_Widget::acquire_gamepad()
 void Multi_HUD_Widget::process_gamepad()
 {
     acquire_gamepad();
-    if (!m_gamepad)
-    {
-        return;
-    }
-
     process_mode();
 
     m_comms.send_multi_input_value(m_input);
@@ -353,6 +457,14 @@ void Multi_HUD_Widget::process()
         m_state = s.value;
         decode_video(m_state.video.value);
     }
+
+    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_state.home_ecef_position.value);
+    util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_uav.enu_to_ecef_transform, m_uav.ecef_to_enu_transform);
+
+    m_uav.enu_position = math::vec3f(math::transform(m_uav.ecef_to_enu_transform, m_state.ecef_position.value));
+    m_uav.local_to_enu_quat = m_state.frame.value;
+
+
     upload_video_frame();
 
     process_gamepad();
@@ -368,40 +480,46 @@ void Multi_HUD_Widget::render()
 {
     m_render_widget->begin_rendering();
 
-    m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_render_widget->width(), m_render_widget->height())));
+    m_camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_render_widget->width(), m_render_widget->height())));
 
     auto color = math::color::u32_to_rgba<float>(0x2c3e50);
     q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
     q::System::inst().get_renderer()->get_render_target()->clear_all();
 
+    m_context.painter.push_post_clip_transform(math::trans3df());
+    m_context.painter.set_post_clip_transform(math::trans3df());
 
     render_video();
 
 
-    util::coordinates::LLA lla;
-    lla.latitude = 0.59341195;
-    lla.longitude = -2.0478571;
-    lla.altitude = 251.702;
+    {
+        util::coordinates::LLA lla;
+        lla.latitude = 0.59341195;
+        lla.longitude = -2.0478571;
+        lla.altitude = 251.702;
 
-    auto N = util::coordinates::normal_distance(lla.latitude);
-    auto ecef = util::coordinates::lla_to_ecef(lla);
-    auto trans = util::coordinates::enu_to_ecef_transform(lla);
-    auto axis_x = trans.get_axis_x();
-    auto axis_y = trans.get_axis_y();
-    auto axis_z = trans.get_axis_z();
+        auto N = util::coordinates::normal_distance(lla.latitude);
+        auto ecef = util::coordinates::lla_to_ecef(lla);
+        auto trans = util::coordinates::enu_to_ecef_transform(lla);
+        auto axis_x = trans.get_axis_x();
+        auto axis_y = trans.get_axis_y();
+        auto axis_z = trans.get_axis_z();
 
-    math::vec3d g(0, 0, -1);
-    auto G = math::rotate(trans, g);
+        math::vec3d g(0, 0, -1);
+        auto G = math::rotate(trans, g);
+    }
 
-//    {
-//        auto delta = m_uav.state.enu_position - m_camera_position_target;
-//        delta *= 0.9f;
-//        m_camera_position_target += delta;
-//        m_context.camera.set_position(m_context.camera.get_position() + delta);
-//        m_camera_controller.set_focus_point(m_camera_position_target);
-//    }
 
-    m_context.painter.set_camera(m_context.camera);
+    //compute the camera rotation from the uav rotation except for the yaw
+    m_camera.set_position(m_uav.enu_position);
+    m_camera.set_rotation(m_state.frame.value);
+
+    m_context.painter.set_camera(m_camera);
+
+//    math::trans3df uav_local_to_enu_transform;
+//    uav_local_to_enu_transform.set_translation(m_uav.enu_position);
+//    uav_local_to_enu_transform.set_rotation(m_state.frame.value);
+
 
     render_ground();
     render_hud();
@@ -410,6 +528,8 @@ void Multi_HUD_Widget::render()
 
     m_render_widget->end_rendering();
     m_render_widget->update();
+
+    m_context.painter.pop_post_clip_transform();
 }
 
 void Multi_HUD_Widget::render_video()
@@ -418,6 +538,10 @@ void Multi_HUD_Widget::render_video()
     {
         return;
     }
+
+    m_context.painter.push_post_clip_transform(math::trans3df());
+    m_context.painter.set_post_clip_transform(math::trans3df());
+
 
     auto mat = m_context.materials.textured_2d;
     mat.get_render_state(0).set_depth_test(true);
@@ -477,17 +601,15 @@ void Multi_HUD_Widget::render_video()
         m_context.painter.fill_rectangle(q::draw::Vertex(math::vec2f(bar_width + middle_width, 0), math::vec2f(1 - tw, 0)),
                                          q::draw::Vertex(math::vec2f(bar_width + middle_width + bar_width, height()), math::vec2f(1 - tw, 1)));
     }
+
+    m_context.painter.pop_post_clip_transform();
 }
 
 void Multi_HUD_Widget::render_ground()
 {
-    return;
-
-    math::vec3d home = m_state.ecef_home_position.value;
-
     //m_state.frame
 
-    math::vec3s32 offset(home);
+    math::vec3s32 offset(m_uav.enu_position);
     offset.z = 0;
 
     math::trans3df trans;
@@ -534,6 +656,9 @@ void Multi_HUD_Widget::render_hud()
 
 void Multi_HUD_Widget::render_modes()
 {
+    m_context.painter.push_post_clip_transform(math::trans3df());
+    m_context.painter.set_post_clip_transform(math::trans3df());
+
     m_context.painter.set_material(m_context.materials.font);
     m_border_text_style.height = 20;
     m_context.texter.set_style(m_border_text_style);
@@ -570,6 +695,8 @@ void Multi_HUD_Widget::render_modes()
         m_context.texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 80));
         break;
     }
+
+    m_context.painter.pop_post_clip_transform();
 }
 
 void Multi_HUD_Widget::render_horizon()
@@ -577,7 +704,6 @@ void Multi_HUD_Widget::render_horizon()
     float yaw, pitch, roll;
     m_state.frame.value.get_as_euler_zxy(pitch, roll, yaw);
 
-    m_context.painter.push_post_clip_transform(math::trans3df());
 
     auto mat = m_context.materials.primitive;
     mat.get_render_state(0).set_depth_test(true);
@@ -600,9 +726,9 @@ void Multi_HUD_Widget::render_horizon()
     {
         float length = i == 0 ? k_huge_length : (i % 4 == 0 ? k_big_length : k_length);
         math::quatf rot;
-        rot.set_from_euler_zyx(pitch + angle, roll, 0);
-        math::vec3f p1 = math::rotate(rot, math::vec3f(-length, k_distance_from_camera, 0));
-        math::vec3f p2 = math::rotate(rot, math::vec3f( length, k_distance_from_camera, 0));
+        rot.set_from_euler_zyx(angle, 0, yaw);
+        math::vec3f p1 = m_uav.enu_position + math::rotate(rot, math::vec3f(-length, k_distance_from_camera, 0));
+        math::vec3f p2 = m_uav.enu_position + math::rotate(rot, math::vec3f( length, k_distance_from_camera, 0));
 
         uint32_t color = 0x88FFFFFF;
 
@@ -613,35 +739,28 @@ void Multi_HUD_Widget::render_horizon()
         uint32_t color = 0x88FFFFFF;
 
         math::quatf rot;
-        rot.set_from_euler_zyx(0, roll, 0);
-        math::vec3f p1 = math::rotate(rot, math::vec3f(-k_huge_length - 0.2f, k_distance_from_camera, 0));
-        math::vec3f p2 = math::rotate(rot, math::vec3f(-k_huge_length, k_distance_from_camera, 0));
+        rot.set_from_euler_zyx(0, 0, yaw);
+        math::vec3f p1 = m_uav.enu_position + math::rotate(rot, math::vec3f(-k_huge_length - 0.2f, k_distance_from_camera, 0));
+        math::vec3f p2 = m_uav.enu_position + math::rotate(rot, math::vec3f(-k_huge_length, k_distance_from_camera, 0));
         m_context.painter.draw_line(q::draw::Vertex(p1, color), q::draw::Vertex(p2, color));
 
-        p1 = math::rotate(rot, math::vec3f(k_huge_length + 0.2f, k_distance_from_camera, 0));
-        p2 = math::rotate(rot, math::vec3f(k_huge_length, k_distance_from_camera, 0));
+        p1 = m_uav.enu_position + math::rotate(rot, math::vec3f(k_huge_length + 0.2f, k_distance_from_camera, 0));
+        p2 = m_uav.enu_position + math::rotate(rot, math::vec3f(k_huge_length, k_distance_from_camera, 0));
         m_context.painter.draw_line(q::draw::Vertex(p1, color), q::draw::Vertex(p2, color));
 
         math::vec2f out;
-        m_context.camera.project(out, p1);
+        m_camera.project(out, p1);
 
         m_context.painter.set_material(m_context.materials.font);
         m_border_text_style.height = 14;
         m_context.texter.set_style(m_border_text_style);
         m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("{.1}", math::degrees(pitch)).c_str(), out);
     }
-
-
-    m_context.painter.pop_post_clip_transform();
 }
 
 void Multi_HUD_Widget::render_altitude()
 {
-    float yaw, pitch, roll;
-    m_state.frame.value.get_as_euler_zxy(pitch, roll, yaw);
-
-    auto ecef_to_enu_transform = util::coordinates::ecef_to_enu_transform(util::coordinates::ecef_to_lla(m_state.ecef_home_position.value));
-    auto enu_position = math::transform(ecef_to_enu_transform, m_state.ecef_position.value);
+    //auto enu_position = math::transform(m_ecef_to_enu_trans, m_state.ecef_position.value);
 
 
     auto mat = m_context.materials.font;
@@ -654,6 +773,6 @@ void Multi_HUD_Widget::render_altitude()
     m_context.painter.set_material(m_context.materials.font);
     m_border_text_style.height = 20;
     m_context.texter.set_style(m_border_text_style);
-    m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("ALT: {.1}m", enu_position.z).c_str(), math::vec2f(0, 120));
+    m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 120));
 }
 
