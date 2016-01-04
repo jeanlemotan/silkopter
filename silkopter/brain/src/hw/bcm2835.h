@@ -459,7 +459,11 @@
   following numbers:
 */
 /*! Peripherals block base address on RPi 1 */
-#define BCM2835_PERI_BASE               0x20000000
+//#define BCM2835_PERI_BASE               0x20000000
+
+/*! Peripherals block base address on RPi 2 */
+#define BCM2835_PERI_BASE               0x3F000000
+
 /*! Size of the peripherals block on RPi 1 */
 #define BCM2835_PERI_SIZE               0x01000000
 
