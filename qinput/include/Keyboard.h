@@ -36,10 +36,7 @@ namespace qinput
 			MM_NEXT,
 			MM_PREVIOUS,
 
-			ENTER,
-			SPACE,
 			ESCAPE,
-			TAB,
 			CONTROL,
 			ALT,
 			SHIFT,
