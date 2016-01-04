@@ -155,7 +155,7 @@ int main(int argc, char const* argv[])
         QLOGI("All systems up. Ready to fly...");
 
         {
-            constexpr std::chrono::milliseconds PERIOD(6);
+            constexpr std::chrono::milliseconds PERIOD(5);
             auto last = q::Clock::now();
             while (!s_exit)
             {
@@ -183,10 +183,6 @@ int main(int argc, char const* argv[])
 exit:
         QLOGI("Stopping everything");
 
-#ifdef RASPBERRY_PI
-        shutdown_bcm();
-#endif
-
         //stop threads
         async_work.reset();
         s_async_io_service.stop();
@@ -196,6 +192,10 @@ exit:
             async_thread.join();
         }
         hal.shutdown();
+
+#ifdef RASPBERRY_PI
+        shutdown_bcm();
+#endif
     }
     catch (std::exception const& e)
     {
