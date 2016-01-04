@@ -864,6 +864,7 @@ void Comms::process()
         switch (msg.get())
         {
         case comms::Pilot_Message::MULTI_STATE : handle_multi_state(); break;
+        default: break;
         }
     }
 
@@ -876,6 +877,7 @@ void Comms::process()
             switch (msg.get())
             {
             case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
+            default: break;
             }
         }
     }
@@ -899,6 +901,8 @@ void Comms::process()
         case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+
+        default: break;
         }
     }
     //    QLOGI("*********** LOOP: {}", xxx);
