@@ -148,6 +148,12 @@ namespace math
 	template <typename T> bool is_negative(trans2d<T> const& v1);
 
 
+    //////////////////////////////////////////////////////////////////////////
+    // nan
+
+    template <typename T> bool is_nan(T v1);
+    template <typename T> bool is_nan(angle<T> const& v1);
+
 	//////////////////////////////////////////////////////////////////////////
 	// component wise
 
@@ -200,6 +206,13 @@ namespace math
 		template<typename T> vec3<bool> is_one(vec3<T> const& v, T tolerance);
 		template<typename T> vec4<bool> is_one(vec4<T> const& v, T tolerance);
 		template<typename T> vec4<bool> is_one(quat<T> const& v, T tolerance);
+
+        //////////////////////////////////////////////////////////////////////////
+
+        template <typename T> vec2<bool> is_nan(vec2<T> const& v);
+        template <typename T> vec3<bool> is_nan(vec3<T> const& v);
+        template <typename T> vec4<bool> is_nan(vec4<T> const& v);
+        template <typename T> vec4<bool> is_nan(quat<T> const& v);
 
 		//////////////////////////////////////////////////////////////////////////
 

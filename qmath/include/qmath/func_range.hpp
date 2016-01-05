@@ -11,11 +11,13 @@ namespace math
 	//These should be branchless as much as possible
 	template <typename T> inline T min(T a, T b)
 	{
+        QASSERT(!(is_nan(a) || is_nan(b)));
 		return a <= b ? a : b;
 	}
 	template <typename T> inline T max(T a, T b)
 	{
-		return a >= b ? a : b;
+        QASSERT(!(is_nan(a) || is_nan(b)));
+        return a >= b ? a : b;
 	}
 	template<typename T> inline vec2<T> min(vec2<T> const& a, vec2<T> const& b)
 	{
@@ -157,6 +159,7 @@ namespace math
 
 	template<typename T> inline T floor(T x)
 	{
+        QASSERT(!is_nan(x));
 #if defined __AVR__ //avr doesn't define std::floor
         return ::floorf(x);
 #else
@@ -165,6 +168,7 @@ namespace math
 	}
 	template<> inline float floor(float x)
 	{
+        QASSERT(!is_nan(x));
         return ::floorf(x);
 	}
 	template<typename T> inline vec2<T> floor(vec2<T> const& x)
@@ -182,6 +186,7 @@ namespace math
 
 	template<typename T> inline T ceil(T x)
 	{
+        QASSERT(!is_nan(x));
 #if defined __AVR__ //avr doesn't define std::floor
         return ::ceilf(x);
 #else
@@ -190,7 +195,8 @@ namespace math
     }
 	template<> inline float ceil(float x)
 	{
-		return ceilf(x);
+        QASSERT(!is_nan(x));
+        return ceilf(x);
 	}
 	template<typename T> inline vec2<T> ceil(vec2<T> const& x)
 	{
@@ -208,7 +214,8 @@ namespace math
 
 	template<typename T> inline T fract(T x)
 	{
-		return x - floor(x);
+        QASSERT(!is_nan(x));
+        return x - floor(x);
 	}
 	template<typename T> inline vec2<T> fract(vec2<T> const& x)
 	{
@@ -229,11 +236,13 @@ namespace math
 	//rounds to the closest integer
 	template<> inline float round(float x)
 	{
-		return floor(x + 0.5f);
+        QASSERT(!is_nan(x));
+        return floor(x + 0.5f);
 	}
 	template<> inline double round(double x)
 	{
-		return floor(x + 0.5);
+        QASSERT(!is_nan(x));
+        return floor(x + 0.5);
 	}
 
 	template<typename T> inline vec2<T> round(vec2<T> const& x)
@@ -256,7 +265,8 @@ namespace math
 	//rounds to the closest integer
 	template<> inline float round(float x, uint8_t decimals)
 	{
-		float ix = floor(x);
+        QASSERT(!is_nan(x));
+        float ix = floor(x);
 		float frac = x - ix;
 		float p = ::powf(10.f, (float)decimals);
 		float f = floor(round(frac * p));
@@ -265,7 +275,8 @@ namespace math
 	}
 	template<> inline double round(double x, uint8_t decimals)
 	{
-		double ix = floor(x);
+        QASSERT(!is_nan(x));
+        double ix = floor(x);
 		double frac = x - ix;
 		double p = ::pow(10.0, (double)decimals);
 		double f = floor(round(frac * p));
