@@ -754,7 +754,7 @@ void Multi_HUD_Widget::render_horizon()
         m_context.painter.set_material(m_context.materials.font);
         m_border_text_style.height = 14;
         m_context.texter.set_style(m_border_text_style);
-        m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("{.1}", math::degrees(pitch)).c_str(), out);
+        m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("{.1}°", math::degrees(pitch)).c_str(), out);
     }
 }
 
