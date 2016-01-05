@@ -222,10 +222,10 @@ void Sim_Window::render_uav(math::trans3df const& trans)
     //render altitude meter
     if (m_ui.action_show_altitude->isChecked())
     {
-        auto p0 = m_uav.sim_state.enu_position;
-        auto p1 = p0;
+        math::vec3f p0 = m_uav.sim_state.enu_position;
+        math::vec3f p1 = p0;
         p0.z = 0;
-        auto p2 = p1 + math::normalized<float, math::safe>(p1 - p0) * 2.f;
+        math::vec3f p2 = p1 + math::vec3f(0, 0, math::sgn(p0.z)) * 2.f;
         m_context.painter.draw_line(q::draw::Vertex(p0, 0x50FFFFFF), q::draw::Vertex(p1, 0x50FFFFFF));
         m_context.painter.draw_line(q::draw::Vertex(p1, 0x50FFFFFF), q::draw::Vertex(p2, 0x00FFFFFF));
         m_context.painter.fill_circle(q::draw::Vertex(p0, 0x50FFFFFF), 0.05, 16);
@@ -247,8 +247,8 @@ void Sim_Window::render_brain_state()
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
     auto ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
 
-    auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position.value);
-    QLOGI("LAT: {}, LON: {}, ALT: {}", lla_position.latitude, lla_position.longitude, lla_position.altitude);
+    //auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position.value);
+    //QLOGI("LAT: {}, LON: {}, ALT: {}", lla_position.latitude, lla_position.longitude, lla_position.altitude);
 
     //render what the brain _thinks_ the orientation is
     {
