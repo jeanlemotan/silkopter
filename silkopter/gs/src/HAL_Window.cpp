@@ -915,6 +915,17 @@ void HAL_Window::load_editor_data()
     {
         QLOGE("Failed to load '{}': {}:{}", path, m_editor_data.GetParseError(), m_editor_data.GetErrorOffset());
     }
+    else
+    {
+        //now set the position of all the nodes
+        for (auto& node_pair: m_ui_nodes)
+        {
+            std::string const& name = node_pair.first;
+            UI_Node& node = node_pair.second;
+            QPointF pos = get_node_position(name);
+            node.block->setPos(pos);
+        }
+    }
 }
 
 void HAL_Window::process()
