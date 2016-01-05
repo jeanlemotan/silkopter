@@ -73,7 +73,7 @@ template<class T> struct Sample
     Sample& operator=(Sample&& other) = default;
 
     T value;
-    bool is_healthy = true;
+    bool is_healthy = false;
 };
 
 
