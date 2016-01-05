@@ -39,7 +39,7 @@ auto Multi_Brain::init(rapidjson::Value const& init_params) -> bool
 
 auto Multi_Brain::init() -> bool
 {
-    auto multi_config = m_hal.get_multi_config();
+    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
     if (!multi_config)
     {
         QLOGE("No multi config found");
@@ -96,7 +96,7 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    auto& input = m_inputs.input.sample.value;
+    stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
 
     if (m_inputs.input.previous_sample.value.mode.value != stream::IMulti_Input::Mode::IDLE)
@@ -143,7 +143,7 @@ void Multi_Brain::process_state_mode_idle()
 
 void Multi_Brain::process_state_mode_armed()
 {
-    auto& input = m_inputs.input.sample.value;
+    stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
     if (!m_home.is_acquired)
@@ -254,8 +254,8 @@ void Multi_Brain::acquire_home_position()
 {
     if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        auto& history = m_home.ecef_position_history;
-        auto per_second = static_cast<size_t>(1.f / m_dts);
+        std::deque<util::coordinates::ECEF>& history = m_home.ecef_position_history;
+        size_t per_second = static_cast<size_t>(1.f / m_dts);
 #ifdef NDEBUG
         while (history.size() > 5 * per_second + 1)
 #else
@@ -272,7 +272,7 @@ void Multi_Brain::acquire_home_position()
         }
         util::coordinates::ECEF avg;
         double mul = 1.0 / double(history.size());
-        for (auto const& h: history)
+        for (util::coordinates::ECEF const& h: history)
         {
             avg += h * mul;
         }
@@ -382,8 +382,8 @@ void Multi_Brain::process()
     {
         stream::IMulti_State::Value state;
         state.ecef_position = m_inputs.position.sample;
-        state.ecef_home_position.value = m_home.ecef_position;
-        state.ecef_home_position.is_healthy = m_home.is_acquired;
+        state.home_ecef_position.value = m_home.ecef_position;
+        state.home_ecef_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
         state.input = m_inputs.input.sample;
         state.proximity = m_inputs.proximity.sample;
@@ -440,7 +440,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    auto output_rate = m_rate_output_stream->get_rate();
+    uint32_t output_rate = m_rate_output_stream->get_rate();
 
     m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multi_config.motor_thrust * m_multi_config.motors.size() * 0.5f);
     m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multi_config.motor_thrust * m_multi_config.motors.size());

@@ -1010,6 +1010,8 @@ void MPU9250::process()
         unlock(buses);
     });
 
+    //TODO - add health indication
+
     //auto now = q::Clock::now();
     //static q::Clock::time_point last_timestamp = q::Clock::now();
    // auto dt = now - last_timestamp;

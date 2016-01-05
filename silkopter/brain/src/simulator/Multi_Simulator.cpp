@@ -219,57 +219,64 @@ void Multi_Simulator::process()
     {
         auto const& uav_state = simulation.get_uav_state();
         {
-            auto& stream = *m_angular_velocity_stream;
+            Angular_Velocity& stream = *m_angular_velocity_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.angular_velocity;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_acceleration_stream;
+            Acceleration& stream = *m_acceleration_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.acceleration;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_magnetic_field_stream;
+            Magnetic_Field& stream = *m_magnetic_field_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 stream.accumulated_dt -= stream.dt;
+                QASSERT(math::cwise::none(math::cwise::is_nan(uav_state.magnetic_field)));
+                QASSERT(!math::is_zero(uav_state.magnetic_field, math::epsilon<float>()));
                 stream.last_sample.value = uav_state.magnetic_field;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_pressure_stream;
+            Pressure& stream = *m_pressure_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.pressure;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_temperature_stream;
+            Temperature& stream = *m_temperature_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.temperature;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_distance_stream;
+            Distance& stream = *m_distance_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
@@ -281,7 +288,7 @@ void Multi_Simulator::process()
         }
 
         {
-            auto& stream = *m_gps_info_stream;
+            GPS_Info& stream = *m_gps_info_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
@@ -291,28 +298,31 @@ void Multi_Simulator::process()
                 stream.last_sample.value.fix_satellites = 4;
                 stream.last_sample.value.pacc = m_ecef_pacc_dist(m_generator);
                 stream.last_sample.value.vacc = m_ecef_vacc_dist(m_generator);
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_ecef_position_stream;
+            ECEF_Position& stream = *m_ecef_position_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 math::vec3d noise(m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator));
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
         {
-            auto& stream = *m_ecef_velocity_stream;
+            ECEF_Velocity& stream = *m_ecef_velocity_stream;
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
                 math::vec3f noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(uav_state.enu_velocity))) + noise;
+                stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }

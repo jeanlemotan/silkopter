@@ -196,6 +196,9 @@ void SRF01::process()
         bus->unlock();
     });
 
+    //TODO - add health indication
+
+
     //the trigger data acts as a header. Following this header there is the actual measurement
     uint16_t d = 0;
     if (read_response_u16(*bus, REAL_RANGING_CM_TX, d))

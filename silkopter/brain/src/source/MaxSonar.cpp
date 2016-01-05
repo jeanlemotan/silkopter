@@ -112,6 +112,8 @@ void MaxSonar::process()
         m_read_data.erase(m_read_data.begin(), m_read_data.begin() + 5);
     }
 
+    //TODO - add health indication
+
     //use the latest data only
     if (d >= 0)
     {

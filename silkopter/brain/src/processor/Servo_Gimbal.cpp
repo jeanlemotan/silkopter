@@ -89,34 +89,41 @@ void Servo_Gimbal::process()
         math::vec3f rotation_euler;
         rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
 
-        bool is_healthy = i_sample.is_healthy;
-
+        if (i_sample.is_healthy)
         {
-            auto const& config = m_config->x_pwm;
-
-            math::anglef angle(rotation_euler.x);
-            angle.normalize();
-            float a = angle.radians;
-            if (a > math::anglef::pi)
             {
-                a = a - math::anglef::_2pi;
-            }
-            auto min_a = math::radians(config.min_angle);
-            auto max_a = math::radians(config.max_angle);
-            auto mu = (a - min_a) / (max_a - min_a);
-            mu = math::clamp(mu, 0.f, 1.f);
+                auto const& config = m_config->x_pwm;
 
-            m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
+                math::anglef angle(rotation_euler.x);
+                angle.normalize();
+                float a = angle.radians;
+                if (a > math::anglef::pi)
+                {
+                    a = a - math::anglef::_2pi;
+                }
+                auto min_a = math::radians(config.min_angle);
+                auto max_a = math::radians(config.max_angle);
+                auto mu = (a - min_a) / (max_a - min_a);
+                mu = math::clamp(mu, 0.f, 1.f);
+
+                m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+            }
+            {
+                auto const& config = m_config->y_pwm;
+                float mu = 0;
+                m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+            }
+            {
+                auto const& config = m_config->z_pwm;
+                float mu = 0;
+                m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+            }
         }
+        else
         {
-            auto const& config = m_config->y_pwm;
-            float mu = 0;
-            m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
-        }
-        {
-            auto const& config = m_config->z_pwm;
-            float mu = 0;
-            m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, is_healthy);
+            m_x_output_stream->push_last_sample(false);
+            m_y_output_stream->push_last_sample(false);
+            m_y_output_stream->push_last_sample(false);
         }
     });
 

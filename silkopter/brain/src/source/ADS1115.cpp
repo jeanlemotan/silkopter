@@ -236,6 +236,8 @@ void ADS1115::process()
         return;
     }
 
+    //TODO - add healthy indication
+
     if (m_config_register.mode == ADS1115_MODE_SINGLESHOT)
     {
         uint16_t cr = 0;

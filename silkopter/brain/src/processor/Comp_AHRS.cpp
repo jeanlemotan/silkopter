@@ -74,7 +74,7 @@ void Comp_AHRS::process()
 
     m_accumulator.process([this, dts](stream::IAngular_Velocity::Sample const& av_sample,
                                       stream::IAcceleration::Sample const& a_sample,
-                                      stream::IMagnetic_Field::Sample const& m_sample)
+                                      stream::IMagnetic_Field::Sample const& mf_sample)
     {
         float av_length = 0;
 
@@ -105,10 +105,26 @@ void Comp_AHRS::process()
             }
         }
 
-        if (a_sample.is_healthy && m_sample.is_healthy)
+        if (a_sample.is_healthy && mf_sample.is_healthy)
         {
             m_noisy_up_w = math::normalized<float, math::safe>(a_sample.value); //acceleration points opposite of gravity - so up
-            m_noisy_front_w = math::normalized<float, math::safe>(m_sample.value); //this is always good
+            math::vec3f front = mf_sample.value;
+            //sanity checks - zero magnetic field, colinear mf and acc vectors
+            if (math::is_zero(math::length_sq(front), math::epsilon<float>()))
+            {
+                QLOGW("zero front vector - invalid magnetic field!!!!!");
+                front = math::vec3f(0, 1, 0);
+            }
+            front = math::normalized<float, math::safe>(front);
+            if (math::abs(math::dot(m_noisy_up_w, front)) < 0.99f)
+            {
+                m_noisy_front_w = front;
+            }
+            else
+            {
+                QLOGW("colinear front and up vectors - using the previous front vector!!!!!");
+            }
+
             m_noisy_right_w = math::normalized<float, math::safe>(math::cross(m_noisy_front_w, m_noisy_up_w));
             m_noisy_front_w = math::cross(m_noisy_up_w, m_noisy_right_w);
 
@@ -136,7 +152,7 @@ void Comp_AHRS::process()
             rot = math::normalized<float, math::safe>(rot);
         }
 
-        m_output_stream->push_sample(rotation, av_sample.is_healthy & a_sample.is_healthy & m_sample.is_healthy);
+        m_output_stream->push_sample(rotation, av_sample.is_healthy & a_sample.is_healthy & mf_sample.is_healthy);
     });
 }
 

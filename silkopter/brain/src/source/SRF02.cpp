@@ -159,6 +159,9 @@ void SRF02::process()
     //trigger immediately
     trigger(*bus);
 
+    //TODO - add health indication
+
+
     if (res)
     {
         int d = (unsigned int)(buf[0] << 8) | buf[1];

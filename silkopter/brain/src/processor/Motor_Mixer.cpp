@@ -134,6 +134,7 @@ void Motor_Mixer::process()
         {
             auto& sample = m_outputs[mi]->last_sample;
             sample.value = m_outputs[mi]->throttle;
+            sample.is_healthy = true;
             m_outputs[mi]->samples.push_back(sample);
         }
     });
