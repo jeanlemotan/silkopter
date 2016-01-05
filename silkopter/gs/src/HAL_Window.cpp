@@ -122,6 +122,10 @@ HAL_Window::HAL_Window(silk::HAL& hal, silk::Comms& comms, Render_Context& conte
     {
         remove_stream(item);
     });
+    m_hal.multi_config_refreshed_signal.connect([this]()
+    {
+       load_editor_data();
+    });
 
 
 
