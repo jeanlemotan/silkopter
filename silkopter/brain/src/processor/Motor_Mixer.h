@@ -2,7 +2,7 @@
 
 #include "common/node/IProcessor.h"
 #include "common/stream/ITorque.h"
-#include "common/stream/IForce.h"
+#include "common/stream/IFloat.h"
 #include "common/stream/IThrottle.h"
 
 #include "HAL.h"
@@ -48,7 +48,7 @@ public:
 private:
     auto init() -> bool;
 
-    void compute_throttles(config::Multi const& config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& torque);
+    void compute_throttles(config::Multi const& config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
     HAL& m_hal;
@@ -56,7 +56,7 @@ private:
     std::shared_ptr<sz::Motor_Mixer::Init_Params> m_init_params;
     std::shared_ptr<sz::Motor_Mixer::Config> m_config;
 
-    Sample_Accumulator<stream::ITorque, stream::IForce> m_accumulator;
+    Sample_Accumulator<stream::ITorque, stream::IFloat> m_accumulator;
 
     struct Stream : public stream::IThrottle
     {

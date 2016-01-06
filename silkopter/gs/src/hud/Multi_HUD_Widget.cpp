@@ -481,11 +481,11 @@ void Multi_HUD_Widget::process()
         decode_video(m_state.video.value);
     }
 
-    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_state.home_ecef_position.value);
+    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_state.home_position.value);
     util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_uav.enu_to_ecef_transform, m_uav.ecef_to_enu_transform);
 
-    m_uav.enu_position = math::vec3f(math::transform(m_uav.ecef_to_enu_transform, m_state.ecef_position.value));
-    m_uav.enu_velocity = math::vec3f(math::rotate(m_uav.ecef_to_enu_transform, math::vec3d(m_state.ecef_velocity.value)));
+    m_uav.enu_position = math::vec3f(math::transform(m_uav.ecef_to_enu_transform, m_state.position.value));
+    m_uav.enu_velocity = math::vec3f(math::rotate(m_uav.ecef_to_enu_transform, math::vec3d(m_state.velocity.value)));
     m_uav.local_to_enu_quat = m_state.frame.value;
 
 

@@ -85,7 +85,7 @@ auto Motor_Mixer::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs =
     {{
         { stream::ITorque::TYPE, m_init_params->rate, "Torque", m_accumulator.get_stream_path(0) },
-        { stream::IForce::TYPE, m_init_params->rate, "Collective Force", m_accumulator.get_stream_path(1) }
+        { stream::IFloat::TYPE, m_init_params->rate, "Collective Thrust", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -126,7 +126,7 @@ void Motor_Mixer::process()
 //    }
 
     m_accumulator.process([this, &multi_config](stream::ITorque::Sample const& t_sample,
-                                                stream::IForce::Sample const& f_sample)
+                                                stream::IFloat::Sample const& f_sample)
     {
         compute_throttles(*multi_config, f_sample.value, t_sample.value);
 
@@ -146,10 +146,10 @@ static float compute_throttle_from_thrust(float max_thrust, float thrust)
     {
         return 0;
     }
-    auto ratio = thrust / max_thrust;
+    float ratio = thrust / max_thrust;
 
     //thrust increases approximately with throttle^2
-    auto throttle = math::sqrt<float, math::safe>(ratio);
+    float throttle = math::sqrt<float, math::safe>(ratio);
     return throttle;
 }
 //static float compute_thrust_from_throttle(float max_thrust, float throttle)
@@ -162,7 +162,7 @@ constexpr float MIN_THRUST = 0.f;
 constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
 
 
-void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& _target)
+void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 {
     auto target = _target;
 
@@ -184,7 +184,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
     //apply the desired thrust
     float min_thrust = MIN_THRUST;
     float max_thrust = MIN_THRUST;
-    float target_thrust = math::dot(collective_thrust, THRUST_VECTOR);
+    float target_thrust = collective_thrust;
     if (target_thrust >= 0.01f)
     {
         auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->armed_thrust, multi_config.motor_thrust);
@@ -271,7 +271,7 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
     }
 
 }
-//void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IForce::Value const& collective_thrust, stream::ITorque::Value const& _target)
+//void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 //{
 ////    auto max_throttle = m_config->max_throttle;
 ////    auto min_throttle = m_config->min_throttle;

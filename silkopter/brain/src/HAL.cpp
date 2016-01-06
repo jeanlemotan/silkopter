@@ -25,6 +25,8 @@
 #include "sink/PIGPIO.h"
 #include "sink/PCA9685.h"
 
+#include "common/stream/IForce.h"
+
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
 #include "processor/LiPo_Battery.h"

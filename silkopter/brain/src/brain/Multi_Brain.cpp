@@ -103,7 +103,7 @@ void Multi_Brain::process_state_mode_idle()
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
-        m_home.ecef_position_history.clear();
+        m_home.position_history.clear();
     }
 
     if (input.vertical.thrust_rate.value != 0)
@@ -138,7 +138,7 @@ void Multi_Brain::process_state_mode_idle()
     }
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
-    m_thrust_output_stream->push_sample(stream::IForce::Value(), true);
+    m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 }
 
 void Multi_Brain::process_state_mode_armed()
@@ -153,7 +153,7 @@ void Multi_Brain::process_state_mode_armed()
         return;
     }
 
-    stream::IForce::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
     stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
 
     //////////////////////////////////////////////////////////////
@@ -164,11 +164,11 @@ void Multi_Brain::process_state_mode_armed()
 
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
-        thrust.z += input.vertical.thrust_rate.value * m_dts;
+        thrust += input.vertical.thrust_rate.value * m_dts;
     }
     else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
-        thrust.z = m_vertical_thrust_offset_data.reference_thrust + input.vertical.thrust_offset.value;
+        thrust = m_vertical_thrust_offset_data.reference_thrust + input.vertical.thrust_offset.value;
     }
     else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::SPEED)
     {
@@ -184,17 +184,17 @@ void Multi_Brain::process_state_mode_armed()
             float error = target_alt - crt_alt;
             float output = error * m_vertical_speed_data.pd.kp - enu_velocity.z * m_vertical_speed_data.pd.kd;
             m_vertical_speed_data.dsp.process(output);
-            thrust.z = output;
+            thrust = output;
         }
     }
 
     //clamp thrust
-    thrust.z = math::clamp(thrust.z, m_config->min_thrust, m_config->max_thrust);
+    thrust = math::clamp(thrust, m_config->min_thrust, m_config->max_thrust);
 
     //refresh references
     if (input.vertical.mode.value != stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
-        m_vertical_thrust_offset_data.reference_thrust = thrust.z;
+        m_vertical_thrust_offset_data.reference_thrust = thrust;
     }
     if (input.vertical.mode.value != stream::IMulti_Input::Vertical::Mode::SPEED)
     {
@@ -240,13 +240,13 @@ void Multi_Brain::process_state_mode_armed()
     }
     else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE)
     {
-        m_yaw_stable_angle_rate_data.target_yaw += input.yaw.angle_rate.value * m_dts;
+        m_yaw_stable_angle_rate_data.reference_yaw += input.yaw.angle_rate.value * m_dts;
 
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
         math::quatf target;
-        target.set_from_euler_zxy(fx, fy, m_yaw_stable_angle_rate_data.target_yaw);
+        target.set_from_euler_zxy(fx, fy, m_yaw_stable_angle_rate_data.reference_yaw);
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
@@ -263,7 +263,7 @@ void Multi_Brain::process_state_mode_armed()
     {
         float _, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
-        m_yaw_stable_angle_rate_data.target_yaw = fz;
+        m_yaw_stable_angle_rate_data.reference_yaw = fz;
     }
 
 
@@ -289,7 +289,7 @@ void Multi_Brain::acquire_home_position()
 {
     if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
-        std::deque<util::coordinates::ECEF>& history = m_home.ecef_position_history;
+        std::deque<util::coordinates::ECEF>& history = m_home.position_history;
         size_t per_second = static_cast<size_t>(1.f / m_dts);
         while (history.size() > 5 * per_second + 1)
         {
@@ -310,10 +310,10 @@ void Multi_Brain::acquire_home_position()
         //auto avg_ = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
         //avg_ /= double(history.size());
 
-        m_home.ecef_position = avg;
-        m_home.lla_position = util::coordinates::ecef_to_lla(m_home.ecef_position);
-        util::coordinates::enu_to_ecef_transform_and_inv(m_home.lla_position, m_home.enu_to_ecef_transform, m_home.ecef_to_enu_transform);
-        util::coordinates::enu_to_ecef_rotation_and_inv(m_home.lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
+        m_home.position = avg;
+        util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_home.position);
+        util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_home.enu_to_ecef_transform, m_home.ecef_to_enu_transform);
+        util::coordinates::enu_to_ecef_rotation_and_inv(lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
     }
 }
 
@@ -329,7 +329,7 @@ void Multi_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
     m_inputs.frame.sample = frame;
     m_inputs.frame.last_valid_tp = frame.is_healthy ? now : m_inputs.frame.last_valid_tp;
 
-    m_home.ecef_position_history.push_back(position.value);
+    m_home.position_history.push_back(position.value);
     if (position.is_healthy)
     {
         m_inputs.position.previous_sample = m_inputs.position.sample;
@@ -412,9 +412,10 @@ void Multi_Brain::process()
          samples_needed >= 2)
     {
         stream::IMulti_State::Value state;
-        state.ecef_position = m_inputs.position.sample;
-        state.home_ecef_position.value = m_home.ecef_position;
-        state.home_ecef_position.is_healthy = m_home.is_acquired;
+        state.position = m_inputs.position.sample;
+        state.velocity = m_inputs.velocity.sample;
+        state.home_position.value = m_home.position;
+        state.home_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
         state.input = m_inputs.input.sample;
         state.proximity = m_inputs.proximity.sample;
@@ -475,7 +476,6 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multi_config.motor_thrust * m_multi_config.motors.size() * 0.5f);
     m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multi_config.motor_thrust * m_multi_config.motors.size());
-
 
     m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
     m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);

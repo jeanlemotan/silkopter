@@ -4,6 +4,7 @@
 
 #include "common/stream/IAngular_Velocity.h"
 #include "common/stream/IFrame.h"
+#include "common/stream/IFloat.h"
 #include "common/stream/ILinear_Acceleration.h"
 #include "common/stream/IBattery_State.h"
 #include "common/stream/IPosition.h"
@@ -85,7 +86,7 @@ private:
     typedef Basic_Output_Stream<stream::IAngular_Velocity> Rate_Output_Stream;
     mutable std::shared_ptr<Rate_Output_Stream> m_rate_output_stream;
 
-    typedef Basic_Output_Stream<stream::IForce> Thrust_Output_Stream;
+    typedef Basic_Output_Stream<stream::IFloat> Thrust_Output_Stream;
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
 
     float m_dts = 0;
@@ -125,9 +126,8 @@ private:
     struct Home
     {
         bool is_acquired = false;
-        util::coordinates::LLA lla_position;
-        util::coordinates::ECEF ecef_position;
-        std::deque<util::coordinates::ECEF> ecef_position_history;
+        util::coordinates::ECEF position;
+        std::deque<util::coordinates::ECEF> position_history;
         math::trans3dd enu_to_ecef_transform;
         math::trans3dd ecef_to_enu_transform;
         math::mat3d enu_to_ecef_rotation;
@@ -162,7 +162,7 @@ private:
 
     struct Yaw_Stable_Angle_Rate_Data
     {
-        float target_yaw = 0;
+        float reference_yaw = 0;
         PID pid;
     } m_yaw_stable_angle_rate_data;
 };
