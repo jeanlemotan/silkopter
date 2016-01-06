@@ -62,13 +62,13 @@ public:
         {
             THRUST_RATE,
             THRUST_OFFSET,
-            SPEED,
+            ALTITUDE,
         };
         Input_Value<Mode> mode = Mode::THRUST_OFFSET;
 
-        Input_Value<float> thrust_rate;
-        Input_Value<float> thrust_offset;
-        Input_Value<float> speed;
+        Input_Value<float> thrust_rate; //Newtons per second
+        Input_Value<float> thrust_offset; //Newtons from a reference thrust
+        Input_Value<float> altitude; //meters
     };
 
     struct Horizontal
@@ -79,13 +79,13 @@ public:
         {
             ANGLE_RATE,
             ANGLE,
-            VELOCITY,
+            POSITION,
         };
-        Input_Value<Mode> mode = Mode::ANGLE_RATE;
+        Input_Value<Mode> mode = Mode::ANGLE;
 
         Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
         Input_Value<math::vec2f> angle;        //angle from horizontal. zero means horizontal
-        Input_Value<math::vec2f> velocity;     //speed, meters per second
+        Input_Value<math::vec2f> position;     //meters
     };
 
     struct Yaw
@@ -93,11 +93,12 @@ public:
         enum class Mode : uint8_t
         {
             ANGLE_RATE,
-            STABLE_ANGLE_RATE,
+            ANGLE,
         };
         Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        Input_Value<float> angle_rate;   //angle rate of change - radians per second. NOTE!!! Used for both ANGLE_RATE and STABLE_ANGLE_RATE modes
+        Input_Value<float> angle_rate;  //radians per second
+        Input_Value<float> angle;       //radians
     };
 
     //the reference frame for the user controls
@@ -189,13 +190,14 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::V
     serialize(buffer, value.vertical.mode, off);
     serialize(buffer, value.vertical.thrust_rate, off);
     serialize(buffer, value.vertical.thrust_offset, off);
-    serialize(buffer, value.vertical.speed, off);
+    serialize(buffer, value.vertical.altitude, off);
     serialize(buffer, value.horizontal.mode, off);
     serialize(buffer, value.horizontal.angle_rate, off);
     serialize(buffer, value.horizontal.angle, off);
-    serialize(buffer, value.horizontal.velocity, off);
+    serialize(buffer, value.horizontal.position, off);
     serialize(buffer, value.yaw.mode, off);
     serialize(buffer, value.yaw.angle_rate, off);
+    serialize(buffer, value.yaw.angle, off);
     serialize(buffer, value.mode, off);
     serialize(buffer, value.reference_frame, off);
     serialize(buffer, value.assists.stay_in_battery_range, off);
@@ -208,19 +210,20 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::V
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_Input::Value& value, size_t& off) -> bool
 {
-    return  deserialize(buffer, value.toggles.land, off) &&
+    return deserialize(buffer, value.toggles.land, off) &&
         deserialize(buffer, value.toggles.return_home, off) &&
         deserialize(buffer, value.toggles.take_off, off) &&
         deserialize(buffer, value.vertical.mode, off) &&
         deserialize(buffer, value.vertical.thrust_rate, off) &&
         deserialize(buffer, value.vertical.thrust_offset, off) &&
-        deserialize(buffer, value.vertical.speed, off) &&
+        deserialize(buffer, value.vertical.altitude, off) &&
         deserialize(buffer, value.horizontal.mode, off) &&
         deserialize(buffer, value.horizontal.angle_rate, off) &&
         deserialize(buffer, value.horizontal.angle, off) &&
-        deserialize(buffer, value.horizontal.velocity, off) &&
+        deserialize(buffer, value.horizontal.position, off) &&
         deserialize(buffer, value.yaw.mode, off) &&
         deserialize(buffer, value.yaw.angle_rate, off) &&
+        deserialize(buffer, value.yaw.angle, off) &&
         deserialize(buffer, value.mode, off) &&
         deserialize(buffer, value.reference_frame, off) &&
         deserialize(buffer, value.assists.stay_in_battery_range, off) &&

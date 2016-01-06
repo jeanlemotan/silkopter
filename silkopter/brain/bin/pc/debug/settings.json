@@ -61,7 +61,7 @@
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": true,
-                    "Ground Enabled": true,
+                    "Ground Enabled": false,
                     "Gravity Enabled": true
                 },
                 "input_paths": [

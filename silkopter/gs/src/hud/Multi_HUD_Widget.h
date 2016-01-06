@@ -54,12 +54,12 @@ private:
 
     void process_vertical_thrust_rate();
     void process_vertical_thrust_offset();
-    void process_vertical_climb_rate();
+    void process_vertical_altitude();
     void process_vertical();
 
     void process_horizontal_angle_rate();
     void process_horizontal_angle();
-    void process_horizontal_velocity();
+    void process_horizontal_position();
     void process_horizontal();
 
     void process_yaw_angle_rate();

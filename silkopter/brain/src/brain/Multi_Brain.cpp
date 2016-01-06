@@ -114,9 +114,9 @@ void Multi_Brain::process_state_mode_idle()
     {
         input.vertical.thrust_rate.set(0);
     }
-    if (input.vertical.speed.value != 0)
+    if (input.vertical.altitude.value != 0)
     {
-        input.vertical.speed.set(0);
+        input.vertical.altitude.set(0);
     }
 
     if (!math::is_zero(input.horizontal.angle_rate.value))
@@ -127,9 +127,9 @@ void Multi_Brain::process_state_mode_idle()
     {
         input.horizontal.angle.set(math::vec2f::zero);
     }
-    if (!math::is_zero(input.horizontal.velocity.value))
+    if (!math::is_zero(input.horizontal.position.value))
     {
-        input.horizontal.velocity.set(math::vec2f::zero);
+        input.horizontal.position.set(math::vec2f::zero);
     }
 
     if (input.yaw.angle_rate.value != 0)
@@ -170,12 +170,9 @@ void Multi_Brain::process_state_mode_armed()
     {
         thrust = m_vertical_thrust_offset_data.reference_thrust + input.vertical.thrust_offset.value;
     }
-    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::SPEED)
+    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::ALTITUDE)
     {
-        float input_speed = input.vertical.speed.value;
-        m_vertical_speed_data.reference_altitude += input_speed * m_dts;
-
-        float target_alt = m_vertical_speed_data.reference_altitude;
+        float target_alt = input.vertical.altitude.value;
         float crt_alt = enu_position.z;
 
         //do a manual PD using (target_alt - crt_alt) as P and vertical speed as D
@@ -195,10 +192,6 @@ void Multi_Brain::process_state_mode_armed()
     if (input.vertical.mode.value != stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
     {
         m_vertical_thrust_offset_data.reference_thrust = thrust;
-    }
-    if (input.vertical.mode.value != stream::IMulti_Input::Vertical::Mode::SPEED)
-    {
-        m_vertical_speed_data.reference_altitude = enu_position.z;
     }
 
     ////////////////////////////////////////////////////////////
@@ -238,15 +231,13 @@ void Multi_Brain::process_state_mode_armed()
     {
         rate.z = input.yaw.angle_rate.value;
     }
-    else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE)
+    else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE)
     {
-        m_yaw_stable_angle_rate_data.reference_yaw += input.yaw.angle_rate.value * m_dts;
-
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
         math::quatf target;
-        target.set_from_euler_zxy(fx, fy, m_yaw_stable_angle_rate_data.reference_yaw);
+        target.set_from_euler_zxy(fx, fy, input.yaw.angle.value);
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
@@ -258,14 +249,6 @@ void Multi_Brain::process_state_mode_armed()
 
         rate.z = z;
     }
-    //refresh references
-    if (input.yaw.mode.value != stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE)
-    {
-        float _, fz;
-        m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
-        m_yaw_stable_angle_rate_data.reference_yaw = fz;
-    }
-
 
     ///////////////////////////////////////////////////////////
 

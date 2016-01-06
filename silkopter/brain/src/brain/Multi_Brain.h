@@ -143,8 +143,6 @@ private:
 
     struct Vertical_Speed_Data
     {
-        float reference_altitude = 0.f;
-
         struct PD
         {
             float kp = 0;
@@ -162,7 +160,6 @@ private:
 
     struct Yaw_Stable_Angle_Rate_Data
     {
-        float reference_yaw = 0;
         PID pid;
     } m_yaw_stable_angle_rate_data;
 };

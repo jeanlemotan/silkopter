@@ -31,7 +31,7 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     //input defaults
     m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
     m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
-    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE);
+    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
 }
 
 void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
@@ -122,14 +122,13 @@ void Multi_HUD_Widget::process_vertical_thrust_offset()
     }
 }
 
-void Multi_HUD_Widget::process_vertical_climb_rate()
+void Multi_HUD_Widget::process_vertical_altitude()
 {
-    float v = 0;
+    float v = m_input.vertical.altitude.value;
 
     if (m_gamepad)
     {
-        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
-        v *= 5.f;
+        v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y * 5.f;
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
@@ -137,7 +136,7 @@ void Multi_HUD_Widget::process_vertical_climb_rate()
     v += kb.is_key_pressed('=') ? kb_value : 0;
     v -= kb.is_key_pressed('-') ? kb_value : 0;
 
-    m_input.vertical.speed.set(v);
+    m_input.vertical.altitude.set(v);
 }
 
 void Multi_HUD_Widget::process_vertical()
@@ -150,8 +149,8 @@ void Multi_HUD_Widget::process_vertical()
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         process_vertical_thrust_offset();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::SPEED:
-        process_vertical_climb_rate();
+    case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
+        process_vertical_altitude();
         break;
     }
 
@@ -161,7 +160,7 @@ void Multi_HUD_Widget::process_vertical()
         {
             int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::SPEED));
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE));
 
             m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
         }
@@ -169,7 +168,7 @@ void Multi_HUD_Widget::process_vertical()
         {
             int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::SPEED));
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE));
 
             m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
         }
@@ -185,7 +184,7 @@ void Multi_HUD_Widget::process_vertical()
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::SPEED);
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE);
     }
 
 }
@@ -240,13 +239,12 @@ void Multi_HUD_Widget::process_horizontal_angle()
     m_input.horizontal.angle.set(v);
 }
 
-void Multi_HUD_Widget::process_horizontal_velocity()
+void Multi_HUD_Widget::process_horizontal_position()
 {
-    math::vec2f v;
+    math::vec2f v = m_input.horizontal.position.value;
     if (m_gamepad)
     {
-        v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
-        v *= 5.f;
+        v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value * 5.f;
     }
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(5.f) : math::radians(1.f);
@@ -255,7 +253,7 @@ void Multi_HUD_Widget::process_horizontal_velocity()
     v.y -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
     v.y += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
-    m_input.horizontal.velocity.set(v);
+    m_input.horizontal.position.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal()
@@ -268,8 +266,8 @@ void Multi_HUD_Widget::process_horizontal()
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
         process_horizontal_angle();
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
-        process_horizontal_velocity();
+    case silk::stream::IMulti_Input::Horizontal::Mode::POSITION:
+        process_horizontal_position();
         break;
     }
 
@@ -279,7 +277,7 @@ void Multi_HUD_Widget::process_horizontal()
         {
             int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) - 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::POSITION));
 
             m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
         }
@@ -287,7 +285,7 @@ void Multi_HUD_Widget::process_horizontal()
         {
             int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) + 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY));
+                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::POSITION));
 
             m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
         }
@@ -304,7 +302,7 @@ void Multi_HUD_Widget::process_horizontal()
     }
     else if (kb.is_key_pressed('H') && kb.is_key_released('3'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY);
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::POSITION);
     }
 }
 
@@ -332,7 +330,25 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
 
 void Multi_HUD_Widget::process_yaw_angle()
 {
-    process_yaw_angle_rate(); //same value as the angle rate
+    float v = m_input.yaw.angle.value;
+    if (m_gamepad)
+    {
+        float gv = 0;
+        gv += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
+        gv -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
+
+        constexpr float expo = 2.f;
+        gv = math::sgn(gv) * std::pow(gv, expo); //some expo
+
+        v = gv * math::anglef::pi2;
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(70.f) : math::radians(40.f);
+    v += kb.is_key_pressed(',') ? kb_value : 0;
+    v -= kb.is_key_pressed('.') ? kb_value : 0;
+
+    m_input.yaw.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_yaw()
@@ -342,7 +358,7 @@ void Multi_HUD_Widget::process_yaw()
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE:
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
         process_yaw_angle();
         break;
     }
@@ -354,7 +370,7 @@ void Multi_HUD_Widget::process_yaw()
     }
     else if (kb.is_key_pressed('Y') && kb.is_key_released('2'))
     {
-        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE);
+        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
     }
 }
 
@@ -447,15 +463,16 @@ void Multi_HUD_Widget::sync_input()
     SYNC(vertical.mode);
     SYNC(vertical.thrust_rate);
     SYNC(vertical.thrust_offset);
-    SYNC(vertical.speed);
+    SYNC(vertical.altitude);
 
     SYNC(horizontal.mode);
     SYNC(horizontal.angle_rate);
     SYNC(horizontal.angle);
-    SYNC(horizontal.velocity);
+    SYNC(horizontal.position);
 
     SYNC(yaw.mode);
     SYNC(yaw.angle_rate);
+    SYNC(yaw.angle);
 
     SYNC(mode);
     SYNC(reference_frame);
@@ -703,13 +720,13 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.vertical.mode.value)
     {
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
-        str = q::util::format2<std::string>("V:Rate:{} | ALT:{} | SPD:{}", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Rate:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
-        str = q::util::format2<std::string>("V:Offset:{} | ALT:{} | SPD:{}", m_input.vertical.thrust_offset.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Offset:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.thrust_offset.value, m_uav.enu_position.z, v_speed);
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::SPEED:
-        str = q::util::format2<std::string>("V:Speed:{} | ALT:{} | SPD:{}", m_input.vertical.speed.value, m_uav.enu_position.z, v_speed);
+    case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
+        str = q::util::format2<std::string>("V:Altitude:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.altitude.value, m_uav.enu_position.z, v_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
@@ -718,13 +735,13 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.horizontal.mode.value)
     {
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("H:Rate:{} | SPD:{}", m_input.horizontal.angle_rate.value, h_speed);
+        str = q::util::format2<std::string>("H:Rate:{.1} | SPD:{.2}", m_input.horizontal.angle_rate.value, h_speed);
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
-        str = q::util::format2<std::string>("H:Angle:{} | SPD:{}", math::degrees(m_input.horizontal.angle.value), h_speed);
+        str = q::util::format2<std::string>("H:Angle:{.1} | SPD:{.2}", math::degrees(m_input.horizontal.angle.value), h_speed);
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
-        str = q::util::format2<std::string>("H:Velocity:{} | SPD:{}", m_input.horizontal.velocity.value, h_speed);
+    case silk::stream::IMulti_Input::Horizontal::Mode::POSITION:
+        str = q::util::format2<std::string>("H:Position:{.1} | SPD:{.2}", m_input.horizontal.position.value, h_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
@@ -732,10 +749,10 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.yaw.mode.value)
     {
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Rate:{}", m_input.yaw.angle_rate.value);
+        str = q::util::format2<std::string>("Y:Rate:{.1}", m_input.yaw.angle_rate.value);
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Angle:{}", math::degrees(m_input.yaw.angle_rate.value));
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+        str = q::util::format2<std::string>("Y:Angle:{.1}", math::degrees(m_input.yaw.angle.value));
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));
