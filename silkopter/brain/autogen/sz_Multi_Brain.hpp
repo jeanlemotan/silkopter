@@ -1524,11 +1524,9 @@ namespace sz { namespace Multi_Brain { struct Altitude {
  float max_speed;
 uint32_t lpf_poles;
 float lpf_cutoff_frequency;
-sz::PID acceleration_pid;
-sz::PD velocity_pd;
-sz::P altitude_p;
+sz::PD pd;
 
-explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), acceleration_pid(), velocity_pd(), altitude_p() {  }
+explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), pd() {  }
 
 
  
@@ -1548,14 +1546,9 @@ private:
     SAXEventHandler< float > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< float > handler_2;
-SAXEventHandler< sz::PID > handler_3;
-SAXEventHandler< sz::PD > handler_4;
-SAXEventHandler< sz::P > handler_5;bool has_max_speed;
+SAXEventHandler< sz::PD > handler_3;bool has_max_speed;
 bool has_lpf_poles;
 bool has_lpf_cutoff_frequency;
-bool has_acceleration_pid;
-bool has_velocity_pd;
-bool has_altitude_p;
 
     bool check_depth(const char* type)
     {
@@ -1576,11 +1569,7 @@ case 1:
 case 2:
     return "lpf_cutoff_frequency";
 case 3:
-    return "acceleration_pid";
-case 4:
-    return "velocity_pd";
-case 5:
-    return "altitude_p";
+    return "pd";
         default:
             break;
         }
@@ -1610,9 +1599,7 @@ case 5:
         has_max_speed = false;
 has_lpf_poles = false;
 has_lpf_cutoff_frequency = false;
-has_acceleration_pid = false;
-has_velocity_pd = false;
-has_altitude_p = false;
+
     }
 
 public:
@@ -1622,9 +1609,7 @@ public:
         , handler_0(&obj->max_speed)
 , handler_1(&obj->lpf_poles)
 , handler_2(&obj->lpf_cutoff_frequency)
-, handler_3(&obj->acceleration_pid)
-, handler_4(&obj->velocity_pd)
-, handler_5(&obj->altitude_p)
+, handler_3(&obj->pd)
     {
         reset_flags();
     }
@@ -1647,12 +1632,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
-
-case 4:
-    return checked_event_forwarding(handler_4.Null());
-
-case 5:
-    return checked_event_forwarding(handler_5.Null());
 
         default:
             break;
@@ -1679,12 +1658,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
-case 4:
-    return checked_event_forwarding(handler_4.Bool(b));
-
-case 5:
-    return checked_event_forwarding(handler_5.Bool(b));
-
         default:
             break;
         }
@@ -1709,12 +1682,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int(i));
 
         default:
             break;
@@ -1741,12 +1708,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint(i));
-
         default:
             break;
         }
@@ -1771,12 +1732,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
-
-case 4:
-    return checked_event_forwarding(handler_4.Int64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Int64(i));
 
         default:
             break;
@@ -1803,12 +1758,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
-case 4:
-    return checked_event_forwarding(handler_4.Uint64(i));
-
-case 5:
-    return checked_event_forwarding(handler_5.Uint64(i));
-
         default:
             break;
         }
@@ -1833,12 +1782,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
-
-case 4:
-    return checked_event_forwarding(handler_4.Double(d));
-
-case 5:
-    return checked_event_forwarding(handler_5.Double(d));
 
         default:
             break;
@@ -1865,12 +1808,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
-case 4:
-    return checked_event_forwarding(handler_4.String(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.String(str, length, copy));
-
         default:
             break;
         }
@@ -1891,12 +1828,8 @@ else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x50\x6f\x6c\x65\x7
 						 { state=1; has_lpf_poles = true; }
 else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25))
 						 { state=2; has_lpf_cutoff_frequency = true; }
-else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x50\x49\x44", 16))
-						 { state=3; has_acceleration_pid = true; }
-else if (utility::string_equal(str, length, "\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x50\x44", 11))
-						 { state=4; has_velocity_pd = true; }
-else if (utility::string_equal(str, length, "\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x50", 10))
-						 { state=5; has_altitude_p = true; }
+else if (utility::string_equal(str, length, "\x50\x44", 2))
+						 { state=3;  }
             else {
                 state = -1;
                 return true;
@@ -1916,12 +1849,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
-
-case 4:
-    return checked_event_forwarding(handler_4.Key(str, length, copy));
-
-case 5:
-    return checked_event_forwarding(handler_5.Key(str, length, copy));
 
             default:
                 break;
@@ -1949,12 +1876,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
-case 4:
-    return checked_event_forwarding(handler_4.StartArray());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartArray());
-
         default:
             break;
         }
@@ -1980,12 +1901,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndArray(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndArray(length));
-
         default:
             break;
         }
@@ -2010,12 +1925,6 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
-
-case 4:
-    return checked_event_forwarding(handler_4.StartObject());
-
-case 5:
-    return checked_event_forwarding(handler_5.StartObject());
 
             default:
                 break;
@@ -2043,12 +1952,6 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
 
-case 4:
-    return checked_event_forwarding(handler_4.EndObject(length));
-
-case 5:
-    return checked_event_forwarding(handler_5.EndObject(length));
-
             default:
                 break;
             }
@@ -2056,9 +1959,6 @@ case 5:
             if (!has_max_speed) set_missing_required("max_speed");
 if (!has_lpf_poles) set_missing_required("lpf_poles");
 if (!has_lpf_cutoff_frequency) set_missing_required("lpf_cutoff_frequency");
-if (!has_acceleration_pid) set_missing_required("acceleration_pid");
-if (!has_velocity_pd) set_missing_required("velocity_pd");
-if (!has_altitude_p) set_missing_required("altitude_p");
         }
         return the_error.empty();
     }
@@ -2085,10 +1985,6 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
-case 4:
-     handler_4.ReapError(errs); break;
-case 5:
-     handler_5.ReapError(errs); break;
 
         default:
             break;
@@ -2107,8 +2003,6 @@ case 5:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
-handler_4.PrepareForReuse();
-handler_5.PrepareForReuse();
 
     }
 };
@@ -2123,11 +2017,9 @@ struct Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b8
         w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.max_speed);
 w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, uint32_t >()(w, value.lpf_poles);
 w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.lpf_cutoff_frequency);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x50\x49\x44", 16, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PID >()(w, value.acceleration_pid);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x50\x44", 11, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PD >()(w, value.velocity_pd);
-w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x50", 10, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::P >()(w, value.altitude_p);
+w.Key("\x50\x44", 2, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PD >()(w, value.pd);
 
-        w.EndObject(6);
+        w.EndObject(4);
     }
 
 };
