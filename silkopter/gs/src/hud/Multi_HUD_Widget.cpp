@@ -31,7 +31,7 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     //input defaults
     m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
     m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
-    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
+    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE);
 }
 
 void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
@@ -342,7 +342,7 @@ void Multi_HUD_Widget::process_yaw()
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+    case silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE:
         process_yaw_angle();
         break;
     }
@@ -354,7 +354,7 @@ void Multi_HUD_Widget::process_yaw()
     }
     else if (kb.is_key_pressed('Y') && kb.is_key_released('2'))
     {
-        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
+        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE);
     }
 }
 
@@ -734,7 +734,7 @@ void Multi_HUD_Widget::render_modes()
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         str = q::util::format2<std::string>("Y:Rate:{}", m_input.yaw.angle_rate.value);
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+    case silk::stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE:
         str = q::util::format2<std::string>("Y:Angle:{}", math::degrees(m_input.yaw.angle_rate.value));
         break;
     }

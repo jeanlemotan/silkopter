@@ -93,11 +93,11 @@ public:
         enum class Mode : uint8_t
         {
             ANGLE_RATE,
-            ANGLE,
+            STABLE_ANGLE_RATE,
         };
         Input_Value<Mode> mode = Mode::ANGLE_RATE;
 
-        Input_Value<float> angle_rate;   //angle rate of change - radians per second. NOTE!!! Used for both ANGLE_RATE and ANGLE modes
+        Input_Value<float> angle_rate;   //angle rate of change - radians per second. NOTE!!! Used for both ANGLE_RATE and STABLE_ANGLE_RATE modes
     };
 
     //the reference frame for the user controls

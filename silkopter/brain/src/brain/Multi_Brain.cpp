@@ -160,6 +160,7 @@ void Multi_Brain::process_state_mode_armed()
     // Verticals
 
     math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
+    math::vec3f enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
 
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
@@ -175,19 +176,16 @@ void Multi_Brain::process_state_mode_armed()
         m_vertical_speed_data.reference_altitude += input_speed * m_dts;
 
         float target_alt = m_vertical_speed_data.reference_altitude;
-
         float crt_alt = enu_position.z;
-        float target_vel = m_vertical_speed_data.velocity_pd.process(crt_alt, target_alt);
 
-        float crt_vel = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_inputs.velocity.sample.value)).z;
-        float target_acc = m_vertical_speed_data.velocity_pd.process(crt_vel, target_vel);
-
-        float crt_acc = math::transform(m_home.ecef_to_enu_rotation, math::vec3d(m_inputs.linear_acceleration.sample.value)).z;
-
-        float half_thrust = (m_config->max_thrust + m_config->min_thrust) * 0.5f;
-        float t =  half_thrust + m_vertical_speed_data.acceleration_pid.process(crt_acc, target_acc);
-        m_vertical_speed_data.dsp.process(t);
-        thrust.z = t;
+        //do a manual PD using (target_alt - crt_alt) as P and vertical speed as D
+        //I'm not using a util::PID here since I have the derivative already calculated - it's the vertical speed
+        {
+            float error = target_alt - crt_alt;
+            float output = error * m_vertical_speed_data.pd.kp - enu_velocity.z * m_vertical_speed_data.pd.kd;
+            m_vertical_speed_data.dsp.process(output);
+            thrust.z = output;
+        }
     }
 
     //clamp thrust
@@ -240,32 +238,32 @@ void Multi_Brain::process_state_mode_armed()
     {
         rate.z = input.yaw.angle_rate.value;
     }
-    else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE)
+    else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE)
     {
-        m_yaw_angle_data.target_yaw += input.yaw.angle_rate.value * m_dts;
+        m_yaw_stable_angle_rate_data.target_yaw += input.yaw.angle_rate.value * m_dts;
 
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
         math::quatf target;
-        target.set_from_euler_zxy(fx, fy, m_yaw_angle_data.target_yaw);
+        target.set_from_euler_zxy(fx, fy, m_yaw_stable_angle_rate_data.target_yaw);
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
 
         float max_speed = math::radians(m_config->yaw_angle.max_speed_deg);
 
-        float z = m_yaw_angle_data.pid.process(-diff_z, 0.f);
+        float z = m_yaw_stable_angle_rate_data.pid.process(-diff_z, 0.f);
         z = math::clamp(z, -max_speed, max_speed);
 
         rate.z = z;
     }
     //refresh references
-    if (input.yaw.mode.value != stream::IMulti_Input::Yaw::Mode::ANGLE)
+    if (input.yaw.mode.value != stream::IMulti_Input::Yaw::Mode::STABLE_ANGLE_RATE)
     {
         float _, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
-        m_yaw_angle_data.target_yaw = fz;
+        m_yaw_stable_angle_rate_data.target_yaw = fz;
     }
 
 
@@ -293,11 +291,7 @@ void Multi_Brain::acquire_home_position()
     {
         std::deque<util::coordinates::ECEF>& history = m_home.ecef_position_history;
         size_t per_second = static_cast<size_t>(1.f / m_dts);
-#ifdef NDEBUG
         while (history.size() > 5 * per_second + 1)
-#else
-        while (history.size() > 5 * per_second + 1)
-#endif
         {
             if (!m_home.is_acquired)
             {
@@ -495,18 +489,18 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         dst.d_filter = src.d_filter;
         dst.rate = output_rate;
     };
-    auto fill_pd_params = [output_rate](PID::Params& dst, sz::PD const& src)
-    {
-        dst.kp = src.kp;
-        dst.kd = src.kd;
-        dst.d_filter = src.d_filter;
-        dst.rate = output_rate;
-    };
-    auto fill_p_params = [output_rate](PID::Params& dst, sz::P const& src)
-    {
-        dst.kp = src.kp;
-        dst.rate = output_rate;
-    };
+//    auto fill_pd_params = [output_rate](PID::Params& dst, sz::PD const& src)
+//    {
+//        dst.kp = src.kp;
+//        dst.kd = src.kd;
+//        dst.d_filter = src.d_filter;
+//        dst.rate = output_rate;
+//    };
+//    auto fill_p_params = [output_rate](PID::Params& dst, sz::P const& src)
+//    {
+//        dst.kp = src.kp;
+//        dst.rate = output_rate;
+//    };
 
     {
         PID::Params x_params, y_params;
@@ -532,7 +526,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
     {
         PID::Params params;
         fill_pid_params(params, m_config->yaw_angle.pid);
-        if (!m_yaw_angle_data.pid.set_params(params))
+        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
         {
             QLOGE("Bad yaw PID params");
             return false;
@@ -540,18 +534,32 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
     }
 
     m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
+//    {
+//        PID::Params params;
+//        fill_pid_params(params, m_config->altitude.acceleration_pid);
+//        fill_pd_params(params, m_config->altitude.velocity_pd);
+//        fill_p_params(params, m_config->altitude.altitude_p);
+//        if (!m_vertical_speed_data.acceleration_pid.set_params(params) ||
+//            !m_vertical_speed_data.velocity_pd.set_params(params) ||
+//            !m_vertical_speed_data.altitude_p.set_params(params))
+//        {
+//            QLOGE("Bad climb rate PID params");
+//            return false;
+//        }
+//    }
     {
-        PID::Params params;
-        fill_pid_params(params, m_config->altitude.acceleration_pid);
-        fill_pd_params(params, m_config->altitude.velocity_pd);
-        fill_p_params(params, m_config->altitude.altitude_p);
-        if (!m_vertical_speed_data.acceleration_pid.set_params(params) ||
-            !m_vertical_speed_data.velocity_pd.set_params(params) ||
-            !m_vertical_speed_data.altitude_p.set_params(params))
-        {
-            QLOGE("Bad climb rate PID params");
-            return false;
-        }
+        m_vertical_speed_data.pd.kp = m_config->altitude.pd.kp;
+        m_vertical_speed_data.pd.kd = m_config->altitude.pd.kd;
+//        fill_pid_params(params, m_config->altitude.acceleration_pid);
+//        fill_pd_params(params, m_config->altitude.velocity_pd);
+//        fill_p_params(params, m_config->altitude.altitude_p);
+//        if (!m_vertical_speed_data.acceleration_pid.set_params(params) ||
+//            !m_vertical_speed_data.velocity_pd.set_params(params) ||
+//            !m_vertical_speed_data.altitude_p.set_params(params))
+//        {
+//            QLOGE("Bad climb rate PID params");
+//            return false;
+//        }
     }
 
     m_config->altitude.lpf_cutoff_frequency = math::clamp(m_config->altitude.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);

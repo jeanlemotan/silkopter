@@ -145,9 +145,11 @@ private:
     {
         float reference_altitude = 0.f;
 
-        PID acceleration_pid;
-        PID velocity_pd;
-        PID altitude_p;
+        struct PD
+        {
+            float kp = 0;
+            float kd = 0;
+        } pd;
 
         util::Butterworth<float> dsp;
     } m_vertical_speed_data;
@@ -158,11 +160,11 @@ private:
         PID y_pid;
     } m_horizontal_angle_data;
 
-    struct Yaw_Angle_Data
+    struct Yaw_Stable_Angle_Rate_Data
     {
         float target_yaw = 0;
         PID pid;
-    } m_yaw_angle_data;
+    } m_yaw_stable_angle_rate_data;
 };
 
 
