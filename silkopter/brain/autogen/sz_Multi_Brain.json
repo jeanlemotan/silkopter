@@ -26,6 +26,16 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Brain",
+    "name": "Yaw_Angle",
+    "members":
+    [
+        ["float", "max_speed_deg", {"required": true, "json_key" : "Max Speed (deg/s)", "default" : 180}],
+        ["sz::PID", "pid", {"required": true, "json_key" : "PID"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multi_Brain",
     "name": "Altitude",
     "members":
     [
@@ -46,6 +56,7 @@
         ["float", "max_thrust", {"required": false, "json_key" : "Max Thrust (N)", "default" : 2}],
         ["float", "min_thrust", {"required": false, "json_key" : "Min Thrust (N)", "default" : 1}],
         ["sz::Multi_Brain::Horizontal_Angle", "horizontal_angle", {"required": true, "json_key" : "Horizontal Angle"}],
+        ["sz::Multi_Brain::Yaw_Angle", "yaw_angle", {"required": false, "json_key" : "Yaw Angle"}],
         ["sz::Multi_Brain::Altitude", "altitude", {"required": false, "json_key" : "Altitude"}]
     ]
 }

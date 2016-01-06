@@ -1091,6 +1091,435 @@ w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
+namespace sz { namespace Multi_Brain { struct Yaw_Angle {
+ float max_speed_deg;
+sz::PID pid;
+
+explicit Yaw_Angle():max_speed_deg(180), pid() {  }
+
+
+ 
+}; }
+ }
+
+
+namespace autojsoncxx {
+
+template <>
+class SAXEventHandler< ::sz::Multi_Brain::Yaw_Angle > {
+private:
+    utility::scoped_ptr<error::ErrorBase> the_error;
+    int state;
+    int depth;
+
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< sz::PID > handler_1;bool has_max_speed_deg;
+bool has_pid;
+
+    bool check_depth(const char* type)
+    {
+        if (depth <= 0) {
+            the_error.reset(new error::TypeMismatchError("object", type));
+            return false;
+        }
+        return true;
+    }
+
+    const char* current_member_name() const
+    {
+        switch (state) {
+            case 0:
+    return "max_speed_deg";
+case 1:
+    return "pid";
+        default:
+            break;
+        }
+        return "<UNKNOWN>";
+    }
+
+    bool checked_event_forwarding(bool success)
+    {
+        if (!success)
+            the_error.reset(new error::ObjectMemberError(current_member_name()));
+        return success;
+    }
+
+    void set_missing_required(const char* name)
+    {
+        if (the_error.empty() || the_error->type() != error::MISSING_REQUIRED)
+            the_error.reset(new error::RequiredFieldMissingError());
+
+        std::vector<std::string>& missing =
+            static_cast<error::RequiredFieldMissingError*>(the_error.get())->missing_members();
+
+        missing.push_back(name);
+    }
+
+    void reset_flags()
+    {
+        has_max_speed_deg = false;
+has_pid = false;
+    }
+
+public:
+    explicit SAXEventHandler( ::sz::Multi_Brain::Yaw_Angle * obj)
+        : state(-1)
+        , depth(0)
+        , handler_0(&obj->max_speed_deg)
+, handler_1(&obj->pid)
+    {
+        reset_flags();
+    }
+
+    bool Null()
+    {
+        if (!check_depth("null"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Bool(bool b)
+    {
+        if (!check_depth("bool"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
+
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int(int i)
+    {
+        if (!check_depth("int"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint(unsigned i)
+    {
+        if (!check_depth("unsigned"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Int64(utility::int64_t i)
+    {
+        if (!check_depth("int64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Uint64(utility::uint64_t i)
+    {
+        if (!check_depth("uint64_t"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Double(double d)
+    {
+        if (!check_depth("double"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool String(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("string"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool Key(const char* str, SizeType length, bool copy)
+    {
+        if (!check_depth("object"))
+            return false;
+
+        if (depth == 1) {
+            if (0) {
+            }
+            else if (utility::string_equal(str, length, "\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17))
+						 { state=0; has_max_speed_deg = true; }
+else if (utility::string_equal(str, length, "\x50\x49\x44", 3))
+						 { state=1; has_pid = true; }
+            else {
+                state = -1;
+                return true;
+            }
+
+        } else {
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool StartArray()
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool EndArray(SizeType length)
+    {
+        if (!check_depth("array"))
+            return false;
+
+        switch (state) {
+
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+        default:
+            break;
+        }
+        return true;
+    }
+
+    bool StartObject()
+    {
+        ++depth;
+        if (depth > 1) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool EndObject(SizeType length)
+    {
+        --depth;
+        if (depth > 0) {
+
+            switch (state) {
+
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
+
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+            default:
+                break;
+            }
+        } else {
+            if (!has_max_speed_deg) set_missing_required("max_speed_deg");
+if (!has_pid) set_missing_required("pid");
+        }
+        return the_error.empty();
+    }
+
+    bool HasError() const
+    {
+        return !this->the_error.empty();
+    }
+
+    bool ReapError(error::ErrorStack& errs)
+    {
+        if (this->the_error.empty())
+            return false;
+
+        errs.push(this->the_error.release());
+
+        switch (state) {
+
+        case 0:
+     handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void PrepareForReuse()
+    {
+        depth = 0;
+        state = -1;
+        the_error.reset();
+        reset_flags();
+        handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+
+    }
+};
+
+template < class Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19 >
+struct Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, ::sz::Multi_Brain::Yaw_Angle > {
+
+    void operator()( Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19& w, const ::sz::Multi_Brain::Yaw_Angle& value) const
+    {
+        w.StartObject();
+
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, float >()(w, value.max_speed_deg);
+w.Key("\x50\x49\x44", 3, false); Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, sz::PID >()(w, value.pid);
+
+        w.EndObject(2);
+    }
+
+};
+}
+
+
+// The MIT License (MIT)
+//
+// Copyright (c) 2014 Siyuan Ren (netheril96@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <autojsoncxx/autojsoncxx.hpp>
+
+// The comments are reserved for replacement
+// such syntax is chosen so that the template file looks like valid C++
+
 namespace sz { namespace Multi_Brain { struct Altitude {
  float max_speed;
 uint32_t lpf_poles;
@@ -1736,9 +2165,10 @@ namespace sz { namespace Multi_Brain { struct Config {
  float max_thrust;
 float min_thrust;
 sz::Multi_Brain::Horizontal_Angle horizontal_angle;
+sz::Multi_Brain::Yaw_Angle yaw_angle;
 sz::Multi_Brain::Altitude altitude;
 
-explicit Config():max_thrust(2), min_thrust(1), horizontal_angle(), altitude() {  }
+explicit Config():max_thrust(2), min_thrust(1), horizontal_angle(), yaw_angle(), altitude() {  }
 
 
  
@@ -1758,7 +2188,8 @@ private:
     SAXEventHandler< float > handler_0;
 SAXEventHandler< float > handler_1;
 SAXEventHandler< sz::Multi_Brain::Horizontal_Angle > handler_2;
-SAXEventHandler< sz::Multi_Brain::Altitude > handler_3;bool has_horizontal_angle;
+SAXEventHandler< sz::Multi_Brain::Yaw_Angle > handler_3;
+SAXEventHandler< sz::Multi_Brain::Altitude > handler_4;bool has_horizontal_angle;
 
     bool check_depth(const char* type)
     {
@@ -1779,6 +2210,8 @@ case 1:
 case 2:
     return "horizontal_angle";
 case 3:
+    return "yaw_angle";
+case 4:
     return "altitude";
         default:
             break;
@@ -1810,6 +2243,7 @@ case 3:
 
 has_horizontal_angle = false;
 
+
     }
 
 public:
@@ -1819,7 +2253,8 @@ public:
         , handler_0(&obj->max_thrust)
 , handler_1(&obj->min_thrust)
 , handler_2(&obj->horizontal_angle)
-, handler_3(&obj->altitude)
+, handler_3(&obj->yaw_angle)
+, handler_4(&obj->altitude)
     {
         reset_flags();
     }
@@ -1842,6 +2277,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
 
         default:
             break;
@@ -1868,6 +2306,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
         default:
             break;
         }
@@ -1892,6 +2333,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
 
         default:
             break;
@@ -1918,6 +2362,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
         default:
             break;
         }
@@ -1942,6 +2389,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
 
         default:
             break;
@@ -1968,6 +2418,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
         default:
             break;
         }
@@ -1992,6 +2445,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
 
         default:
             break;
@@ -2018,6 +2474,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
         default:
             break;
         }
@@ -2038,8 +2497,10 @@ else if (utility::string_equal(str, length, "\x4d\x69\x6e\x20\x54\x68\x72\x75\x7
 						 { state=1;  }
 else if (utility::string_equal(str, length, "\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x41\x6e\x67\x6c\x65", 16))
 						 { state=2; has_horizontal_angle = true; }
-else if (utility::string_equal(str, length, "\x41\x6c\x74\x69\x74\x75\x64\x65", 8))
+else if (utility::string_equal(str, length, "\x59\x61\x77\x20\x41\x6e\x67\x6c\x65", 9))
 						 { state=3;  }
+else if (utility::string_equal(str, length, "\x41\x6c\x74\x69\x74\x75\x64\x65", 8))
+						 { state=4;  }
             else {
                 state = -1;
                 return true;
@@ -2059,6 +2520,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
 
             default:
                 break;
@@ -2086,6 +2550,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
         default:
             break;
         }
@@ -2110,6 +2577,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
 
         default:
             break;
@@ -2136,6 +2606,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
             default:
                 break;
             }
@@ -2161,6 +2634,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
 
             default:
                 break;
@@ -2193,6 +2669,8 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
 
         default:
             break;
@@ -2211,6 +2689,7 @@ case 3:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
 
     }
 };
@@ -2225,9 +2704,10 @@ struct Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb165
         w.Key("\x4d\x61\x78\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.max_thrust);
 w.Key("\x4d\x69\x6e\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.min_thrust);
 w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x41\x6e\x67\x6c\x65", 16, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Horizontal_Angle >()(w, value.horizontal_angle);
+w.Key("\x59\x61\x77\x20\x41\x6e\x67\x6c\x65", 9, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Yaw_Angle >()(w, value.yaw_angle);
 w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65", 8, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Altitude >()(w, value.altitude);
 
-        w.EndObject(4);
+        w.EndObject(5);
     }
 
 };
