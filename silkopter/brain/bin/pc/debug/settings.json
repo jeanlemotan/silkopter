@@ -60,8 +60,8 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": true,
-                    "Ground Enabled": false,
+                    "Drag Enabled": false,
+                    "Ground Enabled": true,
                     "Gravity Enabled": true
                 },
                 "input_paths": [
@@ -242,13 +242,13 @@
                     "Rate (Hz)": 100
                 },
                 "config": {
-                    "Position Accuracy (CEP m)": 1.0,
+                    "Position Accuracy (CEP m)": 2.0,
                     "Velocity Lag (s)": 0.0,
                     "Velocity Accuracy (m/s)": 0.10000000149011612,
                     "Acceleration Lag (s)": 0.10999999940395355,
                     "Acceleration Accuracy (m/s^2)": 1.0,
                     "Pressure Altitude Lag (s)": 0.10000000149011612,
-                    "Pressure Altitude Accuracy (m)": 0.20000000298023225
+                    "Pressure Altitude Accuracy (m)": 0.30000001192092898
                 },
                 "input_paths": [
                     "Position RS (ECEF)/Output",
@@ -268,30 +268,40 @@
                     "Max Thrust (N)": 12.0,
                     "Min Thrust (N)": 2.0,
                     "Horizontal Angle": {
-                        "Max Speed (deg/s)": 180.0,
+                        "Max Speed (deg/s)": 200.0,
                         "Combined PIDs": true,
                         "PIDs": {
-                            "kP": 2.0,
+                            "kP": 4.0,
                             "kI": 0.5,
-                            "kD": 0.05000000074505806,
+                            "kD": 0.30000001192092898,
                             "Max I": 0.5,
                             "D Filter": 0.0
                         }
                     },
-                    "Altitude": {
-                        "Max Speed (m/s)": 2.0,
-                        "LPF Poles": 5,
-                        "LPF Cutoff Frequency (Hz)": 3.0,
-                        "Acceleration PID": {
+                    "Yaw Angle": {
+                        "Max Speed (deg/s)": 180.0,
+                        "PID": {
                             "kP": 1.0,
                             "kI": 0.0,
-                            "kD": 0.03999999910593033,
+                            "kD": 0.0,
+                            "Max I": 0.0,
+                            "D Filter": 0.0
+                        }
+                    },
+                    "Altitude": {
+                        "Max Speed (m/s)": 8.0,
+                        "LPF Poles": 1,
+                        "LPF Cutoff Frequency (Hz)": 3.0,
+                        "Acceleration PID": {
+                            "kP": 0.0,
+                            "kI": 0.0,
+                            "kD": 0.0,
                             "Max I": 0.0,
                             "D Filter": 0.0
                         },
                         "Velocity PD": {
-                            "kP": 2.0,
-                            "kD": 0.05999999865889549,
+                            "kP": 0.0,
+                            "kD": 0.0,
                             "D Filter": 0.0
                         },
                         "Altitude P": {
