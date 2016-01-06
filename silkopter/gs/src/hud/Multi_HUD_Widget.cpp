@@ -27,6 +27,11 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     m_camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
     m_camera.set_near_distance(0.05f);
     m_camera.set_far_distance(20000.f);
+
+    //input defaults
+    m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
+    m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
+    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
 }
 
 void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
@@ -132,7 +137,7 @@ void Multi_HUD_Widget::process_vertical_climb_rate()
     v += kb.is_key_pressed('=') ? kb_value : 0;
     v -= kb.is_key_pressed('-') ? kb_value : 0;
 
-    m_input.vertical.velocity.set(v);
+    m_input.vertical.speed.set(v);
 }
 
 void Multi_HUD_Widget::process_vertical()
@@ -145,7 +150,7 @@ void Multi_HUD_Widget::process_vertical()
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
         process_vertical_thrust_offset();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::VELOCITY:
+    case silk::stream::IMulti_Input::Vertical::Mode::SPEED:
         process_vertical_climb_rate();
         break;
     }
@@ -156,7 +161,7 @@ void Multi_HUD_Widget::process_vertical()
         {
             int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::SPEED));
 
             m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
         }
@@ -164,7 +169,7 @@ void Multi_HUD_Widget::process_vertical()
         {
             int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
                                 static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY));
+                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::SPEED));
 
             m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
         }
@@ -180,7 +185,7 @@ void Multi_HUD_Widget::process_vertical()
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::VELOCITY);
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::SPEED);
     }
 
 }
@@ -202,10 +207,10 @@ void Multi_HUD_Widget::process_horizontal_angle_rate()
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(120.f) : math::radians(45.f);
-    v.y += kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
-    v.y -= kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
-    v.x -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
-    v.x += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
+    v.y += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
+    v.x -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.x += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
     m_input.horizontal.angle_rate.set(v);
 }
@@ -227,10 +232,10 @@ void Multi_HUD_Widget::process_horizontal_angle()
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(40.f) : math::radians(20.f);
-    v.y += kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
-    v.y -= kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
-    v.x -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
-    v.x += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
+    v.y += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
+    v.x -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.x += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
     m_input.horizontal.angle.set(v);
 }
@@ -247,8 +252,8 @@ void Multi_HUD_Widget::process_horizontal_velocity()
     float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(5.f) : math::radians(1.f);
     v.x -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
     v.x += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
-    v.y -= kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
-    v.y += kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.y -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
+    v.y += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
     m_input.horizontal.velocity.set(v);
 }
@@ -291,11 +296,11 @@ void Multi_HUD_Widget::process_horizontal()
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     if (kb.is_key_pressed('H') && kb.is_key_released('1'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE);
     }
     else if (kb.is_key_pressed('H') && kb.is_key_released('2'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE);
+        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
     }
     else if (kb.is_key_pressed('H') && kb.is_key_released('3'))
     {
@@ -318,11 +323,16 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(30.f) : math::radians(15.f);
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(70.f) : math::radians(40.f);
     v += kb.is_key_pressed(',') ? kb_value : 0;
     v -= kb.is_key_pressed('.') ? kb_value : 0;
 
     m_input.yaw.angle_rate.set(v);
+}
+
+void Multi_HUD_Widget::process_yaw_angle()
+{
+    process_yaw_angle_rate(); //same value as the angle rate
 }
 
 void Multi_HUD_Widget::process_yaw()
@@ -332,6 +342,19 @@ void Multi_HUD_Widget::process_yaw()
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
         break;
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+        process_yaw_angle();
+        break;
+    }
+
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if (kb.is_key_pressed('Y') && kb.is_key_released('1'))
+    {
+        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE);
+    }
+    else if (kb.is_key_pressed('Y') && kb.is_key_released('2'))
+    {
+        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
     }
 }
 
@@ -424,7 +447,7 @@ void Multi_HUD_Widget::sync_input()
     SYNC(vertical.mode);
     SYNC(vertical.thrust_rate);
     SYNC(vertical.thrust_offset);
-    SYNC(vertical.velocity);
+    SYNC(vertical.speed);
 
     SYNC(horizontal.mode);
     SYNC(horizontal.angle_rate);
@@ -462,6 +485,7 @@ void Multi_HUD_Widget::process()
     util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_uav.enu_to_ecef_transform, m_uav.ecef_to_enu_transform);
 
     m_uav.enu_position = math::vec3f(math::transform(m_uav.ecef_to_enu_transform, m_state.ecef_position.value));
+    m_uav.enu_velocity = math::vec3f(math::rotate(m_uav.ecef_to_enu_transform, math::vec3d(m_state.ecef_velocity.value)));
     m_uav.local_to_enu_quat = m_state.frame.value;
 
 
@@ -662,39 +686,59 @@ void Multi_HUD_Widget::render_modes()
     m_context.painter.set_material(m_context.materials.font);
     m_border_text_style.height = 20;
     m_context.texter.set_style(m_border_text_style);
+
+    std::string str;
     switch (m_input.mode.value)
     {
     case silk::stream::IMulti_Input::Mode::IDLE:
-        m_context.texter.draw_string(m_context.painter, "Idle", math::vec2f(0, 20));
+        str = q::util::format2<std::string>("M:Idle");
         break;
     case silk::stream::IMulti_Input::Mode::ARMED:
-        m_context.texter.draw_string(m_context.painter, "Armed", math::vec2f(0, 20));
+        str = q::util::format2<std::string>("M:Armed");
         break;
     }
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 20));
+
+    float v_speed = m_uav.enu_velocity.z;
     switch (m_input.vertical.mode.value)
     {
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
-        m_context.texter.draw_string(m_context.painter, "Rate", math::vec2f(0, 50));
+        str = q::util::format2<std::string>("V:Rate:{} | ALT:{} | SPD:{}", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
-        m_context.texter.draw_string(m_context.painter, "Offset", math::vec2f(0, 50));
+        str = q::util::format2<std::string>("V:Offset:{} | ALT:{} | SPD:{}", m_input.vertical.thrust_offset.value, m_uav.enu_position.z, v_speed);
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::VELOCITY:
-        m_context.texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 50));
+    case silk::stream::IMulti_Input::Vertical::Mode::SPEED:
+        str = q::util::format2<std::string>("V:Speed:{} | ALT:{} | SPD:{}", m_input.vertical.speed.value, m_uav.enu_position.z, v_speed);
         break;
     }
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
+
+    float h_speed = math::length(math::vec2f(m_uav.enu_velocity.x, m_uav.enu_velocity.y));
     switch (m_input.horizontal.mode.value)
     {
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
-        m_context.texter.draw_string(m_context.painter, "Rate", math::vec2f(0, 80));
+        str = q::util::format2<std::string>("H:Rate:{} | SPD:{}", m_input.horizontal.angle_rate.value, h_speed);
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
-        m_context.texter.draw_string(m_context.painter, "Angle", math::vec2f(0, 80));
+        str = q::util::format2<std::string>("H:Angle:{} | SPD:{}", math::degrees(m_input.horizontal.angle.value), h_speed);
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::VELOCITY:
-        m_context.texter.draw_string(m_context.painter, "Velocity", math::vec2f(0, 80));
+        str = q::util::format2<std::string>("H:Velocity:{} | SPD:{}", m_input.horizontal.velocity.value, h_speed);
         break;
     }
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
+
+    switch (m_input.yaw.mode.value)
+    {
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
+        str = q::util::format2<std::string>("Y:Rate:{}", m_input.yaw.angle_rate.value);
+        break;
+    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+        str = q::util::format2<std::string>("Y:Angle:{}", math::degrees(m_input.yaw.angle_rate.value));
+        break;
+    }
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));
 
     m_context.painter.pop_post_clip_transform();
 }
@@ -763,16 +807,16 @@ void Multi_HUD_Widget::render_altitude()
     //auto enu_position = math::transform(m_ecef_to_enu_trans, m_state.ecef_position.value);
 
 
-    auto mat = m_context.materials.font;
-    mat.get_render_state(0).set_depth_test(true);
-    mat.get_render_state(0).set_depth_write(false);
-    mat.get_render_state(0).set_culling(false);
-    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
-    m_context.painter.set_material(mat);
+//    auto mat = m_context.materials.font;
+//    mat.get_render_state(0).set_depth_test(true);
+//    mat.get_render_state(0).set_depth_write(false);
+//    mat.get_render_state(0).set_culling(false);
+//    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+//    m_context.painter.set_material(mat);
 
-    m_context.painter.set_material(m_context.materials.font);
-    m_border_text_style.height = 20;
-    m_context.texter.set_style(m_border_text_style);
-    m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 120));
+//    m_context.painter.set_material(m_context.materials.font);
+//    m_border_text_style.height = 20;
+//    m_context.texter.set_style(m_border_text_style);
+//    m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 150));
 }
 

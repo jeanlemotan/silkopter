@@ -295,13 +295,17 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     math::trans3df enu_to_local_trans = math::inverse(local_to_enu_trans);
 
     {
-        auto rotation = bt_to_quatf(wt.getRotation());
-        auto delta = (~m_uav.state.local_to_enu_rotation) * rotation;
+        math::quatf rotation = bt_to_quatf(wt.getRotation());
+        QASSERT(math::cwise::none(math::cwise::is_nan(rotation)));
+        math::quatf delta = (~m_uav.state.local_to_enu_rotation) * rotation;
+        QASSERT(math::cwise::none(math::cwise::is_nan(delta)));
         m_uav.state.local_to_enu_rotation = rotation;
 
         math::vec3f euler;
         delta.get_as_euler_xyz(euler);
+        QASSERT(math::cwise::none(math::cwise::is_nan(euler)));
         m_uav.state.angular_velocity = euler / dts;
+        QASSERT(math::cwise::none(math::cwise::is_nan(m_uav.state.angular_velocity)));
     }
 
     auto enu_to_local_rotation = math::inverse(m_uav.state.local_to_enu_rotation);

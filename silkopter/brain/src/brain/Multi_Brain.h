@@ -87,7 +87,6 @@ private:
 
     typedef Basic_Output_Stream<stream::IForce> Thrust_Output_Stream;
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
-    float m_reference_thrust = 0;
 
     float m_dts = 0;
 
@@ -137,7 +136,12 @@ private:
 
     typedef util::PID<float, float, float> PID;
 
-    struct Altitude_Data
+    struct Vertical_Thrust_Offset_Data
+    {
+        float reference_thrust = 0.f;
+    } m_vertical_thrust_offset_data;
+
+    struct Vertical_Speed_Data
     {
         float reference_altitude = 0.f;
 
@@ -146,13 +150,19 @@ private:
         PID altitude_p;
 
         util::Butterworth<float> dsp;
-    } m_altitude_data;
+    } m_vertical_speed_data;
 
     struct Horizontal_Angle_Data
     {
         PID x_pid;
         PID y_pid;
     } m_horizontal_angle_data;
+
+    struct Yaw_Angle_Data
+    {
+        float target_yaw = 0;
+        PID pid;
+    } m_yaw_angle_data;
 };
 
 

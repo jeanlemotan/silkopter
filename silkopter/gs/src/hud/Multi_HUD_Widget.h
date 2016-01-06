@@ -31,6 +31,7 @@ private:
         math::trans3dd enu_to_ecef_transform; //relative to home
         math::trans3dd ecef_to_enu_transform; //relative to home
         math::vec3f enu_position; //this is in the home enu space
+        math::vec3f enu_velocity; //this is in the home enu space
         math::quatf local_to_enu_quat; //the uav rotation basically.
     } m_uav;
 
@@ -62,6 +63,7 @@ private:
     void process_horizontal();
 
     void process_yaw_angle_rate();
+    void process_yaw_angle();
     void process_yaw();
 
     void process_mode_idle();
