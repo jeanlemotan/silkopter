@@ -1223,7 +1223,7 @@ template<typename T, class Policy> inline T length(quat<T> const& v)
 }
 template <typename T> inline T dot(vec2<T> const& v1, vec2<T> const& v2)
 {
-    QASSERT(none(cwise::is_nan(v1)) && none(cwise::is_nan(v2)));
+    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
     return v1.x*v2.x + v1.y*v2.y;
 }
 template <typename T> inline T dot(vec3<T> const& v1, vec3<T> const& v2)
