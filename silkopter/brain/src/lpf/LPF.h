@@ -117,21 +117,16 @@ auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto output_rate = m_output_stream->get_rate();
+    float output_rate = static_cast<float>(m_output_stream->get_rate());
+    float max_cutoff = output_rate / 2.f - output_rate / 100.f;
 
-    float max_cutoff = output_rate / 2.f;
-    m_config.cutoff_frequency = m_config.cutoff_frequency > 0 ? m_config.cutoff_frequency : max_cutoff;
-    if (m_config.cutoff_frequency > output_rate / 2)
+    if (math::is_zero(m_config.cutoff_frequency))
     {
-        QLOGE("Cutoff frequency {}Hz is bigger than the nyquist frequency of {}Hz",
-              m_config.cutoff_frequency, output_rate / 2);
-        return false;
+        m_config.cutoff_frequency = max_cutoff;
     }
-
+    m_config.cutoff_frequency = math::clamp(m_config.cutoff_frequency, 0.f, max_cutoff);
     m_config.poles = math::max<uint32_t>(m_config.poles, 1);
-    if (m_config.poles > 0 &&
-        m_config.cutoff_frequency > 0 &&
-        !m_dsp.setup(m_config.poles, output_rate, m_config.cutoff_frequency))
+    if (!m_dsp.setup(m_config.poles, output_rate, m_config.cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
@@ -188,7 +183,9 @@ void LPF<Stream_t>::process()
         if (i_sample.is_healthy)
         {
             auto value = i_sample.value;
+            QASSERT(math::is_finite(value));
             m_dsp.process(value);
+            QASSERT(math::is_finite(value));
             m_output_stream->push_sample(value, true);
         }
         else
