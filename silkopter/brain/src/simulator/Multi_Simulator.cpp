@@ -12,22 +12,10 @@ namespace silk
 namespace node
 {
 
-static constexpr double POSITION_STD_DEV = 2.0;
-//static constexpr double POSITION_STD_DEV = 0.0;
-static constexpr float VELOCITY_STD_DEV = 0.2f;
-//static constexpr float VELOCITY_STD_DEV = 0.f;
-static constexpr float PACC_STD_DEV = 0.5f;
-static constexpr float VACC_STD_DEV = 0.1f;
-
-
 Multi_Simulator::Multi_Simulator(HAL& hal)
     : m_hal(hal)
     , m_init_params(new sz::Multi_Simulator::Init_Params())
     , m_config(new sz::Multi_Simulator::Config())
-    , m_ecef_position_dist(0, POSITION_STD_DEV)
-    , m_ecef_velocity_dist(0, VELOCITY_STD_DEV)
-    , m_ecef_pacc_dist(0, PACC_STD_DEV)
-    , m_ecef_vacc_dist(0, VACC_STD_DEV)
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -223,8 +211,9 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                math::vec3f noise(m_noise.angular_velocity_sd(m_noise.generator), m_noise.angular_velocity_sd(m_noise.generator), m_noise.angular_velocity_sd(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.angular_velocity;
+                stream.last_sample.value = uav_state.angular_velocity + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -234,8 +223,9 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                math::vec3f noise(m_noise.acceleration_sd(m_noise.generator), m_noise.acceleration_sd(m_noise.generator), m_noise.acceleration_sd(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.acceleration;
+                stream.last_sample.value = uav_state.acceleration + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -245,10 +235,11 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                math::vec3f noise(m_noise.magnetic_field_sd(m_noise.generator), m_noise.magnetic_field_sd(m_noise.generator), m_noise.magnetic_field_sd(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                QASSERT(math::cwise::none(math::cwise::is_nan(uav_state.magnetic_field)));
+                QASSERT(math::is_finite(uav_state.magnetic_field));
                 QASSERT(!math::is_zero(uav_state.magnetic_field, math::epsilon<float>()));
-                stream.last_sample.value = uav_state.magnetic_field;
+                stream.last_sample.value = uav_state.magnetic_field + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -258,8 +249,9 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                float noise = m_noise.pressure_sd(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.pressure;
+                stream.last_sample.value = uav_state.pressure + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -269,8 +261,9 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                float noise = m_noise.temperature_sd(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.temperature;
+                stream.last_sample.value = uav_state.temperature + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -280,8 +273,9 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
+                float noise = m_noise.ground_distance_sd(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.proximity_distance;
+                stream.last_sample.value = uav_state.proximity_distance + noise;
                 stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<float>::epsilon());
                 stream.samples.push_back(stream.last_sample);
             }
@@ -296,8 +290,8 @@ void Multi_Simulator::process()
                 stream.last_sample.value.fix = stream::IGPS_Info::Value::Fix::FIX_3D;
                 stream.last_sample.value.visible_satellites = 4;
                 stream.last_sample.value.fix_satellites = 4;
-                stream.last_sample.value.pacc = m_ecef_pacc_dist(m_generator);
-                stream.last_sample.value.vacc = m_ecef_vacc_dist(m_generator);
+                stream.last_sample.value.pacc = m_noise.gps_pacc_sd(m_noise.generator);
+                stream.last_sample.value.vacc = m_noise.gps_vacc_sd(m_noise.generator);
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -307,7 +301,7 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
-                math::vec3d noise(m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator), m_ecef_position_dist(m_generator));
+                math::vec3d noise(m_noise.gps_position_sd(m_noise.generator), m_noise.gps_position_sd(m_noise.generator), m_noise.gps_position_sd(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
                 stream.last_sample.is_healthy = true;
@@ -319,7 +313,7 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
-                math::vec3f noise(m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator), m_ecef_velocity_dist(m_generator));
+                math::vec3f noise(m_noise.gps_velocity_sd(m_noise.generator), m_noise.gps_velocity_sd(m_noise.generator), m_noise.gps_velocity_sd(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(uav_state.enu_velocity))) + noise;
                 stream.last_sample.is_healthy = true;
@@ -393,6 +387,36 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
     m_simulation.set_simulation_enabled(sz.simulation_enabled);
 
     *m_config = sz;
+
+    m_config->noise.gps_position_sd = math::max(m_config->noise.gps_position_sd, 0.f);
+    m_noise.gps_position_sd = std::normal_distribution<float>(0, m_config->noise.gps_position_sd);
+
+    m_config->noise.gps_velocity_sd = math::max(m_config->noise.gps_velocity_sd, 0.f);
+    m_noise.gps_velocity_sd = std::normal_distribution<float>(0, m_config->noise.gps_velocity_sd);
+
+    m_config->noise.gps_pacc_sd = math::max(m_config->noise.gps_pacc_sd, 0.f);
+    m_noise.gps_pacc_sd = std::normal_distribution<float>(0, m_config->noise.gps_pacc_sd);
+
+    m_config->noise.gps_vacc_sd = math::max(m_config->noise.gps_vacc_sd, 0.f);
+    m_noise.gps_vacc_sd = std::normal_distribution<float>(0, m_config->noise.gps_vacc_sd);
+
+    m_config->noise.acceleration_sd = math::max(m_config->noise.acceleration_sd, 0.f);
+    m_noise.acceleration_sd = std::normal_distribution<float>(0, m_config->noise.acceleration_sd);
+
+    m_config->noise.angular_velocity_sd = math::max(m_config->noise.angular_velocity_sd, 0.f);
+    m_noise.angular_velocity_sd = std::normal_distribution<float>(0, m_config->noise.angular_velocity_sd);
+
+    m_config->noise.magnetic_field_sd = math::max(m_config->noise.magnetic_field_sd, 0.f);
+    m_noise.magnetic_field_sd = std::normal_distribution<float>(0, m_config->noise.magnetic_field_sd);
+
+    m_config->noise.pressure_sd = math::max(m_config->noise.pressure_sd, 0.f);
+    m_noise.pressure_sd = std::normal_distribution<float>(0, m_config->noise.pressure_sd);
+
+    m_config->noise.temperature_sd = math::max(m_config->noise.temperature_sd, 0.f);
+    m_noise.temperature_sd = std::normal_distribution<float>(0, m_config->noise.temperature_sd);
+
+    m_config->noise.ground_distance_sd = math::max(m_config->noise.ground_distance_sd, 0.f);
+    m_noise.ground_distance_sd = std::normal_distribution<float>(0, m_config->noise.ground_distance_sd);
 
     return true;
 }

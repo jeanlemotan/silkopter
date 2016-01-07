@@ -18,13 +18,32 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Simulator",
+    "name": "Noise",
+    "members":
+    [
+        ["float", "gps_position_sd", {"required": true, "json_key" : "GPS Position SD", "default" : 2.0}],
+        ["float", "gps_velocity_sd", {"required": true, "json_key" : "GPS Velocity SD", "default" : 0.2}],
+        ["float", "gps_pacc_sd", {"required": true, "json_key" : "GPS PACC SD", "default" : 0.5}],
+        ["float", "gps_vacc_sd", {"required": true, "json_key" : "GPS VACC SD", "default" : 0.1}],
+        ["float", "acceleration_sd", {"required": true, "json_key" : "Acceleration SD", "default" : 0.01}],
+        ["float", "angular_velocity_sd", {"required": true, "json_key" : "Angular Velocity SD", "default" : 0.01}],
+        ["float", "magnetic_field_sd", {"required": true, "json_key" : "Magnetic Field SD", "default" : 0.1}],
+        ["float", "pressure_sd", {"required": true, "json_key" : "Pressure SD", "default" : 0.1}],
+        ["float", "temperature_sd", {"required": true, "json_key" : "Temperature SD", "default" : 0.1}],
+        ["float", "ground_distance_sd", {"required": true, "json_key" : "Ground Distance SD", "default" : 0.01}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multi_Simulator",
     "name": "Config",
     "members":
     [
         ["bool", "simulation_enabled", {"required": true, "json_key" : "Simulation Enabled", "default" : true}],
         ["bool", "drag_enabled", {"required": true, "json_key" : "Drag Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
-        ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}]
+        ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
+        ["sz::Multi_Simulator::Noise", "noise", {"required": false, "json_key" : "Noise"}]
     ]
 }
 ]
