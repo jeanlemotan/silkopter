@@ -136,21 +136,11 @@ private:
 
     typedef util::PID<float, float, float> PID;
 
-    struct Vertical_Thrust_Offset_Data
+    struct Vertical_Altitude_Data
     {
-        float reference_thrust = 0.f;
-    } m_vertical_thrust_offset_data;
-
-    struct Vertical_Speed_Data
-    {
-        struct PD
-        {
-            float kp = 0;
-            float kd = 0;
-        } pd;
-
+        PID pid;
         util::Butterworth<float> dsp;
-    } m_vertical_speed_data;
+    } m_vertical_altitude_data;
 
     struct Horizontal_Angle_Data
     {

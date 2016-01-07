@@ -1,5 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Multi_Brain.h"
+#include "physics/constants.h"
 
 #include "sz_math.hpp"
 #include "sz_PID.hpp"
@@ -110,9 +111,9 @@ void Multi_Brain::process_state_mode_idle()
     {
         input.vertical.thrust_rate.set(0);
     }
-    if (input.vertical.thrust_offset.value != 0)
+    if (input.vertical.thrust.value != 0)
     {
-        input.vertical.thrust_rate.set(0);
+        input.vertical.thrust.set(0);
     }
     if (input.vertical.altitude.value != 0)
     {
@@ -143,6 +144,7 @@ void Multi_Brain::process_state_mode_idle()
 
 void Multi_Brain::process_state_mode_armed()
 {
+    stream::IMulti_Input::Sample::Value& prev_input = m_inputs.input.previous_sample.value;
     stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
 
@@ -166,33 +168,39 @@ void Multi_Brain::process_state_mode_armed()
     {
         thrust += input.vertical.thrust_rate.value * m_dts;
     }
-    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
+    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST)
     {
-        thrust = m_vertical_thrust_offset_data.reference_thrust + input.vertical.thrust_offset.value;
+        if (prev_input.vertical.mode.value != input.vertical.mode.value)
+        {
+            input.vertical.thrust_rate.set(thrust);
+            QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
+        }
+
+        thrust = input.vertical.thrust.value;
     }
     else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::ALTITUDE)
     {
+        if (prev_input.vertical.mode.value != input.vertical.mode.value)
+        {
+            input.vertical.altitude.set(enu_position.z);
+            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", enu_position.z);
+        }
+
         float target_alt = input.vertical.altitude.value;
         float crt_alt = enu_position.z;
 
-        //do a manual PD using (target_alt - crt_alt) as P and vertical speed as D
-        //I'm not using a util::PID here since I have the derivative already calculated - it's the vertical speed
-        {
-            float error = target_alt - crt_alt;
-            float output = error * m_vertical_speed_data.pd.kp - enu_velocity.z * m_vertical_speed_data.pd.kd;
-            m_vertical_speed_data.dsp.process(output);
-            thrust = output;
-        }
+        float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, enu_velocity.z);
+        output = math::clamp(output, -1.f, 1.f);
+        m_vertical_altitude_data.dsp.process(output);
+
+        float hover_thrust = m_multi_config.mass * physics::constants::g;
+        float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
+
+        thrust = output * max_thrust_range + hover_thrust;
     }
 
     //clamp thrust
     thrust = math::clamp(thrust, m_config->min_thrust, m_config->max_thrust);
-
-    //refresh references
-    if (input.vertical.mode.value != stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET)
-    {
-        m_vertical_thrust_offset_data.reference_thrust = thrust;
-    }
 
     ////////////////////////////////////////////////////////////
     // Horizontals
@@ -235,6 +243,12 @@ void Multi_Brain::process_state_mode_armed()
     {
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+
+        if (prev_input.yaw.mode.value != input.yaw.mode.value)
+        {
+            input.yaw.angle.set(fz);
+            QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
+        }
 
         math::quatf target;
         target.set_from_euler_zxy(fx, fy, input.yaw.angle.value);
@@ -517,42 +531,24 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
     }
 
     m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
-//    {
-//        PID::Params params;
-//        fill_pid_params(params, m_config->altitude.acceleration_pid);
-//        fill_pd_params(params, m_config->altitude.velocity_pd);
-//        fill_p_params(params, m_config->altitude.altitude_p);
-//        if (!m_vertical_speed_data.acceleration_pid.set_params(params) ||
-//            !m_vertical_speed_data.velocity_pd.set_params(params) ||
-//            !m_vertical_speed_data.altitude_p.set_params(params))
-//        {
-//            QLOGE("Bad climb rate PID params");
-//            return false;
-//        }
-//    }
     {
-        m_vertical_speed_data.pd.kp = m_config->altitude.pd.kp;
-        m_vertical_speed_data.pd.kd = m_config->altitude.pd.kd;
-//        fill_pid_params(params, m_config->altitude.acceleration_pid);
-//        fill_pd_params(params, m_config->altitude.velocity_pd);
-//        fill_p_params(params, m_config->altitude.altitude_p);
-//        if (!m_vertical_speed_data.acceleration_pid.set_params(params) ||
-//            !m_vertical_speed_data.velocity_pd.set_params(params) ||
-//            !m_vertical_speed_data.altitude_p.set_params(params))
-//        {
-//            QLOGE("Bad climb rate PID params");
-//            return false;
-//        }
+        PID::Params params;
+        fill_pid_params(params, m_config->altitude.pid);
+        if (!m_vertical_altitude_data.pid.set_params(params))
+        {
+            QLOGE("Bad altitude PID params");
+            return false;
+        }
     }
 
     m_config->altitude.lpf_cutoff_frequency = math::clamp(m_config->altitude.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);
     m_config->altitude.lpf_poles = math::max<uint32_t>(m_config->altitude.lpf_poles, 1);
-    if (!m_vertical_speed_data.dsp.setup(m_config->altitude.lpf_poles, output_rate, m_config->altitude.lpf_cutoff_frequency))
+    if (!m_vertical_altitude_data.dsp.setup(m_config->altitude.lpf_poles, output_rate, m_config->altitude.lpf_cutoff_frequency))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
     }
-    m_vertical_speed_data.dsp.reset();
+    m_vertical_altitude_data.dsp.reset();
 
     return true;
 }
