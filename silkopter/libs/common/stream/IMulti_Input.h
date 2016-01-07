@@ -12,27 +12,27 @@ template<class T> struct Input_Value
 {
     typedef T Value;
 
-    uint32_t version = 0;
-    T value = T();
-
     Input_Value() = default;
     Input_Value(T value) : value(value) {}
 
     void set(Value const& v) { value = v; version++; }
     T const& get() const { return value; }
+
+    uint32_t version = 0;
+    T value = T();
 };
 template<> struct Input_Value<bool>
 {
     typedef bool Value;
-
-    uint32_t version : 31;
-    uint32_t value : 1;
 
     Input_Value() : version(0), value(0) {}
     Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
 
     void set(Value const& v) { value = v; version++; }
     bool get() const { return value != 0; }
+
+    uint32_t version : 31;
+    uint32_t value : 1;
 };
 
 
@@ -61,14 +61,14 @@ public:
         enum class Mode : uint8_t
         {
             THRUST_RATE,
-            THRUST_OFFSET,
+            THRUST,
             ALTITUDE,
         };
-        Input_Value<Mode> mode = Mode::THRUST_OFFSET;
+        Input_Value<Mode> mode = Mode::THRUST;
 
         Input_Value<float> thrust_rate; //Newtons per second
-        Input_Value<float> thrust_offset; //Newtons from a reference thrust
-        Input_Value<float> altitude; //meters
+        Input_Value<float> thrust;      //Newtons
+        Input_Value<float> altitude;    //meters
     };
 
     struct Horizontal
@@ -189,7 +189,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::V
     serialize(buffer, value.toggles.take_off, off);
     serialize(buffer, value.vertical.mode, off);
     serialize(buffer, value.vertical.thrust_rate, off);
-    serialize(buffer, value.vertical.thrust_offset, off);
+    serialize(buffer, value.vertical.thrust, off);
     serialize(buffer, value.vertical.altitude, off);
     serialize(buffer, value.horizontal.mode, off);
     serialize(buffer, value.horizontal.angle_rate, off);
@@ -215,7 +215,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_
         deserialize(buffer, value.toggles.take_off, off) &&
         deserialize(buffer, value.vertical.mode, off) &&
         deserialize(buffer, value.vertical.thrust_rate, off) &&
-        deserialize(buffer, value.vertical.thrust_offset, off) &&
+        deserialize(buffer, value.vertical.thrust, off) &&
         deserialize(buffer, value.vertical.altitude, off) &&
         deserialize(buffer, value.horizontal.mode, off) &&
         deserialize(buffer, value.horizontal.angle_rate, off) &&

@@ -24,8 +24,8 @@ public:
             FIX_3D
         } fix;
 
-        uint32_t visible_satellites = 0; //how many satellites are visible
-        uint32_t fix_satellites = 0;     //how many satellites are tracked (participate in the fix)
+        uint16_t visible_satellites = 0; //how many satellites are visible
+        uint16_t fix_satellites = 0;     //how many satellites are tracked (participate in the fix)
         float pacc = std::numeric_limits<float>::infinity(); //position accuracy (standard deviation)
         float vacc = std::numeric_limits<float>::infinity(); //velocity accuracy (standard deviation)
 
