@@ -59,11 +59,20 @@ private:
 
     q::Clock::time_point m_last_tp;
 
-    std::default_random_engine m_generator;
-    std::normal_distribution<double> m_ecef_position_dist;
-    std::normal_distribution<float> m_ecef_velocity_dist;
-    std::normal_distribution<float> m_ecef_pacc_dist;
-    std::normal_distribution<float> m_ecef_vacc_dist;
+    struct Noise
+    {
+        std::default_random_engine generator;
+        std::normal_distribution<float> gps_position_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> gps_velocity_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> gps_pacc_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> gps_vacc_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> acceleration_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> angular_velocity_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> magnetic_field_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> pressure_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> temperature_sd = std::normal_distribution<float>(0, 0);
+        std::normal_distribution<float> ground_distance_sd = std::normal_distribution<float>(0, 0);
+    } m_noise;
 
     struct Angular_Velocity : public stream::IAngular_Velocity
     {
