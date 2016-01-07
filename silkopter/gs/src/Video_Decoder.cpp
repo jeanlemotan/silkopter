@@ -67,14 +67,14 @@ Video_Decoder::Video_Decoder()
         exit(1);
     }
 
-    m_ffmpeg.frame_yuv = avcodec_alloc_frame();//av_frame_alloc();
+    m_ffmpeg.frame_yuv = av_frame_alloc();
     if (!m_ffmpeg.frame_yuv)
     {
         QLOGE("Could not allocate video frame");
         exit(1);
     }
 
-    m_ffmpeg.frame_rgb = avcodec_alloc_frame();//av_frame_alloc();
+    m_ffmpeg.frame_rgb = av_frame_alloc();
     if (!m_ffmpeg.frame_rgb)
     {
         QLOGE("Could not allocate video frame");
@@ -92,8 +92,8 @@ Video_Decoder::~Video_Decoder()
     sws_freeContext(m_ffmpeg.sws_context);
     m_ffmpeg.sws_context = nullptr;
 
-    avcodec_free_frame(&m_ffmpeg.frame_rgb);
-    avcodec_free_frame(&m_ffmpeg.frame_yuv);
+    av_frame_free(&m_ffmpeg.frame_rgb);
+    av_frame_free(&m_ffmpeg.frame_yuv);
     avcodec_close(m_ffmpeg.context);
     avcodec_free_context(&m_ffmpeg.context);
 }
@@ -130,7 +130,7 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Value const& frame, ma
 
         if (m_ffmpeg.sws_context)
         {
-            auto line_size = size.x * 4;
+            int line_size = static_cast<int>(size.x * 4);
             if (line_size != m_ffmpeg.rgb->linesize[0])
             {
                 m_ffmpeg.rgb->linesize[0] = line_size;
