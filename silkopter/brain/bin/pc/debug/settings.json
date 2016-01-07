@@ -61,8 +61,20 @@
                 "config": {
                     "Simulation Enabled": true,
                     "Drag Enabled": true,
-                    "Ground Enabled": false,
-                    "Gravity Enabled": true
+                    "Ground Enabled": true,
+                    "Gravity Enabled": true,
+                    "Noise": {
+                        "GPS Position SD": 0.0,
+                        "GPS Velocity SD": 0.0,
+                        "GPS PACC SD": 0.0,
+                        "GPS VACC SD": 0.0,
+                        "Acceleration SD": 1.0,
+                        "Angular Velocity SD": 0.009999999776482582,
+                        "Magnetic Field SD": 0.10000000149011612,
+                        "Pressure SD": 0.0,
+                        "Temperature SD": 0.10000000149011612,
+                        "Ground Distance SD": 0.0010000000474974514
+                    }
                 },
                 "input_paths": [
                     "Motor Mixer/Throttle 0",
@@ -93,7 +105,7 @@
                 "config": {},
                 "input_paths": [
                     "Multi Simulator/Angular Velocity",
-                    "Multi Simulator/Acceleration",
+                    "Acceleration LPF/Output",
                     "Magnetic Field RS/Output"
                 ]
             },
@@ -292,9 +304,11 @@
                         "Max Speed (m/s)": 8.0,
                         "LPF Poles": 2,
                         "LPF Cutoff Frequency (Hz)": 2.0,
-                        "PD": {
-                            "kP": 1.0,
-                            "kD": 3.0,
+                        "PID": {
+                            "kP": 0.10000000149011612,
+                            "kI": 0.10000000149011612,
+                            "kD": 1.0,
+                            "Max I": 0.10000000149011612,
                             "D Filter": 0.0
                         }
                     }
@@ -342,6 +356,19 @@
                 },
                 "input_paths": [
                     "Multi Simulator/Sonar Distance"
+                ]
+            },
+            "Acceleration LPF": {
+                "type": "Acceleration LPF",
+                "init_params": {
+                    "Rate (Hz)": 1000
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 300.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Acceleration"
                 ]
             }
         }

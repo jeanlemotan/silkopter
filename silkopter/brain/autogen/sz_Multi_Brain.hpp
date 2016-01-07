@@ -1524,9 +1524,9 @@ namespace sz { namespace Multi_Brain { struct Altitude {
  float max_speed;
 uint32_t lpf_poles;
 float lpf_cutoff_frequency;
-sz::PD pd;
+sz::PID pid;
 
-explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), pd() {  }
+explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), pid() {  }
 
 
  
@@ -1546,7 +1546,7 @@ private:
     SAXEventHandler< float > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< float > handler_2;
-SAXEventHandler< sz::PD > handler_3;bool has_max_speed;
+SAXEventHandler< sz::PID > handler_3;bool has_max_speed;
 bool has_lpf_poles;
 bool has_lpf_cutoff_frequency;
 
@@ -1569,7 +1569,7 @@ case 1:
 case 2:
     return "lpf_cutoff_frequency";
 case 3:
-    return "pd";
+    return "pid";
         default:
             break;
         }
@@ -1609,7 +1609,7 @@ public:
         , handler_0(&obj->max_speed)
 , handler_1(&obj->lpf_poles)
 , handler_2(&obj->lpf_cutoff_frequency)
-, handler_3(&obj->pd)
+, handler_3(&obj->pid)
     {
         reset_flags();
     }
@@ -1828,7 +1828,7 @@ else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x50\x6f\x6c\x65\x7
 						 { state=1; has_lpf_poles = true; }
 else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25))
 						 { state=2; has_lpf_cutoff_frequency = true; }
-else if (utility::string_equal(str, length, "\x50\x44", 2))
+else if (utility::string_equal(str, length, "\x50\x49\x44", 3))
 						 { state=3;  }
             else {
                 state = -1;
@@ -2017,7 +2017,7 @@ struct Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b8
         w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.max_speed);
 w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, uint32_t >()(w, value.lpf_poles);
 w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.lpf_cutoff_frequency);
-w.Key("\x50\x44", 2, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PD >()(w, value.pd);
+w.Key("\x50\x49\x44", 3, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PID >()(w, value.pid);
 
         w.EndObject(4);
     }
