@@ -8,14 +8,14 @@ namespace math
 template<typename T>
 inline T radians(T const& degrees)
 {
-    QASSERT(!is_nan(degrees));
+    QASSERT(is_finite(degrees));
     return degrees * angle<T>::pi / T(180);
 }
 
 template<typename T>
 inline T degrees(T const& a)
 {
-    QASSERT(!is_nan(a));
+    QASSERT(is_finite(a));
     return a * T(180) / angle<T>::pi;
 }
 
@@ -184,44 +184,44 @@ namespace detail
 
 template<> inline float cos<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::cosf(s);
 }
 template<> inline float sin<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::sinf(s);
 }
 template<> inline float tan<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::tanf(s);
 }
 template<> inline void sin_cos<float, standard>(float const& angle, float& s, float& c)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     s = ::sinf(angle);
 	c = ::cosf(angle);
 }
 
 template<> inline double cos<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::cos(s);
 }
 template<> inline double sin<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::sin(s);
 }
 template<> inline double tan<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::tan(s);
 }
 template<> inline void sin_cos<double, standard>(double const& angle, double& s, double& c)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     s = ::sin(angle);
 	c = ::cos(angle);
 }
@@ -231,43 +231,43 @@ template<> inline void sin_cos<double, standard>(double const& angle, double& s,
 
 template<> inline float cos<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return detail::fast_cos(s);
 }
 template<> inline float sin<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return detail::fast_sin(s);
 }
 template<> inline float tan<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::tanf(s);
 }
 template<> inline void sin_cos<float, fast>(float const& angle, float& s, float& c)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     detail::fast_sin_cos(angle, s, c);
 }
 
 template<> inline double cos<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::cos(s);
 }
 template<> inline double sin<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::sin(s);
 }
 template<> inline double tan<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return ::tan(s);
 }
 template<> inline void sin_cos<double, fast>(double const& angle, double& s, double& c)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     s = ::sin(angle);
 	c = ::cos(angle);
 }
@@ -277,61 +277,61 @@ template<> inline void sin_cos<double, fast>(double const& angle, double& s, dou
 
 template<> inline float cos<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 1 : ::cosf(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 1 : ::cosf(s);
 }
 template<> inline float sin<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : ::sinf(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : ::sinf(s);
 }
 template<> inline float tan<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : ::tanf(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : ::tanf(s);
 }
 template<> inline void sin_cos<float, safe>(float const& angle, float& s, float& c)
 {
-    QASSERT(!is_nan(angle));
-    if (is_nan(angle))
-    {
-        s = 0;
-        c = 1;
-    }
-    else
+    QASSERT(is_finite(angle));
+    if (is_finite(angle))
     {
         s = ::sinf(angle);
         c = ::cosf(angle);
+    }
+    else
+    {
+        s = 0;
+        c = 1;
     }
 }
 
 template<> inline double cos<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 1 : ::cos(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 1 : ::cos(s);
 }
 template<> inline double sin<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : ::sin(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : ::sin(s);
 }
 template<> inline double tan<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : ::tan(s);
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : ::tan(s);
 }
 template<> inline void sin_cos<double, safe>(double const& angle, double& s, double& c)
 {
-    QASSERT(!is_nan(angle));
-    if (is_nan(angle))
-    {
-        s = 0;
-        c = 1;
-    }
-    else
+    QASSERT(is_finite(angle));
+    if (!is_finite(angle))
     {
         s = ::sin(angle);
         c = ::cos(angle);
+    }
+    else
+    {
+        s = 0;
+        c = 1;
     }
 }
 
@@ -346,19 +346,19 @@ template<typename T, class Policy> inline void sin_cos(T const& angle, T& s, T& 
 template<typename T, class Policy>
 inline T cos(T const& angle)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     return std::cos(angle);
 }
 template<typename T, class Policy>
 inline T sin(T const& angle)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     return std::sin(angle);
 }
 template<typename T, class Policy>
 inline T tan(T const& angle)
 {
-    QASSERT(!is_nan(angle));
+    QASSERT(is_finite(angle));
     return std::tan(angle);
 }
 
@@ -366,128 +366,128 @@ inline T tan(T const& angle)
 
 template<> inline float acos<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::acosf(s));
 }
 template<> inline float asin<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::asinf(s));
 }
 template<> inline float atan<float, standard>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::atanf(s));
 }
 template<> inline float atan2<float, standard>(float const& y, float const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y));
+    QASSERT(is_finite(x) && is_finite(y));
     return float(::atan2f(y, x));
 }
 
 template<> inline double acos<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::acos(s));
 }
 template<> inline double asin<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::asin(s));
 }
 template<> inline double atan<double, standard>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::atan(s));
 }
 template<> inline double atan2<double, standard>(double const& y, double const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y));
+    QASSERT(is_finite(x) && is_finite(y));
     return double(::atan2(y, x));
 }
 
 template<> inline float acos<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::acosf(s));
 }
 template<> inline float asin<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::asinf(s));
 }
 template<> inline float atan<float, fast>(float const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return float(::atanf(s));
 }
 template<> inline float atan2<float, fast>(float const& y, float const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y));
+    QASSERT(is_finite(x) && is_finite(y));
     return float(::atan2f(y, x));
 }
 
 template<> inline double acos<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::acos(s));
 }
 template<> inline double asin<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::asin(s));
 }
 template<> inline double atan<double, fast>(double const& s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return double(::atan(s));
 }
 template<> inline double atan2<double, fast>(double const& y, double const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y));
+    QASSERT(is_finite(x) && is_finite(y));
     return double(::atan2(y, x));
 }
 
 template<> inline float acos<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? angle<float>::pi2 : float(::acosf(clamp(s, 0.f, 1.f)));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? angle<float>::pi2 : float(::acosf(clamp(s, 0.f, 1.f)));
 }
 template<> inline float asin<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : float(::asinf(s));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : float(::asinf(s));
 }
 template<> inline float atan<float, safe>(float const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : float(::atanf(s));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : float(::atanf(s));
 }
 template<> inline float atan2<float, safe>(float const& y, float const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_zero(y));
-    return is_nan(x) || is_nan(y) || is_zero(y) ? 0 : float(::atan2f(y, x));
+    QASSERT(is_finite(x) && is_finite(y) && !is_zero(y));
+    return !is_finite(x) || !is_finite(y) || is_zero(y) ? 0 : float(::atan2f(y, x));
 }
 
 template<> inline double acos<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? angle<double>::pi2 : double(::acos(s));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? angle<double>::pi2 : double(::acos(s));
 }
 template<> inline double asin<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : double(::asin(s));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : double(::asin(s));
 }
 template<> inline double atan<double, safe>(double const& s)
 {
-    QASSERT(!is_nan(s));
-    return is_nan(s) ? 0 : double(::atan(s));
+    QASSERT(is_finite(s));
+    return !is_finite(s) ? 0 : double(::atan(s));
 }
 template<> inline double atan2<double, safe>(double const& y, double const& x)
 {
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_zero(y));
-    return is_nan(x) || is_nan(y) || is_zero(y) ? 0 : double(::atan2(y, x));
+    QASSERT(is_finite(x) && is_finite(y) && !is_zero(y));
+    return !is_finite(x) || !is_finite(y) || is_zero(y) ? 0 : double(::atan2(y, x));
 }
 
 //////////////////////////////////////////////////////////////////////////

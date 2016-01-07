@@ -50,109 +50,154 @@ namespace math
 	//////////////////////////////////////////////////////////////////////////
 	// zero with tolerance
 
-	template <typename T> bool is_zero(T v1);
-	template <typename T> bool is_zero(angle<T> const& v1);
-	template <typename T> bool is_zero(vec2<T> const& v1);
-	template <typename T> bool is_zero(vec3<T> const& v1);
-	template <typename T> bool is_zero(vec4<T> const& v1);
-	template <typename T> bool is_zero(quat<T> const& v1);
-	template <typename T> bool is_zero(mat2<T> const& v1);
-	template <typename T> bool is_zero(mat3<T> const& v1);
-	template <typename T> bool is_zero(mat4<T> const& v1);
-	template <typename T> bool is_zero(trans3d<T> const& v1);
-	template <typename T> bool is_zero(trans2d<T> const& v1);
+    template <typename T> bool is_zero(T v);
+    template <typename T> bool is_zero(angle<T> const& v);
+    template <typename T> bool is_zero(vec2<T> const& v);
+    template <typename T> bool is_zero(vec3<T> const& v);
+    template <typename T> bool is_zero(vec4<T> const& v);
+    template <typename T> bool is_zero(quat<T> const& v);
+    template <typename T> bool is_zero(mat2<T> const& v);
+    template <typename T> bool is_zero(mat3<T> const& v);
+    template <typename T> bool is_zero(mat4<T> const& v);
+    template <typename T> bool is_zero(trans3d<T> const& v);
+    template <typename T> bool is_zero(trans2d<T> const& v);
 
-	template <typename T> bool is_zero(T v1, T tolerance);
-	template <typename T> bool is_zero(angle<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(vec2<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(vec3<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(vec4<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(quat<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(mat2<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(mat3<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(mat4<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(trans3d<T> const& v1, T tolerance);
-	template <typename T> bool is_zero(trans2d<T> const& v1, T tolerance);
+    template <typename T> bool is_zero(T v, T tolerance);
+    template <typename T> bool is_zero(angle<T> const& v, T tolerance);
+    template <typename T> bool is_zero(vec2<T> const& v, T tolerance);
+    template <typename T> bool is_zero(vec3<T> const& v, T tolerance);
+    template <typename T> bool is_zero(vec4<T> const& v, T tolerance);
+    template <typename T> bool is_zero(quat<T> const& v, T tolerance);
+    template <typename T> bool is_zero(mat2<T> const& v, T tolerance);
+    template <typename T> bool is_zero(mat3<T> const& v, T tolerance);
+    template <typename T> bool is_zero(mat4<T> const& v, T tolerance);
+    template <typename T> bool is_zero(trans3d<T> const& v, T tolerance);
+    template <typename T> bool is_zero(trans2d<T> const& v, T tolerance);
 
 	
 	//////////////////////////////////////////////////////////////////////////
 	// one with tolerance
 
-	template <typename T> bool is_one(T v1);
-	template <typename T> bool is_one(vec2<T> const& v1);
-	template <typename T> bool is_one(vec3<T> const& v1);
-	template <typename T> bool is_one(vec4<T> const& v1);
-	template <typename T> bool is_one(quat<T> const& v1);
-	template <typename T> bool is_one(mat2<T> const& v1);
-	template <typename T> bool is_one(mat3<T> const& v1);
-	template <typename T> bool is_one(mat4<T> const& v1);
-	template <typename T> bool is_one(trans3d<T> const& v1);
-	template <typename T> bool is_one(trans2d<T> const& v1);
+    template <typename T> bool is_one(T v);
+    template <typename T> bool is_one(vec2<T> const& v);
+    template <typename T> bool is_one(vec3<T> const& v);
+    template <typename T> bool is_one(vec4<T> const& v);
+    template <typename T> bool is_one(quat<T> const& v);
+    template <typename T> bool is_one(mat2<T> const& v);
+    template <typename T> bool is_one(mat3<T> const& v);
+    template <typename T> bool is_one(mat4<T> const& v);
+    template <typename T> bool is_one(trans3d<T> const& v);
+    template <typename T> bool is_one(trans2d<T> const& v);
 
-	template <typename T> bool is_one(T v1, T tolerance);
-	template <typename T> bool is_one(vec2<T> const& v1, T tolerance);
-	template <typename T> bool is_one(vec3<T> const& v1, T tolerance);
-	template <typename T> bool is_one(vec4<T> const& v1, T tolerance);
-	template <typename T> bool is_one(quat<T> const& v1, T tolerance);
-	template <typename T> bool is_one(mat2<T> const& v1, T tolerance);
-	template <typename T> bool is_one(mat3<T> const& v1, T tolerance);
-	template <typename T> bool is_one(mat4<T> const& v1, T tolerance);
-	template <typename T> bool is_one(trans3d<T> const& v1, T tolerance);
-	template <typename T> bool is_one(trans2d<T> const& v1, T tolerance);
+    template <typename T> bool is_one(T v, T tolerance);
+    template <typename T> bool is_one(vec2<T> const& v, T tolerance);
+    template <typename T> bool is_one(vec3<T> const& v, T tolerance);
+    template <typename T> bool is_one(vec4<T> const& v, T tolerance);
+    template <typename T> bool is_one(quat<T> const& v, T tolerance);
+    template <typename T> bool is_one(mat2<T> const& v, T tolerance);
+    template <typename T> bool is_one(mat3<T> const& v, T tolerance);
+    template <typename T> bool is_one(mat4<T> const& v, T tolerance);
+    template <typename T> bool is_one(trans3d<T> const& v, T tolerance);
+    template <typename T> bool is_one(trans2d<T> const& v, T tolerance);
 
 	//////////////////////////////////////////////////////////////////////////
 	// identity with tolerance
 
-	template <typename T> bool is_identity(mat2<T> const& v1);
-	template <typename T> bool is_identity(mat3<T> const& v1);
-	template <typename T> bool is_identity(mat4<T> const& v1);
-	template <typename T> bool is_identity(trans3d<T> const& v1);
-	template <typename T> bool is_identity(trans2d<T> const& v1);
-	template <typename T> bool is_identity(quat<T> const& v1);
+    template <typename T> bool is_identity(mat2<T> const& v);
+    template <typename T> bool is_identity(mat3<T> const& v);
+    template <typename T> bool is_identity(mat4<T> const& v);
+    template <typename T> bool is_identity(trans3d<T> const& v);
+    template <typename T> bool is_identity(trans2d<T> const& v);
+    template <typename T> bool is_identity(quat<T> const& v);
 
-	template <typename T> bool is_identity(mat2<T> const& v1, T tolerance);
-	template <typename T> bool is_identity(mat3<T> const& v1, T tolerance);
-	template <typename T> bool is_identity(mat4<T> const& v1, T tolerance);
-	template <typename T> bool is_identity(trans3d<T> const& v1, T tolerance);
-	template <typename T> bool is_identity(trans2d<T> const& v1, T tolerance);
-	template <typename T> bool is_identity(quat<T> const& v1, T tolerance);
+    template <typename T> bool is_identity(mat2<T> const& v, T tolerance);
+    template <typename T> bool is_identity(mat3<T> const& v, T tolerance);
+    template <typename T> bool is_identity(mat4<T> const& v, T tolerance);
+    template <typename T> bool is_identity(trans3d<T> const& v, T tolerance);
+    template <typename T> bool is_identity(trans2d<T> const& v, T tolerance);
+    template <typename T> bool is_identity(quat<T> const& v, T tolerance);
 
 	//////////////////////////////////////////////////////////////////////////
 	// positive
 
-	template <typename T> bool is_positive(T v1);
-	template <typename T> bool is_positive(angle<T> const& v1);
-	template <typename T> bool is_positive(vec2<T> const& v1);
-	template <typename T> bool is_positive(vec3<T> const& v1);
-	template <typename T> bool is_positive(vec4<T> const& v1);
-	template <typename T> bool is_positive(quat<T> const& v1);
-	template <typename T> bool is_positive(mat2<T> const& v1);
-	template <typename T> bool is_positive(mat3<T> const& v1);
-	template <typename T> bool is_positive(mat4<T> const& v1);
-	template <typename T> bool is_positive(trans3d<T> const& v1);
-	template <typename T> bool is_positive(trans2d<T> const& v1);
+    template <typename T> bool is_positive(T v);
+    template <typename T> bool is_positive(angle<T> const& v);
+    template <typename T> bool is_positive(vec2<T> const& v);
+    template <typename T> bool is_positive(vec3<T> const& v);
+    template <typename T> bool is_positive(vec4<T> const& v);
+    template <typename T> bool is_positive(quat<T> const& v);
+    template <typename T> bool is_positive(mat2<T> const& v);
+    template <typename T> bool is_positive(mat3<T> const& v);
+    template <typename T> bool is_positive(mat4<T> const& v);
+    template <typename T> bool is_positive(trans3d<T> const& v);
+    template <typename T> bool is_positive(trans2d<T> const& v);
 
 	//////////////////////////////////////////////////////////////////////////
 	// negative
 
-	template <typename T> bool is_negative(T v1);
-	template <typename T> bool is_negative(angle<T> const& v1);
-	template <typename T> bool is_negative(vec2<T> const& v1);
-	template <typename T> bool is_negative(vec3<T> const& v1);
-	template <typename T> bool is_negative(vec4<T> const& v1);
-	template <typename T> bool is_negative(quat<T> const& v1);
-	template <typename T> bool is_negative(mat2<T> const& v1);
-	template <typename T> bool is_negative(mat3<T> const& v1);
-	template <typename T> bool is_negative(mat4<T> const& v1);
-	template <typename T> bool is_negative(trans3d<T> const& v1);
-	template <typename T> bool is_negative(trans2d<T> const& v1);
+    template <typename T> bool is_negative(T v);
+    template <typename T> bool is_negative(angle<T> const& v);
+    template <typename T> bool is_negative(vec2<T> const& v);
+    template <typename T> bool is_negative(vec3<T> const& v);
+    template <typename T> bool is_negative(vec4<T> const& v);
+    template <typename T> bool is_negative(quat<T> const& v);
+    template <typename T> bool is_negative(mat2<T> const& v);
+    template <typename T> bool is_negative(mat3<T> const& v);
+    template <typename T> bool is_negative(mat4<T> const& v);
+    template <typename T> bool is_negative(trans3d<T> const& v);
+    template <typename T> bool is_negative(trans2d<T> const& v);
 
 
     //////////////////////////////////////////////////////////////////////////
     // nan
 
-    template <typename T> bool is_nan(T v1);
-    template <typename T> bool is_nan(angle<T> const& v1);
+    bool is_nan(float v);
+    bool is_nan(double v);
+    template <typename T> bool is_nan(T v);
+    template <typename T> bool is_nan(angle<T> const& v);
+    template <typename T> bool is_nan(vec2<T> const& v);
+    template <typename T> bool is_nan(vec3<T> const& v);
+    template <typename T> bool is_nan(vec4<T> const& v);
+    template <typename T> bool is_nan(quat<T> const& v);
+    template <typename T> bool is_nan(mat2<T> const& v);
+    template <typename T> bool is_nan(mat3<T> const& v);
+    template <typename T> bool is_nan(mat4<T> const& v);
+    template <typename T> bool is_nan(trans3d<T> const& v);
+    template <typename T> bool is_nan(trans2d<T> const& v);
+
+    //////////////////////////////////////////////////////////////////////////
+    // inf
+
+    bool is_inf(float v);
+    bool is_inf(double v);
+    template <typename T> bool is_inf(T v);
+    template <typename T> bool is_inf(angle<T> const& v);
+    template <typename T> bool is_inf(vec2<T> const& v);
+    template <typename T> bool is_inf(vec3<T> const& v);
+    template <typename T> bool is_inf(vec4<T> const& v);
+    template <typename T> bool is_inf(quat<T> const& v);
+    template <typename T> bool is_inf(mat2<T> const& v);
+    template <typename T> bool is_inf(mat3<T> const& v);
+    template <typename T> bool is_inf(mat4<T> const& v);
+    template <typename T> bool is_inf(trans3d<T> const& v);
+    template <typename T> bool is_inf(trans2d<T> const& v);
+
+    //////////////////////////////////////////////////////////////////////////
+    // inf
+
+    bool is_finite(float v);
+    bool is_finite(double v);
+    template <typename T> bool is_finite(T v);
+    template <typename T> bool is_finite(angle<T> const& v);
+    template <typename T> bool is_finite(vec2<T> const& v);
+    template <typename T> bool is_finite(vec3<T> const& v);
+    template <typename T> bool is_finite(vec4<T> const& v);
+    template <typename T> bool is_finite(quat<T> const& v);
+    template <typename T> bool is_finite(mat2<T> const& v);
+    template <typename T> bool is_finite(mat3<T> const& v);
+    template <typename T> bool is_finite(mat4<T> const& v);
+    template <typename T> bool is_finite(trans3d<T> const& v);
+    template <typename T> bool is_finite(trans2d<T> const& v);
 
 	//////////////////////////////////////////////////////////////////////////
 	// component wise
@@ -213,6 +258,20 @@ namespace math
         template <typename T> vec3<bool> is_nan(vec3<T> const& v);
         template <typename T> vec4<bool> is_nan(vec4<T> const& v);
         template <typename T> vec4<bool> is_nan(quat<T> const& v);
+
+        //////////////////////////////////////////////////////////////////////////
+
+        template <typename T> vec2<bool> is_inf(vec2<T> const& v);
+        template <typename T> vec3<bool> is_inf(vec3<T> const& v);
+        template <typename T> vec4<bool> is_inf(vec4<T> const& v);
+        template <typename T> vec4<bool> is_inf(quat<T> const& v);
+
+        //////////////////////////////////////////////////////////////////////////
+
+        template <typename T> vec2<bool> is_finite(vec2<T> const& v);
+        template <typename T> vec3<bool> is_finite(vec3<T> const& v);
+        template <typename T> vec4<bool> is_finite(vec4<T> const& v);
+        template <typename T> vec4<bool> is_finite(quat<T> const& v);
 
 		//////////////////////////////////////////////////////////////////////////
 

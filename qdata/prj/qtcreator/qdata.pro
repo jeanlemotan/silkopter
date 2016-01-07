@@ -14,8 +14,8 @@ CONFIG *= precompile_header
 #QMAKE_CFLAGS_RELEASE += -g
 #QMAKE_LFLAGS_RELEASE =
 
-QMAKE_CXXFLAGS += -ffast-math -Wno-unused-variable
-QMAKE_CFLAGS += -ffast-math -Wno-unused-variable
+QMAKE_CXXFLAGS += -Wno-unused-variable
+QMAKE_CFLAGS += -Wno-unused-variable
 
 
 rpi {

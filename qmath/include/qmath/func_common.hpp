@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 
 namespace math
 {
@@ -75,7 +75,7 @@ template<typename T> inline T epsilon()
 
 template <typename T> inline bool equals(T v1, T v2)
 {
-    QASSERT(!is_nan(v1) && !is_nan(v2));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return v1 == v2;
 }
 template <typename T> inline bool equals(angle<T> const& v1, angle<T> const& v2)
@@ -141,14 +141,14 @@ template <typename T> inline bool equals(trans2d<T> const& v1, trans2d<T> const&
 
 template <typename T> inline bool equals(T v1, T v2, T tolerance)
 {
-    QASSERT(!is_nan(v1) && !is_nan(v2) && !is_nan(tolerance));
+    QASSERT(is_finite(v1) && is_finite(v2) && is_finite(tolerance));
     QASSERT(tolerance >= T(0));
     return abs(v1 - v2) <= tolerance;
 }
 
 inline bool equals(float v1, float v2, float tolerance)
 {
-    QASSERT(!is_nan(v1) && !is_nan(v2) && !is_nan(tolerance));
+    QASSERT(is_finite(v1) && is_finite(v2) && is_finite(tolerance));
     QASSERT(tolerance >= 0);
     // http://realtimecollisiondetection.net/pubs/Tolerances/
     // Abs(x - y) <= Max(absTol, relTol * Max(Abs(x), Abs(y)))
@@ -222,7 +222,7 @@ template <typename T> inline bool equals(trans2d<T> const& v1, trans2d<T> const&
 
 template <typename T> inline bool is_zero(T v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v == T(0);
 }
 template <typename T> inline bool is_zero(angle<T> const& v)
@@ -287,7 +287,7 @@ template <typename T> inline bool is_zero(trans2d<T> const& v)
 
 template <typename T> inline bool is_zero(T v, T tolerance)
 {
-    QASSERT(!is_nan(v) && !is_nan(tolerance));
+    QASSERT(is_finite(v) && is_finite(tolerance));
     QASSERT(tolerance >= 0);
     return abs(v) <= tolerance;
 }
@@ -356,7 +356,7 @@ template <typename T> inline bool is_zero(trans2d<T> const& v, T tolerance)
 
 template <typename T> inline bool is_one(T v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v == T(1);
 }
 template <typename T> inline bool is_one(vec2<T> const& v)
@@ -417,7 +417,7 @@ template <typename T> inline bool is_one(trans2d<T> const& v)
 
 template <typename T> inline bool is_one(T v, T tolerance)
 {
-    QASSERT(!is_nan(v) && !is_nan(tolerance));
+    QASSERT(is_finite(v) && is_finite(tolerance));
     QASSERT(tolerance >= 0);
     return abs(v - T(1)) <= tolerance;
 }
@@ -482,12 +482,12 @@ template <typename T> inline bool is_one(trans2d<T> const& v, T tolerance)
 
 template <typename T> inline bool is_positive(T v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v > T(0);
 }
 template <> inline bool is_positive(float v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     uint8_t const* __restrict lb = (reinterpret_cast<uint8_t const*>(&v) + 3); //msb in little endian
     return (*lb & 128) == 0;
 }
@@ -546,12 +546,12 @@ template <typename T> inline bool is_positive(mat4<T> const& v)
 
 template <typename T> inline bool is_negative(T v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v < T(0);
 }
 template <> inline bool is_negative(float v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     uint8_t const* __restrict lb = (reinterpret_cast<uint8_t const*>(&v) + 3); //msb in little endian
     return (*lb & 128) != 0;
 }
@@ -608,13 +608,200 @@ template <typename T> inline bool is_negative(mat4<T> const& v)
 //////////////////////////////////////////////////////////////////////////
 // nan
 
+inline bool is_nan(float f)
+{
+//    union { float f; uint32_t x; } u = { f };
+//    return (u.x << 1) > 0xff000000u;
+    return std::isnan(f);
+}
+inline bool is_nan(double d)
+{
+//    union { double d; uint64_t x; } u = { d };
+//    return (u.x << 1) > 0xff70000000000000ull;
+    return std::isnan(d);
+}
 template <typename T> inline bool is_nan(T v)
 {
-    return v != v;
+    return false;
 }
 template <typename T> inline bool is_nan(angle<T> const& v)
 {
     return v.radians != v.radians;
+}
+template <typename T> inline bool is_nan(vec2<T> const& v)
+{
+    return cwise::any(cwise::is_nan(v));
+}
+template <typename T> inline bool is_nan(vec3<T> const& v)
+{
+    return cwise::any(cwise::is_nan(v));
+}
+template <typename T> inline bool is_nan(vec4<T> const& v)
+{
+    return cwise::any(cwise::is_nan(v));
+}
+template <typename T> inline bool is_nan(quat<T> const& v)
+{
+    return cwise::any(cwise::is_nan(v));
+}
+template <typename T> inline bool is_nan(mat2<T> const& v)
+{
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (!is_nan(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_nan(mat3<T> const& v)
+{
+    for (size_t i = 0; i < 9; i++)
+    {
+        if (!is_nan(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_nan(mat4<T> const& v)
+{
+    return cwise::any(cwise::is_nan(v.get_column(0))) &&
+    cwise::any(cwise::is_nan(v.get_column(1))) &&
+    cwise::any(cwise::is_nan(v.get_column(2))) &&
+    cwise::any(cwise::is_nan(v.get_column(3)));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// inf
+
+inline bool is_inf(float f)
+{
+    return std::isinf(f);
+}
+inline bool is_inf(double d)
+{
+    return std::isinf(d);
+}
+template <typename T> inline bool is_inf(T v)
+{
+    return false;
+}
+template <typename T> inline bool is_inf(angle<T> const& v)
+{
+    return v.radians != v.radians;
+}
+template <typename T> inline bool is_inf(vec2<T> const& v)
+{
+    return cwise::any(cwise::is_inf(v));
+}
+template <typename T> inline bool is_inf(vec3<T> const& v)
+{
+    return cwise::any(cwise::is_inf(v));
+}
+template <typename T> inline bool is_inf(vec4<T> const& v)
+{
+    return cwise::any(cwise::is_inf(v));
+}
+template <typename T> inline bool is_inf(quat<T> const& v)
+{
+    return cwise::any(cwise::is_inf(v));
+}
+template <typename T> inline bool is_inf(mat2<T> const& v)
+{
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (!is_inf(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_inf(mat3<T> const& v)
+{
+    for (size_t i = 0; i < 9; i++)
+    {
+        if (!is_inf(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_inf(mat4<T> const& v)
+{
+    return cwise::any(cwise::is_inf(v.get_column(0))) &&
+    cwise::any(cwise::is_inf(v.get_column(1))) &&
+    cwise::any(cwise::is_inf(v.get_column(2))) &&
+    cwise::any(cwise::is_inf(v.get_column(3)));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// finite
+
+inline bool is_finite(float f)
+{
+    return std::isfinite(f);
+}
+inline bool is_finite(double d)
+{
+    return std::isfinite(d);
+}
+template <typename T> inline bool is_finite(T v)
+{
+    return true;
+}
+template <typename T> inline bool is_finite(angle<T> const& v)
+{
+    return v.radians != v.radians;
+}
+template <typename T> inline bool is_finite(vec2<T> const& v)
+{
+    return cwise::any(cwise::is_finite(v));
+}
+template <typename T> inline bool is_finite(vec3<T> const& v)
+{
+    return cwise::any(cwise::is_finite(v));
+}
+template <typename T> inline bool is_finite(vec4<T> const& v)
+{
+    return cwise::any(cwise::is_finite(v));
+}
+template <typename T> inline bool is_finite(quat<T> const& v)
+{
+    return cwise::any(cwise::is_finite(v));
+}
+template <typename T> inline bool is_finite(mat2<T> const& v)
+{
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (!is_finite(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_finite(mat3<T> const& v)
+{
+    for (size_t i = 0; i < 9; i++)
+    {
+        if (!is_finite(v.m[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename T> inline bool is_finite(mat4<T> const& v)
+{
+    return cwise::any(cwise::is_finite(v.get_column(0))) &&
+    cwise::any(cwise::is_finite(v.get_column(1))) &&
+    cwise::any(cwise::is_finite(v.get_column(2))) &&
+    cwise::any(cwise::is_finite(v.get_column(3)));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -676,22 +863,22 @@ namespace cwise
 {
     template<typename T> inline vec2<bool> equals(vec2<T> const& v1, vec2<T> const& v2)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         return vec2<bool>(v1.x == v2.x, v1.y == v2.y);
     }
     template<typename T> inline vec3<bool> equals(vec3<T> const& v1, vec3<T> const& v2)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         return vec3<bool>(v1.x == v2.x, v1.y == v2.y, v1.z == v2.z);
     }
     template<typename T> inline vec4<bool> equals(vec4<T> const& v1, vec4<T> const& v2)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         return vec4<bool>(v1.x == v2.x, v1.y == v2.y, v1.z == v2.z, v1.w == v2.w);
     }
     template<typename T> inline vec4<bool> equals(quat<T> const& v1, quat<T> const& v2)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         return vec4<bool>(v1.x == v2.x, v1.y == v2.y, v1.z == v2.z, v1.w == v2.w);
     }
 
@@ -720,7 +907,7 @@ namespace cwise
 
     template<> inline vec2<bool> equals(vec2<float> const& v1, vec2<float> const& v2, float tolerance)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         vec2<float> dif(math::uninitialized);
         dif = abs(v1 - v2);
         vec2<float> e(math::uninitialized);
@@ -729,7 +916,7 @@ namespace cwise
     }
     template<> inline vec3<bool> equals(vec3<float> const& v1, vec3<float> const& v2, float tolerance)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         vec3<float> dif(math::uninitialized);
         dif = abs(v1 - v2);
         vec3<float> e(math::uninitialized);
@@ -738,7 +925,7 @@ namespace cwise
     }
     template<> inline vec4<bool> equals(vec4<float> const& v1, vec4<float> const& v2, float tolerance)
     {
-        QASSERT(none(is_nan(v1)) && none(is_nan(v2)));
+        QASSERT(math::is_finite(v1) && math::is_finite(v2));
         vec4<float> dif(math::uninitialized);
         dif = abs(v1 - v2);
         vec4<float> e(math::uninitialized);
@@ -753,22 +940,22 @@ namespace cwise
 
     template <typename T> inline vec2<bool> is_zero(vec2<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec2<bool>(v.x == T(0), v.y == T(0));
     }
     template <typename T> inline vec3<bool> is_zero(vec3<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec3<bool>(v.x == T(0), v.y == T(0), v.z == T(0));
     }
     template <typename T> inline vec4<bool> is_zero(vec4<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec4<bool>(v.x == T(0), v.y == T(0), v.z == T(0), v.w == T(0));
     }
     template <typename T> inline vec4<bool> is_zero(quat<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec4<bool>(v.x == T(0), v.y == T(0), v.z == T(0), v.w == T(0));
     }
 
@@ -793,22 +980,22 @@ namespace cwise
 
     template <typename T> inline vec2<bool> is_one(vec2<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec2<bool>(v.x == T(1), v.y == T(1));
     }
     template <typename T> inline vec3<bool> is_one(vec3<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec3<bool>(v.x == T(1), v.y == T(1), v.z == T(1));
     }
     template <typename T> inline vec4<bool> is_one(vec4<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec4<bool>(v.x == T(1), v.y == T(1), v.z == T(1), v.w == T(1));
     }
     template <typename T> inline vec4<bool> is_one(quat<T> const& v)
     {
-        QASSERT(none(is_nan(v)));
+        QASSERT(math::is_finite(v));
         return vec4<bool>(v.x == T(1), v.y == T(1), v.z == T(1), v.w == T(1));
     }
 
@@ -888,6 +1075,44 @@ namespace cwise
 
     //////////////////////////////////////////////////////////////////////////
 
+    template <typename T> inline vec2<bool> is_inf(vec2<T> const& v)
+    {
+        return vec2<bool>(math::is_inf(v.x), math::is_inf(v.y));
+    }
+    template <typename T> inline vec3<bool> is_inf(vec3<T> const& v)
+    {
+        return vec3<bool>(math::is_inf(v.x), math::is_inf(v.y), math::is_inf(v.z));
+    }
+    template <typename T> inline vec4<bool> is_inf(vec4<T> const& v)
+    {
+        return vec4<bool>(math::is_inf(v.x), math::is_inf(v.y), math::is_inf(v.z), math::is_inf(v.w));
+    }
+    template <typename T> inline vec4<bool> is_inf(quat<T> const& v)
+    {
+        return vec4<bool>(math::is_inf(v.x), math::is_inf(v.y), math::is_inf(v.z), math::is_inf(v.w));
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    template <typename T> inline vec2<bool> is_finite(vec2<T> const& v)
+    {
+        return vec2<bool>(math::is_finite(v.x), math::is_finite(v.y));
+    }
+    template <typename T> inline vec3<bool> is_finite(vec3<T> const& v)
+    {
+        return vec3<bool>(math::is_finite(v.x), math::is_finite(v.y), math::is_finite(v.z));
+    }
+    template <typename T> inline vec4<bool> is_finite(vec4<T> const& v)
+    {
+        return vec4<bool>(math::is_finite(v.x), math::is_finite(v.y), math::is_finite(v.z), math::is_finite(v.w));
+    }
+    template <typename T> inline vec4<bool> is_finite(quat<T> const& v)
+    {
+        return vec4<bool>(math::is_finite(v.x), math::is_finite(v.y), math::is_finite(v.z), math::is_finite(v.w));
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
 
     inline bool all(vec2<bool> const& v)
     {
@@ -934,17 +1159,17 @@ template<typename T, class Policy> inline T sqrt(T const& v); //not defined
 
 template<> inline float sqrt<float, standard>(float const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v)));
+    QASSERT(!(is_negative(v) || !is_finite(v)));
     return ::sqrtf(v);
 }
 template<> inline float sqrt<float, safe>(float const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v)));
-    return ::sqrtf(is_negative(v) || is_nan(v) ? 0.f : v);
+    QASSERT(!(is_negative(v) || !is_finite(v)));
+    return ::sqrtf(is_negative(v) || !is_finite(v) ? 0.f : v);
 }
 template<> inline float sqrt<float, fast>(float const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v)));
+    QASSERT(!(is_negative(v) || !is_finite(v)));
 #ifdef __AVR__
     return ::sqrtf(v);
 #else
@@ -963,17 +1188,17 @@ template<> inline float sqrt<float, fast>(float const& v)
 
 template<> inline double sqrt<double, standard>(double const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v))); return ::sqrt(v);
+    QASSERT(!(is_negative(v) || !is_finite(v))); return ::sqrt(v);
 }
 template<> inline double sqrt<double, fast>(double const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v)));
+    QASSERT(!(is_negative(v) || !is_finite(v)));
     return ::sqrt(v);
 }
 template<> inline double sqrt<double, safe>(double const& v)
 {
-    QASSERT(!(is_negative(v) || is_nan(v)));
-    return ::sqrt(is_negative(v) || is_nan(v) ? 0 : v);
+    QASSERT(!(is_negative(v) || !is_finite(v)));
+    return ::sqrt(is_negative(v) || !is_finite(v) ? 0 : v);
 }
 
 template<typename T, class Policy = standard> inline vec2<T> sqrt(vec2<T> const& v)
@@ -992,18 +1217,18 @@ template<typename T, class Policy = standard> inline vec4<T> sqrt(vec4<T> const&
 
 template<typename T, class Policy> inline T inverse(T const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
+    QASSERT(!(is_zero(v) || !is_finite(v)));
     return 1 / v;
 }
 template<> inline float inverse<float, safe>(float const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
-    return is_zero(v) || is_nan(v) ? std::numeric_limits<float>::max() : (1.f / v);
+    QASSERT(!(is_zero(v) || !is_finite(v)));
+    return is_zero(v) || !is_finite(v) ? std::numeric_limits<float>::max() : (1.f / v);
 }
 template<> inline double inverse<double, safe>(double const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
-    return is_zero(v) || is_nan(v) ? std::numeric_limits<double>::max() : (1.f / v);
+    QASSERT(!(is_zero(v) || !is_finite(v)));
+    return is_zero(v) || !is_finite(v) ? std::numeric_limits<double>::max() : (1.f / v);
 }
 template<typename T, class Policy = standard> inline mat2<T> inverse(mat2<T> const& v)
 {
@@ -1049,12 +1274,12 @@ template<typename T, class Policy = standard> inline quat<T> inverse(quat<T> con
 
 template<typename T, class Policy> inline T inv_sqrt(T const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
+    QASSERT(!(is_zero(v) || !is_finite(v)));
     return inverse<T, Policy>(sqrt<T, Policy>(v));
 }
 template<> inline float inv_sqrt<float, fast>(float const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
+    QASSERT(!(is_zero(v) || !is_finite(v)));
 #ifdef __AVR__
     return inverse<float, fast>(sqrt<float, fast>(v));
 #else
@@ -1069,13 +1294,13 @@ template<> inline float inv_sqrt<float, fast>(float const& v)
 }
 template<> inline float inv_sqrt<float, safe>(float const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
-    return is_zero(v) || is_nan(v) ? std::numeric_limits<float>::max() : inverse<float, safe>(sqrt<float, safe>(v));
+    QASSERT(!(is_zero(v) || !is_finite(v)));
+    return is_zero(v) || !is_finite(v) ? std::numeric_limits<float>::max() : inverse<float, safe>(sqrt<float, safe>(v));
 }
 template<> inline double inv_sqrt<double, safe>(double const& v)
 {
-    QASSERT(!(is_zero(v) || is_nan(v)));
-    return is_zero(v) || is_nan(v) ? std::numeric_limits<double>::max() : inverse<double, safe>(sqrt<double, safe>(v));
+    QASSERT(!(is_zero(v) || !is_finite(v)));
+    return is_zero(v) || !is_finite(v) ? std::numeric_limits<double>::max() : inverse<double, safe>(sqrt<double, safe>(v));
 }
 template<typename T, class Policy = standard> inline vec2<T> inv_sqrt(vec2<T> const& v)
 {
@@ -1095,34 +1320,34 @@ template<typename T, class Policy = standard> inline vec4<T> inv_sqrt(vec4<T> co
 template<typename T, class Policy> inline T pow(T const& a, T const& b);
 template<> inline float pow<float, standard>(float const& a, float const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
+    QASSERT(is_finite(a) && is_finite(b));
     return ::powf(a, b);
 }
 template<> inline float pow<float, fast>(float const& a, float const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
+    QASSERT(is_finite(a) && is_finite(b));
     return ::powf(a, b);
 }
 template<> inline float pow<float, safe>(float const& a, float const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
-    return (is_nan(a) || is_nan(b)) ? 0 : ::powf(a, b);
+    QASSERT(is_finite(a) && is_finite(b));
+    return (!is_finite(a) || !is_finite(b)) ? 0 : ::powf(a, b);
 }
 
 template<> inline double pow<double, standard>(double const& a, double const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
+    QASSERT(is_finite(a) && is_finite(b));
     return ::pow(a, b);
 }
 template<> inline double pow<double, fast>(double const& a, double const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
+    QASSERT(is_finite(a) && is_finite(b));
     return ::pow(a, b);
 }
 template<> inline double pow<double, safe>(double const& a, double const& b)
 {
-    QASSERT(!(is_nan(a) || is_nan(b)));
-    return (is_nan(a) || is_nan(b)) ? 0 : ::pow(a, b);
+    QASSERT(is_finite(a) && is_finite(b));
+    return (!is_finite(a) || !is_finite(b)) ? 0 : ::pow(a, b);
 }
 
 template<typename T, class Policy = standard> inline vec2<T> pow(vec2<T> const& a, vec2<T> const& b)
@@ -1142,12 +1367,12 @@ template<typename T, class Policy = standard> inline vec4<T> pow(vec4<T> const& 
 
 template<> inline float positive_zero(float const& v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v == -0.f ? 0.f : v;
 }
 template<typename T> inline T positive_zero(T const& v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v;
 }
 template<typename T> inline angle<T> positive_zero(angle<T> const& v)
@@ -1223,17 +1448,17 @@ template<typename T, class Policy> inline T length(quat<T> const& v)
 }
 template <typename T> inline T dot(vec2<T> const& v1, vec2<T> const& v2)
 {
-    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return v1.x*v2.x + v1.y*v2.y;
 }
 template <typename T> inline T dot(vec3<T> const& v1, vec3<T> const& v2)
 {
-    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
 template <typename T> inline T dot(vec4<T> const& v1, vec4<T> const& v2)
 {
-    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v1.w*v2.w;
 }
 
@@ -1270,17 +1495,17 @@ template<typename T, class Policy = standard> inline quat<T> normalized(quat<T> 
 
 template<typename T> inline T cross(vec2<T> const& v1, vec2<T> const& v2)
 {
-    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return (v1.x*v2.y - v1.y*v2.x);
 }
 template<typename T> inline vec3<T> cross(vec3<T> const& v1, vec3<T> const& v2)
 {
-    QASSERT(cwise::none(cwise::is_nan(v1)) && cwise::none(cwise::is_nan(v2)));
+    QASSERT(is_finite(v1) && is_finite(v2));
     return vec3<T>(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
 }
 template<typename T> vec4<T> cross(vec4<T> const& x1, vec4<T> const& x2, vec4<T> const& x3)
 {
-    QASSERT(cwise::none(cwise::is_nan(x1)) && cwise::none(cwise::is_nan(x2)) && cwise::none(cwise::is_nan(x3)));
+    QASSERT(is_finite(x1) && is_finite(x2) && is_finite(x3));
     // 4d Cross product (GPG6, section 2.2)
 #define DOT(AX,AY,AZ,BX,BY,BZ) AX*BX+AY*BY+AZ*BZ
 #define CROSS(AX,AY,AZ,BX,BY,BZ,CX,CY,CZ) CX = AY*BZ - AZ*BY; CY = AZ*BX - AX*BZ; CZ = AX*BY - AY*BX;
@@ -1305,7 +1530,7 @@ template<typename T> vec4<T> cross(vec4<T> const& x1, vec4<T> const& x2, vec4<T>
 }
 template<typename T> inline T square(T const& v)
 {
-    QASSERT(!is_nan(v));
+    QASSERT(is_finite(v));
     return v*v;
 }
 template<typename T, class Policy> inline T distance(T const& v1, T const& v2)

@@ -4,20 +4,20 @@ namespace math
 	{
 		template<class Policy> inline float lerp_check_mu(float t)
 		{
-            QASSERT(!is_nan(t));
+            QASSERT(is_finite(t));
             QASSERT(t >= 0 && t <= 1);
 			return t;
 		}
 		template<> inline float lerp_check_mu<safe>(float t)
 		{
-            QASSERT(!is_nan(t));
+            QASSERT(is_finite(t));
             return clamp(t, 0.f, 1.f);
 		}
 	}
 
     template<class Policy = standard> inline float lerp(float a, float b, float t)
 	{
-        QASSERT(!(is_nan(a) || is_nan(b) || is_nan(t)));
+        QASSERT(is_finite(a) && is_finite(b) && is_finite(t));
         t = detail::lerp_check_mu<Policy>(t);
 		float x = b - a;
 		return a + x*t;
@@ -25,7 +25,7 @@ namespace math
 
     template<class T, class Policy> inline T lerp(T const& a, T const& b, float t)
     {
-        QASSERT(!(is_nan(a) || is_nan(b) || is_nan(t)));
+        QASSERT(is_finite(a) && is_finite(b) && is_finite(t));
         t = detail::lerp_check_mu<Policy>(t);
         return (T)(a*(1.f - t) + b*t);
     }

@@ -20,7 +20,7 @@ inline mat4<T>::mat4(math::ZUninitialized)
 template <typename T>
 inline mat4<T>::mat4(T value)
 {
-    QASSERT(!is_nan(value));
+    QASSERT(is_finite(value));
     m[ 0] = m[ 1] = m[ 2] = m[ 3] = value;
 	m[ 4] = m[ 5] = m[ 6] = m[ 7] = value;
 	m[ 8] = m[ 9] = m[10] = m[11] = value;
@@ -80,10 +80,10 @@ inline mat4<T>::mat4(T const v0, T const v1, T const v2, T const v3,
 	m[14] = v14;
 	m[15] = v15;
 
-    QASSERT(!is_nan(m[0]) && !is_nan(m[1]) && !is_nan(m[2]) && !is_nan(m[3]) &&
-            !is_nan(m[4]) && !is_nan(m[5]) && !is_nan(m[6]) && !is_nan(m[7]) &&
-            !is_nan(m[8]) && !is_nan(m[9]) && !is_nan(m[10]) && !is_nan(m[11]) &&
-            !is_nan(m[12]) && !is_nan(m[13]) && !is_nan(m[14]) && !is_nan(m[15]));
+    QASSERT(is_finite(m[0]) && is_finite(m[1]) && is_finite(m[2]) && is_finite(m[3]) &&
+            is_finite(m[4]) && is_finite(m[5]) && is_finite(m[6]) && is_finite(m[7]) &&
+            is_finite(m[8]) && is_finite(m[9]) && is_finite(m[10]) && is_finite(m[11]) &&
+            is_finite(m[12]) && is_finite(m[13]) && is_finite(m[14]) && is_finite(m[15]));
 }
 
 template<typename T>
@@ -104,10 +104,10 @@ inline void mat4<T>::set(T const values[16])
 {
     QASSERT(values);
 	memcpy(m, values, sizeof(T)*16);
-    QASSERT(!is_nan(m[0]) && !is_nan(m[1]) && !is_nan(m[2]) && !is_nan(m[3]) &&
-            !is_nan(m[4]) && !is_nan(m[5]) && !is_nan(m[6]) && !is_nan(m[7]) &&
-            !is_nan(m[8]) && !is_nan(m[9]) && !is_nan(m[10]) && !is_nan(m[11]) &&
-            !is_nan(m[12]) && !is_nan(m[13]) && !is_nan(m[14]) && !is_nan(m[15]));
+    QASSERT(is_finite(m[0]) && is_finite(m[1]) && is_finite(m[2]) && is_finite(m[3]) &&
+            is_finite(m[4]) && is_finite(m[5]) && is_finite(m[6]) && is_finite(m[7]) &&
+            is_finite(m[8]) && is_finite(m[9]) && is_finite(m[10]) && is_finite(m[11]) &&
+            is_finite(m[12]) && is_finite(m[13]) && is_finite(m[14]) && is_finite(m[15]));
 }
 
 template <typename T>
@@ -180,10 +180,10 @@ inline bool mat4<T>::invert()
 
 	*this = out;
 
-    QASSERT(!is_nan(m[0]) && !is_nan(m[1]) && !is_nan(m[2]) && !is_nan(m[3]) &&
-            !is_nan(m[4]) && !is_nan(m[5]) && !is_nan(m[6]) && !is_nan(m[7]) &&
-            !is_nan(m[8]) && !is_nan(m[9]) && !is_nan(m[10]) && !is_nan(m[11]) &&
-            !is_nan(m[12]) && !is_nan(m[13]) && !is_nan(m[14]) && !is_nan(m[15]));
+    QASSERT(is_finite(m[0]) && is_finite(m[1]) && is_finite(m[2]) && is_finite(m[3]) &&
+            is_finite(m[4]) && is_finite(m[5]) && is_finite(m[6]) && is_finite(m[7]) &&
+            is_finite(m[8]) && is_finite(m[9]) && is_finite(m[10]) && is_finite(m[11]) &&
+            is_finite(m[12]) && is_finite(m[13]) && is_finite(m[14]) && is_finite(m[15]));
 
     return true;
 }
@@ -209,7 +209,7 @@ inline vec4<T> mat4<T>::get_row(uint8_t row) const
 template <typename T>
 inline void mat4<T>::set_row(uint8_t row, vec4<T> const& v)
 {
-    QASSERT(!cwise::any(cwise::is_nan(v)));
+    QASSERT(is_finite(v));
     QASSERT(row < 4);
 	m[row + 0] = v.x;
 	m[row + 4] = v.y;
@@ -227,7 +227,7 @@ inline vec4<T> const& mat4<T>::get_column(uint8_t column) const
 template <typename T>
 inline void mat4<T>::set_column(uint8_t column, vec4<T> const& v)
 {
-    QASSERT(!cwise::any(cwise::is_nan(v)));
+    QASSERT(is_finite(v));
     QASSERT(column < 4);
     columns[column] = v;
 }
@@ -259,28 +259,28 @@ inline vec4<T> const& mat4<T>::get_axis_w() const
 template <typename T>
 inline void mat4<T>::set_axis_x(vec4<T> const& axis)
 {
-    QASSERT(!cwise::any(cwise::is_nan(axis)));
+    QASSERT(is_finite(axis));
     set_column(0, axis);
 }
 
 template <typename T>
 inline void mat4<T>::set_axis_y(vec4<T> const& axis)
 {
-    QASSERT(!cwise::any(cwise::is_nan(axis)));
+    QASSERT(is_finite(axis));
     set_column(1, axis);
 }
 
 template <typename T>
 inline void mat4<T>::set_axis_z(vec4<T> const& axis)
 {
-    QASSERT(!cwise::any(cwise::is_nan(axis)));
+    QASSERT(is_finite(axis));
     set_column(2, axis);
 }
 
 template <typename T>
 inline void mat4<T>::set_axis_w(vec4<T> const& axis)
 {
-    QASSERT(!cwise::any(cwise::is_nan(axis)));
+    QASSERT(is_finite(axis));
     set_column(3, axis);
 }
 
@@ -364,40 +364,40 @@ inline mat4<T>& mat4<T>::operator-=(mat4<T> const& other)
 template <typename T>
 inline mat4<T> mat4<T>::operator*(T scalar) const
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     mat4<T> ret;
 	return cwise::multiply(ret, *this, scalar);
 }
 template <typename T>
 inline mat4<T> mat4<T>::operator+(T scalar) const
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     mat4<T> ret;
 	return cwise::add(ret, *this, scalar);
 }
 template <typename T>
 inline mat4<T> mat4<T>::operator-(T scalar) const
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     mat4<T> ret;
 	return cwise::substract(ret, *this, scalar);
 }
 template <typename T>
 inline mat4<T>& mat4<T>::operator*=(T scalar)
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     return cwise::multiply(*this, *this, scalar);
 }
 template <typename T>
 inline mat4<T>& mat4<T>::operator+=(T scalar)
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     return cwise::add(*this, *this, scalar);
 }
 template <typename T>
 inline mat4<T>& mat4<T>::operator-=(T scalar)
 {
-    QASSERT(!is_nan(scalar));
+    QASSERT(is_finite(scalar));
     return cwise::substract(*this, *this, scalar);
 }
 

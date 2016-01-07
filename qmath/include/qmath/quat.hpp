@@ -103,7 +103,7 @@ template <typename T> inline void quat<T>::set(T _x, T _y, T _z, T _w)
 	y = _y;
 	z = _z;
 	w = _w;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 
 template <typename T> template <class Policy>
@@ -115,7 +115,7 @@ inline void quat<T>::normalize()
 	y *= n;
 	z *= n;
 	w *= n;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T>
 inline void quat<T>::invert()
@@ -170,7 +170,7 @@ inline void quat<T>::set_from_mat3(mat3<T> const& mat)
 		*apfQuat[j] = (mat(i,j)+mat(j,i))*fRoot;
 		*apfQuat[k] = (mat(i,k)+mat(k,i))*fRoot;
 	}
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 
 template <typename T> template <class Policy>
@@ -267,7 +267,7 @@ inline void quat<T>::set_from_euler_xyz(T const& ax, T const& ay, T const& az)
 	y = c.z*c.x*s.y - s.z*s.x*c.y;
 	z = s.z*c.x*c.y + c.z*s.x*s.y;
 	w = c.z*c.x*c.y - s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_xzy(T const& ax, T const& ay, T const& az)
@@ -279,7 +279,7 @@ inline void quat<T>::set_from_euler_xzy(T const& ax, T const& ay, T const& az)
     y = c.z*c.x*s.y - s.z*s.x*c.y;
     z = s.z*c.x*c.y + c.z*s.x*s.y;
     w = c.z*c.x*c.y + s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_yxz(T const& ax, T const& ay, T const& az)
@@ -291,7 +291,7 @@ inline void quat<T>::set_from_euler_yxz(T const& ax, T const& ay, T const& az)
     y = c.z*c.x*s.y - s.z*s.x*c.y;
     z = s.z*c.x*c.y - c.z*s.x*s.y;
     w = c.z*c.x*c.y + s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_yzx(T const& ax, T const& ay, T const& az)
@@ -303,7 +303,7 @@ inline void quat<T>::set_from_euler_yzx(T const& ax, T const& ay, T const& az)
     y = c.z*c.x*s.y + s.z*s.x*c.y;
     z = s.z*c.x*c.y - c.z*s.x*s.y;
     w = c.z*c.x*c.y - s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_zxy(T const& ax, T const& ay, T const& az)
@@ -315,7 +315,7 @@ inline void quat<T>::set_from_euler_zxy(T const& ax, T const& ay, T const& az)
     y = c.z*c.x*s.y + s.z*s.x*c.y;
     z = s.z*c.x*c.y + c.z*s.x*s.y;
     w = c.z*c.x*c.y - s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::set_from_euler_zyx(T const& ax, T const& ay, T const& az)
@@ -327,7 +327,7 @@ inline void quat<T>::set_from_euler_zyx(T const& ax, T const& ay, T const& az)
     y = c.z*c.x*s.y + s.z*s.x*c.y;
     z = s.z*c.x*c.y - c.z*s.x*s.y;
     w = c.z*c.x*c.y + s.z*s.x*s.y;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 
 template <typename T> template <class Policy>
@@ -387,7 +387,7 @@ inline void quat<T>::get_as_euler_xyz(T& ax, T& ay, T& az) const
         ax = atan2<T, Policy>(T(2)*(x*y + w*z), T(1) - T(2)*(z*z + x*x));
         az = 0;
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::get_as_euler_xzy(T& ax, T& ay, T& az) const
@@ -414,7 +414,7 @@ inline void quat<T>::get_as_euler_xzy(T& ax, T& ay, T& az) const
         ax = 0;
         az = angle<T>::pi2;
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::get_as_euler_yxz(T& ax, T& ay, T& az) const
@@ -441,7 +441,7 @@ inline void quat<T>::get_as_euler_yxz(T& ax, T& ay, T& az) const
         ax = angle<T>::pi2;
         az = atan2<T, Policy>(-T(2)*(y*x - w*z), T(1) - T(2)*(y*y + z*z));
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 template <typename T> template <class Policy>
 inline void quat<T>::get_as_euler_yzx(T& ax, T& ay, T& az) const
@@ -468,7 +468,7 @@ inline void quat<T>::get_as_euler_yzx(T& ax, T& ay, T& az) const
         ax = 0;
         az = angle<T>::pi2;
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 
 template <typename T> template <class Policy>
@@ -496,7 +496,7 @@ inline void quat<T>::get_as_euler_zxy(T& ax, T& ay, T& az) const
         ax = angle<T>::pi2;
         az = atan2<T, Policy>(T(2)*(z*x + w*y), T(1) - T(2)*(z*z + y*y));
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 
 template <typename T> template <class Policy>
@@ -524,7 +524,7 @@ inline void quat<T>::get_as_euler_zyx(T& ax, T& ay, T& az) const
         ax = 0;
         az = -atan2<T, Policy>(-T(2)*(z*y - w*x), T(1) - T(2)*(z*z + x*x));
 	} 
-    QASSERT(!is_nan(ax) && !is_nan(ay) && !is_nan(az));
+    QASSERT(is_finite(ax) && is_finite(ay) && is_finite(az));
 }
 
 
@@ -573,7 +573,7 @@ inline void quat<T>::set_from_angle_axis(T const& angle, vec3<T> const& axis)
     x = s*axis.x;
     y = s*axis.y;
     z = s*axis.z;
-    QASSERT(!is_nan(x) && !is_nan(y) && !is_nan(z) && !is_nan(w));
+    QASSERT(is_finite(x) && is_finite(y) && is_finite(z) && is_finite(w));
 }
 
 template <typename T> template <class Policy>
@@ -595,7 +595,7 @@ inline void quat<T>::get_as_angle_axis(T& angle, vec3<T> &axis) const
 		axis.y = y * invscale;
 		axis.z = z * invscale;
 	}
-    QASSERT(!is_nan(axis.x) && !is_nan(axis.y) && !is_nan(axis.z));
+    QASSERT(is_finite(axis.x) && is_finite(axis.y) && is_finite(axis.z));
 }
 
 
@@ -657,14 +657,14 @@ template <typename T> inline quat<T>& quat<T>::operator*=(quat<T> const& other)
 template <typename T> template <typename U>
 inline quat<T> quat<T>::operator*(U s) const
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     return quat<T>((T)s*x, (T)s*y, (T)s*z, (T)s*w);
 }
 
 template <typename T> template <typename U>
 inline quat<T>& quat<T>::operator*=(U s)
 {
-    QASSERT(!is_nan(s));
+    QASSERT(is_finite(s));
     x*=s;
 	y*=s;
 	z*=s;

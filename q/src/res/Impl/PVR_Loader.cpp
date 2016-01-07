@@ -76,7 +76,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 	bool supported		= true;
 	bool etcFormat		= false;
 	bool pvr2Format		= false;
-    bool pvr4Format		= false;
+    //bool pvr4Format		= false;
 
 	Dynamic_Image::Format imgFormat;
 	Texture::Format texFormat;
@@ -155,7 +155,7 @@ static void load_pvr(Path const& path, data::Source& source, Resource& r)
 		blockSizeX = blockSizeY = 4;
 		minBlocks = 2;
 		bitsPerPixel = 4;
-		pvr4Format = true;
+//		pvr4Format = true;
 	}
 	else if (header->u64PixelFormat == ePVRTPF_ETC1)
 	{
