@@ -15,22 +15,42 @@ template<class T> bool equals(T const& a, T const& b)
 
 template<class T> void apply_coefficients(T& x, T& w0, T& w1, T& w2, double d1, double d2, double A)
 {
+    QASSERT(math::is_finite(x) && math::is_finite(w0) && math::is_finite(w1) && math::is_finite(w2));
+
     w0 = static_cast<T>(d1*w1 + d2*w2 + x);
+    QASSERT(math::is_finite(w0));
+
     x = static_cast<T>(A*(w0 + 2.0*w1 + w2));
+    QASSERT(math::is_finite(x));
+
     w2 = w1;
+    QASSERT(math::is_finite(w2));
+
     w1 = w0;
+    QASSERT(math::is_finite(w1));
 }
 
 template<> inline void apply_coefficients(math::vec3f& x, math::vec3f& w0, math::vec3f& w1, math::vec3f& w2, double d1, double d2, double A)
 {
+    QASSERT(math::is_finite(x) && math::is_finite(w0) && math::is_finite(w1) && math::is_finite(w2));
+
     math::vec3d w0d(w0);
-    math::vec3d w1d(w1);
-    math::vec3d w2d(w2);
-    math::vec3d xd(x);
-    w0 = math::vec3f(d1*w1d + d2*w2d + xd);
+    const math::vec3d w1d(w1);
+    const math::vec3d w2d(w2);
+    const math::vec3d xd(x);
+
+    w0d = d1*w1d + d2*w2d + xd;
+    w0 = math::vec3f(w0d);
+    QASSERT(math::is_finite(w0));
+
     x = math::vec3f(A*(w0d + 2.0*w1d + w2d));
+    QASSERT(math::is_finite(x));
+
     w2 = w1;
+    QASSERT(math::is_finite(w2));
+
     w1 = w0;
+    QASSERT(math::is_finite(w1));
 }
 
 }
@@ -44,7 +64,8 @@ public:
     auto setup(size_t order, float rate, float cutoff_frequency) -> bool
     {
         if (rate < math::epsilon<float>() ||
-            cutoff_frequency < math::epsilon<float>())
+                cutoff_frequency < math::epsilon<float>() ||
+                cutoff_frequency >= rate / 2.f)
         {
             return false;
         }
@@ -59,6 +80,8 @@ public:
 //        double s = rate;
 //        double f = cutoff_frequency;
         double a = math::tan(math::angled::pi*cutoff_frequency/rate);
+        QASSERT(!math::is_nan(a));
+
         double a2 = a*a;
         A.resize(m_order);
         d1.resize(m_order);
@@ -70,7 +93,9 @@ public:
         for(size_t i = 0; i < m_order; ++i)
         {
             double r = math::sin(math::angled::pi*(2.0*i+1.0)/(4.0*m_order));
+            QASSERT(!math::is_nan(r));
             double s = a2 + 2.0*a*r + 1.0;
+            QASSERT(!math::is_nan(s));
             A[i] = a2/s;
             d1[i] = 2.0*(1.0-a2)/s;
             d2[i] = -(a2 - 2.0*a*r + 1.0)/s;
@@ -90,16 +115,27 @@ public:
         for (size_t i = 0; i < static_cast<size_t>(m_rate) * 100; i++)
         {
             T copy = t;
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             process(copy);
+            QASSERT(math::is_finite(copy));
             if (dsp::equals(copy, t))
             {
                 break;
@@ -109,6 +145,7 @@ public:
     void reset()
     {
         auto t = m_last; //need to make a copy as reset will change it
+        QASSERT(math::is_finite(t));
         reset(t);
     }
 
