@@ -36,6 +36,7 @@ public:
 
     auto set_params(Params const& params) -> bool;
     auto process(Value_t const& input, Value_t const& target) -> Factor_t;
+    auto process_ex(Value_t const& input, Value_t const& target, Value_t const& derivative) -> Factor_t;
     void reset();
 
 private:
@@ -60,7 +61,7 @@ PID<Scalar, Value, Factor>::PID(Params const& params)
 }
 
 template<class Scalar, class Value, class Factor>
-auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& target) -> Factor_t
+auto PID<Scalar, Value, Factor>::process_ex(Value_t const& input, Value_t const& target, Value_t const& derivative) -> Factor_t
 {
     // Compute proportional component
     auto error = pid::sub<Value_t, Factor_t>(target, input);
@@ -76,7 +77,26 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
     // Compute derivative component if time has elapsed
     if (m_has_kd)
     {
-        Factor_t derivative = Factor_t();
+        //low pass filter
+        //Note - a butterworth doesn't work here due to some weird ringing
+        Value_t d = m_last_derivative + (m_dts / (m_params.d_filter + m_dts)) * (derivative - m_last_derivative);
+        m_last_derivative = d;
+
+        // add in derivative component
+        //m_output += m_params.kd * derivative;
+        output -= m_params.kd * d;
+    }
+
+    return output;
+}
+
+template<class Scalar, class Value, class Factor>
+auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& target) -> Factor_t
+{
+    // Compute derivative component if time has elapsed
+    Factor_t derivative = Factor_t();
+    if (m_has_kd)
+    {
         if (!m_is_last_input_valid)
         {
             m_last_input = input;
@@ -88,18 +108,9 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
             derivative = pid::sub<Value_t, Factor_t>(input, m_last_input) * m_dts_inv;
         }
         m_last_input = input;
-
-        //low pass filter
-        //Note - a butterworth doesn't work here due to some weird ringing
-        derivative = m_last_derivative + (m_dts / (m_params.d_filter + m_dts)) * (derivative - m_last_derivative);
-        m_last_derivative = derivative;
-
-        // add in derivative component
-        //m_output += m_params.kd * derivative;
-        output -= m_params.kd * derivative;
     }
 
-    return output;
+    return process_ex(input, target, derivative);
 }
 
 template<class Scalar, class Value, class Factor>
