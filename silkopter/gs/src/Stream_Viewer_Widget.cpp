@@ -326,7 +326,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 4> data;
             for (auto const& s: samples)
             {
-                data = { s.value.fix_satellites, s.value.pdop, s.value.pacc, s.value.vacc };
+                data = { static_cast<double>(s.value.fix_satellites), s.value.pdop, s.value.pacc, s.value.vacc };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();
