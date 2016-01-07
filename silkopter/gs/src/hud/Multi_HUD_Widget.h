@@ -53,7 +53,7 @@ private:
 
 
     void process_vertical_thrust_rate();
-    void process_vertical_thrust_offset();
+    void process_vertical_thrust();
     void process_vertical_altitude();
     void process_vertical();
 

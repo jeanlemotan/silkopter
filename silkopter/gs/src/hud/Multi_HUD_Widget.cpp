@@ -29,7 +29,7 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     m_camera.set_far_distance(20000.f);
 
     //input defaults
-    m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
+    m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST);
     m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
     m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
 }
@@ -97,7 +97,7 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
     }
 }
 
-void Multi_HUD_Widget::process_vertical_thrust_offset()
+void Multi_HUD_Widget::process_vertical_thrust()
 {
     float v = 0;
 
@@ -110,7 +110,7 @@ void Multi_HUD_Widget::process_vertical_thrust_offset()
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 0.5f : 0.2f;
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 0.8f : 0.6f;
     v += kb.is_key_pressed('=') ? kb_value : 0;
     v -= kb.is_key_pressed('-') ? kb_value : 0;
 
@@ -118,7 +118,7 @@ void Multi_HUD_Widget::process_vertical_thrust_offset()
     if (config)
     {
         v *= config->motor_thrust * config->motors.size();
-        m_input.vertical.thrust_offset.set(v);
+        m_input.vertical.thrust.set(v);
     }
 }
 
@@ -146,8 +146,8 @@ void Multi_HUD_Widget::process_vertical()
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
         process_vertical_thrust_rate();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
-        process_vertical_thrust_offset();
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST:
+        process_vertical_thrust();
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
         process_vertical_altitude();
@@ -180,7 +180,7 @@ void Multi_HUD_Widget::process_vertical()
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('2'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET);
+        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST);
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
     {
@@ -462,7 +462,7 @@ void Multi_HUD_Widget::sync_input()
 
     SYNC(vertical.mode);
     SYNC(vertical.thrust_rate);
-    SYNC(vertical.thrust_offset);
+    SYNC(vertical.thrust);
     SYNC(vertical.altitude);
 
     SYNC(horizontal.mode);
@@ -533,22 +533,22 @@ void Multi_HUD_Widget::render()
     render_video();
 
 
-    {
-        util::coordinates::LLA lla;
-        lla.latitude = 0.59341195;
-        lla.longitude = -2.0478571;
-        lla.altitude = 251.702;
+//    {
+//        util::coordinates::LLA lla;
+//        lla.latitude = 0.59341195;
+//        lla.longitude = -2.0478571;
+//        lla.altitude = 251.702;
 
-        auto N = util::coordinates::normal_distance(lla.latitude);
-        auto ecef = util::coordinates::lla_to_ecef(lla);
-        auto trans = util::coordinates::enu_to_ecef_transform(lla);
-        auto axis_x = trans.get_axis_x();
-        auto axis_y = trans.get_axis_y();
-        auto axis_z = trans.get_axis_z();
+//        auto N = util::coordinates::normal_distance(lla.latitude);
+//        auto ecef = util::coordinates::lla_to_ecef(lla);
+//        auto trans = util::coordinates::enu_to_ecef_transform(lla);
+//        auto axis_x = trans.get_axis_x();
+//        auto axis_y = trans.get_axis_y();
+//        auto axis_z = trans.get_axis_z();
 
-        math::vec3d g(0, 0, -1);
-        auto G = math::rotate(trans, g);
-    }
+//        math::vec3d g(0, 0, -1);
+//        auto G = math::rotate(trans, g);
+//    }
 
 
     //compute the camera rotation from the uav rotation except for the yaw
@@ -720,13 +720,13 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.vertical.mode.value)
     {
     case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
-        str = q::util::format2<std::string>("V:Rate:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_OFFSET:
-        str = q::util::format2<std::string>("V:Offset:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.thrust_offset.value, m_uav.enu_position.z, v_speed);
+    case silk::stream::IMulti_Input::Vertical::Mode::THRUST:
+        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.thrust.value, m_uav.enu_position.z, v_speed);
         break;
     case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
-        str = q::util::format2<std::string>("V:Altitude:{.1} | ALT:{.1} | SPD:{.2}", m_input.vertical.altitude.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.altitude.value, m_uav.enu_position.z, v_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
@@ -735,13 +735,13 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.horizontal.mode.value)
     {
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("H:Rate:{.1} | SPD:{.2}", m_input.horizontal.angle_rate.value, h_speed);
+        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_input.horizontal.angle_rate.value, h_speed);
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
-        str = q::util::format2<std::string>("H:Angle:{.1} | SPD:{.2}", math::degrees(m_input.horizontal.angle.value), h_speed);
+        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_input.horizontal.angle.value), h_speed);
         break;
     case silk::stream::IMulti_Input::Horizontal::Mode::POSITION:
-        str = q::util::format2<std::string>("H:Position:{.1} | SPD:{.2}", m_input.horizontal.position.value, h_speed);
+        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_input.horizontal.position.value, h_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
@@ -749,10 +749,10 @@ void Multi_HUD_Widget::render_modes()
     switch (m_input.yaw.mode.value)
     {
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Rate:{.1}", m_input.yaw.angle_rate.value);
+        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_input.yaw.angle_rate.value);
         break;
     case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
-        str = q::util::format2<std::string>("Y:Angle:{.1}", math::degrees(m_input.yaw.angle.value));
+        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_input.yaw.angle.value));
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));
