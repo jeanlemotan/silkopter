@@ -169,12 +169,28 @@ void Numeric_Viewer::add_graph(std::string const& name, std::string const& unit,
 
 void Numeric_Viewer::add_samples(double const* src, bool is_healthy)
 {
+    size_t off = m_values.size();
+    m_values.resize(m_values.size() + m_graphs.size());
+//    std::copy(src, src + m_graphs.size(), m_values.begin() + off);
+    auto dst = m_values.begin() + off;
+
+    QASSERT(src != nullptr);
+    for (size_t i = 0; i < m_graphs.size(); i++)
+    {
+        if (math::is_finite(src[i]))
+        {
+            *dst++ = src[i];
+        }
+        else
+        {
+            QASSERT(0);
+            *dst++ = 0;
+        }
+    }
+
     Sample sample;
     sample.tp = m_tp;
     sample.is_healthy = is_healthy;
-    size_t off = m_values.size();
-    m_values.resize(m_values.size() + m_graphs.size());
-    std::copy(src, src + m_graphs.size(), m_values.begin() + off);
     m_temp_samples.emplace_back(std::move(sample));
     m_tp += m_dts;
 }
