@@ -60,7 +60,7 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": true,
+                    "Drag Enabled": false,
                     "Ground Enabled": true,
                     "Gravity Enabled": true,
                     "Noise": {
@@ -68,8 +68,8 @@
                         "GPS Velocity SD": 0.0,
                         "GPS PACC SD": 0.0,
                         "GPS VACC SD": 0.0,
-                        "Acceleration SD": 1.0,
-                        "Angular Velocity SD": 0.009999999776482582,
+                        "Acceleration SD": 0.5,
+                        "Angular Velocity SD": 0.05000000074505806,
                         "Magnetic Field SD": 0.10000000149011612,
                         "Pressure SD": 0.0,
                         "Temperature SD": 0.10000000149011612,
@@ -94,7 +94,7 @@
                     "Cutoff Frequency (Hz)": 50.0
                 },
                 "input_paths": [
-                    "Multi Simulator/Angular Velocity"
+                    "Angular Velocity LPF/Output"
                 ]
             },
             "Comp AHRS": {
@@ -104,7 +104,7 @@
                 },
                 "config": {},
                 "input_paths": [
-                    "Multi Simulator/Angular Velocity",
+                    "Angular Velocity LPF/Output",
                     "Acceleration LPF/Output",
                     "Magnetic Field RS/Output"
                 ]
@@ -117,7 +117,7 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 50.0
+                    "Cutoff Frequency (Hz)": 30.0
                 },
                 "input_paths": [
                     "Multi Simulator/Magnetic Field"
@@ -160,11 +160,11 @@
                         "Weight (0-1)": 1.0,
                         "Combined XY PID": true,
                         "XY PID": {
-                            "kP": 0.3499999940395355,
+                            "kP": 1.0,
                             "kI": 0.0,
-                            "kD": 0.029999999329447748,
+                            "kD": 0.0,
                             "Max I": 0.05000000074505806,
-                            "D Filter": 0.0
+                            "D Filter": 0.800000011920929
                         },
                         "Z PID": {
                             "kP": 0.4000000059604645,
@@ -231,7 +231,7 @@
                     "Cutoff Frequency (Hz)": 50.0
                 },
                 "input_paths": [
-                    "Multi Simulator/Acceleration"
+                    "Acceleration LPF/Output"
                 ]
             },
             "Velocity RS (ECEF)": {
@@ -283,9 +283,9 @@
                         "Max Speed (deg/s)": 1000.0,
                         "Combined PIDs": true,
                         "PIDs": {
-                            "kP": 3.0,
+                            "kP": 4.0,
                             "kI": 0.0,
-                            "kD": 0.6000000238418579,
+                            "kD": 0.019999999552965165,
                             "Max I": 0.5,
                             "D Filter": 0.0
                         }
@@ -365,10 +365,23 @@
                 },
                 "config": {
                     "Poles": 1,
-                    "Cutoff Frequency (Hz)": 300.0
+                    "Cutoff Frequency (Hz)": 20.0
                 },
                 "input_paths": [
                     "Multi Simulator/Acceleration"
+                ]
+            },
+            "Angular Velocity LPF": {
+                "type": "Angular Velocity LPF",
+                "init_params": {
+                    "Rate (Hz)": 1000
+                },
+                "config": {
+                    "Poles": 1,
+                    "Cutoff Frequency (Hz)": 20.0
+                },
+                "input_paths": [
+                    "Multi Simulator/Angular Velocity"
                 ]
             }
         }
