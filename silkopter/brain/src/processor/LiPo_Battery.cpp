@@ -52,11 +52,20 @@ auto LiPo_Battery::init() -> bool
         return false;
     }
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
 
-    m_current_filter.setup(2, m_init_params->rate, 10.f);
-    m_voltage_filter.setup(2, m_init_params->rate, 2.f);
+    if (!m_current_filter.setup(2, m_init_params->rate, 10.f) ||
+        !m_voltage_filter.setup(2, m_init_params->rate, 2.f))
+    {
+        QLOGE("Cannot setup dsp filters");
+        return false;
+    }
 
+    return true;
+}
+
+auto LiPo_Battery::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
     return true;
 }
 

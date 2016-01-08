@@ -37,6 +37,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    auto start(q::Clock::time_point tp) -> bool override;
+
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
@@ -89,7 +91,7 @@ private:
     double		m_c6 = 0;
 
     uint8_t         m_stage = 0;
-    q::Clock::time_point m_last_reading_tp;
+    q::Clock::time_point m_last_reading_tp = q::Clock::now();
 };
 
 

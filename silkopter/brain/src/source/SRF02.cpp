@@ -116,7 +116,6 @@ auto SRF02::init() -> bool
     trigger(*bus);
 
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
 
     return true;
 }
@@ -125,6 +124,13 @@ void SRF02::trigger(bus::II2C& bus)
 {
     m_last_trigger_tp = q::Clock::now();
     bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+}
+
+auto SRF02::start(q::Clock::time_point tp) -> bool
+{
+    m_last_trigger_tp = tp;
+    m_output_stream->set_tp(tp);
+    return true;
 }
 
 void SRF02::process()

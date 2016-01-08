@@ -43,8 +43,12 @@ auto Multi_Pilot::init() -> bool
         return false;
     }
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
+    return true;
+}
 
+auto Multi_Pilot::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
     return true;
 }
 

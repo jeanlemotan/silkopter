@@ -65,7 +65,13 @@ auto MaxSonar::init() -> bool
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 15);
 
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
+
+    return true;
+}
+
+auto MaxSonar::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
 
     return true;
 }

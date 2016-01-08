@@ -174,6 +174,11 @@ auto PIGPIO::init() -> bool
 #endif
 }
 
+auto PIGPIO::start(q::Clock::time_point tp) -> bool
+{
+    return true;
+}
+
 void PIGPIO::set_pwm_value(size_t idx, float value)
 {
     QLOG_TOPIC("pigpio::set_pwm_value");

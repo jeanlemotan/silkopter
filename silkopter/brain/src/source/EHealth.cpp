@@ -48,6 +48,12 @@ auto EHealth::init() -> bool
     return true;
 }
 
+auto EHealth::start(q::Clock::time_point tp) -> bool
+{
+    m_last_tp = tp;
+    return true;
+}
+
 void EHealth::process()
 {
     QLOG_TOPIC("EHealth::process");

@@ -332,13 +332,8 @@ auto UBLOX::init() -> bool
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 
     m_position_stream->set_rate(m_init_params->rate);
-    m_position_stream->set_tp(q::Clock::now());
-
     m_velocity_stream->set_rate(m_init_params->rate);
-    m_velocity_stream->set_tp(q::Clock::now());
-
     m_gps_info_stream->set_rate(m_init_params->rate);
-    m_gps_info_stream->set_tp(q::Clock::now());
 
     return setup();
 }
@@ -469,11 +464,16 @@ auto UBLOX::setup() -> bool
     util::coordinates::LLA default_coords(0, 0, 0);
     m_last_position_value = util::coordinates::lla_to_ecef(default_coords);
 
-    m_position_stream->set_tp(q::Clock::now());
-    m_velocity_stream->set_tp(q::Clock::now());
-    m_gps_info_stream->set_tp(q::Clock::now());
+    return true;
+}
 
-    m_last_process_tp = q::Clock::now();
+auto UBLOX::start(q::Clock::time_point tp) -> bool
+{
+    m_position_stream->set_tp(tp);
+    m_velocity_stream->set_tp(tp);
+    m_gps_info_stream->set_tp(tp);
+
+    m_last_process_tp = tp;
     return true;
 }
 

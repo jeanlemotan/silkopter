@@ -42,7 +42,13 @@ auto Gravity_Filter::init() -> bool
         return false;
     }
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());    return true;
+    return true;
+}
+
+auto Gravity_Filter::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
+    return true;
 }
 
 auto Gravity_Filter::get_inputs() const -> std::vector<Input>

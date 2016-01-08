@@ -43,6 +43,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    auto start(q::Clock::time_point tp) -> bool override;
+
     void set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
@@ -57,7 +59,7 @@ private:
     std::shared_ptr<sz::Multi_Simulator::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Simulator::Config> m_config;
 
-    q::Clock::time_point m_last_tp;
+    q::Clock::time_point m_last_tp = q::Clock::now();
 
     struct Noise
     {

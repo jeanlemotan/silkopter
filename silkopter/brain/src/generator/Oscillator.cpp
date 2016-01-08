@@ -47,10 +47,15 @@ auto Oscillator::init() -> bool
         return false;
     }
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
 
     m_config->components.resize(m_init_params->component_count);
 
+    return true;
+}
+
+auto Oscillator::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
     return true;
 }
 

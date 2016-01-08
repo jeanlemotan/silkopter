@@ -167,12 +167,6 @@ auto ADS1115::init() -> bool
     m_adcs[2]->set_rate(m_init_params->adc2_rate);
     m_adcs[3]->set_rate(m_init_params->adc3_rate);
 
-    auto now = q::Clock::now();
-    for (auto& adc: m_adcs)
-    {
-        adc->set_tp(now);
-    }
-
     m_config_register.gain = ADS1115_PGA_4096;
     m_config_register.mux = ADS1115_MUX_P0_NG;
     m_config_register.mode = ADS1115_MODE_SINGLESHOT;//ADS1115_MODE_CONTINUOUS;
@@ -204,6 +198,16 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
                         m_config_register.latch |
                         m_config_register.queue;
     return i2c.write_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, config);
+}
+
+auto ADS1115::start(q::Clock::time_point tp) -> bool
+{
+    m_last_tp = tp;
+    for (auto& adc: m_adcs)
+    {
+        adc->set_tp(tp);
+    }
+    return true;
 }
 
 

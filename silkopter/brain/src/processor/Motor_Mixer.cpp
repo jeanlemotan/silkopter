@@ -80,6 +80,12 @@ auto Motor_Mixer::init() -> bool
     return true;
 }
 
+auto Motor_Mixer::start(q::Clock::time_point tp) -> bool
+{
+    //TODO - use an basic_output_stream instead of the ad-hoc streams
+    return true;
+}
+
 auto Motor_Mixer::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =

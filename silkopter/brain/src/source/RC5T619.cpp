@@ -215,6 +215,11 @@ auto RC5T619::init() -> bool
     return true;
 }
 
+auto RC5T619::start(q::Clock::time_point tp) -> bool
+{
+    m_last_tp = tp;
+    return true;
+}
 
 void RC5T619::process()
 {

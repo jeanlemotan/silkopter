@@ -180,8 +180,14 @@ auto PCA9685::init() -> bool
         set_pwm_value(*i2c, i, boost::none);
     }
 
+    return true;
+}
+
+auto PCA9685::start(q::Clock::time_point tp) -> bool
+{
     if (!set_all_pwm_enabled(true))
     {
+        QLOGE("Cannot enable global PWM!");
         return false;
     }
 

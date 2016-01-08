@@ -146,6 +146,12 @@ auto OpenCV_Capture::init() -> bool
 #endif
 }
 
+auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
+{
+    return true;
+}
+
+
 auto OpenCV_Capture::set_config(rapidjson::Value const& json) -> bool
 {
     sz::OpenCV_Capture::Config sz;

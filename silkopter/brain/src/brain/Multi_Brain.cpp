@@ -54,18 +54,21 @@ auto Multi_Brain::init() -> bool
         return false;
     }
     m_state_output_stream->set_rate(m_init_params->state_rate);
-    m_state_output_stream->set_tp(q::Clock::now());
-
     m_rate_output_stream->set_rate(m_init_params->rate);
-    m_rate_output_stream->set_tp(q::Clock::now());
-
     m_thrust_output_stream->set_rate(m_init_params->rate);
-    m_thrust_output_stream->set_tp(q::Clock::now());
 
     m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
 
     m_config->altitude.lpf_cutoff_frequency = 1;
 
+    return true;
+}
+
+auto Multi_Brain::start(q::Clock::time_point tp) -> bool
+{
+    m_state_output_stream->set_tp(tp);
+    m_rate_output_stream->set_tp(tp);
+    m_thrust_output_stream->set_tp(tp);
     return true;
 }
 

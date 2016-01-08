@@ -99,8 +99,6 @@ auto Multi_Simulator::init() -> bool
         return false;
     }
 
-    m_last_tp = q::Clock::now();
-
     m_input_throttle_streams.resize(multi_config->motors.size());
     m_input_throttle_stream_paths.resize(multi_config->motors.size());
 
@@ -132,6 +130,12 @@ auto Multi_Simulator::init() -> bool
     m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
 
+    return true;
+}
+
+auto Multi_Simulator::start(q::Clock::time_point tp) -> bool
+{
+    m_last_tp = tp;
     return true;
 }
 

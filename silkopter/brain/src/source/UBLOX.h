@@ -41,6 +41,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    auto start(q::Clock::time_point tp) -> bool override;
+
     auto get_outputs() const -> std::vector<Output>;
 
     void process();

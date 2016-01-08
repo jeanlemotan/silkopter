@@ -654,9 +654,11 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Rate_Controller>("Rate Controller", *this);
 
 
+    //clear
     get_streams().remove_all();
     get_nodes().remove_all();
 
+    //read the data
     q::data::File_Source fs(k_settings_path);
     if (!fs.is_open())
     {
@@ -673,60 +675,7 @@ auto HAL::init(Comms& comms) -> bool
         return false;
     }
 
-//    uint32_t rate = 1000;
-//    std::vector<float> samples;
-
-//    {
-//        const size_t elements = 1000;
-//        const float noise = 0.3f;
-//        std::vector<std::pair<float, float>> freq =
-//        {{
-//             { 10.f, 1.f },
-//             { 70.f, 1.f/7.f },
-//             { 130.f, 1.f/5.f }
-//         }};
-//        samples.resize(elements);
-//        std::uniform_real_distribution<float> distribution(-noise, noise); //Values between 0 and 2
-//        std::mt19937 engine; // Mersenne twister MT19937
-//        auto generator = std::bind(distribution, engine);
-//        for (size_t i = 0; i < samples.size(); i++)
-//        {
-//            float a = float(i) * math::anglef::_2pi / float(rate);
-//            float output = 0.f;
-//            for (auto& f: freq)
-//            {
-//                output += math::sin(a * f.first) * f.second;
-//            }
-//            samples[i] = output + generator();
-//        }
-//        for (size_t i = 0; i < samples.size(); i++)
-//        {
-//            samples[i] = i < (rate / 2) ? 1 : 0;
-//        }
-//    }
-
-//    write_gnu_plot("in.dat", samples);
-
-//    std::vector<float> out_samples;
-//    for (size_t f = 1; f < rate / 2; f++)
-//    {
-//        util::Butterworth<float> lpf;
-//        lpf.setup(4, rate, 100);
-//        lpf.reset(0);
-//        float inputs = 0;
-//        float outputs = 0;
-//        for (size_t x = 0; x < rate * 10; x++)
-//        {
-//            float a = x <= rate * 2 ? float(x) * math::anglef::_2pi / float(rate) : 0.f;
-//            float v = math::sin(a * f);
-//            inputs += math::sqrt(math::abs(v));
-//            lpf.process(v);
-//            outputs += math::sqrt(math::abs(v));
-//        }
-//        out_samples.push_back(outputs / inputs);
-//    }
-//    write_gnu_plot("out.dat", out_samples);
-
+    //read the UAV config
     auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/multi_config"));
     if (configj)
     {
@@ -746,6 +695,7 @@ auto HAL::init(Comms& comms) -> bool
     }
 
 
+    //create buses and nodes
     auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/buses"));
     auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/nodes"));
 
@@ -753,6 +703,16 @@ auto HAL::init(Comms& comms) -> bool
         (nodesj && !create_nodes(*nodesj)))
     {
         return false;
+    }
+
+    //start the system
+    auto now = q::Clock::now();
+    for (auto const& n: m_nodes.get_all())
+    {
+        if (!n.node->start(now))
+        {
+            return false;
+        }
     }
 
     save_settings();

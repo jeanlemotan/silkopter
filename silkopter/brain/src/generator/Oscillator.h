@@ -34,6 +34,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    auto start(q::Clock::time_point tp) -> bool override;
+
     void set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;

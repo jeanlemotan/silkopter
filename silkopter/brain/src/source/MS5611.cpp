@@ -206,16 +206,17 @@ auto MS5611::init() -> bool
 
     bus_write(buses, CMD_CONVERT_D2_OSR256, nullptr, 0);
 
-    auto now = q::Clock::now();
-    m_last_reading_tp = now;
-
     m_pressure->set_rate(m_init_params->pressure_rate);
-    m_pressure->set_tp(now);
-
     m_temperature->set_rate(m_init_params->pressure_rate / m_init_params->temperature_rate_ratio);
-    m_temperature->set_tp(now);
 
+    return true;
+}
 
+auto MS5611::start(q::Clock::time_point tp) -> bool
+{
+    m_last_reading_tp = tp;
+    m_pressure->set_tp(tp);
+    m_temperature->set_tp(tp);
     return true;
 }
 

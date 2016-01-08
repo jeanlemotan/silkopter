@@ -33,6 +33,8 @@ public:
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
+    auto start(q::Clock::time_point tp) -> bool override;
+
     void set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
@@ -145,7 +147,6 @@ auto Resampler<Stream_t>::init() -> bool
         return false;
     }
     m_output_stream->set_rate(m_init_params.rate);
-    m_output_stream->set_tp(q::Clock::now());
 
     m_input_stream_dt = std::chrono::microseconds(1000000 / m_init_params.input_rate);
 
@@ -212,6 +213,13 @@ auto Resampler<Stream_t>::get_config() const -> rapidjson::Document
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
     return std::move(json);
+}
+
+template<class Stream_t>
+auto Resampler<Stream_t>::start(q::Clock::time_point tp) -> bool
+{
+    m_output_stream->set_tp(tp);
+    return true;
 }
 
 template<class Stream_t>

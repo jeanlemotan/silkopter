@@ -35,6 +35,7 @@ auto Comp_ECEF::init(rapidjson::Value const& init_params) -> bool
     *m_init_params = sz;
     return init();
 }
+
 auto Comp_ECEF::init() -> bool
 {
     if (m_init_params->rate == 0)
@@ -43,11 +44,14 @@ auto Comp_ECEF::init() -> bool
         return false;
     }
     m_position_output_stream->set_rate(m_init_params->rate);
-    m_position_output_stream->set_tp(q::Clock::now());
-
     m_velocity_output_stream->set_rate(m_init_params->rate);
-    m_velocity_output_stream->set_tp(q::Clock::now());
+    return true;
+}
 
+auto Comp_ECEF::start(q::Clock::time_point tp) -> bool
+{
+    m_position_output_stream->set_tp(tp);
+    m_velocity_output_stream->set_tp(tp);
     return true;
 }
 

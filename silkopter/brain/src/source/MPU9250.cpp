@@ -716,20 +716,10 @@ auto MPU9250::init() -> bool
 
     reset_fifo(buses);
 
-    auto now = q::Clock::now();
-
     m_magnetic_field->set_rate(m_init_params->magnetic_field_rate);
-    m_magnetic_field->set_tp(now);
-
     m_acceleration->set_rate(m_init_params->acceleration_angular_velocity_rate);
-    m_acceleration->set_tp(now);
-
     m_angular_velocity->set_rate(m_init_params->acceleration_angular_velocity_rate);
-    m_angular_velocity->set_tp(now);
-
     m_temperature->set_rate(m_init_params->temperature_rate);
-    m_temperature->set_tp(now);
-
 
     return true;
 }
@@ -802,7 +792,6 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
 
 #endif
 
-    m_magnetic_field->set_tp(q::Clock::now());
     return true;
 }
 
@@ -897,7 +886,6 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 
 #endif
 
-    m_magnetic_field->set_tp(q::Clock::now());
     return res;
 }
 
@@ -927,6 +915,17 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 //        mpu_write_u8(buses, MPU_REG_INT_PIN_CFG, tmp);
 //    }
 //}
+
+auto MPU9250::start(q::Clock::time_point tp) -> bool
+{
+    m_magnetic_field->set_tp(tp);
+    m_acceleration->set_tp(tp);
+    m_angular_velocity->set_tp(tp);
+    m_temperature->set_tp(tp);
+    m_magnetic_field->set_tp(tp);
+
+    return true;
+}
 
 void MPU9250::reset_fifo(Buses& buses)
 {

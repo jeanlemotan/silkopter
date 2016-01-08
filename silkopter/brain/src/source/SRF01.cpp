@@ -108,8 +108,14 @@ auto SRF01::init() -> bool
     trigger(*bus);
 
     m_output_stream->set_rate(m_init_params->rate);
-    m_output_stream->set_tp(q::Clock::now());
 
+    return true;
+}
+
+auto SRF01::start(q::Clock::time_point tp) -> bool
+{
+    m_last_trigger_tp = tp;
+    m_output_stream->set_tp(tp);
     return true;
 }
 

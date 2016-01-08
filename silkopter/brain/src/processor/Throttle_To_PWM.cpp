@@ -52,7 +52,15 @@ auto Throttle_To_PWM::init() -> bool
     {
         o.reset(new Output_Stream);
         o->set_rate(m_init_params->rate);
-        o->set_tp(q::Clock::now());
+    }
+    return true;
+}
+
+auto Throttle_To_PWM::start(q::Clock::time_point tp) -> bool
+{
+    for (auto& o: m_output_streams)
+    {
+        o->set_tp(tp);
     }
     return true;
 }

@@ -282,6 +282,10 @@ void Raspicam::shutdown()
 #endif
 }
 
+auto Raspicam::start(q::Clock::time_point tp) -> bool
+{
+    return true;
+}
 
 void Raspicam::process()
 {

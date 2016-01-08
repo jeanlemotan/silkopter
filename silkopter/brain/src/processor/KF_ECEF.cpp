@@ -130,13 +130,8 @@ auto KF_ECEF::init() -> bool
         return false;
     }
     m_position_output_stream->set_rate(m_init_params->rate);
-    m_position_output_stream->set_tp(q::Clock::now());
-
     m_velocity_output_stream->set_rate(m_init_params->rate);
-    m_velocity_output_stream->set_tp(q::Clock::now());
-
     m_linear_acceleration_output_stream->set_rate(m_init_params->rate);
-    m_linear_acceleration_output_stream->set_tp(q::Clock::now());
 
     m_dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
     double dt = m_dts;
@@ -175,6 +170,14 @@ auto KF_ECEF::init() -> bool
     m_kf_y = m_kf_x;
 //    m_kf_z = m_kf_x;
 
+    return true;
+}
+
+auto KF_ECEF::start(q::Clock::time_point tp) -> bool
+{
+    m_position_output_stream->set_tp(tp);
+    m_velocity_output_stream->set_tp(tp);
+    m_linear_acceleration_output_stream->set_tp(tp);
     return true;
 }
 

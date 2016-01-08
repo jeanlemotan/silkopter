@@ -45,12 +45,16 @@ auto Servo_Gimbal::init() -> bool
     }
 
     m_x_output_stream->set_rate(m_init_params->rate);
-    m_x_output_stream->set_tp(q::Clock::now());
     m_y_output_stream->set_rate(m_init_params->rate);
-    m_y_output_stream->set_tp(q::Clock::now());
     m_z_output_stream->set_rate(m_init_params->rate);
-    m_z_output_stream->set_tp(q::Clock::now());
+    return true;
+}
 
+auto Servo_Gimbal::start(q::Clock::time_point tp) -> bool
+{
+    m_x_output_stream->set_tp(tp);
+    m_y_output_stream->set_tp(tp);
+    m_z_output_stream->set_tp(tp);
     return true;
 }
 
