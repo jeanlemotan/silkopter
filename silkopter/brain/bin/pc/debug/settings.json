@@ -60,18 +60,18 @@
                 },
                 "config": {
                     "Simulation Enabled": true,
-                    "Drag Enabled": false,
+                    "Drag Enabled": true,
                     "Ground Enabled": true,
                     "Gravity Enabled": true,
                     "Noise": {
-                        "GPS Position SD": 0.0,
-                        "GPS Velocity SD": 0.0,
-                        "GPS PACC SD": 0.0,
-                        "GPS VACC SD": 0.0,
+                        "GPS Position SD": 1.0,
+                        "GPS Velocity SD": 0.10000000149011612,
+                        "GPS PACC SD": 0.5,
+                        "GPS VACC SD": 0.10000000149011612,
                         "Acceleration SD": 0.5,
                         "Angular Velocity SD": 0.05000000074505806,
                         "Magnetic Field SD": 0.10000000149011612,
-                        "Pressure SD": 0.0,
+                        "Pressure SD": 1.0,
                         "Temperature SD": 0.10000000149011612,
                         "Ground Distance SD": 0.0010000000474974514
                     }
@@ -307,7 +307,7 @@
                         "PID": {
                             "kP": 0.10000000149011612,
                             "kI": 0.10000000149011612,
-                            "kD": 1.0,
+                            "kD": 0.4000000059604645,
                             "Max I": 0.10000000149011612,
                             "D Filter": 0.0
                         }
