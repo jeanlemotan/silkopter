@@ -145,6 +145,67 @@ void Multi_Brain::process_state_mode_idle()
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 }
 
+float Multi_Brain::compute_ff_thrust(float target_altitude, q::Clock::duration time)
+{
+//    float v0 = m_enu_velocity.z;
+//    float d = target_altitude - m_enu_position.z;
+
+//    //t = (sqrt(v0*v0 + 2*a*d) - v0) / a;
+//    //compute the thrust needed for the shortest time
+//    constexpr size_t MAX_STEPS = 100;
+//    float best_time = std::numeric_limits<float>::max();
+//    float best_thrust = 0;
+//    for (size_t i = 0; i <= MAX_STEPS; i++)
+//    {
+//        float ratio = static_cast<float>(i) / static_cast<float>(MAX_STEPS);
+//        float motor_thrust = ratio * m_multi_config.motor_thrust;
+
+//        //compute vertical thrust
+//        float vertical_thrust = 0;
+//        float total_motor_thrust = 0;
+//        for (auto const& mc: m_multi_config.motors)
+//        {
+//            math::vec3f thrust_vector = math::rotate(m_inputs.frame.sample.value, mc.thrust_vector);
+//            vertical_thrust += math::dot(thrust_vector * motor_thrust, physics::constants::local_up_vector);
+//            total_motor_thrust += motor_thrust;
+//        }
+
+//        float a = vertical_thrust / m_multi_config.mass - physics::constants::g;
+
+//        float sq = v0*v0 + 2*a*d;
+//        if (sq < 0.f)
+//        {
+//            continue; //unsolvable
+//        }
+//        float t = (math::sqrt(sq) - v0) / a;
+//        if (t < 0)
+//        {
+//            continue; //unsolvable
+//        }
+//        if (t < best_time)
+//        {
+//            best_time = t;
+//            best_thrust = total_motor_thrust;
+//        }
+//    }
+//    return math::clamp(best_thrust, m_config->min_thrust, m_config->max_thrust);
+
+
+    float v0 = m_enu_velocity.z;
+    float d = target_altitude - m_enu_position.z;
+
+
+    //a = 2*(d - v0*t) / (t*t);
+    float time_s = std::chrono::duration<float>(time).count();
+
+    float a = 2.f*(d - v0*time_s)/math::square(time_s);
+    a += physics::constants::g;
+
+    float thrust = a * m_multi_config.mass;
+
+    return math::clamp(thrust, m_config->min_thrust, m_config->max_thrust);
+}
+
 void Multi_Brain::process_state_mode_armed()
 {
     stream::IMulti_Input::Sample::Value& prev_input = m_inputs.input.previous_sample.value;
@@ -164,9 +225,6 @@ void Multi_Brain::process_state_mode_armed()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    math::vec3f enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
-    math::vec3f enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
-
     if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
     {
         thrust += input.vertical.thrust_rate.value * m_dts;
@@ -175,7 +233,7 @@ void Multi_Brain::process_state_mode_armed()
     {
         if (prev_input.vertical.mode.value != input.vertical.mode.value)
         {
-            input.vertical.thrust_rate.set(thrust);
+            input.vertical.thrust.set(thrust);
             QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
         }
 
@@ -185,21 +243,30 @@ void Multi_Brain::process_state_mode_armed()
     {
         if (prev_input.vertical.mode.value != input.vertical.mode.value)
         {
-            input.vertical.altitude.set(enu_position.z);
-            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", enu_position.z);
+            input.vertical.altitude.set(m_enu_position.z);
+            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
         }
 
-        float target_alt = input.vertical.altitude.value;
-        float crt_alt = enu_position.z;
+        {
+            //d = v0 * t - a*t*t/2
+            static std::chrono::milliseconds time(1000);
+            float output = compute_ff_thrust(input.vertical.altitude.value, time);
+            thrust = output;
+        }
 
-        float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, enu_velocity.z);
-        output = math::clamp(output, -1.f, 1.f);
-        m_vertical_altitude_data.dsp.process(output);
+//        if (0)
+        {
+            float target_alt = input.vertical.altitude.value;
+            float crt_alt = m_enu_position.z;
 
-        float hover_thrust = m_multi_config.mass * physics::constants::g;
-        float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
+            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
+            output = math::clamp(output, -1.f, 1.f);
+            m_vertical_altitude_data.dsp.process(output);
 
-        thrust = output * max_thrust_range + hover_thrust;
+            float max_thrust_range = math::max(thrust, m_config->max_thrust - thrust);
+
+            thrust += output * max_thrust_range;
+        }
     }
 
     //clamp thrust
@@ -277,10 +344,16 @@ void Multi_Brain::process_state()
 {
     if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::IDLE)
     {
+        m_enu_position = math::vec3f::zero;
+        m_enu_velocity = math::vec3f::zero;
+
         process_state_mode_idle();
     }
     else if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::ARMED)
     {
+        m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
+        m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
+
         process_state_mode_armed();
     }
 }

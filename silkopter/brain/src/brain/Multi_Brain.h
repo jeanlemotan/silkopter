@@ -120,6 +120,8 @@ private:
 
     stream::IVideo::Sample m_last_video_sample;
 
+    float compute_ff_thrust(float target_altitude, q::Clock::duration time);
+
     void process_state_mode_idle();
     void process_state_mode_armed();
     void process_state();
@@ -135,6 +137,9 @@ private:
         math::mat3d enu_to_ecef_rotation;
         math::mat3d ecef_to_enu_rotation;
     } m_home;
+
+    math::vec3f m_enu_position;
+    math::vec3f m_enu_velocity;
 
     typedef util::PID<float, float, float> PID;
 

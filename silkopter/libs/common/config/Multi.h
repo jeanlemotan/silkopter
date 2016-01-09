@@ -11,6 +11,7 @@ public:
     struct Motor
     {
         math::vec3f position;
+        math::vec3f thrust_vector = math::vec3f(0, 0, 1);
         bool clockwise = false;
     };
 

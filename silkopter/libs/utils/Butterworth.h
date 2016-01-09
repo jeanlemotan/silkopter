@@ -15,8 +15,6 @@ template<class T> bool equals(T const& a, T const& b)
 
 template<class T> void apply_coefficients(T& x, T& w0, T& w1, T& w2, double d1, double d2, double A)
 {
-    QASSERT(math::is_finite(x) && math::is_finite(w0) && math::is_finite(w1) && math::is_finite(w2));
-
     w0 = static_cast<T>(d1*w1 + d2*w2 + x);
     QASSERT(math::is_finite(w0));
 
@@ -32,14 +30,10 @@ template<class T> void apply_coefficients(T& x, T& w0, T& w1, T& w2, double d1, 
 
 template<> inline void apply_coefficients(math::vec3f& x, math::vec3f& w0, math::vec3f& w1, math::vec3f& w2, double d1, double d2, double A)
 {
-    QASSERT(math::is_finite(x) && math::is_finite(w0) && math::is_finite(w1) && math::is_finite(w2));
-
-    math::vec3d w0d(w0);
     const math::vec3d w1d(w1);
     const math::vec3d w2d(w2);
-    const math::vec3d xd(x);
 
-    w0d = d1*w1d + d2*w2d + xd;
+    const math::vec3d w0d = d1*w1d + d2*w2d + math::vec3d(x);
     w0 = math::vec3f(w0d);
     QASSERT(math::is_finite(w0));
 
@@ -115,27 +109,16 @@ public:
         for (size_t i = 0; i < static_cast<size_t>(m_rate) * 100; i++)
         {
             T copy = t;
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             process(copy);
-            QASSERT(math::is_finite(copy));
             if (dsp::equals(copy, t))
             {
                 break;
@@ -156,7 +139,7 @@ public:
             m_needs_reset = false;
             reset(t);
         }
-        for(size_t i = 0; i < m_order; ++i)
+        for (size_t i = 0; i < m_order; ++i)
         {
             dsp::apply_coefficients(t, w0[i], w1[i], w2[i], d1[i], d2[i], A[i]);
         }

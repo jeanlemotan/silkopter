@@ -373,7 +373,6 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     math::vec3f z_torque;
     float total_force = 0.f;
     {
-        const auto dir = local_to_enu_trans.get_axis_z();
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
             auto& m = m_uav.state.motors[i];
@@ -390,13 +389,15 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
                     m.thrust = math::clamp(m.thrust, 0.f, m_uav.config.motor_thrust);
                 }
             }
-            z_torque.z += m_uav.config.motor_z_torque * (mc.clockwise ? 1 : -1) * (m.thrust / m_uav.config.motor_thrust);
+            z_torque += mc.thrust_vector * m_uav.config.motor_z_torque * (mc.clockwise ? 1 : -1) * (m.thrust / m_uav.config.motor_thrust);
 
 //            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 
             total_force += m.thrust;
             math::vec3f local_pos = mc.position;
             auto pos = math::rotate(local_to_enu_trans, local_pos);
+
+            const auto dir = math::rotate(local_to_enu_trans, mc.thrust_vector);
             m_uav.body->applyForce(vec3f_to_bt(dir * m.thrust), vec3f_to_bt(pos));
         }
     }

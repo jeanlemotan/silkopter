@@ -33,8 +33,6 @@ auto Motor_Mixer::init(rapidjson::Value const& init_params) -> bool
     return init();
 }
 
-constexpr math::vec3f THRUST_VECTOR(0, 0, 1);
-
 auto Motor_Mixer::init() -> bool
 {
     if (m_init_params->rate == 0)
@@ -55,7 +53,7 @@ auto Motor_Mixer::init() -> bool
     for (auto& mc: multi_config->motors)
     {
         center += mc.position;
-        torque += math::cross(mc.position, THRUST_VECTOR) + THRUST_VECTOR*(multi_config->motor_z_torque * (mc.clockwise ? 1 : -1));
+        torque += math::cross(mc.position, mc.thrust_vector) + mc.thrust_vector*(multi_config->motor_z_torque * (mc.clockwise ? 1 : -1));
     }
     if (!math::is_zero(center, 0.05f))
     {
@@ -179,8 +177,8 @@ void Motor_Mixer::compute_throttles(config::Multi const& multi_config, stream::I
         auto& out = m_outputs[i];
         out->config.position = mc.position;
 
-        out->config.max_torque = math::cross(out->config.position, THRUST_VECTOR * multi_config.motor_thrust);
-        out->config.max_torque += THRUST_VECTOR * (multi_config.motor_z_torque * (mc.clockwise ? 1 : -1));
+        out->config.max_torque = math::cross(out->config.position, mc.thrust_vector * multi_config.motor_thrust);
+        out->config.max_torque += mc.thrust_vector * (multi_config.motor_z_torque * (mc.clockwise ? 1 : -1));
         out->config.torque_vector = math::normalized<float, math::safe>(out->config.max_torque);
 
         out->thrust = MIN_THRUST;
