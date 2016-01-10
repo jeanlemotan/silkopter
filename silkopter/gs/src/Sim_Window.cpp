@@ -15,6 +15,8 @@ Sim_Window::Sim_Window(silk::HAL& hal, silk::node::gs::Node_ptr sim_node, silk::
 {
     QASSERT(sim_node);
 
+    m_context.camera.set_position(math::vec3f(5, -5, 3));
+
     setWindowTitle("Simulator");
     setMouseTracking(true);
 
@@ -369,6 +371,8 @@ void Sim_Window::process()
         m_context.camera.set_position(m_context.camera.get_position() + delta);
         m_camera_controller.set_focus_point(m_camera_position_target);
     }
+
+    m_camera_controller.process();
 
     m_context.painter.set_camera(m_context.camera);
 
