@@ -80,6 +80,8 @@ public:
 //    auto get_rover_config() const   -> boost::optional<config::Rover const&>;
 //    auto get_boat_config() const    -> boost::optional<config::Boat const&>;
 
+    q::util::Signal<void(HAL&)> config_changed_signal;
+
     auto get_bus_factory()          -> Factory<bus::IBus>&;
     auto get_node_factory()         -> Factory<node::INode>&;
 
