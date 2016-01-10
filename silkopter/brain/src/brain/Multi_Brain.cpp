@@ -46,7 +46,6 @@ auto Multi_Brain::init() -> bool
         QLOGE("No multi config found");
         return false;
     }
-    m_multi_config = *multi_config;
 
     if (m_init_params->rate == 0)
     {
@@ -145,69 +144,55 @@ void Multi_Brain::process_state_mode_idle()
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 }
 
-float Multi_Brain::compute_ff_thrust(float target_altitude, q::Clock::duration time)
+float Multi_Brain::compute_ff_thrust(float target_altitude)
 {
-//    float v0 = m_enu_velocity.z;
-//    float d = target_altitude - m_enu_position.z;
-
-//    //t = (sqrt(v0*v0 + 2*a*d) - v0) / a;
-//    //compute the thrust needed for the shortest time
-//    constexpr size_t MAX_STEPS = 100;
-//    float best_time = std::numeric_limits<float>::max();
-//    float best_thrust = 0;
-//    for (size_t i = 0; i <= MAX_STEPS; i++)
-//    {
-//        float ratio = static_cast<float>(i) / static_cast<float>(MAX_STEPS);
-//        float motor_thrust = ratio * m_multi_config.motor_thrust;
-
-//        //compute vertical thrust
-//        float vertical_thrust = 0;
-//        float total_motor_thrust = 0;
-//        for (auto const& mc: m_multi_config.motors)
-//        {
-//            math::vec3f thrust_vector = math::rotate(m_inputs.frame.sample.value, mc.thrust_vector);
-//            vertical_thrust += math::dot(thrust_vector * motor_thrust, physics::constants::local_up_vector);
-//            total_motor_thrust += motor_thrust;
-//        }
-
-//        float a = vertical_thrust / m_multi_config.mass - physics::constants::g;
-
-//        float sq = v0*v0 + 2*a*d;
-//        if (sq < 0.f)
-//        {
-//            continue; //unsolvable
-//        }
-//        float t = (math::sqrt(sq) - v0) / a;
-//        if (t < 0)
-//        {
-//            continue; //unsolvable
-//        }
-//        if (t < best_time)
-//        {
-//            best_time = t;
-//            best_thrust = total_motor_thrust;
-//        }
-//    }
-//    return math::clamp(best_thrust, m_config->min_thrust, m_config->max_thrust);
+    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
+    QASSERT(multi_config);
+    float mass = multi_config->mass;
 
 
     float v0 = m_enu_velocity.z;
     float d = target_altitude - m_enu_position.z;
 
+    float a0 = 0; //acceleration phase
+    float a1 = 0; //brake phase
 
-    //a = 2*(d - v0*t) / (t*t);
-    float time_s = std::chrono::duration<float>(time).count();
+    if (d > 0)
+    {
+        a0 = m_config->max_thrust / mass - physics::constants::g;
+        a1 = m_config->min_thrust / mass - physics::constants::g;
+    }
+    else
+    {
+        a1 = m_config->max_thrust / mass - physics::constants::g;
+        a0 = m_config->min_thrust / mass - physics::constants::g;
+    }
 
-    float a = 2.f*(d - v0*time_s)/math::square(time_s);
-    a += physics::constants::g;
+    if (math::sgn(d) != math::sgn(v0))
+    {
+        float thrust = (a0 + physics::constants::g) * mass;
+        return thrust;
+    }
 
-    float thrust = a * m_multi_config.mass;
-
-    return math::clamp(thrust, m_config->min_thrust, m_config->max_thrust);
+    //float stopping_d = (v0*v0) / (2.f*math::abs(a1)); //<---- correct formula
+    float stopping_d = 2.f * (v0*v0) / (2.f*math::abs(a1)); //<---- multiplied by to. For some reason this works very well. Needs investigation
+    if (stopping_d < math::abs(d))
+    {
+        float thrust = (a0 + physics::constants::g) * mass;
+        return thrust;
+    }
+    else
+    {
+        float thrust = (a1 + physics::constants::g) * mass;
+        return thrust;
+    }
 }
 
 void Multi_Brain::process_state_mode_armed()
 {
+    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
+    QASSERT(multi_config);
+
     stream::IMulti_Input::Sample::Value& prev_input = m_inputs.input.previous_sample.value;
     stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
     QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
@@ -248,13 +233,10 @@ void Multi_Brain::process_state_mode_armed()
         }
 
         {
-            //d = v0 * t - a*t*t/2
-            static std::chrono::milliseconds time(1000);
-            float output = compute_ff_thrust(input.vertical.altitude.value, time);
+            float output = compute_ff_thrust(input.vertical.altitude.value);
             thrust = output;
         }
 
-//        if (0)
         {
             float target_alt = input.vertical.altitude.value;
             float crt_alt = m_enu_position.z;
@@ -263,9 +245,10 @@ void Multi_Brain::process_state_mode_armed()
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
-            float max_thrust_range = math::max(thrust, m_config->max_thrust - thrust);
+            float hover_thrust = multi_config->mass * physics::constants::g;
+            float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
 
-            thrust += output * max_thrust_range;
+            thrust += output * max_thrust_range;// + hover_thrust;
         }
     }
 
@@ -533,6 +516,9 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("Multi_Brain::set_config");
 
+    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
+    QASSERT(multi_config);
+
     sz::Multi_Brain::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
@@ -547,8 +533,8 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
-    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multi_config.motor_thrust * m_multi_config.motors.size() * 0.5f);
-    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multi_config.motor_thrust * m_multi_config.motors.size());
+    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, multi_config->motor_thrust * multi_config->motors.size() * 0.5f);
+    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, multi_config->motor_thrust * multi_config->motors.size());
 
     m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
     m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);

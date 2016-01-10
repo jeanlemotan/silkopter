@@ -93,8 +93,6 @@ private:
 
     float m_dts = 0;
 
-    silk::config::Multi m_multi_config;
-
     struct Inputs
     {
         template<class T> struct Data
@@ -120,7 +118,7 @@ private:
 
     stream::IVideo::Sample m_last_video_sample;
 
-    float compute_ff_thrust(float target_altitude, q::Clock::duration time);
+    float compute_ff_thrust(float target_altitude);
 
     void process_state_mode_idle();
     void process_state_mode_armed();
