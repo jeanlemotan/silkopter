@@ -182,3 +182,14 @@ void Camera_Controller_3D::set_depth_getter(Depth_Getter getter)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Camera_Controller_3D::process()
+{
+    math::vec3f dir = m_focus_point - m_camera.get_position();
+    if (!math::is_zero(dir, math::epsilon<float>()))
+    {
+        auto q = math::quatf::look_at(dir, math::vec3f(0, 0, 1));
+        m_camera.set_rotation(q);
+    }
+}
+

@@ -19,6 +19,8 @@ public:
     float	get_screen_depth() const;
 
     void set_focus_point(math::vec3f const& point);
+
+    void process();
 private:
     q::scene::Camera& m_camera;
 
