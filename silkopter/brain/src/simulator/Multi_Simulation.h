@@ -105,6 +105,15 @@ private:
 //	q::Clock::duration m_uav_duration;
 
     void process_uav(q::Clock::duration dt);
+    struct
+    {
+        math::vec3f enu_velocity_sum;
+        math::vec3f prev_enu_velocity;
+        math::vec3f enu_linear_acceleration_sum;
+        math::vec3f angular_velocity_sum;
+    } m_accumulated_data;
+
+    void process_uav_sensors(q::Clock::duration dt);
     void process_air_drag(q::Clock::duration dt);
 };
 

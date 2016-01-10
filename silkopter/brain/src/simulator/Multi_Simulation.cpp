@@ -32,6 +32,8 @@ namespace silk
 namespace node
 {
 
+constexpr size_t SUBSTEPS = 10;
+
 //////////////////////////////////////////////////////////////////////////
 
 Multi_Simulation::Multi_Simulation()
@@ -213,20 +215,27 @@ void Multi_Simulation::process(q::Clock::duration dt, std::function<void(Multi_S
     float dts = std::chrono::duration<float>(m_dt).count();
     while (m_physics_duration >= m_dt)
     {
-        //limit angular velocity
-        if (m_uav.body)
+        auto substep_dts = dts / SUBSTEPS;
+
+        for (size_t i = 0; i < SUBSTEPS; i++)
         {
-            auto vel = bt_to_vec3f(m_uav.body->getAngularVelocity());
-            vel = math::clamp(vel, math::vec3f(-10.f), math::vec3f(10.f));// + math::vec3f(0.001f, 0.f, 0.f);
-            m_uav.body->setAngularVelocity(vec3f_to_bt(vel));
+            //limit angular velocity
+            if (m_uav.body)
+            {
+                auto vel = bt_to_vec3f(m_uav.body->getAngularVelocity());
+                vel = math::clamp(vel, math::vec3f(-10.f), math::vec3f(10.f));// + math::vec3f(0.001f, 0.f, 0.f);
+                m_uav.body->setAngularVelocity(vec3f_to_bt(vel));
+            }
+
+            if (m_is_simulation_enabled)
+            {
+                m_world->stepSimulation(substep_dts, SUBSTEPS, substep_dts);
+            }
+
+            process_uav(m_dt / SUBSTEPS);
         }
 
-        if (m_is_simulation_enabled)
-        {
-            m_world->stepSimulation(dts, 1, dts * 0.5f);
-        }
-
-        process_uav(m_dt);
+        process_uav_sensors(m_dt);
 
         if (callback)
         {
@@ -292,7 +301,6 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
     m_uav.motion_state->getWorldTransform(wt);
 
     math::trans3df local_to_enu_trans(bt_to_vec3f(wt.getOrigin()), bt_to_quatf(wt.getRotation()), math::vec3f::one);
-    math::trans3df enu_to_local_trans = math::inverse(local_to_enu_trans);
 
     {
         math::quatf rotation = bt_to_quatf(wt.getRotation());
@@ -304,70 +312,23 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
         math::vec3f euler;
         delta.get_as_euler_xyz(euler);
         QASSERT(math::is_finite(euler));
-        m_uav.state.angular_velocity = euler / dts;
-        QASSERT(math::is_finite(m_uav.state.angular_velocity));
+        m_accumulated_data.angular_velocity_sum += euler / dts;
+        QASSERT(math::is_finite(m_accumulated_data.angular_velocity_sum));
     }
 
-    auto enu_to_local_rotation = math::inverse(m_uav.state.local_to_enu_rotation);
-
+    auto velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
     {
         auto new_position = bt_to_vec3f(wt.getOrigin());
 
-        //For some reason linear velocity is twice as big.
-        //auto new_velocity = bt_to_vec3f(m_uav.body->getLinearVelocity());
-        auto new_velocity = (new_position - m_uav.state.enu_position) / dts;
-
         m_uav.state.enu_position = new_position;
-        m_uav.state.enu_linear_acceleration = (new_velocity - m_uav.state.enu_velocity) / dts;
-        m_uav.state.enu_velocity = new_velocity;
-        m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
+        m_accumulated_data.enu_linear_acceleration_sum += (velocity - m_accumulated_data.prev_enu_velocity) / dts;
+        m_accumulated_data.prev_enu_velocity = velocity;
+
+        m_accumulated_data.enu_velocity_sum += velocity;
+
+        //m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
         //QLOGI("v: {.4} / la:{.4} / a: {.4}", m_uav.state.enu_velocity, m_uav.state.enu_linear_acceleration, m_uav.state.acceleration);
     }
-
-    {
-        math::vec3f enu_magnetic_field(0, 1, 0);
-        m_uav.state.magnetic_field = math::rotate(enu_to_local_rotation, enu_magnetic_field);
-    }
-
-    {
-        //https://en.wikipedia.org/wiki/Atmospheric_pressure
-        float h = m_uav.state.enu_position.z; //height
-        float p0 = 101325.f; //sea level standard atmospheric pressure
-        float M = 0.0289644f; //molar mass of dry air
-        float R = 8.31447f; //universal gas constant
-        float T0 = 288.15f; //sea level standard temperature (K)
-        m_uav.state.pressure = (p0 * std::exp(-(physics::constants::g * M * h) / (R * T0))) * 0.01f;
-    }
-
-    {
-        float h = m_uav.state.enu_position.z; //height
-        m_uav.state.temperature = 20.f + h / 1000.f;
-    }
-
-    {
-        math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
-        math::vec3f start_point = m_uav.state.enu_position;
-        math::vec3f ray_dir = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
-        float t = 0;
-        if (math::ray_intersect_plane(start_point, ray_dir, ground, t) && t > 0.f)
-        {
-            math::vec3f point = start_point + ray_dir * t;
-            m_uav.state.proximity_distance = math::transform(enu_to_local_trans, point);
-        }
-        else
-        {
-            m_uav.state.proximity_distance = math::vec3f::zero;
-        }
-    }
-
-
-    auto velocity = m_uav.state.enu_velocity;
-    float air_speed = math::dot(local_to_enu_trans.get_axis_z(), velocity);
-
-    //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
-    //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
-    //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
-
 
     //motors
     math::vec3f z_torque;
@@ -437,6 +398,69 @@ void Multi_Simulation::process_uav(q::Clock::duration dt)
 
             math::vec3f local_pos(mc.position);
             m_uav.body->applyForce(vec3f_to_bt(force), vec3f_to_bt(local_pos));
+        }
+    }
+}
+
+void Multi_Simulation::process_uav_sensors(q::Clock::duration dt)
+{
+    if (!m_uav.body)
+    {
+        return;
+    }
+
+    m_uav.state.enu_velocity = m_accumulated_data.enu_velocity_sum / SUBSTEPS;
+    m_accumulated_data.enu_velocity_sum = math::vec3f::zero;
+
+    m_uav.state.enu_linear_acceleration = m_accumulated_data.enu_linear_acceleration_sum / SUBSTEPS;
+    m_accumulated_data.enu_linear_acceleration_sum = math::vec3f::zero;
+
+    m_uav.state.angular_velocity = m_accumulated_data.angular_velocity_sum / SUBSTEPS;
+    m_accumulated_data.angular_velocity_sum = math::vec3f::zero;
+
+    btTransform wt;
+    m_uav.motion_state->getWorldTransform(wt);
+
+    math::trans3df local_to_enu_trans(bt_to_vec3f(wt.getOrigin()), bt_to_quatf(wt.getRotation()), math::vec3f::one);
+    math::trans3df enu_to_local_trans = math::inverse(local_to_enu_trans);
+
+    auto enu_to_local_rotation = math::inverse(m_uav.state.local_to_enu_rotation);
+
+    m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
+
+    {
+        math::vec3f enu_magnetic_field(0, 1, 0);
+        m_uav.state.magnetic_field = math::rotate(enu_to_local_rotation, enu_magnetic_field);
+    }
+
+    {
+        //https://en.wikipedia.org/wiki/Atmospheric_pressure
+        float h = m_uav.state.enu_position.z; //height
+        float p0 = 101325.f; //sea level standard atmospheric pressure
+        float M = 0.0289644f; //molar mass of dry air
+        float R = 8.31447f; //universal gas constant
+        float T0 = 288.15f; //sea level standard temperature (K)
+        m_uav.state.pressure = (p0 * std::exp(-(physics::constants::g * M * h) / (R * T0))) * 0.01f;
+    }
+
+    {
+        float h = m_uav.state.enu_position.z; //height
+        m_uav.state.temperature = 20.f + h / 1000.f;
+    }
+
+    {
+        math::planef ground(math::vec3f::zero, math::vec3f(0, 0, 1));
+        math::vec3f start_point = m_uav.state.enu_position;
+        math::vec3f ray_dir = math::rotate(m_uav.state.local_to_enu_rotation, math::vec3f(0, 0, -1));
+        float t = 0;
+        if (math::ray_intersect_plane(start_point, ray_dir, ground, t) && t > 0.f)
+        {
+            math::vec3f point = start_point + ray_dir * t;
+            m_uav.state.proximity_distance = math::transform(enu_to_local_trans, point);
+        }
+        else
+        {
+            m_uav.state.proximity_distance = math::vec3f::zero;
         }
     }
 }
