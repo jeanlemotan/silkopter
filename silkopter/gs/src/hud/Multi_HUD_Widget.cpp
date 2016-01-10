@@ -340,11 +340,11 @@ void Multi_HUD_Widget::process_yaw_angle()
         constexpr float expo = 2.f;
         gv = math::sgn(gv) * std::pow(gv, expo); //some expo
 
-        v = gv * math::anglef::pi2;
+        v += gv * math::anglef::pi2;
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(70.f) : math::radians(40.f);
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(7.f) : math::radians(4.f);
     v += kb.is_key_pressed(',') ? kb_value : 0;
     v -= kb.is_key_pressed('.') ? kb_value : 0;
 
