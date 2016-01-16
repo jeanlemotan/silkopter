@@ -182,14 +182,6 @@ void Multi_Simulator::process()
     m_ecef_position_stream->samples.clear();
     m_ecef_velocity_stream->samples.clear();
 
-    auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    if (dt < std::chrono::milliseconds(1))
-    {
-        return;
-    }
-    m_last_tp = now;
-
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         auto throttle = m_input_throttle_streams[i].lock();
@@ -202,6 +194,14 @@ void Multi_Simulator::process()
             }
         }
     }
+
+    auto now = q::Clock::now();
+    auto dt = now - m_last_tp;
+    if (dt < std::chrono::milliseconds(1))
+    {
+        return;
+    }
+    m_last_tp = now;
 
     static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.0);
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
@@ -253,7 +253,7 @@ void Multi_Simulator::process()
             stream.accumulated_dt += simulation_dt;
             while (stream.accumulated_dt >= stream.dt)
             {
-                float noise = m_noise.pressure_sd(m_noise.generator);
+                double noise = m_noise.pressure_sd(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
                 stream.last_sample.value = uav_state.pressure + noise;
                 stream.last_sample.is_healthy = true;
