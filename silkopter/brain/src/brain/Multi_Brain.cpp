@@ -174,8 +174,8 @@ float Multi_Brain::compute_ff_thrust(float target_altitude)
         return thrust;
     }
 
-    //float stopping_d = (v0*v0) / (2.f*math::abs(a1)); //<---- correct formula
-    float stopping_d = 2.f * (v0*v0) / (2.f*math::abs(a1)); //<---- multiplied by to. For some reason this works very well. Needs investigation
+    float stopping_d = (v0*v0) / (2.f*math::abs(a1)); //<---- correct formula
+    //float stopping_d = 2.f * (v0*v0) / (2.f*math::abs(a1)); //<---- multiplied by 2. For some reason this works very well. Needs investigation
     if (stopping_d < math::abs(d))
     {
         float thrust = (a0 + physics::constants::g) * mass;
@@ -233,22 +233,27 @@ void Multi_Brain::process_state_mode_armed()
         }
 
         {
-            float output = compute_ff_thrust(input.vertical.altitude.value);
-            thrust = output;
+            //float output = compute_ff_thrust(input.vertical.altitude.value);
+            //thrust = output;
         }
 
         {
             float target_alt = input.vertical.altitude.value;
             float crt_alt = m_enu_position.z;
 
-            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
+            //cascaded PIDS: position P(ID) -> speed PI(D)
+            float velocity_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
+            float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, velocity_output);
+
+
+//            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
             float hover_thrust = multi_config->mass * physics::constants::g;
             float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
 
-            thrust += output * max_thrust_range;// + hover_thrust;
+            thrust = output * max_thrust_range + hover_thrust;
         }
     }
 
@@ -548,18 +553,18 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         dst.d_filter = src.d_filter;
         dst.rate = output_rate;
     };
-//    auto fill_pd_params = [output_rate](PID::Params& dst, sz::PD const& src)
-//    {
-//        dst.kp = src.kp;
-//        dst.kd = src.kd;
-//        dst.d_filter = src.d_filter;
-//        dst.rate = output_rate;
-//    };
-//    auto fill_p_params = [output_rate](PID::Params& dst, sz::P const& src)
-//    {
-//        dst.kp = src.kp;
-//        dst.rate = output_rate;
-//    };
+    auto fill_pi_params = [output_rate](PID::Params& dst, sz::PI const& src)
+    {
+        dst.kp = src.kp;
+        dst.ki = src.ki;
+        dst.max_i = src.max_i;
+        dst.rate = output_rate;
+    };
+    auto fill_p_params = [output_rate](PID::Params& dst, sz::P const& src)
+    {
+        dst.kp = src.kp;
+        dst.rate = output_rate;
+    };
 
     {
         PID::Params x_params, y_params;
@@ -594,9 +599,15 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
     {
-        PID::Params params;
-        fill_pid_params(params, m_config->altitude.pid);
-        if (!m_vertical_altitude_data.pid.set_params(params))
+        PID::Params speed_pi_params, position_p_params;
+        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi);
+        fill_p_params(position_p_params, m_config->altitude.position_p);
+        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
+        {
+            QLOGE("Bad altitude PID params");
+            return false;
+        }
+        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
         {
             QLOGE("Bad altitude PID params");
             return false;

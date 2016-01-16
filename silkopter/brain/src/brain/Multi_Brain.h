@@ -143,7 +143,9 @@ private:
 
     struct Vertical_Altitude_Data
     {
-        PID pid;
+        //PID pid;
+        PID speed_pi;
+        PID position_p;
         util::Butterworth<float> dsp;
     } m_vertical_altitude_data;
 
