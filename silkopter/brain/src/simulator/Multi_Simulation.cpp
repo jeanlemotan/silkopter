@@ -435,12 +435,12 @@ void Multi_Simulation::process_uav_sensors(q::Clock::duration dt)
 
     {
         //https://en.wikipedia.org/wiki/Atmospheric_pressure
-        float h = m_uav.state.enu_position.z; //height
-        float p0 = 101325.f; //sea level standard atmospheric pressure
-        float M = 0.0289644f; //molar mass of dry air
-        float R = 8.31447f; //universal gas constant
-        float T0 = 288.15f; //sea level standard temperature (K)
-        m_uav.state.pressure = (p0 * std::exp(-(physics::constants::g * M * h) / (R * T0))) * 0.01f;
+        double h = m_uav.state.enu_position.z; //height
+        double p0 = 101325.0; //sea level standard atmospheric pressure
+        double M = 0.0289644; //molar mass of dry air
+        double R = 8.31447; //universal gas constant
+        double T0 = 288.15; //sea level standard temperature (K)
+        m_uav.state.pressure = (p0 * std::exp(-(physics::constants::g * M * h) / (R * T0)));
     }
 
     {

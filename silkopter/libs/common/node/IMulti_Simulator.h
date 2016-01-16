@@ -27,7 +27,7 @@ public:
         math::vec3f acceleration;
         math::vec3f angular_velocity;
         math::vec3f magnetic_field;
-        float pressure = 0;
+        double pressure = 0;
         float temperature = 0;
         math::vec3f proximity_distance;
 
