@@ -620,7 +620,7 @@ inline bool is_nan(double d)
 //    return (u.x << 1) > 0xff70000000000000ull;
     return std::isnan(d);
 }
-template <typename T> inline bool is_nan(T v)
+template <typename T> inline bool is_nan(T)
 {
     return false;
 }
@@ -685,7 +685,7 @@ inline bool is_inf(double d)
 {
     return std::isinf(d);
 }
-template <typename T> inline bool is_inf(T v)
+template <typename T> inline bool is_inf(T)
 {
     return false;
 }
@@ -750,7 +750,7 @@ inline bool is_finite(double d)
 {
     return std::isfinite(d);
 }
-template <typename T> inline bool is_finite(T v)
+template <typename T> inline bool is_finite(T)
 {
     return true;
 }
