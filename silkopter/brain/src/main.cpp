@@ -155,28 +155,41 @@ int main(int argc, char const* argv[])
         QLOGI("All systems up. Ready to fly...");
 
         {
-            constexpr std::chrono::milliseconds PERIOD(5);
+            constexpr std::chrono::microseconds PERIOD(5000);
             auto last = q::Clock::now();
             while (!s_exit)
             {
                 auto start = q::Clock::now();
-                if (start - last >= PERIOD)
+                auto dt = start - last;
+                if (dt > std::chrono::milliseconds(10))
+                {
+                    QLOGW("Process Latency of {}!!!!!", dt);
+                }
+                //if (dt >= PERIOD)
                 {
                     last = start;
 
+                    //QLOGI("---- LOOP -----");
                     comms.process();
                     hal.process();
                 }
 
+                //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
+                // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
+
                 //don't sleep too much if we're late
-                if (q::Clock::now() - start < PERIOD)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                }
-                else
-                {
-                    std::this_thread::yield();
-                }
+//                if (q::Clock::now() - start < PERIOD)
+//                {
+//                    //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+//                    for (volatile int i = 0; i < 10000; i++)
+//                    {
+//                        ;
+//                    }
+//                }
+//                else
+//                {
+////                    std::this_thread::yield();
+//                }
             }
         }
 
