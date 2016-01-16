@@ -404,9 +404,9 @@ struct Serializer< Writer30fc2fe5847330908e60ae4e416207ec2a5ccb47e130ab1c2896568
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Comp_AHRS { struct Config {
- 
+ float drift_correction_factor;
 
-explicit Config() {  }
+explicit Config():drift_correction_factor(0.3) {  }
 
 
  
@@ -423,7 +423,7 @@ private:
     int state;
     int depth;
 
-    
+    SAXEventHandler< float > handler_0;
 
     bool check_depth(const char* type)
     {
@@ -437,7 +437,8 @@ private:
     const char* current_member_name() const
     {
         switch (state) {
-            
+            case 0:
+    return "drift_correction_factor";
         default:
             break;
         }
@@ -471,7 +472,7 @@ public:
     explicit SAXEventHandler( ::sz::Comp_AHRS::Config * obj)
         : state(-1)
         , depth(0)
-        
+        , handler_0(&obj->drift_correction_factor)
     {
         reset_flags();
     }
@@ -483,7 +484,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Null());
 
         default:
             break;
@@ -498,7 +500,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Bool(b));
 
         default:
             break;
@@ -513,7 +516,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Int(i));
 
         default:
             break;
@@ -528,7 +532,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Uint(i));
 
         default:
             break;
@@ -543,7 +548,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Int64(i));
 
         default:
             break;
@@ -558,7 +564,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Uint64(i));
 
         default:
             break;
@@ -573,7 +580,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.Double(d));
 
         default:
             break;
@@ -588,7 +596,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.String(str, length, copy));
 
         default:
             break;
@@ -604,7 +613,8 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            
+            else if (utility::string_equal(str, length, "\x44\x72\x69\x66\x74\x20\x43\x6f\x72\x72\x65\x63\x74\x69\x6f\x6e\x20\x46\x61\x63\x74\x6f\x72\x20\x28\x30\x2d\x31\x29", 29))
+						 { state=0;  }
             else {
                 state = -1;
                 return true;
@@ -613,7 +623,8 @@ public:
         } else {
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.Key(str, length, copy));
 
             default:
                 break;
@@ -629,7 +640,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.StartArray());
 
         default:
             break;
@@ -644,7 +656,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+    return checked_event_forwarding(handler_0.EndArray(length));
 
         default:
             break;
@@ -659,7 +672,8 @@ public:
 
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.StartObject());
 
             default:
                 break;
@@ -675,7 +689,8 @@ public:
 
             switch (state) {
 
-            
+            case 0:
+    return checked_event_forwarding(handler_0.EndObject(length));
 
             default:
                 break;
@@ -700,7 +715,8 @@ public:
 
         switch (state) {
 
-        
+        case 0:
+     handler_0.ReapError(errs); break;
 
         default:
             break;
@@ -715,7 +731,8 @@ public:
         state = -1;
         the_error.reset();
         reset_flags();
-        
+        handler_0.PrepareForReuse();
+
     }
 };
 
@@ -726,9 +743,9 @@ struct Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b683935
     {
         w.StartObject();
 
-        
+        w.Key("\x44\x72\x69\x66\x74\x20\x43\x6f\x72\x72\x65\x63\x74\x69\x6f\x6e\x20\x46\x61\x63\x74\x6f\x72\x20\x28\x30\x2d\x31\x29", 29, false); Serializer< Writerdd3fae461a784ebbc930d5dd52c5d2e027e0b121b85d1cc0b68393522e55ab41, float >()(w, value.drift_correction_factor);
 
-        w.EndObject(0);
+        w.EndObject(1);
     }
 
 };

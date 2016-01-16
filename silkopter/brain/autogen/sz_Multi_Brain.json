@@ -42,7 +42,8 @@
         ["float", "max_speed", {"required": true, "json_key" : "Max Speed (m/s)", "default" : 2}],
         ["uint32_t", "lpf_poles", {"required": true, "json_key" : "LPF Poles", "default" : 1}],
         ["float", "lpf_cutoff_frequency", {"required": true, "json_key" : "LPF Cutoff Frequency (Hz)"}],        
-        ["sz::PID", "pid", {"required": false, "json_key" : "PID"}]
+        ["sz::PI", "speed_pi", {"required": false, "json_key" : "Speed PI"}],
+        ["sz::P", "position_p", {"required": false, "json_key" : "Position P"}]
     ]
 },
 {

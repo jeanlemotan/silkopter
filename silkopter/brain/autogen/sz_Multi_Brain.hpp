@@ -1524,9 +1524,10 @@ namespace sz { namespace Multi_Brain { struct Altitude {
  float max_speed;
 uint32_t lpf_poles;
 float lpf_cutoff_frequency;
-sz::PID pid;
+sz::PI speed_pi;
+sz::P position_p;
 
-explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), pid() {  }
+explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), speed_pi(), position_p() {  }
 
 
  
@@ -1546,7 +1547,8 @@ private:
     SAXEventHandler< float > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< float > handler_2;
-SAXEventHandler< sz::PID > handler_3;bool has_max_speed;
+SAXEventHandler< sz::PI > handler_3;
+SAXEventHandler< sz::P > handler_4;bool has_max_speed;
 bool has_lpf_poles;
 bool has_lpf_cutoff_frequency;
 
@@ -1569,7 +1571,9 @@ case 1:
 case 2:
     return "lpf_cutoff_frequency";
 case 3:
-    return "pid";
+    return "speed_pi";
+case 4:
+    return "position_p";
         default:
             break;
         }
@@ -1600,6 +1604,7 @@ case 3:
 has_lpf_poles = false;
 has_lpf_cutoff_frequency = false;
 
+
     }
 
 public:
@@ -1609,7 +1614,8 @@ public:
         , handler_0(&obj->max_speed)
 , handler_1(&obj->lpf_poles)
 , handler_2(&obj->lpf_cutoff_frequency)
-, handler_3(&obj->pid)
+, handler_3(&obj->speed_pi)
+, handler_4(&obj->position_p)
     {
         reset_flags();
     }
@@ -1632,6 +1638,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
 
         default:
             break;
@@ -1658,6 +1667,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
         default:
             break;
         }
@@ -1682,6 +1694,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
 
         default:
             break;
@@ -1708,6 +1723,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
         default:
             break;
         }
@@ -1732,6 +1750,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
 
         default:
             break;
@@ -1758,6 +1779,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
         default:
             break;
         }
@@ -1782,6 +1806,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
 
         default:
             break;
@@ -1808,6 +1835,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
         default:
             break;
         }
@@ -1828,8 +1858,10 @@ else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x50\x6f\x6c\x65\x7
 						 { state=1; has_lpf_poles = true; }
 else if (utility::string_equal(str, length, "\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25))
 						 { state=2; has_lpf_cutoff_frequency = true; }
-else if (utility::string_equal(str, length, "\x50\x49\x44", 3))
+else if (utility::string_equal(str, length, "\x53\x70\x65\x65\x64\x20\x50\x49", 8))
 						 { state=3;  }
+else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10))
+						 { state=4;  }
             else {
                 state = -1;
                 return true;
@@ -1849,6 +1881,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
 
             default:
                 break;
@@ -1876,6 +1911,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
         default:
             break;
         }
@@ -1900,6 +1938,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
 
         default:
             break;
@@ -1926,6 +1967,9 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
             default:
                 break;
             }
@@ -1951,6 +1995,9 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
 
             default:
                 break;
@@ -1985,6 +2032,8 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
 
         default:
             break;
@@ -2003,6 +2052,7 @@ case 3:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
 
     }
 };
@@ -2017,9 +2067,10 @@ struct Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b8
         w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.max_speed);
 w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, uint32_t >()(w, value.lpf_poles);
 w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.lpf_cutoff_frequency);
-w.Key("\x50\x49\x44", 3, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PID >()(w, value.pid);
+w.Key("\x53\x70\x65\x65\x64\x20\x50\x49", 8, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PI >()(w, value.speed_pi);
+w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::P >()(w, value.position_p);
 
-        w.EndObject(4);
+        w.EndObject(5);
     }
 
 };
