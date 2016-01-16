@@ -404,7 +404,8 @@ struct Serializer< Writer0d54807a5b2aa0e8fdde13e71bd935475ffdf59c38870a506205c54
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace KF_ECEF { struct Config {
- float position_accuracy;
+ float position_lag;
+float position_accuracy;
 float velocity_lag;
 float velocity_accuracy;
 float acceleration_lag;
@@ -412,7 +413,7 @@ float acceleration_accuracy;
 float pressure_alt_lag;
 float pressure_alt_accuracy;
 
-explicit Config():position_accuracy(2.0), velocity_lag(0), velocity_accuracy(0.2), acceleration_lag(0), acceleration_accuracy(2.0), pressure_alt_lag(0), pressure_alt_accuracy(0.5) {  }
+explicit Config():position_lag(0), position_accuracy(2.0), velocity_lag(0), velocity_accuracy(0.2), acceleration_lag(0), acceleration_accuracy(2.0), pressure_alt_lag(0), pressure_alt_accuracy(0.5) {  }
 
 
  
@@ -435,7 +436,8 @@ SAXEventHandler< float > handler_2;
 SAXEventHandler< float > handler_3;
 SAXEventHandler< float > handler_4;
 SAXEventHandler< float > handler_5;
-SAXEventHandler< float > handler_6;bool has_position_accuracy;
+SAXEventHandler< float > handler_6;
+SAXEventHandler< float > handler_7;bool has_position_accuracy;
 bool has_velocity_lag;
 bool has_velocity_accuracy;
 bool has_acceleration_lag;
@@ -456,18 +458,20 @@ bool has_pressure_alt_accuracy;
     {
         switch (state) {
             case 0:
-    return "position_accuracy";
+    return "position_lag";
 case 1:
-    return "velocity_lag";
+    return "position_accuracy";
 case 2:
-    return "velocity_accuracy";
+    return "velocity_lag";
 case 3:
-    return "acceleration_lag";
+    return "velocity_accuracy";
 case 4:
-    return "acceleration_accuracy";
+    return "acceleration_lag";
 case 5:
-    return "pressure_alt_lag";
+    return "acceleration_accuracy";
 case 6:
+    return "pressure_alt_lag";
+case 7:
     return "pressure_alt_accuracy";
         default:
             break;
@@ -495,7 +499,8 @@ case 6:
 
     void reset_flags()
     {
-        has_position_accuracy = false;
+        
+has_position_accuracy = false;
 has_velocity_lag = false;
 has_velocity_accuracy = false;
 has_acceleration_lag = false;
@@ -508,13 +513,14 @@ public:
     explicit SAXEventHandler( ::sz::KF_ECEF::Config * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->position_accuracy)
-, handler_1(&obj->velocity_lag)
-, handler_2(&obj->velocity_accuracy)
-, handler_3(&obj->acceleration_lag)
-, handler_4(&obj->acceleration_accuracy)
-, handler_5(&obj->pressure_alt_lag)
-, handler_6(&obj->pressure_alt_accuracy)
+        , handler_0(&obj->position_lag)
+, handler_1(&obj->position_accuracy)
+, handler_2(&obj->velocity_lag)
+, handler_3(&obj->velocity_accuracy)
+, handler_4(&obj->acceleration_lag)
+, handler_5(&obj->acceleration_accuracy)
+, handler_6(&obj->pressure_alt_lag)
+, handler_7(&obj->pressure_alt_accuracy)
     {
         reset_flags();
     }
@@ -546,6 +552,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Null());
+
+case 7:
+    return checked_event_forwarding(handler_7.Null());
 
         default:
             break;
@@ -581,6 +590,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Bool(b));
 
+case 7:
+    return checked_event_forwarding(handler_7.Bool(b));
+
         default:
             break;
         }
@@ -614,6 +626,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Int(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Int(i));
 
         default:
             break;
@@ -649,6 +664,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Uint(i));
 
+case 7:
+    return checked_event_forwarding(handler_7.Uint(i));
+
         default:
             break;
         }
@@ -682,6 +700,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Int64(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Int64(i));
 
         default:
             break;
@@ -717,6 +738,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Uint64(i));
 
+case 7:
+    return checked_event_forwarding(handler_7.Uint64(i));
+
         default:
             break;
         }
@@ -750,6 +774,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Double(d));
+
+case 7:
+    return checked_event_forwarding(handler_7.Double(d));
 
         default:
             break;
@@ -785,6 +812,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.String(str, length, copy));
 
+case 7:
+    return checked_event_forwarding(handler_7.String(str, length, copy));
+
         default:
             break;
         }
@@ -799,20 +829,22 @@ case 6:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25))
-						 { state=0; has_position_accuracy = true; }
+            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 16))
+						 { state=0;  }
+else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25))
+						 { state=1; has_position_accuracy = true; }
 else if (utility::string_equal(str, length, "\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16))
-						 { state=1; has_velocity_lag = true; }
+						 { state=2; has_velocity_lag = true; }
 else if (utility::string_equal(str, length, "\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23))
-						 { state=2; has_velocity_accuracy = true; }
+						 { state=3; has_velocity_accuracy = true; }
 else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20))
-						 { state=3; has_acceleration_lag = true; }
+						 { state=4; has_acceleration_lag = true; }
 else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x5e\x32\x29", 29))
-						 { state=4; has_acceleration_accuracy = true; }
+						 { state=5; has_acceleration_accuracy = true; }
 else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25))
-						 { state=5; has_pressure_alt_lag = true; }
+						 { state=6; has_pressure_alt_lag = true; }
 else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30))
-						 { state=6; has_pressure_alt_accuracy = true; }
+						 { state=7; has_pressure_alt_accuracy = true; }
             else {
                 state = -1;
                 return true;
@@ -841,6 +873,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Key(str, length, copy));
+
+case 7:
+    return checked_event_forwarding(handler_7.Key(str, length, copy));
 
             default:
                 break;
@@ -877,6 +912,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.StartArray());
 
+case 7:
+    return checked_event_forwarding(handler_7.StartArray());
+
         default:
             break;
         }
@@ -910,6 +948,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.EndArray(length));
+
+case 7:
+    return checked_event_forwarding(handler_7.EndArray(length));
 
         default:
             break;
@@ -945,6 +986,9 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.StartObject());
 
+case 7:
+    return checked_event_forwarding(handler_7.StartObject());
+
             default:
                 break;
             }
@@ -979,6 +1023,9 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.EndObject(length));
+
+case 7:
+    return checked_event_forwarding(handler_7.EndObject(length));
 
             default:
                 break;
@@ -1023,6 +1070,8 @@ case 5:
      handler_5.ReapError(errs); break;
 case 6:
      handler_6.ReapError(errs); break;
+case 7:
+     handler_7.ReapError(errs); break;
 
         default:
             break;
@@ -1044,6 +1093,7 @@ handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
 handler_5.PrepareForReuse();
 handler_6.PrepareForReuse();
+handler_7.PrepareForReuse();
 
     }
 };
@@ -1055,7 +1105,8 @@ struct Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.position_accuracy);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.position_lag);
+w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x43\x45\x50\x20\x6d\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.position_accuracy);
 w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x4c\x61\x67\x20\x28\x73\x29", 16, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_lag);
 w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x2f\x73\x29", 23, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.velocity_accuracy);
 w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x4c\x61\x67\x20\x28\x73\x29", 20, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.acceleration_lag);
@@ -1063,7 +1114,7 @@ w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x41\x63\x63\x75\x72\
 w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x4c\x61\x67\x20\x28\x73\x29", 25, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_lag);
 w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x41\x6c\x74\x69\x74\x75\x64\x65\x20\x41\x63\x63\x75\x72\x61\x63\x79\x20\x28\x6d\x29", 30, false); Serializer< Writer8b3dfb852216e0340e74cc42d73fd3515f85d0e64bc8067d9a38002c81de045f, float >()(w, value.pressure_alt_accuracy);
 
-        w.EndObject(7);
+        w.EndObject(8);
     }
 
 };

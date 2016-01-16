@@ -223,7 +223,7 @@ void KF_ECEF::process()
             math::mat3d enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
             math::vec3f ecef_la = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(la_sample.value)));
 
-            auto last_pos_sample = m_position_output_stream->get_last_sample();
+            stream::IECEF_Position::Sample const& last_pos_sample = m_position_output_stream->get_last_sample();
             if (math::distance_sq(pos_sample.value, last_pos_sample.value) > math::square(20))
             {
                 m_kf_x.x.setZero();
@@ -234,33 +234,34 @@ void KF_ECEF::process()
                 m_kf_z.x(0) = pos_sample.value.z;
             }
 
-            m_kf_x.z(0) = pos_sample.value.x;
-            m_kf_y.z(0) = pos_sample.value.y;
-            m_kf_z.z(0) = pos_sample.value.z;
+            m_position_delayer.push_back(pos_sample.value);
+            stream::IECEF_Position::Value const& pos = m_position_delayer.get_value();
+            m_kf_x.z(0) = pos.x;
+            m_kf_y.z(0) = pos.y;
+            m_kf_z.z(0) = pos.z;
+
 
             m_velocity_delayer.push_back(vel_sample.value);
-            m_linear_acceleration_delayer.push_back(ecef_la);
-
-            auto const& vel = m_velocity_delayer.get_value();
+            stream::IECEF_Velocity::Value const& vel = m_velocity_delayer.get_value();
             m_kf_x.z(1) = vel.x;
             m_kf_y.z(1) = vel.y;
             m_kf_z.z(1) = vel.z;
 
-            auto const& acc = m_linear_acceleration_delayer.get_value();
+            m_linear_acceleration_delayer.push_back(ecef_la);
+            stream::IECEF_Linear_Acceleration::Value const& acc = m_linear_acceleration_delayer.get_value();
             m_kf_x.z(2) = acc.x;
             m_kf_y.z(2) = acc.y;
             m_kf_z.z(2) = acc.z;
 
             //pressure
-            double alt = (1.0 - std::pow((p_sample.value / 1013.25), 0.190284)) * 44307.69396;
+            float alt = static_cast<float>((1.0 - std::pow((p_sample.value / 101325.0), 0.190284)) * 44307.69396);
             if (m_last_baro_altitude)
             {
-                m_pressure_alt_delayer.push_back((alt - *m_last_baro_altitude) / m_dts);
+                m_pressure_alt_speed_delayer.push_back((alt - *m_last_baro_altitude) / m_dts);
 
-                auto const& alt = m_pressure_alt_delayer.get_value();
-                m_kf_z.z(3) = alt;
-
-//                QLOGI("{}", (crt_alt - last_alt) / dts);
+                float speed = m_pressure_alt_speed_delayer.get_value();
+                m_kf_z.z(3) = speed;
+                //QLOGI("{}", speed);
             }
             m_last_baro_altitude = alt;
 
@@ -302,6 +303,7 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    m_config->position_lag = math::max(m_config->position_lag, 0.f);
     m_config->position_accuracy = math::max(m_config->position_accuracy, 0.f);
     m_config->velocity_lag = math::max(m_config->velocity_lag, 0.f);
     m_config->velocity_accuracy = math::max(m_config->velocity_accuracy, 0.f);
@@ -325,9 +327,10 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
                 0,      0,      aacc,   0,
                 0,      0,      0,      bacc;
 
+    m_position_delayer.init(m_dts, m_config->position_lag);
     m_velocity_delayer.init(m_dts, m_config->velocity_lag);
     m_linear_acceleration_delayer.init(m_dts, m_config->acceleration_lag);
-    m_pressure_alt_delayer.init(m_dts, m_config->pressure_alt_lag);
+    m_pressure_alt_speed_delayer.init(m_dts, m_config->pressure_alt_lag);
 
     return true;
 }

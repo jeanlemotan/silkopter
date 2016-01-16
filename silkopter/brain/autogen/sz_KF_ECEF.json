@@ -14,6 +14,7 @@
     "name": "Config",
     "members":
     [
+        ["float", "position_lag", {"required": false, "json_key" : "Position Lag (s)", "default" : 0}],
         ["float", "position_accuracy", {"required": true, "json_key" : "Position Accuracy (CEP m)", "default" : 2.0}],
         ["float", "velocity_lag", {"required": true, "json_key" : "Velocity Lag (s)", "default" : 0}],
         ["float", "velocity_accuracy", {"required": true, "json_key" : "Velocity Accuracy (m/s)", "default" : 0.2}],

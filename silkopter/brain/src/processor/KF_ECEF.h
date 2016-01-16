@@ -131,9 +131,10 @@ private:
         size_t min_value_count = 0;
     };
 
+    Delayer<stream::IECEF_Position::Value> m_position_delayer;
     Delayer<stream::IECEF_Velocity::Value> m_velocity_delayer;
     Delayer<stream::IECEF_Linear_Acceleration::Value> m_linear_acceleration_delayer;
-    Delayer<stream::IPressure::Value> m_pressure_alt_delayer;
+    Delayer<stream::IPressure::Value> m_pressure_alt_speed_delayer;
 };
 
 
