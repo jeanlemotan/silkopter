@@ -50,12 +50,13 @@ public:
     };
 
     auto get_all() const -> std::vector<Item> const&;
+    void set_all(std::vector<Item> const& items);
     void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
     auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool;
     void remove(std::shared_ptr<Base> const& node);
 private:
-    std::vector<Item> m_nodes;
+    std::vector<Item> m_items;
 };
 
 class Comms;
@@ -119,6 +120,8 @@ private:
                      rapidjson::Value const& init_params) -> node::INode_ptr;
     auto create_nodes(rapidjson::Value& json) -> bool;
 
+    void sort_nodes(std::shared_ptr<node::INode> first_node);
+
     struct Configs
     {
         boost::optional<config::Multi> multi;
@@ -144,19 +147,25 @@ private:
 template<class Base>
 auto Registry<Base>::get_all() const -> std::vector<Item> const&
 {
-    return m_nodes;
+    return m_items;
+}
+
+template<class Base>
+void Registry<Base>::set_all(std::vector<Item> const& items)
+{
+    m_items = items;
 }
 template<class Base>
 void Registry<Base>::remove_all()
 {
-    m_nodes.clear();
+    m_items.clear();
 }
 template<class Base>
 template<class T>
 auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<T>
 {
-    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [&](Item const& s) { return s.name == name; });
-    return it != m_nodes.end() ? std::dynamic_pointer_cast<T>(it->node) : nullptr;
+    auto it = std::find_if(m_items.begin(), m_items.end(), [&](Item const& s) { return s.name == name; });
+    return it != m_items.end() ? std::dynamic_pointer_cast<T>(it->node) : nullptr;
 }
 template<class Base>
 auto Registry<Base>::add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool
@@ -166,13 +175,13 @@ auto Registry<Base>::add(std::string const& name, std::string const& type, std::
         QLOGE("Duplicated name in node {}", name);
         return false;
     }
-    m_nodes.push_back({name, type, node});
+    m_items.push_back({name, type, node});
     return true;
 }
 template<class Base>
 void Registry<Base>::remove(std::shared_ptr<Base> const& node)
 {
-    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [node](Item const& item) { return item.node == node; }), m_nodes.end());
+    m_items.erase(std::remove_if(m_items.begin(), m_items.end(), [node](Item const& item) { return item.node == node; }), m_items.end());
 }
 
 
