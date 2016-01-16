@@ -110,7 +110,7 @@ void HAL::save_settings()
         auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/multi_config"), rapidjson::kObjectType, allocator);
         if (!configj)
         {
-            QLOGE("Cannot open create multi config node.");
+            QLOGE("Cannot create multi config node.");
             return;
         }
         rapidjson::Document json;
@@ -122,7 +122,7 @@ void HAL::save_settings()
         auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/buses"), rapidjson::kObjectType, allocator);
         if (!busesj)
         {
-            QLOGE("Cannot open create buses settings node.");
+            QLOGE("Cannot create buses settings node.");
             return;
         }
         auto const& nodes = get_buses().get_all();
@@ -132,27 +132,23 @@ void HAL::save_settings()
                 !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
                 !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
             {
-                QLOGE("Cannot open create settings node.");
+                QLOGE("Cannot create settings node.");
                 return;
             }
         }
     }
     {
-        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/nodes"), rapidjson::kObjectType, allocator);
+        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/nodes"), rapidjson::kArrayType, allocator);
         if (!nodesj)
         {
-            QLOGE("Cannot open create nodes settings node.");
+            QLOGE("Cannot create nodes settings node.");
             return;
         }
         auto const& nodes = get_nodes().get_all();
         for (auto const& n: nodes)
         {
-            rapidjson::Value* nodej = jsonutil::get_or_add_value(*nodesj, n.name, rapidjson::kObjectType, allocator);
-            if (!nodej)
-            {
-                QLOGE("Cannot create node {} settings.", n.name);
-                return;
-            }
+            rapidjson::Value nodej;
+            nodej.SetObject();
 
             rapidjson::Value input_pathsj;
             {
@@ -164,14 +160,17 @@ void HAL::save_settings()
                 }
             }
 
-            if (!jsonutil::add_value(*nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-                !jsonutil::add_value(*nodej, std::string("init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*nodej, std::string("config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator) ||
-                !jsonutil::add_value(*nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
+            if (!jsonutil::add_value(nodej, std::string("name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
             {
-                QLOGE("Cannot open create settings node.");
+                QLOGE("Cannot create settings node.");
                 return;
             }
+
+            nodesj->PushBack(nodej, allocator);
         }
     }
 
@@ -404,22 +403,30 @@ static bool read_input_stream_paths(std::string const& node_name, silk::node::IN
 
 auto HAL::create_nodes(rapidjson::Value& json) -> bool
 {
-    if (!json.IsObject())
+    if (!json.IsArray())
     {
         QLOGE("Wrong json type: {}", json.GetType());
         return false;
     }
-    for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
+    for (auto it = json.Begin(); it != json.End(); ++it)
     {
-        std::string name(it->name.GetString());
-        auto* typej = jsonutil::find_value(it->value, std::string("type"));
+        auto* namej = jsonutil::find_value(*it, std::string("name"));
+        if (!namej || namej->GetType() != rapidjson::kStringType)
+        {
+            QLOGE("Node is missing the name");
+            return false;
+        }
+        std::string name(namej->GetString());
+
+        auto* typej = jsonutil::find_value(*it, std::string("type"));
         if (!typej || typej->GetType() != rapidjson::kStringType)
         {
             QLOGE("Node {} is missing the type", name);
             return false;
         }
         std::string type(typej->GetString());
-        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
+
+        auto* init_paramsj = jsonutil::find_value(*it, std::string("init_params"));
         if (!init_paramsj)
         {
             QLOGE("Node {} of type {} is missing the init_params", name, type);
@@ -432,18 +439,21 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
             return false;
         }
     }
-    for (auto it = json.MemberBegin(); it != json.MemberEnd(); ++it)
+
+    auto nodes = m_nodes.get_all();
+    for (auto it = json.Begin(); it != json.End(); ++it)
     {
-        std::string name(it->name.GetString());
-        auto node = get_nodes().find_by_name<node::INode>(name);
+        const auto& item = nodes[std::distance(json.Begin(), it)];
+        const std::string& name = item.name;
+        std::shared_ptr<node::INode> node = item.node;
         QASSERT(node);
 
-        if (!read_input_stream_paths(name, *node, it->value))
+        if (!read_input_stream_paths(name, *node, *it))
         {
             return false;
         }
 
-        auto* configj = jsonutil::find_value(it->value, std::string("config"));
+        auto* configj = jsonutil::find_value(*it, std::string("config"));
         if (!configj)
         {
             QLOGE("Node {} is missing the config", name);
@@ -456,6 +466,91 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
         }
     }
     return true;
+}
+
+void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
+{
+    QASSERT(first_node);
+    if (!first_node)
+    {
+        return;
+    }
+
+    typedef Registry<node::INode>::Item Item;
+
+    std::vector<Item> items = m_nodes.get_all();
+    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.node == first_node; });
+    QASSERT(it != items.end());
+    if (it == items.end())
+    {
+        return;
+    }
+
+    std::vector<Item> sorted;
+    sorted.reserve(items.size() * 2); //to avoid allocations
+
+    Item first_item = *it;
+    items.erase(it);
+
+    sorted.push_back(first_item);
+    for (auto it = sorted.begin(); it != sorted.end(); ++it)
+    {
+        const std::string& node_name = it->name;
+
+        //now find all the nodes that this node uses as input
+        if (it->node != first_node)
+        {
+            std::vector<node::INode::Input> inputs = it->node->get_inputs();
+            for (const node::INode::Input& input : inputs)
+            {
+                if (input.stream_path.empty())
+                {
+                    continue;
+                }
+                for (auto nit = items.begin(); nit != items.end();)
+                {
+                    if (input.stream_path[0] == nit->name)
+                    {
+                        sorted.push_back(*nit);
+                        items.erase(nit);
+                    }
+                    else
+                    {
+                        ++nit;
+                    }
+                }
+            }
+        }
+
+        //now find all the nodes that use this node as an input
+        for (auto nit = items.begin(); nit != items.end();)
+        {
+            bool found = false;
+            std::vector<node::INode::Input> inputs = nit->node->get_inputs();
+            for (const node::INode::Input& input : inputs)
+            {
+                if (!input.stream_path.empty() && input.stream_path[0] == node_name)
+                {
+                    sorted.push_back(*nit);
+                    items.erase(nit);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                ++nit;
+            }
+        }
+    }
+
+    //add all the remainding nodes
+    for (Item const& item: items)
+    {
+        sorted.push_back(item);
+    }
+
+    m_nodes.set_all(sorted);
 }
 
 
@@ -687,7 +782,7 @@ auto HAL::init(Comms& comms) -> bool
         {
             std::ostringstream ss;
             ss << result;
-            QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
+            QLOGE("Cannot deserialize multi config: {}", ss.str());
             return false;
         }
         if (!set_multi_config(config))
@@ -706,6 +801,21 @@ auto HAL::init(Comms& comms) -> bool
     {
         return false;
     }
+
+//    auto* first_nodej = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/first_node"));
+//    if (!first_nodej || first_nodej->GetType() != rapidjson::kStringType)
+//    {
+//        QLOGE("Json value hal/first_node has to be a string");
+//        return false;
+//    }
+//    std::shared_ptr<node::INode> first_node = m_nodes.find_by_name<node::INode>(std::string(first_nodej->GetString()));
+//    if (!first_node)
+//    {
+//        QLOGE("First node '{}' not found", first_nodej->GetString());
+//        return false;
+//    }
+
+    //sort_nodes(first_node);
 
     //start the system
     auto now = q::Clock::now();
@@ -841,27 +951,15 @@ void HAL::process()
     {
         float p = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
         nt.second.process_percentage = math::lerp(nt.second.process_percentage, p, 0.1f);
-        //QLOGI("{.2}%, {}/{} -> {}", nt.second.process_percentage, nt.second.process_duration, m_telemetry_data.total_duration, nt.first);
     }
 
-//    auto* stream = get_streams().find_by_name<node::ILocation>("gps0/stream");
-//    auto* stream_lpf = get_streams().find_by_name<node::ILocation>("gps0_resampler/stream");
-//    for (auto& s: stream->get_samples())
+    //display time
+//    for (auto const& n: m_nodes.get_all())
 //    {
-//        QLOGI("{.8}", s.value.latitude);
-//        s_samples.push_back(s.value.latitude);
-//    }
-//    for (auto& s: stream_lpf->get_samples())
-//    {
-//        QLOGI("\t\t{.8}", s.value.latitude);
-//        s_samples_lpf.push_back(s.value.latitude);
+//        auto& nt = m_telemetry_data.nodes[n.name];
+//        QLOGI("{.2}%, {}/{} -> {}", nt.process_percentage*100.f, nt.process_duration, m_telemetry_data.total_duration, n.name);
 //    }
 
-//    if (s_samples.size() == 50)
-//    {
-//        write_gnu_plot("out.dat", s_samples);
-//        write_gnu_plot("rsout.dat", s_samples_lpf);
-//    }
 }
 
 
