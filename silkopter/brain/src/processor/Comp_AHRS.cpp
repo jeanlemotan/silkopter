@@ -151,7 +151,7 @@ void Comp_AHRS::process()
             {
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
-                float mu = (dts + av_length) * 0.3f;
+                float mu = (dts + av_length) * m_config->drift_correction_factor;
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);
@@ -181,6 +181,8 @@ auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
     }
 
     *m_config = sz;
+
+    m_config->drift_correction_factor = math::clamp(m_config->drift_correction_factor, 0.f, 1.f);
 
     return true;
 }
