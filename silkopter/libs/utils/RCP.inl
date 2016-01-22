@@ -513,7 +513,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         if (id <= last_packet_id)
         {
             QLOGW("Ignoring past packet {}", id);
-            m_global_stats.rx_zombie_datagrams++;
+            m_global_stats.rx_zombie_packets++;
             if (packet->any_header.flag_needs_confirmation)
             {
                 add_packet_confirmation(channel_idx, id);
@@ -640,7 +640,7 @@ inline void RCP::process()
         {
             tp = q::Clock::now();
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            QLOGI("{}: tx {} / rx {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.rx_datagrams, m_global_stats.tx_confirmed_fragments);
+            QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
         }
     }
 
@@ -711,6 +711,7 @@ inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
         {
             stats.tx_packets++;
         }
+        stats.tx_fragments++;
     }
 }
 
@@ -718,10 +719,15 @@ inline auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -
 {
     QASSERT(datagram);
     size_t max_size = m_mtu + m_tx.send_buffer_header_size;
-    if (datagram->data.size() + m_tx.send_buffer.size() <= max_size)
+    size_t tx_send_buffer_size = m_tx.send_buffer.size();
+    if (datagram->data.size() + tx_send_buffer_size <= max_size)
     {
         update_stats(m_global_stats, *datagram);
-        std::copy(datagram->data.begin(), datagram->data.end(), std::back_inserter(m_tx.send_buffer));
+
+        m_tx.send_buffer.resize(tx_send_buffer_size + datagram->data.size());
+        auto dst_it = m_tx.send_buffer.begin() + tx_send_buffer_size;
+
+        std::copy(datagram->data.begin(), datagram->data.end(), dst_it);
         return true;
     }
     return false;
@@ -995,7 +1001,7 @@ inline void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
             return;
         }
 
-        m_global_stats.rx_datagrams++;
+        m_global_stats.rx_total_datagrams++;
 
         auto crc1 = header.crc;
         header.crc = 0;
@@ -1003,13 +1009,13 @@ inline void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
         if (crc1 != crc2)
         {
             m_global_stats.rx_corrupted_datagrams++;
-            auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_datagrams;
+            auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_total_datagrams;
 
             QLOGW("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
         }
         else
         {
-            m_global_stats.rx_good_datagrams++;
+            m_global_stats.rx_datagrams++;
 
             if (!m_connection.is_connected)
             {
@@ -1059,7 +1065,7 @@ inline void RCP::process_packet_data(uint8_t* data_ptr, size_t data_size)
     auto last_packet_id = m_rx.last_packet_ids[channel_idx];
     if (id <= last_packet_id)
     {
-        m_global_stats.rx_zombie_datagrams++;
+        m_global_stats.rx_zombie_packets++;
         if (header.flag_needs_confirmation)
         {
             add_packet_confirmation(channel_idx, id);
@@ -1083,11 +1089,12 @@ inline void RCP::process_packet_data(uint8_t* data_ptr, size_t data_size)
 
         if (packet->fragments[fragment_idx]) //we already have the fragment
         {
-            m_global_stats.rx_duplicated_datagrams++;
+            m_global_stats.rx_duplicated_fragments++;
             //QLOGW("Duplicated fragment {} for packet {}.", fragment_idx, id);
         }
         else
         {
+            m_global_stats.rx_fragments++;
             packet->received_fragment_count++;
             packet->any_header = header;
             if (fragment_idx == 0)
@@ -1172,7 +1179,8 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             key.fragment_idx = FRAGMENT_IDX_ALL;
 
             lb = std::lower_bound(conf, conf_end, key);
-            if (lb != conf_end && lb->channel_idx == key.channel_idx && lb->id == key.id)
+            //if (lb != conf_end && lb->channel_idx == key.channel_idx && lb->id == key.id)
+            if (lb != conf_end && *lb == key)
             {
 //                if (hdr.channel_idx == 20)
 //                {

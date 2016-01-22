@@ -145,9 +145,9 @@ namespace util
                 Data() : all(0) {}
                 struct
                 {
-                    uint64_t id : 24;
-                    uint64_t fragment_idx : 16;
-                    uint64_t channel_idx : 8;
+                    uint32_t id;
+                    uint16_t fragment_idx;
+                    uint8_t channel_idx;
                 };
                 uint64_t all = 0;
                 bool operator<(Data const& other) const { return all < other.all; }
@@ -288,17 +288,17 @@ namespace util
         struct Stats
         {
             size_t tx_datagrams = 0;
-            //size_t tx_cancelled_datagrams = 0;
             size_t tx_confirmed_fragments = 0;
-            size_t tx_confirmed_packets = 0;
             size_t tx_packets = 0;
+            size_t tx_fragments = 0;
             size_t tx_bytes = 0;
 
-            size_t rx_datagrams = 0;
+            size_t rx_total_datagrams = 0;
             size_t rx_corrupted_datagrams = 0;
-            size_t rx_good_datagrams = 0;
-            size_t rx_zombie_datagrams = 0;
-            size_t rx_duplicated_datagrams = 0;
+            size_t rx_datagrams = 0;
+            size_t rx_zombie_packets = 0;
+            size_t rx_fragments = 0;
+            size_t rx_duplicated_fragments = 0;
             size_t rx_packets = 0;
             size_t rx_dropped_packets = 0;
             size_t rx_bytes = 0;
@@ -324,7 +324,7 @@ namespace util
         Stats m_global_stats;
 
         std::atomic_bool m_is_sending = {false};
-        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
+        const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
 
         std::array<Send_Params, MAX_CHANNELS> m_send_params;
         std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
