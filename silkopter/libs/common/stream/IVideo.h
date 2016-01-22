@@ -19,6 +19,7 @@ public:
             H264
         };
 
+        q::Clock::time_point time_point;
         Type type;
         bool is_keyframe = false;
         math::vec2u32 resolution;
@@ -41,6 +42,7 @@ namespace serialization
 
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IVideo::Value const& value, size_t& off)
 {
+    serialize(buffer, value.time_point.time_since_epoch().count(), off);
     serialize(buffer, value.type, off);
     serialize(buffer, value.resolution, off);
     serialize(buffer, value.is_keyframe, off);
@@ -56,7 +58,9 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IVideo::Value c
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IVideo::Value& value, size_t& off) -> bool
 {
     uint32_t size = 0;
-    if (!deserialize(buffer, value.type, off) ||
+    q::Clock::time_point::rep time_point;
+    if (!deserialize(buffer, time_point, off) ||
+        !deserialize(buffer, value.type, off) ||
         !deserialize(buffer, value.resolution, off) ||
         !deserialize(buffer, value.is_keyframe, off) ||
         !deserialize(buffer, size, off) ||
@@ -64,6 +68,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IVideo:
     {
         return false;
     }
+    value.time_point = q::Clock::time_point(q::Clock::duration(time_point));
     value.data.resize(size);
     std::copy(buffer.begin() + off, buffer.begin() + off + size, value.data.begin());
     off += size;
