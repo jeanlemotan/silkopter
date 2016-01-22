@@ -363,14 +363,16 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
             });
         }
 
-        for (auto const& os: node->outputs)
+        for (size_t i = 0; i < node->outputs.size(); i++)
         {
+            silk::node::gs::Node::Output const& os = node->outputs[i];
+
             if (supports_acceleration_calibration(*node, os))
             {
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_acceleration_calibration(node, &os - &node->outputs.front());
+                    do_acceleration_calibration(node, i);
                 });
             }
             if (supports_angular_velocity_calibration(*node, os))
@@ -378,7 +380,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_angular_velocity_calibration(node, &os - &node->outputs.front());
+                    do_angular_velocity_calibration(node, i);
                 });
 
                 continue;
@@ -388,7 +390,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
                 auto action = menu.addAction(QIcon(":/icons/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-                    do_magnetic_field_calibration(node, &os - &node->outputs.front());
+                    do_magnetic_field_calibration(node, i);
                 });
 
                 continue;
@@ -592,6 +594,7 @@ void HAL_Window::open_stream_viewer(std::string const& stream_name)
     dock->layout()->setMargin(0);
     dock->layout()->setContentsMargins(0, 0, 0, 0);
     dock->setWidget(viewer);
+    dock->setAttribute(Qt::WA_DeleteOnClose);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     //dock->show();
 }
@@ -753,6 +756,7 @@ void HAL_Window::add_node(silk::node::gs::Node_ptr node)
         auto port = b->addInputPort(QString());
         port->setBrush(QBrush(QColor(0xe67e22)));
         port->setId(i.name.c_str());
+        port->setToolTip(silk::stream::get_as_string(i.type, true).c_str());
 
         auto input_name = i.name;
         port->connectedSignal.connect([node, input_name, this](QNEPort* output_port)
@@ -772,6 +776,7 @@ void HAL_Window::add_node(silk::node::gs::Node_ptr node)
         auto port = b->addOutputPort(QString());
         port->setBrush(QBrush(QColor(0x9b59b6)));
         port->setId(o.name.c_str());
+        port->setToolTip(silk::stream::get_as_string(o.type, true).c_str());
 
         auto& port_data = data.ui_outputs[o.name];
         port_data.port = port;
