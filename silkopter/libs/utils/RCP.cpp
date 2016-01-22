@@ -1,90 +1,16 @@
-#pragma once
-
-
+#include "RCP.h"
 #include "utils/Timed_Scope.h"
 #include "lz4/lz4.h"
 
 namespace util
 {
-namespace detail
-{
-    inline void intrusive_ptr_add_ref(Pool_Item_Base* p)
-    {
-        QASSERT(p);
-        if (p->count.fetch_add(1, std::memory_order_relaxed) > 999)
-        {
-            QASSERT(0);
-        }
-    }
-    inline void intrusive_ptr_release(Pool_Item_Base* p)
-    {
-        QASSERT(p);
-        if (p->count.fetch_sub(1, std::memory_order_release) == 1u)
-        {
-            if (p->gc)
-            {
-                p->gc(p);
-            }
-            else
-            {
-                QASSERT(0);
-                delete p;
-            }
-        }
-    }
-    template<class T> Pool<T>::Pool()
-    {
-        m_pool = std::make_shared<Items>();
 
-        auto items_ref = m_pool;
-        m_garbage_collector = [items_ref, this](Pool_Item_Base* t)
-        {
-            if (release)
-            {
-                release(static_cast<T&>(*t));
-            }
-
-            std::lock_guard<std::mutex> lg(items_ref->mutex);
-            items_ref->items.emplace_back(static_cast<T*>(t)); //will create a unique pointer from the raw one
-//                QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-//                QLOGI("{}// returned: {} / {}", m_pool.get(), t, x_returned);
-        };
-    }
-
-    template<class T> auto Pool<T>::acquire() -> Ptr
-    {
-        //this will be called when the last shared_ptr to T dies. We can safetly return the object to pur pool
-
-        std::lock_guard<std::mutex> lg(m_pool->mutex);
-        T* item = nullptr;
-        if (!m_pool->items.empty())
-        {
-            item = m_pool->items.back().release(); //release the raw ptr from the control of the unique ptr
-            m_pool->items.pop_back();
-//                QLOGI("{}// recycled: {} / {}", m_pool.get(), item, x_reused);
-//                QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-        }
-        else
-        {
-            item = new T;
-            item->gc = m_garbage_collector;
-            //if (x_new > 1000)
-            {
-//                    QLOGI("{}// allocated: {} / {}", m_pool.get(), item, x_new);
-                //QLOGI("{}// new:{} reused:{} returned:{}", m_pool.get(), x_new, x_reused, x_returned);
-            }
-        }
-        QASSERT(item);
-        return Ptr(item);
-    }
-}
-
-inline auto RCP::acquire_tx_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
+auto RCP::acquire_tx_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
 {
     return acquire_tx_datagram(data_size, data_size);
 }
 
-inline auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP::TX::Datagram_ptr
+auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP::TX::Datagram_ptr
 {
     auto datagram = m_tx.datagram_pool.acquire();
 
@@ -100,11 +26,11 @@ inline auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP:
     return datagram;
 }
 
-inline auto RCP::acquire_rx_datagram(size_t data_size) -> RCP::RX::Datagram_ptr
+auto RCP::acquire_rx_datagram(size_t data_size) -> RCP::RX::Datagram_ptr
 {
     return acquire_rx_datagram(data_size, data_size);
 }
-inline auto RCP::acquire_rx_datagram(size_t zero_size, size_t data_size) -> RCP::RX::Datagram_ptr
+auto RCP::acquire_rx_datagram(size_t zero_size, size_t data_size) -> RCP::RX::Datagram_ptr
 {
     auto datagram = m_rx.datagram_pool.acquire();
     QASSERT(zero_size <= data_size);
@@ -112,7 +38,7 @@ inline auto RCP::acquire_rx_datagram(size_t zero_size, size_t data_size) -> RCP:
     std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
     return datagram;
 }
-inline auto RCP::RX::acquire_packet() -> RCP::RX::Packet_ptr
+auto RCP::RX::acquire_packet() -> RCP::RX::Packet_ptr
 {
     auto packet = packet_pool.acquire();
     packet->received_fragment_count = 0;
@@ -133,7 +59,7 @@ template<class H> auto RCP::get_header(uint8_t* data) -> H&
     return h;
 }
 
-inline auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t
+auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t
 {
     if (data_size < sizeof(Header))
     {
@@ -154,7 +80,7 @@ inline auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> s
     return 0;
 }
 
-inline auto RCP::compute_crc(uint8_t const* data, size_t size) -> uint32_t
+auto RCP::compute_crc(uint8_t const* data, size_t size) -> uint32_t
 {
     auto crc = q::util::compute_murmur_hash32(data, size, 0);
     return crc;
@@ -179,7 +105,7 @@ template<class T> void RCP::erase_unordered(std::vector<T>& c, typename std::vec
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline RCP::RCP(RCP_Socket& socket)
+RCP::RCP(RCP_Socket& socket)
     : m_socket(socket)
 {
 //        auto hsz =sizeof(Header);
@@ -214,7 +140,7 @@ inline RCP::RCP(RCP_Socket& socket)
     }
 }
 
-inline void RCP::set_send_params(uint8_t channel_idx, Send_Params const& params)
+void RCP::set_send_params(uint8_t channel_idx, Send_Params const& params)
 {
     if (channel_idx >= MAX_CHANNELS)
     {
@@ -223,7 +149,7 @@ inline void RCP::set_send_params(uint8_t channel_idx, Send_Params const& params)
     }
     m_send_params[channel_idx] = params;
 }
-inline auto RCP::get_send_params(uint8_t channel_idx) const -> Send_Params const&
+auto RCP::get_send_params(uint8_t channel_idx) const -> Send_Params const&
 {
     if (channel_idx >= MAX_CHANNELS)
     {
@@ -233,7 +159,7 @@ inline auto RCP::get_send_params(uint8_t channel_idx) const -> Send_Params const
     return m_send_params[channel_idx];
 }
 
-inline void RCP::set_receive_params(uint8_t channel_idx, Receive_Params const& params)
+void RCP::set_receive_params(uint8_t channel_idx, Receive_Params const& params)
 {
     if (channel_idx >= MAX_CHANNELS)
     {
@@ -242,13 +168,13 @@ inline void RCP::set_receive_params(uint8_t channel_idx, Receive_Params const& p
     }
     m_receive_params[channel_idx] = params;
 }
-inline void RCP::reconnect()
+void RCP::reconnect()
 {
     std::lock_guard<std::mutex> lg(m_connection.mutex);
     disconnect();
     m_connection.last_sent_tp = q::Clock::now() - RECONNECT_BEACON_TIMEOUT;
 }
-inline auto RCP::is_connected() const -> bool
+auto RCP::is_connected() const -> bool
 {
     bool is_connected = false;
     {
@@ -257,18 +183,18 @@ inline auto RCP::is_connected() const -> bool
     }
     return is_connected;
 }
-inline auto RCP::send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+auto RCP::send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
 {
     auto const& params = m_send_params[channel_idx];
     return send(channel_idx, params, data, size);
 }
-inline auto RCP::try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+auto RCP::try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
 {
     auto const& params = m_send_params[channel_idx];
     return try_sending(channel_idx, params, data, size);
 }
 
-inline auto RCP::send(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::send(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("RCP::send");
     if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
@@ -287,7 +213,7 @@ inline auto RCP::send(uint8_t channel_idx, Send_Params const& params, uint8_t co
 
     return _send_locked(channel_idx, params, data, size);
 }
-inline auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
 {
     QLOG_TOPIC("RCP::try_sending");
     if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
@@ -312,7 +238,7 @@ inline auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, uin
     return false;
 }
 
-inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
 {
     //The send mutex should be locked here!!!
     if (size >= (1 << 24))
@@ -375,22 +301,22 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
             auto& queue = m_tx.packet_queue;
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
 
-            for (auto it = queue.begin(); it != queue.end(); ++it)
+            for (auto it = queue.begin(); it != queue.end();)
             {
-                if (*it)
+                auto& datagram = *it;
+                auto const& hdr = get_header<Packet_Header>(datagram->data.data());
+                if (hdr.channel_idx == channel_idx && hdr.id < id)
                 {
-                    auto const& hdr = get_header<Packet_Header>((*it)->data.data());
-                    if (hdr.channel_idx == channel_idx && hdr.id < id)
-                    {
-                        (*it).reset();
-                    }
+                    it = queue.erase(it);
+                    continue;
                 }
+                ++it;
             }
         }
 
         //QLOGI("crt +{}", fragment_count);
 
-        channel_data.fragments_to_insert.resize(0);
+        channel_data.fragments_to_insert.clear();
         channel_data.fragments_to_insert.reserve(fragment_count);
 
         //add the new fragments
@@ -435,14 +361,14 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
 
         if (!channel_data.fragments_to_insert.empty())
         {
-            auto& queue = m_tx.packet_queue;
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            while (!queue.empty() && !queue.front()) queue.pop_front();
 
+            auto& queue = m_tx.packet_queue;
             queue.insert(std::upper_bound(queue.begin(), queue.end(), channel_data.fragments_to_insert[0], tx_packet_datagram_predicate),
                     channel_data.fragments_to_insert.begin(),
                     channel_data.fragments_to_insert.end());
         }
+        channel_data.fragments_to_insert.clear();
 
     }
 
@@ -453,25 +379,19 @@ inline auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, ui
 
 inline auto RCP::tx_packet_datagram_predicate(TX::Datagram_ptr const& AA, TX::Datagram_ptr const& BB) -> bool
 {
-    if (!AA)
-    {
-        return true;
-    }
-    if (!BB)
-    {
-        return false;
-    }
     int priority_AA = AA->params.importance;
     int priority_BB = BB->params.importance;
     int sent_count_AA = AA->sent_count;
     int sent_count_BB = BB->sent_count;
+    uint32_t id_AA = get_header<Packet_Header>(AA->data.data()).id;
+    uint32_t id_BB = get_header<Packet_Header>(BB->data.data()).id;
 
     return priority_AA > priority_BB ||
             (priority_AA == priority_BB && sent_count_AA < sent_count_BB) ||
-            (priority_AA == priority_BB && sent_count_AA == sent_count_BB && get_header<Packet_Header>(AA->data.data()).id < get_header<Packet_Header>(BB->data.data()).id);
+            (priority_AA == priority_BB && sent_count_AA == sent_count_BB && id_AA < id_BB);
 }
 
-inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
+bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 {
     QLOG_TOPIC("RCP::receive");
 
@@ -612,7 +532,7 @@ inline bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
     return !data.empty();
 }
 
-inline void RCP::process_connection()
+void RCP::process_connection()
 {
     if (m_connection.is_connected)
     {
@@ -632,7 +552,7 @@ inline void RCP::process_connection()
     send_packet_connect_req();
 }
 
-inline void RCP::process()
+void RCP::process()
 {
     {
         static q::Clock::time_point tp = q::Clock::now();
@@ -656,7 +576,7 @@ inline void RCP::process()
     send_datagram();
 }
 
-inline void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
+void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 {
     auto& header = get_header<Header>(datagram.data.data());
     header.size = datagram.data.size();
@@ -681,7 +601,7 @@ inline void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 //            QASSERT_MSG(header.crc != 0, "{}", crc);
 }
 
-inline void RCP::add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram)
+void RCP::add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram)
 {
     if (!datagram)
     {
@@ -699,7 +619,7 @@ inline void RCP::add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex,
     send_datagram();
 }
 
-inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
+void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
 {
     auto const& header = get_header<Header>(datagram.data.data());
     stats.tx_datagrams++;
@@ -715,7 +635,7 @@ inline void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
     }
 }
 
-inline auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool
+auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool
 {
     QASSERT(datagram);
     size_t max_size = m_mtu + m_tx.send_buffer_header_size;
@@ -723,6 +643,8 @@ inline auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -
     if (datagram->data.size() + tx_send_buffer_size <= max_size)
     {
         update_stats(m_global_stats, *datagram);
+
+//        QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
 
         m_tx.send_buffer.resize(tx_send_buffer_size + datagram->data.size());
         auto dst_it = m_tx.send_buffer.begin() + tx_send_buffer_size;
@@ -733,8 +655,7 @@ inline auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -
     return false;
 }
 
-
-inline auto RCP::compute_next_transit_datagram() -> bool
+auto RCP::compute_next_transit_datagram() -> bool
 {
     size_t merged = 0;
     m_tx.send_buffer.resize(m_tx.send_buffer_header_size);
@@ -768,48 +689,27 @@ inline auto RCP::compute_next_transit_datagram() -> bool
 
     //next normal packets
     {
-        auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+
+        m_tx.reinsert_queue.clear();
 
         auto now = q::Clock::now();
 
-        //clean up the queue, front only
-        while (!queue.empty())
+        //now go through the queue and see what we can pack together and send
+        auto& queue = m_tx.packet_queue;
+        for (auto it = queue.begin(); it != queue.end();)
         {
-            auto& datagram = queue.front();
-            //eliminate empty / old datagrams
-            if (!datagram || (datagram->params.cancel_after.count() > 0 && now - datagram->added_tp >= datagram->params.cancel_after))
+            auto& datagram = *it;
+            if (datagram->params.cancel_after.count() > 0 && now - datagram->added_tp >= datagram->params.cancel_after)
             {
-                //auto const& header = get_header<Packet_Header>(datagram->data);
-                //QLOGI("Cancelling fragment {} for packet {}, sent {} times", header.fragment_idx, header.id, datagram->sent_count);
-                queue.pop_front();
+                it = queue.erase(it);
                 continue;
             }
-            else
-            {
-                //found it!!
-                break;
-            }
-        }
 
-        //now go through the queue and see what we can pack together and send
-        size_t size = queue.size(); //store the size as it will change due to reinserting datagrams at the end.
-        for (size_t i = 0; i < size; i++)
-        {
-            auto& d = queue[i];
-            if (d &&
-                now - d->sent_tp >= MIN_RESEND_DURATION &&
-                (d->params.cancel_after.count() == 0 || now - d->added_tp < d->params.cancel_after) &&
-                add_datagram_to_send_buffer(d))
+            if (now - datagram->sent_tp >= MIN_RESEND_DURATION && add_datagram_to_send_buffer(datagram))
             {
                 merged++;
-                auto datagram = std::move(d);
                 datagram->sent_tp = now;
-
-                //park it as null, as the order changed due to the sent_count increase
-                //it will be erased some time later
-                d.reset();
-
                 datagram->sent_count++;
 
 //                auto& header = get_header<Packet_Header>(datagram->data.data());
@@ -818,12 +718,22 @@ inline auto RCP::compute_next_transit_datagram() -> bool
                 //do I have to insert it back?
                 if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
                 {
-                    queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), std::move(datagram));
+                    m_tx.reinsert_queue.push_back(std::move(datagram));
                 }
 
-               // break; //commenting this results in lots of wrong crc's at the other end
+                it = queue.erase(it);
+                continue;
             }
+
+            ++it;
         }
+
+        //now reinsert datagrams
+        for (auto& datagram: m_tx.reinsert_queue)
+        {
+            queue.insert(std::upper_bound(queue.begin(), queue.end(), datagram, tx_packet_datagram_predicate), std::move(datagram));
+        }
+        m_tx.reinsert_queue.clear();
     }
 
 //    if (merged > 1)
@@ -834,7 +744,7 @@ inline auto RCP::compute_next_transit_datagram() -> bool
     return m_tx.send_buffer.size() > m_tx.send_buffer_header_size;
 }
 
-inline void RCP::send_datagram()
+void RCP::send_datagram()
 {
     if (m_is_sending.exchange(true))
     {
@@ -849,19 +759,17 @@ inline void RCP::send_datagram()
         return;
     }
 
-    //QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
-
     m_socket.async_send(m_tx.send_buffer.data(), m_tx.send_buffer.size());
 }
 
-inline void RCP::handle_send(RCP_Socket::Result)
+void RCP::handle_send(RCP_Socket::Result)
 {
     m_is_sending = false;
 
     send_datagram();
 }
 
-inline void RCP::handle_receive(uint8_t* data, size_t size)
+void RCP::handle_receive(uint8_t* data, size_t size)
 {
     if (size > 0)
     {
@@ -869,7 +777,7 @@ inline void RCP::handle_receive(uint8_t* data, size_t size)
     }
 }
 
-inline void RCP::add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx)
+void RCP::add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx)
 {
     std::lock_guard<std::mutex> lg(m_tx.confirmations_mutex);
 
@@ -880,7 +788,7 @@ inline void RCP::add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uin
     m_tx.confirmations.push_back(conf);
 }
 
-inline void RCP::add_packet_confirmation(uint8_t channel_idx, uint32_t id)
+void RCP::add_packet_confirmation(uint8_t channel_idx, uint32_t id)
 {
     std::lock_guard<std::mutex> lg(m_tx.confirmations_mutex);
 
@@ -891,7 +799,7 @@ inline void RCP::add_packet_confirmation(uint8_t channel_idx, uint32_t id)
     m_tx.confirmations.push_back(conf);
 }
 
-inline void RCP::send_pending_confirmations()
+void RCP::send_pending_confirmations()
 {
     {
         std::lock_guard<std::mutex> lg(m_tx.confirmations_mutex);
@@ -941,7 +849,7 @@ inline void RCP::send_pending_confirmations()
     send_datagram();
 }
 
-inline void RCP::send_packet_connect_req()
+void RCP::send_packet_connect_req()
 {
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
@@ -956,7 +864,7 @@ inline void RCP::send_packet_connect_req()
 
     send_datagram();
 }
-inline void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
+void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
 {
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
@@ -972,7 +880,7 @@ inline void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
     send_datagram();
 }
 
-inline void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
+void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
 {
     QASSERT(data_ptr && data_size > 0);
     uint8_t* start_ptr = data_ptr;
@@ -1043,12 +951,12 @@ inline void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
     }
 }
 
-inline auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool
+auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool
 {
     return item1.first < id;
 }
 
-inline void RCP::process_packet_data(uint8_t* data_ptr, size_t data_size)
+void RCP::process_packet_data(uint8_t* data_ptr, size_t data_size)
 {
     QASSERT(data_ptr && data_size > 0);
     auto const& header = get_header<Packet_Header>(data_ptr);
@@ -1128,7 +1036,7 @@ inline void RCP::process_packet_data(uint8_t* data_ptr, size_t data_size)
 //              packet->fragments[0] ? static_cast<size_t>(packet->main_header.fragment_count) : 0u);
 //    }
 }
-inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
+void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
 {
     QASSERT(data_ptr && data_size > 0);
     auto const& header = get_header<Confirmations_Header>(data_ptr);
@@ -1146,16 +1054,12 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
 
     //confirm packet datagrams
     {
-        auto& queue = m_tx.packet_queue;
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-        while (!queue.empty() && !queue.front()) queue.pop_front();
 
-        for (auto& datagram: queue)
+        auto& queue = m_tx.packet_queue;
+        for (auto it = queue.begin(); it != queue.end();)
         {
-            if (!datagram)
-            {
-                continue;
-            }
+            auto& datagram = *it;
             auto const& hdr = get_header<Packet_Header>(datagram->data.data());
             Confirmations_Header::Data key;
 
@@ -1169,9 +1073,9 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             {
 //                if (hdr.channel_idx == 20)
 //                {
-//                    QLOGI("Confirming fragment {} for packet {}: {}", hdr.fragment_idx, hdr.id, q::Clock::now() - datagram->added_tp);
+//                    QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
 //                }
-                datagram.reset();
+                it = queue.erase(it);
                 m_global_stats.tx_confirmed_fragments++;
                 continue;
             }
@@ -1184,17 +1088,19 @@ inline void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             {
 //                if (hdr.channel_idx == 20)
 //                {
-//                    QLOGI("Confirming packet {}: {}", hdr.id, q::Clock::now() - datagram->added_tp);
+//                    QLOGI("Confirming packet {}: {} / {}", hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
 //                }
-                datagram.reset();
+                it = queue.erase(it);
                 m_global_stats.tx_confirmed_fragments++;
                 continue;
             }
+
+            ++it;
         }
     }
 }
 
-inline void RCP::process_connect_req_data(uint8_t* data_ptr, size_t data_size)
+void RCP::process_connect_req_data(uint8_t* data_ptr, size_t data_size)
 {
     QASSERT(data_ptr && data_size > 0);
     auto& header = get_header<Connect_Req_Header>(data_ptr);
@@ -1217,7 +1123,7 @@ inline void RCP::process_connect_req_data(uint8_t* data_ptr, size_t data_size)
 
     send_packet_connect_res(response);
 }
-inline void RCP::process_connect_res_data(uint8_t* data_ptr, size_t data_size)
+void RCP::process_connect_res_data(uint8_t* data_ptr, size_t data_size)
 {
     if (m_connection.is_connected)
     {
@@ -1240,7 +1146,7 @@ inline void RCP::process_connect_res_data(uint8_t* data_ptr, size_t data_size)
     }
 }
 
-inline void RCP::purge()
+void RCP::purge()
 {
     //purge confirmations
     {
@@ -1274,14 +1180,14 @@ inline void RCP::purge()
     std::fill(m_last_id.begin(), m_last_id.end(), 0);
 }
 
-inline void RCP::disconnect()
+void RCP::disconnect()
 {
     m_connection.is_connected = false;
 
     QLOGI("Disconncting.");
     purge();
 }
-inline void RCP::connect()
+void RCP::connect()
 {
     if (m_connection.is_connected)
     {
