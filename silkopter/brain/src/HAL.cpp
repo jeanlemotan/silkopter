@@ -607,6 +607,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Scalar_Generator<stream::ITemperature>>("Temperature Generator", *this);
     m_node_factory.register_node<Scalar_Generator<stream::IPWM>>("PWM Generator", *this);
     m_node_factory.register_node<Scalar_Generator<stream::IThrottle>>("Throttle Generator", *this);
+    m_node_factory.register_node<Scalar_Generator<stream::IFloat>>("Float Generator", *this);
 
     m_node_factory.register_node<Vec3_Generator<stream::IAcceleration>>("Acceleration Generator", *this);
     m_node_factory.register_node<Vec3_Generator<stream::IENU_Acceleration>>("Acceleration Generator (ENU)", *this);
