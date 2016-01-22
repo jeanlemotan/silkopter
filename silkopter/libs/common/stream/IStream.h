@@ -15,12 +15,19 @@ enum class Space : uint8_t
     LOCAL
 };
 
-constexpr const char* Space_Name[] =
+#define GET_AS_STRING(str, details_str) q::util::format2<std::string>(str "{}", (details) ? (" " details_str) : "")
+
+inline auto get_as_string(Space s, bool details) -> std::string
 {
-    "ECEF",
-    "ENU",
-    "Local"
-};
+    switch (s)
+    {
+    case Space::LLA: return GET_AS_STRING("LLA", "(Latitude Longitude Altitude)");
+    case Space::ECEF: return GET_AS_STRING("ECEF", "(Earth Centered Earth Fixed)");
+    case Space::ENU: return GET_AS_STRING("ENU", "(East North Up)");
+    case Space::LOCAL: return GET_AS_STRING("Local", "(UAV Local Frame)");
+    default: QASSERT(false); return "Unknown";
+    }
+}
 
 enum class Type
 {
@@ -50,6 +57,41 @@ enum class Type
     FLOAT,
     BOOL
 };
+
+inline auto get_as_string(Type type, bool details) -> std::string
+{
+    switch (type)
+    {
+    case Type::ACCELERATION: return GET_AS_STRING("Acceleration", "(vec3, m/s^2)");
+    case Type::ADC: return GET_AS_STRING("ADC", "(float, 0..1)");
+    case Type::ANGULAR_VELOCITY: return GET_AS_STRING("Angular Velocity", "(vec3, Rad/s)");
+    case Type::BATTERY_STATE: return GET_AS_STRING("Battery State", "(struct)");
+    case Type::MULTI_INPUT: return GET_AS_STRING("Multi Input", "(struct)");
+    case Type::MULTI_STATE: return GET_AS_STRING("Multi State", "(struct)");
+    case Type::CURRENT: return GET_AS_STRING("Current", "(float, A)");
+    case Type::DISTANCE: return GET_AS_STRING("Distance", "(vec3, Ray)");
+    case Type::FORCE: return GET_AS_STRING("Force", "(vec3, N)");
+    case Type::FRAME: return GET_AS_STRING("Frame", "(quat)");
+    case Type::LINEAR_ACCELERATION: return GET_AS_STRING("Linear Acceleration", "(vec3, m/s^2)");
+    case Type::POSITION: return GET_AS_STRING("Position", "(vec3, m)");
+    case Type::MAGNETIC_FIELD: return GET_AS_STRING("Magnetic Field", "(vec3, T)");
+    case Type::PRESSURE: return GET_AS_STRING("Pressure", "(double, Pa)");
+    case Type::PWM: return GET_AS_STRING("PWM", "(float, 0..1)");
+    case Type::TEMPERATURE: return GET_AS_STRING("Temperature", "(float, °C)");
+    case Type::TORQUE: return GET_AS_STRING("Torque", "(vec3, Nm)");
+    case Type::VELOCITY: return GET_AS_STRING("Velocity", "(vec3, m/s)");
+    case Type::THROTTLE: return GET_AS_STRING("Throttle", "(float, 0..1)");
+    case Type::VIDEO: return GET_AS_STRING("Video", "(blob)");
+    case Type::PROXIMITY: return GET_AS_STRING("Proximity", "(vector<vec3>, Rays>)");
+    case Type::GPS_INFO: return GET_AS_STRING("GPS Info", "(struct)");
+    case Type::VOLTAGE: return GET_AS_STRING("Voltage", "(float, V)");
+    case Type::FLOAT: return GET_AS_STRING("Float", "(float)");
+    case Type::BOOL: return GET_AS_STRING("Bool", "(bool)");
+    default: QASSERT(false); return "Unknown";
+    }
+}
+
+#undef GET_AS_STRING
 
 //for streams of data with a fixed sample rate
 class IStream : q::util::Noncopyable
