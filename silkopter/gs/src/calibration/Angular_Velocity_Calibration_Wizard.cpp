@@ -93,7 +93,10 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
         }
 
 
-        QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
+        QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]()
+        {
+            cancel();
+        });
     }
     else if (m_step == Step::SHOW_INSTRUCTIONS)
     {
@@ -107,8 +110,14 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
                                     "\n"
                                     "Ready?", DATA_COLLECTION_DURATION).c_str());
 
-        QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]() { advance(); });
-        QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
+        QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()
+        {
+            advance();
+        });
+        QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]()
+        {
+            cancel();
+        });
     }
     else if (m_step == Step::COLLECT)
     {
@@ -166,7 +175,15 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
             set_calibration_points(m_crt_calibration);
             this->accept();
         });
-        QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
+
+        QDialogButtonBox* buttonBox = ui.buttonBox;//make a copy as the ui will go out of scope
+        QObject::connect(ui.buttonBox, &QDialogButtonBox::clicked, [buttonBox, this](QAbstractButton* button)
+        {
+            if (buttonBox->buttonRole(button) == QDialogButtonBox::DestructiveRole)
+            {
+                cancel();
+            }
+        });
     }
 }
 
