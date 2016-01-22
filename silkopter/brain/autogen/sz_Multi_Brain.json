@@ -6,7 +6,7 @@
     "members":
     [
         ["uint32_t", "rate", {"required": true, "json_key" : "Rate (Hz)", "default" : 100}],
-        ["uint32_t", "input_rate", {"required": true, "json_key" : "Input Rate (Hz)", "default" : 20}],
+        ["uint32_t", "commands_rate", {"required": true, "json_key" : "Commands Rate (Hz)", "default" : 20}],
         ["uint32_t", "state_rate", {"required": true, "json_key" : "State Rate (Hz)", "default" : 30}]
     ]
 },

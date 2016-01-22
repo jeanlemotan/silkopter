@@ -31,8 +31,7 @@ private:
 
     std::shared_ptr<qinput::Input_Mgr> m_input_mgr;
 
-    q::Clock::time_point m_last_tp;
-    //q::Clock::duration m_duration;
+    q::Clock::time_point m_process_last_tp;
 
     Ui::GS m_ui;
 

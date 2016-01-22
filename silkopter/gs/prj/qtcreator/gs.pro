@@ -150,7 +150,7 @@ HEADERS += \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.h \
     ../../../libs/common/stream/IFloat.h \
-    ../../../libs/common/stream/IMulti_Input.h \
+    ../../../libs/common/stream/IMulti_Commands.h \
     ../../../libs/common/stream/IMulti_State.h \
     ../../../libs/common/stream/IProximity.h \
     ../../../libs/common/stream/Stream_Base.h \
@@ -159,7 +159,9 @@ HEADERS += \
     ../../src/hud/Multi_HUD_Widget.h \
     ../../src/hud/IHUD_Widget.h \
     ../../../libs/utils/Coordinates.h \
-    ../../src/Video_Decoder.h
+    ../../src/Video_Decoder.h \
+    ../../../libs/utils/radiotap/ieee80211_radiotap.h \
+    ../../../libs/utils/radiotap/radiotap.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -184,7 +186,6 @@ SOURCES += \
     ../../src/Axis.cpp \
     ../../src/Video_Viewer.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
-    ../../../libs/utils/RCP.inl \
     ../../../libs/lz4/lz4.c \
     ../../src/calibration/Acceleration_Calibration_Wizard.cpp \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
@@ -192,7 +193,10 @@ SOURCES += \
     ../../src/input/Gamepad_Multi.cpp \
     ../../src/hud/Multi_HUD_Widget.cpp \
     ../../../libs/utils/Coordinates.cpp \
-    ../../src/Video_Decoder.cpp
+    ../../src/Video_Decoder.cpp \
+    ../../../libs/utils/RCP.cpp \
+    ../../../libs/utils/RCP_RFMON_Socket.cpp \
+    ../../../libs/utils/radiotap/radiotap.cpp
 
 FORMS += \
     ../../src/New_Node.ui \

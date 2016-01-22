@@ -27,7 +27,7 @@
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
 #include "common/stream/IMulti_State.h"
-#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_Commands.h"
 
 #include "common/node/IBrain.h"
 
@@ -142,7 +142,7 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.is_compressed = false;
+        params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 10;
         //params.cancel_previous_data = true;
@@ -154,7 +154,6 @@ void Comms::configure_channels()
         params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 100;
-        params.unreliable_retransmit_count = 1;
 //        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(PILOT_CHANNEL, params);
@@ -264,7 +263,7 @@ void Comms::gather_telemetry_data()
                 gather_telemetry_stream<stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IThrottle>(ts, *stream) ||
                 gather_telemetry_stream<stream::ITorque>(ts, *stream) ||
-                gather_telemetry_stream<stream::IMulti_Input>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMulti_Commands>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMulti_State>(ts, *stream) ||
                 gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IVideo>(ts, *stream))
@@ -769,27 +768,31 @@ void Comms::handle_hal_telemetry_active()
     channel.end_pack();
 }
 
-auto Comms::get_multi_input_values() const -> std::vector<stream::IMulti_Input::Value> const&
+auto Comms::get_multi_commands_values() const -> std::vector<stream::IMulti_Commands::Value> const&
 {
-    return m_multi_input_values;
+    return m_multi_commands_values;
 }
 void Comms::add_multi_state_sample(stream::IMulti_State::Sample const& sample)
 {
-    m_multi_state_samples.push_back(sample);
+    m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTI_STATE, sample);
+}
+void Comms::add_video_sample(stream::IVideo::Sample const& sample)
+{
+    m_channels->pilot.pack_all(silk::comms::Pilot_Message::VIDEO, sample);
 }
 
-void Comms::handle_multi_input()
+void Comms::handle_multi_commands()
 {
     auto& channel = m_channels->pilot;
 
-    stream::IMulti_Input::Value value;
+    stream::IMulti_Commands::Value value;
     if (!channel.unpack_all(value))
     {
-        QLOGE("Error in unpacking multi input");
+        QLOGE("Error in unpacking multi commands");
         return;
     }
 
-    m_multi_input_values.push_back(value);
+    m_multi_commands_values.push_back(value);
 }
 
 void Comms::process()
@@ -799,21 +802,13 @@ void Comms::process()
         return;
     }
 
-    m_multi_input_values.clear();
-    for (auto& v: m_multi_state_samples)
-    {
-        m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTI_STATE, v);
-    }
-    m_multi_state_samples.clear();
-
-
-
+    m_multi_commands_values.clear();
 
     while (auto msg = m_channels->pilot.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
-        case comms::Pilot_Message::MULTI_INPUT: handle_multi_input(); break;
+        case comms::Pilot_Message::MULTI_COMMANDS: handle_multi_commands(); break;
 
         default: QLOGE("Received unrecognised pilot message: {}", static_cast<int>(msg.get())); break;
         }
@@ -856,6 +851,8 @@ void Comms::process()
 
     m_rcp->process();
 
+    m_channels->pilot.send(*m_rcp);
+
     auto now = q::Clock::now();
     if (now - m_last_rcp_tp >= RCP_PERIOD)
     {
@@ -864,7 +861,6 @@ void Comms::process()
         pack_telemetry_data();
 
         m_channels->setup.send(*m_rcp);
-        m_channels->pilot.send(*m_rcp);
         m_channels->telemetry.try_sending(*m_rcp);
     }
 

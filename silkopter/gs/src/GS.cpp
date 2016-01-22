@@ -11,11 +11,11 @@ GS::GS(QWidget *parent)
 {
     m_ui.setupUi(this);
 
-    m_last_tp = q::Clock::now();
+    m_process_last_tp = q::Clock::now();
 
 	auto* timer = new QTimer(this);
 	timer->setSingleShot(false);
-    timer->start(33);
+    timer->start(1);
     connect(timer, &QTimer::timeout, this, &GS::process, Qt::QueuedConnection);
 
 	show();
@@ -206,41 +206,31 @@ void GS::process()
     if (!m_comms.is_connected() && !m_remote_address.empty())
     {
         m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8001, 8000);
+        //m_comms.start_rfmon("wlp0s20u1u4", 3);
     }
+
+    m_comms.process_rcp();
 
     auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    m_last_tp = now;
-
-    m_input_mgr->process(dt);
-
-    m_comms.process();
-
-    q::System::inst().get_renderer()->begin_frame();
-
-    m_hal_window->process();
-    m_multi_config_window->process();
-
-    if (m_hud)
+    auto dt = now - m_process_last_tp;
+    if (dt >= std::chrono::milliseconds(33))
     {
-        m_hud->process();
+        m_process_last_tp = now;
+
+        m_comms.process();
+        m_input_mgr->process(dt);
+
+        q::System::inst().get_renderer()->begin_frame();
+
+        m_hal_window->process();
+        m_multi_config_window->process();
+
+        if (m_hud)
+        {
+            m_hud->process();
+        }
+
+        q::System::inst().get_renderer()->end_frame();
     }
-
-//    silk::stream::IMulti_Input::Sample input;
-//    m_comms.get_input_channel().pack_all(silk::comms::Input_Message::MULTI_INPUT, m_comms.get_new_req_id(), input);
-
-
-//	m_render_widget->begin_rendering();
-//    m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_render_widget->width(), m_render_widget->height())));
-
-//	q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(math::vec4f(math::vec3f(m_render_widget->width() / 3024.f, 0, 0), 1));
-//	q::System::inst().get_renderer()->get_render_target()->clear_all();
-//    m_context.painter.set_camera(m_context.camera);
-
-//    m_context.painter.flush();
-
-//	m_render_widget->end_rendering();
-//	m_render_widget->update();
-    q::System::inst().get_renderer()->end_frame();
 }
 

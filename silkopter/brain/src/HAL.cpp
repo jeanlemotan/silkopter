@@ -701,7 +701,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Resampler<stream::IVelocity>>("Velocity RS", *this);
     m_node_factory.register_node<Resampler<stream::IENU_Velocity>>("Velocity RS (ENU)", *this);
     m_node_factory.register_node<Resampler<stream::IECEF_Velocity>>("Velocity RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IMulti_Input>>("Multi Input", *this);
+    m_node_factory.register_node<Resampler<stream::IMulti_Commands>>("Multi Commands", *this);
     m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
     m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity RS", *this);
     m_node_factory.register_node<Resampler<stream::IGPS_Info>>("GPS Info RS", *this);

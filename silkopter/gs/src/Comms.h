@@ -18,13 +18,14 @@ public:
     Comms(HAL& hal);
 
     auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
-    auto start_rfmon(std::string const& interface) -> bool;
+    auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
 
     void disconnect();
     auto is_connected() const -> bool;
 
     void request_all_node_configs();
 
+    void process_rcp();
     void process();
 
     //----------------------------------------------------------------------
@@ -35,8 +36,9 @@ public:
 
     auto get_setup_channel() -> Setup_Channel&;
 
+    auto get_video_samples() const -> std::vector<stream::IVideo::Sample> const&;
     auto get_multi_state_samples() const -> std::vector<stream::IMulti_State::Sample> const&;
-    void send_multi_input_value(stream::IMulti_Input::Value const& value);
+    void send_multi_commands_value(stream::IMulti_Commands::Value const& value);
 
 private:
     HAL& m_hal;
@@ -55,6 +57,7 @@ private:
     mutable Pilot_Channel m_pilot_channel;
     mutable Telemetry_Channel m_telemetry_channel;
 
+    std::vector<stream::IVideo::Sample> m_video_samples;
     std::vector<stream::IMulti_State::Sample> m_multi_state_samples;
 
     auto unpack_node_data(Comms::Setup_Channel& channel, node::gs::Node& node) -> bool;
@@ -67,6 +70,7 @@ private:
 
     void handle_multi_config();
     void handle_multi_state();
+    void handle_video();
 
     void handle_clock();
     void handle_enumerate_nodes();

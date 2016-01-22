@@ -12,7 +12,7 @@
 #include "IFloat.h"
 #include "IVideo.h"
 
-#include "IMulti_Input.h"
+#include "IMulti_Commands.h"
 
 namespace silk
 {
@@ -26,6 +26,7 @@ public:
 
     struct Value
     {
+        q::Clock::time_point time_point;
         IBattery_State::Sample battery_state;
         IFrame::Sample frame;
         IECEF_Linear_Acceleration::Sample linear_acceleration;
@@ -34,9 +35,8 @@ public:
         IECEF_Velocity::Sample velocity;
         IProximity::Sample proximity;
         IFloat::Sample thrust;
-        IVideo::Sample video;
 
-        IMulti_Input::Sample input;
+        IMulti_Commands::Sample commands;
     };
 
     typedef stream::Sample<Value>     Sample;
@@ -60,6 +60,7 @@ namespace serialization
 
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_State::Value const& value, size_t& off)
 {
+    serialize(buffer, value.time_point.time_since_epoch().count(), off);
     serialize(buffer, value.battery_state, off);
     serialize(buffer, value.frame, off);
     serialize(buffer, value.linear_acceleration, off);
@@ -68,22 +69,28 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_State::V
     serialize(buffer, value.velocity, off);
     serialize(buffer, value.proximity, off);
     serialize(buffer, value.thrust, off);
-    serialize(buffer, value.video, off);
-    serialize(buffer, value.input, off);
+    serialize(buffer, value.commands, off);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_State::Value& value, size_t& off) -> bool
 {
-    return deserialize(buffer, value.battery_state, off) &&
-            deserialize(buffer, value.frame, off) &&
-            deserialize(buffer, value.linear_acceleration, off) &&
-            deserialize(buffer, value.position, off) &&
-            deserialize(buffer, value.home_position, off) &&
-            deserialize(buffer, value.velocity, off) &&
-            deserialize(buffer, value.proximity, off) &&
-            deserialize(buffer, value.thrust, off) &&
-            deserialize(buffer, value.video, off) &&
-            deserialize(buffer, value.input, off);
+    q::Clock::time_point::rep time_point;
+    if (!deserialize(buffer, time_point, off) ||
+        !deserialize(buffer, value.battery_state, off) ||
+        !deserialize(buffer, value.frame, off) ||
+        !deserialize(buffer, value.linear_acceleration, off) ||
+        !deserialize(buffer, value.position, off) ||
+        !deserialize(buffer, value.home_position, off) ||
+        !deserialize(buffer, value.velocity, off) ||
+        !deserialize(buffer, value.proximity, off) ||
+        !deserialize(buffer, value.thrust, off) ||
+        !deserialize(buffer, value.commands, off))
+    {
+        return false;
+    }
+
+    value.time_point = q::Clock::time_point(q::Clock::duration(time_point));
+    return true;
 }
 
 

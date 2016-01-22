@@ -121,7 +121,6 @@ SOURCES += \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
-    ../../../libs/utils/RCP.inl \
     ../../../libs/lz4/lz4.c \
     ../../src/source/OpenCV_Capture.cpp \
     ../../src/source/SRF01.cpp \
@@ -135,7 +134,8 @@ SOURCES += \
     ../../src/bus/SPI_RPI.cpp \
     ../../src/hw/bcm2835.c \
     ../../src/bus/I2C_RPI.cpp \
-    ../../src/processor/Proximity.cpp
+    ../../src/processor/Proximity.cpp \
+    ../../../libs/utils/RCP.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -244,7 +244,6 @@ HEADERS += \
     ../../../libs/common/stream/IGPS_Info.h \
     ../../../libs/common/stream/ILinear_Acceleration.h \
     ../../../libs/common/stream/IMagnetic_Field.h \
-    ../../../libs/common/stream/IMulti_Input.h \
     ../../../libs/common/stream/IMulti_State.h \
     ../../../libs/common/stream/IPosition.h \
     ../../../libs/common/stream/IPressure.h \
@@ -276,7 +275,8 @@ HEADERS += \
     ../../src/bus/SPI_RPI.h \
     ../../src/hw/bcm2835.h \
     ../../src/bus/I2C_RPI.h \
-    ../../src/processor/Proximity.h
+    ../../src/processor/Proximity.h \
+    ../../../libs/common/stream/IMulti_Commands.h
 
 DISTFILES +=
 

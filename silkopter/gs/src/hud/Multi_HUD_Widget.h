@@ -22,7 +22,7 @@ private:
 
     qinput::Gamepad_cptr m_gamepad;
 
-    silk::stream::IMulti_Input::Value m_input;
+    silk::stream::IMulti_Commands::Value m_commands;
     silk::stream::IMulti_State::Value m_prev_state;
     silk::stream::IMulti_State::Value m_state;
 
@@ -70,7 +70,7 @@ private:
     void process_mode_armed();
     void process_mode();
 
-    void sync_input();
+    void sync_commands();
 
     void acquire_gamepad();
     void process_gamepad();

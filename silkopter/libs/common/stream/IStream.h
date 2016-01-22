@@ -35,7 +35,7 @@ enum class Type
     ADC,
     ANGULAR_VELOCITY,
     BATTERY_STATE,
-    MULTI_INPUT,
+    MULTI_COMMANDS,
     MULTI_STATE,
     CURRENT,
     DISTANCE,
@@ -66,7 +66,7 @@ inline auto get_as_string(Type type, bool details) -> std::string
     case Type::ADC: return GET_AS_STRING("ADC", "(float, 0..1)");
     case Type::ANGULAR_VELOCITY: return GET_AS_STRING("Angular Velocity", "(vec3, Rad/s)");
     case Type::BATTERY_STATE: return GET_AS_STRING("Battery State", "(struct)");
-    case Type::MULTI_INPUT: return GET_AS_STRING("Multi Input", "(struct)");
+    case Type::MULTI_COMMANDS: return GET_AS_STRING("Multi Commands", "(struct)");
     case Type::MULTI_STATE: return GET_AS_STRING("Multi State", "(struct)");
     case Type::CURRENT: return GET_AS_STRING("Current", "(float, A)");
     case Type::DISTANCE: return GET_AS_STRING("Distance", "(vec3, Ray)");

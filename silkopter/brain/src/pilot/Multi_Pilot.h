@@ -2,8 +2,9 @@
 
 #include "common/node/IPilot.h"
 
-#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_Commands.h"
 #include "common/stream/IMulti_State.h"
+#include "common/stream/IVideo.h"
 
 #include "Comms.h"
 #include "HAL.h"
@@ -53,15 +54,16 @@ private:
     HAL& m_hal;
     Comms& m_comms;
 
-    stream::IMulti_Input::Value m_last_input_value;
-    q::Clock::time_point m_last_received_input_value_tp = q::Clock::now();
+    stream::IMulti_Commands::Value m_last_commands_value;
+    q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();
 
     std::shared_ptr<sz::Multi_Pilot::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Pilot::Config> m_config;
 
-    Sample_Accumulator<stream::IMulti_State> m_accumulator;
+    Sample_Accumulator<stream::IMulti_State> m_state_accumulator;
+    Sample_Accumulator<stream::IVideo> m_video_accumulator;
 
-    typedef Basic_Output_Stream<stream::IMulti_Input> Output_Stream;
+    typedef Basic_Output_Stream<stream::IMulti_Commands> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 

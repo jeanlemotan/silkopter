@@ -28,10 +28,10 @@ Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::I
     m_camera.set_near_distance(0.05f);
     m_camera.set_far_distance(20000.f);
 
-    //input defaults
-    m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST);
-    m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
-    m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
+    //commands defaults
+    m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::THRUST);
+    m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE);
+    m_commands.yaw.mode.set(silk::stream::IMulti_Commands::Yaw::Mode::ANGLE);
 }
 
 void Multi_HUD_Widget::decode_video(silk::stream::gs::Video::Value const& frame)
@@ -93,7 +93,7 @@ void Multi_HUD_Widget::process_vertical_thrust_rate()
     if (config)
     {
         v *= config->motor_thrust * config->motors.size();
-        m_input.vertical.thrust_rate.set(v);
+        m_commands.vertical.thrust_rate.set(v);
     }
 }
 
@@ -118,13 +118,13 @@ void Multi_HUD_Widget::process_vertical_thrust()
     if (config)
     {
         v *= config->motor_thrust * config->motors.size();
-        m_input.vertical.thrust.set(v);
+        m_commands.vertical.thrust.set(v);
     }
 }
 
 void Multi_HUD_Widget::process_vertical_altitude()
 {
-    float v = m_input.vertical.altitude.value;
+    float v = m_commands.vertical.altitude.value;
 
     if (m_gamepad)
     {
@@ -136,20 +136,20 @@ void Multi_HUD_Widget::process_vertical_altitude()
     v += kb.is_key_pressed('=') ? kb_value : 0;
     v -= kb.is_key_pressed('-') ? kb_value : 0;
 
-    m_input.vertical.altitude.set(v);
+    m_commands.vertical.altitude.set(v);
 }
 
 void Multi_HUD_Widget::process_vertical()
 {
-    switch (m_input.vertical.mode.value)
+    switch (m_commands.vertical.mode.value)
     {
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
+    case silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE:
         process_vertical_thrust_rate();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST:
+    case silk::stream::IMulti_Commands::Vertical::Mode::THRUST:
         process_vertical_thrust();
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
+    case silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE:
         process_vertical_altitude();
         break;
     }
@@ -158,33 +158,33 @@ void Multi_HUD_Widget::process_vertical()
     {
         if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_UP))
         {
-            int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) - 1,
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE));
+            int v = math::clamp(static_cast<int>(m_commands.vertical.mode.get()) - 1,
+                                static_cast<int>(silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE),
+                                static_cast<int>(silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE));
 
-            m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+            m_commands.vertical.mode.set(static_cast<silk::stream::IMulti_Commands::Vertical::Mode>(v));
         }
         else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_DOWN))
         {
-            int v = math::clamp(static_cast<int>(m_input.vertical.mode.get()) + 1,
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE));
+            int v = math::clamp(static_cast<int>(m_commands.vertical.mode.get()) + 1,
+                                static_cast<int>(silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE),
+                                static_cast<int>(silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE));
 
-            m_input.vertical.mode.set(static_cast<silk::stream::IMulti_Input::Vertical::Mode>(v));
+            m_commands.vertical.mode.set(static_cast<silk::stream::IMulti_Commands::Vertical::Mode>(v));
         }
     }
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     if (kb.is_key_pressed('V') && kb.is_key_released('1'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE);
+        m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE);
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('2'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::THRUST);
+        m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::THRUST);
     }
     else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
     {
-        m_input.vertical.mode.set(silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE);
+        m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE);
     }
 
 }
@@ -211,7 +211,7 @@ void Multi_HUD_Widget::process_horizontal_angle_rate()
     v.x -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
     v.x += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
-    m_input.horizontal.angle_rate.set(v);
+    m_commands.horizontal.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_angle()
@@ -236,12 +236,12 @@ void Multi_HUD_Widget::process_horizontal_angle()
     v.x -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
     v.x += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
-    m_input.horizontal.angle.set(v);
+    m_commands.horizontal.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal_position()
 {
-    math::vec2f v = m_input.horizontal.position.value;
+    math::vec2f v = m_commands.horizontal.position.value;
     if (m_gamepad)
     {
         v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value * 5.f;
@@ -253,20 +253,20 @@ void Multi_HUD_Widget::process_horizontal_position()
     v.y -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
     v.y += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
 
-    m_input.horizontal.position.set(v);
+    m_commands.horizontal.position.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal()
 {
-    switch (m_input.horizontal.mode.value)
+    switch (m_commands.horizontal.mode.value)
     {
-    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
+    case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE:
         process_horizontal_angle_rate();
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
+    case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE:
         process_horizontal_angle();
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::POSITION:
+    case silk::stream::IMulti_Commands::Horizontal::Mode::POSITION:
         process_horizontal_position();
         break;
     }
@@ -275,34 +275,34 @@ void Multi_HUD_Widget::process_horizontal()
     {
         if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_LEFT))
         {
-            int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) - 1,
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::POSITION));
+            int v = math::clamp(static_cast<int>(m_commands.horizontal.mode.get()) - 1,
+                                static_cast<int>(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE),
+                                static_cast<int>(silk::stream::IMulti_Commands::Horizontal::Mode::POSITION));
 
-            m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+            m_commands.horizontal.mode.set(static_cast<silk::stream::IMulti_Commands::Horizontal::Mode>(v));
         }
         else if (m_gamepad->is_button_released(qinput::Gamepad::Button::LPAD_RIGHT))
         {
-            int v = math::clamp(static_cast<int>(m_input.horizontal.mode.get()) + 1,
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE),
-                                static_cast<int>(silk::stream::IMulti_Input::Horizontal::Mode::POSITION));
+            int v = math::clamp(static_cast<int>(m_commands.horizontal.mode.get()) + 1,
+                                static_cast<int>(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE),
+                                static_cast<int>(silk::stream::IMulti_Commands::Horizontal::Mode::POSITION));
 
-            m_input.horizontal.mode.set(static_cast<silk::stream::IMulti_Input::Horizontal::Mode>(v));
+            m_commands.horizontal.mode.set(static_cast<silk::stream::IMulti_Commands::Horizontal::Mode>(v));
         }
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     if (kb.is_key_pressed('H') && kb.is_key_released('1'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE);
+        m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE);
     }
     else if (kb.is_key_pressed('H') && kb.is_key_released('2'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::ANGLE);
+        m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE);
     }
     else if (kb.is_key_pressed('H') && kb.is_key_released('3'))
     {
-        m_input.horizontal.mode.set(silk::stream::IMulti_Input::Horizontal::Mode::POSITION);
+        m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::POSITION);
     }
 }
 
@@ -325,12 +325,12 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
     v += kb.is_key_pressed(',') ? kb_value : 0;
     v -= kb.is_key_pressed('.') ? kb_value : 0;
 
-    m_input.yaw.angle_rate.set(v);
+    m_commands.yaw.angle_rate.set(v);
 }
 
 void Multi_HUD_Widget::process_yaw_angle()
 {
-    float v = m_input.yaw.angle.value;
+    float v = m_commands.yaw.angle.value;
     if (m_gamepad)
     {
         float gv = 0;
@@ -348,17 +348,17 @@ void Multi_HUD_Widget::process_yaw_angle()
     v += kb.is_key_pressed(',') ? kb_value : 0;
     v -= kb.is_key_pressed('.') ? kb_value : 0;
 
-    m_input.yaw.angle.set(v);
+    m_commands.yaw.angle.set(v);
 }
 
 void Multi_HUD_Widget::process_yaw()
 {
-    switch (m_input.yaw.mode.value)
+    switch (m_commands.yaw.mode.value)
     {
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
+    case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
+    case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE:
         process_yaw_angle();
         break;
     }
@@ -366,11 +366,11 @@ void Multi_HUD_Widget::process_yaw()
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     if (kb.is_key_pressed('Y') && kb.is_key_released('1'))
     {
-        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE);
+        m_commands.yaw.mode.set(silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE);
     }
     else if (kb.is_key_pressed('Y') && kb.is_key_released('2'))
     {
-        m_input.yaw.mode.set(silk::stream::IMulti_Input::Yaw::Mode::ANGLE);
+        m_commands.yaw.mode.set(silk::stream::IMulti_Commands::Yaw::Mode::ANGLE);
     }
 }
 
@@ -380,7 +380,7 @@ void Multi_HUD_Widget::process_mode_idle()
     if ((m_gamepad && m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) && m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X)) ||
         (kb.is_key_pressed(qinput::Key_Code::SHIFT) && kb.is_key_released('A')))
     {
-        m_input.mode.set(silk::stream::IMulti_Input::Mode::ARMED);
+        m_commands.mode.set(silk::stream::IMulti_Commands::Mode::ARMED);
         QLOGI("Trying to ARM");
     }
 }
@@ -391,7 +391,7 @@ void Multi_HUD_Widget::process_mode_armed()
     if ((m_gamepad && m_gamepad->is_button_held(qinput::Gamepad::Button::HOME) && m_gamepad->is_button_released(qinput::Gamepad::Button::PS_X)) ||
         (kb.is_key_pressed(qinput::Key_Code::SHIFT) && kb.is_key_released('A')))
     {
-        m_input.mode.set(silk::stream::IMulti_Input::Mode::IDLE);
+        m_commands.mode.set(silk::stream::IMulti_Commands::Mode::IDLE);
         QLOGI("Trying to DISARM");
     }
 
@@ -402,12 +402,12 @@ void Multi_HUD_Widget::process_mode_armed()
 
 void Multi_HUD_Widget::process_mode()
 {
-    switch (m_input.mode.value)
+    switch (m_commands.mode.value)
     {
-    case silk::stream::IMulti_Input::Mode::IDLE:
+    case silk::stream::IMulti_Commands::Mode::IDLE:
         process_mode_idle();
         break;
-    case silk::stream::IMulti_Input::Mode::ARMED:
+    case silk::stream::IMulti_Commands::Mode::ARMED:
         process_mode_armed();
         break;
     }
@@ -431,30 +431,30 @@ void Multi_HUD_Widget::process_gamepad()
     acquire_gamepad();
     process_mode();
 
-    m_comms.send_multi_input_value(m_input);
+    m_comms.send_multi_commands_value(m_commands);
 }
 
 #define SYNC(x) \
 {\
-    auto& prev_remote = m_prev_state.input.value.x;\
-    auto& remote = m_state.input.value.x;\
-    auto& local = m_input.x;\
+    auto& prev_remote = m_prev_state.commands.value.x;\
+    auto& remote = m_state.commands.value.x;\
+    auto& local = m_commands.x;\
     if (prev_remote.version != local.version && remote.version >= local.version)\
     {\
         if (local.value == remote.value)\
         {\
-            QLOGI("Confirmed input {}: value {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version));\
+            QLOGI("Confirmed command {}: value {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version));\
         }\
         else\
         {\
-            QLOGI("Overriden input {}: value {}@{}, req {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version), local.get(), static_cast<uint32_t>(local.version));\
+            QLOGI("Overriden command {}: value {}@{}, req {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version), local.get(), static_cast<uint32_t>(local.version));\
         }\
         local.value = remote.value;\
         local.version = remote.version;\
     }\
 }
 
-void Multi_HUD_Widget::sync_input()
+void Multi_HUD_Widget::sync_commands()
 {
     SYNC(toggles.land);
     SYNC(toggles.take_off);
@@ -489,13 +489,22 @@ void Multi_HUD_Widget::sync_input()
 
 void Multi_HUD_Widget::process()
 {
-    QLOG_TOPIC("input");
+    QLOG_TOPIC("command");
 
-    auto const& samples = m_comms.get_multi_state_samples();
-    for (auto const& s: samples)
     {
-        m_state = s.value;
-        decode_video(m_state.video.value);
+        auto const& samples = m_comms.get_video_samples();
+        for (auto const& s: samples)
+        {
+            decode_video(s.value);
+        }
+    }
+
+    {
+        auto const& samples = m_comms.get_multi_state_samples();
+        for (auto const& s: samples)
+        {
+            m_state = s.value;
+        }
     }
 
     util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_state.home_position.value);
@@ -510,7 +519,7 @@ void Multi_HUD_Widget::process()
 
     process_gamepad();
 
-    sync_input();
+    sync_commands();
 
     m_prev_state = m_state;
 
@@ -705,54 +714,54 @@ void Multi_HUD_Widget::render_modes()
     m_context.texter.set_style(m_border_text_style);
 
     std::string str;
-    switch (m_input.mode.value)
+    switch (m_commands.mode.value)
     {
-    case silk::stream::IMulti_Input::Mode::IDLE:
+    case silk::stream::IMulti_Commands::Mode::IDLE:
         str = q::util::format2<std::string>("M:Idle");
         break;
-    case silk::stream::IMulti_Input::Mode::ARMED:
+    case silk::stream::IMulti_Commands::Mode::ARMED:
         str = q::util::format2<std::string>("M:Armed");
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 20));
 
     float v_speed = m_uav.enu_velocity.z;
-    switch (m_input.vertical.mode.value)
+    switch (m_commands.vertical.mode.value)
     {
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST_RATE:
-        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
+    case silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE:
+        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::THRUST:
-        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.thrust.value, m_uav.enu_position.z, v_speed);
+    case silk::stream::IMulti_Commands::Vertical::Mode::THRUST:
+        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust.value, m_uav.enu_position.z, v_speed);
         break;
-    case silk::stream::IMulti_Input::Vertical::Mode::ALTITUDE:
-        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_input.vertical.altitude.value, m_uav.enu_position.z, v_speed);
+    case silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE:
+        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.altitude.value, m_uav.enu_position.z, v_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
 
     float h_speed = math::length(math::vec2f(m_uav.enu_velocity.x, m_uav.enu_velocity.y));
-    switch (m_input.horizontal.mode.value)
+    switch (m_commands.horizontal.mode.value)
     {
-    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_input.horizontal.angle_rate.value, h_speed);
+    case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE:
+        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_commands.horizontal.angle_rate.value, h_speed);
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::ANGLE:
-        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_input.horizontal.angle.value), h_speed);
+    case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE:
+        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_commands.horizontal.angle.value), h_speed);
         break;
-    case silk::stream::IMulti_Input::Horizontal::Mode::POSITION:
-        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_input.horizontal.position.value, h_speed);
+    case silk::stream::IMulti_Commands::Horizontal::Mode::POSITION:
+        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_commands.horizontal.position.value, h_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
 
-    switch (m_input.yaw.mode.value)
+    switch (m_commands.yaw.mode.value)
     {
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_input.yaw.angle_rate.value);
+    case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE:
+        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_commands.yaw.angle_rate.value);
         break;
-    case silk::stream::IMulti_Input::Yaw::Mode::ANGLE:
-        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_input.yaw.angle.value));
+    case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE:
+        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_commands.yaw.angle.value));
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));

@@ -11,9 +11,8 @@
 #include "common/stream/IVelocity.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IProximity.h"
-#include "common/stream/IVideo.h"
 
-#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_Commands.h"
 #include "common/stream/IMulti_State.h"
 
 #include "Comms.h"
@@ -68,8 +67,7 @@ private:
     std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Brain::Config> m_config;
 
-    Sample_Accumulator<stream::IMulti_Input> m_input_accumulator;
-    Sample_Accumulator<stream::IVideo> m_video_accumulator;
+    Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
 
     Sample_Accumulator<
         stream::IFrame,
@@ -102,7 +100,7 @@ private:
             q::Clock::time_point last_valid_tp;
         };
 
-        Data<stream::IMulti_Input::Sample> input;
+        Data<stream::IMulti_Commands::Sample> commands;
         Data<stream::IFrame::Sample> frame;
         Data<stream::IECEF_Position::Sample> position;
         Data<stream::IECEF_Velocity::Sample> velocity;
@@ -115,8 +113,6 @@ private:
                         stream::IECEF_Velocity::Sample const& velocity,
                         stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
                         stream::IProximity::Sample const& proximity);
-
-    stream::IVideo::Sample m_last_video_sample;
 
     float compute_ff_thrust(float target_altitude);
 

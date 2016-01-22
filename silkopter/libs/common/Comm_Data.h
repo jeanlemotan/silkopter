@@ -48,16 +48,18 @@ enum class Setup_Message : uint8_t
 
 enum class Pilot_Message : uint8_t
 {
-    MULTI_INPUT,
+    VIDEO,
+
+    MULTI_COMMANDS,
     MULTI_STATE,
 
-    AIRPLANE_INPUT,
+    AIRPLANE_COMMANDS,
     AIRPLANE_STATE,
 
-    ROVER_INPUT,
+    ROVER_COMMANDS,
     ROVER_STATE,
 
-    BOAT_INPUT,
+    BOAT_COMMANDS,
     BOAT_STATE,
 
     COUNT //keep last

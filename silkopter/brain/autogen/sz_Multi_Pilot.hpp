@@ -28,9 +28,11 @@
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Pilot { struct Init_Params {
- uint32_t rate;
+ uint32_t commands_rate;
+uint32_t state_rate;
+uint32_t video_rate;
 
-explicit Init_Params():rate(20) {  }
+explicit Init_Params():commands_rate(20), state_rate(20), video_rate(30) {  }
 
 
  
@@ -47,7 +49,11 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;bool has_rate;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< uint32_t > handler_2;bool has_commands_rate;
+bool has_state_rate;
+bool has_video_rate;
 
     bool check_depth(const char* type)
     {
@@ -62,7 +68,11 @@ private:
     {
         switch (state) {
             case 0:
-    return "rate";
+    return "commands_rate";
+case 1:
+    return "state_rate";
+case 2:
+    return "video_rate";
         default:
             break;
         }
@@ -89,14 +99,18 @@ private:
 
     void reset_flags()
     {
-        has_rate = false;
+        has_commands_rate = false;
+has_state_rate = false;
+has_video_rate = false;
     }
 
 public:
     explicit SAXEventHandler( ::sz::Multi_Pilot::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->rate)
+        , handler_0(&obj->commands_rate)
+, handler_1(&obj->state_rate)
+, handler_2(&obj->video_rate)
     {
         reset_flags();
     }
@@ -110,6 +124,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -127,6 +147,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -142,6 +168,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -159,6 +191,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -174,6 +212,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -191,6 +235,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -206,6 +256,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -223,6 +279,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -237,8 +299,12 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
-						 { state=0; has_rate = true; }
+            else if (utility::string_equal(str, length, "\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
+						 { state=0; has_commands_rate = true; }
+else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
+						 { state=1; has_state_rate = true; }
+else if (utility::string_equal(str, length, "\x56\x69\x64\x65\x6f\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
+						 { state=2; has_video_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -249,6 +315,12 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -267,6 +339,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -283,6 +361,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -298,6 +382,12 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -316,11 +406,19 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_rate) set_missing_required("rate");
+            if (!has_commands_rate) set_missing_required("commands_rate");
+if (!has_state_rate) set_missing_required("state_rate");
+if (!has_video_rate) set_missing_required("video_rate");
         }
         return the_error.empty();
     }
@@ -341,6 +439,10 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -356,6 +458,8 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
@@ -367,9 +471,11 @@ struct Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.rate);
+        w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.commands_rate);
+w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.state_rate);
+w.Key("\x56\x69\x64\x65\x6f\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writer7e9af3503a97daec15006fd35d702ce6683497bec2beb989a7c6b04913e77f12, uint32_t >()(w, value.video_rate);
 
-        w.EndObject(1);
+        w.EndObject(3);
     }
 
 };

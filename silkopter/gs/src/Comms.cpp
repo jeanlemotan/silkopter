@@ -59,6 +59,35 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
     return true;
 }
 
+auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
+{
+    bool is_connected = false;
+    try
+    {
+        auto s = new util::RCP_RFMON_Socket(interface, id);
+        m_socket.reset(s);
+        m_rcp.reset(new util::RCP(*m_socket));
+
+        is_connected = s->start();
+    }
+    catch(std::exception e)
+    {
+        is_connected = false;
+    }
+
+    if (!is_connected)
+    {
+        m_socket.reset();
+        m_rcp.reset();
+        QLOGW("Cannot start comms on interface {}", interface);
+        return false;
+    }
+
+    QLOGI("Started sending on interface {}", interface);
+    configure_channels();
+
+    return true;
+}
 
 void Comms::disconnect()
 {
@@ -426,7 +455,7 @@ auto create_stream_from_type(stream::Type type) -> std::shared_ptr<stream::gs::S
 //        case stream::gs::ECEF_Velocity::TYPE:            return std::make_shared<stream::gs::ECEF_Velocity>();
         case stream::gs::Voltage::TYPE:                  return std::make_shared<stream::gs::Voltage>();
         case stream::gs::Video::TYPE:                    return std::make_shared<stream::gs::Video>();
-        case stream::gs::Multi_Input::TYPE:              return std::make_shared<stream::gs::Multi_Input>();
+        case stream::gs::Multi_Commands::TYPE:              return std::make_shared<stream::gs::Multi_Commands>();
         case stream::gs::Multi_State::TYPE:              return std::make_shared<stream::gs::Multi_State>();
         case stream::gs::Proximity::TYPE:                return std::make_shared<stream::gs::Proximity>();
     }
@@ -791,7 +820,7 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<gs::Torque>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Velocity>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Voltage>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<gs::Multi_Input>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Multi_Commands>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Multi_State>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Proximity>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Video>(m_telemetry_channel, sample_count, *stream))
@@ -840,14 +869,47 @@ void Comms::handle_multi_state()
 
     m_multi_state_samples.push_back(sample);
 }
+void Comms::handle_video()
+{
+    auto& channel = m_pilot_channel;
 
+    stream::IVideo::Sample sample;
+    if (!channel.unpack_all(sample))
+    {
+        QLOGE("Error in unpacking video");
+        return;
+    }
+
+    m_video_samples.push_back(sample);
+}
+
+auto Comms::get_video_samples() const -> std::vector<stream::IVideo::Sample> const&
+{
+    return m_video_samples;
+}
 auto Comms::get_multi_state_samples() const -> std::vector<stream::IMulti_State::Sample> const&
 {
     return m_multi_state_samples;
 }
-void Comms::send_multi_input_value(stream::IMulti_Input::Value const& value)
+void Comms::send_multi_commands_value(stream::IMulti_Commands::Value const& value)
 {
-    m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTI_INPUT, value);
+    m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTI_COMMANDS, value);
+}
+
+void Comms::process_rcp()
+{
+    if (!is_connected())
+    {
+        return;
+    }
+
+    auto result = m_socket->process();
+    if (result != util::RCP_Socket::Result::OK)
+    {
+        m_rcp->reconnect();
+    }
+
+    m_rcp->process();
 }
 
 void Comms::process()
@@ -858,11 +920,13 @@ void Comms::process()
     }
 
     m_multi_state_samples.clear();
+    m_video_samples.clear();
 
     while (auto msg = m_pilot_channel.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
+        case comms::Pilot_Message::VIDEO : handle_video(); break;
         case comms::Pilot_Message::MULTI_STATE : handle_multi_state(); break;
         default: break;
         }
@@ -906,14 +970,6 @@ void Comms::process()
         }
     }
     //    QLOGI("*********** LOOP: {}", xxx);
-
-    auto result = m_socket->process();
-    if (result != util::RCP_Socket::Result::OK)
-    {
-        m_rcp->reconnect();
-    }
-
-    m_rcp->process();
 
     if (m_rcp->is_connected())
     {

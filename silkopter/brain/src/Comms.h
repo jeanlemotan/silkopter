@@ -5,8 +5,9 @@
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_Commands.h"
 #include "common/stream/IMulti_State.h"
+#include "common/stream/IVideo.h"
 
 namespace sz
 {
@@ -42,8 +43,9 @@ public:
 
     void process();
 
-    auto get_multi_input_values() const -> std::vector<stream::IMulti_Input::Value> const&;
+    auto get_multi_commands_values() const -> std::vector<stream::IMulti_Commands::Value> const&;
     void add_multi_state_sample(stream::IMulti_State::Sample const& sample);
+    void add_video_sample(stream::IVideo::Sample const& sample);
 
     struct Channels; //this needs to be public...
 private:
@@ -89,7 +91,7 @@ private:
     void handle_remove_node();
 
     void handle_multi_config();
-    void handle_multi_input();
+    void handle_multi_commands();
 
     void handle_streams_telemetry_active();
     void handle_hal_telemetry_active();
@@ -100,9 +102,7 @@ private:
 
     Manual_Clock m_remote_clock;
 
-    std::vector<stream::IMulti_Input::Value> m_multi_input_values;
-    std::vector<stream::IMulti_State::Sample> m_multi_state_samples;
-
+    std::vector<stream::IMulti_Commands::Value> m_multi_commands_values;
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 

@@ -23,7 +23,7 @@
 #include "common/stream/IVideo.h"
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
-#include "common/stream/IMulti_Input.h"
+#include "common/stream/IMulti_Commands.h"
 #include "common/stream/IMulti_State.h"
 
 #include "common/node/INode.h"
@@ -166,8 +166,8 @@ using Video = Typed_Stream<IVideo>;
 DECLARE_CLASS_PTR(Video);
 using Multi_State = Typed_Stream<IMulti_State>;
 DECLARE_CLASS_PTR(Multi_State);
-using Multi_Input = Typed_Stream<IMulti_Input>;
-DECLARE_CLASS_PTR(Multi_Input);
+using Multi_Commands = Typed_Stream<IMulti_Commands>;
+DECLARE_CLASS_PTR(Multi_Commands);
 using Proximity = Typed_Stream<IProximity>;
 DECLARE_CLASS_PTR(Proximity);
 

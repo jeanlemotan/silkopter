@@ -75,13 +75,12 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMulti_Input::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
+         { stream::IMulti_Commands::TYPE,    m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
          { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
          { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
          { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
          { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
          { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-         { stream::IVideo::TYPE,            m_init_params->state_rate, "Video", m_video_accumulator.get_stream_path(0) },
          //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
      }};
     return inputs;
@@ -99,45 +98,45 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
-    QASSERT(input.mode.value == stream::IMulti_Input::Mode::IDLE);
+    stream::IMulti_Commands::Sample::Value& commands = m_inputs.commands.sample.value;
+    QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::IDLE);
 
-    if (m_inputs.input.previous_sample.value.mode.value != stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.commands.previous_sample.value.mode.value != stream::IMulti_Commands::Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
         m_home.position_history.clear();
     }
 
-    if (input.vertical.thrust_rate.value != 0)
+    if (commands.vertical.thrust_rate.value != 0)
     {
-        input.vertical.thrust_rate.set(0);
+        commands.vertical.thrust_rate.set(0);
     }
-    if (input.vertical.thrust.value != 0)
+    if (commands.vertical.thrust.value != 0)
     {
-        input.vertical.thrust.set(0);
+        commands.vertical.thrust.set(0);
     }
-    if (input.vertical.altitude.value != 0)
+    if (commands.vertical.altitude.value != 0)
     {
-        input.vertical.altitude.set(0);
-    }
-
-    if (!math::is_zero(input.horizontal.angle_rate.value))
-    {
-        input.horizontal.angle_rate.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(input.horizontal.angle.value))
-    {
-        input.horizontal.angle.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(input.horizontal.position.value))
-    {
-        input.horizontal.position.set(math::vec2f::zero);
+        commands.vertical.altitude.set(0);
     }
 
-    if (input.yaw.angle_rate.value != 0)
+    if (!math::is_zero(commands.horizontal.angle_rate.value))
     {
-        input.yaw.angle_rate.set(0);
+        commands.horizontal.angle_rate.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(commands.horizontal.angle.value))
+    {
+        commands.horizontal.angle.set(math::vec2f::zero);
+    }
+    if (!math::is_zero(commands.horizontal.position.value))
+    {
+        commands.horizontal.position.set(math::vec2f::zero);
+    }
+
+    if (commands.yaw.angle_rate.value != 0)
+    {
+        commands.yaw.angle_rate.set(0);
     }
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
@@ -193,14 +192,14 @@ void Multi_Brain::process_state_mode_armed()
     boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
     QASSERT(multi_config);
 
-    stream::IMulti_Input::Sample::Value& prev_input = m_inputs.input.previous_sample.value;
-    stream::IMulti_Input::Sample::Value& input = m_inputs.input.sample.value;
-    QASSERT(input.mode.value == stream::IMulti_Input::Mode::ARMED);
+    stream::IMulti_Commands::Sample::Value& prev_commands = m_inputs.commands.previous_sample.value;
+    stream::IMulti_Commands::Sample::Value& commands = m_inputs.commands.sample.value;
+    QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::ARMED);
 
     if (!m_home.is_acquired)
     {
         QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
-        input.mode.set(stream::IMulti_Input::Mode::IDLE);
+        commands.mode.set(stream::IMulti_Commands::Mode::IDLE);
         return;
     }
 
@@ -210,35 +209,35 @@ void Multi_Brain::process_state_mode_armed()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST_RATE)
+    if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::THRUST_RATE)
     {
-        thrust += input.vertical.thrust_rate.value * m_dts;
+        thrust += commands.vertical.thrust_rate.value * m_dts;
     }
-    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::THRUST)
+    else if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::THRUST)
     {
-        if (prev_input.vertical.mode.value != input.vertical.mode.value)
+        if (prev_commands.vertical.mode.value != commands.vertical.mode.value)
         {
-            input.vertical.thrust.set(thrust);
+            commands.vertical.thrust.set(thrust);
             QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
         }
 
-        thrust = input.vertical.thrust.value;
+        thrust = commands.vertical.thrust.value;
     }
-    else if (input.vertical.mode.value == stream::IMulti_Input::Vertical::Mode::ALTITUDE)
+    else if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::ALTITUDE)
     {
-        if (prev_input.vertical.mode.value != input.vertical.mode.value)
+        if (prev_commands.vertical.mode.value != commands.vertical.mode.value)
         {
-            input.vertical.altitude.set(m_enu_position.z);
+            commands.vertical.altitude.set(m_enu_position.z);
             QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
         }
 
         {
-            //float output = compute_ff_thrust(input.vertical.altitude.value);
+            //float output = compute_ff_thrust(commands.vertical.altitude.value);
             //thrust = output;
         }
 
         {
-            float target_alt = input.vertical.altitude.value;
+            float target_alt = commands.vertical.altitude.value;
             float crt_alt = m_enu_position.z;
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
@@ -263,18 +262,18 @@ void Multi_Brain::process_state_mode_armed()
     ////////////////////////////////////////////////////////////
     // Horizontals
 
-    if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE_RATE)
+    if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE)
     {
-        rate.x = input.horizontal.angle_rate.value.x;
-        rate.y = input.horizontal.angle_rate.value.y;
+        rate.x = commands.horizontal.angle_rate.value.x;
+        rate.y = commands.horizontal.angle_rate.value.y;
     }
-    else if (input.horizontal.mode.value == stream::IMulti_Input::Horizontal::Mode::ANGLE)
+    else if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::ANGLE)
     {
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
         math::quatf target;
-        target.set_from_euler_zxy(input.horizontal.angle.value.x, input.horizontal.angle.value.y, fz);
+        target.set_from_euler_zxy(commands.horizontal.angle.value.x, commands.horizontal.angle.value.y, fz);
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float diff_x, diff_y, _;
         diff.get_as_euler_zxy(diff_x, diff_y, _);
@@ -293,23 +292,23 @@ void Multi_Brain::process_state_mode_armed()
     ///////////////////////////////////////////////////////////
     // Yaw
 
-    if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE_RATE)
+    if (commands.yaw.mode.value == stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE)
     {
-        rate.z = input.yaw.angle_rate.value;
+        rate.z = commands.yaw.angle_rate.value;
     }
-    else if (input.yaw.mode.value == stream::IMulti_Input::Yaw::Mode::ANGLE)
+    else if (commands.yaw.mode.value == stream::IMulti_Commands::Yaw::Mode::ANGLE)
     {
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
-        if (prev_input.yaw.mode.value != input.yaw.mode.value)
+        if (prev_commands.yaw.mode.value != commands.yaw.mode.value)
         {
-            input.yaw.angle.set(fz);
+            commands.yaw.angle.set(fz);
             QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
         }
 
         math::quatf target;
-        target.set_from_euler_zxy(fx, fy, input.yaw.angle.value);
+        target.set_from_euler_zxy(fx, fy, commands.yaw.angle.value);
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
@@ -330,14 +329,14 @@ void Multi_Brain::process_state_mode_armed()
 
 void Multi_Brain::process_state()
 {
-    if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::IDLE)
     {
         m_enu_position = math::vec3f::zero;
         m_enu_velocity = math::vec3f::zero;
 
         process_state_mode_idle();
     }
-    else if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::ARMED)
+    else if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::ARMED)
     {
         m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
         m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
@@ -348,7 +347,7 @@ void Multi_Brain::process_state()
 
 void Multi_Brain::acquire_home_position()
 {
-    if (m_inputs.input.sample.value.mode.value == stream::IMulti_Input::Mode::IDLE)
+    if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::IDLE)
     {
         std::deque<util::coordinates::ECEF>& history = m_home.position_history;
         size_t per_second = static_cast<size_t>(1.f / m_dts);
@@ -444,16 +443,11 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_input_accumulator.process([this](stream::IMulti_Input::Sample const& i_input)
+    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
     {
-        m_inputs.input.previous_sample = m_inputs.input.sample;
-        m_inputs.input.sample = i_input;
-        m_inputs.input.last_valid_tp = i_input.is_healthy ? q::Clock::now() : m_inputs.input.last_valid_tp;
-    });
-
-    m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
-    {
-        m_last_video_sample = i_video;
+        m_inputs.commands.previous_sample = m_inputs.commands.sample;
+        m_inputs.commands.sample = i_commands;
+        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.commands.last_valid_tp;
     });
 
     m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
@@ -469,51 +463,41 @@ void Multi_Brain::process()
     acquire_home_position();
 
     size_t samples_needed = m_state_output_stream->compute_samples_needed();
-    if ((samples_needed > 0 && m_last_video_sample.is_healthy) ||
-         samples_needed >= 2)
+    if (samples_needed > 0)
     {
         stream::IMulti_State::Value state;
+        state.time_point = q::Clock::now();
         state.position = m_inputs.position.sample;
         state.velocity = m_inputs.velocity.sample;
         state.home_position.value = m_home.position;
         state.home_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
-        state.input = m_inputs.input.sample;
+        state.commands = m_inputs.commands.sample;
         state.proximity = m_inputs.proximity.sample;
-
-        //state.video = std::move(m_last_video_sample.value);
-        state.video = m_last_video_sample;
-        //m_last_video_sample.is_healthy = false;
 
         for (size_t i = 0; i < samples_needed; i++)
         {
             m_state_output_stream->push_sample(state, true);
-            //state.video = stream::IVideo::Value();
         }
     }
 }
 
 void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
-//    { stream::IMulti_Input::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
+//    { stream::IMulti_Commands::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
 //    { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
 //    { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
 //    { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
 //    { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
 //    { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-//    { stream::IVideo::TYPE,            m_init_params->state_rate, "Video", m_video_accumulator.get_stream_path(0) },
 
     if (idx == 0)
     {
-        m_input_accumulator.set_stream_path(0, path, m_init_params->input_rate, m_hal);
+        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_hal);
     }
     else if (idx >= 1 && idx <= 5)
     {
         m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_hal);
-    }
-    else
-    {
-        m_video_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_hal);
     }
 }
 

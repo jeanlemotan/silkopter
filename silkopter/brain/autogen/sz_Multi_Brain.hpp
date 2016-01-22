@@ -29,10 +29,10 @@
 
 namespace sz { namespace Multi_Brain { struct Init_Params {
  uint32_t rate;
-uint32_t input_rate;
+uint32_t commands_rate;
 uint32_t state_rate;
 
-explicit Init_Params():rate(100), input_rate(20), state_rate(30) {  }
+explicit Init_Params():rate(100), commands_rate(20), state_rate(30) {  }
 
 
  
@@ -52,7 +52,7 @@ private:
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< uint32_t > handler_1;
 SAXEventHandler< uint32_t > handler_2;bool has_rate;
-bool has_input_rate;
+bool has_commands_rate;
 bool has_state_rate;
 
     bool check_depth(const char* type)
@@ -70,7 +70,7 @@ bool has_state_rate;
             case 0:
     return "rate";
 case 1:
-    return "input_rate";
+    return "commands_rate";
 case 2:
     return "state_rate";
         default:
@@ -100,7 +100,7 @@ case 2:
     void reset_flags()
     {
         has_rate = false;
-has_input_rate = false;
+has_commands_rate = false;
 has_state_rate = false;
     }
 
@@ -109,7 +109,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
-, handler_1(&obj->input_rate)
+, handler_1(&obj->commands_rate)
 , handler_2(&obj->state_rate)
     {
         reset_flags();
@@ -301,8 +301,8 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=0; has_rate = true; }
-else if (utility::string_equal(str, length, "\x49\x6e\x70\x75\x74\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
-						 { state=1; has_input_rate = true; }
+else if (utility::string_equal(str, length, "\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
+						 { state=1; has_commands_rate = true; }
 else if (utility::string_equal(str, length, "\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15))
 						 { state=2; has_state_rate = true; }
             else {
@@ -417,7 +417,7 @@ case 2:
             }
         } else {
             if (!has_rate) set_missing_required("rate");
-if (!has_input_rate) set_missing_required("input_rate");
+if (!has_commands_rate) set_missing_required("commands_rate");
 if (!has_state_rate) set_missing_required("state_rate");
         }
         return the_error.empty();
@@ -472,7 +472,7 @@ struct Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff419
         w.StartObject();
 
         w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.rate);
-w.Key("\x49\x6e\x70\x75\x74\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.input_rate);
+w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.commands_rate);
 w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.state_rate);
 
         w.EndObject(3);

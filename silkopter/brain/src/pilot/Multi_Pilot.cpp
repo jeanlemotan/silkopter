@@ -37,12 +37,22 @@ auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
 
 auto Multi_Pilot::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_init_params->commands_rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad commands rate: {}Hz", m_init_params->commands_rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params->rate);
+    if (m_init_params->state_rate == 0)
+    {
+        QLOGE("Bad state rate: {}Hz", m_init_params->state_rate);
+        return false;
+    }
+    if (m_init_params->video_rate == 0)
+    {
+        QLOGE("Bad video rate: {}Hz", m_init_params->video_rate);
+        return false;
+    }
+    m_output_stream->set_rate(m_init_params->commands_rate);
     return true;
 }
 
@@ -56,7 +66,8 @@ auto Multi_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IMulti_State::TYPE,  m_init_params->rate, "State", m_accumulator.get_stream_path(0) },
+        { stream::IMulti_State::TYPE,  m_init_params->state_rate, "State", m_state_accumulator.get_stream_path(0) },
+        { stream::IVideo::TYPE,        m_init_params->video_rate, "Video", m_video_accumulator.get_stream_path(0) },
     }};
     return inputs;
 }
@@ -64,12 +75,12 @@ auto Multi_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Input",        m_output_stream },
+         { "Commands",        m_output_stream },
     }};
     return outputs;
 }
 
-static constexpr std::chrono::milliseconds INPUT_HEALTHY_TIMEOUT(200);
+static constexpr std::chrono::milliseconds COMMANDS_HEALTHY_TIMEOUT(200);
 
 void Multi_Pilot::process()
 {
@@ -77,39 +88,51 @@ void Multi_Pilot::process()
 
     m_output_stream->clear();
 
-    //process inputs
+    //process commandss
     {
-        auto const& input_values = m_comms.get_multi_input_values();
+        auto const& commands_values = m_comms.get_multi_commands_values();
 
         auto now = q::Clock::now();
 
-        stream::IMulti_Input::Value& input_value = m_last_input_value;
-        if (!input_values.empty())
+        stream::IMulti_Commands::Value& commands_value = m_last_commands_value;
+        if (!commands_values.empty())
         {
-            input_value = input_values.back();
-            m_last_received_input_value_tp = now;
+            commands_value = commands_values.back();
+            m_last_received_commands_value_tp = now;
         }
 
-        bool is_healthy = now - m_last_received_input_value_tp < INPUT_HEALTHY_TIMEOUT;
+        bool is_healthy = now - m_last_received_commands_value_tp < COMMANDS_HEALTHY_TIMEOUT;
 
         size_t samples_needed = m_output_stream->compute_samples_needed();
         for (size_t i = 0; i < samples_needed; i++)
         {
-            m_output_stream->push_sample(input_value, is_healthy);
+            m_output_stream->push_sample(commands_value, is_healthy);
         }
     }
 
 
     //write back the state
-    m_accumulator.process([this](stream::IMulti_State::Sample const& i_state)
+    m_state_accumulator.process([this](stream::IMulti_State::Sample const& i_state)
     {
         m_comms.add_multi_state_sample(i_state);
+    });
+    //write back the video
+    m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
+    {
+        m_comms.add_video_sample(i_video);
     });
 }
 
 void Multi_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+    if (idx == 0)
+    {
+        m_state_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_hal);
+    }
+    else
+    {
+        m_video_accumulator.set_stream_path(0, path, m_init_params->video_rate, m_hal);
+    }
 }
 
 auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool

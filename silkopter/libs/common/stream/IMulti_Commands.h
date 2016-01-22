@@ -36,7 +36,7 @@ template<> struct Input_Value<bool>
 };
 
 
-class IMulti_Input : public IScalar_Stream<Type::MULTI_INPUT>
+class IMulti_Commands : public IScalar_Stream<Type::MULTI_COMMANDS>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -136,11 +136,11 @@ public:
 
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~IMulti_Input() {}
+    virtual ~IMulti_Commands() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IMulti_Input);
+DECLARE_CLASS_PTR(IMulti_Commands);
 
 
 }
@@ -182,7 +182,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::Input_V
 }
 
 
-template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::Value const& value, size_t& off)
+template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Commands::Value const& value, size_t& off)
 {
     serialize(buffer, value.toggles.land, off);
     serialize(buffer, value.toggles.return_home, off);
@@ -208,7 +208,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Input::V
     serialize(buffer, value.assists.avoid_the_user, off);
 }
 
-template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_Input::Value& value, size_t& off) -> bool
+template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_Commands::Value& value, size_t& off) -> bool
 {
     return deserialize(buffer, value.toggles.land, off) &&
         deserialize(buffer, value.toggles.return_home, off) &&
