@@ -605,7 +605,7 @@ void UBLOX::process()
 void UBLOX::read_data(Buses& buses)
 {
     auto start = q::Clock::now();
-    constexpr std::chrono::milliseconds MAX_DURATION(5);
+    constexpr std::chrono::milliseconds MAX_DURATION(1);
 
     while (q::Clock::now() - start < MAX_DURATION)
     {
