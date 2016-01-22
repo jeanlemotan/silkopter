@@ -351,52 +351,52 @@ auto RCP_RFMON_Socket::start() -> bool
     if (m_impl->pcap == nullptr)
     {
         QLOGE("Unable to open interface {}", m_interface);
-        return (1);
+        return false;
     }
     if (pcap_set_snaplen(m_impl->pcap, 1800) < 0)
     {
         QLOGE("Error setting pcap_set_snaplen");
-        return 1;
+        return false;
     }
     if (pcap_set_promisc(m_impl->pcap, 1) < 0)
     {
         QLOGE("Error setting pcap_set_promisc");
-        return 1;
+        return false;
     }
     if (pcap_set_rfmon(m_impl->pcap, 1) < 0)
     {
         QLOGE("Error setting pcap_set_rfmon");
-        return 1;
+        return false;
     }
     if (pcap_set_timeout(m_impl->pcap, -1) < 0)
     {
         QLOGE("Error setting pcap_set_timeout");
-        return 1;
+        return false;
     }
     if (pcap_set_immediate_mode(m_impl->pcap, 1) < 0)
     {
         QLOGE("Error setting pcap_set_immediate_mode");
-        return 1;
+        return false;
     }
     if (pcap_set_buffer_size(m_impl->pcap, 16000000) < 0)
     {
         QLOGE("Error setting pcap_set_buffer_size");
-        return 1;
+        return false;
     }
     if (pcap_activate(m_impl->pcap) < 0)
     {
         QLOGE("Error in pcap_activate");
-        return 1;
+        return false;
     }
 //    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
 //    {
 //        QLOGE("Error setting pcap_set_snaplen");
-//        return 1;
+//        return false;
 //    }
     if (pcap_setdirection(m_impl->pcap, PCAP_D_IN) < 0)
     {
         QLOGE("Error setting pcap_setdirection");
-        return 1;
+        return false;
     }
 
 
