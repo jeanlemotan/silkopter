@@ -783,7 +783,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         param.hdr.id = MMAL_PARAMETER_PROFILE;
         param.hdr.size = sizeof(param);
 
-        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_BASELINE;//MMAL_VIDEO_PROFILE_H264_HIGH;
+        param.profile[0].profile = MMAL_VIDEO_PROFILE_H264_HIGH;
         param.profile[0].level = MMAL_VIDEO_LEVEL_H264_4; // This is the only value supported
 
         MMAL_STATUS_T status;
@@ -829,14 +829,14 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 //        return Component_ptr();
 //    }
 
-//    {
-//        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
-//        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
-//        {
-//            QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
-//            return Component_ptr();
-//        }
-//    }
+    {
+        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
+        if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
+        {
+            QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
+            return Component_ptr();
+        }
+    }
 
 //    {
 //        MMAL_PARAMETER_VIDEO_RATECONTROL_T param = {{ MMAL_PARAMETER_RATECONTROL, sizeof(param)}, MMAL_VIDEO_RATECONTROL_VARIABLE_SKIP_FRAMES};
@@ -861,11 +861,14 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
         param.hdr.id = MMAL_PARAMETER_VIDEO_INTRA_REFRESH;
         param.hdr.size = sizeof(param);
 
+        // Get first so we don't overwrite anything unexpectedly
+        if (mmal_port_parameter_get(output, &param.hdr) != MMAL_SUCCESS)
+        {
+            QLOGW("failed to get INTRA REFRESH HEADER FLAG parameters");
+            return Component_ptr();
+        }
+
         param.refresh_mode = MMAL_VIDEO_INTRA_REFRESH_CYCLIC;
-        param.cir_mbs = 5;
-        param.air_mbs = 5;
-        param.air_ref = 5;
-        param.pir_mbs = 5;
 
         if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
         {
