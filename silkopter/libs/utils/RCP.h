@@ -157,6 +157,8 @@ private:
         uint8_t count;
     };
 
+    static_assert(sizeof(Confirmations_Header::Data) == 8, "Data too big");
+
     struct Connect_Req_Header : public Header
     {
         uint8_t version;
@@ -202,7 +204,7 @@ private:
 
         //this is a list of fragment and packet responses
         //they are accumulated in a vector and then sent repeatedly for a number of times
-        static const uint8_t MAX_CONFIRMATION_SEND_COUNT = 3;
+        static const uint8_t MAX_CONFIRMATION_SEND_COUNT = 2;
         struct Confirmation
         {
             uint32_t id = 0;
@@ -212,6 +214,7 @@ private:
         };
         std::mutex confirmations_mutex;
         std::deque<Confirmation> confirmations;
+        q::Clock::time_point confirmations_last_time_point = q::Clock::now();
 
         //--------------------------------------------
 
@@ -326,7 +329,7 @@ private:
     Stats m_global_stats;
 
     std::atomic_bool m_is_sending = {false};
-    const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(5);
+    const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
 
     std::array<Send_Params, MAX_CHANNELS> m_send_params;
     std::array<Receive_Params, MAX_CHANNELS> m_receive_params;

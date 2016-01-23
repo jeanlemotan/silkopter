@@ -388,7 +388,7 @@ inline auto RCP::tx_packet_datagram_predicate(TX::Datagram_ptr const& AA, TX::Da
 
     return priority_AA > priority_BB ||
             (priority_AA == priority_BB && sent_count_AA < sent_count_BB) ||
-            (priority_AA == priority_BB && sent_count_AA == sent_count_BB && id_AA < id_BB);
+            (priority_AA == priority_BB && sent_count_AA == sent_count_BB && id_AA > id_BB);
 }
 
 bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
@@ -472,7 +472,7 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
                 break;
             }
 
-            //QLOGW("Canceling late packet {}. {} / {}", id, packet->received_fragment_count, packet->fragments[0] ? packet->main_header.fragment_count : 0);
+            QLOGW("Canceling late packet {}. {} / {}", id, packet->received_fragment_count, packet->fragments[0] ? packet->main_header.fragment_count : 0);
             add_packet_confirmation(channel_idx, id);
             packets.pop_front();
             last_packet_id = id;
@@ -695,6 +695,9 @@ auto RCP::compute_next_transit_datagram() -> bool
 
         auto now = q::Clock::now();
 
+//        std::string dbg;
+//        dbg.reserve(1024);
+
         //now go through the queue and see what we can pack together and send
         auto& queue = m_tx.packet_queue;
         for (auto it = queue.begin(); it != queue.end();)
@@ -706,8 +709,13 @@ auto RCP::compute_next_transit_datagram() -> bool
                 continue;
             }
 
+            Packet_Header const& pheader = get_header<Packet_Header>(datagram->data.data());
+
             if (now - datagram->sent_tp >= MIN_RESEND_DURATION && add_datagram_to_send_buffer(datagram))
             {
+//                dbg += q::util::format2<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
+//                dbg += "#,";
+
                 merged++;
                 datagram->sent_tp = now;
                 datagram->sent_count++;
@@ -724,9 +732,15 @@ auto RCP::compute_next_transit_datagram() -> bool
                 it = queue.erase(it);
                 continue;
             }
+//            dbg += " ,";
 
             ++it;
         }
+
+//        if (merged > 0)
+//        {
+//            QLOGI("mrg:{} dg: {}", merged, dbg);
+//        }
 
         //now reinsert datagrams
         for (auto& datagram: m_tx.reinsert_queue)
@@ -804,6 +818,16 @@ void RCP::send_pending_confirmations()
     {
         std::lock_guard<std::mutex> lg(m_tx.confirmations_mutex);
 
+        //don't send confirmations too often otherwise we spam the channel and the other end cannot send data
+        //Send often enough to avoid resends though
+        auto now = q::Clock::now();
+        if (now - m_tx.confirmations_last_time_point < MIN_RESEND_DURATION / 2)
+        {
+            return;
+        }
+        m_tx.confirmations_last_time_point = now;
+
+
         //first throw away the ones we sent enough times
         while (!m_tx.confirmations.empty() && m_tx.confirmations.front().sent_count >= TX::MAX_CONFIRMATION_SEND_COUNT)
         {
@@ -814,6 +838,7 @@ void RCP::send_pending_confirmations()
 
         size_t max_count = math::min<size_t>((m_mtu - header_size) / sizeof(Confirmations_Header::Data), 255u);
 
+        size_t datagrams_added = 0;
         //now take them and pack them in a datagram
         size_t pidx = 0;
         while (pidx < m_tx.confirmations.size())
@@ -843,7 +868,14 @@ void RCP::send_pending_confirmations()
                 std::lock_guard<std::mutex> ilg(m_tx.internal_queues.mutex);
                 m_tx.internal_queues.confirmations.push_back(datagram);
             }
+
+            datagrams_added++;
         }
+
+//#ifndef RASPBERRY_PI
+//        QLOGI("pending conf: {} / {}", m_tx.confirmations.size(), datagrams_added);
+//#endif
+
     }
 
     send_datagram();
@@ -886,6 +918,9 @@ void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
     uint8_t* start_ptr = data_ptr;
     uint8_t const* end_ptr = start_ptr + data_size;
     QASSERT(start_ptr);
+    //std::string dbg;
+    //dbg.reserve(1024);
+    size_t count = 0;
     while (start_ptr + sizeof(Header) <= end_ptr)
     {
         size_t available_size = size_t(end_ptr - start_ptr);
@@ -944,11 +979,16 @@ void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
                 case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
                 default: QASSERT(0); break;
                 }
+                //dbg += q::util::format2<std::string>("d{},", (int)header.type);
             }
         }
 
+        count++;
+
         start_ptr += size;
     }
+
+    //QLOGI("rcv:{} - {}", count, dbg);
 }
 
 auto RCP::rx_packet_id_predicate(RX::Packet_Queue::Item const& item1, uint32_t id) -> bool
@@ -1098,6 +1138,49 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             ++it;
         }
     }
+
+//    Confirmations_Header::Data* conf = reinterpret_cast<Confirmations_Header::Data*>(data_ptr + sizeof(Confirmations_Header));
+
+//    //confirm packet datagrams
+//    {
+//        std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
+//        auto& queue = m_tx.packet_queue;
+
+//        for (size_t i = 0; i < count; i++)
+//        {
+//            const Confirmations_Header::Data& c = conf[i];
+
+//            auto it = std::find_if(queue.begin(), queue.end(), [&c](TX::Datagram_ptr const& datagram)
+//            {
+//                Packet_Header const& hdr = get_header<Packet_Header>(datagram->data.data());
+//                return c.channel_idx == hdr.channel_idx && c.id == hdr.id &&
+//                        (c.fragment_idx == hdr.fragment_idx || c.fragment_idx == FRAGMENT_IDX_ALL);
+//            });
+
+//            if (it != queue.end())
+//            {
+//                Packet_Header const& hdr = get_header<Packet_Header>((*it)->data.data());
+//                if (c.fragment_idx == FRAGMENT_IDX_ALL)
+//                {
+////                  if (hdr.channel_idx == 20)
+////                  {
+////                      QLOGI("Confirming packet {}: {} / {}", hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+////                  }
+//                    queue.erase(it);
+//                    m_global_stats.tx_confirmed_fragments++;
+//                }
+//                else
+//                {
+////                  if (hdr.channel_idx == 20)
+////                  {
+////                      QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+////                  }
+//                    queue.erase(it);
+//                    m_global_stats.tx_confirmed_fragments++;
+//                }
+//            }
+//        }
+//    }
 }
 
 void RCP::process_connect_req_data(uint8_t* data_ptr, size_t data_size)
