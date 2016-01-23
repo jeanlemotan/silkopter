@@ -77,7 +77,7 @@ void ADC_Voltmeter::process()
     {
         if (i_sample.is_healthy)
         {
-            m_output_stream->push_sample(i_sample.value, true);
+            m_output_stream->push_sample(i_sample.value * m_config->scale + m_config->bias, true);
         }
         else
         {
