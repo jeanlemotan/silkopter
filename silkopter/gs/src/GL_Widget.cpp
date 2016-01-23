@@ -4,9 +4,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 GL_Widget::GL_Widget(QWidget* parent) 
-	: QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::Rgba | QGL::NoStencilBuffer), parent)
+    : QGLWidget(parent)
 {
 	//setAttribute(Qt::WA_PaintOnScreen);
+
+    QGLFormat format(QGL::DepthBuffer | QGL::Rgba | QGL::NoStencilBuffer);
+    format.setSwapInterval(0);
+    setFormat(format);
 }
 
 //////////////////////////////////////////////////////////////////////////
