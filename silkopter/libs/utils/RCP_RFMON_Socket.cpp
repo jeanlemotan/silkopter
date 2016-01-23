@@ -416,7 +416,7 @@ auto RCP_RFMON_Socket::start() -> bool
             struct timeval to;
 
             to.tv_sec = 0;
-            to.tv_usec = 1e5;
+            to.tv_usec = 1e3;
 
             FD_ZERO(&readset);
             FD_SET(m_impl->rx_pcap_selectable_fd, &readset);
