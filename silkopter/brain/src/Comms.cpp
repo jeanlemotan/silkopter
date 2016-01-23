@@ -142,7 +142,7 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.is_compressed = true;
+        params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 10;
         //params.cancel_previous_data = true;
