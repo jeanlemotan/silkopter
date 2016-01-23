@@ -98,10 +98,10 @@ namespace q
 #else
 
 	#define QASSERT(condition) QUNUSED(condition)
-    #define QASSERT_MSG(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(q::volatile_false())
+    #define QASSERT_MSG(condition, fmt, ...)
 
 	#define QASSERT_ONCE(condition) QUNUSED(condition)
-    #define QASSERT_MSG_ONCE(condition, fmt, ...) do { QUNUSED(condition); QUNUSED(fmt); } while(q::volatile_false())
+    #define QASSERT_MSG_ONCE(condition, fmt, ...)
 
 #endif
 
