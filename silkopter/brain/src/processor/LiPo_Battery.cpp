@@ -12,7 +12,7 @@ namespace node
 constexpr uint32_t MIN_RATE = 50;
 
 constexpr size_t CELL_COUNT_DETECTION_MIN_SAMPLES = 5;
-constexpr float CELL_COUNT_DETECTION_MAX_CURRENT = 0.8f;
+constexpr float CELL_COUNT_DETECTION_MAX_CURRENT = 6.f;
 
 constexpr size_t CAPACITY_DETECTION_MIN_SAMPLES = 5;
 constexpr float CAPACITY_DETECTION_MAX_CURRENT = 0.4f;
