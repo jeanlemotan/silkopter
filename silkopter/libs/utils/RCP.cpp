@@ -105,20 +105,13 @@ template<class T> void RCP::erase_unordered(std::vector<T>& c, typename std::vec
 
 //////////////////////////////////////////////////////////////////////////////
 
-RCP::RCP(RCP_Socket& socket)
-    : m_socket(socket)
+RCP::RCP()
 {
 //        auto hsz =sizeof(Header);
 //        hsz =sizeof(Packet_Main_Header);
 //        hsz =sizeof(Packet_Header);
 
 //        hsz =sizeof(Packets_Confirmed_Header);
-
-    m_mtu = m_socket.get_mtu();
-    m_tx.send_buffer_header_size = m_socket.prepare_buffer(m_tx.send_buffer);
-
-    m_socket.receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
-    m_socket.send_callback = std::bind(&RCP::handle_send, this, std::placeholders::_1);
 
     m_rx.packet_pool.release = [](RX::Packet& p)
     {
@@ -138,6 +131,49 @@ RCP::RCP(RCP_Socket& socket)
     {
         ch.lz4_state.resize(LZ4_sizeofState());
     }
+}
+
+RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
+{
+    Socket_Handle handle = static_cast<int>(m_sockets.size());
+    m_sockets.resize(m_sockets.size() + 1);
+
+    Socket_Data& socket_data = m_sockets.back();
+    socket_data.socket = socket;
+    socket_data.buffer_header_size = socket->prepare_buffer(socket_data.buffer);
+    socket_data.mtu = socket->get_mtu();
+
+    socket->receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
+    socket->send_callback = std::bind(&RCP::handle_send, this, handle, std::placeholders::_1);
+
+    return handle;
+}
+
+void RCP::set_socket_handle(uint8_t channel_idx, Socket_Handle socket_handle)
+{
+    if (channel_idx >= MAX_CHANNELS)
+    {
+        QASSERT(0);
+        return;
+    }
+    if (socket_handle < 0 || socket_handle >= static_cast<int>(m_sockets.size()))
+    {
+        QASSERT(0);
+        return;
+    }
+
+    m_tx.channel_data[channel_idx].socket_handle = socket_handle;
+}
+
+void RCP::set_internal_socket_handle(Socket_Handle socket_handle)
+{
+    if (socket_handle < 0 || socket_handle >= static_cast<int>(m_sockets.size()))
+    {
+        QASSERT(0);
+        return;
+    }
+
+    m_tx.internal_queues.socket_handle = socket_handle;
 }
 
 void RCP::set_send_params(uint8_t channel_idx, Send_Params const& params)
@@ -247,7 +283,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t c
         return false;
     }
 
-    auto& channel_data = m_tx.channel_data[channel_idx];
+    TX::Channel_Data& channel_data = m_tx.channel_data[channel_idx];
 
     bool is_compressed = params.is_compressed;
     size_t uncompressed_size = size;
@@ -280,7 +316,9 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t c
         }
     }
 
-    size_t max_fragment_size = m_mtu - sizeof(Packet_Main_Header);
+    Socket_Data& socket_data = m_sockets[channel_data.socket_handle];
+
+    size_t max_fragment_size = socket_data.mtu - sizeof(Packet_Main_Header);
     size_t left = size;
     size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
     if (fragment_count > MAX_FRAGMENTS)
@@ -372,7 +410,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t c
 
     }
 
-    send_datagram();
+    send_datagram(channel_data.socket_handle);
 
     return true;
 }
@@ -572,8 +610,6 @@ void RCP::process()
     {
         send_pending_confirmations();
     }
-
-    send_datagram();
 }
 
 void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
@@ -601,24 +637,6 @@ void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 //            QASSERT_MSG(header.crc != 0, "{}", crc);
 }
 
-void RCP::add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram)
-{
-    if (!datagram)
-    {
-        QASSERT(0);
-        return;
-    }
-
-    prepare_to_send_datagram(*datagram);
-
-    //add to the queue
-    {
-        std::lock_guard<std::mutex> lg(mutex);
-        queue.push_back(datagram);
-    }
-    send_datagram();
-}
-
 void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
 {
     auto const& header = get_header<Header>(datagram.data.data());
@@ -635,19 +653,19 @@ void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
     }
 }
 
-auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool
+auto RCP::add_datagram_to_send_buffer(Socket_Data& socket_data, TX::Datagram_ptr const& datagram) -> bool
 {
     QASSERT(datagram);
-    size_t max_size = m_mtu + m_tx.send_buffer_header_size;
-    size_t tx_send_buffer_size = m_tx.send_buffer.size();
+    size_t max_size = socket_data.mtu + socket_data.buffer_header_size;
+    size_t tx_send_buffer_size = socket_data.buffer.size();
     if (datagram->data.size() + tx_send_buffer_size <= max_size)
     {
         update_stats(m_global_stats, *datagram);
 
 //        QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
 
-        m_tx.send_buffer.resize(tx_send_buffer_size + datagram->data.size());
-        auto dst_it = m_tx.send_buffer.begin() + tx_send_buffer_size;
+        socket_data.buffer.resize(tx_send_buffer_size + datagram->data.size());
+        auto dst_it = socket_data.buffer.begin() + tx_send_buffer_size;
 
         std::copy(datagram->data.begin(), datagram->data.end(), dst_it);
         return true;
@@ -655,20 +673,23 @@ auto RCP::add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool
     return false;
 }
 
-auto RCP::compute_next_transit_datagram() -> bool
+auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
 {
     size_t merged = 0;
-    m_tx.send_buffer.resize(m_tx.send_buffer_header_size);
 
+    Socket_Data& socket_data = m_sockets[socket_handle];
+    socket_data.buffer.resize(socket_data.buffer_header_size);
+
+    if (socket_handle == m_tx.internal_queues.socket_handle)
     {
         std::lock_guard<std::mutex> lg(m_tx.internal_queues.mutex);
-        if (m_tx.internal_queues.connection_res && add_datagram_to_send_buffer(m_tx.internal_queues.connection_res))
+        if (m_tx.internal_queues.connection_res && add_datagram_to_send_buffer(socket_data, m_tx.internal_queues.connection_res))
         {
             m_tx.internal_queues.connection_res.reset();
             merged++;
 //                QLOGI("Sending connection res datagram {}", static_cast<int>(get_header<Con_Header>(datagram->data).seq));
         }
-        else if (m_tx.internal_queues.connection_req && add_datagram_to_send_buffer(m_tx.internal_queues.connection_req))
+        else if (m_tx.internal_queues.connection_req && add_datagram_to_send_buffer(socket_data, m_tx.internal_queues.connection_req))
         {
             m_tx.internal_queues.connection_req.reset();
             merged++;
@@ -678,7 +699,7 @@ auto RCP::compute_next_transit_datagram() -> bool
         //next the confirmations
         {
             auto& queue = m_tx.internal_queues.confirmations;
-            while (!queue.empty() && add_datagram_to_send_buffer(queue.front()))
+            while (!queue.empty() && add_datagram_to_send_buffer(socket_data, queue.front()))
             {
 //                    QLOGI("Sending confirmation for {} datagrams", static_cast<int>(get_header<Packets_Confirmed_Header>(datagram->data).count));
                 merged++;
@@ -711,28 +732,31 @@ auto RCP::compute_next_transit_datagram() -> bool
 
             Packet_Header const& pheader = get_header<Packet_Header>(datagram->data.data());
 
-            if (now - datagram->sent_tp >= MIN_RESEND_DURATION && add_datagram_to_send_buffer(datagram))
+            if (now - datagram->sent_tp >= MIN_RESEND_DURATION && socket_handle == m_tx.channel_data[pheader.channel_idx].socket_handle)
             {
-//                dbg += q::util::format2<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
-//                dbg += "#,";
-
-                merged++;
-                datagram->sent_tp = now;
-                datagram->sent_count++;
-
-//                auto& header = get_header<Packet_Header>(datagram->data.data());
-//                QLOGI("SENDING {}: pk {} fr {}, ch {}", queue.size(), int(header.id), header.fragment_idx, static_cast<int>(header.channel_idx));
-
-                //do I have to insert it back?
-                if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
+                if (add_datagram_to_send_buffer(socket_data, datagram))
                 {
-                    m_tx.reinsert_queue.push_back(std::move(datagram));
-                }
+                    //                dbg += q::util::format2<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
+                    //                dbg += "#,";
 
-                it = queue.erase(it);
-                continue;
+                    merged++;
+                    datagram->sent_tp = now;
+                    datagram->sent_count++;
+
+                    //                auto& header = get_header<Packet_Header>(datagram->data.data());
+                    //                QLOGI("SENDING {}: pk {} fr {}, ch {}", queue.size(), int(header.id), header.fragment_idx, static_cast<int>(header.channel_idx));
+
+                    //do I have to insert it back?
+                    if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
+                    {
+                        m_tx.reinsert_queue.push_back(std::move(datagram));
+                    }
+
+                    it = queue.erase(it);
+                    continue;
+                }
             }
-//            dbg += " ,";
+            //            dbg += " ,";
 
             ++it;
         }
@@ -754,38 +778,49 @@ auto RCP::compute_next_transit_datagram() -> bool
 //    {
 //        QLOGI("Merged: {}", merged);
 //    }
-
-    return m_tx.send_buffer.size() > m_tx.send_buffer_header_size;
+    return socket_data.buffer.size() > socket_data.buffer_header_size;
 }
 
-void RCP::send_datagram()
+void RCP::send_datagram(Socket_Handle socket_handle)
 {
-    if (m_is_sending.exchange(true))
+    Socket_Data& socket_data = m_sockets[socket_handle];
+    RCP_Socket* socket = socket_data.socket;
+    QASSERT(socket != nullptr);
+
+//    if (m_is_sending.exchange(true))
+//    {
+//        //was already sending, return
+//        //QLOGI("send blocked {}", q::Clock::now());
+//        return;
+//    }
+    if (!socket->lock())
     {
-        //was already sending, return
-        //QLOGI("send blocked {}", q::Clock::now());
         return;
     }
 
-    if (!compute_next_transit_datagram())
+    if (!compute_next_transit_datagram(socket_handle))
     {
-        m_is_sending = false;
+        socket->unlock();
         return;
     }
 
-    m_socket.async_send(m_tx.send_buffer.data(), m_tx.send_buffer.size());
+    socket->async_send(socket_data.buffer.data(), socket_data.buffer.size());
 }
 
-void RCP::handle_send(RCP_Socket::Result)
+void RCP::handle_send(Socket_Handle socket_handle, RCP_Socket::Result)
 {
-    m_is_sending = false;
+    Socket_Data& socket_data = m_sockets[socket_handle];
+    RCP_Socket* socket = socket_data.socket;
+    QASSERT(socket != nullptr);
 
-    send_datagram();
+    socket->unlock();
+
+    send_datagram(socket_handle);
 }
 
 void RCP::handle_receive(uint8_t* data, size_t size)
 {
-    if (size > 0)
+    if (data != nullptr && size > 0)
     {
         process_incoming_data(data, size);
     }
@@ -836,7 +871,9 @@ void RCP::send_pending_confirmations()
 
         size_t header_size = sizeof(Confirmations_Header);
 
-        size_t max_count = math::min<size_t>((m_mtu - header_size) / sizeof(Confirmations_Header::Data), 255u);
+        Socket_Data& socket_data = m_sockets[m_tx.internal_queues.socket_handle];
+
+        size_t max_count = math::min<size_t>((socket_data.mtu - header_size) / sizeof(Confirmations_Header::Data), 255u);
 
         size_t datagrams_added = 0;
         //now take them and pack them in a datagram
@@ -878,7 +915,7 @@ void RCP::send_pending_confirmations()
 
     }
 
-    send_datagram();
+    send_datagram(m_tx.internal_queues.socket_handle);
 }
 
 void RCP::send_packet_connect_req()
@@ -894,7 +931,7 @@ void RCP::send_packet_connect_req()
         prepare_to_send_datagram(*m_tx.internal_queues.connection_req);
     }
 
-    send_datagram();
+    send_datagram(m_tx.internal_queues.socket_handle);
 }
 void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
 {
@@ -909,7 +946,7 @@ void RCP::send_packet_connect_res(Connect_Res_Header::Response response)
 
         prepare_to_send_datagram(*m_tx.internal_queues.connection_res);
     }
-    send_datagram();
+    send_datagram(m_tx.internal_queues.socket_handle);
 }
 
 void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)

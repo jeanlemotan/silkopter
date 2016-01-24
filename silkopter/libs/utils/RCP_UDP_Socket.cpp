@@ -67,10 +67,24 @@ auto RCP_UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
     return buffer;
 }
 
+auto RCP_UDP_Socket::lock() -> bool
+{
+    if (m_send_in_progress.exchange(true))
+    {
+        //already locked
+        return false;
+    }
+    return true;
+}
+
+void RCP_UDP_Socket::unlock()
+{
+    m_send_in_progress = false;
+}
+
 void RCP_UDP_Socket::async_send(uint8_t const* data, size_t size)
 {
-    QASSERT(!m_send_in_progress);
-    m_send_in_progress = true;
+    QASSERT(m_send_in_progress == true);
 
     std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
 
@@ -137,11 +151,11 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
                 if (m_send_in_progress)
                 {
                     QASSERT(bytes_transferred == 1);
-                    m_send_in_progress = false;
                     if (send_callback)
                     {
                         send_callback(Result::OK);
                     }
+                    unlock();
                 }
             }
         }
@@ -199,7 +213,6 @@ auto RCP_UDP_Socket::process() -> Result
     auto now = q::Clock::now();
     if (m_send_in_progress && now - m_tx_data_sent_tp > MAX_ACK_TIMEOUT)
     {
-        m_send_in_progress = false;
         if (send_callback)
         {
             send_callback(Result::ERROR);

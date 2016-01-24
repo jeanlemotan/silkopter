@@ -12,17 +12,20 @@ public:
     RCP_UDP_Socket();
     ~RCP_UDP_Socket();
 
-    auto process() -> Result;
+    auto process() -> Result override;
 
     void set_send_endpoint(boost::asio::ip::udp::endpoint endpoint);
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
 
-    auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t;
-    auto get_mtu() const -> size_t;
+    auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t override;
+    auto get_mtu() const -> size_t override;
+
+    auto lock() -> bool override;
+    void unlock() override;
 
 private:
-    void async_send(uint8_t const* data, size_t size);
+    void async_send(uint8_t const* data, size_t size) override;
 
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred);

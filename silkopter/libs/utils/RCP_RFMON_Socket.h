@@ -21,6 +21,9 @@ public:
 
     auto get_mtu() const -> size_t;
 
+    auto lock() -> bool override;
+    void unlock() override;
+
 private:
 
     auto prepare_filter() -> bool;
@@ -28,6 +31,7 @@ private:
     void prepare_tx_packet_header(uint8_t* buffer);
     auto process_rx_packet() -> bool;
 
+    std::atomic_bool m_send_in_progress = {false};
 
     struct Impl;
     std::unique_ptr<Impl> m_impl;

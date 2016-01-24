@@ -80,13 +80,29 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     {
         auto s = new util::RCP_UDP_Socket();
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP(*m_socket));
+        m_rcp.reset(new util::RCP());
 
-        s->open(send_port, receive_port);
-        s->start_listening();
-        s->set_send_endpoint(ip::udp::endpoint(ip::address::from_string("127.0.0.1"), send_port));
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        if (handle >= 0)
+        {
+            m_rcp->set_internal_socket_handle(handle);
+            m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+            m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
+
+            s->open(send_port, receive_port);
+            s->start_listening();
+            s->set_send_endpoint(ip::udp::endpoint(ip::address::from_string("127.0.0.1"), send_port));
+            m_is_connected = true;
+        }
     }
     catch(std::exception e)
+    {
+        m_is_connected = false;
+        return false;
+    }
+
+    if (!m_is_connected)
     {
         m_socket.reset();
         m_rcp.reset();
@@ -94,7 +110,6 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
         return false;
     }
 
-    m_is_connected = true;
     QLOGI("Started sending on ports s:{} r:{}", send_port, receive_port);
 
     configure_channels();
@@ -108,9 +123,18 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
     {
         auto s = new util::RCP_RFMON_Socket(interface, id);
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP(*m_socket));
+        m_rcp.reset(new util::RCP);
 
-        m_is_connected = s->start();
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        if (handle >= 0)
+        {
+            m_rcp->set_internal_socket_handle(handle);
+            m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+            m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
+
+            m_is_connected = s->start();
+        }
     }
     catch(std::exception e)
     {

@@ -534,8 +534,25 @@ auto RCP_RFMON_Socket::start() -> bool
     return true;
 }
 
+auto RCP_RFMON_Socket::lock() -> bool
+{
+    if (m_send_in_progress.exchange(true))
+    {
+        //already locked
+        return false;
+    }
+    return true;
+}
+
+void RCP_RFMON_Socket::unlock()
+{
+    m_send_in_progress = false;
+}
+
 void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
 {
+    QASSERT(m_send_in_progress == true);
+
     QASSERT(size <= m_impl->tx_packet_header_length + MAX_USER_PACKET_SIZE);
     QASSERT(size >= m_impl->tx_packet_header_length);
 

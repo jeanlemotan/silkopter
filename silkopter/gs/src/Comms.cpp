@@ -28,7 +28,19 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
     {
         auto s = new util::RCP_UDP_Socket();
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP(*m_socket));
+        m_rcp.reset(new util::RCP());
+
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        if (handle < 0)
+        {
+            QASSERT(0);
+            throw std::exception();
+        }
+
+        m_rcp->set_internal_socket_handle(handle);
+        m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+        m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+        m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         s->open(send_port, receive_port);
         s->set_send_endpoint(ip::udp::endpoint(address, send_port));
@@ -66,7 +78,19 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
     {
         auto s = new util::RCP_RFMON_Socket(interface, id);
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP(*m_socket));
+        m_rcp.reset(new util::RCP());
+
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        if (handle < 0)
+        {
+            QASSERT(0);
+            throw std::exception();
+        }
+
+        m_rcp->set_internal_socket_handle(handle);
+        m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+        m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+        m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         is_connected = s->start();
     }

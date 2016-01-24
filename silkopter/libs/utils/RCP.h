@@ -25,8 +25,10 @@ namespace detail
         std::function<void(Pool_Item_Base*)> m_garbage_collector;
         struct Items
         {
-            std::vector<std::unique_ptr<T>> items;
+            ////
             std::mutex mutex;
+            std::vector<std::unique_ptr<T>> items;
+            ////
         };
         std::shared_ptr<Items> m_pool;
     };
@@ -56,13 +58,16 @@ public:
     virtual void async_send(uint8_t const* data, size_t size) = 0;
 
     virtual auto get_mtu() const -> size_t = 0;
+
+    virtual auto lock() -> bool = 0;
+    virtual void unlock() = 0;
 };
 
 //Reliable Channel Protocol
 class RCP : q::util::Noncopyable
 {
 public:
-    RCP(RCP_Socket& socket);
+    RCP();
 
     void reconnect();
     auto is_connected() const -> bool;
@@ -78,6 +83,12 @@ public:
     };
     void set_send_params(uint8_t channel_idx, Send_Params const& params);
     auto get_send_params(uint8_t channel_idx) const -> Send_Params const&;
+
+    typedef int32_t Socket_Handle;
+    Socket_Handle add_socket(RCP_Socket* socket);
+
+    void set_socket_handle(uint8_t channel_idx, Socket_Handle socket_handle);
+    void set_internal_socket_handle(Socket_Handle socket_handle);
 
     struct Receive_Params
     {
@@ -178,14 +189,22 @@ private:
 
 #pragma pack(pop)
 
-    RCP_Socket& m_socket;
-
     typedef std::vector<uint8_t> Buffer_t;
 
     static const int MAX_PRIORITY = 127;
     static const int MIN_PRIORITY = -127;
 
     static const uint16_t FRAGMENT_IDX_ALL = 65535;
+
+    struct Socket_Data
+    {
+        RCP_Socket* socket = nullptr;
+        size_t mtu = 0;
+        std::vector<uint8_t> buffer;
+        size_t buffer_header_size = 0;
+    };
+
+    std::vector<Socket_Data> m_sockets;
 
     struct TX
     {
@@ -212,36 +231,44 @@ private:
             uint8_t channel_idx = 0;
             uint8_t sent_count = 0;
         };
+        /////
         std::mutex confirmations_mutex;
         std::deque<Confirmation> confirmations;
         q::Clock::time_point confirmations_last_time_point = q::Clock::now();
+        /////
 
         //--------------------------------------------
-
 
         typedef std::deque<Datagram_ptr> Send_Queue;
 
         struct Internal_Queues
         {
+            Socket_Handle socket_handle = Socket_Handle(-1);
+
+            /////
             std::mutex mutex;
             Datagram_ptr connection_req;
             Datagram_ptr connection_res;
             Send_Queue confirmations;
+            /////
         } internal_queues;
 
+        /////
         std::mutex packet_queue_mutex;
         Send_Queue packet_queue;
         std::vector<Datagram_ptr> reinsert_queue; //a place to store datagrams that need to be reinserted for resend purposes.
-
-        std::vector<uint8_t> send_buffer;
-        size_t send_buffer_header_size = 0;
+        /////
 
         struct Channel_Data
         {
+            Socket_Handle socket_handle = Socket_Handle(-1);
+
+            /////
             std::mutex send_mutex;
             std::vector<uint8_t> compression_buffer;
             std::vector<uint8_t> lz4_state;
             std::vector<Datagram_ptr> fragments_to_insert;
+            /////
         };
         std::array<Channel_Data, MAX_CHANNELS> channel_data;
 
@@ -278,8 +305,10 @@ private:
         struct Packet_Queue
         {
             typedef std::pair<uint32_t, Packet_ptr> Item;
-            std::deque<Item> packets;
+            /////
             std::mutex mutex;
+            std::deque<Item> packets;
+            /////
         };
 
         //waiting to be received
@@ -313,8 +342,10 @@ private:
     {
         std::atomic_bool is_connected = { false };
 
+        ////
         mutable std::mutex mutex;
         q::Clock::time_point last_sent_tp = q::Clock::time_point(q::Clock::duration{0});
+        ////
     } m_connection;
 
     void disconnect();
@@ -322,13 +353,10 @@ private:
 
     void purge();
 
-    size_t m_mtu = 0;
-
     q::Clock::time_point m_init_tp = q::Clock::time_point(q::Clock::duration{0});
     std::array<std::atomic_int, MAX_CHANNELS> m_last_id;
     Stats m_global_stats;
 
-    std::atomic_bool m_is_sending = {false};
     const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
 
     std::array<Send_Params, MAX_CHANNELS> m_send_params;
@@ -347,14 +375,13 @@ private:
     void update_stats(Stats& stats, TX::Datagram const& datagram);
 
     void prepare_to_send_datagram(TX::Datagram& datagram);
-    void add_and_send_datagram(TX::Send_Queue& queue, std::mutex& mutex, TX::Datagram_ptr const& datagram);
 
     static auto tx_packet_datagram_predicate(TX::Datagram_ptr const& datagram1, TX::Datagram_ptr const& datagram2) -> bool;
-    auto add_datagram_to_send_buffer(TX::Datagram_ptr const& datagram) -> bool;
-    auto compute_next_transit_datagram() -> bool;
-    void send_datagram();
+    auto add_datagram_to_send_buffer(Socket_Data& socket_data, TX::Datagram_ptr const& datagram) -> bool;
+    auto compute_next_transit_datagram(Socket_Handle socket_handle) -> bool;
+    void send_datagram(Socket_Handle socket_handle);
 
-    void handle_send(RCP_Socket::Result reult);
+    void handle_send(Socket_Handle socket_handle, RCP_Socket::Result reult);
     void handle_receive(uint8_t* data, size_t size);
 
     void add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
