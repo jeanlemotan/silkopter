@@ -17,8 +17,6 @@ public:
 
     void async_send(uint8_t const* data, size_t size);
 
-    auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t;
-
     auto get_mtu() const -> size_t;
 
     auto lock() -> bool override;

@@ -53,8 +53,6 @@ public:
     std::function<void(uint8_t* data, size_t size)> receive_callback;
     std::function<void(Result)> send_callback;
 
-    virtual auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t = 0;
-
     virtual void async_send(uint8_t const* data, size_t size) = 0;
 
     virtual auto get_mtu() const -> size_t = 0;
@@ -201,7 +199,6 @@ private:
         RCP_Socket* socket = nullptr;
         size_t mtu = 0;
         std::vector<uint8_t> buffer;
-        size_t buffer_header_size = 0;
     };
 
     std::vector<Socket_Data> m_sockets;

@@ -59,9 +59,9 @@ struct RCP_RFMON_Socket::Impl
     size_t _80211_header_length = 0;
     size_t tx_packet_header_length = 0;
 
-    uint8_t const* tx_buffer = nullptr;
-    size_t tx_buffer_size = 0;
     std::mutex tx_buffer_mutex;
+    std::vector<uint8_t> tx_buffer;
+    bool tx_buffer_has_data = false;
     std::condition_variable tx_buffer_cv;
 };
 
@@ -405,8 +405,8 @@ auto RCP_RFMON_Socket::start() -> bool
         return false;
     }
 
-//    m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
-//    prepare_tx_packet_header(m_impl->tx_buffer.data());
+    m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
+    prepare_tx_packet_header(m_impl->tx_buffer.data());
 
     m_rx_thread = std::thread([this]()
     {
@@ -443,17 +443,17 @@ auto RCP_RFMON_Socket::start() -> bool
             {
                 //wait for data
                 std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
-                if (!m_impl->tx_buffer)
+                if (!m_impl->tx_buffer_has_data)
                 {
-                    m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer != nullptr; });
+                    m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_has_data == true; });
                 }
 
                 //inject packets
-                if (m_impl->tx_buffer)
+                if (m_impl->tx_buffer_has_data)
                 {
                     std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
-                    int isize = static_cast<int>(m_impl->tx_buffer_size);
-                    int r = pcap_inject(m_impl->pcap, m_impl->tx_buffer, isize);
+                    int isize = static_cast<int>(m_impl->tx_buffer.size());
+                    int r = pcap_inject(m_impl->pcap, m_impl->tx_buffer.data(), isize);
 //                    if (r <= 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
 //                    {
 //                        break;
@@ -473,7 +473,7 @@ auto RCP_RFMON_Socket::start() -> bool
                     }
 
                     sent = true;
-                    m_impl->tx_buffer = nullptr;
+                    m_impl->tx_buffer_has_data = false;
                 }
             }
 
@@ -491,7 +491,7 @@ auto RCP_RFMON_Socket::start() -> bool
                     static size_t xxx_data = 0;
                     static size_t xxx_real_data = 0;
                     static std::chrono::system_clock::time_point xxx_last_tp = std::chrono::system_clock::now();
-                    xxx_data += m_impl->tx_buffer_size;
+                    xxx_data += m_impl->tx_buffer.size();
                     xxx_real_data += MAX_USER_PACKET_SIZE;
                     auto now = std::chrono::system_clock::now();
                     if (now - xxx_last_tp >= std::chrono::seconds(1))
@@ -553,25 +553,18 @@ void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
 {
     QASSERT(m_send_in_progress == true);
 
-    QASSERT(size <= m_impl->tx_packet_header_length + MAX_USER_PACKET_SIZE);
-    QASSERT(size >= m_impl->tx_packet_header_length);
+    QASSERT(size <= MAX_USER_PACKET_SIZE);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
 
-        QASSERT(!m_impl->tx_buffer);
-        m_impl->tx_buffer = data;
-        m_impl->tx_buffer_size = size;
+        QASSERT(!m_impl->tx_buffer_has_data);
+        m_impl->tx_buffer.resize(m_impl->tx_packet_header_length + size);
+        std::copy(data, data + size, m_impl->tx_buffer.begin() + m_impl->tx_packet_header_length);
     }
 
+    m_impl->tx_buffer_has_data = true;
     m_impl->tx_buffer_cv.notify_all();
-}
-
-auto RCP_RFMON_Socket::prepare_buffer(std::vector<uint8_t>& buffer) -> size_t
-{
-    buffer.resize(MAX_PACKET_SIZE);
-    prepare_tx_packet_header(buffer.data());
-    return m_impl->tx_packet_header_length;
 }
 
 auto RCP_RFMON_Socket::get_mtu() const -> size_t

@@ -18,7 +18,6 @@ public:
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
 
-    auto prepare_buffer(std::vector<uint8_t>& buffer) -> size_t override;
     auto get_mtu() const -> size_t override;
 
     auto lock() -> bool override;
@@ -42,8 +41,9 @@ private:
     typedef std::shared_ptr<std::vector<uint8_t>> Buffer;
 
     auto acquire_tx_buffer_locked(size_t size) -> Buffer;
-
     void send_next_packet_locked();
+
+    size_t m_tx_buffer_header_size = 0;
 
     std::mutex m_tx_buffer_mutex;
     std::vector<Buffer> m_tx_buffer_pool;

@@ -140,7 +140,6 @@ RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
 
     Socket_Data& socket_data = m_sockets.back();
     socket_data.socket = socket;
-    socket_data.buffer_header_size = socket->prepare_buffer(socket_data.buffer);
     socket_data.mtu = socket->get_mtu();
 
     socket->receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
@@ -656,7 +655,7 @@ void RCP::update_stats(Stats& stats, TX::Datagram const& datagram)
 auto RCP::add_datagram_to_send_buffer(Socket_Data& socket_data, TX::Datagram_ptr const& datagram) -> bool
 {
     QASSERT(datagram);
-    size_t max_size = socket_data.mtu + socket_data.buffer_header_size;
+    size_t max_size = socket_data.mtu;
     size_t tx_send_buffer_size = socket_data.buffer.size();
     if (datagram->data.size() + tx_send_buffer_size <= max_size)
     {
@@ -678,7 +677,7 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
     size_t merged = 0;
 
     Socket_Data& socket_data = m_sockets[socket_handle];
-    socket_data.buffer.resize(socket_data.buffer_header_size);
+    socket_data.buffer.clear();
 
     if (socket_handle == m_tx.internal_queues.socket_handle)
     {
@@ -778,7 +777,7 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
 //    {
 //        QLOGI("Merged: {}", merged);
 //    }
-    return socket_data.buffer.size() > socket_data.buffer_header_size;
+    return socket_data.buffer.empty() == false;
 }
 
 void RCP::send_datagram(Socket_Handle socket_handle)
