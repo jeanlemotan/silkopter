@@ -155,7 +155,6 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
                     {
                         send_callback(Result::OK);
                     }
-                    unlock();
                 }
             }
         }
