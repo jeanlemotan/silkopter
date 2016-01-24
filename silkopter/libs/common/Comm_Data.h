@@ -48,8 +48,6 @@ enum class Setup_Message : uint8_t
 
 enum class Pilot_Message : uint8_t
 {
-    VIDEO,
-
     MULTI_COMMANDS,
     MULTI_STATE,
 

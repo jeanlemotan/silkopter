@@ -12,12 +12,14 @@ using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t PILOT_CHANNEL = 15;
+constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_setup_channel(SETUP_CHANNEL)
     , m_pilot_channel(PILOT_CHANNEL)
+    , m_video_channel(PILOT_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
 }
@@ -40,6 +42,7 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
         m_rcp->set_internal_socket_handle(handle);
         m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
         m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+        m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
         m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         s->open(send_port, receive_port);
@@ -90,6 +93,7 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
         m_rcp->set_internal_socket_handle(handle);
         m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
         m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+        m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
         m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         is_connected = s->start();
@@ -160,6 +164,11 @@ void Comms::configure_channels()
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::milliseconds(300);
         m_rcp->set_receive_params(PILOT_CHANNEL, params);
+    }
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::milliseconds(300);
+        m_rcp->set_receive_params(VIDEO_CHANNEL, params);
     }
 
     {
@@ -895,7 +904,7 @@ void Comms::handle_multi_state()
 }
 void Comms::handle_video()
 {
-    auto& channel = m_pilot_channel;
+    auto& channel = m_video_channel;
 
     stream::IVideo::Sample sample;
     if (!channel.unpack_all(sample))
@@ -950,8 +959,15 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Pilot_Message::VIDEO : handle_video(); break;
         case comms::Pilot_Message::MULTI_STATE : handle_multi_state(); break;
+        default: break;
+        }
+    }
+    while (auto msg = m_video_channel.get_next_message(*m_rcp))
+    {
+        switch (msg.get())
+        {
+        case comms::Video_Message::FRAME_DATA : handle_video(); break;
         default: break;
         }
     }

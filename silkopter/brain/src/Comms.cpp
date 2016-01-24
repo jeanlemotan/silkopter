@@ -47,6 +47,7 @@ using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t PILOT_CHANNEL = 15;
+constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
@@ -55,17 +56,20 @@ struct Comms::Channels
 {
     typedef util::Channel<comms::Setup_Message, uint32_t> Setup;
     typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot;
+    typedef util::Channel<comms::Video_Message, uint32_t> Video;
     typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry;
 
     Channels()
         : setup(SETUP_CHANNEL)
         , pilot(PILOT_CHANNEL)
         , telemetry(TELEMETRY_CHANNEL)
+        , video(VIDEO_CHANNEL)
     {}
 
     Setup setup;
     Pilot pilot;
     Telemetry telemetry;
+    Video video;
 };
 
 Comms::Comms(HAL& hal)
@@ -88,6 +92,7 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
             m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+            m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
             m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             s->open(send_port, receive_port);
@@ -131,6 +136,7 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
             m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+            m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
             m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             m_is_connected = s->start();
@@ -166,21 +172,28 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Send_Params params;
-        params.is_compressed = false;
+        params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 10;
-        //params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
+    }
+    {
+        util::RCP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = true;
+        params.importance = 100;
+        params.cancel_previous_data = true;
+        params.cancel_after = std::chrono::milliseconds(150);
+        m_rcp->set_send_params(PILOT_CHANNEL, params);
     }
     {
         util::RCP::Send_Params params;
         params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 100;
-//        params.cancel_previous_data = true;
         params.cancel_after = std::chrono::milliseconds(150);
-        m_rcp->set_send_params(PILOT_CHANNEL, params);
+        m_rcp->set_send_params(VIDEO_CHANNEL, params);
     }
 
     {
@@ -802,7 +815,7 @@ void Comms::add_multi_state_sample(stream::IMulti_State::Sample const& sample)
 }
 void Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
-    m_channels->pilot.pack_all(silk::comms::Pilot_Message::VIDEO, sample);
+    m_channels->video.pack_all(silk::comms::Video_Message::FRAME_DATA, sample);
 }
 
 void Comms::handle_multi_commands()
@@ -875,6 +888,7 @@ void Comms::process()
 
     m_rcp->process();
 
+    m_channels->video.send(*m_rcp);
     m_channels->pilot.send(*m_rcp);
 
     auto now = q::Clock::now();
