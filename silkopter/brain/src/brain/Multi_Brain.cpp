@@ -327,6 +327,19 @@ void Multi_Brain::process_state_mode_armed()
     m_thrust_output_stream->push_sample(thrust, true);
 }
 
+struct Increment_Version
+{
+    template<class T>
+    bool operator()(T const& prev, T& crt)
+    {
+        if (crt.value != prev.value)
+        {
+            crt.version++;
+        }
+        return true;
+    }
+};
+
 void Multi_Brain::process_state()
 {
     if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::IDLE)
@@ -343,6 +356,10 @@ void Multi_Brain::process_state()
 
         process_state_mode_armed();
     }
+
+    //increment version of overriden commands
+    Increment_Version func;
+    stream::IMulti_Commands::apply(func, m_inputs.commands.previous_sample.value, m_inputs.commands.sample.value);
 }
 
 void Multi_Brain::acquire_home_position()
@@ -421,20 +438,20 @@ void Multi_Brain::process()
         last_timestamp = now;
         static q::Clock::duration min_dt, max_dt, avg_dt;
         static int xxx = 0;
-        if (xxx == 0)
-        {
-            QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt);
-            min_dt = dt;
-            max_dt = dt;
-            avg_dt = std::chrono::milliseconds(0);
-        }
         min_dt = std::min(min_dt, dt);
         max_dt = std::max(max_dt, dt);
         avg_dt += dt;
         xxx++;
-        if (xxx == 1000)
+        static q::Clock::time_point xxx_timestamp = q::Clock::now();
+        if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
         {
-            avg_dt = avg_dt / xxx;
+            xxx_timestamp = now;
+
+            QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
+            min_dt = dt;
+            max_dt = dt;
+            avg_dt = std::chrono::milliseconds(0);
+
             xxx = 0;
         }
     }
@@ -443,10 +460,14 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
+    stream::IMulti_Commands::Assignment_Functor func;
+    m_commands_accumulator.process([this, &func](stream::IMulti_Commands::Sample const& i_commands)
     {
         m_inputs.commands.previous_sample = m_inputs.commands.sample;
-        m_inputs.commands.sample = i_commands;
+
+        m_inputs.commands.sample.is_healthy = i_commands.is_healthy;
+        stream::IMulti_Commands::apply(func, m_inputs.commands.sample.value, i_commands.value);
+
         m_inputs.commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.commands.last_valid_tp;
     });
 
@@ -472,7 +493,9 @@ void Multi_Brain::process()
         state.home_position.value = m_home.position;
         state.home_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
-        state.commands = m_inputs.commands.sample;
+
+        state.commands = m_inputs.commands.sample.value;
+
         state.proximity = m_inputs.proximity.sample;
 
         for (size_t i = 0; i < samples_needed; i++)

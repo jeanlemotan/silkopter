@@ -36,7 +36,7 @@ public:
         IProximity::Sample proximity;
         IFloat::Sample thrust;
 
-        IMulti_Commands::Sample commands;
+        IMulti_Commands::Value commands;
     };
 
     typedef stream::Sample<Value>     Sample;

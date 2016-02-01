@@ -18,6 +18,10 @@ template<class T> struct Input_Value
     void set(Value const& v) { value = v; version++; }
     T const& get() const { return value; }
 
+//    bool operator==(Input_Value const& other) = delete;//{ return value == other.value; }
+//    bool operator!=(Input_Value const& other) = delete;//{ return !operator==(other); }
+//    Input_Value const& operator=(Input_Value const& other)  = delete;//{ value = other.value; return *this; }
+
     uint32_t version = 0;
     T value = T();
 };
@@ -30,6 +34,10 @@ template<> struct Input_Value<bool>
 
     void set(Value const& v) { value = v; version++; }
     bool get() const { return value != 0; }
+
+//    bool operator==(Input_Value const& other) = delete;// { return value == other.value; }
+//    bool operator!=(Input_Value const& other) = delete;// { return !operator==(other); }
+//    Input_Value const& operator=(Input_Value const& other) = delete;// { value = other.value; return *this; }
 
     uint32_t version : 31;
     uint32_t value : 1;
@@ -139,6 +147,52 @@ public:
     virtual ~IMulti_Commands() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+
+
+    //helper function that applies a functor on every member of the value
+    template<class F, class... V>
+    static bool apply(F& functor, V&&... values)
+    {
+        return     functor(values.toggles.land                  ...)
+                && functor(values.toggles.return_home           ...)
+                && functor(values.toggles.take_off              ...)
+                && functor(values.vertical.mode                 ...)
+                && functor(values.vertical.thrust_rate          ...)
+                && functor(values.vertical.thrust               ...)
+                && functor(values.vertical.altitude             ...)
+                && functor(values.horizontal.mode               ...)
+                && functor(values.horizontal.angle_rate         ...)
+                && functor(values.horizontal.angle              ...)
+                && functor(values.horizontal.position           ...)
+                && functor(values.yaw.mode                      ...)
+                && functor(values.yaw.angle_rate                ...)
+                && functor(values.yaw.angle                     ...)
+                && functor(values.mode                          ...)
+                && functor(values.reference_frame               ...)
+                && functor(values.assists.stay_in_battery_range ...)
+                && functor(values.assists.stay_in_perimeter     ...)
+                && functor(values.assists.stay_in_range         ...)
+                && functor(values.assists.avoid_altitude_drop   ...)
+                && functor(values.assists.avoid_proximity       ...)
+                && functor(values.assists.avoid_the_user        ...);
+    }
+
+    struct Equality_Functor
+    {
+        template<class T> bool operator()(T const& v1, T const& v2) { return v1.value == v2.value; }
+    };
+    struct Equality_Version_Functor
+    {
+        template<class T> bool operator()(T const& v1, T const& v2) { return v1.value == v2.value && v1.version == v2.version; }
+    };
+    struct Assignment_Functor
+    {
+        template<class T> bool operator()(T& v1, T const& v2) { v1.value = v2.value; return true; }
+    };
+    struct Assignment_Version_Functor
+    {
+        template<class T> bool operator()(T& v1, T const& v2) { v1.value = v2.value; v1.version = v2.version; return true; }
+    };
 };
 DECLARE_CLASS_PTR(IMulti_Commands);
 
@@ -181,57 +235,45 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::Input_V
     return true;
 }
 
+namespace detail
+{
+struct Serializer
+{
+    Serializer(Buffer_t& buffer, size_t& off) : m_buffer(buffer), m_off(off) {}
+    Buffer_t& m_buffer;
+    size_t& m_off;
+
+    template<class T>
+    bool operator()(T const& v)
+    {
+        serialize(m_buffer, v, m_off);
+        return true;
+    }
+};
+struct Deserializer
+{
+    Deserializer(Buffer_t const& buffer, size_t& off) : m_buffer(buffer), m_off(off) {}
+    Buffer_t const& m_buffer;
+    size_t& m_off;
+
+    template<class T>
+    bool operator()(T& v)
+    {
+        return deserialize(m_buffer, v, m_off);
+    }
+};
+}
 
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Commands::Value const& value, size_t& off)
 {
-    serialize(buffer, value.toggles.land, off);
-    serialize(buffer, value.toggles.return_home, off);
-    serialize(buffer, value.toggles.take_off, off);
-    serialize(buffer, value.vertical.mode, off);
-    serialize(buffer, value.vertical.thrust_rate, off);
-    serialize(buffer, value.vertical.thrust, off);
-    serialize(buffer, value.vertical.altitude, off);
-    serialize(buffer, value.horizontal.mode, off);
-    serialize(buffer, value.horizontal.angle_rate, off);
-    serialize(buffer, value.horizontal.angle, off);
-    serialize(buffer, value.horizontal.position, off);
-    serialize(buffer, value.yaw.mode, off);
-    serialize(buffer, value.yaw.angle_rate, off);
-    serialize(buffer, value.yaw.angle, off);
-    serialize(buffer, value.mode, off);
-    serialize(buffer, value.reference_frame, off);
-    serialize(buffer, value.assists.stay_in_battery_range, off);
-    serialize(buffer, value.assists.stay_in_perimeter, off);
-    serialize(buffer, value.assists.stay_in_range, off);
-    serialize(buffer, value.assists.avoid_altitude_drop, off);
-    serialize(buffer, value.assists.avoid_proximity, off);
-    serialize(buffer, value.assists.avoid_the_user, off);
+    detail::Serializer serializer(buffer, off);
+    silk::stream::IMulti_Commands::apply(serializer, value);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_Commands::Value& value, size_t& off) -> bool
 {
-    return deserialize(buffer, value.toggles.land, off) &&
-        deserialize(buffer, value.toggles.return_home, off) &&
-        deserialize(buffer, value.toggles.take_off, off) &&
-        deserialize(buffer, value.vertical.mode, off) &&
-        deserialize(buffer, value.vertical.thrust_rate, off) &&
-        deserialize(buffer, value.vertical.thrust, off) &&
-        deserialize(buffer, value.vertical.altitude, off) &&
-        deserialize(buffer, value.horizontal.mode, off) &&
-        deserialize(buffer, value.horizontal.angle_rate, off) &&
-        deserialize(buffer, value.horizontal.angle, off) &&
-        deserialize(buffer, value.horizontal.position, off) &&
-        deserialize(buffer, value.yaw.mode, off) &&
-        deserialize(buffer, value.yaw.angle_rate, off) &&
-        deserialize(buffer, value.yaw.angle, off) &&
-        deserialize(buffer, value.mode, off) &&
-        deserialize(buffer, value.reference_frame, off) &&
-        deserialize(buffer, value.assists.stay_in_battery_range, off) &&
-        deserialize(buffer, value.assists.stay_in_perimeter, off) &&
-        deserialize(buffer, value.assists.stay_in_range, off) &&
-        deserialize(buffer, value.assists.avoid_altitude_drop, off) &&
-        deserialize(buffer, value.assists.avoid_proximity, off) &&
-        deserialize(buffer, value.assists.avoid_the_user, off);
+    detail::Deserializer deserializer(buffer, off);
+    return silk::stream::IMulti_Commands::apply(deserializer, value);
 }
 
 

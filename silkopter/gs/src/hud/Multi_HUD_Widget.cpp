@@ -436,10 +436,10 @@ void Multi_HUD_Widget::process_gamepad()
 
 #define SYNC(x) \
 {\
-    auto& prev_remote = m_prev_state.commands.value.x;\
-    auto& remote = m_state.commands.value.x;\
+    auto& prev_remote = m_prev_state.commands.x;\
+    auto& remote = m_state.commands.x;\
     auto& local = m_commands.x;\
-    if (prev_remote.version != local.version && remote.version >= local.version)\
+    if (prev_remote.version != remote.version)\
     {\
         if (local.value == remote.value)\
         {\
@@ -447,10 +447,9 @@ void Multi_HUD_Widget::process_gamepad()
         }\
         else\
         {\
-            QLOGI("Overriden command {}: value {}@{}, req {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version), local.get(), static_cast<uint32_t>(local.version));\
+            QLOGI("Overriden command {}: remote {}@{}, local {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version), local.get(), static_cast<uint32_t>(local.version));\
         }\
         local.value = remote.value;\
-        local.version = remote.version;\
     }\
 }
 
