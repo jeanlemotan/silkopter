@@ -83,7 +83,7 @@ void Keyboard::process_events(q::Clock::duration /*dt*/)
 			}
 			break;
 		default:
-            QLOGE("Ignored keyboard event - {}", (int)event.type);
+            //QLOGE("Ignored keyboard event - {}", (int)event.type);
 			break;
 		}
 	}
@@ -93,6 +93,6 @@ void Keyboard::process_events(q::Clock::duration /*dt*/)
 void Keyboard::add_event(Keyboard_Event const& event)
 {
     std::lock_guard<std::mutex> sm(m_events_mutex);
-    QLOGI("Keyboard event {}, {}", event.key_code, event.timestamp);
+    //QLOGI("Keyboard event {}, {}", event.key_code, event.timestamp);
 	m_events.emplace_back(event);
 }
