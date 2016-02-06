@@ -813,6 +813,7 @@ namespace gles
 		bool ihasExtensionPart(const char* extensionPart);
         
         void iflush();
+        void isync();
 
 
 		//////////////////////////////////////////////////////////////////////////
