@@ -9,6 +9,11 @@ GS::GS(QWidget *parent)
     , m_hal(m_comms)
     , m_comms(m_hal)
 {
+    QGLFormat format(QGL::DepthBuffer | QGL::Rgba | QGL::NoStencilBuffer | QGL::SingleBuffer);
+    format.setSwapInterval(0);
+    QGLFormat::setDefaultFormat(format);
+
+
     m_ui.setupUi(this);
 
     m_process_last_tp = q::Clock::now();
