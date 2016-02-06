@@ -426,7 +426,7 @@ void Multi_HUD_Widget::acquire_gamepad()
     }
 }
 
-void Multi_HUD_Widget::process_gamepad()
+void Multi_HUD_Widget::process_commands()
 {
     acquire_gamepad();
     process_mode();
@@ -516,7 +516,7 @@ void Multi_HUD_Widget::process()
 
     upload_video_frame();
 
-    process_gamepad();
+    process_commands();
 
     sync_commands();
 

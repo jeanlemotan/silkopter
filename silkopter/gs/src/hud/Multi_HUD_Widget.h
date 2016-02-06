@@ -73,7 +73,7 @@ private:
     void sync_commands();
 
     void acquire_gamepad();
-    void process_gamepad();
+    void process_commands();
 
     //////////////////////////
 
