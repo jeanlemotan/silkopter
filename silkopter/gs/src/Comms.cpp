@@ -927,6 +927,7 @@ auto Comms::get_multi_state_samples() const -> std::vector<stream::IMulti_State:
 void Comms::send_multi_commands_value(stream::IMulti_Commands::Value const& value)
 {
     m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTI_COMMANDS, value);
+    m_pilot_channel.try_sending(*m_rcp);
 }
 
 void Comms::process_rcp()
@@ -1026,6 +1027,5 @@ void Comms::process()
 
     m_setup_channel.send(*m_rcp);
     m_telemetry_channel.try_sending(*m_rcp);
-    m_pilot_channel.try_sending(*m_rcp);
 }
 
