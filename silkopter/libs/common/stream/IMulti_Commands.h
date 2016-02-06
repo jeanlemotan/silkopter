@@ -15,7 +15,7 @@ template<class T> struct Input_Value
     Input_Value() = default;
     Input_Value(T value) : value(value) {}
 
-    void set(Value const& v) { value = v; version++; }
+    void set(Value const& v) { if (value != v) { value = v; version++; } }
     T const& get() const { return value; }
 
 //    bool operator==(Input_Value const& other) = delete;//{ return value == other.value; }
@@ -32,7 +32,7 @@ template<> struct Input_Value<bool>
     Input_Value() : version(0), value(0) {}
     Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
 
-    void set(Value const& v) { value = v; version++; }
+    void set(Value const& v) { if (value != v) { value = v; version++; } }
     bool get() const { return value != 0; }
 
 //    bool operator==(Input_Value const& other) = delete;// { return value == other.value; }
