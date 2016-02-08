@@ -377,7 +377,7 @@ void Comms::handle_clock()
     }
     else
     {
-        QLOGE("Error in enumerating node defs");
+        QLOGE("Error in enumerating clock");
     }
 }
 
