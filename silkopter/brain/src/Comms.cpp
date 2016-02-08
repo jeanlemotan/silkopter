@@ -443,7 +443,7 @@ void Comms::handle_clock()
     auto& channel = m_channels->setup;
     QLOGI("Req clock");
 
-    auto tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
+    uint64_t tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
     channel.pack_all(comms::Setup_Message::CLOCK, tp);
 }
 
@@ -560,7 +560,7 @@ void Comms::handle_get_node_data()
 
     channel.begin_pack(comms::Setup_Message::GET_NODE_DATA);
     channel.pack_param(name);
-    pack_node_data(m_channels->setup, *node);
+    pack_node_data(channel, *node);
     channel.end_pack();
 }
 
@@ -661,7 +661,7 @@ void Comms::handle_node_input_stream_path()
 
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
     channel.pack_param(name);
-    pack_node_data(m_channels->setup, *node);
+    pack_node_data(channel, *node);
     channel.end_pack();
 }
 
@@ -694,7 +694,7 @@ void Comms::handle_add_node()
     //reply
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
     channel.pack_param(name);
-    pack_node_data(m_channels->setup, *node);
+    pack_node_data(channel, *node);
     channel.end_pack();
 }
 
