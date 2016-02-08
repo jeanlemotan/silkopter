@@ -610,9 +610,12 @@ auto MPU9250::init() -> bool
     auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
-    // disable I2C as recommended by the datasheet
-    res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, MPU_BIT_I2C_IF_DIS, CONFIG_REGISTER_SPEED);
-    std::this_thread::sleep_for(std::chrono::milliseconds(120));
+    if (buses.spi)
+    {
+        // disable I2C as recommended by the datasheet
+        res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, MPU_BIT_I2C_IF_DIS, CONFIG_REGISTER_SPEED);
+        std::this_thread::sleep_for(std::chrono::milliseconds(120));
+    }
 
     res &= mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, 0, CONFIG_REGISTER_SPEED); //wakeup
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
