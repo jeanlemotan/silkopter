@@ -7,8 +7,10 @@
 #ifdef RASPBERRY_PI
 extern "C"
 {
-    #include "pigpio.h"
+    #include "hw/pigpio.h"
 }
+extern std::chrono::microseconds PIGPIO_PERIOD;
+
 #endif
 
 namespace silk
@@ -23,6 +25,11 @@ PIGPIO::PIGPIO(HAL& hal)
 {
     m_pwm_channels.resize(8);
 }
+
+PIGPIO::~PIGPIO()
+{
+}
+
 
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
@@ -60,14 +67,7 @@ auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 
 auto PIGPIO::init() -> bool
 {
-    size_t period = m_init_params->period_micro;
-
-    std::vector<size_t> periods = {1, 2, 4, 5, 8, 10};
-    if (std::find(periods.begin(), periods.end(), period) == periods.end())
-    {
-        QLOGE("Invalid period {}. Supported are: {}", period, periods);
-        return false;
-    }
+    size_t period = PIGPIO_PERIOD.count();
 
     std::vector<size_t> rates = { 40000, 20000, 10000, 8000, 5000, 4000, 2500, 2000, 1600, 1250, 1000, 800, 500, 400, 250, 200, 100, 50 };
     for (auto& f: rates)
@@ -94,7 +94,6 @@ auto PIGPIO::init() -> bool
     m_pwm_channels[7].config = &m_init_params->channel_27;
 
 #if defined (RASPBERRY_PI)
-
     //first validate
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
@@ -115,20 +114,6 @@ auto PIGPIO::init() -> bool
             QLOGE("channel {}: invalid rate {}. Supported are: {}", gpio, ch.rate, rates);
             return false;
         }
-    }
-
-    QLOGI("Initializing pigpio");
-    if (gpioCfgClock(period, 1, 0) < 0 ||
-        gpioCfgPermissions(static_cast<uint64_t>(-1)) ||
-        gpioCfgInterfaces(PI_DISABLE_SOCK_IF | PI_DISABLE_FIFO_IF))
-    {
-        QLOGE("Cannot configure pigpio");
-        return false;
-    }
-    if (gpioInitialise() < 0)
-    {
-        QLOGE("Cannot initialize pigpio");
-        return false;
     }
 
     //first of all turn on the pull-down to that if the board is reset of powerred off the motors don't start spinning

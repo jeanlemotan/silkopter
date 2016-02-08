@@ -10,8 +10,6 @@ extern "C"
     #include "hw/bcm2835.h"
 }
 
-extern auto initialize_bcm() -> bool;
-
 #endif
 
 
@@ -208,12 +206,6 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     bool is_enabled = s_pwm_enabled_count > 0;
 
 #if defined RASPBERRY_PI
-    auto ok = initialize_bcm();
-    if (!ok)
-    {
-        return false;
-    }
-
     QLOGI("Setting all pwm to {}", is_enabled ? "enabled" : "disabled");
 
     bcm2835_gpio_fsel(27, BCM2835_GPIO_FSEL_OUTP);

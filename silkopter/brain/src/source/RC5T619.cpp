@@ -10,7 +10,7 @@
 
 extern "C"
 {
-    #include "pigpio.h"
+    #include "hw/pigpio.h"
 }
 
 #endif

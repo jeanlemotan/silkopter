@@ -24,6 +24,7 @@ class PIGPIO : public ISink
 {
 public:
     PIGPIO(HAL& hal);
+    ~PIGPIO();
 
     static const size_t MAX_PWM_CHANNELS = 8;
 

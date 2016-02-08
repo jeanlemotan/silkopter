@@ -77,7 +77,6 @@ LIBS += -lpcap
 rpi {
     LIBS += -lnl-3
     LIBS += -lnl-genl-3
-    LIBS += -lpigpio
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client
@@ -131,11 +130,14 @@ SOURCES += \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/processor/Comp_ECEF.cpp \
     ../../src/processor/KF_ECEF.cpp \
-    ../../src/bus/SPI_RPI.cpp \
     ../../src/hw/bcm2835.c \
-    ../../src/bus/I2C_RPI.cpp \
     ../../src/processor/Proximity.cpp \
-    ../../../libs/utils/RCP.cpp
+    ../../../libs/utils/RCP.cpp \
+    ../../src/hw/pigpio.c \
+    ../../src/bus/I2C_BCM.cpp \
+    ../../src/bus/SPI_BCM.cpp \
+    ../../src/bus/UART_BBang.cpp \
+    ../../src/hw/command.c
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -272,11 +274,13 @@ HEADERS += \
     ../../../libs/kalman/kvector_impl.hpp \
     ../../src/processor/Comp_ECEF.h \
     ../../src/processor/KF_ECEF.h \
-    ../../src/bus/SPI_RPI.h \
     ../../src/hw/bcm2835.h \
-    ../../src/bus/I2C_RPI.h \
     ../../src/processor/Proximity.h \
-    ../../../libs/common/stream/IMulti_Commands.h
+    ../../../libs/common/stream/IMulti_Commands.h \
+    ../../src/hw/pigpio.h \
+    ../../src/bus/I2C_BCM.h \
+    ../../src/bus/SPI_BCM.h \
+    ../../src/bus/UART_BBang.h
 
 DISTFILES +=
 
