@@ -1,0 +1,21 @@
+[
+{
+    "definition" : true,
+    "namespace" : "sz::UART_BBang",
+    "name": "Init_Params",
+    "members":
+    [
+        ["uint32_t", "rx_pin", {"required": true}],
+        ["bool", "invert", {"required": true, "default" : false}],
+        ["uint32_t", "baud", {"required": true}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::UART_BBang",
+    "name": "Config",
+    "members":
+    [
+    ]
+}
+]

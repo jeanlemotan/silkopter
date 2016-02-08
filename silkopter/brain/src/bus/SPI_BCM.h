@@ -4,7 +4,7 @@
 
 namespace sz
 {
-namespace SPI_RPI
+namespace SPI_BCM
 {
 struct Init_Params;
 struct Config;
@@ -17,11 +17,11 @@ namespace silk
 namespace bus
 {
 
-class SPI_RPI : public ISPI
+class SPI_BCM : public ISPI
 {
 public:
-    SPI_RPI();
-    ~SPI_RPI();
+    SPI_BCM();
+    ~SPI_BCM();
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -44,8 +44,8 @@ private:
     auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
 
 
-    std::shared_ptr<sz::SPI_RPI::Init_Params> m_init_params;
-    std::shared_ptr<sz::SPI_RPI::Config> m_config;
+    std::shared_ptr<sz::SPI_BCM::Init_Params> m_init_params;
+    std::shared_ptr<sz::SPI_BCM::Config> m_config;
 
     uint32_t m_clock_divider = 0;
 

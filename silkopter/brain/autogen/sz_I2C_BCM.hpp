@@ -27,12 +27,10 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SPI_RPI { struct Init_Params {
+namespace sz { namespace I2C_BCM { struct Init_Params {
  uint32_t dev;
-uint32_t mode;
-uint32_t speed;
 
-explicit Init_Params():dev(), mode(), speed() {  }
+explicit Init_Params():dev() {  }
 
 
  
@@ -43,17 +41,13 @@ explicit Init_Params():dev(), mode(), speed() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SPI_RPI::Init_Params > {
+class SAXEventHandler< ::sz::I2C_BCM::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< uint32_t > handler_1;
-SAXEventHandler< uint32_t > handler_2;bool has_dev;
-bool has_mode;
-bool has_speed;
+    SAXEventHandler< uint32_t > handler_0;bool has_dev;
 
     bool check_depth(const char* type)
     {
@@ -69,10 +63,6 @@ bool has_speed;
         switch (state) {
             case 0:
     return "dev";
-case 1:
-    return "mode";
-case 2:
-    return "speed";
         default:
             break;
         }
@@ -100,17 +90,13 @@ case 2:
     void reset_flags()
     {
         has_dev = false;
-has_mode = false;
-has_speed = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SPI_RPI::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::I2C_BCM::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->dev)
-, handler_1(&obj->mode)
-, handler_2(&obj->speed)
     {
         reset_flags();
     }
@@ -124,12 +110,6 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
-
-case 1:
-    return checked_event_forwarding(handler_1.Null());
-
-case 2:
-    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -147,12 +127,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
-case 1:
-    return checked_event_forwarding(handler_1.Bool(b));
-
-case 2:
-    return checked_event_forwarding(handler_2.Bool(b));
-
         default:
             break;
         }
@@ -168,12 +142,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -191,12 +159,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint(i));
-
         default:
             break;
         }
@@ -212,12 +174,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
-
-case 1:
-    return checked_event_forwarding(handler_1.Int64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -235,12 +191,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
-case 1:
-    return checked_event_forwarding(handler_1.Uint64(i));
-
-case 2:
-    return checked_event_forwarding(handler_2.Uint64(i));
-
         default:
             break;
         }
@@ -256,12 +206,6 @@ case 2:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
-
-case 1:
-    return checked_event_forwarding(handler_1.Double(d));
-
-case 2:
-    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -279,12 +223,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
-case 1:
-    return checked_event_forwarding(handler_1.String(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.String(str, length, copy));
-
         default:
             break;
         }
@@ -301,10 +239,6 @@ case 2:
             }
             else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
 						 { state=0; has_dev = true; }
-else if (utility::string_equal(str, length, "\x6d\x6f\x64\x65", 4))
-						 { state=1; has_mode = true; }
-else if (utility::string_equal(str, length, "\x73\x70\x65\x65\x64", 5))
-						 { state=2; has_speed = true; }
             else {
                 state = -1;
                 return true;
@@ -315,12 +249,6 @@ else if (utility::string_equal(str, length, "\x73\x70\x65\x65\x64", 5))
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
-
-case 1:
-    return checked_event_forwarding(handler_1.Key(str, length, copy));
-
-case 2:
-    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -339,12 +267,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
-case 1:
-    return checked_event_forwarding(handler_1.StartArray());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartArray());
-
         default:
             break;
         }
@@ -361,12 +283,6 @@ case 2:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndArray(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndArray(length));
-
         default:
             break;
         }
@@ -382,12 +298,6 @@ case 2:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
-
-case 1:
-    return checked_event_forwarding(handler_1.StartObject());
-
-case 2:
-    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -406,19 +316,11 @@ case 2:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
-case 1:
-    return checked_event_forwarding(handler_1.EndObject(length));
-
-case 2:
-    return checked_event_forwarding(handler_2.EndObject(length));
-
             default:
                 break;
             }
         } else {
             if (!has_dev) set_missing_required("dev");
-if (!has_mode) set_missing_required("mode");
-if (!has_speed) set_missing_required("speed");
         }
         return the_error.empty();
     }
@@ -439,10 +341,6 @@ if (!has_speed) set_missing_required("speed");
 
         case 0:
      handler_0.ReapError(errs); break;
-case 1:
-     handler_1.ReapError(errs); break;
-case 2:
-     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -458,24 +356,20 @@ case 2:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
-handler_1.PrepareForReuse();
-handler_2.PrepareForReuse();
 
     }
 };
 
-template < class Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c >
-struct Serializer< Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c, ::sz::SPI_RPI::Init_Params > {
+template < class Writer77f079cc8a358ea8d7872323ff1e7580cdb02d83e5ddefa1594c53e2539d60fa >
+struct Serializer< Writer77f079cc8a358ea8d7872323ff1e7580cdb02d83e5ddefa1594c53e2539d60fa, ::sz::I2C_BCM::Init_Params > {
 
-    void operator()( Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c& w, const ::sz::SPI_RPI::Init_Params& value) const
+    void operator()( Writer77f079cc8a358ea8d7872323ff1e7580cdb02d83e5ddefa1594c53e2539d60fa& w, const ::sz::I2C_BCM::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x64\x65\x76", 3, false); Serializer< Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c, uint32_t >()(w, value.dev);
-w.Key("\x6d\x6f\x64\x65", 4, false); Serializer< Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c, uint32_t >()(w, value.mode);
-w.Key("\x73\x70\x65\x65\x64", 5, false); Serializer< Writere09217728ee7e7c15de60e2a76a3d197f5755fb5b0ba8f1688be13dfb66e4f4c, uint32_t >()(w, value.speed);
+        w.Key("\x64\x65\x76", 3, false); Serializer< Writer77f079cc8a358ea8d7872323ff1e7580cdb02d83e5ddefa1594c53e2539d60fa, uint32_t >()(w, value.dev);
 
-        w.EndObject(3);
+        w.EndObject(1);
     }
 
 };
@@ -509,7 +403,7 @@ w.Key("\x73\x70\x65\x65\x64", 5, false); Serializer< Writere09217728ee7e7c15de60
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace SPI_RPI { struct Config {
+namespace sz { namespace I2C_BCM { struct Config {
  
 
 explicit Config() {  }
@@ -523,7 +417,7 @@ explicit Config() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::SPI_RPI::Config > {
+class SAXEventHandler< ::sz::I2C_BCM::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -574,7 +468,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::SPI_RPI::Config * obj)
+    explicit SAXEventHandler( ::sz::I2C_BCM::Config * obj)
         : state(-1)
         , depth(0)
         
@@ -825,10 +719,10 @@ public:
     }
 };
 
-template < class Writerefeaf68c91cffa2a846562a506ccfc6826cfd0d1755a86b29db6cb855aa8fbc3 >
-struct Serializer< Writerefeaf68c91cffa2a846562a506ccfc6826cfd0d1755a86b29db6cb855aa8fbc3, ::sz::SPI_RPI::Config > {
+template < class Writerfe1a03163cbeb93774fe123b99470902f80d11e69709c2f35eea7d4e8134e2b5 >
+struct Serializer< Writerfe1a03163cbeb93774fe123b99470902f80d11e69709c2f35eea7d4e8134e2b5, ::sz::I2C_BCM::Config > {
 
-    void operator()( Writerefeaf68c91cffa2a846562a506ccfc6826cfd0d1755a86b29db6cb855aa8fbc3& w, const ::sz::SPI_RPI::Config& value) const
+    void operator()( Writerfe1a03163cbeb93774fe123b99470902f80d11e69709c2f35eea7d4e8134e2b5& w, const ::sz::I2C_BCM::Config& value) const
     {
         w.StartObject();
 

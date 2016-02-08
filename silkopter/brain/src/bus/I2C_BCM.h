@@ -4,7 +4,7 @@
 
 namespace sz
 {
-namespace I2C_RPI
+namespace I2C_BCM
 {
 struct Init_Params;
 struct Config;
@@ -17,11 +17,11 @@ namespace silk
 namespace bus
 {
 
-class I2C_RPI : public II2C
+class I2C_BCM : public II2C
 {
 public:
-    I2C_RPI();
-    ~I2C_RPI();
+    I2C_BCM();
+    ~I2C_BCM();
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -42,8 +42,8 @@ public:
 private:
     auto init() -> bool;
 
-    std::shared_ptr<sz::I2C_RPI::Init_Params> m_init_params;
-    std::shared_ptr<sz::I2C_RPI::Config> m_config;
+    std::shared_ptr<sz::I2C_BCM::Init_Params> m_init_params;
+    std::shared_ptr<sz::I2C_BCM::Config> m_config;
 
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;

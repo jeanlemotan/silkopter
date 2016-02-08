@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::SPI_RPI",
+    "namespace" : "sz::SPI_BCM",
     "name": "Init_Params",
     "members":
     [
@@ -12,7 +12,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::SPI_RPI",
+    "namespace" : "sz::SPI_BCM",
     "name": "Config",
     "members":
     [

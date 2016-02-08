@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::I2C_RPI",
+    "namespace" : "sz::I2C_BCM",
     "name": "Init_Params",
     "members":
     [
@@ -10,7 +10,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::I2C_RPI",
+    "namespace" : "sz::I2C_BCM",
     "name": "Config",
     "members":
     [

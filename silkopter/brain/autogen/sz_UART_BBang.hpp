@@ -27,10 +27,12 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace I2C_RPI { struct Init_Params {
- uint32_t dev;
+namespace sz { namespace UART_BBang { struct Init_Params {
+ uint32_t rx_pin;
+bool invert;
+uint32_t baud;
 
-explicit Init_Params():dev() {  }
+explicit Init_Params():rx_pin(), invert(false), baud() {  }
 
 
  
@@ -41,13 +43,17 @@ explicit Init_Params():dev() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::I2C_RPI::Init_Params > {
+class SAXEventHandler< ::sz::UART_BBang::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;bool has_dev;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< bool > handler_1;
+SAXEventHandler< uint32_t > handler_2;bool has_rx_pin;
+bool has_invert;
+bool has_baud;
 
     bool check_depth(const char* type)
     {
@@ -62,7 +68,11 @@ private:
     {
         switch (state) {
             case 0:
-    return "dev";
+    return "rx_pin";
+case 1:
+    return "invert";
+case 2:
+    return "baud";
         default:
             break;
         }
@@ -89,14 +99,18 @@ private:
 
     void reset_flags()
     {
-        has_dev = false;
+        has_rx_pin = false;
+has_invert = false;
+has_baud = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::I2C_RPI::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::UART_BBang::Init_Params * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->dev)
+        , handler_0(&obj->rx_pin)
+, handler_1(&obj->invert)
+, handler_2(&obj->baud)
     {
         reset_flags();
     }
@@ -110,6 +124,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -127,6 +147,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -142,6 +168,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -159,6 +191,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -174,6 +212,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -191,6 +235,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -206,6 +256,12 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -223,6 +279,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -237,8 +299,12 @@ public:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x64\x65\x76", 3))
-						 { state=0; has_dev = true; }
+            else if (utility::string_equal(str, length, "\x72\x78\x5f\x70\x69\x6e", 6))
+						 { state=0; has_rx_pin = true; }
+else if (utility::string_equal(str, length, "\x69\x6e\x76\x65\x72\x74", 6))
+						 { state=1; has_invert = true; }
+else if (utility::string_equal(str, length, "\x62\x61\x75\x64", 4))
+						 { state=2; has_baud = true; }
             else {
                 state = -1;
                 return true;
@@ -249,6 +315,12 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -267,6 +339,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -283,6 +361,12 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -298,6 +382,12 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -316,11 +406,19 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_dev) set_missing_required("dev");
+            if (!has_rx_pin) set_missing_required("rx_pin");
+if (!has_invert) set_missing_required("invert");
+if (!has_baud) set_missing_required("baud");
         }
         return the_error.empty();
     }
@@ -341,6 +439,10 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -356,20 +458,24 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
 
-template < class Writer4a4785540ad16ddb05aeda98e6ceeb85f4aa99d3d8b165c18851ddbd612d3ea7 >
-struct Serializer< Writer4a4785540ad16ddb05aeda98e6ceeb85f4aa99d3d8b165c18851ddbd612d3ea7, ::sz::I2C_RPI::Init_Params > {
+template < class Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2 >
+struct Serializer< Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2, ::sz::UART_BBang::Init_Params > {
 
-    void operator()( Writer4a4785540ad16ddb05aeda98e6ceeb85f4aa99d3d8b165c18851ddbd612d3ea7& w, const ::sz::I2C_RPI::Init_Params& value) const
+    void operator()( Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2& w, const ::sz::UART_BBang::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x64\x65\x76", 3, false); Serializer< Writer4a4785540ad16ddb05aeda98e6ceeb85f4aa99d3d8b165c18851ddbd612d3ea7, uint32_t >()(w, value.dev);
+        w.Key("\x72\x78\x5f\x70\x69\x6e", 6, false); Serializer< Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2, uint32_t >()(w, value.rx_pin);
+w.Key("\x69\x6e\x76\x65\x72\x74", 6, false); Serializer< Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2, bool >()(w, value.invert);
+w.Key("\x62\x61\x75\x64", 4, false); Serializer< Writer7e1adf25f5dd519894dd4ed0d090e19291f910c24b31cdef76002acb1df4b6e2, uint32_t >()(w, value.baud);
 
-        w.EndObject(1);
+        w.EndObject(3);
     }
 
 };
@@ -403,7 +509,7 @@ struct Serializer< Writer4a4785540ad16ddb05aeda98e6ceeb85f4aa99d3d8b165c18851ddb
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace I2C_RPI { struct Config {
+namespace sz { namespace UART_BBang { struct Config {
  
 
 explicit Config() {  }
@@ -417,7 +523,7 @@ explicit Config() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::I2C_RPI::Config > {
+class SAXEventHandler< ::sz::UART_BBang::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -468,7 +574,7 @@ private:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::I2C_RPI::Config * obj)
+    explicit SAXEventHandler( ::sz::UART_BBang::Config * obj)
         : state(-1)
         , depth(0)
         
@@ -719,10 +825,10 @@ public:
     }
 };
 
-template < class Writerbc76d02dc004a9378534b6c32005858e2ec7a39d9a340151a1279a75a590081b >
-struct Serializer< Writerbc76d02dc004a9378534b6c32005858e2ec7a39d9a340151a1279a75a590081b, ::sz::I2C_RPI::Config > {
+template < class Writere5095dd59f1d91677c51ed400967b1aadc25f04ed2bda0220e2c51338b4d9541 >
+struct Serializer< Writere5095dd59f1d91677c51ed400967b1aadc25f04ed2bda0220e2c51338b4d9541, ::sz::UART_BBang::Config > {
 
-    void operator()( Writerbc76d02dc004a9378534b6c32005858e2ec7a39d9a340151a1279a75a590081b& w, const ::sz::I2C_RPI::Config& value) const
+    void operator()( Writere5095dd59f1d91677c51ed400967b1aadc25f04ed2bda0220e2c51338b4d9541& w, const ::sz::UART_BBang::Config& value) const
     {
         w.StartObject();
 

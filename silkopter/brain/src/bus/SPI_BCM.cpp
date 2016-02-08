@@ -1,73 +1,16 @@
 #include "BrainStdAfx.h"
-#include "bus/SPI_RPI.h"
+#include "bus/SPI_BCM.h"
 
 #ifdef RASPBERRY_PI
 
 extern "C"
 {
-    #include "pigpio.h"
     #include "hw/bcm2835.h"
 }
 
 #endif
 
-#include "sz_SPI_RPI.hpp"
-
-#ifdef RASPBERRY_PI
-
-///////////////////////////////////////////////////////////////////
-
-//auto initialize_pigpio() -> bool
-//{
-//    static bool initialized = false;
-//    if (initialized)
-//    {
-//        return true;
-//    }
-
-//    if (gpioGetMode(27) == PI_NOT_INITIALISED)
-//    {
-//        QLOGI("Initializing pigpio");
-//        gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
-//        if (gpioInitialise() < 0)
-//        {
-//            QLOGE("PIGPIO library initialization failed");
-//            return false;
-//        }
-//    }
-//    initialized = true;
-//    return true;
-//}
-
-auto initialize_bcm() -> bool
-{
-    static bool initialized = false;
-    if (initialized)
-    {
-        return true;
-    }
-
-    QLOGI("Initializing bcm2835");
-    if (!bcm2835_init())
-    {
-        QLOGE("bcm 2835 library initialization failed");
-        return false;
-    }
-
-    initialized = true;
-    return true;
-}
-
-auto shutdown_bcm() -> bool
-{
-    QLOGI("Shutting down bcm2835");
-    bcm2835_spi_end();
-    bcm2835_i2c_end();
-    bcm2835_close();
-    return true;
-}
-
-#endif
+#include "sz_SPI_BCM.hpp"
 
 ///////////////////////////////////////////////////////////////////
 
@@ -76,36 +19,36 @@ namespace silk
 namespace bus
 {
 
-std::mutex SPI_RPI::s_mutex;
+std::mutex SPI_BCM::s_mutex;
 
 
-SPI_RPI::SPI_RPI()
-    : m_init_params(new sz::SPI_RPI::Init_Params())
-    , m_config(new sz::SPI_RPI::Config())
+SPI_BCM::SPI_BCM()
+    : m_init_params(new sz::SPI_BCM::Init_Params())
+    , m_config(new sz::SPI_BCM::Config())
 {
 }
 
-SPI_RPI::~SPI_RPI()
+SPI_BCM::~SPI_BCM()
 {
 }
 
-auto SPI_RPI::init(rapidjson::Value const& init_params) -> bool
+auto SPI_BCM::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::init");
+    QLOG_TOPIC("spi_bcm::init");
 
-    sz::SPI_RPI::Init_Params sz;
+    sz::SPI_BCM::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize SPI_RPI data: {}", ss.str());
+        QLOGE("Cannot deserialize spi_bcm data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
-auto SPI_RPI::init() -> bool
+auto SPI_BCM::init() -> bool
 {
     if (m_init_params->dev > 1)
     {
@@ -120,11 +63,6 @@ auto SPI_RPI::init() -> bool
 
 #ifdef RASPBERRY_PI
 
-    auto ok = initialize_bcm();
-    if (!ok)
-    {
-        return false;
-    }
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
     bcm2835_spi_setChipSelectPolarity(m_init_params->dev, LOW);      // the default
@@ -134,22 +72,22 @@ auto SPI_RPI::init() -> bool
     return true;
 }
 
-void SPI_RPI::lock()
+void SPI_BCM::lock()
 {
     s_mutex.lock();
 }
 
-auto SPI_RPI::try_lock() -> bool
+auto SPI_BCM::try_lock() -> bool
 {
     return s_mutex.try_lock();
 }
 
-void SPI_RPI::unlock()
+void SPI_BCM::unlock()
 {
     s_mutex.unlock();
 }
 
-auto SPI_RPI::get_divider(uint32_t speed) const -> uint32_t
+auto SPI_BCM::get_divider(uint32_t speed) const -> uint32_t
 {
 #ifdef RASPBERRY_PI
     if (speed > 125000000) return BCM2835_SPI_CLOCK_DIVIDER_2;
@@ -173,7 +111,7 @@ auto SPI_RPI::get_divider(uint32_t speed) const -> uint32_t
 #endif
 }
 
-auto SPI_RPI::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_BCM::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
     QASSERT(size > 0);
     if (size == 0)
@@ -205,15 +143,15 @@ auto SPI_RPI::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size,
     return true;
 }
 
-auto SPI_RPI::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_BCM::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::transfer");
+    QLOG_TOPIC("spi_bcm::transfer");
     return do_transfer(tx_data, rx_data, size, speed);
 }
 
-auto SPI_RPI::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_BCM::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::transfer_register");
+    QLOG_TOPIC("spi_bcm::transfer_register");
 
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;
@@ -229,31 +167,31 @@ auto SPI_RPI::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx
     return true;
 }
 
-auto SPI_RPI::set_config(rapidjson::Value const& json) -> bool
+auto SPI_BCM::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("SPI_RPI::set_config");
+    QLOG_TOPIC("spi_bcm::set_config");
 
-    sz::SPI_RPI::Config sz;
+    sz::SPI_BCM::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize SPI_RPI config data: {}", ss.str());
+        QLOGE("Cannot deserialize spi_bcm config data: {}", ss.str());
         return false;
     }
 
     *m_config = sz;
     return true;
 }
-auto SPI_RPI::get_config() const -> rapidjson::Document
+auto SPI_BCM::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto SPI_RPI::get_init_params() const -> rapidjson::Document
+auto SPI_BCM::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);

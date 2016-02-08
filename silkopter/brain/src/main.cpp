@@ -9,10 +9,6 @@
 #include <thread>
 #include <iostream>
 
-#ifdef RASPBERRY_PI
-extern auto shutdown_bcm() -> bool;
-#endif
-
 size_t s_test = 0;
 bool s_exit = false;
 boost::asio::io_service s_async_io_service;
@@ -171,6 +167,7 @@ int main(int argc, char const* argv[])
 
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 
@@ -186,10 +183,6 @@ exit:
             async_thread.join();
         }
         hal.shutdown();
-
-#ifdef RASPBERRY_PI
-        shutdown_bcm();
-#endif
     }
     catch (std::exception const& e)
     {

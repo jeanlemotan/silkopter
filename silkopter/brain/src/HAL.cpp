@@ -9,9 +9,10 @@
 
 #include "bus/I2C_Linux.h"
 #include "bus/SPI_Linux.h"
-#include "bus/I2C_RPI.h"
-#include "bus/SPI_RPI.h"
+#include "bus/I2C_BCM.h"
+#include "bus/SPI_BCM.h"
 #include "bus/UART_Linux.h"
+#include "bus/UART_BBang.h"
 
 #include "source/Raspicam.h"
 #include "source/MPU9250.h"
@@ -64,6 +65,80 @@
 #include "autojsoncxx/boost_types.hpp"
 #include "sz_math.hpp"
 #include "sz_Multi_Config.hpp"
+
+
+
+#ifdef RASPBERRY_PI
+
+extern "C"
+{
+    #include "hw/pigpio.h"
+    #include "hw/bcm2835.h"
+}
+
+///////////////////////////////////////////////////////////////////
+
+std::chrono::microseconds PIGPIO_PERIOD(5);
+
+static auto initialize_pigpio() -> bool
+{
+    static bool initialized = false;
+    if (initialized)
+    {
+        return true;
+    }
+
+    QLOGI("Initializing pigpio");
+    if (gpioCfgClock(PIGPIO_PERIOD.count(), 1, 0) < 0 ||
+        gpioCfgPermissions(static_cast<uint64_t>(-1)))
+    {
+        QLOGE("Cannot configure pigpio");
+        return false;
+    }
+    if (gpioInitialise() < 0)
+    {
+        QLOGE("Cannot initialize pigpio");
+        return false;
+    }
+
+    initialized = true;
+    return true;
+}
+static auto shutdown_pigpio() -> bool
+{
+    gpioTerminate();
+    return true;
+}
+
+static auto initialize_bcm() -> bool
+{
+    static bool initialized = false;
+    if (initialized)
+    {
+        return true;
+    }
+
+    QLOGI("Initializing bcm2835");
+    if (!bcm2835_init())
+    {
+        QLOGE("bcm 2835 library initialization failed");
+        return false;
+    }
+
+    initialized = true;
+    return true;
+}
+
+static auto shutdown_bcm() -> bool
+{
+    QLOGI("Shutting down bcm2835");
+    bcm2835_spi_end();
+    bcm2835_i2c_end();
+    bcm2835_close();
+    return true;
+}
+
+#endif
 
 
 namespace silk
@@ -560,11 +635,28 @@ auto HAL::init(Comms& comms) -> bool
 
     QLOG_TOPIC("hal::init");
 
+#if defined (RASPBERRY_PI)
+    QLOGI("Initializing pigpio");
+    if (!initialize_pigpio())
+    {
+        QLOGE("Cannot initialize pigpio");
+        return false;
+    }
+    QLOGI("Initializing bcm");
+    if (!initialize_bcm())
+    {
+        QLOGE("Cannot initialize bcm");
+        return false;
+    }
+#endif
+
+
     m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
+    m_bus_factory.register_node<bus::UART_BBang>("UART BBang");
     m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
     m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
-    m_bus_factory.register_node<bus::I2C_RPI>("I2C RPI");
-    m_bus_factory.register_node<bus::SPI_RPI>("SPI RPI");
+    m_bus_factory.register_node<bus::I2C_BCM>("I2C BCM");
+    m_bus_factory.register_node<bus::SPI_BCM>("SPI BCM");
 
 #if !defined RASPBERRY_PI
     m_node_factory.register_node<Multi_Simulator>("Multi Simulator", *this);
@@ -835,6 +927,10 @@ auto HAL::init(Comms& comms) -> bool
 
 void HAL::shutdown()
 {
+#if defined (RASPBERRY_PI)
+    shutdown_bcm();
+    shutdown_pigpio();
+#endif
 }
 
 void HAL::generate_settings_file()
@@ -861,7 +957,7 @@ void HAL::generate_settings_file()
 //    }
     for (size_t i = 0; i < 2; i++)
     {
-        auto node = m_bus_factory.create_node("SPI RPI");
+        auto node = m_bus_factory.create_node("SPI BCM");
         QASSERT(node);
         rapidjson::Document json;
         jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
@@ -873,7 +969,7 @@ void HAL::generate_settings_file()
         valj->SetInt(1000000);
         if (node->init(json))
         {
-            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI RPI", node);
+            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI BCM", node);
             QASSERT(res);
         }
     }

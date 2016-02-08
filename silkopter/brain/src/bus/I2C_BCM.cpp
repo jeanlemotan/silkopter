@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "bus/I2C_RPI.h"
+#include "bus/I2C_BCM.h"
 
 #ifdef RASPBERRY_PI
 
@@ -8,11 +8,9 @@ extern "C"
     #include "hw/bcm2835.h"
 }
 
-extern auto initialize_bcm() -> bool;
-
 #endif
 
-#include "sz_I2C_RPI.hpp"
+#include "sz_I2C_BCM.hpp"
 
 
 namespace silk
@@ -20,38 +18,38 @@ namespace silk
 namespace bus
 {
 
-std::mutex I2C_RPI::s_mutex;
+std::mutex I2C_BCM::s_mutex;
 
 
 
-I2C_RPI::I2C_RPI()
-    : m_init_params(new sz::I2C_RPI::Init_Params())
-    , m_config(new sz::I2C_RPI::Config())
+I2C_BCM::I2C_BCM()
+    : m_init_params(new sz::I2C_BCM::Init_Params())
+    , m_config(new sz::I2C_BCM::Config())
 {
 }
 
-I2C_RPI::~I2C_RPI()
+I2C_BCM::~I2C_BCM()
 {
 }
 
-auto I2C_RPI::init(rapidjson::Value const& init_params) -> bool
+auto I2C_BCM::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::init");
+    QLOG_TOPIC("i2c_bcm::init");
 
-    sz::I2C_RPI::Init_Params sz;
+    sz::I2C_BCM::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize I2C_RPI data: {}", ss.str());
+        QLOGE("Cannot deserialize i2c_bcm data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
 
-auto I2C_RPI::init() -> bool
+auto I2C_BCM::init() -> bool
 {
     if (m_init_params->dev > 1)
     {
@@ -61,12 +59,6 @@ auto I2C_RPI::init() -> bool
 
 #ifdef RASPBERRY_PI
 
-    auto ok = initialize_bcm();
-    if (!ok)
-    {
-        return false;
-    }
-
     bcm2835_i2c_set_baudrate(400000);
     bcm2835_i2c_begin();
 
@@ -75,23 +67,23 @@ auto I2C_RPI::init() -> bool
     return true;
 }
 
-void I2C_RPI::lock()
+void I2C_BCM::lock()
 {
     s_mutex.lock();
 }
 
-auto I2C_RPI::try_lock() -> bool
+auto I2C_BCM::try_lock() -> bool
 {
     return s_mutex.try_lock();
 }
-void I2C_RPI::unlock()
+void I2C_BCM::unlock()
 {
     s_mutex.unlock();
 }
 
-auto I2C_RPI::read(uint8_t address, uint8_t* data, size_t size) -> bool
+auto I2C_BCM::read(uint8_t address, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::read");
+    QLOG_TOPIC("i2c_bcm::read");
 
 #ifdef RASPBERRY_PI
 
@@ -107,9 +99,9 @@ auto I2C_RPI::read(uint8_t address, uint8_t* data, size_t size) -> bool
 
     return true;
 }
-auto I2C_RPI::write(uint8_t address, uint8_t const* data, size_t size) -> bool
+auto I2C_BCM::write(uint8_t address, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::write");
+    QLOG_TOPIC("i2c_bcm::write");
 
 #ifdef RASPBERRY_PI
 
@@ -126,9 +118,9 @@ auto I2C_RPI::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     return true;
 }
 
-auto I2C_RPI::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
+auto I2C_BCM::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t size) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::read_register");
+    QLOG_TOPIC("i2c_bcm::read_register");
 
 #ifdef RASPBERRY_PI
 
@@ -144,9 +136,9 @@ auto I2C_RPI::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
 
     return true;
 }
-auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
+auto I2C_BCM::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::write_register");
+    QLOG_TOPIC("i2c_bcm::write_register");
 
     m_buffer.resize(size + 1);
 
@@ -171,31 +163,31 @@ auto I2C_RPI::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     return true;
 }
 
-auto I2C_RPI::set_config(rapidjson::Value const& json) -> bool
+auto I2C_BCM::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("i2c_RPI::set_config");
+    QLOG_TOPIC("i2c_bcm::set_config");
 
-    sz::I2C_RPI::Config sz;
+    sz::I2C_BCM::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize I2C_RPI config data: {}", ss.str());
+        QLOGE("Cannot deserialize i2c_bcm config data: {}", ss.str());
         return false;
     }
 
     *m_config = sz;
     return true;
 }
-auto I2C_RPI::get_config() const -> rapidjson::Document
+auto I2C_BCM::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto I2C_RPI::get_init_params() const -> rapidjson::Document
+auto I2C_BCM::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
