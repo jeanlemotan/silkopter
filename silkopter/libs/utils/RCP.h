@@ -150,6 +150,7 @@ private:
 
     struct Confirmations_Header : public Header
     {
+        constexpr static size_t MAX_CONFIRMATIONS = 127u;
         union Data
         {
             Data() : all(0) {}
@@ -163,7 +164,8 @@ private:
             bool operator<(Data const& other) const { return all < other.all; }
             bool operator==(Data const& other) const { return all == other.all; }
         };
-        uint8_t count;
+        uint8_t count : 7;
+        uint8_t is_compressed : 1;
     };
 
     static_assert(sizeof(Confirmations_Header::Data) == 8, "Data too big");
@@ -203,6 +205,12 @@ private:
 
     std::vector<Socket_Data> m_sockets;
 
+    struct Compression_State
+    {
+        std::vector<uint8_t> buffer;
+        std::vector<uint8_t> lz4_state;
+    };
+
     struct TX
     {
         struct Datagram : public detail::Pool_Item_Base
@@ -232,6 +240,7 @@ private:
         std::mutex confirmations_mutex;
         std::deque<Confirmation> confirmations;
         q::Clock::time_point confirmations_last_time_point = q::Clock::now();
+        Compression_State confirmations_comp_state;
         /////
 
         //--------------------------------------------
@@ -262,8 +271,7 @@ private:
 
             /////
             std::mutex send_mutex;
-            std::vector<uint8_t> compression_buffer;
-            std::vector<uint8_t> lz4_state;
+            Compression_State comp_state;
             std::vector<Datagram_ptr> fragments_to_insert;
             /////
         };
@@ -276,9 +284,7 @@ private:
 
     struct RX
     {
-        std::vector<uint8_t> compression_buffer;
-
-        //std::vector<uint8_t> temp_buffer;
+        std::vector<uint8_t> confirmations_decompression_buffer;
 
         struct Datagram : public detail::Pool_Item_Base
         {
@@ -305,6 +311,7 @@ private:
             /////
             std::mutex mutex;
             std::deque<Item> packets;
+            std::vector<uint8_t> decompression_buffer;
             /////
         };
 

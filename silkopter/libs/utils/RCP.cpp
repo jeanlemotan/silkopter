@@ -129,8 +129,10 @@ RCP::RCP()
 
     for (auto& ch: m_tx.channel_data)
     {
-        ch.lz4_state.resize(LZ4_sizeofState());
+        ch.comp_state.lz4_state.resize(LZ4_sizeofState());
     }
+
+    m_tx.confirmations_comp_state.lz4_state.resize(LZ4_sizeofState());
 }
 
 RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
@@ -291,18 +293,18 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t c
         //auto start = q::Clock::now();
 
         auto comp_size = LZ4_compressBound(static_cast<int>(size));
-        channel_data.compression_buffer.resize(comp_size);
-        int ret = LZ4_compress_fast_extState(channel_data.lz4_state.data(),
+        channel_data.comp_state.buffer.resize(comp_size);
+        int ret = LZ4_compress_fast_extState(channel_data.comp_state.lz4_state.data(),
                                              reinterpret_cast<const char*>(data),
-                                             reinterpret_cast<char*>(channel_data.compression_buffer.data()),
+                                             reinterpret_cast<char*>(channel_data.comp_state.buffer.data()),
                                              static_cast<int>(size),
                                              comp_size,
                                              5);
         if (ret > 0 && static_cast<size_t>(ret) < uncompressed_size)
         {
 //            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
-            channel_data.compression_buffer.resize(ret);
-            data = channel_data.compression_buffer.data();
+            channel_data.comp_state.buffer.resize(ret);
+            data = channel_data.comp_state.buffer.data();
             size = ret;
         }
         else
@@ -527,8 +529,8 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
 
         //copy the data
         auto const& main_header = packet->main_header;
-        m_rx.compression_buffer.clear();
-        m_rx.compression_buffer.resize(main_header.packet_size);
+        queue.decompression_buffer.clear();
+        queue.decompression_buffer.resize(main_header.packet_size);
         size_t offset = 0;
         size_t fragment_idx = 0;
         for (auto it = packet->fragments.begin(); it != packet->fragments.end(); ++it, fragment_idx++)
@@ -537,7 +539,7 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             QASSERT(it->first == fragment_idx);
             auto header_size = (fragment_idx == 0 ? sizeof(Packet_Main_Header) : sizeof(Packet_Header));
             QASSERT(fragment->data.size() > header_size);
-            std::copy(fragment->data.begin() + header_size, fragment->data.end(), m_rx.compression_buffer.begin() + offset);
+            std::copy(fragment->data.begin() + header_size, fragment->data.end(), queue.decompression_buffer.begin() + offset);
             offset += fragment->data.size() - header_size;
         }
         packet->fragments.clear();
@@ -545,7 +547,7 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         if (main_header.flag_is_compressed)
         {
             data.resize(main_header.packet_size);
-            int ret = LZ4_decompress_fast(reinterpret_cast<const char*>(m_rx.compression_buffer.data()),
+            int ret = LZ4_decompress_fast(reinterpret_cast<const char*>(queue.decompression_buffer.data()),
                                           reinterpret_cast<char*>(data.data()),
                                           static_cast<int>(main_header.packet_size));
             if (ret < 0)
@@ -557,8 +559,8 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
         }
         else
         {
-            QASSERT(m_rx.compression_buffer.size() == main_header.packet_size);
-            std::swap(data, m_rx.compression_buffer);
+            QASSERT(queue.decompression_buffer.size() == main_header.packet_size);
+            std::swap(data, queue.decompression_buffer);
         }
 
         packets.pop_front();
@@ -872,7 +874,7 @@ void RCP::send_pending_confirmations()
 
         Socket_Data& socket_data = m_sockets[m_tx.internal_queues.socket_handle];
 
-        size_t max_count = math::min<size_t>((socket_data.mtu - header_size) / sizeof(Confirmations_Header::Data), 255u);
+        size_t max_count = math::min<size_t>((socket_data.mtu - header_size) / sizeof(Confirmations_Header::Data), Confirmations_Header::MAX_CONFIRMATIONS);
 
         size_t datagrams_added = 0;
         //now take them and pack them in a datagram
@@ -881,11 +883,13 @@ void RCP::send_pending_confirmations()
         {
             size_t count = math::min(m_tx.confirmations.size() - pidx, max_count);
 
-            TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + count * sizeof(Confirmations_Header::Data)); //channel_idx:1 + id:3);
+            size_t data_size = count * sizeof(Confirmations_Header::Data);
+            TX::Datagram_ptr datagram = acquire_tx_datagram(header_size, header_size + data_size); //channel_idx:1 + id:3);
 
             auto& header = get_header<Confirmations_Header>(datagram->data.data());
             header.type = TYPE_CONFIRMATIONS;
             header.count = static_cast<uint8_t>(count);
+            header.is_compressed = 0;
 
             Confirmations_Header::Data* data_ptr = reinterpret_cast<Confirmations_Header::Data*>(datagram->data.data() + header_size);
             for (size_t i = 0; i < count; i++, pidx++, data_ptr++)
@@ -896,6 +900,24 @@ void RCP::send_pending_confirmations()
                 data_ptr->id = res.id;
                 data_ptr->fragment_idx = res.fragment_idx;
                 data_ptr->channel_idx = res.channel_idx;
+            }
+
+            int comp_size = LZ4_compressBound(static_cast<int>(data_size));
+            m_tx.confirmations_comp_state.buffer.resize(comp_size);
+            int ret = LZ4_compress_fast_extState(m_tx.confirmations_comp_state.lz4_state.data(),
+                                                 reinterpret_cast<const char*>(datagram->data.data() + header_size),
+                                                 reinterpret_cast<char*>(m_tx.confirmations_comp_state.buffer.data()),
+                                                 static_cast<int>(data_size),
+                                                 comp_size,
+                                                 1);
+            if (ret > 0 && static_cast<size_t>(ret) < data_size)
+            {
+                QLOGI("Compressed {}B -> {}B. {}%", static_cast<int>(data_size), ret, ret * 100.f / data_size);
+                data_size = ret;
+                m_tx.confirmations_comp_state.buffer.resize(data_size);
+                datagram->data.resize(header_size + data_size);
+                std::copy(m_tx.confirmations_comp_state.buffer.begin(), m_tx.confirmations_comp_state.buffer.end(), datagram->data.begin() + header_size);
+                header.is_compressed = 1;
             }
 
             prepare_to_send_datagram(*datagram);
@@ -1116,13 +1138,31 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
 {
     QASSERT(data_ptr && data_size > 0);
     auto const& header = get_header<Confirmations_Header>(data_ptr);
+    data_ptr += sizeof(Confirmations_Header);
+    data_size -= sizeof(Confirmations_Header);
+
+    if (header.is_compressed)
+    {
+        data_size = header.count * sizeof(Confirmations_Header::Data);
+        m_rx.confirmations_decompression_buffer.resize(data_size);
+        int ret = LZ4_decompress_fast(reinterpret_cast<const char*>(data_ptr),
+                                      reinterpret_cast<char*>(m_rx.confirmations_decompression_buffer.data()),
+                                      static_cast<int>(data_size));
+        if (ret < 0)
+        {
+            QLOGW("Decompression error: {}", ret);
+            return;
+        }
+
+        data_ptr = m_rx.confirmations_decompression_buffer.data();
+    }
 
     size_t count = header.count;
     QASSERT(count > 0);
 
-    QASSERT(data_size == sizeof(Confirmations_Header) + sizeof(Confirmations_Header::Data)*count);
+    QASSERT(data_size == sizeof(Confirmations_Header::Data)*count);
 
-    Confirmations_Header::Data* conf = reinterpret_cast<Confirmations_Header::Data*>(data_ptr + sizeof(Confirmations_Header));
+    Confirmations_Header::Data* conf = reinterpret_cast<Confirmations_Header::Data*>(data_ptr);
     Confirmations_Header::Data* conf_end = conf + count;
 
     //sort the confirmations ascending so we can search fast
@@ -1175,7 +1215,7 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
         }
     }
 
-//    Confirmations_Header::Data* conf = reinterpret_cast<Confirmations_Header::Data*>(data_ptr + sizeof(Confirmations_Header));
+//    Confirmations_Header::Data* conf = reinterpret_cast<Confirmations_Header::Data*>(data_ptr);
 
 //    //confirm packet datagrams
 //    {
