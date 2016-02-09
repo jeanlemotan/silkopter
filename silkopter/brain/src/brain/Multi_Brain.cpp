@@ -133,10 +133,13 @@ void Multi_Brain::process_state_mode_idle()
     {
         commands.horizontal.position.set(math::vec2f::zero);
     }
-
     if (commands.yaw.angle_rate.value != 0)
     {
         commands.yaw.angle_rate.set(0);
+    }
+    if (commands.yaw.angle.value != 0)
+    {
+        commands.yaw.angle.set(0);
     }
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
