@@ -67,15 +67,6 @@ auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 
 auto PIGPIO::init() -> bool
 {
-    size_t period = PIGPIO_PERIOD.count();
-
-    std::vector<size_t> rates = { 40000, 20000, 10000, 8000, 5000, 4000, 2500, 2000, 1600, 1250, 1000, 800, 500, 400, 250, 200, 100, 50 };
-    for (auto& f: rates)
-    {
-        auto x = math::round(double(f) / double(period));
-        f = static_cast<size_t>(x);
-    }
-
     m_pwm_channels[0].gpio = 4;
     m_pwm_channels[0].config = &m_init_params->channel_4;
     m_pwm_channels[1].gpio = 17;
@@ -94,6 +85,15 @@ auto PIGPIO::init() -> bool
     m_pwm_channels[7].config = &m_init_params->channel_27;
 
 #if defined (RASPBERRY_PI)
+    size_t period = PIGPIO_PERIOD.count();
+
+    std::vector<size_t> rates = { 40000, 20000, 10000, 8000, 5000, 4000, 2500, 2000, 1600, 1250, 1000, 800, 500, 400, 250, 200, 100, 50 };
+    for (auto& f: rates)
+    {
+        auto x = math::round(double(f) / double(period));
+        f = static_cast<size_t>(x);
+    }
+
     //first validate
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
