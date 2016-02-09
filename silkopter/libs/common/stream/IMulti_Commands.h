@@ -22,7 +22,7 @@ template<class T> struct Input_Value
 //    bool operator!=(Input_Value const& other) = delete;//{ return !operator==(other); }
 //    Input_Value const& operator=(Input_Value const& other)  = delete;//{ value = other.value; return *this; }
 
-    uint32_t version = 0;
+    uint8_t version = 0;
     T value = T();
 };
 template<> struct Input_Value<bool>
@@ -39,8 +39,8 @@ template<> struct Input_Value<bool>
 //    bool operator!=(Input_Value const& other) = delete;// { return !operator==(other); }
 //    Input_Value const& operator=(Input_Value const& other) = delete;// { value = other.value; return *this; }
 
-    uint32_t version : 31;
-    uint32_t value : 1;
+    uint8_t version : 7;
+    uint8_t value : 1;
 };
 
 
@@ -213,8 +213,8 @@ template<class T> inline void serialize(Buffer_t& buffer, silk::stream::Input_Va
 }
 template<> inline void serialize(Buffer_t& buffer, silk::stream::Input_Value<bool> const& value, size_t& off)
 {
-    uint32_t x = value.version;
-    x |= value.value << 31;
+    uint8_t x = value.version & 0x7F;
+    x |= value.value << 7;
     serialize(buffer, x, off);
 }
 
@@ -225,13 +225,13 @@ template<class T> inline auto deserialize(Buffer_t const& buffer, silk::stream::
 }
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::Input_Value<bool>& value, size_t& off) -> bool
 {
-    uint32_t x = 0;
+    uint8_t x = 0;
     if (!deserialize(buffer, x, off))
     {
         return false;
     }
-    value.version = x & 0x7FFFFFFF;
-    value.value = x >> 31;
+    value.version = x & 0x7F;
+    value.value = x >> 7;
     return true;
 }
 
