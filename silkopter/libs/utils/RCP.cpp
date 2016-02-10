@@ -912,7 +912,7 @@ void RCP::send_pending_confirmations()
                                                  1);
             if (ret > 0 && static_cast<size_t>(ret) < data_size)
             {
-                QLOGI("Compressed {}B -> {}B. {}%", static_cast<int>(data_size), ret, ret * 100.f / data_size);
+                //QLOGI("Compressed {}B -> {}B. {}%", static_cast<int>(data_size), ret, ret * 100.f / data_size);
                 data_size = ret;
                 m_tx.confirmations_comp_state.buffer.resize(data_size);
                 datagram->data.resize(header_size + data_size);
