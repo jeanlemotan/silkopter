@@ -299,9 +299,9 @@ constexpr uint8_t AKM_WHOAMI                        = 0x48;
 constexpr uint8_t READ_FLAG = 0x80;
 
 
-constexpr size_t CONFIG_REGISTER_SPEED = 500000;
+constexpr size_t CONFIG_REGISTER_SPEED = 100000;
 constexpr size_t MISC_REGISTER_SPEED = 1000000;
-constexpr size_t SENSOR_REGISTER_SPEED = 2000000;
+constexpr size_t SENSOR_REGISTER_SPEED = 1000000;
 
 
 MPU9250::MPU9250(HAL& hal)
@@ -1056,27 +1056,45 @@ void MPU9250::process()
 //                m_angular_velocity->samples.resize(sample_count);
 //                m_acceleration->samples.resize(sample_count);
 
+                constexpr size_t k_max_sample_difference = 3;
+                auto now = q::Clock::now();
+                auto acc_dt = m_acceleration->get_dt();
+                auto av_dt = m_angular_velocity->get_dt();
+
                 auto* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    math::vec3f value(x, y, z);
-                    value = value * m_acceleration_scale - m_acceleration_bias;
-                    value = math::transform(m_imu_rotation, value);
-                    m_acceleration->push_sample(value, true);
 
-
+                    if (m_acceleration->get_tp() > now + acc_dt*k_max_sample_difference)
+                    {
+                        m_stats.acc.skipped++;
+                    }
+                    else
+                    {
+                        math::vec3f value(x, y, z);
+                        value = value * m_acceleration_scale - m_acceleration_bias;
+                        value = math::transform(m_imu_rotation, value);
+                        m_acceleration->push_sample(value, true);
+                    }
 
                     x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
                     z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
 
-                    value.set(x, y, z);
-                    value = value * m_angular_velocity_sensor_scale - m_angular_velocity_bias;
-                    value = math::transform(m_imu_rotation, value);
-                    m_angular_velocity->push_sample(value, true);
+                    if (m_angular_velocity->get_tp() > now + av_dt*k_max_sample_difference)
+                    {
+                        m_stats.av.skipped++;
+                    }
+                    else
+                    {
+                        math::vec3f value(x, y, z);
+                        value = value * m_angular_velocity_sensor_scale - m_angular_velocity_bias;
+                        value = math::transform(m_imu_rotation, value);
+                        m_angular_velocity->push_sample(value, true);
+                    }
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
 //                    {
@@ -1087,8 +1105,54 @@ void MPU9250::process()
         }
     }
 
+    auto now = q::Clock::now();
+
+    //handle and report the slow clock
+    {
+        constexpr size_t k_max_sample_difference = 8;
+        {
+            auto dt = m_acceleration->get_dt();
+            if (m_acceleration->get_tp() <= now - dt * k_max_sample_difference)
+            {
+                while (m_acceleration->get_tp() <= now - dt)
+                {
+                    m_acceleration->push_last_sample(false);
+                    m_stats.acc.added++;
+                }
+            }
+        }
+        {
+            auto dt = m_angular_velocity->get_dt();
+            if (m_angular_velocity->get_tp() <= now - dt * k_max_sample_difference)
+            {
+                while (m_angular_velocity->get_tp() <= now - dt)
+                {
+                    m_angular_velocity->push_sample(math::vec3f::zero, false);
+                    m_stats.av.added++;
+                }
+            }
+        }
+    }
+
     process_thermometer(buses);
     process_magnetometer(buses);
+
+    if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
+    {
+        if (m_stats.acc.added + m_stats.acc.skipped +
+            m_stats.av.added + m_stats.av.skipped +
+            m_stats.mf.added + m_stats.mf.skipped +
+            m_stats.temp.added + m_stats.temp.skipped > 0)
+        {
+            QLOGW("IMU samples adjusted: A:+{}-{}, AV:+{}-{}, MF:+{}-{}, T:+{}-{}",
+                        m_stats.acc.added, m_stats.acc.skipped,
+                        m_stats.av.added, m_stats.av.skipped,
+                        m_stats.mf.added, m_stats.mf.skipped,
+                        m_stats.temp.added, m_stats.temp.skipped);
+        }
+        m_stats = Stats();
+        m_stats.last_report_tp = now;
+    }
 
 //    LOG_INFO("fc {} / {}", fifo_count, fc2);
 }
@@ -1137,66 +1201,84 @@ void MPU9250::process_magnetometer(Buses& buses)
 #ifdef USE_AK8963
     auto now = q::Clock::now();
 
-    auto dt = now - m_magnetic_field->get_tp();
+    auto dt = now - m_last_magnetic_field_tp;
     if (dt >= std::chrono::seconds(5))
     {
         QLOGW("reset magnetometer!");
         setup_magnetometer(buses);
     }
 
-    std::array<uint8_t, 8> tmp;
-    if (buses.i2c)
+    bool data_available = false;
+    std::array<uint8_t, 8> data;
+    if (dt >= m_magnetic_field->get_dt())
     {
-        if (dt < m_magnetic_field->get_dt())
+        if (buses.i2c)
         {
-            return;
+            if (akm_read(buses, AKM_REG_ST1, data.data(), data.size(), SENSOR_REGISTER_SPEED))
+            {
+                data_available = true;
+            }
         }
-
-        if (!akm_read(buses, AKM_REG_ST1, tmp.data(), tmp.size(), SENSOR_REGISTER_SPEED))
+        else //spi
         {
-            return;
+            //first read what is in the ext registers (so the previous reading)
+            if (mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data.data(), data.size(), SENSOR_REGISTER_SPEED))
+            {
+                data_available = true;
+            }
+
+    //        //now request the transfer again
+    //        constexpr uint8_t READ_FLAG = 0x80;
+    //        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
+    //        if (m_akm_address != akm_address)
+    //        {
+    //            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
+    //            m_akm_address = akm_address;
+    //        }
+    //        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
+    //        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + data.size());
         }
     }
-    else //spi
-    {
-        //first read what is in the ext registers (so the previous reading)
-        if (!mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, tmp.data(), tmp.size(), SENSOR_REGISTER_SPEED))
-        {
-            return;
-        }
 
-//        //now request the transfer again
-//        constexpr uint8_t READ_FLAG = 0x80;
-//        constexpr uint8_t akm_address = 0x0C | READ_FLAG;
-//        if (m_akm_address != akm_address)
-//        {
-//            mpu_write_u8(buses, MPU_REG_I2C_SLV0_ADDR, akm_address);
-//            m_akm_address = akm_address;
-//        }
-//        mpu_write_u8(buses, MPU_REG_I2C_SLV0_REG,  AKM_REG_ST1);
-//        mpu_write_u8(buses, MPU_REG_I2C_SLV0_CTRL, MPU_BIT_I2C_SLV0_EN + tmp.size());
+    if (data_available && (data[0] & AKM_DATA_READY) != 0)
+    {
+        if (data[7] & AKM_OVERFLOW)
+        {
+            m_stats.mf.overflow++;
+        }
+        else
+        {
+            math::vec3f value(static_cast<int16_t>((data[2] << 8) | data[1]),
+                            static_cast<int16_t>((data[4] << 8) | data[3]),
+                            static_cast<int16_t>((data[6] << 8) | data[5]));
+            float length_sq = math::length_sq(value);
+            if (length_sq > 10.f && length_sq < 1000.f)
+            {
+                value = math::transform(m_magnetometer_rotation, value);
+                m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;
+
+                m_last_magnetic_field_tp = q::Clock::now();
+            }
+            else
+            {
+                m_stats.mf.bad_values++;
+            }
+        }
     }
 
-    if ((tmp[0] & AKM_DATA_READY) != 0)
-    {
-        if (tmp[7] & AKM_OVERFLOW)
-        {
-            QLOGW("data overflow");
-            return;
-        }
-
-        math::vec3f data(static_cast<int16_t>((tmp[2] << 8) | tmp[1]),
-                         static_cast<int16_t>((tmp[4] << 8) | tmp[3]),
-                         static_cast<int16_t>((tmp[6] << 8) | tmp[5]));
-
-        data = math::transform(m_magnetometer_rotation, data);
-        m_last_magnetic_field_value = data * m_magnetic_field_scale - m_magnetic_field_bias;
-    }
+    constexpr size_t k_max_sample_difference = 5;
+    bool is_healthy = q::Clock::now() - m_last_magnetic_field_tp <= m_magnetic_field->get_dt() * k_max_sample_difference;
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();
+
+    if (!is_healthy)
+    {
+        m_stats.mf.added += samples_needed;
+    }
+
     while (samples_needed > 0)
     {
-        m_magnetic_field->push_sample(m_last_magnetic_field_value, true);
+        m_magnetic_field->push_sample(m_last_magnetic_field_value, is_healthy);
         samples_needed--;
     }
 

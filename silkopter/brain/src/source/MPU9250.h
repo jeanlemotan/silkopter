@@ -118,9 +118,38 @@ private:
     math::mat3f m_magnetometer_rotation;
 
     math::vec3f m_last_magnetic_field_value;
+    q::Clock::time_point m_last_magnetic_field_tp = q::Clock::now();
 
     typedef Basic_Output_Stream<stream::ITemperature> Temperature_Stream;
     mutable std::shared_ptr<Temperature_Stream> m_temperature;
+
+
+    struct Stats
+    {
+        q::Clock::time_point last_report_tp = q::Clock::now();
+        struct Acceleration
+        {
+            size_t added = 0;
+            size_t skipped = 0;
+        } acc;
+        struct Angular_Velocity
+        {
+            size_t added = 0;
+            size_t skipped = 0;
+        } av;
+        struct Magnetic_Field
+        {
+            size_t added = 0;
+            size_t skipped = 0;
+            size_t overflow = 0;
+            size_t bad_values = 0;
+        } mf;
+        struct Temperature
+        {
+            size_t added = 0;
+            size_t skipped = 0;
+        } temp;
+    } m_stats;
 
 };
 
