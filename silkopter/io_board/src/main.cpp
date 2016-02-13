@@ -1,12 +1,13 @@
-#include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
+#include <avr/sleep.h>
 
 #include "avr_stdio.h"
 #include <deque>
 #include "Chrono.h"
+#include "I2C_slave.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //COMPILER STUFF
@@ -60,10 +61,12 @@ void wdt_init(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // ADC
 
-constexpr uint8_t s_adc_ports[] = { 6, 7 };
-static uint8_t s_adc_port_idx = 0;
-static int16_t s_adc_values[sizeof(s_adc_ports)] = {0};
-static uint8_t s_adc_interrupt_count = 0;
+constexpr uint8_t k_adc_port_count = 2;
+constexpr uint8_t k_adc_ports[k_adc_port_count] = { 6, 7 };
+static volatile uint8_t s_adc_port_idx = 0;
+static volatile uint32_t s_adc_value_sums[k_adc_port_count] = {0};
+static volatile uint16_t s_adc_values[k_adc_port_count] = {0};
+static volatile uint16_t s_adc_value_counters[k_adc_port_count] = {0};
 
 void init_adc()
 {
@@ -82,7 +85,7 @@ void init_adc()
               (0<< ADIF)|	// ADC Interrupt Flag
               (1<< ADIE)|	// ADC Interrupt Enable
               (1<<ADPS2)|
-              (1<<ADPS1)|	// ADC Prescaler Selects adc sample freq.
+              (0<<ADPS1)|	// ADC Prescaler Selects adc sample freq.
               (1<<ADPS0));
 
     ADCSRB = ((1<<ADHSM)|	// High Speed mode select
@@ -98,20 +101,54 @@ void init_adc()
 
 void start_adc()
 {
-    ADCSRA |= (1<< ADSC);
+//    s_adc_value_sums[s_adc_port_idx] += ADCW << 5;
+//    s_adc_value_counters[s_adc_port_idx]++;
+
+//    s_adc_port_idx++;
+//    if (s_adc_port_idx >= k_adc_port_count)
+//    {
+//        s_adc_port_idx = 0;
+//    }
+
+//    ADMUX = (ADMUX & 0xF8) | (k_adc_ports[s_adc_port_idx]);
+
+    ADCSRA |= (1 << ADSC);
+}
+
+volatile bool is_adc_done()
+{
+    return (ADCSRA & (1 << ADSC)) == 0;
+}
+
+void compute_adc()
+{
+    for (uint8_t i = 0; i < k_adc_port_count; i++)
+    {
+        volatile uint16_t& count = s_adc_value_counters[i];
+        volatile uint32_t& sum = s_adc_value_sums[i];
+        if (count > 0)
+        {
+            s_adc_values[i] = (uint32_t)sum / (uint32_t)count;
+            count = 0;
+        }
+        sum = 0;
+    }
 }
 
 ISR(ADC_vect)
 {
-    s_adc_interrupt_count++;
-    s_adc_values[s_adc_port_idx] = ADCW;
+    s_adc_value_sums[s_adc_port_idx] += ADCW << 5;
+    s_adc_value_counters[s_adc_port_idx]++;
+
     s_adc_port_idx++;
-    if (s_adc_port_idx >= sizeof(s_adc_ports))
+    if (s_adc_port_idx >= k_adc_port_count)
     {
         s_adc_port_idx = 0;
     }
 
-    ADMUX  = (ADMUX & 0xF8) | (s_adc_ports[s_adc_port_idx]);
+    ADMUX = (ADMUX & 0xF8) | (k_adc_ports[s_adc_port_idx]);
+
+    ADCSRA |= (1 << ADSC); //start another conversion
 }
 
 
@@ -422,6 +459,8 @@ static void init_pwm()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+uint8_t s_i2c_buffer[4] = {};
+
 void setup()
 {
     int mcusr_value = MCUSR;
@@ -466,8 +505,12 @@ void setup()
 //        chrono::delay(chrono::millis(1));
 //    }
 
-    init_pwm();
+    //init_pwm();
     init_adc();
+    //i2c_slave::init(0x17, false);
+    TWI_init(F_CPU, 100000, s_i2c_buffer, sizeof(s_i2c_buffer), nullptr);
+    TWI_enable_slave_mode(0x17, 0xFF, 0);
+
     sei();
 }
 
@@ -477,19 +520,16 @@ int main()
 
     start_adc();
 
-    chrono::time_ms last_adc = chrono::now();
-
     while (true)
     {
-        printf("ADC: %d, %d / %d\n", (int)s_adc_values[0], (int)s_adc_values[1], (int)s_adc_interrupt_count);
-
-        auto now = chrono::now();
-        if (now - last_adc > chrono::millis(10))
         {
-            last_adc = now;
-            start_adc();
+            Scope_Sync ss;
+            if (s_adc_value_counters[1] >= 40)
+            {
+                compute_adc();
+                memcpy((uint8_t*)s_i2c_buffer, (uint8_t*)s_adc_values, sizeof(s_adc_values));
+            }
         }
-
-        OCR1A++;
+        chrono::delay(chrono::millis(2));
     }
 }

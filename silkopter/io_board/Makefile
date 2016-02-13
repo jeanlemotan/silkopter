@@ -19,7 +19,7 @@ EXTRAINCDIRS = src src/stl
 SRC =
 
 # specify *.cpp source files pertaining to my project
-PSRC = src/main.cpp src/avr_stdio.cpp
+PSRC = src/main.cpp src/avr_stdio.cpp src/I2C_slave.cpp
 
 # specify additional (non-core) Arduino libraries to include
 #ARDLIBS = SoftwareSerial

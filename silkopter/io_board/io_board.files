@@ -80,3 +80,5 @@ src/stl/utility
 src/stl/valarray
 src/stl/vector
 src/Storage.h
+src/I2C_slave.cpp
+src/I2C_slave.h
