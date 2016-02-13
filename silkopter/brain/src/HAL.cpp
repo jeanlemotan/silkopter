@@ -19,6 +19,7 @@
 #include "source/MS5611.h"
 #include "source/RC5T619.h"
 #include "source/ADS1115.h"
+#include "source/AVRADC.h"
 #include "source/SRF01.h"
 #include "source/SRF02.h"
 #include "source/MaxSonar.h"
@@ -672,6 +673,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Raspicam>("Raspicam", *this);
     m_node_factory.register_node<RC5T619>("RC5T619", *this);
     m_node_factory.register_node<ADS1115>("ADS1115", *this);
+    m_node_factory.register_node<AVRADC>("AVRADC", *this);
     m_node_factory.register_node<UBLOX>("UBLOX", *this);
 
     m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
