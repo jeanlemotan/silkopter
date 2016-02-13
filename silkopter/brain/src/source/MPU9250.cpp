@@ -1139,15 +1139,12 @@ void MPU9250::process()
 
     if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
     {
-        if (m_stats.acc.added + m_stats.acc.skipped +
-            m_stats.av.added + m_stats.av.skipped +
-            m_stats.mf.added + m_stats.mf.skipped +
-            m_stats.temp.added + m_stats.temp.skipped > 0)
+        if (m_stats != Stats())
         {
-            QLOGW("IMU samples adjusted: A:+{}-{}, AV:+{}-{}, MF:+{}-{}, T:+{}-{}",
+            QLOGW("IMU stats: A:a{}s{}, AV:a{}s{}, MF:r{}a{}s{}o{}b{}, T:a{}s{}",
                         m_stats.acc.added, m_stats.acc.skipped,
                         m_stats.av.added, m_stats.av.skipped,
-                        m_stats.mf.added, m_stats.mf.skipped,
+                        m_stats.mf.reset, m_stats.mf.added, m_stats.mf.skipped, m_stats.mf.overflow, m_stats.mf.bad_values,
                         m_stats.temp.added, m_stats.temp.skipped);
         }
         m_stats = Stats();
@@ -1168,28 +1165,38 @@ void MPU9250::process_thermometer(Buses& buses)
     }
 
     uint16_t data = 0;
-    auto res = mpu_read_u16(buses, MPU_REG_TEMP_OUT_H, data, SENSOR_REGISTER_SPEED);
-    if (!res)
+    if (mpu_read_u16(buses, MPU_REG_TEMP_OUT_H, data, SENSOR_REGISTER_SPEED))
     {
-        return;
+        int16_t itemp = static_cast<int16_t>(data);
+        float temp = itemp / 333.87f + 21.f;
+        if (temp > -55.f && temp < 90.f)
+        {
+            m_last_temperature_value = temp;
+            m_last_temperature_tp = q::Clock::now();
+
+            m_acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temp);
+            m_acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temp) * m_acceleration_scale;
+            m_acceleration_scale *= m_acceleration_sensor_scale;
+
+            m_angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temp);
+
+            m_magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temp);
+            m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
+            m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
+        }
     }
 
-    int16_t itemp = static_cast<int16_t>(data);
-    float temp = itemp / 333.87f + 21.f;
+    constexpr size_t k_max_sample_difference = 5;
+    bool is_healthy = q::Clock::now() - m_last_temperature_tp <= m_temperature->get_dt() * k_max_sample_difference;
 
-    m_acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temp);
-    m_acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temp) * m_acceleration_scale;
-    m_acceleration_scale *= m_acceleration_sensor_scale;
-
-    m_angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temp);
-
-    m_magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temp);
-    m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
-    m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
+    if (!is_healthy)
+    {
+        m_stats.temp.added += samples_needed;
+    }
 
     while (samples_needed > 0)
     {
-        m_temperature->push_sample(temp, true);
+        m_temperature->push_sample(m_last_temperature_value, is_healthy);
         samples_needed--;
     }
 }
@@ -1204,7 +1211,7 @@ void MPU9250::process_magnetometer(Buses& buses)
     auto dt = now - m_last_magnetic_field_tp;
     if (dt >= std::chrono::seconds(5))
     {
-        QLOGW("reset magnetometer!");
+        m_stats.mf.reset++;
         setup_magnetometer(buses);
     }
 
@@ -1252,7 +1259,7 @@ void MPU9250::process_magnetometer(Buses& buses)
                             static_cast<int16_t>((data[4] << 8) | data[3]),
                             static_cast<int16_t>((data[6] << 8) | data[5]));
             float length_sq = math::length_sq(value);
-            if (length_sq > 10.f && length_sq < 1000.f)
+            if (length_sq > math::square(10.f) && length_sq < math::square(1000.f))
             {
                 value = math::transform(m_magnetometer_rotation, value);
                 m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;

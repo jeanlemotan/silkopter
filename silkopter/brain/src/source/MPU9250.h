@@ -123,22 +123,32 @@ private:
     typedef Basic_Output_Stream<stream::ITemperature> Temperature_Stream;
     mutable std::shared_ptr<Temperature_Stream> m_temperature;
 
+    float m_last_temperature_value = 0;
+    q::Clock::time_point m_last_temperature_tp = q::Clock::now();
+
 
     struct Stats
     {
         q::Clock::time_point last_report_tp = q::Clock::now();
         struct Acceleration
         {
+            bool operator==(Acceleration const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Acceleration const& o) const { return !operator==(o); }
             size_t added = 0;
             size_t skipped = 0;
         } acc;
         struct Angular_Velocity
         {
+            bool operator==(Angular_Velocity const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Angular_Velocity const& o) const { return !operator==(o); }
             size_t added = 0;
             size_t skipped = 0;
         } av;
         struct Magnetic_Field
         {
+            bool operator==(Magnetic_Field const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Magnetic_Field const& o) const { return !operator==(o); }
+            size_t reset = 0;
             size_t added = 0;
             size_t skipped = 0;
             size_t overflow = 0;
@@ -146,9 +156,14 @@ private:
         } mf;
         struct Temperature
         {
+            bool operator==(Temperature const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Temperature const& o) const { return !operator==(o); }
             size_t added = 0;
             size_t skipped = 0;
         } temp;
+
+        bool operator==(Stats const& o) const { return acc == o.acc && av == o.av && mf == o.mf && temp == o.temp; }
+        bool operator!=(Stats const& o) const { return !operator==(o); }
     } m_stats;
 
 };
