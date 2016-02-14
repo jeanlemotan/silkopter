@@ -108,35 +108,53 @@ void MaxSonar::process()
         m_read_data.pop_front();
     }
 
+    auto now = q::Clock::now();
+
     //parse the entire buffer to get the latest data
-    int d = -1;
     while (m_read_data.size() >= 5) //R + XXX + New Line
     {
         char const* str = reinterpret_cast<char const*>(&m_read_data[1]);
         m_read_data[4] = 0; //replace newline with zero so we can convert this to a string
-        d = atoi(str);
+
+        m_last_distance = static_cast<float>(atoi(str)) / 100.f;
+
+        m_last_reading_tp = now;
         m_read_data.erase(m_read_data.begin(), m_read_data.begin() + 5);
     }
 
-    //TODO - add health indication
-
     //use the latest data only
-    if (d >= 0)
     {
-        float distance = static_cast<float>(d) / 100.f; //meters
+        constexpr size_t k_max_sample_difference = 5;
+
+        auto samples_needed = m_output_stream->compute_samples_needed();
 
         float min_distance = m_config->min_distance;
         float max_distance = m_config->max_distance;
-        auto value = m_config->direction * math::clamp(distance, min_distance, max_distance);
-        auto is_healthy = distance >= min_distance && distance <= max_distance;
 
-        m_output_stream->clear();
-        auto samples_needed = m_output_stream->compute_samples_needed();
+        bool is_healthy = m_last_distance >= min_distance && m_last_distance <= max_distance &&
+                        q::Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * k_max_sample_difference;
+        if (!is_healthy)
+        {
+            m_stats.added += samples_needed;
+        }
+
+        math::vec3f value = m_config->direction * math::clamp(m_last_distance, min_distance, max_distance);
+
         while (samples_needed > 0)
         {
             m_output_stream->push_sample(value, is_healthy);
             samples_needed--;
         }
+    }
+
+    if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
+    {
+        if (m_stats != Stats())
+        {
+            QLOGW("Stats: a{}", m_stats.added);
+        }
+        m_stats = Stats();
+        m_stats.last_report_tp = now;
     }
 }
 

@@ -56,6 +56,17 @@ private:
 
     std::deque<uint8_t> m_read_data;
 
+    float m_last_distance = 0;
+    q::Clock::time_point m_last_reading_tp = q::Clock::now();
+
+    struct Stats
+    {
+        q::Clock::time_point last_report_tp = q::Clock::now();
+        size_t added = 0;
+
+        bool operator==(Stats const& o) const { return added == o.added; }
+        bool operator!=(Stats const& o) const { return !operator==(o); }
+    } m_stats;
 };
 
 }
