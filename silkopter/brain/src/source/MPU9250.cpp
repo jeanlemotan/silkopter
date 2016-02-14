@@ -1259,7 +1259,7 @@ void MPU9250::process_magnetometer(Buses& buses)
                             static_cast<int16_t>((data[4] << 8) | data[3]),
                             static_cast<int16_t>((data[6] << 8) | data[5]));
             float length_sq = math::length_sq(value);
-            if (length_sq > math::square(10.f) && length_sq < math::square(1000.f))
+            if (length_sq > math::square(1.f) && length_sq < math::square(10000.f))
             {
                 value = math::transform(m_magnetometer_rotation, value);
                 m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;
