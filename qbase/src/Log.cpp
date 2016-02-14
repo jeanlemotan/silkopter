@@ -183,9 +183,9 @@ void q::log(logging::Level level, const char* file, int line, const std::string&
     {
         char mbstr[100];
         auto d = q::Clock::now() - detail::s_start_tp;
-        uint64_t us = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
-        uint32_t _us = us % 1000ULL;
-        uint64_t ms = us / 1000ULL;
+        uint32_t us = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
+        uint32_t _us = us % 1000;
+        uint32_t ms = us / 1000;
         uint32_t _ms = ms % 1000;
         uint32_t _s = ms / 1000;
         sprintf(mbstr, "[%u.%03u.%03u]", _s, _ms, _us);
