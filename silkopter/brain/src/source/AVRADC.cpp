@@ -78,14 +78,12 @@ auto AVRADC::init() -> bool
     m_adcs[0]->set_rate(m_init_params->rate);
     m_adcs[1]->set_rate(m_init_params->rate);
 
-    m_crt_adc = 0;
-
     return true;
 }
 
 auto AVRADC::start(q::Clock::time_point tp) -> bool
 {
-    m_last_tp = tp;
+    m_last_process_tp = tp;
     for (auto& adc: m_adcs)
     {
         adc->set_tp(tp);
@@ -116,35 +114,59 @@ void AVRADC::process()
     });
 
     auto now = q::Clock::now();
-    if (now - m_last_tp < MIN_CONVERSION_DURATION)
+    if (now - m_last_process_tp < MIN_CONVERSION_DURATION)
     {
         return;
     }
+    m_last_process_tp = now;
 
     //TODO - add healthy indication
     uint8_t data[4] = {0};
-    if (!i2c->read(AVRADC_ADDRESS, data, sizeof(data)))
+    if (i2c->read(AVRADC_ADDRESS, data, sizeof(data)))
     {
-        return;
+        for (size_t i = 0; i < m_adcs.size(); i++)
+        {
+            uint16_t idata = static_cast<uint16_t>((data[1 + i*2] << 8) | data[0 + i*2]);
+            float value = math::clamp(idata / 32768.f, 0.f, 1.f);
+            m_last_values[i] = value;
+        }
+        m_last_reading_tp = now;
     }
+    else
+    {
+        m_stats.bus_failures++;
+    }
+
+    constexpr size_t k_max_sample_difference = 5;
 
     for (size_t i = 0; i < m_adcs.size(); i++)
     {
-        uint16_t idata = static_cast<uint16_t>((data[1 + i*2] << 8) | data[0 + i*2]);
-
-        //scale to 0..1
-        float value = math::clamp(idata / 32768.f, 0.f, 1.f) * 5.f;
-
         //add samples up to the sample rate
-        auto samples_needed = m_adcs[i]->compute_samples_needed();
+        size_t samples_needed = m_adcs[i]->compute_samples_needed();
+        bool is_healthy = q::Clock::now() - m_last_reading_tp <= m_adcs[0]->get_dt() * k_max_sample_difference;
+        if (!is_healthy)
+        {
+            m_stats.added += samples_needed;
+        }
+
         while (samples_needed > 0)
         {
-            m_adcs[i]->push_sample(value, true);
+            m_adcs[i]->push_sample(m_last_values[i], is_healthy);
             samples_needed--;
         }
     }
 
-    m_last_tp = now;
+    if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
+    {
+        if (m_stats != Stats())
+        {
+            QLOGW("Stats: a{}, bus{}",
+                        m_stats.added,
+                        m_stats.bus_failures);
+        }
+        m_stats = Stats();
+        m_stats.last_report_tp = now;
+    }
 }
 
 auto AVRADC::set_config(rapidjson::Value const& json) -> bool

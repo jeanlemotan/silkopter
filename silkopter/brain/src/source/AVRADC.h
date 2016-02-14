@@ -51,12 +51,22 @@ private:
     std::shared_ptr<sz::AVRADC::Init_Params> m_init_params;
     std::shared_ptr<sz::AVRADC::Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    q::Clock::time_point m_last_process_tp = q::Clock::now();
+    q::Clock::time_point m_last_reading_tp = q::Clock::now();
 
     typedef Basic_Output_Stream<stream::IADC> Output_Stream;
     mutable std::array<std::shared_ptr<Output_Stream>, 2> m_adcs;
+    std::array<float, 2> m_last_values;
 
-    uint8_t m_crt_adc = 0;
+    struct Stats
+    {
+        q::Clock::time_point last_report_tp = q::Clock::now();
+        size_t added = 0;
+        size_t bus_failures = 0;
+
+        bool operator==(Stats const& o) const { return added == o.added && bus_failures == o.bus_failures; }
+        bool operator!=(Stats const& o) const { return !operator==(o); }
+    } m_stats;
 };
 
 
