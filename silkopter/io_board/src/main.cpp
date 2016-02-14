@@ -509,7 +509,7 @@ void setup()
     init_adc();
     //i2c_slave::init(0x17, false);
     TWI_init(F_CPU, 100000, s_i2c_buffer, sizeof(s_i2c_buffer), nullptr);
-    TWI_enable_slave_mode(0x17, 0xFF, 0);
+    TWI_enable_slave_mode(0x17, 0, 0);
 
     sei();
 }
