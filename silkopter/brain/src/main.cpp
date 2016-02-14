@@ -158,7 +158,7 @@ int main(int argc, char const* argv[])
                 auto start = q::Clock::now();
                 auto dt = start - last;
                 last = start;
-                if (dt > std::chrono::milliseconds(10))
+                if (dt > std::chrono::milliseconds(5))
                 {
                     QLOGW("Process Latency of {}!!!!!", dt);
                 }
@@ -167,7 +167,7 @@ int main(int argc, char const* argv[])
 
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 
