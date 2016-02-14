@@ -168,6 +168,32 @@ private:
     q::Clock::time_point m_last_process_tp = q::Clock::time_point(q::Clock::duration::zero());
     q::Clock::time_point m_last_reset_tp = q::Clock::now() - std::chrono::seconds(1000);
     q::Clock::time_point m_last_poll_tp = q::Clock::now() - std::chrono::seconds(1000);
+
+    struct Stats
+    {
+        q::Clock::time_point last_report_tp = q::Clock::now();
+        struct Position
+        {
+            bool operator==(Position const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Position const& o) const { return !operator==(o); }
+            size_t added = 0;
+        } pos;
+        struct Velocity
+        {
+            bool operator==(Velocity const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Velocity const& o) const { return !operator==(o); }
+            size_t added = 0;
+        } vel;
+        struct Info
+        {
+            bool operator==(Info const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Info const& o) const { return !operator==(o); }
+            size_t added = 0;
+        } info;
+
+        bool operator==(Stats const& o) const { return pos == o.pos && vel == o.vel && info == o.info; }
+        bool operator!=(Stats const& o) const { return !operator==(o); }
+    } m_stats;
 };
 
 

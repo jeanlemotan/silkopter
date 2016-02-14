@@ -211,7 +211,7 @@ auto MS5611::init() -> bool
 
 auto MS5611::start(q::Clock::time_point tp) -> bool
 {
-    m_last_reading_tp = tp;
+    m_last_process_tp = tp;
     m_pressure->set_tp(tp);
     m_temperature->set_tp(tp);
     return true;
@@ -236,10 +236,11 @@ void MS5611::process()
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
-    if (now - m_last_reading_tp < m_pressure->get_dt())
+    if (now - m_last_process_tp < m_pressure->get_dt())
     {
         return;
     }
+    m_last_process_tp = now;
 
     if (m_stage == 0)
     {
@@ -247,11 +248,12 @@ void MS5611::process()
         //read temperature
         if (bus_read_u24(buses, 0x00, data))
         {
+            m_last_temperature_reading_tp = now;
             m_temperature->reading = static_cast<double>(data);
         }
         else
         {
-            int a = 0;
+            m_stats.bus_failures++;
         }
 
         //next
@@ -261,7 +263,7 @@ void MS5611::process()
         }
         else
         {
-            int a = 0;
+            m_stats.bus_failures++;
         }
     }
     else
@@ -270,11 +272,12 @@ void MS5611::process()
         //read pressure
         if (bus_read_u24(buses, 0x00, data))
         {
+            m_last_pressure_reading_tp = now;
             m_pressure->reading = static_cast<double>(data);
         }
         else
         {
-            int a = 0;
+            m_stats.bus_failures++;
         }
 
         //next
@@ -286,7 +289,7 @@ void MS5611::process()
             }
             else
             {
-                int a = 0;
+                m_stats.bus_failures++;
             }
         }
         else if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
@@ -295,10 +298,9 @@ void MS5611::process()
         }
         else
         {
-            int a = 0;
+            m_stats.bus_failures++;
         }
     }
-    m_last_reading_tp = now;
 
     {
         // Formulas from manufacturer datasheet
@@ -324,22 +326,47 @@ void MS5611::process()
         float t = static_cast<float>(TEMP) * 0.01f;
         double p = (m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125;
 
+        constexpr size_t k_max_sample_difference = 5;
+
         {
             size_t samples_needed = m_pressure->compute_samples_needed();
+            bool is_healthy = q::Clock::now() - m_last_pressure_reading_tp <= m_pressure->get_dt() * k_max_sample_difference;
+            if (!is_healthy)
+            {
+                m_stats.pres.added += samples_needed;
+            }
             while (samples_needed > 0)
             {
-                m_pressure->push_sample(p, true);
+                m_pressure->push_sample(p, is_healthy);
                 samples_needed--;
             }
         }
         {
             size_t samples_needed = m_temperature->compute_samples_needed();
+            bool is_healthy = q::Clock::now() - m_last_temperature_reading_tp <= m_temperature->get_dt() * k_max_sample_difference;
+            if (!is_healthy)
+            {
+                m_stats.temp.added += samples_needed;
+            }
             while (samples_needed > 0)
             {
-                m_temperature->push_sample(t, true);
+                m_temperature->push_sample(t, is_healthy);
                 samples_needed--;
             }
         }
+    }
+
+    if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
+    {
+        if (m_stats != Stats())
+        {
+            QLOGW("Stats: P:a{}, T:a{}, bus{}",
+                        m_stats.pres.added,
+                        m_stats.temp.added,
+                        m_stats.bus_failures);
+        }
+        m_stats = Stats();
+        m_stats.last_report_tp = now;
     }
 }
 

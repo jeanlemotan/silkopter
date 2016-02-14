@@ -86,7 +86,32 @@ private:
     double		m_c6 = 0;
 
     uint8_t         m_stage = 0;
-    q::Clock::time_point m_last_reading_tp = q::Clock::now();
+    q::Clock::time_point m_last_process_tp = q::Clock::now();
+    q::Clock::time_point m_last_temperature_reading_tp = q::Clock::now();
+    q::Clock::time_point m_last_pressure_reading_tp = q::Clock::now();
+
+    struct Stats
+    {
+        q::Clock::time_point last_report_tp = q::Clock::now();
+        struct Pressure
+        {
+            bool operator==(Pressure const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Pressure const& o) const { return !operator==(o); }
+            size_t added = 0;
+        } pres;
+        struct Temperature
+        {
+            bool operator==(Temperature const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
+            bool operator!=(Temperature const& o) const { return !operator==(o); }
+            size_t added = 0;
+        } temp;
+
+        size_t bus_failures = 0;
+
+        bool operator==(Stats const& o) const { return pres == o.pres && temp == o.temp && bus_failures == o.bus_failures; }
+        bool operator!=(Stats const& o) const { return !operator==(o); }
+    } m_stats;
+
 };
 
 

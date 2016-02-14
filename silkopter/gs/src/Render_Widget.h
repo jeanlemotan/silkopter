@@ -84,7 +84,7 @@ private:
 	void resolve_depth_buffer(Buffer& buffer);
 	void finish_buffer_transfer(Buffer& buffer);
 
-	std::array<Buffer, 2> m_buffers;
+    std::array<Buffer, 1> m_buffers;
     std::atomic<size_t> m_read_buffer_idx{0};
     std::atomic<size_t> m_write_buffer_idx{0};
 	bool m_buffers_full;
