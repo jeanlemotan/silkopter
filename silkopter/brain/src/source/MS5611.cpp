@@ -35,8 +35,6 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
-constexpr uint8_t READ_FLAG = 0x80;
-
 
 MS5611::MS5611(HAL& hal)
     : m_hal(hal)
@@ -75,46 +73,38 @@ void MS5611::unlock(Buses& buses)
     }
 }
 
-auto MS5611::bus_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size) -> bool
+auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 {
-    m_dummy_tx_data.resize(size);
-    return buses.i2c ? buses.i2c->read_register(ADDR_MS5611, reg, rx_data, size)
-         : buses.spi ? buses.spi->transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size)
-         : false;
+    uint8_t tx_data[3] = {0};
+    uint8_t rx_data[3];
+    bool res = buses.i2c ? buses.i2c->read_register(ADDR_MS5611, reg, rx_data, 3)
+                : buses.spi ? buses.spi->transfer_register(reg, tx_data, rx_data, 3)
+                : false;
+    if (res)
+    {
+        dst = (((uint32_t)rx_data[0]) << 16) | (((uint32_t)rx_data[1]) << 8) | rx_data[2];
+    }
+    return res;
 }
 auto MS5611::bus_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data) -> bool
 {
     uint8_t dummy_data = 0;
     return buses.i2c ? buses.i2c->read_register_u8(ADDR_MS5611, reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u8(reg, dummy_data, rx_data)
          : false;
 }
 auto MS5611::bus_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data) -> bool
 {
     uint16_t dummy_data = 0;
     return buses.i2c ? buses.i2c->read_register_u16(ADDR_MS5611, reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data)
+         : buses.spi ? buses.spi->transfer_register_u16(reg, dummy_data, rx_data)
          : false;
 }
-auto MS5611::bus_write(Buses& buses, uint8_t reg, uint8_t const* tx_data, uint32_t size) -> bool
+auto MS5611::bus_write(Buses& buses, uint8_t data) -> bool
 {
-    m_dummy_rx_data.resize(size);
-    return buses.i2c ? buses.i2c->write_register(ADDR_MS5611, reg, tx_data, size)
-         : buses.spi ? buses.spi->transfer_register(reg, tx_data, m_dummy_rx_data.data(), size)
-         : false;
-}
-auto MS5611::bus_write_u8(Buses& buses, uint8_t reg, uint8_t const& tx_data) -> bool
-{
-    uint8_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->write_register_u8(ADDR_MS5611, reg, tx_data)
-         : buses.spi ? buses.spi->transfer_register_u8(reg, tx_data, dummy_data)
-         : false;
-}
-auto MS5611::bus_write_u16(Buses& buses, uint8_t reg, uint16_t const& tx_data) -> bool
-{
-    uint16_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->write_register_u16(ADDR_MS5611, reg, tx_data)
-         : buses.spi ? buses.spi->transfer_register_u16(reg, tx_data, dummy_data)
+    uint8_t dummy_data;
+    return buses.i2c ? buses.i2c->write(ADDR_MS5611, &data, 1)
+         : buses.spi ? buses.spi->transfer(&data, &dummy_data, 1)
          : false;
 }
 
@@ -168,14 +158,14 @@ auto MS5611::init() -> bool
 
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
-    bus_write(buses, CMD_MS5611_RESET, nullptr, 0);
+    bool res = bus_write(buses, CMD_MS5611_RESET);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // We read the factory calibration
     // The on-chip CRC is not used
     uint16_t C1, C2, C3, C4, C5, C6;
-    auto res = bus_read_u16(buses, CMD_MS5611_PROM_C1, C1);
+    res &= bus_read_u16(buses, CMD_MS5611_PROM_C1, C1);
     res &= bus_read_u16(buses, CMD_MS5611_PROM_C2, C2);
     res &= bus_read_u16(buses, CMD_MS5611_PROM_C3, C3);
     res &= bus_read_u16(buses, CMD_MS5611_PROM_C4, C4);
@@ -204,7 +194,14 @@ auto MS5611::init() -> bool
 #endif
     }
 
-    bus_write(buses, CMD_CONVERT_D2_OSR256, nullptr, 0);
+    res = bus_write(buses, CMD_CONVERT_D2_OSR256);
+    if (!res)
+    {
+        QLOGE("cannot start conversion");
+#ifdef RASPBERRY_PI
+        return false;
+#endif
+    }
 
     m_pressure->set_rate(m_init_params->pressure_rate);
     m_temperature->set_rate(m_init_params->pressure_rate / m_init_params->temperature_rate_ratio);
@@ -244,43 +241,61 @@ void MS5611::process()
         return;
     }
 
-    std::array<uint8_t, 3> buf;
     if (m_stage == 0)
     {
+        uint32_t data = 0;
         //read temperature
-        if (bus_read(buses, 0x00, buf.data(), buf.size()))
+        if (bus_read_u24(buses, 0x00, data))
         {
-            double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_temperature->reading = val;
-
+            m_temperature->reading = static_cast<double>(data);
+        }
+        else
+        {
+            int a = 0;
         }
 
         //next
-        if (bus_write(buses, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
+        if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
         {
             m_stage++;
+        }
+        else
+        {
+            int a = 0;
         }
     }
     else
     {
+        uint32_t data = 0;
         //read pressure
-        if (bus_read(buses, 0x00, buf.data(), buf.size()))
+        if (bus_read_u24(buses, 0x00, data))
         {
-            double val = (((uint32_t)buf[0]) << 16) | (((uint32_t)buf[1]) << 8) | buf[2];
-            m_pressure->reading = val;
+            m_pressure->reading = static_cast<double>(data);
+        }
+        else
+        {
+            int a = 0;
         }
 
         //next
         if (m_stage >= m_init_params->temperature_rate_ratio)
         {
-            if (bus_write(buses, CMD_CONVERT_D2_OSR256, nullptr, 0)) //read temp next
+            if (bus_write(buses, CMD_CONVERT_D2_OSR256)) //read temp next
             {
                 m_stage = 0;
             }
+            else
+            {
+                int a = 0;
+            }
         }
-        else if (bus_write(buses, CMD_CONVERT_D1_OSR256, nullptr, 0)) //read pressure next
+        else if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
         {
             m_stage++;
+        }
+        else
+        {
+            int a = 0;
         }
     }
     m_last_reading_tp = now;
@@ -310,7 +325,7 @@ void MS5611::process()
         double p = (m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125;
 
         {
-            auto samples_needed = m_pressure->compute_samples_needed();
+            size_t samples_needed = m_pressure->compute_samples_needed();
             while (samples_needed > 0)
             {
                 m_pressure->push_sample(p, true);
@@ -318,7 +333,7 @@ void MS5611::process()
             }
         }
         {
-            auto samples_needed = m_temperature->compute_samples_needed();
+            size_t samples_needed = m_temperature->compute_samples_needed();
             while (samples_needed > 0)
             {
                 m_temperature->push_sample(t, true);
