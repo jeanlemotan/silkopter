@@ -150,6 +150,7 @@ private:
             bool operator!=(Magnetic_Field const& o) const { return !operator==(o); }
             size_t reset = 0;
             size_t added = 0;
+            size_t skipped = 0;
             size_t overflow = 0;
             size_t bad_values = 0;
         } mf;
@@ -158,11 +159,10 @@ private:
             bool operator==(Temperature const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
             bool operator!=(Temperature const& o) const { return !operator==(o); }
             size_t added = 0;
+            size_t skipped = 0;
         } temp;
 
-        size_t bus_failures = 0;
-
-        bool operator==(Stats const& o) const { return acc == o.acc && av == o.av && mf == o.mf && temp == o.temp && bus_failures == o.bus_failures; }
+        bool operator==(Stats const& o) const { return acc == o.acc && av == o.av && mf == o.mf && temp == o.temp; }
         bool operator!=(Stats const& o) const { return !operator==(o); }
     } m_stats;
 

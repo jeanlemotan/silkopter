@@ -558,82 +558,47 @@ void UBLOX::process()
     //see section: 8.2 Extended TX timeout
     poll_for_data(buses);
 
+    bool is_gps_info_healthy = true;
     if (now - m_last_gps_info_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Info packets for {}", now - m_last_gps_info_tp);
         poll_for_data(buses);
+        is_gps_info_healthy = false;
     }
+    bool is_position_healthy = true;
     if (now - m_last_position_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Position packets for {}", now - m_last_position_tp);
         poll_for_data(buses);
+        is_position_healthy = false;
     }
+    bool is_velocity_healthy = true;
     if (now - m_last_velocity_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Velocity packets for {}", now - m_last_velocity_tp);
         poll_for_data(buses);
+        is_velocity_healthy = false;
     }
 
-    constexpr size_t k_max_sample_difference = 5;
-
-    bool is_gps_info_healthy = true;
+    size_t samples_needed = m_position_stream->compute_samples_needed();
+    while (samples_needed > 0)
     {
-        size_t samples_needed = m_gps_info_stream->compute_samples_needed();
-        is_gps_info_healthy = q::Clock::now() - m_last_gps_info_tp <= m_gps_info_stream->get_dt() * k_max_sample_difference;
-        if (!is_gps_info_healthy)
-        {
-            m_stats.info.added += samples_needed;
-        }
-        while (samples_needed > 0)
-        {
-            m_gps_info_stream->push_sample(m_last_gps_info_value, is_gps_info_healthy);
-            samples_needed--;
-        }
+        m_position_stream->push_sample(m_last_position_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_position_healthy);
+        samples_needed--;
     }
 
+    samples_needed = m_velocity_stream->compute_samples_needed();
+    while (samples_needed > 0)
     {
-        size_t samples_needed = m_position_stream->compute_samples_needed();
-        bool is_healthy = q::Clock::now() - m_last_position_tp <= m_position_stream->get_dt() * k_max_sample_difference;
-        if (!is_healthy)
-        {
-            m_stats.pos.added += samples_needed;
-        }
-        while (samples_needed > 0)
-        {
-            m_position_stream->push_sample(m_last_position_value, is_healthy &&
-                                           is_gps_info_healthy &&
-                                           m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
-            samples_needed--;
-        }
+        m_velocity_stream->push_sample(m_last_velocity_value, m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID && is_velocity_healthy);
+        samples_needed--;
     }
 
+    samples_needed = m_gps_info_stream->compute_samples_needed();
+    while (samples_needed > 0)
     {
-        size_t samples_needed = m_velocity_stream->compute_samples_needed();
-        bool is_healthy = q::Clock::now() - m_last_velocity_tp <= m_velocity_stream->get_dt() * k_max_sample_difference;
-        if (!is_healthy)
-        {
-            m_stats.vel.added += samples_needed;
-        }
-        while (samples_needed > 0)
-        {
-            m_velocity_stream->push_sample(m_last_velocity_value, is_healthy &&
-                                           is_gps_info_healthy &&
-                                           m_last_gps_info_value.fix != stream::IGPS_Info::Value::Fix::INVALID);
-            samples_needed--;
-        }
-    }
-
-    if (m_stats.last_report_tp + std::chrono::seconds(1) < now)
-    {
-        if (m_stats != Stats())
-        {
-            QLOGW("Stats: P:a{}, V:a{}, I:a{}",
-                        m_stats.pos.added,
-                        m_stats.vel.added,
-                        m_stats.info.added);
-        }
-        m_stats = Stats();
-        m_stats.last_report_tp = now;
+        m_gps_info_stream->push_sample(m_last_gps_info_value, is_gps_info_healthy);
+        samples_needed--;
     }
 }
 
