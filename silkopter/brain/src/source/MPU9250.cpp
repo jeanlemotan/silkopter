@@ -1021,6 +1021,10 @@ void MPU9250::process()
 
     uint16_t fifo_count;
     auto res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count, MISC_REGISTER_SPEED);
+    if (!res)
+    {
+        m_stats.bus_failures++;
+    }
 
    // float xxx = (float(fifo_count) / std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) * 1000.f;
    // LOG_INFO("{.2}b/ms", xxx);
@@ -1102,6 +1106,10 @@ void MPU9250::process()
 //                    }
                 }
             }
+            else
+            {
+                m_stats.bus_failures++;
+            }
         }
     }
 
@@ -1141,11 +1149,12 @@ void MPU9250::process()
     {
         if (m_stats != Stats())
         {
-            QLOGW("IMU stats: A:a{}s{}, AV:a{}s{}, MF:r{}a{}s{}o{}b{}, T:a{}s{}",
+            QLOGW("IMU stats: A:a{}s{}, AV:a{}s{}, MF:r{}a{}o{}b{}, T:a{}, bus{}",
                         m_stats.acc.added, m_stats.acc.skipped,
                         m_stats.av.added, m_stats.av.skipped,
-                        m_stats.mf.reset, m_stats.mf.added, m_stats.mf.skipped, m_stats.mf.overflow, m_stats.mf.bad_values,
-                        m_stats.temp.added, m_stats.temp.skipped);
+                        m_stats.mf.reset, m_stats.mf.added, m_stats.mf.overflow, m_stats.mf.bad_values,
+                        m_stats.temp.added,
+                        m_stats.bus_failures);
         }
         m_stats = Stats();
         m_stats.last_report_tp = now;
@@ -1184,6 +1193,10 @@ void MPU9250::process_thermometer(Buses& buses)
             m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
             m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
         }
+    }
+    else
+    {
+        m_stats.bus_failures++;
     }
 
     constexpr size_t k_max_sample_difference = 5;
@@ -1225,6 +1238,10 @@ void MPU9250::process_magnetometer(Buses& buses)
             {
                 data_available = true;
             }
+            else
+            {
+                m_stats.bus_failures++;
+            }
         }
         else //spi
         {
@@ -1232,6 +1249,10 @@ void MPU9250::process_magnetometer(Buses& buses)
             if (mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, data.data(), data.size(), SENSOR_REGISTER_SPEED))
             {
                 data_available = true;
+            }
+            else
+            {
+                m_stats.bus_failures++;
             }
 
     //        //now request the transfer again
