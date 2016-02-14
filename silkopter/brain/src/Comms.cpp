@@ -851,8 +851,6 @@ void Comms::process()
         }
     }
 
-    size_t x1 = sizeof(silk::stream::IMulti_Commands::Value);
-    size_t x2 = sizeof(silk::stream::IMulti_State::Value);
 
     while (auto msg = m_channels->setup.get_next_message(*m_rcp))
     {

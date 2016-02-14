@@ -1,15 +1,23 @@
 {
     "hal": {
         "multi_config": {
-            "Name": "silkopter sim",
+            "Name": "quadcopter",
             "Mass (Kg)": 0.699999988079071,
-            "Height (m)": 0.10000000149011612,
-            "Radius (m)": 0.30000001192092898,
+            "Height (m)": 0.20000000298023225,
+            "Radius (m)": 0.3499999940395355,
             "Motor Thrust @ 100% (N)": 3.799999952316284,
-            "Motor Z Torque @ 100% (Nm)": 0.10000000149011612,
-            "Motor Acceleration (s)": 0.07000000029802323,
-            "Motor Deceleration (s)": 0.10000000149011612,
+            "Motor Z Torque @ 100% (Nm)": 0.20000000298023225,
+            "Motor Acceleration (s)": 0.10000000149011612,
+            "Motor Deceleration (s)": 0.11999999731779099,
             "Motors": [
+                {
+                    "Position": {
+                        "x": 0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
                 {
                     "Position": {
                         "x": -0.25999999046325686,
@@ -20,8 +28,8 @@
                 },
                 {
                     "Position": {
-                        "x": 0.25999999046325686,
-                        "y": -0.25999999046325686,
+                        "x": -0.25999999046325686,
+                        "y": 0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": true
@@ -29,15 +37,7 @@
                 {
                     "Position": {
                         "x": 0.25999999046325686,
-                        "y": 0.25999999046325686,
-                        "z": 0.0
-                    },
-                    "Clockwise": false
-                },
-                {
-                    "Position": {
-                        "x": -0.25999999046325686,
-                        "y": 0.25999999046325686,
+                        "y": -0.25999999046325686,
                         "z": 0.0
                     },
                     "Clockwise": true
@@ -47,7 +47,7 @@
         "buses": {},
         "nodes": [
             {
-                "name": "Multi Simulator",
+                "name": "Simulator",
                 "type": "Multi Simulator",
                 "init_params": {
                     "Throttle Rate (Hz)": 100,
@@ -56,7 +56,7 @@
                     "Magnetic Field Rate (Hz)": 100,
                     "Pressure Rate (Hz)": 100,
                     "Temperature Rate (Hz)": 10,
-                    "Distance Rate (Hz)": 10,
+                    "Distance Rate (Hz)": 12,
                     "GPS Rate (Hz)": 5
                 },
                 "config": {
@@ -65,395 +65,21 @@
                     "Ground Enabled": true,
                     "Gravity Enabled": true,
                     "Noise": {
-                        "GPS Position SD": 1.0,
-                        "GPS Velocity SD": 0.009999999776482582,
-                        "GPS PACC SD": 1.0,
+                        "GPS Position SD": 2.0,
+                        "GPS Velocity SD": 0.20000000298023225,
+                        "GPS PACC SD": 0.5,
                         "GPS VACC SD": 0.10000000149011612,
-                        "Acceleration SD": 0.20000000298023225,
-                        "Angular Velocity SD": 0.05000000074505806,
+                        "Acceleration SD": 0.009999999776482582,
+                        "Angular Velocity SD": 0.009999999776482582,
                         "Magnetic Field SD": 0.10000000149011612,
                         "Pressure SD": 0.10000000149011612,
                         "Temperature SD": 0.10000000149011612,
-                        "Ground Distance SD": 0.0010000000474974514
+                        "Ground Distance SD": 0.009999999776482582
                     }
                 },
                 "input_paths": [
-                    "Motor Mixer/Throttle 0",
-                    "Motor Mixer/Throttle 1",
-                    "Motor Mixer/Throttle 2",
-                    "Motor Mixer/Throttle 3"
-                ]
-            },
-            {
-                "name": "Magnetic Field RS",
-                "type": "Magnetic Field RS",
-                "init_params": {
-                    "Input Rate (Hz)": 100,
-                    "Rate (Hz)": 1000
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 30.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Magnetic Field"
-                ]
-            },
-            {
-                "name": "Position RS (ECEF)",
-                "type": "Position RS (ECEF)",
-                "init_params": {
-                    "Input Rate (Hz)": 5,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 2.5
-                },
-                "input_paths": [
-                    "Multi Simulator/GPS Position (ecef)"
-                ]
-            },
-            {
-                "name": "Velocity RS (ECEF)",
-                "type": "Velocity RS (ECEF)",
-                "init_params": {
-                    "Input Rate (Hz)": 5,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 2.5
-                },
-                "input_paths": [
-                    "Multi Simulator/GPS Velocity (ecef)"
-                ]
-            },
-            {
-                "name": "Distance RS",
-                "type": "Distance RS",
-                "init_params": {
-                    "Input Rate (Hz)": 10,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 5.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Sonar Distance"
-                ]
-            },
-            {
-                "name": "Acceleration LPF",
-                "type": "Acceleration LPF",
-                "init_params": {
-                    "Rate (Hz)": 1000
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 20.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Acceleration"
-                ]
-            },
-            {
-                "name": "Angular Velocity LPF",
-                "type": "Angular Velocity LPF",
-                "init_params": {
-                    "Rate (Hz)": 1000
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 20.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Angular Velocity"
-                ]
-            },
-            {
-                "name": "Pressure LPF",
-                "type": "Pressure LPF",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 5.0
-                },
-                "input_paths": [
-                    "Multi Simulator/Pressure"
-                ]
-            },
-            {
-                "name": "Comp AHRS",
-                "type": "Comp AHRS",
-                "init_params": {
-                    "Rate (Hz)": 1000
-                },
-                "config": {
-                    "Drift Correction Factor (0-1)": 0.10000000149011612
-                },
-                "input_paths": [
-                    "Angular Velocity LPF/Output",
-                    "Acceleration LPF/Output",
-                    "Magnetic Field RS/Output"
-                ]
-            },
-            {
-                "name": "EKF ECEF",
-                "type": "EKF ECEF",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Position Lag (s)": 0.0,
-                    "Position Accuracy (CEP m)": 1.0,
-                    "Velocity Lag (s)": 0.0,
-                    "Velocity Accuracy (m/s)": 0.10000000149011612,
-                    "Acceleration Lag (s)": 0.20000000298023225,
-                    "Acceleration Accuracy (m/s^2)": 0.5,
-                    "Pressure Altitude Lag (s)": 0.05000000074505806,
-                    "Pressure Altitude Accuracy (m)": 0.30000001192092898
-                },
-                "input_paths": [
-                    "Position RS (ECEF)/Output",
-                    "Velocity RS (ECEF)/Output",
-                    "Linear Acceleration (Local->ENU)/Output",
-                    "Pressure LPF/Output"
-                ]
-            },
-            {
-                "name": "Proximity",
-                "type": "Proximity",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "Channels": 1
-                },
-                "config": {},
-                "input_paths": [
-                    "Distance RS/Output"
-                ]
-            },
-            {
-                "name": "Acceleration RS",
-                "type": "Acceleration RS",
-                "init_params": {
-                    "Input Rate (Hz)": 1000,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 50.0
-                },
-                "input_paths": [
-                    "Acceleration LPF/Output"
-                ]
-            },
-            {
-                "name": "Angular Velocity RS",
-                "type": "Angular Velocity RS",
-                "init_params": {
-                    "Input Rate (Hz)": 1000,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 50.0
-                },
-                "input_paths": [
-                    "Angular Velocity LPF/Output"
-                ]
-            },
-            {
-                "name": "Frame RS",
-                "type": "Frame RS",
-                "init_params": {
-                    "Input Rate (Hz)": 1000,
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Poles": 1,
-                    "Cutoff Frequency (Hz)": 50.0
-                },
-                "input_paths": [
-                    "Comp AHRS/Frame"
-                ]
-            },
-            {
-                "name": "Linear Acceleration (Local->ENU)",
-                "type": "Linear Acceleration (Local->ENU)",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {},
-                "input_paths": [
-                    "Gravity Filter/Linear Acceleration",
-                    "Frame RS/Output"
-                ]
-            },
-            {
-                "name": "Multi Brain",
-                "type": "Multi Brain",
-                "init_params": {
-                    "Rate (Hz)": 100,
-                    "Commands Rate (Hz)": 30,
-                    "State Rate (Hz)": 30
-                },
-                "config": {
-                    "Max Thrust (N)": 12.0,
-                    "Min Thrust (N)": 2.0,
-                    "Horizontal Angle": {
-                        "Max Speed (deg/s)": 1000.0,
-                        "Combined PIDs": true,
-                        "PIDs": {
-                            "kP": 4.0,
-                            "kI": 0.4000000059604645,
-                            "kD": 0.05000000074505806,
-                            "Max I": 0.4000000059604645,
-                            "D Filter": 0.0
-                        }
-                    },
-                    "Yaw Angle": {
-                        "Max Speed (deg/s)": 400.0,
-                        "PID": {
-                            "kP": 3.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        }
-                    },
-                    "Altitude": {
-                        "Max Speed (m/s)": 2.0,
-                        "LPF Poles": 1,
-                        "LPF Cutoff Frequency (Hz)": 15.0,
-                        "Speed PI": {
-                            "kP": 0.20000000298023225,
-                            "kI": 0.009999999776482582,
-                            "Max I": 0.009999999776482582
-                        },
-                        "Position P": {
-                            "kP": 1.0
-                        }
-                    }
-                },
-                "input_paths": [
-                    "Multi Pilot/Commands",
-                    "Frame RS/Output",
-                    "EKF ECEF/Position (ecef)",
-                    "EKF ECEF/Velocity (ecef)",
-                    "EKF ECEF/Linear Acceleration (ecef)",
-                    "Proximity/Proximity"
-                ]
-            },
-            {
-                "name": "Gravity Filter",
-                "type": "Gravity Filter",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {},
-                "input_paths": [
-                    "Frame RS/Output",
-                    "Acceleration RS/Output"
-                ]
-            },
-            {
-                "name": "Rate Controller",
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Feedback": {
-                        "Weight (0-1)": 1.0,
-                        "Combined XY PID": true,
-                        "XY PID": {
-                            "kP": 0.10000000149011612,
-                            "kI": 0.009999999776482582,
-                            "kD": 0.004000000189989805,
-                            "Max I": 0.009999999776482582,
-                            "D Filter": 0.0
-                        },
-                        "Z PID": {
-                            "kP": 0.14000000059604646,
-                            "kI": 0.009999999776482582,
-                            "kD": 0.0,
-                            "Max I": 0.009999999776482582,
-                            "D Filter": 0.5
-                        }
-                    },
-                    "Feedforward": {
-                        "Weight (0-1)": 0.0,
-                        "Max Torque (N)": 0.10000000149011612
-                    }
-                },
-                "input_paths": [
-                    "Angular Velocity RS/Output",
-                    "Multi Brain/Rate"
-                ]
-            },
-            {
-                "name": "Multi Pilot",
-                "type": "Multi Pilot",
-                "init_params": {
-                    "Commands Rate (Hz)": 30,
-                    "State Rate (Hz)": 30,
-                    "Video Rate (Hz)": 30
-                },
-                "config": {},
-                "input_paths": [
-                    "Multi Brain/State",
-                    ""
-                ]
-            },
-            {
-                "name": "Motor Mixer",
-                "type": "Motor Mixer",
-                "init_params": {
-                    "Rate (Hz)": 100
-                },
-                "config": {
-                    "Armed Thrust": 0.20000000298023225
-                },
-                "input_paths": [
-                    "Rate Controller/Torque",
-                    "Multi Brain/Thrust"
-                ]
-            },
-            {
-                "name": "Rate Controller 0",
-                "type": "Rate Controller",
-                "init_params": {
-                    "Rate (Hz)": 400
-                },
-                "config": {
-                    "Feedback": {
-                        "Weight (0-1)": 0.0,
-                        "Combined XY PID": true,
-                        "XY PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        },
-                        "Z PID": {
-                            "kP": 0.0,
-                            "kI": 0.0,
-                            "kD": 0.0,
-                            "Max I": 0.0,
-                            "D Filter": 0.0
-                        }
-                    },
-                    "Feedforward": {
-                        "Weight (0-1)": 1.0,
-                        "Max Torque (N)": 0.0
-                    }
-                },
-                "input_paths": [
+                    "",
+                    "",
                     "",
                     ""
                 ]

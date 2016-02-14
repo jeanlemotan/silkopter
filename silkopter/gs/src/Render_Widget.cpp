@@ -131,7 +131,7 @@ void Render_Widget::end_rendering()
 	q::System::inst().get_renderer()->flush();
 
 	q::video::gles::Interface interf;
-    interf.iglFinish();
+	interf.iglFlush();
 
 	{
 		auto& buffer = m_buffers[m_write_buffer_idx];

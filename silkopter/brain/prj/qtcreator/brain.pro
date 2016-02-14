@@ -137,8 +137,7 @@ SOURCES += \
     ../../src/bus/I2C_BCM.cpp \
     ../../src/bus/SPI_BCM.cpp \
     ../../src/bus/UART_BBang.cpp \
-    ../../src/hw/command.c \
-    ../../src/source/AVRADC.cpp
+    ../../src/hw/command.c
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -281,8 +280,7 @@ HEADERS += \
     ../../src/hw/pigpio.h \
     ../../src/bus/I2C_BCM.h \
     ../../src/bus/SPI_BCM.h \
-    ../../src/bus/UART_BBang.h \
-    ../../src/source/AVRADC.h
+    ../../src/bus/UART_BBang.h
 
 DISTFILES +=
 
