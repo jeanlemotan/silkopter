@@ -1,0 +1,471 @@
+{
+    "hal": {
+        "multi_config": {
+            "Name": "silkopter",
+            "Mass (Kg)": 0.6499999761581421,
+            "Height (m)": 0.30000001192092898,
+            "Radius (m)": 0.3199999928474426,
+            "Motor Thrust @ 100% (N)": 3.299999952316284,
+            "Motor Z Torque @ 100% (Nm)": 0.20000000298023225,
+            "Motor Acceleration (s)": 0.10000000149011612,
+            "Motor Deceleration (s)": 0.15000000596046449,
+            "Motors": [
+                {
+                    "Position": {
+                        "x": -0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": 0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                },
+                {
+                    "Position": {
+                        "x": 0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": false
+                },
+                {
+                    "Position": {
+                        "x": -0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "Clockwise": true
+                }
+            ]
+        },
+        "buses": {
+            "spi0": {
+                "type": "SPI Linux",
+                "init_params": {
+                    "dev": "/dev/spidev0.0",
+                    "mode": 0,
+                    "speed": 1000000
+                },
+                "config": {}
+            },
+            "spi1": {
+                "type": "SPI Linux",
+                "init_params": {
+                    "dev": "/dev/spidev0.1",
+                    "mode": 0,
+                    "speed": 1000000
+                },
+                "config": {}
+            },
+            "i2c1": {
+                "type": "I2C Linux",
+                "init_params": {
+                    "dev": "/dev/i2c-1"
+                },
+                "config": {}
+            },
+            "uart0": {
+                "type": "UART Linux",
+                "init_params": {
+                    "dev": "/dev/ttyAMA0",
+                    "baud": 115200
+                },
+                "config": {}
+            },
+            "bb_uart5": {
+                "type": "UART BBang",
+                "init_params": {
+                    "rx_pin": 5,
+                    "invert": true,
+                    "baud": 9600
+                },
+                "config": {}
+            }
+        },
+        "nodes": [
+            {
+                "name": "AVRADC1",
+                "type": "AVRADC",
+                "init_params": {
+                    "Bus": "i2c1",
+                    "Rate (Hz)": 200
+                },
+                "config": {},
+                "input_paths": []
+            },
+            {
+                "name": "MPU9250",
+                "type": "MPU9250",
+                "init_params": {
+                    "Bus": "spi0",
+                    "Acceleration & Angular Velocity Rate (Hz)": 1000,
+                    "Magnetic Field Rate (Hz)": 100,
+                    "Temperature Rate (Hz)": 10,
+                    "Acceleration Range (G)": 8,
+                    "Angular Velocity Range (DPS)": 500
+                },
+                "config": {
+                    "Rotation (deg)": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 180.0
+                    },
+                    "Calibration": {
+                        "Acceleration": {
+                            "Points": [
+                                {
+                                    "Temperature": 29.5,
+                                    "Bias": {
+                                        "x": 0.14038002490997315,
+                                        "y": -0.09705516695976258,
+                                        "z": 0.11181255429983139
+                                    },
+                                    "Scale": {
+                                        "x": 0.9995987415313721,
+                                        "y": 0.9984339475631714,
+                                        "z": 0.9909504652023315
+                                    }
+                                },
+                                {
+                                    "Temperature": 40.0,
+                                    "Bias": {
+                                        "x": 0.12376974523067475,
+                                        "y": -0.13861936330795289,
+                                        "z": 0.10672499984502793
+                                    },
+                                    "Scale": {
+                                        "x": 0.9997972249984741,
+                                        "y": 0.9987334609031677,
+                                        "z": 0.9927396774291992
+                                    }
+                                }
+                            ]
+                        },
+                        "Angular Velocity": {
+                            "Points": [
+                                {
+                                    "Temperature": 31.5,
+                                    "Bias": {
+                                        "x": 0.0419764518737793,
+                                        "y": 0.0549473874270916,
+                                        "z": -0.001864773454144597
+                                    }
+                                },
+                                {
+                                    "Temperature": 37.29999923706055,
+                                    "Bias": {
+                                        "x": 0.04161009564995766,
+                                        "y": 0.05338362231850624,
+                                        "z": -0.004092508461326361
+                                    }
+                                },
+                                {
+                                    "Temperature": 41.79999923706055,
+                                    "Bias": {
+                                        "x": 0.04140894487500191,
+                                        "y": 0.05222659185528755,
+                                        "z": -0.0055673085153102879
+                                    }
+                                }
+                            ]
+                        },
+                        "Magnetic Field": {
+                            "Points": [
+                                {
+                                    "Temperature": 33.29999923706055,
+                                    "Bias": {
+                                        "x": 2.123432159423828,
+                                        "y": -1.1578121185302735,
+                                        "z": 38.23945236206055
+                                    },
+                                    "Scale": {
+                                        "x": 1.0984809398651124,
+                                        "y": 1.070664405822754,
+                                        "z": 0.8653119802474976
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "input_paths": []
+            },
+            {
+                "name": "MaxSonar",
+                "type": "MaxSonar",
+                "init_params": {
+                    "Bus": "bb_uart5",
+                    "Rate (Hz)": 10
+                },
+                "config": {
+                    "Direction (normalized vector)": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -1.0
+                    },
+                    "Minimum Distance (m)": 0.20000000298023225,
+                    "Maximum Distance (m)": 6.0
+                },
+                "input_paths": []
+            },
+            {
+                "name": "Raspicam",
+                "type": "Raspicam",
+                "init_params": {
+                    "FPS": 30,
+                    "low": {
+                        "Resolution": {
+                            "x": 320,
+                            "y": 240
+                        },
+                        "Bitrate (bps)": 100000
+                    },
+                    "high": {
+                        "Resolution": {
+                            "x": 640,
+                            "y": 480
+                        },
+                        "Bitrate (bps)": 2000000
+                    },
+                    "recording": {
+                        "Resolution": {
+                            "x": 1280,
+                            "y": 960
+                        },
+                        "Bitrate (bps)": 8000000
+                    }
+                },
+                "config": {
+                    "Iso": 0,
+                    "Shutter Speed (ms)": 0,
+                    "Quality (0..1)": 0
+                },
+                "input_paths": []
+            },
+            {
+                "name": "MS5611",
+                "type": "MS5611",
+                "init_params": {
+                    "Bus": "spi1",
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate Ratio": 10
+                },
+                "config": {},
+                "input_paths": []
+            },
+            {
+                "name": "MS 5611",
+                "type": "MS5611",
+                "init_params": {
+                    "Bus": "i2c1",
+                    "Pressure Rate (Hz)": 100,
+                    "Temperature Rate Ratio": 10
+                },
+                "config": {},
+                "input_paths": []
+            },
+            {
+                "name": "PIGPIO",
+                "type": "PIGPIO",
+                "init_params": {
+                    "Period (us)": 5,
+                    "Channel 4": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 17": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 18": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 22": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 23": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 24": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 25": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 2500,
+                        "Rate (Hz)": 400
+                    },
+                    "Channel 27": {
+                        "Min": 1000,
+                        "Max": 2000,
+                        "Range": 10000,
+                        "Rate (Hz)": 100
+                    }
+                },
+                "config": {},
+                "input_paths": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            {
+                "name": "Oscillator",
+                "type": "Oscillator",
+                "init_params": {
+                    "Rate (Hz)": 100,
+                    "Component Count": 1
+                },
+                "config": {
+                    "Amplitude": 1.0,
+                    "Noise": 0.0,
+                    "Square": false,
+                    "Components": [
+                        {
+                            "Frequency (Hz)": 0.15000000596046449,
+                            "Amplitude": 1.0
+                        }
+                    ]
+                },
+                "input_paths": []
+            },
+            {
+                "name": "PWM Generator",
+                "type": "PWM Generator",
+                "init_params": {
+                    "Rate (Hz)": 100
+                },
+                "config": {
+                    "Value": 0.5
+                },
+                "input_paths": [
+                    "Oscillator/Output"
+                ]
+            },
+            {
+                "name": "MPU9250 i2c",
+                "type": "MPU9250",
+                "init_params": {
+                    "Bus": "i2c1",
+                    "Acceleration & Angular Velocity Rate (Hz)": 1000,
+                    "Magnetic Field Rate (Hz)": 100,
+                    "Temperature Rate (Hz)": 10,
+                    "Acceleration Range (G)": 8,
+                    "Angular Velocity Range (DPS)": 500
+                },
+                "config": {
+                    "Rotation (deg)": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Calibration": {
+                        "Acceleration": {
+                            "Points": [
+                                {
+                                    "Temperature": 33.5,
+                                    "Bias": {
+                                        "x": 0.06220391392707825,
+                                        "y": 0.05412860959768295,
+                                        "z": -0.04053443297743797
+                                    },
+                                    "Scale": {
+                                        "x": 0.9989395141601563,
+                                        "y": 0.9973829388618469,
+                                        "z": 0.9920925498008728
+                                    }
+                                },
+                                {
+                                    "Temperature": 41.900001525878909,
+                                    "Bias": {
+                                        "x": 0.06261353194713593,
+                                        "y": 0.06389854103326798,
+                                        "z": -0.11234229803085327
+                                    },
+                                    "Scale": {
+                                        "x": 0.9991918802261353,
+                                        "y": 0.9976440668106079,
+                                        "z": 0.992831289768219
+                                    }
+                                }
+                            ]
+                        },
+                        "Angular Velocity": {
+                            "Points": [
+                                {
+                                    "Temperature": 28.700000762939454,
+                                    "Bias": {
+                                        "x": -0.02979409694671631,
+                                        "y": 0.04304291680455208,
+                                        "z": 0.013325510546565056
+                                    }
+                                },
+                                {
+                                    "Temperature": 30.5,
+                                    "Bias": {
+                                        "x": -0.029439659789204599,
+                                        "y": 0.041436176747083667,
+                                        "z": 0.012902818620204926
+                                    }
+                                },
+                                {
+                                    "Temperature": 40.79999923706055,
+                                    "Bias": {
+                                        "x": -0.026787707582116128,
+                                        "y": 0.03422296419739723,
+                                        "z": 0.01226344145834446
+                                    }
+                                }
+                            ]
+                        },
+                        "Magnetic Field": {
+                            "Points": [
+                                {
+                                    "Temperature": 37.29999923706055,
+                                    "Bias": {
+                                        "x": -29.355459213256837,
+                                        "y": -4.172163009643555,
+                                        "z": 77.58106231689453
+                                    },
+                                    "Scale": {
+                                        "x": 1.0552043914794922,
+                                        "y": 1.017557978630066,
+                                        "z": 0.9349539875984192
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "input_paths": []
+            }
+        ]
+    }
+}
