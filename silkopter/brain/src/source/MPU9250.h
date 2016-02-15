@@ -158,6 +158,7 @@ private:
             bool operator==(Temperature const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }
             bool operator!=(Temperature const& o) const { return !operator==(o); }
             size_t added = 0;
+            size_t bad_values = 0;
         } temp;
 
         size_t bus_failures = 0;

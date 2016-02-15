@@ -950,7 +950,12 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
     {
         return math::vec3f::one;
     }
-    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
+    typename Calibration_Data::value_type key;
+    key.temperature = temperature;
+    auto it = std::upper_bound(points.begin(), points.end(), key, [](const typename Calibration_Data::value_type& a, const typename Calibration_Data::value_type& b)
+    {
+        return a.temperature < b.temperature;
+    });
     if (it == points.end()) //temp is too big, use the last point
     {
         return points.back().scale;
@@ -974,7 +979,12 @@ auto get_calibration_bias(Calibration_Data const& points, float temperature) -> 
     {
         return math::vec3f::zero;
     }
-    auto it = std::lower_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& x, float t) { return t < x.temperature; });
+    typename Calibration_Data::value_type key;
+    key.temperature = temperature;
+    auto it = std::upper_bound(points.begin(), points.end(), key, [](const typename Calibration_Data::value_type& a, const typename Calibration_Data::value_type& b)
+    {
+        return a.temperature < b.temperature;
+    });
     if (it == points.end()) //temp is too big, use the last point
     {
         return points.back().bias;
@@ -1079,8 +1089,8 @@ void MPU9250::process()
                     else
                     {
                         math::vec3f value(x, y, z);
-                        value = value * m_acceleration_scale - m_acceleration_bias;
                         value = math::transform(m_imu_rotation, value);
+                        value = value * m_acceleration_scale - m_acceleration_bias;
                         m_acceleration->push_sample(value, true);
                     }
 
@@ -1095,8 +1105,9 @@ void MPU9250::process()
                     else
                     {
                         math::vec3f value(x, y, z);
-                        value = value * m_angular_velocity_sensor_scale - m_angular_velocity_bias;
+                        value = value * m_angular_velocity_sensor_scale;
                         value = math::transform(m_imu_rotation, value);
+                        value = value - m_angular_velocity_bias;
                         m_angular_velocity->push_sample(value, true);
                     }
 
@@ -1149,11 +1160,11 @@ void MPU9250::process()
     {
         if (m_stats != Stats())
         {
-            QLOGW("IMU stats: A:a{}s{}, AV:a{}s{}, MF:r{}a{}o{}b{}, T:a{}, bus{}",
+            QLOGW("IMU stats: A:a{}s{}, AV:a{}s{}, MF:r{}a{}o{}b{}, T:a{}b{}, bus{}",
                         m_stats.acc.added, m_stats.acc.skipped,
                         m_stats.av.added, m_stats.av.skipped,
                         m_stats.mf.reset, m_stats.mf.added, m_stats.mf.overflow, m_stats.mf.bad_values,
-                        m_stats.temp.added,
+                        m_stats.temp.added, m_stats.temp.bad_values,
                         m_stats.bus_failures);
         }
         m_stats = Stats();
@@ -1192,6 +1203,10 @@ void MPU9250::process_thermometer(Buses& buses)
             m_magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temp);
             m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
             m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
+        }
+        else
+        {
+            m_stats.temp.bad_values += samples_needed;
         }
     }
     else
@@ -1329,6 +1344,7 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    //sort so we can lower_bound search the point quickly
     std::sort(m_config->calibration.acceleration.points.begin(), m_config->calibration.acceleration.points.end(),
               [](const sz::calibration::Acceleration& a, const sz::calibration::Acceleration& b)
     {
