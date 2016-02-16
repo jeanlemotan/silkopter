@@ -282,7 +282,9 @@ HEADERS += \
     ../../src/bus/I2C_BCM.h \
     ../../src/bus/SPI_BCM.h \
     ../../src/bus/UART_BBang.h \
-    ../../src/source/AVRADC.h
+    ../../src/source/AVRADC.h \
+    ../../../libs/common/node/ICombiner.h \
+    ../../src/combiner/Combiner.h
 
 DISTFILES +=
 

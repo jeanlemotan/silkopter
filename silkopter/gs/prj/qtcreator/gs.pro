@@ -161,7 +161,8 @@ HEADERS += \
     ../../../libs/utils/Coordinates.h \
     ../../src/Video_Decoder.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/radiotap/radiotap.h
+    ../../../libs/utils/radiotap/radiotap.h \
+    ../../../libs/common/node/ICombiner.h
 
 SOURCES += \
     ../../src/GS.cpp \

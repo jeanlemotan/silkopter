@@ -27,6 +27,7 @@
 #include "common/node/ISource.h"
 #include "common/node/IProcessor.h"
 #include "common/node/ILPF.h"
+#include "common/node/ICombiner.h"
 #include "common/node/IResampler.h"
 #include "common/node/IPilot.h"
 #include "common/node/IController.h"
@@ -57,6 +58,7 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IGenerator::TYPE, QColor(0xC40FF1) },
     { silk::node::IMulti_Simulator::TYPE, QColor(0xF1C40F) },
     { silk::node::IBrain::TYPE, QColor(0xC4F10F) },
+    { silk::node::ICombiner::TYPE, QColor(0xF10FC4) },
 }};
 
 
@@ -419,6 +421,7 @@ void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
     QMenu* sinks = menu.addMenu(QIcon(":/icons/Sink.png"), "Sinks");
     QMenu* processors = menu.addMenu(QIcon(":/icons/Processor.png"), "Processors");
     QMenu* lpfs = menu.addMenu(QIcon(":/icons/LPF.png"), "Low Pass Filters");
+    QMenu* combiners = menu.addMenu(QIcon(":/icons/Combiner.png"), "Combiners");
     QMenu* resamplers = menu.addMenu(QIcon(":/icons/Resampler.png"), "Resamplers");
     QMenu* controllers = menu.addMenu(QIcon(":/icons/Controller.png"), "Controllers");
     QMenu* transformers = menu.addMenu(QIcon(":/icons/Transformer.png"), "Transformers");
@@ -429,6 +432,7 @@ void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
     sinks->setEnabled(false);
     processors->setEnabled(false);
     lpfs->setEnabled(false);
+    combiners->setEnabled(false);
     resamplers->setEnabled(false);
     controllers->setEnabled(false);
     transformers->setEnabled(false);
@@ -458,6 +462,11 @@ void HAL_Window::context_menu(QGraphicsSceneMouseEvent* event)
         {
             action = lpfs->addAction(get_icon(":/icons/LPF.png", *n), prettify_name(n->name).c_str());
             lpfs->setEnabled(true);
+        }
+        else if (n->type == silk::node::ICombiner::TYPE)
+        {
+            action = combiners->addAction(get_icon(":/icons/Combiner.png", *n), prettify_name(n->name).c_str());
+            combiners->setEnabled(true);
         }
         else if (n->type == silk::node::IResampler::TYPE)
         {

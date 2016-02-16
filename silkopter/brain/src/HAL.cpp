@@ -41,6 +41,7 @@
 #include "processor/Throttle_To_PWM.h"
 #include "processor/Proximity.h"
 
+#include "combiner/Combiner.h"
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
 #include "brain/Multi_Brain.h"
@@ -725,6 +726,37 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Vec3_Generator<stream::IENU_Velocity>>("Velocity Generator (ENU)", *this);
     m_node_factory.register_node<Vec3_Generator<stream::IECEF_Velocity>>("Velocity Generator (ECEF)", *this);
 
+    m_node_factory.register_node<Combiner<stream::IAcceleration>>("Acceleration CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Acceleration>>("Acceleration CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::ILinear_Acceleration>>("Linear Acceleration CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Linear_Acceleration>>("Linear Acceleration CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Linear_Acceleration>>("Linear Acceleration CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IAngular_Velocity>>("Angular Velocity CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Angular_Velocity>>("Angular Velocity CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Angular_Velocity>>("Angular Velocity CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IADC>>("ADC CMB", *this);
+    m_node_factory.register_node<Combiner<stream::ICurrent>>("Current CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IVoltage>>("Voltage CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Position>>("Position CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IDistance>>("Distance CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Distance>>("Distance CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Distance>>("Distance CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IMagnetic_Field>>("Magnetic Field CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Magnetic_Field>>("Magnetic Field CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Magnetic_Field>>("Magnetic Field CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IPressure>>("Pressure CMB", *this);
+    m_node_factory.register_node<Combiner<stream::ITemperature>>("Temperature CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IPWM>>("PWM CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IFloat>>("Float CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IForce>>("Force CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Force>>("Force CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Force>>("Force CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::ITorque>>("Torque CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Torque>>("Torque CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Torque>>("Torque CMB (ECEF)", *this);
+    m_node_factory.register_node<Combiner<stream::IVelocity>>("Velocity CMB", *this);
+    m_node_factory.register_node<Combiner<stream::IENU_Velocity>>("Velocity CMB (ENU)", *this);
+    m_node_factory.register_node<Combiner<stream::IECEF_Velocity>>("Velocity CMB (ECEF)", *this);
 
     m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
     m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);

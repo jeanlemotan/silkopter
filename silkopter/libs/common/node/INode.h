@@ -18,6 +18,7 @@ enum class Type : uint8_t
     PILOT,
     RESAMPLER,
     TRANSFORMER,
+    COMBINER,
     CONTROLLER,
     GENERATOR,
     SIMULATOR,
