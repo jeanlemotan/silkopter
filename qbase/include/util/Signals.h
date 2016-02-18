@@ -105,6 +105,11 @@ public:
 		m_ptr.reset(nullptr);
 	}
 
+    void disconnect()
+    {
+        m_ptr.reset(nullptr);
+    }
+
 private:
 	static void disconnect_and_delete(Connection* c)
 	{
