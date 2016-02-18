@@ -812,10 +812,12 @@ auto Comms::get_multi_commands_values() const -> std::vector<stream::IMulti_Comm
 void Comms::add_multi_state_sample(stream::IMulti_State::Sample const& sample)
 {
     m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTI_STATE, sample);
+    m_channels->pilot.send(*m_rcp);
 }
 void Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
     m_channels->video.pack_all(silk::comms::Video_Message::FRAME_DATA, sample);
+    m_channels->video.send(*m_rcp);
 }
 
 void Comms::handle_multi_commands()
@@ -887,9 +889,6 @@ void Comms::process()
 
 
     m_rcp->process();
-
-    m_channels->video.send(*m_rcp);
-    m_channels->pilot.send(*m_rcp);
 
     auto now = q::Clock::now();
     if (now - m_last_rcp_tp >= RCP_PERIOD)
