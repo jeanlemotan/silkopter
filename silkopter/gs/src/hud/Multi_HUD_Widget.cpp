@@ -247,7 +247,7 @@ void Multi_HUD_Widget::process_horizontal_position()
         v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value * 5.f;
     }
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? math::radians(5.f) : math::radians(1.f);
+    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 3.f : 0.5f;
     v.x -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
     v.x += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
     v.y -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
