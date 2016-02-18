@@ -167,7 +167,9 @@ int main(int argc, char const* argv[])
 
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
-                //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#ifndef RASPBERRY_PI
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#endif
             }
         }
 
