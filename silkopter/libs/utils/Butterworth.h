@@ -47,6 +47,25 @@ template<> inline void apply_coefficients(math::vec3f& x, math::vec3f& w0, math:
     QASSERT(math::is_finite(w1));
 }
 
+template<> inline void apply_coefficients(math::vec2f& x, math::vec2f& w0, math::vec2f& w1, math::vec2f& w2, double d1, double d2, double A)
+{
+    const math::vec2d w1d(w1);
+    const math::vec2d w2d(w2);
+
+    const math::vec2d w0d = d1*w1d + d2*w2d + math::vec2d(x);
+    w0 = math::vec2f(w0d);
+    QASSERT(math::is_finite(w0));
+
+    x = math::vec2f(A*(w0d + 2.0*w1d + w2d));
+    QASSERT(math::is_finite(x));
+
+    w2 = w1;
+    QASSERT(math::is_finite(w2));
+
+    w1 = w0;
+    QASSERT(math::is_finite(w1));
+}
+
 }
 
 
