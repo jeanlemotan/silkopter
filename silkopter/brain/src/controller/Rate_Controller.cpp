@@ -148,7 +148,7 @@ auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool
     m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);
     m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.f, 1.f);
 
-    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.f);
+    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.01f);
 
     auto fill_params = [this](PID::Params& dst, sz::PID const& src)
     {
