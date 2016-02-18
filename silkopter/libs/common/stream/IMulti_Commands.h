@@ -16,6 +16,7 @@ template<class T> struct Input_Value
     Input_Value(T value) : value(value) {}
 
     void set(Value const& v) { if (value != v) { value = v; version++; } }
+    void set_unversioned(Value const& v) { value = v; }
     T const& get() const { return value; }
 
 //    bool operator==(Input_Value const& other) = delete;//{ return value == other.value; }
@@ -23,6 +24,7 @@ template<class T> struct Input_Value
 //    Input_Value const& operator=(Input_Value const& other)  = delete;//{ value = other.value; return *this; }
 
     uint8_t version = 0;
+private:
     T value = T();
 };
 template<> struct Input_Value<bool>
@@ -33,6 +35,7 @@ template<> struct Input_Value<bool>
     Input_Value(bool value) : version(0), value(value ? 1 : 0) {}
 
     void set(Value const& v) { if (value != v) { value = v; version++; } }
+    void set_unversioned(Value const& v) { value = v; }
     bool get() const { return value != 0; }
 
 //    bool operator==(Input_Value const& other) = delete;// { return value == other.value; }
@@ -40,6 +43,7 @@ template<> struct Input_Value<bool>
 //    Input_Value const& operator=(Input_Value const& other) = delete;// { value = other.value; return *this; }
 
     uint8_t version : 7;
+private:
     uint8_t value : 1;
 };
 
@@ -153,28 +157,28 @@ public:
     template<class F, class... V>
     static bool apply(F& functor, V&&... values)
     {
-        return     functor(values.toggles.land                  ...)
-                && functor(values.toggles.return_home           ...)
-                && functor(values.toggles.take_off              ...)
-                && functor(values.vertical.mode                 ...)
-                && functor(values.vertical.thrust_rate          ...)
-                && functor(values.vertical.thrust               ...)
-                && functor(values.vertical.altitude             ...)
-                && functor(values.horizontal.mode               ...)
-                && functor(values.horizontal.angle_rate         ...)
-                && functor(values.horizontal.angle              ...)
-                && functor(values.horizontal.position           ...)
-                && functor(values.yaw.mode                      ...)
-                && functor(values.yaw.angle_rate                ...)
-                && functor(values.yaw.angle                     ...)
-                && functor(values.mode                          ...)
-                && functor(values.reference_frame               ...)
-                && functor(values.assists.stay_in_battery_range ...)
-                && functor(values.assists.stay_in_perimeter     ...)
-                && functor(values.assists.stay_in_range         ...)
-                && functor(values.assists.avoid_altitude_drop   ...)
-                && functor(values.assists.avoid_proximity       ...)
-                && functor(values.assists.avoid_the_user        ...);
+        return     functor("toggles.land", values.toggles.land...)
+                && functor("toggles.return_home", values.toggles.return_home...)
+                && functor("toggles.take_off", values.toggles.take_off...)
+                && functor("vertical.mode", values.vertical.mode...)
+                && functor("vertical.thrust_rate", values.vertical.thrust_rate...)
+                && functor("vertical.thrust", values.vertical.thrust...)
+                && functor("vertical.altitude", values.vertical.altitude...)
+                && functor("horizontal.mode", values.horizontal.mode...)
+                && functor("horizontal.angle_rate", values.horizontal.angle_rate...)
+                && functor("horizontal.angle", values.horizontal.angle...)
+                && functor("horizontal.position", values.horizontal.position...)
+                && functor("yaw.mode", values.yaw.mode...)
+                && functor("yaw.angle_rate", values.yaw.angle_rate...)
+                && functor("yaw.angle", values.yaw.angle...)
+                && functor("yaw.mode", values.mode...)
+                && functor("reference_frame", values.reference_frame...)
+                && functor("assists.stay_in_battery_range", values.assists.stay_in_battery_range...)
+                && functor("assists.stay_in_perimeter", values.assists.stay_in_perimeter...)
+                && functor("assists.stay_in_range", values.assists.stay_in_range...)
+                && functor("assists.avoid_altitude_drop", values.assists.avoid_altitude_drop...)
+                && functor("assists.avoid_proximity", values.assists.avoid_proximity...)
+                && functor("assists.avoid_the_user", values.assists.avoid_the_user...);
     }
 
     struct Equality_Functor
@@ -206,35 +210,6 @@ namespace util
 namespace serialization
 {
 
-template<class T> inline void serialize(Buffer_t& buffer, silk::stream::Input_Value<T> const& value, size_t& off)
-{
-    serialize(buffer, value.get(), off);
-    serialize(buffer, value.version, off);
-}
-template<> inline void serialize(Buffer_t& buffer, silk::stream::Input_Value<bool> const& value, size_t& off)
-{
-    uint8_t x = value.version & 0x7F;
-    x |= value.value << 7;
-    serialize(buffer, x, off);
-}
-
-template<class T> inline auto deserialize(Buffer_t const& buffer, silk::stream::Input_Value<T>& value, size_t& off) -> bool
-{
-    return  deserialize(buffer, value.value, off) &&
-        deserialize(buffer, value.version, off);
-}
-template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::Input_Value<bool>& value, size_t& off) -> bool
-{
-    uint8_t x = 0;
-    if (!deserialize(buffer, x, off))
-    {
-        return false;
-    }
-    value.version = x & 0x7F;
-    value.value = x >> 7;
-    return true;
-}
-
 namespace detail
 {
 struct Serializer
@@ -244,9 +219,17 @@ struct Serializer
     size_t& m_off;
 
     template<class T>
-    bool operator()(T const& v)
+    bool operator()(const char*, T const& v)
     {
-        serialize(m_buffer, v, m_off);
+        serialize(m_buffer, v.get(), m_off);
+        serialize(m_buffer, v.version, m_off);
+        return true;
+    }
+    bool operator()(const char*, silk::stream::Input_Value<bool> const& v)
+    {
+        uint8_t x = v.version & 0x7F;
+        x |= v.get() << 7;
+        serialize(m_buffer, x, m_off);
         return true;
     }
 };
@@ -257,9 +240,26 @@ struct Deserializer
     size_t& m_off;
 
     template<class T>
-    bool operator()(T& v)
+    bool operator()(const char*, T& v)
     {
-        return deserialize(m_buffer, v, m_off);
+        typename T::Value x;
+        bool res = deserialize(m_buffer, x, m_off) && deserialize(m_buffer, v.version, m_off);
+        if (res)
+        {
+            v.set_unversioned(x);
+        }
+        return res;
+    }
+    bool operator()(const char*, silk::stream::Input_Value<bool>& v)
+    {
+        uint8_t x = 0;
+        if (!deserialize(m_buffer, x, m_off))
+        {
+            return false;
+        }
+        v.version = x & 0x7F;
+        v.set_unversioned(x >> 7);
+        return true;
     }
 };
 }

@@ -100,7 +100,8 @@ private:
             q::Clock::time_point last_valid_tp;
         };
 
-        Data<stream::IMulti_Commands::Sample> commands;
+        Data<stream::IMulti_Commands::Sample> local_commands;
+        Data<stream::IMulti_Commands::Sample> remote_commands;
         Data<stream::IFrame::Sample> frame;
         Data<stream::IECEF_Position::Sample> position;
         Data<stream::IECEF_Velocity::Sample> velocity;

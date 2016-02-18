@@ -98,49 +98,25 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    stream::IMulti_Commands::Value& commands = m_inputs.commands.sample.value;
-    QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::IDLE);
+    stream::IMulti_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
+    stream::IMulti_Commands::Value& commands = m_inputs.local_commands.sample.value;
+    QASSERT(commands.mode.get() == stream::IMulti_Commands::Mode::IDLE);
 
-    if (m_inputs.commands.previous_sample.value.mode.value != stream::IMulti_Commands::Mode::IDLE)
+    if (prev_commands.mode.get() != stream::IMulti_Commands::Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
         m_home.position_history.clear();
     }
 
-    if (commands.vertical.thrust_rate.value != 0)
-    {
-        commands.vertical.thrust_rate.set(0);
-    }
-    if (commands.vertical.thrust.value != 0)
-    {
-        commands.vertical.thrust.set(0);
-    }
-    if (commands.vertical.altitude.value != 0)
-    {
-        commands.vertical.altitude.set(0);
-    }
-
-    if (!math::is_zero(commands.horizontal.angle_rate.value))
-    {
-        commands.horizontal.angle_rate.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(commands.horizontal.angle.value))
-    {
-        commands.horizontal.angle.set(math::vec2f::zero);
-    }
-    if (!math::is_zero(commands.horizontal.position.value))
-    {
-        commands.horizontal.position.set(math::vec2f::zero);
-    }
-    if (commands.yaw.angle_rate.value != 0)
-    {
-        commands.yaw.angle_rate.set(0);
-    }
-    if (commands.yaw.angle.value != 0)
-    {
-        commands.yaw.angle.set(0);
-    }
+    commands.vertical.thrust_rate.set(0);
+    commands.vertical.thrust.set(0);
+    commands.vertical.altitude.set(0);
+    commands.horizontal.angle_rate.set(math::vec2f::zero);
+    commands.horizontal.angle.set(math::vec2f::zero);
+    commands.horizontal.position.set(math::vec2f::zero);
+    commands.yaw.angle_rate.set(0);
+    commands.yaw.angle.set(0);
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
@@ -216,7 +192,7 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
     QASSERT(multi_config);
 
-    QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::ARMED);
+    QASSERT(commands.mode.get() == stream::IMulti_Commands::Mode::ARMED);
 
     if (!m_home.is_acquired)
     {
@@ -231,39 +207,41 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::THRUST_RATE)
+    if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::THRUST_RATE)
     {
-        thrust += commands.vertical.thrust_rate.value * m_dts;
+        thrust += commands.vertical.thrust_rate.get() * m_dts;
     }
-    else if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::THRUST)
+    else if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::THRUST)
     {
-        if (prev_commands.vertical.mode.value != commands.vertical.mode.value)
+        if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
         {
             commands.vertical.thrust.set(thrust);
             QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
         }
 
-        thrust = commands.vertical.thrust.value;
+        thrust = commands.vertical.thrust.get();
     }
-    else if (commands.vertical.mode.value == stream::IMulti_Commands::Vertical::Mode::ALTITUDE)
+    else if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::ALTITUDE)
     {
-        if (prev_commands.vertical.mode.value != commands.vertical.mode.value)
+        if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
         {
             commands.vertical.altitude.set(m_enu_position.z);
             QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
         }
 
         {
-            //float output = compute_ff_thrust(commands.vertical.altitude.value);
+            //float output = compute_ff_thrust(commands.vertical.altitude.get());
             //thrust = output;
         }
 
         {
-            float target_alt = commands.vertical.altitude.value;
+            float target_alt = commands.vertical.altitude.get();
             float crt_alt = m_enu_position.z;
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
             float speed_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
+            speed_output = math::clamp(speed_output, -m_config->altitude.max_speed, m_config->altitude.max_speed);
+
             float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, speed_output);
 
 
@@ -284,31 +262,36 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     ////////////////////////////////////////////////////////////
     // Horizontals
 
-    if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE)
+    if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE)
     {
-        rate.x = commands.horizontal.angle_rate.value.x;
-        rate.y = commands.horizontal.angle_rate.value.y;
+        rate.x = commands.horizontal.angle_rate.get().x;
+        rate.y = commands.horizontal.angle_rate.get().y;
     }
-    else if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::ANGLE)
+    else if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::ANGLE)
     {
-        math::vec2f hrate = compute_horizontal_rate_for_angle(commands.horizontal.angle.value);
+        math::vec2f hrate = compute_horizontal_rate_for_angle(commands.horizontal.angle.get());
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
-    else if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::POSITION)
+    else if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::POSITION)
     {
-        if (prev_commands.horizontal.mode.value != commands.horizontal.mode.value)
+        if (prev_commands.horizontal.mode.get() != commands.horizontal.mode.get())
         {
-            commands.horizontal.position.set(math::vec2f(m_enu_position.x, m_enu_position.y));
-            QLOGI("Horizontal mode changed to POSITION. Initializing altitude to {}", math::vec2f(m_enu_position.x,  m_enu_position.y));
+            commands.horizontal.position.set(math::vec2f(m_enu_position));
+            QLOGI("Horizontal mode changed to POSITION. Initializing position to {}", math::vec2f(m_enu_position));
         }
 
         {
-            math::vec2f target_pos = commands.horizontal.position.value;
-            math::vec2f crt_pos(m_enu_position.x, m_enu_position.y);
+            math::vec2f target_pos = commands.horizontal.position.get();
+            math::vec2f crt_pos(m_enu_position);
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
             math::vec2f velocity_output = m_horizontal_position_data.position_p.process(crt_pos, target_pos);
+            if (math::length(velocity_output) > m_config->horizontal_position.max_speed)
+            {
+                velocity_output.set_length(m_config->horizontal_position.max_speed);
+            }
+
             math::vec2f output = m_horizontal_position_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
 
             output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
@@ -335,23 +318,23 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     ///////////////////////////////////////////////////////////
     // Yaw
 
-    if (commands.yaw.mode.value == stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE)
+    if (commands.yaw.mode.get() == stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE)
     {
-        rate.z = commands.yaw.angle_rate.value;
+        rate.z = commands.yaw.angle_rate.get();
     }
-    else if (commands.yaw.mode.value == stream::IMulti_Commands::Yaw::Mode::ANGLE)
+    else if (commands.yaw.mode.get() == stream::IMulti_Commands::Yaw::Mode::ANGLE)
     {
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
-        if (prev_commands.yaw.mode.value != commands.yaw.mode.value)
+        if (prev_commands.yaw.mode.get() != commands.yaw.mode.get())
         {
             commands.yaw.angle.set(fz);
             QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
         }
 
         math::quatf target;
-        target.set_from_euler_zxy(fx, fy, commands.yaw.angle.value);
+        target.set_from_euler_zxy(fx, fy, commands.yaw.angle.get());
         math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
@@ -373,8 +356,8 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
 void Multi_Brain::process_return_home_toggle(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands)
 {
     commands.vertical.mode.set(stream::IMulti_Commands::Vertical::Mode::ALTITUDE);
-    float distance = math::length(m_enu_position);
-    if (distance < 10.f)
+    float distance_2d = math::length(math::vec2f(m_enu_position));
+    if (distance_2d < 10.f)
     {
         commands.vertical.altitude.set(5.f);
     }
@@ -385,8 +368,8 @@ void Multi_Brain::process_return_home_toggle(const stream::IMulti_Commands::Valu
 
 void Multi_Brain::process_state_mode_armed()
 {
-    const stream::IMulti_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
-    stream::IMulti_Commands::Value& commands = m_inputs.commands.sample.value;
+    const stream::IMulti_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
+    stream::IMulti_Commands::Value& commands = m_inputs.local_commands.sample.value;
     if (!m_home.is_acquired)
     {
         QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
@@ -394,7 +377,14 @@ void Multi_Brain::process_state_mode_armed()
         return;
     }
 
-    if (commands.toggles.return_home.value)
+    auto now = q::Clock::now();
+    if (commands.toggles.return_home.get() == false && now - m_inputs.remote_commands.last_valid_tp > std::chrono::seconds(2))
+    {
+        QLOGW("No input received for {}. Heading home", now - m_inputs.remote_commands.last_valid_tp);
+        commands.toggles.return_home.set(true);
+    }
+
+    if (commands.toggles.return_home.get())
     {
         process_return_home_toggle(prev_commands, commands);
     }
@@ -402,29 +392,42 @@ void Multi_Brain::process_state_mode_armed()
     state_mode_armed_apply_commands(prev_commands, commands);
 }
 
-struct Increment_Version
+//struct Increment_Version
+//{
+//    template<class T>
+//    bool operator()(const char* name, T const& prev, T& crt)
+//    {
+//        if (crt.get() != prev.get())
+//        {
+//            crt.version++;
+//        }
+//        return true;
+//    }
+//};
+struct Merge_Commands
 {
     template<class T>
-    bool operator()(T const& prev, T& crt)
+    bool operator()(const char* name, T const& remote_prev, T const& remote_crt, T& local)
     {
-        if (crt.value != prev.value)
+        if (remote_crt.version != remote_prev.version)
         {
-            crt.version++;
+            local.set(remote_crt.get());
         }
         return true;
     }
 };
 
+
 void Multi_Brain::process_state()
 {
-    if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::IDLE)
+    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::IDLE)
     {
         m_enu_position = math::vec3f::zero;
         m_enu_velocity = math::vec3f::zero;
 
         process_state_mode_idle();
     }
-    else if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::ARMED)
+    else if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::ARMED)
     {
         m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
         m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
@@ -433,13 +436,16 @@ void Multi_Brain::process_state()
     }
 
     //increment version of overriden commands
-    Increment_Version func;
-    stream::IMulti_Commands::apply(func, m_inputs.commands.previous_sample.value, m_inputs.commands.sample.value);
+    //Increment_Version func;
+    //stream::IMulti_Commands::apply(func, m_inputs.local_commands.previous_sample.value, m_inputs.local_commands.sample.value);
+
+    //back up the current commands
+    m_inputs.local_commands.previous_sample = m_inputs.local_commands.sample;
 }
 
 void Multi_Brain::acquire_home_position()
 {
-    if (m_inputs.commands.sample.value.mode.value == stream::IMulti_Commands::Mode::IDLE)
+    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::IDLE)
     {
         std::deque<util::coordinates::ECEF>& history = m_home.position_history;
         size_t per_second = static_cast<size_t>(1.f / m_dts);
@@ -535,16 +541,15 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    stream::IMulti_Commands::Assignment_Functor func;
-    m_commands_accumulator.process([this, &func](stream::IMulti_Commands::Sample const& i_commands)
+    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
     {
-        m_inputs.commands.previous_sample = m_inputs.commands.sample;
-
-        m_inputs.commands.sample.is_healthy = i_commands.is_healthy;
-        stream::IMulti_Commands::apply(func, m_inputs.commands.sample.value, i_commands.value);
-
-        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.commands.last_valid_tp;
+        m_inputs.remote_commands.sample = i_commands;
+        m_inputs.remote_commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.remote_commands.last_valid_tp;
     });
+
+    Merge_Commands func;
+    stream::IMulti_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
+    m_inputs.remote_commands.previous_sample.value = m_inputs.remote_commands.sample.value;
 
     m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
                                       stream::IECEF_Position::Sample const& i_position,
@@ -569,7 +574,7 @@ void Multi_Brain::process()
         state.home_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
 
-        state.commands = m_inputs.commands.sample.value;
+        state.commands = m_inputs.local_commands.sample.value;
 
         state.proximity = m_inputs.proximity.sample;
 

@@ -46,7 +46,7 @@ private:
 
     Step m_step = Step::RESET;
 
-    q::util::Connection m_connection;
+    q::util::Scoped_Connection m_connection;
 
     std::vector<math::vec3f> m_samples;
 };

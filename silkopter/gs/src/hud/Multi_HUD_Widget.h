@@ -66,6 +66,8 @@ private:
     void process_yaw_angle();
     void process_yaw();
 
+    void process_toggles();
+
     void process_mode_idle();
     void process_mode_armed();
     void process_mode();

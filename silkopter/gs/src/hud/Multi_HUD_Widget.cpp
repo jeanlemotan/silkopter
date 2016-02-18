@@ -1,4 +1,5 @@
 #include "hud/Multi_HUD_Widget.h"
+#include "physics/constants.h"
 
 Multi_HUD_Widget::Multi_HUD_Widget(silk::HAL& hal, silk::Comms& comms, qinput::Input_Mgr& input_mgr, Render_Context& context, QWidget* parent)
     : m_hal(hal)
@@ -124,7 +125,7 @@ void Multi_HUD_Widget::process_vertical_thrust()
 
 void Multi_HUD_Widget::process_vertical_altitude()
 {
-    float v = m_commands.vertical.altitude.value;
+    float v = m_commands.vertical.altitude.get();
 
     if (m_gamepad)
     {
@@ -141,7 +142,7 @@ void Multi_HUD_Widget::process_vertical_altitude()
 
 void Multi_HUD_Widget::process_vertical()
 {
-    switch (m_commands.vertical.mode.value)
+    switch (m_commands.vertical.mode.get())
     {
     case silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE:
         process_vertical_thrust_rate();
@@ -174,15 +175,15 @@ void Multi_HUD_Widget::process_vertical()
         }
     }
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    if (kb.is_key_pressed('V') && kb.is_key_released('1'))
+    if (kb.is_key_released('V'))
     {
         m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE);
     }
-    else if (kb.is_key_pressed('V') && kb.is_key_released('2'))
+    else if (kb.is_key_released('B'))
     {
         m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::THRUST);
     }
-    else if (kb.is_key_pressed('V') && kb.is_key_released('3'))
+    else if (kb.is_key_released('N'))
     {
         m_commands.vertical.mode.set(silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE);
     }
@@ -241,24 +242,31 @@ void Multi_HUD_Widget::process_horizontal_angle()
 
 void Multi_HUD_Widget::process_horizontal_position()
 {
-    math::vec2f v = m_commands.horizontal.position.value;
+    //compute the front/right in enu space
+    math::vec2f front_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_front_vector)));
+    math::vec2f right_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_right_vector)));
+
+    math::vec2f v = m_commands.horizontal.position.get();
     if (m_gamepad)
     {
-        v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value * 5.f;
+        math::vec2f stick = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
+        v += right_vector * (stick.x * 5.f);
+        v += front_vector * (stick.y * 5.f);
     }
+
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
     float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 3.f : 0.5f;
-    v.x -= kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0;
-    v.x += kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0;
-    v.y -= kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0;
-    v.y += kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0;
+    v -= right_vector * (kb.is_key_pressed(qinput::Key_Code::LEFT) ? kb_value : 0);
+    v += right_vector * (kb.is_key_pressed(qinput::Key_Code::RIGHT) ? kb_value : 0);
+    v += front_vector * (kb.is_key_pressed(qinput::Key_Code::UP) ? kb_value : 0);
+    v -= front_vector * (kb.is_key_pressed(qinput::Key_Code::DOWN) ? kb_value : 0);
 
     m_commands.horizontal.position.set(v);
 }
 
 void Multi_HUD_Widget::process_horizontal()
 {
-    switch (m_commands.horizontal.mode.value)
+    switch (m_commands.horizontal.mode.get())
     {
     case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE:
         process_horizontal_angle_rate();
@@ -292,15 +300,15 @@ void Multi_HUD_Widget::process_horizontal()
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    if (kb.is_key_pressed('H') && kb.is_key_released('1'))
+    if (kb.is_key_released('H'))
     {
         m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE);
     }
-    else if (kb.is_key_pressed('H') && kb.is_key_released('2'))
+    else if (kb.is_key_released('J'))
     {
         m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE);
     }
-    else if (kb.is_key_pressed('H') && kb.is_key_released('3'))
+    else if (kb.is_key_released('K'))
     {
         m_commands.horizontal.mode.set(silk::stream::IMulti_Commands::Horizontal::Mode::POSITION);
     }
@@ -330,7 +338,7 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
 
 void Multi_HUD_Widget::process_yaw_angle()
 {
-    float v = m_commands.yaw.angle.value;
+    float v = m_commands.yaw.angle.get();
     if (m_gamepad)
     {
         float gv = 0;
@@ -353,7 +361,7 @@ void Multi_HUD_Widget::process_yaw_angle()
 
 void Multi_HUD_Widget::process_yaw()
 {
-    switch (m_commands.yaw.mode.value)
+    switch (m_commands.yaw.mode.get())
     {
     case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE:
         process_yaw_angle_rate();
@@ -364,13 +372,23 @@ void Multi_HUD_Widget::process_yaw()
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    if (kb.is_key_pressed('Y') && kb.is_key_released('1'))
+    if (kb.is_key_released('Y'))
     {
         m_commands.yaw.mode.set(silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE);
     }
-    else if (kb.is_key_pressed('Y') && kb.is_key_released('2'))
+    else if (kb.is_key_released('U'))
     {
         m_commands.yaw.mode.set(silk::stream::IMulti_Commands::Yaw::Mode::ANGLE);
+    }
+}
+
+void Multi_HUD_Widget::process_toggles()
+{
+    const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
+    if (kb.is_key_released(qinput::Key_Code::HOME))
+    {
+        m_commands.toggles.return_home.set(!m_commands.toggles.return_home.get());
+        QLOGI("Return Home {}", m_commands.toggles.return_home.get() ? "ON" : "OFF");
     }
 }
 
@@ -398,11 +416,12 @@ void Multi_HUD_Widget::process_mode_armed()
     process_vertical();
     process_horizontal();
     process_yaw();
+    process_toggles();
 }
 
 void Multi_HUD_Widget::process_mode()
 {
-    switch (m_commands.mode.value)
+    switch (m_commands.mode.get())
     {
     case silk::stream::IMulti_Commands::Mode::IDLE:
         process_mode_idle();
@@ -434,56 +453,33 @@ void Multi_HUD_Widget::process_commands()
     m_comms.send_multi_commands_value(m_commands);
 }
 
-#define SYNC(x) \
-{\
-    auto& prev_remote = m_prev_state.commands.x;\
-    auto& remote = m_state.commands.x;\
-    auto& local = m_commands.x;\
-    if (prev_remote.version != remote.version)\
-    {\
-        if (local.value == remote.value)\
-        {\
-            QLOGI("Confirmed command {}: value {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version));\
-        }\
-        else\
-        {\
-            QLOGI("Overriden command {}: remote {}@{}, local {}@{}", #x, remote.get(), static_cast<uint32_t>(remote.version), local.get(), static_cast<uint32_t>(local.version));\
-        }\
-        local.value = remote.value;\
-    }\
-}
+struct Merge_Commands
+{
+    template<class T>
+    bool operator()(const char* name, T const& remote_prev, T const& remote_crt, T& local)
+    {
+        if (remote_prev.version != remote_crt.version)
+        {
+            if (local.get() == remote_crt.get())
+            {
+                QLOGI("Confirmed command {}: value {}@{}", name, remote_crt.get(), static_cast<uint32_t>(remote_crt.version));
+            }
+            else
+            {
+                QLOGI("Overriden command {}: remote {}@{}, local {}@{}", name, remote_crt.get(), static_cast<uint32_t>(remote_crt.version), local.get(), static_cast<uint32_t>(local.version));
+            }
+            local.set_unversioned(remote_crt.get());
+        }
+        return true;
+    }
+};
 
 void Multi_HUD_Widget::sync_commands()
 {
-    SYNC(toggles.land);
-    SYNC(toggles.take_off);
-    SYNC(toggles.return_home);
-
-    SYNC(vertical.mode);
-    SYNC(vertical.thrust_rate);
-    SYNC(vertical.thrust);
-    SYNC(vertical.altitude);
-
-    SYNC(horizontal.mode);
-    SYNC(horizontal.angle_rate);
-    SYNC(horizontal.angle);
-    SYNC(horizontal.position);
-
-    SYNC(yaw.mode);
-    SYNC(yaw.angle_rate);
-    SYNC(yaw.angle);
-
-    SYNC(mode);
-    SYNC(reference_frame);
-
-    SYNC(assists.stay_in_range);
-    SYNC(assists.stay_in_battery_range);
-    SYNC(assists.stay_in_perimeter);
-    SYNC(assists.avoid_altitude_drop);
-    SYNC(assists.avoid_the_user);
-    SYNC(assists.avoid_proximity);
+    Merge_Commands func;
+    silk::stream::IMulti_Commands::apply(func, m_prev_state.commands, m_state.commands, m_commands);
+    m_prev_state.commands = m_state.commands;
 }
-#undef SYNC
 
 
 void Multi_HUD_Widget::process()
@@ -713,7 +709,7 @@ void Multi_HUD_Widget::render_modes()
     m_context.texter.set_style(m_border_text_style);
 
     std::string str;
-    switch (m_commands.mode.value)
+    switch (m_commands.mode.get())
     {
     case silk::stream::IMulti_Commands::Mode::IDLE:
         str = q::util::format2<std::string>("M:Idle");
@@ -725,42 +721,42 @@ void Multi_HUD_Widget::render_modes()
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 20));
 
     float v_speed = m_uav.enu_velocity.z;
-    switch (m_commands.vertical.mode.value)
+    switch (m_commands.vertical.mode.get())
     {
     case silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE:
-        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust_rate.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust_rate.get(), m_uav.enu_position.z, v_speed);
         break;
     case silk::stream::IMulti_Commands::Vertical::Mode::THRUST:
-        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust.get(), m_uav.enu_position.z, v_speed);
         break;
     case silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE:
-        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.altitude.value, m_uav.enu_position.z, v_speed);
+        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.altitude.get(), m_uav.enu_position.z, v_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
 
     float h_speed = math::length(math::vec2f(m_uav.enu_velocity.x, m_uav.enu_velocity.y));
-    switch (m_commands.horizontal.mode.value)
+    switch (m_commands.horizontal.mode.get())
     {
     case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_commands.horizontal.angle_rate.value, h_speed);
+        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_commands.horizontal.angle_rate.get(), h_speed);
         break;
     case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE:
-        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_commands.horizontal.angle.value), h_speed);
+        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_commands.horizontal.angle.get()), h_speed);
         break;
     case silk::stream::IMulti_Commands::Horizontal::Mode::POSITION:
-        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_commands.horizontal.position.value, h_speed);
+        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_commands.horizontal.position.get(), h_speed);
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
 
-    switch (m_commands.yaw.mode.value)
+    switch (m_commands.yaw.mode.get())
     {
     case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_commands.yaw.angle_rate.value);
+        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_commands.yaw.angle_rate.get());
         break;
     case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE:
-        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_commands.yaw.angle.value));
+        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_commands.yaw.angle.get()));
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));

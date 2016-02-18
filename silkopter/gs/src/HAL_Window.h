@@ -58,7 +58,7 @@ private:
     void try_add_node(silk::node::gs::Node_Def_ptr def, QPointF pos);
     void try_remove_node(silk::node::gs::Node_ptr node);
 
-    std::vector<q::util::Connection> m_connections;
+    std::vector<q::util::Scoped_Connection> m_connections;
 
     silk::HAL& m_hal;
     silk::Comms& m_comms;

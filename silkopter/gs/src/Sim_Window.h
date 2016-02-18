@@ -54,6 +54,6 @@ private:
 
     math::vec3f m_camera_position_target;
 
-    std::vector<q::util::Connection> m_connections;
+    std::vector<q::util::Scoped_Connection> m_connections;
 };
 
