@@ -47,8 +47,6 @@ auto Proximity::init() -> bool
     }
 
     m_accumulators.resize(m_init_params->channels);
-    m_last_input_samples.resize(m_init_params->channels);
-
     m_output_stream->set_rate(m_init_params->rate);
 
     return true;
@@ -83,27 +81,22 @@ void Proximity::process()
     QLOG_TOPIC("Proximity::process");
 
     m_output_stream->clear();
+    m_output_value.distances.clear();
 
     for (size_t i = 0; i < m_init_params->channels; i++)
     {
         m_accumulators[i].process([this, i](stream::IDistance::Sample const& i_sample)
         {
-            m_last_input_samples[i] = i_sample;
+            if (i_sample.is_healthy)
+            {
+                m_output_value.distances.push_back(i_sample.value);
+            }
         });
     }
 
     size_t samples_needed = m_output_stream->compute_samples_needed();
     if (samples_needed > 0)
     {
-        m_output_value.distances.clear();
-        for (auto const& i_sample: m_last_input_samples)
-        {
-            if (i_sample.is_healthy)
-            {
-                m_output_value.distances.push_back(i_sample.value);
-            }
-        }
-
         for (size_t i = 0; i < samples_needed; i++)
         {
             m_output_stream->push_sample(m_output_value, !m_output_value.distances.empty());

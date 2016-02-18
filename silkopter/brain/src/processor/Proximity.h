@@ -52,7 +52,6 @@ private:
     std::shared_ptr<sz::Proximity::Config> m_config;
 
     std::vector<Sample_Accumulator<stream::IDistance>> m_accumulators;
-    std::vector<stream::IDistance::Sample> m_last_input_samples;
 
     typedef Basic_Output_Stream<stream::IProximity> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
