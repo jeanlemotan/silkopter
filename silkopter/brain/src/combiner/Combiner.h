@@ -150,8 +150,6 @@ void Combiner<Stream_t>::process()
     {
         if (sample1.is_healthy & sample2.is_healthy)
         {
-            //Output_Stream::Value value = m_output_stream->get_last_sample().value;
-
             m_last_valid_value1 = sample1.value;
             m_last_valid_value2 = sample2.value;
             m_average = (sample1.value + sample2.value) * 0.5f;
