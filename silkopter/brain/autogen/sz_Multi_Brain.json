@@ -26,6 +26,19 @@
 {
     "definition" : true,
     "namespace" : "sz::Multi_Brain",
+    "name": "Horizontal_Position",
+    "members":
+    [
+        ["float", "max_speed", {"required": true, "json_key" : "Max Speed (m/s)", "default" : 2}],
+        ["uint32_t", "lpf_poles", {"required": true, "json_key" : "LPF Poles", "default" : 1}],
+        ["float", "lpf_cutoff_frequency", {"required": true, "json_key" : "LPF Cutoff Frequency (Hz)"}],        
+        ["sz::PI", "velocity_pi", {"required": false, "json_key" : "Velocity PI"}],
+        ["sz::P", "position_p", {"required": false, "json_key" : "Position P"}]
+    ]
+},
+{
+    "definition" : true,
+    "namespace" : "sz::Multi_Brain",
     "name": "Yaw_Angle",
     "members":
     [
@@ -55,6 +68,7 @@
         ["float", "max_thrust", {"required": false, "json_key" : "Max Thrust (N)", "default" : 2}],
         ["float", "min_thrust", {"required": false, "json_key" : "Min Thrust (N)", "default" : 1}],
         ["sz::Multi_Brain::Horizontal_Angle", "horizontal_angle", {"required": true, "json_key" : "Horizontal Angle"}],
+        ["sz::Multi_Brain::Horizontal_Position", "horizontal_position", {"required": false, "json_key" : "Horizontal Position"}],
         ["sz::Multi_Brain::Yaw_Angle", "yaw_angle", {"required": false, "json_key" : "Yaw Angle"}],
         ["sz::Multi_Brain::Altitude", "altitude", {"required": false, "json_key" : "Altitude"}]
     ]

@@ -115,9 +115,13 @@ private:
                         stream::IProximity::Sample const& proximity);
 
     float compute_ff_thrust(float target_altitude);
+    math::vec2f compute_horizontal_rate_for_angle(math::vec2f const& angle);
 
     void process_state_mode_idle();
     void process_state_mode_armed();
+    void state_mode_armed_apply_commands(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands);
+    void process_return_home_toggle(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands);
+
     void process_state();
 
     void acquire_home_position();
@@ -136,10 +140,10 @@ private:
     math::vec3f m_enu_velocity;
 
     typedef util::PID<float, float, float> PID;
+    typedef util::PID<float, math::vec2f, math::vec2f> PID2;
 
     struct Vertical_Altitude_Data
     {
-        //PID pid;
         PID speed_pi;
         PID position_p;
         util::Butterworth<float> dsp;
@@ -150,6 +154,13 @@ private:
         PID x_pid;
         PID y_pid;
     } m_horizontal_angle_data;
+
+    struct Horizontal_Position_Data
+    {
+        PID2 velocity_pi;
+        PID2 position_p;
+        util::Butterworth<math::vec2f> dsp;
+    } m_horizontal_position_data;
 
     struct Yaw_Stable_Angle_Rate_Data
     {

@@ -98,7 +98,7 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
 
 void Multi_Brain::process_state_mode_idle()
 {
-    stream::IMulti_Commands::Sample::Value& commands = m_inputs.commands.sample.value;
+    stream::IMulti_Commands::Value& commands = m_inputs.commands.sample.value;
     QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::IDLE);
 
     if (m_inputs.commands.previous_sample.value.mode.value != stream::IMulti_Commands::Mode::IDLE)
@@ -190,13 +190,32 @@ float Multi_Brain::compute_ff_thrust(float target_altitude)
     }
 }
 
-void Multi_Brain::process_state_mode_armed()
+math::vec2f Multi_Brain::compute_horizontal_rate_for_angle(math::vec2f const& angle)
+{
+    float fx, fy, fz;
+    m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+
+    math::quatf target;
+    target.set_from_euler_zxy(angle.x, angle.y, fz);
+    math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
+    float diff_x, diff_y, _;
+    diff.get_as_euler_zxy(diff_x, diff_y, _);
+
+    float max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
+
+    float rx = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
+    rx = math::clamp(rx, -max_speed, max_speed);
+    float ry = m_horizontal_angle_data.y_pid.process(-diff_y, 0.f);
+    ry = math::clamp(ry, -max_speed, max_speed);
+
+    return math::vec2f(rx, ry);
+}
+
+void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands)
 {
     boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
     QASSERT(multi_config);
 
-    stream::IMulti_Commands::Sample::Value& prev_commands = m_inputs.commands.previous_sample.value;
-    stream::IMulti_Commands::Sample::Value& commands = m_inputs.commands.sample.value;
     QASSERT(commands.mode.value == stream::IMulti_Commands::Mode::ARMED);
 
     if (!m_home.is_acquired)
@@ -244,8 +263,8 @@ void Multi_Brain::process_state_mode_armed()
             float crt_alt = m_enu_position.z;
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
-            float velocity_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
-            float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, velocity_output);
+            float speed_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
+            float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, speed_output);
 
 
 //            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
@@ -272,24 +291,45 @@ void Multi_Brain::process_state_mode_armed()
     }
     else if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::ANGLE)
     {
-        float fx, fy, fz;
-        m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+        math::vec2f hrate = compute_horizontal_rate_for_angle(commands.horizontal.angle.value);
+        rate.x = hrate.x;
+        rate.y = hrate.y;
+    }
+    else if (commands.horizontal.mode.value == stream::IMulti_Commands::Horizontal::Mode::POSITION)
+    {
+        if (prev_commands.horizontal.mode.value != commands.horizontal.mode.value)
+        {
+            commands.horizontal.position.set(math::vec2f(m_enu_position.x, m_enu_position.y));
+            QLOGI("Horizontal mode changed to POSITION. Initializing altitude to {}", math::vec2f(m_enu_position.x,  m_enu_position.y));
+        }
 
-        math::quatf target;
-        target.set_from_euler_zxy(commands.horizontal.angle.value.x, commands.horizontal.angle.value.y, fz);
-        math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
-        float diff_x, diff_y, _;
-        diff.get_as_euler_zxy(diff_x, diff_y, _);
+        {
+            math::vec2f target_pos = commands.horizontal.position.value;
+            math::vec2f crt_pos(m_enu_position.x, m_enu_position.y);
 
-        float max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
+            //cascaded PIDS: position P(ID) -> speed PI(D)
+            math::vec2f velocity_output = m_horizontal_position_data.position_p.process(crt_pos, target_pos);
+            math::vec2f output = m_horizontal_position_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
 
-        float x = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
-        x = math::clamp(x, -max_speed, max_speed);
-        float y = m_horizontal_angle_data.y_pid.process(-diff_y, 0.f);
-        y = math::clamp(y, -max_speed, max_speed);
+            output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
+            m_horizontal_position_data.dsp.process(output);
 
-        rate.x = x;
-        rate.y = y;
+            //compute the front/right in enu space
+            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::local_front_vector);
+            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::local_right_vector);
+
+            //figure out how the delta displacement maps over the axis
+            float dx = math::dot(math::vec3f(output, 0.f), right_vector);
+            float dy = math::dot(math::vec3f(output, 0.f), front_vector);
+
+            //movement along X axis is obtained by rotation along the Y
+            //movement along Y axis is obtained by rotation along the -X
+            math::vec2f angle = math::vec2f(-dy, dx);
+
+            math::vec2f hrate = compute_horizontal_rate_for_angle(angle);
+            rate.x = hrate.x;
+            rate.y = hrate.y;
+        }
     }
 
     ///////////////////////////////////////////////////////////
@@ -328,6 +368,38 @@ void Multi_Brain::process_state_mode_armed()
 
     m_rate_output_stream->push_sample(rate, true);
     m_thrust_output_stream->push_sample(thrust, true);
+}
+
+void Multi_Brain::process_return_home_toggle(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands)
+{
+    commands.vertical.mode.set(stream::IMulti_Commands::Vertical::Mode::ALTITUDE);
+    float distance = math::length(m_enu_position);
+    if (distance < 10.f)
+    {
+        commands.vertical.altitude.set(5.f);
+    }
+
+    commands.horizontal.mode.set(stream::IMulti_Commands::Horizontal::Mode::POSITION);
+    commands.horizontal.position.set(math::vec2f::zero);
+}
+
+void Multi_Brain::process_state_mode_armed()
+{
+    const stream::IMulti_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
+    stream::IMulti_Commands::Value& commands = m_inputs.commands.sample.value;
+    if (!m_home.is_acquired)
+    {
+        QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
+        commands.mode.set(stream::IMulti_Commands::Mode::IDLE);
+        return;
+    }
+
+    if (commands.toggles.return_home.value)
+    {
+        process_return_home_toggle(prev_commands, commands);
+    }
+
+    state_mode_armed_apply_commands(prev_commands, commands);
 }
 
 struct Increment_Version
@@ -527,6 +599,31 @@ void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
+template<class T>
+void fill_pid_params(T& dst, sz::PID const& src, size_t rate)
+{
+    dst.kp = src.kp;
+    dst.ki = src.ki;
+    dst.kd = src.kd;
+    dst.max_i = src.max_i;
+    dst.d_filter = src.d_filter;
+    dst.rate = rate;
+}
+template<class T>
+void fill_pi_params(T& dst, sz::PI const& src, size_t rate)
+{
+    dst.kp = src.kp;
+    dst.ki = src.ki;
+    dst.max_i = decltype(dst.max_i)(src.max_i);
+    dst.rate = rate;
+}
+template<class T>
+void fill_p_params(T& dst, sz::P const& src, size_t rate)
+{
+    dst.kp = src.kp;
+    dst.rate = rate;
+}
+
 auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 {
     QLOG_TOPIC("Multi_Brain::set_config");
@@ -554,39 +651,17 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
     m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
     m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
 
-    auto fill_pid_params = [output_rate](PID::Params& dst, sz::PID const& src)
-    {
-        dst.kp = src.kp;
-        dst.ki = src.ki;
-        dst.kd = src.kd;
-        dst.max_i = src.max_i;
-        dst.d_filter = src.d_filter;
-        dst.rate = output_rate;
-    };
-    auto fill_pi_params = [output_rate](PID::Params& dst, sz::PI const& src)
-    {
-        dst.kp = src.kp;
-        dst.ki = src.ki;
-        dst.max_i = src.max_i;
-        dst.rate = output_rate;
-    };
-    auto fill_p_params = [output_rate](PID::Params& dst, sz::P const& src)
-    {
-        dst.kp = src.kp;
-        dst.rate = output_rate;
-    };
-
     {
         PID::Params x_params, y_params;
         if (m_config->horizontal_angle.combined_pids)
         {
-            fill_pid_params(x_params, m_config->horizontal_angle.pids);
-            fill_pid_params(y_params, m_config->horizontal_angle.pids);
+            fill_pid_params(x_params, m_config->horizontal_angle.pids, output_rate);
+            fill_pid_params(y_params, m_config->horizontal_angle.pids, output_rate);
         }
         else
         {
-            fill_pid_params(x_params, m_config->horizontal_angle.x_pid);
-            fill_pid_params(y_params, m_config->horizontal_angle.y_pid);
+            fill_pid_params(x_params, m_config->horizontal_angle.x_pid, output_rate);
+            fill_pid_params(y_params, m_config->horizontal_angle.y_pid, output_rate);
         }
 
         if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
@@ -599,7 +674,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     {
         PID::Params params;
-        fill_pid_params(params, m_config->yaw_angle.pid);
+        fill_pid_params(params, m_config->yaw_angle.pid, output_rate);
         if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
         {
             QLOGE("Bad yaw PID params");
@@ -607,11 +682,12 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         }
     }
 
+    //altitude
     m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
     {
         PID::Params speed_pi_params, position_p_params;
-        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi);
-        fill_p_params(position_p_params, m_config->altitude.position_p);
+        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi, output_rate);
+        fill_p_params(position_p_params, m_config->altitude.position_p, output_rate);
         if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
         {
             QLOGE("Bad altitude PID params");
@@ -632,6 +708,33 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
     m_vertical_altitude_data.dsp.reset();
+
+    //horizontal position
+    m_config->horizontal_position.max_speed = math::clamp(m_config->horizontal_position.max_speed, 0.f, 10.f);
+    {
+        PID2::Params velocity_pi_params, position_p_params;
+        fill_pi_params(velocity_pi_params, m_config->horizontal_position.velocity_pi, output_rate);
+        fill_p_params(position_p_params, m_config->horizontal_position.position_p, output_rate);
+        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
+        {
+            QLOGE("Bad horizontal position PID params");
+            return false;
+        }
+        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
+        {
+            QLOGE("Bad horizontal position PID params");
+            return false;
+        }
+    }
+
+    m_config->horizontal_position.lpf_cutoff_frequency = math::clamp(m_config->horizontal_position.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);
+    m_config->horizontal_position.lpf_poles = math::max<uint32_t>(m_config->horizontal_position.lpf_poles, 1);
+    if (!m_horizontal_position_data.dsp.setup(m_config->horizontal_position.lpf_poles, output_rate, m_config->horizontal_position.lpf_cutoff_frequency))
+    {
+        QLOGE("Cannot setup dsp filter.");
+        return false;
+    }
+    m_horizontal_position_data.dsp.reset();
 
     return true;
 }
