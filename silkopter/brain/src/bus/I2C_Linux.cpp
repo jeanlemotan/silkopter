@@ -14,8 +14,8 @@
 
 struct i2c_msg
 {
-  uint16_t addr;
-  uint16_t flags;
+  uint16_t addr = 0;
+  uint16_t flags = 0;
 #define I2C_M_TEN		0x0010
 #define I2C_M_RD		0x0001
 #define I2C_M_NOSTART		0x4000
@@ -23,8 +23,8 @@ struct i2c_msg
 #define I2C_M_IGNORE_NAK	0x1000
 #define I2C_M_NO_RD_ACK		0x0800
 #define I2C_M_RECV_LEN		0x0400
-  uint16_t len;
-  uint8_t* buf;
+  uint16_t len = 0;
+  uint8_t* buf = nullptr;
 };
 
 
@@ -113,14 +113,14 @@ auto I2C_Linux::read(uint8_t address, uint8_t* data, size_t size) -> bool
     std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io = {0};
-    struct i2c_msg msg[1] = {0};
+    struct i2c_msg msg;
 
-    msg[0].addr = address;
-    msg[0].flags = I2C_M_RD;
-    msg[0].len = size;
-    msg[0].buf = reinterpret_cast<decltype(i2c_msg::buf)>(data);
+    msg.addr = address;
+    msg.flags = I2C_M_RD;
+    msg.len = size;
+    msg.buf = reinterpret_cast<decltype(i2c_msg::buf)>(data);
 
-    io.msgs = msg;
+    io.msgs = &msg;
     io.nmsgs = 1;
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
@@ -137,7 +137,7 @@ auto I2C_Linux::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io = {0};
-    struct i2c_msg msg = {0};
+    struct i2c_msg msg;
 
     msg.addr = address;
     msg.flags = 0;
@@ -161,7 +161,7 @@ auto I2C_Linux::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_
     std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io = {0};
-    struct i2c_msg msg[2] = {0};
+    struct i2c_msg msg[2];
 
     msg[0].addr = address;
     msg[0].flags = 0;
@@ -190,7 +190,7 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
     std::lock_guard<I2C_Linux> lg(*this);
 
     struct i2c_rdwr_ioctl_data io = {0};
-    struct i2c_msg msg = {0};
+    struct i2c_msg msg;
 
     m_buffer.resize(size + 1);
 
