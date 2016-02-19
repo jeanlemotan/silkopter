@@ -64,16 +64,19 @@ private:
     struct Noise
     {
         std::default_random_engine generator;
-        std::normal_distribution<float> gps_position_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> gps_velocity_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> gps_pacc_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> gps_vacc_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> acceleration_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> angular_velocity_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> magnetic_field_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> pressure_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> temperature_sd = std::normal_distribution<float>(0, 0);
-        std::normal_distribution<float> ground_distance_sd = std::normal_distribution<float>(0, 0);
+
+        template<typename T> using Distribution = std::uniform_real_distribution<T>;
+
+        Distribution<float> gps_position = Distribution<float>(0, 0);
+        Distribution<float> gps_velocity = Distribution<float>(0, 0);
+        Distribution<float> gps_pacc = Distribution<float>(0, 0);
+        Distribution<float> gps_vacc = Distribution<float>(0, 0);
+        Distribution<float> acceleration = Distribution<float>(0, 0);
+        Distribution<float> angular_velocity = Distribution<float>(0, 0);
+        Distribution<float> magnetic_field = Distribution<float>(0, 0);
+        Distribution<float> pressure = Distribution<float>(0, 0);
+        Distribution<float> temperature = Distribution<float>(0, 0);
+        Distribution<float> ground_distance = Distribution<float>(0, 0);
     } m_noise;
 
     struct Angular_Velocity : public stream::IAngular_Velocity

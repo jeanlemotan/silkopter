@@ -21,16 +21,16 @@
     "name": "Noise",
     "members":
     [
-        ["float", "gps_position_sd", {"required": true, "json_key" : "GPS Position SD", "default" : 2.0}],
-        ["float", "gps_velocity_sd", {"required": true, "json_key" : "GPS Velocity SD", "default" : 0.2}],
-        ["float", "gps_pacc_sd", {"required": true, "json_key" : "GPS PACC SD", "default" : 0.5}],
-        ["float", "gps_vacc_sd", {"required": true, "json_key" : "GPS VACC SD", "default" : 0.1}],
-        ["float", "acceleration_sd", {"required": true, "json_key" : "Acceleration SD", "default" : 0.01}],
-        ["float", "angular_velocity_sd", {"required": true, "json_key" : "Angular Velocity SD", "default" : 0.01}],
-        ["float", "magnetic_field_sd", {"required": true, "json_key" : "Magnetic Field SD", "default" : 0.1}],
-        ["float", "pressure_sd", {"required": true, "json_key" : "Pressure SD", "default" : 0.1}],
-        ["float", "temperature_sd", {"required": true, "json_key" : "Temperature SD", "default" : 0.1}],
-        ["float", "ground_distance_sd", {"required": true, "json_key" : "Ground Distance SD", "default" : 0.01}]
+        ["float", "gps_position", {"required": false, "json_key" : "GPS Position", "default" : 2.0}],
+        ["float", "gps_velocity", {"required": false, "json_key" : "GPS Velocity", "default" : 0.2}],
+        ["float", "gps_pacc", {"required": false, "json_key" : "GPS PACC", "default" : 0.5}],
+        ["float", "gps_vacc", {"required": false, "json_key" : "GPS VACC", "default" : 0.1}],
+        ["float", "acceleration", {"required": false, "json_key" : "Acceleration", "default" : 0.01}],
+        ["float", "angular_velocity", {"required": false, "json_key" : "Angular Velocity", "default" : 0.01}],
+        ["float", "magnetic_field", {"required": false, "json_key" : "Magnetic Field", "default" : 0.1}],
+        ["float", "pressure", {"required": false, "json_key" : "Pressure", "default" : 0.1}],
+        ["float", "temperature", {"required": false, "json_key" : "Temperature", "default" : 0.1}],
+        ["float", "ground_distance", {"required": false, "json_key" : "Ground Distance", "default" : 0.01}]
     ]
 },
 {

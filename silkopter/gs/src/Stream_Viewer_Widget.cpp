@@ -113,17 +113,17 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (type == IMagnetic_Field::TYPE)
     {
-        auto viewer = new Numeric_Viewer("Teslas", stream->rate, this);
-        viewer->add_graph("X", "Teslas", QColor(0xe74c3c));
-        viewer->add_graph("Y", "Teslas", QColor(0x2ecc71));
-        viewer->add_graph("Z", "Teslas", QColor(0x3498db));
+        auto viewer = new Numeric_Viewer("μT", stream->rate, this);
+        viewer->add_graph("X", "μT", QColor(0xe74c3c));
+        viewer->add_graph("Y", "μT", QColor(0x2ecc71));
+        viewer->add_graph("Z", "μT", QColor(0x3498db));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<gs::Magnetic_Field>(stream)->samples_available_signal.connect([this, viewer](gs::Magnetic_Field::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)
             {
-                data = { s.value.x, s.value.y, s.value.z };
+                data = { s.value.x * 1000000.0, s.value.y * 1000000.0, s.value.z * 1000000.0 };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();
@@ -131,15 +131,15 @@ void Stream_Viewer_Widget::create_viewer()
     }
     else if (type == IPressure::TYPE)
     {
-        auto viewer = new Numeric_Viewer("Pascals", stream->rate, this);
-        viewer->add_graph("Pressure", "Pascals", QColor(0xe74c3c));
+        auto viewer = new Numeric_Viewer("kPa", stream->rate, this);
+        viewer->add_graph("Pressure", "kPa", QColor(0xe74c3c));
         layout()->addWidget(viewer);
         m_connection = std::static_pointer_cast<gs::Pressure>(stream)->samples_available_signal.connect([this, viewer](gs::Pressure::Samples const& samples)
         {
             std::array<double, 1> data;
             for (auto const& s: samples)
             {
-                data = { s.value };
+                data = { s.value / 1000.0 };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();

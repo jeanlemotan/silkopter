@@ -775,18 +775,18 @@ w.Key("\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serial
 // such syntax is chosen so that the template file looks like valid C++
 
 namespace sz { namespace Multi_Simulator { struct Noise {
- float gps_position_sd;
-float gps_velocity_sd;
-float gps_pacc_sd;
-float gps_vacc_sd;
-float acceleration_sd;
-float angular_velocity_sd;
-float magnetic_field_sd;
-float pressure_sd;
-float temperature_sd;
-float ground_distance_sd;
+ float gps_position;
+float gps_velocity;
+float gps_pacc;
+float gps_vacc;
+float acceleration;
+float angular_velocity;
+float magnetic_field;
+float pressure;
+float temperature;
+float ground_distance;
 
-explicit Noise():gps_position_sd(2.0), gps_velocity_sd(0.2), gps_pacc_sd(0.5), gps_vacc_sd(0.1), acceleration_sd(0.01), angular_velocity_sd(0.01), magnetic_field_sd(0.1), pressure_sd(0.1), temperature_sd(0.1), ground_distance_sd(0.01) {  }
+explicit Noise():gps_position(2.0), gps_velocity(0.2), gps_pacc(0.5), gps_vacc(0.1), acceleration(0.01), angular_velocity(0.01), magnetic_field(0.1), pressure(0.1), temperature(0.1), ground_distance(0.01) {  }
 
 
  
@@ -812,16 +812,7 @@ SAXEventHandler< float > handler_5;
 SAXEventHandler< float > handler_6;
 SAXEventHandler< float > handler_7;
 SAXEventHandler< float > handler_8;
-SAXEventHandler< float > handler_9;bool has_gps_position_sd;
-bool has_gps_velocity_sd;
-bool has_gps_pacc_sd;
-bool has_gps_vacc_sd;
-bool has_acceleration_sd;
-bool has_angular_velocity_sd;
-bool has_magnetic_field_sd;
-bool has_pressure_sd;
-bool has_temperature_sd;
-bool has_ground_distance_sd;
+SAXEventHandler< float > handler_9;
 
     bool check_depth(const char* type)
     {
@@ -836,25 +827,25 @@ bool has_ground_distance_sd;
     {
         switch (state) {
             case 0:
-    return "gps_position_sd";
+    return "gps_position";
 case 1:
-    return "gps_velocity_sd";
+    return "gps_velocity";
 case 2:
-    return "gps_pacc_sd";
+    return "gps_pacc";
 case 3:
-    return "gps_vacc_sd";
+    return "gps_vacc";
 case 4:
-    return "acceleration_sd";
+    return "acceleration";
 case 5:
-    return "angular_velocity_sd";
+    return "angular_velocity";
 case 6:
-    return "magnetic_field_sd";
+    return "magnetic_field";
 case 7:
-    return "pressure_sd";
+    return "pressure";
 case 8:
-    return "temperature_sd";
+    return "temperature";
 case 9:
-    return "ground_distance_sd";
+    return "ground_distance";
         default:
             break;
         }
@@ -881,32 +872,32 @@ case 9:
 
     void reset_flags()
     {
-        has_gps_position_sd = false;
-has_gps_velocity_sd = false;
-has_gps_pacc_sd = false;
-has_gps_vacc_sd = false;
-has_acceleration_sd = false;
-has_angular_velocity_sd = false;
-has_magnetic_field_sd = false;
-has_pressure_sd = false;
-has_temperature_sd = false;
-has_ground_distance_sd = false;
+        
+
+
+
+
+
+
+
+
+
     }
 
 public:
     explicit SAXEventHandler( ::sz::Multi_Simulator::Noise * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->gps_position_sd)
-, handler_1(&obj->gps_velocity_sd)
-, handler_2(&obj->gps_pacc_sd)
-, handler_3(&obj->gps_vacc_sd)
-, handler_4(&obj->acceleration_sd)
-, handler_5(&obj->angular_velocity_sd)
-, handler_6(&obj->magnetic_field_sd)
-, handler_7(&obj->pressure_sd)
-, handler_8(&obj->temperature_sd)
-, handler_9(&obj->ground_distance_sd)
+        , handler_0(&obj->gps_position)
+, handler_1(&obj->gps_velocity)
+, handler_2(&obj->gps_pacc)
+, handler_3(&obj->gps_vacc)
+, handler_4(&obj->acceleration)
+, handler_5(&obj->angular_velocity)
+, handler_6(&obj->magnetic_field)
+, handler_7(&obj->pressure)
+, handler_8(&obj->temperature)
+, handler_9(&obj->ground_distance)
     {
         reset_flags();
     }
@@ -1263,26 +1254,26 @@ case 9:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x53\x44", 15))
-						 { state=0; has_gps_position_sd = true; }
-else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x53\x44", 15))
-						 { state=1; has_gps_velocity_sd = true; }
-else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x50\x41\x43\x43\x20\x53\x44", 11))
-						 { state=2; has_gps_pacc_sd = true; }
-else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x56\x41\x43\x43\x20\x53\x44", 11))
-						 { state=3; has_gps_vacc_sd = true; }
-else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x53\x44", 15))
-						 { state=4; has_acceleration_sd = true; }
-else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x53\x44", 19))
-						 { state=5; has_angular_velocity_sd = true; }
-else if (utility::string_equal(str, length, "\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x53\x44", 17))
-						 { state=6; has_magnetic_field_sd = true; }
-else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65\x20\x53\x44", 11))
-						 { state=7; has_pressure_sd = true; }
-else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x53\x44", 14))
-						 { state=8; has_temperature_sd = true; }
-else if (utility::string_equal(str, length, "\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x53\x44", 18))
-						 { state=9; has_ground_distance_sd = true; }
+            else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 12))
+						 { state=0;  }
+else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 12))
+						 { state=1;  }
+else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x50\x41\x43\x43", 8))
+						 { state=2;  }
+else if (utility::string_equal(str, length, "\x47\x50\x53\x20\x56\x41\x43\x43", 8))
+						 { state=3;  }
+else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
+						 { state=4;  }
+else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16))
+						 { state=5;  }
+else if (utility::string_equal(str, length, "\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14))
+						 { state=6;  }
+else if (utility::string_equal(str, length, "\x50\x72\x65\x73\x73\x75\x72\x65", 8))
+						 { state=7;  }
+else if (utility::string_equal(str, length, "\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11))
+						 { state=8;  }
+else if (utility::string_equal(str, length, "\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65", 15))
+						 { state=9;  }
             else {
                 state = -1;
                 return true;
@@ -1499,16 +1490,7 @@ case 9:
                 break;
             }
         } else {
-            if (!has_gps_position_sd) set_missing_required("gps_position_sd");
-if (!has_gps_velocity_sd) set_missing_required("gps_velocity_sd");
-if (!has_gps_pacc_sd) set_missing_required("gps_pacc_sd");
-if (!has_gps_vacc_sd) set_missing_required("gps_vacc_sd");
-if (!has_acceleration_sd) set_missing_required("acceleration_sd");
-if (!has_angular_velocity_sd) set_missing_required("angular_velocity_sd");
-if (!has_magnetic_field_sd) set_missing_required("magnetic_field_sd");
-if (!has_pressure_sd) set_missing_required("pressure_sd");
-if (!has_temperature_sd) set_missing_required("temperature_sd");
-if (!has_ground_distance_sd) set_missing_required("ground_distance_sd");
+            
         }
         return the_error.empty();
     }
@@ -1582,16 +1564,16 @@ struct Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f9
     {
         w.StartObject();
 
-        w.Key("\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x53\x44", 15, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_position_sd);
-w.Key("\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x53\x44", 15, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_velocity_sd);
-w.Key("\x47\x50\x53\x20\x50\x41\x43\x43\x20\x53\x44", 11, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_pacc_sd);
-w.Key("\x47\x50\x53\x20\x56\x41\x43\x43\x20\x53\x44", 11, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_vacc_sd);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x53\x44", 15, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.acceleration_sd);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x53\x44", 19, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.angular_velocity_sd);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x53\x44", 17, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.magnetic_field_sd);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x53\x44", 11, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.pressure_sd);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x53\x44", 14, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.temperature_sd);
-w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x53\x44", 18, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.ground_distance_sd);
+        w.Key("\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_position);
+w.Key("\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_velocity);
+w.Key("\x47\x50\x53\x20\x50\x41\x43\x43", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_pacc);
+w.Key("\x47\x50\x53\x20\x56\x41\x43\x43", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_vacc);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.acceleration);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.angular_velocity);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.magnetic_field);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.pressure);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.temperature);
+w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65", 15, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.ground_distance);
 
         w.EndObject(10);
     }

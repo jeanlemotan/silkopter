@@ -18,7 +18,7 @@ public:
         QWidget* editor = QStyledItemDelegate::createEditor(parent, option, index);
         if(QDoubleSpinBox* spinbox = qobject_cast<QDoubleSpinBox*>(editor))
         {
-            spinbox->setDecimals(6);
+            spinbox->setDecimals(12);
         }
         return editor;
     }
