@@ -1294,9 +1294,13 @@ void MPU9250::process_magnetometer(Buses& buses)
             math::vec3f value(static_cast<int16_t>((data[2] << 8) | data[1]),
                             static_cast<int16_t>((data[4] << 8) | data[3]),
                             static_cast<int16_t>((data[6] << 8) | data[5]));
+
             float length_sq = math::length_sq(value);
-            if (length_sq > math::square(1.f) && length_sq < math::square(10000.f))
+            if (length_sq > math::square(1.f) && length_sq < math::square(32767.f))
             {
+                //result is in micro teslas, scale it to teslas
+                value /= 1000000.f;
+
                 value = math::transform(m_magnetometer_rotation, value);
                 m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;
 

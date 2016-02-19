@@ -429,7 +429,7 @@ void Multi_Simulation::process_uav_sensors(q::Clock::duration dt)
     m_uav.state.acceleration = math::rotate(enu_to_local_rotation, m_uav.state.enu_linear_acceleration + math::vec3f(0, 0, physics::constants::g));
 
     {
-        math::vec3f enu_magnetic_field(0, 1, 0);
+        math::vec3f enu_magnetic_field(0, 50.f/1000000.f, 0); //50 uT
         m_uav.state.magnetic_field = math::rotate(enu_to_local_rotation, enu_magnetic_field);
     }
 
