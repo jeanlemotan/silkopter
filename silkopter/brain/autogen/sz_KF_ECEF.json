@@ -14,14 +14,12 @@
     "name": "Config",
     "members":
     [
-        ["float", "position_lag", {"required": false, "json_key" : "Position Lag (s)", "default" : 0}],
-        ["float", "position_accuracy", {"required": true, "json_key" : "Position Accuracy (CEP m)", "default" : 2.0}],
-        ["float", "velocity_lag", {"required": true, "json_key" : "Velocity Lag (s)", "default" : 0}],
-        ["float", "velocity_accuracy", {"required": true, "json_key" : "Velocity Accuracy (m/s)", "default" : 0.2}],
-        ["float", "acceleration_lag", {"required": true, "json_key" : "Acceleration Lag (s)", "default" : 0}],
-        ["float", "acceleration_accuracy", {"required": true, "json_key" : "Acceleration Accuracy (m/s^2)", "default" : 2.0}],
-        ["float", "pressure_alt_lag", {"required": true, "json_key" : "Pressure Altitude Lag (s)", "default" : 0}],
-        ["float", "pressure_alt_accuracy", {"required": true, "json_key" : "Pressure Altitude Accuracy (m)", "default" : 0.5}]
+        ["float", "gps_position_lag", {"required": false, "json_key" : "GPS Position Lag (s)", "default" : 0}],
+        ["float", "gps_position_accuracy", {"required": false, "json_key" : "GPS Position Accuracy (CEP m)", "default" : 2.0}],
+        ["float", "gps_velocity_lag", {"required": false, "json_key" : "GPS Velocity Lag (s)", "default" : 0}],
+        ["float", "gps_velocity_accuracy", {"required": false, "json_key" : "GPS Velocity Accuracy (m/s)", "default" : 0.2}],
+        ["float", "acceleration_lag", {"required": false, "json_key" : "Acceleration Lag (s)", "default" : 0}],
+        ["float", "acceleration_accuracy", {"required": false, "json_key" : "Acceleration Accuracy (m/s^2)", "default" : 2.0}]
     ]
 }
 ]
