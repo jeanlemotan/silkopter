@@ -393,34 +393,34 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
     *m_config = sz;
 
     m_config->noise.gps_position = math::max(m_config->noise.gps_position, 0.f);
-    m_noise.gps_position = Noise::Distribution<float>(0, m_config->noise.gps_position);
+    m_noise.gps_position = Noise::Distribution<float>(-m_config->noise.gps_position*0.5f, m_config->noise.gps_position*0.5f);
 
     m_config->noise.gps_velocity = math::max(m_config->noise.gps_velocity, 0.f);
-    m_noise.gps_velocity = Noise::Distribution<float>(0, m_config->noise.gps_velocity);
+    m_noise.gps_velocity = Noise::Distribution<float>(-m_config->noise.gps_velocity*0.5f, m_config->noise.gps_velocity*0.5f);
 
     m_config->noise.gps_pacc = math::max(m_config->noise.gps_pacc, 0.f);
-    m_noise.gps_pacc = Noise::Distribution<float>(0, m_config->noise.gps_pacc);
+    m_noise.gps_pacc = Noise::Distribution<float>(-m_config->noise.gps_pacc*0.5f, m_config->noise.gps_pacc*0.5f);
 
     m_config->noise.gps_vacc = math::max(m_config->noise.gps_vacc, 0.f);
-    m_noise.gps_vacc = Noise::Distribution<float>(0, m_config->noise.gps_vacc);
+    m_noise.gps_vacc = Noise::Distribution<float>(-m_config->noise.gps_vacc*0.5f, m_config->noise.gps_vacc*0.5f);
 
     m_config->noise.acceleration = math::max(m_config->noise.acceleration, 0.f);
-    m_noise.acceleration = Noise::Distribution<float>(0, m_config->noise.acceleration);
+    m_noise.acceleration = Noise::Distribution<float>(-m_config->noise.acceleration*0.5f, m_config->noise.acceleration*0.5f);
 
     m_config->noise.angular_velocity = math::max(m_config->noise.angular_velocity, 0.f);
-    m_noise.angular_velocity = Noise::Distribution<float>(0, m_config->noise.angular_velocity);
+    m_noise.angular_velocity = Noise::Distribution<float>(-m_config->noise.angular_velocity*0.5f, m_config->noise.angular_velocity*0.5f);
 
     m_config->noise.magnetic_field = math::max(m_config->noise.magnetic_field, 0.f);
-    m_noise.magnetic_field = Noise::Distribution<float>(0, m_config->noise.magnetic_field);
+    m_noise.magnetic_field = Noise::Distribution<float>(-m_config->noise.magnetic_field*0.5f, m_config->noise.magnetic_field*0.5f);
 
     m_config->noise.pressure = math::max(m_config->noise.pressure, 0.f);
-    m_noise.pressure = Noise::Distribution<float>(0, m_config->noise.pressure);
+    m_noise.pressure = Noise::Distribution<float>(-m_config->noise.pressure*0.5f, m_config->noise.pressure*0.5f);
 
     m_config->noise.temperature = math::max(m_config->noise.temperature, 0.f);
-    m_noise.temperature = Noise::Distribution<float>(0, m_config->noise.temperature);
+    m_noise.temperature = Noise::Distribution<float>(-m_config->noise.temperature*0.5f, m_config->noise.temperature*0.5f);
 
     m_config->noise.ground_distance = math::max(m_config->noise.ground_distance, 0.f);
-    m_noise.ground_distance = Noise::Distribution<float>(0, m_config->noise.ground_distance);
+    m_noise.ground_distance = Noise::Distribution<float>(-m_config->noise.ground_distance*0.5f, m_config->noise.ground_distance*0.5f);
 
     return true;
 }

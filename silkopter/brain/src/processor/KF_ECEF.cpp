@@ -137,37 +137,25 @@ auto KF_ECEF::init() -> bool
     double dt = m_dts;
 
     {
-        m_kf_x.A << 1, dt, 0.5*dt*dt,
-                    0,  1, dt,
-                    0,  0, 1;
+        m_kf_x.A << 1,      dt,     0.5*dt*dt,
+                    0,      1,      dt,
+                    0,      0,      1;
+
+        m_kf_x.H << 1,      0,      0,
+                    0,      1,      0,
+                    0,      0,      1;
+
         double pn = 0.01;
         double dt4 = dt*dt*dt*dt;
         double dt3 = dt*dt*dt;
         double dt2 = dt*dt;
         m_kf_x.Q << pn*0.25*dt4,    pn*0.5*dt3, pn*0.5*dt2,
-                pn*0.5*dt3,     pn*dt2,     pn*dt,
-                pn*0.5*dt2,     pn*dt,      pn*1.0;
-    }
-    {
-        double vc = 1; //how many velocity sensors we have
-        m_kf_z.A << 1,  dt/vc,  0.5*dt*dt,
-                    0,  1,      dt*vc,
-                    0,  0,      1;
-        m_kf_z.H << 1,  0,  0,
-                    0,  1,  0,
-                    0,  0,  1,
-                    0,  0,  0;
-
-        double pn = 0.01;
-        double dt4 = dt*dt*dt*dt;
-        double dt3 = dt*dt*dt;
-        double dt2 = dt*dt;
-        m_kf_z.Q << pn*0.25*dt4,    pn*0.5*dt3, pn*0.5*dt2,
                     pn*0.5*dt3,     pn*dt2,     pn*dt,
                     pn*0.5*dt2,     pn*dt,      pn*1.0;
     }
 
     m_kf_y = m_kf_x;
+    m_kf_z = m_kf_x;
 //    m_kf_z = m_kf_x;
 
     return true;
@@ -188,7 +176,6 @@ auto KF_ECEF::get_inputs() const -> std::vector<Input>
         { stream::IECEF_Position::TYPE, m_init_params->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
         { stream::IECEF_Velocity::TYPE, m_init_params->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
         { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(3) }
     }};
     return inputs;
 }
@@ -212,58 +199,51 @@ void KF_ECEF::process()
     m_velocity_output_stream->clear();
     m_linear_acceleration_output_stream->clear();
 
-    m_accumulator.process([this](stream::IECEF_Position::Sample const& pos_sample,
-                                  stream::IECEF_Velocity::Sample const& vel_sample,
-                                  stream::IENU_Linear_Acceleration::Sample const& la_sample,
-                                  stream::IPressure::Sample const& p_sample)
+    m_accumulator.process([this](stream::IECEF_Position::Sample const& gps_pos_sample,
+                                  stream::IECEF_Velocity::Sample const& gps_vel_sample,
+                                  stream::IENU_Linear_Acceleration::Sample const& la_sample)
     {
-        if (pos_sample.is_healthy & vel_sample.is_healthy & la_sample.is_healthy & p_sample.is_healthy)
+        if (gps_pos_sample.is_healthy & gps_vel_sample.is_healthy & la_sample.is_healthy)
         {
-            util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(pos_sample.value);
+            util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(gps_pos_sample.value);
             math::mat3d enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(lla_position);
             math::vec3f ecef_la = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(la_sample.value)));
 
-            stream::IECEF_Position::Sample const& last_pos_sample = m_position_output_stream->get_last_sample();
-            if (math::distance_sq(pos_sample.value, last_pos_sample.value) > math::square(20))
+            stream::IECEF_Position::Sample const& last_gps_pos_sample = m_position_output_stream->get_last_sample();
+            if (math::distance_sq(gps_pos_sample.value, last_gps_pos_sample.value) > math::square(20))
             {
                 m_kf_x.x.setZero();
                 m_kf_y.x.setZero();
                 m_kf_z.x.setZero();
-                m_kf_x.x(0) = pos_sample.value.x;
-                m_kf_y.x(0) = pos_sample.value.y;
-                m_kf_z.x(0) = pos_sample.value.z;
+                m_kf_x.x(0) = gps_pos_sample.value.x;
+                m_kf_y.x(0) = gps_pos_sample.value.y;
+                m_kf_z.x(0) = gps_pos_sample.value.z;
             }
 
-            m_position_delayer.push_back(pos_sample.value);
-            stream::IECEF_Position::Value const& pos = m_position_delayer.get_value();
-            m_kf_x.z(0) = pos.x;
-            m_kf_y.z(0) = pos.y;
-            m_kf_z.z(0) = pos.z;
-
-
-            m_velocity_delayer.push_back(vel_sample.value);
-            stream::IECEF_Velocity::Value const& vel = m_velocity_delayer.get_value();
-            m_kf_x.z(1) = vel.x;
-            m_kf_y.z(1) = vel.y;
-            m_kf_z.z(1) = vel.z;
-
-            m_linear_acceleration_delayer.push_back(ecef_la);
-            stream::IECEF_Linear_Acceleration::Value const& acc = m_linear_acceleration_delayer.get_value();
-            m_kf_x.z(2) = acc.x;
-            m_kf_y.z(2) = acc.y;
-            m_kf_z.z(2) = acc.z;
-
-            //pressure
-            float alt = static_cast<float>((1.0 - std::pow((p_sample.value / 101325.0), 0.190284)) * 44307.69396);
-            if (m_last_baro_altitude)
             {
-                m_pressure_alt_speed_delayer.push_back((alt - *m_last_baro_altitude) / m_dts);
-
-                float speed = m_pressure_alt_speed_delayer.get_value();
-                m_kf_z.z(3) = speed;
-                //QLOGI("{}", speed);
+                m_gps_position_delayer.push_back(gps_pos_sample.value);
+                stream::IECEF_Position::Value const& pos = m_gps_position_delayer.get_value();
+                m_kf_x.z(0) = pos.x;
+                m_kf_y.z(0) = pos.y;
+                m_kf_z.z(0) = pos.z;
             }
-            m_last_baro_altitude = alt;
+
+
+            {
+                m_gps_velocity_delayer.push_back(gps_vel_sample.value);
+                stream::IECEF_Velocity::Value const& vel = m_gps_velocity_delayer.get_value();
+                m_kf_x.z(1) = vel.x;
+                m_kf_y.z(1) = vel.y;
+                m_kf_z.z(1) = vel.z;
+            }
+
+            {
+                m_linear_acceleration_delayer.push_back(ecef_la);
+                stream::IECEF_Linear_Acceleration::Value const& acc = m_linear_acceleration_delayer.get_value();
+                m_kf_x.z(2) = acc.x;
+                m_kf_y.z(2) = acc.y;
+                m_kf_z.z(2) = acc.z;
+            }
 
             m_kf_x.process();
             m_kf_y.process();
@@ -303,34 +283,29 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    m_config->position_lag = math::max(m_config->position_lag, 0.f);
-    m_config->position_accuracy = math::max(m_config->position_accuracy, 0.f);
-    m_config->velocity_lag = math::max(m_config->velocity_lag, 0.f);
-    m_config->velocity_accuracy = math::max(m_config->velocity_accuracy, 0.f);
+    m_config->gps_position_lag = math::max(m_config->gps_position_lag, 0.f);
+    m_config->gps_position_accuracy = math::max(m_config->gps_position_accuracy, 0.f);
+    m_config->gps_velocity_lag = math::max(m_config->gps_velocity_lag, 0.f);
+    m_config->gps_velocity_accuracy = math::max(m_config->gps_velocity_accuracy, 0.f);
     m_config->acceleration_lag = math::max(m_config->acceleration_lag, 0.f);
     m_config->acceleration_accuracy = math::max(m_config->acceleration_accuracy, 0.f);
-    m_config->pressure_alt_lag = math::max(m_config->pressure_alt_lag, 0.f);
-    m_config->pressure_alt_accuracy = math::max(m_config->pressure_alt_accuracy, 0.f);
 
 
-    double pacc = math::square(m_config->position_accuracy);
-    double vacc = math::square(m_config->velocity_accuracy);
-    double aacc = math::square(m_config->acceleration_accuracy);
-    double bacc = math::square(m_config->pressure_alt_accuracy);
+    double gps_pos_acu = math::square(m_config->gps_position_accuracy);
+    double gps_vel_acu = math::square(m_config->gps_velocity_accuracy);
+    double acc_acu = math::square(m_config->acceleration_accuracy);
 
-    m_kf_x.R << pacc,    0,       0,
-                0,       vacc,    0,
-                0,       0,       aacc;
+    m_kf_x.R << gps_pos_acu,    0,              0,
+                0,              gps_vel_acu,    0,
+                0,              0,              acc_acu,
+                0,              0,              0;
+
     m_kf_y.R = m_kf_x.R;
-    m_kf_z.R << pacc,   0,      0,      0,
-                0,      vacc,   0,      0,
-                0,      0,      aacc,   0,
-                0,      0,      0,      bacc;
+    m_kf_z.R = m_kf_x.R;
 
-    m_position_delayer.init(m_dts, m_config->position_lag);
-    m_velocity_delayer.init(m_dts, m_config->velocity_lag);
+    m_gps_position_delayer.init(m_dts, m_config->gps_position_lag);
+    m_gps_velocity_delayer.init(m_dts, m_config->gps_velocity_lag);
     m_linear_acceleration_delayer.init(m_dts, m_config->acceleration_lag);
-    m_pressure_alt_speed_delayer.init(m_dts, m_config->pressure_alt_lag);
 
     return true;
 }

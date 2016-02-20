@@ -325,6 +325,7 @@ void MS5611::process()
 
         float t = static_cast<float>(TEMP) * 0.01f;
         double p = (m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125;
+        p = p * 0.001; //pascals to kilopascals
 
         constexpr size_t k_max_sample_difference = 5;
 

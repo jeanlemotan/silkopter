@@ -1298,9 +1298,7 @@ void MPU9250::process_magnetometer(Buses& buses)
             float length_sq = math::length_sq(value);
             if (length_sq > math::square(1.f) && length_sq < math::square(32767.f))
             {
-                //result is in micro teslas, scale it to teslas
-                value /= 1000000.f;
-
+                //result is already in in micro teslas
                 value = math::transform(m_magnetometer_rotation, value);
                 m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;
 

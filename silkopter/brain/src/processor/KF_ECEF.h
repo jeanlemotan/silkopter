@@ -5,7 +5,6 @@
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
 #include "common/stream/IAcceleration.h"
-#include "common/stream/IPressure.h"
 #include "common/stream/IFrame.h"
 
 #include "HAL.h"
@@ -64,8 +63,7 @@ private:
 
     Sample_Accumulator<stream::IECEF_Position,
                        stream::IECEF_Velocity,
-                       stream::IENU_Linear_Acceleration,
-                       stream::IPressure> m_accumulator;
+                       stream::IENU_Linear_Acceleration> m_accumulator;
 
     typedef Basic_Output_Stream<stream::IECEF_Position> Position_Output_Stream;
     mutable std::shared_ptr<Position_Output_Stream> m_position_output_stream;
@@ -75,8 +73,6 @@ private:
 
     typedef Basic_Output_Stream<stream::IECEF_Linear_Acceleration> Linear_Acceleration_Output_Stream;
     mutable std::shared_ptr<Linear_Acceleration_Output_Stream> m_linear_acceleration_output_stream;
-
-    boost::optional<float> m_last_baro_altitude;
 
     template<size_t St, size_t Me>
     class KF
@@ -116,7 +112,7 @@ private:
 
     KF<3, 3> m_kf_x;
     KF<3, 3> m_kf_y;
-    KF<3, 4> m_kf_z;
+    KF<3, 3> m_kf_z;
 
     float m_dts = 0;
 
@@ -131,10 +127,9 @@ private:
         size_t min_value_count = 0;
     };
 
-    Delayer<stream::IECEF_Position::Value> m_position_delayer;
-    Delayer<stream::IECEF_Velocity::Value> m_velocity_delayer;
+    Delayer<stream::IECEF_Position::Value> m_gps_position_delayer;
+    Delayer<stream::IECEF_Velocity::Value> m_gps_velocity_delayer;
     Delayer<stream::IECEF_Linear_Acceleration::Value> m_linear_acceleration_delayer;
-    Delayer<stream::IPressure::Value> m_pressure_alt_speed_delayer;
 };
 
 

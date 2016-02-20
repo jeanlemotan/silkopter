@@ -22,23 +22,18 @@ public:
 };
 DECLARE_CLASS_PTR(IFrame);
 
-//class IENU_Frame : public ISpatial_Stream<Type::FRAME, Space::ENU>
-//{
-//public:
-//    typedef std::false_type can_be_filtered_t;
+class IENU_Frame : public ISpatial_Stream<Type::FRAME, Space::ENU>
+{
+public:
+    typedef std::false_type can_be_filtered_t;
 
-//    struct Value
-//    {
-//        math::quatd rotation;        //local to parent. vec local * rotation == vec parent
-//        math::vec3d ecef_origin;     //this ENU frame is tangent to this ecef point
-//    };
+    typedef math::quatf Value; //local to parent. vec local * rotation == vec parent
+    typedef stream::Sample<Value>     Sample;
+    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
-//    typedef stream::Sample<Value>     Sample;
-//    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-//    static constexpr Space PARENT_SPACE = Space::ECEF;
-//};
-//DECLARE_CLASS_PTR(IENU_Frame);
+    static constexpr Space PARENT_SPACE = Space::ECEF;
+};
+DECLARE_CLASS_PTR(IENU_Frame);
 
 
 }

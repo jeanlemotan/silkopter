@@ -138,7 +138,9 @@ SOURCES += \
     ../../src/bus/SPI_BCM.cpp \
     ../../src/bus/UART_BBang.cpp \
     ../../src/hw/command.c \
-    ../../src/source/AVRADC.cpp
+    ../../src/source/AVRADC.cpp \
+    ../../src/processor/Pressure_Velocity.cpp \
+    ../../src/processor/ENU_Frame_System.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -284,7 +286,9 @@ HEADERS += \
     ../../src/bus/UART_BBang.h \
     ../../src/source/AVRADC.h \
     ../../../libs/common/node/ICombiner.h \
-    ../../src/combiner/Combiner.h
+    ../../src/combiner/Combiner.h \
+    ../../src/processor/Pressure_Velocity.h \
+    ../../src/processor/ENU_Frame_System.h
 
 DISTFILES +=
 

@@ -123,7 +123,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 3> data;
             for (auto const& s: samples)
             {
-                data = { s.value.x * 1000000.0, s.value.y * 1000000.0, s.value.z * 1000000.0 };
+                data = { s.value.x, s.value.y, s.value.z };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();
@@ -139,7 +139,7 @@ void Stream_Viewer_Widget::create_viewer()
             std::array<double, 1> data;
             for (auto const& s: samples)
             {
-                data = { s.value / 1000.0 };
+                data = { s.value };
                 viewer->add_samples(data.data(), s.is_healthy);
             }
             viewer->process();
