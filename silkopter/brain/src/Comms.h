@@ -39,7 +39,6 @@ public:
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
 
     auto is_connected() const -> bool;
-    auto get_remote_clock() const -> Manual_Clock const&;
 
     void process();
 
@@ -99,8 +98,6 @@ private:
 
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
-
-    Manual_Clock m_remote_clock;
 
     std::vector<stream::IMulti_Commands::Value> m_multi_commands_values;
 

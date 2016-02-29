@@ -218,11 +218,6 @@ auto Comms::is_connected() const -> bool
     return m_is_connected;
 }
 
-auto Comms::get_remote_clock() const -> Manual_Clock const&
-{
-    return m_remote_clock;
-}
-
 //auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
 //{
 //    if (_stream.get_type() != stream::IVideo::TYPE)
@@ -442,6 +437,31 @@ void Comms::handle_clock()
 {
     auto& channel = m_channels->setup;
     QLOGI("Req clock");
+
+    channel.begin_unpack();
+
+    QLOGI("Req multi config");
+
+    int64_t time_t_data = 0;
+    if (channel.unpack_param(time_t_data))
+    {
+        time_t t = time_t_data;
+        if (stime(&t) == 0)
+        {
+            char mbstr[256] = {0};
+            std::time_t t = std::time(nullptr);
+            if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
+            {
+                strcpy(mbstr, "<cannot format>");
+            }
+            QLOGI("Clock set, current time is: {}", mbstr);
+        }
+        else
+        {
+            QLOGE("Failed to set time: {}", strerror(errno));
+        }
+    }
+    channel.end_unpack();
 
     uint64_t tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
     channel.pack_all(comms::Setup_Message::CLOCK, tp);

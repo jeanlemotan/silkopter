@@ -192,7 +192,11 @@ void Comms::reset()
 
 void Comms::request_data()
 {
-    m_setup_channel.pack_all(comms::Setup_Message::CLOCK);
+    {
+        time_t t = time(nullptr);
+        int64_t time_t_data = t;
+        m_setup_channel.pack_all(comms::Setup_Message::CLOCK, time_t_data);
+    }
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES);
     m_setup_channel.pack_all(comms::Setup_Message::MULTI_CONFIG);
