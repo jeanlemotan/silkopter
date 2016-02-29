@@ -140,7 +140,8 @@ SOURCES += \
     ../../src/hw/command.c \
     ../../src/source/AVRADC.cpp \
     ../../src/processor/Pressure_Velocity.cpp \
-    ../../src/processor/ENU_Frame_System.cpp
+    ../../src/processor/ENU_Frame_System.cpp \
+    ../../src/source/RaspiCamControl.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -288,7 +289,8 @@ HEADERS += \
     ../../../libs/common/node/ICombiner.h \
     ../../src/combiner/Combiner.h \
     ../../src/processor/Pressure_Velocity.h \
-    ../../src/processor/ENU_Frame_System.h
+    ../../src/processor/ENU_Frame_System.h \
+    ../../src/source/RaspiCamControl.h
 
 DISTFILES +=
 

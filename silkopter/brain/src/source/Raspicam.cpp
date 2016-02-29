@@ -20,6 +20,8 @@ extern "C"
     #include "interface/mmal/util/mmal_connection.h"
 }
 
+#include "RaspiCamControl.h"
+
 #define _QUOTE(str) #str
 #define QUOTE(str) _QUOTE(str)
 //#define MMAL_CALL(x) x, LOG_INFO("MMAL: {}", QUOTE(x))
@@ -262,6 +264,24 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
     {
         stop_recording();
     }
+
+    raspicamcontrol_set_shutter_speed(m_impl->camera.get(), m_config->shutter_speed * 1000);
+    raspicamcontrol_set_ISO(m_impl->camera.get(), m_config->iso);
+
+    m_config->ev = math::clamp(m_config->ev, -10, 10);
+    raspicamcontrol_set_exposure_compensation(m_impl->camera.get(), m_config->ev);
+
+    m_config->sharpness = math::clamp(m_config->sharpness, 0u, 100u);
+    raspicamcontrol_set_sharpness(m_impl->camera.get(), int(m_config->sharpness) * 2 - 100);
+
+    m_config->contrast = math::clamp(m_config->contrast, 0u, 100u);
+    raspicamcontrol_set_contrast(m_impl->camera.get(), int(m_config->contrast) * 2 - 100);
+
+    m_config->brightness = math::clamp(m_config->brightness, 0u, 100u);
+    raspicamcontrol_set_brightness(m_impl->camera.get(), int(m_config->brightness));
+
+    m_config->saturation = math::clamp(m_config->saturation, 0u, 100u);
+    raspicamcontrol_set_saturation(m_impl->camera.get(), int(m_config->saturation) * 2 - 100);
 
     return true;
 }

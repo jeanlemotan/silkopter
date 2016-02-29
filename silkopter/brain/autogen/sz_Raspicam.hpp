@@ -994,10 +994,15 @@ w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f74
 namespace sz { namespace Raspicam { struct Config {
  uint32_t iso;
 uint32_t shutter_speed;
+int32_t ev;
+uint32_t sharpness;
+uint32_t contrast;
+uint32_t brightness;
+uint32_t saturation;
 uint32_t quality;
 bool recording;
 
-explicit Config():iso(0), shutter_speed(0), quality(0), recording(false) {  }
+explicit Config():iso(0), shutter_speed(0), ev(50), sharpness(50), contrast(50), brightness(50), saturation(50), quality(0), recording(false) {  }
 
 
  
@@ -1016,8 +1021,13 @@ private:
 
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< uint32_t > handler_1;
-SAXEventHandler< uint32_t > handler_2;
-SAXEventHandler< bool > handler_3;bool has_iso;
+SAXEventHandler< int32_t > handler_2;
+SAXEventHandler< uint32_t > handler_3;
+SAXEventHandler< uint32_t > handler_4;
+SAXEventHandler< uint32_t > handler_5;
+SAXEventHandler< uint32_t > handler_6;
+SAXEventHandler< uint32_t > handler_7;
+SAXEventHandler< bool > handler_8;bool has_iso;
 bool has_shutter_speed;
 bool has_quality;
 
@@ -1038,8 +1048,18 @@ bool has_quality;
 case 1:
     return "shutter_speed";
 case 2:
-    return "quality";
+    return "ev";
 case 3:
+    return "sharpness";
+case 4:
+    return "contrast";
+case 5:
+    return "brightness";
+case 6:
+    return "saturation";
+case 7:
+    return "quality";
+case 8:
     return "recording";
         default:
             break;
@@ -1069,6 +1089,11 @@ case 3:
     {
         has_iso = false;
 has_shutter_speed = false;
+
+
+
+
+
 has_quality = false;
 
     }
@@ -1079,8 +1104,13 @@ public:
         , depth(0)
         , handler_0(&obj->iso)
 , handler_1(&obj->shutter_speed)
-, handler_2(&obj->quality)
-, handler_3(&obj->recording)
+, handler_2(&obj->ev)
+, handler_3(&obj->sharpness)
+, handler_4(&obj->contrast)
+, handler_5(&obj->brightness)
+, handler_6(&obj->saturation)
+, handler_7(&obj->quality)
+, handler_8(&obj->recording)
     {
         reset_flags();
     }
@@ -1103,6 +1133,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Null());
+
+case 4:
+    return checked_event_forwarding(handler_4.Null());
+
+case 5:
+    return checked_event_forwarding(handler_5.Null());
+
+case 6:
+    return checked_event_forwarding(handler_6.Null());
+
+case 7:
+    return checked_event_forwarding(handler_7.Null());
+
+case 8:
+    return checked_event_forwarding(handler_8.Null());
 
         default:
             break;
@@ -1129,6 +1174,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Bool(b));
 
+case 4:
+    return checked_event_forwarding(handler_4.Bool(b));
+
+case 5:
+    return checked_event_forwarding(handler_5.Bool(b));
+
+case 6:
+    return checked_event_forwarding(handler_6.Bool(b));
+
+case 7:
+    return checked_event_forwarding(handler_7.Bool(b));
+
+case 8:
+    return checked_event_forwarding(handler_8.Bool(b));
+
         default:
             break;
         }
@@ -1153,6 +1213,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Int(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Int(i));
 
         default:
             break;
@@ -1179,6 +1254,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Uint(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Uint(i));
+
         default:
             break;
         }
@@ -1203,6 +1293,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Int64(i));
+
+case 4:
+    return checked_event_forwarding(handler_4.Int64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Int64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Int64(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Int64(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Int64(i));
 
         default:
             break;
@@ -1229,6 +1334,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.Uint64(i));
 
+case 4:
+    return checked_event_forwarding(handler_4.Uint64(i));
+
+case 5:
+    return checked_event_forwarding(handler_5.Uint64(i));
+
+case 6:
+    return checked_event_forwarding(handler_6.Uint64(i));
+
+case 7:
+    return checked_event_forwarding(handler_7.Uint64(i));
+
+case 8:
+    return checked_event_forwarding(handler_8.Uint64(i));
+
         default:
             break;
         }
@@ -1253,6 +1373,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Double(d));
+
+case 4:
+    return checked_event_forwarding(handler_4.Double(d));
+
+case 5:
+    return checked_event_forwarding(handler_5.Double(d));
+
+case 6:
+    return checked_event_forwarding(handler_6.Double(d));
+
+case 7:
+    return checked_event_forwarding(handler_7.Double(d));
+
+case 8:
+    return checked_event_forwarding(handler_8.Double(d));
 
         default:
             break;
@@ -1279,6 +1414,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.String(str, length, copy));
 
+case 4:
+    return checked_event_forwarding(handler_4.String(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.String(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.String(str, length, copy));
+
+case 7:
+    return checked_event_forwarding(handler_7.String(str, length, copy));
+
+case 8:
+    return checked_event_forwarding(handler_8.String(str, length, copy));
+
         default:
             break;
         }
@@ -1297,10 +1447,20 @@ case 3:
 						 { state=0; has_iso = true; }
 else if (utility::string_equal(str, length, "\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18))
 						 { state=1; has_shutter_speed = true; }
-else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
-						 { state=2; has_quality = true; }
-else if (utility::string_equal(str, length, "\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9))
+else if (utility::string_equal(str, length, "\x45\x78\x70\x6f\x73\x75\x72\x65\x20\x43\x6f\x6d\x70\x65\x6e\x73\x61\x74\x69\x6f\x6e\x20\x28\x2d\x31\x30\x2e\x2e\x31\x30\x29", 31))
+						 { state=2;  }
+else if (utility::string_equal(str, length, "\x53\x68\x61\x72\x70\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 18))
 						 { state=3;  }
+else if (utility::string_equal(str, length, "\x43\x6f\x6e\x74\x72\x61\x73\x74\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 17))
+						 { state=4;  }
+else if (utility::string_equal(str, length, "\x42\x72\x69\x67\x68\x74\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19))
+						 { state=5;  }
+else if (utility::string_equal(str, length, "\x53\x61\x74\x75\x72\x61\x74\x69\x6f\x6e\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19))
+						 { state=6;  }
+else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
+						 { state=7; has_quality = true; }
+else if (utility::string_equal(str, length, "\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9))
+						 { state=8;  }
             else {
                 state = -1;
                 return true;
@@ -1320,6 +1480,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.Key(str, length, copy));
+
+case 4:
+    return checked_event_forwarding(handler_4.Key(str, length, copy));
+
+case 5:
+    return checked_event_forwarding(handler_5.Key(str, length, copy));
+
+case 6:
+    return checked_event_forwarding(handler_6.Key(str, length, copy));
+
+case 7:
+    return checked_event_forwarding(handler_7.Key(str, length, copy));
+
+case 8:
+    return checked_event_forwarding(handler_8.Key(str, length, copy));
 
             default:
                 break;
@@ -1347,6 +1522,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartArray());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartArray());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartArray());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartArray());
+
+case 7:
+    return checked_event_forwarding(handler_7.StartArray());
+
+case 8:
+    return checked_event_forwarding(handler_8.StartArray());
+
         default:
             break;
         }
@@ -1371,6 +1561,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndArray(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndArray(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndArray(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndArray(length));
+
+case 7:
+    return checked_event_forwarding(handler_7.EndArray(length));
+
+case 8:
+    return checked_event_forwarding(handler_8.EndArray(length));
 
         default:
             break;
@@ -1397,6 +1602,21 @@ case 2:
 case 3:
     return checked_event_forwarding(handler_3.StartObject());
 
+case 4:
+    return checked_event_forwarding(handler_4.StartObject());
+
+case 5:
+    return checked_event_forwarding(handler_5.StartObject());
+
+case 6:
+    return checked_event_forwarding(handler_6.StartObject());
+
+case 7:
+    return checked_event_forwarding(handler_7.StartObject());
+
+case 8:
+    return checked_event_forwarding(handler_8.StartObject());
+
             default:
                 break;
             }
@@ -1422,6 +1642,21 @@ case 2:
 
 case 3:
     return checked_event_forwarding(handler_3.EndObject(length));
+
+case 4:
+    return checked_event_forwarding(handler_4.EndObject(length));
+
+case 5:
+    return checked_event_forwarding(handler_5.EndObject(length));
+
+case 6:
+    return checked_event_forwarding(handler_6.EndObject(length));
+
+case 7:
+    return checked_event_forwarding(handler_7.EndObject(length));
+
+case 8:
+    return checked_event_forwarding(handler_8.EndObject(length));
 
             default:
                 break;
@@ -1456,6 +1691,16 @@ case 2:
      handler_2.ReapError(errs); break;
 case 3:
      handler_3.ReapError(errs); break;
+case 4:
+     handler_4.ReapError(errs); break;
+case 5:
+     handler_5.ReapError(errs); break;
+case 6:
+     handler_6.ReapError(errs); break;
+case 7:
+     handler_7.ReapError(errs); break;
+case 8:
+     handler_8.ReapError(errs); break;
 
         default:
             break;
@@ -1474,6 +1719,11 @@ case 3:
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
 handler_3.PrepareForReuse();
+handler_4.PrepareForReuse();
+handler_5.PrepareForReuse();
+handler_6.PrepareForReuse();
+handler_7.PrepareForReuse();
+handler_8.PrepareForReuse();
 
     }
 };
@@ -1487,10 +1737,15 @@ struct Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201
 
         w.Key("\x49\x73\x6f", 3, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.iso);
 w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.shutter_speed);
+w.Key("\x45\x78\x70\x6f\x73\x75\x72\x65\x20\x43\x6f\x6d\x70\x65\x6e\x73\x61\x74\x69\x6f\x6e\x20\x28\x2d\x31\x30\x2e\x2e\x31\x30\x29", 31, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, int32_t >()(w, value.ev);
+w.Key("\x53\x68\x61\x72\x70\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.sharpness);
+w.Key("\x43\x6f\x6e\x74\x72\x61\x73\x74\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 17, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.contrast);
+w.Key("\x42\x72\x69\x67\x68\x74\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.brightness);
+w.Key("\x53\x61\x74\x75\x72\x61\x74\x69\x6f\x6e\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.saturation);
 w.Key("\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.quality);
 w.Key("\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, bool >()(w, value.recording);
 
-        w.EndObject(4);
+        w.EndObject(9);
     }
 
 };
