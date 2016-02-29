@@ -29,7 +29,8 @@
     [
         ["uint32_t", "iso", {"required": true, "default" : 0, "json_key" : "Iso"}],
         ["uint32_t", "shutter_speed", {"required": true, "default" : 0, "json_key" : "Shutter Speed (ms)"}],
-        ["uint32_t", "quality", {"required": true, "default" : 0, "json_key" : "Quality (0..1)"}]
+        ["uint32_t", "quality", {"required": true, "default" : 0, "json_key" : "Quality (0..1)"}],
+        ["bool", "recording", {"required": false, "default" : false, "json_key" : "Recording"}]
     ]
 }
 ]

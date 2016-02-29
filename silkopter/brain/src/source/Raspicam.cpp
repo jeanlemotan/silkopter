@@ -229,7 +229,7 @@ auto Raspicam::init() -> bool
         return false;
     }
 
-    set_active_streams(false, m_config->quality);
+    activate_streams();
 
     return true;
 #else
@@ -252,7 +252,16 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
-    set_active_streams(false, m_config->quality);
+    activate_streams();
+
+    if (m_config->recording)
+    {
+        start_recording();
+    }
+    else
+    {
+        stop_recording();
+    }
 
     return true;
 }
@@ -353,13 +362,14 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     m_temp_samples.count++;
 }
 
-void Raspicam::set_active_streams(bool recording, uint32_t quality)
+void Raspicam::activate_streams()
 {
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
-    bool high = quality == 0;
-    bool low = quality == 1;
+    bool recording = m_file_sink != nullptr;
+    bool high = m_config->quality == 0;
+    bool low = m_config->quality == 1;
 
     if (m_impl->recording.is_active == recording &&
         m_impl->high.is_active == high &&
@@ -368,7 +378,7 @@ void Raspicam::set_active_streams(bool recording, uint32_t quality)
         return;
     }
 
-    QLOGI("activating streams recording {}, quality {}", recording, quality);
+    QLOGI("activating streams recording {}, quality {}", recording, m_config->quality);
 
     if (set_connection_enabled(m_impl->recording.encoder_connection, recording))
     {
@@ -399,6 +409,88 @@ void Raspicam::set_active_streams(bool recording, uint32_t quality)
 #endif
 }
 
+void Raspicam::create_file_sink()
+{
+    char mbstr[256] = {0};
+    std::time_t t = std::time(nullptr);
+    if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
+    {
+        strcpy(mbstr, "no-date");
+    }
+
+    size_t file_idx = 0;
+
+    do
+    {
+        std::string filepath;
+        q::util::format_emplace(filepath, "capture/{}-{}", mbstr, file_idx);
+        if (!q::util::fs::exists(q::Path(filepath)))
+        {
+            m_file_sink.reset(new q::data::File_Sink(q::Path(filepath)));
+            if (m_file_sink->is_open())
+            {
+                return;
+            }
+            m_file_sink.reset();
+        }
+        file_idx++;
+    } while (file_idx < 16);
+
+    QLOGW("Failed to create capture file.");
+    m_file_sink.reset();
+}
+
+
+auto Raspicam::start_recording() -> bool
+{
+#if defined RASPBERRY_PI
+    if (!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
+    {
+        QLOGW("Cannot create capture folder");
+        return false;
+    }
+
+    if (!m_file_sink)
+    {
+        create_file_sink();
+    }
+
+    activate_streams();
+#endif
+    return true;
+}
+void Raspicam::stop_recording()
+{
+#if defined RASPBERRY_PI
+    m_file_sink.reset();
+
+    activate_streams();
+#endif
+}
+
+//void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
+//{
+//#if defined RASPBERRY_PI
+//    m_stream_quality = sq;
+
+//    std::lock_guard<std::mutex> lg(m_impl->mutex);
+//    if (m_impl->camera)
+//    {
+////        set_active_streams(m_file_sink != nullptr,
+////                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
+////                           m_stream_quality == camera_input::Stream_Quality::LOW);
+//    }
+//#endif
+//}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined RASPBERRY_PI
@@ -1306,91 +1398,6 @@ auto Raspicam::create_components() -> bool
     return true;
 }
 
-void Raspicam::create_file_sink()
-{
-    char mbstr[256] = {0};
-    std::time_t t = std::time(nullptr);
-    if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
-    {
-        strcpy(mbstr, "no-date");
-    }
-
-    size_t file_idx = 0;
-
-    do
-    {
-        std::string filepath;
-        q::util::format_emplace(filepath, "capture/{}-{}", mbstr, file_idx);
-        if (!q::util::fs::exists(q::Path(filepath)))
-        {
-            m_file_sink.reset(new q::data::File_Sink(q::Path(filepath)));
-            if (m_file_sink->is_open())
-            {
-                return;
-            }
-            m_file_sink.reset();
-        }
-        file_idx++;
-    } while (file_idx < 16);
-
-    QLOGW("Failed to create capture file.");
-    m_file_sink.reset();
-}
-
-
-auto Raspicam::start_recording() -> bool
-{
-#if defined RASPBERRY_PI
-    if (!!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
-    {
-        QLOGW("Cannot create capture folder");
-        return false;
-    }
-
-    if (!m_file_sink)
-    {
-        create_file_sink();
-    }
-
-    std::lock_guard<std::mutex> lg(m_impl->mutex);
-    if (m_impl->camera)
-    {
-//        set_active_streams(m_file_sink != nullptr,
-//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-//                           m_stream_quality == camera_input::Stream_Quality::LOW);
-    }
-#endif
-    return true;
-}
-void Raspicam::stop_recording()
-{
-#if defined RASPBERRY_PI
-    m_file_sink.reset();
-
-    std::lock_guard<std::mutex> lg(m_impl->mutex);
-    if (m_impl->camera)
-    {
-//        set_active_streams(m_file_sink != nullptr,
-//                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-//                           m_stream_quality == camera_input::Stream_Quality::LOW);
-    }
-#endif
-}
-
-//void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
-//{
-//#if defined RASPBERRY_PI
-//    m_stream_quality = sq;
-
-//    std::lock_guard<std::mutex> lg(m_impl->mutex);
-//    if (m_impl->camera)
-//    {
-////        set_active_streams(m_file_sink != nullptr,
-////                           m_stream_quality == camera_input::Stream_Quality::MEDIUM,
-////                           m_stream_quality == camera_input::Stream_Quality::LOW);
-//    }
-//#endif
-//}
 
 
 }

@@ -995,8 +995,9 @@ namespace sz { namespace Raspicam { struct Config {
  uint32_t iso;
 uint32_t shutter_speed;
 uint32_t quality;
+bool recording;
 
-explicit Config():iso(0), shutter_speed(0), quality(0) {  }
+explicit Config():iso(0), shutter_speed(0), quality(0), recording(false) {  }
 
 
  
@@ -1015,7 +1016,8 @@ private:
 
     SAXEventHandler< uint32_t > handler_0;
 SAXEventHandler< uint32_t > handler_1;
-SAXEventHandler< uint32_t > handler_2;bool has_iso;
+SAXEventHandler< uint32_t > handler_2;
+SAXEventHandler< bool > handler_3;bool has_iso;
 bool has_shutter_speed;
 bool has_quality;
 
@@ -1037,6 +1039,8 @@ case 1:
     return "shutter_speed";
 case 2:
     return "quality";
+case 3:
+    return "recording";
         default:
             break;
         }
@@ -1066,6 +1070,7 @@ case 2:
         has_iso = false;
 has_shutter_speed = false;
 has_quality = false;
+
     }
 
 public:
@@ -1075,6 +1080,7 @@ public:
         , handler_0(&obj->iso)
 , handler_1(&obj->shutter_speed)
 , handler_2(&obj->quality)
+, handler_3(&obj->recording)
     {
         reset_flags();
     }
@@ -1094,6 +1100,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Null());
+
+case 3:
+    return checked_event_forwarding(handler_3.Null());
 
         default:
             break;
@@ -1117,6 +1126,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Bool(b));
 
+case 3:
+    return checked_event_forwarding(handler_3.Bool(b));
+
         default:
             break;
         }
@@ -1138,6 +1150,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int(i));
 
         default:
             break;
@@ -1161,6 +1176,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint(i));
+
         default:
             break;
         }
@@ -1182,6 +1200,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Int64(i));
+
+case 3:
+    return checked_event_forwarding(handler_3.Int64(i));
 
         default:
             break;
@@ -1205,6 +1226,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.Uint64(i));
 
+case 3:
+    return checked_event_forwarding(handler_3.Uint64(i));
+
         default:
             break;
         }
@@ -1226,6 +1250,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Double(d));
+
+case 3:
+    return checked_event_forwarding(handler_3.Double(d));
 
         default:
             break;
@@ -1249,6 +1276,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.String(str, length, copy));
 
+case 3:
+    return checked_event_forwarding(handler_3.String(str, length, copy));
+
         default:
             break;
         }
@@ -1269,6 +1299,8 @@ else if (utility::string_equal(str, length, "\x53\x68\x75\x74\x74\x65\x72\x20\x5
 						 { state=1; has_shutter_speed = true; }
 else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
 						 { state=2; has_quality = true; }
+else if (utility::string_equal(str, length, "\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9))
+						 { state=3;  }
             else {
                 state = -1;
                 return true;
@@ -1285,6 +1317,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.Key(str, length, copy));
+
+case 3:
+    return checked_event_forwarding(handler_3.Key(str, length, copy));
 
             default:
                 break;
@@ -1309,6 +1344,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartArray());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartArray());
+
         default:
             break;
         }
@@ -1330,6 +1368,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.EndArray(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndArray(length));
 
         default:
             break;
@@ -1353,6 +1394,9 @@ case 1:
 case 2:
     return checked_event_forwarding(handler_2.StartObject());
 
+case 3:
+    return checked_event_forwarding(handler_3.StartObject());
+
             default:
                 break;
             }
@@ -1375,6 +1419,9 @@ case 1:
 
 case 2:
     return checked_event_forwarding(handler_2.EndObject(length));
+
+case 3:
+    return checked_event_forwarding(handler_3.EndObject(length));
 
             default:
                 break;
@@ -1407,6 +1454,8 @@ case 1:
      handler_1.ReapError(errs); break;
 case 2:
      handler_2.ReapError(errs); break;
+case 3:
+     handler_3.ReapError(errs); break;
 
         default:
             break;
@@ -1424,6 +1473,7 @@ case 2:
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
 handler_2.PrepareForReuse();
+handler_3.PrepareForReuse();
 
     }
 };
@@ -1438,8 +1488,9 @@ struct Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201
         w.Key("\x49\x73\x6f", 3, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.iso);
 w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.shutter_speed);
 w.Key("\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.quality);
+w.Key("\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, bool >()(w, value.recording);
 
-        w.EndObject(3);
+        w.EndObject(4);
     }
 
 };
