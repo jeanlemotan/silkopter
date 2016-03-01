@@ -993,16 +993,17 @@ w.Key("\x72\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writerd3f74
 
 namespace sz { namespace Raspicam { struct Config {
  uint32_t iso;
-uint32_t shutter_speed;
+float shutter_speed;
 int32_t ev;
 uint32_t sharpness;
 uint32_t contrast;
 uint32_t brightness;
 uint32_t saturation;
+uint32_t awb_mode;
 uint32_t quality;
 bool recording;
 
-explicit Config():iso(0), shutter_speed(0), ev(50), sharpness(50), contrast(50), brightness(50), saturation(50), quality(0), recording(false) {  }
+explicit Config():iso(0), shutter_speed(0), ev(50), sharpness(50), contrast(50), brightness(50), saturation(50), awb_mode(0), quality(0), recording(false) {  }
 
 
  
@@ -1020,14 +1021,15 @@ private:
     int depth;
 
     SAXEventHandler< uint32_t > handler_0;
-SAXEventHandler< uint32_t > handler_1;
+SAXEventHandler< float > handler_1;
 SAXEventHandler< int32_t > handler_2;
 SAXEventHandler< uint32_t > handler_3;
 SAXEventHandler< uint32_t > handler_4;
 SAXEventHandler< uint32_t > handler_5;
 SAXEventHandler< uint32_t > handler_6;
 SAXEventHandler< uint32_t > handler_7;
-SAXEventHandler< bool > handler_8;bool has_iso;
+SAXEventHandler< uint32_t > handler_8;
+SAXEventHandler< bool > handler_9;bool has_iso;
 bool has_shutter_speed;
 bool has_quality;
 
@@ -1058,8 +1060,10 @@ case 5:
 case 6:
     return "saturation";
 case 7:
-    return "quality";
+    return "awb_mode";
 case 8:
+    return "quality";
+case 9:
     return "recording";
         default:
             break;
@@ -1094,6 +1098,7 @@ has_shutter_speed = false;
 
 
 
+
 has_quality = false;
 
     }
@@ -1109,8 +1114,9 @@ public:
 , handler_4(&obj->contrast)
 , handler_5(&obj->brightness)
 , handler_6(&obj->saturation)
-, handler_7(&obj->quality)
-, handler_8(&obj->recording)
+, handler_7(&obj->awb_mode)
+, handler_8(&obj->quality)
+, handler_9(&obj->recording)
     {
         reset_flags();
     }
@@ -1148,6 +1154,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Null());
+
+case 9:
+    return checked_event_forwarding(handler_9.Null());
 
         default:
             break;
@@ -1189,6 +1198,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Bool(b));
 
+case 9:
+    return checked_event_forwarding(handler_9.Bool(b));
+
         default:
             break;
         }
@@ -1228,6 +1240,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Int(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Int(i));
 
         default:
             break;
@@ -1269,6 +1284,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Uint(i));
 
+case 9:
+    return checked_event_forwarding(handler_9.Uint(i));
+
         default:
             break;
         }
@@ -1308,6 +1326,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Int64(i));
+
+case 9:
+    return checked_event_forwarding(handler_9.Int64(i));
 
         default:
             break;
@@ -1349,6 +1370,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.Uint64(i));
 
+case 9:
+    return checked_event_forwarding(handler_9.Uint64(i));
+
         default:
             break;
         }
@@ -1388,6 +1412,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Double(d));
+
+case 9:
+    return checked_event_forwarding(handler_9.Double(d));
 
         default:
             break;
@@ -1429,6 +1456,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.String(str, length, copy));
 
+case 9:
+    return checked_event_forwarding(handler_9.String(str, length, copy));
+
         default:
             break;
         }
@@ -1457,10 +1487,12 @@ else if (utility::string_equal(str, length, "\x42\x72\x69\x67\x68\x74\x6e\x65\x7
 						 { state=5;  }
 else if (utility::string_equal(str, length, "\x53\x61\x74\x75\x72\x61\x74\x69\x6f\x6e\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19))
 						 { state=6;  }
+else if (utility::string_equal(str, length, "\x41\x57\x42\x20\x4d\x6f\x64\x65\x20\x28\x30\x2e\x2e\x38\x29", 15))
+						 { state=7;  }
 else if (utility::string_equal(str, length, "\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14))
-						 { state=7; has_quality = true; }
+						 { state=8; has_quality = true; }
 else if (utility::string_equal(str, length, "\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9))
-						 { state=8;  }
+						 { state=9;  }
             else {
                 state = -1;
                 return true;
@@ -1495,6 +1527,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.Key(str, length, copy));
+
+case 9:
+    return checked_event_forwarding(handler_9.Key(str, length, copy));
 
             default:
                 break;
@@ -1537,6 +1572,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.StartArray());
 
+case 9:
+    return checked_event_forwarding(handler_9.StartArray());
+
         default:
             break;
         }
@@ -1576,6 +1614,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.EndArray(length));
+
+case 9:
+    return checked_event_forwarding(handler_9.EndArray(length));
 
         default:
             break;
@@ -1617,6 +1658,9 @@ case 7:
 case 8:
     return checked_event_forwarding(handler_8.StartObject());
 
+case 9:
+    return checked_event_forwarding(handler_9.StartObject());
+
             default:
                 break;
             }
@@ -1657,6 +1701,9 @@ case 7:
 
 case 8:
     return checked_event_forwarding(handler_8.EndObject(length));
+
+case 9:
+    return checked_event_forwarding(handler_9.EndObject(length));
 
             default:
                 break;
@@ -1701,6 +1748,8 @@ case 7:
      handler_7.ReapError(errs); break;
 case 8:
      handler_8.ReapError(errs); break;
+case 9:
+     handler_9.ReapError(errs); break;
 
         default:
             break;
@@ -1724,6 +1773,7 @@ handler_5.PrepareForReuse();
 handler_6.PrepareForReuse();
 handler_7.PrepareForReuse();
 handler_8.PrepareForReuse();
+handler_9.PrepareForReuse();
 
     }
 };
@@ -1736,16 +1786,17 @@ struct Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201
         w.StartObject();
 
         w.Key("\x49\x73\x6f", 3, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.iso);
-w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.shutter_speed);
+w.Key("\x53\x68\x75\x74\x74\x65\x72\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x73\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, float >()(w, value.shutter_speed);
 w.Key("\x45\x78\x70\x6f\x73\x75\x72\x65\x20\x43\x6f\x6d\x70\x65\x6e\x73\x61\x74\x69\x6f\x6e\x20\x28\x2d\x31\x30\x2e\x2e\x31\x30\x29", 31, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, int32_t >()(w, value.ev);
 w.Key("\x53\x68\x61\x72\x70\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 18, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.sharpness);
 w.Key("\x43\x6f\x6e\x74\x72\x61\x73\x74\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 17, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.contrast);
 w.Key("\x42\x72\x69\x67\x68\x74\x6e\x65\x73\x73\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.brightness);
 w.Key("\x53\x61\x74\x75\x72\x61\x74\x69\x6f\x6e\x20\x28\x30\x2e\x2e\x31\x30\x30\x29", 19, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.saturation);
+w.Key("\x41\x57\x42\x20\x4d\x6f\x64\x65\x20\x28\x30\x2e\x2e\x38\x29", 15, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.awb_mode);
 w.Key("\x51\x75\x61\x6c\x69\x74\x79\x20\x28\x30\x2e\x2e\x31\x29", 14, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, uint32_t >()(w, value.quality);
 w.Key("\x52\x65\x63\x6f\x72\x64\x69\x6e\x67", 9, false); Serializer< Writer643a9a9b41238dc421c7c57f07cfb6d1dbd07de2e3a286c22c52201bac37ab34, bool >()(w, value.recording);
 
-        w.EndObject(9);
+        w.EndObject(10);
     }
 
 };

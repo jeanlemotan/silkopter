@@ -265,7 +265,9 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
         stop_recording();
     }
 
-    raspicamcontrol_set_shutter_speed(m_impl->camera.get(), m_config->shutter_speed * 1000);
+    m_config->shutter_speed = math::clamp(m_config->shutter_speed, 0.f, 1000.f / m_init_params->fps);
+    raspicamcontrol_set_shutter_speed(m_impl->camera.get(), static_cast<uint32_t>(m_config->shutter_speed * 1000.f));
+
     raspicamcontrol_set_ISO(m_impl->camera.get(), m_config->iso);
 
     m_config->ev = math::clamp(m_config->ev, -10, 10);
@@ -282,6 +284,10 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
 
     m_config->saturation = math::clamp(m_config->saturation, 0u, 100u);
     raspicamcontrol_set_saturation(m_impl->camera.get(), int(m_config->saturation) * 2 - 100);
+
+    m_config->awb_mode = math::clamp(m_config->awb_mode, 0u, 8u);
+    raspicamcontrol_set_awb_mode(m_impl->camera.get(), static_cast<MMAL_PARAM_AWBMODE_T>(static_cast<uint32_t>(MMAL_PARAM_AWBMODE_AUTO) + m_config->awb_mode));
+    //raspicamcontrol_set_awb_gains(m_impl->camera.get(), m_config->awb_rb_gains.x, m_config->awb_rb_gains.y);
 
     return true;
 }
@@ -1253,8 +1259,7 @@ auto Raspicam::create_components() -> bool
         cam_config.stills_capture_circular_buffer_height = 0;
         cam_config.fast_preview_resume = 0;
         cam_config.use_stc_timestamp = MMAL_PARAM_TIMESTAMP_MODE_RESET_STC;
-        MMAL_STATUS_T status;
-        status = MMAL_CALL(mmal_port_parameter_set(m_impl->camera->control, &cam_config.hdr));
+        MMAL_STATUS_T status = MMAL_CALL(mmal_port_parameter_set(m_impl->camera->control, &cam_config.hdr));
         if (status != MMAL_SUCCESS)
         {
             QLOGE("Couldn't set camera config: error {}", status);
@@ -1263,13 +1268,12 @@ auto Raspicam::create_components() -> bool
     }
 
     {
-        // setup preview port format
+        // setup preview port format -> used for streaming
         auto* format = camera_preview_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
         setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
-        MMAL_STATUS_T status;
-        status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
+        MMAL_STATUS_T status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
         {
             QLOGE("Couldn't set preview port format : error {}", status);
@@ -1278,13 +1282,12 @@ auto Raspicam::create_components() -> bool
     }
 
     {
-        //setup video port format
+        //setup video port format -> used for recording
         auto* format = camera_video_port->format;
         format->encoding = MMAL_ENCODING_OPAQUE;
-        format->encoding_variant = MMAL_ENCODING_I420;
+        format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
         setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
-        MMAL_STATUS_T status;
-        status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
+        MMAL_STATUS_T status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
         {
             QLOGE("Couldn't set video port format : error {}", status);
@@ -1307,14 +1310,28 @@ auto Raspicam::create_components() -> bool
         format->es->video.frame_rate.den = 1;
         format->es->video.par.num = 1;
         format->es->video.par.den = 1;
-        MMAL_STATUS_T status;
-        status = MMAL_CALL(mmal_port_format_commit(camera_capture_port));
+        MMAL_STATUS_T status = MMAL_CALL(mmal_port_format_commit(camera_capture_port));
         if (status != MMAL_SUCCESS)
         {
             QLOGE("Couldn't set still port format : error {}", status);
             return false;
         }
     }
+
+    {
+        //setup use case
+        MMAL_PARAMETER_CAMERA_USE_CASE_T param;
+        param.hdr.id = MMAL_PARAMETER_CAMERA_USE_CASE;
+        param.hdr.size = sizeof(param);
+        param.use_case = MMAL_PARAM_CAMERA_USE_CASE_VIDEO_CAPTURE;
+        MMAL_STATUS_T status = MMAL_CALL(mmal_port_parameter_set(m_impl->camera->control, &param.hdr));
+        if (status != MMAL_SUCCESS)
+        {
+            QLOGE("Couldn't set camera config: error {}", status);
+            return false;
+        }
+    }
+
 
     static uint32_t buffer_count = 3;
     auto userdata = reinterpret_cast<MMAL_PORT_USERDATA_T*>(m_impl.get());

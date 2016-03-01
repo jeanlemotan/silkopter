@@ -28,12 +28,13 @@
     "members":
     [
         ["uint32_t", "iso", {"required": true, "default" : 0, "json_key" : "Iso"}],
-        ["uint32_t", "shutter_speed", {"required": true, "default" : 0, "json_key" : "Shutter Speed (ms)"}],
+        ["float", "shutter_speed", {"required": true, "default" : 0, "json_key" : "Shutter Speed (ms)"}],
         ["int32_t", "ev", {"required": false, "default" : 50, "json_key" : "Exposure Compensation (-10..10)"}],
         ["uint32_t", "sharpness", {"required": false, "default" : 50, "json_key" : "Sharpness (0..100)"}],
         ["uint32_t", "contrast", {"required": false, "default" : 50, "json_key" : "Contrast (0..100)"}],
         ["uint32_t", "brightness", {"required": false, "default" : 50, "json_key" : "Brightness (0..100)"}],
         ["uint32_t", "saturation", {"required": false, "default" : 50, "json_key" : "Saturation (0..100)"}],
+        ["uint32_t", "awb_mode", {"required": false, "default" : 0, "json_key" : "AWB Mode (0..8)"}],
         ["uint32_t", "quality", {"required": true, "default" : 0, "json_key" : "Quality (0..1)"}],
         ["bool", "recording", {"required": false, "default" : false, "json_key" : "Recording"}]
     ]
