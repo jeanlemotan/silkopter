@@ -6,8 +6,6 @@ using namespace q;
 using namespace data;
 
 File_Sink::File_Sink(Path const& path)
-    : m_offset(0)
-    , m_size(0)
 {
 	m_file = fopen(path.get_as_string().c_str(), "wb");
     if (!m_file)
@@ -80,3 +78,11 @@ size_t File_Sink::seek_relative(int offset)
 	return 0;
 }
 
+void File_Sink::flush()
+{
+    QASSERT(is_open());
+    if (is_open())
+    {
+        fflush(m_file);
+    }
+}

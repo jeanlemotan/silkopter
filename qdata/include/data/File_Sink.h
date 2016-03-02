@@ -22,10 +22,12 @@ public:
 	size_t		seek(size_t offset);
 	size_t		seek_relative(int offset);
 
+    void        flush();
+
 private:
-	FILE*		m_file;
-	size_t		m_offset;
-	size_t		m_size;
+    FILE*		m_file = nullptr;
+    size_t		m_offset = 0;
+    size_t		m_size = 0;
 };
 
 

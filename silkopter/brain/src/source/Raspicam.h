@@ -66,10 +66,8 @@ private:
     std::shared_ptr<Impl> m_impl;
 
     void streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
-    void file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
+    void recording_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
     void create_file_sink();
-
-    std::shared_ptr<q::data::File_Sink> m_file_sink;
 
     auto create_components() -> bool;
 
@@ -83,12 +81,23 @@ private:
     };
     mutable std::shared_ptr<Stream> m_stream;
 
-    struct
+    struct Sample_Queue
     {
         std::mutex mutex;
-        std::vector<Stream::Sample> samples;
+        std::deque<Stream::Sample> samples;
         size_t count = 0;
-    } m_temp_samples;
+    } m_sample_queue;
+
+
+    struct Recording_Data
+    {
+        std::mutex mutex;
+        std::thread thread;
+        std::atomic_bool should_stop = {false};
+        std::vector<uint8_t> data_in;
+        std::vector<uint8_t> data_out;
+        std::shared_ptr<q::data::File_Sink> file_sink;
+    } m_recording_data;
 
 };
 

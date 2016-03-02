@@ -126,7 +126,7 @@ Raspicam::Raspicam(HAL& hal)
     m_impl->high.is_active = false;
     m_impl->low.is_active = false;
 
-    m_impl->recording.callback = std::bind(&Raspicam::file_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    m_impl->recording.callback = std::bind(&Raspicam::recording_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 #endif
@@ -139,7 +139,7 @@ Raspicam::Raspicam(HAL& hal)
     m_init_params->high.resolution.set(640, 480);
     m_init_params->high.bitrate = 2000000;
 
-    m_init_params->recording.resolution.set(1280, 960);
+    m_init_params->recording.resolution.set(1296, 972);
     m_init_params->recording.bitrate = 8000000;
 
     m_stream = std::make_shared<Stream>();
@@ -147,6 +147,13 @@ Raspicam::Raspicam(HAL& hal)
 Raspicam::~Raspicam()
 {
     QLOG_TOPIC("~raspicam");
+
+    m_recording_data.should_stop = true;
+    if (m_recording_data.thread.joinable())
+    {
+        m_recording_data.thread.join();
+    }
+
 #if defined RASPBERRY_PI
     {
         //first kill the pools to disable the callbacks
@@ -217,6 +224,47 @@ auto Raspicam::init() -> bool
     {
         return true;
     }
+
+    m_recording_data.thread = std::thread([this]()
+    {
+        while (!m_recording_data.should_stop)
+        {
+            {
+                std::lock_guard<std::mutex> lg(m_recording_data.mutex);
+                if (!m_recording_data.data_in.empty())
+                {
+                    m_recording_data.data_out = std::move(m_recording_data.data_in);
+                }
+            }
+
+            if (!m_recording_data.data_out.empty())
+            {
+                std::shared_ptr<q::data::File_Sink> sink = m_recording_data.file_sink;
+                if (sink != nullptr && sink->is_open())
+                {
+                    sink->write(m_recording_data.data_out.data(), m_recording_data.data_out.size());
+                    sink->flush();
+                }
+                m_recording_data.data_out.clear();
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    });
+
+#if defined RASPBERRY_PI
+    {
+        int policy = SCHED_IDLE;
+        struct sched_param param;
+        param.sched_priority = sched_get_priority_min(policy);
+        if (pthread_setschedparam(m_recording_data.thread.native_handle(), policy, &param) != 0)
+        {
+            perror("recording thread sched_setscheduler");
+            exit(EXIT_FAILURE);
+        }
+    }
+#endif
+
 
     m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
 
@@ -326,39 +374,45 @@ void Raspicam::process()
 {
     QLOG_TOPIC("raspicam::process");
 
-    std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
+    std::lock_guard<std::mutex> lg(m_sample_queue.mutex);
 
     //put the samples back
     for (auto& sample: m_stream->samples)
     {
-        m_temp_samples.samples.push_back(std::move(sample));
+        m_sample_queue.samples.push_back(std::move(sample));
     }
 
-    m_stream->samples.resize(m_temp_samples.count);
-    if (m_temp_samples.count > 0)
+    m_stream->samples.resize(m_sample_queue.count);
+    if (m_sample_queue.count > 0)
     {
-        for (size_t i = 0; i < m_temp_samples.count; i++)
+        for (size_t i = 0; i < m_sample_queue.count; i++)
         {
-            m_stream->samples[i] = std::move(m_temp_samples.samples[i]);
+            m_stream->samples[i] = std::move(m_sample_queue.samples.front());
+            m_sample_queue.samples.pop_front();
         }
-        m_temp_samples.samples.erase(m_temp_samples.samples.begin(), m_temp_samples.samples.begin() + m_temp_samples.count);
-        m_temp_samples.count = 0;
+        m_sample_queue.count = 0;
     }
 }
 
 
-void Raspicam::file_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
+void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
         return;
     }
-    auto sink = m_file_sink; //make a copy in case the other thread destroyes the file
-    if (!sink || !sink->is_open())
+
+    std::lock_guard<std::mutex> lg(m_recording_data.mutex);
+    size_t offset = m_recording_data.data_in.size();
+    if (offset < 10 * 1024 * 1024)
     {
-        return;
+        m_recording_data.data_in.resize(offset + size);
+        std::copy(data, data + size, m_recording_data.data_in.begin() + offset);
     }
-    sink->write(data, size);
+    else
+    {
+        QLOGW("Recording skipping frames!!! Pending data too big: {}", offset);
+    }
 }
 
 void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
@@ -368,16 +422,14 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
         return;
     }
 
-    std::lock_guard<std::mutex> lg(m_temp_samples.mutex);
+    std::lock_guard<std::mutex> lg(m_sample_queue.mutex);
 
-    //m_temp_samples.count = 0;
-
-    if (m_temp_samples.samples.size() <= m_temp_samples.count)
+    if (m_sample_queue.samples.size() <= m_sample_queue.count)
     {
-        m_temp_samples.samples.resize(m_temp_samples.samples.size() + m_temp_samples.count + 1);
+        m_sample_queue.samples.resize(m_sample_queue.samples.size() + m_sample_queue.count + 1);
     }
 
-    auto& sample = m_temp_samples.samples[m_temp_samples.count];
+    auto& sample = m_sample_queue.samples[m_sample_queue.count];
     sample.is_healthy = true;
     sample.value.type = Stream::Value::Type::H264;
     sample.value.is_keyframe = is_keyframe;
@@ -385,7 +437,7 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     sample.value.data.resize(size);
     std::copy(data, data + size, sample.value.data.begin());
 
-    m_temp_samples.count++;
+    m_sample_queue.count++;
 }
 
 void Raspicam::activate_streams()
@@ -393,7 +445,7 @@ void Raspicam::activate_streams()
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
-    bool recording = m_file_sink != nullptr;
+    bool recording = m_recording_data.file_sink != nullptr;
     bool high = m_config->quality == 0;
     bool low = m_config->quality == 1;
 
@@ -452,18 +504,18 @@ void Raspicam::create_file_sink()
         q::util::format_emplace(filepath, "capture/{}-{}", mbstr, file_idx);
         if (!q::util::fs::exists(q::Path(filepath)))
         {
-            m_file_sink.reset(new q::data::File_Sink(q::Path(filepath)));
-            if (m_file_sink->is_open())
+            m_recording_data.file_sink.reset(new q::data::File_Sink(q::Path(filepath)));
+            if (m_recording_data.file_sink->is_open())
             {
                 return;
             }
-            m_file_sink.reset();
+            m_recording_data.file_sink.reset();
         }
         file_idx++;
     } while (file_idx < 16);
 
     QLOGW("Failed to create capture file.");
-    m_file_sink.reset();
+    m_recording_data.file_sink.reset();
 }
 
 
@@ -476,7 +528,7 @@ auto Raspicam::start_recording() -> bool
         return false;
     }
 
-    if (!m_file_sink)
+    if (!m_recording_data.file_sink)
     {
         create_file_sink();
     }
@@ -488,7 +540,7 @@ auto Raspicam::start_recording() -> bool
 void Raspicam::stop_recording()
 {
 #if defined RASPBERRY_PI
-    m_file_sink.reset();
+    m_recording_data.file_sink.reset();
 
     activate_streams();
 #endif
