@@ -11,6 +11,7 @@ namespace PIGPIO
 struct Init_Params;
 struct Config;
 struct PWM_Channel;
+struct PWM_Config;
 }
 }
 
@@ -53,10 +54,12 @@ private:
 
     struct PWM_Channel
     {
-        sz::PIGPIO::PWM_Channel* config = nullptr;
-        stream::IPWM_wptr stream;
+        bool is_servo = false;
+        uint32_t rate = 0;
+        sz::PIGPIO::PWM_Config* config = nullptr;
         uint32_t gpio = 0;
         q::Path stream_path;
+        stream::IPWM_wptr stream;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

@@ -13,6 +13,14 @@ extern std::chrono::microseconds PIGPIO_PERIOD;
 
 #endif
 
+constexpr float MIN_SERVO_MS = 0.5f;
+constexpr float MAX_SERVO_MS = 2.4f;
+
+
+//
+//PIN:  13 12 11 10  9  8  7  6  5  4  3  2  1
+//GPIO:  5        6 12 13 16 17 19    25 18 24
+
 namespace silk
 {
 namespace node
@@ -23,7 +31,6 @@ PIGPIO::PIGPIO(HAL& hal)
     , m_init_params(new sz::PIGPIO::Init_Params())
     , m_config(new sz::PIGPIO::Config())
 {
-    m_pwm_channels.resize(8);
 }
 
 PIGPIO::~PIGPIO()
@@ -33,17 +40,11 @@ PIGPIO::~PIGPIO()
 
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs =
-    {{
-        { stream::IPWM::TYPE, m_init_params->channel_4.rate, "Channel 4", m_pwm_channels[0].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_17.rate, "Channel 17", m_pwm_channels[1].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_18.rate, "Channel 18", m_pwm_channels[2].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_22.rate, "Channel 22", m_pwm_channels[3].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_23.rate, "Channel 23", m_pwm_channels[4].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_24.rate, "Channel 24", m_pwm_channels[5].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_25.rate, "Channel 25", m_pwm_channels[6].stream_path },
-        { stream::IPWM::TYPE, m_init_params->channel_27.rate, "Channel 27", m_pwm_channels[7].stream_path }
-    }};
+    std::vector<Input> inputs;
+    for (PWM_Channel const& channel: m_pwm_channels)
+    {
+        inputs.push_back({stream::IPWM::TYPE, channel.rate, q::util::format2<std::string>("GPIO {}", channel.gpio), channel.stream_path});
+    }
     return inputs;
 }
 
@@ -67,22 +68,48 @@ auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
 
 auto PIGPIO::init() -> bool
 {
-    m_pwm_channels[0].gpio = 4;
-    m_pwm_channels[0].config = &m_init_params->channel_4;
-    m_pwm_channels[1].gpio = 17;
-    m_pwm_channels[1].config = &m_init_params->channel_17;
-    m_pwm_channels[2].gpio = 18;
-    m_pwm_channels[2].config = &m_init_params->channel_18;
-    m_pwm_channels[3].gpio = 22;
-    m_pwm_channels[3].config = &m_init_params->channel_22;
-    m_pwm_channels[4].gpio = 23;
-    m_pwm_channels[4].config = &m_init_params->channel_23;
-    m_pwm_channels[5].gpio = 24;
-    m_pwm_channels[5].config = &m_init_params->channel_24;
-    m_pwm_channels[6].gpio = 25;
-    m_pwm_channels[6].config = &m_init_params->channel_25;
-    m_pwm_channels[7].gpio = 27;
-    m_pwm_channels[7].config = &m_init_params->channel_27;
+#define SETUP_CHANNEL(GPIO)\
+    {\
+        sz::PIGPIO::PWM_Channel* init_params = &m_init_params->gpio_##GPIO;\
+        if (init_params->enabled)\
+        {\
+            PWM_Channel ch;\
+            ch.is_servo = init_params->servo;\
+            ch.rate = init_params->rate;\
+            ch.gpio = GPIO;\
+            ch.config = &m_config->gpio_##GPIO;\
+            m_pwm_channels.push_back(ch);\
+        }\
+    }
+
+    SETUP_CHANNEL(2);
+    SETUP_CHANNEL(3);
+    SETUP_CHANNEL(4);
+    SETUP_CHANNEL(5);
+    SETUP_CHANNEL(6);
+    SETUP_CHANNEL(7);
+    SETUP_CHANNEL(8);
+    SETUP_CHANNEL(9);
+    SETUP_CHANNEL(10);
+    SETUP_CHANNEL(11);
+    SETUP_CHANNEL(12);
+    SETUP_CHANNEL(13);
+    SETUP_CHANNEL(14);
+    SETUP_CHANNEL(15);
+    SETUP_CHANNEL(16);
+    SETUP_CHANNEL(17);
+    SETUP_CHANNEL(18);
+    SETUP_CHANNEL(19);
+    SETUP_CHANNEL(20);
+    SETUP_CHANNEL(21);
+    SETUP_CHANNEL(22);
+    SETUP_CHANNEL(23);
+    SETUP_CHANNEL(24);
+    SETUP_CHANNEL(25);
+    SETUP_CHANNEL(26);
+    SETUP_CHANNEL(27);
+#undef SETUP_CHANNEL
+
 
 #if defined (RASPBERRY_PI)
     size_t period = PIGPIO_PERIOD.count();
@@ -97,21 +124,26 @@ auto PIGPIO::init() -> bool
     //first validate
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        auto const& ch = *m_pwm_channels[i].config;
-        auto gpio = m_pwm_channels[i].gpio;
-        if (ch.min >= ch.max)
+        auto const& channel = m_pwm_channels[i];
+        if (channel.is_servo && channel.rate > 400)
         {
-            QLOGE("channel {}: min ({}) is bigger than max ({})", gpio, ch.min, ch.max);
+            QLOGE("channel {} on GPIO {}: max rate for servo channels is 400Hz", i, channel.gpio);
             return false;
         }
-        if (ch.max > ch.range)
+//        if (config.min >= config.max)
+//        {
+//            QLOGE("channel {}: min ({}) is bigger than max ({})", channel.gpio, config.min, config.max);
+//            return false;
+//        }
+//        uint32_t range = channel.is_servo ? (1000000 / channel.rate) : 1000000;
+//        if (config.max > config.range)
+//        {
+//            QLOGE("channel {}: max ({}) is bigger than the range ({})", channel.gpio, config.max, config.range);
+//            return false;
+//        }
+        if (std::find(rates.begin(), rates.end(), channel.rate) == rates.end())
         {
-            QLOGE("channel {}: max ({}) is bigger than the range ({})", gpio, ch.max, ch.range);
-            return false;
-        }
-        if (std::find(rates.begin(), rates.end(), ch.rate) == rates.end())
-        {
-            QLOGE("channel {}: invalid rate {}. Supported are: {}", gpio, ch.rate, rates);
+            QLOGE("channel {}: invalid rate {}. Supported are: {}", channel.gpio, channel.rate, rates);
             return false;
         }
     }
@@ -120,15 +152,15 @@ auto PIGPIO::init() -> bool
     //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        auto gpio = m_pwm_channels[i].gpio;
-        if (gpioSetPullUpDown(gpio, PI_PUD_DOWN) < 0)
+        auto const& channel = m_pwm_channels[i];
+        if (gpioSetPullUpDown(channel.gpio, PI_PUD_DOWN) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, channel.gpio);
             return false;
         }
-        if (gpioSetMode(gpio, PI_OUTPUT) < 0)
+        if (gpioSetMode(channel.gpio, PI_OUTPUT) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, gpio);
+            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, channel.gpio);
             return false;
         }
      }
@@ -136,20 +168,27 @@ auto PIGPIO::init() -> bool
     //now configure the pin for PWM or servo
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
-        auto const& ch = *m_pwm_channels[i].config;
-        auto gpio = m_pwm_channels[i].gpio;
-        auto f = gpioSetPWMfrequency(gpio, ch.rate);
+        auto const& channel = m_pwm_channels[i];
+        auto f = gpioSetPWMfrequency(channel.gpio, channel.rate);
         if (f < 0)
         {
-            QLOGE("channel {}: Cannot set pwm rate {}", gpio, ch.rate);
+            QLOGE("channel {}: Cannot set pwm rate {}", channel.gpio, channel.rate);
             return false;
         }
-        if (gpioSetPWMrange(gpio, ch.range) < 0)
+        if (channel.is_servo)
         {
-            QLOGE("channel {}: Cannot set pwm range {} on gpio {}", gpio, ch.range);
-            return false;
+            uint32_t range = 1000000 / channel.rate;
+            if (gpioSetPWMrange(channel.gpio, range) < 0)
+            {
+                QLOGE("channel {}: Cannot set pwm range {} on gpio {}", channel.gpio, range);
+                return false;
+            }
+            QLOGI("SERVO Channel {}: gpio {}, rate {}, range {}", i, channel.gpio, channel.rate, range);
         }
-        QLOGI("channel {}: rate {} range {}", gpio, ch.rate, ch.range);
+        else
+        {
+            QLOGI("PWM Channel {}: gpio {}, rate {}", i, channel.gpio, channel.rate);
+        }
     }
 
     return true;
@@ -169,10 +208,14 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     QLOG_TOPIC("pigpio::set_pwm_value");
 
 #if defined RASPBERRY_PI
-    auto const& ch = *m_pwm_channels[idx].config;
-    value = math::clamp(value, 0.f, 1.f);
-    int pulse = value * (ch.max - ch.min);
-    gpioPWM(m_pwm_channels[idx].gpio, ch.min + pulse);
+    auto const& channel = m_pwm_channels[idx];
+    if (channel.is_servo)
+    {
+        auto const& config = *m_pwm_channels[idx].config;
+        value = math::clamp(value, 0.f, 1.f);
+        float pulse = value * (config.max_servo - config.min_servo);
+        gpioPWM(m_pwm_channels[idx].gpio, (config.min_servo + pulse) * 1000);
+    }
 #else
     QUNUSED(idx);
     QUNUSED(value);
@@ -205,37 +248,25 @@ void PIGPIO::process()
 }
 
 
-#define READ_CONFIG(IDX, CH)\
-if (idx == IDX)\
-{\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
-    auto rate = input_stream ? input_stream->get_rate() : 0u;\
-    if (rate != m_init_params->channel_##CH.rate)\
-    {\
-        if (input_stream)\
-        {\
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->channel_##CH.rate, rate);\
-        }\
-        m_pwm_channels[IDX].stream.reset();\
-        m_pwm_channels[IDX].stream_path = q::Path();\
-    }\
-    else\
-    {\
-        m_pwm_channels[IDX].stream = input_stream;\
-        m_pwm_channels[IDX].stream_path = path;\
-    }\
-}
 
 void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    READ_CONFIG(0, 4);
-    READ_CONFIG(1, 17);
-    READ_CONFIG(2, 18);
-    READ_CONFIG(3, 22);
-    READ_CONFIG(4, 23);
-    READ_CONFIG(5, 24);
-    READ_CONFIG(6, 25);
-    READ_CONFIG(7, 27);
+    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());
+    auto rate = input_stream ? input_stream->get_rate() : 0u;
+    if (rate != m_pwm_channels[idx].rate)
+    {
+        if (input_stream)
+        {
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_pwm_channels[idx].rate, rate);
+        }
+        m_pwm_channels[idx].stream.reset();
+        m_pwm_channels[idx].stream_path = q::Path();
+    }
+    else
+    {
+        m_pwm_channels[idx].stream = input_stream;
+        m_pwm_channels[idx].stream_path = path;
+    }
 }
 
 
@@ -255,12 +286,55 @@ auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
 
     *m_config = sz;
 
+    for (size_t i = 2; i <= 27; i++)
+    {
+        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
+        if (it != m_pwm_channels.end())
+        {
+            PWM_Channel& channel = *it;
+            if (it->is_servo)
+            {
+                channel.config->min_servo = math::clamp(channel.config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
+                channel.config->max_servo = math::clamp(channel.config->max_servo, channel.config->min_servo, MAX_SERVO_MS);
+            }
+            else
+            {
+                channel.config->min_pwm = math::clamp(channel.config->min_pwm, 0.f, 1.f);
+                channel.config->max_pwm = math::clamp(channel.config->max_pwm, channel.config->min_pwm, 1.f);
+            }
+        }
+    }
+
     return true;
 }
 auto PIGPIO::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
+
+    for (size_t i = 2; i <= 27; i++)
+    {
+        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
+        if (it != m_pwm_channels.end())
+        {
+            if (it->is_servo)
+            {
+                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Min PWM", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Max PWM", i)));
+            }
+            else
+            {
+                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Min Servo (ms)", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Max Servo (ms)", i)));
+            }
+        }
+        else
+        {
+            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}", i)));
+        }
+    }
+
+
     return std::move(json);
 }
 
